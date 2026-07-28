@@ -12,7 +12,21 @@ from .client import ProjectedClientView
 from .deck import DeckDefinition, DeckLoader, parse_deck_text
 from .engine import ActionResult, CommanderEngine, GameRuleError
 from .model import GameConfig, GameState
-from .pilot import RunMetrics, SequentialPilotRunner
+from .pilot import (
+    ManualJsonPilot,
+    PilotMemory,
+    PilotResponse,
+    RunMetrics,
+    ScriptedPilot,
+    SequentialPilotRunner,
+    SubprocessJsonPilot,
+)
+from .preflight import semantic_preflight
+from .profiles import (
+    DeckPilotProfile,
+    DeckProfileCache,
+    deck_profile_fingerprint,
+)
 from .projection import ProjectionCursor, StateProjector
 from .protocol import PROTOCOL_VERSION, ProtocolError, apply_json_patch, json_patch, view_hash
 from .semantics import SemanticProgram, SemanticRegistry
@@ -40,6 +54,11 @@ __all__ = [
     "ScryfallBulkDataError",
     "ScryfallBulkItem",
     "SequentialPilotRunner",
+    "ScriptedPilot",
+    "ManualJsonPilot",
+    "SubprocessJsonPilot",
+    "PilotMemory",
+    "PilotResponse",
     "RunMetrics",
     "SemanticProgram",
     "SemanticRegistry",
@@ -51,6 +70,10 @@ __all__ = [
     "parse_deck_text",
     "refresh_scryfall_database",
     "view_hash",
+    "semantic_preflight",
+    "DeckPilotProfile",
+    "DeckProfileCache",
+    "deck_profile_fingerprint",
 ]
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"

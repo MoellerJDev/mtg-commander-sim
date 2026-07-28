@@ -1,5 +1,11 @@
 # Roadmap
 
+Version 0.4.0 establishes the provider-neutral runner, isolated resumable seat
+memory, fingerprinted profiles, trust-aware semantic packs/preflight, native
+command-replay fixtures, and two narrowly validated shortcut lines. The phases
+below describe remaining production depth; the 0.4.0 scripted fixture is not a
+claim that the full batch-runner or Oracle corpus is complete.
+
 ## Phase 1 — stabilize the multiplayer kernel
 
 - maintain passing regression suite for turns, priority, combat, mulligans, state-based actions, and permissions
@@ -23,15 +29,15 @@
 - special actions and non-hand casting permissions
 - first/double-strike damage and trample assignment
 - copied/face-down/linked-object edge cases
-- deterministic loop/shortcut representation
+- general deterministic loop/shortcut negotiation beyond the two 0.4.0 fixtures
 
 ## Phase 4 — multi-agent batch runner
 
-- isolated seat contexts with compact strategic memory
+- production isolation for remote seat contexts (the in-process provider boundary and compact memory are implemented)
 - arbiter model tier separate from pilots
 - model timeout/retry policy
 - deterministic seeds and replay IDs
-- metrics: calls, tokens, invalid actions, arbiter misses, win rate, turn of elimination, interaction exchanges, mulligan outcomes
+- batch metrics: win rate, turn of elimination, interaction exchanges, and mulligan outcomes; native call/token/retry metrics are implemented
 - parallel game workers over immutable deck definitions and local card data
 
 ## Phase 5 — native/web client

@@ -1,86 +1,135 @@
-# MTG Commander Sim 0.3.0 — verification results
+# MTG Commander Sim 0.4.0 — verification results
 
 Date: 2026-07-28
 Python: 3.11
 
-## Compile and schemas
+## Compile, schemas, and protocol demo
 
 PASS: `python -m compileall -q mtg_commander_sim tests scripts simctl.py`
 
-PASS: all 9 JSON schema files parse successfully.
+PASS: all 11 JSON schema files parse successfully.
 
-## Unit/integration tests
+PASS: `python scripts/demo_four_player_protocol.py --out demo`
 
-PASS: 56 tests
+- bootstrap: 6,213 bytes / 1,549 estimated tokens
+- unchanged live-decision delta: 1,076 bytes / 269 estimated tokens
+- post-declaration delta: 435 bytes / 108 estimated tokens
 
-The original 48 tests remain green. Added coverage verifies:
+## Unit and integration tests
 
-- Game Record v3 artifact layout and v2 migration
-- checkpoint removal of event history, consumed capabilities, and raw tokens
-- capability reissue after load
-- accepted-command hashing and rejection isolation
-- command replay through the normal permission/rules boundary
-- minimal/standard/debug trace filtering
-- seat-scoped decision audits and analyst-only opening-hand review
-- explicit duel/multiplayer Commander profiles
-- server-derived land entry, including all requested regression lands
-- Mana Confluence life payment and legal noncreature exposure
-- server-advertised mana and nonmana abilities
-- Flooded Strand and Wooded Foothills subtype search behavior
-- private resolution-time fetchland choice and deterministic shuffle
-- ordered main-phase plans with conservative invalidation
-- unresolved semantic coverage blocking deck-review eligibility
-- the completed live-duel characterization snapshot
+PASS: 69 tests in 15.161 seconds.
 
-## Completed fixture migration
+All previous 56 tests remain green. The 13 added tests cover:
 
-PASS: migrated `run/live-duel/game.json` to
-`run/migrated-live-duel`.
+- legacy placeholder reasons and unknown migrated provider-call counts
+- isolated provider metadata and ordered pilot responses
+- native nonempty command replay with complete command audit fields
+- durable-record capability-token exclusion
+- eliminated-player hidden-information preservation
+- trust-aware semantic preflight and fail-closed eligibility
+- card-aware review prose with payments and pilot reasoning
+- Lotus Cobra landfall and delegated mana choice
+- Zimone and Dina activation and second-draw trigger
+- Field of the Dead's distinct-land threshold
+- Mishra's Warform characteristics and delayed sacrifice
+- Red Elemental Blast target exposure
+- audited Soultrader and Gonti's Aether Heart shortcuts
 
-- legacy monolith: 662,955 bytes
-- v3 authoritative/journal components before derived review: 412,930 bytes
-- reduction before derived review: 37.7%
-- standard journal: 158 events, 0 priority-pass events, 0 step-boundary events
-- legacy pilot decisions preserved: 475
-- raw capability fields persisted: 0
-- snapshot replay hash:
-  `35921e1ab1141fc335c8396e696d411fca290654b9fdcd2d93b5fbb3daba2ce8`
+The retained suites continue to cover multiplayer mulligans and priority,
+fetchlands and shocklands, live-opponent bond-land entry, ordered-plan
+invalidation, permissions, projection privacy, retry behavior, and rules
+authority.
 
-The review matches the fixture characterization: both seats kept seven; A cast
-Lotus Cobra, Zimone and Dina, and Birds of Paradise; B cast zero spells; turns
-begun were 11/10; Zimone and Dina dealt 21 commander damage; B was eliminated
-on turn 21; all 14 land events recorded tapped with exactly 10 conflicts; no
-fetchland was activated; and B discarded seven cards at cleanup.
+## Fresh native two-seat pilot fixture
 
-Fidelity is `smoke_only`, `review_eligible=false`, and
-`matchup_evidence=false`.
+PASS: `run/native-zimone-vs-mishra` is a fresh Game Record v3 record using
+`replay.mode = "command_replay"`.
 
-The historical model-call comparison is 475 observed decisions versus a
-57-call upper bound if every observed pass had been proven safe to automate.
-This is explicitly reported as an estimate, not a claim about historical
-legality.
+- live Moxfield metadata identifies `g5vtVfRuS0W5KxZuYqZHGQ` as Zimone and
+  Dina and `armNI_ntVUagNNygnUVyxQ` as Mishra, Eminent One
+- advanced through turn sequence 8
+- 16 accepted commands and 16 recorded pilot invocations
+- 0 arbiter invocations, rejected actions, or retries
+- 37 pass-only windows skipped and 101 yield-covered windows
+- 40,898 provider-packet bytes
+- 10,205 estimated input tokens and 1,254 estimated output tokens
+- observed token totals are null and status is `unavailable`, because the
+  deterministic ScriptedPilot does not report provider usage
+- Flooded Strand paid 1 life, found Breeding Pool, and shuffled
+- Sensei's Divining Top was cast from hand with an exact Island payment
+- land-entry conflicts: 0
+- raw capability tokens in durable artifacts: 0
+- classification: `pilot_test`; review eligible: false; matchup evidence: false
 
-## Live data/deck integration retained
+PASS: exact command replay:
 
-PASS: runtime Scryfall `GET /bulk-data` discovery and atomic local database
-refresh remain covered.
+`ff6b1ecf7937763f24f9c700f50571bfd0ce20608cb76b8cb2767ff81d88db5a`
 
-PASS: both public Moxfield Commander deck IDs remain fetchable, cached, and
-validated:
+PASS: every accepted command records sequence, principal, actor, decision and
+template IDs, normalized payload, selected refs, targets, modes, X, selected
+costs, before/after hashes, RNG details, and semantic program metadata.
 
-- `g5vtVfRuS0W5KxZuYqZHGQ` — Zimone and Dina — 100 cards
-- `armNI_ntVUagNNygnUVyxQ` — Mishra, Eminent One — 100 cards
+PASS: review size metrics match the actual files:
+
+- checkpoint: 134,222 bytes
+- commands/events/decisions: 15,750 / 16,811 / 28,036 bytes
+- manifest: 1,849 bytes
+- derived review: 24,243 bytes
+- resumable core: 248,302 bytes
+- complete record: 274,038 bytes
+
+## Four-player native protocol fixture
+
+PASS: `run/four-player-pilot` uses four independently isolated seat runtimes,
+duplicated fixture decks, Commander multiplayer rules, and command replay.
+
+- 12 accepted commands
+- 11 pilot invocations and 1 arbiter invocation
+- 140 pass-only windows skipped
+- observed provider token totals correctly remain unavailable
+- classification: `pilot_test`; not matchup evidence
+
+PASS: exact command replay:
+
+`b50fd88f6918102f09379401e5460727450f8d7334a8ce8e48465185cbd2990a`
+
+PASS: no raw capability token appears in either fixture's commands, events,
+decisions, manifest, review JSON, or review Markdown.
+
+## Semantic packs and preflight
+
+PASS: the installed registry loads 17 validated programs from the two packaged
+semantic packs; 13 are trusted and the remaining programs are explicitly
+provisional.
+
+PASS: both live 100-card lists were preflighted:
+
+- Zimone and Dina: 42 fully playable, 2 partial, 56 unresolved, 58 expected
+  arbiter calls
+- Mishra, Eminent One: 44 fully playable, 3 partial, 53 unresolved, 56 expected
+  arbiter calls
+
+Both reports correctly set `deck_review_eligible_possible=false`. The semantic
+packs are a tested vertical slice, not complete Oracle coverage.
 
 ## Package
 
-PASS: built `dist/mtg_commander_sim-0.3.0-py3-none-any.whl`
+PASS: built `dist/mtg_commander_sim-0.4.0-py3-none-any.whl`.
 
-- size: 103,009 bytes
+- size: 116,175 bytes
 - SHA-256:
-  `204c331cae62cd6a1ef766d18c5b46999088e2e8ad04146ce2ce2c123f7c5bfa`
+  `9b3d0b1c8cf4f0b7a00b54d8c059cbbc04fd13caf21fe6e631aef0dc4965c853`
+- includes both semantic packs and both deck profiles
 
 PASS: installed the wheel into a fresh virtual environment with
 `--no-index --no-deps`.
 
-PASS: installed package reports `0.3.0`; installed `simctl replay --help`
-exposes record, database, and verification arguments.
+PASS: the installed package reports `0.4.0`, loads all 17 semantic programs,
+and exposes the provider-neutral `pilot-run` CLI.
+
+## Fidelity statement
+
+These records prove native-v3 journaling, provider isolation, compact legal
+actions, bounded card semantics, deterministic replay, and review generation.
+They do not prove full Magic rules coverage, deck-review eligibility, or
+statistical matchup results.

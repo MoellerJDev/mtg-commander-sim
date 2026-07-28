@@ -254,6 +254,7 @@ def auto_plan_payment(
     *,
     allow_conditional: bool = False,
     reserve: dict[str, int] | None = None,
+    starting_pool: dict[str, int] | None = None,
 ) -> ManaPlan:
     """Find a deterministic one-activation-per-source payment plan.
 
@@ -264,6 +265,7 @@ def auto_plan_payment(
     """
 
     reserve = normalize_mana_bundle(reserve)
+    starting_pool = normalize_mana_bundle(starting_pool)
     fixed_need = normalize_mana_bundle(None)
     for color in MANA_COLORS:
         fixed_need[color] = int(requirements.get(color, 0))
@@ -336,11 +338,11 @@ def auto_plan_payment(
             chosen.pop()
         dfs(index + 1, pool, chosen)
 
-    dfs(0, normalize_mana_bundle(None), [])
+    dfs(0, starting_pool, [])
     if best is None:
         raise ManaPlanError("No conservative mana plan can satisfy the declared cost")
 
-    pool = normalize_mana_bundle(None)
+    pool = normalize_mana_bundle(starting_pool)
     activations: list[dict[str, Any]] = []
     for source, mode in best:
         for color, amount in mode.bundle.items():

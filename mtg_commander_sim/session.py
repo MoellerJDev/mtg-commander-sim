@@ -11,6 +11,7 @@ from .deck import DeckDefinition, DeckLoader
 from .engine import ActionResult, CommanderEngine
 from .model import GameConfig
 from .projection import ProjectionCursor, StateProjector
+from .profiles import DeckProfileCache
 from .record import (
     authoritative_state_hash,
     capability_id,
@@ -71,8 +72,9 @@ class CommanderSession:
     commands: list[dict[str, Any]] = field(default_factory=list)
     decisions: list[dict[str, Any]] = field(default_factory=list)
     created_at: str = field(default_factory=utc_now)
-    replay_mode: str = "commands"
+    replay_mode: str = "command_replay"
     plans: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+    pilot_profiles: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     @classmethod
     def create(
@@ -132,7 +134,7 @@ class CommanderSession:
             if issues:
                 raise ValueError(f"{seat} deck validation failed: {'; '.join(issues)}")
         order = list(sources)
-        return cls.create(
+        session = cls.create(
             card_db,
             decks,
             first_player=first_player or order[0],
@@ -141,6 +143,13 @@ class CommanderSession:
             config=config,
             semantics_path=semantics_path,
         )
+        profile_cache = DeckProfileCache()
+        session.pilot_profiles = {
+            f"pilot:{seat}": profile.to_dict()
+            for seat, deck in decks.items()
+            if (profile := profile_cache.load_for_deck(deck)) is not None
+        }
+        return session
 
     @property
     def state(self):
@@ -220,7 +229,12 @@ class CommanderSession:
         actionable: list[dict[str, Any]] = []
         for item in plan:
             if isinstance(item, Mapping) and item.get("action_id"):
-                actionable.append(copy.deepcopy(dict(item)))
+                planned = copy.deepcopy(dict(item))
+                choices = planned.pop("choices", None)
+                if isinstance(choices, Mapping):
+                    for key, value in choices.items():
+                        planned.setdefault(str(key), copy.deepcopy(value))
+                actionable.append(planned)
             elif isinstance(item, str) and (
                 item in {"keep", "mulligan", "pass", "concede"}
                 or ":" in item
@@ -249,17 +263,29 @@ class CommanderSession:
         response: Mapping[str, Any],
     ) -> tuple[str, dict[str, Any], dict[str, Any]]:
         raw = dict(response)
+        choices = raw.pop("choices", None)
+        if isinstance(choices, Mapping):
+            for key, value in choices.items():
+                raw.setdefault(str(key), copy.deepcopy(value))
         audit_keys = {
             "reason",
             "plan",
+            "plan_category",
             "confidence",
+            "provider",
             "model",
             "model_id",
+            "invocation_id",
             "input_tokens",
             "output_tokens",
             "latency_ms",
+            "provider_invoked",
+            "estimated_input_tokens",
+            "retry_count",
             "automatic",
             "fallback",
+            "automatic_fallback",
+            "memory_update",
         }
         audit = {key: copy.deepcopy(raw.pop(key)) for key in list(raw) if key in audit_keys}
         action_id = raw.pop("action_id", None)
@@ -358,14 +384,32 @@ class CommanderSession:
                     "payload": {},
                     "legal_alternatives": self._legal_alternatives(capability, actor_context),
                     "decision_context": actor_context,
-                    "reason": str(reason)[:160] if reason is not None else None,
+                    "reason": str(reason)[:180] if reason is not None else None,
                     "plan": response.get("plan"),
-                    "plan_category": response.get("plan") if isinstance(response.get("plan"), str) else None,
+                    "plan_category": response.get("plan_category") or (
+                        response.get("plan")
+                        if isinstance(response.get("plan"), str)
+                        else None
+                    ),
                     "confidence": response.get("confidence"),
+                    "provider": response.get("provider"),
                     "model": response.get("model_id", response.get("model")),
-                    "metrics": {},
+                    "invocation_id": response.get("invocation_id"),
+                    "provider_invoked": bool(response.get("provider_invoked", False)),
+                    "metrics": {
+                        key: response[key]
+                        for key in (
+                            "input_tokens",
+                            "output_tokens",
+                            "latency_ms",
+                            "estimated_input_tokens",
+                        )
+                        if response.get(key) is not None
+                    },
                     "automatic": False,
-                    "fallback": response.get("fallback"),
+                    "fallback": response.get(
+                        "automatic_fallback", response.get("fallback")
+                    ),
                     "retry_count": retry_count,
                     "accepted": False,
                     "rejection": str(exc),
@@ -456,19 +500,29 @@ class CommanderSession:
             "payload": copy.deepcopy(payload),
             "legal_alternatives": self._legal_alternatives(capability, actor_context),
             "decision_context": actor_context,
-            "reason": str(reason)[:160] if reason is not None else None,
+            "reason": str(reason)[:180] if reason is not None else None,
             "plan": plan,
-            "plan_category": plan if isinstance(plan, str) else None,
+            "plan_category": audit.get("plan_category") or (
+                plan if isinstance(plan, str) else None
+            ),
             "confidence": audit.get("confidence"),
+            "provider": audit.get("provider"),
             "model": audit.get("model_id", audit.get("model")),
+            "invocation_id": audit.get("invocation_id"),
+            "provider_invoked": bool(audit.get("provider_invoked", False)),
             "metrics": {
                 key: audit[key]
-                for key in ("input_tokens", "output_tokens", "latency_ms")
-                if key in audit
+                for key in (
+                    "input_tokens",
+                    "output_tokens",
+                    "latency_ms",
+                    "estimated_input_tokens",
+                )
+                if key in audit and audit[key] is not None
             },
             "automatic": bool(audit.get("automatic", False)),
-            "fallback": audit.get("fallback"),
-            "retry_count": retry_count,
+            "fallback": audit.get("automatic_fallback", audit.get("fallback")),
+            "retry_count": max(retry_count, int(audit.get("retry_count", 0))),
             "accepted": result.ok,
             "rejection": None if result.ok else result.summary,
             "before_state_hash": before_hash,
@@ -487,6 +541,16 @@ class CommanderSession:
         if not audit.get("automatic"):
             self.decisions.append(decision_row)
         if result.ok:
+            selected_refs: list[str] = []
+            for key in (
+                "card",
+                "source",
+                "search_card",
+            ):
+                if payload.get(key) is not None:
+                    selected_refs.append(str(payload[key]))
+            for key in ("cards", "cost_cards", "targets"):
+                selected_refs.extend(str(value) for value in payload.get(key) or [])
             self.commands.append(
                 {
                     "sequence": len(self.commands) + 1,
@@ -499,14 +563,37 @@ class CommanderSession:
                         if audit.get("automatic")
                         else "external_decision"
                     ),
+                    "action_template_id": audit.get("action_id"),
                     "capability_id": capability_id(capability.token),
                     "action": action,
                     "payload": copy.deepcopy(payload),
+                    "normalized_payload": copy.deepcopy(payload),
+                    "selected_object_refs": list(dict.fromkeys(selected_refs)),
+                    "targets": copy.deepcopy(list(payload.get("targets") or [])),
+                    "modes": copy.deepcopy(list(payload.get("modes") or [])),
+                    "x": payload.get("x"),
+                    "selected_costs": {
+                        key: copy.deepcopy(payload[key])
+                        for key in (
+                            "cost_cards",
+                            "payment",
+                            "mana",
+                            "pay_life",
+                            "entry_pay_life",
+                        )
+                        if key in payload
+                    },
                     "before_state_hash": before_hash,
                     "after_state_hash": after_hash,
                     "rng": {
                         "shuffle_counts_before": before_shuffles,
                         "shuffle_counts_after": after_shuffles,
+                        "consumed": before_shuffles != after_shuffles,
+                        "results": {
+                            seat: after_shuffles[seat]
+                            for seat in after_shuffles
+                            if after_shuffles[seat] != before_shuffles.get(seat)
+                        },
                     },
                     "semantics_fingerprint": semantics_fingerprint(self.engine.semantics),
                     "semantics": {
@@ -516,11 +603,29 @@ class CommanderSession:
                     },
                 }
             )
-            self._install_plan(
-                principal,
-                audit.get("plan"),
-                current_action_id=audit.get("action_id"),
+            new_events = [
+                event
+                for event in self.state.events
+                if event.event_id > before_event_sequence
+            ]
+            plan_stop = (
+                tuple(item.ref for item in self.state.stack)
+                != tuple(before_stack_semantics)
+                or any(
+                    event.code == "card.draw.private"
+                    for event in new_events
+                )
+                or self.state.pending_decision is not None
+                and principal not in self.pending_principals()
             )
+            if plan_stop:
+                self.plans.pop(principal, None)
+            else:
+                self._install_plan(
+                    principal,
+                    audit.get("plan"),
+                    current_action_id=audit.get("action_id"),
+                )
         self.projector.state = self.engine.state
         return result
 
@@ -560,12 +665,6 @@ class CommanderSession:
             created_at=self.created_at,
             replay_mode=self.replay_mode,
         )
-        write_review_artifacts(
-            directory,
-            self.engine,
-            decisions=self.decisions,
-            manifest=manifest,
-        )
         cursor_payload = {
             principal: {
                 "event_id": cursor.event_id,
@@ -579,7 +678,17 @@ class CommanderSession:
         (directory / "cursors.json").write_text(
             json.dumps(cursor_payload, indent=2, sort_keys=True), encoding="utf-8"
         )
+        (directory / "pilot-profiles.json").write_text(
+            json.dumps(self.pilot_profiles, indent=2, sort_keys=True),
+            encoding="utf-8",
+        )
         self.engine.semantics.save()
+        write_review_artifacts(
+            directory,
+            self.engine,
+            decisions=self.decisions,
+            manifest=manifest,
+        )
 
     @classmethod
     def load(
@@ -610,7 +719,9 @@ class CommanderSession:
             ]
             manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
             created_at = str(manifest.get("created_at") or utc_now())
-            replay_mode = str(manifest.get("replay", {}).get("mode") or "commands")
+            replay_mode = str(
+                manifest.get("replay", {}).get("mode") or "command_replay"
+            )
         else:
             engine = CommanderEngine.load(card_db, str(directory / "game.json"), semantics)
             initial_checkpoint = checkpoint_envelope(engine.state)
@@ -629,6 +740,12 @@ class CommanderSession:
                     packet_no=int(value.get("packet_no", 0)),
                     view_hash=value.get("view_hash"),
                 )
+        profiles_path = directory / "pilot-profiles.json"
+        pilot_profiles = (
+            json.loads(profiles_path.read_text(encoding="utf-8"))
+            if profiles_path.exists()
+            else {}
+        )
         return cls(
             card_db,
             engine,
@@ -640,4 +757,5 @@ class CommanderSession:
             created_at,
             replay_mode,
             {},
+            pilot_profiles,
         )

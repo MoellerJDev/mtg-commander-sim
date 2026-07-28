@@ -1,0 +1,124 @@
+{
+  "schema_version": 2,
+  "name": "mishra-eminent-one-vertical-slice",
+  "programs": [
+    {
+      "key": "d3438037-3efd-4ce0-88ec-6d48ab521992:spell:front",
+      "label": "Mishra, Eminent One permanent spell",
+      "oracle_id": "d3438037-3efd-4ce0-88ec-6d48ab521992",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_mishra_warform_and_delayed_sacrifice"],
+      "provenance": {
+        "source_oracle_hash": "5e5d0dbc6591b03f3531a136ce50a0917416e316f299ce36bf778a0e003ae6fb",
+        "source_rulings_hash": "873d63da353ea5ec1a53f91a4269f585af4b3076b2d5e58c14dbc8de4f5ceb0a",
+        "authored_by": "vertical-slice",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "d3438037-3efd-4ce0-88ec-6d48ab521992:trigger:beginning-combat",
+      "label": "Mishra beginning-of-combat trigger",
+      "oracle_id": "d3438037-3efd-4ce0-88ec-6d48ab521992",
+      "ability_id": "trigger:beginning-combat",
+      "active_zone": "battlefield",
+      "event": "step.begin",
+      "effects": [{"op": "choose_warform"}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "token_copy", "characteristic_override", "delayed_trigger", "player_choice"],
+      "tests": ["test_mishra_warform_and_delayed_sacrifice"],
+      "provenance": {
+        "source_oracle_hash": "5e5d0dbc6591b03f3531a136ce50a0917416e316f299ce36bf778a0e003ae6fb",
+        "source_rulings_hash": "873d63da353ea5ec1a53f91a4269f585af4b3076b2d5e58c14dbc8de4f5ceb0a",
+        "authored_by": "vertical-slice",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "5b5ef43b-13fd-4461-8d2d-18be65e9a790:spell:front",
+      "label": "Ichor Wellspring",
+      "oracle_id": "5b5ef43b-13fd-4461-8d2d-18be65e9a790",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "provisional",
+      "coverage": ["permanent_characteristics", "enters_trigger", "dies_trigger"],
+      "tests": ["test_mishra_warform_and_delayed_sacrifice"],
+      "provenance": {
+        "source_oracle_hash": "e4bf9909a8a6ea954ed19c53f23563407e79bb95939937099bb2d7e68ddb6cdf",
+        "source_rulings_hash": "5187c65de7049179aebea323ce62d43be9a02dea1416770fb7ea49596a0dee04",
+        "authored_by": "vertical-slice",
+        "review_status": "provisional"
+      }
+    },
+    {
+      "key": "69428825-3c40-486d-b051-14e97a598ce6:spell:front",
+      "label": "Gonti's Aether Heart",
+      "oracle_id": "69428825-3c40-486d-b051-14e97a598ce6",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "provisional",
+      "coverage": ["permanent_characteristics", "artifact_enters_trigger", "energy", "extra_turn"],
+      "tests": ["test_gonti_heart_extra_turn_accounting"],
+      "provenance": {
+        "source_oracle_hash": "434bb9416b3dec6147424cf0543adee367220eaf07fad754a1636816ae5506ca",
+        "source_rulings_hash": "ab7ecefd531a51f03dff5c13ca7b5bdfcb30ce28c96da21bbf6c45edd305ef15",
+        "authored_by": "vertical-slice",
+        "review_status": "provisional"
+      }
+    },
+    {
+      "key": "69428825-3c40-486d-b051-14e97a598ce6:trigger:artifact-enter",
+      "label": "Gonti's Aether Heart artifact-enter trigger",
+      "oracle_id": "69428825-3c40-486d-b051-14e97a598ce6",
+      "ability_id": "trigger:artifact-enter",
+      "active_zone": "battlefield",
+      "event": "artifact.enter",
+      "effects": [{"op": "energy", "player": "$controller", "delta": 2}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "energy"],
+      "tests": ["test_gonti_heart_extra_turn_accounting"],
+      "provenance": {
+        "source_oracle_hash": "434bb9416b3dec6147424cf0543adee367220eaf07fad754a1636816ae5506ca",
+        "source_rulings_hash": "ab7ecefd531a51f03dff5c13ca7b5bdfcb30ce28c96da21bbf6c45edd305ef15",
+        "authored_by": "vertical-slice",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "bb329a5c-b9f9-4973-a53f-090024146325:spell:front",
+      "label": "Red Elemental Blast",
+      "oracle_id": "bb329a5c-b9f9-4973-a53f-090024146325",
+      "effects": [{"op": "counter_or_destroy_blue", "target": "$target.0"}],
+      "destination": "graveyard",
+      "target_schema": {"count": 1, "selector": "blue_spell_or_permanent"},
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "target_validation"],
+      "tests": ["test_red_elemental_blast_targets_zimone"],
+      "provenance": {
+        "source_oracle_hash": "baca93ae5aa10651b17803aed248264090f0ffbb80b899881b96c68abb294806",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "vertical-slice",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ecc435e2-deb1-420a-a79f-01dd08747314:spell:front",
+      "label": "Pyroblast",
+      "oracle_id": "ecc435e2-deb1-420a-a79f-01dd08747314",
+      "effects": [{"op": "counter_or_destroy_blue", "target": "$target.0"}],
+      "destination": "graveyard",
+      "target_schema": {"count": 1, "selector": "blue_spell_or_permanent"},
+      "trust_level": "provisional",
+      "coverage": ["spell_resolution", "target_validation"],
+      "tests": ["test_red_elemental_blast_targets_zimone"],
+      "provenance": {
+        "source_oracle_hash": "c13d947b7bea88227cf7f595b81fa2b954f059027b989a4ba07d74d56ac0bc2f",
+        "source_rulings_hash": "94df9cd3f5c5d5cbaec839a8d4f46ee693e88e0b66c9ab1a39a0af870059e1a5",
+        "authored_by": "vertical-slice",
+        "review_status": "provisional"
+      }
+    }
+  ]
+}

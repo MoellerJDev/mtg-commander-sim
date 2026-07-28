@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "deck_fingerprint": "39eba1106d1885d067b7831f1230815455b7d26d934080a3f701fd3d8e6b916d",
+  "commander": ["Mishra, Eminent One"],
+  "archetype": "Grixis artifact combo-control",
+  "primary_game_plan": "Establish exact UBR access and useful artifacts before casting Mishra, then convert the first safe combat into Warform value.",
+  "secondary_game_plan": "Control the table while assembling artifact recursion, copy, extra-turn, or lock engines.",
+  "primary_engine_pieces": ["Mishra, Eminent One", "Ichor Wellspring", "Gonti's Aether Heart", "Strionic Resonator", "Lithoform Engine", "Goblin Engineer", "Goblin Welder"],
+  "primary_win_lines": ["Mishra Warform value chains", "Gonti's Aether Heart extra turns with sufficient energy", "Mindslaver recursion", "Portal to Phyrexia recursion"],
+  "common_tutor_priorities": ["exact missing commander color", "an artifact to copy before Mishra combat", "Goblin Engineer/Welder setup", "engine artifact appropriate to the board"],
+  "cards_commonly_used_as_fodder": ["Ichor Wellspring after value", "spent utility artifacts", "artifact tokens"],
+  "interaction_priorities": ["protect the first meaningful Mishra combat", "stop graveyard hate before committing recursion", "hold cheap stack interaction for pivotal turns"],
+  "mulligan_requirements": ["functional mana with a path to UBR", "early artifact development", "do not count total mana without checking colors"],
+  "cards_normally_preserved": ["Red Elemental Blast against blue engines", "high-impact copy targets", "Goblin Engineer/Welder when recursion is live"],
+  "cards_that_require_setup": ["Mishra, Eminent One", "Gonti's Aether Heart", "Mindslaver", "Portal to Phyrexia", "Sundial of the Infinite"],
+  "known_color_requirements": ["Mishra requires UBR plus two generic", "red is needed for several interaction and recursion lines", "blue supports countermagic and artifact engines"],
+  "expected_development_turns": ["turns 1-2 deploy mana and cheap artifacts", "turns 3-4 establish value/recursion", "turn 5+ cast Mishra with a protected combat target"],
+  "threat_assessment": "Do not expose Mishra without a useful noncreature artifact and a reasonable chance to reach beginning of combat."
+}

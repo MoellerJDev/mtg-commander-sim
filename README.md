@@ -1,4 +1,4 @@
-# MTG Commander Sim 0.3.0
+# MTG Commander Sim 0.4.0
 
 A persistent, four-player-first Commander simulation kernel designed for LLM pilots, rules arbitration, matchup testing, and a future graphical/network client.
 
@@ -19,7 +19,7 @@ The complete bundle can run directly from its source tree. To install the prebui
 ```bash
 python -m venv .venv
 . .venv/bin/activate        # Windows PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install --no-index dist/mtg_commander_sim-0.3.0-py3-none-any.whl
+python -m pip install --no-index dist/mtg_commander_sim-0.4.0-py3-none-any.whl
 ```
 
 For editable development, use `python -m pip install -e . --no-build-isolation` in an environment that already has setuptools 68 or newer. Running `python simctl.py`, `make test`, and `make demo` from the repository does not require installation.
@@ -85,6 +85,13 @@ advertised `.jsonl.gz` files. Network access remains outside the game engine.
 - server-derived land entry and built-in fetchland search resolution
 - server-generated stable legal action IDs with exact alternatives in the decision audit
 - derived turn-grouped reviews with an explicit fidelity gate
+- provider-neutral scripted, manual-JSON, and subprocess-JSON pilots
+- isolated, persistent per-seat strategic memory and fingerprinted deck profiles
+- schema-validated semantic packs with trust and source provenance
+- trust-aware semantic preflight for files and live Moxfield URLs
+- compact cast, land, activation, target, and resolution-time search templates
+- native-v3 pilot runs that can stop, save, resume, and command-replay
+- validated aggregate shortcuts for the vertical-slice Soultrader and Gonti's Aether Heart lines
 
 ## Why this runs faster with an LLM
 
@@ -94,13 +101,22 @@ For the bundled four-seat Mishra/Zimone benchmark:
 
 | Packet | Compact characters | Approximate input tokens |
 |---|---:|---:|
-| Initial A-seat bootstrap | 7,146 | 1,786 |
-| Same live decision, unchanged state | 990 | 247 |
+| Initial A-seat bootstrap | 6,197 | 1,549 |
+| Same live decision, unchanged state | 1,076 | 269 |
 | A mulligan declaration delta | 435 | 108 |
 
 Card definitions are emitted once per principal. Routine passes and bookkeeping remain in authoritative history but do not enter ordinary packets. Detailed rulings are requested only when an interaction is materially ambiguous.
 
 See `demo/token-benchmark.json` and `LLM_PROTOCOL.md`.
+
+The fresh turn-eight native duel records the provider segment in
+`run/native-zimone-vs-mishra/call-benchmark.json`: 16 strategic pilot
+invocations, no arbiter invocation, 37 pass-only windows skipped, 101 windows
+covered by yields, 40,898 compact packet bytes, and no rejected action or retry.
+The scripted provider does not report token usage, so observed input/output
+tokens are `null`; 10,205 input and 1,254 output tokens are separately labeled
+character-count estimates. This fixture is a pilot/protocol test, not a
+strategic-strength or matchup benchmark.
 
 ## Deliberate rules boundary
 
@@ -170,7 +186,7 @@ strategy metadata that is stripped before the command reaches the engine:
 {
   "action_id":"cast:A12",
   "reason":"Deploy graveyard interaction before the opponent can recur a target.",
-  "plan":["cast lantern","hold up interaction"],
+  "plan":"HOLD_INTERACTION",
   "confidence":0.84
 }
 ```
@@ -226,6 +242,42 @@ commanders, contain 100 cards, satisfy singleton checks, and stay within the
 commander color identity. Successful live responses are cached for reproducible
 reruns.
 
+Moxfield metadata is authoritative for commander identity. At the time of this
+release, `g5vtVfRuS0W5KxZuYqZHGQ` identifies the Zimone and Dina list and
+`armNI_ntVUagNNygnUVyxQ` identifies the Mishra, Eminent One list. This is the
+reverse of the labels in the original development brief, so the native fixture
+uses the commanders and contents returned by Moxfield.
+
+Preflight semantic coverage before a pilot run:
+
+```bash
+python simctl.py semantics preflight \
+  https://moxfield.com/decks/g5vtVfRuS0W5KxZuYqZHGQ \
+  --db data/scryfall-20260728-compact.sqlite3 \
+  --cache-dir run/deck-cache \
+  --output run/semantic-preflight-zimone.json
+```
+
+Run the seats through any mix of provider adapters:
+
+```bash
+python simctl.py pilot-run \
+  --db data/scryfall-20260728-compact.sqlite3 \
+  --profile commander_duel \
+  --deck A=https://moxfield.com/decks/g5vtVfRuS0W5KxZuYqZHGQ \
+  --deck B=https://moxfield.com/decks/armNI_ntVUagNNygnUVyxQ \
+  --pilot A=manual \
+  --pilot B=subprocess:"python my_pilot.py" \
+  --output run/native-zimone-vs-mishra \
+  --through-turn 8
+```
+
+`scripted` is the deterministic fixture provider. `manual` writes a compact
+task under the run directory and reads one JSON response from stdin.
+`subprocess:<command>` sends JSON on stdin and expects one JSON object on
+stdout. A resumed `pilot-run` restores the checkpoint, projection cursors, and
+each seat's private pilot memory.
+
 Each save is a Game Record v3 directory rather than a monolithic `game.json`.
 Inspect, migrate, verify, and review records with:
 
@@ -240,6 +292,10 @@ python simctl.py migrate-record run/old/game.json \
 
 See `GAME_RECORD.md` for file semantics, trace levels, replay guarantees, and
 the review fidelity gate.
+
+See `PILOT_PROVIDERS.md` for provider contracts and isolation guarantees, and
+`SEMANTIC_PACKS.md` for pack provenance, trust, preflight, and the deliberately
+bounded 0.4.0 card coverage.
 
 Read the next scoped task:
 
@@ -286,6 +342,9 @@ For strict isolation, use four pilot contexts plus one arbiter context against o
 - `mtg_commander_sim/session.py` — ChatGPT/Codex-friendly façade
 - `mtg_commander_sim/service.py` — transport-neutral application boundary
 - `mtg_commander_sim/pilot.py` — LLM callback orchestration and token metrics
+- `mtg_commander_sim/profiles.py` — fingerprinted advisory deck profiles
+- `mtg_commander_sim/preflight.py` — trust-aware deck semantic coverage
+- `mtg_commander_sim/shortcuts.py` — validated aggregate loop fixtures
 - `mtg_commander_sim/record.py` — Game Record v3 hashing, journals, migration, inspection, and replay
 - `mtg_commander_sim/report.py` — derived review and fidelity classification
 - `mtg_commander_sim/carddb.py` — local Oracle/rulings database
@@ -294,4 +353,5 @@ For strict isolation, use four pilot contexts plus one arbiter context against o
 - `scripts/` — data bootstrap and protocol smoke/benchmark tools
 - `tests/` — multiplayer, permission, rules, and token-efficiency regression tests
 
-Read `ARCHITECTURE.md`, `LLM_PROTOCOL.md`, and `CLIENT_INTEGRATION.md` before extending the engine.
+Read `ARCHITECTURE.md`, `LLM_PROTOCOL.md`, `PILOT_PROVIDERS.md`,
+`SEMANTIC_PACKS.md`, and `CLIENT_INTEGRATION.md` before extending the engine.

@@ -8,6 +8,14 @@ from typing import Any
 
 from .carddb import CardDatabase
 from .model import GameConfig
+from .pilot import (
+    ManualJsonPilot,
+    PilotMemory,
+    ScriptedPilot,
+    SequentialPilotRunner,
+    SubprocessJsonPilot,
+)
+from .preflight import semantic_preflight
 from .record import inspect_game, migrate_v2_game, replay_record
 from .report import review_markdown, write_review_artifacts
 from .session import CommanderSession
@@ -32,6 +40,170 @@ def _load(db_path: str, game_dir: str) -> tuple[CardDatabase, CommanderSession]:
         semantics_path=Path(game_dir) / "semantics.json",
     )
     return db, session
+
+
+def _scripted_choice(
+    observation: dict[str, Any],
+    decision: dict[str, Any],
+    memory: PilotMemory,
+) -> dict[str, Any]:
+    """Conservative deterministic pilot for local characterization fixtures."""
+
+    kind = str(decision.get("kind") or "")
+    context = dict(decision.get("ctx") or {})
+    actions = list(decision.get("legal_actions") or [])
+    if kind == "mulligan.declare":
+        action_id = "keep"
+        plan = "MULLIGAN"
+        reason = "Keep a functional hand without chasing an ideal synergy hand."
+        return {"action_id": action_id, "plan": plan, "reason": reason}
+    if kind == "mulligan.bottom":
+        hand = list(context.get("hand") or [])
+        count = int(context.get("count", 0))
+        return {
+            "action_id": "bottom",
+            "cards": [item["id"] for item in hand[:count]],
+            "plan": "MULLIGAN",
+            "reason": "Bottom the least immediately useful cards after the counted redraw.",
+        }
+    if kind == "search.fetch":
+        choices = list(context.get("search_cards") or [])
+        selected = choices[0]["id"] if choices else None
+        return {
+            "action_id": "choose",
+            "search_card": selected,
+            "entry_pay_life": False,
+            "plan": "FIX_COLORS",
+            "reason": "Choose a legal typed source and preserve life unless untapped mana is required.",
+        }
+    if kind in {"semantic.choice", "semantic.target"}:
+        options = list(
+            context.get("options")
+            or context.get("target_schema", {}).get("legal_refs")
+            or []
+        )
+        choices: dict[str, Any] = {}
+        if kind == "semantic.target":
+            count = int(context.get("target_schema", {}).get("count", 1))
+            choices["targets"] = options[:count]
+        elif context.get("operation") == "choose_mana":
+            choices["choice"] = "G"
+        elif options:
+            choices["card"] = options[0]
+        return {
+            "action_id": "choose",
+            **choices,
+            "plan": "DEVELOP_ENGINE",
+            "reason": "Make the advertised semantic choice that advances the current engine line.",
+        }
+    if kind == "arbiter.resolve":
+        return {
+            "action_id": "resolve",
+            "effects": [],
+            "note": "Explicit one-shot provisional resolution; semantic remains unresolved.",
+            "plan": "RECOVER",
+            "reason": "Resolve once without registering unsupported text or inventing hidden choices.",
+        }
+    if kind == "combat.attackers":
+        return {
+            "action_id": "attack",
+            "attackers": {},
+            "plan": "DEVELOP_ENGINE",
+            "reason": "Avoid unsupported combat risk during deterministic characterization.",
+        }
+    if kind == "combat.blockers":
+        return {
+            "action_id": "block",
+            "blocks": {},
+            "plan": "DEVELOP_ENGINE",
+            "reason": "No profitable deterministic block is selected.",
+        }
+    if kind == "cleanup.discard":
+        hand = list(context.get("hand") or [])
+        count = int(context.get("count", 0))
+        return {
+            "action_id": "discard",
+            "cards": [item["id"] for item in hand[:count]],
+            "plan": "RECOVER",
+            "reason": "Discard to the authoritative maximum-hand-size requirement.",
+        }
+    if kind in {"state.legend", "choice.apnap", "trigger.order"}:
+        options = (
+            context.get("keep_one")
+            or context.get("options")
+            or [item["id"] for item in context.get("triggers") or []]
+        )
+        choices = {}
+        if kind == "state.legend":
+            choices["card"] = options[0]
+        elif kind == "trigger.order":
+            choices["triggers"] = options
+        else:
+            choices["cards"] = options[: int(context.get("count", 0))]
+        return {
+            "action_id": actions[0]["id"] if actions else "choose",
+            **choices,
+            "plan": "DEVELOP_ENGINE",
+            "reason": "Make the deterministic required rules choice.",
+        }
+    land = next((item for item in actions if item.get("kind") == "play_land"), None)
+    if land:
+        choices = {}
+        if land.get("choice_schema", {}).get("pay_life"):
+            choices["pay_life"] = False
+        return {
+            "action_id": land["id"],
+            **choices,
+            "plan": "DEVELOP_MANA",
+            "reason": "Make the available land drop and preserve life unless tempo requires otherwise.",
+        }
+    cast = next((item for item in actions if item.get("kind") == "cast"), None)
+    if cast:
+        target_schema = cast.get("target_schema") or {}
+        choices = {}
+        if target_schema:
+            choices["targets"] = list(target_schema.get("legal_refs") or [])[
+                : int(target_schema.get("count", 0))
+            ]
+        return {
+            "action_id": cast["id"],
+            **choices,
+            "plan": "DEVELOP_ENGINE",
+            "reason": "Deploy an affordable engine piece from the complete legal-action catalog.",
+        }
+    fetch = next(
+        (
+            item
+            for item in actions
+            if item.get("kind") == "activate"
+            and item.get("choice_schema", {}).get("resolution_time")
+        ),
+        None,
+    )
+    if fetch:
+        return {
+            "action_id": fetch["id"],
+            "plan": "FIX_COLORS",
+            "reason": "Use the fetchland while its resolution-time typed-land search is available.",
+        }
+    return {
+        "action_id": "pass",
+        "yield": "until_public_change",
+        "plan": "PASS_WITH_YIELD",
+        "reason": "No meaningful development or interaction is currently advertised.",
+    }
+
+
+def _provider_from_spec(spec: str, output: Path, seat: str):
+    if spec == "scripted":
+        return ScriptedPilot(chooser=_scripted_choice)
+    if spec == "manual":
+        return ManualJsonPilot(
+            task_path=output / "manual" / f"{seat}-task.json",
+        )
+    if spec.startswith("subprocess:"):
+        return SubprocessJsonPilot(spec.split(":", 1)[1])
+    raise ValueError(f"Unknown pilot provider {spec!r}")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -102,11 +274,223 @@ def build_parser() -> argparse.ArgumentParser:
     replay.add_argument("--db", required=True)
     replay.add_argument("--verify", action="store_true")
 
+    semantics = sub.add_parser("semantics", help="Inspect semantic coverage")
+    semantics_sub = semantics.add_subparsers(dest="semantics_cmd", required=True)
+    preflight = semantics_sub.add_parser(
+        "preflight", help="Preflight a deck or public Moxfield URL"
+    )
+    preflight.add_argument("deck")
+    preflight.add_argument(
+        "--db", default="data/scryfall-20260728-compact.sqlite3"
+    )
+    preflight.add_argument("--cache-dir")
+    preflight.add_argument("--refresh-decks", action="store_true")
+    preflight.add_argument("--output")
+
+    pilot_run = sub.add_parser(
+        "pilot-run", help="Create or resume a provider-piloted native v3 run"
+    )
+    pilot_run.add_argument(
+        "--db", default="data/scryfall-20260728-compact.sqlite3"
+    )
+    pilot_run.add_argument("--profile", choices=("commander_duel", "commander_multiplayer", "commander_review", "auto"), default="auto")
+    pilot_run.add_argument("--deck", action="append", required=True)
+    pilot_run.add_argument("--pilot", action="append", required=True)
+    pilot_run.add_argument("--output", required=True)
+    pilot_run.add_argument("--cache-dir")
+    pilot_run.add_argument("--refresh-decks", action="store_true")
+    pilot_run.add_argument("--first")
+    pilot_run.add_argument("--seed", type=int)
+    pilot_run.add_argument("--through-turn", type=int, default=8)
+    pilot_run.add_argument("--max-invocations", type=int, default=200)
+
+    inspect_decisions = sub.add_parser(
+        "inspect-decisions", help="Inspect a record's durable decision audit"
+    )
+    inspect_decisions.add_argument("record")
+
+    inspect_semantics = sub.add_parser(
+        "inspect-semantics", help="Inspect semantic programs and review coverage"
+    )
+    inspect_semantics.add_argument("record")
+
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.cmd == "semantics" and args.semantics_cmd == "preflight":
+        db = CardDatabase(args.db)
+        try:
+            result = semantic_preflight(
+                db,
+                args.deck,
+                cache_dir=args.cache_dir,
+                force_refresh=args.refresh_decks,
+            )
+            if args.output:
+                Path(args.output).write_text(
+                    stable_json(result), encoding="utf-8"
+                )
+            print(stable_json(result))
+        finally:
+            db.close()
+        return 0
+
+    if args.cmd == "inspect-decisions":
+        path = Path(args.record) / "decisions.jsonl"
+        rows = [
+            json.loads(line)
+            for line in path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        print(stable_json({"record": args.record, "decisions": rows}))
+        return 0
+
+    if args.cmd == "inspect-semantics":
+        record = Path(args.record)
+        registry_path = record / "semantics.json"
+        from .semantics import SemanticRegistry
+
+        registry = SemanticRegistry(registry_path)
+        review_path = record / "review.json"
+        review = (
+            json.loads(review_path.read_text(encoding="utf-8"))
+            if review_path.exists()
+            else {}
+        )
+        print(
+            stable_json(
+                {
+                    "record": args.record,
+                    "programs": [
+                        program.to_dict() for program in registry.programs()
+                    ],
+                    "coverage": review.get("semantic_coverage"),
+                }
+            )
+        )
+        return 0
+
+    if args.cmd == "pilot-run":
+        output = Path(args.output)
+        output.mkdir(parents=True, exist_ok=True)
+        db = CardDatabase(args.db)
+        try:
+            if (output / "manifest.json").exists():
+                session = CommanderSession.load(
+                    db, output, semantics_path=output / "semantics.json"
+                )
+            else:
+                sources = _seat_values(args.deck)
+                effective_profile = (
+                    "commander_multiplayer"
+                    if args.profile == "commander_review"
+                    else args.profile
+                )
+                config = GameConfig(
+                    seed=args.seed,
+                    profile=effective_profile,
+                    trace_level="standard",
+                )
+                session = CommanderSession.from_sources(
+                    db,
+                    sources,
+                    first_player=args.first or next(iter(sources)),
+                    seed=args.seed,
+                    cache_dir=args.cache_dir,
+                    force_refresh=args.refresh_decks,
+                    semantics_path=output / "semantics.json",
+                    config=config,
+                )
+            specs = _seat_values(args.pilot)
+            providers = {
+                f"pilot:{seat}": _provider_from_spec(spec, output, seat)
+                for seat, spec in specs.items()
+            }
+            arbiter = ScriptedPilot(chooser=_scripted_choice, implementation_id="provisional-arbiter-v1")
+            memories_path = output / "pilot-memory.json"
+            memories = {}
+            if memories_path.exists():
+                memories = {
+                    principal: PilotMemory.from_dict(value)
+                    for principal, value in json.loads(
+                        memories_path.read_text(encoding="utf-8")
+                    ).items()
+                }
+            runner = SequentialPilotRunner(
+                session,
+                providers,
+                arbiter=arbiter,
+                memories=memories,
+            )
+            invocations = 0
+            while (
+                not session.state.game_over
+                and session.state.turn_sequence < args.through_turn
+                and invocations < args.max_invocations
+            ):
+                if not runner.step():
+                    break
+                invocations += 1
+                memories_path.write_text(
+                    stable_json(
+                        {
+                            principal: memory.to_dict()
+                            for principal, memory in runner.memories.items()
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+                session.save(output)
+            memories_path.write_text(
+                stable_json(
+                    {
+                        principal: memory.to_dict()
+                        for principal, memory in runner.memories.items()
+                    }
+                ),
+                encoding="utf-8",
+            )
+            session.save(output)
+            benchmark = {
+                "schema_version": 1,
+                "game_id": session.state.game_id,
+                "through_turn_sequence": session.state.turn_sequence,
+                "provider_segment": runner.metrics.to_dict(),
+                "notes": {
+                    "observed_tokens": (
+                        "Provider-reported only; null when the adapter supplied no usage."
+                    ),
+                    "estimated_tokens": (
+                        "Compact packet/response character estimates; never labeled observed."
+                    ),
+                    "resume_scope": (
+                        "Provider-segment packet metrics cover this pilot-run invocation; "
+                        "review.json derives durable decision/provider totals across the record."
+                    ),
+                },
+            }
+            (output / "call-benchmark.json").write_text(
+                stable_json(benchmark), encoding="utf-8"
+            )
+            # Include the benchmark file in the stable record-size review.
+            session.save(output)
+            print(
+                stable_json(
+                    {
+                        "game_id": session.state.game_id,
+                        "record": str(output),
+                        "turn_sequence": session.state.turn_sequence,
+                        "game_over": session.state.game_over,
+                        "pending": session.pending_principals(),
+                        "metrics": benchmark["provider_segment"],
+                    }
+                )
+            )
+        finally:
+            db.close()
+        return 0
     if args.cmd == "inspect-game":
         result = inspect_game(args.path)
         print(stable_json(result) if args.pretty else json.dumps(result, separators=(",", ":"), ensure_ascii=False))

@@ -27,6 +27,19 @@ MEANINGFUL_CODES = {
     "game.win",
     "game.draw",
     "action.rejected",
+    "state.creatures_died",
+    "effect.damage",
+    "effect.life",
+    "effect.energy",
+    "token.create",
+    "turn.extra.scheduled",
+}
+LEGACY_PLACEHOLDERS = {
+    "",
+    "unavailable",
+    "unavailable in v2 record",
+    "unknown",
+    "not recorded",
 }
 
 
@@ -44,6 +57,17 @@ def _oracle_name(engine: CommanderEngine, oracle_id: str) -> str:
         return engine.card_db.by_oracle_id(oracle_id).name
     except KeyError:
         return oracle_id
+
+
+def _format_mana(bundle: Mapping[str, Any] | None) -> str:
+    values = dict(bundle or {})
+    symbols: list[str] = []
+    generic = int(values.get("GENERIC", 0))
+    if generic:
+        symbols.append(f"{{{generic}}}")
+    for color in ("W", "U", "B", "R", "G", "C"):
+        symbols.extend(f"{{{color}}}" for _ in range(int(values.get(color, 0))))
+    return "".join(symbols) or "no mana"
 
 
 def _opening_hands(engine: CommanderEngine) -> dict[str, dict[str, Any]]:
@@ -136,13 +160,22 @@ def _semantic_coverage(engine: CommanderEngine) -> dict[str, Any]:
         operations = refs[ref]
         if not record:
             continue
-        key_prefix = record.oracle_id
-        registered = any(key.startswith(key_prefix) for key in engine.semantics.keys())
+        registered_programs = engine.semantics.programs_for_oracle(record.oracle_id)
+        trust = engine.semantics.trust_for_oracle(record.oracle_id)
         oracle = record.oracle_text.casefold()
         builtin_fetch = bool(engine._fetch_land_types(record.oracle_text))
-        if registered or ("stack.activate" in operations and builtin_fetch):
+        if trust == "trusted" or ("stack.activate" in operations and builtin_fetch):
             status = "fully_supported"
-            reason = "registered or built-in semantics"
+            reason = "trusted semantic pack or built-in semantics"
+        elif trust == "intentionally_ignored":
+            status = "intentionally_ignored_as_irrelevant"
+            reason = "semantic pack marks the encountered text intentionally irrelevant"
+        elif registered_programs and trust == "provisional":
+            status = "partially_supported"
+            reason = "only provisional semantic programs covered this card"
+        elif registered_programs and trust == "unresolved":
+            status = "unresolved"
+            reason = "semantic pack explicitly marks relevant behavior unresolved"
         elif operations == {"land.play"} and not any(
             marker in oracle for marker in ("when ", "whenever ", "as ")
         ):
@@ -167,12 +200,28 @@ def _semantic_coverage(engine: CommanderEngine) -> dict[str, Any]:
         else:
             status = "unresolved"
             reason = "relevant Oracle semantics were not registered or observed resolving"
+        effective_trust = trust
+        if status == "fully_supported" and (
+            builtin_fetch or operations == {"land.play"}
+        ):
+            effective_trust = "trusted"
+        elif status == "intentionally_ignored_as_irrelevant":
+            effective_trust = "intentionally_ignored"
         row = {
             "id": ref,
             "name": record.name,
             "operations": sorted(operations),
             "status": status,
             "reason": reason,
+            "trust_level": effective_trust,
+            "semantic_programs": [
+                {
+                    "key": program.key,
+                    "version": program.version,
+                    "trust_level": program.trust_level,
+                }
+                for program in registered_programs
+            ],
         }
         cards.append(row)
         if status == "unresolved":
@@ -201,21 +250,113 @@ def _event_description(engine: CommanderEngine, event: Event) -> str:
     if event.code == "land.play":
         ref = str(details.get("object") or "")
         suffix = " tapped" if details.get("tapped") else " untapped"
-        return f"{seat} played {_name(engine, ref)}{suffix}."
+        paid = (
+            f" after paying {details.get('life_paid')} life"
+            if details.get("life_paid")
+            else ""
+        )
+        return f"{seat} played {_name(engine, ref)}{suffix}{paid}."
     if event.code == "stack.cast":
         ref = str(details.get("object") or "")
-        return f"{seat} cast {_name(engine, ref)} from {details.get('from', 'an unknown zone')}."
+        payment = details.get("payment") or {}
+        sources = details.get("mana_sources") or []
+        paid = (
+            " using "
+            + ", ".join(
+                f"{_name(engine, str(item.get('source')))} for "
+                f"{_format_mana(item.get('bundle'))}"
+                for item in sources
+                if item.get("source")
+            )
+            if sources
+            else ""
+        )
+        tax = (
+            f" (commander tax {details.get('commander_tax')})"
+            if details.get("commander_tax")
+            else ""
+        )
+        target = (
+            f", targeting {', '.join(_name(engine, str(value)) for value in details.get('targets') or [])}"
+            if details.get("targets")
+            else ""
+        )
+        modes = (
+            f", modes {', '.join(map(str, details.get('modes') or []))}"
+            if details.get("modes")
+            else ""
+        )
+        x_value = (
+            f", X={details.get('x')}"
+            if details.get("x") is not None
+            else ""
+        )
+        return (
+            f"{seat} cast {_name(engine, ref)} from "
+            f"{details.get('from', 'an unknown zone')} for "
+            f"{_format_mana(payment)}{paid}{tax}{target}{modes}{x_value}."
+        )
     if event.code == "stack.activate":
         ref = str(details.get("source") or "")
-        return f"{seat} activated {_name(engine, ref)} ({details.get('ability')})."
+        payment = details.get("payment") or {}
+        life_paid = int(details.get("life_paid") or 0)
+        if not life_paid:
+            source = _card_by_ref(engine).get(ref)
+            if source is not None:
+                life_paid = next(
+                    (
+                        ability.life_payment
+                        for ability in engine._activated_abilities(source)
+                        if ability.ability_id == details.get("ability")
+                    ),
+                    0,
+                )
+        costs = [
+            _name(engine, str(value))
+            for value in details.get("cost_objects") or []
+        ]
+        suffix = []
+        if payment:
+            suffix.append(f"paid {_format_mana(payment)}")
+        if life_paid:
+            suffix.append(f"paid {life_paid} life")
+        if costs:
+            suffix.append(f"used {', '.join(costs)} as costs")
+        if details.get("targets"):
+            suffix.append(
+                "targeted "
+                + ", ".join(
+                    _name(engine, str(value))
+                    for value in details["targets"]
+                )
+            )
+        if details.get("modes"):
+            suffix.append(f"chose modes {', '.join(map(str, details['modes']))}")
+        return (
+            f"{seat} activated {_name(engine, ref)} "
+            f"({details.get('ability')})"
+            f"{'; ' + '; '.join(suffix) if suffix else ''}."
+        )
     if event.code == "stack.resolve":
+        if details.get("note") == "Automatic vanilla/default resolution":
+            return (
+                f"Resolved {details.get('stack')} as a permanent spell; "
+                "no entry trigger applied."
+            )
         return f"Resolved {details.get('stack')} ({details.get('note') or 'registered/default semantics'})."
     if event.code == "stack.counter":
         return f"{details.get('stack')} was countered ({details.get('reason')})."
     if event.code == "library.search":
         ref = details.get("object")
+        entry = "tapped" if details.get("tapped") else "untapped"
+        life_suffix = (
+            f" after paying {details.get('life_paid')} life"
+            if details.get("life_paid")
+            else ""
+        )
         return (
-            f"{seat} searched for {_name(engine, str(ref))}."
+            f"{seat} searched for {_name(engine, str(ref))}; it entered "
+            f"{entry}{life_suffix}."
             if ref
             else f"{seat} searched and did not find a card."
         )
@@ -234,7 +375,11 @@ def _event_description(engine: CommanderEngine, event: Event) -> str:
         return f"{seat} attacked with {values}."
     if event.code == "combat.block":
         blocks = details.get("blocks") or {}
-        return f"{seat} declared {len(blocks)} block(s)."
+        values = ", ".join(
+            f"{_name(engine, str(blocker))} blocked {_name(engine, str(attacker))}"
+            for blocker, attacker in blocks.items()
+        )
+        return f"{seat} declared {values or str(len(blocks)) + ' block(s)'}."
     if event.code == "combat.damage":
         values = ", ".join(
             f"{_name(engine, str(item.get('source')))} dealt {item.get('amount')} to {item.get('target')}"
@@ -249,6 +394,27 @@ def _event_description(engine: CommanderEngine, event: Event) -> str:
         return "The game ended in a draw."
     if event.code == "action.rejected":
         return f"{seat}'s action was rejected: {details.get('reason') or 'unknown reason'}."
+    if event.code == "state.creatures_died":
+        names = ", ".join(
+            _name(engine, str(ref)) for ref in details.get("objects") or []
+        )
+        return f"{names or 'Permanents'} died or were put into graveyards."
+    if event.code == "token.create":
+        names = ", ".join(
+            _name(engine, str(ref)) for ref in details.get("objects") or []
+        )
+        return f"{seat} created {names or 'token(s)'}."
+    if event.code == "effect.damage":
+        return (
+            f"{details.get('target')} took {details.get('amount')} damage "
+            f"({details.get('reason') or 'effect'})."
+        )
+    if event.code == "effect.life":
+        return f"{details.get('player')} changed life by {details.get('delta')}."
+    if event.code == "effect.energy":
+        return f"{details.get('player')} changed energy by {details.get('delta')}."
+    if event.code == "turn.extra.scheduled":
+        return f"{seat} received an extra turn."
     return event.summary if event.summary != event.code else event.code
 
 
@@ -395,7 +561,8 @@ def derive_review(
         for row in decisions
     )
     complete_reasons = bool(decisions) and not legacy_decisions and all(
-        row.get("reason") is not None
+        isinstance(row.get("reason"), str)
+        and row.get("reason", "").strip().casefold() not in LEGACY_PLACEHOLDERS
         for row in decisions
     )
     if not complete_alternatives or not complete_reasons:
@@ -410,7 +577,11 @@ def derive_review(
     }:
         fidelity_failures.append("format profile mismatch")
     if not state.game_over:
-        classification = "in_progress"
+        classification = (
+            "pilot_test"
+            if decisions and not legacy_decisions and not smoke_marker
+            else "in_progress"
+        )
     elif smoke_marker or legacy_decisions or not decisions:
         classification = "smoke_only"
     elif fidelity_failures:
@@ -424,6 +595,25 @@ def derive_review(
     rejected = len(decisions) - accepted
     pass_decisions = sum(row.get("action") == "pass" for row in decisions)
     turn_groups = _turn_groups(state.events, engine)
+    groups_by_turn = {group["turn"]: group for group in turn_groups}
+    for row in decisions:
+        if not row.get("accepted") or row.get("action") == "pass":
+            continue
+        group = groups_by_turn.get(int(row.get("turn", 0)))
+        if group is None:
+            continue
+        group.setdefault("decisions", []).append(
+            {
+                "seat": row.get("seat") or row.get("actor"),
+                "action_id": row.get("action_id"),
+                "plan": row.get("plan_category"),
+                "reason": row.get("reason"),
+                "legacy_incomplete": bool(row.get("legacy_incomplete")),
+                "legal_alternatives_recorded": isinstance(
+                    row.get("legal_alternatives"), list
+                ),
+            }
+        )
     first_three: dict[str, list[dict[str, Any]]] = {}
     for seat in state.turn_order:
         seat_turns = [
@@ -472,6 +662,63 @@ def derive_review(
         "hidden_information": "pass",
         "replay_verification": "pass" if replay_pass else "fail",
     }
+    provider_rows = [
+        row for row in decisions if row.get("provider_invoked") is True
+    ]
+    pilot_provider_rows = [
+        row for row in provider_rows if row.get("role") == "pilot"
+    ]
+    arbiter_provider_rows = [
+        row for row in provider_rows if row.get("role") == "arbiter"
+    ]
+    observed_input = sum(
+        int(row.get("metrics", {}).get("input_tokens", 0))
+        for row in provider_rows
+        if row.get("metrics", {}).get("input_tokens") is not None
+    )
+    observed_output = sum(
+        int(row.get("metrics", {}).get("output_tokens", 0))
+        for row in provider_rows
+        if row.get("metrics", {}).get("output_tokens") is not None
+    )
+    measured_invocations = sum(
+        row.get("metrics", {}).get("input_tokens") is not None
+        and row.get("metrics", {}).get("output_tokens") is not None
+        for row in provider_rows
+    )
+    def observed_role_tokens(
+        rows: list[dict[str, Any]], field: str
+    ) -> int | None:
+        measured = [
+            int(row.get("metrics", {}).get(field, 0))
+            for row in rows
+            if row.get("metrics", {}).get(field) is not None
+        ]
+        return sum(measured) if measured else None
+    if legacy_decisions:
+        token_status = "unknown_legacy"
+        pilot_invocations: int | None = None
+        arbiter_invocations: int | None = None
+    else:
+        token_status = (
+            "complete"
+            if provider_rows and measured_invocations == len(provider_rows)
+            else "partial"
+            if measured_invocations
+            else "unavailable"
+        )
+        pilot_invocations = len(pilot_provider_rows)
+        arbiter_invocations = len(arbiter_provider_rows)
+    automatic_decisions = 0
+    if record_directory:
+        command_path = Path(record_directory) / "commands.jsonl"
+        if command_path.exists():
+            automatic_decisions = sum(
+                json.loads(line).get("execution") == "planned_automatic"
+                for line in command_path.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            )
+
     report: dict[str, Any] = {
         "schema_version": 1,
         "game_id": state.game_id,
@@ -631,16 +878,68 @@ def derive_review(
         },
         "semantic_coverage": semantics,
         "pilot_audit": {
+            "decision_records_observed": len(decisions),
+            "pilot_invocations_observed": pilot_invocations,
+            "arbiter_invocations_observed": arbiter_invocations,
+            "automatic_decisions": automatic_decisions,
+            "pass_only_windows_skipped": sum(
+                int(
+                    state.players[seat]
+                    .stats.get("decision_optimization", {})
+                    .get("pass_only_windows_skipped", 0)
+                )
+                for seat in state.turn_order
+            ),
+            "yield_covered_windows": sum(
+                int(
+                    state.players[seat]
+                    .stats.get("decision_optimization", {})
+                    .get("yield_covered_windows", 0)
+                )
+                for seat in state.turn_order
+            ),
+            "ordered_plan_actions_executed": automatic_decisions,
+            "estimated_calls_without_optimization": len(decisions)
+            + automatic_decisions
+            + pass_decisions,
+            "estimated_calls_with_optimization": (
+                len(provider_rows) if not legacy_decisions else None
+            ),
+            "input_tokens_observed": (
+                observed_input
+                if token_status in {"complete", "partial"}
+                else None
+            ),
+            "output_tokens_observed": (
+                observed_output
+                if token_status in {"complete", "partial"}
+                else None
+            ),
+            "token_measurement_status": token_status,
+            "pilot_input_tokens_observed": observed_role_tokens(
+                pilot_provider_rows, "input_tokens"
+            ),
+            "pilot_output_tokens_observed": observed_role_tokens(
+                pilot_provider_rows, "output_tokens"
+            ),
+            "arbiter_input_tokens_observed": observed_role_tokens(
+                arbiter_provider_rows, "input_tokens"
+            ),
+            "arbiter_output_tokens_observed": observed_role_tokens(
+                arbiter_provider_rows, "output_tokens"
+            ),
             "attempts": len(decisions),
             "accepted": accepted,
             "rejected": rejected,
             "complete_alternatives": complete_alternatives,
             "complete_reasons": complete_reasons,
-            "model_calls_observed": len(decisions),
+            "model_calls_observed": (
+                len(provider_rows) if not legacy_decisions else None
+            ),
             "legacy_priority_passes": pass_decisions,
             "potential_calls_avoided_by_empty-priority_auto-pass": pass_decisions,
             "before_after_model_call_estimate": {
-                "before_observed": len(decisions),
+                "before_observed": None if legacy_decisions else len(provider_rows),
                 "after_if_every_observed_pass_were_proven_safe": max(
                     0, len(decisions) - pass_decisions
                 ),
@@ -668,8 +967,12 @@ def derive_review(
             "dimensions": dimensions,
             "replay_verification": replay_status,
             "statement": (
-                "This run is a smoke/protocol artifact, not evidence about deck quality or matchup balance."
-                if not eligible
+                "This migrated or heuristic run is a smoke/protocol artifact, not evidence about deck quality or matchup balance."
+                if classification == "smoke_only"
+                else "This native run is an unfinished pilot characterization; it is not evidence about deck quality or matchup balance."
+                if classification == "pilot_test"
+                else "This record is incomplete and is not deck-review evidence."
+                if classification == "in_progress"
                 else "This run passed the single-game deck-review fidelity gate; it is not sufficient matchup evidence."
             ),
         },
@@ -685,20 +988,51 @@ def derive_review(
         component_bytes = {
             path.name: path.stat().st_size
             for path in directory.glob("*")
-            if path.is_file() and path.name not in {"review.json", "review.md"}
+            if path.is_file()
         }
+        core_names = {
+            "manifest.json",
+            "checkpoint.json",
+            "initial-checkpoint.json.gz",
+            "commands.jsonl",
+            "events.jsonl",
+            "decisions.jsonl",
+            "semantics.json",
+            "cursors.json",
+            "pilot-profiles.json",
+            "pilot-memory.json",
+        }
+        resumable_core = sum(
+            value for name, value in component_bytes.items() if name in core_names
+        )
+        review_artifacts = sum(
+            value
+            for name, value in component_bytes.items()
+            if name in {"review.json", "review.md"}
+        )
         record_total = sum(component_bytes.values())
         report["size_comparison"] = {
             "legacy_game_json_bytes": before_bytes,
             "record_components_bytes": component_bytes,
+            "checkpoint_bytes": component_bytes.get("checkpoint.json", 0),
+            "initial_checkpoint_bytes": component_bytes.get(
+                "initial-checkpoint.json.gz", 0
+            ),
+            "command_journal_bytes": component_bytes.get("commands.jsonl", 0),
+            "event_journal_bytes": component_bytes.get("events.jsonl", 0),
+            "decision_journal_bytes": component_bytes.get("decisions.jsonl", 0),
+            "manifest_bytes": component_bytes.get("manifest.json", 0),
+            "review_artifact_bytes": review_artifacts,
+            "resumable_core_bytes": resumable_core,
+            "complete_record_bytes": record_total,
             "record_total_bytes": record_total,
             "bytes_saved_before_derived_review": (
-                before_bytes - record_total
+                before_bytes - resumable_core
                 if before_bytes is not None
                 else None
             ),
             "percent_smaller_before_derived_review": (
-                round((before_bytes - record_total) * 100 / before_bytes, 1)
+                round((before_bytes - resumable_core) * 100 / before_bytes, 1)
                 if before_bytes
                 else None
             ),
@@ -742,8 +1076,9 @@ def review_markdown(review: Mapping[str, Any]) -> str:
             f"- Land plays: {review['land_entry']['plays']}; entry-state conflicts: {review['land_entry']['conflict_count']}.",
             f"- Fetchland activations: {review['fetchlands']['activations']}; resolved searches: {review['fetchlands']['searches_resolved']}.",
             f"- Pilot decision attempts: {review['pilot_audit']['attempts']}; accepted: {review['pilot_audit']['accepted']}; rejected: {review['pilot_audit']['rejected']}.",
-            f"- Model-call estimate: observed {review['pilot_audit']['before_after_model_call_estimate']['before_observed']}; "
-            f"upper-bound after safe pass automation {review['pilot_audit']['before_after_model_call_estimate']['after_if_every_observed_pass_were_proven_safe']}.",
+            f"- Provider calls observed: pilots {review['pilot_audit']['pilot_invocations_observed']}; "
+            f"arbiter {review['pilot_audit']['arbiter_invocations_observed']}; "
+            f"token status {review['pilot_audit']['token_measurement_status']}.",
             f"- Semantic coverage: {review['semantic_coverage']['status']}.",
         ]
     )
@@ -760,7 +1095,13 @@ def review_markdown(review: Mapping[str, Any]) -> str:
                 "### Record size",
                 "",
                 f"- Legacy monolith: {size.get('legacy_game_json_bytes')} bytes.",
-                f"- V3 record components before derived review: {size.get('record_total_bytes')} bytes.",
+                f"- Current checkpoint: {size.get('checkpoint_bytes')} bytes.",
+                f"- Command/event/decision journals: {size.get('command_journal_bytes')}/"
+                f"{size.get('event_journal_bytes')}/{size.get('decision_journal_bytes')} bytes.",
+                f"- Manifest: {size.get('manifest_bytes')} bytes; derived review: "
+                f"{size.get('review_artifact_bytes')} bytes.",
+                f"- Resumable core: {size.get('resumable_core_bytes')} bytes; "
+                f"complete record: {size.get('complete_record_bytes')} bytes.",
                 f"- Reduction before derived review: {size.get('percent_smaller_before_derived_review')}%.",
             ]
         )
@@ -782,6 +1123,16 @@ def review_markdown(review: Mapping[str, Any]) -> str:
         lines.append("")
         for event in turn["events"]:
             lines.append(f"- {event['summary']}")
+        for decision in turn.get("decisions", []):
+            if decision.get("legacy_incomplete"):
+                lines.append(
+                    "- Decision audit: migrated v2 entry; no historical reason "
+                    "or complete legal-action catalog is available."
+                )
+                continue
+            plan = decision.get("plan") or "UNSPECIFIED"
+            reason = decision.get("reason") or "No reason recorded."
+            lines.append(f"- Decision — Plan: {plan}. Reason: {reason}")
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
@@ -800,8 +1151,6 @@ def write_review_artifacts(
         manifest=manifest,
         record_directory=directory,
     )
-    (directory / "review.json").write_text(stable_json(review), encoding="utf-8")
-    (directory / "review.md").write_text(review_markdown(review), encoding="utf-8")
     if manifest is not None:
         updated = dict(manifest)
         updated["review"] = {
@@ -810,6 +1159,33 @@ def write_review_artifacts(
             "matchup_evidence": review["fidelity"]["matchup_evidence"],
         }
         (directory / "manifest.json").write_text(stable_json(updated), encoding="utf-8")
+        manifest = updated
+    # Size fields include the derived artifacts themselves. Iterate until their
+    # decimal byte counts stabilize so review.json and review.md use the same
+    # definitions and values.
+    previous_sizes: Mapping[str, Any] | None = None
+    for _ in range(5):
+        (directory / "review.json").write_text(
+            stable_json(review), encoding="utf-8"
+        )
+        (directory / "review.md").write_text(
+            review_markdown(review), encoding="utf-8"
+        )
+        refreshed = derive_review(
+            engine,
+            decisions=decisions,
+            manifest=manifest,
+            record_directory=directory,
+        )
+        sizes = refreshed.get("size_comparison")
+        review = refreshed
+        if sizes == previous_sizes:
+            break
+        previous_sizes = sizes
+    (directory / "review.json").write_text(stable_json(review), encoding="utf-8")
+    (directory / "review.md").write_text(
+        review_markdown(review), encoding="utf-8"
+    )
     return review
 
 

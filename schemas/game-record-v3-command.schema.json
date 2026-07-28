@@ -8,13 +8,23 @@
     "command_id",
     "decision_id",
     "principal",
+    "actor",
+    "execution",
+    "action_template_id",
     "capability_id",
     "action",
     "payload",
+    "normalized_payload",
+    "selected_object_refs",
+    "targets",
+    "modes",
+    "x",
+    "selected_costs",
     "before_state_hash",
     "after_state_hash",
     "rng",
-    "semantics_fingerprint"
+    "semantics_fingerprint",
+    "semantics"
   ],
   "properties": {
     "sequence": {"type": "integer", "minimum": 1},
@@ -29,8 +39,15 @@
     "before_state_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "after_state_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "rng": {"type": "object"},
-    "semantics_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
-    ,"semantics": {"type": "object"}
+    "semantics_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "action_template_id": {"type": ["string", "null"]},
+    "normalized_payload": {"type": "object"},
+    "selected_object_refs": {"type": "array", "items": {"type": "string"}},
+    "targets": {"type": "array"},
+    "modes": {"type": "array"},
+    "x": {},
+    "selected_costs": {"type": "object"},
+    "semantics": {"type": "object"}
   },
   "additionalProperties": false
 }

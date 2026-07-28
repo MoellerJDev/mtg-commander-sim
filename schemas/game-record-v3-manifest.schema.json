@@ -70,7 +70,7 @@
       "type": "object",
       "required": ["mode", "verification", "engine_version", "semantics_fingerprint"],
       "properties": {
-        "mode": {"enum": ["commands", "legacy_snapshot"]},
+        "mode": {"enum": ["command_replay", "commands", "legacy_snapshot"]},
         "verification": {"enum": ["not_run", "pass", "fail", "snapshot_only"]},
         "engine_version": {"type": "string"},
         "semantics_fingerprint": {"type": "string"}

@@ -1,9 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.invalid/mtg-commander-sim/semantic-program-v1.json",
-  "title": "Reusable semantic program",
+  "$id": "https://mtg-commander-sim.local/schemas/semantic-program-v2.json",
+  "title": "Reusable semantic program v2",
   "type": "object",
-  "required": ["key", "label", "effects"],
+  "required": [
+    "key",
+    "label",
+    "effects",
+    "oracle_id",
+    "ability_id",
+    "active_zone",
+    "event",
+    "semantic_schema_version",
+    "trust_level",
+    "provenance",
+    "tests",
+    "coverage"
+  ],
   "properties": {
     "key": {"type": "string"},
     "label": {"type": "string"},
@@ -11,7 +24,18 @@
     "destination": {"type": ["string", "null"]},
     "requires_arbiter": {"type": "boolean"},
     "notes": {"type": "string"},
-    "version": {"type": "integer", "minimum": 1}
+    "version": {"type": "integer", "minimum": 1},
+    "oracle_id": {"type": ["string", "null"]},
+    "ability_id": {"type": "string"},
+    "active_zone": {"type": "string"},
+    "event": {"type": "string"},
+    "semantic_schema_version": {"type": "integer", "minimum": 1},
+    "trust_level": {"enum": ["trusted", "provisional", "unresolved", "intentionally_ignored"]},
+    "provenance": {"type": "object"},
+    "tests": {"type": "array", "items": {"type": "string"}},
+    "handlers": {"type": "array", "items": {"type": "object"}},
+    "target_schema": {"type": ["object", "null"]},
+    "coverage": {"type": "array", "items": {"type": "string"}}
   },
   "additionalProperties": false
 }

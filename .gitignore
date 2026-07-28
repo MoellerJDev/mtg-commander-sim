@@ -7,6 +7,12 @@ dist/
 run/*
 !run/migrated-live-duel/
 !run/migrated-live-duel/**
+!run/native-zimone-vs-mishra/
+!run/native-zimone-vs-mishra/**
+!run/four-player-pilot/
+!run/four-player-pilot/**
+!run/semantic-preflight-zimone.json
+!run/semantic-preflight-mishra.json
 *.sqlite3
 data/*.sqlite3.gz
 data/*.tmp

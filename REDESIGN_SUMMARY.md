@@ -80,8 +80,8 @@ Bundled benchmark:
 
 | Packet | Estimated tokens |
 |---|---:|
-| A-seat four-player bootstrap | 1,786 |
-| unchanged repeated live decision | 247 |
+| A-seat four-player bootstrap | 1,549 |
+| unchanged repeated live decision | 269 |
 | A mulligan-declaration delta | 108 |
 
 The larger improvement is call count: known-empty priority windows no longer invoke a model at all.

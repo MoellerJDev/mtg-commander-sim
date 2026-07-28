@@ -1,0 +1,186 @@
+{
+  "schema_version": 2,
+  "name": "zimone-and-dina-vertical-slice",
+  "programs": [
+    {
+      "key": "5bc66b18-22ac-4138-b527-fa711116e298:spell:front",
+      "label": "Zimone and Dina permanent spell",
+      "oracle_id": "5bc66b18-22ac-4138-b527-fa711116e298",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_zimone_activation_and_second_draw_trigger"],
+      "provenance": {
+        "source_oracle_hash": "e233feb4416b8d33db3d7b7f52f07c8fcf01831e888f31ecac6ffb79e3879c24",
+        "source_rulings_hash": "4936a1e7a4744fe2764acc87285d4b2695c8da4f6141bdbd872d1fb8e2a4e713",
+        "authored_by": "vertical-slice",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "5bc66b18-22ac-4138-b527-fa711116e298:ability:ab2",
+      "label": "Zimone and Dina activated ability",
+      "oracle_id": "5bc66b18-22ac-4138-b527-fa711116e298",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "draw_optional_land",
+          "player": "$controller",
+          "repeat_if_land_count": 8
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "player_choice", "conditional_repetition"],
+      "tests": ["test_zimone_activation_and_second_draw_trigger"],
+      "provenance": {
+        "source_oracle_hash": "e233feb4416b8d33db3d7b7f52f07c8fcf01831e888f31ecac6ffb79e3879c24",
+        "source_rulings_hash": "4936a1e7a4744fe2764acc87285d4b2695c8da4f6141bdbd872d1fb8e2a4e713",
+        "authored_by": "vertical-slice",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "5bc66b18-22ac-4138-b527-fa711116e298:trigger:second-draw",
+      "label": "Zimone and Dina second-card trigger",
+      "oracle_id": "5bc66b18-22ac-4138-b527-fa711116e298",
+      "ability_id": "trigger:second-draw",
+      "active_zone": "battlefield",
+      "event": "card.second_draw",
+      "effects": [{"op": "drain_opponent", "target": "$target.0", "amount": 2}],
+      "target_schema": {"count": 1, "selector": "opponent"},
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "second_card_drawn_tracking", "target_selection"],
+      "tests": ["test_zimone_activation_and_second_draw_trigger"],
+      "provenance": {
+        "source_oracle_hash": "e233feb4416b8d33db3d7b7f52f07c8fcf01831e888f31ecac6ffb79e3879c24",
+        "source_rulings_hash": "4936a1e7a4744fe2764acc87285d4b2695c8da4f6141bdbd872d1fb8e2a4e713",
+        "authored_by": "vertical-slice",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "8ad91f64-ccab-4edc-bd54-b2ee9267d614:spell:front",
+      "label": "Lotus Cobra permanent spell",
+      "oracle_id": "8ad91f64-ccab-4edc-bd54-b2ee9267d614",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_lotus_cobra_landfall_choice"],
+      "provenance": {
+        "source_oracle_hash": "fda510469c392dfaf037cffe1bf087bd6b51a2ffe51ff9c7b17865be740fecf3",
+        "source_rulings_hash": "cbf118534ebab693b77b542a6ba279e3b326c3fc77d0376c114e5a25116e47b6",
+        "authored_by": "vertical-slice",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "8ad91f64-ccab-4edc-bd54-b2ee9267d614:trigger:landfall",
+      "label": "Lotus Cobra landfall",
+      "oracle_id": "8ad91f64-ccab-4edc-bd54-b2ee9267d614",
+      "ability_id": "trigger:landfall",
+      "active_zone": "battlefield",
+      "event": "land.enter",
+      "effects": [{"op": "choose_mana", "player": "$controller", "amount": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "landfall", "player_choice"],
+      "tests": ["test_lotus_cobra_landfall_choice"],
+      "provenance": {
+        "source_oracle_hash": "fda510469c392dfaf037cffe1bf087bd6b51a2ffe51ff9c7b17865be740fecf3",
+        "source_rulings_hash": "cbf118534ebab693b77b542a6ba279e3b326c3fc77d0376c114e5a25116e47b6",
+        "authored_by": "vertical-slice",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "aa959340-c869-4caa-92c7-572bd8d23eef:spell:front",
+      "label": "Field of the Dead land semantics",
+      "oracle_id": "aa959340-c869-4caa-92c7-572bd8d23eef",
+      "active_zone": "battlefield",
+      "event": "land.enter",
+      "effects": [{"op": "field_of_dead_token"}],
+      "trust_level": "trusted",
+      "coverage": ["land_entry", "triggered_ability", "landfall"],
+      "tests": ["test_field_of_the_dead_threshold"],
+      "provenance": {
+        "source_oracle_hash": "f2944c340979a9d7c4d1e98190b4099d3e9b5953a2d537d4329583fca5beddfc",
+        "source_rulings_hash": "31d5e3c1c7db80ee0e6a79b709c517b9c9633e020f0b9f89b2666b876765a556",
+        "authored_by": "vertical-slice",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ace86e56-efde-4eb7-8815-71456a4c3abe:spell:front",
+      "label": "Warren Soultrader permanent spell",
+      "oracle_id": "ace86e56-efde-4eb7-8815-71456a4c3abe",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_soultrader_loop_shortcut"],
+      "provenance": {
+        "source_oracle_hash": "a99bbb6b79a373929d6ffd91a6fce3ba8d08833fd5b5837145231ca43ef99828",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "vertical-slice",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ace86e56-efde-4eb7-8815-71456a4c3abe:ability:ab1",
+      "label": "Warren Soultrader activation",
+      "oracle_id": "ace86e56-efde-4eb7-8815-71456a4c3abe",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [{"op": "create_treasure", "controller": "$controller"}],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability"],
+      "tests": ["test_soultrader_loop_shortcut"],
+      "provenance": {
+        "source_oracle_hash": "a99bbb6b79a373929d6ffd91a6fce3ba8d08833fd5b5837145231ca43ef99828",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "vertical-slice",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "09ff28b1-b6c9-48e6-b12e-2f0e644f709f:spell:front",
+      "label": "Gravecrawler cast permission",
+      "oracle_id": "09ff28b1-b6c9-48e6-b12e-2f0e644f709f",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "provisional",
+      "coverage": ["graveyard_cast_permission"],
+      "requires_arbiter": false,
+      "tests": ["test_soultrader_loop_shortcut"],
+      "provenance": {
+        "source_oracle_hash": "3d9bbbc6f080b63067335db047bd58f7f523070fc449842eab9839e4d30ff4d4",
+        "source_rulings_hash": "0dbaec2ebb906bdc4413ce150c84453e00dbdcc9c2353873ed0853f6a9031349",
+        "authored_by": "vertical-slice",
+        "review_status": "provisional"
+      }
+    },
+    {
+      "key": "76b003e0-15af-4f22-bdf2-1ade5430964a:spell:front",
+      "label": "Zulaport Cutthroat permanent spell",
+      "oracle_id": "76b003e0-15af-4f22-bdf2-1ade5430964a",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "dies_trigger"],
+      "tests": ["test_soultrader_loop_shortcut"],
+      "provenance": {
+        "source_oracle_hash": "6f53b8def8027bea15a33e3bf3bbc092054b9ff348cf7ba34e79322d815f5f6b",
+        "source_rulings_hash": "0e85da5024dea676d60d89963da2578358fbeb962fe463e54a099e4e0387b463",
+        "authored_by": "vertical-slice",
+        "review_status": "reviewed"
+      }
+    }
+  ]
+}

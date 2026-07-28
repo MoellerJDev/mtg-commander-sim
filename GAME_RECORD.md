@@ -17,10 +17,18 @@ authoritative checkpoint, append-oriented journals, and a derived review.
 | `review.md` | Human-readable review grouped by meaningful turns |
 | `semantics.json` | Optional local semantic programs used by that game |
 | `cursors.json` | Delivery cursor state; not part of authoritative replay |
+| `pilot-profiles.json` | Advisory fingerprinted profile assigned to each pilot principal |
+| `pilot-memory.json` | Isolated compact strategic memory used to resume provider runs |
+| `call-benchmark.json` | Provider-segment packet, invocation, retry, latency, and observed/estimated token metrics |
 
 Raw capability tokens are never durable state. Checkpoints store only SHA-256
 identifiers for active capabilities, clear the capability map, and issue new
 opaque tokens when loaded. Consumed capabilities are not retained.
+
+Native command rows also record the action-template ID, selected object refs,
+targets, modes, X, selected costs, RNG consumption/results, and semantic
+program versions used by the transition. Rejected attempts stay in
+`decisions.jsonl` and never enter `commands.jsonl`.
 
 The JSON schemas live under `schemas/game-record-v3-*.schema.json` and
 `schemas/game-review-v1.schema.json`.
@@ -45,6 +53,10 @@ python simctl.py replay run/duel --db data/scryfall-current.sqlite3 --verify
 
 A mismatch fails closed at the first divergent command. Event text and
 capability tokens do not participate in the authoritative hash.
+
+Fresh native records use `manifest.replay.mode = "command_replay"`. The
+separate `legacy_snapshot` mode is reserved for migrated records whose accepted
+commands cannot be reconstructed honestly.
 
 ## Legacy migration
 
@@ -88,3 +100,58 @@ The migrated turn-21 live duel is deliberately classified `smoke_only`. It is
 useful protocol and kernel evidence, but its ignored Oracle semantics, ten
 incorrect land-entry states, missing historical action catalogs, and smoke
 pilot make it unsuitable for claims about either deck or their matchup.
+
+An unfinished native run with real command and decision journals is a
+`pilot_test`, while its outcome remains `in_progress`. `pilot_test` is protocol
+and characterization evidence only. `deck_review_eligible` additionally
+requires a terminal game, replay verification, complete historical
+alternatives/reasons, trusted materially relevant semantics, the requested
+format, no material rules conflict, and a genuinely strategic pilot.
+
+## Decision and provider metrics
+
+The review keeps observations separate from estimates:
+
+- `decision_records_observed`: audit rows, including rejected provider attempts
+- `pilot_invocations_observed`: actual strategic provider calls, or `null` when unknown
+- `arbiter_invocations_observed`: actual rules-provider calls, or `null` when unknown
+- `automatic_decisions`: accepted planned commands that required no new provider call
+- `estimated_calls_without_optimization`: explicitly labeled counterfactual
+- `estimated_calls_with_optimization`: actual provider rows for a native run
+- `input_tokens_observed` / `output_tokens_observed`: provider-reported totals only
+- `token_measurement_status`: `complete`, `partial`, `unavailable`, or `unknown_legacy`
+
+A legacy `decision.response` event is not assumed to be an LLM call. Placeholder
+values such as `unavailable in v2 record` do not count as complete reasons or
+plans. If a native adapter does not supply usage data, observed token totals are
+`null`; packet-size estimates remain separately labeled estimates.
+
+## Size definitions
+
+All byte values are exact on-disk file sizes at review generation:
+
+- `checkpoint_bytes`: `checkpoint.json`
+- `command_journal_bytes`: `commands.jsonl`
+- `event_journal_bytes`: `events.jsonl`
+- `decision_journal_bytes`: `decisions.jsonl`
+- `manifest_bytes`: `manifest.json`
+- `review_artifact_bytes`: `review.json` plus `review.md`
+- `resumable_core_bytes`: every run file needed to restore authoritative state,
+  projection cursors, semantic registry, pilot profiles, and pilot memory,
+  excluding derived reviews
+- `complete_record_bytes`: every regular file in the run directory, including
+  derived review artifacts
+
+`review.json` and `review.md` use these same definitions. Because review files
+contain the metrics describing themselves, generation iterates until the
+serialized sizes stabilize.
+
+## Elimination privacy
+
+The authoritative record preserves physical identities so an analyst can audit
+the game. It does not turn owner departure into public revelation. Remaining
+pilot projections keep the former hand, library order, face-down cards, and
+private choices hidden while retaining cards that were already public or
+legally known. Legacy migration chooses the more restrictive knowledge state
+when exact historical knowledge cannot be reconstructed and annotates that
+uncertainty.

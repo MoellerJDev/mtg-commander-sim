@@ -12,6 +12,12 @@ For strict hidden information, use five independent contexts:
 
 A sixth analyst context can review full game logs after the game. A single ChatGPT context may pilot every seat for exploratory testing, but that relies on the model honoring seat projections rather than literally forgetting prior hands.
 
+`PilotProvider` is the transport-neutral strategic boundary. The built-in
+implementations are deterministic scripted responses, manual JSON
+file/stdin exchange, and JSON stdin/stdout subprocesses. Each seat owns a
+provider instance and `PilotMemory`; the arbiter is never multiplexed into a
+strategic seat. See `PILOT_PROVIDERS.md`.
+
 ## Pilot system instruction
 
 ```text
@@ -119,10 +125,11 @@ catalog entry:
 ```json
 {
   "action_id":"activate:A44:ab2",
-  "search_card":"A73",
+  "choices":{"search_card":"A73"},
+  "plan":"FIX_COLORS",
   "reason":"Fetch the untapped source needed for the next spell.",
-  "plan":["fetch A73","cast the two-drop"],
-  "confidence":0.91
+  "confidence":0.91,
+  "memory_update":"The fetched source establishes the missing color."
 }
 ```
 
@@ -131,7 +138,18 @@ decision-audit metadata. `CommanderSession` removes them before submitting the
 normalized action to `CommanderEngine`. Rejections are logged as decision
 attempts but never as accepted replay commands.
 
-An ordered `plan` may contain future `{"action_id":"..."}` entries. The session
+Provider responses validate against `schemas/pilot-response.schema.json`.
+`reason` is limited to 180 characters, `memory_update` to 500, confidence to
+0–1, and `plan` to the fixed strategic categories documented in
+`PILOT_PROVIDERS.md`. A fingerprinted advisory deck profile is loaded once into
+that seat's private memory rather than repeated in every observation.
+
+Provider, model/implementation ID, invocation ID, usage, latency, retry, and
+fallback fields are audit metadata. A decision row is counted as a provider
+invocation only when the runner actually called a provider. Missing usage stays
+unknown; it is not replaced by a token estimate.
+
+An ordered `actions` array may contain future `{"action_id":"..."}` entries. The session
 executes a queued entry without another model call only when the same principal
 immediately receives the next decision and that ID is still in the new
 server-generated catalog. A different actor, a missing/stale ID, a rejection,

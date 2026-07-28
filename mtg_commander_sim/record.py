@@ -16,7 +16,7 @@ from .semantics import SemanticRegistry
 from .util import stable_json
 
 RECORD_SCHEMA_VERSION = 3
-ENGINE_VERSION = "0.3.0"
+ENGINE_VERSION = "0.4.0"
 TRACE_LEVELS = {"minimal", "standard", "debug"}
 
 _STANDARD_OMIT = {
@@ -295,7 +295,7 @@ def write_record(
     commands: Sequence[Mapping[str, Any]],
     decisions: Sequence[Mapping[str, Any]],
     created_at: str,
-    replay_mode: str = "commands",
+    replay_mode: str = "command_replay",
     migrated_from: str | None = None,
 ) -> dict[str, Any]:
     directory = Path(directory)
@@ -379,7 +379,7 @@ def replay_record(
     if manifest.get("semantics_fingerprint") != semantics_fingerprint(semantics):
         raise ValueError("Semantic registry fingerprint does not match the record")
     initial = read_initial_checkpoint(directory / "initial-checkpoint.json.gz")
-    mode = str(manifest.get("replay", {}).get("mode") or "commands")
+    mode = str(manifest.get("replay", {}).get("mode") or "command_replay")
     if mode == "legacy_snapshot":
         actual = authoritative_state_hash(initial["state"])
         expected = str(manifest["final_state_hash"])
@@ -462,6 +462,58 @@ def migrate_v2_game(
     state.config.profile = state.config.effective_profile(len(state.turn_order))
     semantics = SemanticRegistry(semantics_path)
     created_at = utc_now()
+    # Older elimination code moved every owned card to the public ``outside``
+    # zone and marked it known to every seat. That did not prove the hidden
+    # hand or library had actually been revealed. Reconstruct only identities
+    # supported by public event evidence and otherwise preserve the restrictive
+    # knowledge state.
+    public_refs: set[str] = set()
+    public_codes = {
+        "land.play",
+        "stack.cast",
+        "stack.activate",
+        "combat.attack",
+        "combat.block",
+        "library.search",
+        "cleanup.discard",
+        "zone.move",
+        "permanent.untap",
+        "state.creatures_died",
+    }
+    for event in state.events:
+        if event.code not in public_codes:
+            continue
+        details = event.details
+        for key in ("object", "source", "card", "kept"):
+            if details.get(key):
+                public_refs.add(str(details[key]))
+        for key in ("objects", "moved"):
+            public_refs.update(str(value) for value in details.get(key) or [])
+    restricted = 0
+    for card in state.cards.values():
+        if (
+            card.owner in state.eliminated_players
+            and card.zone == "outside"
+            and card.ref not in public_refs
+        ):
+            card.known_to = [card.owner]
+            card.revealed_to = []
+            card.annotations["migration_hidden_zone_uncertain"] = True
+            card.annotations["hidden_after_owner_left"] = True
+            restricted += 1
+    if restricted:
+        state.annotations.append(
+            {
+                "kind": "migration_uncertainty",
+                "scope": "eliminated-player hidden zones",
+                "objects_restricted": restricted,
+                "note": (
+                    "V2 did not retain enough history to reconstruct exact "
+                    "knowledge; identities were kept private unless public "
+                    "event evidence supported disclosure."
+                ),
+            }
+        )
     initial = checkpoint_envelope(state)
     output_path = Path(output)
     output_path.mkdir(parents=True, exist_ok=True)
@@ -495,6 +547,7 @@ def migrate_v2_game(
                 "reason": "unavailable in v2 record",
                 "plan": "unavailable in v2 record",
                 "plan_category": None,
+                "provider_invoked": None,
                 "retry_count": 0,
                 "phase": event.phase,
                 "step": event.step,

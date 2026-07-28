@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mtg-commander-sim.local/schemas/pilot-profile-v1.json",
+  "title": "Deck pilot profile",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "deck_fingerprint",
+    "commander",
+    "archetype",
+    "primary_game_plan",
+    "secondary_game_plan",
+    "primary_engine_pieces",
+    "primary_win_lines",
+    "mulligan_requirements",
+    "known_color_requirements",
+    "threat_assessment"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "deck_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "commander": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "archetype": {"type": "string"},
+    "primary_game_plan": {"type": "string"},
+    "secondary_game_plan": {"type": "string"},
+    "primary_engine_pieces": {"type": "array", "items": {"type": "string"}},
+    "primary_win_lines": {"type": "array", "items": {"type": "string"}},
+    "common_tutor_priorities": {"type": "array", "items": {"type": "string"}},
+    "cards_commonly_used_as_fodder": {"type": "array", "items": {"type": "string"}},
+    "interaction_priorities": {"type": "array", "items": {"type": "string"}},
+    "mulligan_requirements": {"type": "array", "items": {"type": "string"}},
+    "cards_normally_preserved": {"type": "array", "items": {"type": "string"}},
+    "cards_that_require_setup": {"type": "array", "items": {"type": "string"}},
+    "known_color_requirements": {"type": "array", "items": {"type": "string"}},
+    "expected_development_turns": {"type": "array", "items": {"type": "string"}},
+    "threat_assessment": {"type": "string"}
+  },
+  "additionalProperties": false
+}

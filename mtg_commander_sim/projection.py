@@ -48,6 +48,16 @@ class StateProjector:
     def _card_visible(self, card: CardInstance, principal: str) -> bool:
         if principal in {"analyst", "admin"}:
             return True
+        if card.annotations.get("hidden_after_owner_left"):
+            seat = self.seat_for(principal)
+            return bool(
+                seat
+                and (
+                    seat == card.owner
+                    or seat in card.known_to
+                    or seat in card.revealed_to
+                )
+            )
         if card.zone in {"battlefield", "graveyard", "exile", "command", "stack", "outside"}:
             return not card.face_down
         seat = self.seat_for(principal)
@@ -181,6 +191,21 @@ class StateProjector:
                 "ex": self._zone(p.zones["exile"], principal),
                 "cmd": self._zone(p.zones["command"], principal),
             }
+            if not p.in_game:
+                publicly_known_left = [
+                    card
+                    for card in self.state.cards.values()
+                    if card.owner == player_seat
+                    and card.zone == "outside"
+                    and self._card_visible(card, principal)
+                ]
+                if publicly_known_left:
+                    summary["left"] = [
+                        self._obj(card, principal)
+                        for card in sorted(
+                            publicly_known_left, key=lambda value: value.ref
+                        )
+                    ]
             if seat == player_seat or principal in {"analyst", "admin"}:
                 summary["hand"] = self._zone(p.zones["hand"], principal)
                 known_top = []
@@ -351,6 +376,7 @@ class StateProjector:
         pretty = stable_json(packet)
         return {
             "compact_chars": len(compact),
+            "compact_bytes": len(compact.encode("utf-8")),
             "pretty_chars": len(pretty),
             "estimated_tokens": max(1, len(compact) // 4),
         }

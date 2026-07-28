@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "deck_fingerprint": "336b6ecbf92db0fe4990dddbeeac37c1d327043c2b04dcd0bfab50f3b56b1240",
+  "commander": ["Zimone and Dina"],
+  "archetype": "Sultai lands, aristocrats, value-combo",
+  "primary_game_plan": "Develop BGU, turn landfall and recurring creatures into cards and mana, then assemble a compact sacrifice or land engine.",
+  "secondary_game_plan": "Grind with Field of the Dead, Seedborn Muse, and repeatable commander activations.",
+  "primary_engine_pieces": ["Zimone and Dina", "Lotus Cobra", "Survival of the Fittest", "Wight of the Reliquary", "Field of the Dead", "Seedborn Muse"],
+  "primary_win_lines": ["Warren Soultrader + Gravecrawler + Zulaport Cutthroat", "Protean Hulk packages", "Field of the Dead pressure"],
+  "common_tutor_priorities": ["missing commander colors", "Survival of the Fittest", "recurring creature fodder", "Protean Hulk line pieces"],
+  "cards_commonly_used_as_fodder": ["Bloodghast", "Gravecrawler", "recursive creatures", "expendable creature tokens"],
+  "interaction_priorities": ["protect the graveyard from exile", "preserve graveyard interaction for opposing recursion", "stop faster deterministic wins"],
+  "mulligan_requirements": ["functional mana or one land plus credible one-mana acceleration/selection", "a path to BGU", "do not chase ideal synergy after a functional free redraw"],
+  "cards_normally_preserved": ["Bojuka Bog when opposing recursion matters", "Survival of the Fittest", "Seedborn Muse", "compact combo pieces"],
+  "cards_that_require_setup": ["Field of the Dead", "Protean Hulk", "Retreat to Coralhelm", "Intruder Alarm"],
+  "known_color_requirements": ["Zimone and Dina requires BGU", "early green is important", "black supports sacrifice and recursion"],
+  "expected_development_turns": ["turns 1-2 establish green and land engines", "turns 3-4 deploy commander or Survival", "later turns convert recurring creatures and landfall into a win"],
+  "threat_assessment": "Disrupt faster combo engines first; preserve recursive resources unless converting them creates a concrete advantage."
+}

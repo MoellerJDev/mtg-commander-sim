@@ -16,8 +16,8 @@ The key decision is to stop treating one ChatGPT context as the player, judge, s
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│ Pilot contexts A / B / C / D             Rules arbiter      │
-│ strategic choices only                    semantics only      │
+│ PilotProvider A / B / C / D               Rules arbiter      │
+│ isolated memory + deck profile             semantics only      │
 └───────────────┬──────────────────────────────────┬───────────┘
                 │ compact action + capability      │
                 ▼                                  ▼
@@ -39,7 +39,7 @@ The key decision is to stop treating one ChatGPT context as the player, judge, s
             ▼                               ▼
 ┌─────────────────────────────┐  ┌─────────────────────────────┐
 │ SemanticRegistry            │  │ Local CardDatabase          │
-│ cached generic effect DSL   │  │ Oracle cards + rulings      │
+│ trusted/provisional packs   │  │ Oracle cards + rulings      │
 └─────────────────────────────┘  └─────────────────────────────┘
             │
             ▼
@@ -53,6 +53,18 @@ The key decision is to stop treating one ChatGPT context as the player, judge, s
 │ bootstrap, hash-checked JSON patches, resync boundary         │
 └──────────────────────────────────────────────────────────────┘
 ```
+
+`SequentialPilotRunner` is an orchestration adapter, not a source of rules.
+Each `PilotProvider` receives only the packet already projected for its
+principal, the current decision, and that principal's private `PilotMemory`.
+The runner validates the compact response, records actual provider metadata,
+and submits it through `CommanderSession` and `GameService`. Scripted, manual
+JSON, subprocess JSON, and future hosted-model providers all use this boundary.
+
+Fingerprint-keyed deck profiles are advisory and loaded once into the matching
+seat memory. They never enter `CommanderEngine`, determine legality, or replace
+Oracle text. Profile and memory files are resumable pilot state, not
+authoritative game state.
 
 ## Authoritative state versus projected state
 
@@ -68,6 +80,11 @@ A pilot/client sees only a projected view:
 - the live decision capability for that principal
 
 The projection is not a mutable copy of the game. A client action returns to the service and is validated against authoritative state.
+
+Elimination does not relax this boundary. A departed player's hidden hand,
+library order, face-down identities, and private choices remain hidden from
+other pilots. Publicly known objects remain visible, while the analyst can
+inspect the preserved authoritative objects after the game.
 
 ## Roles and permissions
 
@@ -152,6 +169,40 @@ Generic operations include draw, move, sacrifice, destroy, exile, bounce, discar
 
 Runtime placeholders such as `$controller`, `$source`, `$stack`, and `$target.0` prevent semantics from hard-coding physical game object IDs.
 
+### Pack trust and provenance
+
+Version 0.4.0 loads semantic packs as data. A program identifies its Oracle ID,
+ability/face, active zone, event, schema version, coverage, tests, source Oracle
+hash, source-rulings hash, authoring provenance, review status, and trust level:
+
+- `trusted`: reviewed behavior with deterministic characterization coverage
+- `provisional`: usable for a pilot test but not trusted matchup evidence
+- `unresolved`: known to require arbitration or further compilation
+- `intentionally_ignored`: proven irrelevant in the scoped context
+
+Only validated generic operations execute. Card-specific behavior is selected
+by registry key; `CommanderEngine` does not branch on printed card names.
+Preflight evaluates every deck entry conservatively and keeps review eligibility
+false when relevant coverage is partial or unresolved.
+
+The current vertical slice includes trusted execution for Zimone and Dina's
+activation/second-draw trigger, Lotus Cobra landfall, Field of the Dead's
+threshold, Warren Soultrader's activation, Mishra's Warform and delayed
+sacrifice, Gonti's Aether Heart energy triggers, and Red Elemental Blast.
+Several supporting cards are deliberately provisional. The preflight artifacts,
+not this summary, are the definitive coverage inventory.
+
+### Deterministic shortcuts
+
+`shortcuts.py` accepts a named, demonstrated sequence of existing legal-action
+IDs, an explicit repeat count/stop condition, and opponent priority responses.
+It validates the required objects, zones, resources, and exact sequence before
+applying an aggregate. The event records the loop signature, demonstrated
+iteration, count, resource/life/zone delta, semantic versions, and responses.
+The 0.4.0 implementations are intentionally limited to the tested
+Soultrader/Gravecrawler/Zulaport line and Mishra/Gonti's Aether Heart energy
+line; this is not a general shortcut-negotiation implementation.
+
 ## Protocol and client-state updates
 
 Protocol 2.1 separates durable projected state from delivery metadata.
@@ -206,10 +257,10 @@ rules-incomplete smoke run from silently becoming deck-performance evidence.
 
 ### Bootstrap once, patch thereafter
 
-The bundled benchmark measures approximately:
+The refreshed bundled benchmark measures approximately:
 
-- 1,786 tokens for the initial four-player A-seat projection
-- 247 tokens for an unchanged repeated live decision
+- 1,549 tokens for the initial four-player A-seat projection
+- 269 tokens for an unchanged repeated live decision
 - 108 tokens after A declares a mulligan
 
 ### Stable short references
