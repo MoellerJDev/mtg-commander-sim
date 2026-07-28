@@ -1,0 +1,643 @@
+from __future__ import annotations
+
+import json
+import copy
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Mapping, Sequence
+
+from .carddb import CardDatabase
+from .deck import DeckDefinition, DeckLoader
+from .engine import ActionResult, CommanderEngine
+from .model import GameConfig
+from .projection import ProjectionCursor, StateProjector
+from .record import (
+    authoritative_state_hash,
+    capability_id,
+    checkpoint_envelope,
+    semantics_fingerprint,
+    utc_now,
+    write_record,
+)
+from .report import write_review_artifacts
+from .semantics import SemanticRegistry
+
+
+ACTION_ALIASES = {
+    "p": "pass",
+    "k": "keep",
+    "m": "mulligan",
+    "b": "bottom",
+    "l": "play_land",
+    "c": "cast",
+    "x": "activate",
+    "atk": "attack",
+    "blk": "block",
+    "dmg": "assign_damage",
+    "r": "resolve",
+    "ch": "choose",
+    "ord": "order",
+    "con": "concede",
+}
+FIELD_ALIASES = {
+    "y": "yield",
+    "src": "source",
+    "t": "targets",
+    "tg": "targets",
+    "crd": "card",
+    "cs": "cards",
+    "atk": "attackers",
+    "blk": "blocks",
+    "eff": "effects",
+    "sem": "semantic_key",
+    "n": "note",
+}
+
+
+@dataclass(slots=True)
+class CommanderSession:
+    """ChatGPT-oriented client over the authoritative Commander engine.
+
+    A single conversation may route all principals sequentially. For strict
+    hidden information, run one session client per pilot context against the
+    same server-side engine; the command and projection formats are identical.
+    """
+
+    card_db: CardDatabase
+    engine: CommanderEngine
+    projector: StateProjector
+    cursors: dict[str, ProjectionCursor] = field(default_factory=dict)
+    initial_checkpoint: dict[str, Any] = field(default_factory=dict)
+    commands: list[dict[str, Any]] = field(default_factory=list)
+    decisions: list[dict[str, Any]] = field(default_factory=list)
+    created_at: str = field(default_factory=utc_now)
+    replay_mode: str = "commands"
+    plans: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+
+    @classmethod
+    def create(
+        cls,
+        card_db: CardDatabase,
+        decks: Mapping[str, DeckDefinition],
+        *,
+        first_player: str,
+        player_names: Mapping[str, str] | None = None,
+        seed: int | None = None,
+        config: GameConfig | None = None,
+        semantics_path: str | Path | None = None,
+    ) -> "CommanderSession":
+        semantics = SemanticRegistry(semantics_path)
+        game_config = config or GameConfig(seed=seed)
+        if seed is not None:
+            game_config.seed = seed
+        engine = CommanderEngine.create(
+            card_db,
+            decks,
+            first_player=first_player,
+            player_names=player_names,
+            config=game_config,
+            semantics=semantics,
+        )
+        return cls(
+            card_db,
+            engine,
+            StateProjector(card_db, engine.state),
+            initial_checkpoint=checkpoint_envelope(engine.state),
+        )
+
+    @classmethod
+    def from_sources(
+        cls,
+        card_db: CardDatabase,
+        sources: Mapping[str, str | Path],
+        *,
+        commanders: Mapping[str, str] | None = None,
+        first_player: str | None = None,
+        player_names: Mapping[str, str] | None = None,
+        seed: int | None = None,
+        cache_dir: str | Path | None = None,
+        force_refresh: bool = False,
+        semantics_path: str | Path | None = None,
+        config: GameConfig | None = None,
+    ) -> "CommanderSession":
+        loader = DeckLoader(card_db, cache_dir=cache_dir)
+        decks: dict[str, DeckDefinition] = {}
+        for seat, source in sources.items():
+            decks[seat] = loader.load(
+                source,
+                commander=(commanders or {}).get(seat),
+                force_refresh=force_refresh,
+            )
+            issues = loader.validate_commander_deck(decks[seat])
+            if issues:
+                raise ValueError(f"{seat} deck validation failed: {'; '.join(issues)}")
+        order = list(sources)
+        return cls.create(
+            card_db,
+            decks,
+            first_player=first_player or order[0],
+            player_names=player_names,
+            seed=seed,
+            config=config,
+            semantics_path=semantics_path,
+        )
+
+    @property
+    def state(self):
+        return self.engine.state
+
+    def _cursor(self, principal: str) -> ProjectionCursor:
+        return self.cursors.setdefault(principal, ProjectionCursor())
+
+    def pending_principals(self) -> list[str]:
+        decision = self.state.pending_decision
+        if decision is None:
+            return []
+        principals: list[str] = []
+        for actor in decision.actors:
+            principal = f"pilot:{actor}" if decision.role == "pilot" else decision.role
+            cap = self.engine.permissions.capability_for(principal)
+            if cap and principal not in principals:
+                principals.append(principal)
+        return principals
+
+    def packet(self, principal: str, *, full: bool = False) -> dict[str, Any]:
+        # Rebind after a loaded/rolled-back engine state.
+        self.projector.state = self.engine.state
+        return self.projector.packet(principal, self._cursor(principal), force_full=full)
+
+    def next_task(self, *, full: bool = False) -> dict[str, Any] | None:
+        for _ in range(64):
+            principals = self.pending_principals()
+            if not principals:
+                self.engine.pump()
+                principals = self.pending_principals()
+            if not principals:
+                return None
+            principal = principals[0]
+            for planned_principal in list(self.plans):
+                if planned_principal != principal:
+                    # Another actor receiving a decision is a conservative
+                    # public-state invalidation point.
+                    self.plans.pop(planned_principal, None)
+            queue = self.plans.get(principal) or []
+            if not queue:
+                return self.packet(principal, full=full)
+            planned = dict(queue.pop(0))
+            if queue:
+                self.plans[principal] = queue
+            else:
+                self.plans.pop(principal, None)
+            planned.setdefault("automatic", True)
+            planned.setdefault("reason", "Execute a still-legal action from the accepted ordered plan.")
+            before_stack = tuple(item.ref for item in self.state.stack)
+            before_event = self.state.event_sequence
+            result = self.act(principal, planned)
+            if not result.ok:
+                self.plans.pop(principal, None)
+                return self.packet(principal, full=full)
+            new_events = [
+                event
+                for event in self.state.events
+                if event.event_id > before_event
+            ]
+            if (
+                tuple(item.ref for item in self.state.stack) != before_stack
+                or any(event.code == "card.draw.private" for event in new_events)
+            ):
+                self.plans.pop(principal, None)
+        raise RuntimeError("Ordered plan exceeded 64 automatic actions without yielding")
+
+    def _install_plan(
+        self,
+        principal: str,
+        plan: Any,
+        *,
+        current_action_id: str | None,
+    ) -> None:
+        if not isinstance(plan, list):
+            return
+        actionable: list[dict[str, Any]] = []
+        for item in plan:
+            if isinstance(item, Mapping) and item.get("action_id"):
+                actionable.append(copy.deepcopy(dict(item)))
+            elif isinstance(item, str) and (
+                item in {"keep", "mulligan", "pass", "concede"}
+                or ":" in item
+            ):
+                actionable.append({"action_id": item})
+        if actionable and current_action_id and actionable[0].get("action_id") == current_action_id:
+            actionable.pop(0)
+        if actionable:
+            self.plans[principal] = actionable
+
+    @staticmethod
+    def expand_action(response: Mapping[str, Any]) -> tuple[str, dict[str, Any]]:
+        raw = dict(response)
+        action = str(raw.pop("action", raw.pop("a", "")))
+        action = ACTION_ALIASES.get(action, action)
+        if not action:
+            raise ValueError("Response needs 'a' or 'action'")
+        payload: dict[str, Any] = {}
+        for key, value in raw.items():
+            payload[FIELD_ALIASES.get(key, key)] = value
+        return action, payload
+
+    def _expand_action_id(
+        self,
+        principal: str,
+        response: Mapping[str, Any],
+    ) -> tuple[str, dict[str, Any], dict[str, Any]]:
+        raw = dict(response)
+        audit_keys = {
+            "reason",
+            "plan",
+            "confidence",
+            "model",
+            "model_id",
+            "input_tokens",
+            "output_tokens",
+            "latency_ms",
+            "automatic",
+            "fallback",
+        }
+        audit = {key: copy.deepcopy(raw.pop(key)) for key in list(raw) if key in audit_keys}
+        action_id = raw.pop("action_id", None)
+        if not action_id and isinstance(audit.get("plan"), list) and audit["plan"]:
+            first = audit["plan"][0]
+            if isinstance(first, Mapping):
+                action_id = first.get("action_id")
+            elif isinstance(first, str) and (
+                first in {"keep", "mulligan", "pass", "concede"}
+                or ":" in first
+            ):
+                action_id = first
+        if not action_id:
+            action, payload = self.expand_action(raw)
+            return action, payload, audit
+        decision = self.state.pending_decision
+        capability = self.engine.permissions.capability_for(principal)
+        if decision is None or capability is None:
+            raise ValueError("No pending decision for action_id")
+        actor_key = capability.actor or principal
+        context = decision.payload_by_actor.get(actor_key, {})
+        legal = context.get("legal", {})
+        catalog = list(
+            legal.get("actions")
+            or context.get("legal_actions")
+            or (
+                {"id": allowed, "action": allowed}
+                for allowed in capability.allowed_actions
+            )
+        )
+        selected = next(
+            (item for item in catalog if str(item.get("id")) == str(action_id)),
+            None,
+        )
+        if selected is None:
+            raise ValueError(f"Unknown or stale action_id {action_id!r}")
+        action = str(selected["action"])
+        payload = {
+            key: copy.deepcopy(value)
+            for key, value in selected.items()
+            if key not in {"id", "action", "search_cards"}
+        }
+        for key, value in raw.items():
+            if key not in {"a", "action"}:
+                payload[FIELD_ALIASES.get(key, key)] = value
+        audit["action_id"] = str(action_id)
+        return action, payload, audit
+
+    @staticmethod
+    def _legal_alternatives(capability: Any, context: Mapping[str, Any]) -> list[dict[str, Any]]:
+        legal = context.get("legal") or {}
+        return copy.deepcopy(
+            list(
+                legal.get("actions")
+                or context.get("legal_actions")
+                or (
+                    {"id": action, "action": action}
+                    for action in capability.allowed_actions
+                )
+            )
+        )
+
+    def act(self, principal: str, response: Mapping[str, Any]) -> ActionResult:
+        capability = self.engine.permissions.capability_for(principal)
+        if capability is None:
+            return ActionResult(False, f"No pending capability for {principal}", [], state_changed=False)
+        try:
+            action, payload, audit = self._expand_action_id(principal, response)
+        except ValueError as exc:
+            decision = self.state.pending_decision
+            actor = capability.actor or principal
+            cursor = self.cursors.get(principal)
+            actor_context = copy.deepcopy(
+                decision.payload_by_actor.get(actor, {}) if decision else {}
+            )
+            current_hash = authoritative_state_hash(self.state)
+            retry_count = sum(
+                row.get("decision_id") == (decision.decision_id if decision else None)
+                and row.get("principal") == principal
+                and not row.get("accepted")
+                for row in self.decisions
+            )
+            reason = response.get("reason")
+            self.decisions.append(
+                {
+                    "sequence": len(self.decisions) + 1,
+                    "decision_id": decision.decision_id if decision else None,
+                    "kind": decision.kind if decision else None,
+                    "role": capability.role,
+                    "principal": principal,
+                    "actor": actor,
+                    "seat": actor if actor in self.state.players else None,
+                    "capability_id": capability_id(capability.token),
+                    "action": None,
+                    "action_id": response.get("action_id"),
+                    "payload": {},
+                    "legal_alternatives": self._legal_alternatives(capability, actor_context),
+                    "decision_context": actor_context,
+                    "reason": str(reason)[:160] if reason is not None else None,
+                    "plan": response.get("plan"),
+                    "plan_category": response.get("plan") if isinstance(response.get("plan"), str) else None,
+                    "confidence": response.get("confidence"),
+                    "model": response.get("model_id", response.get("model")),
+                    "metrics": {},
+                    "automatic": False,
+                    "fallback": response.get("fallback"),
+                    "retry_count": retry_count,
+                    "accepted": False,
+                    "rejection": str(exc),
+                    "before_state_hash": current_hash,
+                    "after_state_hash": current_hash,
+                    "turn": self.state.turn_sequence,
+                    "phase": self.state.phase,
+                    "step": self.state.step,
+                    "projected_state_hash": cursor.view_hash if cursor else None,
+                    "observation_revision": (
+                        cursor.snapshot.get("rev")
+                        if cursor and cursor.snapshot
+                        else None
+                    ),
+                    "observation_base_hash": cursor.view_hash if cursor else None,
+                }
+            )
+            return ActionResult(False, str(exc), [], state_changed=False)
+        decision = self.state.pending_decision
+        turn = self.state.turn_sequence
+        phase = self.state.phase
+        step = self.state.step
+        cursor = self.cursors.get(principal)
+        before_event_sequence = self.state.event_sequence
+        before_stack_semantics = {
+            item.ref: item.semantic_key
+            for item in self.state.stack
+        }
+        before_hash = authoritative_state_hash(self.state)
+        before_shuffles = {
+            seat: int(player.stats.get("shuffle_count", 0))
+            for seat, player in self.state.players.items()
+        }
+        actor = capability.actor or principal
+        actor_context = copy.deepcopy(
+            decision.payload_by_actor.get(actor, {}) if decision else {}
+        )
+        result = self.engine.try_submit(
+            token=capability.token,
+            principal=principal,
+            action=action,
+            payload=payload,
+        )
+        after_hash = authoritative_state_hash(self.state)
+        after_shuffles = {
+            seat: int(player.stats.get("shuffle_count", 0))
+            for seat, player in self.state.players.items()
+        }
+        programs_used: list[dict[str, Any]] = []
+        for event in self.state.events:
+            if event.event_id <= before_event_sequence or event.code != "stack.resolve":
+                continue
+            stack_ref = str(event.details.get("stack") or "")
+            semantic_key = before_stack_semantics.get(stack_ref)
+            if not semantic_key:
+                continue
+            program = self.engine.semantics.get(semantic_key)
+            programs_used.append(
+                {
+                    "key": semantic_key,
+                    "version": (
+                        program.version
+                        if program is not None
+                        else 1 if semantic_key.startswith("builtin:") else None
+                    ),
+                    "builtin": semantic_key.startswith("builtin:"),
+                }
+            )
+        retry_count = sum(
+            row.get("decision_id") == (decision.decision_id if decision else None)
+            and row.get("principal") == principal
+            and not row.get("accepted")
+            for row in self.decisions
+        )
+        reason = audit.get("reason")
+        plan = audit.get("plan")
+        decision_row = {
+            "sequence": len(self.decisions) + 1,
+            "decision_id": decision.decision_id if decision else None,
+            "kind": decision.kind if decision else None,
+            "role": capability.role,
+            "principal": principal,
+            "actor": actor,
+            "seat": actor if actor in self.state.players else None,
+            "capability_id": capability_id(capability.token),
+            "action": action,
+            "action_id": audit.get("action_id"),
+            "payload": copy.deepcopy(payload),
+            "legal_alternatives": self._legal_alternatives(capability, actor_context),
+            "decision_context": actor_context,
+            "reason": str(reason)[:160] if reason is not None else None,
+            "plan": plan,
+            "plan_category": plan if isinstance(plan, str) else None,
+            "confidence": audit.get("confidence"),
+            "model": audit.get("model_id", audit.get("model")),
+            "metrics": {
+                key: audit[key]
+                for key in ("input_tokens", "output_tokens", "latency_ms")
+                if key in audit
+            },
+            "automatic": bool(audit.get("automatic", False)),
+            "fallback": audit.get("fallback"),
+            "retry_count": retry_count,
+            "accepted": result.ok,
+            "rejection": None if result.ok else result.summary,
+            "before_state_hash": before_hash,
+            "after_state_hash": after_hash,
+            "turn": turn,
+            "phase": phase,
+            "step": step,
+            "projected_state_hash": cursor.view_hash if cursor else None,
+            "observation_revision": (
+                cursor.snapshot.get("rev")
+                if cursor and cursor.snapshot
+                else None
+            ),
+            "observation_base_hash": cursor.view_hash if cursor else None,
+        }
+        if not audit.get("automatic"):
+            self.decisions.append(decision_row)
+        if result.ok:
+            self.commands.append(
+                {
+                    "sequence": len(self.commands) + 1,
+                    "command_id": f"C{len(self.commands) + 1}",
+                    "decision_id": decision.decision_id if decision else None,
+                    "principal": principal,
+                    "actor": actor,
+                    "execution": (
+                        "planned_automatic"
+                        if audit.get("automatic")
+                        else "external_decision"
+                    ),
+                    "capability_id": capability_id(capability.token),
+                    "action": action,
+                    "payload": copy.deepcopy(payload),
+                    "before_state_hash": before_hash,
+                    "after_state_hash": after_hash,
+                    "rng": {
+                        "shuffle_counts_before": before_shuffles,
+                        "shuffle_counts_after": after_shuffles,
+                    },
+                    "semantics_fingerprint": semantics_fingerprint(self.engine.semantics),
+                    "semantics": {
+                        "registry_schema_version": 1,
+                        "registry_hash": semantics_fingerprint(self.engine.semantics),
+                        "programs_used": programs_used,
+                    },
+                }
+            )
+            self._install_plan(
+                principal,
+                audit.get("plan"),
+                current_action_id=audit.get("action_id"),
+            )
+        self.projector.state = self.engine.state
+        return result
+
+    def rules(
+        self,
+        values: Sequence[str],
+        *,
+        include_rulings: bool = True,
+        max_rulings_per_card: int = 6,
+        format: str = "markdown",
+    ) -> Any:
+        names: list[str] = []
+        by_ref = {card.ref: card for card in self.state.cards.values()}
+        for value in values:
+            card = by_ref.get(value)
+            names.append(card.printed_name if card else value)
+        return self.card_db.rules_digest(
+            names,
+            include_rulings=include_rulings,
+            max_rulings_per_card=max_rulings_per_card,
+            format=format,
+        )
+
+    def save(self, directory: str | Path) -> None:
+        directory = Path(directory)
+        directory.mkdir(parents=True, exist_ok=True)
+        if not self.initial_checkpoint:
+            self.initial_checkpoint = checkpoint_envelope(self.state)
+        manifest = write_record(
+            directory,
+            state=self.state,
+            card_db=self.card_db,
+            semantics=self.engine.semantics,
+            initial_checkpoint=self.initial_checkpoint,
+            commands=self.commands,
+            decisions=self.decisions,
+            created_at=self.created_at,
+            replay_mode=self.replay_mode,
+        )
+        write_review_artifacts(
+            directory,
+            self.engine,
+            decisions=self.decisions,
+            manifest=manifest,
+        )
+        cursor_payload = {
+            principal: {
+                "event_id": cursor.event_id,
+                "snapshot": cursor.snapshot,
+                "seen_oracles": sorted(cursor.seen_oracles),
+                "packet_no": cursor.packet_no,
+                "view_hash": cursor.view_hash,
+            }
+            for principal, cursor in self.cursors.items()
+        }
+        (directory / "cursors.json").write_text(
+            json.dumps(cursor_payload, indent=2, sort_keys=True), encoding="utf-8"
+        )
+        self.engine.semantics.save()
+
+    @classmethod
+    def load(
+        cls,
+        card_db: CardDatabase,
+        directory: str | Path,
+        *,
+        semantics_path: str | Path | None = None,
+    ) -> "CommanderSession":
+        directory = Path(directory)
+        semantics = SemanticRegistry(semantics_path)
+        if (directory / "manifest.json").exists():
+            from .record import load_record_state, read_initial_checkpoint
+
+            state = load_record_state(directory)
+            engine = CommanderEngine(card_db, state, semantics)
+            engine.permissions.reissue_pending()
+            initial_checkpoint = read_initial_checkpoint(directory / "initial-checkpoint.json.gz")
+            commands = [
+                json.loads(line)
+                for line in (directory / "commands.jsonl").read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+            decisions = [
+                json.loads(line)
+                for line in (directory / "decisions.jsonl").read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+            manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+            created_at = str(manifest.get("created_at") or utc_now())
+            replay_mode = str(manifest.get("replay", {}).get("mode") or "commands")
+        else:
+            engine = CommanderEngine.load(card_db, str(directory / "game.json"), semantics)
+            initial_checkpoint = checkpoint_envelope(engine.state)
+            commands = []
+            decisions = []
+            created_at = utc_now()
+            replay_mode = "legacy_snapshot"
+        cursors: dict[str, ProjectionCursor] = {}
+        cursor_path = directory / "cursors.json"
+        if cursor_path.exists():
+            for principal, value in json.loads(cursor_path.read_text(encoding="utf-8")).items():
+                cursors[principal] = ProjectionCursor(
+                    event_id=int(value.get("event_id", 0)),
+                    snapshot=value.get("snapshot"),
+                    seen_oracles=set(value.get("seen_oracles", [])),
+                    packet_no=int(value.get("packet_no", 0)),
+                    view_hash=value.get("view_hash"),
+                )
+        return cls(
+            card_db,
+            engine,
+            StateProjector(card_db, engine.state),
+            cursors,
+            initial_checkpoint,
+            commands,
+            decisions,
+            created_at,
+            replay_mode,
+            {},
+        )

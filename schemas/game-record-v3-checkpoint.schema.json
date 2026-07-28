@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mtg-commander-sim.local/schemas/game-record-v3-checkpoint.schema.json",
+  "title": "MTG Commander Game Record v3 checkpoint",
+  "type": "object",
+  "required": ["schema_version", "kind", "state_hash", "active_capabilities", "state"],
+  "properties": {
+    "schema_version": {"const": 3},
+    "kind": {"const": "authoritative-checkpoint"},
+    "state_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "active_capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "decision_id", "principal"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "decision_id": {"type": "string"},
+          "principal": {"type": "string"},
+          "actor": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "state": {
+      "type": "object",
+      "required": ["game_id", "config", "players", "cards", "events", "capabilities"],
+      "properties": {
+        "events": {"type": "array", "maxItems": 0},
+        "capabilities": {"type": "object", "maxProperties": 0}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

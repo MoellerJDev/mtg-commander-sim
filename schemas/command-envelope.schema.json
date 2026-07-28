@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/mtg-commander-sim/command-envelope-v2.1.json",
+  "title": "MTG Commander Sim client command envelope v2.1",
+  "description": "The authenticated principal is transport metadata and MUST NOT be accepted from this client-controlled body.",
+  "type": "object",
+  "required": ["game_id", "capability", "action", "payload"],
+  "properties": {
+    "game_id": {"type": "string"},
+    "capability": {"type": "string"},
+    "action": {"type": "string"},
+    "payload": {"type": "object"}
+  },
+  "additionalProperties": false
+}

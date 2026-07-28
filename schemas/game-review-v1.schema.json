@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mtg-commander-sim.local/schemas/game-review-v1.schema.json",
+  "title": "MTG Commander derived review v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "game_id",
+    "outcome",
+    "format",
+    "opening_hands",
+    "players",
+    "land_entry",
+    "fetchlands",
+    "semantic_coverage",
+    "pilot_audit",
+    "turns",
+    "fidelity"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "game_id": {"type": "string"},
+    "outcome": {"type": "object"},
+    "format": {"type": "object"},
+    "opening_hands": {"type": "object"},
+    "players": {"type": "object"},
+    "land_entry": {"type": "object"},
+    "fetchlands": {"type": "object"},
+    "semantic_coverage": {"type": "object"},
+    "pilot_audit": {"type": "object"},
+    "trace": {"type": "object"},
+    "turns": {"type": "array"},
+    "fidelity": {
+      "type": "object",
+      "required": ["classification", "review_eligible", "matchup_evidence", "failures", "statement"],
+      "properties": {
+        "classification": {
+          "enum": ["in_progress", "invalid", "smoke_only", "rules_test", "pilot_test", "deck_review_eligible", "matchup_evidence"]
+        },
+        "review_eligible": {"type": "boolean"},
+        "matchup_evidence": {"type": "boolean"},
+        "failures": {"type": "array", "items": {"type": "string"}},
+        "statement": {"type": "string"}
+      }
+    }
+  },
+  "additionalProperties": true
+}

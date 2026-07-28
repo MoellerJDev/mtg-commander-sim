@@ -1,0 +1,86 @@
+# MTG Commander Sim 0.3.0 — verification results
+
+Date: 2026-07-28
+Python: 3.11
+
+## Compile and schemas
+
+PASS: `python -m compileall -q mtg_commander_sim tests scripts simctl.py`
+
+PASS: all 9 JSON schema files parse successfully.
+
+## Unit/integration tests
+
+PASS: 56 tests
+
+The original 48 tests remain green. Added coverage verifies:
+
+- Game Record v3 artifact layout and v2 migration
+- checkpoint removal of event history, consumed capabilities, and raw tokens
+- capability reissue after load
+- accepted-command hashing and rejection isolation
+- command replay through the normal permission/rules boundary
+- minimal/standard/debug trace filtering
+- seat-scoped decision audits and analyst-only opening-hand review
+- explicit duel/multiplayer Commander profiles
+- server-derived land entry, including all requested regression lands
+- Mana Confluence life payment and legal noncreature exposure
+- server-advertised mana and nonmana abilities
+- Flooded Strand and Wooded Foothills subtype search behavior
+- private resolution-time fetchland choice and deterministic shuffle
+- ordered main-phase plans with conservative invalidation
+- unresolved semantic coverage blocking deck-review eligibility
+- the completed live-duel characterization snapshot
+
+## Completed fixture migration
+
+PASS: migrated `run/live-duel/game.json` to
+`run/migrated-live-duel`.
+
+- legacy monolith: 662,955 bytes
+- v3 authoritative/journal components before derived review: 412,930 bytes
+- reduction before derived review: 37.7%
+- standard journal: 158 events, 0 priority-pass events, 0 step-boundary events
+- legacy pilot decisions preserved: 475
+- raw capability fields persisted: 0
+- snapshot replay hash:
+  `35921e1ab1141fc335c8396e696d411fca290654b9fdcd2d93b5fbb3daba2ce8`
+
+The review matches the fixture characterization: both seats kept seven; A cast
+Lotus Cobra, Zimone and Dina, and Birds of Paradise; B cast zero spells; turns
+begun were 11/10; Zimone and Dina dealt 21 commander damage; B was eliminated
+on turn 21; all 14 land events recorded tapped with exactly 10 conflicts; no
+fetchland was activated; and B discarded seven cards at cleanup.
+
+Fidelity is `smoke_only`, `review_eligible=false`, and
+`matchup_evidence=false`.
+
+The historical model-call comparison is 475 observed decisions versus a
+57-call upper bound if every observed pass had been proven safe to automate.
+This is explicitly reported as an estimate, not a claim about historical
+legality.
+
+## Live data/deck integration retained
+
+PASS: runtime Scryfall `GET /bulk-data` discovery and atomic local database
+refresh remain covered.
+
+PASS: both public Moxfield Commander deck IDs remain fetchable, cached, and
+validated:
+
+- `g5vtVfRuS0W5KxZuYqZHGQ` — Zimone and Dina — 100 cards
+- `armNI_ntVUagNNygnUVyxQ` — Mishra, Eminent One — 100 cards
+
+## Package
+
+PASS: built `dist/mtg_commander_sim-0.3.0-py3-none-any.whl`
+
+- size: 103,009 bytes
+- SHA-256:
+  `204c331cae62cd6a1ef766d18c5b46999088e2e8ad04146ce2ce2c123f7c5bfa`
+
+PASS: installed the wheel into a fresh virtual environment with
+`--no-index --no-deps`.
+
+PASS: installed package reports `0.3.0`; installed `simctl replay --help`
+exposes record, database, and verification arguments.

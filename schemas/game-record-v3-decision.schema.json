@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mtg-commander-sim.local/schemas/game-record-v3-decision.schema.json",
+  "title": "MTG Commander Game Record v3 pilot/arbiter decision attempt",
+  "type": "object",
+  "required": ["sequence", "principal", "action", "accepted"],
+  "properties": {
+    "sequence": {"type": "integer", "minimum": 1},
+    "decision_id": {"type": ["string", "null"]},
+    "kind": {"type": ["string", "null"]},
+    "role": {"type": ["string", "null"]},
+    "principal": {"type": ["string", "null"]},
+    "actor": {"type": ["string", "null"]},
+    "seat": {"type": ["string", "null"]},
+    "capability_id": {"type": "string"},
+    "action": {"type": ["string", "null"]},
+    "action_id": {"type": ["string", "null"]},
+    "payload": {"type": "object"},
+    "legal_alternatives": {},
+    "decision_context": {"type": "object"},
+    "reason": {},
+    "plan": {},
+    "plan_category": {"type": ["string", "null"]},
+    "confidence": {},
+    "model": {},
+    "metrics": {"type": "object"},
+    "automatic": {"type": "boolean"},
+    "fallback": {},
+    "retry_count": {"type": "integer", "minimum": 0},
+    "accepted": {"type": "boolean"},
+    "rejection": {"type": ["string", "null"]},
+    "legacy_incomplete": {"type": "boolean"},
+    "before_state_hash": {"type": "string"},
+    "after_state_hash": {"type": "string"},
+    "turn": {"type": "integer", "minimum": 0}
+    ,"phase": {"type": "string"}
+    ,"step": {"type": "string"}
+    ,"projected_state_hash": {"type": ["string", "null"]}
+    ,"observation_revision": {"type": ["integer", "null"]}
+    ,"observation_base_hash": {"type": ["string", "null"]}
+  },
+  "additionalProperties": true
+}

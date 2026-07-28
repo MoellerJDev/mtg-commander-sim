@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mtg-commander-sim.local/schemas/game-record-v3-event.schema.json",
+  "title": "MTG Commander Game Record v3 event",
+  "type": "object",
+  "required": ["id", "revision", "turn", "phase", "step", "code", "details", "visibility", "importance"],
+  "properties": {
+    "id": {"type": "integer", "minimum": 1},
+    "revision": {"type": "integer", "minimum": 0},
+    "turn": {"type": "integer", "minimum": 0},
+    "active_player": {"type": ["string", "null"]},
+    "phase": {"type": "string"},
+    "step": {"type": "string"},
+    "actor": {"type": ["string", "null"]},
+    "code": {"type": "string"},
+    "summary": {"type": "string"},
+    "details": {"type": "object"},
+    "visibility": {"type": "array", "items": {"type": "string"}},
+    "importance": {"type": "integer"},
+    "changed_objects": {"type": "array", "items": {"type": "string"}},
+    "changed_players": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

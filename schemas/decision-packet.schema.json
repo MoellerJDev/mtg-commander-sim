@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/mtg-commander-sim/decision-packet-v2.1.json",
+  "title": "MTG Commander Sim projected decision packet v2.1",
+  "type": "object",
+  "required": ["v", "mode", "principal", "pkt", "view", "decision"],
+  "properties": {
+    "v": {"const": "2.1"},
+    "mode": {"enum": ["full", "delta"]},
+    "principal": {"type": "string"},
+    "pkt": {"type": "integer", "minimum": 1},
+    "base": {"type": ["string", "null"]},
+    "view": {"type": "string", "minLength": 8},
+    "rev": {"type": "integer", "minimum": 0},
+    "event": {"type": "integer", "minimum": 0},
+    "state": {"type": "object"},
+    "patch": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["op", "path"],
+        "properties": {
+          "op": {"enum": ["add", "remove", "replace"]},
+          "path": {"type": "string"},
+          "value": {}
+        },
+        "additionalProperties": false
+      }
+    },
+    "defs": {"type": "array"},
+    "events": {"type": "array"},
+    "decision": {
+      "type": ["object", "null"],
+      "properties": {
+        "cap": {"type": "string"},
+        "id": {"type": "string"},
+        "kind": {"type": "string"},
+        "allow": {"type": "array", "items": {"type": "string"}},
+        "ctx": {"type": "object"}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"const": "full"}}},
+      "then": {"required": ["state"], "properties": {"base": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"mode": {"const": "delta"}}},
+      "then": {"required": ["patch", "rev", "event"], "properties": {"base": {"type": "string"}}}
+    }
+  ],
+  "additionalProperties": true
+}

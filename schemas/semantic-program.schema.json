@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/mtg-commander-sim/semantic-program-v1.json",
+  "title": "Reusable semantic program",
+  "type": "object",
+  "required": ["key", "label", "effects"],
+  "properties": {
+    "key": {"type": "string"},
+    "label": {"type": "string"},
+    "effects": {"type": "array", "items": {"type": "object"}},
+    "destination": {"type": ["string", "null"]},
+    "requires_arbiter": {"type": "boolean"},
+    "notes": {"type": "string"},
+    "version": {"type": "integer", "minimum": 1}
+  },
+  "additionalProperties": false
+}

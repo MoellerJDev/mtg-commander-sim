@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mtg-commander-sim.local/schemas/game-record-v3-command.schema.json",
+  "title": "MTG Commander Game Record v3 accepted command",
+  "type": "object",
+  "required": [
+    "sequence",
+    "command_id",
+    "decision_id",
+    "principal",
+    "capability_id",
+    "action",
+    "payload",
+    "before_state_hash",
+    "after_state_hash",
+    "rng",
+    "semantics_fingerprint"
+  ],
+  "properties": {
+    "sequence": {"type": "integer", "minimum": 1},
+    "command_id": {"type": "string", "pattern": "^C[1-9][0-9]*$"},
+    "decision_id": {"type": ["string", "null"]},
+    "principal": {"type": "string"},
+    "actor": {"type": ["string", "null"]},
+    "execution": {"enum": ["external_decision", "planned_automatic"]},
+    "capability_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "action": {"type": "string"},
+    "payload": {"type": "object"},
+    "before_state_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "after_state_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "rng": {"type": "object"},
+    "semantics_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+    ,"semantics": {"type": "object"}
+  },
+  "additionalProperties": false
+}

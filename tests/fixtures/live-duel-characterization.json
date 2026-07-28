@@ -1,0 +1,28 @@
+{
+  "classification": "smoke_only",
+  "review_eligible": false,
+  "opening_hand_sizes": {
+    "A": 7,
+    "B": 7
+  },
+  "turns_begun": {
+    "A": 11,
+    "B": 10
+  },
+  "spells_cast": {
+    "A": [
+      "Lotus Cobra",
+      "Zimone and Dina",
+      "Birds of Paradise"
+    ],
+    "B": []
+  },
+  "commander_damage_to_b": 21,
+  "eliminated_seat": "B",
+  "elimination_turn": 21,
+  "land_plays": 14,
+  "all_lands_recorded_tapped": true,
+  "land_entry_conflicts": 10,
+  "fetchland_activations": 0,
+  "b_cleanup_discards": 7
+}

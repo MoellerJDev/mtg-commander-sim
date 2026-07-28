@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mtg-commander-sim.local/schemas/game-record-v3-manifest.schema.json",
+  "title": "MTG Commander Game Record v3 manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_schema_version",
+    "record_type",
+    "game_id",
+    "engine_version",
+    "format",
+    "players",
+    "player_count",
+    "turn_order",
+    "trace_level",
+    "semantics_fingerprint",
+    "semantics_registry",
+    "scryfall",
+    "final_state_hash",
+    "replay",
+    "review"
+  ],
+  "properties": {
+    "schema_version": {"const": 3},
+    "record_schema_version": {"const": 3},
+    "record_type": {"const": "mtg-commander-game"},
+    "game_id": {"type": "string", "minLength": 1},
+    "engine_version": {"type": "string"},
+    "state_version": {"type": "integer", "minimum": 1},
+    "protocol_version": {"type": "integer", "minimum": 1},
+    "format": {
+      "type": "object",
+      "required": ["name", "review_profile", "profile", "starting_life", "free_mulligans", "first_player_draws"],
+      "properties": {
+        "name": {"const": "commander"},
+        "review_profile": {"const": "commander_review"},
+        "profile": {"enum": ["commander_duel", "commander_multiplayer"]},
+        "starting_life": {"type": "integer", "minimum": 1},
+        "free_mulligans": {"type": "integer", "minimum": 0},
+        "first_player_draws": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    },
+    "players": {"type": "array", "minItems": 2, "maxItems": 6},
+    "player_count": {"type": "integer", "minimum": 2, "maximum": 6},
+    "turn_order": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 6},
+    "seed": {"type": ["integer", "null"]},
+    "trace_level": {"enum": ["minimal", "standard", "debug"]},
+    "semantics_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "semantics_registry": {
+      "type": "object",
+      "required": ["schema_version", "hash"],
+      "properties": {
+        "schema_version": {"type": "integer", "minimum": 1},
+        "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "scryfall": {"type": "object"},
+    "created_at": {"type": "string"},
+    "updated_at": {"type": "string"},
+    "started_at": {"type": ["string", "null"]},
+    "ended_at": {"type": ["string", "null"]},
+    "migrated_at": {"type": "string"},
+    "status": {"enum": ["in_progress", "complete"]},
+    "winner": {"type": ["string", "null"]},
+    "draw": {"type": "boolean"},
+    "final_state_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "replay": {
+      "type": "object",
+      "required": ["mode", "verification", "engine_version", "semantics_fingerprint"],
+      "properties": {
+        "mode": {"enum": ["commands", "legacy_snapshot"]},
+        "verification": {"enum": ["not_run", "pass", "fail", "snapshot_only"]},
+        "engine_version": {"type": "string"},
+        "semantics_fingerprint": {"type": "string"}
+      }
+    },
+    "review": {
+      "type": "object",
+      "required": ["classification", "eligible"],
+      "properties": {
+        "classification": {"type": "string"},
+        "eligible": {"type": "boolean"},
+        "matchup_evidence": {"type": "boolean"}
+      }
+    }
+  },
+  "additionalProperties": true
+}
