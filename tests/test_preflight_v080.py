@@ -81,6 +81,74 @@ class SemanticPreflightV2Tests(unittest.TestCase):
         )
         self.assertEqual(forward, reverse)
 
+    def test_reminder_text_does_not_invent_source_mana_ability(self):
+        row = card_semantic_status(
+            self.db.lookup("An Offer You Can't Refuse"),
+            SemanticRegistry(),
+            db=self.db,
+        )
+
+        self.assertNotIn(
+            "mana_ability", row["material_effect_categories"]
+        )
+        self.assertNotIn("mana_ability", row["unresolved"])
+
+    def test_mixed_keyword_and_static_card_is_not_silently_complete(self):
+        row = card_semantic_status(
+            self.db.lookup("Roaming Throne"),
+            SemanticRegistry(),
+            db=self.db,
+        )
+
+        self.assertIn(
+            "combat_or_protection_keyword",
+            row["material_effect_categories"],
+        )
+        self.assertIn("static_ability", row["material_effect_categories"])
+        self.assertIn("keyword:ward", row["unresolved"])
+        self.assertEqual("unresolved", row["status"])
+
+    def test_each_nonmana_activated_ability_needs_exact_coverage(self):
+        row = card_semantic_status(
+            self.db.lookup("Deathrite Shaman"),
+            SemanticRegistry(),
+            db=self.db,
+        )
+
+        self.assertEqual(
+            {
+                "activated_ability:ab1",
+                "activated_ability:ab2",
+                "activated_ability:ab3",
+            },
+            {
+                value
+                for value in row["unresolved"]
+                if value.startswith("activated_ability:")
+            },
+        )
+
+    def test_unrestricted_generic_mana_ability_remains_trusted_builtin(self):
+        row = card_semantic_status(
+            self.db.lookup("Sol Ring"),
+            SemanticRegistry(),
+            db=self.db,
+        )
+
+        self.assertEqual("fully_playable", row["status"])
+        self.assertNotIn("mana_ability", row["unresolved"])
+
+    def test_unsupported_keyword_action_is_not_silently_ignored(self):
+        row = card_semantic_status(
+            self.db.lookup("Lightning Greaves"),
+            SemanticRegistry(),
+            db=self.db,
+        )
+
+        self.assertIn("keyword_ability", row["material_effect_categories"])
+        self.assertIn("keyword:equip", row["unresolved"])
+        self.assertEqual("unresolved", row["status"])
+
 
 class TrustedOnlyPolicyTests(unittest.TestCase):
     @classmethod
@@ -120,26 +188,32 @@ class TrustedOnlyPolicyTests(unittest.TestCase):
     def test_provisional_cast_is_not_advertised(self):
         session = self.make_session(801)
         engine = session.engine
-        engineer = self.card(engine, "Goblin Engineer", "A")
-        engine.move_card(engineer.object_id, "hand")
-        engine.state.players["A"].mana_pool.update({"C": 1, "R": 1})
-        engine.state.active_player = "A"
+        intent = self.card(engine, "Diabolic Intent", "B")
+        fodder = self.card(engine, "Birds of Paradise", "B")
+        engine.move_card(intent.object_id, "hand")
+        engine.move_card(
+            fodder.object_id,
+            "battlefield",
+            controller="B",
+        )
+        engine.state.players["B"].mana_pool.update({"C": 1, "B": 1})
+        engine.state.active_player = "B"
         engine.state.phase = "precombat_main"
         engine.state.step = "main"
-        engine.state.priority_player = "A"
+        engine.state.priority_player = "B"
 
-        hints = engine._priority_action_hints("A")
+        hints = engine._priority_action_hints("B")
 
         self.assertFalse(
             any(
-                action.get("card") == engineer.ref
+                action.get("card") == intent.ref
                 for action in hints["actions"]
             )
         )
         diagnostic = hints["diagnostic"]["unresolved_cost_semantics"]
         self.assertTrue(
             any(
-                row.get("card") == engineer.ref
+                row.get("card") == intent.ref
                 and row.get("reason")
                 == "semantic_policy_requires_trusted"
                 for row in diagnostic
@@ -149,17 +223,17 @@ class TrustedOnlyPolicyTests(unittest.TestCase):
     def test_untrusted_resolution_pauses_without_arbiter(self):
         session = self.make_session(802)
         engine = session.engine
-        engineer = self.card(engine, "Goblin Engineer", "A")
-        program_key = f"{engineer.oracle_id}:spell:front"
-        engine._remove_from_zone(engineer)
-        engineer.zone = "stack"
+        intent = self.card(engine, "Diabolic Intent", "B")
+        program_key = f"{intent.oracle_id}:spell:front"
+        engine._remove_from_zone(intent)
+        intent.zone = "stack"
         item = StackItem(
             stack_id="trusted-only-test",
             ref="S-untrusted",
             kind="spell",
-            controller="A",
-            label=engineer.printed_name,
-            card_object_id=engineer.object_id,
+            controller="B",
+            label=intent.printed_name,
+            card_object_id=intent.object_id,
             semantic_key=program_key,
             default_destination="graveyard",
             visibility=list(engine.seats),
@@ -349,7 +423,7 @@ class NormalizedZoneEventTests(unittest.TestCase):
     def test_graveyard_source_observes_land_enter(self):
         session = self.make_session(806)
         engine = session.engine
-        bloodghast = self.card(engine, "Bloodghast", "A")
+        bloodghast = self.card(engine, "Elves of Deep Shadow", "A")
         land = self.card(engine, "Island", "A")
         engine.move_card(bloodghast.object_id, "graveyard")
         engine.semantics.put(

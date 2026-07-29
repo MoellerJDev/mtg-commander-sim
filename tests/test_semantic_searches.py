@@ -501,6 +501,183 @@ class SemanticPrivateSearchTests(unittest.TestCase):
         self.assertIn(target.ref, opposing)
         self.assertIn("Ichor Wellspring", opposing)
 
+    def test_spellseeker_search_trigger(self):
+        session = self._session()
+        engine = session.engine
+        seeker = self._card(engine, "B", "Spellseeker")
+        target = self._card(engine, "B", "Entomb")
+        engine.move_card(target.object_id, "library", log=False)
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.priority_player = None
+
+        engine.move_card(
+            seeker.object_id,
+            "battlefield",
+            controller="B",
+            semantic_events=True,
+            reason="Spellseeker scenario",
+        )
+        self.assertFalse(engine._stabilize())
+        engine._prepare_stack_resolution()
+        packet = session.packet("pilot:B", full=True)
+        candidates = {
+            row["id"]
+            for row in packet["decision"]["ctx"]["search_cards"]
+        }
+        self.assertIn(target.ref, candidates)
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "search_card": target.ref,
+                "plan": "ASSEMBLE_ENGINE",
+                "reason": "Find the one-mana instant.",
+            },
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("hand", target.zone)
+        self.assertEqual(set(engine.seats), set(target.known_to))
+
+    def test_goblin_engineer_search_trigger(self):
+        session = self._session()
+        engine = session.engine
+        engineer = self._card(engine, "A", "Goblin Engineer")
+        target = self._card(engine, "A", "Sol Ring")
+        engine.move_card(target.object_id, "library", log=False)
+        target.known_to = ["A"]
+        target.revealed_to = []
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.priority_player = None
+
+        engine.move_card(
+            engineer.object_id,
+            "battlefield",
+            controller="A",
+            semantic_events=True,
+            reason="Goblin Engineer scenario",
+        )
+        self.assertFalse(engine._stabilize())
+        engine._prepare_stack_resolution()
+        packet = session.packet("pilot:A", full=True)
+        self.assertIn(
+            target.ref,
+            {
+                row["id"]
+                for row in packet["decision"]["ctx"]["search_cards"]
+            },
+        )
+        opposing_before = json.dumps(
+            session.packet("pilot:B", full=True)
+        )
+        self.assertNotIn(target.ref, opposing_before)
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "search_card": target.ref,
+                "plan": "SETUP_GRAVEYARD",
+                "reason": "Put the mana artifact into the graveyard.",
+            },
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("graveyard", target.zone)
+        self.assertEqual(set(engine.seats), set(target.known_to))
+
+    def test_survival_search_after_authoritative_cost(self):
+        session = self._session()
+        engine = session.engine
+        survival = self._card(engine, "B", "Survival of the Fittest")
+        discarded = self._card(engine, "B", "Faerie Mastermind")
+        target = self._card(engine, "B", "Bloodghast")
+        engine.move_card(
+            survival.object_id,
+            "battlefield",
+            controller="B",
+            log=False,
+        )
+        engine.move_card(discarded.object_id, "hand", log=False)
+        engine.move_card(target.object_id, "library", log=False)
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.players["B"].mana_pool["G"] = 1
+        engine.state.priority_player = "B"
+        engine.state.priority_passes = []
+
+        engine._activate(
+            "B",
+            {
+                "source": survival.ref,
+                "ability": "ab1",
+                "cost_cards": [discarded.ref],
+                "pay": "manual",
+                "payment": {"G": 1},
+            },
+        )
+        engine.state.priority_player = None
+        engine._prepare_stack_resolution()
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "search_card": target.ref,
+                "plan": "ASSEMBLE_ENGINE",
+                "reason": "Exchange the creature in hand for Bloodghast.",
+            },
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("graveyard", discarded.zone)
+        self.assertEqual("hand", target.zone)
+        self.assertEqual(0, engine.state.players["B"].mana_pool["G"])
+
+    def test_goblin_engineer_activation_pays_cost_and_returns_small_artifact(
+        self,
+    ):
+        session = self._session()
+        engine = session.engine
+        engineer = self._card(engine, "A", "Goblin Engineer")
+        sacrifice = self._card(engine, "A", "Sol Ring")
+        target = self._card(engine, "A", "Ichor Wellspring")
+        for card in (engineer, sacrifice):
+            engine.move_card(
+                card.object_id,
+                "battlefield",
+                controller="A",
+                tapped=False,
+                log=False,
+            )
+        engineer.acquired_control_turn_count = (
+            engine.state.players["A"].turns_begun - 1
+        )
+        engine.move_card(target.object_id, "graveyard", log=False)
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.players["A"].mana_pool["R"] = 1
+        engine.state.priority_player = "A"
+        engine.state.priority_passes = []
+
+        engine._activate(
+            "A",
+            {
+                "source": engineer.ref,
+                "ability": "ab2",
+                "targets": [target.ref],
+                "cost_cards": [sacrifice.ref],
+                "pay": "manual",
+                "payment": {"R": 1},
+            },
+        )
+        engine.state.priority_player = None
+        engine._prepare_stack_resolution()
+
+        self.assertEqual("graveyard", sacrifice.zone)
+        self.assertEqual("battlefield", target.zone)
+        self.assertTrue(engineer.tapped)
+
     def test_ordered_plan_spans_fetch_entomb_and_private_search(self):
         session = CommanderSession.create(
             self.db,

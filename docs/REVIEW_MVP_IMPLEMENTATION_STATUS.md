@@ -79,7 +79,7 @@ and beyond D27 with both `suppressed_meaningful_windows` and
 
 Duplicated-list fixtures must always retain `matchup_evidence=false`.
 
-Current implementation checkpoint: 163 tests pass. Preflight v2 records
+Current implementation checkpoint: 189 tests pass. Preflight v2 records
 canonical Oracle/rulings provenance, exact list/source fingerprints, material
 categories, scenario witnesses, and fail-closed drift. Rulings hashes are
 content-canonical and are independent of SQLite import order. The trusted-only
@@ -91,13 +91,26 @@ conditions, batched AP/NAP trigger placement, same-controller trigger-order
 decisions, and exact Ichor Wellspring, Bastion of Remembrance, Reckless
 Fireweaver, Bojuka Bog, Reanimate, Sylvan Safekeeper, Sensei's Divining Top,
 Three Visits, Nature's Lore, and Fabricate families are also covered.
+Preflight now audits mixed static, keyword, mana, zone-permission, trigger, and
+activated abilities independently, without treating reminder or granted quoted
+text as source abilities. Exact combat covers flying/reach, shadow, protection,
+vigilance, haste, indestructible, and server-derived deathtouch. Additional
+trusted families include cycling, Spellseeker, Survival of the Fittest, Goblin
+Engineer, Spine of Ish Sah, Cryogen Relic and stun counters, Ophiomancer,
+Tireless Provisioner with functional Food/Treasure tokens, Bloodghast, Scute
+Swarm, and the three bounce lands.
 
 Current full-database preflight (100 cards per list):
 
-- Zimone and Dina: 66 fully playable, 6 partial, 28 unresolved, zero source
+- Zimone and Dina: 68 fully playable, 4 partial, 28 unresolved, zero source
   drift.
-- Mishra, Eminent One: 62 fully playable, 1 partial, 37 unresolved, zero
+- Mishra, Eminent One: 56 fully playable, 0 partial, 44 unresolved, zero
   source drift.
+
+The Mishra total decreased because the stricter audit now correctly exposes
+previously hidden restricted-mana, static, keyword, and activated-ability gaps.
+This is a fidelity correction rather than a regression in implemented runtime
+behavior.
 
 This is an implementation checkpoint, not semantic closure and not game
 evidence.

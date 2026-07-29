@@ -321,13 +321,15 @@ class TrustedSemanticScenarioTests(unittest.TestCase):
         engine = session.engine
         self._clear_decision(engine)
         zimone = self._card(engine, "B", "Zimone and Dina")
-        fodder = self._card(engine, "B", "Bloodghast")
+        fodder = self._card(engine, "B", "Birds of Paradise")
         land = next(
             card
             for card in engine.state.cards.values()
             if card.owner == "B"
             and engine.card_record(card)
             and engine.card_record(card).is_land
+            and "when"
+            not in engine.card_record(card).oracle_text.casefold()
             and card.object_id not in {zimone.object_id, fodder.object_id}
         )
         engine.move_card(zimone.object_id, "battlefield", controller="B")

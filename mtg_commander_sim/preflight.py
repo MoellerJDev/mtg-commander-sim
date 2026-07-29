@@ -4,12 +4,13 @@ from collections import Counter
 from dataclasses import asdict
 import hashlib
 from pathlib import Path
+import re
 from typing import Any
 
 from .abilities import parse_activated_abilities
 from .carddb import CardDatabase, CardRecord
 from .deck import DeckDefinition, DeckLoader
-from .mana import ManaPlanError, parsed_cost
+from .mana import ManaPlanError, extract_mana_modes, parsed_cost
 from .profiles import (
     deck_list_fingerprint,
     deck_source_fingerprint,
@@ -18,6 +19,229 @@ from .semantics import SemanticRegistry
 from .util import mana_cost_to_vector, stable_json
 
 PREFLIGHT_SCHEMA_VERSION = 2
+
+_BUILTIN_STATIC_KEYWORDS = {
+    # These keywords are consumed authoritatively by timing, attack, target,
+    # destruction, or state-based-action code rather than semantic programs.
+    "deathtouch",
+    "flash",
+    "flying",
+    "haste",
+    "hexproof",
+    "indestructible",
+    "protection",
+    "reach",
+    "shadow",
+    "shroud",
+    "vigilance",
+}
+
+_BUILTIN_MATERIAL_KEYWORDS = {
+    "affinity",
+    "channel",
+    "convoke",
+    "flash",
+    "kicker",
+    "metalcraft",
+    "overload",
+    "storm",
+}
+
+_MATERIAL_KEYWORDS = {
+    "bestow",
+    "craft",
+    "crew",
+    "cumulative upkeep",
+    "cycling",
+    "deathtouch",
+    "delirium",
+    "double strike",
+    "dredge",
+    "enchant",
+    "equip",
+    "evoke",
+    "explore",
+    "fabricate",
+    "first strike",
+    "flying",
+    "haste",
+    "hexproof",
+    "indestructible",
+    "lifelink",
+    "menace",
+    "populate",
+    "protection",
+    "reach",
+    "shadow",
+    "shroud",
+    "trample",
+    "transform",
+    "vigilance",
+    "ward",
+}
+
+
+def _without_parenthetical_reminder(text: str) -> str:
+    """Remove balanced parenthetical reminder text from Oracle text.
+
+    Reminder text frequently contains colons, trigger words, and token mana
+    abilities that are not separate abilities of the printed card. Treating
+    those fragments as source abilities makes preflight over-count coverage
+    and makes the activated-ability parser expose impossible actions.
+    """
+
+    result: list[str] = []
+    depth = 0
+    for character in text:
+        if character == "(":
+            depth += 1
+            continue
+        if character == ")" and depth:
+            depth -= 1
+            continue
+        if depth == 0:
+            result.append(character)
+    return "".join(result)
+
+
+def _without_quoted_granted_text(text: str) -> str:
+    """Remove quoted abilities granted to another object.
+
+    The enclosing static ability remains material. The quoted activated or
+    triggered ability is not itself an ability of the source card.
+    """
+
+    result: list[str] = []
+    quoted = False
+    for character in text:
+        if character in {'"', "“", "”"}:
+            quoted = not quoted
+            continue
+        if not quoted:
+            result.append(character)
+    return "".join(result)
+
+
+def _material_oracle_text(record: CardRecord) -> str:
+    return _without_parenthetical_reminder(record.oracle_text)
+
+
+def _printed_activated_abilities(record: CardRecord) -> tuple[Any, ...]:
+    return parse_activated_abilities(
+        card_name=record.name,
+        oracle_text=_without_quoted_granted_text(
+            _material_oracle_text(record)
+        ),
+        keywords=record.keywords,
+    )
+
+
+def _printed_trigger_lines(record: CardRecord) -> list[str]:
+    if not record.is_permanent_spell:
+        return []
+    return [
+        line
+        for line in _material_oracle_text(record).splitlines()
+        if any(
+            marker in line.casefold()
+            for marker in ("when ", "whenever ", "at the beginning")
+        )
+    ]
+
+
+def _printed_static_lines(record: CardRecord) -> list[str]:
+    """Return conservative material permanent text not otherwise categorized."""
+
+    if not record.is_permanent_spell:
+        return []
+    activated_effects = {
+        ability.effect_text.casefold().strip().rstrip(".")
+        for ability in _printed_activated_abilities(record)
+    }
+    rows: list[str] = []
+    for raw_line in _material_oracle_text(record).splitlines():
+        line = raw_line.strip()
+        lower = line.casefold()
+        if not line or line in {"//"} or line.startswith("•"):
+            continue
+        if any(
+            marker in lower
+            for marker in ("when ", "whenever ", "at the beginning")
+        ):
+            continue
+        if ":" in line and any(
+            effect and effect in lower for effect in activated_effects
+        ):
+            continue
+        # Keyword action/cost lines are accounted for separately.
+        if any(
+            lower.startswith(prefix)
+            for prefix in (
+                "affinity ",
+                "cycling ",
+                "equip ",
+                "crew ",
+                "evoke",
+                "bestow ",
+                "craft with ",
+            )
+        ):
+            continue
+        rows.append(line)
+    return rows
+
+
+def _static_lines_needing_program(record: CardRecord) -> list[str]:
+    rows: list[str] = []
+    for line in _printed_static_lines(record):
+        lower = line.casefold().strip().rstrip(".")
+        if lower in _BUILTIN_STATIC_KEYWORDS:
+            continue
+        keyword_parts = [
+            part.strip() for part in lower.split(",") if part.strip()
+        ]
+        if keyword_parts and all(
+            part in _BUILTIN_STATIC_KEYWORDS
+            or (
+                part.startswith("protection from ")
+                and "protection" in _BUILTIN_STATIC_KEYWORDS
+            )
+            for part in keyword_parts
+        ):
+            continue
+        if record.is_land and (
+            lower == "this land enters tapped"
+            or lower
+            == "this land enters tapped unless you have two or more opponents"
+            or lower
+            == "this land enters tapped unless you control a forest"
+            or lower
+            == "you may pay 2 life. if you don't, it enters tapped"
+        ):
+            continue
+        rows.append(line)
+    return rows
+
+
+def _mana_ability_requires_semantics(
+    record: CardRecord,
+    *,
+    commander_identity: tuple[str, ...] = (),
+) -> bool:
+    """Whether generic mana production would lose a restriction or effect."""
+
+    if (
+        "one mana of any color in your commander's color identity"
+        in record.oracle_text.casefold()
+    ):
+        return False
+    modes = extract_mana_modes(record, commander_identity)
+    return any(
+        mode.conditional
+        or mode.requires_choice
+        or bool(mode.side_effects)
+        for mode in modes
+    )
 
 
 def _kernel_compiles_cast_cost(record: CardRecord) -> bool:
@@ -94,23 +318,20 @@ def _card_source_hashes(
 
 
 def _material_effect_categories(record: CardRecord) -> list[str]:
-    oracle = record.oracle_text.casefold()
+    oracle = _material_oracle_text(record).casefold()
     categories: set[str] = set()
-    abilities = parse_activated_abilities(
-        card_name=record.name,
-        oracle_text=record.oracle_text,
-        keywords=record.keywords,
-    )
+    abilities = _printed_activated_abilities(record)
     if record.is_instant or record.is_sorcery:
         categories.add("spell_effect")
     if any(ability.mana_ability for ability in abilities):
         categories.add("mana_ability")
     if any(not ability.mana_ability for ability in abilities):
         categories.add("activated_ability")
-    if any(
-        marker in oracle
-        for marker in ("when ", "whenever ", "at the beginning")
-    ) or "storm" in {keyword.casefold() for keyword in record.keywords}:
+    if _printed_trigger_lines(record) or (
+        record.is_instant or record.is_sorcery
+    ) and "storm" in {
+        keyword.casefold() for keyword in record.keywords
+    }:
         categories.add("triggered_ability")
     if "instead" in oracle:
         categories.add("replacement_effect")
@@ -129,19 +350,22 @@ def _material_effect_categories(record: CardRecord) -> list[str]:
         )
     ):
         categories.add("cost_option")
-    if (
-        record.is_permanent_spell
-        and oracle
-        and not categories.intersection(
-            {
-                "activated_ability",
-                "mana_ability",
-                "triggered_ability",
-                "replacement_effect",
-            }
+    if _printed_static_lines(record):
+        categories.add("static_ability")
+    keywords = {keyword.casefold() for keyword in record.keywords}
+    if keywords.intersection(_MATERIAL_KEYWORDS):
+        categories.add("combat_or_protection_keyword")
+        categories.add("keyword_ability")
+    if any(
+        marker in oracle
+        for marker in (
+            "you may cast this card from",
+            "you may cast that card",
+            "you may play lands from",
+            "you may play it this turn",
         )
     ):
-        categories.add("static_ability")
+        categories.add("zone_permission")
     return sorted(categories)
 
 
@@ -200,30 +424,26 @@ def card_semantic_status(
             pass
         else:
             unresolved.append("cast_cost")
-    abilities = parse_activated_abilities(
-        card_name=record.name,
-        oracle_text=record.oracle_text,
-        keywords=record.keywords,
-    )
+    abilities = _printed_activated_abilities(record)
     unresolved.extend(
         "activated_ability"
         for ability in abilities
         if not ability.compiled_cost and not ability.mana_ability
     )
-    oracle = record.oracle_text.casefold()
+    oracle = _material_oracle_text(record).casefold()
     if record.is_land:
         generic_status, generic_unresolved = _generic_land_status(record)
         unresolved.extend(generic_unresolved)
     else:
         generic_status = "none"
-    if any(marker in oracle for marker in ("when ", "whenever ", "at the beginning")):
-        if not any(
-            "triggered_ability" in program.coverage
-            or program.event not in {"resolve", "cast"}
-            for program in programs
-            if program in trusted_programs
-        ):
-            unresolved.append("triggered_ability")
+    trigger_lines = _printed_trigger_lines(record)
+    trusted_event_programs = [
+        program
+        for program in trusted_programs
+        if program.event not in {"resolve", "cast"}
+    ]
+    if trigger_lines and len(trusted_event_programs) < len(trigger_lines):
+        unresolved.append("triggered_ability")
     if "instead" in oracle and not any(
         "replacement_effect" in program.coverage
         for program in trusted_programs
@@ -234,6 +454,75 @@ def card_semantic_status(
         for program in trusted_programs
         for value in program.coverage
     }
+    trusted_ability_ids = {
+        program.ability_id
+        for program in trusted_programs
+        if program.ability_id.startswith("ability:")
+    }
+    for ability in abilities:
+        if ability.mana_ability:
+            if (
+                _mana_ability_requires_semantics(record)
+                and f"ability:{ability.ability_id}"
+                not in trusted_ability_ids
+                and "restricted_mana" not in trusted_coverage
+                and "mana_side_effect" not in trusted_coverage
+            ):
+                unresolved.append("mana_ability")
+            continue
+        builtin_fetch = bool(
+            re.search(
+                r"search your library for (?:an?|up to one) "
+                r"(?:plains|island|swamp|mountain|forest)"
+                r"(?: or (?:plains|island|swamp|mountain|forest))* card, "
+                r"put (?:it|that card) onto the battlefield",
+                ability.effect_text,
+                re.IGNORECASE,
+            )
+        )
+        if (
+            not builtin_fetch
+            and f"ability:{ability.ability_id}" not in trusted_ability_ids
+        ):
+            unresolved.append(f"activated_ability:{ability.ability_id}")
+    if (
+        _static_lines_needing_program(record)
+        and "static_ability" not in trusted_coverage
+        and "continuous_effect" not in trusted_coverage
+        and "cost_reduction" not in trusted_coverage
+    ):
+        unresolved.append("static_ability")
+    unsupported_keywords = sorted(
+        {
+            keyword.casefold()
+            for keyword in record.keywords
+            if keyword.casefold() in _MATERIAL_KEYWORDS
+            and keyword.casefold() not in _BUILTIN_STATIC_KEYWORDS
+            and keyword.casefold() not in _BUILTIN_MATERIAL_KEYWORDS
+            and keyword.casefold() not in trusted_coverage
+        }
+    )
+    if (
+        unsupported_keywords
+        and "keyword_ability" not in trusted_coverage
+        and "combat_keyword" not in trusted_coverage
+        and "protection_keyword" not in trusted_coverage
+    ):
+        unresolved.extend(
+            f"keyword:{keyword}" for keyword in unsupported_keywords
+        )
+    if (
+        "zone_permission" in _material_effect_categories(record)
+        and not trusted_coverage.intersection(
+            {
+                "zone_permission",
+                "graveyard_cast_permission",
+                "graveyard_land_permission",
+                "play_without_mana_cost",
+            }
+        )
+    ):
+        unresolved.append("zone_permission")
     trusted_spell_program = any(
         program.ability_id.startswith("spell:")
         and "spell_resolution" in program.coverage

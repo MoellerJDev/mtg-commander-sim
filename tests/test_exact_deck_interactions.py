@@ -50,7 +50,7 @@ class ExactDeckInteractionFamilyTests(unittest.TestCase):
         engine = session.engine
         bog = self.card(engine, "B", "Bojuka Bog")
         opposing_card = self.card(engine, "A", "Ichor Wellspring")
-        own_card = self.card(engine, "B", "Bloodghast")
+        own_card = self.card(engine, "B", "Faerie Mastermind")
         engine.move_card(opposing_card.object_id, "graveyard")
         engine.move_card(own_card.object_id, "graveyard")
 

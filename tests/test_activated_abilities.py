@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim.abilities import parse_activated_abilities
 
 
 class ActivatedAbilityAndCostTests(unittest.TestCase):
@@ -355,6 +356,57 @@ class ActivatedAbilityAndCostTests(unittest.TestCase):
                 for item in hints["diagnostic"]["unresolved_cost_semantics"]
             )
         )
+
+    def test_token_reminder_text_does_not_create_source_mana_ability(self):
+        abilities = parse_activated_abilities(
+            card_name="An Offer You Can't Refuse",
+            oracle_text=(
+                "Counter target noncreature spell. Its controller creates "
+                "two Treasure tokens. (They're artifacts with "
+                '"{T}, Sacrifice this token: Add one mana of any color.")'
+            ),
+            keywords=("Treasure",),
+        )
+
+        self.assertEqual((), abilities)
+
+    def test_quoted_granted_ability_is_not_source_activated_ability(self):
+        abilities = parse_activated_abilities(
+            card_name="Insidious Roots",
+            oracle_text=(
+                'Creature tokens you control have "{T}: Add one mana of '
+                'any color."'
+            ),
+        )
+
+        self.assertEqual((), abilities)
+
+    def test_graveyard_target_does_not_move_source_ability_zone(self):
+        engineer = self.db.lookup("Goblin Engineer")
+        ability = parse_activated_abilities(
+            card_name=engineer.name,
+            oracle_text=engineer.oracle_text,
+            keywords=engineer.keywords,
+        )[0]
+
+        self.assertEqual(("battlefield",), ability.zones)
+
+    def test_cycling_keyword_compiles_hand_discard_activation(self):
+        triome = self.db.lookup("Zagoth Triome")
+        ability = next(
+            ability
+            for ability in parse_activated_abilities(
+                card_name=triome.name,
+                oracle_text=triome.oracle_text,
+                keywords=triome.keywords,
+            )
+            if ability.ability_id == "ab3"
+        )
+
+        self.assertEqual(("hand",), ability.zones)
+        self.assertTrue(ability.discard_source)
+        self.assertEqual(3, ability.mana["GENERIC"])
+        self.assertEqual("Draw a card.", ability.effect_text)
 
     def test_elvish_reclaimer_land_sacrifice_cost_is_compiled(self):
         session = make_session(self.db, self.mishra, self.zimone, seed=511)

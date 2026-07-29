@@ -159,9 +159,17 @@ def _ability_zones(
 
     if prefix == "channel" or ("channel" in keyword_set and lower_line.startswith("channel")):
         return ("hand",)
+    if prefix == "cycling":
+        return ("hand",)
     if "discard this card" in lower_cost and (prefix or "channel" in keyword_set):
         return ("hand",)
-    if "from your graveyard" in lower_line or "from a graveyard" in lower_line:
+    if "exile this card from your graveyard" in lower_cost:
+        return ("graveyard",)
+    if re.search(
+        r"activate (?:this ability )?only (?:from|if this card is in) "
+        r"(?:your|a) graveyard",
+        lower_line,
+    ):
         return ("graveyard",)
     if any(keyword in keyword_set for keyword in {"unearth", "encore", "scavenge", "embalm", "eternalize"}):
         if any(lower_line.startswith(keyword) for keyword in {"unearth", "encore", "scavenge", "embalm", "eternalize"}):
@@ -178,6 +186,36 @@ def _split_cost_clauses(cost_text: str) -> list[str]:
     return [clause.strip() for clause in cost_text.split(",") if clause.strip()]
 
 
+def _strip_inline_reminder_and_granted_text(line: str) -> str:
+    """Keep only activated abilities printed on the source itself.
+
+    Parenthetical token reminder text and quoted abilities granted to other
+    objects can contain colons, but neither is an activated ability of this
+    card. A fully parenthesized basic-land-type mana reminder remains
+    supported below because that reminder represents an intrinsic ability of
+    the land itself.
+    """
+
+    result: list[str] = []
+    parenthetical_depth = 0
+    quoted = False
+    for character in line:
+        if character in {'"', "“", "”"} and parenthetical_depth == 0:
+            quoted = not quoted
+            continue
+        if quoted:
+            continue
+        if character == "(":
+            parenthetical_depth += 1
+            continue
+        if character == ")" and parenthetical_depth:
+            parenthetical_depth -= 1
+            continue
+        if parenthetical_depth == 0:
+            result.append(character)
+    return "".join(result).strip()
+
+
 def parse_activated_abilities(
     *,
     card_name: str,
@@ -187,11 +225,28 @@ def parse_activated_abilities(
     abilities: list[ActivatedAbility] = []
     for line_index, raw_line in enumerate(oracle_text.splitlines()):
         line = raw_line.strip()
+        keyword_override: str | None = None
         # Scryfall preserves reminder text for basic-land-type mana abilities
         # as a fully parenthesized Oracle line, for example
         # "({T}: Add {G} or {U}.)".  The parentheses are not part of the cost.
-        if line.startswith("(") and line.endswith(")"):
+        intrinsic_basic_mana = (
+            line.startswith("({T}: Add ") and line.endswith(")")
+        )
+        if intrinsic_basic_mana:
             line = line[1:-1].strip()
+        else:
+            line = _strip_inline_reminder_and_granted_text(line)
+        cycling_match = re.match(
+            r"^cycling\s+(?P<cost>(?:\{[^{}]+\})+)$",
+            line,
+            re.IGNORECASE,
+        )
+        if cycling_match:
+            line = (
+                f"{cycling_match.group('cost')}, Discard this card: "
+                "Draw a card."
+            )
+            keyword_override = "Cycling"
         if not line or ":" not in line:
             continue
         left, effect_text = line.split(":", 1)
@@ -199,6 +254,7 @@ def parse_activated_abilities(
         if not effect_text:
             continue
         actual_cost, keyword_prefix = _strip_keyword_prefix(left.strip())
+        keyword_prefix = keyword_override or keyword_prefix
         zones = _ability_zones(
             line=line,
             cost_text=actual_cost,
@@ -237,6 +293,7 @@ def parse_activated_abilities(
                 "sacrifice this artifact",
                 "sacrifice this creature",
                 "sacrifice this land",
+                "sacrifice this token",
                 "sacrifice this card",
             }:
                 sacrifice_source = True

@@ -404,25 +404,32 @@ class CommanderEngine:
         card = value if isinstance(value, CardInstance) else self.state.cards[value]
         record = self.card_record(card)
         if record is None:
+            token_characteristics = dict(
+                card.annotations.get("token_characteristics", {})
+            )
             base = {
                 "name": card.printed_name,
                 "mana_cost": "",
-                "mana_value": 0,
-                "type_line": str(card.annotations.get("token_characteristics", {}).get("type_line", "Token")),
-                "oracle_text": "",
-                "power": card.annotations.get("token_characteristics", {}).get("power"),
-                "toughness": card.annotations.get("token_characteristics", {}).get("toughness"),
+                "mana_value": token_characteristics.get(
+                    "mana_value", 0
+                ),
+                "type_line": str(
+                    token_characteristics.get("type_line", "Token")
+                ),
+                "oracle_text": str(
+                    token_characteristics.get("oracle_text", "")
+                ),
+                "power": token_characteristics.get("power"),
+                "toughness": token_characteristics.get("toughness"),
                 "keywords": list(
-                    card.annotations.get("token_characteristics", {}).get(
-                        "keywords", []
-                    )
+                    token_characteristics.get("keywords", [])
                 ),
                 "colors": list(
-                    card.annotations.get("token_characteristics", {}).get(
-                        "colors", []
-                    )
+                    token_characteristics.get("colors", [])
                 ),
-                "produced_mana": [],
+                "produced_mana": list(
+                    token_characteristics.get("produced_mana", [])
+                ),
             }
         else:
             face = None
@@ -451,6 +458,24 @@ class CommanderEngine:
             + list(overrides.get("keywords") or [])
             + list(card.temporary_keywords)
         )
+        conditional_haste = re.search(
+            r"has haste as long as an opponent has "
+            r"(?P<life>\d+) or less life",
+            str(base.get("oracle_text") or ""),
+            re.IGNORECASE,
+        )
+        if (
+            conditional_haste
+            and any(
+                seat != card.controller
+                and player.in_game
+                and player.life <= int(conditional_haste.group("life"))
+                for seat, player in self.state.players.items()
+            )
+        ):
+            base["keywords"] = unique_preserving_order(
+                [*base["keywords"], "Haste"]
+            )
         return base
 
     def display_name(self, object_id: str) -> str:
@@ -1324,6 +1349,38 @@ class CommanderEngine:
                 player.mana_pool = normalize_mana_bundle(None)
                 self._log(seat, "mana.empty", f"{seat}'s mana pool emptied.", {"lost": lost, "reason": reason}, importance=0, changed_players=[seat])
 
+    def _untap_permanent(
+        self,
+        card: CardInstance,
+        *,
+        actor: str | None,
+        reason: str,
+    ) -> bool:
+        if not card.tapped:
+            return False
+        stun = int(card.counters.get("stun", 0))
+        if stun > 0:
+            if stun == 1:
+                card.counters.pop("stun", None)
+            else:
+                card.counters["stun"] = stun - 1
+            self._log(
+                actor,
+                "permanent.untap.replaced",
+                f"A stun counter was removed from {card.ref} instead of untapping it.",
+                {
+                    "object": card.ref,
+                    "counter": "stun",
+                    "reason": reason,
+                },
+                importance=1,
+                changed_objects=[card.object_id],
+                changed_players=[card.controller],
+            )
+            return False
+        card.tapped = False
+        return True
+
     def _enter_step(self) -> None:
         phase, step = TURN_STEPS[self.state.phase_index]
         self.state.phase = phase
@@ -1344,8 +1401,11 @@ class CommanderEngine:
                         continue
                     if card.annotations.pop("does_not_untap_next", False):
                         continue
-                    if card.tapped:
-                        card.tapped = False
+                    if self._untap_permanent(
+                        card,
+                        actor=active,
+                        reason="untap step",
+                    ):
                         changed.append(object_id)
                 if changed:
                     self._log(active, "permanent.untap", f"{active} untapped {len(changed)} permanent(s).", {"objects": [self.state.cards[oid].ref for oid in changed]}, importance=0, changed_objects=changed, changed_players=[active])
@@ -2899,9 +2959,19 @@ class CommanderEngine:
             bundle["C"] += int(output["GENERIC"])
         if sum(bundle.values()) and not complex_symbols:
             return normalize_mana_bundle(bundle)
+        raw_choice = str(response.get("mana_choice") or "").upper()
         declared = normalize_mana_bundle(response.get("mana_output"))
+        if raw_choice in "WUBRGC" and len(raw_choice) == 1:
+            declared[raw_choice] += 1
         record = self.card_record(source)
         if not record:
+            if (
+                "one mana of any color"
+                in ability.effect_text.casefold()
+                and sum(declared.values()) == 1
+                and declared["C"] == 0
+            ):
+                return declared
             raise GameRuleError("Custom mana ability needs compiled semantics")
         legal_modes = extract_mana_modes(record, self._commander_identity(seat))
         if not any(normalize_mana_bundle(mode.bundle) == declared for mode in legal_modes):
@@ -3112,10 +3182,27 @@ class CommanderEngine:
             self.state.priority_passes = []
             return
 
+        source_types, source_subtypes, _ = self._type_parts(
+            str(
+                self._effective_card_data(source).get("type_line")
+                or ""
+            )
+        )
+        builtin_food = (
+            self.card_record(source) is None
+            and "artifact" in source_types
+            and "food" in source_subtypes
+            and "you gain 3 life"
+            in ability.effect_text.casefold()
+        )
         semantic_key = str(
             "builtin:fetch_land"
             if builtin_context
-            else candidate_semantic_key
+            else (
+                "builtin:food"
+                if builtin_food
+                else candidate_semantic_key
+            )
         )
         ref = self._next_ref("S")
         item = StackItem(
@@ -3254,7 +3341,9 @@ class CommanderEngine:
             ):
                 return "unavailable", "summoning_sickness"
         if ability.untap_source and (
-            zone != "battlefield" or not card.tapped
+            zone != "battlefield"
+            or not card.tapped
+            or int(card.counters.get("stun", 0)) > 0
         ):
             return "unavailable", "untap_cost_unavailable"
         if ability.discard_source and zone != "hand":
@@ -4805,7 +4894,31 @@ class CommanderEngine:
         field = str(condition.get("field") or "")
         if not field:
             raise GameRuleError("Semantic event condition requires a field")
-        actual = context.get(field)
+        if field == "source_controller_subtype_count":
+            subtype = str(condition.get("subtype") or "").casefold()
+            if not subtype:
+                raise GameRuleError(
+                    "Subtype-count condition requires a subtype"
+                )
+            actual = sum(
+                1
+                for object_id in self.state.players[
+                    source.controller
+                ].zones["battlefield"]
+                if self.state.cards[object_id].controller
+                == source.controller
+                and subtype
+                in self._type_parts(
+                    str(
+                        self._effective_card_data(object_id).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )[1]
+            )
+        else:
+            actual = context.get(field)
         expected = self._semantic_event_value(
             condition.get("value"),
             source=source,
@@ -5281,6 +5394,10 @@ class CommanderEngine:
             if (
                 "hexproof" in keywords
                 and card.controller != controller
+            ):
+                return False
+            if self._protection_colors(card).intersection(
+                self._source_colors_for_ref(source_ref)
             ):
                 return False
         if group.categories and str(row["category"]) not in {
@@ -5828,6 +5945,12 @@ class CommanderEngine:
         return False
 
     def _program_can_auto_resolve(self, item: StackItem) -> bool:
+        if item.semantic_key in {
+            "builtin:food",
+            "builtin:sacrifice-source",
+            "builtin:storm",
+        }:
+            return True
         program = self.semantics.get(item.semantic_key)
         target_schema = self._stack_target_schema(item, program)
         if (
@@ -5940,6 +6063,21 @@ class CommanderEngine:
                 [{"op": "sacrifice_if_present", "card": "$source"}],
                 None,
                 note="Mishra delayed sacrifice",
+            )
+            return
+        if item.semantic_key == "builtin:food":
+            self._begin_resolve_item(
+                item,
+                [
+                    {
+                        "op": "life",
+                        "player": item.controller,
+                        "delta": 3,
+                        "reason": "Food token",
+                    }
+                ],
+                None,
+                note="Built-in Food token ability resolved",
             )
             return
         program = self.semantics.get(item.semantic_key)
@@ -6642,6 +6780,8 @@ class CommanderEngine:
                 return
             if effect.get("op") in {
                 "choose_card_name",
+                "choose_objects",
+                "choose_option",
                 "choose_mana",
                 "counter_unless_pay",
                 "draw_optional_land",
@@ -6723,6 +6863,124 @@ class CommanderEngine:
                                 "field": "card_name",
                                 "type": "card_name",
                                 "nonempty": True,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "choose_objects":
+            selector = dict(effect.get("selector") or {})
+            selector.setdefault(
+                "min", int(effect.get("minimum", 1))
+            )
+            selector.setdefault(
+                "max", int(effect.get("maximum", selector["min"]))
+            )
+            group = TargetGroup.from_mapping(
+                selector,
+                default_id="choice",
+            )
+            source = self.state.cards.get(
+                item.source_object_id or item.card_object_id or ""
+            )
+            source_ref = source.ref if source else None
+            options = [
+                str(row["ref"])
+                for row in self._target_candidate_rows(seat, group)
+                if self._target_row_matches(
+                    seat,
+                    group,
+                    row,
+                    source_ref=source_ref,
+                    as_target=False,
+                )
+            ]
+            if not options:
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            minimum = min(group.min_targets, len(options))
+            maximum = min(group.max_targets, len(options))
+            effect = {
+                **dict(effect),
+                "_legal_refs": options,
+                "_minimum": minimum,
+                "_maximum": maximum,
+            }
+            context.update(
+                {
+                    "prompt": str(
+                        effect.get("prompt")
+                        or "Choose the required public object(s)."
+                    ),
+                    "objects": [
+                        {
+                            "id": ref,
+                            "name": self._resolve_object(
+                                seat, ref
+                            ).printed_name,
+                        }
+                        for ref in options
+                    ],
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "objects",
+                                "legal_refs": options,
+                                "minimum": minimum,
+                                "maximum": maximum,
+                                "distinct": True,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "choose_option":
+            raw_options = list(effect.get("options") or [])
+            options = [
+                {
+                    "id": str(
+                        option.get("id")
+                        if isinstance(option, Mapping)
+                        else option
+                    ),
+                    "label": str(
+                        option.get("label")
+                        if isinstance(option, Mapping)
+                        else option
+                    ),
+                }
+                for option in raw_options
+            ]
+            if not options or any(not option["id"] for option in options):
+                raise GameRuleError(
+                    "Semantic option choice requires nonempty options"
+                )
+            legal_values = [option["id"] for option in options]
+            effect = {
+                **dict(effect),
+                "_legal_values": legal_values,
+            }
+            context.update(
+                {
+                    "prompt": str(
+                        effect.get("prompt") or "Choose one option."
+                    ),
+                    "options": options,
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "choice",
+                                "legal_values": legal_values,
                             },
                         }
                     ],
@@ -7012,6 +7270,7 @@ class CommanderEngine:
             self._validate_semantic_frame(frame, item)
         effect = dict(continuation["effect"])
         op = str(effect["op"])
+        choice_effects: list[dict[str, Any]] = []
         if op == "choose_mana":
             choice = str(
                 response.get("choice")
@@ -7055,6 +7314,103 @@ class CommanderEngine:
                 {"source": source.ref, "card_name": chosen},
                 importance=2,
                 changed_objects=[source.object_id],
+            )
+        elif op == "choose_objects":
+            selected = [
+                str(value)
+                for value in response.get(
+                    "objects", response.get("cards", [])
+                )
+            ]
+            legal = set(effect.get("_legal_refs") or [])
+            minimum = int(effect.get("_minimum", 0))
+            maximum = int(effect.get("_maximum", len(legal)))
+            if (
+                len(selected) != len(set(selected))
+                or len(selected) < minimum
+                or len(selected) > maximum
+                or any(value not in legal for value in selected)
+            ):
+                raise GameRuleError(
+                    "Object choices do not satisfy the authoritative "
+                    "selection constraints"
+                )
+            for continuation_effect in effect.get("then") or []:
+                next_effect = dict(continuation_effect)
+                next_op = str(next_effect.get("op") or "")
+                if next_op in {
+                    "move_selected",
+                    "sacrifice_selected",
+                }:
+                    destination_name = (
+                        "graveyard"
+                        if next_op == "sacrifice_selected"
+                        else str(
+                            next_effect.get("destination")
+                            or "graveyard"
+                        )
+                    )
+                    cards = [
+                        self._resolve_object(seat, value)
+                        for value in selected
+                    ]
+                    self._move_cards_simultaneously(
+                        [
+                            (card.object_id, destination_name)
+                            for card in cards
+                        ],
+                        reason=str(
+                            next_effect.get("reason") or item.label
+                        ),
+                        log=True,
+                    )
+                elif next_op == "add_counter_selected":
+                    self.apply_effect(
+                        {
+                            **next_effect,
+                            "cards": selected,
+                        },
+                        actor=seat,
+                    )
+                else:
+                    raise GameRuleError(
+                        f"Unsupported object-choice continuation {next_op!r}"
+                    )
+            self._log(
+                seat,
+                "semantic.objects.chosen",
+                f"{seat} chose {len(selected)} object(s) for {item.label}.",
+                {"stack": item.ref, "objects": selected},
+                importance=1,
+            )
+        elif op == "choose_option":
+            choice = str(
+                response.get("choice")
+                or response.get("option")
+                or ""
+            )
+            legal_values = {
+                str(value)
+                for value in effect.get("_legal_values") or []
+            }
+            if choice not in legal_values:
+                raise GameRuleError(
+                    "Choose one of the authoritative option values"
+                )
+            by_choice = effect.get("then_by_choice") or {}
+            choice_effects = [
+                dict(value)
+                for value in by_choice.get(choice, [])
+            ]
+            self._log(
+                seat,
+                "semantic.option.chosen",
+                f"{seat} chose {choice} for {item.label}.",
+                {
+                    "stack": item.ref,
+                    "choice": choice,
+                },
+                importance=1,
             )
         elif op == "look_reorder_top":
             expected = [
@@ -7235,6 +7591,8 @@ class CommanderEngine:
         if item not in self.state.stack:
             return
         remaining = [dict(value) for value in continuation.get("remaining", [])]
+        if choice_effects:
+            remaining = [*choice_effects, *remaining]
         if op == "draw_optional_land" and effect.get("_repeat"):
             repeated = dict(effect)
             repeated.pop("_repeat", None)
@@ -7982,6 +8340,96 @@ class CommanderEngine:
             return False
         return self.state.players[card.controller].turns_begun <= card.acquired_control_turn_count
 
+    def _protection_colors(self, card: CardInstance) -> set[str]:
+        oracle = str(
+            self._effective_card_data(card).get("oracle_text") or ""
+        ).casefold()
+        color_symbols = {
+            "white": "W",
+            "blue": "U",
+            "black": "B",
+            "red": "R",
+            "green": "G",
+        }
+        return {
+            symbol
+            for name, symbol in color_symbols.items()
+            if re.search(rf"protection from (?:[a-z ]+ and )?{name}", oracle)
+        }
+
+    def _source_colors_for_ref(self, source_ref: str | None) -> set[str]:
+        if not source_ref:
+            return set()
+        card = next(
+            (
+                candidate
+                for candidate in self.state.cards.values()
+                if candidate.ref == source_ref
+            ),
+            None,
+        )
+        if card is None:
+            stack_item = next(
+                (
+                    candidate
+                    for candidate in self.state.stack
+                    if candidate.ref == source_ref
+                ),
+                None,
+            )
+            if stack_item is not None:
+                source_id = (
+                    stack_item.card_object_id
+                    or stack_item.source_object_id
+                )
+                card = (
+                    self.state.cards.get(source_id)
+                    if source_id
+                    else None
+                )
+        if card is None:
+            return set()
+        return {
+            str(color).upper()
+            for color in self._effective_card_data(card).get("colors", [])
+        }
+
+    def _can_block(
+        self,
+        attacker: CardInstance,
+        blocker: CardInstance,
+    ) -> tuple[bool, str | None]:
+        attacker_data = self._effective_card_data(attacker)
+        blocker_data = self._effective_card_data(blocker)
+        attacker_keywords = {
+            str(value).casefold()
+            for value in attacker_data.get("keywords", [])
+        }
+        blocker_keywords = {
+            str(value).casefold()
+            for value in blocker_data.get("keywords", [])
+        }
+        if "can't block" in str(
+            blocker_data.get("oracle_text") or ""
+        ).casefold():
+            return False, "blocker_cannot_block"
+        if "shadow" in attacker_keywords and "shadow" not in blocker_keywords:
+            return False, "attacker_has_shadow"
+        if "shadow" in blocker_keywords and "shadow" not in attacker_keywords:
+            return False, "blocker_has_shadow"
+        if (
+            "flying" in attacker_keywords
+            and not blocker_keywords.intersection({"flying", "reach"})
+        ):
+            return False, "attacker_has_flying"
+        blocker_colors = {
+            str(color).upper()
+            for color in blocker_data.get("colors", [])
+        }
+        if self._protection_colors(attacker).intersection(blocker_colors):
+            return False, "attacker_has_protection"
+        return True, None
+
     def _issue_attackers(self) -> None:
         active = self.state.active_player
         if active not in self.active_seats:
@@ -8055,20 +8503,39 @@ class CommanderEngine:
             self._grant_priority(self.state.active_player)
             return
         defender = defenders[self.state.combat.blocker_cursor]
-        attackers = [self.state.cards[oid].ref for oid, target in self.state.combat.attackers.items() if target == defender]
+        attacker_cards = [
+            self.state.cards[oid]
+            for oid, target in self.state.combat.attackers.items()
+            if target == defender
+        ]
+        attackers = [card.ref for card in attacker_cards]
         blockers = []
+        legal_blocks: dict[str, list[str]] = {}
         for oid in self.state.players[defender].zones["battlefield"]:
             card = self.state.cards[oid]
             if card.controller != defender or card.tapped or card.phased_out:
                 continue
             if "creature" in str(self._effective_card_data(card).get("type_line") or "").casefold():
-                blockers.append(card.ref)
+                legal_attackers = [
+                    attacker.ref
+                    for attacker in attacker_cards
+                    if self._can_block(attacker, card)[0]
+                ]
+                if legal_attackers:
+                    blockers.append(card.ref)
+                    legal_blocks[card.ref] = legal_attackers
         self.permissions.issue(
             kind="combat.blockers",
             role="pilot",
             actors=[defender],
             allowed_actions=["block"],
-            payload_by_actor={defender: {"attackers": attackers, "blockers": blockers}},
+            payload_by_actor={
+                defender: {
+                    "attackers": attackers,
+                    "blockers": blockers,
+                    "legal_blocks": legal_blocks,
+                }
+            },
         )
 
     def _complete_blockers(self, decision: Any) -> None:
@@ -8085,6 +8552,11 @@ class CommanderEngine:
                 raise GameRuleError(f"{attacker.ref} is not attacking {defender}")
             if blocker.tapped or "creature" not in str(self._effective_card_data(blocker).get("type_line") or "").casefold():
                 raise GameRuleError(f"{blocker.ref} cannot block")
+            can_block, reason = self._can_block(attacker, blocker)
+            if not can_block:
+                raise GameRuleError(
+                    f"{blocker.ref} cannot block {attacker.ref}: {reason}"
+                )
             self.state.combat.blockers.setdefault(attacker.object_id, []).append(blocker.object_id)
             blocker.blocking = attacker.object_id
             used_blockers.add(blocker.object_id)
@@ -8096,12 +8568,12 @@ class CommanderEngine:
         for attacker_id, blockers in self.state.combat.blockers.items():
             data = self._effective_card_data(attacker_id)
             keywords = set(data.get("keywords") or [])
-            if len(blockers) > 1 or keywords.intersection({"Trample", "First strike", "Double strike", "Deathtouch", "Lifelink"}):
+            if len(blockers) > 1 or keywords.intersection({"Trample", "First strike", "Double strike", "Lifelink"}):
                 return False
         for blockers in self.state.combat.blockers.values():
             for blocker_id in blockers:
                 keywords = set(self._effective_card_data(blocker_id).get("keywords") or [])
-                if keywords.intersection({"First strike", "Double strike", "Deathtouch", "Lifelink"}):
+                if keywords.intersection({"First strike", "Double strike", "Lifelink"}):
                     return False
         return True
 
@@ -8168,8 +8640,43 @@ class CommanderEngine:
                 target_card = next((card for card in self.state.cards.values() if card.ref == target_value), None)
                 if target_card is None:
                     raise GameRuleError(f"Unknown combat target {target_value}")
+                source_colors = {
+                    str(color).upper()
+                    for color in self._effective_card_data(source).get(
+                        "colors", []
+                    )
+                }
+                if self._protection_colors(target_card).intersection(
+                    source_colors
+                ):
+                    self._log(
+                        source.controller,
+                        "combat.damage.prevented",
+                        (
+                            f"Combat damage from {source.ref} to "
+                            f"{target_card.ref} was prevented by protection."
+                        ),
+                        {
+                            "source": source.ref,
+                            "target": target_card.ref,
+                            "amount": amount,
+                            "reason": "protection",
+                        },
+                        importance=1,
+                        changed_objects=[target_card.object_id],
+                    )
+                    continue
+                source_keywords = {
+                    str(value).casefold()
+                    for value in self._effective_card_data(source).get(
+                        "keywords", []
+                    )
+                }
                 target_card.marked_damage += amount
-                target_card.deathtouch_damage = target_card.deathtouch_damage or bool(assignment.get("deathtouch"))
+                target_card.deathtouch_damage = (
+                    target_card.deathtouch_damage
+                    or (amount > 0 and "deathtouch" in source_keywords)
+                )
                 changed_objects.append(target_card.object_id)
         self.state.combat.damage_assignments.extend(dict(item) for item in assignments)
         self._log(None, "combat.damage", "Combat damage was dealt.", {"assignments": list(assignments)}, importance=2, changed_objects=changed_objects, changed_players=changed_players)
@@ -8398,6 +8905,43 @@ class CommanderEngine:
         reason = str(effect.get("reason") or ("cost" if as_cost else "effect"))
         if op == "draw":
             return self.draw(str(effect.get("player") or actor), int(effect.get("count", 1)), reason=reason)
+        if op == "add_counter_selected":
+            counter = str(effect.get("counter") or "").strip()
+            amount = int(effect.get("amount", 1))
+            if not counter or amount < 0:
+                raise GameRuleError("Counter effect requires a name and nonnegative amount")
+            changed: list[str] = []
+            for value in effect.get("cards") or []:
+                card = self._resolve_object(
+                    actor,
+                    str(value),
+                    zones={"battlefield"},
+                )
+                card.counters[counter] = (
+                    int(card.counters.get(counter, 0)) + amount
+                )
+                changed.append(card.object_id)
+            if changed:
+                self._log(
+                    actor,
+                    "counter.add",
+                    f"Added {amount} {counter} counter(s) to {len(changed)} permanent(s).",
+                    {
+                        "counter": counter,
+                        "amount": amount,
+                        "objects": [
+                            self.state.cards[object_id].ref
+                            for object_id in changed
+                        ],
+                        "reason": reason,
+                    },
+                    importance=2,
+                    changed_objects=changed,
+                )
+            return [
+                self.state.cards[object_id].ref
+                for object_id in changed
+            ]
         if op == "mana":
             seat = str(effect.get("player") or actor)
             color = str(effect.get("color") or "C").upper()
@@ -8502,6 +9046,19 @@ class CommanderEngine:
             return self.move_card(
                 card.object_id,
                 destination,
+                controller=effect.get("controller"),
+                tapped=bool(effect.get("tapped", False)),
+                reason=reason,
+                semantic_events=True,
+            )
+        if op == "move_if_in_zone":
+            expected_zone = str(effect.get("from") or "")
+            card = self._resolve_object(actor, str(effect["card"]))
+            if not expected_zone or card.zone != expected_zone:
+                return None
+            return self.move_card(
+                card.object_id,
+                str(effect.get("destination") or "graveyard"),
                 controller=effect.get("controller"),
                 tapped=bool(effect.get("tapped", False)),
                 reason=reason,
@@ -8809,6 +9366,24 @@ class CommanderEngine:
                 self._log(actor, "effect.damage", f"{target} took {amount} damage.", {"target": target, "amount": amount, "reason": reason}, importance=2, changed_players=[target])
             else:
                 card = self._resolve_object(actor, target, zones={"battlefield"})
+                if self._protection_colors(card).intersection(
+                    self._source_colors_for_ref(
+                        str(effect.get("source") or "") or None
+                    )
+                ):
+                    self._log(
+                        actor,
+                        "effect.damage.prevented",
+                        f"Damage to {card.ref} was prevented by protection.",
+                        {
+                            "target": card.ref,
+                            "amount": amount,
+                            "reason": "protection",
+                        },
+                        importance=1,
+                        changed_objects=[card.object_id],
+                    )
+                    return 0
                 card.marked_damage += amount
                 card.deathtouch_damage = card.deathtouch_damage or bool(effect.get("deathtouch"))
                 self._log(actor, "effect.damage", f"{card.ref} took {amount} damage.", {"target": card.ref, "amount": amount, "reason": reason}, importance=2, changed_objects=[card.object_id])
@@ -8956,6 +9531,42 @@ class CommanderEngine:
                 },
                 reason="Field of the Dead",
             )
+        if op == "scute_swarm_token":
+            controller = str(effect.get("controller") or actor)
+            land_count = sum(
+                1
+                for object_id in self.state.players[
+                    controller
+                ].zones["battlefield"]
+                if self.state.cards[object_id].controller == controller
+                and "land"
+                in self._type_parts(
+                    str(
+                        self._effective_card_data(object_id).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )[0]
+            )
+            if land_count >= int(effect.get("threshold", 6)):
+                return self.create_token(
+                    controller,
+                    name="Scute Swarm",
+                    copy_of=str(effect["source"]),
+                    reason=reason,
+                )
+            return self.create_token(
+                controller,
+                name="Insect",
+                characteristics={
+                    "type_line": "Token Creature — Insect",
+                    "colors": ["G"],
+                    "power": "1",
+                    "toughness": "1",
+                },
+                reason=reason,
+            )
         if op == "counter_or_destroy_blue":
             target = str(effect["target"])
             stack_item = next(
@@ -9046,9 +9657,49 @@ class CommanderEngine:
                 temporary_keywords=list(effect.get("temporary_keywords") or []),
                 reason=reason,
             )
+        if op == "create_token_if_no_controlled_subtype":
+            controller = str(effect.get("controller") or actor)
+            subtype = str(effect.get("subtype") or "").casefold()
+            if not subtype:
+                raise GameRuleError(
+                    "Conditional token effect requires a subtype"
+                )
+            if any(
+                self.state.cards[object_id].controller == controller
+                and subtype
+                in self._type_parts(
+                    str(
+                        self._effective_card_data(object_id).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )[1]
+                for object_id in self.state.players[
+                    controller
+                ].zones["battlefield"]
+            ):
+                return []
+            return self.create_token(
+                controller,
+                name=str(effect.get("name") or subtype.title()),
+                quantity=int(effect.get("quantity", 1)),
+                tapped=bool(effect.get("tapped", False)),
+                characteristics=dict(
+                    effect.get("characteristics") or {}
+                ),
+                reason=reason,
+            )
         if op == "tap" or op == "untap":
             card = self._resolve_object(actor, str(effect["card"]), zones={"battlefield"})
-            card.tapped = op == "tap"
+            if op == "tap":
+                card.tapped = True
+            else:
+                self._untap_permanent(
+                    card,
+                    actor=actor,
+                    reason=reason,
+                )
             self._log(actor, f"permanent.{op}", f"{card.ref} was {op}ped.", {"object": card.ref, "reason": reason}, importance=1, changed_objects=[card.object_id])
             return card.ref
         if op == "grant_keyword_until_end_of_turn":
