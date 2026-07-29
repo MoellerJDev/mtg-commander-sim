@@ -376,7 +376,84 @@ class CommanderEngine:
             changed_players=list(changed_players),
         )
         self.state.events.append(event)
+        self._update_yield_change_epochs(event)
         return event
+
+    def _yield_change_epoch(
+        self,
+        kind: str,
+        seat: str | None = None,
+    ) -> int:
+        key = (
+            f"yield_change:{kind}:{seat}"
+            if seat is not None
+            else f"yield_change:{kind}"
+        )
+        return int(self.state.ref_counters.get(key, 0))
+
+    def _increment_yield_change_epoch(
+        self,
+        kind: str,
+        seat: str | None = None,
+    ) -> None:
+        key = (
+            f"yield_change:{kind}:{seat}"
+            if seat is not None
+            else f"yield_change:{kind}"
+        )
+        self.state.ref_counters[key] = (
+            int(self.state.ref_counters.get(key, 0)) + 1
+        )
+
+    def _update_yield_change_epochs(self, event: Event) -> None:
+        """Persist yield-invalidating changes independently of trace output.
+
+        Standard Game Records intentionally omit some low-level events. Yield
+        correctness therefore cannot depend on rescanning the in-memory event
+        list after a save/load boundary.
+        """
+
+        stack_codes = {
+            "stack.cast",
+            "stack.activate",
+            "stack.trigger",
+            "stack.resolve",
+            "stack.counter",
+        }
+        if event.code in stack_codes:
+            self._increment_yield_change_epoch("stack")
+            return
+        if event.code == "card.draw.private":
+            for seat in self.state.players:
+                if seat in event.visibility:
+                    self._increment_yield_change_epoch("draw", seat)
+            return
+        if event.code == "zone.move":
+            if (
+                event.details.get("from") == "hand"
+                or event.details.get("to") == "hand"
+            ):
+                for seat in event.changed_players:
+                    if seat in self.state.players:
+                        self._increment_yield_change_epoch(
+                            "action",
+                            seat,
+                        )
+            self._increment_yield_change_epoch("public")
+            return
+        if event.code == "permanent.untap":
+            for seat in event.changed_players:
+                if seat in self.state.players:
+                    self._increment_yield_change_epoch("action", seat)
+            self._increment_yield_change_epoch("public")
+            return
+        if event.code in {
+            "land.play",
+            "token.create",
+            "control.change",
+            "player.eliminated",
+        }:
+            self._increment_yield_change_epoch("public")
 
     def _assert_invariants(self) -> None:
         membership: dict[str, list[tuple[str, str]]] = {}
@@ -2666,6 +2743,13 @@ class CommanderEngine:
             mode=mode,
             created_revision=self.state.revision,
             created_event_sequence=self.state.event_sequence,
+            created_stack_change_epoch=self._yield_change_epoch("stack"),
+            created_public_change_epoch=self._yield_change_epoch("public"),
+            created_draw_epoch=self._yield_change_epoch("draw", seat),
+            created_action_change_epoch=self._yield_change_epoch(
+                "action",
+                seat,
+            ),
             created_turn_sequence=self.state.turn_sequence,
             created_priority_epoch=self.state.priority_epoch,
             created_active_player=self.state.active_player,
@@ -2807,49 +2891,26 @@ class CommanderEngine:
             return "phase"
         if policy.stack_signature != self._stack_signature():
             return "stack"
-        stack_codes = {
-            "stack.cast",
-            "stack.activate",
-            "stack.trigger",
-            "stack.resolve",
-            "stack.counter",
-        }
-        public_codes = {
-            "land.play",
-            "zone.move",
-            "card.draw.private",
-            "token.create",
-            "control.change",
-            "player.eliminated",
-            "permanent.untap",
-        }
-        for event in self.state.events:
-            if event.event_id <= policy.created_event_sequence:
-                continue
-            if event.code == "card.draw.private":
-                if seat in event.visibility:
-                    return "draw"
-                continue
-            if event.code in stack_codes:
-                return "stack"
-            if event.code == "zone.move":
-                details = event.details
-                if (
-                    seat in event.changed_players
-                    and (
-                        details.get("from") == "hand"
-                        or details.get("to") == "hand"
-                    )
-                ):
-                    return "action_change"
-                return "public_change"
-            if event.code in public_codes:
-                return (
-                    "action_change"
-                    if event.code == "permanent.untap"
-                    and seat in event.changed_players
-                    else "public_change"
-                )
+        if (
+            policy.created_stack_change_epoch
+            != self._yield_change_epoch("stack")
+        ):
+            return "stack"
+        if (
+            policy.created_draw_epoch
+            != self._yield_change_epoch("draw", seat)
+        ):
+            return "draw"
+        if (
+            policy.created_action_change_epoch
+            != self._yield_change_epoch("action", seat)
+        ):
+            return "action_change"
+        if (
+            policy.created_public_change_epoch
+            != self._yield_change_epoch("public")
+        ):
+            return "public_change"
         if (
             policy.created_land_plays_remaining
             != self.state.players[seat].land_plays_remaining

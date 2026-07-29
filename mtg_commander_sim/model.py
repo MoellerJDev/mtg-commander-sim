@@ -64,6 +64,10 @@ class YieldPolicy:
     mode: str = "none"
     created_revision: int = 0
     created_event_sequence: int = 0
+    created_stack_change_epoch: int = 0
+    created_public_change_epoch: int = 0
+    created_draw_epoch: int = 0
+    created_action_change_epoch: int = 0
     created_turn_sequence: int = 0
     created_priority_epoch: int = 0
     created_active_player: str | None = None

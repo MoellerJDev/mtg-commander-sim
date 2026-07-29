@@ -4,6 +4,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from common import DB_PATH, load_assets, make_session
 from mtg_commander_sim.codex_cli import (
@@ -206,6 +207,45 @@ class CodexCliArenaRunnerTests(unittest.TestCase):
             self.assertEqual("paused", reloaded.record_status)
             self.assertEqual("codex_transport", reloaded.pause_reason["kind"])
             self.assertFalse(reloaded.decisions)
+
+    def test_replay_failure_pauses_and_disqualifies_the_run(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            record = self._record(Path(temporary), seed=803)
+            client = FakeCodexClient()
+            runner = CodexCliArenaRunner(
+                game_dir=record,
+                db_path=DB_PATH,
+                client=client,
+            )
+            with mock.patch(
+                "mtg_commander_sim.codex_cli.refresh_record",
+                side_effect=ValueError("replay divergence"),
+            ):
+                with self.assertRaisesRegex(
+                    CodexCliError,
+                    "Exact command replay failed",
+                ):
+                    runner.run(
+                        through_turn=1,
+                        max_invocations=10,
+                        verify_replay=True,
+                    )
+            reloaded = CommanderSession.load(
+                self.db,
+                record,
+                semantics_path=record / "semantics.json",
+            )
+            self.assertEqual("paused", reloaded.record_status)
+            self.assertEqual(
+                "command_replay",
+                reloaded.pause_reason["kind"],
+            )
+            benchmark = json.loads(
+                (record / "codex-cli-benchmark.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertEqual("command_replay", benchmark["stop_reason"])
 
     def test_response_envelope_decodes_choices_but_rejects_two_action_modes(self):
         value = CodexCliArenaRunner.normalize_response(

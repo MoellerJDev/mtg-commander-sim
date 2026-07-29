@@ -174,23 +174,35 @@ seconds. The productized command recovered the same four real sessions, kept
 `suppressed_meaningful_windows=0`, and passed exact prefix replay. This run is
 only transport characterization, not deck-operation or matchup evidence.
 
+The first natural trusted-only attempt (`seed=20260742`) was correctly
+disqualified after 40 accepted commands when replay exposed a save/load yield
+divergence at command 39. Standard Game Record traces omit low-level events,
+but yield invalidation had still rescanned the in-memory event list, so a
+reloaded coordinator and continuous replay could disagree. Yield-relevant
+stack, public, draw, and action changes now advance durable authoritative
+epochs instead. A standard-trace reload regression proves the invalidation
+survives omitted events, and the Codex runner now pauses and disqualifies any
+replay failure instead of leaving an ambiguous in-progress record. The full
+suite is 282 passing tests. The failed run is infrastructure evidence only and
+does not count toward the three-game gate.
+
 ## GitHub finalization
 
 - [ ] Full branch security/large-file audit
 - [ ] Complete tests, replay/privacy, preflight, schemas, wheel, and clean
   installation pass
-- [ ] `agent/review-mvp` pushed
+- [x] `agent/review-mvp` pushed
 - [ ] Draft PR opened against `main`
 - [ ] Draft PR left unmerged and not marked ready automatically
 - [ ] `OVERNIGHT_HANDOFF.md` written
 
 ## Next work
 
-Commit the passing fast four-session transport slice, then run fresh natural
-trusted-only four-player games through `arena-codex-run`. Stop and fix any
-runtime semantic or fidelity defect, and count only three consecutive natural
-games passing every `deck_operation_evidence` gate. Implement `review-batch`
-and linked per-deck operation reports after qualifying records exist. After the
-review-MVP draft PR exists, rules-corpus work moves to
+Commit the durable yield/replay fix, then restart fresh natural trusted-only
+four-player games through `arena-codex-run`. Stop and fix any runtime semantic
+or fidelity defect, and count only three consecutive natural games passing
+every `deck_operation_evidence` gate. Implement `review-batch` and linked
+per-deck operation reports after qualifying records exist. After the review-MVP
+draft PR exists, rules-corpus work moves to
 `agent/rules-completeness` and a stacked draft PR; it does not broaden this
 feature branch.

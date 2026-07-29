@@ -1081,27 +1081,44 @@ class CodexCliArenaRunner:
         self._benchmark(stop_reason=stop_reason, invocations=invocations)
         replay_result: dict[str, Any] | None = None
         if verify_replay:
-            db = CardDatabase(self.db_path)
             try:
-                current = CommanderSession.load(
-                    db,
-                    self.game_dir,
-                    semantics_path=self.game_dir / "semantics.json",
+                db = CardDatabase(self.db_path)
+                try:
+                    current = CommanderSession.load(
+                        db,
+                        self.game_dir,
+                        semantics_path=self.game_dir / "semantics.json",
+                    )
+                    preserved_status = (
+                        None
+                        if current.state.game_over
+                        else current.record_status
+                    )
+                    refreshed = refresh_record(
+                        self.game_dir,
+                        db,
+                        status=preserved_status,
+                        verify_replay=True,
+                    )
+                    replay_result = dict(
+                        refreshed.get("replay_result") or {}
+                    )
+                finally:
+                    db.close()
+            except Exception as exc:
+                self._pause(
+                    "command_replay",
+                    "Exact command replay failed; this run is not evidence: "
+                    + str(exc),
                 )
-                preserved_status = (
-                    None
-                    if current.state.game_over
-                    else current.record_status
+                stop_reason = "command_replay"
+                self._benchmark(
+                    stop_reason=stop_reason,
+                    invocations=invocations,
                 )
-                refreshed = refresh_record(
-                    self.game_dir,
-                    db,
-                    status=preserved_status,
-                    verify_replay=True,
-                )
-                replay_result = dict(refreshed.get("replay_result") or {})
-            finally:
-                db.close()
+                raise CodexCliError(
+                    "Exact command replay failed; the arena was paused"
+                ) from exc
         principal, turn_sequence, game_over, record_status = self._next_state()
         assert self.registry is not None
         return {

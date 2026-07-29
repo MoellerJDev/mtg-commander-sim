@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import tempfile
 import unittest
+from pathlib import Path
 
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim import CommanderSession, GameConfig
@@ -183,6 +185,67 @@ class DecisionOpportunityTests(unittest.TestCase):
         self.assertEqual(
             "until_public_change",
             engine.state.players["A"].yield_policy.mode,
+        )
+
+    def test_yield_invalidation_survives_standard_trace_reload(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            seed=308,
+            auto_pass_empty=True,
+        )
+        keep_all(session)
+        engine = session.engine
+        top = self._card(engine, "A", "Sensei's Divining Top")
+        engine.move_card(
+            top.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+        )
+        engine.state.players["A"].mana_pool["U"] = 1
+        engine.permissions.invalidate_current()
+        engine.state.active_player = "B"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        self._reset_priority(engine, "A")
+        engine._set_yield("A", "until_public_change")
+        engine._log(
+            "B",
+            "permanent.untap",
+            "B untapped a permanent.",
+            {"object": "regression"},
+            importance=0,
+            changed_players=["B"],
+        )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record = Path(temporary) / "record"
+            session.save(record)
+            self.assertNotIn(
+                '"code":"permanent.untap"',
+                (record / "events.jsonl").read_text(encoding="utf-8"),
+            )
+            loaded = CommanderSession.load(
+                self.db,
+                record,
+                semantics_path=record / "semantics.json",
+            )
+            hints = loaded.engine._priority_action_hints("A")
+            allowed, reason = loaded.engine._can_auto_pass(
+                "A",
+                action_signature=(
+                    loaded.engine.meaningful_action_signature("A", hints)
+                ),
+                meaningful=loaded.engine._signature_has_actions("A", hints),
+            )
+
+        self.assertFalse(allowed)
+        self.assertEqual("public_change", reason)
+        self.assertEqual(
+            "none",
+            loaded.state.players["A"].yield_policy.mode,
         )
 
     def test_fidelity_fails_if_meaningful_window_is_suppressed(self):
