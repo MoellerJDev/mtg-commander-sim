@@ -99,7 +99,7 @@ class CommanderEngine:
         self.state = state
         self.semantics = semantics or SemanticRegistry()
         self.permissions = CapabilityManager(self.state)
-        self._semantic_trust_cache: dict[str, bool] = {}
+        self._semantic_trust_cache: dict[tuple[str, str], bool] = {}
         self._assert_invariants()
 
     def semantic_program_is_current_trusted(
@@ -108,26 +108,38 @@ class CommanderEngine:
     ) -> bool:
         if program is None or program.trust_level != "trusted":
             return False
-        cached = self._semantic_trust_cache.get(program.key)
+        program_hash = hashlib.sha256(
+            stable_json(program.to_dict()).encode("utf-8")
+        ).hexdigest()
+        cache_key = (program.key, program_hash)
+        cached = self._semantic_trust_cache.get(cache_key)
         if cached is not None:
             return cached
         if not program.oracle_id:
-            self._semantic_trust_cache[program.key] = False
+            self._semantic_trust_cache[cache_key] = False
             return False
         try:
             record = self.card_db.by_oracle_id(program.oracle_id)
         except KeyError:
-            self._semantic_trust_cache[program.key] = False
+            self._semantic_trust_cache[cache_key] = False
             return False
         oracle_hash = hashlib.sha256(
             record.oracle_text.encode("utf-8")
         ).hexdigest()
         rulings_hash = hashlib.sha256(
             stable_json(
-                [
-                    asdict(ruling)
-                    for ruling in self.card_db.rulings(record)
-                ]
+                sorted(
+                    (
+                        asdict(ruling)
+                        for ruling in self.card_db.rulings(record)
+                    ),
+                    key=lambda row: (
+                        str(row["published_at"]),
+                        str(row["source"]),
+                        str(row["comment"]),
+                        str(row["oracle_id"]),
+                    ),
+                )
             ).encode("utf-8")
         ).hexdigest()
         result = (
@@ -136,7 +148,7 @@ class CommanderEngine:
             and program.provenance.get("source_rulings_hash")
             == rulings_hash
         )
-        self._semantic_trust_cache[program.key] = result
+        self._semantic_trust_cache[cache_key] = result
         return result
 
     # ------------------------------------------------------------------
@@ -676,6 +688,7 @@ class CommanderEngine:
         departure_sources: Sequence[CardInstance],
         departure_source_zones: Mapping[str, str],
         reason: str,
+        trigger_batch: list[StackItem] | None = None,
     ) -> None:
         """Emit normalized semantic events for one authoritative zone change.
 
@@ -685,6 +698,8 @@ class CommanderEngine:
         zone mutation atomic from the perspective of effect resolution.
         """
 
+        owns_trigger_batch = trigger_batch is None
+        event_triggers = trigger_batch if trigger_batch is not None else []
         origin_types, _, _ = self._type_parts(
             str(origin_data.get("type_line") or "")
         )
@@ -724,12 +739,23 @@ class CommanderEngine:
                     departure_context,
                     sources=departure_sources,
                     source_zones=departure_source_zones,
+                    trigger_batch=event_triggers,
                 )
         if origin == "graveyard" and event_destination != "graveyard":
-            self._dispatch_semantic_event("card.leave_graveyard", common)
+            self._dispatch_semantic_event(
+                "card.leave_graveyard",
+                common,
+                trigger_batch=event_triggers,
+            )
         if origin == "hand" and event_destination == "graveyard":
-            self._dispatch_semantic_event("card.discarded", common)
+            self._dispatch_semantic_event(
+                "card.discarded",
+                common,
+                trigger_batch=event_triggers,
+            )
         if event_destination != "battlefield" or origin == "battlefield":
+            if owns_trigger_batch:
+                self._enqueue_semantic_trigger_batch(event_triggers)
             return
         entered_data = self._effective_card_data(card)
         entered_types, _, _ = self._type_parts(
@@ -741,13 +767,20 @@ class CommanderEngine:
             "types": sorted(entered_types),
             "tapped": card.tapped,
         }
-        self._dispatch_semantic_event("permanent.enter", entered_context)
+        self._dispatch_semantic_event(
+            "permanent.enter",
+            entered_context,
+            trigger_batch=event_triggers,
+        )
         for card_type in ("artifact", "creature", "land", "enchantment"):
             if card_type in entered_types:
                 self._dispatch_semantic_event(
                     f"{card_type}.enter",
                     entered_context,
+                    trigger_batch=event_triggers,
                 )
+        if owns_trigger_batch:
+            self._enqueue_semantic_trigger_batch(event_triggers)
 
     def _move_cards_simultaneously(
         self,
@@ -781,6 +814,7 @@ class CommanderEngine:
                 log=log,
                 semantic_events=False,
             )
+        trigger_batch: list[StackItem] = []
         for (
             card,
             origin,
@@ -797,7 +831,9 @@ class CommanderEngine:
                 departure_sources=sources,
                 departure_source_zones=source_zones,
                 reason=reason,
+                trigger_batch=trigger_batch,
             )
+        self._enqueue_semantic_trigger_batch(trigger_batch)
         return [card for card, *_ in snapshots]
 
     def shuffle_library(self, seat: str, *, reason: str = "shuffle") -> None:
@@ -2010,6 +2046,46 @@ class CommanderEngine:
     def _complete_trigger_order(self, decision: Any) -> None:
         controller = decision.actors[0]
         values = list(decision.responses[controller].get("triggers") or decision.responses[controller].get("order") or [])
+        semantic_batch_id = decision.continuation.get(
+            "semantic_trigger_batch_id"
+        )
+        if semantic_batch_id:
+            batch = next(
+                (
+                    value
+                    for value in self.state.pending_trigger_batches
+                    if value.get("batch_id") == semantic_batch_id
+                ),
+                None,
+            )
+            if batch is None or not batch.get("groups"):
+                raise GameRuleError(
+                    "Semantic trigger batch is no longer pending"
+                )
+            group = batch["groups"][0]
+            if group.get("controller") != controller:
+                raise GameRuleError(
+                    "Only the trigger controller may order this group"
+                )
+            items = list(group.get("items") or [])
+            by_ref = {
+                str(item["ref"]): item
+                for item in items
+            }
+            refs = [str(value) for value in values]
+            if sorted(refs) != sorted(by_ref):
+                raise GameRuleError(
+                    "Trigger order must contain every listed trigger "
+                    "exactly once"
+                )
+            self._place_semantic_trigger_items(
+                [by_ref[ref] for ref in refs]
+            )
+            batch["groups"] = list(batch["groups"])[1:]
+            if self._begin_pending_semantic_trigger_batch():
+                return
+            self._grant_priority(self.state.active_player)
+            return
         ids = list(decision.continuation["trigger_ids"])
         by_ref = {trigger.ref: trigger.trigger_id for trigger in self.state.delayed_triggers if trigger.trigger_id in ids}
         resolved = [by_ref.get(str(value), str(value)) for value in values]
@@ -4644,6 +4720,122 @@ class CommanderEngine:
     # ------------------------------------------------------------------
     # Stack resolution and arbiter role
     # ------------------------------------------------------------------
+    def _semantic_event_value(
+        self,
+        value: Any,
+        *,
+        source: CardInstance,
+        context: Mapping[str, Any],
+    ) -> Any:
+        substitutions = {
+            "$source.controller": source.controller,
+            "$source.owner": source.owner,
+            "$source.ref": source.ref,
+            "$source.object_id": source.object_id,
+            "$active_player": self.state.active_player,
+        }
+        if isinstance(value, str) and value in substitutions:
+            return substitutions[value]
+        if isinstance(value, str) and value.startswith("$context."):
+            return context.get(value.removeprefix("$context."))
+        if isinstance(value, list):
+            return [
+                self._semantic_event_value(
+                    item,
+                    source=source,
+                    context=context,
+                )
+                for item in value
+            ]
+        return value
+
+    def _semantic_event_condition_matches(
+        self,
+        condition: Mapping[str, Any],
+        *,
+        source: CardInstance,
+        context: Mapping[str, Any],
+    ) -> bool:
+        """Evaluate a declarative trigger condition against event context.
+
+        Conditions deliberately read only normalized event fields and stable
+        source identity. They cannot mutate state or execute semantic effects.
+        """
+
+        if "all" in condition:
+            values = condition.get("all")
+            if not isinstance(values, Sequence) or isinstance(
+                values, (str, bytes)
+            ):
+                raise GameRuleError("Semantic event 'all' must be a list")
+            return all(
+                self._semantic_event_condition_matches(
+                    dict(item),
+                    source=source,
+                    context=context,
+                )
+                for item in values
+                if isinstance(item, Mapping)
+            )
+        if "any" in condition:
+            values = condition.get("any")
+            if not isinstance(values, Sequence) or isinstance(
+                values, (str, bytes)
+            ):
+                raise GameRuleError("Semantic event 'any' must be a list")
+            return any(
+                self._semantic_event_condition_matches(
+                    dict(item),
+                    source=source,
+                    context=context,
+                )
+                for item in values
+                if isinstance(item, Mapping)
+            )
+        if "not" in condition:
+            nested = condition.get("not")
+            if not isinstance(nested, Mapping):
+                raise GameRuleError("Semantic event 'not' must be an object")
+            return not self._semantic_event_condition_matches(
+                nested,
+                source=source,
+                context=context,
+            )
+
+        field = str(condition.get("field") or "")
+        if not field:
+            raise GameRuleError("Semantic event condition requires a field")
+        actual = context.get(field)
+        expected = self._semantic_event_value(
+            condition.get("value"),
+            source=source,
+            context=context,
+        )
+        op = str(condition.get("op") or "eq")
+        if op == "eq":
+            return actual == expected
+        if op == "ne":
+            return actual != expected
+        if op == "in":
+            return actual in (expected or [])
+        if op == "not_in":
+            return actual not in (expected or [])
+        if op == "gte":
+            return actual is not None and actual >= expected
+        if op == "gt":
+            return actual is not None and actual > expected
+        if op == "lte":
+            return actual is not None and actual <= expected
+        if op == "lt":
+            return actual is not None and actual < expected
+        if op == "truthy":
+            return bool(actual)
+        if op == "falsy":
+            return not bool(actual)
+        raise GameRuleError(
+            f"Unsupported semantic event condition operator {op!r}"
+        )
+
     def _semantic_event_matches(
         self,
         program: SemanticProgram,
@@ -4668,6 +4860,12 @@ class CommanderEngine:
             return False
         if source.controller not in self.active_seats:
             return False
+        if program.event_condition is not None:
+            return self._semantic_event_condition_matches(
+                program.event_condition,
+                source=source,
+                context=context,
+            )
         if event == "land.enter":
             entered = self._resolve_object(
                 source.controller,
@@ -4703,10 +4901,11 @@ class CommanderEngine:
         *,
         sources: Sequence[CardInstance] | None = None,
         source_zones: Mapping[str, str] | None = None,
+        trigger_batch: list[StackItem] | None = None,
     ) -> list[str]:
         """Queue data-driven triggers for a normalized authoritative event."""
 
-        queued: list[str] = []
+        triggered: list[StackItem] = []
         candidates = list(sources) if sources is not None else self._semantic_event_sources()
         for source in candidates:
             active_zone = (
@@ -4737,7 +4936,7 @@ class CommanderEngine:
                         event=event,
                         source=source,
                     )
-                    return queued
+                    return [item.ref for item in triggered]
                 ref = self._next_ref("S")
                 item = StackItem(
                     stack_id=self._stable_runtime_id("stack", ref),
@@ -4758,22 +4957,118 @@ class CommanderEngine:
                         ),
                     },
                 )
-                self.state.stack.append(item)
-                queued.append(item.ref)
-                self._log(
-                    source.controller,
-                    "stack.trigger",
-                    f"Queued {item.ref}: {item.label}.",
+                triggered.append(item)
+        if trigger_batch is not None:
+            trigger_batch.extend(triggered)
+        elif triggered:
+            self._enqueue_semantic_trigger_batch(triggered)
+        return [item.ref for item in triggered]
+
+    def _enqueue_semantic_trigger_batch(
+        self,
+        items: Sequence[StackItem],
+    ) -> None:
+        if not items:
+            return
+        groups: list[dict[str, Any]] = []
+        for controller in self.apnap_order():
+            controlled = [
+                item.to_dict()
+                for item in items
+                if item.controller == controller
+            ]
+            if controlled:
+                groups.append(
                     {
-                        "stack": item.ref,
-                        "source": source.ref,
-                        "semantic_program": program.key,
-                        "event": event,
-                    },
-                    importance=2,
-                    changed_objects=[source.object_id],
+                        "controller": controller,
+                        "items": controlled,
+                    }
                 )
-        return queued
+        if not groups:
+            return
+        batch_ref = self._next_ref("TB")
+        self.state.pending_trigger_batches.append(
+            {
+                "batch_id": self._stable_runtime_id(
+                    "trigger-batch",
+                    batch_ref,
+                ),
+                "ref": batch_ref,
+                "apnap_order": self.apnap_order(),
+                "groups": groups,
+                "turn_sequence": self.state.turn_sequence,
+            }
+        )
+
+    def _place_semantic_trigger_items(
+        self,
+        values: Sequence[Mapping[str, Any]],
+    ) -> None:
+        for value in values:
+            item = StackItem.from_dict(copy.deepcopy(dict(value)))
+            self.state.stack.append(item)
+            source = (
+                self.state.cards.get(item.source_object_id)
+                if item.source_object_id
+                else None
+            )
+            self._log(
+                item.controller,
+                "stack.trigger",
+                f"Queued {item.ref}: {item.label}.",
+                {
+                    "stack": item.ref,
+                    "source": source.ref if source else None,
+                    "semantic_program": item.semantic_key,
+                    "event": item.context.get("event"),
+                },
+                importance=2,
+                changed_objects=(
+                    [source.object_id] if source is not None else []
+                ),
+            )
+
+    def _begin_pending_semantic_trigger_batch(self) -> bool:
+        while self.state.pending_trigger_batches:
+            batch = self.state.pending_trigger_batches[0]
+            groups = list(batch.get("groups") or [])
+            if not groups:
+                self.state.pending_trigger_batches.pop(0)
+                continue
+            group = groups[0]
+            controller = str(group["controller"])
+            items = list(group.get("items") or [])
+            if len(items) > 1:
+                self.permissions.issue(
+                    kind="trigger.order",
+                    role="pilot",
+                    actors=[controller],
+                    allowed_actions=["order"],
+                    payload_by_actor={
+                        controller: {
+                            "triggers": [
+                                {
+                                    "id": str(item["ref"]),
+                                    "label": str(item["label"]),
+                                }
+                                for item in items
+                            ],
+                            "instruction": (
+                                "Order bottom-to-top on the stack."
+                            ),
+                        }
+                    },
+                    continuation={
+                        "semantic_trigger_batch_id": batch["batch_id"],
+                        "trigger_refs": [
+                            str(item["ref"]) for item in items
+                        ],
+                    },
+                )
+                return True
+            self._place_semantic_trigger_items(items)
+            batch["groups"] = groups[1:]
+        return False
 
     def _semantic_target_options(
         self,
@@ -5593,6 +5888,8 @@ class CommanderEngine:
         return False
 
     def _prepare_stack_resolution(self) -> None:
+        if self.state.pending_trigger_batches and self._stabilize():
+            return
         if not self.state.stack:
             self._advance_step()
             return
@@ -6349,6 +6646,7 @@ class CommanderEngine:
                 "counter_unless_pay",
                 "draw_optional_land",
                 "choose_warform",
+                "look_reorder_top",
                 "pay_or_lose",
                 "proliferate",
             }:
@@ -6425,6 +6723,62 @@ class CommanderEngine:
                                 "field": "card_name",
                                 "type": "card_name",
                                 "nonempty": True,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "look_reorder_top":
+            count = max(0, int(effect.get("count", 1)))
+            looked = self.apply_effect(
+                {
+                    "op": "look_top",
+                    "player": seat,
+                    "viewer": seat,
+                    "count": count,
+                    "reason": item.label,
+                },
+                actor=item.controller,
+            )
+            options = [str(value) for value in (looked or [])]
+            if not options:
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            effect = {**dict(effect), "_looked_refs": options}
+            context.update(
+                {
+                    "prompt": (
+                        "Put the looked-at cards back in top-to-bottom "
+                        "order."
+                    ),
+                    "cards": [
+                        {
+                            "id": ref,
+                            "name": self._resolve_object(
+                                seat,
+                                ref,
+                                zones={"library"},
+                            ).printed_name,
+                        }
+                        for ref in options
+                    ],
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "cards",
+                                "legal_refs": options,
+                                "minimum": len(options),
+                                "maximum": len(options),
+                                "distinct": True,
+                                "order": "top_to_bottom",
                             },
                         }
                     ],
@@ -6701,6 +7055,36 @@ class CommanderEngine:
                 {"source": source.ref, "card_name": chosen},
                 importance=2,
                 changed_objects=[source.object_id],
+            )
+        elif op == "look_reorder_top":
+            expected = [
+                str(value)
+                for value in effect.get("_looked_refs", [])
+            ]
+            selected = [
+                str(value)
+                for value in response.get(
+                    "cards",
+                    response.get("order", []),
+                )
+            ]
+            if (
+                len(selected) != len(set(selected))
+                or sorted(selected) != sorted(expected)
+            ):
+                raise GameRuleError(
+                    "Top-card order must contain every looked-at card "
+                    "exactly once"
+                )
+            self.apply_effect(
+                {
+                    "op": "reorder_top",
+                    "player": seat,
+                    "viewer": seat,
+                    "cards": selected,
+                    "reason": item.label,
+                },
+                actor=item.controller,
             )
         elif op == "counter_unless_pay":
             requirements = {
@@ -7915,6 +8299,8 @@ class CommanderEngine:
                     continuation={"object_ids": ids},
                 )
                 return True
+            if self._begin_pending_semantic_trigger_batch():
+                return True
             if self._begin_pending_trigger_target_selection():
                 return True
             return False
@@ -8121,6 +8507,29 @@ class CommanderEngine:
                 reason=reason,
                 semantic_events=True,
             )
+        if op == "reanimate":
+            card = self._resolve_object(
+                actor,
+                str(effect["card"]),
+                zones={"graveyard"},
+            )
+            types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(card).get("type_line")
+                    or ""
+                )
+            )
+            if "creature" not in types:
+                raise GameRuleError(
+                    "Reanimate effect requires a creature card"
+                )
+            return self.move_card(
+                card.object_id,
+                "battlefield",
+                controller=str(effect.get("controller") or actor),
+                reason=reason,
+                semantic_events=True,
+            )
         if op in {"destroy_all", "exile_all"}:
             specification = dict(effect.get("filter") or {})
             specification.setdefault("zones", ["battlefield"])
@@ -8187,6 +8596,27 @@ class CommanderEngine:
                 log=True,
             )
             return [self.state.cards[object_id].ref for object_id, _ in changes]
+        if op == "exile_graveyard":
+            player = str(effect["player"])
+            if player not in self.active_seats:
+                raise GameRuleError(
+                    "Graveyard exile requires an active player"
+                )
+            changes = [
+                (object_id, "exile")
+                for object_id in list(
+                    self.state.players[player].zones["graveyard"]
+                )
+            ]
+            self._move_cards_simultaneously(
+                changes,
+                reason=reason,
+                log=True,
+            )
+            return [
+                self.state.cards[object_id].ref
+                for object_id, _ in changes
+            ]
         if op == "destroy_selected":
             changes: list[tuple[str, str]] = []
             for raw_ref in effect.get("cards") or []:
@@ -8383,6 +8813,28 @@ class CommanderEngine:
                 card.deathtouch_damage = card.deathtouch_damage or bool(effect.get("deathtouch"))
                 self._log(actor, "effect.damage", f"{card.ref} took {amount} damage.", {"target": card.ref, "amount": amount, "reason": reason}, importance=2, changed_objects=[card.object_id])
             return amount
+        if op == "damage_each_opponent":
+            amount = max(0, int(effect.get("amount", 0)))
+            opponents = [
+                seat
+                for seat in self.active_seats
+                if seat != actor
+            ]
+            for opponent in opponents:
+                self.state.players[opponent].life -= amount
+            self._log(
+                actor,
+                "effect.damage",
+                f"Each opponent of {actor} took {amount} damage.",
+                {
+                    "opponents": opponents,
+                    "amount": amount,
+                    "reason": reason,
+                },
+                importance=2,
+                changed_players=opponents,
+            )
+            return amount
         if op == "life":
             seat = str(effect.get("player") or actor)
             delta = int(effect.get("delta", 0))
@@ -8398,6 +8850,25 @@ class CommanderEngine:
                 "effect.life",
                 f"{seat} lost {amount} life.",
                 {"player": seat, "delta": -amount},
+                importance=1,
+                changed_players=[seat],
+            )
+            return self.state.players[seat].life
+        if op == "lose_life_equal_mana_value":
+            seat = str(effect.get("player") or actor)
+            card = self._resolve_object(actor, str(effect["card"]))
+            record = self.card_record(card)
+            amount = int(record.mana_value if record else 0)
+            self.state.players[seat].life -= amount
+            self._log(
+                actor,
+                "effect.life",
+                f"{seat} lost {amount} life.",
+                {
+                    "player": seat,
+                    "delta": -amount,
+                    "card": card.ref,
+                },
                 importance=1,
                 changed_players=[seat],
             )
@@ -8580,6 +9051,29 @@ class CommanderEngine:
             card.tapped = op == "tap"
             self._log(actor, f"permanent.{op}", f"{card.ref} was {op}ped.", {"object": card.ref, "reason": reason}, importance=1, changed_objects=[card.object_id])
             return card.ref
+        if op == "grant_keyword_until_end_of_turn":
+            card = self._resolve_object(
+                actor,
+                str(effect["card"]),
+                zones={"battlefield"},
+            )
+            keyword = str(effect["keyword"])
+            card.temporary_keywords = unique_preserving_order(
+                [*card.temporary_keywords, keyword]
+            )
+            self._log(
+                actor,
+                "permanent.keyword",
+                f"{card.ref} gained {keyword} until end of turn.",
+                {
+                    "object": card.ref,
+                    "keyword": keyword,
+                    "reason": reason,
+                },
+                importance=1,
+                changed_objects=[card.object_id],
+            )
+            return card.ref
         if op == "counter":
             card = self._resolve_object(actor, str(effect["card"]), zones={"battlefield"})
             name = str(effect.get("counter") or "+1/+1")
@@ -8684,6 +9178,7 @@ class CommanderEngine:
                 self.state.combat.attackers[object_id] = attacking
             created.append(object_id)
         self._log(controller, "token.create", f"{controller} created {quantity} {name} token(s).", {"objects": [self.state.cards[oid].ref for oid in created], "reason": reason}, importance=1, changed_objects=created, changed_players=[controller])
+        trigger_batch: list[StackItem] = []
         for object_id in created:
             card = self.state.cards[object_id]
             data = self._effective_card_data(card)
@@ -8701,14 +9196,24 @@ class CommanderEngine:
                 "tapped": card.tapped,
                 "reason": reason,
             }
-            self._dispatch_semantic_event("token.created", context)
-            self._dispatch_semantic_event("permanent.enter", context)
+            self._dispatch_semantic_event(
+                "token.created",
+                context,
+                trigger_batch=trigger_batch,
+            )
+            self._dispatch_semantic_event(
+                "permanent.enter",
+                context,
+                trigger_batch=trigger_batch,
+            )
             for card_type in ("artifact", "creature", "land", "enchantment"):
                 if card_type in types:
                     self._dispatch_semantic_event(
                         f"{card_type}.enter",
                         context,
+                        trigger_batch=trigger_batch,
                     )
+        self._enqueue_semantic_trigger_batch(trigger_batch)
         return [self.state.cards[oid].ref for oid in created]
 
     def change_control(self, object_id: str, new_controller: str, *, reason: str = "") -> None:

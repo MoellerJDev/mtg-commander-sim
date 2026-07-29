@@ -31,6 +31,7 @@ VALID_EFFECT_OPERATIONS = {
     "create_treasure",
     "create_warform",
     "damage",
+    "damage_each_opponent",
     "delayed_mana",
     "delayed_pact_payment",
     "delayed_trigger",
@@ -45,12 +46,15 @@ VALID_EFFECT_OPERATIONS = {
     "energy",
     "exile",
     "exile_all",
+    "exile_graveyard",
     "exile_opponent_graveyards",
     "extra_turn",
     "field_of_dead_token",
     "life",
     "lose_life",
+    "lose_life_equal_mana_value",
     "look_top",
+    "look_reorder_top",
     "move",
     "mana",
     "note",
@@ -66,6 +70,8 @@ VALID_EFFECT_OPERATIONS = {
     "pay_or_lose",
     "proliferate",
     "pump_controlled_creatures",
+    "reanimate",
+    "grant_keyword_until_end_of_turn",
 }
 
 
@@ -89,6 +95,7 @@ class SemanticProgram:
     handlers: list[dict[str, Any]] = field(default_factory=list)
     target_schema: dict[str, Any] | None = None
     cost_schema: dict[str, Any] | None = None
+    event_condition: dict[str, Any] | None = None
     coverage: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -158,6 +165,7 @@ class SemanticProgram:
             "handlers": self.handlers,
             "target_schema": self.target_schema,
             "cost_schema": self.cost_schema,
+            "event_condition": self.event_condition,
             "coverage": self.coverage,
         }
 
@@ -190,6 +198,11 @@ class SemanticProgram:
             cost_schema=(
                 dict(data["cost_schema"])
                 if isinstance(data.get("cost_schema"), Mapping)
+                else None
+            ),
+            event_condition=(
+                dict(data["event_condition"])
+                if isinstance(data.get("event_condition"), Mapping)
                 else None
             ),
             coverage=[str(value) for value in data.get("coverage", [])],

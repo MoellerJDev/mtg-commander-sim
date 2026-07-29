@@ -47,10 +47,15 @@
         }
       ],
       "destination": "graveyard",
-      "trust_level": "provisional",
+      "trust_level": "trusted",
       "coverage": ["spell_resolution", "typed_library_search", "natural_land_entry", "semantic_continuation"],
-      "tests": ["test_three_visits_search_template"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+      "tests": ["test_three_visits_to_bayou_and_natures_lore_template", "test_three_visits_shockland_tapped_and_untapped"],
+      "provenance": {
+        "source_oracle_hash": "0416b1413bddd6d390b428142d16aa63214e3291adfa721b0dea1e88b4d788e9",
+        "source_rulings_hash": "d483913cdb4f9c857759d8c636c300eaa41bd7a6e5caf55ea14cdf06722f5035",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "78826359-fe63-44ad-adc4-a17ffcd710e4:spell:front",
@@ -70,10 +75,15 @@
         }
       ],
       "destination": "graveyard",
-      "trust_level": "provisional",
+      "trust_level": "trusted",
       "coverage": ["spell_resolution", "typed_library_search", "natural_land_entry", "semantic_continuation"],
-      "tests": ["test_natures_lore_reuses_search_template"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+      "tests": ["test_three_visits_to_bayou_and_natures_lore_template"],
+      "provenance": {
+        "source_oracle_hash": "1969fa96656688d1b432d41afaac52db1994afdf353355b2218c4dada7c2b13f",
+        "source_rulings_hash": "e03478f72b5b59260186a64fb4aabbe3cefebd3fd47f4019b048b2d1e4c5197b",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "422e1869-134f-463d-9fa1-86b66a998b3e:spell:front",
@@ -92,10 +102,15 @@
         }
       ],
       "destination": "graveyard",
-      "trust_level": "provisional",
+      "trust_level": "trusted",
       "coverage": ["spell_resolution", "revealed_library_search", "semantic_continuation"],
-      "tests": ["test_revealed_search_target_is_public"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+      "tests": ["test_fabricate_reveals_artifact_and_moves_it_to_hand", "test_private_and_revealed_hand_search_visibility"],
+      "provenance": {
+        "source_oracle_hash": "89935eef7baef80c6f616448109b71332a1c105f50715fcc8db587a0e3ca2dda",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "47a785ed-8095-4685-8daa-02c4e2b0ffcd:spell:front",

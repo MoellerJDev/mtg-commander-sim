@@ -354,6 +354,7 @@ class SemanticPrivateSearchTests(unittest.TestCase):
             {"op": "sacrifice", "card": hulk.ref},
             actor="B",
         )
+        self.assertFalse(engine._stabilize())
         trigger = next(
             item
             for item in engine.state.stack
@@ -466,6 +467,39 @@ class SemanticPrivateSearchTests(unittest.TestCase):
                 self.assertEqual(
                     reveal, "object" in public_event.details
                 )
+
+    def test_fabricate_reveals_artifact_and_moves_it_to_hand(self):
+        session = self._session()
+        engine = session.engine
+        target = self._card(engine, "A", "Ichor Wellspring")
+        if target.zone != "library":
+            engine.move_card(target.object_id, "library", log=False)
+        spell, _ = self._begin_spell(
+            session,
+            seat="A",
+            name="Fabricate",
+        )
+        packet = session.packet("pilot:A", full=True)
+        candidates = {
+            item["id"]
+            for item in packet["decision"]["ctx"]["search_cards"]
+        }
+        self.assertIn(target.ref, candidates)
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "search_card": target.ref,
+                "plan": "DEVELOP_ENGINE",
+                "reason": "Find and reveal Ichor Wellspring with Fabricate.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("hand", target.zone)
+        self.assertEqual("graveyard", spell.zone)
+        opposing = json.dumps(session.packet("pilot:B", full=True))
+        self.assertIn(target.ref, opposing)
+        self.assertIn("Ichor Wellspring", opposing)
 
     def test_ordered_plan_spans_fetch_entomb_and_private_search(self):
         session = CommanderSession.create(

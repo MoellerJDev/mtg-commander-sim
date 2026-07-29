@@ -1,0 +1,174 @@
+{
+  "schema_version": 3,
+  "name": "v0.8-exact-deck-interactions",
+  "programs": [
+    {
+      "key": "04b7362d-0490-4cb0-b5d7-2a7732f659ce:trigger:enter",
+      "label": "Bojuka Bog enters",
+      "oracle_id": "04b7362d-0490-4cb0-b5d7-2a7732f659ce",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [{"op": "exile_graveyard", "player": "$target.0"}],
+      "target_schema": {
+        "zones": ["player"],
+        "categories": ["player"],
+        "player_relation": "any",
+        "count": 1
+      },
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "target_validation", "graveyard_exile"],
+      "tests": ["test_bojuka_bog_targets_and_exiles_one_graveyard"],
+      "provenance": {
+        "source_oracle_hash": "9c5428f8acbd5660566419cfd4cc8fce0d2634bc9fc319fd679a8cd62c44c34c",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-interaction-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "a044474a-cd72-4e9d-bd8d-a08f2de9cdc0:spell:front",
+      "label": "Reanimate",
+      "oracle_id": "a044474a-cd72-4e9d-bd8d-a08f2de9cdc0",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [
+        {
+          "op": "reanimate",
+          "card": "$target.0",
+          "controller": "$controller"
+        },
+        {
+          "op": "lose_life_equal_mana_value",
+          "player": "$controller",
+          "card": "$target.0"
+        }
+      ],
+      "destination": "graveyard",
+      "target_schema": {
+        "zones": ["graveyard"],
+        "categories": ["card"],
+        "creature": true,
+        "count": 1
+      },
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "target_validation", "reanimation", "life_loss"],
+      "tests": ["test_reanimate_uses_any_graveyard_and_exact_mana_value_loss"],
+      "provenance": {
+        "source_oracle_hash": "f1ecf392c79ffa7860a72a61d01db5561af2ab12078485cdcf5a1b337f79e60d",
+        "source_rulings_hash": "6ca88966debbf365aa94934388da07b03ee5fed17c01ca03f63d23949431eb11",
+        "authored_by": "v0.8-interaction-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "bddf8f4a-3149-4dd6-a9e5-7747e7e45a1c:spell:front",
+      "label": "Sylvan Safekeeper",
+      "oracle_id": "bddf8f4a-3149-4dd6-a9e5-7747e7e45a1c",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_sylvan_safekeeper_pays_land_and_grants_temporary_shroud"],
+      "provenance": {
+        "source_oracle_hash": "05df518328628818c65e865015418f5ce9e9d8d5fb90404835cb3854dcf4564f",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-interaction-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "bddf8f4a-3149-4dd6-a9e5-7747e7e45a1c:ability:ab1",
+      "label": "Sylvan Safekeeper shroud ability",
+      "oracle_id": "bddf8f4a-3149-4dd6-a9e5-7747e7e45a1c",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "grant_keyword_until_end_of_turn",
+          "card": "$target.0",
+          "keyword": "Shroud"
+        }
+      ],
+      "target_schema": {
+        "zones": ["battlefield"],
+        "categories": ["permanent"],
+        "controller": "you",
+        "creature": true,
+        "count": 1
+      },
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "sacrifice_cost", "target_validation", "temporary_keyword"],
+      "tests": ["test_sylvan_safekeeper_pays_land_and_grants_temporary_shroud"],
+      "provenance": {
+        "source_oracle_hash": "05df518328628818c65e865015418f5ce9e9d8d5fb90404835cb3854dcf4564f",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-interaction-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "13575cf9-65c1-4861-b21e-eb2155e07766:spell:front",
+      "label": "Sensei's Divining Top",
+      "oracle_id": "13575cf9-65c1-4861-b21e-eb2155e07766",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_senseis_divining_top_reorders_and_draws_to_library"],
+      "provenance": {
+        "source_oracle_hash": "3e5449eb60878e31d3c192f6975ab1fcdfcd92d020d467e797a509cb2c7dcb02",
+        "source_rulings_hash": "446717fe6a506dc5cbdde7466f2fa03b316b4631df41257c9e79f498626c8ba1",
+        "authored_by": "v0.8-interaction-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "13575cf9-65c1-4861-b21e-eb2155e07766:ability:ab1",
+      "label": "Sensei's Divining Top look ability",
+      "oracle_id": "13575cf9-65c1-4861-b21e-eb2155e07766",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [{"op": "look_reorder_top", "player": "$controller", "count": 3}],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "hidden_information", "library_reorder"],
+      "tests": ["test_senseis_divining_top_reorders_and_draws_to_library"],
+      "provenance": {
+        "source_oracle_hash": "3e5449eb60878e31d3c192f6975ab1fcdfcd92d020d467e797a509cb2c7dcb02",
+        "source_rulings_hash": "446717fe6a506dc5cbdde7466f2fa03b316b4631df41257c9e79f498626c8ba1",
+        "authored_by": "v0.8-interaction-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "13575cf9-65c1-4861-b21e-eb2155e07766:ability:ab2",
+      "label": "Sensei's Divining Top draw ability",
+      "oracle_id": "13575cf9-65c1-4861-b21e-eb2155e07766",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {"op": "draw", "player": "$controller", "count": 1},
+        {"op": "move", "card": "$source", "destination": "library"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "draw", "library_top"],
+      "tests": ["test_senseis_divining_top_reorders_and_draws_to_library"],
+      "provenance": {
+        "source_oracle_hash": "3e5449eb60878e31d3c192f6975ab1fcdfcd92d020d467e797a509cb2c7dcb02",
+        "source_rulings_hash": "446717fe6a506dc5cbdde7466f2fa03b316b4631df41257c9e79f498626c8ba1",
+        "authored_by": "v0.8-interaction-family",
+        "review_status": "reviewed"
+      }
+    }
+  ]
+}

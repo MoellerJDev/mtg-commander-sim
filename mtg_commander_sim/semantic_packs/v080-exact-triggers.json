@@ -1,0 +1,176 @@
+{
+  "schema_version": 3,
+  "name": "v0.8-exact-deck-trigger-families",
+  "programs": [
+    {
+      "key": "5b5ef43b-13fd-4461-8d2d-18be65e9a790:spell:front",
+      "label": "Ichor Wellspring",
+      "oracle_id": "5b5ef43b-13fd-4461-8d2d-18be65e9a790",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_ichor_wellspring_draws_on_enter_and_graveyard"],
+      "provenance": {
+        "source_oracle_hash": "e4bf9909a8a6ea954ed19c53f23563407e79bb95939937099bb2d7e68ddb6cdf",
+        "source_rulings_hash": "f77e4b392f9aacd30708de28e3750edde794f0c6367885866ce625bd463afa9e",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "5b5ef43b-13fd-4461-8d2d-18be65e9a790:trigger:enter",
+      "label": "Ichor Wellspring enters",
+      "oracle_id": "5b5ef43b-13fd-4461-8d2d-18be65e9a790",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [{"op": "draw", "player": "$controller", "count": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "draw"],
+      "tests": ["test_ichor_wellspring_draws_on_enter_and_graveyard"],
+      "provenance": {
+        "source_oracle_hash": "e4bf9909a8a6ea954ed19c53f23563407e79bb95939937099bb2d7e68ddb6cdf",
+        "source_rulings_hash": "f77e4b392f9aacd30708de28e3750edde794f0c6367885866ce625bd463afa9e",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "5b5ef43b-13fd-4461-8d2d-18be65e9a790:trigger:graveyard",
+      "label": "Ichor Wellspring graveyard trigger",
+      "oracle_id": "5b5ef43b-13fd-4461-8d2d-18be65e9a790",
+      "ability_id": "trigger:graveyard",
+      "active_zone": "battlefield",
+      "event": "artifact.graveyard.self",
+      "effects": [{"op": "draw", "player": "$controller", "count": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "graveyard_trigger", "draw", "last_known_information"],
+      "tests": ["test_ichor_wellspring_draws_on_enter_and_graveyard"],
+      "provenance": {
+        "source_oracle_hash": "e4bf9909a8a6ea954ed19c53f23563407e79bb95939937099bb2d7e68ddb6cdf",
+        "source_rulings_hash": "f77e4b392f9aacd30708de28e3750edde794f0c6367885866ce625bd463afa9e",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c7f33cea-2ec8-4081-9208-a5b1d86721b3:spell:front",
+      "label": "Bastion of Remembrance",
+      "oracle_id": "c7f33cea-2ec8-4081-9208-a5b1d86721b3",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_bastion_enter_and_multiplayer_death_triggers"],
+      "provenance": {
+        "source_oracle_hash": "01f9cb664f0cfaedc8cc919bf37984304aa32c37cc80ea906c246ff3d824238a",
+        "source_rulings_hash": "0f194c208c22666b3a3f19ea1cb736e6bf43e7cd278a94cfe77dc72760247dfb",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c7f33cea-2ec8-4081-9208-a5b1d86721b3:trigger:enter",
+      "label": "Bastion of Remembrance enters",
+      "oracle_id": "c7f33cea-2ec8-4081-9208-a5b1d86721b3",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [
+        {
+          "op": "create_token",
+          "controller": "$controller",
+          "name": "Human Soldier",
+          "quantity": 1,
+          "characteristics": {
+            "type_line": "Token Creature — Human Soldier",
+            "colors": ["W"],
+            "power": "1",
+            "toughness": "1"
+          }
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "token_creation"],
+      "tests": ["test_bastion_enter_and_multiplayer_death_triggers"],
+      "provenance": {
+        "source_oracle_hash": "01f9cb664f0cfaedc8cc919bf37984304aa32c37cc80ea906c246ff3d824238a",
+        "source_rulings_hash": "0f194c208c22666b3a3f19ea1cb736e6bf43e7cd278a94cfe77dc72760247dfb",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c7f33cea-2ec8-4081-9208-a5b1d86721b3:trigger:dies",
+      "label": "Bastion of Remembrance dies trigger",
+      "oracle_id": "c7f33cea-2ec8-4081-9208-a5b1d86721b3",
+      "ability_id": "trigger:dies",
+      "active_zone": "battlefield",
+      "event": "creature.dies",
+      "event_condition": {
+        "field": "previous_controller",
+        "op": "eq",
+        "value": "$source.controller"
+      },
+      "effects": [{"op": "drain_each_opponent", "amount": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "dies_trigger", "multiplayer_life"],
+      "tests": ["test_bastion_enter_and_multiplayer_death_triggers"],
+      "provenance": {
+        "source_oracle_hash": "01f9cb664f0cfaedc8cc919bf37984304aa32c37cc80ea906c246ff3d824238a",
+        "source_rulings_hash": "0f194c208c22666b3a3f19ea1cb736e6bf43e7cd278a94cfe77dc72760247dfb",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "180e1a7e-890d-477c-80a5-da8a5f2857b3:spell:front",
+      "label": "Reckless Fireweaver",
+      "oracle_id": "180e1a7e-890d-477c-80a5-da8a5f2857b3",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_reckless_fireweaver_damages_each_opponent"],
+      "provenance": {
+        "source_oracle_hash": "6fdfc482de8b4563bcf66f9782f18d705e3e47d32317264519630e4de485f5e1",
+        "source_rulings_hash": "79bc360f1cd14b7456b95fa00bf9a0cc379a68f1c8d8d6d69a52c39c5c932f9c",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "180e1a7e-890d-477c-80a5-da8a5f2857b3:trigger:artifact-enter",
+      "label": "Reckless Fireweaver artifact-enter trigger",
+      "oracle_id": "180e1a7e-890d-477c-80a5-da8a5f2857b3",
+      "ability_id": "trigger:artifact-enter",
+      "active_zone": "battlefield",
+      "event": "artifact.enter",
+      "event_condition": {
+        "field": "controller",
+        "op": "eq",
+        "value": "$source.controller"
+      },
+      "effects": [{"op": "damage_each_opponent", "amount": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "artifact_enters_trigger", "multiplayer_damage"],
+      "tests": ["test_reckless_fireweaver_damages_each_opponent"],
+      "provenance": {
+        "source_oracle_hash": "6fdfc482de8b4563bcf66f9782f18d705e3e47d32317264519630e4de485f5e1",
+        "source_rulings_hash": "79bc360f1cd14b7456b95fa00bf9a0cc379a68f1c8d8d6d69a52c39c5c932f9c",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    }
+  ]
+}

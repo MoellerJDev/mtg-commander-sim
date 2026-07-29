@@ -497,6 +497,30 @@ class TrustedSemanticScenarioTests(unittest.TestCase):
             ],
             reason="Zulaport scenario",
         )
+        self.assertTrue(engine._stabilize())
+        packet = session.packet("pilot:B", full=True)
+        self.assertEqual("trigger.order", packet["decision"]["kind"])
+        trigger_refs = [
+            item["id"]
+            for item in packet["decision"]["ctx"]["triggers"]
+        ]
+        self.assertTrue(
+            session.act(
+                "pilot:B",
+                {
+                    "action_id": "order",
+                    "triggers": trigger_refs,
+                    "plan": "DEVELOP_ENGINE",
+                    "reason": (
+                        "Place both simultaneous Cutthroat triggers on "
+                        "the stack in a deterministic order."
+                    ),
+                },
+            ).ok
+        )
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.priority_player = None
 
         self.assertEqual(
             2,

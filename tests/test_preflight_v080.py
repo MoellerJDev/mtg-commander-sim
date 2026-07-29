@@ -120,9 +120,9 @@ class TrustedOnlyPolicyTests(unittest.TestCase):
     def test_provisional_cast_is_not_advertised(self):
         session = self.make_session(801)
         engine = session.engine
-        fabricate = self.card(engine, "Fabricate", "A")
-        engine.move_card(fabricate.object_id, "hand")
-        engine.state.players["A"].mana_pool.update({"C": 2, "U": 1})
+        engineer = self.card(engine, "Goblin Engineer", "A")
+        engine.move_card(engineer.object_id, "hand")
+        engine.state.players["A"].mana_pool.update({"C": 1, "R": 1})
         engine.state.active_player = "A"
         engine.state.phase = "precombat_main"
         engine.state.step = "main"
@@ -132,14 +132,14 @@ class TrustedOnlyPolicyTests(unittest.TestCase):
 
         self.assertFalse(
             any(
-                action.get("card") == fabricate.ref
+                action.get("card") == engineer.ref
                 for action in hints["actions"]
             )
         )
         diagnostic = hints["diagnostic"]["unresolved_cost_semantics"]
         self.assertTrue(
             any(
-                row.get("card") == fabricate.ref
+                row.get("card") == engineer.ref
                 and row.get("reason")
                 == "semantic_policy_requires_trusted"
                 for row in diagnostic
@@ -149,17 +149,17 @@ class TrustedOnlyPolicyTests(unittest.TestCase):
     def test_untrusted_resolution_pauses_without_arbiter(self):
         session = self.make_session(802)
         engine = session.engine
-        fabricate = self.card(engine, "Fabricate", "A")
-        program_key = f"{fabricate.oracle_id}:spell:front"
-        engine._remove_from_zone(fabricate)
-        fabricate.zone = "stack"
+        engineer = self.card(engine, "Goblin Engineer", "A")
+        program_key = f"{engineer.oracle_id}:spell:front"
+        engine._remove_from_zone(engineer)
+        engineer.zone = "stack"
         item = StackItem(
             stack_id="trusted-only-test",
             ref="S-untrusted",
             kind="spell",
             controller="A",
-            label=fabricate.printed_name,
-            card_object_id=fabricate.object_id,
+            label=engineer.printed_name,
+            card_object_id=engineer.object_id,
             semantic_key=program_key,
             default_destination="graveyard",
             visibility=list(engine.seats),
@@ -371,6 +371,7 @@ class NormalizedZoneEventTests(unittest.TestCase):
             semantic_events=True,
             reason="zone-event test",
         )
+        self.assertFalse(engine._stabilize())
 
         self.assertTrue(
             any(
@@ -382,7 +383,7 @@ class NormalizedZoneEventTests(unittest.TestCase):
     def test_self_dies_trigger_uses_last_known_battlefield_zone(self):
         session = self.make_session(807)
         engine = session.engine
-        hulk = self.card(engine, "Protean Hulk", "A")
+        hulk = self.card(engine, "Elves of Deep Shadow", "A")
         engine.move_card(
             hulk.object_id,
             "battlefield",
@@ -391,7 +392,7 @@ class NormalizedZoneEventTests(unittest.TestCase):
         engine.semantics.put(
             SemanticProgram(
                 key=f"{hulk.oracle_id}:test:dies",
-                label="Protean Hulk test dies",
+                label="Self dies test",
                 oracle_id=hulk.oracle_id,
                 ability_id="test:dies",
                 active_zone="battlefield",
@@ -404,13 +405,140 @@ class NormalizedZoneEventTests(unittest.TestCase):
             {"op": "sacrifice", "card": hulk.ref},
             actor="A",
         )
+        self.assertFalse(engine._stabilize())
 
         self.assertEqual("graveyard", hulk.zone)
         self.assertTrue(
             any(
-                item.label == "Protean Hulk test dies"
+                item.label == "Self dies test"
                 for item in engine.state.stack
             )
+        )
+
+    def test_declarative_event_condition_matches_normalized_context(self):
+        session = self.make_session(8071)
+        engine = session.engine
+        source = self.card(engine, "Elves of Deep Shadow", "A")
+        engine.move_card(
+            source.object_id,
+            "battlefield",
+            controller="A",
+        )
+        engine.semantics.put(
+            SemanticProgram(
+                key=f"{source.oracle_id}:test:upkeep",
+                label="Conditional upkeep test",
+                oracle_id=source.oracle_id,
+                ability_id="test:upkeep",
+                active_zone="battlefield",
+                event="step.begin",
+                event_condition={
+                    "all": [
+                        {
+                            "field": "step",
+                            "op": "eq",
+                            "value": "upkeep",
+                        },
+                        {
+                            "field": "player",
+                            "op": "eq",
+                            "value": "$source.controller",
+                        },
+                    ]
+                },
+                effects=[],
+            )
+        )
+
+        engine._dispatch_semantic_event(
+            "step.begin",
+            {"phase": "combat", "step": "beginning_combat", "player": "A"},
+        )
+        engine._dispatch_semantic_event(
+            "step.begin",
+            {"phase": "beginning", "step": "upkeep", "player": "B"},
+        )
+        self.assertFalse(engine._stabilize())
+        self.assertFalse(engine.state.stack)
+
+        engine._dispatch_semantic_event(
+            "step.begin",
+            {"phase": "beginning", "step": "upkeep", "player": "A"},
+        )
+        self.assertFalse(engine._stabilize())
+        self.assertEqual(
+            ["Conditional upkeep test"],
+            [item.label for item in engine.state.stack],
+        )
+
+    def test_simultaneous_semantic_triggers_use_apnap_and_owner_order(self):
+        session = self.make_session(8072)
+        engine = session.engine
+        source_a = self.card(engine, "Elves of Deep Shadow", "A")
+        source_b = self.card(engine, "Sensei's Divining Top", "B")
+        for source in (source_a, source_b):
+            engine.move_card(
+                source.object_id,
+                "battlefield",
+                controller=source.owner,
+            )
+        for suffix, label in (("one", "A trigger one"), ("two", "A trigger two")):
+            engine.semantics.put(
+                SemanticProgram(
+                    key=f"{source_a.oracle_id}:test:{suffix}",
+                    label=label,
+                    oracle_id=source_a.oracle_id,
+                    ability_id=f"test:{suffix}",
+                    active_zone="battlefield",
+                    event="test.simultaneous",
+                    effects=[],
+                )
+            )
+        engine.semantics.put(
+            SemanticProgram(
+                key=f"{source_b.oracle_id}:test:three",
+                label="B trigger",
+                oracle_id=source_b.oracle_id,
+                ability_id="test:three",
+                active_zone="battlefield",
+                event="test.simultaneous",
+                effects=[],
+            )
+        )
+        engine.state.active_player = "A"
+        engine.state.config.auto_pass_empty_priority = False
+
+        engine._dispatch_semantic_event(
+            "test.simultaneous",
+            {},
+            sources=[source_a, source_b],
+        )
+        self.assertTrue(engine._stabilize())
+        packet = session.packet("pilot:A", full=True)
+        self.assertEqual("trigger.order", packet["decision"]["kind"])
+        by_label = {
+            item["label"]: item["id"]
+            for item in packet["decision"]["ctx"]["triggers"]
+        }
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "order",
+                "triggers": [
+                    by_label["A trigger two"],
+                    by_label["A trigger one"],
+                ],
+                "plan": "DEVELOP_ENGINE",
+                "reason": (
+                    "Choose A's bottom-to-top order before the nonactive "
+                    "player's trigger is placed."
+                ),
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(
+            ["A trigger two", "A trigger one", "B trigger"],
+            [item.label for item in engine.state.stack],
         )
 
     def test_hybrid_cast_cost_exposes_only_payable_variants(self):

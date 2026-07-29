@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mtg-commander-sim.local/schemas/semantic-program-v2.json",
-  "title": "Reusable semantic program v2",
+  "$id": "https://mtg-commander-sim.local/schemas/semantic-program-v3.json",
+  "title": "Reusable semantic program v3",
   "type": "object",
   "required": [
     "key",
@@ -35,6 +35,8 @@
     "tests": {"type": "array", "items": {"type": "string"}},
     "handlers": {"type": "array", "items": {"type": "object"}},
     "target_schema": {"type": ["object", "null"]},
+    "cost_schema": {"type": ["object", "null"]},
+    "event_condition": {"type": ["object", "null"]},
     "coverage": {"type": "array", "items": {"type": "string"}}
   },
   "additionalProperties": false

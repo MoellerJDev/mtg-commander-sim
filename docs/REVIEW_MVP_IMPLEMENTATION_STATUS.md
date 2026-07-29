@@ -79,20 +79,24 @@ and beyond D27 with both `suppressed_meaningful_windows` and
 
 Duplicated-list fixtures must always retain `matchup_evidence=false`.
 
-Current implementation checkpoint: 153 tests pass. Preflight v2 records
+Current implementation checkpoint: 163 tests pass. Preflight v2 records
 canonical Oracle/rulings provenance, exact list/source fingerprints, material
 categories, scenario witnesses, and fail-closed drift. Rulings hashes are
 content-canonical and are independent of SQLite import order. The trusted-only
 runtime, normalized zone-event dispatch, hybrid/X/convoke/improvise/affinity
 cost plans, mandatory sacrifice/discard costs, multi-zone/aggregate searches,
 Mishra Warform target capture, Gonti energy payment, and simultaneous
-Zulaport drains have focused positive and negative coverage.
+Zulaport drains have focused positive and negative coverage. Declarative event
+conditions, batched AP/NAP trigger placement, same-controller trigger-order
+decisions, and exact Ichor Wellspring, Bastion of Remembrance, Reckless
+Fireweaver, Bojuka Bog, Reanimate, Sylvan Safekeeper, Sensei's Divining Top,
+Three Visits, Nature's Lore, and Fabricate families are also covered.
 
 Current full-database preflight (100 cards per list):
 
-- Zimone and Dina: 60 fully playable, 8 partial, 32 unresolved, zero source
+- Zimone and Dina: 66 fully playable, 6 partial, 28 unresolved, zero source
   drift.
-- Mishra, Eminent One: 58 fully playable, 3 partial, 39 unresolved, zero
+- Mishra, Eminent One: 62 fully playable, 1 partial, 37 unresolved, zero
   source drift.
 
 This is an implementation checkpoint, not semantic closure and not game

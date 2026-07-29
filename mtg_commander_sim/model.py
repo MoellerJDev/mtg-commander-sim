@@ -357,6 +357,9 @@ class GameState:
     step: str = "mulligan"
     stack: list[StackItem] = field(default_factory=list)
     delayed_triggers: list[DelayedTrigger] = field(default_factory=list)
+    pending_trigger_batches: list[dict[str, Any]] = field(
+        default_factory=list
+    )
     combat: CombatState = field(default_factory=CombatState)
     events: list[Event] = field(default_factory=list)
     annotations: list[dict[str, Any]] = field(default_factory=list)
@@ -402,6 +405,9 @@ class GameState:
             "step": self.step,
             "stack": [item.to_dict() for item in self.stack],
             "delayed_triggers": [trigger.to_dict() for trigger in self.delayed_triggers],
+            "pending_trigger_batches": copy.deepcopy(
+                self.pending_trigger_batches
+            ),
             "combat": self.combat.to_dict(),
             "events": [event.to_dict() for event in self.events],
             "annotations": copy.deepcopy(self.annotations),
@@ -444,6 +450,9 @@ class GameState:
             step=str(data.get("step", "mulligan")),
             stack=[StackItem.from_dict(item) for item in data.get("stack", [])],
             delayed_triggers=[DelayedTrigger.from_dict(item) for item in data.get("delayed_triggers", [])],
+            pending_trigger_batches=copy.deepcopy(
+                data.get("pending_trigger_batches", [])
+            ),
             combat=CombatState.from_dict(data.get("combat", {})),
             events=[Event.from_dict(event) for event in data.get("events", [])],
             annotations=list(data.get("annotations", [])),
