@@ -458,14 +458,18 @@ class CommanderEngine:
             + list(overrides.get("keywords") or [])
             + list(card.temporary_keywords)
         )
-        temporary_types = [
+        added_types = [
+            str(value).strip()
+            for value in card.annotations.get("continuous_add_types", [])
+            if str(value).strip()
+        ] + [
             str(value).strip()
             for value in dict(
                 card.annotations.get("until_end_of_turn") or {}
             ).get("add_types", [])
             if str(value).strip()
         ]
-        if temporary_types:
+        if added_types:
             type_line = str(base.get("type_line") or "")
             normalized = type_line.replace("—", "-")
             left, separator, right = normalized.partition("-")
@@ -474,7 +478,7 @@ class CommanderEngine:
             }
             additions = [
                 value
-                for value in temporary_types
+                for value in added_types
                 if value.casefold() not in existing
             ]
             if additions:
@@ -500,6 +504,46 @@ class CommanderEngine:
             base["keywords"] = unique_preserving_order(
                 [*base["keywords"], "Haste"]
             )
+        if card.zone == "battlefield":
+            card_types, _, _ = self._type_parts(
+                str(base.get("type_line") or "")
+            )
+            for permanent_id in self.state.players[
+                card.controller
+            ].zones["battlefield"]:
+                source = self.state.cards[permanent_id]
+                if source.controller != card.controller or source.phased_out:
+                    continue
+                source_record = self.card_record(source)
+                source_oracle = (
+                    str(source_record.oracle_text or "").casefold()
+                    if source_record is not None
+                    else str(
+                        dict(
+                            source.annotations.get(
+                                "token_characteristics", {}
+                            )
+                        ).get("oracle_text")
+                        or ""
+                    ).casefold()
+                )
+                if (
+                    "artifact" in card_types
+                    and "artifacts you control have hexproof"
+                    in source_oracle
+                ):
+                    base["keywords"] = unique_preserving_order(
+                        [*base["keywords"], "Hexproof"]
+                    )
+                if (
+                    card.is_token
+                    and "creature" in card_types
+                    and "creature tokens you control have haste"
+                    in source_oracle
+                ):
+                    base["keywords"] = unique_preserving_order(
+                        [*base["keywords"], "Haste"]
+                    )
         return base
 
     def display_name(self, object_id: str) -> str:
@@ -602,6 +646,7 @@ class CommanderEngine:
         card.attached_to = None
         card.attachments.clear()
         card.phased_out = False
+        card.annotations.pop("continuous_add_types", None)
         if destination != "battlefield":
             card.controller = card.owner
             card.counters.clear()
@@ -2887,6 +2932,7 @@ class CommanderEngine:
             changed_objects=[card.object_id],
             changed_players=[seat],
         )
+        cast_trigger_batch: list[StackItem] = []
         for (
             paid_card,
             paid_origin,
@@ -2902,7 +2948,30 @@ class CommanderEngine:
                 departure_sources=deferred_cost_sources,
                 departure_source_zones=deferred_cost_source_zones,
                 reason=f"{card.printed_name} additional cost",
+                trigger_batch=cast_trigger_batch,
             )
+        cast_types, _, _ = self._type_parts(type_line)
+        cast_context = {
+            "card": card.ref,
+            "controller": seat,
+            "player": seat,
+            "from": origin,
+            "to": "stack",
+            "types": sorted(cast_types),
+            "stack": item.ref,
+        }
+        self._dispatch_semantic_event(
+            "spell.cast",
+            cast_context,
+            trigger_batch=cast_trigger_batch,
+        )
+        if "artifact" in cast_types:
+            self._dispatch_semantic_event(
+                "artifact.cast",
+                cast_context,
+                trigger_batch=cast_trigger_batch,
+            )
+        self._enqueue_semantic_trigger_batch(cast_trigger_batch)
         self.state.priority_player = seat
         self.state.priority_passes = []
         self.state.players[seat].yield_policy = YieldPolicy()
@@ -3226,6 +3295,10 @@ class CommanderEngine:
             source.tapped = False
 
         paid_objects = self._pay_ability_choice_costs(seat, source, ability, response)
+        paid_object_snapshots = [
+            self._target_snapshot(self.state.cards[object_id].ref)
+            for object_id in paid_objects
+        ]
         if ability.life_payment:
             if self.state.players[seat].life < ability.life_payment:
                 raise GameRuleError("Cannot pay more life than the player has")
@@ -3337,6 +3410,17 @@ class CommanderEngine:
                 "target_snapshots": target_snapshots,
                 "targets_revalidated": False,
                 "targets_chosen_at_creation": True,
+                "cost_objects": [
+                    self.state.cards[object_id].ref
+                    for object_id in paid_objects
+                ],
+                "cost_object_snapshots": paid_object_snapshots,
+                "cost_mana_value_plus_one": (
+                    float(paid_object_snapshots[0].get("mana_value", 0))
+                    + 1
+                    if len(paid_object_snapshots) == 1
+                    else None
+                ),
             },
         )
         self.state.stack.append(item)
@@ -5087,6 +5171,33 @@ class CommanderEngine:
                     )
                 )[0]
             )
+        elif (
+            field
+            == "source_controller_controls_highest_artifact_mana_value"
+        ):
+            controlled_values: list[float] = []
+            all_values: list[float] = []
+            for active_seat in self.active_seats:
+                for object_id in self.state.players[
+                    active_seat
+                ].zones["battlefield"]:
+                    permanent = self.state.cards[object_id]
+                    if permanent.phased_out:
+                        continue
+                    data = self._effective_card_data(permanent)
+                    types, _, _ = self._type_parts(
+                        str(data.get("type_line") or "")
+                    )
+                    if "artifact" not in types:
+                        continue
+                    value = float(data.get("mana_value") or 0)
+                    all_values.append(value)
+                    if permanent.controller == source.controller:
+                        controlled_values.append(value)
+            actual = bool(
+                controlled_values
+                and max(controlled_values) == max(all_values)
+            )
         else:
             actual = context.get(field)
         expected = self._semantic_event_value(
@@ -5103,6 +5214,8 @@ class CommanderEngine:
             return actual in (expected or [])
         if op == "not_in":
             return actual not in (expected or [])
+        if op == "contains_any":
+            return bool(set(actual or []).intersection(expected or []))
         if op == "gte":
             return actual is not None and actual >= expected
         if op == "gt":
@@ -5802,6 +5915,20 @@ class CommanderEngine:
             globally_used: set[str],
         ) -> bool:
             if index >= len(slots):
+                for left_group, right_group in plan.same_player_groups:
+                    left = selected.get(left_group, [])
+                    right = selected.get(right_group, [])
+                    if not left or not right:
+                        return False
+                    if any(
+                        self._target_snapshot(left_ref).get("controller")
+                        != self._target_snapshot(right_ref).get(
+                            "controller"
+                        )
+                        for left_ref in left
+                        for right_ref in right
+                    ):
+                        return False
                 return True
             group = slots[index]
             for ref in candidates.get(group.group_id, ()):
@@ -6024,6 +6151,22 @@ class CommanderEngine:
                         "Target groups require globally distinct targets"
                     )
                 used_global.update(chosen)
+            for left_group, right_group in plan.same_player_groups:
+                left = grouped.get(left_group, [])
+                right = grouped.get(right_group, [])
+                if not left or not right:
+                    raise GameRuleError(
+                        "Related target groups must both contain a target"
+                    )
+                if any(
+                    self._target_snapshot(left_ref).get("controller")
+                    != self._target_snapshot(right_ref).get("controller")
+                    for left_ref in left
+                    for right_ref in right
+                ):
+                    raise GameRuleError(
+                        "Related targets must belong to the same player"
+                    )
             flattened = [
                 ref
                 for group in plan.groups
@@ -6251,6 +6394,39 @@ class CommanderEngine:
             )
             return
         program = self.semantics.get(item.semantic_key)
+        if (
+            program is not None
+            and "intervening_condition" in program.coverage
+            and program.event_condition is not None
+        ):
+            source = self.state.cards.get(item.source_object_id or "")
+            condition_holds = bool(
+                source is not None
+                and source.zone == program.active_zone
+                and self._semantic_event_condition_matches(
+                    program.event_condition,
+                    source=source,
+                    context=item.context,
+                )
+            )
+            if not condition_holds:
+                self.state.stack.remove(item)
+                self._log(
+                    item.controller,
+                    "stack.trigger.removed",
+                    (
+                        f"Removed {item.ref}: {item.label}; its intervening "
+                        "condition was false on resolution."
+                    ),
+                    {
+                        "stack": item.ref,
+                        "reason": "intervening_condition_false",
+                    },
+                    importance=2,
+                )
+                if not self._stabilize():
+                    self._grant_priority(self.state.active_player)
+                return
         trusted_generic_resolution = False
         if (
             program is None
@@ -6852,6 +7028,8 @@ class CommanderEngine:
             return item.x_value or 0
         if value == "$turn_sequence":
             return self.state.turn_sequence
+        if value.startswith("$context."):
+            return item.context.get(value.removeprefix("$context."))
         if value == "$targets":
             return [
                 target
@@ -6955,6 +7133,7 @@ class CommanderEngine:
                 "choose_mana",
                 "counter_unless_pay",
                 "draw_optional_land",
+                "fabricate",
                 "choose_warform",
                 "look_reorder_top",
                 "pay_or_lose",
@@ -7043,6 +7222,46 @@ class CommanderEngine:
                                 "field": "card_name",
                                 "type": "card_name",
                                 "nonempty": True,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "fabricate":
+            source = self.state.cards.get(
+                item.source_object_id or item.card_object_id or ""
+            )
+            legal_values = ["token"]
+            if source is not None and source.zone == "battlefield":
+                legal_values.insert(0, "counter")
+            effect = {
+                **dict(effect),
+                "_legal_values": legal_values,
+            }
+            context.update(
+                {
+                    "prompt": (
+                        "Choose whether to put +1/+1 counter(s) on the "
+                        "source or create Servo token(s)."
+                    ),
+                    "options": [
+                        {
+                            "id": value,
+                            "label": (
+                                "Put +1/+1 counters on this creature"
+                                if value == "counter"
+                                else "Create Servo tokens"
+                            ),
+                        }
+                        for value in legal_values
+                    ],
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "choice",
+                                "legal_values": legal_values,
                             },
                         }
                     ],
@@ -7503,6 +7722,49 @@ class CommanderEngine:
                 importance=2,
                 changed_objects=[source.object_id],
             )
+        elif op == "fabricate":
+            choice = str(response.get("choice") or "")
+            legal_values = {
+                str(value)
+                for value in effect.get("_legal_values") or []
+            }
+            if choice not in legal_values:
+                raise GameRuleError(
+                    "Choose an authoritative fabricate option"
+                )
+            amount = max(0, int(effect.get("amount", 1)))
+            source = self.state.cards.get(
+                item.source_object_id or item.card_object_id or ""
+            )
+            if choice == "counter":
+                if source is None or source.zone != "battlefield":
+                    raise GameRuleError(
+                        "The fabricate source is no longer on the battlefield"
+                    )
+                source.counters["+1/+1"] = (
+                    int(source.counters.get("+1/+1", 0)) + amount
+                )
+                self._log(
+                    seat,
+                    "fabricate.counter",
+                    f"{source.ref} received {amount} +1/+1 counter(s).",
+                    {"source": source.ref, "amount": amount},
+                    importance=2,
+                    changed_objects=[source.object_id],
+                )
+            else:
+                self.create_token(
+                    seat,
+                    name="Servo",
+                    quantity=amount,
+                    characteristics={
+                        "type_line": "Artifact Creature — Servo",
+                        "power": "1",
+                        "toughness": "1",
+                        "colors": [],
+                    },
+                    reason=item.label,
+                )
         elif op == "choose_objects":
             selected = [
                 str(value)
@@ -9254,6 +9516,55 @@ class CommanderEngine:
                 reason=reason,
                 semantic_events=True,
             )
+        if op == "welder_exchange":
+            battlefield_ref = effect.get("battlefield_card")
+            graveyard_ref = effect.get("graveyard_card")
+            if not battlefield_ref or not graveyard_ref:
+                return None
+            try:
+                battlefield_card = self._resolve_object(
+                    actor,
+                    str(battlefield_ref),
+                    zones={"battlefield"},
+                )
+                graveyard_card = self._resolve_object(
+                    actor,
+                    str(graveyard_ref),
+                    zones={"graveyard"},
+                )
+            except GameRuleError:
+                return None
+            battlefield_types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(battlefield_card).get(
+                        "type_line"
+                    )
+                    or ""
+                )
+            )
+            graveyard_types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(graveyard_card).get(
+                        "type_line"
+                    )
+                    or ""
+                )
+            )
+            if (
+                "artifact" not in battlefield_types
+                or "artifact" not in graveyard_types
+                or battlefield_card.controller != graveyard_card.owner
+            ):
+                return None
+            self._move_cards_simultaneously(
+                [
+                    (battlefield_card.object_id, "graveyard"),
+                    (graveyard_card.object_id, "battlefield"),
+                ],
+                reason=reason,
+                log=True,
+            )
+            return [battlefield_card.ref, graveyard_card.ref]
         if op == "mill":
             seat = str(effect.get("player") or actor)
             self._require_seat(seat, in_game=True)
@@ -9960,6 +10271,43 @@ class CommanderEngine:
                 actor,
                 "permanent.type",
                 f"{card.ref} became a {card_type} in addition to its other types until end of turn.",
+                {
+                    "object": card.ref,
+                    "type": card_type,
+                    "reason": reason,
+                },
+                importance=1,
+                changed_objects=[card.object_id],
+            )
+            return card.ref
+        if op == "add_type":
+            card = self._resolve_object(
+                actor,
+                str(effect["card"]),
+                zones={"battlefield"},
+            )
+            card_type = str(effect.get("type") or "").strip().title()
+            if not card_type:
+                raise GameRuleError("Continuous type effect requires a type")
+            card.annotations["continuous_add_types"] = (
+                unique_preserving_order(
+                    [
+                        *list(
+                            card.annotations.get(
+                                "continuous_add_types", []
+                            )
+                        ),
+                        card_type,
+                    ]
+                )
+            )
+            self._log(
+                actor,
+                "permanent.type",
+                (
+                    f"{card.ref} became a {card_type} in addition to its "
+                    "other types."
+                ),
                 {
                     "object": card.ref,
                     "type": card_type,

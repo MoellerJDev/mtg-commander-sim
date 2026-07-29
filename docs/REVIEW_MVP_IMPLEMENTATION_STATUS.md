@@ -107,12 +107,17 @@ include basic-land fetch predicates, library-position moves, milling, live
 token-history activation checks, declarative permanent-type counts, temporary
 type changes, restricted mana derived from live opposing lands, and dynamic
 permanent-color mana.
+The artifact-engine tranche additionally closes Arcum Dagsson, Sai, Padeem,
+Marionette Apprentice, Portal to Phyrexia, Goblin Welder, and Repurposing Bay.
+It adds batched cast events, plural sacrifice costs, intervening-if
+revalidation, related multi-target constraints, Fabricate choices, exact
+APNAP sacrifice, persistent type additions, and cost-object value binding.
 
 Current full-database preflight (100 cards per list):
 
 - Zimone and Dina: 74 fully playable, 4 partial, 22 unresolved, zero source
   drift.
-- Mishra, Eminent One: 66 fully playable, 0 partial, 34 unresolved, zero
+- Mishra, Eminent One: 73 fully playable, 0 partial, 27 unresolved, zero
   source drift.
 
 This is an implementation checkpoint, not semantic closure and not game

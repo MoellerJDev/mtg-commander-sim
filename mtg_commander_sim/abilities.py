@@ -23,7 +23,7 @@ _PAY_ENERGY = re.compile(
 )
 _SACRIFICE_CHOICE = re.compile(
     r"^sacrifice\s+(?:(?P<another>another)\s+|(?P<count>a|an|one|two|three|\d+)\s+)"
-    r"(?P<kind>creature|artifact|enchantment|land|permanent)(?:\s+you\s+control)?$",
+    r"(?P<kind>creature|artifact|enchantment|land|permanent)s?(?:\s+you\s+control)?$",
     re.IGNORECASE,
 )
 _DISCARD_CHOICE = re.compile(

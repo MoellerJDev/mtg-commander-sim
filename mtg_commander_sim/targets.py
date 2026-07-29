@@ -198,6 +198,7 @@ class TargetPlan:
     groups: tuple[TargetGroup, ...]
     modes: tuple[str, ...] = ()
     globally_distinct: bool = False
+    same_player_groups: tuple[tuple[str, str], ...] = ()
 
 
 def available_modes(schema: Mapping[str, Any]) -> tuple[str, ...]:
@@ -251,6 +252,11 @@ def target_plan(
         groups=parsed,
         modes=selected_modes,
         globally_distinct=bool(schema.get("globally_distinct", False)),
+        same_player_groups=tuple(
+            (str(value[0]), str(value[1]))
+            for value in schema.get("same_player_groups", [])
+            if isinstance(value, (list, tuple)) and len(value) == 2
+        ),
     )
 
 

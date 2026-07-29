@@ -18,6 +18,7 @@ SEMANTIC_SCHEMA_VERSION = 3
 BUILTIN_PACK_DIRECTORY = Path(__file__).resolve().parent / "semantic_packs"
 VALID_EFFECT_OPERATIONS = {
     "add_counter_selected",
+    "add_type",
     "add_type_until_end_of_turn",
     "bounce",
     "change_control",
@@ -48,6 +49,7 @@ VALID_EFFECT_OPERATIONS = {
     "drain_each_opponent",
     "draw",
     "draw_optional_land",
+    "fabricate",
     "energy",
     "exile",
     "exile_all",
@@ -76,6 +78,7 @@ VALID_EFFECT_OPERATIONS = {
     "tap",
     "toxic_deluge",
     "untap",
+    "welder_exchange",
     "pay_or_lose",
     "proliferate",
     "pump_controlled_creatures",
