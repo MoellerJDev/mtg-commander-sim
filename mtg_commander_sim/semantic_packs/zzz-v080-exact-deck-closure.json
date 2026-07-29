@@ -2338,6 +2338,372 @@
         "authored_by": "v0.8-exact-deck-closure",
         "review_status": "reviewed"
       }
+    },
+    {
+      "key": "ea9f4de3-fc35-435a-8dff-a5657d14a9bd:spell:front",
+      "label": "Daretti, Scrap Savant",
+      "oracle_id": "ea9f4de3-fc35-435a-8dff-a5657d14a9bd",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "static_ability", "commander_eligibility"],
+      "tests": ["test_daretti_loyalty_exchange_and_emblem_return"],
+      "provenance": {
+        "source_oracle_hash": "4c8c466a6a8bc086a492aef46a2f9eb9346851a2722301718658da76613fb2bd",
+        "source_rulings_hash": "d46040b62c16491f4b48dda7d8919f60ab32c4d883236281d7176bf5ac6568e9",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ea9f4de3-fc35-435a-8dff-a5657d14a9bd:ability:ab1",
+      "label": "Daretti +2",
+      "oracle_id": "ea9f4de3-fc35-435a-8dff-a5657d14a9bd",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [{"op": "discard_draw_up_to", "maximum": 2}],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "loyalty_cost", "private_discard", "private_draw"],
+      "tests": ["test_daretti_loyalty_exchange_and_emblem_return"],
+      "provenance": {
+        "source_oracle_hash": "4c8c466a6a8bc086a492aef46a2f9eb9346851a2722301718658da76613fb2bd",
+        "source_rulings_hash": "d46040b62c16491f4b48dda7d8919f60ab32c4d883236281d7176bf5ac6568e9",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ea9f4de3-fc35-435a-8dff-a5657d14a9bd:ability:ab2",
+      "label": "Daretti -2",
+      "oracle_id": "ea9f4de3-fc35-435a-8dff-a5657d14a9bd",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "groups": [{
+          "id": "artifact_card",
+          "zones": ["graveyard"],
+          "categories": ["card"],
+          "owner": "you",
+          "artifact": true,
+          "count": 1
+        }]
+      },
+      "effects": [{"op": "daretti_exchange", "card": "$target.0"}],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "loyalty_cost", "resolution_sacrifice", "graveyard_target", "reanimation"],
+      "tests": ["test_daretti_loyalty_exchange_and_emblem_return"],
+      "provenance": {
+        "source_oracle_hash": "4c8c466a6a8bc086a492aef46a2f9eb9346851a2722301718658da76613fb2bd",
+        "source_rulings_hash": "d46040b62c16491f4b48dda7d8919f60ab32c4d883236281d7176bf5ac6568e9",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ea9f4de3-fc35-435a-8dff-a5657d14a9bd:ability:ab3",
+      "label": "Daretti -10",
+      "oracle_id": "ea9f4de3-fc35-435a-8dff-a5657d14a9bd",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [{"op": "create_daretti_emblem"}],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "loyalty_cost", "emblem", "triggered_ability", "delayed_trigger"],
+      "tests": ["test_daretti_loyalty_exchange_and_emblem_return"],
+      "provenance": {
+        "source_oracle_hash": "4c8c466a6a8bc086a492aef46a2f9eb9346851a2722301718658da76613fb2bd",
+        "source_rulings_hash": "d46040b62c16491f4b48dda7d8919f60ab32c4d883236281d7176bf5ac6568e9",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "88075828-a76e-412d-b738-182f50e3a133:spell:front",
+      "label": "Demonic Junker",
+      "oracle_id": "88075828-a76e-412d-b738-182f50e3a133",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "affinity", "keyword_ability", "crew"],
+      "tests": ["test_demonic_junker_targets_per_player_and_crews"],
+      "provenance": {
+        "source_oracle_hash": "907271a8ca15afbe327acb87e04f0aef17bc859a18d591b1d9df59064e0be866",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "88075828-a76e-412d-b738-182f50e3a133:trigger:enter",
+      "label": "Demonic Junker enters",
+      "oracle_id": "88075828-a76e-412d-b738-182f50e3a133",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "target_schema": {
+        "globally_distinct": true,
+        "groups": [
+          {"id": "seat_a", "zones": ["battlefield"], "categories": ["permanent"], "creature": true, "controller_seat": "A", "min": 0, "max": 1},
+          {"id": "seat_b", "zones": ["battlefield"], "categories": ["permanent"], "creature": true, "controller_seat": "B", "min": 0, "max": 1},
+          {"id": "seat_c", "zones": ["battlefield"], "categories": ["permanent"], "creature": true, "controller_seat": "C", "min": 0, "max": 1},
+          {"id": "seat_d", "zones": ["battlefield"], "categories": ["permanent"], "creature": true, "controller_seat": "D", "min": 0, "max": 1}
+        ]
+      },
+      "effects": [{"op": "demonic_junker_resolve", "source": "$source", "cards": "$targets"}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "per_player_optional_targets", "simultaneous_destroy", "conditional_counters"],
+      "tests": ["test_demonic_junker_targets_per_player_and_crews"],
+      "provenance": {
+        "source_oracle_hash": "907271a8ca15afbe327acb87e04f0aef17bc859a18d591b1d9df59064e0be866",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "88075828-a76e-412d-b738-182f50e3a133:ability:crew",
+      "label": "Demonic Junker crew",
+      "oracle_id": "88075828-a76e-412d-b738-182f50e3a133",
+      "ability_id": "ability:crew",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [{"op": "add_type_until_end_of_turn", "card": "$source", "type": "Creature"}],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "crew", "aggregate_power_cost", "temporary_type"],
+      "tests": ["test_demonic_junker_targets_per_player_and_crews"],
+      "provenance": {
+        "source_oracle_hash": "907271a8ca15afbe327acb87e04f0aef17bc859a18d591b1d9df59064e0be866",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "883a4180-9ede-4249-a4b8-3a29c998fb63:spell:front",
+      "label": "Tithing Blade",
+      "oracle_id": "883a4180-9ede-4249-a4b8-3a29c998fb63",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "keyword_ability", "craft", "transform"],
+      "tests": ["test_tithing_blade_apnap_craft_and_back_upkeep"],
+      "provenance": {
+        "source_oracle_hash": "7e66588288ac7d6afbf81fe6b7cb957ca60140f336d4c314bb43125540a3bf16",
+        "source_rulings_hash": "56ba94da8ef4eab671c98f76f5516b94383bcad1366e80173ee946d54ed822b5",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "883a4180-9ede-4249-a4b8-3a29c998fb63:trigger:front-enter",
+      "label": "Tithing Blade enters",
+      "oracle_id": "883a4180-9ede-4249-a4b8-3a29c998fb63",
+      "ability_id": "trigger:front-enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "event_condition": {"field": "source_active_face", "op": "eq", "value": "Tithing Blade"},
+      "effects": [{
+        "op": "choose_cards_apnap",
+        "players": "opponents",
+        "actor": "$controller",
+        "zone": "battlefield",
+        "filter": {"type": "creature", "controlled": true},
+        "count": 1,
+        "then": "sacrifice",
+        "prompt": "Choose a creature to sacrifice."
+      }],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "apnap_choice", "simultaneous_sacrifice"],
+      "tests": ["test_tithing_blade_apnap_craft_and_back_upkeep"],
+      "provenance": {
+        "source_oracle_hash": "7e66588288ac7d6afbf81fe6b7cb957ca60140f336d4c314bb43125540a3bf16",
+        "source_rulings_hash": "56ba94da8ef4eab671c98f76f5516b94383bcad1366e80173ee946d54ed822b5",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "883a4180-9ede-4249-a4b8-3a29c998fb63:ability:craft_battlefield",
+      "label": "Tithing Blade craft with battlefield creature",
+      "oracle_id": "883a4180-9ede-4249-a4b8-3a29c998fb63",
+      "ability_id": "ability:craft_battlefield",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [{"op": "return_transformed", "card": "$source"}],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "craft", "mana_cost", "exile_cost", "transform"],
+      "tests": ["test_tithing_blade_apnap_craft_and_back_upkeep"],
+      "provenance": {
+        "source_oracle_hash": "7e66588288ac7d6afbf81fe6b7cb957ca60140f336d4c314bb43125540a3bf16",
+        "source_rulings_hash": "56ba94da8ef4eab671c98f76f5516b94383bcad1366e80173ee946d54ed822b5",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "883a4180-9ede-4249-a4b8-3a29c998fb63:ability:craft_graveyard",
+      "label": "Tithing Blade craft with graveyard creature",
+      "oracle_id": "883a4180-9ede-4249-a4b8-3a29c998fb63",
+      "ability_id": "ability:craft_graveyard",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [{"op": "return_transformed", "card": "$source"}],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "craft", "mana_cost", "exile_cost", "transform"],
+      "tests": ["test_tithing_blade_apnap_craft_and_back_upkeep"],
+      "provenance": {
+        "source_oracle_hash": "7e66588288ac7d6afbf81fe6b7cb957ca60140f336d4c314bb43125540a3bf16",
+        "source_rulings_hash": "56ba94da8ef4eab671c98f76f5516b94383bcad1366e80173ee946d54ed822b5",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "883a4180-9ede-4249-a4b8-3a29c998fb63:trigger:back-upkeep",
+      "label": "Consuming Sepulcher upkeep",
+      "oracle_id": "883a4180-9ede-4249-a4b8-3a29c998fb63",
+      "ability_id": "trigger:back-upkeep",
+      "active_zone": "battlefield",
+      "event": "step.begin",
+      "event_condition": {
+        "all": [
+          {"field": "source_active_face", "op": "eq", "value": "Consuming Sepulcher"},
+          {"field": "player", "op": "eq", "value": "$source.controller"},
+          {"field": "step", "op": "eq", "value": "upkeep"}
+        ]
+      },
+      "effects": [{"op": "drain_each_opponent", "amount": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "upkeep_trigger", "multiplayer_drain"],
+      "tests": ["test_tithing_blade_apnap_craft_and_back_upkeep"],
+      "provenance": {
+        "source_oracle_hash": "7e66588288ac7d6afbf81fe6b7cb957ca60140f336d4c314bb43125540a3bf16",
+        "source_rulings_hash": "56ba94da8ef4eab671c98f76f5516b94383bcad1366e80173ee946d54ed822b5",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "dbe792f9-22be-4972-b418-99a6190c4421:spell:front",
+      "label": "Transmute Artifact",
+      "oracle_id": "dbe792f9-22be-4972-b418-99a6190c4421",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [{"op": "transmute_artifact", "stage": "sacrifice"}],
+      "destination": "graveyard",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "resolution_sacrifice", "library_search", "derived_mana_payment", "fail_to_find"],
+      "tests": ["test_transmute_artifact_resolution_payment_and_decline"],
+      "provenance": {
+        "source_oracle_hash": "1df0b1374de7b84b50138f1ff38de29f39913f9985d699e90c2b4b1508a037fd",
+        "source_rulings_hash": "d00967f3582e0b6c973376ae55851174e53fefa611284ef758f0756309eebbb5",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "4c6a0c30-b547-4eff-8ff4-0ca25803c076:trigger:chapter-1",
+      "label": "Urza's Saga chapter I",
+      "oracle_id": "4c6a0c30-b547-4eff-8ff4-0ca25803c076",
+      "ability_id": "trigger:chapter-1",
+      "active_zone": "battlefield",
+      "event": "saga.chapter.1",
+      "effects": [{"op": "grant_urzas_saga_chapter", "source": "$source", "chapter": 1}],
+      "trust_level": "trusted",
+      "coverage": ["static_ability", "saga_chapter", "lore_counter", "granted_mana_ability"],
+      "tests": ["test_urzas_saga_chapters_construct_search_and_sacrifice"],
+      "provenance": {
+        "source_oracle_hash": "bafb55185281b4f6700f864fc0f755a970aa98d52bb40f2e5d7113e427490b9e",
+        "source_rulings_hash": "163e11dd783eb41b1457a6d822579f432c99f7a98cd48660423676396017cf70",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "4c6a0c30-b547-4eff-8ff4-0ca25803c076:trigger:chapter-2",
+      "label": "Urza's Saga chapter II",
+      "oracle_id": "4c6a0c30-b547-4eff-8ff4-0ca25803c076",
+      "ability_id": "trigger:chapter-2",
+      "active_zone": "battlefield",
+      "event": "saga.chapter.2",
+      "effects": [{"op": "grant_urzas_saga_chapter", "source": "$source", "chapter": 2}],
+      "trust_level": "trusted",
+      "coverage": ["static_ability", "saga_chapter", "lore_counter", "granted_activated_ability"],
+      "tests": ["test_urzas_saga_chapters_construct_search_and_sacrifice"],
+      "provenance": {
+        "source_oracle_hash": "bafb55185281b4f6700f864fc0f755a970aa98d52bb40f2e5d7113e427490b9e",
+        "source_rulings_hash": "163e11dd783eb41b1457a6d822579f432c99f7a98cd48660423676396017cf70",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "4c6a0c30-b547-4eff-8ff4-0ca25803c076:ability:saga_construct",
+      "label": "Urza's Saga Construct ability",
+      "oracle_id": "4c6a0c30-b547-4eff-8ff4-0ca25803c076",
+      "ability_id": "ability:saga_construct",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [{
+        "op": "create_token",
+        "controller": "$controller",
+        "name": "Construct",
+        "characteristics": {
+          "type_line": "Token Artifact Creature — Construct",
+          "power": "0",
+          "toughness": "0",
+          "colors": [],
+          "oracle_text": "This token gets +1/+1 for each artifact you control."
+        }
+      }],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "mana_cost", "tap_cost", "construct_token", "continuous_power_toughness"],
+      "tests": ["test_urzas_saga_chapters_construct_search_and_sacrifice"],
+      "provenance": {
+        "source_oracle_hash": "bafb55185281b4f6700f864fc0f755a970aa98d52bb40f2e5d7113e427490b9e",
+        "source_rulings_hash": "163e11dd783eb41b1457a6d822579f432c99f7a98cd48660423676396017cf70",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "4c6a0c30-b547-4eff-8ff4-0ca25803c076:trigger:chapter-3",
+      "label": "Urza's Saga chapter III",
+      "oracle_id": "4c6a0c30-b547-4eff-8ff4-0ca25803c076",
+      "ability_id": "trigger:chapter-3",
+      "active_zone": "battlefield",
+      "event": "saga.chapter.3",
+      "effects": [{
+        "op": "search",
+        "searching_player": "$controller",
+        "zone": "library",
+        "selector": {"types": ["artifact"], "predicate": "mana_cost_0_or_1"},
+        "count": {"minimum": 1, "maximum": 1},
+        "destination": "battlefield",
+        "reveal": true,
+        "shuffle_after": true
+      }],
+      "trust_level": "trusted",
+      "coverage": ["static_ability", "saga_chapter", "saga_final_chapter", "mana_cost_selector", "library_search"],
+      "tests": ["test_urzas_saga_chapters_construct_search_and_sacrifice"],
+      "provenance": {
+        "source_oracle_hash": "bafb55185281b4f6700f864fc0f755a970aa98d52bb40f2e5d7113e427490b9e",
+        "source_rulings_hash": "163e11dd783eb41b1457a6d822579f432c99f7a98cd48660423676396017cf70",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
     }
   ]
 }

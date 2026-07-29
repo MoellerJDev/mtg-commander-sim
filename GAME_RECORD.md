@@ -149,6 +149,13 @@ legal targets. The report records `profile_fingerprint_match`,
 `provider_identity_verified`, `model_identity_verified`,
 `seat_projection_verified`, and `codex_subagent_run`.
 
+Version 0.8.0 records use the same Game Record v3 layout. Semantic closure does
+not redesign the record: replay continues to pin semantic-program identity,
+source hashes, accepted commands, transition hashes, opportunity rows, and
+honest provider metadata. A 100/100 exact-list preflight is necessary but not
+sufficient for matchup evidence; the terminal, replay, pilot, fidelity, format,
+and sample-size gates still apply.
+
 The target-action audit additionally records actions prevented before
 exposure, incorrectly advertised actions, no-target/mode-target removals,
 candidate generation, rejected target submissions, targets becoming illegal,

@@ -9,7 +9,13 @@ from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from typing import Any, Iterable, Iterator, Mapping, Sequence
 
-from .abilities import ActivatedAbility, choose_ability, parse_activated_abilities, reduced_requirements
+from .abilities import (
+    ActivatedAbility,
+    CostChoice,
+    choose_ability,
+    parse_activated_abilities,
+    reduced_requirements,
+)
 from .carddb import CardDatabase, CardRecord
 from .deck import DeckDefinition
 from .mana import (
@@ -1275,6 +1281,39 @@ class CommanderEngine:
                 )
             if (
                 event_destination == "graveyard"
+                and "artifact" in origin_types
+                and not card.is_token
+                and card.owner in self.active_seats
+            ):
+                emblem_count = int(
+                    self.state.players[card.owner].stats.get(
+                        "daretti_emblems", 0
+                    )
+                )
+                for _ in range(emblem_count):
+                    ref = self._next_ref("S")
+                    event_triggers.append(
+                        StackItem(
+                            stack_id=self._stable_runtime_id(
+                                "stack", ref
+                            ),
+                            ref=ref,
+                            kind="triggered_ability",
+                            controller=card.owner,
+                            label=(
+                                "Daretti emblem — return artifact at "
+                                "the next end step"
+                            ),
+                            semantic_key="builtin:daretti-emblem",
+                            visibility=list(self.seats),
+                            context={
+                                "event": "artifact.graveyard",
+                                "card": card.ref,
+                            },
+                        )
+                    )
+            if (
+                event_destination == "graveyard"
                 and "creature" in origin_types
             ):
                 for source in departure_sources:
@@ -1361,8 +1400,69 @@ class CommanderEngine:
                     entered_context,
                     trigger_batch=event_triggers,
                 )
+        if "saga" in entered_subtypes:
+            self._add_saga_lore(
+                card,
+                trigger_batch=event_triggers,
+                reason="Saga entered",
+            )
         if owns_trigger_batch:
             self._enqueue_semantic_trigger_batch(event_triggers)
+
+    def _add_saga_lore(
+        self,
+        saga: CardInstance,
+        *,
+        trigger_batch: list[StackItem] | None = None,
+        reason: str,
+    ) -> int:
+        if saga.zone != "battlefield" or saga.phased_out:
+            return int(saga.counters.get("lore", 0))
+        _, subtypes, _ = self._type_parts(
+            str(self._effective_card_data(saga).get("type_line") or "")
+        )
+        if "saga" not in subtypes:
+            return int(saga.counters.get("lore", 0))
+        chapter = int(saga.counters.get("lore", 0)) + 1
+        saga.counters["lore"] = chapter
+        self._log(
+            saga.controller,
+            "saga.lore",
+            f"{saga.ref} received lore counter {chapter}.",
+            {
+                "source": saga.ref,
+                "chapter": chapter,
+                "reason": reason,
+            },
+            importance=1,
+            changed_objects=[saga.object_id],
+            changed_players=[saga.controller],
+        )
+        self._dispatch_semantic_event(
+            f"saga.chapter.{chapter}",
+            {
+                "card": saga.ref,
+                "controller": saga.controller,
+                "chapter": chapter,
+            },
+            trigger_batch=trigger_batch,
+        )
+        return chapter
+
+    def _advance_active_player_sagas(self, seat: str) -> None:
+        trigger_batch: list[StackItem] = []
+        for object_id in list(
+            self.state.players[seat].zones["battlefield"]
+        ):
+            saga = self.state.cards[object_id]
+            if saga.controller != seat:
+                continue
+            self._add_saga_lore(
+                saga,
+                trigger_batch=trigger_batch,
+                reason="precombat main phase began",
+            )
+        self._enqueue_semantic_trigger_batch(trigger_batch)
 
     def _move_cards_simultaneously(
         self,
@@ -2330,6 +2430,9 @@ class CommanderEngine:
             self._advance_step()
             return
 
+        if phase == "precombat_main" and step == "main":
+            self._advance_active_player_sagas(active)
+
         delayed = self._matching_delayed_triggers("step.begin", {"phase": phase, "step": step, "player": active})
         if delayed:
             self._start_trigger_batch(delayed, after="grant_priority")
@@ -2470,8 +2573,11 @@ class CommanderEngine:
                 semantic_events=False,
             )
             exiled_cards.append(card.object_id)
-        removed_stack = [item.ref for item in self.state.stack]
+        removed_items = list(self.state.stack)
+        removed_stack = [item.ref for item in removed_items]
         self.state.stack.clear()
+        for item in removed_items:
+            self._maybe_sacrifice_completed_saga(item)
         self.state.pending_trigger_batches.clear()
         self.permissions.invalidate_current()
         self.state.priority_player = None
@@ -4480,11 +4586,120 @@ class CommanderEngine:
 
     def _activated_abilities(self, card: CardInstance) -> tuple[ActivatedAbility, ...]:
         data = self._effective_card_data(card)
-        return parse_activated_abilities(
+        abilities = list(
+            parse_activated_abilities(
             card_name=str(data.get("name") or card.printed_name),
             oracle_text=str(data.get("oracle_text") or ""),
             keywords=tuple(data.get("keywords") or ()),
+            )
         )
+        if card.printed_name == "Demonic Junker":
+            crew_match = re.search(
+                r"\bCrew\s+(?P<power>\d+)\b",
+                str(data.get("oracle_text") or ""),
+                re.IGNORECASE,
+            )
+            if crew_match is not None:
+                threshold = int(crew_match.group("power"))
+                abilities.append(
+                    ActivatedAbility(
+                        ability_id="crew",
+                        line_index=10_000,
+                        oracle_line=f"Crew {threshold}",
+                        cost_text=f"Crew {threshold}",
+                        effect_text=(
+                            "This Vehicle becomes an artifact creature "
+                            f"until end of turn. Crew {threshold}."
+                        ),
+                        zones=("battlefield",),
+                        mana=normalize_mana_bundle(None),
+                    )
+                )
+        if (
+            card.oracle_id == "883a4180-9ede-4249-a4b8-3a29c998fb63"
+            and card.active_face in {None, "Tithing Blade"}
+            and card.zone == "battlefield"
+        ):
+            for ability_id, zone in (
+                ("craft_battlefield", "battlefield"),
+                ("craft_graveyard", "graveyard"),
+            ):
+                abilities.append(
+                    ActivatedAbility(
+                        ability_id=ability_id,
+                        line_index=10_001 + len(abilities),
+                        oracle_line=(
+                            "{4}{B}, Exile this artifact, Exile a creature "
+                            + (
+                                "you control"
+                                if zone == "battlefield"
+                                else "card from your graveyard"
+                            )
+                            + ": Return this card transformed under its "
+                            "owner's control. Activate only as a sorcery."
+                        ),
+                        cost_text="{4}{B}, Exile this artifact",
+                        effect_text=(
+                            "Return this card transformed under its owner's "
+                            "control. Activate only as a sorcery."
+                        ),
+                        zones=("battlefield",),
+                        mana={
+                            **normalize_mana_bundle(None),
+                            "GENERIC": 4,
+                            "B": 1,
+                        },
+                        exile_source=True,
+                        choices=(
+                            CostChoice(
+                                kind="exile",
+                                count=1,
+                                zone=zone,
+                                card_type="creature",
+                            ),
+                        ),
+                        sorcery_speed=True,
+                    )
+                )
+        if card.printed_name == "Urza's Saga":
+            if card.annotations.get("urzas_saga_chapter_1"):
+                abilities.append(
+                    ActivatedAbility(
+                        ability_id="saga_mana",
+                        line_index=10_010,
+                        oracle_line="{T}: Add {C}.",
+                        cost_text="{T}",
+                        effect_text="Add {C}.",
+                        zones=("battlefield",),
+                        mana=normalize_mana_bundle(None),
+                        tap_source=True,
+                        mana_ability=True,
+                    )
+                )
+            if card.annotations.get("urzas_saga_chapter_2"):
+                abilities.append(
+                    ActivatedAbility(
+                        ability_id="saga_construct",
+                        line_index=10_011,
+                        oracle_line=(
+                            "{2}, {T}: Create a 0/0 colorless Construct "
+                            "artifact creature token with \"This token gets "
+                            "+1/+1 for each artifact you control.\""
+                        ),
+                        cost_text="{2}, {T}",
+                        effect_text=(
+                            "Create a 0/0 colorless Construct artifact "
+                            "creature token."
+                        ),
+                        zones=("battlefield",),
+                        mana={
+                            **normalize_mana_bundle(None),
+                            "GENERIC": 2,
+                        },
+                        tap_source=True,
+                    )
+                )
+        return tuple(abilities)
 
     def _queue_ward_triggers_for_targets(
         self,
@@ -4613,9 +4828,10 @@ class CommanderEngine:
                     if choice.card_type not in type_line:
                         raise GameRuleError(f"{card.ref} is not a {choice.card_type}")
                 used.append(card.object_id)
-                destination = (
-                    "hand" if choice.kind == "return" else "graveyard"
-                )
+                destination = {
+                    "return": "hand",
+                    "exile": "exile",
+                }.get(choice.kind, "graveyard")
                 self.move_card(
                     card.object_id,
                     destination,
@@ -4912,7 +5128,13 @@ class CommanderEngine:
                 raise GameRuleError("Untap-symbol cost requires a tapped battlefield permanent")
             source.tapped = False
 
-        paid_objects = self._pay_ability_choice_costs(seat, source, ability, response)
+        paid_objects = (
+            self._pay_crew_cost(seat, source, ability, response)
+            if self._crew_threshold(ability) is not None
+            else self._pay_ability_choice_costs(
+                seat, source, ability, response
+            )
+        )
         paid_object_snapshots = [
             self._target_snapshot(self.state.cards[object_id].ref)
             for object_id in paid_objects
@@ -5193,6 +5415,98 @@ class CommanderEngine:
 
         return assign(0, set())
 
+    @staticmethod
+    def _crew_threshold(ability: ActivatedAbility) -> int | None:
+        if ability.ability_id != "crew":
+            return None
+        match = re.search(
+            r"\bCrew\s+(?P<power>\d+)\b",
+            ability.effect_text,
+            re.IGNORECASE,
+        )
+        return int(match.group("power")) if match is not None else None
+
+    def _crew_candidates(
+        self,
+        seat: str,
+        source: CardInstance,
+    ) -> list[CardInstance]:
+        return [
+            self.state.cards[object_id]
+            for object_id in self.state.players[seat].zones["battlefield"]
+            if object_id != source.object_id
+            and self.state.cards[object_id].controller == seat
+            and not self.state.cards[object_id].phased_out
+            and not self.state.cards[object_id].tapped
+            and "creature"
+            in self._type_parts(
+                str(
+                    self._effective_card_data(object_id).get("type_line")
+                    or ""
+                )
+            )[0]
+        ]
+
+    def _pay_crew_cost(
+        self,
+        seat: str,
+        source: CardInstance,
+        ability: ActivatedAbility,
+        response: Mapping[str, Any],
+    ) -> list[str]:
+        threshold = self._crew_threshold(ability)
+        if threshold is None:
+            raise GameRuleError("Crew threshold is not compiled")
+        values = [
+            str(value)
+            for value in (
+                response.get("cost_cards")
+                or response.get("cost_objects")
+                or []
+            )
+        ]
+        if not values or len(values) != len(set(values)):
+            raise GameRuleError(
+                "Crew requires one or more distinct untapped creatures"
+            )
+        candidates = {
+            candidate.ref: candidate
+            for candidate in self._crew_candidates(seat, source)
+        }
+        if any(value not in candidates for value in values):
+            raise GameRuleError(
+                "Crew cost objects must be other untapped creatures you control"
+            )
+        selected = [candidates[value] for value in values]
+        total_power = sum(
+            max(0, self._numeric_stat(card.object_id, "power"))
+            for card in selected
+        )
+        if total_power < threshold:
+            raise GameRuleError(
+                f"Crew {threshold} requires at least {threshold} total power"
+            )
+        for card in selected:
+            card.tapped = True
+        self._log(
+            seat,
+            "cost.crew",
+            (
+                f"{seat} tapped {len(selected)} creature(s) with "
+                f"{total_power} total power to crew {source.ref}."
+            ),
+            {
+                "source": source.ref,
+                "threshold": threshold,
+                "total_power": total_power,
+                "objects": [card.ref for card in selected],
+            },
+            importance=1,
+            changed_objects=[card.object_id for card in selected],
+            changed_players=[seat],
+        )
+        return [card.object_id for card in selected]
+
     def _ability_availability(
         self,
         seat: str,
@@ -5287,6 +5601,12 @@ class CommanderEngine:
             seat, card, ability
         ):
             return "unpayable", "mandatory_cost_object_unavailable"
+        crew_threshold = self._crew_threshold(ability)
+        if crew_threshold is not None and sum(
+            max(0, self._numeric_stat(candidate.object_id, "power"))
+            for candidate in self._crew_candidates(seat, card)
+        ) < crew_threshold:
+            return "unpayable", "insufficient_crew_power"
         requirements = reduced_requirements(
             ability,
             legendary_creatures=self._legendary_creatures_controlled(seat),
@@ -5492,6 +5812,23 @@ class CommanderEngine:
                     if zone not in ability.zones:
                         continue
                     hint = ability.compact(source_ref=card.ref, zone=zone)
+                    crew_threshold = self._crew_threshold(ability)
+                    if crew_threshold is not None:
+                        candidates = self._crew_candidates(
+                            seat, card
+                        )
+                        hint["choose_cost"] = [
+                            {
+                                "k": "crew",
+                                "z": "battlefield",
+                                "minimum": 1,
+                                "minimum_total_power": crew_threshold,
+                                "legal_refs": [
+                                    candidate.ref
+                                    for candidate in candidates
+                                ],
+                            }
+                        ]
                     status, reason = self._ability_availability(
                         seat, card, ability
                     )
@@ -7161,6 +7498,15 @@ class CommanderEngine:
             actual = source.annotations.get(
                 field.removeprefix("source_annotation.")
             )
+        elif field == "source_active_face":
+            actual = source.active_face or (
+                (
+                    self.card_record(source).faces[0].get("name")
+                    if self.card_record(source) is not None
+                    and self.card_record(source).faces
+                    else None
+                )
+            )
         else:
             actual = context.get(field)
         expected = self._semantic_event_value(
@@ -7810,6 +8156,11 @@ class CommanderEngine:
             str(row.get("controller")),
             controller,
             group.controller_relation,
+        ):
+            return False
+        if (
+            group.controller_seat is not None
+            and str(row.get("controller")) != group.controller_seat
         ):
             return False
         if not self._relation_matches(
@@ -8631,6 +8982,45 @@ class CommanderEngine:
                 ),
                 None,
                 note="Thornbite Staff granted trigger",
+            )
+            return
+        if item.semantic_key == "builtin:daretti-emblem":
+            card_ref = str(item.context.get("card") or "")
+            self._begin_resolve_item(
+                item,
+                [
+                    {
+                        "op": "delayed_trigger",
+                        "controller": item.controller,
+                        "label": (
+                            f"Return {card_ref} with Daretti's emblem"
+                        ),
+                        "event": "step.begin",
+                        "condition": {
+                            "phase": "ending",
+                            "step": "end_step",
+                        },
+                        "stack": {
+                            "label": (
+                                f"Return {card_ref} with Daretti's emblem"
+                            ),
+                            "context": {
+                                "dynamic_effects": [
+                                    {
+                                        "op": "move_if_in_zone",
+                                        "card": card_ref,
+                                        "from": "graveyard",
+                                        "destination": "battlefield",
+                                        "controller": item.controller,
+                                    }
+                                ]
+                            },
+                        },
+                        "once": True,
+                    }
+                ],
+                None,
+                note="Daretti emblem delayed return scheduled",
             )
             return
         program = self.semantics.get(item.semantic_key)
@@ -9517,6 +9907,8 @@ class CommanderEngine:
                 "copy_stack_item",
                 "counter_unless_pay",
                 "cumulative_upkeep",
+                "daretti_exchange",
+                "discard_draw_up_to",
                 "draw_optional_land",
                 "explore",
                 "fabricate",
@@ -9533,6 +9925,7 @@ class CommanderEngine:
                 "scry",
                 "springheart_landfall",
                 "sylvan_library_settle",
+                "transmute_artifact",
             }:
                 self._begin_semantic_choice(
                     item=item,
@@ -9550,6 +9943,7 @@ class CommanderEngine:
         # Remove the resolving object from stack only when all player choices
         # and effects have completed.
         self.state.stack.remove(item)
+        self._maybe_sacrifice_completed_saga(item)
         entered: CardInstance | None = None
         if item.context.get("copy_permanent_spell"):
             characteristics = copy.deepcopy(
@@ -10217,6 +10611,277 @@ class CommanderEngine:
                     ],
                 }
             )
+        elif op == "discard_draw_up_to":
+            maximum = max(0, int(effect.get("maximum", 2)))
+            options = [
+                self.state.cards[object_id].ref
+                for object_id in self.state.players[seat].zones["hand"]
+            ]
+            if not options or maximum == 0:
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            maximum = min(maximum, len(options))
+            effect = {
+                **dict(effect),
+                "_legal_refs": options,
+                "_maximum": maximum,
+            }
+            context.update(
+                {
+                    "prompt": (
+                        f"Discard up to {maximum} card(s), then draw "
+                        "that many cards."
+                    ),
+                    "cards": [
+                        {
+                            "id": ref,
+                            "name": self._resolve_object(
+                                seat,
+                                ref,
+                                zones={"hand"},
+                                owned_only=True,
+                            ).printed_name,
+                        }
+                        for ref in options
+                    ],
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "cards",
+                                "legal_refs": options,
+                                "minimum": 0,
+                                "maximum": maximum,
+                                "distinct": True,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "daretti_exchange":
+            options = [
+                self.state.cards[object_id].ref
+                for object_id in self.state.players[seat].zones[
+                    "battlefield"
+                ]
+                if self.state.cards[object_id].controller == seat
+                and not self.state.cards[object_id].phased_out
+                and "artifact"
+                in self._type_parts(
+                    str(
+                        self._effective_card_data(object_id).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )[0]
+            ]
+            if not options:
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            effect = {
+                **dict(effect),
+                "_legal_refs": options,
+            }
+            context.update(
+                {
+                    "prompt": (
+                        "Choose an artifact you control to sacrifice."
+                    ),
+                    "objects": options,
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "card",
+                                "legal_refs": options,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "transmute_artifact":
+            stage = str(effect.get("stage") or "sacrifice")
+            if stage == "sacrifice":
+                options = [
+                    self.state.cards[object_id].ref
+                    for object_id in self.state.players[seat].zones[
+                        "battlefield"
+                    ]
+                    if self.state.cards[object_id].controller == seat
+                    and not self.state.cards[object_id].phased_out
+                    and "artifact"
+                    in self._type_parts(
+                        str(
+                            self._effective_card_data(object_id).get(
+                                "type_line"
+                            )
+                            or ""
+                        )
+                    )[0]
+                ]
+                if not options:
+                    self._continue_resolution(
+                        stack_ref=item.ref,
+                        effects=list(remaining),
+                        destination=destination,
+                        note=note,
+                        instruction_pointer=instruction_pointer + 1,
+                    )
+                    return
+                effect = {
+                    **dict(effect),
+                    "stage": stage,
+                    "_legal_refs": options,
+                }
+                context.update(
+                    {
+                        "prompt": (
+                            "Choose exactly one artifact to sacrifice "
+                            "while Transmute Artifact resolves."
+                        ),
+                        "objects": options,
+                        "legal_actions": [
+                            {
+                                "id": "choose",
+                                "action": "choose",
+                                "choice_schema": {
+                                    "field": "card",
+                                    "legal_refs": options,
+                                },
+                            }
+                        ],
+                    }
+                )
+            elif stage == "search":
+                options = [
+                    self.state.cards[object_id].ref
+                    for object_id in self.state.players[seat].zones[
+                        "library"
+                    ]
+                    if "artifact"
+                    in self._type_parts(
+                        str(
+                            self._effective_card_data(object_id).get(
+                                "type_line"
+                            )
+                            or ""
+                        )
+                    )[0]
+                ]
+                effect = {
+                    **dict(effect),
+                    "stage": stage,
+                    "_legal_refs": options,
+                }
+                context.update(
+                    {
+                        "prompt": (
+                            "Choose an artifact card from your library, "
+                            "or fail to find."
+                        ),
+                        "search_cards": [
+                            {
+                                "id": ref,
+                                "name": self._resolve_object(
+                                    seat,
+                                    ref,
+                                    zones={"library"},
+                                    owned_only=True,
+                                ).printed_name,
+                            }
+                            for ref in options
+                        ],
+                        "legal_actions": [
+                            {
+                                "id": "choose",
+                                "action": "choose",
+                                "choice_schema": {
+                                    "field": "card",
+                                    "legal_refs": options,
+                                    "optional": True,
+                                    "rules_may_fail_to_find": True,
+                                },
+                            }
+                        ],
+                    }
+                )
+            elif stage == "pay":
+                card = self._resolve_object(
+                    seat,
+                    str(effect.get("card") or ""),
+                    zones={"library"},
+                    owned_only=True,
+                )
+                difference = max(0, int(effect.get("difference", 0)))
+                requirements = {
+                    **normalize_mana_bundle(None),
+                    "GENERIC": difference,
+                }
+                if not self._cost_is_affordable(seat, requirements):
+                    self.move_card(
+                        card.object_id,
+                        "graveyard",
+                        reason="Transmute Artifact payment declined",
+                        semantic_events=True,
+                    )
+                    self.shuffle_library(
+                        seat, reason="Transmute Artifact resolved"
+                    )
+                    self._continue_resolution(
+                        stack_ref=item.ref,
+                        effects=list(remaining),
+                        destination=destination,
+                        note=note,
+                        instruction_pointer=instruction_pointer + 1,
+                    )
+                    return
+                effect = {
+                    **dict(effect),
+                    "stage": stage,
+                    "_requirements": requirements,
+                }
+                context.update(
+                    {
+                        "prompt": (
+                            f"Pay {difference} generic mana to put "
+                            f"{card.ref} onto the battlefield?"
+                        ),
+                        "card": {
+                            "id": card.ref,
+                            "name": card.printed_name,
+                        },
+                        "cost": requirements,
+                        "legal_actions": [
+                            {
+                                "id": "choose",
+                                "action": "choose",
+                                "choice_schema": {
+                                    "field": "pay",
+                                    "legal_values": [True, False],
+                                },
+                            }
+                        ],
+                    }
+                )
+            else:
+                raise GameRuleError(
+                    f"Unknown Transmute Artifact stage {stage!r}"
+                )
         elif op == "choose_objects":
             selector = dict(effect.get("selector") or {})
             selector.setdefault(
@@ -11424,6 +12089,288 @@ class CommanderEngine:
                 changed_objects=[card.object_id for card in cards],
                 changed_players=[seat],
             )
+        elif op == "discard_draw_up_to":
+            selected = [
+                str(value) for value in response.get("cards", [])
+            ]
+            legal = {
+                str(value)
+                for value in effect.get("_legal_refs") or []
+            }
+            maximum = int(effect.get("_maximum", 0))
+            if (
+                len(selected) != len(set(selected))
+                or len(selected) > maximum
+                or any(value not in legal for value in selected)
+            ):
+                raise GameRuleError(
+                    "Discard selection must contain up to the offered "
+                    "number of distinct hand cards"
+                )
+            cards = [
+                self._resolve_object(
+                    seat,
+                    ref,
+                    zones={"hand"},
+                    owned_only=True,
+                )
+                for ref in selected
+            ]
+            if cards:
+                self._move_cards_simultaneously(
+                    [
+                        (card.object_id, "graveyard")
+                        for card in cards
+                    ],
+                    reason=item.label,
+                    log=False,
+                )
+                choice_effects = [
+                    {
+                        "op": "draw",
+                        "player": seat,
+                        "count": len(cards),
+                        "private": True,
+                        "reason": item.label,
+                    }
+                ]
+            self._log(
+                seat,
+                "daretti.discard_draw",
+                (
+                    f"{seat} discarded {len(cards)} card(s) and will "
+                    "draw that many."
+                ),
+                {
+                    "count": len(cards),
+                    "objects": [card.ref for card in cards],
+                },
+                visibility=[seat, "analyst"],
+                importance=2,
+                changed_objects=[card.object_id for card in cards],
+                changed_players=[seat],
+            )
+        elif op == "daretti_exchange":
+            selected = str(response.get("card") or "")
+            legal = {
+                str(value)
+                for value in effect.get("_legal_refs") or []
+            }
+            if selected not in legal:
+                raise GameRuleError(
+                    "Choose one of the authoritative artifact options"
+                )
+            sacrificed = self._resolve_object(
+                seat,
+                selected,
+                zones={"battlefield"},
+                controlled_only=True,
+            )
+            if "artifact" not in self._type_parts(
+                str(
+                    self._effective_card_data(sacrificed).get(
+                        "type_line"
+                    )
+                    or ""
+                )
+            )[0]:
+                raise GameRuleError(
+                    "Daretti's selected permanent is no longer an artifact"
+                )
+            self.move_card(
+                sacrificed.object_id,
+                "graveyard",
+                reason=item.label,
+                semantic_events=True,
+            )
+            target_ref = str(effect.get("card") or "")
+            try:
+                target = self._resolve_object(
+                    seat,
+                    target_ref,
+                    zones={"graveyard"},
+                    owned_only=True,
+                )
+            except GameRuleError:
+                target = None
+            if (
+                target is not None
+                and "artifact"
+                in self._type_parts(
+                    str(
+                        self._effective_card_data(target).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )[0]
+            ):
+                self.move_card(
+                    target.object_id,
+                    "battlefield",
+                    controller=seat,
+                    reason=item.label,
+                    semantic_events=True,
+                )
+            self._log(
+                seat,
+                "daretti.exchange",
+                f"{seat} sacrificed {sacrificed.ref} for Daretti.",
+                {
+                    "sacrificed": sacrificed.ref,
+                    "returned": target.ref if target is not None else None,
+                },
+                importance=2,
+                changed_objects=[
+                    sacrificed.object_id,
+                    *(
+                        [target.object_id]
+                        if target is not None
+                        else []
+                    ),
+                ],
+                changed_players=[seat],
+            )
+        elif op == "transmute_artifact":
+            stage = str(effect.get("stage") or "sacrifice")
+            legal = {
+                str(value)
+                for value in effect.get("_legal_refs") or []
+            }
+            if stage == "sacrifice":
+                selected = str(response.get("card") or "")
+                if selected not in legal:
+                    raise GameRuleError(
+                        "Choose one of the authoritative artifact options"
+                    )
+                sacrificed = self._resolve_object(
+                    seat,
+                    selected,
+                    zones={"battlefield"},
+                    controlled_only=True,
+                )
+                types, _, _ = self._type_parts(
+                    str(
+                        self._effective_card_data(sacrificed).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )
+                if "artifact" not in types:
+                    raise GameRuleError(
+                        "Transmute Artifact requires an artifact"
+                    )
+                mana_value = int(
+                    float(
+                        self._effective_card_data(sacrificed).get(
+                            "mana_value", 0
+                        )
+                        or 0
+                    )
+                )
+                self.move_card(
+                    sacrificed.object_id,
+                    "graveyard",
+                    reason=item.label,
+                    semantic_events=True,
+                )
+                choice_effects = [
+                    {
+                        "op": "transmute_artifact",
+                        "stage": "search",
+                        "sacrificed_mana_value": mana_value,
+                    }
+                ]
+            elif stage == "search":
+                selected = response.get("card")
+                if selected in {"", None}:
+                    selected = None
+                if selected is not None and str(selected) not in legal:
+                    raise GameRuleError(
+                        "Selected Transmute Artifact result is not legal"
+                    )
+                if selected is None:
+                    self.shuffle_library(
+                        seat, reason="Transmute Artifact resolved"
+                    )
+                else:
+                    found = self._resolve_object(
+                        seat,
+                        str(selected),
+                        zones={"library"},
+                        owned_only=True,
+                    )
+                    found_value = int(
+                        float(
+                            self._effective_card_data(found).get(
+                                "mana_value", 0
+                            )
+                            or 0
+                        )
+                    )
+                    sacrificed_value = int(
+                        effect.get("sacrificed_mana_value", 0)
+                    )
+                    difference = max(
+                        0, found_value - sacrificed_value
+                    )
+                    if difference == 0:
+                        self.move_card(
+                            found.object_id,
+                            "battlefield",
+                            controller=seat,
+                            reason=item.label,
+                            semantic_events=True,
+                        )
+                        self.shuffle_library(
+                            seat,
+                            reason="Transmute Artifact resolved",
+                        )
+                    else:
+                        choice_effects = [
+                            {
+                                "op": "transmute_artifact",
+                                "stage": "pay",
+                                "card": found.ref,
+                                "difference": difference,
+                            }
+                        ]
+            elif stage == "pay":
+                found = self._resolve_object(
+                    seat,
+                    str(effect.get("card") or ""),
+                    zones={"library"},
+                    owned_only=True,
+                )
+                pay = bool(response.get("pay", False))
+                requirements = self._mana_vector(
+                    effect.get("_requirements") or {}
+                )
+                if pay:
+                    if not self._cost_is_affordable(
+                        seat, requirements
+                    ):
+                        raise GameRuleError(
+                            "Transmute Artifact payment is no longer payable"
+                        )
+                    self._pay_for_cost(
+                        seat, requirements, {"pay": "auto"}
+                    )
+                self.move_card(
+                    found.object_id,
+                    "battlefield" if pay else "graveyard",
+                    controller=seat if pay else None,
+                    reason=item.label,
+                    semantic_events=True,
+                )
+                self.shuffle_library(
+                    seat, reason="Transmute Artifact resolved"
+                )
+            else:
+                raise GameRuleError(
+                    f"Unknown Transmute Artifact stage {stage!r}"
+                )
         elif op == "choose_objects":
             selected = [
                 str(value)
@@ -12605,6 +13552,7 @@ class CommanderEngine:
             )
             return item
         self.state.stack.remove(item)
+        self._maybe_sacrifice_completed_saga(item)
         if item.card_object_id:
             card = self.state.cards[item.card_object_id]
             if card.zone == "stack":
@@ -12635,6 +13583,36 @@ class CommanderEngine:
             importance=2,
         )
         return item
+
+    def _maybe_sacrifice_completed_saga(
+        self, chapter_item: StackItem
+    ) -> None:
+        program = self.semantics.get(chapter_item.semantic_key)
+        if (
+            program is None
+            or "saga_final_chapter" not in program.coverage
+            or chapter_item.source_object_id not in self.state.cards
+        ):
+            return
+        saga = self.state.cards[chapter_item.source_object_id]
+        if saga.zone != "battlefield":
+            return
+        if any(
+            item.source_object_id == saga.object_id
+            and (
+                (candidate := self.semantics.get(item.semantic_key))
+                is not None
+                and "saga_chapter" in candidate.coverage
+            )
+            for item in self.state.stack
+        ):
+            return
+        self.move_card(
+            saga.object_id,
+            "graveyard",
+            reason="Saga final chapter left the stack",
+            semantic_events=True,
+        )
 
     # ------------------------------------------------------------------
     # APNAP delegated choices during resolution
@@ -14556,6 +15534,136 @@ class CommanderEngine:
         if op == "end_turn":
             self._end_turn_now(actor=actor, reason=reason)
             return None
+        if op == "create_daretti_emblem":
+            player = self.state.players[actor]
+            player.stats["daretti_emblems"] = (
+                int(player.stats.get("daretti_emblems", 0)) + 1
+            )
+            self._log(
+                actor,
+                "emblem.create",
+                f"{actor} created a Daretti, Scrap Savant emblem.",
+                {
+                    "name": "Daretti, Scrap Savant",
+                    "count": player.stats["daretti_emblems"],
+                    "reason": reason,
+                },
+                importance=3,
+                changed_players=[actor],
+            )
+            return player.stats["daretti_emblems"]
+        if op == "grant_urzas_saga_chapter":
+            source = self._resolve_object(
+                actor,
+                str(effect.get("source") or ""),
+                zones={"battlefield"},
+                controlled_only=True,
+            )
+            chapter = int(effect.get("chapter", 0))
+            if source.printed_name != "Urza's Saga" or chapter not in {
+                1,
+                2,
+            }:
+                raise GameRuleError(
+                    "Urza's Saga chapter grant is not valid"
+                )
+            source.annotations[
+                f"urzas_saga_chapter_{chapter}"
+            ] = True
+            self._log(
+                actor,
+                "saga.ability.gained",
+                f"{source.ref} gained its chapter {chapter} ability.",
+                {
+                    "source": source.ref,
+                    "chapter": chapter,
+                    "reason": reason,
+                },
+                importance=2,
+                changed_objects=[source.object_id],
+                changed_players=[actor],
+            )
+            return chapter
+        if op == "return_transformed":
+            source = self._resolve_object(
+                actor,
+                str(effect.get("card") or effect.get("source") or ""),
+                zones={"exile"},
+            )
+            record = self.card_record(source)
+            if record is None or len(record.faces) < 2:
+                raise GameRuleError(
+                    "Return transformed requires a transforming card"
+                )
+            source.active_face = str(record.faces[1].get("name") or "")
+            self.move_card(
+                source.object_id,
+                "battlefield",
+                controller=source.owner,
+                reason=reason,
+                semantic_events=True,
+            )
+            return source.ref
+        if op == "demonic_junker_resolve":
+            source = self._resolve_object(
+                actor,
+                str(effect.get("source") or ""),
+            )
+            changes: list[tuple[str, str]] = []
+            destroyed_controlled = False
+            for raw_ref in effect.get("cards") or []:
+                if raw_ref is None:
+                    continue
+                try:
+                    creature = self._resolve_object(
+                        actor,
+                        str(raw_ref),
+                        zones={"battlefield"},
+                    )
+                except GameRuleError:
+                    continue
+                types, _, _ = self._type_parts(
+                    str(
+                        self._effective_card_data(creature).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )
+                keywords = {
+                    str(value).casefold()
+                    for value in self._effective_card_data(creature).get(
+                        "keywords", []
+                    )
+                }
+                if (
+                    "creature" not in types
+                    or "indestructible" in keywords
+                ):
+                    continue
+                destroyed_controlled = (
+                    destroyed_controlled
+                    or creature.controller == actor
+                )
+                changes.append((creature.object_id, "graveyard"))
+            if changes:
+                self._move_cards_simultaneously(
+                    changes,
+                    reason=reason,
+                    log=True,
+                )
+            if (
+                destroyed_controlled
+                and source.zone == "battlefield"
+                and source.controller == actor
+            ):
+                source.counters["+1/+1"] = (
+                    int(source.counters.get("+1/+1", 0)) + 2
+                )
+            return [
+                self.state.cards[object_id].ref
+                for object_id, _ in changes
+            ]
         if op == "delayed_trigger":
             source = effect.get("source")
             source_id = None

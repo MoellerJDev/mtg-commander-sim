@@ -1,4 +1,4 @@
-# MTG Commander Sim 0.7.0
+# MTG Commander Sim 0.8.0
 
 An experimental, persistent, four-player-first Commander simulation kernel
 designed for LLM pilots, rules arbitration, auditable testing, and a future
@@ -135,6 +135,14 @@ Pact/Mana Drain delayed effects), modal and mass removal, graveyard disruption,
 Channel, Pithing Needle, proliferate, and Soul-Guide Lantern. This is exact
 coverage for those declared programs, not a claim of complete Oracle coverage
 for either deck.
+
+Version 0.8.0 closes the conservative semantic preflight for the pinned live
+Zimone and Dina and Mishra, Eminent One lists: both exact 100-card lists report
+100 fully playable cards and no partial or unresolved cards. The closure adds
+the remaining exact-list costs, permissions, replacement effects, delayed
+effects, linked choices, copy/token engines, Saga chapters, Craft, Crew,
+restricted mana, extra-turn control, and deterministic characterization
+scenarios. It remains exact-list coverage, not full Oracle-corpus coverage.
 
 ## Why this runs faster with an LLM
 
@@ -336,7 +344,7 @@ the review fidelity gate.
 
 See `PILOT_PROVIDERS.md` for provider contracts and isolation guarantees, and
 `SEMANTIC_PACKS.md` for pack provenance, trust, preflight, and the deliberately
-bounded 0.7.0 card coverage. See `CODEX_ARENA.md` for the persistent four-pilot
+bounded 0.8.0 exact-list coverage. See `CODEX_ARENA.md` for the persistent four-pilot
 workflow.
 
 Create the default four-seat Codex arena:

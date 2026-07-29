@@ -1,6 +1,6 @@
 # Codex Commander Arena
 
-Version 0.6.0 supports one neutral primary Codex task coordinating exactly four
+Version 0.8.0 supports one neutral primary Codex task coordinating exactly four
 persistent, seat-isolated strategic pilot tasks.
 
 ## Roles

@@ -123,6 +123,18 @@ def _without_quoted_granted_text(text: str) -> str:
 
 
 def _material_oracle_text(record: CardRecord) -> str:
+    # The compact database prefixes each face in its combined display text
+    # (``Face Name: Oracle text``).  Those labels are not activated-ability
+    # costs.  Inspect the actual face texts so transform/modal cards do not
+    # acquire phantom colon abilities during preflight.
+    if record.faces:
+        return "\n//\n".join(
+            _without_parenthetical_reminder(
+                str(face.get("oracle_text") or "")
+            )
+            for face in record.faces
+            if str(face.get("oracle_text") or "").strip()
+        )
     return _without_parenthetical_reminder(record.oracle_text)
 
 

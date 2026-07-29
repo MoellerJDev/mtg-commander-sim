@@ -118,6 +118,13 @@ VALID_EFFECT_OPERATIONS = {
     "grant_play_without_mana_cost",
     "put_artifact_from_hand",
     "control_next_turn",
+    "create_daretti_emblem",
+    "daretti_exchange",
+    "demonic_junker_resolve",
+    "discard_draw_up_to",
+    "grant_urzas_saga_chapter",
+    "return_transformed",
+    "transmute_artifact",
 }
 
 

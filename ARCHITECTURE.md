@@ -207,6 +207,13 @@ became illegal, rules/effect counters, and stack-interaction windows. Any
 advertised mandatory-target action lacking legal targets fails
 `legal_action_exposure` and the record fidelity gate.
 
+Version 0.8.0 extends the same data-driven boundary through the two pinned
+100-card review lists. The resulting exact-list preflight is 100/100 for both
+lists, including linked choices, alternate costs, restricted mana, replacement
+and delayed effects, copy/token engines, and the remaining exact Mishra
+artifact families. This is a closed reviewed slice behind `CommanderEngine`,
+not a claim that arbitrary Oracle text or the complete layer system is solved.
+
 When the top stack object lacks registered semantics:
 
 1. the kernel creates an `arbiter.resolve` capability

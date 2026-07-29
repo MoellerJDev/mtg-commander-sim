@@ -1204,6 +1204,409 @@ class ExactMishraClosureTests(unittest.TestCase):
             engine.state.players["A"].stats,
         )
 
+    def test_daretti_loyalty_exchange_and_emblem_return(self):
+        session = self.make_session(1122)
+        engine = session.engine
+        daretti = self.card(engine, "A", "Daretti, Scrap Savant")
+        sacrifice = self.card(engine, "A", "Arcane Signet")
+        returned = self.card(engine, "A", "Sol Ring")
+        engine.move_card(
+            daretti.object_id, "battlefield", controller="A"
+        )
+        self.assertEqual(3, daretti.counters["loyalty"])
+        self.prepare_main(engine)
+
+        hand_refs = [
+            engine.state.cards[object_id].ref
+            for object_id in engine.state.players["A"].zones["hand"]
+        ][:2]
+        before_hand = len(engine.state.players["A"].zones["hand"])
+        engine._activate(
+            "A", {"source": daretti.ref, "ability": "ab1"}
+        )
+        self.resolve_top(engine)
+        self.assertEqual("semantic.choice", engine.state.pending_decision.kind)
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "cards": hand_refs,
+                "plan": "FILTER_HAND",
+                "reason": "Exchange two cards for two fresh draws.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(5, daretti.counters["loyalty"])
+        self.assertEqual(
+            before_hand, len(engine.state.players["A"].zones["hand"])
+        )
+
+        engine.state.turn_sequence += 1
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.move_card(
+            sacrifice.object_id, "battlefield", controller="A"
+        )
+        engine.move_card(returned.object_id, "graveyard")
+        self.prepare_main(engine)
+        engine._activate(
+            "A",
+            {
+                "source": daretti.ref,
+                "ability": "ab2",
+                "targets": [returned.ref],
+            },
+        )
+        self.resolve_top(engine)
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "card": sacrifice.ref,
+                "plan": "RECUR_ARTIFACT",
+                "reason": "Exchange the small artifact for Sol Ring.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("graveyard", sacrifice.zone)
+        self.assertEqual("battlefield", returned.zone)
+
+        engine.state.turn_sequence += 1
+        daretti.counters["loyalty"] = 10
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        self.prepare_main(engine)
+        engine._activate(
+            "A", {"source": daretti.ref, "ability": "ab3"}
+        )
+        self.resolve_top(engine)
+        self.assertEqual(
+            1, engine.state.players["A"].stats["daretti_emblems"]
+        )
+        engine.move_card(
+            returned.object_id,
+            "graveyard",
+            reason="emblem test",
+            semantic_events=True,
+        )
+        self.assertFalse(engine._stabilize())
+        self.assertTrue(
+            any(
+                item.semantic_key == "builtin:daretti-emblem"
+                for item in engine.state.stack
+            )
+        )
+        self.resolve_top(engine)
+        self.assertTrue(engine.state.delayed_triggers)
+        delayed = engine._matching_delayed_triggers(
+            "step.begin",
+            {
+                "phase": "ending",
+                "step": "end_step",
+                "player": "A",
+            },
+        )
+        self.assertTrue(delayed)
+        engine._start_trigger_batch(delayed, after="grant_priority")
+        self.resolve_top(engine)
+        self.assertEqual("battlefield", returned.zone)
+
+    def test_demonic_junker_targets_per_player_and_crews(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=4,
+            seed=1123,
+        )
+        keep_all(session)
+        engine = session.engine
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        junker = self.card(engine, "A", "Demonic Junker")
+        creatures = {}
+        for seat in engine.seats:
+            ref = engine.create_token(
+                seat,
+                name=f"{seat} Crew Test",
+                characteristics={
+                    "type_line": "Token Creature — Citizen",
+                    "power": "2",
+                    "toughness": "2",
+                },
+                reason="test setup",
+            )[0]
+            creatures[seat] = engine._resolve_object(seat, ref)
+        engine.move_card(
+            junker.object_id,
+            "battlefield",
+            controller="A",
+            semantic_events=True,
+        )
+        self.assertTrue(engine._stabilize())
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "targets": [
+                    {"group": f"seat_{seat.casefold()}", "ref": card.ref}
+                    for seat, card in creatures.items()
+                ],
+                "plan": "CLEAR_CREATURES",
+                "reason": "Destroy one creature controlled by each player.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.resolve_top(engine)
+        self.assertTrue(
+            all(card.zone != "battlefield" for card in creatures.values())
+        )
+        self.assertEqual(2, junker.counters["+1/+1"])
+
+        crew_ref = engine.create_token(
+            "A",
+            name="Crew Pilot",
+            characteristics={
+                "type_line": "Token Creature — Pilot",
+                "power": "2",
+                "toughness": "2",
+            },
+            reason="crew test",
+        )[0]
+        crew = engine._resolve_object("A", crew_ref)
+        self.prepare_main(engine)
+        crew_hint = next(
+            hint
+            for hint in engine._priority_action_hints("A")["abilities"]
+            if hint["s"] == junker.ref and hint["a"] == "crew"
+        )
+        self.assertEqual(
+            2, crew_hint["choose_cost"][0]["minimum_total_power"]
+        )
+        self.assertIn(
+            crew.ref, crew_hint["choose_cost"][0]["legal_refs"]
+        )
+        engine._activate(
+            "A",
+            {
+                "source": junker.ref,
+                "ability": "crew",
+                "cost_cards": [crew.ref],
+            },
+        )
+        self.assertTrue(crew.tapped)
+        self.resolve_top(engine)
+        self.assertIn(
+            "creature",
+            engine._type_parts(
+                engine._effective_card_data(junker)["type_line"]
+            )[0],
+        )
+
+    def test_tithing_blade_apnap_craft_and_back_upkeep(self):
+        session = self.make_session(1124)
+        engine = session.engine
+        blade = self.card(
+            engine, "A", "Tithing Blade // Consuming Sepulcher"
+        )
+        victim_ref = engine.create_token(
+            "B",
+            name="Tithing Victim",
+            characteristics={
+                "type_line": "Token Creature — Citizen",
+                "power": "1",
+                "toughness": "1",
+            },
+            reason="test setup",
+        )[0]
+        victim = engine._resolve_object("B", victim_ref)
+        engine.move_card(
+            blade.object_id,
+            "battlefield",
+            controller="A",
+            semantic_events=True,
+        )
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        self.assertEqual("choice.apnap", engine.state.pending_decision.kind)
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "cards": [victim.ref],
+                "plan": "PAY_MANDATORY_COST",
+                "reason": "Sacrifice the required creature.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertNotEqual("battlefield", victim.zone)
+
+        craft_ref = engine.create_token(
+            "A",
+            name="Craft Creature",
+            characteristics={
+                "type_line": "Token Creature — Citizen",
+                "power": "1",
+                "toughness": "1",
+            },
+            reason="craft test",
+        )[0]
+        craft_card = engine._resolve_object("A", craft_ref)
+        self.prepare_main(engine)
+        engine.state.players["A"].mana_pool.update(
+            {"C": 4, "B": 1}
+        )
+        engine._activate(
+            "A",
+            {
+                "source": blade.ref,
+                "ability": "craft_battlefield",
+                "cost_cards": [craft_card.ref],
+                "pay": "manual",
+                "payment": {"C": 4, "B": 1},
+            },
+        )
+        self.assertEqual("exile", blade.zone)
+        self.assertNotEqual("battlefield", craft_card.zone)
+        self.resolve_top(engine)
+        self.assertEqual("battlefield", blade.zone)
+        self.assertEqual("Consuming Sepulcher", blade.active_face)
+
+        before_a = engine.state.players["A"].life
+        before_b = engine.state.players["B"].life
+        engine._dispatch_semantic_event(
+            "step.begin",
+            {"phase": "beginning", "step": "upkeep", "player": "A"},
+        )
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        self.assertEqual(before_a + 1, engine.state.players["A"].life)
+        self.assertEqual(before_b - 1, engine.state.players["B"].life)
+
+    def test_transmute_artifact_resolution_payment_and_decline(self):
+        session = self.make_session(1125)
+        engine = session.engine
+        transmute = self.card(engine, "A", "Transmute Artifact")
+        sacrifice = self.card(engine, "A", "Arcane Signet")
+        found = self.card(engine, "A", "Panharmonicon")
+        engine.move_card(
+            sacrifice.object_id, "battlefield", controller="A"
+        )
+        engine.move_card(transmute.object_id, "hand")
+        engine.move_card(found.object_id, "library")
+        self.prepare_main(engine)
+        engine.state.players["A"].mana_pool.update(
+            {"U": 2, "C": 2}
+        )
+        engine._cast(
+            "A",
+            {
+                "card": transmute.ref,
+                "pay": "manual",
+                "payment": {"U": 2},
+            },
+        )
+        self.resolve_top(engine)
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "card": sacrifice.ref,
+                "plan": "TUTOR_ARTIFACT",
+                "reason": "Sacrifice the two-mana artifact.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "card": found.ref,
+                "plan": "TUTOR_ARTIFACT",
+                "reason": "Find the four-mana artifact.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("semantic.choice", engine.state.pending_decision.kind)
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "pay": True,
+                "plan": "TUTOR_ARTIFACT",
+                "reason": "Pay the two-mana difference.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("battlefield", found.zone)
+        self.assertEqual("graveyard", sacrifice.zone)
+
+    def test_urzas_saga_chapters_construct_search_and_sacrifice(self):
+        session = self.make_session(1126)
+        engine = session.engine
+        saga = self.card(engine, "A", "Urza's Saga")
+        found = self.card(engine, "A", "Sol Ring")
+        engine.move_card(found.object_id, "library")
+        engine.move_card(
+            saga.object_id,
+            "battlefield",
+            controller="A",
+            semantic_events=True,
+        )
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        self.assertTrue(saga.annotations["urzas_saga_chapter_1"])
+        self.assertIn(
+            "saga_mana",
+            {
+                ability.ability_id
+                for ability in engine._activated_abilities(saga)
+            },
+        )
+
+        engine._add_saga_lore(saga, reason="test chapter II")
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        self.assertTrue(saga.annotations["urzas_saga_chapter_2"])
+        saga.tapped = False
+        self.prepare_main(engine)
+        engine.state.players["A"].mana_pool["C"] = 2
+        engine._activate(
+            "A",
+            {
+                "source": saga.ref,
+                "ability": "saga_construct",
+                "pay": "manual",
+                "payment": {"C": 2},
+            },
+        )
+        self.resolve_top(engine)
+        self.assertTrue(
+            any(
+                card.is_token
+                and card.printed_name == "Construct"
+                and card.zone == "battlefield"
+                for card in engine.state.cards.values()
+            )
+        )
+
+        engine._add_saga_lore(saga, reason="test chapter III")
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        self.assertEqual("semantic.search", engine.state.pending_decision.kind)
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "search_cards": [found.ref],
+                "plan": "TUTOR_ARTIFACT",
+                "reason": "Put Sol Ring onto the battlefield.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("battlefield", found.zone)
+        self.assertEqual("graveyard", saga.zone)
+
     def test_promoted_mishra_cards_preflight_fully(self):
         engine = self.make_session(1107).engine
         for name in (
@@ -1224,6 +1627,11 @@ class ExactMishraClosureTests(unittest.TestCase):
             "Sundial of the Infinite",
             "The Mightstone and Weakstone",
             "The Stasis Coffin",
+            "Daretti, Scrap Savant",
+            "Demonic Junker",
+            "Tithing Blade",
+            "Transmute Artifact",
+            "Urza's Saga",
         ):
             with self.subTest(card=name):
                 row = card_semantic_status(

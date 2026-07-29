@@ -58,6 +58,7 @@ class TargetGroup:
     mana_value_max: float | None = None
     mana_value_equal: float | None = None
     controller_relation: str = "any"
+    controller_seat: str | None = None
     owner_relation: str = "any"
     player_relation: str = "any"
     attacking: bool | None = None
@@ -156,6 +157,11 @@ class TargetGroup:
                 else None
             ),
             controller_relation=relation,
+            controller_seat=(
+                str(raw["controller_seat"])
+                if raw.get("controller_seat") is not None
+                else None
+            ),
             owner_relation=owner,
             player_relation=player_relation,
             attacking=_optional_bool(raw.get("attacking")),
