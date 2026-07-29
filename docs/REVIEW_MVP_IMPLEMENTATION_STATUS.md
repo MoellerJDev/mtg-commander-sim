@@ -79,7 +79,7 @@ and beyond D27 with both `suppressed_meaningful_windows` and
 
 Duplicated-list fixtures must always retain `matchup_evidence=false`.
 
-Current implementation checkpoint: 242 tests pass. Preflight v2 records
+Current implementation checkpoint: 253 tests pass. Preflight v2 records
 canonical Oracle/rulings provenance, exact list/source fingerprints, material
 categories, scenario witnesses, and fail-closed drift. Rulings hashes are
 content-canonical and are independent of SQLite import order. The trusted-only
@@ -138,12 +138,20 @@ state, Dredge draw replacement with resumable private decisions, draw-step
 trigger ordering, cumulative upkeep, escalating unless payments,
 bestow-as-Aura resolution and illegal-target fallback, conditional landfall
 payments, loyalty initialization/cost/timing, and activation-only haste.
+The first Mishra closure tranche promotes Emry, Master Transmuter, Loki's
+Scepter, Shuri, Simulacrum Synthesizer, Stridehangar Automaton, Worldwalker
+Helm, Lithoform Engine, Scientist Supreme of A.I.M., and Strionic Resonator.
+It adds paid graveyard cast permissions, artifact-from-hand choices,
+temporary control restoration, nonlegendary temporary copies, artifact-token
+replacement expansion, Map/explore decisions, dynamic Construct and Thopter
+modifiers, static artifact-spell reduction, reusable stack-object copying,
+copy target reassignment, and permanent-spell copy token resolution.
 
 Current full-database preflight (one row per distinct exact-list card):
 
 - Zimone and Dina: 100 fully playable, 0 partial, 0 unresolved, zero source
   drift.
-- Mishra, Eminent One: 77 fully playable, 0 partial, 22 unresolved, zero
+- Mishra, Eminent One: 87 fully playable, 0 partial, 12 unresolved, zero
   source drift.
 
 This is an implementation checkpoint, not semantic closure and not game

@@ -1498,6 +1498,568 @@
         "authored_by": "v0.8-exact-deck-closure",
         "review_status": "reviewed"
       }
+    },
+    {
+      "key": "da3e7d3d-2ca0-40c3-9602-fca37c92f507:spell:front",
+      "label": "Emry, Lurker of the Loch",
+      "oracle_id": "da3e7d3d-2ca0-40c3-9602-fca37c92f507",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "cost_option"],
+      "tests": ["test_emry_mills_and_grants_exact_graveyard_cast_permission"],
+      "provenance": {
+        "source_oracle_hash": "3f3d61ce469920ddcc07f210e9ad3ed4cf2afd9ed31c45d70f378c78b153c2ba",
+        "source_rulings_hash": "f7ae57fa2b243897012078f0ff897302523f30352e1948a9b984ed623c76c323",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "da3e7d3d-2ca0-40c3-9602-fca37c92f507:trigger:enter",
+      "label": "Emry enter trigger",
+      "oracle_id": "da3e7d3d-2ca0-40c3-9602-fca37c92f507",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [
+        {"op": "mill", "player": "$controller", "count": 4}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "self_mill"],
+      "tests": ["test_emry_mills_and_grants_exact_graveyard_cast_permission"],
+      "provenance": {
+        "source_oracle_hash": "3f3d61ce469920ddcc07f210e9ad3ed4cf2afd9ed31c45d70f378c78b153c2ba",
+        "source_rulings_hash": "f7ae57fa2b243897012078f0ff897302523f30352e1948a9b984ed623c76c323",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "da3e7d3d-2ca0-40c3-9602-fca37c92f507:ability:ab3",
+      "label": "Emry graveyard cast permission",
+      "oracle_id": "da3e7d3d-2ca0-40c3-9602-fca37c92f507",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "zones": ["graveyard"],
+        "categories": ["card"],
+        "owner": "you",
+        "artifact": true,
+        "count": 1
+      },
+      "effects": [
+        {
+          "op": "grant_cast_permission",
+          "card": "$target.0",
+          "zone": "graveyard",
+          "owned_only": true,
+          "types_any": ["Artifact"],
+          "source": "$source"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "zone_permission", "graveyard_cast_permission"],
+      "tests": ["test_emry_mills_and_grants_exact_graveyard_cast_permission"],
+      "provenance": {
+        "source_oracle_hash": "3f3d61ce469920ddcc07f210e9ad3ed4cf2afd9ed31c45d70f378c78b153c2ba",
+        "source_rulings_hash": "f7ae57fa2b243897012078f0ff897302523f30352e1948a9b984ed623c76c323",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "da46786e-28df-4638-ab3d-121011d2f150:spell:front",
+      "label": "Master Transmuter",
+      "oracle_id": "da46786e-28df-4638-ab3d-121011d2f150",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution"],
+      "tests": ["test_master_transmuter_pays_return_cost_and_puts_artifact"],
+      "provenance": {
+        "source_oracle_hash": "5d4e5a5cf9f6a5b86a9c19868c5ecf1d3b972b0ddab15afe7b7794686dfe099d",
+        "source_rulings_hash": "11d818a2804467fda3ce41694b769f4953b3906df9c149940caf608679ddc548",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "da46786e-28df-4638-ab3d-121011d2f150:ability:ab1",
+      "label": "Master Transmuter activation",
+      "oracle_id": "da46786e-28df-4638-ab3d-121011d2f150",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {"op": "put_artifact_from_hand", "player": "$controller"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "return_cost", "put_from_hand"],
+      "tests": ["test_master_transmuter_pays_return_cost_and_puts_artifact"],
+      "provenance": {
+        "source_oracle_hash": "5d4e5a5cf9f6a5b86a9c19868c5ecf1d3b972b0ddab15afe7b7794686dfe099d",
+        "source_rulings_hash": "11d818a2804467fda3ce41694b769f4953b3906df9c149940caf608679ddc548",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "5f8941d8-f8f7-4ec3-86c3-88af8829080b:spell:front",
+      "label": "Loki's Scepter",
+      "oracle_id": "5f8941d8-f8f7-4ec3-86c3-88af8829080b",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution"],
+      "tests": ["test_loki_scepter_temporary_control_untap_type_and_haste"],
+      "provenance": {
+        "source_oracle_hash": "191de0787f0dbf8fa44fdf96c3fb85ca9d3768bff67a64efb00be84fab640705",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "5f8941d8-f8f7-4ec3-86c3-88af8829080b:trigger:enter",
+      "label": "Loki's Scepter enter trigger",
+      "oracle_id": "5f8941d8-f8f7-4ec3-86c3-88af8829080b",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "target_schema": {
+        "zones": ["battlefield"],
+        "categories": ["permanent"],
+        "creature": true,
+        "count": 1
+      },
+      "effects": [
+        {"op": "change_control_until_end_of_turn", "card": "$target.0", "controller": "$controller"},
+        {"op": "untap", "card": "$target.0"},
+        {"op": "add_subtype_until_end_of_turn", "card": "$target.0", "subtype": "Villain"},
+        {"op": "grant_keyword_until_end_of_turn", "card": "$target.0", "keyword": "Haste"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "temporary_control", "temporary_type", "temporary_keyword"],
+      "tests": ["test_loki_scepter_temporary_control_untap_type_and_haste"],
+      "provenance": {
+        "source_oracle_hash": "191de0787f0dbf8fa44fdf96c3fb85ca9d3768bff67a64efb00be84fab640705",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "a8c047fc-20a9-4c62-b8a6-9ead56d60ad0:spell:front",
+      "label": "Shuri, Wakandan Inventor",
+      "oracle_id": "a8c047fc-20a9-4c62-b8a6-9ead56d60ad0",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "static_ability", "cost_reduction"],
+      "tests": ["test_shuri_reduces_artifact_spells_and_copies_nonlegendary"],
+      "provenance": {
+        "source_oracle_hash": "f72b8bc960c4883e53dfc7d2d2a7f542a377f4fa765556a04b17dcfe4f9b5a0c",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "a8c047fc-20a9-4c62-b8a6-9ead56d60ad0:ability:ab2",
+      "label": "Shuri copy activation",
+      "oracle_id": "a8c047fc-20a9-4c62-b8a6-9ead56d60ad0",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "globally_distinct": true,
+        "groups": [
+          {
+            "id": "copying",
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "controller": "you",
+            "artifact": true,
+            "count": 1
+          },
+          {
+            "id": "copied",
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "controller": "you",
+            "artifact": true,
+            "count": 1
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "copy_until_end_of_turn",
+          "source": "$target.0",
+          "target": "$target.1",
+          "except_nonlegendary": true
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "copy_effect", "duration_effect"],
+      "tests": ["test_shuri_reduces_artifact_spells_and_copies_nonlegendary"],
+      "provenance": {
+        "source_oracle_hash": "f72b8bc960c4883e53dfc7d2d2a7f542a377f4fa765556a04b17dcfe4f9b5a0c",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "eb7a1f21-a66d-415b-8520-710b44890bb6:spell:front",
+      "label": "Simulacrum Synthesizer",
+      "oracle_id": "eb7a1f21-a66d-415b-8520-710b44890bb6",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution"],
+      "tests": ["test_simulacrum_synthesizer_scry_and_construct_trigger"],
+      "provenance": {
+        "source_oracle_hash": "5f4ef63c1ac266b942fe09a97b284df7368eb8624172c0c09c895e4400fc3ae9",
+        "source_rulings_hash": "9afc50e800435a755311fe050e9ebc1c8bd06cdec076679803cdefbfe29998ba",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "eb7a1f21-a66d-415b-8520-710b44890bb6:trigger:enter",
+      "label": "Simulacrum Synthesizer enter trigger",
+      "oracle_id": "eb7a1f21-a66d-415b-8520-710b44890bb6",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [{"op": "scry", "player": "$controller", "count": 2}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "scry"],
+      "tests": ["test_simulacrum_synthesizer_scry_and_construct_trigger"],
+      "provenance": {
+        "source_oracle_hash": "5f4ef63c1ac266b942fe09a97b284df7368eb8624172c0c09c895e4400fc3ae9",
+        "source_rulings_hash": "9afc50e800435a755311fe050e9ebc1c8bd06cdec076679803cdefbfe29998ba",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "eb7a1f21-a66d-415b-8520-710b44890bb6:trigger:artifact-enter",
+      "label": "Simulacrum Synthesizer artifact-enter trigger",
+      "oracle_id": "eb7a1f21-a66d-415b-8520-710b44890bb6",
+      "ability_id": "trigger:artifact-enter",
+      "active_zone": "battlefield",
+      "event": "artifact.enter",
+      "event_condition": {
+        "all": [
+          {"field": "controller", "op": "eq", "value": "$source.controller"},
+          {"field": "card", "op": "ne", "value": "$source.ref"},
+          {"field": "mana_value", "op": "gte", "value": 3}
+        ]
+      },
+      "effects": [
+        {
+          "op": "create_token",
+          "controller": "$controller",
+          "name": "Construct",
+          "characteristics": {
+            "type_line": "Token Artifact Creature — Construct",
+            "colors": [],
+            "power": "0",
+            "toughness": "0",
+            "oracle_text": "This token gets +1/+1 for each artifact you control."
+          }
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "conditional_trigger", "token_creation", "dynamic_power_toughness"],
+      "tests": ["test_simulacrum_synthesizer_scry_and_construct_trigger"],
+      "provenance": {
+        "source_oracle_hash": "5f4ef63c1ac266b942fe09a97b284df7368eb8624172c0c09c895e4400fc3ae9",
+        "source_rulings_hash": "9afc50e800435a755311fe050e9ebc1c8bd06cdec076679803cdefbfe29998ba",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "9070c98b-fd01-4eeb-a4ec-fc464946c7c0:spell:front",
+      "label": "Stridehangar Automaton",
+      "oracle_id": "9070c98b-fd01-4eeb-a4ec-fc464946c7c0",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "replacement_effect", "static_ability", "continuous_effect", "token_creation"],
+      "tests": ["test_stridehangar_adds_thopter_and_applies_anthem"],
+      "provenance": {
+        "source_oracle_hash": "59ad59fe37f21e3590dbc0a425607daeb83e89e783ee0a45ea5c3aae39a11272",
+        "source_rulings_hash": "1c6f2c3ce17591f7b1816add38df1c1e7259f4fb0be4ccc861fe40dc0e0633f7",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "9573c85a-e574-4b4e-aae0-2165c45fd27e:spell:front",
+      "label": "Worldwalker Helm",
+      "oracle_id": "9573c85a-e574-4b4e-aae0-2165c45fd27e",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "replacement_effect", "static_ability", "keyword_ability", "explore"],
+      "tests": ["test_worldwalker_adds_map_copies_token_and_map_explores"],
+      "provenance": {
+        "source_oracle_hash": "b83e34ade394fce60da4d1a032c8795b5c12ad8132dba550d4fc88dafe8ba82a",
+        "source_rulings_hash": "08b1c351c375cdbbf524449e4a1ccea93654ffa255c0dd4fd6dacbec7abf56a6",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "9573c85a-e574-4b4e-aae0-2165c45fd27e:ability:ab2",
+      "label": "Worldwalker Helm token-copy activation",
+      "oracle_id": "9573c85a-e574-4b4e-aae0-2165c45fd27e",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "zones": ["battlefield"],
+        "categories": ["permanent"],
+        "controller": "you",
+        "artifact": true,
+        "token": true,
+        "count": 1
+      },
+      "effects": [
+        {
+          "op": "create_token",
+          "controller": "$controller",
+          "name": "",
+          "copy_of": "$target.0"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "token_copy", "target_validation"],
+      "tests": ["test_worldwalker_adds_map_copies_token_and_map_explores"],
+      "provenance": {
+        "source_oracle_hash": "b83e34ade394fce60da4d1a032c8795b5c12ad8132dba550d4fc88dafe8ba82a",
+        "source_rulings_hash": "08b1c351c375cdbbf524449e4a1ccea93654ffa255c0dd4fd6dacbec7abf56a6",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "0bf299da-1854-4153-baea-3cee2eb01ee8:spell:front",
+      "label": "Lithoform Engine",
+      "oracle_id": "0bf299da-1854-4153-baea-3cee2eb01ee8",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution"],
+      "tests": ["test_lithoform_engine_copies_abilities_spells_and_permanent_spells"],
+      "provenance": {
+        "source_oracle_hash": "3b400c26ed4af3dd93e48a4521fa68f78817b25600fcc9cfd2f4aef2c773f1fa",
+        "source_rulings_hash": "bca878ec0190fcfb61e9616f4adeac94fba76d51955e65a8af535a49c0ef2bc0",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "0bf299da-1854-4153-baea-3cee2eb01ee8:ability:ab1",
+      "label": "Lithoform Engine ability-copy activation",
+      "oracle_id": "0bf299da-1854-4153-baea-3cee2eb01ee8",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "zones": ["stack"],
+        "categories": ["ability"],
+        "controller": "you",
+        "count": 1
+      },
+      "effects": [
+        {"op": "copy_stack_item", "stack": "$target.0"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "stack_copy", "target_reassignment"],
+      "tests": ["test_lithoform_engine_copies_abilities_spells_and_permanent_spells"],
+      "provenance": {
+        "source_oracle_hash": "3b400c26ed4af3dd93e48a4521fa68f78817b25600fcc9cfd2f4aef2c773f1fa",
+        "source_rulings_hash": "bca878ec0190fcfb61e9616f4adeac94fba76d51955e65a8af535a49c0ef2bc0",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "0bf299da-1854-4153-baea-3cee2eb01ee8:ability:ab2",
+      "label": "Lithoform Engine instant-or-sorcery-copy activation",
+      "oracle_id": "0bf299da-1854-4153-baea-3cee2eb01ee8",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "zones": ["stack"],
+        "categories": ["spell"],
+        "controller": "you",
+        "types_any": ["Instant", "Sorcery"],
+        "count": 1
+      },
+      "effects": [
+        {"op": "copy_stack_item", "stack": "$target.0"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "spell_copy", "target_reassignment"],
+      "tests": ["test_lithoform_engine_copies_abilities_spells_and_permanent_spells"],
+      "provenance": {
+        "source_oracle_hash": "3b400c26ed4af3dd93e48a4521fa68f78817b25600fcc9cfd2f4aef2c773f1fa",
+        "source_rulings_hash": "bca878ec0190fcfb61e9616f4adeac94fba76d51955e65a8af535a49c0ef2bc0",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "0bf299da-1854-4153-baea-3cee2eb01ee8:ability:ab3",
+      "label": "Lithoform Engine permanent-spell-copy activation",
+      "oracle_id": "0bf299da-1854-4153-baea-3cee2eb01ee8",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "zones": ["stack"],
+        "categories": ["spell"],
+        "controller": "you",
+        "predicate": "permanent_card",
+        "count": 1
+      },
+      "effects": [
+        {"op": "copy_stack_item", "stack": "$target.0"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "permanent_spell_copy", "token_creation"],
+      "tests": ["test_lithoform_engine_copies_abilities_spells_and_permanent_spells"],
+      "provenance": {
+        "source_oracle_hash": "3b400c26ed4af3dd93e48a4521fa68f78817b25600fcc9cfd2f4aef2c773f1fa",
+        "source_rulings_hash": "bca878ec0190fcfb61e9616f4adeac94fba76d51955e65a8af535a49c0ef2bc0",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c09c424b-6aba-4190-9f55-f0307d746386:spell:front",
+      "label": "Scientist Supreme of A.I.M.",
+      "oracle_id": "c09c424b-6aba-4190-9f55-f0307d746386",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution"],
+      "tests": ["test_scientist_supreme_copies_artifact_ability_once_on_own_turn"],
+      "provenance": {
+        "source_oracle_hash": "f81b4899c3192315be25a18f82dcfadd2a2d37a25e69a56ac575fb7493654eb2",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c09c424b-6aba-4190-9f55-f0307d746386:ability:ab1",
+      "label": "Scientist Supreme artifact-ability copy",
+      "oracle_id": "c09c424b-6aba-4190-9f55-f0307d746386",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "zones": ["stack"],
+        "categories": ["ability"],
+        "controller": "you",
+        "predicate": "artifact_source",
+        "count": 1
+      },
+      "effects": [
+        {"op": "copy_stack_item", "stack": "$target.0"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "stack_copy", "artifact_source", "once_each_turn", "activation_timing"],
+      "tests": ["test_scientist_supreme_copies_artifact_ability_once_on_own_turn"],
+      "provenance": {
+        "source_oracle_hash": "f81b4899c3192315be25a18f82dcfadd2a2d37a25e69a56ac575fb7493654eb2",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "cf751552-156f-4f81-ac94-9814dce099f9:spell:front",
+      "label": "Strionic Resonator",
+      "oracle_id": "cf751552-156f-4f81-ac94-9814dce099f9",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution"],
+      "tests": ["test_strionic_resonator_only_copies_controlled_trigger"],
+      "provenance": {
+        "source_oracle_hash": "e6b70e068fb8bd2f4288d45e5aef2a31efff113876cf4f3c38b5b82367195d9f",
+        "source_rulings_hash": "9018d01a40eb235b7fc41acd4d30484408fc0ea91361682b944ffc3f8561602c",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "cf751552-156f-4f81-ac94-9814dce099f9:ability:ab1",
+      "label": "Strionic Resonator trigger-copy activation",
+      "oracle_id": "cf751552-156f-4f81-ac94-9814dce099f9",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "zones": ["stack"],
+        "categories": ["ability"],
+        "controller": "you",
+        "predicate": "triggered_ability",
+        "count": 1
+      },
+      "effects": [
+        {"op": "copy_stack_item", "stack": "$target.0"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "trigger_copy", "target_reassignment"],
+      "tests": ["test_strionic_resonator_only_copies_controlled_trigger"],
+      "provenance": {
+        "source_oracle_hash": "e6b70e068fb8bd2f4288d45e5aef2a31efff113876cf4f3c38b5b82367195d9f",
+        "source_rulings_hash": "9018d01a40eb235b7fc41acd4d30484408fc0ea91361682b944ffc3f8561602c",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
     }
   ]
 }

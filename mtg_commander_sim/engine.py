@@ -498,6 +498,31 @@ class CommanderEngine:
                     f"{left.strip()} {' '.join(additions)}"
                     + (f" — {right.strip()}" if separator else "")
                 )
+        added_subtypes = [
+            str(value).strip()
+            for value in dict(
+                card.annotations.get("until_end_of_turn") or {}
+            ).get("add_subtypes", [])
+            if str(value).strip()
+        ]
+        if added_subtypes:
+            type_line = str(base.get("type_line") or "")
+            normalized = type_line.replace("—", "-")
+            left, separator, right = normalized.partition("-")
+            existing = {
+                word.casefold()
+                for word in re.findall(r"[A-Za-z]+", right)
+            }
+            additions = [
+                value
+                for value in added_subtypes
+                if value.casefold() not in existing
+            ]
+            if additions:
+                base["type_line"] = (
+                    f"{left.strip()} — "
+                    f"{' '.join([right.strip(), *additions]).strip()}"
+                )
         conditional_haste = re.search(
             r"has haste as long as an opponent has "
             r"(?P<life>\d+) or less life",
@@ -517,7 +542,7 @@ class CommanderEngine:
                 [*base["keywords"], "Haste"]
             )
         if card.zone == "battlefield":
-            card_types, _, _ = self._type_parts(
+            card_types, card_subtypes, _ = self._type_parts(
                 str(base.get("type_line") or "")
             )
             for permanent_id in self.state.players[
@@ -637,6 +662,75 @@ class CommanderEngine:
                             ]
                         ).strip()
             oracle = str(base.get("oracle_text") or "").casefold()
+            if (
+                "gets +1/+1 for each artifact you control" in oracle
+                and "creature" in card_types
+            ):
+                artifact_count = sum(
+                    1
+                    for object_id in self.state.players[
+                        card.controller
+                    ].zones["battlefield"]
+                    if self.state.cards[object_id].controller
+                    == card.controller
+                    and not self.state.cards[object_id].phased_out
+                    and "artifact"
+                    in self._type_parts(
+                        str(
+                            dict(
+                                self.state.cards[
+                                    object_id
+                                ].annotations.get(
+                                    "copy_overrides", {}
+                                )
+                            ).get("type_line")
+                            or dict(
+                                self.state.cards[
+                                    object_id
+                                ].annotations.get(
+                                    "token_characteristics", {}
+                                )
+                            ).get("type_line")
+                            or (
+                                self.card_record(object_id).type_line
+                                if self.card_record(object_id)
+                                is not None
+                                else ""
+                            )
+                            or ""
+                        )
+                    )[0]
+                )
+                for stat in ("power", "toughness"):
+                    try:
+                        base[stat] = str(
+                            int(str(base.get(stat))) + artifact_count
+                        )
+                    except (TypeError, ValueError):
+                        pass
+            if "thopter" in card_subtypes:
+                anthem_count = sum(
+                    1
+                    for object_id in self.state.players[
+                        card.controller
+                    ].zones["battlefield"]
+                    if self.state.cards[object_id].controller
+                    == card.controller
+                    and not self.state.cards[object_id].phased_out
+                    and self.state.cards[
+                        object_id
+                    ].printed_name
+                    == "Stridehangar Automaton"
+                )
+                if anthem_count:
+                    for stat in ("power", "toughness"):
+                        try:
+                            base[stat] = str(
+                                int(str(base.get(stat)))
+                                + anthem_count
+                            )
+                        except (TypeError, ValueError):
+                            pass
             graveyard_ids = self.state.players[card.owner].zones[
                 "graveyard"
             ]
@@ -1243,6 +1337,9 @@ class CommanderEngine:
             "controller": card.controller,
             "types": sorted(entered_types),
             "subtypes": sorted(entered_subtypes),
+            "mana_value": float(
+                entered_data.get("mana_value", 0) or 0
+            ),
             "tapped": card.tapped,
         }
         self._dispatch_semantic_event(
@@ -2299,6 +2396,17 @@ class CommanderEngine:
                     card.annotations["copy_overrides"] = copy.deepcopy(
                         previous
                     )
+            previous_controller = until_end.get("control_previous")
+            if (
+                previous_controller in self.state.players
+                and card.zone == "battlefield"
+                and card.controller != previous_controller
+            ):
+                self.change_control(
+                    card.object_id,
+                    str(previous_controller),
+                    reason="temporary control effect ended",
+                )
             card.annotations.pop("until_end_of_turn", None)
         for player in self.state.players.values():
             player.stats.pop("next_spell_improvise", None)
@@ -4338,6 +4446,28 @@ class CommanderEngine:
             ability,
         )
         target_program = self.semantics.get(candidate_semantic_key)
+        source_data = self._effective_card_data(source)
+        source_card_types, source_subtypes, _ = self._type_parts(
+            str(source_data.get("type_line") or "")
+        )
+        builtin_map = bool(
+            source.is_token
+            and "artifact" in source_card_types
+            and "map" in source_subtypes
+            and "target creature you control explores"
+            in ability.effect_text.casefold()
+        )
+        target_schema_override = (
+            {
+                "zones": ["battlefield"],
+                "categories": ["permanent"],
+                "controller": "you",
+                "creature": True,
+                "count": 1,
+            }
+            if builtin_map
+            else None
+        )
         selected_modes = [str(value) for value in response.get("modes") or []]
         validated_targets, target_groups = self._validate_semantic_targets(
             seat,
@@ -4345,6 +4475,7 @@ class CommanderEngine:
             list(response.get("targets") or []),
             modes=selected_modes,
             source_ref=source.ref,
+            target_schema=target_schema_override,
         )
         target_snapshots = {
             ref: self._target_snapshot(ref) for ref in validated_targets
@@ -4427,7 +4558,7 @@ class CommanderEngine:
         if sum(requirements.values()):
             spent, activations = self._pay_for_cost(seat, requirements, response)
 
-        if "activate only once each turn" in ability.effect_text.casefold():
+        if "only once each turn" in ability.effect_text.casefold():
             activation_key = (
                 f"{source.object_id}:{ability.ability_id}:"
                 f"{self.state.turn_sequence}"
@@ -4508,7 +4639,11 @@ class CommanderEngine:
             else (
                 "builtin:food"
                 if builtin_food
-                else candidate_semantic_key
+                else (
+                    "builtin:map-explore"
+                    if builtin_map
+                    else candidate_semantic_key
+                )
             )
         )
         ref = self._next_ref("S")
@@ -4530,6 +4665,15 @@ class CommanderEngine:
                 "target_snapshots": target_snapshots,
                 "targets_revalidated": False,
                 "targets_chosen_at_creation": True,
+                **(
+                    {
+                        "target_schema_override": copy.deepcopy(
+                            target_schema_override
+                        )
+                    }
+                    if target_schema_override is not None
+                    else {}
+                ),
                 "cost_objects": [
                     self.state.cards[object_id].ref
                     for object_id in paid_objects
@@ -4777,7 +4921,12 @@ class CommanderEngine:
         """
 
         effect = ability.effect_text.casefold()
-        if "activate only once each turn" in effect:
+        if (
+            "activate only during your turn" in effect
+            and self.state.active_player != seat
+        ):
+            return "unavailable", "only_during_your_turn"
+        if "only once each turn" in effect:
             if source is None:
                 return "unresolved", "activation_source_required"
             activation_key = (
@@ -5628,6 +5777,36 @@ class CommanderEngine:
             option["base_requirements"] = self._mana_vector(
                 option["requirements"]
             )
+            cast_types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(card).get("type_line")
+                    or ""
+                )
+            )
+            if "artifact" in cast_types:
+                shuri_reductions = sum(
+                    1
+                    for object_id in self.state.players[seat].zones[
+                        "battlefield"
+                    ]
+                    if self.state.cards[object_id].controller == seat
+                    and not self.state.cards[object_id].phased_out
+                    and self.state.cards[object_id].printed_name
+                    == "Shuri, Wakandan Inventor"
+                )
+                if shuri_reductions:
+                    applied = min(
+                        int(option["requirements"]["GENERIC"]),
+                        shuri_reductions,
+                    )
+                    option["requirements"]["GENERIC"] -= applied
+                    option.setdefault("cost_reductions", []).append(
+                        {
+                            "kind": "artifact_spell_static",
+                            "source": "Shuri, Wakandan Inventor",
+                            "count": applied,
+                        }
+                    )
             exile_spec = option.get("exile_from_hand")
             if isinstance(exile_spec, Mapping):
                 candidates = self._exile_cost_candidates(
@@ -6134,6 +6313,45 @@ class CommanderEngine:
                 if source
                 else None
             )
+            source_types: set[str] = set()
+            source_subtypes: set[str] = set()
+            selected_ability = None
+            if source is not None:
+                source_types, source_subtypes, _ = self._type_parts(
+                    str(
+                        self._effective_card_data(source).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )
+                selected_ability = next(
+                    (
+                        value
+                        for value in self._activated_abilities(source)
+                        if value.ability_id == ability_hint["a"]
+                    ),
+                    None,
+                )
+            builtin_target_schema = (
+                {
+                    "zones": ["battlefield"],
+                    "categories": ["permanent"],
+                    "controller": "you",
+                    "creature": True,
+                    "count": 1,
+                }
+                if (
+                    source is not None
+                    and source.is_token
+                    and "artifact" in source_types
+                    and "map" in source_subtypes
+                    and selected_ability is not None
+                    and "target creature you control explores"
+                    in selected_ability.effect_text.casefold()
+                )
+                else None
+            )
             if (
                 program is not None
                 and self.state.config.semantic_policy == "trusted_only"
@@ -6149,12 +6367,21 @@ class CommanderEngine:
                     }
                 )
                 return False
-            if not program or not program.target_schema:
+            target_schema = (
+                builtin_target_schema
+                if builtin_target_schema is not None
+                else (
+                    program.target_schema
+                    if program is not None
+                    else None
+                )
+            )
+            if target_schema is None:
                 ability_target_status[action_id] = True
                 return True
             public_schema = self._public_target_schema(
                 seat,
-                program.target_schema,
+                target_schema,
                 source_ref=source.ref,
             )
             if public_schema is None:
@@ -6917,6 +7144,17 @@ class CommanderEngine:
                 types, subtypes, supertypes = self._type_parts(
                     str(data.get("type_line") or "")
                 )
+                ability_source = self.state.cards.get(
+                    item.source_object_id or ""
+                )
+                source_data = (
+                    self._effective_card_data(ability_source)
+                    if ability_source is not None
+                    else data
+                )
+                stack_source_types, _, _ = self._type_parts(
+                    str(source_data.get("type_line") or "")
+                )
                 rows.append(
                     {
                         "ref": item.ref,
@@ -6942,6 +7180,7 @@ class CommanderEngine:
                         ),
                         "card": card,
                         "stack_item": item,
+                        "stack_source_types": stack_source_types,
                     }
                 )
         for zone in (
@@ -7178,6 +7417,22 @@ class CommanderEngine:
                     not isinstance(card, CardInstance)
                     or row.get("zone") != "exile"
                     or int(card.counters.get("void", 0)) <= 0
+                ):
+                    return False
+            elif group.predicate == "artifact_source":
+                if (
+                    row.get("zone") != "stack"
+                    or "artifact"
+                    not in set(
+                        row.get("stack_source_types") or ()
+                    )
+                ):
+                    return False
+            elif group.predicate == "triggered_ability":
+                stack_item = row.get("stack_item")
+                if (
+                    not isinstance(stack_item, StackItem)
+                    or stack_item.kind != "triggered_ability"
                 ):
                     return False
             else:
@@ -7713,6 +7968,11 @@ class CommanderEngine:
             and not program.requires_arbiter
         ):
             return True
+        if (
+            item.kind == "spell_copy"
+            and item.context.get("copy_permanent_spell")
+        ):
+            return True
         if item.kind == "spell" and item.card_object_id:
             record = self.card_record(item.card_object_id)
             if record and item.default_destination == "battlefield":
@@ -7789,6 +8049,20 @@ class CommanderEngine:
                 ],
                 None,
                 note="Built-in Food token ability resolved",
+            )
+            return
+        if item.semantic_key == "builtin:map-explore":
+            self._begin_resolve_item(
+                item,
+                [
+                    {
+                        "op": "explore",
+                        "player": item.controller,
+                        "card": "$target.0",
+                    }
+                ],
+                None,
+                note="Map token explore ability resolved",
             )
             return
         if item.semantic_key == "builtin:optional-mill-one":
@@ -7877,6 +8151,12 @@ class CommanderEngine:
             trusted_generic_resolution = bool(
                 record and self._trusted_generic_spell(record)
             )
+        elif (
+            program is None
+            and item.kind == "spell_copy"
+            and item.context.get("copy_permanent_spell")
+        ):
+            trusted_generic_resolution = True
         if (
             self.state.config.semantic_policy == "trusted_only"
             and (
@@ -8134,6 +8414,90 @@ class CommanderEngine:
             importance=2,
         )
         self._grant_priority(self.state.active_player)
+
+    def _copy_stack_item(
+        self,
+        *,
+        controller: str,
+        target: StackItem,
+        targets: Sequence[str],
+        target_groups: Mapping[str, Sequence[str]],
+        reason: str,
+    ) -> StackItem:
+        """Create an independent stack copy without copying paid costs."""
+
+        ref = self._next_ref("S")
+        original_card = self.state.cards.get(
+            target.card_object_id or ""
+        )
+        original_data = (
+            self._copyable_characteristics(original_card)
+            if original_card is not None
+            else {}
+        )
+        original_types, _, _ = self._type_parts(
+            str(original_data.get("type_line") or "")
+        )
+        permanent_spell = bool(
+            target.kind in {"spell", "spell_copy"}
+            and original_types
+            and not original_types.intersection({"instant", "sorcery"})
+        )
+        copied = StackItem(
+            stack_id=self._stable_runtime_id("stack", ref),
+            ref=ref,
+            kind=(
+                "spell_copy"
+                if target.kind in {"spell", "spell_copy"}
+                else target.kind
+            ),
+            controller=controller,
+            label=f"{target.label} copy",
+            source_object_id=target.source_object_id,
+            semantic_key=target.semantic_key,
+            targets=[str(value) for value in targets],
+            modes=list(target.modes),
+            x_value=target.x_value,
+            chosen_face=target.chosen_face,
+            notes=target.notes,
+            default_destination=target.default_destination,
+            visibility=list(self.seats),
+            context={
+                **copy.deepcopy(dict(target.context)),
+                "target_groups": {
+                    str(key): [str(value) for value in values]
+                    for key, values in target_groups.items()
+                },
+                "target_snapshots": {
+                    str(value): self._target_snapshot(str(value))
+                    for value in targets
+                },
+                "targets_revalidated": False,
+                "targets_chosen_at_creation": True,
+                "copied_from_stack": target.ref,
+                "copy_permanent_spell": permanent_spell,
+                "copy_permanent_name": str(
+                    original_data.get("name") or target.label
+                ),
+                "copy_permanent_characteristics": copy.deepcopy(
+                    original_data
+                ),
+            },
+        )
+        self.state.stack.append(copied)
+        self._log(
+            controller,
+            "stack.copy",
+            f"{controller} copied {target.ref} as {copied.ref}.",
+            {
+                "source_stack": target.ref,
+                "copy_stack": copied.ref,
+                "targets": list(copied.targets),
+                "reason": reason,
+            },
+            importance=2,
+        )
+        return copied
 
     def _complete_fetch_choice(self, decision: Any) -> None:
         seat = decision.actors[0]
@@ -8623,9 +8987,11 @@ class CommanderEngine:
                 "choose_option",
                 "choose_mana",
                 "copy_all_tokens",
+                "copy_stack_item",
                 "counter_unless_pay",
                 "cumulative_upkeep",
                 "draw_optional_land",
+                "explore",
                 "fabricate",
                 "choose_warform",
                 "look_reorder_top",
@@ -8633,6 +8999,7 @@ class CommanderEngine:
                 "populate_with_haste",
                 "proliferate",
                 "put_land_from_hand",
+                "put_artifact_from_hand",
                 "remora_tax",
                 "scry",
                 "springheart_landfall",
@@ -8653,6 +9020,31 @@ class CommanderEngine:
         # and effects have completed.
         self.state.stack.remove(item)
         entered: CardInstance | None = None
+        if item.context.get("copy_permanent_spell"):
+            characteristics = copy.deepcopy(
+                dict(
+                    item.context.get(
+                        "copy_permanent_characteristics", {}
+                    )
+                )
+            )
+            name = str(
+                item.context.get("copy_permanent_name")
+                or item.label.removesuffix(" copy")
+            )
+            created_ref = self.create_token(
+                item.controller,
+                name=name,
+                characteristics=characteristics,
+                reason=f"{item.label} resolved",
+            )[0]
+            entered = self._resolve_object(
+                item.controller,
+                created_ref,
+                zones={"battlefield"},
+                controlled_only=True,
+            )
+            entered.annotations["copy_overrides"] = characteristics
         if item.card_object_id:
             card = self.state.cards[item.card_object_id]
             if card.zone == "stack":
@@ -8706,6 +9098,93 @@ class CommanderEngine:
                             "choice_schema": {
                                 "field": "choice",
                                 "legal_values": legal_colors,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "copy_stack_item":
+            target_ref = str(effect.get("stack") or "")
+            target_item = next(
+                (
+                    candidate
+                    for candidate in self.state.stack
+                    if candidate.ref == target_ref
+                    and candidate.ref != item.ref
+                ),
+                None,
+            )
+            if target_item is None:
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            target_program = self.semantics.get(
+                target_item.semantic_key
+            )
+            target_schema = self._stack_target_schema(
+                target_item,
+                target_program,
+            )
+            if not target_schema or not target_item.targets:
+                self._copy_stack_item(
+                    controller=seat,
+                    target=target_item,
+                    targets=list(target_item.targets),
+                    target_groups=copy.deepcopy(
+                        dict(
+                            target_item.context.get(
+                                "target_groups", {}
+                            )
+                        )
+                    ),
+                    reason=item.label,
+                )
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            public_schema = self._public_target_schema(
+                seat,
+                target_schema,
+                source_ref=self._stack_source_ref(target_item),
+            )
+            if public_schema is None:
+                raise GameRuleError(
+                    "The copied stack object has no legal target assignment"
+                )
+            effect = {
+                **dict(effect),
+                "_target_stack_ref": target_item.ref,
+                "_target_schema": copy.deepcopy(dict(target_schema)),
+                "_default_targets": list(target_item.targets),
+            }
+            context.update(
+                {
+                    "prompt": (
+                        "Choose targets for the copy, or keep the "
+                        "original targets."
+                    ),
+                    "target_stack": target_item.ref,
+                    "default_targets": list(target_item.targets),
+                    "target_schema": public_schema,
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "targets",
+                                "optional": True,
+                                "default": list(target_item.targets),
+                                "target_schema": public_schema,
                             },
                         }
                     ],
@@ -8872,6 +9351,143 @@ class CommanderEngine:
                                 "field": "card",
                                 "legal_refs": options,
                                 "optional": True,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "put_artifact_from_hand":
+            options = [
+                self.state.cards[object_id].ref
+                for object_id in self.state.players[seat].zones["hand"]
+                if "artifact"
+                in self._type_parts(
+                    str(
+                        self._effective_card_data(object_id).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )[0]
+            ]
+            if not options:
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            effect = {**dict(effect), "_legal_refs": options}
+            context.update(
+                {
+                    "prompt": (
+                        "You may put an artifact card from your hand "
+                        "onto the battlefield."
+                    ),
+                    "objects": [
+                        {
+                            "id": ref,
+                            "name": self._resolve_object(
+                                seat,
+                                ref,
+                                zones={"hand"},
+                                owned_only=True,
+                            ).printed_name,
+                        }
+                        for ref in options
+                    ],
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "card",
+                                "legal_refs": options,
+                                "optional": True,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "explore":
+            explorer = self._resolve_object(
+                seat,
+                str(effect["card"]),
+                zones={"battlefield"},
+            )
+            library = self.state.players[seat].zones["library"]
+            if not library:
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            top = self.state.cards[library[-1]]
+            top.known_to = list(self.seats)
+            top.revealed_to = list(self.seats)
+            top_types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(top).get("type_line")
+                    or ""
+                )
+            )
+            self._log(
+                seat,
+                "explore.reveal",
+                f"{seat} revealed {top.printed_name} while exploring.",
+                {
+                    "player": seat,
+                    "card": top.ref,
+                    "explorer": explorer.ref,
+                },
+                importance=2,
+                changed_objects=[top.object_id, explorer.object_id],
+            )
+            if "land" in top_types:
+                self.move_card(
+                    top.object_id,
+                    "hand",
+                    reason="explore",
+                    semantic_events=True,
+                )
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            explorer.counters["+1/+1"] = (
+                int(explorer.counters.get("+1/+1", 0)) + 1
+            )
+            effect = {
+                **dict(effect),
+                "_top_ref": top.ref,
+                "_explorer_ref": explorer.ref,
+            }
+            context.update(
+                {
+                    "prompt": (
+                        "Put the revealed nonland card into your "
+                        "graveyard or leave it on top."
+                    ),
+                    "card": {
+                        "id": top.ref,
+                        "name": top.printed_name,
+                    },
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "choice",
+                                "legal_values": ["graveyard", "top"],
                             },
                         }
                     ],
@@ -9570,6 +10186,52 @@ class CommanderEngine:
                 importance=1,
                 changed_players=[seat],
             )
+        elif op == "copy_stack_item":
+            target_ref = str(effect.get("_target_stack_ref") or "")
+            target_item = next(
+                (
+                    candidate
+                    for candidate in self.state.stack
+                    if candidate.ref == target_ref
+                ),
+                None,
+            )
+            if target_item is None:
+                raise GameRuleError(
+                    "The stack object selected for copying no longer exists"
+                )
+            submitted = response.get("targets")
+            if submitted is None:
+                selected = [
+                    str(value)
+                    for value in effect.get("_default_targets", [])
+                ]
+                grouped = copy.deepcopy(
+                    dict(
+                        target_item.context.get("target_groups", {})
+                    )
+                )
+            else:
+                target_program = self.semantics.get(
+                    target_item.semantic_key
+                )
+                selected, grouped = self._validate_semantic_targets(
+                    seat,
+                    target_program,
+                    list(submitted or []),
+                    modes=list(target_item.modes),
+                    source_ref=self._stack_source_ref(target_item),
+                    target_schema=dict(
+                        effect.get("_target_schema") or {}
+                    ),
+                )
+            self._copy_stack_item(
+                controller=seat,
+                target=target_item,
+                targets=selected,
+                target_groups=grouped,
+                reason=item.label,
+            )
         elif op == "choose_card_name":
             raw_name = str(response.get("card_name") or "").strip()
             if not raw_name:
@@ -9780,6 +10442,104 @@ class CommanderEngine:
                     changed_objects=[card.object_id],
                     changed_players=[seat],
                 )
+        elif op == "put_artifact_from_hand":
+            selected = str(response.get("card") or "")
+            legal = {
+                str(value)
+                for value in effect.get("_legal_refs") or []
+            }
+            if selected and selected not in legal:
+                raise GameRuleError(
+                    "Selected card is not an authoritative artifact option"
+                )
+            if selected:
+                card = self._resolve_object(
+                    seat,
+                    selected,
+                    zones={"hand"},
+                    owned_only=True,
+                )
+                types, _, _ = self._type_parts(
+                    str(
+                        self._effective_card_data(card).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )
+                if "artifact" not in types:
+                    raise GameRuleError(
+                        "Selected object is no longer an artifact card "
+                        "in hand"
+                    )
+                self.move_card(
+                    card.object_id,
+                    "battlefield",
+                    controller=seat,
+                    reason=item.label,
+                    semantic_events=True,
+                )
+                self._log(
+                    seat,
+                    "artifact.put",
+                    (
+                        f"{seat} put {card.ref} onto the battlefield "
+                        "from hand."
+                    ),
+                    {
+                        "card": card.ref,
+                        "source": item.ref,
+                    },
+                    importance=2,
+                    changed_objects=[card.object_id],
+                    changed_players=[seat],
+                )
+        elif op == "explore":
+            choice = str(response.get("choice") or "")
+            if choice not in {"graveyard", "top"}:
+                raise GameRuleError(
+                    "Explore requires choosing graveyard or top"
+                )
+            top_ref = str(effect.get("_top_ref") or "")
+            top = self._resolve_object(
+                seat,
+                top_ref,
+                zones={"library"},
+                owned_only=True,
+            )
+            if (
+                not self.state.players[seat].zones["library"]
+                or self.state.players[seat].zones["library"][-1]
+                != top.object_id
+            ):
+                raise GameRuleError(
+                    "The revealed explore card is no longer on top"
+                )
+            if choice == "graveyard":
+                self.move_card(
+                    top.object_id,
+                    "graveyard",
+                    reason="explore",
+                    semantic_events=True,
+                )
+            self._log(
+                seat,
+                "explore.complete",
+                (
+                    f"{seat} put {top.ref} into their graveyard."
+                    if choice == "graveyard"
+                    else f"{seat} left {top.ref} on top of their library."
+                ),
+                {
+                    "player": seat,
+                    "card": top.ref,
+                    "destination": choice,
+                    "explorer": effect.get("_explorer_ref"),
+                },
+                importance=2,
+                changed_objects=[top.object_id],
+                changed_players=[seat],
+            )
         elif op == "choose_objects":
             selected = [
                 str(value)
@@ -12974,6 +13734,43 @@ class CommanderEngine:
                 changed_objects=[card.object_id],
             )
             return card.ref
+        if op == "add_subtype_until_end_of_turn":
+            card = self._resolve_object(
+                actor,
+                str(effect["card"]),
+                zones={"battlefield"},
+            )
+            subtype = str(effect.get("subtype") or "").strip().title()
+            if not subtype:
+                raise GameRuleError(
+                    "Temporary subtype effect requires a subtype"
+                )
+            until_end = card.annotations.setdefault(
+                "until_end_of_turn",
+                {},
+            )
+            until_end["add_subtypes"] = unique_preserving_order(
+                [
+                    *list(until_end.get("add_subtypes") or []),
+                    subtype,
+                ]
+            )
+            self._log(
+                actor,
+                "permanent.subtype",
+                (
+                    f"{card.ref} became a {subtype} in addition to "
+                    "its other types until end of turn."
+                ),
+                {
+                    "object": card.ref,
+                    "subtype": subtype,
+                    "reason": reason,
+                },
+                importance=1,
+                changed_objects=[card.object_id],
+            )
+            return card.ref
         if op == "copy_until_end_of_turn":
             source = self._resolve_object(
                 actor,
@@ -12992,9 +13789,19 @@ class CommanderEngine:
                 until_end["copy_overrides_previous"] = copy.deepcopy(
                     source.annotations.get("copy_overrides")
                 )
-            source.annotations["copy_overrides"] = (
-                self._copyable_characteristics(target)
-            )
+            characteristics = self._copyable_characteristics(target)
+            if effect.get("except_nonlegendary"):
+                type_line = str(
+                    characteristics.get("type_line") or ""
+                )
+                characteristics["type_line"] = re.sub(
+                    r"\bLegendary\s+",
+                    "",
+                    type_line,
+                    count=1,
+                    flags=re.IGNORECASE,
+                )
+            source.annotations["copy_overrides"] = characteristics
             self._log(
                 actor,
                 "permanent.copy",
@@ -13012,6 +13819,26 @@ class CommanderEngine:
                 changed_objects=[source.object_id],
             )
             return source.ref
+        if op == "change_control_until_end_of_turn":
+            card = self._resolve_object(
+                actor,
+                str(effect["card"]),
+                zones={"battlefield"},
+            )
+            new_controller = str(
+                effect.get("controller") or actor
+            )
+            until_end = card.annotations.setdefault(
+                "until_end_of_turn",
+                {},
+            )
+            until_end.setdefault("control_previous", card.controller)
+            self.change_control(
+                card.object_id,
+                new_controller,
+                reason=reason,
+            )
+            return card.ref
         if op == "add_type":
             card = self._resolve_object(
                 actor,
@@ -13115,6 +13942,63 @@ class CommanderEngine:
                 changed_players=[actor],
             )
             return card.ref
+        if op == "grant_cast_permission":
+            card = self._resolve_object(
+                actor,
+                str(effect["card"]),
+                zones={str(effect.get("zone") or "graveyard")},
+                owned_only=bool(effect.get("owned_only", True)),
+            )
+            allowed_types = {
+                str(value).casefold()
+                for value in effect.get("types_any", [])
+            }
+            card_types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(card).get("type_line")
+                    or ""
+                )
+            )
+            if allowed_types and not allowed_types.intersection(
+                card_types
+            ):
+                raise GameRuleError(
+                    "The selected card does not satisfy the cast permission"
+                )
+            card.annotations["temporary_play_permission"] = {
+                "player": actor,
+                "zone": card.zone,
+                "turn_sequence": self.state.turn_sequence,
+                "without_mana_cost": bool(
+                    effect.get("without_mana_cost", False)
+                ),
+                "allow_land": False,
+                "allow_spell": True,
+                "source": str(effect.get("source") or ""),
+            }
+            self._log(
+                actor,
+                "permission.cast",
+                (
+                    f"{actor} may cast {card.ref} from {card.zone} "
+                    "this turn."
+                ),
+                {
+                    "player": actor,
+                    "object": card.ref,
+                    "zone": card.zone,
+                    "turn_sequence": self.state.turn_sequence,
+                    "without_mana_cost": bool(
+                        effect.get("without_mana_cost", False)
+                    ),
+                    "reason": reason,
+                },
+                visibility=[actor, "analyst"],
+                importance=2,
+                changed_objects=[card.object_id],
+                changed_players=[actor],
+            )
+            return card.ref
         if op == "counter":
             card = self._resolve_object(actor, str(effect["card"]), zones={"battlefield"})
             name = str(effect.get("counter") or "+1/+1")
@@ -13206,6 +14090,47 @@ class CommanderEngine:
             return None
         raise GameRuleError(f"Unsupported effect operation {op!r}")
 
+    def _create_replacement_token_instance(
+        self,
+        controller: str,
+        *,
+        name: str,
+        characteristics: Mapping[str, Any],
+    ) -> str:
+        """Create one token object without dispatching its enter events."""
+
+        ref = self._next_ref("T")
+        object_id = self._stable_runtime_id("token-object", ref)
+        card = CardInstance(
+            object_id=object_id,
+            ref=ref,
+            oracle_id=(
+                f"custom-token:"
+                f"{self._stable_runtime_id('token-oracle', ref)}"
+            ),
+            printed_name=name,
+            owner=controller,
+            controller=controller,
+            zone="battlefield",
+            is_token=True,
+            annotations={
+                "token_characteristics": copy.deepcopy(
+                    dict(characteristics)
+                )
+            },
+            acquired_control_turn_count=self.state.players[
+                controller
+            ].turns_begun,
+            entered_battlefield_turn_sequence=self.state.turn_sequence,
+            known_to=list(self.seats),
+            revealed_to=list(self.seats),
+        )
+        self.state.cards[object_id] = card
+        self.state.players[controller].zones["battlefield"].append(
+            object_id
+        )
+        return object_id
+
     def create_token(
         self,
         controller: str,
@@ -13220,6 +14145,33 @@ class CommanderEngine:
         reason: str = "token effect",
     ) -> list[str]:
         self._require_seat(controller, in_game=True)
+        if copy_of:
+            copied_source = self._resolve_object(
+                controller,
+                str(copy_of),
+                zones={"battlefield"},
+            )
+            created_types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(copied_source).get(
+                        "type_line"
+                    )
+                    or ""
+                )
+            )
+        else:
+            type_line = str(
+                dict(characteristics or {}).get("type_line") or ""
+            )
+            if not type_line:
+                try:
+                    type_line = self.card_db.lookup(name).type_line
+                except KeyError:
+                    type_line = ""
+            created_types, _, _ = self._type_parts(type_line)
+        artifact_token_event = bool(
+            quantity > 0 and "artifact" in created_types
+        )
         created: list[str] = []
         for _ in range(quantity):
             if copy_of:
@@ -13243,6 +14195,10 @@ class CommanderEngine:
                     oracle_id = f"custom-token:{self._stable_runtime_id('token-oracle', ref)}"
                     printed_name = name
                 annotations = {"token_characteristics": dict(characteristics or {})}
+                if characteristics:
+                    annotations["copy_overrides"] = copy.deepcopy(
+                        dict(characteristics)
+                    )
             if copy_of:
                 ref = self._next_ref("T")
             object_id = self._stable_runtime_id("token-object", ref)
@@ -13269,12 +14225,71 @@ class CommanderEngine:
             if attacking:
                 self.state.combat.attackers[object_id] = attacking
             created.append(object_id)
+        if artifact_token_event:
+            replacement_sources = [
+                self.state.cards[object_id]
+                for object_id in list(
+                    self.state.players[controller].zones[
+                        "battlefield"
+                    ]
+                )
+                if self.state.cards[object_id].controller == controller
+                and not self.state.cards[object_id].phased_out
+            ]
+            for source in replacement_sources:
+                if source.printed_name == "Stridehangar Automaton":
+                    created.append(
+                        self._create_replacement_token_instance(
+                            controller,
+                            name="Thopter",
+                            characteristics={
+                                "type_line": (
+                                    "Token Artifact Creature — Thopter"
+                                ),
+                                "colors": [],
+                                "power": "1",
+                                "toughness": "1",
+                                "keywords": ["Flying"],
+                            },
+                        )
+                    )
+                elif source.printed_name == "Worldwalker Helm":
+                    created.append(
+                        self._create_replacement_token_instance(
+                            controller,
+                            name="Map",
+                            characteristics={
+                                "type_line": "Token Artifact — Map",
+                                "oracle_text": (
+                                    "{1}, {T}, Sacrifice this token: "
+                                    "Target creature you control explores. "
+                                    "Activate only as a sorcery."
+                                ),
+                            },
+                        )
+                    )
         tracker = self.state.players[controller].stats.setdefault(
             "tokens_created_by_turn", {}
         )
         turn_key = str(self.state.turn_sequence)
         tracker[turn_key] = int(tracker.get(turn_key, 0)) + len(created)
-        self._log(controller, "token.create", f"{controller} created {quantity} {name} token(s).", {"objects": [self.state.cards[oid].ref for oid in created], "reason": reason}, importance=1, changed_objects=created, changed_players=[controller])
+        self._log(
+            controller,
+            "token.create",
+            f"{controller} created {len(created)} token(s).",
+            {
+                "objects": [
+                    self.state.cards[oid].ref for oid in created
+                ],
+                "base_name": name,
+                "base_quantity": quantity,
+                "replacement_count": len(created) - quantity,
+                "reason": reason,
+            },
+            importance=1,
+            changed_objects=created,
+            changed_players=[controller],
+        )
         trigger_batch: list[StackItem] = []
         for object_id in created:
             card = self.state.cards[object_id]
@@ -13289,6 +14304,9 @@ class CommanderEngine:
                 "from": "outside",
                 "to": "battlefield",
                 "types": sorted(types),
+                "mana_value": float(
+                    data.get("mana_value", 0) or 0
+                ),
                 "token": True,
                 "tapped": card.tapped,
                 "reason": reason,
