@@ -8,6 +8,7 @@ from typing import Any, Mapping, Sequence
 
 from .engine import CommanderEngine
 from .model import Event
+from .preflight import card_semantic_status
 from .util import stable_json
 
 MEANINGFUL_CODES = {
@@ -180,6 +181,14 @@ def _semantic_coverage(engine: CommanderEngine) -> dict[str, Any]:
         )
         if trusted_programs and not source_hash_match:
             trust = "unresolved"
+        preflight_status = card_semantic_status(
+            record,
+            engine.semantics,
+            db=engine.card_db,
+        )
+        preflight_fully_playable = (
+            preflight_status["status"] == "fully_playable"
+        )
         oracle = record.oracle_text.casefold()
         builtin_fetch = bool(engine._fetch_land_types(record.oracle_text))
         builtin_land_entry = operations == {"land.play"} and any(
@@ -190,7 +199,8 @@ def _semantic_coverage(engine: CommanderEngine) -> dict[str, Any]:
             )
         )
         if (
-            trust == "trusted"
+            preflight_fully_playable
+            or trust == "trusted"
             or ("stack.activate" in operations and builtin_fetch)
             or builtin_land_entry
         ):
@@ -231,7 +241,10 @@ def _semantic_coverage(engine: CommanderEngine) -> dict[str, Any]:
             reason = "relevant Oracle semantics were not registered or observed resolving"
         effective_trust = trust
         if status == "fully_supported" and (
-            builtin_fetch or builtin_land_entry or operations == {"land.play"}
+            preflight_fully_playable
+            or builtin_fetch
+            or builtin_land_entry
+            or operations == {"land.play"}
         ):
             effective_trust = "trusted"
         elif status == "intentionally_ignored_as_irrelevant":

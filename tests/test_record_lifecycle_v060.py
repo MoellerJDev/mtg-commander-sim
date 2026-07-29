@@ -79,6 +79,39 @@ class RecordLifecycleAndTypedToolTests(unittest.TestCase):
         self.assertEqual("trusted", row["trust_level"])
         self.assertEqual("complete", coverage["status"])
 
+    def test_builtin_mana_side_effect_is_trusted_in_coverage_report(self):
+        session = make_session(
+            self.db, self.mishra, self.zimone, players=2, seed=420
+        )
+        elves = next(
+            card
+            for card in session.engine.state.cards.values()
+            if card.printed_name == "Elves of Deep Shadow"
+        )
+        session.engine.state.events.append(
+            Event(
+                event_id=1,
+                revision=0,
+                turn_sequence=1,
+                active_player=elves.owner,
+                phase="main",
+                step="precombat_main",
+                actor=elves.owner,
+                code="stack.cast",
+                summary="cast Elves of Deep Shadow",
+                details={"object": elves.ref},
+            )
+        )
+        coverage = _semantic_coverage(session.engine)
+        row = next(
+            card
+            for card in coverage["cards"]
+            if card["name"] == "Elves of Deep Shadow"
+        )
+        self.assertEqual("fully_supported", row["status"])
+        self.assertEqual("trusted", row["trust_level"])
+        self.assertEqual("complete", coverage["status"])
+
     def test_typed_schema_enforces_plan_and_reason_bounds(self):
         spec = next(
             item for item in _tool_specs() if item["name"] == "submit_action"
