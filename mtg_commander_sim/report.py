@@ -182,7 +182,18 @@ def _semantic_coverage(engine: CommanderEngine) -> dict[str, Any]:
             trust = "unresolved"
         oracle = record.oracle_text.casefold()
         builtin_fetch = bool(engine._fetch_land_types(record.oracle_text))
-        if trust == "trusted" or ("stack.activate" in operations and builtin_fetch):
+        builtin_land_entry = operations == {"land.play"} and any(
+            marker in oracle
+            for marker in (
+                "you may pay 2 life. if you don't, it enters tapped",
+                "enters tapped unless you have two or more opponents",
+            )
+        )
+        if (
+            trust == "trusted"
+            or ("stack.activate" in operations and builtin_fetch)
+            or builtin_land_entry
+        ):
             status = "fully_supported"
             reason = "trusted semantic pack or built-in semantics"
         elif trust == "intentionally_ignored":
@@ -220,7 +231,7 @@ def _semantic_coverage(engine: CommanderEngine) -> dict[str, Any]:
             reason = "relevant Oracle semantics were not registered or observed resolving"
         effective_trust = trust
         if status == "fully_supported" and (
-            builtin_fetch or operations == {"land.play"}
+            builtin_fetch or builtin_land_entry or operations == {"land.play"}
         ):
             effective_trust = "trusted"
         elif status == "intentionally_ignored_as_irrelevant":
