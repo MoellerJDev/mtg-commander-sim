@@ -544,10 +544,125 @@ class CommanderEngine:
                     base["keywords"] = unique_preserving_order(
                         [*base["keywords"], "Haste"]
                     )
+            for attachment_id in card.attachments:
+                equipment = self.state.cards.get(attachment_id)
+                if (
+                    equipment is None
+                    or equipment.zone != "battlefield"
+                    or equipment.attached_to != card.object_id
+                ):
+                    continue
+                equipment_record = self.card_record(equipment)
+                equipment_oracle = (
+                    str(equipment_record.oracle_text or "")
+                    if equipment_record is not None
+                    else ""
+                )
+                granted = re.search(
+                    r"equipped creature has (?P<keywords>[^.]+)",
+                    equipment_oracle,
+                    re.IGNORECASE,
+                )
+                if granted:
+                    keywords = [
+                        value.strip().title()
+                        for value in re.split(
+                            r"\s+and\s+|,\s*",
+                            granted.group("keywords"),
+                        )
+                        if value.strip()
+                    ]
+                    base["keywords"] = unique_preserving_order(
+                        [*base["keywords"], *keywords]
+                    )
+                modifier = re.search(
+                    r"equipped creature gets "
+                    r"(?P<power>[+-]\d+)/(?P<toughness>[+-]\d+)",
+                    equipment_oracle,
+                    re.IGNORECASE,
+                )
+                if modifier:
+                    for stat in ("power", "toughness"):
+                        try:
+                            base[stat] = str(
+                                int(str(base.get(stat)))
+                                + int(modifier.group(stat))
+                            )
+                        except (TypeError, ValueError):
+                            pass
         return base
 
     def display_name(self, object_id: str) -> str:
         return str(self._effective_card_data(object_id).get("name") or self.state.cards[object_id].printed_name)
+
+    def _copyable_characteristics(
+        self, card: CardInstance
+    ) -> dict[str, Any]:
+        record = self.card_record(card)
+        if record is None:
+            base = copy.deepcopy(
+                dict(card.annotations.get("token_characteristics") or {})
+            )
+            base.setdefault("name", card.printed_name)
+            base.setdefault("mana_cost", "")
+            base.setdefault("mana_value", 0)
+            base.setdefault("type_line", "Token")
+            base.setdefault("oracle_text", "")
+            base.setdefault("keywords", [])
+            base.setdefault("colors", [])
+            base.setdefault("produced_mana", [])
+        else:
+            face = None
+            if card.active_face:
+                face = next(
+                    (
+                        value
+                        for value in record.faces
+                        if str(value.get("name") or "")
+                        == card.active_face
+                    ),
+                    None,
+                )
+            base = {
+                "name": (
+                    str(face.get("name"))
+                    if face is not None
+                    else record.name
+                ),
+                "mana_cost": (
+                    str(face.get("mana_cost") or "")
+                    if face is not None
+                    else record.mana_cost
+                ),
+                "mana_value": record.mana_value,
+                "type_line": (
+                    str(face.get("type_line") or "")
+                    if face is not None
+                    else record.type_line
+                ),
+                "oracle_text": (
+                    str(face.get("oracle_text") or "")
+                    if face is not None
+                    else record.oracle_text
+                ),
+                "power": (
+                    face.get("power")
+                    if face is not None
+                    else record.power
+                ),
+                "toughness": (
+                    face.get("toughness")
+                    if face is not None
+                    else record.toughness
+                ),
+                "keywords": list(record.keywords),
+                "colors": list(record.colors),
+                "produced_mana": list(record.produced_mana),
+            }
+        base.update(
+            copy.deepcopy(dict(card.annotations.get("copy_overrides") or {}))
+        )
+        return base
 
     def _resolve_object(
         self,
@@ -671,6 +786,11 @@ class CommanderEngine:
         card = self.state.cards[object_id]
         origin = card.zone
         origin_controller = card.controller
+        origin_attachments = [
+            self.state.cards[attachment_id].ref
+            for attachment_id in card.attachments
+            if attachment_id in self.state.cards
+        ]
         origin_data = (
             copy.deepcopy(self._effective_card_data(card))
             if semantic_events
@@ -738,6 +858,7 @@ class CommanderEngine:
                 destination=destination,
                 origin_controller=origin_controller,
                 origin_data=origin_data,
+                origin_attachments=origin_attachments,
                 departure_sources=departure_sources,
                 departure_source_zones=departure_source_zones,
                 reason=reason,
@@ -779,6 +900,7 @@ class CommanderEngine:
         destination: str | None,
         origin_controller: str,
         origin_data: Mapping[str, Any],
+        origin_attachments: Sequence[str],
         departure_sources: Sequence[CardInstance],
         departure_source_zones: Mapping[str, str],
         reason: str,
@@ -807,6 +929,7 @@ class CommanderEngine:
             "to": event_destination,
             "reason": reason,
             "token": card.is_token,
+            "attachments": list(origin_attachments),
         }
         if origin == "battlefield" and event_destination != "battlefield":
             departure_context = {
@@ -888,7 +1011,14 @@ class CommanderEngine:
         sources = self._semantic_event_sources()
         source_zones = {source.object_id: source.zone for source in sources}
         snapshots: list[
-            tuple[CardInstance, str, str, dict[str, Any], str]
+            tuple[
+                CardInstance,
+                str,
+                str,
+                dict[str, Any],
+                list[str],
+                str,
+            ]
         ] = []
         for object_id, destination in changes:
             card = self.state.cards[object_id]
@@ -898,6 +1028,11 @@ class CommanderEngine:
                     card.zone,
                     card.controller,
                     copy.deepcopy(self._effective_card_data(card)),
+                    [
+                        self.state.cards[attachment_id].ref
+                        for attachment_id in card.attachments
+                        if attachment_id in self.state.cards
+                    ],
                     destination,
                 )
             )
@@ -914,6 +1049,7 @@ class CommanderEngine:
             origin,
             origin_controller,
             origin_data,
+            origin_attachments,
             destination,
         ) in snapshots:
             self._dispatch_zone_change_events(
@@ -922,6 +1058,7 @@ class CommanderEngine:
                 destination=destination,
                 origin_controller=origin_controller,
                 origin_data=origin_data,
+                origin_attachments=origin_attachments,
                 departure_sources=sources,
                 departure_source_zones=source_zones,
                 reason=reason,
@@ -2687,7 +2824,13 @@ class CommanderEngine:
                 changed_players=[seat],
             )
         deferred_cost_events: list[
-            tuple[CardInstance, str, str, dict[str, Any]]
+            tuple[
+                CardInstance,
+                str,
+                str,
+                dict[str, Any],
+                list[str],
+            ]
         ] = []
         deferred_cost_sources: list[CardInstance] = []
         deferred_cost_source_zones: dict[str, str] = {}
@@ -2742,7 +2885,14 @@ class CommanderEngine:
                     for source in deferred_cost_sources
                 }
                 changes: list[
-                    tuple[CardInstance, str, str, dict[str, Any], str]
+                    tuple[
+                        CardInstance,
+                        str,
+                        str,
+                        dict[str, Any],
+                        list[str],
+                        str,
+                    ]
                 ] = []
                 for selected in selected_additional:
                     kind = str(selected["kind"])
@@ -2763,6 +2913,13 @@ class CommanderEngine:
                                 copy.deepcopy(
                                     self._effective_card_data(paid_card)
                                 ),
+                                [
+                                    self.state.cards[
+                                        attachment_id
+                                    ].ref
+                                    for attachment_id in paid_card.attachments
+                                    if attachment_id in self.state.cards
+                                ],
                                 kind,
                             )
                         )
@@ -2771,6 +2928,7 @@ class CommanderEngine:
                     paid_origin,
                     paid_controller,
                     paid_data,
+                    paid_attachments,
                     kind,
                 ) in changes:
                     self.move_card(
@@ -2786,6 +2944,7 @@ class CommanderEngine:
                             paid_origin,
                             paid_controller,
                             paid_data,
+                            paid_attachments,
                         )
                     )
                     self._log(
@@ -2938,6 +3097,7 @@ class CommanderEngine:
             paid_origin,
             paid_controller,
             paid_data,
+            paid_attachments,
         ) in deferred_cost_events:
             self._dispatch_zone_change_events(
                 paid_card,
@@ -2945,6 +3105,7 @@ class CommanderEngine:
                 destination="graveyard",
                 origin_controller=paid_controller,
                 origin_data=paid_data,
+                origin_attachments=paid_attachments,
                 departure_sources=deferred_cost_sources,
                 departure_source_zones=deferred_cost_source_zones,
                 reason=f"{card.printed_name} additional cost",
@@ -5353,7 +5514,71 @@ class CommanderEngine:
                         ),
                     },
                 )
+                trigger_count = 1
+                entering_types = {
+                    str(value).casefold()
+                    for value in context.get("types", [])
+                }
+                if (
+                    event
+                    in {
+                        "permanent.enter",
+                        "artifact.enter",
+                        "creature.enter",
+                        "land.enter",
+                        "enchantment.enter",
+                    }
+                    and entering_types.intersection(
+                        {"artifact", "creature"}
+                    )
+                    and source.zone == "battlefield"
+                ):
+                    trigger_count += sum(
+                        1
+                        for permanent_id in self.state.players[
+                            source.controller
+                        ].zones["battlefield"]
+                        if self.state.cards[
+                            permanent_id
+                        ].controller
+                        == source.controller
+                        and not self.state.cards[
+                            permanent_id
+                        ].phased_out
+                        and (
+                            (
+                                "if an artifact or creature entering causes "
+                                "a triggered ability of a permanent you "
+                                "control to trigger, that ability triggers "
+                                "an additional time"
+                            )
+                            in str(
+                                (
+                                    self.card_record(
+                                        self.state.cards[permanent_id]
+                                    ).oracle_text
+                                    if self.card_record(
+                                        self.state.cards[permanent_id]
+                                    )
+                                    is not None
+                                    else ""
+                                )
+                            ).casefold()
+                        )
+                    )
                 triggered.append(item)
+                for copy_index in range(1, trigger_count):
+                    copy_ref = self._next_ref("S")
+                    copied = StackItem.from_dict(item.to_dict())
+                    copied.stack_id = self._stable_runtime_id(
+                        "stack", copy_ref
+                    )
+                    copied.ref = copy_ref
+                    copied.context = {
+                        **copy.deepcopy(item.context),
+                        "additional_trigger_copy": copy_index,
+                    }
+                    triggered.append(copied)
         if trigger_batch is not None:
             trigger_batch.extend(triggered)
         elif triggered:
@@ -7131,12 +7356,14 @@ class CommanderEngine:
                 "choose_objects",
                 "choose_option",
                 "choose_mana",
+                "copy_all_tokens",
                 "counter_unless_pay",
                 "draw_optional_land",
                 "fabricate",
                 "choose_warform",
                 "look_reorder_top",
                 "pay_or_lose",
+                "populate_with_haste",
                 "proliferate",
             }:
                 self._begin_semantic_choice(
@@ -7262,6 +7489,57 @@ class CommanderEngine:
                             "choice_schema": {
                                 "field": "choice",
                                 "legal_values": legal_values,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op in {"populate_with_haste", "copy_all_tokens"}:
+            options = [
+                self.state.cards[object_id].ref
+                for object_id in self.state.players[
+                    seat
+                ].zones["battlefield"]
+                if self.state.cards[object_id].controller == seat
+                and self.state.cards[object_id].is_token
+                and (
+                    op == "copy_all_tokens"
+                    or "creature"
+                    in self._type_parts(
+                        str(
+                            self._effective_card_data(object_id).get(
+                                "type_line"
+                            )
+                            or ""
+                        )
+                    )[0]
+                )
+            ]
+            if not options:
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            effect = {**dict(effect), "_legal_refs": options}
+            context.update(
+                {
+                    "prompt": (
+                        "Choose a creature token to populate."
+                        if op == "populate_with_haste"
+                        else "Choose a token for every other token to copy."
+                    ),
+                    "options": options,
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "card",
+                                "legal_refs": options,
                             },
                         }
                     ],
@@ -7764,6 +8042,90 @@ class CommanderEngine:
                         "colors": [],
                     },
                     reason=item.label,
+                )
+        elif op in {"populate_with_haste", "copy_all_tokens"}:
+            selected = str(response.get("card") or "")
+            legal = {
+                str(value)
+                for value in effect.get("_legal_refs") or []
+            }
+            if selected not in legal:
+                raise GameRuleError(
+                    "Selected token is not an authoritative copy option"
+                )
+            original = self._resolve_object(
+                seat,
+                selected,
+                zones={"battlefield"},
+                controlled_only=True,
+            )
+            if not original.is_token:
+                raise GameRuleError("Token-copy choice requires a token")
+            if op == "populate_with_haste":
+                created_ref = self.create_token(
+                    seat,
+                    name="",
+                    copy_of=original.ref,
+                    temporary_keywords=["Haste"],
+                    reason=item.label,
+                )[0]
+                created = self._resolve_object(
+                    seat,
+                    created_ref,
+                    zones={"battlefield"},
+                    controlled_only=True,
+                )
+                self.schedule_delayed_trigger(
+                    controller=seat,
+                    label=f"Sacrifice {created.ref}",
+                    event_kind="step.begin",
+                    condition={
+                        "phase": "ending",
+                        "step": "end_step",
+                    },
+                    stack_template={
+                        "label": f"Sacrifice {created.ref}",
+                        "semantic_key": "builtin:sacrifice-source",
+                    },
+                    source_object_id=created.object_id,
+                    once=True,
+                )
+            else:
+                characteristics = self._copyable_characteristics(
+                    original
+                )
+                changed: list[str] = []
+                for object_id in self.state.players[
+                    seat
+                ].zones["battlefield"]:
+                    token = self.state.cards[object_id]
+                    if (
+                        token.controller != seat
+                        or not token.is_token
+                        or token.object_id == original.object_id
+                    ):
+                        continue
+                    token.annotations["copy_overrides"] = copy.deepcopy(
+                        characteristics
+                    )
+                    changed.append(token.object_id)
+                self._log(
+                    seat,
+                    "token.copy_all",
+                    (
+                        f"{len(changed)} other token(s) became copies of "
+                        f"{original.ref}."
+                    ),
+                    {
+                        "source": item.ref,
+                        "chosen_token": original.ref,
+                        "objects": [
+                            self.state.cards[object_id].ref
+                            for object_id in changed
+                        ],
+                    },
+                    importance=2,
+                    changed_objects=changed,
                 )
         elif op == "choose_objects":
             selected = [
@@ -9516,6 +9878,60 @@ class CommanderEngine:
                 reason=reason,
                 semantic_events=True,
             )
+        if op == "attach":
+            equipment = self._resolve_object(
+                actor,
+                str(effect.get("equipment") or effect.get("source")),
+                zones={"battlefield"},
+            )
+            creature = self._resolve_object(
+                actor,
+                str(effect["creature"]),
+                zones={"battlefield"},
+            )
+            equipment_types, equipment_subtypes, _ = self._type_parts(
+                str(
+                    self._effective_card_data(equipment).get("type_line")
+                    or ""
+                )
+            )
+            creature_types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(creature).get("type_line")
+                    or ""
+                )
+            )
+            if (
+                "artifact" not in equipment_types
+                or "equipment" not in equipment_subtypes
+                or "creature" not in creature_types
+            ):
+                raise GameRuleError(
+                    "Attach requires an Equipment and a creature"
+                )
+            if equipment.attached_to in self.state.cards:
+                previous = self.state.cards[equipment.attached_to]
+                if equipment.object_id in previous.attachments:
+                    previous.attachments.remove(equipment.object_id)
+            equipment.attached_to = creature.object_id
+            if equipment.object_id not in creature.attachments:
+                creature.attachments.append(equipment.object_id)
+            self._log(
+                actor,
+                "attachment.attach",
+                f"{equipment.ref} became attached to {creature.ref}.",
+                {
+                    "equipment": equipment.ref,
+                    "creature": creature.ref,
+                    "reason": reason,
+                },
+                importance=2,
+                changed_objects=[
+                    equipment.object_id,
+                    creature.object_id,
+                ],
+            )
+            return creature.ref
         if op == "welder_exchange":
             battlefield_ref = effect.get("battlefield_card")
             graveyard_ref = effect.get("graveyard_card")

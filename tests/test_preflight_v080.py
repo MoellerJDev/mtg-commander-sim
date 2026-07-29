@@ -138,7 +138,7 @@ class SemanticPreflightV2Tests(unittest.TestCase):
         self.assertEqual("fully_playable", row["status"])
         self.assertNotIn("mana_ability", row["unresolved"])
 
-    def test_unsupported_keyword_action_is_not_silently_ignored(self):
+    def test_exact_equip_keyword_is_recognized_as_supported(self):
         row = card_semantic_status(
             self.db.lookup("Lightning Greaves"),
             SemanticRegistry(),
@@ -146,8 +146,8 @@ class SemanticPreflightV2Tests(unittest.TestCase):
         )
 
         self.assertIn("keyword_ability", row["material_effect_categories"])
-        self.assertIn("keyword:equip", row["unresolved"])
-        self.assertEqual("unresolved", row["status"])
+        self.assertNotIn("keyword:equip", row["unresolved"])
+        self.assertEqual("fully_playable", row["status"])
 
 
 class TrustedOnlyPolicyTests(unittest.TestCase):

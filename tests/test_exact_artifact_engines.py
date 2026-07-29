@@ -374,6 +374,216 @@ class ExactArtifactEngineTests(unittest.TestCase):
         self.assertEqual("graveyard", sol_ring.zone)
         self.assertEqual("battlefield", target.zone)
 
+    def test_panharmonicon_adds_one_matching_enter_trigger(self):
+        session = self.make_session(907)
+        engine = session.engine
+        panharmonicon = self.card(engine, "A", "Panharmonicon")
+        wellspring = self.card(engine, "A", "Ichor Wellspring")
+        engine.move_card(
+            panharmonicon.object_id,
+            "battlefield",
+            controller="A",
+        )
+        engine.move_card(
+            wellspring.object_id,
+            "battlefield",
+            controller="A",
+            semantic_events=True,
+        )
+        queued = [
+            item
+            for batch in engine.state.pending_trigger_batches
+            for group in batch["groups"]
+            for item in group["items"]
+            if item["label"] == "Ichor Wellspring enters"
+        ]
+        self.assertEqual(2, len(queued))
+
+    def test_brudiclad_creates_myr_and_copies_other_tokens(self):
+        session = self.make_session(908)
+        engine = session.engine
+        brudiclad = self.card(
+            engine, "A", "Brudiclad, Telchor Engineer"
+        )
+        engine.move_card(
+            brudiclad.object_id,
+            "battlefield",
+            controller="A",
+        )
+        treasure_ref = engine.create_token(
+            "A",
+            name="Treasure",
+            characteristics={"type_line": "Artifact — Treasure"},
+        )[0]
+        engine._dispatch_semantic_event(
+            "step.begin",
+            {
+                "phase": "combat",
+                "step": "beginning_combat",
+                "player": "A",
+            },
+        )
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        packet = session.packet("pilot:A", full=True)
+        myr_ref = next(
+            value
+            for value in packet["decision"]["ctx"]["options"]
+            if value != treasure_ref
+        )
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "card": myr_ref,
+                "plan": "BUILD_BOARD",
+                "reason": "Make every other token a 2/1 Myr.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        treasure = engine._resolve_object(
+            "A", treasure_ref, zones={"battlefield"}
+        )
+        copied = engine._effective_card_data(treasure)
+        self.assertEqual("Phyrexian Myr", copied["name"])
+        self.assertIn("Artifact Creature", copied["type_line"])
+        self.assertEqual("2", copied["power"])
+        self.assertIn("Haste", copied["keywords"])
+
+    def test_determined_iteration_populates_with_haste_and_delayed_sacrifice(self):
+        session = self.make_session(909)
+        engine = session.engine
+        iteration = self.card(engine, "A", "Determined Iteration")
+        engine.move_card(
+            iteration.object_id,
+            "battlefield",
+            controller="A",
+        )
+        original_ref = engine.create_token(
+            "A",
+            name="Bear",
+            characteristics={
+                "type_line": "Creature — Bear",
+                "power": "2",
+                "toughness": "2",
+            },
+        )[0]
+        engine._dispatch_semantic_event(
+            "step.begin",
+            {
+                "phase": "combat",
+                "step": "beginning_combat",
+                "player": "A",
+            },
+        )
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "card": original_ref,
+                "plan": "BUILD_BOARD",
+                "reason": "Populate the Bear for combat.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        bears = [
+            card
+            for card in engine.state.cards.values()
+            if card.is_token
+            and card.zone == "battlefield"
+            and engine._effective_card_data(card)["name"] == "Bear"
+        ]
+        self.assertEqual(2, len(bears))
+        created = next(card for card in bears if card.ref != original_ref)
+        self.assertIn(
+            "Haste", engine._effective_card_data(created)["keywords"]
+        )
+
+        delayed = engine._matching_delayed_triggers(
+            "step.begin",
+            {"phase": "ending", "step": "end_step", "player": "A"},
+        )
+        self.assertEqual(1, len(delayed))
+        engine._start_trigger_batch(delayed, after="grant_priority")
+        self.resolve_top(engine)
+        self.assertEqual("outside", created.zone)
+        self.assertEqual("battlefield", engine._resolve_object("A", original_ref).zone)
+
+    def test_lightning_greaves_equip_grants_haste_and_shroud(self):
+        session = self.make_session(910)
+        engine = session.engine
+        greaves = self.card(engine, "A", "Lightning Greaves")
+        mishra = self.card(engine, "A", "Mishra, Eminent One")
+        engine.move_card(greaves.object_id, "battlefield", controller="A")
+        engine.move_card(mishra.object_id, "battlefield", controller="A")
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine.state.priority_player = "A"
+        engine._activate(
+            "A",
+            {
+                "source": greaves.ref,
+                "ability": "ab2",
+                "targets": [mishra.ref],
+            },
+        )
+        self.resolve_top(engine)
+        self.assertEqual(mishra.object_id, greaves.attached_to)
+        self.assertIn(greaves.object_id, mishra.attachments)
+        keywords = engine._effective_card_data(mishra)["keywords"]
+        self.assertIn("Haste", keywords)
+        self.assertIn("Shroud", keywords)
+
+    def test_skullclamp_modifier_and_attached_death_draw(self):
+        session = self.make_session(911)
+        engine = session.engine
+        skullclamp = self.card(engine, "B", "Skullclamp")
+        engine.move_card(
+            skullclamp.object_id,
+            "battlefield",
+            controller="B",
+        )
+        token_ref = engine.create_token(
+            "B",
+            name="Saproling",
+            characteristics={
+                "type_line": "Creature — Saproling",
+                "power": "1",
+                "toughness": "1",
+            },
+        )[0]
+        token = engine._resolve_object("B", token_ref)
+        engine.state.active_player = "B"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine.state.players["B"].mana_pool["C"] = 1
+        engine.state.priority_player = "B"
+        before_hand = len(engine.state.players["B"].zones["hand"])
+        engine._activate(
+            "B",
+            {
+                "source": skullclamp.ref,
+                "ability": "ab3",
+                "targets": [token.ref],
+                "pay": "manual",
+                "payment": {"C": 1},
+            },
+        )
+        self.resolve_top(engine)
+        self.assertEqual("outside", token.zone)
+        self.assertEqual(
+            "Skullclamp equipped-creature death trigger",
+            engine.state.stack[-1].label,
+        )
+        self.resolve_top(engine)
+        self.assertEqual(
+            before_hand + 2,
+            len(engine.state.players["B"].zones["hand"]),
+        )
+
     def test_artifact_engine_cards_pass_exact_semantic_preflight(self):
         for name in (
             "Arcum Dagsson",
@@ -383,6 +593,11 @@ class ExactArtifactEngineTests(unittest.TestCase):
             "Portal to Phyrexia",
             "Goblin Welder",
             "Repurposing Bay",
+            "Panharmonicon",
+            "Brudiclad, Telchor Engineer",
+            "Determined Iteration",
+            "Lightning Greaves",
+            "Skullclamp",
         ):
             with self.subTest(card=name):
                 record = self.db.lookup(name)

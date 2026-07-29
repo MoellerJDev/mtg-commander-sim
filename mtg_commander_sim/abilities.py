@@ -247,6 +247,17 @@ def parse_activated_abilities(
                 "Draw a card."
             )
             keyword_override = "Cycling"
+        equip_match = re.match(
+            r"^equip\s+(?P<cost>(?:\{[^{}]+\})+)$",
+            line,
+            re.IGNORECASE,
+        )
+        if equip_match:
+            line = (
+                f"{equip_match.group('cost')}: Attach this Equipment to "
+                "target creature you control. Activate only as a sorcery."
+            )
+            keyword_override = "Equip"
         if not line or ":" not in line:
             continue
         left, effect_text = line.split(":", 1)

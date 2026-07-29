@@ -79,7 +79,7 @@ and beyond D27 with both `suppressed_meaningful_windows` and
 
 Duplicated-list fixtures must always retain `matchup_evidence=false`.
 
-Current implementation checkpoint: 203 tests pass. Preflight v2 records
+Current implementation checkpoint: 216 tests pass. Preflight v2 records
 canonical Oracle/rulings provenance, exact list/source fingerprints, material
 categories, scenario witnesses, and fail-closed drift. Rulings hashes are
 content-canonical and are independent of SQLite import order. The trusted-only
@@ -107,17 +107,20 @@ include basic-land fetch predicates, library-position moves, milling, live
 token-history activation checks, declarative permanent-type counts, temporary
 type changes, restricted mana derived from live opposing lands, and dynamic
 permanent-color mana.
-The artifact-engine tranche additionally closes Arcum Dagsson, Sai, Padeem,
-Marionette Apprentice, Portal to Phyrexia, Goblin Welder, and Repurposing Bay.
-It adds batched cast events, plural sacrifice costs, intervening-if
-revalidation, related multi-target constraints, Fabricate choices, exact
-APNAP sacrifice, persistent type additions, and cost-object value binding.
+The artifact-engine tranches additionally close Arcum Dagsson, Sai, Padeem,
+Marionette Apprentice, Portal to Phyrexia, Goblin Welder, Repurposing Bay,
+Panharmonicon, Brudiclad, Determined Iteration, Lightning Greaves, and
+Skullclamp. They add batched cast events, plural sacrifice costs,
+intervening-if revalidation, related multi-target constraints, Fabricate
+choices, exact APNAP sacrifice, persistent type additions, cost-object value
+binding, additional enter-trigger generation, token-copy/populate choices,
+delayed token sacrifice, and authoritative Equipment attachment effects.
 
-Current full-database preflight (100 cards per list):
+Current full-database preflight (one row per distinct exact-list card):
 
-- Zimone and Dina: 74 fully playable, 4 partial, 22 unresolved, zero source
+- Zimone and Dina: 76 fully playable, 4 partial, 20 unresolved, zero source
   drift.
-- Mishra, Eminent One: 73 fully playable, 0 partial, 27 unresolved, zero
+- Mishra, Eminent One: 76 fully playable, 0 partial, 23 unresolved, zero
   source drift.
 
 This is an implementation checkpoint, not semantic closure and not game
