@@ -13858,10 +13858,29 @@ class CommanderEngine:
     def _complete_attackers(self, decision: Any) -> None:
         active = decision.actors[0]
         response = decision.responses[active]
-        declarations = response.get("attackers") or {}
+        declarations = response.get("attackers")
+        if declarations is None:
+            declarations = response.get("attacks")
+        declarations = declarations or {}
         if isinstance(declarations, list):
-            default_defender = response.get("defender")
-            declarations = {value: default_defender for value in declarations}
+            if all(isinstance(value, Mapping) for value in declarations):
+                normalized: dict[str, Any] = {}
+                for value in declarations:
+                    attacker = value.get("attacker") or value.get("id")
+                    defender = value.get("defender")
+                    if attacker is None or defender is None:
+                        raise GameRuleError(
+                            "Each attack declaration needs attacker and defender"
+                        )
+                    normalized[str(attacker)] = defender
+                declarations = normalized
+            else:
+                default_defender = response.get("defender")
+                declarations = {
+                    str(value): default_defender for value in declarations
+                }
+        if not isinstance(declarations, Mapping):
+            raise GameRuleError("Attack declarations must be a mapping or list")
         used: set[str] = set()
         for value, defender in dict(declarations).items():
             card = self._resolve_object(active, str(value), zones={"battlefield"}, controlled_only=True)

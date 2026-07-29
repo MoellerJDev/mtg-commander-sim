@@ -107,6 +107,51 @@ class MultiplayerRuleTests(unittest.TestCase):
         self.assertTrue(session.act("pilot:C", {"a": "block", "blk": {}}).ok)
         self.assertEqual({"B", "C"}, set(engine.state.combat.defending_players))
 
+    def test_structured_attack_list_reaches_authoritative_combat_state(self):
+        session = make_session(self.db, self.mishra, self.zimone, seed=351)
+        keep_all(session)
+        engine = session.engine
+        engine.permissions.invalidate_current()
+        engine.state.priority_player = None
+        first, second = engine.create_token(
+            "A",
+            name="Structured Attacker",
+            quantity=2,
+            characteristics={
+                "type_line": "Creature",
+                "power": "2",
+                "toughness": "2",
+            },
+            temporary_keywords=["Haste"],
+        )
+        engine.state.phase_index = 5
+        engine._enter_step()
+        self.assertEqual("combat.attackers", engine.state.pending_decision.kind)
+        result = session.act(
+            "pilot:A",
+            {
+                "a": "attack",
+                "attacks": [
+                    {"attacker": first, "defender": "B"},
+                    {"attacker": second, "defender": "C"},
+                ],
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(
+            {first: "B", second: "C"},
+            {
+                engine.state.cards[object_id].ref: defender
+                for object_id, defender in engine.state.combat.attackers.items()
+            },
+        )
+        event = next(
+            event
+            for event in reversed(engine.state.events)
+            if event.code == "combat.attack"
+        )
+        self.assertEqual({first: "B", second: "C"}, event.details["attackers"])
+
     def test_player_elimination_keeps_multiplayer_game_running(self):
         session = make_session(self.db, self.mishra, self.zimone, seed=36)
         keep_all(session)
