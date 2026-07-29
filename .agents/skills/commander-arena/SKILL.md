@@ -45,7 +45,8 @@ Loop sequentially even though all four pilot threads remain active:
    private-dependent data only through its fixed-seat tool. Its message back to
    the parent may contain only status, accepted decision IDs, and the principal
    boundary—never hand/library cards, private search choices, memory, or raw
-   task data.
+   task data. A blocked response may add a sanitized error code/message only
+   when it contains no private game data.
 4. Submit the response through that seat's fixed MCP server. On rejection,
    return only the compact error/current task to the same thread and retry.
 5. Apply a legal pilot action even when the primary considers it strategically

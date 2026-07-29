@@ -2183,7 +2183,12 @@ class CommanderEngine:
         for seat in decision.actors:
             player = self.state.players[seat]
             response = decision.responses[seat]
-            values = list(response.get("cards") or response.get("bottom") or [])
+            values = list(
+                response.get("cards")
+                or response.get("card_ids")
+                or response.get("bottom")
+                or []
+            )
             required = player.mulligan_penalty
             if len(values) != required:
                 raise GameRuleError(f"{seat} must bottom exactly {required} card(s)")

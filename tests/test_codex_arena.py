@@ -48,6 +48,7 @@ class CodexArenaBoundaryTests(unittest.TestCase):
             "Never echo private task data",
             "accepted decision IDs",
             "principal boundary",
+            "sanitized error code/message",
         )
         for seat in "abcd":
             config = tomllib.loads(

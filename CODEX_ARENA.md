@@ -157,7 +157,9 @@ The loop is:
    Private task data is submitted only to that surface. A pilot's message back
    to the primary may contain only status, accepted decision IDs, and the next
    principal boundary; it must not echo hand/library cards, private search
-   choices, memory, or task packets.
+   choices, memory, or task packets. A blocked pilot may add a sanitized error
+   code/message containing no private game data so the coordinator can
+   distinguish a transport failure from a rules stop.
 6. Return compact rejection data to the same thread when needed.
 7. Resolve arbiter tasks from public/rules context without choosing player
    strategy.
