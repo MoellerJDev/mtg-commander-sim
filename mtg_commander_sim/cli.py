@@ -2,11 +2,20 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
 
 from .carddb import CardDatabase
+from .arena import (
+    CodexThreadRegistry,
+    CoordinatorTools,
+    PilotInvocationIdentity,
+    SeatScopedPilotTools,
+    primary_session_prompt,
+    run_pilot_mcp_stdio,
+)
 from .model import GameConfig
 from .pilot import (
     ManualJsonPilot,
@@ -314,11 +323,245 @@ def build_parser() -> argparse.ArgumentParser:
     )
     inspect_semantics.add_argument("record")
 
+    pilot_mcp = sub.add_parser(
+        "pilot-mcp",
+        help="Run a fixed-seat MCP server without exposing authoritative state",
+    )
+    pilot_mcp.add_argument(
+        "--db", default="data/scryfall-20260728-compact.sqlite3"
+    )
+    pilot_mcp.add_argument(
+        "--game-dir", default=os.environ.get("MTG_GAME_DIR")
+    )
+    pilot_mcp.add_argument("--seat", required=True)
+    pilot_mcp.add_argument("--provider", default="codex_subagent")
+    pilot_mcp.add_argument("--model")
+    pilot_mcp.add_argument("--reasoning-effort")
+    pilot_mcp.add_argument("--thread-id")
+    pilot_mcp.add_argument("--thread-label")
+    pilot_mcp.add_argument("--parent-session-id")
+    pilot_mcp.add_argument("--provider-invoked", action="store_true")
+
+    pilot_tool = sub.add_parser(
+        "pilot-tool",
+        help="Invoke one fixed-seat pilot tool for local Codex orchestration",
+    )
+    pilot_tool.add_argument(
+        "--db", default="data/scryfall-20260728-compact.sqlite3"
+    )
+    pilot_tool.add_argument("--game-dir", required=True)
+    pilot_tool.add_argument("--seat", required=True)
+    pilot_tool.add_argument("--provider", default="codex_subagent")
+    pilot_tool.add_argument("--model")
+    pilot_tool.add_argument("--reasoning-effort")
+    pilot_tool.add_argument("--thread-id")
+    pilot_tool.add_argument("--thread-label")
+    pilot_tool.add_argument("--parent-session-id")
+    pilot_tool.add_argument("--provider-invoked", action="store_true")
+    pilot_tool.add_argument(
+        "operation",
+        choices=(
+            "get-task",
+            "submit-action",
+            "get-rules",
+            "get-profile",
+            "get-memory",
+            "update-memory",
+        ),
+    )
+    pilot_tool.add_argument("--json")
+    pilot_tool.add_argument("--file")
+    pilot_tool.add_argument("--ref", action="append", default=[])
+    pilot_tool.add_argument("--text")
+
+    arena_create = sub.add_parser(
+        "arena-create",
+        help="Create a four-seat commander_review record and primary prompt",
+    )
+    arena_create.add_argument(
+        "--db", default="data/scryfall-20260728-compact.sqlite3"
+    )
+    arena_create.add_argument("--deck", action="append", required=True)
+    arena_create.add_argument("--output", required=True)
+    arena_create.add_argument("--cache-dir")
+    arena_create.add_argument("--refresh-decks", action="store_true")
+    arena_create.add_argument("--first", default="A")
+    arena_create.add_argument("--seed", type=int)
+
+    arena_status = sub.add_parser(
+        "arena-status",
+        help="Inspect public coordinator progress without pilot packets",
+    )
+    arena_status.add_argument(
+        "--db", default="data/scryfall-20260728-compact.sqlite3"
+    )
+    arena_status.add_argument("--game", required=True)
+
+    coordinator_tool = sub.add_parser(
+        "coordinator-tool",
+        help="Invoke the public coordinator/arbiter surface (never a seat action)",
+    )
+    coordinator_tool.add_argument(
+        "--db", default="data/scryfall-20260728-compact.sqlite3"
+    )
+    coordinator_tool.add_argument("--game", required=True)
+    coordinator_tool.add_argument(
+        "operation",
+        choices=("status", "get-arbiter-task", "submit-arbiter"),
+    )
+    coordinator_tool.add_argument("--json")
+
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.cmd == "pilot-mcp":
+        if not args.game_dir:
+            raise SystemExit(
+                "pilot-mcp requires --game-dir or MTG_GAME_DIR"
+            )
+        identity = PilotInvocationIdentity(
+            provider=args.provider,
+            model=args.model,
+            reasoning_effort=args.reasoning_effort,
+            thread_id=args.thread_id,
+            thread_label=args.thread_label,
+            parent_session_id=args.parent_session_id,
+            provider_invoked=bool(args.provider_invoked),
+        )
+        tools = SeatScopedPilotTools.open(
+            game_dir=args.game_dir,
+            db_path=args.db,
+            seat=args.seat,
+            identity=identity,
+        )
+        run_pilot_mcp_stdio(tools)
+        return 0
+    if args.cmd == "pilot-tool":
+        identity = PilotInvocationIdentity(
+            provider=args.provider,
+            model=args.model,
+            reasoning_effort=args.reasoning_effort,
+            thread_id=args.thread_id,
+            thread_label=args.thread_label,
+            parent_session_id=args.parent_session_id,
+            provider_invoked=bool(args.provider_invoked),
+        )
+        tools = SeatScopedPilotTools.open(
+            game_dir=args.game_dir,
+            db_path=args.db,
+            seat=args.seat,
+            identity=identity,
+        )
+        if args.operation == "get-task":
+            value = tools.get_task()
+        elif args.operation == "submit-action":
+            if bool(args.json) == bool(args.file):
+                raise SystemExit(
+                    "submit-action requires exactly one of --json or --file"
+                )
+            response = json.loads(
+                args.json
+                if args.json
+                else Path(args.file).read_text(encoding="utf-8")
+            )
+            value = tools.submit_action(response)
+        elif args.operation == "get-rules":
+            value = tools.get_rules(args.ref)
+        elif args.operation == "get-profile":
+            value = tools.get_profile()
+        elif args.operation == "get-memory":
+            value = tools.get_memory()
+        else:
+            if args.text is None:
+                raise SystemExit("update-memory requires --text")
+            value = tools.update_memory(args.text)
+        print(stable_json(value))
+        return 0
+    if args.cmd == "arena-create":
+        sources = _seat_values(args.deck)
+        if set(sources) != {"A", "B", "C", "D"}:
+            raise SystemExit(
+                "arena-create requires exactly A, B, C, and D deck sources"
+            )
+        output = Path(args.output)
+        db = CardDatabase(args.db)
+        try:
+            session = CommanderSession.from_sources(
+                db,
+                sources,
+                first_player=args.first,
+                seed=args.seed,
+                cache_dir=args.cache_dir,
+                force_refresh=args.refresh_decks,
+                semantics_path=output / "semantics.json",
+                config=GameConfig(
+                    seed=args.seed,
+                    profile="commander_multiplayer",
+                    auto_pass_empty_priority=True,
+                ),
+            )
+            registry = CodexThreadRegistry()
+            for seat in "ABCD":
+                registry.register(
+                    seat=seat,
+                    thread_label=f"mtg-pilot-{seat.lower()}",
+                    provider="unavailable",
+                    model=None,
+                    reasoning_effort=None,
+                    thread_id=None,
+                )
+            session.arena_metadata = registry.metadata()
+            session.save(output)
+            prompt = primary_session_prompt(output)
+            (output / "PRIMARY_CODEX_PROMPT.md").write_text(
+                prompt + "\n", encoding="utf-8"
+            )
+            print(
+                stable_json(
+                    {
+                        "game_id": session.state.game_id,
+                        "record": str(output.resolve()),
+                        "profile": "commander_review",
+                        "pilot_thread_count": 4,
+                        "codex_subagent_run": False,
+                        "primary_prompt": prompt,
+                    }
+                )
+            )
+        finally:
+            db.close()
+        return 0
+    if args.cmd == "arena-status":
+        db, session = _load(args.db, args.game)
+        try:
+            print(stable_json(CoordinatorTools(session).status()))
+        finally:
+            db.close()
+        return 0
+    if args.cmd == "coordinator-tool":
+        db, session = _load(args.db, args.game)
+        try:
+            coordinator = CoordinatorTools(session)
+            if args.operation == "status":
+                if args.json:
+                    raise SystemExit("status does not accept --json")
+                value = coordinator.status()
+            elif args.operation == "get-arbiter-task":
+                if args.json:
+                    raise SystemExit("get-arbiter-task does not accept --json")
+                value = coordinator.get_arbiter_task()
+            else:
+                if not args.json:
+                    raise SystemExit("submit-arbiter requires --json")
+                value = coordinator.submit_arbiter(json.loads(args.json))
+                if value.get("accepted"):
+                    session.save(args.game)
+            print(stable_json(value))
+        finally:
+            db.close()
+        return 0
     if args.cmd == "semantics" and args.semantics_cmd == "preflight":
         db = CardDatabase(args.db)
         try:

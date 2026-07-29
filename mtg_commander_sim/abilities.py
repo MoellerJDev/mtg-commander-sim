@@ -19,7 +19,7 @@ _ACTIVATE_ONLY_SORCERY = re.compile(r"activate only as a sorcery", re.IGNORECASE
 _PAY_LIFE = re.compile(r"^pay\s+(\d+)\s+life$", re.IGNORECASE)
 _SACRIFICE_CHOICE = re.compile(
     r"^sacrifice\s+(?:(?P<another>another)\s+|(?P<count>a|an|one|two|three|\d+)\s+)"
-    r"(?P<kind>creature|artifact|enchantment|permanent)(?:\s+you\s+control)?$",
+    r"(?P<kind>creature|artifact|enchantment|land|permanent)(?:\s+you\s+control)?$",
     re.IGNORECASE,
 )
 _DISCARD_CHOICE = re.compile(
@@ -169,6 +169,11 @@ def parse_activated_abilities(
     abilities: list[ActivatedAbility] = []
     for line_index, raw_line in enumerate(oracle_text.splitlines()):
         line = raw_line.strip()
+        # Scryfall preserves reminder text for basic-land-type mana abilities
+        # as a fully parenthesized Oracle line, for example
+        # "({T}: Add {G} or {U}.)".  The parentheses are not part of the cost.
+        if line.startswith("(") and line.endswith(")"):
+            line = line[1:-1].strip()
         if not line or ":" not in line:
             continue
         left, effect_text = line.split(":", 1)

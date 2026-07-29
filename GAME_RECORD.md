@@ -13,13 +13,16 @@ authoritative checkpoint, append-oriented journals, and a derived review.
 | `commands.jsonl` | Accepted external commands only, with principal, hashed capability ID, exact normalized payload, RNG counters, and before/after hashes |
 | `events.jsonl` | Normalized trace at `minimal`, `standard`, or `debug` level |
 | `decisions.jsonl` | Every external attempt, including rejected attempts, scoped legal alternatives, reason/plan/confidence, model metrics, and fallback status |
+| `opportunities.jsonl` | Engine-side priority audit with meaningful-action signature, delivery/suppression disposition, and decision link |
 | `review.json` | Machine-readable derived history, diagnostics, and fidelity gate |
 | `review.md` | Human-readable review grouped by meaningful turns |
 | `semantics.json` | Optional local semantic programs used by that game |
 | `cursors.json` | Delivery cursor state; not part of authoritative replay |
 | `pilot-profiles.json` | Advisory fingerprinted profile assigned to each pilot principal |
-| `pilot-memory.json` | Isolated compact strategic memory used to resume provider runs |
-| `call-benchmark.json` | Provider-segment packet, invocation, retry, latency, and observed/estimated token metrics |
+| `plans.json` | Remaining validated ordered-plan actions required to resume safely across fixed-seat tool processes |
+| `pilot-seat-memory/<seat>.json` | Bounded strategic memory isolated to one fixed seat |
+| `call-benchmark.json` | Priority/yield/opportunity and observed provider-call metrics |
+| `hidden-information-audit.json` | Seat projection, decision-field, and memory reference-leak audit |
 
 Raw capability tokens are never durable state. Checkpoints store only SHA-256
 identifiers for active capabilities, clear the capability map, and issue new
@@ -108,6 +111,19 @@ requires a terminal game, replay verification, complete historical
 alternatives/reasons, trusted materially relevant semantics, the requested
 format, no material rules conflict, and a genuinely strategic pilot.
 
+Version 0.5.0 fails legal-action exposure when any meaningful window is
+incorrectly suppressed. The report records `profile_fingerprint_match`,
+`action_opportunity_coverage`, `suppressed_meaningful_windows`,
+`yields_invalidated_by_reason`, `pilot_thread_count`,
+`persistent_thread_reuse`, `primary_made_strategic_decision`,
+`provider_identity_verified`, `model_identity_verified`,
+`seat_projection_verified`, and `codex_subagent_run`.
+
+A pilot is never blamed for a missed action when its opportunity row says no
+task was delivered, the generator failed, semantics were unresolved, or a
+yield suppressed the window. Duplicate-deck four-player protocol fixtures are
+always `matchup_evidence: false`.
+
 ## Decision and provider metrics
 
 The review keeps observations separate from estimates:
@@ -116,6 +132,11 @@ The review keeps observations separate from estimates:
 - `pilot_invocations_observed`: actual strategic provider calls, or `null` when unknown
 - `arbiter_invocations_observed`: actual rules-provider calls, or `null` when unknown
 - `automatic_decisions`: accepted planned commands that required no new provider call
+- `priority_windows_considered`: every engine priority opportunity audited
+- `pass_only_windows_skipped`: priority windows with no meaningful action
+- `yield_covered_windows`: unchanged windows safely covered by a yield
+- `suppressed_meaningful_windows`: must remain zero
+- `ordered_plan_responses`: accepted multi-action pilot plans
 - `estimated_calls_without_optimization`: explicitly labeled counterfactual
 - `estimated_calls_with_optimization`: actual provider rows for a native run
 - `input_tokens_observed` / `output_tokens_observed`: provider-reported totals only
@@ -125,6 +146,12 @@ A legacy `decision.response` event is not assumed to be an LLM call. Placeholder
 values such as `unavailable in v2 record` do not count as complete reasons or
 plans. If a native adapter does not supply usage data, observed token totals are
 `null`; packet-size estimates remain separately labeled estimates.
+
+For Codex arenas, `manifest.json.codex_arena` records the parent session ID
+when exposed; immutable seat/thread labels and IDs; provider, model, and
+reasoning effort; invocation count; first/last timestamps; reuse; retries; and
+restart/interruption counters. Unknown token counts or opaque platform IDs are
+stored as `null`, never estimated as observed.
 
 ## Size definitions
 

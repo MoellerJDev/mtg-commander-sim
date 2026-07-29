@@ -167,6 +167,228 @@ class ActivatedAbilityAndCostTests(unittest.TestCase):
         self.assertEqual("hand", signet.zone)
         self.assertIsNotNone(engine.permissions.capability_for("pilot:A"))
 
+    def test_boseiju_channel_is_not_advertised_with_one_green_source(self):
+        session = make_session(self.db, self.mishra, self.zimone, seed=506)
+        keep_all(session)
+        engine = session.engine
+        boseiju = self._owned_named(engine, "B", "Boseiju, Who Endures")
+        breeding_pool = self._owned_named(engine, "B", "Breeding Pool")
+        engine.move_card(boseiju.object_id, "hand", log=False)
+        engine.move_card(
+            breeding_pool.object_id,
+            "battlefield",
+            controller="B",
+            tapped=False,
+            log=False,
+        )
+        hints = engine._priority_action_hints("B")
+
+        self.assertFalse(
+            any(
+                item["s"] == boseiju.ref and item["a"] == "ab2"
+                for item in hints["abilities"]
+            )
+        )
+        self.assertTrue(
+            any(
+                item.get("s") == boseiju.ref
+                and item.get("a") == "ab2"
+                and item.get("reason") == "insufficient_mana"
+                for item in hints["diagnostic"]["unpayable"]
+            )
+        )
+
+    def test_boseiju_channel_is_advertised_with_two_sufficient_sources(self):
+        session = make_session(self.db, self.mishra, self.zimone, seed=507)
+        keep_all(session)
+        engine = session.engine
+        boseiju = self._owned_named(engine, "B", "Boseiju, Who Endures")
+        breeding_pool = self._owned_named(engine, "B", "Breeding Pool")
+        island = self._owned_named(engine, "B", "Island")
+        engine.move_card(boseiju.object_id, "hand", log=False)
+        for card in (breeding_pool, island):
+            engine.move_card(
+                card.object_id,
+                "battlefield",
+                controller="B",
+                tapped=False,
+                log=False,
+            )
+        hints = engine._priority_action_hints("B")
+
+        self.assertTrue(
+            any(
+                item["s"] == boseiju.ref and item["a"] == "ab2"
+                for item in hints["abilities"]
+            )
+        )
+
+    def test_divining_top_payability_and_tap_availability(self):
+        session = make_session(self.db, self.mishra, self.zimone, seed=508)
+        keep_all(session)
+        engine = session.engine
+        top = self._owned_named(engine, "A", "Sensei's Divining Top")
+        island = next(
+            card
+            for card in engine.state.cards.values()
+            if card.owner == "A" and card.printed_name == "Island"
+        )
+        for card in (top, island):
+            engine.move_card(
+                card.object_id,
+                "battlefield",
+                controller="A",
+                tapped=False,
+                log=False,
+            )
+
+        hints = engine._priority_action_hints("A")
+        payable = {
+            (item["s"], item["a"]) for item in hints["abilities"]
+        }
+        self.assertIn((top.ref, "ab1"), payable)
+        self.assertIn((top.ref, "ab2"), payable)
+
+        top.tapped = True
+        tapped_hints = engine._priority_action_hints("A")
+        tapped_payable = {
+            (item["s"], item["a"])
+            for item in tapped_hints["abilities"]
+        }
+        self.assertIn((top.ref, "ab1"), tapped_payable)
+        self.assertNotIn((top.ref, "ab2"), tapped_payable)
+
+    def test_mox_opal_requires_public_metalcraft(self):
+        session = make_session(self.db, self.mishra, self.zimone, seed=509)
+        keep_all(session)
+        engine = session.engine
+        opal = self._owned_named(engine, "A", "Mox Opal")
+        engine.move_card(
+            opal.object_id,
+            "battlefield",
+            controller="A",
+            tapped=False,
+            log=False,
+        )
+
+        hints = engine._priority_action_hints("A")
+        self.assertFalse(
+            any(
+                item["s"] == opal.ref and item["a"] == "ab1"
+                for item in hints["mana_abilities"]
+            )
+        )
+        self.assertFalse(
+            any(source.object_id == opal.object_id for source in engine.available_mana_sources("A"))
+        )
+
+        result = session.act(
+            "pilot:A",
+            {"a": "x", "source": opal.ref, "ability": "ab1", "mana_choice": "U"},
+        )
+        self.assertFalse(result.ok)
+        self.assertIn("requires_3_artifacts", result.summary)
+
+        for name in ("Sensei's Divining Top", "Arcane Signet"):
+            artifact = self._owned_named(engine, "A", name)
+            engine.move_card(
+                artifact.object_id,
+                "battlefield",
+                controller="A",
+                tapped=False,
+                log=False,
+            )
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine._grant_priority("A")
+        engine.pump()
+        payable = engine._priority_action_hints("A")
+        self.assertTrue(
+            any(
+                item["s"] == opal.ref and item["a"] == "ab1"
+                for item in payable["mana_abilities"]
+            )
+        )
+        self.assertTrue(
+            any(source.object_id == opal.object_id for source in engine.available_mana_sources("A"))
+        )
+
+    def test_parenthesized_basic_land_mana_ability_is_compiled(self):
+        session = make_session(self.db, self.mishra, self.zimone, seed=510)
+        keep_all(session)
+        engine = session.engine
+        pool = self._owned_named(engine, "B", "Breeding Pool")
+        engine.move_card(
+            pool.object_id,
+            "battlefield",
+            controller="B",
+            tapped=False,
+            log=False,
+        )
+
+        hints = engine._priority_action_hints("B")
+        self.assertTrue(
+            any(
+                item["s"] == pool.ref
+                and item["a"] == "ab1"
+                and not item.get("needs_rules")
+                for item in hints["mana_abilities"]
+            )
+        )
+        self.assertFalse(
+            any(
+                item.get("s") == pool.ref
+                for item in hints["diagnostic"]["unresolved_cost_semantics"]
+            )
+        )
+
+    def test_elvish_reclaimer_land_sacrifice_cost_is_compiled(self):
+        session = make_session(self.db, self.mishra, self.zimone, seed=511)
+        keep_all(session)
+        engine = session.engine
+        reclaimer = self._owned_named(engine, "B", "Elvish Reclaimer")
+        lands = [
+            card
+            for card in engine.state.cards.values()
+            if card.owner == "B"
+            and (record := engine.card_record(card))
+            and record.is_land
+        ][:3]
+        engine.move_card(
+            reclaimer.object_id,
+            "battlefield",
+            controller="B",
+            tapped=False,
+            log=False,
+        )
+        reclaimer.acquired_control_turn_count = (
+            engine.state.players["B"].turns_begun - 1
+        )
+        for land in lands:
+            engine.move_card(
+                land.object_id,
+                "battlefield",
+                controller="B",
+                tapped=False,
+                log=False,
+            )
+
+        hints = engine._priority_action_hints("B")
+        self.assertFalse(
+            any(
+                item.get("s") == reclaimer.ref
+                for item in hints["diagnostic"]["unresolved_cost_semantics"]
+            )
+        )
+        self.assertTrue(
+            any(
+                item["s"] == reclaimer.ref
+                and item["a"] == "ab2"
+                and item["choose_cost"][0]["t"] == "land"
+                for item in hints["abilities"]
+            )
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

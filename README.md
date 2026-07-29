@@ -1,4 +1,4 @@
-# MTG Commander Sim 0.4.0
+# MTG Commander Sim 0.5.0
 
 A persistent, four-player-first Commander simulation kernel designed for LLM pilots, rules arbitration, matchup testing, and a future graphical/network client.
 
@@ -19,7 +19,7 @@ The complete bundle can run directly from its source tree. To install the prebui
 ```bash
 python -m venv .venv
 . .venv/bin/activate        # Windows PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install --no-index dist/mtg_commander_sim-0.4.0-py3-none-any.whl
+python -m pip install --no-index dist/mtg_commander_sim-0.5.0-py3-none-any.whl
 ```
 
 For editable development, use `python -m pip install -e . --no-build-isolation` in an environment that already has setuptools 68 or newer. Running `python simctl.py`, `make test`, and `make demo` from the repository does not require installation.
@@ -60,7 +60,10 @@ advertised `.jsonl.gz` files. Network access remains outside the game engine.
 - first-player draw in ordinary multiplayer Commander
 - AP/NAP priority across every active seat
 - automatic skipping of known-empty priority windows
-- conservative yield policies for longer periods with no intended response
+- canonical meaningful-action signatures and conservative, invalidating yields
+- an engine-side opportunity journal for every priority window, including
+  delivered, safely yielded, pass-only, ordered-plan, and incorrectly
+  suppressed dispositions
 - attacks split among multiple defenders and defender-by-defender blocking
 - extra-turn scheduling in most-recent-created-first order
 - native upkeep/end-step delayed triggers
@@ -87,6 +90,12 @@ advertised `.jsonl.gz` files. Network access remains outside the game engine.
 - derived turn-grouped reviews with an explicit fidelity gate
 - provider-neutral scripted, manual-JSON, and subprocess-JSON pilots
 - isolated, persistent per-seat strategic memory and fingerprinted deck profiles
+- exact-list/profile/source fingerprint validation with explicit
+  commander/archetype fallback warnings
+- a fixed-seat MCP/CLI pilot surface that never exposes raw capabilities,
+  checkpoints, analyst data, or another seat's hidden objects
+- project-scoped GPT-5.6 Sol pilot-agent configuration and a
+  `commander-arena` Codex skill
 - schema-validated semantic packs with trust and source provenance
 - trust-aware semantic preflight for files and live Moxfield URLs
 - compact cast, land, activation, target, and resolution-time search templates
@@ -109,14 +118,19 @@ Card definitions are emitted once per principal. Routine passes and bookkeeping 
 
 See `demo/token-benchmark.json` and `LLM_PROTOCOL.md`.
 
-The fresh turn-eight native duel records the provider segment in
-`run/native-zimone-vs-mishra/call-benchmark.json`: 16 strategic pilot
-invocations, no arbiter invocation, 37 pass-only windows skipped, 101 windows
-covered by yields, 40,898 compact packet bytes, and no rejected action or retry.
-The scripted provider does not report token usage, so observed input/output
-tokens are `null`; 10,205 input and 1,254 output tokens are separately labeled
-character-count estimates. This fixture is a pilot/protocol test, not a
-strategic-strength or matchup benchmark.
+The corrected seed-20260730 duel under
+`run/native-zimone-vs-mishra-0.5.0` records 168 audited priority windows, 89
+pass-only skips, 24 safe yield covers, and zero suppressed meaningful windows.
+Its 61 accepted commands replay exactly.
+
+The live four-seat Codex protocol record under
+`run/codex-subagent-four-player-0.5.0` records four distinct persistent
+GPT-5.6 Sol/max thread identities, 14 actual pilot invocations, four ordered
+main-phase plans, 192 audited priority windows, 183 pass-only skips, and zero
+suppressed meaningful windows. It stopped at turn sequence 5 because Three
+Visits requires an uncompiled hidden-library choice. The duplicated lists make
+this a `pilot_test`, never matchup evidence. Provider token counts were not
+exposed and remain `null`.
 
 ## Deliberate rules boundary
 
@@ -295,7 +309,34 @@ the review fidelity gate.
 
 See `PILOT_PROVIDERS.md` for provider contracts and isolation guarantees, and
 `SEMANTIC_PACKS.md` for pack provenance, trust, preflight, and the deliberately
-bounded 0.4.0 card coverage.
+bounded 0.5.0 card coverage. See `CODEX_ARENA.md` for the persistent four-pilot
+workflow.
+
+Create the default four-seat Codex arena:
+
+```bash
+python simctl.py arena-create \
+  --db data/scryfall-20260728-compact.sqlite3 \
+  --deck A=https://moxfield.com/decks/g5vtVfRuS0W5KxZuYqZHGQ \
+  --deck B=https://moxfield.com/decks/armNI_ntVUagNNygnUVyxQ \
+  --deck C=https://moxfield.com/decks/g5vtVfRuS0W5KxZuYqZHGQ \
+  --deck D=https://moxfield.com/decks/armNI_ntVUagNNygnUVyxQ \
+  --refresh-decks --output run/codex-arena
+```
+
+Run the primary Codex task in GPT-5.6 Sol with Ultra reasoning, then use the
+generated `PRIMARY_CODEX_PROMPT.md`. A fixed pilot process uses:
+
+```bash
+python simctl.py pilot-mcp --game-dir run/codex-arena --seat A
+```
+
+The primary reads only public routing/fidelity data and scoped arbiter tasks:
+
+```bash
+python simctl.py coordinator-tool --game run/codex-arena status
+python simctl.py coordinator-tool --game run/codex-arena get-arbiter-task
+```
 
 Read the next scoped task:
 
@@ -326,7 +367,16 @@ python simctl.py rules \
 
 A single ChatGPT conversation can obey seat projections, but it cannot literally forget a hand shown while it was previously acting as another player.
 
-For strict isolation, use four pilot contexts plus one arbiter context against one `GameService`. Each connection authenticates as `pilot:A`, `pilot:B`, `pilot:C`, `pilot:D`, or `arbiter`. No engine or permission refactor is required for a GUI or network service; only a transport adapter is added around `GameService`.
+For strict live isolation, use four persistent pilot contexts plus the neutral
+primary coordinator against one `GameService`. Each pilot process fixes its
+seat at startup. The primary is the arbiter rather than a fifth strategic
+pilot. Projected packets, per-seat memory files, server-injected provider
+identity, and exact-ref rules lookup prevent protocol-level leakage.
+
+Custom-agent instructions are not an operating-system sandbox when a parent
+Codex session overrides them with `danger-full-access`. The MCP/CLI façade is
+the enforced game-state boundary; use a dedicated read-only permission profile
+and empty pilot workspace when filesystem-level isolation must also be proven.
 
 ## Project map
 

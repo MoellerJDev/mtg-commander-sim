@@ -1,6 +1,6 @@
 # Pilot providers
 
-Version 0.4.0 separates strategic inference from the authoritative game. A
+Version 0.5.0 separates strategic inference from the authoritative game. A
 provider implements:
 
 ```python
@@ -29,6 +29,19 @@ session. Nonzero exit, timeout, empty output, and invalid JSON fail visibly.
 
 The arbiter is a separate provider and receives only an `arbiter` capability.
 A pilot response can never submit effect-DSL operations.
+
+`codex_subagent` is the project-scoped live arena provider. It does not replace
+the scripted, manual, or subprocess adapters. Exactly four persistent
+GPT-5.6 Sol/max contexts are registered once, one per seat, and every later
+task returns to the same thread. The primary GPT-5.6 Sol/Ultra task is the
+coordinator/arbiter, never a strategic pilot.
+
+Pilots do not read the run directory. `simctl pilot-mcp --game-dir <run>
+--seat A` fixes the seat at startup and exposes only `get_task`,
+`submit_action`, `get_rules`, `get_profile`, `get_memory`, and
+`update_memory`. Provider/model/thread metadata is injected by the coordinator;
+pilot-supplied identity, capability, principal, effect, or semantic fields are
+rejected and journaled.
 
 ## Response contract
 
@@ -62,6 +75,10 @@ one of:
 - `RECOVER`
 - `PASS_WITH_YIELD`
 
+Codex-subagent responses must include a plan category, nonempty concise reason,
+and confidence. Missing audit fields are rejected rather than silently filled
+by the parent.
+
 An ordered response may instead provide `actions`, each containing an
 `action_id` and choices. Only the first action is initially submitted. Later
 entries execute without another provider invocation only if the same principal
@@ -84,6 +101,8 @@ The decision audit can persist:
 - latency
 - retry count
 - automatic-fallback status
+- immutable seat thread ID/label and reasoning effort
+- first/last invocation timestamps and reuse/restart telemetry
 
 Only a call made through a provider is counted as an invocation. A decision
 record is not assumed to be a model call. Token counts are `null` with
@@ -92,15 +111,24 @@ them; packet-size token estimates remain separately labeled estimates.
 
 ## Profiles and memory
 
-`DeckProfileCache` keys advisory JSON profiles by a canonical deck fingerprint.
+`DeckProfileCache` keys advisory JSON profiles by a canonical deck-list
+fingerprint.
 The built-in Zimone and Mishra profiles conform to
 `schemas/pilot-profile.schema.json`. The runner copies the matching profile
 into that seat's `PilotMemory` once, and persists memory independently in
-`pilot-memory.json`.
+`pilot-seat-memory/<seat>.json`.
 
 Profiles describe strategy, mulligan policy, colors, engines, preservation
 priorities, and threat assessment. They are not rules data. The engine does not
 read them and cannot use them to make a card legal.
+
+Profile schema v2 distinguishes `deck_list_fingerprint`, optional
+`deck_source_fingerprint`, `profile_source_fingerprint`,
+`profile_schema_version`, and `fingerprint_algorithm_version`. Exact compatible
+list identity is required by default. A commander/archetype fallback must be
+explicitly enabled, emits a fidelity warning, and never counts as
+`profile_fingerprint_match`. Refreshing a changed live Moxfield list therefore
+invalidates stale tutor, combo, and mulligan assumptions.
 
 ## CLI
 
@@ -119,3 +147,6 @@ Running the same command again resumes an existing output directory. The
 checkpoint, projection cursors, profiles, and per-seat memories are restored.
 The external subprocess is responsible for restoring any provider-side session
 state beyond the persisted compact memory supplied in the request.
+
+See `CODEX_ARENA.md` for the project agent files, primary prompt, lifecycle,
+fixed-seat commands, and honest provider-identity rules.

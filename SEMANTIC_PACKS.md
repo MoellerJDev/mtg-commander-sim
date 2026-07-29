@@ -36,7 +36,7 @@ by Oracle/ability keys and runtime events, not printed-name branches. Runtime
 placeholders such as `$controller` and `$target.0` are resolved against the
 current stack object.
 
-## Version 0.4.0 vertical slice
+## Version 0.5.0 vertical slice
 
 The bundled packs characterize:
 
@@ -58,6 +58,23 @@ preflight reports retain unresolved costs, activated abilities, triggers, and
 replacement effects rather than silently treating them as vanilla. The
 generated reports under `run/semantic-preflight-*.json` are the authoritative
 inventory for this snapshot.
+
+Version 0.5.0 improves legal-action exactness without claiming broad Oracle
+coverage:
+
+- mandatory activated costs must be currently payable before an action is
+  advertised
+- Boseiju Channel is withheld without enough independent mana
+- tapped-source and tap-symbol availability are exact for Sensei's Divining Top
+- Mox Opal validates the public three-artifact Metalcraft condition before it
+  can pay another action
+- fully parenthesized basic-land reminder abilities are normalized
+- `Sacrifice a land` is a compiled delegated mandatory cost
+
+Other activation conditions remain unresolved rather than guessed. The live
+Codex fixture stops at Three Visits because its hidden-library search choice is
+outside this semantic slice; the primary coordinator does not choose the land
+for the player.
 
 ## Preflight
 
@@ -85,9 +102,9 @@ For the July 28, 2026 decks, the current reports are:
 | Zimone and Dina (`g5vt…`) | 42 | 2 | 56 | 58 | no |
 | Mishra, Eminent One (`armNI…`) | 44 | 3 | 53 | 56 | no |
 
-Those counts are a safety result, not a defect hidden by the fixture: the
-native turn-eight record is a `pilot_test`, not deck-quality or matchup
-evidence.
+Those counts are a safety result, not a defect hidden by a fixture. Neither the
+scripted turn-eight duel nor the duplicated-list Codex run is deck-quality or
+matchup evidence.
 
 ## Adding coverage
 

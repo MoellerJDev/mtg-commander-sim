@@ -11,6 +11,12 @@ run/*
 !run/native-zimone-vs-mishra/**
 !run/four-player-pilot/
 !run/four-player-pilot/**
+!run/native-zimone-vs-mishra-0.5.0/
+!run/native-zimone-vs-mishra-0.5.0/**
+!run/codex-subagent-four-player-0.5.0/
+!run/codex-subagent-four-player-0.5.0/**
+run/codex-subagent-four-player-0.5.0/.arena.lock
+run/codex-subagent-four-player-0.5.0/deck-cache/
 !run/semantic-preflight-zimone.json
 !run/semantic-preflight-mishra.json
 *.sqlite3

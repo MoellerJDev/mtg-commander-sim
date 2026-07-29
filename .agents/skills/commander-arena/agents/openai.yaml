@@ -1,0 +1,4 @@
+interface:
+  display_name: "Commander Arena"
+  short_description: "Coordinate four persistent Commander pilots"
+  default_prompt: "Use $commander-arena to run this match with four seat-isolated persistent pilots."

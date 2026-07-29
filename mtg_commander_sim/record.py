@@ -16,7 +16,7 @@ from .semantics import SemanticRegistry
 from .util import stable_json
 
 RECORD_SCHEMA_VERSION = 3
-ENGINE_VERSION = "0.4.0"
+ENGINE_VERSION = "0.5.0"
 TRACE_LEVELS = {"minimal", "standard", "debug"}
 
 _STANDARD_OMIT = {
@@ -112,20 +112,38 @@ def database_fingerprint(card_db: CardDatabase) -> dict[str, Any]:
     }
 
 
-def deck_fingerprints(state: GameState) -> dict[str, str]:
+def deck_list_fingerprints(state: GameState) -> dict[str, str]:
     result: dict[str, str] = {}
     for seat in state.turn_order:
-        cards = sorted(
+        counts = Counter(
             (
-                card.oracle_id,
-                bool(card.is_commander),
                 card.printed_name,
+                "commander" if card.is_commander else "mainboard",
             )
             for card in state.cards.values()
             if card.owner == seat and not card.is_token
         )
-        result[seat] = _canonical_hash(cards)
+        payload = {
+            "commanders": sorted(
+                card.printed_name
+                for card in state.cards.values()
+                if card.owner == seat
+                and not card.is_token
+                and card.is_commander
+            ),
+            "cards": sorted(
+                (name, quantity, board)
+                for (name, board), quantity in counts.items()
+            ),
+        }
+        result[seat] = _canonical_hash(payload)
     return result
+
+
+def deck_fingerprints(state: GameState) -> dict[str, str]:
+    """Compatibility alias; Game Record v3 now names this exact list hash."""
+
+    return deck_list_fingerprints(state)
 
 
 def event_for_trace(event: Event, trace_level: str) -> dict[str, Any] | None:
@@ -226,8 +244,25 @@ def build_manifest(
     created_at: str,
     updated_at: str,
     replay_mode: str,
+    deck_provenance: Mapping[str, Mapping[str, Any]] | None = None,
+    profile_validation: Mapping[str, Mapping[str, Any]] | None = None,
+    codex_arena: Mapping[str, Any] | None = None,
     migrated_from: str | None = None,
 ) -> dict[str, Any]:
+    list_fingerprints = deck_list_fingerprints(state)
+    provenance = dict(deck_provenance or {})
+    validations = dict(profile_validation or {})
+    match_values = [
+        validations.get(f"pilot:{seat}", {}).get(
+            "profile_fingerprint_match"
+        )
+        for seat in state.turn_order
+    ]
+    overall_profile_match: bool | str = (
+        all(value is True for value in match_values)
+        if any(value is not None for value in match_values)
+        else "unavailable"
+    )
     return {
         "schema_version": RECORD_SCHEMA_VERSION,
         "record_schema_version": RECORD_SCHEMA_VERSION,
@@ -251,10 +286,18 @@ def build_manifest(
                 "seat": seat,
                 "name": state.players[seat].name,
                 "deck": state.deck_names.get(seat, ""),
-                "deck_fingerprint": deck_fingerprints(state)[seat],
+                "deck_fingerprint": list_fingerprints[seat],
+                "deck_list_fingerprint": list_fingerprints[seat],
+                "deck_source_fingerprint": provenance.get(seat, {}).get(
+                    "deck_source_fingerprint"
+                ),
+                "deck_source": provenance.get(seat, {}).get("source"),
+                "profile_validation": validations.get(f"pilot:{seat}"),
             }
             for seat in state.turn_order
         ],
+        "fingerprint_algorithm_version": 1,
+        "profile_fingerprint_match": overall_profile_match,
         "seed": state.config.seed,
         "trace_level": state.config.trace_level,
         "semantics_fingerprint": semantics_fingerprint(semantics),
@@ -281,6 +324,11 @@ def build_manifest(
             "classification": "unreviewed",
             "eligible": False,
         },
+        **(
+            {"codex_arena": copy.deepcopy(dict(codex_arena))}
+            if codex_arena
+            else {}
+        ),
         **({"migrated_from": migrated_from} if migrated_from else {}),
     }
 
@@ -296,6 +344,9 @@ def write_record(
     decisions: Sequence[Mapping[str, Any]],
     created_at: str,
     replay_mode: str = "command_replay",
+    deck_provenance: Mapping[str, Mapping[str, Any]] | None = None,
+    profile_validation: Mapping[str, Mapping[str, Any]] | None = None,
+    codex_arena: Mapping[str, Any] | None = None,
     migrated_from: str | None = None,
 ) -> dict[str, Any]:
     directory = Path(directory)
@@ -317,6 +368,9 @@ def write_record(
         created_at=created_at,
         updated_at=updated_at,
         replay_mode=replay_mode,
+        deck_provenance=deck_provenance,
+        profile_validation=profile_validation,
+        codex_arena=codex_arena,
         migrated_from=migrated_from,
     )
     if prior_manifest:
@@ -343,6 +397,10 @@ def write_record(
         ),
     )
     _atomic_jsonl(directory / "decisions.jsonl", decisions)
+    _atomic_jsonl(
+        directory / "opportunities.jsonl",
+        state.action_opportunities,
+    )
     initial_path = directory / "initial-checkpoint.json.gz"
     if not initial_path.exists():
         write_initial_checkpoint(initial_path, initial_checkpoint)

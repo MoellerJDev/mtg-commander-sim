@@ -1,10 +1,10 @@
 # Roadmap
 
-Version 0.4.0 establishes the provider-neutral runner, isolated resumable seat
-memory, fingerprinted profiles, trust-aware semantic packs/preflight, native
-command-replay fixtures, and two narrowly validated shortcut lines. The phases
-below describe remaining production depth; the 0.4.0 scripted fixture is not a
-claim that the full batch-runner or Oracle corpus is complete.
+Version 0.5.0 adds the fixed-seat Codex arena, persistent thread identity,
+meaningful-action/yield auditing, exact profile validation, payable-action
+filtering, and native command-replay fixtures. The phases below describe
+remaining production depth; neither the scripted regression nor duplicated
+four-seat pilot fixture claims a complete Oracle corpus or matchup evidence.
 
 ## Phase 1 — stabilize the multiplayer kernel
 
@@ -29,15 +29,15 @@ claim that the full batch-runner or Oracle corpus is complete.
 - special actions and non-hand casting permissions
 - first/double-strike damage and trample assignment
 - copied/face-down/linked-object edge cases
-- general deterministic loop/shortcut negotiation beyond the two 0.4.0 fixtures
+- general deterministic loop/shortcut negotiation beyond the two validated shortcut fixtures
 
-## Phase 4 — multi-agent batch runner
+## Phase 4 — arena and batch hardening
 
-- production isolation for remote seat contexts (the in-process provider boundary and compact memory are implemented)
+- OS/process isolation for remote seat contexts beyond the implemented fixed-seat projection/tool boundary
 - arbiter model tier separate from pilots
 - model timeout/retry policy
 - deterministic seeds and replay IDs
-- batch metrics: win rate, turn of elimination, interaction exchanges, and mulligan outcomes; native call/token/retry metrics are implemented
+- batch metrics: win rate, turn of elimination, interaction exchanges, and mulligan outcomes; native call/yield/opportunity/retry metrics are implemented
 - parallel game workers over immutable deck definitions and local card data
 
 ## Phase 5 — native/web client

@@ -1,11 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mtg-commander-sim.local/schemas/pilot-profile-v1.json",
+  "$id": "https://mtg-commander-sim.local/schemas/pilot-profile-v2.json",
   "title": "Deck pilot profile",
   "type": "object",
   "required": [
-    "schema_version",
-    "deck_fingerprint",
+    "profile_schema_version",
+    "fingerprint_algorithm_version",
+    "deck_list_fingerprint",
+    "profile_source_fingerprint",
     "commander",
     "archetype",
     "primary_game_plan",
@@ -17,8 +19,16 @@
     "threat_assessment"
   ],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"const": 2},
+    "profile_schema_version": {"const": 2},
+    "fingerprint_algorithm_version": {"const": 1},
     "deck_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "deck_list_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "deck_source_fingerprint": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "profile_source_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "commander": {"type": "array", "items": {"type": "string"}, "minItems": 1},
     "archetype": {"type": "string"},
     "primary_game_plan": {"type": "string"},

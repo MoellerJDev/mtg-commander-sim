@@ -25,13 +25,24 @@ from .preflight import semantic_preflight
 from .profiles import (
     DeckPilotProfile,
     DeckProfileCache,
+    FINGERPRINT_ALGORITHM_VERSION,
+    PROFILE_SCHEMA_VERSION,
+    deck_list_fingerprint,
     deck_profile_fingerprint,
+    deck_source_fingerprint,
+    profile_source_fingerprint,
 )
 from .projection import ProjectionCursor, StateProjector
 from .protocol import PROTOCOL_VERSION, ProtocolError, apply_json_patch, json_patch, view_hash
 from .semantics import SemanticProgram, SemanticRegistry
 from .service import CommandEnvelope, GameService
 from .session import CommanderSession
+from .arena import (
+    CodexThreadRegistry,
+    CoordinatorTools,
+    PilotInvocationIdentity,
+    SeatScopedPilotTools,
+)
 
 __all__ = [
     "ActionResult",
@@ -73,7 +84,16 @@ __all__ = [
     "semantic_preflight",
     "DeckPilotProfile",
     "DeckProfileCache",
+    "FINGERPRINT_ALGORITHM_VERSION",
+    "PROFILE_SCHEMA_VERSION",
+    "deck_list_fingerprint",
     "deck_profile_fingerprint",
+    "deck_source_fingerprint",
+    "profile_source_fingerprint",
+    "CodexThreadRegistry",
+    "CoordinatorTools",
+    "PilotInvocationIdentity",
+    "SeatScopedPilotTools",
 ]
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"

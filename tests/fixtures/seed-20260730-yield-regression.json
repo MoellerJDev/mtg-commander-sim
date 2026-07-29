@@ -1,0 +1,38 @@
+{
+  "source_record": "run/native-zimone-vs-mishra",
+  "source_game_id": "869d51969e4d4bc0bc95f134c6f7f975",
+  "seed": 20260730,
+  "profile": "commander_duel",
+  "opening_hands": {
+    "A": [
+      "Deadly Rollick",
+      "Scute Swarm",
+      "Elves of Deep Shadow",
+      "Flooded Strand",
+      "Force of Vigor",
+      "Island",
+      "Verdant Catacombs"
+    ],
+    "B": [
+      "Island",
+      "Strionic Resonator",
+      "Watery Grave",
+      "Lightning Greaves",
+      "The Mightstone and Weakstone",
+      "Panharmonicon",
+      "Sensei's Divining Top"
+    ]
+  },
+  "required_main_phase_opportunities": {
+    "3": ["Island", "Verdant Catacombs", "Boseiju, Who Endures"],
+    "4": ["Watery Grave"],
+    "5": ["land_play"],
+    "6": ["Sol Ring"],
+    "7": ["land_play"]
+  },
+  "historical_failure": {
+    "yield": "until_public_change",
+    "yield_covered_windows": 101,
+    "classification": "infrastructure_yield_failure_not_pilot_failure"
+  }
+}

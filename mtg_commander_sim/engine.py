@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import random
 import re
 import uuid
@@ -30,6 +31,7 @@ from .util import (
     mana_cost_to_vector,
     normalize_mana_bundle,
     pay_mana_from_pool,
+    stable_json,
     unique_preserving_order,
 )
 
@@ -1005,6 +1007,10 @@ class CommanderEngine:
         player = self.state.players[entry.player]
         player.turns_begun += 1
         player.land_plays_remaining = 1
+        if player.yield_policy.mode != "none":
+            self._increment_optimization(
+                entry.player, "yields_invalidated_by_phase"
+            )
         player.yield_policy = YieldPolicy()
         self.state.combat = CombatState()
         self.state.phase_index = 0
@@ -1138,13 +1144,16 @@ class CommanderEngine:
         self.state.priority_passes = []
         self.state.priority_epoch += 1
 
-    def _issue_priority(self, seat: str) -> None:
+    def _issue_priority(
+        self, seat: str, hints: Mapping[str, Any] | None = None
+    ) -> Any:
+        hints = dict(hints or self._priority_action_hints(seat))
         payload = {
             "stack": [{"id": item.ref, "label": item.label, "controller": item.controller} for item in reversed(self.state.stack)],
-            "legal": self._priority_action_hints(seat),
+            "legal": hints,
             "yield_modes": ["none", "until_public_change", "until_my_turn", "auto_if_no_response"],
         }
-        self.permissions.issue(
+        return self.permissions.issue(
             kind="priority",
             role="pilot",
             actors=[seat],
@@ -1177,40 +1186,202 @@ class CommanderEngine:
             return
         if mode not in {"until_public_change", "until_my_turn", "auto_if_no_response"}:
             raise GameRuleError(f"Unknown yield mode {mode}")
+        signature = self.meaningful_action_signature(seat)
         self.state.players[seat].yield_policy = YieldPolicy(
             mode=mode,
             created_revision=self.state.revision,
-            expires_turn_sequence=(self.state.turn_sequence + 1 if mode == "until_my_turn" else None),
+            created_event_sequence=self.state.event_sequence,
+            created_turn_sequence=self.state.turn_sequence,
+            created_priority_epoch=self.state.priority_epoch,
+            created_active_player=self.state.active_player,
+            created_phase=self.state.phase,
+            created_step=self.state.step,
+            created_land_plays_remaining=self.state.players[
+                seat
+            ].land_plays_remaining,
+            action_signature=signature,
+            stack_signature=self._stack_signature(),
             note="Pilot-issued priority yield",
         )
 
-    def _yield_stopped(self, seat: str) -> bool:
+    @staticmethod
+    def _signature_hash(value: Any) -> str:
+        return hashlib.sha256(stable_json(value).encode("utf-8")).hexdigest()
+
+    def _stack_signature(self) -> str:
+        return self._signature_hash(
+            [
+                {
+                    "ref": item.ref,
+                    "kind": item.kind,
+                    "controller": item.controller,
+                    "source": item.source_object_id,
+                    "card": item.card_object_id,
+                    "semantic": item.semantic_key,
+                    "targets": item.targets,
+                    "modes": item.modes,
+                    "x": item.x_value,
+                }
+                for item in self.state.stack
+            ]
+        )
+
+    def meaningful_action_signature(
+        self,
+        seat: str,
+        hints: Mapping[str, Any] | None = None,
+    ) -> str:
+        """Hash the currently executable strategic choices visible to ``seat``.
+
+        Ordinary tap-for-mana actions are deliberately absent. They are payment
+        mechanics for the cast/activation choices that do appear here and must
+        not turn every empty priority pass into an LLM task.
+        """
+
+        hints = dict(hints or self._priority_action_hints(seat))
+        meaningful_actions = []
+        ordinary_mana_ids = {
+            f"activate:{item['s']}:{item['a']}"
+            for item in hints.get("mana_abilities", [])
+            if item not in hints.get("abilities", [])
+        }
+        for action in hints.get("actions", []):
+            if action.get("id") == "pass" or action.get("id") in ordinary_mana_ids:
+                continue
+            meaningful_actions.append(copy.deepcopy(action))
+        payload: dict[str, Any] = {
+            "algorithm": "meaningful-action-signature/v1",
+            "actions": sorted(
+                meaningful_actions,
+                key=lambda item: stable_json(item),
+            ),
+        }
+        decision = self.state.pending_decision
+        if decision is not None and seat in decision.actors:
+            payload["mandatory_or_optional_choice"] = {
+                "kind": decision.kind,
+                "allowed": list(decision.allowed_actions),
+                "context": copy.deepcopy(decision.payload_by_actor.get(seat, {})),
+            }
+        return self._signature_hash(payload)
+
+    def _optimization_stats(self, seat: str) -> dict[str, Any]:
+        telemetry = self.state.players[seat].stats.setdefault(
+            "decision_optimization", {}
+        )
+        for key in (
+            "priority_windows_considered",
+            "pass_only_windows_skipped",
+            "yield_covered_windows",
+            "suppressed_empty_windows",
+            "suppressed_meaningful_windows",
+            "yields_invalidated_by_phase",
+            "yields_invalidated_by_draw",
+            "yields_invalidated_by_action_change",
+            "yields_invalidated_by_stack",
+            "yields_invalidated_by_public_change",
+        ):
+            telemetry.setdefault(key, 0)
+        return telemetry
+
+    def _increment_optimization(self, seat: str, key: str) -> None:
+        telemetry = self._optimization_stats(seat)
+        telemetry[key] = int(telemetry.get(key, 0)) + 1
+
+    def _yield_stop_reason(
+        self, seat: str, action_signature: str | None = None
+    ) -> str | None:
         policy = self.state.players[seat].yield_policy
         if policy.mode == "none":
-            return True
+            return "none"
+        if (
+            policy.stop_phase is not None
+            and self.state.phase == policy.stop_phase
+            and (
+                policy.stop_step is None
+                or self.state.step == policy.stop_step
+            )
+        ):
+            return "phase"
+        if self.state.active_player == seat and (
+            policy.created_active_player != seat
+            or policy.created_turn_sequence != self.state.turn_sequence
+            or policy.created_priority_epoch != self.state.priority_epoch
+            or (
+                self.state.phase
+                in {"precombat_main", "postcombat_main"}
+                and (
+                    policy.created_phase != self.state.phase
+                    or policy.created_step != "main"
+                )
+            )
+        ):
+            return "phase"
         if policy.mode == "until_my_turn" and self.state.active_player == seat:
-            return True
-        relevant_codes = {
+            return "phase"
+        if policy.stack_signature != self._stack_signature():
+            return "stack"
+        stack_codes = {
             "stack.cast",
             "stack.activate",
             "stack.trigger",
             "stack.resolve",
             "stack.counter",
+        }
+        public_codes = {
+            "land.play",
             "zone.move",
             "card.draw.private",
             "token.create",
             "control.change",
             "player.eliminated",
+            "permanent.untap",
         }
         for event in self.state.events:
-            if event.revision <= policy.created_revision:
+            if event.event_id <= policy.created_event_sequence:
                 continue
-            if event.code not in relevant_codes:
+            if event.code == "card.draw.private":
+                if seat in event.visibility:
+                    return "draw"
                 continue
-            if event.code == "card.draw.private" and seat not in event.visibility:
-                continue
-            return True
-        return False
+            if event.code in stack_codes:
+                return "stack"
+            if event.code == "zone.move":
+                details = event.details
+                if (
+                    seat in event.changed_players
+                    and (
+                        details.get("from") == "hand"
+                        or details.get("to") == "hand"
+                    )
+                ):
+                    return "action_change"
+                return "public_change"
+            if event.code in public_codes:
+                return (
+                    "action_change"
+                    if event.code == "permanent.untap"
+                    and seat in event.changed_players
+                    else "public_change"
+                )
+        if (
+            policy.created_land_plays_remaining
+            != self.state.players[seat].land_plays_remaining
+        ):
+            return "action_change"
+        current_signature = action_signature or self.meaningful_action_signature(
+            seat
+        )
+        if policy.action_signature != current_signature:
+            return "action_change"
+        if policy.mode == "auto_if_no_response" and self._signature_has_actions(
+            seat
+        ):
+            return "action_change"
+        return None
+
+    def _yield_stopped(self, seat: str) -> bool:
+        return self._yield_stop_reason(seat) is not None
 
     def _has_conservative_response(self, seat: str) -> bool:
         player = self.state.players[seat]
@@ -1220,14 +1391,93 @@ class CommanderEngine:
                 return True
         return bool(self._ability_hints(seat))
 
-    def _can_auto_pass(self, seat: str) -> bool:
+    def _can_auto_pass(
+        self,
+        seat: str,
+        *,
+        action_signature: str,
+        meaningful: bool,
+    ) -> tuple[bool, str | None]:
         policy = self.state.players[seat].yield_policy
-        if policy.mode == "none" or self._yield_stopped(seat):
+        if policy.mode == "none":
+            return False, None
+        reason = self._yield_stop_reason(seat, action_signature)
+        if reason is not None:
             self.state.players[seat].yield_policy = YieldPolicy()
-            return False
-        if policy.mode == "auto_if_no_response" and self._has_conservative_response(seat):
-            return False
-        return True
+            if reason != "none":
+                self._increment_optimization(
+                    seat, f"yields_invalidated_by_{reason}"
+                )
+            return False, reason
+        if policy.mode == "auto_if_no_response" and meaningful:
+            self.state.players[seat].yield_policy = YieldPolicy()
+            self._increment_optimization(
+                seat, "yields_invalidated_by_action_change"
+            )
+            return False, "action_change"
+        return True, None
+
+    def _signature_has_actions(
+        self, seat: str, hints: Mapping[str, Any] | None = None
+    ) -> bool:
+        hints = dict(hints or self._priority_action_hints(seat))
+        return any(
+            hints.get(key) for key in ("cast", "lands", "abilities")
+        )
+
+    def _record_action_opportunity(
+        self,
+        seat: str,
+        *,
+        hints: Mapping[str, Any],
+        action_signature: str,
+        outcome: str,
+        yield_invalidation: str | None = None,
+    ) -> dict[str, Any]:
+        self.state.opportunity_sequence += 1
+        meaningful_ids = [
+            action["id"]
+            for action in hints.get("actions", [])
+            if action.get("id") != "pass"
+            and action.get("kind") != "mana"
+            and (
+                action.get("kind") != "activate"
+                or any(
+                    item.get("s") == action.get("source")
+                    and item.get("a") == action.get("ability")
+                    for item in hints.get("abilities", [])
+                )
+            )
+        ]
+        diagnostics = copy.deepcopy(hints.get("diagnostic") or {})
+        meaningful = bool(meaningful_ids)
+        row = {
+                "sequence": self.state.opportunity_sequence,
+                "revision": self.state.revision,
+                "event_sequence": self.state.event_sequence,
+                "turn_sequence": self.state.turn_sequence,
+                "active_player": self.state.active_player,
+                "phase": self.state.phase,
+                "step": self.state.step,
+                "priority_epoch": self.state.priority_epoch,
+                "seat": seat,
+                "action_signature": action_signature,
+                "action_signature_algorithm": "meaningful-action-signature/v1",
+                "meaningful_action_ids": meaningful_ids,
+                "meaningful_action_count": len(meaningful_ids),
+                "meaningful_actions_exist": meaningful,
+                "pilot_task_issued": outcome == "pilot_task_issued",
+                "safe_yield_covered": outcome == "safe_yield",
+                "pass_only_auto_pass": outcome == "pass_only_auto_pass",
+                "ordered_plan_covered": outcome == "ordered_plan",
+                "incorrectly_suppressed": outcome
+                == "incorrectly_suppressed",
+                "outcome": outcome,
+                "yield_invalidated_by": yield_invalidation,
+                "diagnostic": diagnostics,
+            }
+        self.state.action_opportunities.append(row)
+        return row
 
     def _pass_priority(self, seat: str, *, automatic: bool = False) -> None:
         if self.state.priority_player != seat:
@@ -1254,25 +1504,59 @@ class CommanderEngine:
                 return
             if self.state.priority_player is not None:
                 seat = self.state.priority_player
-                if self.state.config.auto_pass_empty_priority and self._priority_window_empty(seat):
-                    telemetry = self.state.players[seat].stats.setdefault(
-                        "decision_optimization", {}
+                hints = self._priority_action_hints(seat)
+                action_signature = self.meaningful_action_signature(
+                    seat, hints
+                )
+                meaningful = self._signature_has_actions(seat, hints)
+                self._increment_optimization(
+                    seat, "priority_windows_considered"
+                )
+                can_yield, invalidation = self._can_auto_pass(
+                    seat,
+                    action_signature=action_signature,
+                    meaningful=meaningful,
+                )
+                if (
+                    self.state.config.auto_pass_empty_priority
+                    and not meaningful
+                ):
+                    self._increment_optimization(
+                        seat, "pass_only_windows_skipped"
                     )
-                    telemetry["pass_only_windows_skipped"] = (
-                        int(telemetry.get("pass_only_windows_skipped", 0)) + 1
+                    self._increment_optimization(
+                        seat, "suppressed_empty_windows"
+                    )
+                    self._record_action_opportunity(
+                        seat,
+                        hints=hints,
+                        action_signature=action_signature,
+                        outcome="pass_only_auto_pass",
+                        yield_invalidation=invalidation,
                     )
                     self._pass_priority(seat, automatic=True)
                     continue
-                if self._can_auto_pass(seat):
-                    telemetry = self.state.players[seat].stats.setdefault(
-                        "decision_optimization", {}
+                if can_yield:
+                    self._increment_optimization(
+                        seat, "yield_covered_windows"
                     )
-                    telemetry["yield_covered_windows"] = (
-                        int(telemetry.get("yield_covered_windows", 0)) + 1
+                    self._record_action_opportunity(
+                        seat,
+                        hints=hints,
+                        action_signature=action_signature,
+                        outcome="safe_yield",
                     )
                     self._pass_priority(seat, automatic=True)
                     continue
-                self._issue_priority(seat)
+                row = self._record_action_opportunity(
+                    seat,
+                    hints=hints,
+                    action_signature=action_signature,
+                    outcome="pilot_task_issued",
+                    yield_invalidation=invalidation,
+                )
+                decision = self._issue_priority(seat, hints)
+                row["decision_id"] = decision.decision_id
                 return
             # Step handlers normally either advance or grant priority. Re-enter
             # only as a fail-safe for a loaded state between transitions.
@@ -1420,6 +1704,19 @@ class CommanderEngine:
             record = self.card_record(card)
             if not record:
                 continue
+            mana_abilities = [
+                ability
+                for ability in self._activated_abilities(card)
+                if ability.mana_ability and card.zone in ability.zones
+            ]
+            if mana_abilities and not any(
+                self._activation_condition_status(seat, ability)[0] == "payable"
+                for ability in mana_abilities
+            ):
+                # A source whose only Oracle mana abilities have an unmet or
+                # unresolved activation condition must not make dependent
+                # spells appear payable.
+                continue
             modes = extract_mana_modes(record, identity)
             if modes:
                 sources.append(ManaSource(object_id, card.ref, self.display_name(object_id), modes))
@@ -1438,6 +1735,18 @@ class CommanderEngine:
             matching = [mode for mode in modes if normalize_mana_bundle(mode.bundle) == bundle]
             if not matching:
                 raise GameRuleError(f"Declared output is not a recognized mana mode of {card.printed_name}")
+            mana_abilities = [
+                ability
+                for ability in self._activated_abilities(card)
+                if ability.mana_ability and card.zone in ability.zones
+            ]
+            if mana_abilities and not any(
+                self._activation_condition_status(seat, ability)[0] == "payable"
+                for ability in mana_abilities
+            ):
+                raise GameRuleError(
+                    f"{card.printed_name}'s mana ability has an unmet or unresolved activation condition"
+                )
             mode = matching[0]
             if mode.requires_choice:
                 raise GameRuleError(
@@ -1880,6 +2189,14 @@ class CommanderEngine:
                 f"Cost for {source.printed_name} {ability.ability_id} is not compiled: {detail}. "
                 "Request a rules/cost semantic rather than declaring the cost as a pilot."
             )
+        availability, availability_reason = self._ability_availability(
+            seat, source, ability
+        )
+        if availability != "payable":
+            raise GameRuleError(
+                f"{source.printed_name} {ability.ability_id} is not currently payable"
+                + (f": {availability_reason}" if availability_reason else "")
+            )
         if self.state.config.strict_mana and any(
             key in response for key in ("mana_cost", "declared_cost", "costs", "cost_effects", "tap")
         ):
@@ -1998,9 +2315,179 @@ class CommanderEngine:
         self.state.priority_passes = []
         self.state.players[seat].yield_policy = YieldPolicy()
 
-    def _ability_hints(self, seat: str) -> list[dict[str, Any]]:
+    def _ability_choice_payable(
+        self,
+        seat: str,
+        source: CardInstance,
+        ability: ActivatedAbility,
+    ) -> bool:
+        slots: list[list[str]] = []
         player = self.state.players[seat]
-        hints: list[dict[str, Any]] = []
+        for choice in ability.choices:
+            candidates: list[str] = []
+            for object_id in player.zones.get(choice.zone, []):
+                card = self.state.cards[object_id]
+                if choice.zone == "battlefield":
+                    if card.controller != seat or card.phased_out:
+                        continue
+                elif card.owner != seat:
+                    continue
+                if choice.another and card.object_id == source.object_id:
+                    continue
+                if choice.card_type:
+                    type_line = str(
+                        self._effective_card_data(card).get("type_line") or ""
+                    ).casefold()
+                    if choice.card_type not in type_line:
+                        continue
+                candidates.append(card.object_id)
+            for _ in range(choice.count):
+                slots.append(candidates)
+
+        def assign(index: int, used: set[str]) -> bool:
+            if index >= len(slots):
+                return True
+            for object_id in slots[index]:
+                if object_id in used:
+                    continue
+                used.add(object_id)
+                if assign(index + 1, used):
+                    return True
+                used.remove(object_id)
+            return False
+
+        return assign(0, set())
+
+    def _ability_availability(
+        self,
+        seat: str,
+        card: CardInstance,
+        ability: ActivatedAbility,
+    ) -> tuple[str, str | None]:
+        """Return payable, unpayable, unresolved, or unavailable."""
+
+        player = self.state.players[seat]
+        zone = card.zone
+        if zone not in ability.zones:
+            return "unavailable", "wrong_zone"
+        if not ability.compiled_cost:
+            return "unresolved", "unresolved_cost_semantics"
+        condition_status, condition_reason = self._activation_condition_status(
+            seat, ability
+        )
+        if condition_status != "payable":
+            return condition_status, condition_reason
+        if ability.sorcery_speed and not (
+            seat == self.state.active_player
+            and not self.state.stack
+            and (self.state.phase, self.state.step)
+            in {
+                ("precombat_main", "main"),
+                ("postcombat_main", "main"),
+            }
+        ):
+            return "unavailable", "sorcery_timing"
+        if ability.tap_source:
+            if zone != "battlefield":
+                return "unavailable", "tap_cost_wrong_zone"
+            if card.tapped:
+                return "unavailable", "source_tapped"
+            if (
+                self._is_summoning_sick(card)
+                and "Haste"
+                not in self._effective_card_data(card).get("keywords", [])
+            ):
+                return "unavailable", "summoning_sickness"
+        if ability.untap_source and (
+            zone != "battlefield" or not card.tapped
+        ):
+            return "unavailable", "untap_cost_unavailable"
+        if ability.discard_source and zone != "hand":
+            return "unavailable", "discard_source_wrong_zone"
+        if ability.sacrifice_source and zone != "battlefield":
+            return "unavailable", "sacrifice_source_wrong_zone"
+        if ability.life_payment and player.life < ability.life_payment:
+            return "unpayable", "insufficient_life"
+        if ability.choices and not self._ability_choice_payable(
+            seat, card, ability
+        ):
+            return "unpayable", "mandatory_cost_object_unavailable"
+        requirements = reduced_requirements(
+            ability,
+            legendary_creatures=self._legendary_creatures_controlled(seat),
+        )
+        excluded = {card.object_id} if ability.tap_source else set()
+        if sum(requirements.values()) and not self._cost_is_affordable(
+            seat, requirements, exclude_sources=excluded
+        ):
+            return "unpayable", "insufficient_mana"
+        return "payable", None
+
+    def _activation_condition_status(
+        self,
+        seat: str,
+        ability: ActivatedAbility,
+    ) -> tuple[str, str | None]:
+        """Evaluate the small compiled activation-condition grammar.
+
+        Conditions outside this grammar are unresolved rather than guessed.
+        This deliberately covers Metalcraft-style minimum-permanent checks
+        without claiming general Oracle condition support.
+        """
+
+        effect = ability.effect_text.casefold()
+        if "activate only if" not in effect:
+            return "payable", None
+        match = re.search(
+            r"activate only if you control "
+            r"(?P<count>\d+|one|two|three|four|five|six|seven|eight|nine|ten) "
+            r"or more (?P<kind>artifacts?|creatures?|lands?)",
+            effect,
+        )
+        if not match:
+            return "unresolved", "unresolved_activation_condition"
+        words = {
+            "one": 1,
+            "two": 2,
+            "three": 3,
+            "four": 4,
+            "five": 5,
+            "six": 6,
+            "seven": 7,
+            "eight": 8,
+            "nine": 9,
+            "ten": 10,
+        }
+        raw_count = match.group("count")
+        required = int(raw_count) if raw_count.isdigit() else words[raw_count]
+        kind = match.group("kind").removesuffix("s")
+        controlled = 0
+        for object_id in self.state.players[seat].zones["battlefield"]:
+            permanent = self.state.cards[object_id]
+            if permanent.controller != seat or permanent.phased_out:
+                continue
+            type_line = str(
+                self._effective_card_data(permanent).get("type_line") or ""
+            ).casefold()
+            if kind in type_line:
+                controlled += 1
+        if controlled < required:
+            return "unavailable", f"requires_{required}_{kind}s"
+        return "payable", None
+
+    def _classified_ability_hints(
+        self, seat: str
+    ) -> tuple[
+        list[dict[str, Any]],
+        list[dict[str, Any]],
+        list[dict[str, Any]],
+        list[dict[str, Any]],
+    ]:
+        player = self.state.players[seat]
+        strategic: list[dict[str, Any]] = []
+        mana: list[dict[str, Any]] = []
+        unpayable: list[dict[str, Any]] = []
+        unresolved: list[dict[str, Any]] = []
         for zone in ("battlefield", "hand", "graveyard", "exile"):
             for object_id in player.zones[zone]:
                 card = self.state.cards[object_id]
@@ -2012,54 +2499,67 @@ class CommanderEngine:
                 for ability in self._activated_abilities(card):
                     if zone not in ability.zones:
                         continue
-                    if not ability.compiled_cost:
+                    hint = ability.compact(source_ref=card.ref, zone=zone)
+                    status, reason = self._ability_availability(
+                        seat, card, ability
+                    )
+                    if status == "unresolved":
+                        unresolved.append(
+                            {
+                                **hint,
+                                "status": status,
+                                "reason": reason,
+                            }
+                        )
                         continue
-                    if ability.tap_source and (zone != "battlefield" or card.tapped):
+                    if status == "unpayable":
+                        unpayable.append(
+                            {
+                                **hint,
+                                "status": status,
+                                "reason": reason,
+                            }
+                        )
                         continue
-                    if ability.life_payment and player.life < ability.life_payment:
+                    if status != "payable":
                         continue
                     # Ordinary tap-for-one mana abilities do not justify an LLM
                     # call. Mana abilities with sacrifices, life payments, or
                     # other strategic costs remain visible so the player can
                     # float mana before a subsequent action (for example,
                     # Phyrexian Tower).
-                    if ability.mana_ability and not (
+                    ordinary_mana = ability.mana_ability and not (
                         ability.choices
                         or ability.life_payment
                         or ability.discard_source
                         or ability.sacrifice_source
                         or ability.exile_source
                         or ability.uncompiled_costs
-                    ):
-                        continue
-                    hint = ability.compact(source_ref=card.ref, zone=zone)
+                    )
                     fetch_types = self._fetch_land_types(ability.effect_text)
                     if fetch_types:
                         hint["search_types"] = list(fetch_types)
-                    hints.append(hint)
-        return hints
+                    if ability.mana_ability:
+                        mana.append(hint)
+                    if not ordinary_mana:
+                        strategic.append(hint)
+        return strategic, mana, unpayable, unresolved
+
+    def _ability_hints(self, seat: str) -> list[dict[str, Any]]:
+        strategic, _, _, _ = self._classified_ability_hints(seat)
+        return strategic
 
     def _mana_ability_hints(self, seat: str) -> list[dict[str, Any]]:
-        player = self.state.players[seat]
-        hints: list[dict[str, Any]] = []
-        for object_id in player.zones["battlefield"]:
-            card = self.state.cards[object_id]
-            if card.controller != seat or card.phased_out or card.tapped:
-                continue
-            for ability in self._activated_abilities(card):
-                if (
-                    ability.mana_ability
-                    and "battlefield" in ability.zones
-                    and ability.compiled_cost
-                    and (not ability.tap_source or not card.tapped)
-                    and player.life >= ability.life_payment
-                ):
-                    hints.append(
-                        ability.compact(source_ref=card.ref, zone="battlefield")
-                    )
-        return hints
+        _, mana, _, _ = self._classified_ability_hints(seat)
+        return mana
 
-    def _cost_is_affordable(self, seat: str, requirements: Mapping[str, int]) -> bool:
+    def _cost_is_affordable(
+        self,
+        seat: str,
+        requirements: Mapping[str, int],
+        *,
+        exclude_sources: set[str] | None = None,
+    ) -> bool:
         remaining = {key: int(requirements.get(key, 0)) for key in ("GENERIC", "W", "U", "B", "R", "G", "C")}
         pool = normalize_mana_bundle(self.state.players[seat].mana_pool)
         for color in "WUBRGC":
@@ -2071,7 +2571,12 @@ class CommanderEngine:
         if not sum(remaining.values()):
             return True
         try:
-            auto_plan_payment(remaining, self.available_mana_sources(seat))
+            sources = [
+                source
+                for source in self.available_mana_sources(seat)
+                if source.object_id not in (exclude_sources or set())
+            ]
+            auto_plan_payment(remaining, sources)
             return True
         except ManaPlanError:
             return False
@@ -2094,16 +2599,46 @@ class CommanderEngine:
         player = self.state.players[seat]
         candidate_zones = [*player.zones["hand"], *player.zones["command"]]
         castable: list[str] = []
+        unpayable_casts: list[dict[str, Any]] = []
+        unresolved_casts: list[dict[str, Any]] = []
         for oid in candidate_zones:
             record = self.card_record(oid)
             if not record or record.is_land:
                 continue
             main_timing = seat == self.state.active_player and not self.state.stack and self.state.step == "main"
             requirements = self._card_cast_requirements(seat, self.state.cards[oid])
+            timing_available = record.is_instant or record.has_flash or main_timing
+            if timing_available and requirements is None:
+                unresolved_casts.append(
+                    {
+                        "id": f"cast:{self.state.cards[oid].ref}",
+                        "kind": "cast",
+                        "card": self.state.cards[oid].ref,
+                        "from": self.state.cards[oid].zone,
+                        "status": "unresolved",
+                        "reason": "unresolved_cost_semantics",
+                    }
+                )
+                continue
             if (
-                (record.is_instant or record.has_flash or main_timing)
+                timing_available
                 and requirements is not None
-                and self._cost_is_affordable(seat, requirements)
+                and not self._cost_is_affordable(seat, requirements)
+            ):
+                unpayable_casts.append(
+                    {
+                        "id": f"cast:{self.state.cards[oid].ref}",
+                        "kind": "cast",
+                        "card": self.state.cards[oid].ref,
+                        "from": self.state.cards[oid].zone,
+                        "status": "unpayable",
+                        "reason": "insufficient_mana",
+                    }
+                )
+                continue
+            if (
+                timing_available
+                and requirements is not None
             ):
                 program = self.semantics.get(
                     f"{record.oracle_id}:spell:front"
@@ -2118,6 +2653,16 @@ class CommanderEngine:
                     )
                     < int(program.target_schema.get("count", 0))
                 ):
+                    unpayable_casts.append(
+                        {
+                            "id": f"cast:{self.state.cards[oid].ref}",
+                            "kind": "cast",
+                            "card": self.state.cards[oid].ref,
+                            "from": self.state.cards[oid].zone,
+                            "status": "unavailable",
+                            "reason": "mandatory_target_unavailable",
+                        }
+                    )
                     continue
                 castable.append(self.state.cards[oid].ref)
         lands: list[str] = []
@@ -2127,8 +2672,12 @@ class CommanderEngine:
                 for oid in player.zones["hand"]
                 if (self.card_record(oid) and self.card_record(oid).is_land)
             ]
-        abilities = self._ability_hints(seat)
-        mana_abilities = self._mana_ability_hints(seat)
+        (
+            abilities,
+            mana_abilities,
+            unpayable_abilities,
+            unresolved_abilities,
+        ) = self._classified_ability_hints(seat)
         actions: list[dict[str, Any]] = [{"id": "pass", "action": "pass"}]
         for ref in lands:
             card = next(
@@ -2221,9 +2770,21 @@ class CommanderEngine:
             "abilities": abilities,
             "mana_abilities": mana_abilities,
             "actions": actions,
+            "diagnostic": {
+                "unpayable": [
+                    *unpayable_casts,
+                    *unpayable_abilities,
+                ],
+                "unresolved_cost_semantics": [
+                    *unresolved_casts,
+                    *unresolved_abilities,
+                ],
+            },
         }
 
-    def _priority_window_empty(self, seat: str) -> bool:
+    def _priority_window_empty(
+        self, seat: str, hints: Mapping[str, Any] | None = None
+    ) -> bool:
         """Whether the implemented action grammar exposes no priority action.
 
         Concede is deliberately ignored: the simulator should not spend an LLM
@@ -2232,7 +2793,7 @@ class CommanderEngine:
         additional special actions not yet represented by the kernel.
         """
 
-        hints = self._priority_action_hints(seat)
+        hints = dict(hints or self._priority_action_hints(seat))
         return not any(hints.get(key) for key in ("cast", "lands", "abilities"))
 
     # ------------------------------------------------------------------

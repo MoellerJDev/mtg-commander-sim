@@ -96,6 +96,11 @@ inspect the preserved authoritative objects after the game.
 | `spectator` | public state | none | never |
 | server/admin process | persistence and lifecycle | administrative operations | not through pilot API |
 
+In a Codex arena, four persistent `gpt-5.6-sol` subagent threads own seats A–D.
+The primary GPT-5.6 Sol/Ultra task is the neutral coordinator and arbiter. It
+routes tasks by public principal identity and never substitutes its judgment
+for a legal pilot action.
+
 A capability token is:
 
 - opaque
@@ -123,6 +128,14 @@ Capabilities are **decision authorization**, not login credentials. A future ser
 
 If a model action is illegal, the transaction rolls back and the capability remains live. `SequentialPilotRunner` may retry a bounded number of times with a compact rejection message rather than resending a full state or silently repairing the move.
 
+Four pilot threads remain alive concurrently for memory isolation, but game
+decisions are invoked sequentially because Magic grants one principal (or one
+ordered decision group) authority at a time. `SeatScopedPilotTools` fixes the
+seat at process startup and exposes only `get_task`, `submit_action`,
+`get_rules`, `get_profile`, `get_memory`, and `update_memory`.
+`CoordinatorTools` separately exposes public progress, fidelity, and arbiter
+tasks and contains no seat-action method.
+
 ### Multiplayer mulligans
 
 Mulligan declarations are issued in starting-player/turn order. Once every eligible player has declared, all players who chose to mulligan redraw seven. Counted bottom choices are private and collected as one multi-actor decision before being applied. A player who keeps is removed from future rounds.
@@ -141,17 +154,31 @@ The `realistic_mulligan_guard` is a simulation policy, not a Magic rule. It prev
 
 ### Call suppression
 
-Before issuing a priority capability, the kernel checks the implemented action grammar. If the seat has no castable-by-timing card, land play, or nonmana activated ability, the priority pass is deterministic and no model is called.
+Before issuing a priority capability, the kernel computes a versioned canonical
+meaningful-action signature from currently payable land, cast, commander,
+nonmana ability, interaction, combat, and player-choice alternatives. A
+pass-only window is deterministic and no model is called.
 
-This can be disabled for debugging or when a future client adds special actions not yet represented by the kernel.
+A yield is only an optimization. It cannot authorize skipping a changed
+signature. Yields are re-evaluated after every draw and phase/step transition
+and expire on:
 
-Yield policies allow a pilot to skip additional windows until:
+- the seat becoming active or reaching either of its main phases
+- private hand additions/removals
+- untap or land-play allowance changes
+- newly payable casts, abilities, targets, attacks, blocks, or choices
+- stack or relevant public battlefield changes
+- the explicit stop condition
 
-- its own turn
-- a public change
-- a known response becomes possible
+`until_public_change` is primarily a nonactive response optimization.
+`until_my_turn` ends no later than that seat's next untap. An active player's
+upkeep/draw yield never covers its next main phase.
 
-The yield is invalidated conservatively by stack changes, visible zone changes, and relevant private draws.
+Every priority state enters the authoritative opportunity journal with its
+signature hash and one disposition: pilot task, safe yield, pass-only
+auto-pass, ordered plan, or incorrect suppression. A nonzero
+`suppressed_meaningful_windows` fails fidelity and caps classification at
+`rules_test`.
 
 ## Rules arbitration and semantic programs
 
@@ -171,7 +198,7 @@ Runtime placeholders such as `$controller`, `$source`, `$stack`, and `$target.0`
 
 ### Pack trust and provenance
 
-Version 0.4.0 loads semantic packs as data. A program identifies its Oracle ID,
+Version 0.5.0 loads semantic packs as data. A program identifies its Oracle ID,
 ability/face, active zone, event, schema version, coverage, tests, source Oracle
 hash, source-rulings hash, authoring provenance, review status, and trust level:
 
@@ -199,7 +226,7 @@ IDs, an explicit repeat count/stop condition, and opponent priority responses.
 It validates the required objects, zones, resources, and exact sequence before
 applying an aggregate. The event records the loop signature, demonstrated
 iteration, count, resource/life/zone delta, semantic versions, and responses.
-The 0.4.0 implementations are intentionally limited to the tested
+The current implementations are intentionally limited to the tested
 Soultrader/Gravecrawler/Zulaport line and Mishra/Gonti's Aether Heart energy
 line; this is not a general shortcut-negotiation implementation.
 
@@ -234,6 +261,7 @@ initial-checkpoint.json.gz ── accepted commands ──> checkpoint.json
                                   │
                                   ├── commands.jsonl  (replay truth)
                                   ├── decisions.jsonl (strategy/model audit)
+                                  ├── opportunities.jsonl (priority coverage)
                                   └── events.jsonl    (normalized trace)
                                                         │
                                                         └── review.json / review.md
@@ -300,6 +328,10 @@ Pilots do not spend tokens restating card behavior. The arbiter does not receive
 | one context saw every hand | seat projections; strict mode uses isolated pilot contexts |
 | repeated full state exhausted context | bootstrap + JSON patches + definitions cache + yields |
 | every empty priority window called the model | known-empty windows auto-pass |
+| beginning-step yield covered the active player's main phase | signature-based yield invalidation plus mandatory active/main/draw stops |
+| review blamed a pilot that was never asked | engine-side opportunity journal attributes delivery, generator, semantics, and yield failures separately |
+| unpayable Channel ability advertised | current mandatory-cost and mana-source payability gates |
+| one stateless model call per action | four immutable seat-to-thread routes with reusable projected memory |
 | player supplied arbitrary effects | only arbiter resolution capabilities accept DSL effects |
 | mulligans chased ideal sevens | exact free-mulligan procedure plus configurable functional-hand guard |
 | pilot asserted every land was tapped | engine derives entry state from Oracle conditions and live opponent/board state |

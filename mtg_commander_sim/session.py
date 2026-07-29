@@ -11,7 +11,11 @@ from .deck import DeckDefinition, DeckLoader
 from .engine import ActionResult, CommanderEngine
 from .model import GameConfig
 from .projection import ProjectionCursor, StateProjector
-from .profiles import DeckProfileCache
+from .profiles import (
+    DeckProfileCache,
+    deck_list_fingerprint,
+    deck_source_fingerprint,
+)
 from .record import (
     authoritative_state_hash,
     capability_id,
@@ -75,6 +79,9 @@ class CommanderSession:
     replay_mode: str = "command_replay"
     plans: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
     pilot_profiles: dict[str, dict[str, Any]] = field(default_factory=dict)
+    deck_provenance: dict[str, dict[str, Any]] = field(default_factory=dict)
+    profile_validation: dict[str, dict[str, Any]] = field(default_factory=dict)
+    arena_metadata: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def create(
@@ -100,11 +107,42 @@ class CommanderSession:
             config=game_config,
             semantics=semantics,
         )
+        profile_cache = DeckProfileCache()
+        pilot_profiles: dict[str, dict[str, Any]] = {}
+        validations: dict[str, dict[str, Any]] = {}
+        provenance: dict[str, dict[str, Any]] = {}
+        for seat, deck in decks.items():
+            principal = f"pilot:{seat}"
+            result = profile_cache.load_validated(deck)
+            validation = {
+                "status": result.status,
+                "profile_fingerprint_match": (
+                    result.profile_fingerprint_match
+                ),
+                "deck_list_fingerprint": deck_list_fingerprint(deck),
+                "deck_source_fingerprint": deck_source_fingerprint(deck),
+                "warning": result.warning,
+            }
+            validations[principal] = validation
+            if result.profile is not None:
+                pilot_profiles[principal] = {
+                    **result.profile.to_dict(),
+                    "validation": validation,
+                }
+            provenance[seat] = {
+                "source": deck.source,
+                "metadata": copy.deepcopy(deck.metadata),
+                "deck_list_fingerprint": deck_list_fingerprint(deck),
+                "deck_source_fingerprint": deck_source_fingerprint(deck),
+            }
         return cls(
-            card_db,
-            engine,
-            StateProjector(card_db, engine.state),
+            card_db=card_db,
+            engine=engine,
+            projector=StateProjector(card_db, engine.state),
             initial_checkpoint=checkpoint_envelope(engine.state),
+            pilot_profiles=pilot_profiles,
+            deck_provenance=provenance,
+            profile_validation=validations,
         )
 
     @classmethod
@@ -143,12 +181,6 @@ class CommanderSession:
             config=config,
             semantics_path=semantics_path,
         )
-        profile_cache = DeckProfileCache()
-        session.pilot_profiles = {
-            f"pilot:{seat}": profile.to_dict()
-            for seat, deck in decks.items()
-            if (profile := profile_cache.load_for_deck(deck)) is not None
-        }
         return session
 
     @property
@@ -201,6 +233,11 @@ class CommanderSession:
             planned.setdefault("reason", "Execute a still-legal action from the accepted ordered plan.")
             before_stack = tuple(item.ref for item in self.state.stack)
             before_event = self.state.event_sequence
+            before_kind = (
+                self.state.pending_decision.kind
+                if self.state.pending_decision
+                else None
+            )
             result = self.act(principal, planned)
             if not result.ok:
                 self.plans.pop(principal, None)
@@ -210,8 +247,14 @@ class CommanderSession:
                 for event in self.state.events
                 if event.event_id > before_event
             ]
+            expected_continuation = self._ordered_plan_continuation_allowed(
+                principal,
+                before_kind=before_kind,
+                new_events=new_events,
+            )
             if (
                 tuple(item.ref for item in self.state.stack) != before_stack
+                and not expected_continuation
                 or any(event.code == "card.draw.private" for event in new_events)
             ):
                 self.plans.pop(principal, None)
@@ -244,6 +287,34 @@ class CommanderSession:
             actionable.pop(0)
         if actionable:
             self.plans[principal] = actionable
+
+    def _ordered_plan_continuation_allowed(
+        self,
+        principal: str,
+        *,
+        before_kind: str | None,
+        new_events: Sequence[Any],
+    ) -> bool:
+        """Allow only the predeclared choice/resolution inside a fetch plan."""
+
+        queue = self.plans.get(principal) or []
+        if not queue:
+            return False
+        if any(event.code == "card.draw.private" for event in new_events):
+            return False
+        pending = self.state.pending_decision
+        pending_principals = self.pending_principals()
+        if pending and pending.kind == "search.fetch":
+            return (
+                pending_principals == [principal]
+                and str(queue[0].get("action_id")) == "choose"
+            )
+        if before_kind == "search.fetch":
+            return (
+                not pending_principals
+                or pending_principals == [principal]
+            )
+        return False
 
     @staticmethod
     def expand_action(response: Mapping[str, Any]) -> tuple[str, dict[str, Any]]:
@@ -280,6 +351,11 @@ class CommanderSession:
             "output_tokens",
             "latency_ms",
             "provider_invoked",
+            "reasoning_effort",
+            "thread_id",
+            "thread_label",
+            "parent_session_id",
+            "invoked_at",
             "estimated_input_tokens",
             "retry_count",
             "automatic",
@@ -395,6 +471,15 @@ class CommanderSession:
                     "provider": response.get("provider"),
                     "model": response.get("model_id", response.get("model")),
                     "invocation_id": response.get("invocation_id"),
+                    "reasoning_effort": response.get(
+                        "reasoning_effort"
+                    ),
+                    "thread_id": response.get("thread_id"),
+                    "thread_label": response.get("thread_label"),
+                    "parent_session_id": response.get(
+                        "parent_session_id"
+                    ),
+                    "invoked_at": response.get("invoked_at"),
                     "provider_invoked": bool(response.get("provider_invoked", False)),
                     "metrics": {
                         key: response[key]
@@ -509,6 +594,11 @@ class CommanderSession:
             "provider": audit.get("provider"),
             "model": audit.get("model_id", audit.get("model")),
             "invocation_id": audit.get("invocation_id"),
+            "reasoning_effort": audit.get("reasoning_effort"),
+            "thread_id": audit.get("thread_id"),
+            "thread_label": audit.get("thread_label"),
+            "parent_session_id": audit.get("parent_session_id"),
+            "invoked_at": audit.get("invoked_at"),
             "provider_invoked": bool(audit.get("provider_invoked", False)),
             "metrics": {
                 key: audit[key]
@@ -608,9 +698,17 @@ class CommanderSession:
                 for event in self.state.events
                 if event.event_id > before_event_sequence
             ]
+            expected_continuation = (
+                self._ordered_plan_continuation_allowed(
+                    principal,
+                    before_kind=decision.kind if decision else None,
+                    new_events=new_events,
+                )
+            )
             plan_stop = (
                 tuple(item.ref for item in self.state.stack)
                 != tuple(before_stack_semantics)
+                and not expected_continuation
                 or any(
                     event.code == "card.draw.private"
                     for event in new_events
@@ -664,6 +762,9 @@ class CommanderSession:
             decisions=self.decisions,
             created_at=self.created_at,
             replay_mode=self.replay_mode,
+            deck_provenance=self.deck_provenance,
+            profile_validation=self.profile_validation,
+            codex_arena=self.arena_metadata,
         )
         cursor_payload = {
             principal: {
@@ -680,6 +781,10 @@ class CommanderSession:
         )
         (directory / "pilot-profiles.json").write_text(
             json.dumps(self.pilot_profiles, indent=2, sort_keys=True),
+            encoding="utf-8",
+        )
+        (directory / "plans.json").write_text(
+            json.dumps(self.plans, indent=2, sort_keys=True),
             encoding="utf-8",
         )
         self.engine.semantics.save()
@@ -746,16 +851,72 @@ class CommanderSession:
             if profiles_path.exists()
             else {}
         )
+        plans: dict[str, list[dict[str, Any]]] = {}
+        plans_path = directory / "plans.json"
+        if plans_path.exists():
+            stored_plans = json.loads(
+                plans_path.read_text(encoding="utf-8")
+            )
+            if isinstance(stored_plans, Mapping):
+                for principal, items in stored_plans.items():
+                    if (
+                        principal not in {
+                            f"pilot:{seat}" for seat in engine.state.players
+                        }
+                        or not isinstance(items, list)
+                    ):
+                        continue
+                    plans[str(principal)] = [
+                        copy.deepcopy(dict(item))
+                        for item in items[:64]
+                        if isinstance(item, Mapping)
+                        and item.get("action_id")
+                    ]
+        deck_provenance: dict[str, dict[str, Any]] = {}
+        profile_validation: dict[str, dict[str, Any]] = {}
+        arena_metadata: dict[str, Any] = {}
+        if (directory / "manifest.json").exists():
+            for player in manifest.get("players", []):
+                seat = str(player.get("seat") or "")
+                if not seat:
+                    continue
+                deck_provenance[seat] = {
+                    "source": player.get("deck_source"),
+                    "deck_list_fingerprint": player.get(
+                        "deck_list_fingerprint"
+                    )
+                    or player.get("deck_fingerprint"),
+                    "deck_source_fingerprint": player.get(
+                        "deck_source_fingerprint"
+                    ),
+                }
+                if player.get("profile_validation") is not None:
+                    profile_validation[f"pilot:{seat}"] = dict(
+                        player["profile_validation"]
+                    )
+            arena_metadata = dict(manifest.get("codex_arena") or {})
+        for principal, profile in pilot_profiles.items():
+            if (
+                principal not in profile_validation
+                and isinstance(profile, Mapping)
+                and isinstance(profile.get("validation"), Mapping)
+            ):
+                profile_validation[str(principal)] = copy.deepcopy(
+                    dict(profile["validation"])
+                )
         return cls(
-            card_db,
-            engine,
-            StateProjector(card_db, engine.state),
-            cursors,
-            initial_checkpoint,
-            commands,
-            decisions,
-            created_at,
-            replay_mode,
-            {},
-            pilot_profiles,
+            card_db=card_db,
+            engine=engine,
+            projector=StateProjector(card_db, engine.state),
+            cursors=cursors,
+            initial_checkpoint=initial_checkpoint,
+            commands=commands,
+            decisions=decisions,
+            created_at=created_at,
+            replay_mode=replay_mode,
+            plans=plans,
+            pilot_profiles=pilot_profiles,
+            deck_provenance=deck_provenance,
+            profile_validation=profile_validation,
+            arena_metadata=arena_metadata,
         )

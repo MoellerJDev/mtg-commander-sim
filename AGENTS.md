@@ -8,10 +8,15 @@
 - Hidden information must be projected by principal. Never solve a UI issue by exposing full state.
 - No Scryfall network calls during a game. Use local SQLite data.
 - Unknown Oracle semantics must fail into an arbiter decision; never guess silently.
+- A yield is an optimization, never authority to suppress a changed meaningful-action signature. `suppressed_meaningful_windows` must remain zero.
 - Pilots select server-advertised ability/cost options. Never restore arbitrary `declared_cost`, `cost_effects`, or uncompiled cast-from-zone input in strict mode.
 - Treat `principal` as authenticated transport metadata, never as a seat chosen inside a client command body.
 - Keep public protocol objects JSON-serializable, versioned, and hash-resynchronizable.
 - The realistic mulligan guard is policy, not a Magic rule; preserve the distinction.
+- Codex arena pilots use only their fixed-seat tool surface. Never give a pilot a run path to inspect, another seat's packet/memory, a raw capability, or authoritative checkpoint.
+- The primary Codex task may arbitrate public rules context but must never choose a strategic seat action or silently repair a legal poor choice.
+- Never label provider/model/thread identity as observed unless it came from an actual invocation. Preserve `null` when the platform does not expose a value.
+- Never promote a duplicated-deck fixture or a run with incomplete material semantics to matchup evidence.
 
 ## Before committing
 
@@ -19,6 +24,7 @@
 python -m compileall -q mtg_commander_sim tests scripts simctl.py
 python -m unittest discover -s tests -p 'test_*.py' -v
 python scripts/demo_four_player_protocol.py --out demo
+python simctl.py replay --db data/scryfall-20260728-compact.sqlite3 --verify run/native-zimone-vs-mishra-0.5.0
 ```
 
 Set `MTG_CARD_DB` when the database is outside `data/`.
@@ -26,6 +32,10 @@ Set `MTG_CARD_DB` when the database is outside `data/`.
 ## Architecture tests required
 
 Changes touching turns, priority, combat, state-based actions, mulligans, permissions, projection patches, or semantic resolution require regression tests.
+
+Changes touching legal-action generation or yields also require opportunity
+journal assertions, a zero-suppression check, and exact replay of the
+seed-20260730 fixture.
 
 For a new client feature:
 

@@ -64,6 +64,10 @@ class PilotResponse:
     provider: str | None = None
     model: str | None = None
     invocation_id: str | None = None
+    reasoning_effort: str | None = None
+    thread_id: str | None = None
+    thread_label: str | None = None
+    parent_session_id: str | None = None
     input_tokens: int | None = None
     output_tokens: int | None = None
     latency_ms: float | None = None
@@ -81,6 +85,8 @@ class PilotResponse:
             "yield", "memory_update", "provider", "model", "model_id",
             "implementation_id", "invocation_id", "input_tokens",
             "output_tokens", "latency_ms", "automatic_fallback", "fallback",
+            "reasoning_effort", "thread_id", "thread_label",
+            "parent_session_id",
         }
         for key, child in value.items():
             if key not in reserved:
@@ -110,6 +116,10 @@ class PilotResponse:
                 or value.get("implementation_id")
             ),
             invocation_id=value.get("invocation_id"),
+            reasoning_effort=value.get("reasoning_effort"),
+            thread_id=value.get("thread_id"),
+            thread_label=value.get("thread_label"),
+            parent_session_id=value.get("parent_session_id"),
             input_tokens=(
                 int(value["input_tokens"])
                 if value.get("input_tokens") is not None
@@ -182,6 +192,10 @@ class PilotResponse:
             "provider": self.provider,
             "model_id": self.model,
             "invocation_id": self.invocation_id,
+            "reasoning_effort": self.reasoning_effort,
+            "thread_id": self.thread_id,
+            "thread_label": self.thread_label,
+            "parent_session_id": self.parent_session_id,
             "input_tokens": self.input_tokens,
             "output_tokens": self.output_tokens,
             "latency_ms": self.latency_ms,

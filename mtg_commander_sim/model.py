@@ -63,6 +63,15 @@ class CardInstance:
 class YieldPolicy:
     mode: str = "none"
     created_revision: int = 0
+    created_event_sequence: int = 0
+    created_turn_sequence: int = 0
+    created_priority_epoch: int = 0
+    created_active_player: str | None = None
+    created_phase: str | None = None
+    created_step: str | None = None
+    created_land_plays_remaining: int | None = None
+    action_signature: str | None = None
+    stack_signature: str | None = None
     expires_turn_sequence: int | None = None
     expires_on_stack_change: bool = True
     expires_on_hand_change: bool = True
@@ -350,6 +359,8 @@ class GameState:
     combat: CombatState = field(default_factory=CombatState)
     events: list[Event] = field(default_factory=list)
     annotations: list[dict[str, Any]] = field(default_factory=list)
+    action_opportunities: list[dict[str, Any]] = field(default_factory=list)
+    opportunity_sequence: int = 0
     pending_decision: DecisionGroup | None = None
     capabilities: dict[str, Capability] = field(default_factory=dict)
     started: bool = False
@@ -359,7 +370,7 @@ class GameState:
     eliminated_players: list[str] = field(default_factory=list)
     revision: int = 0
     event_sequence: int = 0
-    state_version: int = 2
+    state_version: int = 3
     mulligan_round: int = 0
     ref_counters: dict[str, int] = field(default_factory=dict)
 
@@ -393,6 +404,8 @@ class GameState:
             "combat": self.combat.to_dict(),
             "events": [event.to_dict() for event in self.events],
             "annotations": copy.deepcopy(self.annotations),
+            "action_opportunities": copy.deepcopy(self.action_opportunities),
+            "opportunity_sequence": self.opportunity_sequence,
             "pending_decision": self.pending_decision.to_dict() if self.pending_decision else None,
             "capabilities": {token: cap.to_dict() for token, cap in self.capabilities.items()},
             "started": self.started,
@@ -433,6 +446,8 @@ class GameState:
             combat=CombatState.from_dict(data.get("combat", {})),
             events=[Event.from_dict(event) for event in data.get("events", [])],
             annotations=list(data.get("annotations", [])),
+            action_opportunities=list(data.get("action_opportunities", [])),
+            opportunity_sequence=int(data.get("opportunity_sequence", 0)),
             pending_decision=(DecisionGroup.from_dict(data["pending_decision"]) if data.get("pending_decision") else None),
             capabilities={token: Capability.from_dict(cap) for token, cap in data.get("capabilities", {}).items()},
             started=bool(data.get("started", False)),

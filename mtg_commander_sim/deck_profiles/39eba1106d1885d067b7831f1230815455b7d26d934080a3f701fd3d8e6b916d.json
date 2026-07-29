@@ -1,6 +1,10 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "profile_schema_version": 2,
+  "fingerprint_algorithm_version": 1,
   "deck_fingerprint": "39eba1106d1885d067b7831f1230815455b7d26d934080a3f701fd3d8e6b916d",
+  "deck_list_fingerprint": "39eba1106d1885d067b7831f1230815455b7d26d934080a3f701fd3d8e6b916d",
+  "profile_source_fingerprint": "f08fcd9d172a76587405b3471a4236da367242db1e15fec73c11f206abecdcf5",
   "commander": ["Mishra, Eminent One"],
   "archetype": "Grixis artifact combo-control",
   "primary_game_plan": "Establish exact UBR access and useful artifacts before casting Mishra, then convert the first safe combat into Warform value.",

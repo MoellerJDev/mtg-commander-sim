@@ -1,6 +1,10 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "profile_schema_version": 2,
+  "fingerprint_algorithm_version": 1,
   "deck_fingerprint": "336b6ecbf92db0fe4990dddbeeac37c1d327043c2b04dcd0bfab50f3b56b1240",
+  "deck_list_fingerprint": "336b6ecbf92db0fe4990dddbeeac37c1d327043c2b04dcd0bfab50f3b56b1240",
+  "profile_source_fingerprint": "12dc241ee30b73919170ed7aefdd2b5bf4143f21cb7623f2c4e70f3f7a6d4c87",
   "commander": ["Zimone and Dina"],
   "archetype": "Sultai lands, aristocrats, value-combo",
   "primary_game_plan": "Develop BGU, turn landfall and recurring creatures into cards and mana, then assemble a compact sacrifice or land engine.",

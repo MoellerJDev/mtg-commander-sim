@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -550,6 +551,74 @@ def derive_review(
     replay_status = (
         str((manifest or {}).get("replay", {}).get("verification") or "not_run")
     )
+    opportunities = copy.deepcopy(state.action_opportunities)
+    optimization_totals = {
+        key: sum(
+            int(
+                state.players[seat]
+                .stats.get("decision_optimization", {})
+                .get(key, 0)
+            )
+            for seat in state.turn_order
+        )
+        for key in (
+            "priority_windows_considered",
+            "pass_only_windows_skipped",
+            "yield_covered_windows",
+            "suppressed_empty_windows",
+            "suppressed_meaningful_windows",
+            "yields_invalidated_by_phase",
+            "yields_invalidated_by_draw",
+            "yields_invalidated_by_action_change",
+            "yields_invalidated_by_stack",
+            "yields_invalidated_by_public_change",
+        )
+    }
+    suppressed_meaningful = max(
+        optimization_totals["suppressed_meaningful_windows"],
+        sum(
+            bool(row.get("incorrectly_suppressed"))
+            and bool(row.get("meaningful_actions_exist"))
+            for row in opportunities
+        ),
+    )
+    meaningful_opportunities = [
+        row for row in opportunities if row.get("meaningful_actions_exist")
+    ]
+    uncovered_opportunities = [
+        row
+        for row in meaningful_opportunities
+        if row.get("incorrectly_suppressed")
+        or row.get("outcome")
+        not in {
+            "pilot_task_issued",
+            "safe_yield",
+            "ordered_plan",
+        }
+    ]
+    opportunity_coverage = (
+        "unavailable"
+        if not opportunities
+        else "fail"
+        if suppressed_meaningful or uncovered_opportunities
+        else "pass"
+    )
+    arena = dict((manifest or {}).get("codex_arena") or {})
+    manifest_deck_fingerprints = [
+        str(
+            player.get("deck_list_fingerprint")
+            or player.get("deck_fingerprint")
+            or ""
+        )
+        for player in (manifest or {}).get("players", [])
+    ]
+    duplicated_deck_fixture = (
+        len(manifest_deck_fingerprints) == len(state.turn_order)
+        and len(set(manifest_deck_fingerprints)) < len(state.turn_order)
+    )
+    profile_match_value = (manifest or {}).get(
+        "profile_fingerprint_match", "unavailable"
+    )
     fidelity_failures = []
     if land_review["conflict_count"]:
         fidelity_failures.append("land-entry conflicts")
@@ -567,6 +636,22 @@ def derive_review(
     )
     if not complete_alternatives or not complete_reasons:
         fidelity_failures.append("incomplete pilot decision alternatives/reasons")
+    if opportunity_coverage == "unavailable":
+        fidelity_failures.append(
+            "historical action-opportunity coverage unavailable"
+        )
+    elif opportunity_coverage == "fail":
+        fidelity_failures.append("action-opportunity coverage failed")
+    if suppressed_meaningful:
+        fidelity_failures.append(
+            f"{suppressed_meaningful} meaningful decision window(s) were suppressed"
+        )
+    if profile_match_value is False:
+        fidelity_failures.append("pilot profile deck-list fingerprint mismatch")
+    if duplicated_deck_fixture:
+        fidelity_failures.append(
+            "duplicated-deck protocol fixture is not matchup evidence"
+        )
     if replay_status not in {"pass", "snapshot_only"}:
         fidelity_failures.append("replay verification not established")
     if smoke_marker:
@@ -576,7 +661,15 @@ def derive_review(
         "commander_multiplayer",
     }:
         fidelity_failures.append("format profile mismatch")
-    if not state.game_over:
+    arena_disqualifiers = [
+        bool(arena.get("primary_made_strategic_decision")),
+        arena.get("persistent_thread_reuse") is False,
+        arena.get("seat_projection_verified") is False,
+        arena.get("provider_identity_verified") is False,
+    ]
+    if suppressed_meaningful:
+        classification = "rules_test"
+    elif not state.game_over:
         classification = (
             "pilot_test"
             if decisions and not legacy_decisions and not smoke_marker
@@ -588,6 +681,10 @@ def derive_review(
         classification = "pilot_test"
     else:
         classification = "deck_review_eligible"
+    if classification == "pilot_test" and any(arena_disqualifiers):
+        classification = "rules_test"
+    if duplicated_deck_fixture and classification == "deck_review_eligible":
+        classification = "pilot_test"
     eligible = classification == "deck_review_eligible" and not fidelity_failures
 
     turns_begun = {seat: state.players[seat].turns_begun for seat in state.turn_order}
@@ -614,6 +711,64 @@ def derive_review(
                 ),
             }
         )
+    for opportunity in opportunities:
+        if not opportunity.get("meaningful_actions_exist"):
+            continue
+        group = groups_by_turn.get(
+            int(opportunity.get("turn_sequence", 0))
+        )
+        if group is None:
+            continue
+        action_ids = list(
+            opportunity.get("meaningful_action_ids") or []
+        )
+        land_names = [
+            _name(engine, action_id.split(":", 1)[1])
+            for action_id in action_ids
+            if str(action_id).startswith("play-land:")
+        ]
+        cast_names = [
+            _name(engine, action_id.split(":", 1)[1])
+            for action_id in action_ids
+            if str(action_id).startswith("cast:")
+        ]
+        delivered_decision = next(
+            (
+                row
+                for row in decisions
+                if str(row.get("decision_id"))
+                == str(opportunity.get("decision_id"))
+                and row.get("accepted")
+            ),
+            None,
+        )
+        group.setdefault("action_opportunities", []).append(
+            {
+                "seat": opportunity.get("seat"),
+                "phase": opportunity.get("phase"),
+                "step": opportunity.get("step"),
+                "action_signature": opportunity.get("action_signature"),
+                "yield_invalidated_by": opportunity.get(
+                    "yield_invalidated_by"
+                ),
+                "legal_land_plays": land_names,
+                "legal_casts": cast_names,
+                "outcome": opportunity.get("outcome"),
+                "incorrectly_suppressed": bool(
+                    opportunity.get("incorrectly_suppressed")
+                ),
+                "chosen_action_id": (
+                    delivered_decision.get("action_id")
+                    if delivered_decision
+                    else None
+                ),
+                "plan": (
+                    delivered_decision.get("plan_category")
+                    if delivered_decision
+                    else None
+                ),
+            }
+        )
     first_three: dict[str, list[dict[str, Any]]] = {}
     for seat in state.turn_order:
         seat_turns = [
@@ -621,7 +776,11 @@ def derive_review(
             if group["turn"] and group["active_player"] == seat
         ][:3]
         first_three[seat] = seat_turns
-    legal_action_trace_complete = complete_alternatives and complete_reasons
+    legal_action_trace_complete = (
+        complete_alternatives
+        and complete_reasons
+        and opportunity_coverage == "pass"
+    )
     stranded = {
         seat: [
             {
@@ -633,34 +792,82 @@ def derive_review(
         ]
         for seat in state.turn_order
     }
+    opportunity_by_decision = {
+        str(row.get("decision_id")): row
+        for row in opportunities
+        if row.get("decision_id")
+    }
     suspected_pilot: list[dict[str, Any]] = []
-    for seat in state.turn_order:
-        if not casts[seat] and discards[seat]:
-            suspected_pilot.append(
-                {
-                    "seat": seat,
-                    "finding": (
-                        f"{seat} cast no spells and discarded {discards[seat]} card(s) "
-                        "to maximum hand size."
-                    ),
-                    "confidence": "suspected",
-                    "legal_alternatives_verified": legal_action_trace_complete,
-                    "caveat": (
-                        None
-                        if legal_action_trace_complete
-                        else "Historical action catalogs are unavailable, so no specific unchosen play is asserted legal."
-                    ),
-                }
-            )
+    for row in decisions:
+        if not row.get("accepted") or row.get("action") != "pass":
+            continue
+        opportunity = opportunity_by_decision.get(
+            str(row.get("decision_id"))
+        )
+        if not opportunity or not opportunity.get(
+            "meaningful_actions_exist"
+        ):
+            continue
+        suspected_pilot.append(
+            {
+                "seat": row.get("seat") or row.get("actor"),
+                "turn": row.get("turn"),
+                "phase": row.get("phase"),
+                "finding": (
+                    "Pilot chose to pass in this exact delivered window despite "
+                    "at least one verified, currently payable action."
+                ),
+                "confidence": "verified_delivery",
+                "legal_alternatives_verified": True,
+                "action_signature": opportunity.get("action_signature"),
+                "action_ids": opportunity.get("meaningful_action_ids", []),
+                "caveat": None,
+            }
+        )
     replay_pass = replay_status in {"pass", "snapshot_only"}
     dimensions = {
         "format_match": "pass",
         "rules_kernel": "fail" if land_review["conflict_count"] else "partial",
         "card_semantics": "pass" if semantics["status"] == "complete" else "fail",
         "pilot_trace": "pass" if legal_action_trace_complete else "fail",
-        "legal_action_exposure": "pass" if legal_action_trace_complete else "fail",
+        "legal_action_exposure": (
+            "fail"
+            if suppressed_meaningful
+            else "pass"
+            if legal_action_trace_complete
+            else "unavailable"
+        ),
+        "profile_fingerprint_match": (
+            "pass"
+            if profile_match_value is True
+            else "fail"
+            if profile_match_value is False
+            else "unavailable"
+        ),
+        "action_opportunity_coverage": opportunity_coverage,
         "hidden_information": "pass",
         "replay_verification": "pass" if replay_pass else "fail",
+        "pilot_thread_count": arena.get("pilot_thread_count"),
+        "persistent_thread_reuse": arena.get(
+            "persistent_thread_reuse", "not_applicable"
+        ),
+        "primary_made_strategic_decision": arena.get(
+            "primary_made_strategic_decision", False
+        ),
+        "provider_identity_verified": arena.get(
+            "provider_identity_verified", "not_applicable"
+        ),
+        "model_identity_verified": arena.get(
+            "model_identity_verified", "not_applicable"
+        ),
+        "seat_projection_verified": arena.get(
+            "seat_projection_verified", "not_applicable"
+        ),
+        "codex_subagent_run": arena.get("codex_subagent_run", False),
+        "ordered_plan_responses": int(
+            arena.get("ordered_plan_responses", 0)
+        ),
+        "arena_stop_reason": arena.get("stop_reason"),
     }
     provider_rows = [
         row for row in decisions if row.get("provider_invoked") is True
@@ -710,14 +917,75 @@ def derive_review(
         pilot_invocations = len(pilot_provider_rows)
         arbiter_invocations = len(arbiter_provider_rows)
     automatic_decisions = 0
+    planned_decision_ids: set[str] = set()
     if record_directory:
         command_path = Path(record_directory) / "commands.jsonl"
         if command_path.exists():
-            automatic_decisions = sum(
-                json.loads(line).get("execution") == "planned_automatic"
-                for line in command_path.read_text(encoding="utf-8").splitlines()
+            command_rows = [
+                json.loads(line)
+                for line in command_path.read_text(
+                    encoding="utf-8"
+                ).splitlines()
                 if line.strip()
+            ]
+            automatic_decisions = sum(
+                row.get("execution") == "planned_automatic"
+                for row in command_rows
             )
+            planned_decision_ids = {
+                str(row.get("decision_id"))
+                for row in command_rows
+                if row.get("execution") == "planned_automatic"
+                and row.get("decision_id")
+            }
+    for opportunity in opportunities:
+        if str(opportunity.get("decision_id")) in planned_decision_ids:
+            opportunity["ordered_plan_covered"] = True
+
+    diagnostic_unpayable = sum(
+        len((row.get("diagnostic") or {}).get("unpayable") or [])
+        for row in opportunities
+    )
+    diagnostic_unresolved = sum(
+        len(
+            (row.get("diagnostic") or {}).get(
+                "unresolved_cost_semantics"
+            )
+            or []
+        )
+        for row in opportunities
+    )
+    opportunity_audit = {
+        "status": opportunity_coverage,
+        "priority_windows_considered": optimization_totals[
+            "priority_windows_considered"
+        ],
+        "journal_rows": len(opportunities),
+        "meaningful_windows": len(meaningful_opportunities),
+        "pilot_chose_to_pass_with_verified_action": len(
+            suspected_pilot
+        ),
+        "pilot_was_never_asked": sum(
+            bool(row.get("meaningful_actions_exist"))
+            and bool(row.get("incorrectly_suppressed"))
+            for row in opportunities
+        ),
+        "action_generator_failed_to_expose": sum(
+            bool((row.get("diagnostic") or {}).get("generator_failure"))
+            for row in opportunities
+        ),
+        "yield_incorrectly_suppressed": suppressed_meaningful,
+        "action_existed_but_was_not_payable": diagnostic_unpayable,
+        "semantics_prevented_action_generation": diagnostic_unresolved,
+        "note": (
+            "Each priority opportunity is joined to its exact action-signature "
+            "and disposition."
+            if opportunities
+            else "This historical record predates the engine-side opportunity "
+            "journal. Inactivity is infrastructure-unverified and is not "
+            "attributed to a pilot."
+        ),
+    }
 
     report: dict[str, Any] = {
         "schema_version": 1,
@@ -740,12 +1008,27 @@ def derive_review(
             "name": state.config.format_name,
             "review_profile": state.config.review_profile,
             "profile": state.config.effective_profile(len(state.turn_order)),
+            "mode": (
+                "two-player commander_duel"
+                if state.config.effective_profile(len(state.turn_order))
+                == "commander_duel"
+                else "four-player commander_review"
+                if len(state.turn_order) == 4
+                else "multiplayer commander_review"
+            ),
             "seed": state.config.seed,
             "warnings": (
                 [
                     "This is an explicit Commander duel/1v1 profile and must not be treated as four-player matchup evidence."
                 ]
                 if state.config.effective_profile(len(state.turn_order)) == "commander_duel"
+                else []
+            )
+            + (
+                [
+                    "This protocol fixture duplicates deck lists and is classified as pilot_test, never matchup evidence."
+                ]
+                if duplicated_deck_fixture
                 else []
             ),
         },
@@ -775,7 +1058,14 @@ def derive_review(
                 ],
                 "commander_casts": commander_casts[seat],
                 "land_drops_made": land_counts[seat],
-                "baseline_land_drops_missed": max(0, turns_begun[seat] - land_counts[seat]),
+                "unused_land_play_allowances_observed": max(
+                    0, turns_begun[seat] - land_counts[seat]
+                ),
+                "unused_land_play_caveat": (
+                    "This is state telemetry, not a pilot mistake. A missed land "
+                    "drop is never attributed unless the exact payable land-play "
+                    "opportunity was delivered and audited."
+                ),
                 "stranded_cards": stranded[seat],
                 "ending_life": state.players[seat].life,
             }
@@ -822,12 +1112,7 @@ def derive_review(
         },
         "tutors_and_searches": tutors,
         "interaction_opportunities": {
-            "status": "available" if legal_action_trace_complete else "unavailable",
-            "note": (
-                "Consult decisions.jsonl legal_alternatives for authoritative historical options."
-                if legal_action_trace_complete
-                else "No specific unchosen interaction is asserted legal from the v2 event log."
-            ),
+            **opportunity_audit,
         },
         "pivotal_timeline": [
             {
@@ -851,6 +1136,17 @@ def derive_review(
         "suspected_rules_or_semantics_failures": {
             "land_entry_conflicts": land_review["conflicts"],
             "unresolved_relevant_semantics": semantics["unresolved_relevant"],
+            "decision_opportunity_infrastructure": [
+                {
+                    "turn": row.get("turn_sequence"),
+                    "seat": row.get("seat"),
+                    "phase": row.get("phase"),
+                    "action_signature": row.get("action_signature"),
+                    "finding": "Meaningful action window was not delivered.",
+                }
+                for row in opportunities
+                if row.get("incorrectly_suppressed")
+            ],
         },
         "win_route": {
             "winner": state.winner,
@@ -882,22 +1178,56 @@ def derive_review(
             "pilot_invocations_observed": pilot_invocations,
             "arbiter_invocations_observed": arbiter_invocations,
             "automatic_decisions": automatic_decisions,
-            "pass_only_windows_skipped": sum(
-                int(
-                    state.players[seat]
-                    .stats.get("decision_optimization", {})
-                    .get("pass_only_windows_skipped", 0)
+            "priority_windows_considered": optimization_totals[
+                "priority_windows_considered"
+            ],
+            "pass_only_windows_skipped": optimization_totals[
+                "pass_only_windows_skipped"
+            ],
+            "yield_covered_windows": optimization_totals[
+                "yield_covered_windows"
+            ],
+            "suppressed_empty_windows": optimization_totals[
+                "suppressed_empty_windows"
+            ],
+            "suppressed_meaningful_windows": suppressed_meaningful,
+            "yields_invalidated_by_reason": {
+                reason: optimization_totals[
+                    f"yields_invalidated_by_{reason}"
+                ]
+                for reason in (
+                    "phase",
+                    "draw",
+                    "action_change",
+                    "stack",
+                    "public_change",
                 )
-                for seat in state.turn_order
+            },
+            "action_opportunity_coverage": opportunity_coverage,
+            "profile_fingerprint_match": profile_match_value,
+            "pilot_thread_count": arena.get("pilot_thread_count"),
+            "persistent_thread_reuse": arena.get(
+                "persistent_thread_reuse"
             ),
-            "yield_covered_windows": sum(
-                int(
-                    state.players[seat]
-                    .stats.get("decision_optimization", {})
-                    .get("yield_covered_windows", 0)
-                )
-                for seat in state.turn_order
+            "primary_made_strategic_decision": arena.get(
+                "primary_made_strategic_decision", False
             ),
+            "provider_identity_verified": arena.get(
+                "provider_identity_verified"
+            ),
+            "model_identity_verified": arena.get(
+                "model_identity_verified"
+            ),
+            "seat_projection_verified": arena.get(
+                "seat_projection_verified"
+            ),
+            "codex_subagent_run": arena.get(
+                "codex_subagent_run", False
+            ),
+            "ordered_plan_responses": int(
+                arena.get("ordered_plan_responses", 0)
+            ),
+            "arena_stop_reason": arena.get("stop_reason"),
             "ordered_plan_actions_executed": automatic_decisions,
             "estimated_calls_without_optimization": len(decisions)
             + automatic_decisions
@@ -969,6 +1299,8 @@ def derive_review(
             "statement": (
                 "This migrated or heuristic run is a smoke/protocol artifact, not evidence about deck quality or matchup balance."
                 if classification == "smoke_only"
+                else "This run is a rules/infrastructure test. It is not evidence about pilot quality, deck quality, or matchup balance."
+                if classification == "rules_test"
                 else "This native run is an unfinished pilot characterization; it is not evidence about deck quality or matchup balance."
                 if classification == "pilot_test"
                 else "This record is incomplete and is not deck-review evidence."
@@ -1000,6 +1332,7 @@ def derive_review(
             "semantics.json",
             "cursors.json",
             "pilot-profiles.json",
+            "plans.json",
             "pilot-memory.json",
         }
         resumable_core = sum(
@@ -1123,6 +1456,41 @@ def review_markdown(review: Mapping[str, Any]) -> str:
         lines.append("")
         for event in turn["events"]:
             lines.append(f"- {event['summary']}")
+        for opportunity in turn.get("action_opportunities", []):
+            if (
+                opportunity.get("seat") != turn.get("active_player")
+                or opportunity.get("phase")
+                not in {"precombat_main", "postcombat_main"}
+            ):
+                continue
+            invalidated = opportunity.get("yield_invalidated_by")
+            if invalidated:
+                lines.append(
+                    f"- Previous yield expired by {invalidated} before "
+                    f"{opportunity['phase'].replace('_', ' ')}."
+                )
+            if opportunity.get("legal_land_plays"):
+                lines.append(
+                    "- Legal land plays: "
+                    + ", ".join(opportunity["legal_land_plays"])
+                    + "."
+                )
+            if opportunity.get("legal_casts"):
+                lines.append(
+                    "- Currently payable casts: "
+                    + ", ".join(opportunity["legal_casts"])
+                    + "."
+                )
+            if opportunity.get("chosen_action_id"):
+                lines.append(
+                    f"- Pilot chose {opportunity['chosen_action_id']}. "
+                    f"Plan: {opportunity.get('plan') or 'UNSPECIFIED'}."
+                )
+            lines.append(
+                "- No meaningful decision window was suppressed."
+                if not opportunity.get("incorrectly_suppressed")
+                else "- Infrastructure failure: this meaningful decision window was suppressed."
+            )
         for decision in turn.get("decisions", []):
             if decision.get("legacy_incomplete"):
                 lines.append(
