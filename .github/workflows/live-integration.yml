@@ -1,0 +1,45 @@
+name: Live integration (manual, non-blocking)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install package
+        run: python -m pip install -e .
+      - name: Refresh Scryfall and validate live Moxfield decks
+        id: live
+        continue-on-error: true
+        shell: bash
+        run: |
+          python scripts/bootstrap_data.py \
+            --refresh-from-scryfall \
+            --output data/scryfall-live.sqlite3 \
+            --force
+          python simctl.py semantics preflight \
+            https://moxfield.com/decks/g5vtVfRuS0W5KxZuYqZHGQ \
+            --db data/scryfall-live.sqlite3 \
+            --cache-dir run/live-deck-cache \
+            --output run/live-zimone-preflight.json
+          python simctl.py semantics preflight \
+            https://moxfield.com/decks/armNI_ntVUagNNygnUVyxQ \
+            --db data/scryfall-live.sqlite3 \
+            --cache-dir run/live-deck-cache \
+            --output run/live-mishra-preflight.json
+      - name: Report live result without making it a merge gate
+        if: always()
+        shell: bash
+        run: |
+          echo "Live integration outcome: ${{ steps.live.outcome }}" \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo "This network-dependent check is diagnostic and non-blocking." \
+            >> "$GITHUB_STEP_SUMMARY"

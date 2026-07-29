@@ -1,0 +1,383 @@
+{
+  "v": "2.1",
+  "mode": "full",
+  "principal": "pilot:A",
+  "base": null,
+  "view": "2b0fadb1c68206eec0b6",
+  "state": {
+    "rev": 0,
+    "event": 10,
+    "game": {
+      "id": "88ad4fe1",
+      "over": false,
+      "winner": null
+    },
+    "turn": {
+      "seq": 0,
+      "active": null,
+      "phase": "setup",
+      "step": "mulligan",
+      "priority": null,
+      "passes": [],
+      "extra_q": []
+    },
+    "players": {
+      "A": {
+        "life": 40,
+        "poison": 0,
+        "energy": 0,
+        "in": 1,
+        "hand_n": 7,
+        "lib_n": 92,
+        "mana": {},
+        "lands": 1,
+        "bf": [],
+        "gy": [],
+        "ex": [],
+        "cmd": [
+          {
+            "id": "A01",
+            "cid": "d3438037",
+            "n": "Mishra, Eminent One",
+            "cmd": 1
+          }
+        ],
+        "hand": [
+          {
+            "id": "A30",
+            "cid": "c1d6cce8",
+            "n": "Goblin Engineer"
+          },
+          {
+            "id": "A65",
+            "cid": "3640c29b",
+            "n": "Roaming Throne"
+          },
+          {
+            "id": "A22",
+            "cid": "da3e7d3d",
+            "n": "Emry, Lurker of the Loch"
+          },
+          {
+            "id": "A53",
+            "cid": "de2440de",
+            "n": "Mox Opal"
+          },
+          {
+            "id": "A31",
+            "cid": "9fc28e1f",
+            "n": "Goblin Welder"
+          },
+          {
+            "id": "A29",
+            "cid": "ac2173f9",
+            "n": "Force of Negation"
+          },
+          {
+            "id": "A54",
+            "cid": "e9b6a394",
+            "n": "Otawara, Soaring City"
+          }
+        ]
+      },
+      "B": {
+        "life": 40,
+        "poison": 0,
+        "energy": 0,
+        "in": 1,
+        "hand_n": 7,
+        "lib_n": 92,
+        "mana": {},
+        "lands": 1,
+        "bf": [],
+        "gy": [],
+        "ex": [],
+        "cmd": [
+          {
+            "id": "B01",
+            "cid": "5bc66b18",
+            "n": "Zimone and Dina",
+            "cmd": 1
+          }
+        ]
+      },
+      "C": {
+        "life": 40,
+        "poison": 0,
+        "energy": 0,
+        "in": 1,
+        "hand_n": 7,
+        "lib_n": 92,
+        "mana": {},
+        "lands": 1,
+        "bf": [],
+        "gy": [],
+        "ex": [],
+        "cmd": [
+          {
+            "id": "C01",
+            "cid": "d3438037",
+            "n": "Mishra, Eminent One",
+            "cmd": 1
+          }
+        ]
+      },
+      "D": {
+        "life": 40,
+        "poison": 0,
+        "energy": 0,
+        "in": 1,
+        "hand_n": 7,
+        "lib_n": 92,
+        "mana": {},
+        "lands": 1,
+        "bf": [],
+        "gy": [],
+        "ex": [],
+        "cmd": [
+          {
+            "id": "D01",
+            "cid": "5bc66b18",
+            "n": "Zimone and Dina",
+            "cmd": 1
+          }
+        ]
+      }
+    },
+    "stack": [],
+    "combat": {
+      "atk": {},
+      "blk": {}
+    }
+  },
+  "decision": {
+    "cap": "<redacted-capability>",
+    "id": "D1",
+    "kind": "mulligan.declare",
+    "actor": "A",
+    "allow": [
+      "keep",
+      "mulligan"
+    ],
+    "legal_actions": [
+      {
+        "id": "keep",
+        "action": "keep"
+      },
+      {
+        "id": "mulligan",
+        "action": "mulligan"
+      }
+    ],
+    "sim": 0,
+    "ctx": {
+      "hand": [
+        {
+          "id": "A30",
+          "name": "Goblin Engineer"
+        },
+        {
+          "id": "A65",
+          "name": "Roaming Throne"
+        },
+        {
+          "id": "A22",
+          "name": "Emry, Lurker of the Loch"
+        },
+        {
+          "id": "A53",
+          "name": "Mox Opal"
+        },
+        {
+          "id": "A31",
+          "name": "Goblin Welder"
+        },
+        {
+          "id": "A29",
+          "name": "Force of Negation"
+        },
+        {
+          "id": "A54",
+          "name": "Otawara, Soaring City"
+        }
+      ],
+      "hand_size": 7,
+      "mulligans_taken": 0,
+      "free_mulligans": 1,
+      "signals": {
+        "lands": 1,
+        "cheap_mana": 1,
+        "other_early_actions": 3,
+        "visible_source_colors": [
+          "U"
+        ],
+        "commander_colors": [
+          "B",
+          "R",
+          "U"
+        ],
+        "red_flags": [],
+        "functional_baseline": true
+      },
+      "if_mulligan": {
+        "draw": 7,
+        "bottom": 0,
+        "resulting_hand_size": 7
+      },
+      "decision_policy": "This is the multiplayer free-mulligan decision. Mulligan only for a materially better chance at a functional opener, not a perfect one."
+    }
+  },
+  "defs": [
+    {
+      "cid": "3640c29b",
+      "n": "Roaming Throne",
+      "m": "{4}",
+      "mv": 4.0,
+      "t": "Artifact Creature — Golem",
+      "o": "Ward {2} / As this creature enters, choose a creature type. / This creature is the chosen type in addition to its other types. / If a triggered ability of another creature you control of the chosen type triggers, it triggers an additional time.",
+      "p": "4",
+      "q": "4",
+      "k": [
+        "Ward"
+      ]
+    },
+    {
+      "cid": "5bc66b18",
+      "n": "Zimone and Dina",
+      "m": "{B}{G}{U}",
+      "mv": 3.0,
+      "t": "Legendary Creature — Human Dryad",
+      "o": "Whenever you draw your second card each turn, target opponent loses 2 life and you gain 2 life. / {T}, Sacrifice another creature: Draw a card. You may put a land card from your hand onto the battlefield tapped. If you control eight or more lands, repeat this process once.",
+      "p": "3",
+      "q": "4"
+    },
+    {
+      "cid": "9fc28e1f",
+      "n": "Goblin Welder",
+      "m": "{R}",
+      "mv": 1.0,
+      "t": "Creature — Goblin Artificer",
+      "o": "{T}: Choose target artifact a player controls and target artifact card in that player's graveyard. If both targets are still legal as this ability resolves, that player simultaneously sacrifices the artifact and returns the artifact card to the battlefield.",
+      "p": "1",
+      "q": "1"
+    },
+    {
+      "cid": "ac2173f9",
+      "n": "Force of Negation",
+      "m": "{1}{U}{U}",
+      "mv": 3.0,
+      "t": "Instant",
+      "o": "If it's not your turn, you may exile a blue card from your hand rather than pay this spell's mana cost. / Counter target noncreature spell. If that spell is countered this way, exile it instead of putting it into its owner's graveyard."
+    },
+    {
+      "cid": "c1d6cce8",
+      "n": "Goblin Engineer",
+      "m": "{1}{R}",
+      "mv": 2.0,
+      "t": "Creature — Goblin Artificer",
+      "o": "When this creature enters, you may search your library for an artifact card, put it into your graveyard, then shuffle. / {R}, {T}, Sacrifice an artifact: Return target artifact card with mana value 3 or less from your graveyard to the battlefield.",
+      "p": "1",
+      "q": "2"
+    },
+    {
+      "cid": "d3438037",
+      "n": "Mishra, Eminent One",
+      "m": "{2}{U}{B}{R}",
+      "mv": 5.0,
+      "t": "Legendary Creature — Human Artificer",
+      "o": "At the beginning of combat on your turn, create a token that's a copy of target noncreature artifact you control, except its name is Mishra's Warform and it's a 4/4 Construct artifact creature in addition to its other types. It gains haste until end of turn. Sacrifice it at the beginning of the next end step.",
+      "p": "5",
+      "q": "4"
+    },
+    {
+      "cid": "da3e7d3d",
+      "n": "Emry, Lurker of the Loch",
+      "m": "{2}{U}",
+      "mv": 3.0,
+      "t": "Legendary Creature — Merfolk Wizard",
+      "o": "Affinity for artifacts (This spell costs {1} less to cast for each artifact you control.) / When Emry enters, mill four cards. / {T}: Choose target artifact card in your graveyard. You may cast that card this turn. (You still pay its costs. Timing rules still apply.)",
+      "p": "1",
+      "q": "2",
+      "k": [
+        "Affinity",
+        "Mill"
+      ]
+    },
+    {
+      "cid": "de2440de",
+      "n": "Mox Opal",
+      "m": "{0}",
+      "mv": 0.0,
+      "t": "Legendary Artifact",
+      "o": "Metalcraft — {T}: Add one mana of any color. Activate only if you control three or more artifacts.",
+      "k": [
+        "Metalcraft"
+      ]
+    },
+    {
+      "cid": "e9b6a394",
+      "n": "Otawara, Soaring City",
+      "m": "",
+      "mv": 0.0,
+      "t": "Legendary Land",
+      "o": "{T}: Add {U}. / Channel — {3}{U}, Discard this card: Return target artifact, creature, enchantment, or planeswalker to its owner's hand. This ability costs {1} less to activate for each legendary creature you control.",
+      "k": [
+        "Channel"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "c": "game.created",
+      "a": null,
+      "s": "Created 4-player Commander game; A starts.",
+      "d": {
+        "decks": {
+          "A": "mishra-eminent-one",
+          "B": "zimone-and-dina",
+          "C": "mishra-eminent-one",
+          "D": "zimone-and-dina"
+        },
+        "turn_order": [
+          "A",
+          "B",
+          "C",
+          "D"
+        ],
+        "seed": 20260728
+      }
+    },
+    {
+      "id": 2,
+      "c": "card.draw",
+      "a": "A",
+      "s": "A drew 7 card(s)."
+    },
+    {
+      "id": 4,
+      "c": "card.draw",
+      "a": "B",
+      "s": "B drew 7 card(s)."
+    },
+    {
+      "id": 6,
+      "c": "card.draw",
+      "a": "C",
+      "s": "C drew 7 card(s)."
+    },
+    {
+      "id": 8,
+      "c": "card.draw",
+      "a": "D",
+      "s": "D drew 7 card(s)."
+    },
+    {
+      "id": 10,
+      "c": "mulligan.round",
+      "a": null,
+      "s": "Mulligan round 1 declarations opened in turn order."
+    }
+  ],
+  "pkt": 1
+}

@@ -1,0 +1,27 @@
+{
+  "bootstrap": {
+    "compact_chars": 6197,
+    "compact_bytes": 6213,
+    "pretty_chars": 6197,
+    "estimated_tokens": 1549
+  },
+  "unchanged_live_decision": {
+    "compact_chars": 1076,
+    "compact_bytes": 1076,
+    "pretty_chars": 1076,
+    "estimated_tokens": 269
+  },
+  "after_declaration": {
+    "compact_chars": 435,
+    "compact_bytes": 435,
+    "pretty_chars": 435,
+    "estimated_tokens": 108
+  },
+  "ratios": {
+    "unchanged_vs_bootstrap": 0.1736,
+    "declaration_vs_bootstrap": 0.0702
+  },
+  "protocol": "2.1",
+  "players": 4,
+  "seed": 20260728
+}

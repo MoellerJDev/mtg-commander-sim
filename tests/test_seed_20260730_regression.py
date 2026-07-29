@@ -1,22 +1,19 @@
 from __future__ import annotations
 
-import gzip
 import json
+import random
 import tempfile
 import unittest
 from pathlib import Path
 
 from common import ROOT, load_assets
 from mtg_commander_sim.cli import _scripted_choice
-from mtg_commander_sim.engine import CommanderEngine
-from mtg_commander_sim.model import GameState
+from mtg_commander_sim import GameConfig
 from mtg_commander_sim.pilot import (
     ScriptedPilot,
     SequentialPilotRunner,
 )
-from mtg_commander_sim.projection import StateProjector
 from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.semantics import SemanticRegistry
 from mtg_commander_sim.session import CommanderSession
 
 
@@ -38,28 +35,83 @@ class Seed20260730RegressionTests(unittest.TestCase):
         cls.db.close()
 
     def _session_from_exact_initial_state(self) -> CommanderSession:
-        record = ROOT / self.fixture["source_record"]
-        with gzip.open(
-            record / "initial-checkpoint.json.gz",
-            "rt",
-            encoding="utf-8",
-        ) as handle:
-            envelope = json.load(handle)
-        state = GameState.from_dict(envelope["state"])
-        state.config.auto_pass_empty_priority = True
-        state.config.profile = "commander_duel"
-        engine = CommanderEngine(
+        session = CommanderSession.create(
             self.db,
-            state,
-            SemanticRegistry(record / "semantics.json"),
+            {"A": self.zimone, "B": self.mishra},
+            first_player="A",
+            seed=self.fixture["seed"],
+            config=GameConfig(
+                seed=self.fixture["seed"],
+                profile="commander_duel",
+                auto_pass_empty_priority=True,
+            ),
         )
-        engine.permissions.reissue_pending()
-        return CommanderSession(
-            card_db=self.db,
-            engine=engine,
-            projector=StateProjector(self.db, state),
-            initial_checkpoint=checkpoint_envelope(state),
-        )
+        engine = session.engine
+        for seat, names in self.fixture["opening_hands"].items():
+            for object_id in list(engine.state.players[seat].zones["hand"]):
+                engine.move_card(object_id, "library", log=False)
+            selected: set[str] = set()
+            for name in names:
+                card = next(
+                    value
+                    for value in engine.state.cards.values()
+                    if value.owner == seat
+                    and value.printed_name == name
+                    and value.object_id not in selected
+                    and value.zone == "library"
+                )
+                selected.add(card.object_id)
+                engine.move_card(card.object_id, "hand", log=False)
+
+            draw_ids = []
+            for name in self.fixture["draw_sequence"][seat]:
+                card = next(
+                    value
+                    for value in engine.state.cards.values()
+                    if value.owner == seat
+                    and value.printed_name == name
+                    and value.zone == "library"
+                    and value.object_id not in draw_ids
+                )
+                draw_ids.append(card.object_id)
+            library = engine.state.players[seat].zones["library"]
+            fetch_name = self.fixture.get("pre_draw_fetch", {}).get(seat)
+            if fetch_name:
+                fetched = next(
+                    value
+                    for value in engine.state.cards.values()
+                    if value.owner == seat
+                    and value.printed_name == fetch_name
+                    and value.zone == "library"
+                    and value.object_id not in draw_ids
+                )
+                remaining = [
+                    object_id
+                    for object_id in library
+                    if object_id not in draw_ids
+                    and object_id != fetched.object_id
+                ]
+                pre_shuffle = [None] * (len(remaining) + len(draw_ids))
+                permutation = list(range(len(pre_shuffle)))
+                random.Random(
+                    f"{self.fixture['seed']}|{seat}|shuffle|1"
+                ).shuffle(permutation)
+                for offset, object_id in enumerate(draw_ids):
+                    pre_shuffle[permutation[-1 - offset]] = object_id
+                remaining_iterator = iter(remaining)
+                pre_shuffle = [
+                    next(remaining_iterator) if object_id is None else object_id
+                    for object_id in pre_shuffle
+                ]
+                library[:] = [fetched.object_id, *pre_shuffle]
+            else:
+                library[:] = [
+                    object_id
+                    for object_id in library
+                    if object_id not in draw_ids
+                ] + list(reversed(draw_ids))
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        return session
 
     @staticmethod
     def _names_for_action_ids(session, action_ids):

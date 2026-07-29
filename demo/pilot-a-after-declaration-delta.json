@@ -1,0 +1,37 @@
+{
+  "v": "2.1",
+  "mode": "delta",
+  "principal": "pilot:A",
+  "base": "2b0fadb1c68206eec0b6",
+  "view": "c0a7478d6be63c1516a1",
+  "rev": 1,
+  "event": 12,
+  "patch": [
+    {
+      "op": "replace",
+      "path": "/event",
+      "value": 12
+    },
+    {
+      "op": "replace",
+      "path": "/rev",
+      "value": 1
+    }
+  ],
+  "decision": null,
+  "events": [
+    {
+      "id": 11,
+      "c": "decision.response",
+      "a": "A",
+      "s": "pilot:A submitted mulligan for mulligan.declare."
+    },
+    {
+      "id": 12,
+      "c": "mulligan.declare",
+      "a": "A",
+      "s": "A declared a mulligan in round 1."
+    }
+  ],
+  "pkt": 3
+}

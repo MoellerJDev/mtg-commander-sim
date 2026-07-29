@@ -28,13 +28,19 @@
 
 ```bash
 python -m compileall -q mtg_commander_sim tests scripts simctl.py
+python scripts/build_test_database.py build --fixture tests/fixtures/scryfall-exact-lists.json --output data/test-ci.sqlite3
+# Set MTG_CARD_DB=data/test-ci.sqlite3 for the remaining commands.
 python -m unittest discover -s tests -p 'test_*.py' -v
-python scripts/demo_four_player_protocol.py --out demo
-python simctl.py replay --db data/scryfall-20260728-compact.sqlite3 --verify run/native-zimone-vs-mishra-0.5.0
-python simctl.py verify-record --db data/scryfall-current.sqlite3 run/codex-subagent-four-player-0.6.0-final
+python scripts/demo_four_player_protocol.py --db data/test-ci.sqlite3 --out demo
+python scripts/validate_repository.py
+python -m build --wheel
+python scripts/verify_wheel.py
 ```
 
 Set `MTG_CARD_DB` when the database is outside `data/`.
+Never stage `run/`, a SQLite database, a raw deck cache, a capability-bearing
+packet, or a live Game Record. Regression records must be generated in a
+temporary directory from sanitized recipes.
 
 ## Architecture tests required
 

@@ -1,6 +1,6 @@
 {
-  "source_record": "run/native-zimone-vs-mishra",
-  "source_game_id": "869d51969e4d4bc0bc95f134c6f7f975",
+  "fixture_kind": "sanitized_state_recipe",
+  "source_game_id": "historical-regression-869d5196",
   "seed": 20260730,
   "profile": "commander_duel",
   "opening_hands": {
@@ -22,6 +22,21 @@
       "Panharmonicon",
       "Sensei's Divining Top"
     ]
+  },
+  "draw_sequence": {
+    "A": [
+      "Boseiju, Who Endures",
+      "Deathrite Shaman",
+      "Mystic Remora"
+    ],
+    "B": [
+      "Goblin Engineer",
+      "Reshape",
+      "Sol Ring"
+    ]
+  },
+  "pre_draw_fetch": {
+    "A": "Breeding Pool"
   },
   "required_main_phase_opportunities": {
     "3": ["Island", "Verdant Catacombs", "Boseiju, Who Endures"],

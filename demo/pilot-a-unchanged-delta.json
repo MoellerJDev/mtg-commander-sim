@@ -1,0 +1,88 @@
+{
+  "v": "2.1",
+  "mode": "delta",
+  "principal": "pilot:A",
+  "base": "2b0fadb1c68206eec0b6",
+  "view": "2b0fadb1c68206eec0b6",
+  "rev": 0,
+  "event": 10,
+  "patch": [],
+  "decision": {
+    "cap": "<redacted-capability>",
+    "id": "D1",
+    "kind": "mulligan.declare",
+    "actor": "A",
+    "allow": [
+      "keep",
+      "mulligan"
+    ],
+    "legal_actions": [
+      {
+        "id": "keep",
+        "action": "keep"
+      },
+      {
+        "id": "mulligan",
+        "action": "mulligan"
+      }
+    ],
+    "sim": 0,
+    "ctx": {
+      "hand": [
+        {
+          "id": "A30",
+          "name": "Goblin Engineer"
+        },
+        {
+          "id": "A65",
+          "name": "Roaming Throne"
+        },
+        {
+          "id": "A22",
+          "name": "Emry, Lurker of the Loch"
+        },
+        {
+          "id": "A53",
+          "name": "Mox Opal"
+        },
+        {
+          "id": "A31",
+          "name": "Goblin Welder"
+        },
+        {
+          "id": "A29",
+          "name": "Force of Negation"
+        },
+        {
+          "id": "A54",
+          "name": "Otawara, Soaring City"
+        }
+      ],
+      "hand_size": 7,
+      "mulligans_taken": 0,
+      "free_mulligans": 1,
+      "signals": {
+        "lands": 1,
+        "cheap_mana": 1,
+        "other_early_actions": 3,
+        "visible_source_colors": [
+          "U"
+        ],
+        "commander_colors": [
+          "B",
+          "R",
+          "U"
+        ],
+        "red_flags": [],
+        "functional_baseline": true
+      },
+      "if_mulligan": {
+        "draw": 7,
+        "bottom": 0,
+        "resulting_hand_size": 7
+      },
+      "decision_policy": "This is the multiplayer free-mulligan decision. Mulligan only for a materially better chance at a functional opener, not a perfect one."
+    }
+  },
+  "pkt": 2
+}

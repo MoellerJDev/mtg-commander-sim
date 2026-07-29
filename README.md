@@ -1,6 +1,9 @@
 # MTG Commander Sim 0.6.0
 
-A persistent, four-player-first Commander simulation kernel designed for LLM pilots, rules arbitration, matchup testing, and a future graphical/network client.
+An experimental, persistent, four-player-first Commander simulation kernel
+designed for LLM pilots, rules arbitration, auditable testing, and a future
+graphical/network client. The current release is a research/development
+baseline, not a complete implementation of Magic's rules or Oracle corpus.
 
 This is a structural rewrite of the earlier two-player duel lab. The server-side game kernel is now separate from:
 
@@ -14,25 +17,30 @@ The engine is authoritative. Pilots choose legal actions through short-lived cap
 
 ## Local setup
 
-The complete bundle can run directly from its source tree. To install the prebuilt command-line package without any network access:
+Create an environment and install the source tree:
 
 ```bash
 python -m venv .venv
 . .venv/bin/activate        # Windows PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install --no-index dist/mtg_commander_sim-0.6.0-py3-none-any.whl
+python -m pip install -e . -r requirements-dev.txt
 ```
 
-For editable development, use `python -m pip install -e . --no-build-isolation` in an environment that already has setuptools 68 or newer. Running `python simctl.py`, `make test`, and `make demo` from the repository does not require installation.
-
-The complete bundle already contains `data/scryfall-20260728-compact.sqlite3`. With the source-only bundle, place the separately supplied `scryfall-20260728-compact.sqlite3.gz` under `data/` and run:
+The repository deliberately does not contain a Scryfall bulk export or SQLite
+database. CI builds a small database from the committed public exact-list
+fixture:
 
 ```bash
-python scripts/bootstrap_data.py
-make test
-make demo
+python scripts/build_test_database.py build \
+  --fixture tests/fixtures/scryfall-exact-lists.json \
+  --output data/test-ci.sqlite3
+MTG_CARD_DB=data/test-ci.sqlite3 \
+  python -m unittest discover -s tests -p "test_*.py" -v
 ```
 
-The local database was built from Scryfall's July 28, 2026 Oracle-card and ruling bulk files. No card-data network call is required during play.
+In PowerShell, set the variable with
+`$env:MTG_CARD_DB = "data/test-ci.sqlite3"` before running the tests. The
+compact fixture covers the bundled Zimone and Dina and Mishra, Eminent One
+lists; it is not a substitute for the complete Oracle corpus.
 
 To discover Scryfall's current timestamped Oracle and rulings exports and
 atomically rebuild the local database before a game:
@@ -45,6 +53,12 @@ python scripts/bootstrap_data.py \
 
 This follows `GET https://api.scryfall.com/bulk-data` at runtime and streams the
 advertised `.jsonl.gz` files. Network access remains outside the game engine.
+
+Game records, deck caches, bulk downloads, SQLite databases, pilot memories,
+and live capability values are local-only artifacts under ignored paths such
+as `run/` and `data/`. Do not commit them. The tracked `demo/` packets are
+generated documentation fixtures with bearer capabilities redacted. See
+`REPOSITORY_HYGIENE.md` and `SECURITY.md`.
 
 ## What is implemented
 
@@ -123,23 +137,12 @@ Card definitions are emitted once per principal. Routine passes and bookkeeping 
 
 See `demo/token-benchmark.json` and `LLM_PROTOCOL.md`.
 
-The corrected seed-20260730 duel under
-`run/native-zimone-vs-mishra-0.5.0` records 168 audited priority windows, 89
-pass-only skips, 24 safe yield covers, and zero suppressed meaningful windows.
-Its 61 accepted commands replay exactly.
-
-Version 0.6.0 refreshes the characterized four-seat record at
-`run/codex-subagent-four-player-0.5.0-final` without inventing provider
-provenance. Its accepted-command prefix replays exactly and its Entomb boundary
-remains an explicit paused arbiter task. The fresh duplicated-list arena under
-`run/codex-subagent-four-player-0.6.0-final` used four verified persistent
-GPT-5.6 Sol/max handles, 23 provider attempts (22 accepted, one typed-plan
-retry), three ordered plans/automatic actions, and 26 accepted replay
-commands. It paused during turn sequence 5 after exposing a targeted
-counterspell with no legal target; the review correctly classifies that as a
-legal-action exposure failure and `rules_test`. Its accepted prefix replays
-exactly, hidden-information audit passes, and suppressed meaningful windows
-remain zero. This is protocol/rules evidence only, never matchup evidence.
+The seed-20260730 regression is reconstructed from a sanitized state recipe in
+`tests/fixtures/`; it verifies the corrected action-opportunity boundary and
+exact command replay without publishing the original checkpoint. Historical
+live and Codex arena records remain private, local artifacts. Any duplicated
+four-seat Zimone/Mishra arena is protocol/rules evidence only—never matchup
+evidence and never a basis for changing either deck.
 
 ## Deliberate rules boundary
 
@@ -425,6 +428,12 @@ and empty pilot workspace when filesystem-level isolation must also be proven.
 - `schemas/` — versioned client-facing JSON schemas
 - `scripts/` — data bootstrap and protocol smoke/benchmark tools
 - `tests/` — multiplayer, permission, rules, and token-efficiency regression tests
+- `.github/workflows/` — offline merge-gating CI and manual live integration
+- `REPOSITORY_HYGIENE.md` — tracked-artifact and history policy
+- `SECURITY.md` — private vulnerability reporting and hidden-information scope
 
 Read `ARCHITECTURE.md`, `LLM_PROTOCOL.md`, `PILOT_PROVIDERS.md`,
 `SEMANTIC_PACKS.md`, and `CLIENT_INTEGRATION.md` before extending the engine.
+
+No software license has been selected for this private repository. Possession
+of the source does not grant redistribution or relicensing rights.

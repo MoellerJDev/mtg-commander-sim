@@ -49,4 +49,22 @@ four-seat pilot fixture claims a complete Oracle corpus or matchup evidence.
 - reconnect/full-resync path
 - spectator and postgame analyst views
 
-No roadmap phase should expand pilot permissions. New rules and UI features remain behind the existing capability and projection boundaries.
+## Version 0.7.0 — interaction correctness
+
+- data-driven exact target domains across stack and public zones
+- mode-aware target generation before an action is advertised
+- authoritative target revalidation on submission and resolution
+- counterspell and removal characterization for the two exact review lists
+- exact replay and target-fidelity telemetry
+
+## Version 0.8.0 — review MVP
+
+- exact-list semantic preflight closure for the two review decks
+- batch review aggregation with explicit sample-size and fidelity gates
+- three complete four-seat Codex pilot games only after preflight passes
+- auditable draft-PR evidence without publishing private Game Records
+
+No roadmap phase should expand pilot permissions. New rules and UI features
+remain behind the existing capability and projection boundaries. A duplicated
+deck pod, an incomplete semantic pack, or an undersized sample can never be
+promoted to matchup evidence.

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 from pathlib import Path
 import sys
@@ -16,6 +17,16 @@ from mtg_commander_sim import (
     ProjectedClientView,
     StateProjector,
 )
+
+
+def public_fixture_packet(packet: dict) -> dict:
+    """Return a documentation-safe packet with bearer capabilities redacted."""
+
+    sanitized = copy.deepcopy(packet)
+    decision = sanitized.get("decision")
+    if isinstance(decision, dict) and "cap" in decision:
+        decision["cap"] = "<redacted-capability>"
+    return sanitized
 
 
 def main() -> int:
@@ -55,14 +66,18 @@ def main() -> int:
         after_declaration = session.packet("pilot:A")
         client.ingest(after_declaration)
 
+        public_full = public_fixture_packet(full)
+        public_unchanged = public_fixture_packet(unchanged)
+        public_after_declaration = public_fixture_packet(after_declaration)
+
         (out / "pilot-a-bootstrap.json").write_text(
-            json.dumps(full, indent=2, ensure_ascii=False), encoding="utf-8"
+            json.dumps(public_full, indent=2, ensure_ascii=False), encoding="utf-8"
         )
         (out / "pilot-a-unchanged-delta.json").write_text(
-            json.dumps(unchanged, indent=2, ensure_ascii=False), encoding="utf-8"
+            json.dumps(public_unchanged, indent=2, ensure_ascii=False), encoding="utf-8"
         )
         (out / "pilot-a-after-declaration-delta.json").write_text(
-            json.dumps(after_declaration, indent=2, ensure_ascii=False), encoding="utf-8"
+            json.dumps(public_after_declaration, indent=2, ensure_ascii=False), encoding="utf-8"
         )
 
         measures = {

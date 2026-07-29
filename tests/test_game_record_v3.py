@@ -6,17 +6,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from common import ROOT, load_assets, make_session
-from mtg_commander_sim.engine import CommanderEngine
-from mtg_commander_sim.model import GameState
+from common import keep_all, load_assets, make_session
 from mtg_commander_sim.record import (
     event_for_trace,
     inspect_game,
     migrate_v2_game,
     replay_record,
 )
-from mtg_commander_sim.report import derive_review, write_review_artifacts
-from mtg_commander_sim.semantics import SemanticRegistry
 from mtg_commander_sim.session import CommanderSession
 
 
@@ -145,79 +141,31 @@ class GameRecordV3Tests(unittest.TestCase):
         self.assertFalse(session.decisions[0]["accepted"])
         self.assertEqual(session.pending_principals()[0], principal)
 
-    def test_inspect_and_migrate_completed_v2_fixture(self):
-        fixture = ROOT / "run" / "live-duel" / "game.json"
-        if not fixture.exists():
-            self.skipTest("completed live-duel v2 fixture is not present in this source bundle")
-        expected = json.loads(
-            (ROOT / "tests" / "fixtures" / "live-duel-characterization.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        inspection = inspect_game(fixture)
-        self.assertEqual(inspection["record_version"], 2)
-        self.assertEqual(inspection["events"], 1331)
-
+    def test_inspect_and_migrate_synthetic_v2_fixture(self):
         with tempfile.TemporaryDirectory() as temporary:
+            fixture = Path(temporary) / "synthetic-v2.json"
+            source = make_session(
+                self.db,
+                self.mishra,
+                self.zimone,
+                players=2,
+                seed=32,
+                auto_pass_empty=False,
+            )
+            keep_all(source)
+            source.state.game_over = True
+            source.state.winner = "A"
+            source.state.save(fixture)
+            inspection = inspect_game(fixture)
+            self.assertEqual(inspection["record_version"], 2)
+            self.assertGreater(inspection["events"], 0)
+
             output = Path(temporary) / "migrated"
             manifest = migrate_v2_game(fixture, output, self.db)
-            state = GameState.load(fixture)
-            engine = CommanderEngine(self.db, state, SemanticRegistry())
-            decisions = []
-            for event in state.events:
-                if event.code == "decision.response":
-                    decisions.append(
-                        {
-                            "action": event.details.get("action"),
-                            "accepted": True,
-                            "legacy_incomplete": True,
-                        }
-                    )
-            review = derive_review(engine, decisions=decisions, manifest=manifest)
-            self.assertEqual(review["fidelity"]["classification"], expected["classification"])
-            self.assertFalse(review["fidelity"]["review_eligible"])
-            self.assertEqual(
-                {seat: hand["kept"] for seat, hand in review["opening_hands"].items()},
-                expected["opening_hand_sizes"],
-            )
-            self.assertEqual(
-                {seat: player["turns_begun"] for seat, player in review["players"].items()},
-                expected["turns_begun"],
-            )
-            self.assertEqual(
-                {
-                    seat: [spell["name"] for spell in player["spells_cast"]]
-                    for seat, player in review["players"].items()
-                },
-                expected["spells_cast"],
-            )
-            self.assertEqual(
-                sum(review["players"]["B"]["commander_damage_received"].values()),
-                expected["commander_damage_to_b"],
-            )
-            self.assertEqual(review["land_entry"]["plays"], expected["land_plays"])
-            self.assertTrue(review["land_entry"]["all_recorded_tapped"])
-            self.assertEqual(
-                review["land_entry"]["conflict_count"],
-                expected["land_entry_conflicts"],
-            )
-            self.assertEqual(review["fetchlands"]["activations"], 0)
-            self.assertEqual(
-                review["players"]["B"]["cleanup_discards"],
-                expected["b_cleanup_discards"],
-            )
-            self.assertIn(
-                "incomplete relevant Oracle semantics",
-                review["fidelity"]["failures"],
-            )
-            self.assertEqual(
-                review["fidelity"]["dimensions"]["card_semantics"],
-                "fail",
-            )
             replay = replay_record(output, self.db, verify=True)
             self.assertTrue(replay["ok"])
             self.assertEqual(replay["mode"], "legacy_snapshot")
-            write_review_artifacts(output, engine, decisions=decisions, manifest=manifest)
+            self.assertEqual("complete", manifest["status"])
 
 
 if __name__ == "__main__":
