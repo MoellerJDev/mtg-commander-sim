@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mtg-commander-sim.local/schemas/codex-pilot-response-v1.json",
+  "title": "Codex structured pilot response",
+  "type": "object",
+  "required": [
+    "action_id",
+    "actions",
+    "choices_json",
+    "plan",
+    "reason",
+    "confidence",
+    "yield",
+    "memory_update"
+  ],
+  "properties": {
+    "action_id": {
+      "type": ["string", "null"]
+    },
+    "actions": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["action_id", "choices_json"],
+        "properties": {
+          "action_id": {
+            "type": "string"
+          },
+          "choices_json": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "choices_json": {
+      "type": "string"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "MULLIGAN",
+        "DEVELOP_MANA",
+        "FIX_COLORS",
+        "DEVELOP_ENGINE",
+        "HOLD_INTERACTION",
+        "DISRUPT_LEADER",
+        "PROTECT_ENGINE",
+        "ASSEMBLE_WIN",
+        "PRESSURE_PLAYER",
+        "RECOVER",
+        "PASS_WITH_YIELD"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "maxLength": 180
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "yield": {
+      "type": ["string", "null"]
+    },
+    "memory_update": {
+      "type": "string",
+      "maxLength": 500
+    }
+  },
+  "additionalProperties": false
+}

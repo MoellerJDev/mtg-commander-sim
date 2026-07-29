@@ -20,4 +20,8 @@ where = ["."]
 include = ["mtg_commander_sim*"]
 
 [tool.setuptools.package-data]
-mtg_commander_sim = ["deck_profiles/*.json", "semantic_packs/*.json"]
+mtg_commander_sim = [
+  "deck_profiles/*.json",
+  "semantic_packs/*.json",
+  "schemas/*.json"
+]

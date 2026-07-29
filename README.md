@@ -360,7 +360,22 @@ python simctl.py arena-create \
 ```
 
 Run the primary Codex task in GPT-5.6 Sol with Ultra reasoning, then use the
-generated `PRIMARY_CODEX_PROMPT.md`. A fixed pilot process uses:
+generated `PRIMARY_CODEX_PROMPT.md`. Start four persistent fast pilot sessions
+and drive the requested prefix with:
+
+```bash
+python simctl.py arena-codex-run \
+  --db data/scryfall-20260728-compact.sqlite3 \
+  --game run/codex-arena \
+  --model gpt-5.6-sol \
+  --reasoning-effort low \
+  --service-tier priority \
+  --through-turn 8
+```
+
+Use `--through-turn 0` for a natural terminal game. This environment does not
+expose GPT-5.5/Instant, so the fast profile records the actual GPT-5.6 Sol/low
+identity. A fixed pilot MCP process remains available for manual orchestration:
 
 ```bash
 python simctl.py pilot-mcp --game-dir run/codex-arena --seat A

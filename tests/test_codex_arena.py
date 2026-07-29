@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import copy
+import contextlib
+import io
 import json
 import tempfile
 import tomllib
@@ -18,6 +20,7 @@ from mtg_commander_sim.arena import (
     primary_session_prompt,
 )
 from mtg_commander_sim.bulk import SCRYFALL_USER_AGENT
+from mtg_commander_sim.cli import main as cli_main
 from mtg_commander_sim.deck import DeckDefinition
 from mtg_commander_sim.profiles import DeckProfileCache
 from mtg_commander_sim.record import ENGINE_VERSION
@@ -60,6 +63,8 @@ class CodexArenaBoundaryTests(unittest.TestCase):
             instructions = config["developer_instructions"]
             for phrase in required:
                 self.assertIn(phrase, instructions)
+            self.assertEqual("low", config["model_reasoning_effort"])
+            self.assertEqual("priority", config["service_tier"])
         skill = (
             root / ".agents" / "skills" / "commander-arena" / "SKILL.md"
         ).read_text(encoding="utf-8")
@@ -379,6 +384,41 @@ class CodexArenaBoundaryTests(unittest.TestCase):
         prompt = primary_session_prompt("run/test")
         self.assertIn("every submit-action invocation", prompt)
         self.assertIn("never shorten that command", prompt)
+        self.assertIn("semantic_policy is trusted_only", prompt)
+
+    def test_arena_create_defaults_to_trusted_only_semantics(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "arena"
+            zimone = Path(__file__).parents[1] / "examples" / "zimone-and-dina.txt"
+            mishra = Path(__file__).parents[1] / "examples" / "mishra-eminent-one.txt"
+            with contextlib.redirect_stdout(io.StringIO()):
+                result = cli_main(
+                    [
+                        "arena-create",
+                        "--db",
+                        str(DB_PATH),
+                        "--deck",
+                        f"A={zimone}",
+                        "--deck",
+                        f"B={mishra}",
+                        "--deck",
+                        f"C={zimone}",
+                        "--deck",
+                        f"D={mishra}",
+                        "--output",
+                        str(output),
+                        "--seed",
+                        "414",
+                    ]
+                )
+            self.assertEqual(0, result)
+            checkpoint = json.loads(
+                (output / "checkpoint.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                "trusted_only",
+                checkpoint["state"]["config"]["semantic_policy"],
+            )
 
     def test_pilot_memory_is_seat_isolated(self):
         session = make_session(

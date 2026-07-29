@@ -8,7 +8,10 @@ description: Coordinate, resume, inspect, or review a four-seat Commander match 
 Run the primary Codex session as the neutral coordinator and rules arbiter. The
 primary is not a fifth pilot and must never select a strategic seat action.
 Recommend GPT-5.6 Sol with Ultra reasoning for the primary session. Pilot agents
-use the project `.codex/agents/mtg-pilot-*.toml` definitions.
+use the project `.codex/agents/mtg-pilot-*.toml` definitions. The user-selected
+fast profile is `gpt-5.6-sol` with `low` reasoning and the `priority` service
+tier; do not call it GPT-5.5 or Instant because this runtime does not expose
+that identity.
 
 ## Start
 
@@ -18,16 +21,24 @@ use the project `.codex/agents/mtg-pilot-*.toml` definitions.
    or mark an explicit commander/archetype fallback with a fidelity warning.
 2. Create `commander_review` by default: four players, 40 life, first player
    draws on turn one, and one free multiplayer mulligan. Use `commander_duel`
-   only when the user explicitly requests a duel or narrow regression.
+   only when the user explicitly requests a duel or narrow regression. A
+   Commander review arena defaults to `semantic_policy=trusted_only`; verify
+   that policy before sending the first pilot task. Use `arbitrate_or_pause`
+   only for an explicitly non-evidence development run.
 3. Set `MTG_GAME_DIR` to the created record directory. Never place all four
    private hands in the primary prompt.
-4. Spawn exactly these four persistent agents once:
-   `mtg_pilot_a`, `mtg_pilot_b`, `mtg_pilot_c`, and `mtg_pilot_d`.
+4. Start exactly four persistent pilot sessions once: `mtg_pilot_a`,
+   `mtg_pilot_b`, `mtg_pilot_c`, and `mtg_pilot_d`. Prefer
+   `simctl arena-codex-run` when the desktop host counts the primary against
+   its four active child slots; that command starts four local Codex sessions
+   in parallel outside the child-slot pool.
    Save each actual thread label/ID, provider, model, and reasoning effort.
    If a stable ID or token usage is unavailable, record `null`; do not estimate
    it as observed.
-5. Give each pilot only its own fixed-seat MCP tools, validated profile, and
-   initial projected task. Keep all four threads open for the whole match.
+5. Give each pilot only its own fixed-seat façade output, validated profile,
+   and initial projected task. The fast broker disables pilot tools and relays
+   these values internally without exposing them to the primary. Keep all four
+   sessions for the whole match.
 
 Do not spawn a new agent per action. Do not allow a pilot to advise another
 seat, inspect the run directory, or spawn nested subagents.
@@ -53,12 +64,13 @@ Loop sequentially even though all four pilot threads remain active:
    ID/label when exposed, `--provider-invoked`, and both available identity
    verification flags. Never abbreviate the command on later turns. A missing
    or changed identity is a fidelity error, not an acceptable unverified action.
-4. Submit the response through that seat's fixed MCP server. On rejection,
+4. Submit the response through that seat's fixed façade. On rejection,
    return only the compact error/current task to the same thread and retry.
 5. Apply a legal pilot action even when the primary considers it strategically
    poor. Never silently replace it.
-6. For an arbiter task, resolve it in the primary using only public/rules
-   context. Do not disclose authoritative or private state to a pilot.
+6. For an arbiter task under `trusted_only`, stop the game without live
+   improvisation. Only an explicitly non-evidence `arbitrate_or_pause`
+   development run may resolve it in the primary using public/rules context.
 7. Ask only the principal that actually has a meaningful task. Do not ask every
    pilot to answer every priority window.
 8. Allow ordered plans for normal development. Stop a plan on an opposing
@@ -78,9 +90,10 @@ capabilities, checkpoint access, arbitrary state mutation, or arbiter DSL.
 ## Resume or inspect
 
 Load the existing record, verify its game ID and four-seat thread registry, and
-resume each original thread. A failed resume is an interruption/restart event;
-do not silently create a replacement. Use the coordinator surface for public
-progress. Use each fixed-seat MCP surface only from its assigned pilot.
+resume each original session. `arena-codex-run` performs this recovery
+automatically. A failed resume is an interruption/restart event; do not silently
+create a replacement. Use the coordinator surface for public progress and each
+fixed-seat surface only for its assigned pilot.
 
 Distinguish provider types precisely:
 

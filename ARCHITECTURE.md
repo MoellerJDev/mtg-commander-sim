@@ -96,10 +96,13 @@ inspect the preserved authoritative objects after the game.
 | `spectator` | public state | none | never |
 | server/admin process | persistence and lifecycle | administrative operations | not through pilot API |
 
-In a Codex arena, four persistent `gpt-5.6-sol` subagent threads own seats A–D.
-The primary GPT-5.6 Sol/Ultra task is the neutral coordinator and arbiter. It
-routes tasks by public principal identity and never substitutes its judgment
-for a legal pilot action.
+In a Codex arena, four persistent `gpt-5.6-sol` pilot sessions own seats A–D.
+The primary GPT-5.6 Sol/Ultra task is the neutral coordinator and arbiter. The
+default fast transport uses low reasoning on the priority tier and starts the
+four sessions outside the desktop child-agent pool, because that pool counts
+the primary against its active-slot limit. A neutral broker routes one
+fixed-seat projection to the corresponding stable session and never substitutes
+its judgment for a legal pilot action.
 
 A capability token is:
 

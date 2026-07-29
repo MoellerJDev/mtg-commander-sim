@@ -418,7 +418,9 @@ class CommanderSession:
             "model_id",
             "invocation_id",
             "input_tokens",
+            "cached_input_tokens",
             "output_tokens",
+            "reasoning_output_tokens",
             "latency_ms",
             "provider_invoked",
             "reasoning_effort",
@@ -573,7 +575,9 @@ class CommanderSession:
                         key: response[key]
                         for key in (
                             "input_tokens",
+                            "cached_input_tokens",
                             "output_tokens",
+                            "reasoning_output_tokens",
                             "latency_ms",
                             "estimated_input_tokens",
                         )
@@ -705,7 +709,9 @@ class CommanderSession:
                 key: audit[key]
                 for key in (
                     "input_tokens",
+                    "cached_input_tokens",
                     "output_tokens",
+                    "reasoning_output_tokens",
                     "latency_ms",
                     "estimated_input_tokens",
                 )

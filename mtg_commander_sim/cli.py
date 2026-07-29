@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .carddb import CardDatabase
+from .codex_cli import CodexCliArenaRunner, CodexExecClient
 from .arena import (
     CodexThreadRegistry,
     CoordinatorTools,
@@ -528,6 +529,15 @@ def build_parser() -> argparse.ArgumentParser:
     arena_create.add_argument("--refresh-decks", action="store_true")
     arena_create.add_argument("--first", default="A")
     arena_create.add_argument("--seed", type=int)
+    arena_create.add_argument(
+        "--semantic-policy",
+        choices=("trusted_only", "arbitrate_or_pause"),
+        default="trusted_only",
+        help=(
+            "Semantic execution policy; Commander review arenas default to "
+            "trusted_only so a natural game can qualify as operation evidence"
+        ),
+    )
 
     arena_status = sub.add_parser(
         "arena-status",
@@ -537,6 +547,46 @@ def build_parser() -> argparse.ArgumentParser:
         "--db", default="data/scryfall-20260728-compact.sqlite3"
     )
     arena_status.add_argument("--game", required=True)
+
+    arena_codex_run = sub.add_parser(
+        "arena-codex-run",
+        help=(
+            "Drive a fixed-seat arena with four persistent fast Codex CLI "
+            "sessions"
+        ),
+    )
+    arena_codex_run.add_argument(
+        "--db", default="data/scryfall-20260728-compact.sqlite3"
+    )
+    arena_codex_run.add_argument("--game", required=True)
+    arena_codex_run.add_argument("--codex-executable", default="codex")
+    arena_codex_run.add_argument("--project-root", default=os.getcwd())
+    arena_codex_run.add_argument("--model", default="gpt-5.6-sol")
+    arena_codex_run.add_argument(
+        "--reasoning-effort",
+        choices=("low", "medium", "high", "xhigh", "max", "ultra"),
+        default="low",
+    )
+    arena_codex_run.add_argument("--service-tier", default="priority")
+    arena_codex_run.add_argument(
+        "--parent-session-id",
+        default=(
+            os.environ.get("CODEX_THREAD_ID")
+            or os.environ.get("CODEX_SESSION_ID")
+        ),
+    )
+    arena_codex_run.add_argument("--through-turn", type=int, default=8)
+    arena_codex_run.add_argument("--max-invocations", type=int, default=200)
+    arena_codex_run.add_argument(
+        "--bootstrap-timeout", type=float, default=30
+    )
+    arena_codex_run.add_argument(
+        "--decision-timeout", type=float, default=90
+    )
+    arena_codex_run.add_argument("--max-retries", type=int, default=2)
+    arena_codex_run.add_argument(
+        "--no-replay-verify", action="store_true"
+    )
 
     coordinator_tool = sub.add_parser(
         "coordinator-tool",
@@ -767,6 +817,7 @@ def main(argv: list[str] | None = None) -> int:
                     seed=args.seed,
                     profile="commander_multiplayer",
                     auto_pass_empty_priority=True,
+                    semantic_policy=args.semantic_policy,
                 ),
             )
             registry = CodexThreadRegistry()
@@ -806,6 +857,33 @@ def main(argv: list[str] | None = None) -> int:
             print(stable_json(CoordinatorTools(session).status()))
         finally:
             db.close()
+        return 0
+    if args.cmd == "arena-codex-run":
+        client = CodexExecClient(
+            project_root=args.project_root,
+            executable=args.codex_executable,
+            model=args.model,
+            reasoning_effort=args.reasoning_effort,
+            service_tier=args.service_tier,
+        )
+        runner = CodexCliArenaRunner(
+            game_dir=args.game,
+            db_path=args.db,
+            client=client,
+            model=args.model,
+            reasoning_effort=args.reasoning_effort,
+            service_tier=args.service_tier,
+            parent_session_id=args.parent_session_id,
+            bootstrap_timeout=args.bootstrap_timeout,
+            decision_timeout=args.decision_timeout,
+            max_retries=args.max_retries,
+        )
+        result = runner.run(
+            through_turn=args.through_turn,
+            max_invocations=args.max_invocations,
+            verify_replay=not args.no_replay_verify,
+        )
+        print(stable_json(result))
         return 0
     if args.cmd == "coordinator-tool":
         db, session = _load(args.db, args.game)

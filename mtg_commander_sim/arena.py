@@ -40,8 +40,11 @@ FORBIDDEN_PILOT_RESPONSE_FIELDS = {
     "thread_label",
     "parent_session_id",
     "provider_invoked",
+    "invocation_id",
     "input_tokens",
+    "cached_input_tokens",
     "output_tokens",
+    "reasoning_output_tokens",
     "latency_ms",
     "estimated_input_tokens",
     "effects",
@@ -75,9 +78,11 @@ def primary_session_prompt(game_dir: str | Path) -> str:
     return (
         "Use $commander-arena as the neutral coordinator for the Commander "
         f"record at {directory}. Run this primary session with GPT-5.6 Sol "
-        "Ultra. Validate all four exact-list profiles, spawn mtg_pilot_a "
-        "through mtg_pilot_d exactly once, and route each later seat task to "
-        "its original persistent thread through the fixed-seat MCP tools. "
+        "Ultra. Validate all four exact-list profiles, then use "
+        "arena-codex-run to start mtg_pilot_a through mtg_pilot_d exactly "
+        "once with gpt-5.6-sol/low/priority and route every later seat task "
+        "to its original persistent session through the fixed-seat broker. "
+        "Confirm semantic_policy is trusted_only before the first pilot call. "
         "Never pilot a seat, never disclose another seat's hidden information, "
         "and stop immediately if suppressed_meaningful_windows becomes nonzero. "
         "For the one-shot pilot-tool fallback, repeat the actual provider, "
@@ -103,12 +108,17 @@ class PilotInvocationIdentity:
     model_identity_verified: bool = False
     model_configured: str | None = None
     reasoning_effort_configured: str | None = None
+    invocation_id: str | None = None
+    input_tokens: int | None = None
+    cached_input_tokens: int | None = None
+    output_tokens: int | None = None
+    reasoning_output_tokens: int | None = None
+    latency_ms: float | None = None
 
     def audit_fields(self) -> dict[str, Any]:
         return {
             **asdict(self),
             "thread_handle": self.thread_id,
-            "invocation_id": None,
         }
 
 
@@ -237,6 +247,11 @@ class SeatScopedPilotTools:
 
     def tool_names(self) -> tuple[str, ...]:
         return PILOT_TOOL_NAMES
+
+    def close(self) -> None:
+        """Release the local card database held by this façade."""
+
+        self._session.card_db.close()
 
     def _reload(self) -> None:
         if self._game_dir is None or self._db_path is None:
@@ -496,6 +511,43 @@ class SeatScopedPilotTools:
                     identity.thread_id if identity else None
                 ),
                 "invoked_at": utc_now(),
+                "invocation_id": (
+                    identity.invocation_id if identity else None
+                ),
+                "metrics": {
+                    key: value
+                    for key, value in (
+                        (
+                            "input_tokens",
+                            identity.input_tokens if identity else None,
+                        ),
+                        (
+                            "cached_input_tokens",
+                            (
+                                identity.cached_input_tokens
+                                if identity
+                                else None
+                            ),
+                        ),
+                        (
+                            "output_tokens",
+                            identity.output_tokens if identity else None,
+                        ),
+                        (
+                            "reasoning_output_tokens",
+                            (
+                                identity.reasoning_output_tokens
+                                if identity
+                                else None
+                            ),
+                        ),
+                        (
+                            "latency_ms",
+                            identity.latency_ms if identity else None,
+                        ),
+                    )
+                    if value is not None
+                },
                 "retry_count": sum(
                     1
                     for row in self._session.decisions

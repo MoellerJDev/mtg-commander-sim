@@ -43,7 +43,11 @@ def validate_schemas() -> int:
             "Install requirements-dev.txt before schema validation"
         ) from exc
     checked = 0
-    for path in sorted((ROOT / "schemas").glob("*.json")):
+    paths = [
+        *(ROOT / "schemas").glob("*.json"),
+        *(ROOT / "mtg_commander_sim" / "schemas").glob("*.json"),
+    ]
+    for path in sorted(paths):
         schema = json.loads(path.read_text(encoding="utf-8"))
         validator_for(schema).check_schema(schema)
         checked += 1

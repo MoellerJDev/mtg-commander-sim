@@ -65,8 +65,8 @@ and beyond D27 with both `suppressed_meaningful_windows` and
 ## Checkpoint 2 — v0.8.0 exact-deck operation MVP
 
 - [x] Semantic preflight v2 and hash-drift invalidation
-- [ ] Trusted material semantic closure for both live exact lists
-- [ ] Reusable exact-list cost, search, trigger, static, replacement, copy,
+- [x] Trusted material semantic closure for both live exact lists
+- [x] Reusable exact-list cost, search, trigger, static, replacement, copy,
   loop, and combat families
 - [x] `semantic_policy=trusted_only`
 - [x] `deck_operation_evidence` gate
@@ -74,12 +74,12 @@ and beyond D27 with both `suppressed_meaningful_windows` and
 - [ ] Deterministic scripted semantic soak
 - [ ] Three consecutive qualifying four-seat persistent-Codex games
 - [ ] Per-deck operation reports with source-record links
-- [ ] Package version updated to 0.8.0
+- [x] Package version updated to 0.8.0
 - [ ] Complete validation, milestone commit, and branch push
 
 Duplicated-list fixtures must always retain `matchup_evidence=false`.
 
-Current implementation checkpoint: 253 tests pass. Preflight v2 records
+Current implementation checkpoint: 280 tests pass. Preflight v2 records
 canonical Oracle/rulings provenance, exact list/source fingerprints, material
 categories, scenario witnesses, and fail-closed drift. Rulings hashes are
 content-canonical and are independent of SQLite import order. The trusted-only
@@ -151,11 +151,28 @@ Current full-database preflight (one row per distinct exact-list card):
 
 - Zimone and Dina: 100 fully playable, 0 partial, 0 unresolved, zero source
   drift.
-- Mishra, Eminent One: 87 fully playable, 0 partial, 12 unresolved, zero
+- Mishra, Eminent One: 100 fully playable, 0 partial, 0 unresolved, zero
   source drift.
 
-This is an implementation checkpoint, not semantic closure and not game
-evidence.
+Both lists are `trusted_only_ready`, have zero expected arbiter calls, and are
+eligible to enter the operation-run gate. This is exact-deck semantic closure,
+not yet game evidence.
+
+The Codex transport now includes `arena-codex-run`, a neutral fixed-seat broker
+for four persistent local Codex CLI sessions. It avoids the desktop host's
+primary-plus-three-child ceiling, starts A–D in parallel, disables pilot shell,
+apps, tools, and nested agents, resumes exact stable session IDs, validates a
+strict structured-output schema, injects actual provider/model identity and
+observed usage, checkpoints every accepted action, and exact-replay verifies
+without converting an unfinished prefix to `paused`. The user explicitly
+selected the supported fast profile `gpt-5.6-sol`/`low`/`priority`; this runtime
+does not expose GPT-5.5/Instant, and records do not claim that identity.
+
+The fresh speed characterization recorded five accepted initial decisions in
+5.05–7.99 seconds and a repeated decision on the same D session in 5.52
+seconds. The productized command recovered the same four real sessions, kept
+`suppressed_meaningful_windows=0`, and passed exact prefix replay. This run is
+only transport characterization, not deck-operation or matchup evidence.
 
 ## GitHub finalization
 
@@ -169,10 +186,11 @@ evidence.
 
 ## Next work
 
-Continue dependency-ordered exact-list closure, beginning with generic
-event-condition and simultaneous-trigger/APNAP ordering primitives, then the
-highest-frequency trigger, static, replacement, recursion, copy, and activated
-ability families. Do not run live evidence games until both current live lists
-pass the trusted-material preflight gate. After the review-MVP draft PR exists,
-rules-corpus work moves to `agent/rules-completeness` and a stacked draft PR;
-it does not broaden this feature branch.
+Commit the passing fast four-session transport slice, then run fresh natural
+trusted-only four-player games through `arena-codex-run`. Stop and fix any
+runtime semantic or fidelity defect, and count only three consecutive natural
+games passing every `deck_operation_evidence` gate. Implement `review-batch`
+and linked per-deck operation reports after qualifying records exist. After the
+review-MVP draft PR exists, rules-corpus work moves to
+`agent/rules-completeness` and a stacked draft PR; it does not broaden this
+feature branch.
