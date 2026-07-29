@@ -934,6 +934,570 @@
         "authored_by": "v0.8-exact-deck-closure",
         "review_status": "reviewed"
       }
+    },
+    {
+      "key": "848c2b8f-8086-4047-8ad0-24b701dc4d0d:spell:front",
+      "label": "Tyvar, Jubilant Brawler",
+      "oracle_id": "848c2b8f-8086-4047-8ad0-24b701dc4d0d",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": [
+        "permanent_characteristics",
+        "activated_ability",
+        "static_ability"
+      ],
+      "tests": [
+        "test_tyvar_initializes_loyalty_grants_activation_haste_and_resolves_both_abilities"
+      ],
+      "provenance": {
+        "source_oracle_hash": "1d26348fa1d992167404764fc2dba2045715f58dcda38c39002c8983af1e0eb2",
+        "source_rulings_hash": "e98eb35d7f97394f782a183557a0bd1cc04c868faa2645cd51b940fac4be52fa",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "848c2b8f-8086-4047-8ad0-24b701dc4d0d:ability:ab2",
+      "label": "Tyvar untap",
+      "oracle_id": "848c2b8f-8086-4047-8ad0-24b701dc4d0d",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "zones": ["battlefield"],
+        "categories": ["permanent"],
+        "creature": true,
+        "min": 0,
+        "max": 1
+      },
+      "effects": [
+        {"op": "untap", "card": "$target.0"}
+      ],
+      "trust_level": "trusted",
+      "coverage": [
+        "activated_ability",
+        "loyalty_cost",
+        "target_validation",
+        "untap"
+      ],
+      "tests": [
+        "test_tyvar_initializes_loyalty_grants_activation_haste_and_resolves_both_abilities"
+      ],
+      "provenance": {
+        "source_oracle_hash": "1d26348fa1d992167404764fc2dba2045715f58dcda38c39002c8983af1e0eb2",
+        "source_rulings_hash": "e98eb35d7f97394f782a183557a0bd1cc04c868faa2645cd51b940fac4be52fa",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "848c2b8f-8086-4047-8ad0-24b701dc4d0d:ability:ab3",
+      "label": "Tyvar mill and return",
+      "oracle_id": "848c2b8f-8086-4047-8ad0-24b701dc4d0d",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {"op": "mill", "player": "$controller", "count": 3},
+        {
+          "op": "choose_objects",
+          "player": "$controller",
+          "prompt": "You may return a creature card with mana value 2 or less.",
+          "selector": {
+            "zones": ["graveyard"],
+            "categories": ["card"],
+            "owner_relation": "you",
+            "creature": true,
+            "mana_value_max": 2,
+            "min": 0,
+            "max": 1
+          },
+          "then": [
+            {
+              "op": "move_selected",
+              "destination": "battlefield",
+              "reason": "Tyvar, Jubilant Brawler"
+            }
+          ]
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": [
+        "activated_ability",
+        "loyalty_cost",
+        "mill",
+        "optional_graveyard_return"
+      ],
+      "tests": [
+        "test_tyvar_initializes_loyalty_grants_activation_haste_and_resolves_both_abilities"
+      ],
+      "provenance": {
+        "source_oracle_hash": "1d26348fa1d992167404764fc2dba2045715f58dcda38c39002c8983af1e0eb2",
+        "source_rulings_hash": "e98eb35d7f97394f782a183557a0bd1cc04c868faa2645cd51b940fac4be52fa",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ac8fba34-512c-4f24-999a-ab72f1ce4acb:spell:front",
+      "label": "Life from the Loam",
+      "oracle_id": "ac8fba34-512c-4f24-999a-ab72f1ce4acb",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "target_schema": {
+        "zones": ["graveyard"],
+        "categories": ["card"],
+        "owner_relation": "you",
+        "land": true,
+        "min": 0,
+        "max": 3,
+        "distinct": true
+      },
+      "effects": [
+        {
+          "op": "move_if_in_zone",
+          "card": "$target.0",
+          "from": "graveyard",
+          "destination": "hand"
+        },
+        {
+          "op": "move_if_in_zone",
+          "card": "$target.1",
+          "from": "graveyard",
+          "destination": "hand"
+        },
+        {
+          "op": "move_if_in_zone",
+          "card": "$target.2",
+          "from": "graveyard",
+          "destination": "hand"
+        }
+      ],
+      "destination": "graveyard",
+      "trust_level": "trusted",
+      "coverage": [
+        "spell_effect",
+        "target_validation",
+        "graveyard_return"
+      ],
+      "tests": [
+        "test_life_from_the_loam_returns_lands_and_dredge_replaces_draw"
+      ],
+      "provenance": {
+        "source_oracle_hash": "50e1a5a215ca87887148a3797875a2ee054df37b6d42c6d3fc97fc893d01feea",
+        "source_rulings_hash": "2d785394479a22a6adc5fd5dbcc58f7d96c5855caff7084111872f611ab33ca8",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ac8fba34-512c-4f24-999a-ab72f1ce4acb:replacement:dredge",
+      "label": "Life from the Loam dredge replacement",
+      "oracle_id": "ac8fba34-512c-4f24-999a-ab72f1ce4acb",
+      "ability_id": "replacement:dredge",
+      "active_zone": "graveyard",
+      "event": "draw.replace",
+      "effects": [],
+      "trust_level": "trusted",
+      "coverage": [
+        "dredge",
+        "keyword_ability",
+        "replacement_effect",
+        "draw_replacement"
+      ],
+      "tests": [
+        "test_life_from_the_loam_returns_lands_and_dredge_replaces_draw"
+      ],
+      "provenance": {
+        "source_oracle_hash": "50e1a5a215ca87887148a3797875a2ee054df37b6d42c6d3fc97fc893d01feea",
+        "source_rulings_hash": "2d785394479a22a6adc5fd5dbcc58f7d96c5855caff7084111872f611ab33ca8",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "92eed395-62ca-4293-882b-8565c40daab5:spell:front",
+      "label": "Sylvan Library",
+      "oracle_id": "92eed395-62ca-4293-882b-8565c40daab5",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": [
+        "test_sylvan_library_draws_two_and_enforces_life_or_top_choices"
+      ],
+      "provenance": {
+        "source_oracle_hash": "32a6459a69873eb74023faaedb891e3afdb26e3ad40000e93a3f83fefd9d0941",
+        "source_rulings_hash": "6c63e9cc07c003dd6489481d86569eddfbb2d5fdbcf42dd8f88cf2a36ef87c41",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "92eed395-62ca-4293-882b-8565c40daab5:trigger:draw-step",
+      "label": "Sylvan Library draw-step trigger",
+      "oracle_id": "92eed395-62ca-4293-882b-8565c40daab5",
+      "ability_id": "trigger:draw-step",
+      "active_zone": "battlefield",
+      "event": "step.begin",
+      "event_condition": {
+        "all": [
+          {
+            "field": "player",
+            "op": "eq",
+            "value": "$source.controller"
+          },
+          {"field": "step", "op": "eq", "value": "draw"}
+        ]
+      },
+      "effects": [
+        {
+          "op": "choose_option",
+          "player": "$controller",
+          "prompt": "Draw two additional cards with Sylvan Library?",
+          "options": [
+            {"id": "draw", "label": "Draw two additional cards"},
+            {"id": "decline", "label": "Do not draw"}
+          ],
+          "then_by_choice": {
+            "draw": [
+              {
+                "op": "draw",
+                "player": "$controller",
+                "count": 2,
+                "private": true
+              },
+              {
+                "op": "sylvan_library_settle",
+                "player": "$controller"
+              }
+            ],
+            "decline": []
+          }
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": [
+        "triggered_ability",
+        "draw_step",
+        "optional_draw",
+        "life_or_top"
+      ],
+      "tests": [
+        "test_sylvan_library_draws_two_and_enforces_life_or_top_choices"
+      ],
+      "provenance": {
+        "source_oracle_hash": "32a6459a69873eb74023faaedb891e3afdb26e3ad40000e93a3f83fefd9d0941",
+        "source_rulings_hash": "6c63e9cc07c003dd6489481d86569eddfbb2d5fdbcf42dd8f88cf2a36ef87c41",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "8a52f3c0-2552-4425-b2e3-5496eb2232a7:spell:front",
+      "label": "Mystic Remora",
+      "oracle_id": "8a52f3c0-2552-4425-b2e3-5496eb2232a7",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": [
+        "permanent_characteristics",
+        "cumulative upkeep",
+        "keyword_ability",
+        "static_ability"
+      ],
+      "tests": [
+        "test_mystic_remora_cumulative_upkeep_and_opponent_spell_tax"
+      ],
+      "provenance": {
+        "source_oracle_hash": "4c1b24efecbfc96ef5aa572d00c124322ce5f061349ecbec21e3a0676021a00b",
+        "source_rulings_hash": "cc00c9883540f490f42f3e6337de233dfd90b59dfc858c587ad9a2ec2805ff87",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "8a52f3c0-2552-4425-b2e3-5496eb2232a7:trigger:cumulative-upkeep",
+      "label": "Mystic Remora cumulative upkeep",
+      "oracle_id": "8a52f3c0-2552-4425-b2e3-5496eb2232a7",
+      "ability_id": "trigger:cumulative-upkeep",
+      "active_zone": "battlefield",
+      "event": "step.begin",
+      "event_condition": {
+        "all": [
+          {
+            "field": "player",
+            "op": "eq",
+            "value": "$source.controller"
+          },
+          {"field": "step", "op": "eq", "value": "upkeep"}
+        ]
+      },
+      "effects": [
+        {
+          "op": "cumulative_upkeep",
+          "player": "$controller",
+          "source": "$source",
+          "cost_per_counter": {"GENERIC": 1}
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": [
+        "triggered_ability",
+        "cumulative upkeep",
+        "age_counter",
+        "upkeep_payment"
+      ],
+      "tests": [
+        "test_mystic_remora_cumulative_upkeep_and_opponent_spell_tax"
+      ],
+      "provenance": {
+        "source_oracle_hash": "4c1b24efecbfc96ef5aa572d00c124322ce5f061349ecbec21e3a0676021a00b",
+        "source_rulings_hash": "cc00c9883540f490f42f3e6337de233dfd90b59dfc858c587ad9a2ec2805ff87",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "8a52f3c0-2552-4425-b2e3-5496eb2232a7:trigger:opponent-noncreature",
+      "label": "Mystic Remora opponent spell trigger",
+      "oracle_id": "8a52f3c0-2552-4425-b2e3-5496eb2232a7",
+      "ability_id": "trigger:opponent-noncreature",
+      "active_zone": "battlefield",
+      "event": "spell.cast",
+      "event_condition": {
+        "all": [
+          {
+            "field": "controller",
+            "op": "ne",
+            "value": "$source.controller"
+          },
+          {
+            "not": {
+              "field": "types",
+              "op": "contains_any",
+              "value": ["creature"]
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "remora_tax",
+          "player": "$context.controller",
+          "beneficiary": "$controller",
+          "cost": {"GENERIC": 4}
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": [
+        "triggered_ability",
+        "opponent_noncreature_cast",
+        "unless_payment",
+        "optional_draw"
+      ],
+      "tests": [
+        "test_mystic_remora_cumulative_upkeep_and_opponent_spell_tax"
+      ],
+      "provenance": {
+        "source_oracle_hash": "4c1b24efecbfc96ef5aa572d00c124322ce5f061349ecbec21e3a0676021a00b",
+        "source_rulings_hash": "cc00c9883540f490f42f3e6337de233dfd90b59dfc858c587ad9a2ec2805ff87",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c0d8fef4-65f4-4769-982d-b397d2b7e977:spell:front",
+      "label": "Animate Dead",
+      "oracle_id": "c0d8fef4-65f4-4769-982d-b397d2b7e977",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "target_schema": {
+        "zones": ["graveyard"],
+        "categories": ["card"],
+        "creature": true,
+        "count": 1
+      },
+      "effects": [
+        {
+          "op": "animate_dead_prepare",
+          "aura": "$card",
+          "card": "$target.0"
+        }
+      ],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": [
+        "enchant",
+        "keyword_ability",
+        "static_ability",
+        "target_validation",
+        "aura_attachment"
+      ],
+      "tests": [
+        "test_animate_dead_reanimates_attaches_modifies_power_and_sacrifices_on_leave"
+      ],
+      "provenance": {
+        "source_oracle_hash": "7829eaf903dad1dd9890b2d0f38d50a2b939e98f2ebc1399549c63d01e0efde0",
+        "source_rulings_hash": "5c5b28a91bc89b64c41cc1dd5f4a0b136af6ce02711dff655630fed0976e47f9",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c0d8fef4-65f4-4769-982d-b397d2b7e977:trigger:enter",
+      "label": "Animate Dead enter trigger",
+      "oracle_id": "c0d8fef4-65f4-4769-982d-b397d2b7e977",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [
+        {
+          "op": "animate_dead_reanimate",
+          "aura": "$source"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": [
+        "triggered_ability",
+        "graveyard_return",
+        "control_change",
+        "aura_attachment"
+      ],
+      "tests": [
+        "test_animate_dead_reanimates_attaches_modifies_power_and_sacrifices_on_leave"
+      ],
+      "provenance": {
+        "source_oracle_hash": "7829eaf903dad1dd9890b2d0f38d50a2b939e98f2ebc1399549c63d01e0efde0",
+        "source_rulings_hash": "5c5b28a91bc89b64c41cc1dd5f4a0b136af6ce02711dff655630fed0976e47f9",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c0d8fef4-65f4-4769-982d-b397d2b7e977:trigger:leave",
+      "label": "Animate Dead leave trigger",
+      "oracle_id": "c0d8fef4-65f4-4769-982d-b397d2b7e977",
+      "ability_id": "trigger:leave",
+      "active_zone": "battlefield",
+      "event": "permanent.leave.self",
+      "effects": [
+        {
+          "op": "sacrifice_if_present",
+          "card": "$context.attached_to"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": [
+        "triggered_ability",
+        "leaves_trigger",
+        "linked_sacrifice"
+      ],
+      "tests": [
+        "test_animate_dead_reanimates_attaches_modifies_power_and_sacrifices_on_leave"
+      ],
+      "provenance": {
+        "source_oracle_hash": "7829eaf903dad1dd9890b2d0f38d50a2b939e98f2ebc1399549c63d01e0efde0",
+        "source_rulings_hash": "5c5b28a91bc89b64c41cc1dd5f4a0b136af6ce02711dff655630fed0976e47f9",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "8a3ad2ef-8bcb-40c0-85de-f03328c2b644:spell:front",
+      "label": "Springheart Nantuko",
+      "oracle_id": "8a3ad2ef-8bcb-40c0-85de-f03328c2b644",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "cost_schema": {
+        "alternate_costs": [
+          {
+            "id": "bestow",
+            "kind": "alternate",
+            "label": "Bestow {1}{G}",
+            "requirements": {"GENERIC": 1, "G": 1},
+            "cast_type_line": "Enchantment — Aura",
+            "target_schema": {
+              "zones": ["battlefield"],
+              "categories": ["permanent"],
+              "creature": true,
+              "count": 1
+            },
+            "effects": [
+              {
+                "op": "bestow_prepare",
+                "aura": "$card",
+                "card": "$target.0"
+              }
+            ]
+          }
+        ]
+      },
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": [
+        "bestow",
+        "keyword_ability",
+        "static_ability",
+        "alternate_cost",
+        "aura_attachment"
+      ],
+      "tests": [
+        "test_springheart_bestow_landfall_copy_and_unattached_creature_state"
+      ],
+      "provenance": {
+        "source_oracle_hash": "7d4c1655447a74ab1f2871dacc281b7d44fbba5040ae1880de6a1e44f89d73b8",
+        "source_rulings_hash": "1400c44543e758598af9c5cf3a2bbb3192731a09ba1453f74da53d3e2bad1efb",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "8a3ad2ef-8bcb-40c0-85de-f03328c2b644:trigger:landfall",
+      "label": "Springheart Nantuko landfall",
+      "oracle_id": "8a3ad2ef-8bcb-40c0-85de-f03328c2b644",
+      "ability_id": "trigger:landfall",
+      "active_zone": "battlefield",
+      "event": "land.enter",
+      "effects": [
+        {
+          "op": "springheart_landfall",
+          "player": "$controller",
+          "source": "$source",
+          "cost": {"GENERIC": 1, "G": 1}
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": [
+        "triggered_ability",
+        "landfall",
+        "conditional_payment",
+        "token_copy",
+        "token_creation"
+      ],
+      "tests": [
+        "test_springheart_bestow_landfall_copy_and_unattached_creature_state"
+      ],
+      "provenance": {
+        "source_oracle_hash": "7d4c1655447a74ab1f2871dacc281b7d44fbba5040ae1880de6a1e44f89d73b8",
+        "source_rulings_hash": "1400c44543e758598af9c5cf3a2bbb3192731a09ba1453f74da53d3e2bad1efb",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
     }
   ]
 }

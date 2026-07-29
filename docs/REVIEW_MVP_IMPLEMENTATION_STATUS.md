@@ -79,7 +79,7 @@ and beyond D27 with both `suppressed_meaningful_windows` and
 
 Duplicated-list fixtures must always retain `matchup_evidence=false`.
 
-Current implementation checkpoint: 236 tests pass. Preflight v2 records
+Current implementation checkpoint: 242 tests pass. Preflight v2 records
 canonical Oracle/rulings provenance, exact list/source fingerprints, material
 categories, scenario witnesses, and fail-closed drift. Rulings hashes are
 content-canonical and are independent of SQLite import order. The trusted-only
@@ -131,10 +131,17 @@ one-or-more graveyard triggers, granted token mana, Equipment-granted
 abilities, death-triggered untapping, pre-zone-change graveyard replacement,
 void counters, and temporary opponent-owned exile play permissions with
 server-derived no-mana casting costs.
+The Zimone closure tranche completes Animate Dead, Life from the Loam,
+Mystic Remora, Springheart Nantuko, Sylvan Library, and Tyvar, Jubilant
+Brawler. Shared engine work now includes Aura attachment and linked-leave
+state, Dredge draw replacement with resumable private decisions, draw-step
+trigger ordering, cumulative upkeep, escalating unless payments,
+bestow-as-Aura resolution and illegal-target fallback, conditional landfall
+payments, loyalty initialization/cost/timing, and activation-only haste.
 
 Current full-database preflight (one row per distinct exact-list card):
 
-- Zimone and Dina: 94 fully playable, 0 partial, 6 unresolved, zero source
+- Zimone and Dina: 100 fully playable, 0 partial, 0 unresolved, zero source
   drift.
 - Mishra, Eminent One: 77 fully playable, 0 partial, 22 unresolved, zero
   source drift.

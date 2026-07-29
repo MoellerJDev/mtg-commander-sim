@@ -204,7 +204,8 @@ class NativeV3AuditAndPilotTests(unittest.TestCase):
         report = semantic_preflight(self.db, self.zimone)
         self.assertEqual(2, report["schema_version"])
         self.assertEqual(100, report["total_cards"])
-        self.assertFalse(report["deck_review_eligible_possible"])
+        self.assertTrue(report["deck_review_eligible_possible"])
+        self.assertEqual(0, report["unresolved_cards"])
         by_name = {row["name"]: row for row in report["cards"]}
         self.assertTrue(by_name["Lotus Cobra"]["source_hash_match"])
         self.assertNotIn(

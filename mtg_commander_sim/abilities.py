@@ -87,6 +87,7 @@ class ActivatedAbility:
     exile_source: bool = False
     life_payment: int = 0
     energy_payment: int = 0
+    loyalty_delta: int | None = None
     choices: tuple[CostChoice, ...] = ()
     uncompiled_costs: tuple[str, ...] = ()
     mana_ability: bool = False
@@ -119,6 +120,8 @@ class ActivatedAbility:
             result["life"] = self.life_payment
         if self.energy_payment:
             result["energy"] = self.energy_payment
+        if self.loyalty_delta is not None:
+            result["loyalty"] = self.loyalty_delta
         if self.choices:
             result["choose_cost"] = [choice.compact() for choice in self.choices]
         if not self.compiled_cost:
@@ -291,6 +294,7 @@ def parse_activated_abilities(
         exile_source = False
         life_payment = 0
         energy_payment = 0
+        loyalty_delta: int | None = None
         choices: list[CostChoice] = []
         uncompiled: list[str] = []
 
@@ -301,6 +305,18 @@ def parse_activated_abilities(
             if not residue:
                 continue
             lower = residue.casefold().strip(" .")
+            loyalty_match = re.fullmatch(
+                r"(?P<sign>[+\-\u2212])(?P<amount>\d+)",
+                residue,
+            )
+            if loyalty_match:
+                amount = int(loyalty_match.group("amount"))
+                loyalty_delta = (
+                    amount
+                    if loyalty_match.group("sign") == "+"
+                    else -amount
+                )
+                continue
             if lower.startswith("channel"):
                 continue
             if lower in {"discard this card", f"discard {card_name.casefold()}"}:
@@ -412,6 +428,7 @@ def parse_activated_abilities(
                 exile_source=exile_source,
                 life_payment=life_payment,
                 energy_payment=energy_payment,
+                loyalty_delta=loyalty_delta,
                 choices=tuple(choices),
                 uncompiled_costs=tuple(uncompiled),
                 mana_ability=mana_ability,

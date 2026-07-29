@@ -187,6 +187,7 @@ class ExactZimoneClosureTests(unittest.TestCase):
 
     def test_promoted_exact_cards_preflight_fully(self):
         for name in (
+            "Animate Dead",
             "Diabolic Intent",
             "Archway of Innovation",
             "Dauthi Voidwalker",
@@ -196,14 +197,19 @@ class ExactZimoneClosureTests(unittest.TestCase):
             "Gravecrawler",
             "Insidious Roots",
             "Intruder Alarm",
+            "Life from the Loam",
             "Mole Man, Moloid Master",
             "Mistrise Village",
+            "Mystic Remora",
             "Retreat to Coralhelm",
             "Scryb Ranger",
             "Seedborn Muse",
             "Shifting Woodland",
             "Spelunking",
+            "Springheart Nantuko",
+            "Sylvan Library",
             "Thornbite Staff",
+            "Tyvar, Jubilant Brawler",
             "Wight of the Reliquary",
             "Veil of Summer",
         ):
@@ -214,6 +220,445 @@ class ExactZimoneClosureTests(unittest.TestCase):
                     db=self.db,
                 )
                 self.assertEqual("fully_playable", row["status"], row)
+
+    def test_springheart_bestow_landfall_copy_and_unattached_creature_state(
+        self,
+    ):
+        session = self.make_session(1025)
+        engine = session.engine
+        nantuko = self.card(engine, "B", "Springheart Nantuko")
+        creature = self.card(engine, "B", "Birds of Paradise")
+        first_land = self.card(engine, "B", "Island")
+        second_land = self.card(engine, "B", "Bayou")
+        engine.move_card(nantuko.object_id, "hand")
+        engine.move_card(creature.object_id, "battlefield", controller="B")
+        self.prepare_main(engine, "B")
+        engine.state.players["B"].mana_pool.update({"C": 1, "G": 1})
+        engine._cast(
+            "B",
+            {
+                "card": nantuko.ref,
+                "cost_option": "bestow",
+                "targets": [creature.ref],
+                "pay": "manual",
+                "payment": {"C": 1, "G": 1},
+            },
+        )
+        self.resolve_top(engine)
+        self.assertEqual(creature.object_id, nantuko.attached_to)
+        self.assertEqual(
+            {"enchantment"},
+            engine._type_parts(
+                engine._effective_card_data(nantuko)["type_line"]
+            )[0],
+        )
+        self.assertEqual(
+            1, engine._numeric_stat(creature.object_id, "power")
+        )
+        self.assertEqual(
+            2, engine._numeric_stat(creature.object_id, "toughness")
+        )
+
+        engine.state.players["B"].mana_pool.update({"C": 1, "G": 1})
+        engine.move_card(
+            first_land.object_id,
+            "battlefield",
+            controller="B",
+            semantic_events=True,
+        )
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        self.assertEqual("semantic.choice", engine.state.pending_decision.kind)
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "pay": True,
+                "plan": "COPY_CREATURE",
+                "reason": "Pay to copy the enchanted mana creature.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        bird_tokens = [
+            card
+            for card in engine.state.cards.values()
+            if card.is_token
+            and card.zone == "battlefield"
+            and card.controller == "B"
+            and engine.display_name(card.object_id)
+            == "Birds of Paradise"
+        ]
+        self.assertEqual(1, len(bird_tokens))
+
+        engine.move_card(
+            creature.object_id,
+            "graveyard",
+            reason="test enchanted creature leaves",
+            semantic_events=True,
+        )
+        self.assertIn(
+            "creature",
+            engine._type_parts(
+                engine._effective_card_data(nantuko)["type_line"]
+            )[0],
+        )
+        before_insects = sum(
+            card.is_token
+            and card.zone == "battlefield"
+            and card.printed_name == "Insect"
+            for card in engine.state.cards.values()
+        )
+        engine.move_card(
+            second_land.object_id,
+            "battlefield",
+            controller="B",
+            semantic_events=True,
+        )
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        after_insects = sum(
+            card.is_token
+            and card.zone == "battlefield"
+            and card.printed_name == "Insect"
+            for card in engine.state.cards.values()
+        )
+        self.assertEqual(before_insects + 1, after_insects)
+
+    def test_animate_dead_reanimates_attaches_modifies_power_and_sacrifices_on_leave(
+        self,
+    ):
+        session = self.make_session(1024)
+        engine = session.engine
+        aura = self.card(engine, "B", "Animate Dead")
+        creature = self.card(engine, "A", "Goblin Engineer")
+        engine.move_card(aura.object_id, "hand")
+        engine.move_card(creature.object_id, "graveyard")
+        self.prepare_main(engine, "B")
+        engine.state.players["B"].mana_pool.update({"C": 1, "B": 1})
+        engine._cast(
+            "B",
+            {
+                "card": aura.ref,
+                "targets": [creature.ref],
+                "pay": "manual",
+                "payment": {"C": 1, "B": 1},
+            },
+        )
+        self.resolve_top(engine)
+        self.assertEqual("battlefield", aura.zone)
+        self.assertEqual(creature.object_id, aura.attached_to)
+        self.resolve_top(engine)
+        self.assertEqual("battlefield", creature.zone)
+        self.assertEqual("B", creature.controller)
+        self.assertEqual(creature.object_id, aura.attached_to)
+        self.assertEqual(0, engine._numeric_stat(creature.object_id, "power"))
+
+        engine.move_card(
+            aura.object_id,
+            "graveyard",
+            reason="test removal",
+            semantic_events=True,
+        )
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        self.assertEqual("graveyard", creature.zone)
+
+    def test_mystic_remora_cumulative_upkeep_and_opponent_spell_tax(
+        self,
+    ):
+        session = self.make_session(1023)
+        engine = session.engine
+        remora = self.card(engine, "B", "Mystic Remora")
+        spell = self.card(engine, "A", "Sol Ring")
+        engine.move_card(remora.object_id, "battlefield", controller="B")
+        engine.state.active_player = "B"
+        engine.state.phase = "beginning"
+        engine.state.step = "upkeep"
+        engine.state.players["B"].mana_pool["C"] = 1
+
+        engine._dispatch_semantic_event(
+            "step.begin",
+            {
+                "phase": "beginning",
+                "step": "upkeep",
+                "player": "B",
+            },
+        )
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        self.assertEqual(1, remora.counters["age"])
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "pay": True,
+                "plan": "KEEP_REMORA",
+                "reason": "Pay the first cumulative upkeep.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("battlefield", remora.zone)
+
+        engine.move_card(spell.object_id, "hand")
+        self.prepare_main(engine, "A")
+        engine.state.players["A"].mana_pool["C"] = 1
+        before_draws = len(engine.state.players["B"].draw_history)
+        engine._cast(
+            "A",
+            {
+                "card": spell.ref,
+                "pay": "manual",
+                "payment": {"C": 1},
+            },
+        )
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        self.assertEqual("semantic.choice", engine.state.pending_decision.kind)
+        self.assertEqual(
+            ["A"], engine.state.pending_decision.actors
+        )
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "pay": False,
+                "plan": "DECLINE_TAX",
+                "reason": "No mana remains to pay for Mystic Remora.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(["B"], engine.state.pending_decision.actors)
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "choice": "draw",
+                "plan": "DRAW_CARD",
+                "reason": "Take the Mystic Remora draw.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(
+            before_draws + 1,
+            len(engine.state.players["B"].draw_history),
+        )
+        self.resolve_top(engine)
+
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.priority_player = None
+        engine.state.active_player = "B"
+        engine.state.phase = "beginning"
+        engine.state.step = "upkeep"
+        engine.state.turn_sequence += 1
+        engine._dispatch_semantic_event(
+            "step.begin",
+            {
+                "phase": "beginning",
+                "step": "upkeep",
+                "player": "B",
+            },
+        )
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        self.assertEqual(2, remora.counters["age"])
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "pay": False,
+                "plan": "SACRIFICE_REMORA",
+                "reason": "Decline the second cumulative upkeep.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("graveyard", remora.zone)
+
+    def test_sylvan_library_draws_two_and_enforces_life_or_top_choices(
+        self,
+    ):
+        session = self.make_session(1022)
+        engine = session.engine
+        sylvan = self.card(engine, "B", "Sylvan Library")
+        engine.move_card(sylvan.object_id, "battlefield", controller="B")
+        engine.state.active_player = "B"
+        engine.state.phase = "beginning"
+        engine.state.step = "draw"
+        engine.state.turn_sequence = 3
+        engine.draw("B", 1, reason="turn-based draw")
+        before_life = engine.state.players["B"].life
+        before_draws = len(engine.state.players["B"].draw_history)
+
+        engine._dispatch_semantic_event(
+            "step.begin",
+            {"phase": "beginning", "step": "draw", "player": "B"},
+        )
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "choice": "draw",
+                "plan": "SEE_MORE_CARDS",
+                "reason": "Use Sylvan Library's additional draws.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(
+            before_draws + 2,
+            len(engine.state.players["B"].draw_history),
+        )
+        self.assertEqual(
+            "semantic.choice",
+            engine.state.pending_decision.kind,
+        )
+        additional = [
+            entry["object"]
+            for entry in engine.state.players["B"].draw_history[-2:]
+        ]
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "decisions": {
+                    additional[0]: "pay_life",
+                    additional[1]: "top",
+                },
+                "top_order": [additional[1]],
+                "plan": "KEEP_BEST_CARD",
+                "reason": "Keep one extra card and return the other.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(
+            before_life - 4,
+            engine.state.players["B"].life,
+        )
+        top_id = engine.state.players["B"].zones["library"][-1]
+        self.assertEqual(additional[1], engine.state.cards[top_id].ref)
+
+    def test_life_from_the_loam_returns_lands_and_dredge_replaces_draw(
+        self,
+    ):
+        session = self.make_session(1021)
+        engine = session.engine
+        loam = self.card(engine, "B", "Life from the Loam")
+        lands = [
+            self.card(engine, "B", name)
+            for name in ("Island", "Bayou", "Command Tower")
+        ]
+        engine.move_card(loam.object_id, "hand")
+        for land in lands:
+            engine.move_card(land.object_id, "graveyard")
+        self.prepare_main(engine, "B")
+        engine.state.players["B"].mana_pool.update({"C": 1, "G": 1})
+        engine._cast(
+            "B",
+            {
+                "card": loam.ref,
+                "targets": [land.ref for land in lands],
+                "pay": "manual",
+                "payment": {"C": 1, "G": 1},
+            },
+        )
+        self.resolve_top(engine)
+        self.assertEqual("graveyard", loam.zone)
+        self.assertTrue(all(land.zone == "hand" for land in lands))
+
+        before_library = len(engine.state.players["B"].zones["library"])
+        before_draws = len(engine.state.players["B"].draw_history)
+        engine._begin_draw_sequence(
+            "B",
+            1,
+            reason="test draw",
+        )
+        self.assertEqual(
+            "draw.replacement",
+            engine.state.pending_decision.kind,
+        )
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "choice": loam.ref,
+                "plan": "DREDGE",
+                "reason": "Replace the draw with Dredge 3.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("hand", loam.zone)
+        self.assertEqual(
+            before_library - 3,
+            len(engine.state.players["B"].zones["library"]),
+        )
+        self.assertEqual(
+            before_draws,
+            len(engine.state.players["B"].draw_history),
+        )
+
+    def test_tyvar_initializes_loyalty_grants_activation_haste_and_resolves_both_abilities(
+        self,
+    ):
+        session = self.make_session(1020)
+        engine = session.engine
+        tyvar = self.card(engine, "B", "Tyvar, Jubilant Brawler")
+        bird = self.card(engine, "B", "Birds of Paradise")
+        engine.move_card(tyvar.object_id, "battlefield", controller="B")
+        engine.move_card(bird.object_id, "battlefield", controller="B")
+        self.assertEqual(3, tyvar.counters["loyalty"])
+        bird_ability = engine._activated_abilities(bird)[0]
+        self.assertEqual(
+            ("payable", None),
+            engine._ability_availability(
+                "B", bird, bird_ability
+            ),
+        )
+
+        bird.tapped = True
+        self.prepare_main(engine, "B")
+        engine._activate(
+            "B",
+            {
+                "source": tyvar.ref,
+                "ability": "ab2",
+                "targets": [bird.ref],
+            },
+        )
+        self.assertEqual(4, tyvar.counters["loyalty"])
+        self.resolve_top(engine)
+        self.assertFalse(bird.tapped)
+        plus = next(
+            ability
+            for ability in engine._activated_abilities(tyvar)
+            if ability.ability_id == "ab2"
+        )
+        self.assertEqual(
+            ("unavailable", "loyalty_already_activated"),
+            engine._ability_availability("B", tyvar, plus),
+        )
+
+        engine.move_card(bird.object_id, "graveyard")
+        engine.state.turn_sequence += 1
+        self.prepare_main(engine, "B")
+        engine._activate(
+            "B",
+            {"source": tyvar.ref, "ability": "ab3"},
+        )
+        self.assertEqual(2, tyvar.counters["loyalty"])
+        self.resolve_top(engine)
+        self.assertEqual("semantic.choice", engine.state.pending_decision.kind)
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "objects": [bird.ref],
+                "plan": "RECUR_CREATURE",
+                "reason": "Return the qualifying mana creature.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("battlefield", bird.zone)
 
     def test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free(
         self,
