@@ -27,6 +27,13 @@ Four pilot contexts stay alive so their private strategy and bounded memory are
 stable. Invocations are nevertheless sequential: Magic gives authority to one
 principal, or one ordered decision group, at a time.
 
+The current desktop collaboration host counts the primary task against its
+four actively sampling slots. In that host, the primary plus three pilots may
+sample concurrently; a fourth simultaneous child invocation is rejected with
+`agent thread limit reached`. This does not prevent four persistent A–D
+contexts: dormant contexts retain their canonical IDs and are reactivated
+sequentially as the game changes principal.
+
 ## Project configuration
 
 The project configuration is:
@@ -147,6 +154,10 @@ The loop is:
 3. Read the next principal from public coordinator status.
 4. Route a pilot task only to that seat's original thread.
 5. Accept strict JSON and submit through the fixed-seat surface.
+   Private task data is submitted only to that surface. A pilot's message back
+   to the primary may contain only status, accepted decision IDs, and the next
+   principal boundary; it must not echo hand/library cards, private search
+   choices, memory, or task packets.
 6. Return compact rejection data to the same thread when needed.
 7. Resolve arbiter tasks from public/rules context without choosing player
    strategy.
@@ -157,6 +168,11 @@ The loop is:
 Do not spawn a fresh agent per action, prompt every pilot at every priority
 window, disclose all hands to the primary, let pilots advise one another, or
 continue past meaningful suppression.
+
+An app-level pilot message that echoes private task data is itself a hidden-
+information fidelity failure even when the durable game record and fixed-seat
+tool audit are clean. Pause immediately; never treat the affected run as deck
+operation evidence.
 
 ## Responses and ordered plans
 

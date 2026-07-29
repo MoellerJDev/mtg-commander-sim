@@ -41,7 +41,11 @@ Loop sequentially even though all four pilot threads remain active:
    material fidelity gate requires code work.
 3. For `pilot:A` through `pilot:D`, route the task only to that seat's existing
    thread. Ask for strict JSON matching the typed action/ordered-plan union,
-   exact plan enum, and bounded reason/memory fields.
+   exact plan enum, and bounded reason/memory fields. The pilot must submit
+   private-dependent data only through its fixed-seat tool. Its message back to
+   the parent may contain only status, accepted decision IDs, and the principal
+   boundary—never hand/library cards, private search choices, memory, or raw
+   task data.
 4. Submit the response through that seat's fixed MCP server. On rejection,
    return only the compact error/current task to the same thread and retry.
 5. Apply a legal pilot action even when the primary considers it strategically
@@ -56,6 +60,10 @@ Loop sequentially even though all four pilot threads remain active:
    fidelity failure. A plan may supply a future private-search card name, but
    only the fixed-seat server may resolve it after that private choice exists.
 9. Save/checkpoint periodically and after every accepted external action.
+10. If a pilot echoes any private task data into the parent-message channel,
+    stop immediately and classify the run as a fidelity failure. A clean
+    durable hidden-information audit cannot retroactively make that app-level
+    disclosure safe.
 
 Never continue after a suppressed meaningful window. Never grant pilots raw
 capabilities, checkpoint access, arbitrary state mutation, or arbiter DSL.

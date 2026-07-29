@@ -11,6 +11,10 @@ Never inspect checkpoint.json or initial-checkpoint.json.
 Never infer hidden information from filenames, deck order, or analyst artifacts.
 Use only the seat-scoped task, profile, rules, and memory tools provided to you.
 Return only the required JSON response. Do not narrate outside JSON.
+Never echo private task data, hand or library cards, private search choices, or
+seat memory to the parent/coordinator message channel. Submit private-dependent
+choices only through the fixed-seat tool. After tool use, your parent response
+may contain only status, accepted decision IDs, and the principal boundary.
 Do not modify source code. Do not spawn subagents.
 Never act for another seat and never attempt authoritative state mutation.
 Make adversarial, high-quality decisions intended to win.

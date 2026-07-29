@@ -42,6 +42,28 @@ class CodexArenaBoundaryTests(unittest.TestCase):
         self.assertEqual(__version__, ENGINE_VERSION)
         self.assertIn(f"/{__version__} ", SCRYFALL_USER_AGENT)
 
+    def test_pilot_parent_responses_forbid_private_packet_echoes(self):
+        root = Path(__file__).parents[1]
+        required = (
+            "Never echo private task data",
+            "accepted decision IDs",
+            "principal boundary",
+        )
+        for seat in "abcd":
+            config = tomllib.loads(
+                (
+                    root / ".codex" / "agents" / f"mtg-pilot-{seat}.toml"
+                ).read_text(encoding="utf-8")
+            )
+            instructions = config["developer_instructions"]
+            for phrase in required:
+                self.assertIn(phrase, instructions)
+        skill = (
+            root / ".agents" / "skills" / "commander-arena" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("parent-message channel", skill)
+        self.assertIn("fidelity failure", skill)
+
     def test_exact_profile_fingerprint_acceptance_and_mismatch_warning(self):
         cache = DeckProfileCache()
         exact = cache.load_validated(self.zimone)
