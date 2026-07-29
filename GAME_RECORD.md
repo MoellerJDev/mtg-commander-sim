@@ -140,13 +140,22 @@ requires a terminal game, replay verification, complete historical
 alternatives/reasons, trusted materially relevant semantics, the requested
 format, no material rules conflict, and a genuinely strategic pilot.
 
-Version 0.6.0 fails legal-action exposure when any meaningful window is
-incorrectly suppressed. The report records `profile_fingerprint_match`,
+Version 0.7.0 fails legal-action exposure when any meaningful window is
+incorrectly suppressed or a mandatory-target action is advertised without
+legal targets. The report records `profile_fingerprint_match`,
 `action_opportunity_coverage`, `suppressed_meaningful_windows`,
 `yields_invalidated_by_reason`, `pilot_thread_count`,
 `persistent_thread_reuse`, `primary_made_strategic_decision`,
 `provider_identity_verified`, `model_identity_verified`,
 `seat_projection_verified`, and `codex_subagent_run`.
+
+The target-action audit additionally records actions prevented before
+exposure, incorrectly advertised actions, no-target/mode-target removals,
+candidate generation, rejected target submissions, targets becoming illegal,
+rules/effect counter totals, and stack interaction windows created or
+auto-passed. A nonzero `illegal_target_actions_advertised` value fails fidelity,
+caps classification at `rules_test`, and is attributed to infrastructure
+rather than the pilot.
 
 A pilot is never blamed for a missed action when its opportunity row says no
 task was delivered, the generator failed, semantics were unresolved, or a

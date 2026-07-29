@@ -36,6 +36,29 @@ by Oracle/ability keys and runtime events, not printed-name branches. Runtime
 placeholders such as `$controller` and `$target.0` are resolved against the
 current stack object.
 
+## Version 0.7.0 interaction slice
+
+Target schemas are declarative plans rather than card-name conditionals. They
+support modal groups, public zones, players and stack objects, target counts,
+distinctness, state/type/color/mana-value filters, controller and owner
+relationships, source exclusion, and resolution-time conditions. Mandatory
+groups with insufficient candidates remove the cast or activation from the
+ordinary legal alternatives.
+
+The interaction pack pins current local Oracle and rulings hashes and has
+deterministic positive and negative scenarios for:
+
+- An Offer You Can't Refuse, Mana Drain, Swan Song, Force of Negation, Pact of
+  Negation, Flusterstorm, Red Elemental Blast, and Pyroblast
+- Assassin's Trophy, Abrade, Chaos Warp, Feed the Swarm, Tear Asunder, Force of
+  Vigor, Toxic Deluge, Vandalblast, and Deadly Rollick
+- Boseiju, Who Endures; Otawara, Soaring City; Cankerbloom; Soul-Guide
+  Lantern; and Pithing Needle
+
+These programs preserve their different target timing, modes, destinations,
+delayed payments/mana, storm copies, kicker/overload/pitch costs, life-X, and
+token results. They are not interchangeable templates.
+
 ## Version 0.6.0 vertical slice
 
 The bundled packs characterize:

@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+## 0.7.0 — 2026-07-28
+
+### Exact targets and interaction
+
+- Added declarative target plans spanning stack objects, players, battlefield
+  permanents, and visible graveyard/exile/command-zone cards.
+- Withheld mandatory-target actions until every target group, mode, timing
+  rule, and server-issued cost option is currently satisfiable.
+- Added submission and resolution revalidation, partial target survival, and
+  separate rules/effect counter telemetry.
+- Added trusted counterspell, removal, Channel, graveyard, proliferate,
+  Pithing Needle, storm, kicker, overload, pitch, delayed-cost, and life-X
+  interaction scenarios for the exact review lists.
+- Extended the fidelity report so illegal target exposure fails the record and
+  is attributed to infrastructure rather than a pilot.
+- Reconstructed the seed-20260730 regression through turn sequence 8 with zero
+  suppressed meaningful windows, zero advertised illegal target actions,
+  passing seat projection, and exact command replay.
+
 ### Repository milestone
 
 - Added offline Linux/Windows CI for Python 3.11 and 3.12.

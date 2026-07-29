@@ -1,4 +1,4 @@
-# MTG Commander Sim 0.6.0
+# MTG Commander Sim 0.7.0
 
 An experimental, persistent, four-player-first Commander simulation kernel
 designed for LLM pilots, rules arbitration, auditable testing, and a future
@@ -87,6 +87,14 @@ generated documentation fixtures with bearer capabilities redacted. See
 - server-extracted explicit activated abilities, including hand-zone Channel abilities and validated nonmana cost selections
 - authoritative printed costs: a pilot cannot understate a spell cost, invent an activation cost, or cast from an unauthorized zone
 - first-class stack-object countering
+- declarative, visibility-safe target plans for spells, abilities, players,
+  stack objects, and public-zone cards
+- mode-aware legal-action generation that withholds mandatory-target actions
+  until every target group and current cost is satisfiable
+- target validation on submission and resolution, including partial target
+  survival and rules-countering when every selected target becomes illegal
+- server-issued alternate/additional cost choices for the reviewed pitch,
+  kicker, overload, commander-dependent, and life-X interactions
 - top-of-library knowledge and reordering
 - seat-private projections
 - opaque single-use decision capabilities
@@ -120,6 +128,13 @@ generated documentation fixtures with bearer capabilities redacted. See
   templates
 - native-v3 pilot runs that can stop, save, resume, and command-replay
 - validated aggregate shortcuts for the vertical-slice Soultrader and Gonti's Aether Heart lines
+
+Version 0.7.0 adds trusted deterministic scenarios for the interaction slice
+used by the exact review lists: the counterspell suite (including storm and
+Pact/Mana Drain delayed effects), modal and mass removal, graveyard disruption,
+Channel, Pithing Needle, proliferate, and Soul-Guide Lantern. This is exact
+coverage for those declared programs, not a claim of complete Oracle coverage
+for either deck.
 
 ## Why this runs faster with an LLM
 
@@ -321,7 +336,7 @@ the review fidelity gate.
 
 See `PILOT_PROVIDERS.md` for provider contracts and isolation guarantees, and
 `SEMANTIC_PACKS.md` for pack provenance, trust, preflight, and the deliberately
-bounded 0.6.0 card coverage. See `CODEX_ARENA.md` for the persistent four-pilot
+bounded 0.7.0 card coverage. See `CODEX_ARENA.md` for the persistent four-pilot
 workflow.
 
 Create the default four-seat Codex arena:

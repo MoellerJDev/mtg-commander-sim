@@ -1,10 +1,11 @@
 # Roadmap
 
-Version 0.6.0 adds resumable private-search semantics, typed Codex output,
-ordered future choices, explicit record lifecycle/finalization, and
-journal-derived provider telemetry on top of the fixed-seat arena. The phases below describe
-remaining production depth; neither the scripted regression nor duplicated
-four-seat pilot fixture claims a complete Oracle corpus or matchup evidence.
+Version 0.7.0 adds exact public target generation, mode-aware action exposure,
+resolution revalidation, and the reviewed interaction slice on top of the
+resumable private-search and fixed-seat arena baseline. The phases below
+describe remaining production depth; neither the scripted regression nor a
+duplicated four-seat pilot fixture claims a complete Oracle corpus or matchup
+evidence.
 
 ## Phase 1 — stabilize the multiplayer kernel
 

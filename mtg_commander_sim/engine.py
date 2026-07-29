@@ -27,6 +27,13 @@ from .model import (
 )
 from .permissions import AuthorizedCommand, CapabilityManager, PermissionDenied
 from .semantics import SemanticProgram, SemanticRegistry
+from .targets import (
+    TargetGroup,
+    TargetPlan,
+    available_modes,
+    mode_effects,
+    target_plan,
+)
 from .util import (
     mana_cost_to_vector,
     normalize_mana_bundle,
@@ -347,7 +354,16 @@ class CommanderEngine:
                 "oracle_text": "",
                 "power": card.annotations.get("token_characteristics", {}).get("power"),
                 "toughness": card.annotations.get("token_characteristics", {}).get("toughness"),
-                "keywords": [],
+                "keywords": list(
+                    card.annotations.get("token_characteristics", {}).get(
+                        "keywords", []
+                    )
+                ),
+                "colors": list(
+                    card.annotations.get("token_characteristics", {}).get(
+                        "colors", []
+                    )
+                ),
                 "produced_mana": [],
             }
         else:
@@ -367,10 +383,11 @@ class CommanderEngine:
                 "toughness": face.get("toughness") if face else record.toughness,
                 "loyalty": face.get("loyalty") if face else record.loyalty,
                 "keywords": list(record.keywords),
+                "colors": list(record.colors),
                 "produced_mana": list(record.produced_mana),
             }
         overrides = dict(card.annotations.get("copy_overrides") or {})
-        base.update({key: copy.deepcopy(value) for key, value in overrides.items() if key in base or key in {"name", "type_line", "power", "toughness", "oracle_text", "mana_value", "mana_cost"}})
+        base.update({key: copy.deepcopy(value) for key, value in overrides.items() if key in base or key in {"name", "type_line", "power", "toughness", "oracle_text", "mana_value", "mana_cost", "colors"}})
         base["keywords"] = unique_preserving_order(
             list(base.get("keywords") or [])
             + list(overrides.get("keywords") or [])
@@ -696,6 +713,8 @@ class CommanderEngine:
             self._complete_semantic_choice(decision)
         elif kind == "semantic.search":
             self._complete_semantic_search(decision)
+        elif kind == "semantic.storm":
+            self._complete_storm_choice(decision)
         else:
             raise GameRuleError(f"Unsupported completed decision {kind}")
 
@@ -1282,6 +1301,17 @@ class CommanderEngine:
             "yields_invalidated_by_action_change",
             "yields_invalidated_by_stack",
             "yields_invalidated_by_public_change",
+            "illegal_target_actions_prevented",
+            "illegal_target_actions_advertised",
+            "actions_removed_for_no_targets",
+            "actions_removed_for_mode_target_failure",
+            "target_candidates_generated",
+            "target_submissions_rejected",
+            "targets_became_illegal_on_resolution",
+            "spells_countered_by_rules",
+            "spells_countered_by_effect",
+            "stack_interaction_windows_created",
+            "stack_interaction_windows_auto_passed",
         ):
             telemetry.setdefault(key, 0)
         return telemetry
@@ -1514,6 +1544,15 @@ class CommanderEngine:
                 self._increment_optimization(
                     seat, "priority_windows_considered"
                 )
+                if self.state.stack:
+                    self._increment_optimization(
+                        seat,
+                        (
+                            "stack_interaction_windows_created"
+                            if meaningful
+                            else "stack_interaction_windows_auto_passed"
+                        ),
+                    )
                 can_yield, invalidation = self._can_auto_pass(
                     seat,
                     action_signature=action_signature,
@@ -1611,6 +1650,10 @@ class CommanderEngine:
                 continue
             if key == "player" and expected == "controller":
                 expected = trigger.controller
+            if isinstance(expected, (list, tuple, set)):
+                if context.get(key) not in expected:
+                    return False
+                continue
             if context.get(key) != expected:
                 return False
         return True
@@ -1683,6 +1726,7 @@ class CommanderEngine:
             targets=list(template.get("targets") or []),
             notes=str(template.get("note") or ""),
             visibility=list(self.seats),
+            context=copy.deepcopy(dict(template.get("context") or {})),
         )
         self.state.stack.append(item)
         self._log(trigger.controller, "stack.trigger", f"Queued {item.ref}: {item.label}.", {"stack": item.ref, "trigger": trigger.ref}, importance=2)
@@ -1938,32 +1982,81 @@ class CommanderEngine:
         if card.zone == "command" and card.is_commander:
             commander_tax = 2 * self.state.players[seat].commander_casts.get(card.oracle_id, 0)
         declared_cost = response.get("declared_cost")
-        try:
-            requirements = parsed_cost(mana_cost, commander_tax)
-        except ManaPlanError as exc:
-            # X is an objective pilot choice and can be compiled without an
-            # arbiter. Other alternate/hybrid/Phyrexian costs must become a
-            # server-issued cost option; a pilot may not simply assert a cheap
-            # declared_cost against authoritative state.
-            fixed, complex_symbols = mana_cost_to_vector(mana_cost)
-            if complex_symbols and set(complex_symbols) == {"X"} and response.get("x") is not None:
-                x_value = int(response.get("x"))
-                if x_value < 0:
-                    raise GameRuleError("X cannot be negative")
-                fixed["GENERIC"] += x_value * complex_symbols.count("X") + commander_tax
-                requirements = fixed
-            elif self.state.config.strict_mana:
+        semantic_key = str(
+            response.get("semantic_key")
+            or (
+                f"{record.oracle_id}:spell:"
+                f"{str(face.get('name')) if face else 'front'}"
+            )
+        )
+        program = self.semantics.get(semantic_key)
+        selected_cost_option: dict[str, Any] | None = None
+        target_schema_override: dict[str, Any] | None = None
+        if program and program.cost_schema:
+            options = self._cast_cost_options(
+                seat,
+                card,
+                program,
+                response=response,
+                hint=False,
+            )
+            requested_option = str(
+                response.get("cost_option")
+                or (
+                    "normal"
+                    if any(option["id"] == "normal" for option in options)
+                    else options[0]["id"]
+                    if len(options) == 1
+                    else ""
+                )
+            )
+            selected_cost_option = next(
+                (
+                    option
+                    for option in options
+                    if option["id"] == requested_option
+                ),
+                None,
+            )
+            if selected_cost_option is None:
                 raise GameRuleError(
-                    f"{card.printed_name} has an uncompiled casting cost ({mana_cost}). "
-                    "The rules/cost compiler must issue a legal cost option; pilots cannot supply declared_cost."
-                ) from exc
-            elif declared_cost:
-                requirements = {"GENERIC": int(declared_cost.get("GENERIC", 0))}
-                for color in "WUBRGC":
-                    requirements[color] = int(declared_cost.get(color, 0))
-                requirements["GENERIC"] += commander_tax
-            else:
-                raise GameRuleError(f"Supply declared_cost for {card.printed_name} in non-strict mode: {exc}") from exc
+                    "The selected casting-cost option is not currently legal "
+                    "and payable"
+                )
+            requirements = self._mana_vector(
+                selected_cost_option["requirements"]
+            )
+            if "target_schema" in selected_cost_option:
+                target_schema_override = copy.deepcopy(
+                    dict(selected_cost_option["target_schema"])
+                )
+        else:
+            try:
+                requirements = parsed_cost(mana_cost, commander_tax)
+            except ManaPlanError as exc:
+                # X is an objective pilot choice and can be compiled without an
+                # arbiter. Other alternate/hybrid/Phyrexian costs must become a
+                # server-issued cost option; a pilot may not simply assert a cheap
+                # declared_cost against authoritative state.
+                fixed, complex_symbols = mana_cost_to_vector(mana_cost)
+                if complex_symbols and set(complex_symbols) == {"X"} and response.get("x") is not None:
+                    x_value = int(response.get("x"))
+                    if x_value < 0:
+                        raise GameRuleError("X cannot be negative")
+                    fixed["GENERIC"] += x_value * complex_symbols.count("X") + commander_tax
+                    requirements = fixed
+                elif self.state.config.strict_mana:
+                    raise GameRuleError(
+                        f"{card.printed_name} has an uncompiled casting cost ({mana_cost}). "
+                        "The rules/cost compiler must issue a legal cost option; pilots cannot supply declared_cost."
+                    ) from exc
+                elif declared_cost:
+                    requirements = {"GENERIC": int(declared_cost.get("GENERIC", 0))}
+                    for color in "WUBRGC":
+                        requirements[color] = int(declared_cost.get(color, 0))
+                    requirements["GENERIC"] += commander_tax
+                else:
+                    raise GameRuleError(f"Supply declared_cost for {card.printed_name} in non-strict mode: {exc}") from exc
         if declared_cost and self.state.config.strict_mana:
             supplied = {"GENERIC": int(declared_cost.get("GENERIC", 0)) + commander_tax}
             supplied.update({color: int(declared_cost.get(color, 0)) for color in "WUBRGC"})
@@ -1971,18 +2064,64 @@ class CommanderEngine:
                 raise GameRuleError(
                     f"Pilot-declared casting cost {supplied} does not match authoritative cost {requirements}."
                 )
+        selected_modes = [str(value) for value in response.get("modes") or []]
+        validated_targets, target_groups = self._validate_semantic_targets(
+            seat,
+            program,
+            list(response.get("targets") or []),
+            modes=selected_modes,
+            source_ref=card.ref,
+            target_schema=target_schema_override,
+        )
+        target_snapshots = {
+            ref: self._target_snapshot(ref) for ref in validated_targets
+        }
         spent, activations = self._pay_for_cost(seat, requirements, response)
+        if selected_cost_option is not None:
+            selected_exile = selected_cost_option.get(
+                "selected_exile_card"
+            )
+            if selected_exile:
+                exiled = self._resolve_object(
+                    seat,
+                    str(selected_exile),
+                    zones={"hand"},
+                    owned_only=True,
+                )
+                self.move_card(
+                    exiled.object_id,
+                    "exile",
+                    reason=f"{card.printed_name} alternate cost",
+                )
+            for additional in selected_cost_option.get(
+                "additional_costs", []
+            ):
+                if additional.get("kind") == "life_x":
+                    life_paid = int(response.get("x", 0))
+                    if life_paid > self.state.players[seat].life:
+                        raise GameRuleError(
+                            "The selected life payment is no longer payable"
+                        )
+                    self.state.players[seat].life -= life_paid
+                    self._log(
+                        seat,
+                        "cost.life",
+                        f"{seat} paid {life_paid} life to cast "
+                        f"{card.printed_name}.",
+                        {
+                            "object": card.ref,
+                            "amount": life_paid,
+                            "cost_option": selected_cost_option["id"],
+                        },
+                        importance=1,
+                        changed_players=[seat],
+                    )
         origin = card.zone
         self._remove_from_zone(card)
         card.zone = "stack"
         card.controller = seat
         card.active_face = str(face.get("name")) if face else None
         default_destination = "battlefield" if any(word in type_line.casefold() for word in ("artifact", "battle", "creature", "enchantment", "planeswalker")) else "graveyard"
-        semantic_key = str(response.get("semantic_key") or f"{record.oracle_id}:spell:{card.active_face or 'front'}")
-        program = self.semantics.get(semantic_key)
-        self._validate_semantic_targets(
-            seat, program, list(response.get("targets") or [])
-        )
         ref = self._next_ref("S")
         item = StackItem(
             stack_id=self._stable_runtime_id("stack", ref),
@@ -1992,15 +2131,90 @@ class CommanderEngine:
             label=card.active_face or record.name,
             card_object_id=card.object_id,
             semantic_key=semantic_key,
-            targets=list(response.get("targets") or []),
-            modes=list(response.get("modes") or []),
+            targets=validated_targets,
+            modes=selected_modes,
             x_value=response.get("x"),
             chosen_face=card.active_face,
             notes=str(response.get("note") or ""),
             default_destination=default_destination,
             visibility=list(self.seats),
+            context={
+                "target_groups": target_groups,
+                "target_snapshots": target_snapshots,
+                "targets_revalidated": False,
+                "targets_chosen_at_creation": True,
+                "cost_option": (
+                    selected_cost_option["id"]
+                    if selected_cost_option
+                    else "normal"
+                ),
+                **(
+                    {"target_schema_override": target_schema_override}
+                    if target_schema_override is not None
+                    else {}
+                ),
+                **(
+                    {
+                        "cast_option_effects": copy.deepcopy(
+                            list(
+                                selected_cost_option.get("effects", [])
+                            )
+                        )
+                    }
+                    if selected_cost_option
+                    and "effects" in selected_cost_option
+                    else {}
+                ),
+            },
         )
         self.state.stack.append(item)
+        if program and "storm" in program.coverage:
+            prior_spells = sum(
+                event.code == "stack.cast"
+                and event.turn_sequence == self.state.turn_sequence
+                for event in self.state.events
+            )
+            storm_ref = self._next_ref("S")
+            storm_item = StackItem(
+                stack_id=self._stable_runtime_id("stack", storm_ref),
+                ref=storm_ref,
+                kind="triggered_ability",
+                controller=seat,
+                label=f"{item.label} — Storm",
+                source_object_id=card.object_id,
+                semantic_key="builtin:storm",
+                visibility=list(self.seats),
+                context={
+                    "copy_count": prior_spells,
+                    "copy_template": {
+                        "label": item.label,
+                        "controller": item.controller,
+                        "semantic_key": item.semantic_key,
+                        "targets": copy.deepcopy(item.targets),
+                        "modes": copy.deepcopy(item.modes),
+                        "x_value": item.x_value,
+                        "target_groups": copy.deepcopy(target_groups),
+                        "target_snapshots": copy.deepcopy(
+                            target_snapshots
+                        ),
+                        "target_schema": copy.deepcopy(
+                            self._stack_target_schema(item, program)
+                        ),
+                    },
+                },
+            )
+            self.state.stack.append(storm_item)
+            self._log(
+                seat,
+                "stack.trigger",
+                f"Queued {storm_item.ref}: {storm_item.label}.",
+                {
+                    "stack": storm_item.ref,
+                    "source_stack": item.ref,
+                    "copy_count": prior_spells,
+                },
+                importance=2,
+            )
         if origin == "command" and card.is_commander:
             player = self.state.players[seat]
             player.commander_casts[card.oracle_id] = player.commander_casts.get(card.oracle_id, 0) + 1
@@ -2019,6 +2233,12 @@ class CommanderEngine:
                 "modes": item.modes,
                 "x": item.x_value,
                 "commander_tax": commander_tax,
+                "cost_option": item.context["cost_option"],
+                "exiled_for_cost": (
+                    selected_cost_option.get("selected_exile_card")
+                    if selected_cost_option
+                    else None
+                ),
             },
             importance=2,
             changed_objects=[card.object_id],
@@ -2208,6 +2428,22 @@ class CommanderEngine:
         if ability.sorcery_speed:
             self._sorcery_timing(seat)
 
+        candidate_semantic_key = str(
+            response.get("semantic_key")
+            or f"{source.oracle_id}:ability:{ability.ability_id}"
+        )
+        target_program = self.semantics.get(candidate_semantic_key)
+        selected_modes = [str(value) for value in response.get("modes") or []]
+        validated_targets, target_groups = self._validate_semantic_targets(
+            seat,
+            target_program,
+            list(response.get("targets") or []),
+            modes=selected_modes,
+            source_ref=source.ref,
+        )
+        target_snapshots = {
+            ref: self._target_snapshot(ref) for ref in validated_targets
+        }
         builtin_context = self._fetch_context(seat, ability, response)
         if ability.tap_source:
             if source.zone != "battlefield":
@@ -2274,7 +2510,11 @@ class CommanderEngine:
 
         semantic_key = str(
             response.get("semantic_key")
-            or ("builtin:fetch_land" if builtin_context else f"{source.oracle_id}:ability:{ability.ability_id}")
+            or (
+                "builtin:fetch_land"
+                if builtin_context
+                else candidate_semantic_key
+            )
         )
         ref = self._next_ref("S")
         item = StackItem(
@@ -2285,11 +2525,17 @@ class CommanderEngine:
             label=str(response.get("label") or f"{self.display_name(source.object_id)} — {ability.effect_text}"),
             source_object_id=source.object_id,
             semantic_key=semantic_key,
-            targets=list(response.get("targets") or []),
-            modes=list(response.get("modes") or []),
+            targets=validated_targets,
+            modes=selected_modes,
             notes=str(response.get("note") or ""),
             visibility=list(self.seats),
-            context=builtin_context,
+            context={
+                **builtin_context,
+                "target_groups": target_groups,
+                "target_snapshots": target_snapshots,
+                "targets_revalidated": False,
+                "targets_chosen_at_creation": True,
+            },
         )
         self.state.stack.append(item)
         self._log(
@@ -2374,6 +2620,11 @@ class CommanderEngine:
             return "unavailable", "wrong_zone"
         if not ability.compiled_cost:
             return "unresolved", "unresolved_cost_semantics"
+        if (
+            not ability.mana_ability
+            and self._nonmana_ability_prohibited_by_name(card)
+        ):
+            return "unavailable", "named_ability_prohibition"
         condition_status, condition_reason = self._activation_condition_status(
             seat, ability
         )
@@ -2424,6 +2675,34 @@ class CommanderEngine:
         ):
             return "unpayable", "insufficient_mana"
         return "payable", None
+
+    def _nonmana_ability_prohibited_by_name(
+        self,
+        source: CardInstance,
+    ) -> bool:
+        source_name = str(
+            self._effective_card_data(source).get("name")
+            or source.printed_name
+        ).casefold()
+        for seat in self.active_seats:
+            for object_id in self.state.players[seat].zones["battlefield"]:
+                permanent = self.state.cards[object_id]
+                chosen_name = str(
+                    permanent.annotations.get("chosen_name") or ""
+                ).casefold()
+                if not chosen_name or chosen_name != source_name:
+                    continue
+                oracle = str(
+                    self._effective_card_data(permanent).get("oracle_text")
+                    or ""
+                ).casefold()
+                if (
+                    "activated abilities of sources with the chosen name "
+                    "can't be activated unless they're mana abilities"
+                    in oracle
+                ):
+                    return True
+        return False
 
     def _activation_condition_status(
         self,
@@ -2597,10 +2876,293 @@ class CommanderEngine:
         except ManaPlanError:
             return None
 
+    @staticmethod
+    def _mana_vector(value: Mapping[str, Any] | None) -> dict[str, int]:
+        return {
+            key: int((value or {}).get(key, 0))
+            for key in ("GENERIC", "W", "U", "B", "R", "G", "C")
+        }
+
+    def _controls_commander(self, seat: str) -> bool:
+        return any(
+            self.state.cards[object_id].controller == seat
+            and self.state.cards[object_id].is_commander
+            for object_id in self.state.players[seat].zones["battlefield"]
+        )
+
+    def _alternate_cost_condition_met(
+        self,
+        seat: str,
+        condition: Mapping[str, Any],
+    ) -> bool:
+        if condition.get("not_your_turn") and self.state.active_player == seat:
+            return False
+        if condition.get("your_turn") and self.state.active_player != seat:
+            return False
+        if condition.get("control_commander") and not self._controls_commander(
+            seat
+        ):
+            return False
+        return True
+
+    def _exile_cost_candidates(
+        self,
+        seat: str,
+        source: CardInstance,
+        specification: Mapping[str, Any],
+    ) -> list[str]:
+        colors = {
+            str(value).upper()
+            for value in specification.get("colors_any", [])
+        }
+        candidates: list[str] = []
+        for object_id in self.state.players[seat].zones["hand"]:
+            card = self.state.cards[object_id]
+            if (
+                specification.get("exclude_source", True)
+                and card.object_id == source.object_id
+            ):
+                continue
+            record = self.card_record(card)
+            if record is None:
+                continue
+            if colors and not colors.intersection(
+                {str(value).upper() for value in record.colors}
+            ):
+                continue
+            candidates.append(card.ref)
+        return candidates
+
+    def _compiled_printed_cost(
+        self,
+        seat: str,
+        card: CardInstance,
+        *,
+        x_value: int | None,
+        hint: bool,
+    ) -> tuple[dict[str, int] | None, bool]:
+        record = self.card_record(card)
+        if record is None:
+            return None, False
+        commander_tax = (
+            2
+            * self.state.players[seat].commander_casts.get(card.oracle_id, 0)
+            if card.zone == "command" and card.is_commander
+            else 0
+        )
+        try:
+            return parsed_cost(record.mana_cost, commander_tax), False
+        except ManaPlanError:
+            fixed, complex_symbols = mana_cost_to_vector(record.mana_cost)
+            if complex_symbols and set(complex_symbols) == {"X"}:
+                if x_value is None and not hint:
+                    raise GameRuleError(
+                        f"Casting {record.name} requires an explicit X value"
+                    )
+                selected_x = 0 if x_value is None else int(x_value)
+                if selected_x < 0:
+                    raise GameRuleError("X cannot be negative")
+                fixed["GENERIC"] += (
+                    selected_x * complex_symbols.count("X") + commander_tax
+                )
+                return self._mana_vector(fixed), True
+            return None, False
+
+    def _maximum_affordable_x(
+        self,
+        seat: str,
+        card: CardInstance,
+        *,
+        limit: int = 100,
+    ) -> int:
+        maximum = -1
+        for value in range(limit + 1):
+            requirements, _ = self._compiled_printed_cost(
+                seat,
+                card,
+                x_value=value,
+                hint=False,
+            )
+            if requirements is None or not self._cost_is_affordable(
+                seat, requirements
+            ):
+                break
+            maximum = value
+        return maximum
+
+    def _cast_cost_options(
+        self,
+        seat: str,
+        card: CardInstance,
+        program: SemanticProgram | None,
+        *,
+        response: Mapping[str, Any] | None = None,
+        hint: bool,
+    ) -> list[dict[str, Any]]:
+        """Compile server-authoritative payable casting-cost alternatives.
+
+        Semantic packs describe reusable cost families.  The returned options
+        contain only costs that are currently payable and whose nonmana cost
+        objects are currently available to this seat.
+        """
+
+        response = dict(response or {})
+        x_value = response.get("x")
+        requirements, has_x = self._compiled_printed_cost(
+            seat,
+            card,
+            x_value=(int(x_value) if x_value is not None else None),
+            hint=hint,
+        )
+        schema = dict(program.cost_schema or {}) if program else {}
+        base_options: list[dict[str, Any]] = []
+        if requirements is not None:
+            base_options.append(
+                {
+                    "id": "normal",
+                    "kind": "mana",
+                    "requirements": requirements,
+                }
+            )
+        commander_tax = (
+            2
+            * self.state.players[seat].commander_casts.get(card.oracle_id, 0)
+            if card.zone == "command" and card.is_commander
+            else 0
+        )
+        for raw in schema.get("alternate_costs", []):
+            alternative = dict(raw)
+            if not self._alternate_cost_condition_met(
+                seat, dict(alternative.get("condition") or {})
+            ):
+                continue
+            option_requirements = self._mana_vector(
+                alternative.get("requirements")
+            )
+            option_requirements["GENERIC"] += commander_tax
+            base_options.append(
+                {
+                    **alternative,
+                    "id": str(alternative["id"]),
+                    "kind": str(
+                        alternative.get("kind") or "alternate"
+                    ),
+                    "requirements": option_requirements,
+                }
+            )
+        expanded = list(base_options)
+        for raw in schema.get("optional_costs", []):
+            additional = dict(raw)
+            additional_vector = self._mana_vector(
+                additional.get("requirements")
+            )
+            for base in list(base_options):
+                combined = self._mana_vector(base["requirements"])
+                for symbol, amount in additional_vector.items():
+                    combined[symbol] += amount
+                expanded.append(
+                    {
+                        **base,
+                        **{
+                            key: copy.deepcopy(value)
+                            for key, value in additional.items()
+                            if key
+                            not in {
+                                "requirements",
+                                "id",
+                            }
+                        },
+                        "id": str(additional["id"]),
+                        "kind": str(
+                            additional.get("kind")
+                            or "optional_additional"
+                        ),
+                        "requirements": combined,
+                        "base_cost_option": base["id"],
+                    }
+                )
+        mandatory_costs = [
+            dict(value) for value in schema.get("additional_costs", [])
+        ]
+        payable: list[dict[str, Any]] = []
+        for option in expanded:
+            option = copy.deepcopy(option)
+            exile_spec = option.get("exile_from_hand")
+            if isinstance(exile_spec, Mapping):
+                candidates = self._exile_cost_candidates(
+                    seat, card, exile_spec
+                )
+                if not candidates:
+                    continue
+                option["exile_candidates"] = candidates
+            if not self._cost_is_affordable(
+                seat, option["requirements"]
+            ):
+                continue
+            choice_schema: dict[str, Any] = {}
+            if has_x:
+                maximum_x = self._maximum_affordable_x(seat, card)
+                if maximum_x < 0:
+                    continue
+                choice_schema["x"] = {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": maximum_x,
+                }
+            valid_additional = True
+            for additional in mandatory_costs:
+                if additional.get("kind") == "life_x":
+                    selected_x = (
+                        int(response["x"])
+                        if response.get("x") is not None
+                        else 0
+                    )
+                    minimum = int(additional.get("minimum", 0))
+                    maximum = self.state.players[seat].life
+                    if maximum < minimum:
+                        valid_additional = False
+                        break
+                    if selected_x < minimum or selected_x > maximum:
+                        valid_additional = False
+                        break
+                    choice_schema["x"] = {
+                        "type": "integer",
+                        "minimum": minimum,
+                        "maximum": maximum,
+                        "payment": "life",
+                    }
+            if not valid_additional:
+                continue
+            if isinstance(exile_spec, Mapping):
+                choice_schema["exile_card"] = {
+                    "type": "object_ref",
+                    "legal_refs": list(option["exile_candidates"]),
+                    "zone": "hand",
+                    "destination": "exile",
+                }
+                if not hint:
+                    selected = str(
+                        response.get("exile_card")
+                        or (
+                            list(response.get("exile_cards") or [None])[0]
+                        )
+                        or ""
+                    )
+                    if selected not in option["exile_candidates"]:
+                        continue
+                    option["selected_exile_card"] = selected
+            option["additional_costs"] = mandatory_costs
+            if choice_schema:
+                option["choice_schema"] = choice_schema
+            payable.append(option)
+        return payable
+
     def _priority_action_hints(self, seat: str) -> dict[str, Any]:
         player = self.state.players[seat]
         candidate_zones = [*player.zones["hand"], *player.zones["command"]]
         castable: list[str] = []
+        cast_target_schemas: dict[str, dict[str, Any]] = {}
+        cast_cost_options: dict[str, list[dict[str, Any]]] = {}
         unpayable_casts: list[dict[str, Any]] = []
         unresolved_casts: list[dict[str, Any]] = []
         for oid in candidate_zones:
@@ -2608,8 +3170,80 @@ class CommanderEngine:
             if not record or record.is_land:
                 continue
             main_timing = seat == self.state.active_player and not self.state.stack and self.state.step == "main"
-            requirements = self._card_cast_requirements(seat, self.state.cards[oid])
+            program = self.semantics.get(
+                f"{record.oracle_id}:spell:front"
+            )
             timing_available = record.is_instant or record.has_flash or main_timing
+            if timing_available and program and program.cost_schema:
+                options = self._cast_cost_options(
+                    seat,
+                    self.state.cards[oid],
+                    program,
+                    hint=True,
+                )
+                legal_options: list[dict[str, Any]] = []
+                for option in options:
+                    target_specification = (
+                        dict(option["target_schema"])
+                        if isinstance(
+                            option.get("target_schema"), Mapping
+                        )
+                        else program.target_schema
+                    )
+                    public_target_schema = None
+                    if target_specification is not None:
+                        public_target_schema = self._public_target_schema(
+                            seat,
+                            target_specification,
+                            source_ref=self.state.cards[oid].ref,
+                        )
+                        if public_target_schema is None:
+                            continue
+                    public_option = {
+                        key: copy.deepcopy(value)
+                        for key, value in option.items()
+                        if key
+                        in {
+                            "id",
+                            "kind",
+                            "requirements",
+                            "choice_schema",
+                            "label",
+                        }
+                    }
+                    if public_target_schema is not None:
+                        public_option["target_schema"] = (
+                            public_target_schema
+                        )
+                    legal_options.append(public_option)
+                if not legal_options:
+                    unpayable_casts.append(
+                        {
+                            "id": f"cast:{self.state.cards[oid].ref}",
+                            "kind": "cast",
+                            "card": self.state.cards[oid].ref,
+                            "from": self.state.cards[oid].zone,
+                            "status": "unavailable",
+                            "reason": (
+                                "mandatory_target_unavailable"
+                                if options
+                                else "mandatory_cost_unpayable"
+                            ),
+                        }
+                    )
+                    continue
+                ref = self.state.cards[oid].ref
+                cast_cost_options[ref] = legal_options
+                if (
+                    len(legal_options) == 1
+                    and legal_options[0].get("target_schema")
+                ):
+                    cast_target_schemas[ref] = copy.deepcopy(
+                        legal_options[0]["target_schema"]
+                    )
+                castable.append(ref)
+                continue
+            requirements = self._card_cast_requirements(seat, self.state.cards[oid])
             if timing_available and requirements is None:
                 unresolved_casts.append(
                     {
@@ -2642,30 +3276,27 @@ class CommanderEngine:
                 timing_available
                 and requirements is not None
             ):
-                program = self.semantics.get(
-                    f"{record.oracle_id}:spell:front"
-                )
-                if (
-                    program
-                    and program.target_schema
-                    and len(
-                        self._semantic_target_options(
-                            seat, program.target_schema
+                if program and program.target_schema:
+                    public_target_schema = self._public_target_schema(
+                        seat,
+                        program.target_schema,
+                        source_ref=self.state.cards[oid].ref,
+                    )
+                    if public_target_schema is None:
+                        unpayable_casts.append(
+                            {
+                                "id": f"cast:{self.state.cards[oid].ref}",
+                                "kind": "cast",
+                                "card": self.state.cards[oid].ref,
+                                "from": self.state.cards[oid].zone,
+                                "status": "unavailable",
+                                "reason": "mandatory_target_unavailable",
+                            }
                         )
-                    )
-                    < int(program.target_schema.get("count", 0))
-                ):
-                    unpayable_casts.append(
-                        {
-                            "id": f"cast:{self.state.cards[oid].ref}",
-                            "kind": "cast",
-                            "card": self.state.cards[oid].ref,
-                            "from": self.state.cards[oid].zone,
-                            "status": "unavailable",
-                            "reason": "mandatory_target_unavailable",
-                        }
-                    )
-                    continue
+                        continue
+                    cast_target_schemas[
+                        self.state.cards[oid].ref
+                    ] = public_target_schema
                 castable.append(self.state.cards[oid].ref)
         lands: list[str] = []
         if seat == self.state.active_player and not self.state.stack and self.state.step == "main" and player.land_plays_remaining:
@@ -2680,6 +3311,61 @@ class CommanderEngine:
             unpayable_abilities,
             unresolved_abilities,
         ) = self._classified_ability_hints(seat)
+        ability_target_schemas: dict[str, dict[str, Any]] = {}
+        ability_target_status: dict[str, bool] = {}
+
+        def target_available(ability_hint: Mapping[str, Any]) -> bool:
+            action_id = (
+                f"activate:{ability_hint['s']}:{ability_hint['a']}"
+            )
+            if action_id in ability_target_status:
+                return ability_target_status[action_id]
+            source = next(
+                (
+                    value
+                    for value in self.state.cards.values()
+                    if value.ref == ability_hint["s"]
+                ),
+                None,
+            )
+            program = (
+                self.semantics.get(
+                    f"{source.oracle_id}:ability:{ability_hint['a']}"
+                )
+                if source
+                else None
+            )
+            if not program or not program.target_schema:
+                ability_target_status[action_id] = True
+                return True
+            public_schema = self._public_target_schema(
+                seat,
+                program.target_schema,
+                source_ref=source.ref,
+            )
+            if public_schema is None:
+                ability_target_status[action_id] = False
+                unpayable_abilities.append(
+                    {
+                        **dict(ability_hint),
+                        "id": action_id,
+                        "status": "unavailable",
+                        "reason": "mandatory_target_unavailable",
+                    }
+                )
+                return False
+            ability_target_status[action_id] = True
+            ability_target_schemas[action_id] = public_schema
+            return True
+
+        abilities = [
+            ability for ability in abilities if target_available(ability)
+        ]
+        mana_abilities = [
+            ability
+            for ability in mana_abilities
+            if target_available(ability)
+        ]
         actions: list[dict[str, Any]] = [{"id": "pass", "action": "pass"}]
         for ref in lands:
             card = next(
@@ -2724,13 +3410,14 @@ class CommanderEngine:
                 "cost": record.mana_cost if record else "",
                 "auto_pay": True,
             }
-            if program and program.target_schema:
-                action["target_schema"] = {
-                    **copy.deepcopy(program.target_schema),
-                    "legal_refs": self._semantic_target_options(
-                        seat, program.target_schema
-                    ),
-                }
+            if ref in cast_target_schemas:
+                action["target_schema"] = copy.deepcopy(
+                    cast_target_schemas[ref]
+                )
+            if ref in cast_cost_options:
+                action["cost_options"] = copy.deepcopy(
+                    cast_cost_options[ref]
+                )
             actions.append(action)
         seen_ability_actions: set[str] = set()
         for ability in [*abilities, *mana_abilities]:
@@ -2765,6 +3452,10 @@ class CommanderEngine:
                     "resolution_time": True,
                     "search_types": copy.deepcopy(ability["search_types"]),
                 }
+            if action_id in ability_target_schemas:
+                action["target_schema"] = copy.deepcopy(
+                    ability_target_schemas[action_id]
+                )
             actions.append(action)
         return {
             "cast": castable,
@@ -2808,7 +3499,15 @@ class CommanderEngine:
         event: str,
         context: Mapping[str, Any],
     ) -> bool:
-        if program.event != event or program.active_zone != source.zone:
+        self_event = program.event.endswith(".self")
+        program_event = (
+            program.event.removesuffix(".self")
+            if self_event
+            else program.event
+        )
+        if program_event != event or program.active_zone != source.zone:
+            return False
+        if self_event and str(context.get("card") or "") != source.ref:
             return False
         if source.controller not in self.active_seats:
             return False
@@ -2853,7 +3552,6 @@ class CommanderEngine:
             for program in self.semantics.programs_for_oracle(
                 source.oracle_id,
                 active_zone="battlefield",
-                event=event,
             ):
                 if program.trust_level == "unresolved":
                     continue
@@ -2871,7 +3569,15 @@ class CommanderEngine:
                     source_object_id=source.object_id,
                     semantic_key=program.key,
                     visibility=list(self.seats),
-                    context={"event": event, **copy.deepcopy(dict(context))},
+                    context={
+                        "event": event,
+                        **copy.deepcopy(dict(context)),
+                        **(
+                            {"trigger_target_selection_pending": True}
+                            if program.target_schema
+                            else {}
+                        ),
+                    },
                 )
                 self.state.stack.append(item)
                 queued.append(item.ref)
@@ -2894,54 +3600,780 @@ class CommanderEngine:
         self,
         controller: str,
         schema: Mapping[str, Any],
+        *,
+        modes: Sequence[str] = (),
+        source_ref: str | None = None,
     ) -> list[str]:
-        selector = str(schema.get("selector") or "")
-        if selector == "opponent":
-            return [seat for seat in self.active_seats if seat != controller]
-        if selector == "blue_spell_or_permanent":
-            options: list[str] = []
-            for item in self.state.stack:
-                if item.card_object_id:
-                    record = self.card_record(item.card_object_id)
-                    if record and "U" in record.colors:
-                        options.append(item.ref)
+        """Return the candidate-set union for a declarative target plan.
+
+        Candidate sets are intentionally returned rather than target tuples.
+        The submitted grouping/count/distinctness constraints are validated by
+        the authoritative engine.
+        """
+
+        try:
+            plan = target_plan(
+                schema,
+                modes,
+                require_modes=bool(available_modes(schema)),
+            )
+        except ValueError:
+            return []
+        options: list[str] = []
+        for group in plan.groups:
+            options.extend(
+                self._target_candidates(
+                    controller,
+                    group,
+                    source_ref=source_ref,
+                )
+            )
+        return unique_preserving_order(options)
+
+    @staticmethod
+    def _type_parts(type_line: str) -> tuple[set[str], set[str], set[str]]:
+        normalized = type_line.replace("—", "-")
+        left, _, right = normalized.partition("-")
+        words = {word.casefold() for word in re.findall(r"[A-Za-z]+", left)}
+        card_types = {
+            "artifact",
+            "battle",
+            "creature",
+            "enchantment",
+            "instant",
+            "kindred",
+            "land",
+            "planeswalker",
+            "sorcery",
+        }
+        supertypes = {"basic", "legendary", "ongoing", "snow", "world"}
+        return (
+            words.intersection(card_types),
+            {
+                word.casefold()
+                for word in re.findall(r"[A-Za-z]+", right)
+            },
+            words.intersection(supertypes),
+        )
+
+    @staticmethod
+    def _relation_matches(
+        value: str | None,
+        controller: str,
+        relation: str,
+    ) -> bool:
+        if relation == "any":
+            return True
+        if relation == "you":
+            return value == controller
+        return value is not None and value != controller
+
+    def _target_candidate_rows(
+        self,
+        controller: str,
+        group: TargetGroup,
+    ) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        if "player" in group.zones:
             for seat in self.active_seats:
-                for object_id in self.state.players[seat].zones["battlefield"]:
-                    record = self.card_record(object_id)
-                    if record and "U" in record.colors:
-                        options.append(self.state.cards[object_id].ref)
-            return options
-        return []
+                rows.append(
+                    {
+                        "ref": seat,
+                        "zone": "player",
+                        "category": "player",
+                        "controller": seat,
+                        "owner": seat,
+                        "types": set(),
+                        "subtypes": set(),
+                        "supertypes": set(),
+                        "colors": set(),
+                        "mana_value": 0.0,
+                        "card": None,
+                    }
+                )
+        if "stack" in group.zones:
+            for item in self.state.stack:
+                card = self.state.cards.get(item.card_object_id or "")
+                data = self._effective_card_data(card) if card else {}
+                types, subtypes, supertypes = self._type_parts(
+                    str(data.get("type_line") or "")
+                )
+                rows.append(
+                    {
+                        "ref": item.ref,
+                        "zone": "stack",
+                        "category": (
+                            "spell" if item.kind == "spell" else "ability"
+                        ),
+                        "controller": item.controller,
+                        "owner": card.owner if card else item.controller,
+                        "types": types,
+                        "subtypes": subtypes,
+                        "supertypes": supertypes,
+                        "colors": {
+                            str(color).upper()
+                            for color in data.get("colors", [])
+                        },
+                        "mana_value": float(
+                            data.get(
+                                "mana_value",
+                                data.get("cmc", 0),
+                            )
+                            or 0
+                        ),
+                        "card": card,
+                        "stack_item": item,
+                    }
+                )
+        for zone in (
+            "battlefield",
+            "graveyard",
+            "exile",
+            "command",
+        ):
+            if zone not in group.zones:
+                continue
+            for seat in self.active_seats:
+                for object_id in self.state.players[seat].zones.get(zone, []):
+                    card = self.state.cards[object_id]
+                    if card.face_down and controller not in card.known_to:
+                        # A face-down object in a public zone remains a public,
+                        # targetable object.  Candidate generation must use only
+                        # its public characteristics and never its hidden front.
+                        data = {
+                            "type_line": (
+                                "Creature" if zone == "battlefield" else ""
+                            ),
+                            "colors": [],
+                            "mana_value": 0,
+                        }
+                    else:
+                        data = self._effective_card_data(card)
+                    types, subtypes, supertypes = self._type_parts(
+                        str(data.get("type_line") or "")
+                    )
+                    rows.append(
+                        {
+                            "ref": card.ref,
+                            "zone": zone,
+                            "category": (
+                                "permanent" if zone == "battlefield" else "card"
+                            ),
+                            "controller": card.controller,
+                            "owner": card.owner,
+                            "types": types,
+                            "subtypes": subtypes,
+                            "supertypes": supertypes,
+                            "colors": {
+                                str(color).upper()
+                                for color in data.get("colors", [])
+                            },
+                            "mana_value": float(
+                                data.get(
+                                    "mana_value",
+                                    data.get("cmc", 0),
+                                )
+                                or 0
+                            ),
+                            "card": card,
+                        }
+                    )
+        return rows
+
+    def _target_row_matches(
+        self,
+        controller: str,
+        group: TargetGroup,
+        row: Mapping[str, Any],
+        *,
+        source_ref: str | None,
+        as_target: bool = True,
+    ) -> bool:
+        ref = str(row["ref"])
+        if (group.source_exclusion or group.another) and ref == source_ref:
+            return False
+        card = row.get("card")
+        if as_target and row.get("zone") == "battlefield" and isinstance(
+            card, CardInstance
+        ):
+            keywords = {
+                str(value).casefold()
+                for value in self._effective_card_data(card).get(
+                    "keywords", []
+                )
+            }
+            if "shroud" in keywords:
+                return False
+            if (
+                "hexproof" in keywords
+                and card.controller != controller
+            ):
+                return False
+        if group.categories and str(row["category"]) not in {
+            value.casefold() for value in group.categories
+        }:
+            return False
+        if not self._relation_matches(
+            str(row.get("controller")),
+            controller,
+            group.controller_relation,
+        ):
+            return False
+        if not self._relation_matches(
+            str(row.get("owner")),
+            controller,
+            group.owner_relation,
+        ):
+            return False
+        if row["category"] == "player" and not self._relation_matches(
+            str(row["ref"]),
+            controller,
+            group.player_relation,
+        ):
+            return False
+        types = set(row.get("types") or ())
+        subtypes = set(row.get("subtypes") or ())
+        supertypes = set(row.get("supertypes") or ())
+        types_any = {value.casefold() for value in group.types_any}
+        types_all = {value.casefold() for value in group.types_all}
+        if types_any and not types.intersection(types_any):
+            return False
+        if types_all and not types_all.issubset(types):
+            return False
+        if group.subtypes_any and not subtypes.intersection(
+            value.casefold() for value in group.subtypes_any
+        ):
+            return False
+        if group.supertypes_any and not supertypes.intersection(
+            value.casefold() for value in group.supertypes_any
+        ):
+            return False
+        colors = set(row.get("colors") or ())
+        if group.colors_any and not colors.intersection(group.colors_any):
+            return False
+        if group.colors_all and not set(group.colors_all).issubset(colors):
+            return False
+        if group.colorless is not None and (not colors) != group.colorless:
+            return False
+        mana_value = float(row.get("mana_value", 0) or 0)
+        if (
+            group.mana_value_equal is not None
+            and mana_value != group.mana_value_equal
+        ):
+            return False
+        if (
+            group.mana_value_min is not None
+            and mana_value < group.mana_value_min
+        ):
+            return False
+        if (
+            group.mana_value_max is not None
+            and mana_value > group.mana_value_max
+        ):
+            return False
+        card = row.get("card")
+        if group.attacking is not None and (
+            bool(card and card.attacking is not None) != group.attacking
+        ):
+            return False
+        if group.blocking is not None and (
+            bool(card and card.blocking is not None) != group.blocking
+        ):
+            return False
+        if group.tapped is not None and (
+            bool(card and card.tapped) != group.tapped
+        ):
+            return False
+        if group.commander is not None and (
+            bool(card and card.is_commander) != group.commander
+        ):
+            return False
+        if group.token is not None and (
+            bool(card and card.is_token) != group.token
+        ):
+            return False
+        derived = {
+            "land": "land" in types,
+            "creature": "creature" in types,
+            "artifact": "artifact" in types,
+            "enchantment": "enchantment" in types,
+            "permanent": row["category"] == "permanent",
+        }
+        if group.predicate:
+            if group.predicate == "artifact_or_enchantment_or_nonbasic_land":
+                if not (
+                    derived["artifact"]
+                    or derived["enchantment"]
+                    or (
+                        derived["land"]
+                        and "basic" not in supertypes
+                    )
+                ):
+                    return False
+            else:
+                raise GameRuleError(
+                    f"Unsupported target predicate {group.predicate!r}"
+                )
+        for name in (
+            "land",
+            "creature",
+            "artifact",
+            "enchantment",
+            "permanent",
+        ):
+            expected = getattr(group, name)
+            if expected is not None and derived[name] != expected:
+                return False
+        return True
+
+    def _target_candidates(
+        self,
+        controller: str,
+        group: TargetGroup,
+        *,
+        source_ref: str | None = None,
+    ) -> list[str]:
+        values = [
+            str(row["ref"])
+            for row in self._target_candidate_rows(controller, group)
+            if self._target_row_matches(
+                controller,
+                group,
+                row,
+                source_ref=source_ref,
+            )
+        ]
+        values = unique_preserving_order(values)
+        self._optimization_stats(controller)["target_candidates_generated"] += len(
+            values
+        )
+        return values
+
+    def _target_snapshot(self, ref: str) -> dict[str, Any]:
+        if ref in self.state.players:
+            return {
+                "ref": ref,
+                "category": "player",
+                "controller": ref,
+                "owner": ref,
+                "colors": [],
+                "mana_value": 0,
+                "type_line": "Player",
+            }
+        item = next(
+            (candidate for candidate in self.state.stack if candidate.ref == ref),
+            None,
+        )
+        if item is not None:
+            card = self.state.cards.get(item.card_object_id or "")
+            data = self._effective_card_data(card) if card else {}
+            return {
+                "ref": ref,
+                "category": (
+                    "spell" if item.kind == "spell" else "ability"
+                ),
+                "controller": item.controller,
+                "owner": card.owner if card else item.controller,
+                "colors": list(data.get("colors", [])),
+                "mana_value": float(
+                    data.get("mana_value", data.get("cmc", 0)) or 0
+                ),
+                "type_line": str(data.get("type_line") or ""),
+            }
+        card = next(
+            (
+                candidate
+                for candidate in self.state.cards.values()
+                if candidate.ref == ref
+            ),
+            None,
+        )
+        if card is None:
+            return {"ref": ref}
+        data = self._effective_card_data(card)
+        return {
+            "ref": ref,
+            "category": (
+                "permanent" if card.zone == "battlefield" else "card"
+            ),
+            "controller": card.controller,
+            "owner": card.owner,
+            "colors": list(data.get("colors", [])),
+            "mana_value": float(
+                data.get("mana_value", data.get("cmc", 0)) or 0
+            ),
+            "type_line": str(data.get("type_line") or ""),
+        }
+
+    def _target_candidate_map(
+        self,
+        controller: str,
+        plan: TargetPlan,
+        *,
+        source_ref: str | None,
+    ) -> dict[str, list[str]]:
+        return {
+            group.group_id: self._target_candidates(
+                controller,
+                group,
+                source_ref=source_ref,
+            )
+            for group in plan.groups
+        }
+
+    @staticmethod
+    def _target_plan_feasible(
+        plan: TargetPlan,
+        candidates: Mapping[str, Sequence[str]],
+    ) -> bool:
+        for group in plan.groups:
+            if len(candidates.get(group.group_id, ())) < group.min_targets:
+                return False
+        slots = [
+            group
+            for group in plan.groups
+            for _ in range(group.min_targets)
+        ]
+
+        def choose(
+            index: int,
+            selected: dict[str, list[str]],
+            globally_used: set[str],
+        ) -> bool:
+            if index >= len(slots):
+                return True
+            group = slots[index]
+            for ref in candidates.get(group.group_id, ()):
+                own = selected.setdefault(group.group_id, [])
+                if group.distinct and not group.allow_reuse and ref in own:
+                    continue
+                if plan.globally_distinct and ref in globally_used:
+                    continue
+                if any(
+                    ref in selected.get(other, ())
+                    for other in group.different_from_groups
+                ):
+                    continue
+                own.append(ref)
+                added_global = ref not in globally_used
+                if added_global:
+                    globally_used.add(ref)
+                if choose(index + 1, selected, globally_used):
+                    return True
+                own.pop()
+                if added_global:
+                    globally_used.remove(ref)
+            return False
+
+        return choose(0, {}, set())
+
+    def _public_target_schema(
+        self,
+        controller: str,
+        schema: Mapping[str, Any],
+        *,
+        source_ref: str | None,
+    ) -> dict[str, Any] | None:
+        modes = available_modes(schema)
+        if modes:
+            legal_modes: list[str] = []
+            mode_schemas: dict[str, Any] = {}
+            for mode in modes:
+                try:
+                    plan = target_plan(schema, [mode], require_modes=True)
+                except ValueError:
+                    continue
+                candidates = self._target_candidate_map(
+                    controller,
+                    plan,
+                    source_ref=source_ref,
+                )
+                if not self._target_plan_feasible(plan, candidates):
+                    continue
+                legal_modes.append(mode)
+                mode_schemas[mode] = {
+                    "groups": [
+                        group.public_dict(candidates[group.group_id])
+                        for group in plan.groups
+                    ]
+                }
+            if not legal_modes:
+                self._increment_optimization(
+                    controller, "illegal_target_actions_prevented"
+                )
+                self._increment_optimization(
+                    controller, "actions_removed_for_mode_target_failure"
+                )
+                return None
+            legal_refs = unique_preserving_order(
+                ref
+                for mode in legal_modes
+                for group in mode_schemas[mode]["groups"]
+                for ref in group["legal_refs"]
+            )
+            return {
+                "mode_count": int(schema.get("mode_count", 1)),
+                "min_modes": int(
+                    schema.get("min_modes", schema.get("mode_count", 1))
+                ),
+                "max_modes": int(
+                    schema.get("max_modes", schema.get("mode_count", 1))
+                ),
+                "legal_modes": legal_modes,
+                "mode_schemas": mode_schemas,
+                "legal_refs": legal_refs,
+            }
+        try:
+            plan = target_plan(schema)
+        except ValueError:
+            return None
+        candidates = self._target_candidate_map(
+            controller,
+            plan,
+            source_ref=source_ref,
+        )
+        if not self._target_plan_feasible(plan, candidates):
+            self._increment_optimization(
+                controller, "illegal_target_actions_prevented"
+            )
+            self._increment_optimization(
+                controller, "actions_removed_for_no_targets"
+            )
+            return None
+        result = copy.deepcopy(dict(schema))
+        result["groups"] = [
+            group.public_dict(candidates[group.group_id])
+            for group in plan.groups
+        ]
+        if len(plan.groups) == 1:
+            result["legal_refs"] = list(candidates[plan.groups[0].group_id])
+        return result
+
+    @staticmethod
+    def _group_target_submission(
+        plan: TargetPlan,
+        targets: Sequence[Any],
+    ) -> dict[str, list[str]]:
+        grouped: dict[str, list[str]] = {
+            group.group_id: [] for group in plan.groups
+        }
+        if targets and all(isinstance(value, Mapping) for value in targets):
+            for value in targets:
+                group_id = str(value.get("group") or value.get("group_id") or "")
+                ref = value.get("ref", value.get("target"))
+                if group_id not in grouped or ref is None:
+                    raise GameRuleError("Grouped target selection is malformed")
+                grouped[group_id].append(str(ref))
+            return grouped
+        if len(plan.groups) == 1:
+            grouped[plan.groups[0].group_id] = [str(value) for value in targets]
+            return grouped
+        cursor = 0
+        if all(group.min_targets == group.max_targets for group in plan.groups):
+            for group in plan.groups:
+                grouped[group.group_id] = [
+                    str(value)
+                    for value in targets[
+                        cursor : cursor + group.min_targets
+                    ]
+                ]
+                cursor += group.min_targets
+            if cursor == len(targets):
+                return grouped
+        raise GameRuleError(
+            "Multiple variable target groups require "
+            "{group, ref} target selections"
+        )
 
     def _validate_semantic_targets(
         self,
         controller: str,
         program: SemanticProgram | None,
         targets: Sequence[Any],
-    ) -> None:
-        if program is None or not program.target_schema:
-            return
-        required = int(program.target_schema.get("count", 0))
-        if len(targets) != required:
-            raise GameRuleError(f"Action requires exactly {required} target(s)")
-        legal = set(
-            self._semantic_target_options(controller, program.target_schema)
+        *,
+        modes: Sequence[str] = (),
+        source_ref: str | None = None,
+        target_schema: Mapping[str, Any] | None = None,
+    ) -> tuple[list[str], dict[str, list[str]]]:
+        schema = (
+            target_schema
+            if target_schema is not None
+            else program.target_schema
+            if program is not None
+            else None
         )
-        if any(str(target) not in legal for target in targets):
-            raise GameRuleError("Selected target is not legal for this semantic program")
+        if schema is None:
+            if targets or modes:
+                self._increment_optimization(
+                    controller, "target_submissions_rejected"
+                )
+                raise GameRuleError(
+                    "This semantic program does not accept targets or modes"
+                )
+            return [], {}
+        try:
+            plan = target_plan(
+                schema,
+                modes,
+                require_modes=bool(available_modes(schema)),
+            )
+            candidates = self._target_candidate_map(
+                controller,
+                plan,
+                source_ref=source_ref,
+            )
+            grouped = self._group_target_submission(plan, targets)
+            used_global: set[str] = set()
+            for group in plan.groups:
+                chosen = grouped[group.group_id]
+                if not (
+                    group.min_targets
+                    <= len(chosen)
+                    <= group.max_targets
+                ):
+                    raise GameRuleError(
+                        f"Target group {group.group_id} requires between "
+                        f"{group.min_targets} and {group.max_targets} target(s)"
+                    )
+                if (
+                    group.distinct
+                    and not group.allow_reuse
+                    and len(set(chosen)) != len(chosen)
+                ):
+                    raise GameRuleError(
+                        f"Target group {group.group_id} requires distinct targets"
+                    )
+                legal = set(candidates[group.group_id])
+                if any(ref not in legal for ref in chosen):
+                    raise GameRuleError(
+                        "Selected target is not legal for this target group"
+                    )
+                if any(
+                    ref in grouped.get(other, ())
+                    for other in group.different_from_groups
+                    for ref in chosen
+                ):
+                    raise GameRuleError(
+                        "Selected targets violate a different-target restriction"
+                    )
+                if plan.globally_distinct and any(
+                    ref in used_global for ref in chosen
+                ):
+                    raise GameRuleError(
+                        "Target groups require globally distinct targets"
+                    )
+                used_global.update(chosen)
+            flattened = [
+                ref
+                for group in plan.groups
+                for ref in grouped[group.group_id]
+            ]
+            return flattened, grouped
+        except (GameRuleError, ValueError) as exc:
+            self._increment_optimization(
+                controller, "target_submissions_rejected"
+            )
+            if isinstance(exc, GameRuleError):
+                raise
+            raise GameRuleError(str(exc)) from exc
+
+    @staticmethod
+    def _stack_target_schema(
+        item: StackItem,
+        program: SemanticProgram | None,
+    ) -> Mapping[str, Any] | None:
+        if "target_schema_override" in item.context:
+            return dict(item.context["target_schema_override"])
+        return program.target_schema if program is not None else None
+
+    def _stack_source_ref(self, item: StackItem) -> str:
+        if (
+            item.source_object_id
+            and item.source_object_id in self.state.cards
+        ):
+            return self.state.cards[item.source_object_id].ref
+        if (
+            item.card_object_id
+            and item.card_object_id in self.state.cards
+        ):
+            return self.state.cards[item.card_object_id].ref
+        return item.ref
+
+    def _begin_pending_trigger_target_selection(self) -> bool:
+        for item in self.state.stack:
+            if not item.context.get("trigger_target_selection_pending"):
+                continue
+            program = self.semantics.get(item.semantic_key)
+            target_schema = self._stack_target_schema(item, program)
+            if program is None or not target_schema:
+                item.context.pop("trigger_target_selection_pending", None)
+                continue
+            public_schema = self._public_target_schema(
+                item.controller,
+                target_schema,
+                source_ref=self._stack_source_ref(item),
+            )
+            if public_schema is None:
+                self.state.stack.remove(item)
+                self._log(
+                    item.controller,
+                    "stack.trigger.removed",
+                    (
+                        f"Removed {item.ref}: {item.label}; its mandatory "
+                        "targets could not be chosen."
+                    ),
+                    {"stack": item.ref, "reason": "no_legal_targets"},
+                    importance=2,
+                )
+                return self._begin_pending_trigger_target_selection()
+            self.permissions.issue(
+                kind="semantic.target",
+                role="pilot",
+                actors=[item.controller],
+                allowed_actions=["choose"],
+                payload_by_actor={
+                    item.controller: {
+                        "stack": item.ref,
+                        "prompt": f"Choose legal targets for {program.label}.",
+                        "target_schema": public_schema,
+                        "legal_actions": [
+                            {
+                                "id": "choose",
+                                "action": "choose",
+                                "target_schema": public_schema,
+                            }
+                        ],
+                    }
+                },
+                continuation={
+                    "stack_ref": item.ref,
+                    "trigger_creation": True,
+                },
+            )
+            return True
+        return False
 
     def _program_can_auto_resolve(self, item: StackItem) -> bool:
         program = self.semantics.get(item.semantic_key)
-        if program and program.target_schema and not item.targets:
-            options = self._semantic_target_options(
-                item.controller, program.target_schema
+        target_schema = self._stack_target_schema(item, program)
+        if (
+            program
+            and target_schema
+            and not item.targets
+            and not item.context.get("targets_chosen_at_creation")
+        ):
+            public_schema = self._public_target_schema(
+                item.controller,
+                target_schema,
+                source_ref=self._stack_source_ref(item),
             )
-            required = int(program.target_schema.get("count", 0))
-            if len(options) < required:
+            if public_schema is None:
                 self._counter_stack_item(
                     item.ref,
                     destination=item.default_destination or "graveyard",
                     reason="no legal targets",
+                    as_rule=True,
+                    countered_by=item.controller,
                 )
                 self._grant_priority(self.state.active_player)
                 return
@@ -2953,19 +4385,13 @@ class CommanderEngine:
                 payload_by_actor={
                     item.controller: {
                         "stack": item.ref,
-                        "prompt": f"Choose {required} target(s) for {program.label}.",
-                        "target_schema": {
-                            **copy.deepcopy(program.target_schema),
-                            "legal_refs": options,
-                        },
+                        "prompt": f"Choose legal targets for {program.label}.",
+                        "target_schema": public_schema,
                         "legal_actions": [
                             {
                                 "id": "choose",
                                 "action": "choose",
-                                "target_schema": {
-                                    **copy.deepcopy(program.target_schema),
-                                    "legal_refs": options,
-                                },
+                                "target_schema": public_schema,
                             }
                         ],
                     }
@@ -2992,6 +4418,9 @@ class CommanderEngine:
             self._advance_step()
             return
         item = self.state.stack[-1]
+        if item.semantic_key == "builtin:storm":
+            self._prepare_storm_resolution(item)
+            return
         if item.context.get("builtin") == "fetch_land":
             if not item.context.get("choice_made"):
                 options = self._fetch_land_options(
@@ -3038,7 +4467,13 @@ class CommanderEngine:
             )
             return
         program = self.semantics.get(item.semantic_key)
-        if program and program.target_schema and not item.targets:
+        target_schema = self._stack_target_schema(item, program)
+        if (
+            program
+            and target_schema
+            and not item.targets
+            and not item.context.get("targets_chosen_at_creation")
+        ):
             # Triggered semantics acquire controller-chosen targets when the
             # trigger is put onto/processed from the stack. Spell targets were
             # already validated at cast time.
@@ -3049,7 +4484,32 @@ class CommanderEngine:
             and program.trust_level in {"trusted", "provisional", "intentionally_ignored"}
             and not program.requires_arbiter
         ):
-            self._begin_resolve_item(item, program.effects, program.destination or item.default_destination, note=program.notes)
+            option_effects = item.context.get("cast_option_effects")
+            self._begin_resolve_item(
+                item,
+                (
+                    [dict(effect) for effect in option_effects]
+                    if option_effects is not None
+                    else [
+                        *program.effects,
+                        *(
+                            mode_effects(target_schema, item.modes)
+                            if target_schema
+                            else []
+                        ),
+                    ]
+                ),
+                program.destination or item.default_destination,
+                note=program.notes,
+            )
+            return
+        if item.context.get("dynamic_effects") is not None:
+            self._begin_resolve_item(
+                item,
+                list(item.context.get("dynamic_effects") or []),
+                item.default_destination,
+                note=item.notes,
+            )
             return
         if self._program_can_auto_resolve(item):
             self._begin_resolve_item(
@@ -3078,6 +4538,168 @@ class CommanderEngine:
                 }
             },
         )
+
+    def _prepare_storm_resolution(self, item: StackItem) -> None:
+        count = max(0, int(item.context.get("copy_count", 0)))
+        template = dict(item.context.get("copy_template") or {})
+        if count == 0:
+            self.state.stack.remove(item)
+            self._log(
+                item.controller,
+                "stack.resolve",
+                f"Resolved {item.ref} {item.label} with no copies.",
+                {"stack": item.ref, "copy_count": 0},
+                importance=2,
+            )
+            self._grant_priority(self.state.active_player)
+            return
+        target_schema = template.get("target_schema")
+        public_schema = (
+            self._public_target_schema(
+                item.controller,
+                target_schema,
+                source_ref=item.ref,
+            )
+            if isinstance(target_schema, Mapping)
+            else None
+        )
+        copies = [
+            {
+                "copy_index": index,
+                "default_targets": copy.deepcopy(
+                    template.get("targets") or []
+                ),
+                "target_schema": copy.deepcopy(public_schema),
+            }
+            for index in range(count)
+        ]
+        self.permissions.issue(
+            kind="semantic.storm",
+            role="pilot",
+            actors=[item.controller],
+            allowed_actions=["choose"],
+            payload_by_actor={
+                item.controller: {
+                    "stack": item.ref,
+                    "prompt": (
+                        "Choose targets for each storm copy, or keep the "
+                        "copied targets."
+                    ),
+                    "copies": copies,
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "copy_targets",
+                                "copy_count": count,
+                                "may_keep_default": True,
+                            },
+                        }
+                    ],
+                }
+            },
+            continuation={"stack_ref": item.ref},
+        )
+
+    def _complete_storm_choice(self, decision: Any) -> None:
+        seat = decision.actors[0]
+        response = decision.responses[seat]
+        stack_ref = str(decision.continuation.get("stack_ref") or "")
+        trigger = next(
+            (
+                candidate
+                for candidate in self.state.stack
+                if candidate.ref == stack_ref
+                and candidate.semantic_key == "builtin:storm"
+            ),
+            None,
+        )
+        if trigger is None:
+            raise GameRuleError("The storm trigger is no longer on the stack")
+        count = max(0, int(trigger.context.get("copy_count", 0)))
+        template = dict(trigger.context.get("copy_template") or {})
+        submitted = response.get("copy_targets")
+        if submitted is None:
+            submitted = [
+                copy.deepcopy(template.get("targets") or [])
+                for _ in range(count)
+            ]
+        if not isinstance(submitted, list) or len(submitted) != count:
+            raise GameRuleError(
+                "Storm target selection must contain one entry per copy"
+            )
+        program = self.semantics.get(template.get("semantic_key"))
+        target_schema = template.get("target_schema")
+        copies: list[StackItem] = []
+        for index, raw_targets in enumerate(submitted):
+            selected = [
+                str(value) for value in (raw_targets or [])
+            ]
+            defaults = [
+                str(value)
+                for value in template.get("targets") or []
+            ]
+            if selected == defaults:
+                grouped = copy.deepcopy(
+                    dict(template.get("target_groups") or {})
+                )
+            else:
+                selected, grouped = self._validate_semantic_targets(
+                    seat,
+                    program,
+                    selected,
+                    modes=list(template.get("modes") or []),
+                    source_ref=trigger.ref,
+                    target_schema=(
+                        target_schema
+                        if isinstance(target_schema, Mapping)
+                        else None
+                    ),
+                )
+            copy_ref = self._next_ref("S")
+            copies.append(
+                StackItem(
+                    stack_id=self._stable_runtime_id(
+                        "stack", copy_ref
+                    ),
+                    ref=copy_ref,
+                    kind="spell_copy",
+                    controller=seat,
+                    label=f"{template.get('label') or 'Spell'} copy",
+                    semantic_key=template.get("semantic_key"),
+                    targets=selected,
+                    modes=list(template.get("modes") or []),
+                    x_value=template.get("x_value"),
+                    visibility=list(self.seats),
+                    context={
+                        "target_groups": grouped,
+                        "target_snapshots": {
+                            ref: self._target_snapshot(ref)
+                            for ref in selected
+                            if ref is not None
+                        },
+                        "targets_revalidated": False,
+                    },
+                )
+            )
+        self.state.stack.remove(trigger)
+        self.state.stack.extend(copies)
+        self._log(
+            seat,
+            "stack.storm.copy",
+            f"{seat} created {len(copies)} storm copy/copies.",
+            {
+                "source_trigger": trigger.ref,
+                "copies": [copy_item.ref for copy_item in copies],
+                "targets": [
+                    copy.deepcopy(copy_item.targets)
+                    for copy_item in copies
+                ],
+            },
+            importance=2,
+        )
+        self._grant_priority(self.state.active_player)
 
     def _complete_fetch_choice(self, decision: Any) -> None:
         seat = decision.actors[0]
@@ -3118,9 +4740,28 @@ class CommanderEngine:
             raise GameRuleError("The targeted semantic object is no longer on the stack")
         program = self.semantics.get(item.semantic_key)
         targets = list(response.get("targets") or [])
-        self._validate_semantic_targets(seat, program, targets)
-        item.targets = [str(value) for value in targets]
-        self._prepare_stack_resolution()
+        modes = [str(value) for value in response.get("modes") or []]
+        validated, grouped = self._validate_semantic_targets(
+            seat,
+            program,
+            targets,
+            modes=modes,
+            source_ref=self._stack_source_ref(item),
+            target_schema=self._stack_target_schema(item, program),
+        )
+        item.targets = validated
+        item.modes = modes
+        item.context["target_groups"] = grouped
+        item.context["target_snapshots"] = {
+            ref: self._target_snapshot(ref) for ref in validated
+        }
+        item.context["targets_revalidated"] = False
+        if decision.continuation.get("trigger_creation"):
+            item.context.pop("trigger_target_selection_pending", None)
+            item.context["targets_chosen_at_creation"] = True
+            self._grant_priority(self.state.active_player)
+        else:
+            self._prepare_stack_resolution()
 
     def _resolve_fetch_land(self, item: StackItem) -> None:
         seat = item.controller
@@ -3211,7 +4852,13 @@ class CommanderEngine:
             raise GameRuleError("Stack became empty before arbiter resolution")
         item = self.state.stack[-1]
         if action == "counter_as_rule" or action == "fizzle":
-            self._counter_stack_item(item.ref, destination=str(response.get("destination") or "graveyard"), reason=action)
+            self._counter_stack_item(
+                item.ref,
+                destination=str(response.get("destination") or "graveyard"),
+                reason=action,
+                as_rule=True,
+                countered_by="arbiter",
+            )
             self._grant_priority(self.state.active_player)
             return
         effects = [dict(effect) for effect in response.get("effects") or []]
@@ -3241,6 +4888,8 @@ class CommanderEngine:
         *,
         note: str = "",
     ) -> None:
+        if not self._revalidate_resolution_targets(item):
+            return
         self._continue_resolution(
             stack_ref=item.ref,
             effects=[dict(effect) for effect in effects],
@@ -3248,6 +4897,87 @@ class CommanderEngine:
             note=note,
             instruction_pointer=0,
         )
+
+    def _revalidate_resolution_targets(self, item: StackItem) -> bool:
+        if item.context.get("targets_revalidated"):
+            return True
+        program = self.semantics.get(item.semantic_key)
+        target_schema = self._stack_target_schema(item, program)
+        if not program or target_schema is None:
+            item.context["targets_revalidated"] = True
+            return True
+        try:
+            plan = target_plan(
+                target_schema,
+                item.modes,
+                require_modes=bool(available_modes(target_schema)),
+            )
+            candidates = self._target_candidate_map(
+                item.controller,
+                plan,
+                source_ref=item.ref,
+            )
+            grouped = dict(item.context.get("target_groups") or {})
+            if not grouped:
+                grouped = self._group_target_submission(plan, item.targets)
+        except (ValueError, GameRuleError):
+            self._counter_stack_item(
+                item.ref,
+                destination=item.default_destination or "graveyard",
+                reason="target schema invalid at resolution",
+                as_rule=True,
+                countered_by=item.controller,
+            )
+            self._grant_priority(self.state.active_player)
+            return False
+        updated: list[Any] = []
+        valid_count = 0
+        selected_count = 0
+        current_groups: dict[str, list[Any]] = {}
+        for group in plan.groups:
+            legal = set(candidates[group.group_id])
+            current: list[Any] = []
+            for raw_ref in grouped.get(group.group_id, []):
+                selected_count += 1
+                ref = str(raw_ref)
+                if ref in legal:
+                    current.append(ref)
+                    updated.append(ref)
+                    valid_count += 1
+                    continue
+                current.append(None)
+                updated.append(None)
+                self._increment_optimization(
+                    item.controller,
+                    "targets_became_illegal_on_resolution",
+                )
+                self._log(
+                    item.controller,
+                    "target.illegal",
+                    f"{ref} is no longer a legal target for {item.ref}.",
+                    {
+                        "stack": item.ref,
+                        "target": ref,
+                        "group": group.group_id,
+                        "reason": "candidate_no_longer_matches",
+                    },
+                    importance=2,
+                )
+            current_groups[group.group_id] = current
+        item.targets = updated
+        item.context["target_groups_current"] = current_groups
+        item.context["targets_revalidated"] = True
+        if selected_count and valid_count == 0:
+            self._counter_stack_item(
+                item.ref,
+                destination=item.default_destination or "graveyard",
+                reason="all targets illegal on resolution",
+                as_rule=True,
+                countered_by=item.controller,
+            )
+            self._grant_priority(self.state.active_player)
+            return False
+        return True
 
     def _semantic_frame(
         self,
@@ -3310,6 +5040,35 @@ class CommanderEngine:
             return item.ref
         if value == "$x":
             return item.x_value or 0
+        if value == "$turn_sequence":
+            return self.state.turn_sequence
+        if value == "$targets":
+            return [
+                target
+                for target in item.targets
+                if target is not None
+            ]
+        attribute_match = re.fullmatch(
+            r"\$target\.(?P<attribute>controller|owner|mana_value|colors|type_line)"
+            r"[.\[](?P<index>\d+)\]?",
+            value,
+        )
+        if attribute_match:
+            index = int(attribute_match.group("index"))
+            if index >= len(item.targets):
+                raise GameRuleError(
+                    f"Semantic program requested missing target {index}"
+                )
+            target_ref = item.targets[index]
+            if target_ref is None:
+                return None
+            snapshot = dict(
+                item.context.get("target_snapshots", {}).get(
+                    str(target_ref),
+                    self._target_snapshot(str(target_ref)),
+                )
+            )
+            return snapshot.get(attribute_match.group("attribute"))
         target_match = re.fullmatch(r"\$target[.\[](?P<index>\d+)\]?", value)
         if target_match:
             index = int(target_match.group("index"))
@@ -3317,6 +5076,13 @@ class CommanderEngine:
                 raise GameRuleError(f"Semantic program requested missing target {index}")
             return item.targets[index]
         return value
+
+    @staticmethod
+    def _effect_has_missing_target(effect: Mapping[str, Any]) -> bool:
+        return any(
+            key in effect and effect.get(key) is None
+            for key in ("target", "stack", "card", "object")
+        )
 
     def _continue_resolution(
         self,
@@ -3333,6 +5099,20 @@ class CommanderEngine:
         index = 0
         while index < len(effects):
             effect = self._semantic_value(effects[index], item)
+            if self._effect_has_missing_target(effect):
+                self._log(
+                    item.controller,
+                    "effect.target.skipped",
+                    f"Skipped a target-dependent part of {item.ref}.",
+                    {
+                        "stack": item.ref,
+                        "operation": effect.get("op"),
+                        "reason": "that target is illegal",
+                    },
+                    importance=1,
+                )
+                index += 1
+                continue
             if effect.get("op") == "choose_cards_apnap":
                 self._issue_apnap_choice(
                     effect=effect,
@@ -3359,9 +5139,13 @@ class CommanderEngine:
                 )
                 return
             if effect.get("op") in {
+                "choose_card_name",
                 "choose_mana",
+                "counter_unless_pay",
                 "draw_optional_land",
                 "choose_warform",
+                "pay_or_lose",
+                "proliferate",
             }:
                 self._begin_semantic_choice(
                     item=item,
@@ -3429,6 +5213,123 @@ class CommanderEngine:
                             "choice_schema": {
                                 "field": "choice",
                                 "legal_values": list("WUBRGC"),
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "choose_card_name":
+            context.update(
+                {
+                    "prompt": "Choose a Magic card name.",
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "card_name",
+                                "type": "card_name",
+                                "nonempty": True,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "counter_unless_pay":
+            requirements = {
+                key: int((effect.get("cost") or {}).get(key, 0))
+                for key in (
+                    "GENERIC",
+                    "W",
+                    "U",
+                    "B",
+                    "R",
+                    "G",
+                    "C",
+                )
+            }
+            payable = self._cost_is_affordable(seat, requirements)
+            context.update(
+                {
+                    "prompt": "Pay the stated cost to prevent the spell from being countered.",
+                    "cost": requirements,
+                    "payable": payable,
+                    "target_stack": effect.get("stack"),
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "pay",
+                                "legal_values": (
+                                    [True, False] if payable else [False]
+                                ),
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "proliferate":
+            objects = [
+                self.state.cards[object_id].ref
+                for active_seat in self.active_seats
+                for object_id in self.state.players[
+                    active_seat
+                ].zones["battlefield"]
+                if any(
+                    amount > 0
+                    for amount in self.state.cards[
+                        object_id
+                    ].counters.values()
+                )
+            ]
+            players = [
+                active_seat
+                for active_seat in self.active_seats
+                if self.state.players[active_seat].poison > 0
+                or self.state.players[active_seat].energy > 0
+            ]
+            context.update(
+                {
+                    "prompt": "Choose any number of permanents and/or players with counters to proliferate.",
+                    "options": [*objects, *players],
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "objects",
+                                "minimum": 0,
+                                "maximum": len(objects) + len(players),
+                                "legal_refs": [*objects, *players],
+                                "distinct": True,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "pay_or_lose":
+            requirements = {
+                key: int((effect.get("cost") or {}).get(key, 0))
+                for key in ("GENERIC", "W", "U", "B", "R", "G", "C")
+            }
+            payable = self._cost_is_affordable(seat, requirements)
+            context.update(
+                {
+                    "prompt": (
+                        "Pay the delayed Pact cost or lose the game."
+                    ),
+                    "cost": requirements,
+                    "payable": payable,
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "pay",
+                                "legal_values": (
+                                    [True, False] if payable else [False]
+                                ),
                             },
                         }
                     ],
@@ -3581,6 +5482,146 @@ class CommanderEngine:
                 importance=1,
                 changed_players=[seat],
             )
+        elif op == "choose_card_name":
+            raw_name = str(response.get("card_name") or "").strip()
+            if not raw_name:
+                raise GameRuleError("A card name is required")
+            try:
+                chosen = self.card_db.lookup(raw_name).name
+            except KeyError as exc:
+                raise GameRuleError(
+                    f"{raw_name!r} is not a recognized Magic card name"
+                ) from exc
+            source_id = item.card_object_id or item.source_object_id
+            if source_id not in self.state.cards:
+                raise GameRuleError(
+                    "The naming effect no longer has a source object"
+                )
+            source = self.state.cards[source_id]
+            source.annotations["chosen_name"] = chosen
+            self._log(
+                seat,
+                "card.name.chosen",
+                f"{seat} chose {chosen} for {source.ref}.",
+                {"source": source.ref, "card_name": chosen},
+                importance=2,
+                changed_objects=[source.object_id],
+            )
+        elif op == "counter_unless_pay":
+            requirements = {
+                key: int((effect.get("cost") or {}).get(key, 0))
+                for key in (
+                    "GENERIC",
+                    "W",
+                    "U",
+                    "B",
+                    "R",
+                    "G",
+                    "C",
+                )
+            }
+            target_stack = str(effect.get("stack") or "")
+            if bool(response.get("pay", False)):
+                if not self._cost_is_affordable(seat, requirements):
+                    raise GameRuleError(
+                        "The counter-prevention cost is no longer payable"
+                    )
+                self._pay_for_cost(
+                    seat,
+                    requirements,
+                    {"pay": "auto"},
+                )
+                self._log(
+                    seat,
+                    "counter.unless.paid",
+                    f"{seat} paid to prevent {target_stack} from being countered.",
+                    {"stack": target_stack, "cost": requirements},
+                    importance=2,
+                    changed_players=[seat],
+                )
+            elif any(
+                candidate.ref == target_stack
+                for candidate in self.state.stack
+            ):
+                self._counter_stack_item(
+                    target_stack,
+                    reason=item.label,
+                    countered_by=item.controller,
+                )
+        elif op == "proliferate":
+            selected = [
+                str(value)
+                for value in response.get(
+                    "objects", response.get("choices", [])
+                )
+            ]
+            legal = set(
+                decision.payload_by_actor.get(seat, {}).get(
+                    "options", []
+                )
+            )
+            if (
+                len(selected) != len(set(selected))
+                or any(value not in legal for value in selected)
+            ):
+                raise GameRuleError(
+                    "Proliferate choices must be distinct eligible objects"
+                )
+            changed_objects: list[str] = []
+            changed_players: list[str] = []
+            for value in selected:
+                if value in self.state.players:
+                    player = self.state.players[value]
+                    if player.poison > 0:
+                        player.poison += 1
+                    if player.energy > 0:
+                        player.energy += 1
+                    changed_players.append(value)
+                    continue
+                card = self._resolve_object(
+                    seat, value, zones={"battlefield"}
+                )
+                for name, amount in list(card.counters.items()):
+                    if amount > 0:
+                        card.counters[name] = amount + 1
+                changed_objects.append(card.object_id)
+            self._log(
+                seat,
+                "counter.proliferate",
+                f"{seat} proliferated {len(selected)} object(s).",
+                {"objects": selected},
+                importance=2,
+                changed_objects=changed_objects,
+                changed_players=changed_players,
+            )
+        elif op == "pay_or_lose":
+            requirements = {
+                key: int((effect.get("cost") or {}).get(key, 0))
+                for key in ("GENERIC", "W", "U", "B", "R", "G", "C")
+            }
+            if bool(response.get("pay", False)):
+                if not self._cost_is_affordable(seat, requirements):
+                    raise GameRuleError(
+                        "The delayed Pact cost is no longer payable"
+                    )
+                self._pay_for_cost(
+                    seat,
+                    requirements,
+                    {"pay": "auto"},
+                )
+                self._log(
+                    seat,
+                    "pact.paid",
+                    f"{seat} paid the delayed Pact cost.",
+                    {"cost": requirements, "stack": item.ref},
+                    importance=2,
+                    changed_players=[seat],
+                )
+            else:
+                self._eliminate_players(
+                    [seat],
+                    reason="failed to pay Pact of Negation",
+                )
         elif op == "draw_optional_land":
             selected = response.get("card")
             options = set(
@@ -3647,6 +5688,8 @@ class CommanderEngine:
                 "artifact.enter",
                 {"card": created.ref, "controller": seat},
             )
+        if item not in self.state.stack:
+            return
         remaining = [dict(value) for value in continuation.get("remaining", [])]
         if op == "draw_optional_land" and effect.get("_repeat"):
             repeated = dict(effect)
@@ -3732,6 +5775,15 @@ class CommanderEngine:
             return "creature" not in type_words
         if predicate == "mana_cost_0_or_1":
             return record.mana_cost in {"{0}", "{1}"}
+        if predicate == "land_with_basic_land_type":
+            return (
+                "land" in type_words
+                and bool(
+                    subtype_words.intersection(
+                        {"plains", "island", "swamp", "mountain", "forest"}
+                    )
+                )
+            )
         raise GameRuleError(f"Unsupported search predicate {predicate!r}")
 
     def _semantic_search_options(
@@ -4081,16 +6133,77 @@ class CommanderEngine:
             instruction_pointer=int(frame.get("instruction_pointer", 0)) + 1,
         )
 
-    def _counter_stack_item(self, value: str, *, destination: str = "graveyard", reason: str = "countered") -> StackItem:
+    def _stack_item_can_be_countered(self, item: StackItem) -> bool:
+        if item.context.get("cant_be_countered"):
+            return False
+        if item.card_object_id:
+            card = self.state.cards[item.card_object_id]
+            if card.annotations.get("cant_be_countered"):
+                return False
+            record = self.card_record(card)
+            if (
+                record
+                and "this spell can't be countered"
+                in record.oracle_text.casefold()
+            ):
+                return False
+        return True
+
+    def _counter_stack_item(
+        self,
+        value: str,
+        *,
+        destination: str = "graveyard",
+        reason: str = "countered",
+        as_rule: bool = False,
+        countered_by: str | None = None,
+    ) -> StackItem:
         item = next((candidate for candidate in self.state.stack if candidate.ref == value or candidate.stack_id == value), None)
         if item is None:
             raise GameRuleError(f"No stack object {value}")
+        if not as_rule and not self._stack_item_can_be_countered(item):
+            self._log(
+                countered_by,
+                "stack.counter.failed",
+                f"{item.ref} {item.label} could not be countered.",
+                {
+                    "stack": item.ref,
+                    "reason": reason,
+                    "cant_be_countered": True,
+                },
+                importance=2,
+            )
+            return item
         self.state.stack.remove(item)
         if item.card_object_id:
             card = self.state.cards[item.card_object_id]
             if card.zone == "stack":
                 self.move_card(card.object_id, destination, reason=reason, log=False)
-        self._log(None, "stack.counter", f"{item.ref} {item.label} was countered.", {"stack": item.ref, "destination": destination, "reason": reason}, importance=2)
+        telemetry_seat = (
+            countered_by
+            if countered_by in self.state.players
+            else item.controller
+        )
+        self._increment_optimization(
+            telemetry_seat,
+            (
+                "spells_countered_by_rules"
+                if as_rule
+                else "spells_countered_by_effect"
+            ),
+        )
+        self._log(
+            countered_by,
+            "stack.counter",
+            f"{item.ref} {item.label} was countered.",
+            {
+                "stack": item.ref,
+                "destination": destination,
+                "reason": reason,
+                "counter_kind": "rules" if as_rule else "effect",
+            },
+            importance=2,
+        )
         return item
 
     # ------------------------------------------------------------------
@@ -4438,6 +6551,11 @@ class CommanderEngine:
         if stat == "power":
             base += card.counters.get("+1/+1", 0)
             base -= card.counters.get("-1/-1", 0)
+        base += int(
+            dict(card.annotations.get("until_end_of_turn") or {}).get(
+                stat, 0
+            )
+        )
         return base
 
     def _legend_groups(self) -> list[tuple[str, str, list[str]]]:
@@ -4511,6 +6629,8 @@ class CommanderEngine:
                     payload_by_actor={seat: {"name": name, "keep_one": [self.state.cards[oid].ref for oid in ids]}},
                     continuation={"object_ids": ids},
                 )
+                return True
+            if self._begin_pending_trigger_target_selection():
                 return True
             return False
         raise StateInvariantError("State-based action loop did not stabilize")
@@ -4600,8 +6720,100 @@ class CommanderEngine:
         reason = str(effect.get("reason") or ("cost" if as_cost else "effect"))
         if op == "draw":
             return self.draw(str(effect.get("player") or actor), int(effect.get("count", 1)), reason=reason)
+        if op == "mana":
+            seat = str(effect.get("player") or actor)
+            color = str(effect.get("color") or "C").upper()
+            amount = int(effect.get("amount", 1))
+            if color not in "WUBRGC" or len(color) != 1 or amount < 0:
+                raise GameRuleError("Invalid semantic mana effect")
+            self.state.players[seat].mana_pool[color] += amount
+            self._log(
+                actor,
+                "mana.semantic",
+                f"{seat} added {amount} {color}.",
+                {"bundle": {color: amount}, "reason": reason},
+                importance=1,
+                changed_players=[seat],
+            )
+            return amount
+        if op == "delayed_mana":
+            seat = str(effect.get("player") or actor)
+            amount = int(effect.get("amount", 0))
+            return self.schedule_delayed_trigger(
+                controller=seat,
+                label=str(effect.get("label") or "Delayed mana"),
+                event_kind="step.begin",
+                condition={
+                    "player": seat,
+                    "phase": ["precombat_main", "postcombat_main"],
+                    "step": "main",
+                },
+                stack_template={
+                    "label": str(effect.get("label") or "Delayed mana"),
+                    "context": {
+                        "dynamic_effects": [
+                            {
+                                "op": "mana",
+                                "player": seat,
+                                "color": str(effect.get("color") or "C"),
+                                "amount": amount,
+                            }
+                        ]
+                    },
+                },
+                once=True,
+            ).ref
+        if op == "delayed_pact_payment":
+            seat = str(effect.get("player") or actor)
+            cost = dict(effect.get("cost") or {})
+            return self.schedule_delayed_trigger(
+                controller=seat,
+                label=str(
+                    effect.get("label")
+                    or "Pact of Negation delayed payment"
+                ),
+                event_kind="step.begin",
+                condition={
+                    "player": seat,
+                    "phase": "beginning",
+                    "step": "upkeep",
+                    "after_turn_sequence": self.state.turn_sequence,
+                },
+                stack_template={
+                    "label": str(
+                        effect.get("label")
+                        or "Pact of Negation delayed payment"
+                    ),
+                    "context": {
+                        "dynamic_effects": [
+                            {
+                                "op": "pay_or_lose",
+                                "player": seat,
+                                "cost": cost,
+                            }
+                        ]
+                    },
+                },
+                once=True,
+            ).ref
         if op in {"move", "sacrifice", "destroy", "exile", "bounce", "discard"}:
             card = self._resolve_object(actor, str(effect["card"]))
+            if op == "destroy":
+                keywords = {
+                    str(value).casefold()
+                    for value in self._effective_card_data(card).get(
+                        "keywords", []
+                    )
+                }
+                if "indestructible" in keywords:
+                    self._log(
+                        actor,
+                        "effect.destroy.prevented",
+                        f"{card.ref} was not destroyed because it is indestructible.",
+                        {"object": card.ref, "reason": reason},
+                        importance=1,
+                    )
+                    return None
             destination = {
                 "sacrifice": "graveyard",
                 "destroy": "graveyard",
@@ -4610,6 +6822,188 @@ class CommanderEngine:
                 "discard": "graveyard",
             }.get(op, str(effect.get("destination") or "graveyard"))
             return self.move_card(card.object_id, destination, controller=effect.get("controller"), tapped=bool(effect.get("tapped", False)), reason=reason)
+        if op in {"destroy_all", "exile_all"}:
+            specification = dict(effect.get("filter") or {})
+            specification.setdefault("zones", ["battlefield"])
+            specification.setdefault("categories", ["permanent"])
+            specification.setdefault("min", 0)
+            specification.setdefault("max", 10000)
+            group = TargetGroup.from_mapping(
+                specification,
+                default_id="affected",
+            )
+            source_ref = str(effect.get("source") or "") or None
+            refs = [
+                str(row["ref"])
+                for row in self._target_candidate_rows(actor, group)
+                if self._target_row_matches(
+                    actor,
+                    group,
+                    row,
+                    source_ref=source_ref,
+                    as_target=False,
+                )
+            ]
+            moved: list[str] = []
+            for ref in refs:
+                try:
+                    card = self._resolve_object(
+                        actor, ref, zones={"battlefield"}
+                    )
+                except GameRuleError:
+                    continue
+                if op == "destroy_all":
+                    keywords = {
+                        str(value).casefold()
+                        for value in self._effective_card_data(card).get(
+                            "keywords", []
+                        )
+                    }
+                    if "indestructible" in keywords:
+                        continue
+                self.move_card(
+                    card.object_id,
+                    "graveyard" if op == "destroy_all" else "exile",
+                    reason=reason,
+                )
+                moved.append(ref)
+            return moved
+        if op == "exile_opponent_graveyards":
+            moved: list[str] = []
+            for opponent in self.active_seats:
+                if opponent == actor:
+                    continue
+                for object_id in list(
+                    self.state.players[opponent].zones["graveyard"]
+                ):
+                    card = self.state.cards[object_id]
+                    self.move_card(
+                        card.object_id,
+                        "exile",
+                        reason=reason,
+                    )
+                    moved.append(card.ref)
+            return moved
+        if op == "destroy_selected":
+            moved: list[str] = []
+            for raw_ref in effect.get("cards") or []:
+                if raw_ref is None:
+                    continue
+                try:
+                    card = self._resolve_object(
+                        actor,
+                        str(raw_ref),
+                        zones={"battlefield"},
+                    )
+                except GameRuleError:
+                    continue
+                keywords = {
+                    str(value).casefold()
+                    for value in self._effective_card_data(card).get(
+                        "keywords", []
+                    )
+                }
+                if "indestructible" in keywords:
+                    continue
+                self.move_card(
+                    card.object_id,
+                    "graveyard",
+                    reason=reason,
+                )
+                moved.append(card.ref)
+            return moved
+        if op == "toxic_deluge":
+            amount = int(effect.get("amount", 0))
+            if amount < 0:
+                raise GameRuleError("Toxic Deluge X cannot be negative")
+            affected_ids: list[str] = []
+            for seat in self.active_seats:
+                for object_id in list(
+                    self.state.players[seat].zones["battlefield"]
+                ):
+                    card = self.state.cards[object_id]
+                    if "creature" not in str(
+                        self._effective_card_data(card).get("type_line")
+                        or ""
+                    ).casefold():
+                        continue
+                    until_end = card.annotations.setdefault(
+                        "until_end_of_turn", {}
+                    )
+                    until_end["power"] = int(
+                        until_end.get("power", 0)
+                    ) - amount
+                    until_end["toughness"] = int(
+                        until_end.get("toughness", 0)
+                    ) - amount
+                    affected_ids.append(card.object_id)
+            self._log(
+                actor,
+                "effect.toxic_deluge",
+                f"Creatures got -{amount}/-{amount} until end of turn.",
+                {
+                    "amount": amount,
+                    "objects": [
+                        self.state.cards[object_id].ref
+                        for object_id in affected_ids
+                    ],
+                },
+                importance=2,
+                changed_objects=affected_ids,
+            )
+            return [
+                self.state.cards[object_id].ref
+                for object_id in affected_ids
+            ]
+        if op == "shuffle_into_library":
+            card = self._resolve_object(
+                actor, str(effect["card"]), zones={"battlefield"}
+            )
+            owner = card.owner
+            moved = self.move_card(
+                card.object_id,
+                "library",
+                reason=reason,
+            )
+            self.shuffle_library(owner, reason=reason)
+            return moved.ref
+        if op == "reveal_top_permanent":
+            seat = str(effect.get("player") or actor)
+            library = self.state.players[seat].zones["library"]
+            if not library:
+                return None
+            card = self.state.cards[library[-1]]
+            card.known_to = list(self.seats)
+            card.revealed_to = list(self.seats)
+            self._log(
+                actor,
+                "library.reveal",
+                f"{seat} revealed {card.ref} {card.printed_name}.",
+                {"player": seat, "object": card.ref},
+                importance=2,
+                changed_objects=[card.object_id],
+            )
+            data = self._effective_card_data(card)
+            types, _, _ = self._type_parts(
+                str(data.get("type_line") or "")
+            )
+            if types.intersection(
+                {
+                    "artifact",
+                    "battle",
+                    "creature",
+                    "enchantment",
+                    "land",
+                    "planeswalker",
+                }
+            ):
+                self.move_card(
+                    card.object_id,
+                    "battlefield",
+                    controller=seat,
+                    reason=reason,
+                )
+            return card.ref
         if op == "damage":
             target = str(effect["target"])
             amount = int(effect.get("amount", 0))
@@ -4627,6 +7021,19 @@ class CommanderEngine:
             delta = int(effect.get("delta", 0))
             self.state.players[seat].life += delta
             self._log(actor, "effect.life", f"{seat}'s life changed by {delta}.", {"player": seat, "delta": delta}, importance=1, changed_players=[seat])
+            return self.state.players[seat].life
+        if op == "lose_life":
+            seat = str(effect.get("player") or actor)
+            amount = max(0, int(effect.get("amount", 0)))
+            self.state.players[seat].life -= amount
+            self._log(
+                actor,
+                "effect.life",
+                f"{seat} lost {amount} life.",
+                {"player": seat, "delta": -amount},
+                importance=1,
+                changed_players=[seat],
+            )
             return self.state.players[seat].life
         if op == "energy":
             seat = str(effect.get("player") or actor)
@@ -4693,17 +7100,24 @@ class CommanderEngine:
             )
             if stack_item is not None:
                 if not stack_item.card_object_id:
-                    raise GameRuleError("Target stack object is not a blue spell")
+                    return None
                 record = self.card_record(stack_item.card_object_id)
                 if not record or "U" not in record.colors:
-                    raise GameRuleError("Target spell is no longer blue")
+                    return None
                 return self._counter_stack_item(
-                    target, reason="Red/Pyroblast semantic"
+                    target,
+                    reason="Red/Pyroblast semantic",
+                    countered_by=actor,
                 ).ref
-            card = self._resolve_object(actor, target, zones={"battlefield"})
+            try:
+                card = self._resolve_object(
+                    actor, target, zones={"battlefield"}
+                )
+            except GameRuleError:
+                return None
             record = self.card_record(card)
             if not record or "U" not in record.colors:
-                raise GameRuleError("Target permanent is no longer blue")
+                return None
             self.move_card(
                 card.object_id,
                 "graveyard",
@@ -4723,7 +7137,12 @@ class CommanderEngine:
             self.move_card(card.object_id, "graveyard", reason=reason)
             return card.ref
         if op == "counter_stack":
-            return self._counter_stack_item(str(effect["stack"]), destination=str(effect.get("destination") or "graveyard"), reason=reason).ref
+            return self._counter_stack_item(
+                str(effect["stack"]),
+                destination=str(effect.get("destination") or "graveyard"),
+                reason=reason,
+                countered_by=actor,
+            ).ref
         if op == "extra_turn":
             return self.schedule_extra_turn(str(effect.get("player") or actor), source=str(effect.get("source") or reason)).turn_id
         if op == "delayed_trigger":

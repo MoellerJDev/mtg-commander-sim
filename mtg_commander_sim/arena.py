@@ -937,7 +937,7 @@ def run_pilot_mcp_stdio(
                     "capabilities": {"tools": {}},
                     "serverInfo": {
                         "name": f"mtg-pilot-{tools.seat}",
-                        "version": "0.6.0",
+                        "version": "0.7.0",
                     },
                 }
             elif method == "notifications/initialized":

@@ -184,6 +184,29 @@ auto-pass, ordered plan, or incorrect suppression. A nonzero
 
 The engine should not infer arbitrary card behavior from prose during a state transition.
 
+### Exact target plans
+
+Version 0.7.0 compiles target requirements into declarative plans before an
+action is exposed. A plan contains one or more structural groups with public
+candidate sets, minimum/maximum counts, distinctness and cross-group
+constraints, controller/owner relationships, zone and characteristic filters,
+and optional mode-specific schemas. Candidate sets remain compact; the engine
+does not enumerate every target tuple.
+
+The same plan is validated when the command is submitted and again when the
+object resolves. Legal surviving targets resolve independently. If every
+selected target is illegal, the spell or ability is countered by the rules;
+this is recorded separately from an effect that counters it. Trigger targets
+are chosen as the trigger is put on the stack, before response priority.
+Hidden zones are never accepted by this public target-query path, and face-down
+objects contribute only characteristics visible to the querying seat.
+
+Legal-action telemetry records candidates generated, actions removed for
+missing targets or failed modal targets, rejected submissions, targets that
+became illegal, rules/effect counters, and stack-interaction windows. Any
+advertised mandatory-target action lacking legal targets fails
+`legal_action_exposure` and the record fidelity gate.
+
 When the top stack object lacks registered semantics:
 
 1. the kernel creates an `arbiter.resolve` capability

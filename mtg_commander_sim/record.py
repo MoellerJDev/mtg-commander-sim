@@ -16,7 +16,7 @@ from .semantics import SemanticRegistry
 from .util import stable_json
 
 RECORD_SCHEMA_VERSION = 3
-ENGINE_VERSION = "0.6.0"
+ENGINE_VERSION = "0.7.0"
 TRACE_LEVELS = {"minimal", "standard", "debug"}
 RUN_STATES = {
     "created",

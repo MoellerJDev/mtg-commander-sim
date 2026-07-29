@@ -19,35 +19,50 @@ BUILTIN_PACK_DIRECTORY = Path(__file__).resolve().parent / "semantic_packs"
 VALID_EFFECT_OPERATIONS = {
     "bounce",
     "change_control",
+    "choose_card_name",
     "choose_cards_apnap",
     "choose_mana",
     "choose_warform",
     "counter",
     "counter_or_destroy_blue",
     "counter_stack",
+    "counter_unless_pay",
     "create_token",
     "create_treasure",
     "damage",
+    "delayed_mana",
+    "delayed_pact_payment",
     "delayed_trigger",
     "destroy",
+    "destroy_all",
+    "destroy_selected",
     "discard",
     "drain_opponent",
     "draw",
     "draw_optional_land",
     "energy",
     "exile",
+    "exile_all",
+    "exile_opponent_graveyards",
     "extra_turn",
     "field_of_dead_token",
     "life",
+    "lose_life",
     "look_top",
     "move",
+    "mana",
     "note",
     "reorder_top",
+    "reveal_top_permanent",
     "search",
+    "shuffle_into_library",
     "sacrifice",
     "sacrifice_if_present",
     "tap",
+    "toxic_deluge",
     "untap",
+    "pay_or_lose",
+    "proliferate",
 }
 
 
@@ -70,6 +85,7 @@ class SemanticProgram:
     tests: list[str] = field(default_factory=list)
     handlers: list[dict[str, Any]] = field(default_factory=list)
     target_schema: dict[str, Any] | None = None
+    cost_schema: dict[str, Any] | None = None
     coverage: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -77,7 +93,21 @@ class SemanticProgram:
             raise ValueError(f"Unknown semantic trust level {self.trust_level!r}")
         if self.version < 1 or self.semantic_schema_version < 1:
             raise ValueError("Semantic versions must be positive")
-        for effect in self.effects:
+        effects_to_validate = list(self.effects)
+        mode_definitions = (
+            self.target_schema.get("modes")
+            if isinstance(self.target_schema, Mapping)
+            else None
+        )
+        if isinstance(mode_definitions, Mapping):
+            for definition in mode_definitions.values():
+                if isinstance(definition, Mapping):
+                    effects_to_validate.extend(
+                        effect
+                        for effect in definition.get("effects", [])
+                        if isinstance(effect, Mapping)
+                    )
+        for effect in effects_to_validate:
             operation = str(effect.get("op") or "")
             if operation not in VALID_EFFECT_OPERATIONS:
                 raise ValueError(
@@ -124,6 +154,7 @@ class SemanticProgram:
             "tests": self.tests,
             "handlers": self.handlers,
             "target_schema": self.target_schema,
+            "cost_schema": self.cost_schema,
             "coverage": self.coverage,
         }
 
@@ -151,6 +182,11 @@ class SemanticProgram:
             target_schema=(
                 dict(data["target_schema"])
                 if isinstance(data.get("target_schema"), Mapping)
+                else None
+            ),
+            cost_schema=(
+                dict(data["cost_schema"])
+                if isinstance(data.get("cost_schema"), Mapping)
                 else None
             ),
             coverage=[str(value) for value in data.get("coverage", [])],

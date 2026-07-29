@@ -113,10 +113,36 @@ def _scripted_choice(
         )
         choices: dict[str, Any] = {}
         if kind == "semantic.target":
-            count = int(context.get("target_schema", {}).get("count", 1))
-            choices["targets"] = options[:count]
+            schema = dict(context.get("target_schema") or {})
+            legal_modes = list(schema.get("legal_modes") or [])
+            if legal_modes:
+                mode = legal_modes[0]
+                choices["modes"] = [mode]
+                groups = list(
+                    schema.get("mode_schemas", {})
+                    .get(mode, {})
+                    .get("groups", [])
+                )
+            else:
+                groups = list(schema.get("groups") or [])
+            choices["targets"] = [
+                ref
+                for group in groups
+                for ref in list(group.get("legal_refs") or [])[
+                    : int(group.get("min", 0))
+                ]
+            ]
         elif context.get("operation") == "choose_mana":
             choices["choice"] = "G"
+        elif context.get("operation") == "choose_card_name":
+            choices["card_name"] = "Sensei's Divining Top"
+        elif context.get("operation") in {
+            "counter_unless_pay",
+            "pay_or_lose",
+        }:
+            choices["pay"] = False
+        elif context.get("operation") == "proliferate":
+            choices["objects"] = options
         elif options:
             choices["card"] = options[0]
         return {
@@ -186,13 +212,92 @@ def _scripted_choice(
             "plan": "DEVELOP_MANA",
             "reason": "Make the available land drop and preserve life unless tempo requires otherwise.",
         }
-    cast = next((item for item in actions if item.get("kind") == "cast"), None)
+    def useful_cast(item: dict[str, Any]) -> bool:
+        options = list(item.get("cost_options") or [])
+        candidate_options = (
+            [
+                option
+                for option in options
+                if option.get("id") == "normal"
+            ]
+            or options
+        )
+        if not candidate_options:
+            return True
+        option = candidate_options[0]
+        schema = dict(
+            option.get("target_schema")
+            or item.get("target_schema")
+            or {}
+        )
+        groups = list(schema.get("groups") or [])
+        if (
+            option.get("kind") == "alternate_exile"
+            and groups
+            and all(int(group.get("min", 0)) == 0 for group in groups)
+            and not any(group.get("legal_refs") for group in groups)
+        ):
+            return False
+        return True
+
+    cast = next(
+        (
+            item
+            for item in actions
+            if item.get("kind") == "cast" and useful_cast(item)
+        ),
+        None,
+    )
     if cast:
-        target_schema = cast.get("target_schema") or {}
         choices = {}
+        cost_options = list(cast.get("cost_options") or [])
+        selected_cost = (
+            next(
+                (
+                    option
+                    for option in cost_options
+                    if option.get("id") == "normal"
+                ),
+                None,
+            )
+            or (cost_options[0] if cost_options else None)
+        )
+        if selected_cost:
+            choices["cost_option"] = selected_cost["id"]
+            choice_schema = dict(
+                selected_cost.get("choice_schema") or {}
+            )
+            if choice_schema.get("exile_card", {}).get("legal_refs"):
+                choices["exile_card"] = choice_schema["exile_card"][
+                    "legal_refs"
+                ][0]
+            if choice_schema.get("x"):
+                choices["x"] = int(
+                    choice_schema["x"].get("minimum", 0)
+                )
+        target_schema = dict(
+            (selected_cost or {}).get("target_schema")
+            or cast.get("target_schema")
+            or {}
+        )
         if target_schema:
-            choices["targets"] = list(target_schema.get("legal_refs") or [])[
-                : int(target_schema.get("count", 0))
+            legal_modes = list(target_schema.get("legal_modes") or [])
+            if legal_modes:
+                mode = legal_modes[0]
+                choices["modes"] = [mode]
+                groups = list(
+                    target_schema.get("mode_schemas", {})
+                    .get(mode, {})
+                    .get("groups", [])
+                )
+            else:
+                groups = list(target_schema.get("groups") or [])
+            choices["targets"] = [
+                ref
+                for group in groups
+                for ref in list(group.get("legal_refs") or [])[
+                    : int(group.get("min", 0))
+                ]
             ]
         return {
             "action_id": cast["id"],

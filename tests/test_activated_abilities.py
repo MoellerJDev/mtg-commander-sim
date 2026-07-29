@@ -41,6 +41,13 @@ class ActivatedAbilityAndCostTests(unittest.TestCase):
             engine.move_card(boseiju.object_id, "hand", log=False)
         commander_id = engine.state.players["B"].zones["command"][0]
         engine.move_card(commander_id, "battlefield", controller="B", log=False)
+        target = self._owned_named(engine, "A", "Sol Ring")
+        engine.move_card(
+            target.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+        )
         engine.state.players["B"].mana_pool["G"] = 1
         self._priority_for(session, "B")
 
@@ -58,7 +65,7 @@ class ActivatedAbilityAndCostTests(unittest.TestCase):
                 "source": boseiju.ref,
                 "from": "hand",
                 "ability": "ab2",
-                "targets": ["A"],
+                "targets": [target.ref],
                 "pay": "manual",
                 "payment": {"G": 1},
             },
@@ -205,7 +212,14 @@ class ActivatedAbilityAndCostTests(unittest.TestCase):
         boseiju = self._owned_named(engine, "B", "Boseiju, Who Endures")
         breeding_pool = self._owned_named(engine, "B", "Breeding Pool")
         island = self._owned_named(engine, "B", "Island")
+        target = self._owned_named(engine, "A", "Sol Ring")
         engine.move_card(boseiju.object_id, "hand", log=False)
+        engine.move_card(
+            target.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+        )
         for card in (breeding_pool, island):
             engine.move_card(
                 card.object_id,

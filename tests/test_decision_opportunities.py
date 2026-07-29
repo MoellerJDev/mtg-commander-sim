@@ -275,6 +275,45 @@ class DecisionOpportunityTests(unittest.TestCase):
             review["interaction_opportunities"]["note"],
         )
 
+    def test_illegal_target_advertisement_fails_exposure_dimension(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            seed=306,
+            auto_pass_empty=True,
+        )
+        keep_all(session)
+        session.state.players["A"].stats.setdefault(
+            "decision_optimization", {}
+        ).update(
+            {
+                "illegal_target_actions_advertised": 1,
+                "illegal_target_actions_prevented": 4,
+            }
+        )
+
+        review = derive_review(session.engine, decisions=[])
+
+        self.assertEqual(
+            "rules_test", review["fidelity"]["classification"]
+        )
+        self.assertEqual(
+            "fail",
+            review["fidelity"]["dimensions"]["legal_action_exposure"],
+        )
+        target_audit = review["pilot_audit"]["target_action_audit"]
+        self.assertEqual(1, target_audit["illegal_target_actions_advertised"])
+        self.assertGreaterEqual(
+            target_audit["illegal_target_actions_prevented"], 4
+        )
+        self.assertTrue(
+            any(
+                "advertised without a legal mandatory target" in failure
+                for failure in review["fidelity"]["failures"]
+            )
+        )
+
     def test_fetch_untapped_and_cast_accelerator_ordered_plan(self):
         session = CommanderSession.create(
             self.db,

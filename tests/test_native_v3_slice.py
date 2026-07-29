@@ -475,6 +475,7 @@ class TrustedSemanticScenarioTests(unittest.TestCase):
             "pilot:A",
             {
                 "action_id": action["id"],
+                "modes": ["destroy"],
                 "targets": [zimone.ref],
                 "pay": "manual",
                 "payment": {"R": 1},

@@ -578,6 +578,17 @@ def derive_review(
             "yields_invalidated_by_action_change",
             "yields_invalidated_by_stack",
             "yields_invalidated_by_public_change",
+            "illegal_target_actions_prevented",
+            "illegal_target_actions_advertised",
+            "actions_removed_for_no_targets",
+            "actions_removed_for_mode_target_failure",
+            "target_candidates_generated",
+            "target_submissions_rejected",
+            "targets_became_illegal_on_resolution",
+            "spells_countered_by_rules",
+            "spells_countered_by_effect",
+            "stack_interaction_windows_created",
+            "stack_interaction_windows_auto_passed",
         )
     }
     suppressed_meaningful = max(
@@ -617,6 +628,9 @@ def derive_review(
     )
     legal_exposure_stop = (
         stop_reason.get("kind") == "legal_action_exposure_failure"
+    )
+    illegal_target_exposure = (
+        optimization_totals["illegal_target_actions_advertised"] > 0
     )
     manifest_deck_fingerprints = [
         str(
@@ -685,6 +699,11 @@ def derive_review(
         fidelity_failures.append(
             "legal-action exposure failed at the recorded arena stop boundary"
         )
+    if illegal_target_exposure:
+        fidelity_failures.append(
+            f"{optimization_totals['illegal_target_actions_advertised']} action(s) "
+            "were advertised without a legal mandatory target"
+        )
     if profile_match_value is False:
         fidelity_failures.append("pilot profile deck-list fingerprint mismatch")
     if duplicated_deck_fixture:
@@ -706,7 +725,7 @@ def derive_review(
         arena.get("seat_projection_verified") is False,
         arena.get("provider_identity_verified") is False,
     ]
-    if suppressed_meaningful or legal_exposure_stop:
+    if suppressed_meaningful or legal_exposure_stop or illegal_target_exposure:
         classification = "rules_test"
     elif not state.game_over:
         classification = (
@@ -871,7 +890,11 @@ def derive_review(
         "pilot_trace": "pass" if legal_action_trace_complete else "fail",
         "legal_action_exposure": (
             "fail"
-            if suppressed_meaningful or legal_exposure_stop
+            if (
+                suppressed_meaningful
+                or legal_exposure_stop
+                or illegal_target_exposure
+            )
             else "pass"
             if legal_action_trace_complete
             else "unavailable"
@@ -1254,6 +1277,22 @@ def derive_review(
                 )
             },
             "action_opportunity_coverage": opportunity_coverage,
+            "target_action_audit": {
+                key: optimization_totals[key]
+                for key in (
+                    "illegal_target_actions_prevented",
+                    "illegal_target_actions_advertised",
+                    "actions_removed_for_no_targets",
+                    "actions_removed_for_mode_target_failure",
+                    "target_candidates_generated",
+                    "target_submissions_rejected",
+                    "targets_became_illegal_on_resolution",
+                    "spells_countered_by_rules",
+                    "spells_countered_by_effect",
+                    "stack_interaction_windows_created",
+                    "stack_interaction_windows_auto_passed",
+                )
+            },
             "profile_fingerprint_match": profile_match_value,
             "pilot_thread_count": arena.get("pilot_thread_count"),
             "persistent_thread_reuse": arena.get(
