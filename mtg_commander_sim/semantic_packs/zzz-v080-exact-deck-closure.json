@@ -2060,6 +2060,284 @@
         "authored_by": "v0.8-exact-deck-closure",
         "review_status": "reviewed"
       }
+    },
+    {
+      "key": "ae120613-97d6-4393-b39d-c3e6c076f5d6:spell:front",
+      "label": "Deflecting Swat",
+      "oracle_id": "ae120613-97d6-4393-b39d-c3e6c076f5d6",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "cost_schema": {
+        "alternate_costs": [
+          {
+            "id": "commander_free",
+            "kind": "alternate",
+            "label": "Cast without paying its mana cost while you control a commander",
+            "requirements": {},
+            "condition": {"control_commander": true}
+          }
+        ]
+      },
+      "target_schema": {
+        "zones": ["stack"],
+        "categories": ["spell", "ability"],
+        "source_exclusion": true,
+        "count": 1
+      },
+      "effects": [
+        {"op": "retarget_stack_item", "stack": "$target.0"}
+      ],
+      "destination": "graveyard",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "commander_dependent_alternate_cost", "stack_target", "target_reassignment"],
+      "tests": ["test_deflecting_swat_free_cost_and_exact_retarget"],
+      "provenance": {
+        "source_oracle_hash": "c6a60ec3035447a23e1aadae058b4c602508264c2013df7ef67cbf2fddb18ce4",
+        "source_rulings_hash": "8d0d4b293c931b3b8238985735298900feaca14aec286140a669b3f424996be2",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "622a53bd-d894-422c-a606-7126041afa02:ability:ab2",
+      "label": "Fomori Vault selection activation",
+      "oracle_id": "622a53bd-d894-422c-a606-7126041afa02",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {"op": "fomori_vault"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "discard_cost", "artifact_count", "private_library_look", "random_bottom_order"],
+      "tests": ["test_fomori_vault_counts_artifacts_and_bottoms_rest_randomly"],
+      "provenance": {
+        "source_oracle_hash": "c87821555c5c4a15ed81b669c629742479491accef40fe88252b067dfc94474d",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "a806f4ee-f48a-46c3-8772-5aaabebe4c7e:spell:front",
+      "label": "Mindslaver",
+      "oracle_id": "a806f4ee-f48a-46c3-8772-5aaabebe4c7e",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution"],
+      "tests": ["test_mindslaver_routes_controlled_turn_to_controller_pilot"],
+      "provenance": {
+        "source_oracle_hash": "49a6e0126876db0a5e9efa487bb522d096d4800df1ffc1383a9e65436240b465",
+        "source_rulings_hash": "ecd2eac6dbcad6f44667ac26272a6b6d35b35d99e3bec971c94748d4f2bd89be",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "a806f4ee-f48a-46c3-8772-5aaabebe4c7e:ability:ab1",
+      "label": "Mindslaver activation",
+      "oracle_id": "a806f4ee-f48a-46c3-8772-5aaabebe4c7e",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "zones": ["player"],
+        "categories": ["player"],
+        "player_relation": "any",
+        "count": 1
+      },
+      "effects": [
+        {"op": "control_next_turn", "player": "$target.0"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "sacrifice_cost", "target_validation", "turn_control", "hidden_information_authorization"],
+      "tests": ["test_mindslaver_routes_controlled_turn_to_controller_pilot"],
+      "provenance": {
+        "source_oracle_hash": "49a6e0126876db0a5e9efa487bb522d096d4800df1ffc1383a9e65436240b465",
+        "source_rulings_hash": "ecd2eac6dbcad6f44667ac26272a6b6d35b35d99e3bec971c94748d4f2bd89be",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "3640c29b-1534-4952-b297-619ade948431:spell:front",
+      "label": "Roaming Throne",
+      "oracle_id": "3640c29b-1534-4952-b297-619ade948431",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [
+        {"op": "choose_creature_type"}
+      ],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "as_enters_choice", "static_ability", "static_type_addition", "trigger_multiplier", "ward"],
+      "tests": ["test_roaming_throne_type_trigger_multiplier_and_ward"],
+      "provenance": {
+        "source_oracle_hash": "7bc787ba43ceedaa7261e6c4120045eb535825c8e7e7b04416ce7f54487c535c",
+        "source_rulings_hash": "3487bdefe4c4ddfd61dbfd8f1b75bc354dcd1873687d4ce1373a6caa04468cb0",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "79d46e09-2548-440f-9c02-3c3dc39a0cd1:spell:front",
+      "label": "Sundial of the Infinite",
+      "oracle_id": "79d46e09-2548-440f-9c02-3c3dc39a0cd1",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution"],
+      "tests": ["test_sundial_ends_turn_and_exiles_stack"],
+      "provenance": {
+        "source_oracle_hash": "4b16303e967f63fbdf8a6ebea2b1ecf2fcd616b9f7667735ced40bfb1ace4959",
+        "source_rulings_hash": "b0e80406d048f14ef5417d27ee038b87f7c29e0f6b57c3420de5ac8ff6a0f186",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "79d46e09-2548-440f-9c02-3c3dc39a0cd1:ability:ab1",
+      "label": "Sundial end-turn activation",
+      "oracle_id": "79d46e09-2548-440f-9c02-3c3dc39a0cd1",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {"op": "end_turn"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "turn_restriction", "end_turn", "stack_exile", "cleanup"],
+      "tests": ["test_sundial_ends_turn_and_exiles_stack"],
+      "provenance": {
+        "source_oracle_hash": "4b16303e967f63fbdf8a6ebea2b1ecf2fcd616b9f7667735ced40bfb1ace4959",
+        "source_rulings_hash": "b0e80406d048f14ef5417d27ee038b87f7c29e0f6b57c3420de5ac8ff6a0f186",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c396db03-bf11-4e20-b630-4f9aa8fd78da:spell:front",
+      "label": "The Mightstone and Weakstone",
+      "oracle_id": "c396db03-bf11-4e20-b630-4f9aa8fd78da",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "restricted_mana"],
+      "tests": ["test_mightstone_modal_enter_and_restricted_powerstone_mana"],
+      "provenance": {
+        "source_oracle_hash": "7f0c009a7216fa3dce253f87d08d3eb36fc92fd2fcd81cc06eb29cc860bddc19",
+        "source_rulings_hash": "c0f91a7afd6ec9d3858a2966c85efc4c1a3e803a0a5b857130bbf3d8947f5fe2",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c396db03-bf11-4e20-b630-4f9aa8fd78da:trigger:enter",
+      "label": "The Mightstone and Weakstone enter trigger",
+      "oracle_id": "c396db03-bf11-4e20-b630-4f9aa8fd78da",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [],
+      "target_schema": {
+        "mode_count": 1,
+        "modes": {
+          "draw": {
+            "groups": [],
+            "effects": [
+              {"op": "draw", "player": "$controller", "count": 2, "private": true}
+            ]
+          },
+          "weaken": {
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "creature": true,
+            "count": 1,
+            "effects": [
+              {"op": "modify_stats_until_end_of_turn", "card": "$target.0", "power": -5, "toughness": -5}
+            ]
+          }
+        }
+      },
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "mode_selection", "private_draw", "target_validation", "temporary_power_toughness"],
+      "tests": ["test_mightstone_modal_enter_and_restricted_powerstone_mana"],
+      "provenance": {
+        "source_oracle_hash": "7f0c009a7216fa3dce253f87d08d3eb36fc92fd2fcd81cc06eb29cc860bddc19",
+        "source_rulings_hash": "c0f91a7afd6ec9d3858a2966c85efc4c1a3e803a0a5b857130bbf3d8947f5fe2",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "a46bfaf5-e631-4603-850a-f0074395b2f5:spell:front",
+      "label": "The Stasis Coffin",
+      "oracle_id": "a46bfaf5-e631-4603-850a-f0074395b2f5",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution"],
+      "tests": ["test_stasis_coffin_protection_blocks_targeting_and_damage"],
+      "provenance": {
+        "source_oracle_hash": "45d7187807386be64b9509d1027f03f13cf7cb2ebe28f0bf57adc42e534cb47c",
+        "source_rulings_hash": "3a771979ff08bc732ac593c86b71a96abe952761d0a590547051b1dfd219e79c",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "a46bfaf5-e631-4603-850a-f0074395b2f5:ability:ab1",
+      "label": "The Stasis Coffin protection activation",
+      "oracle_id": "a46bfaf5-e631-4603-850a-f0074395b2f5",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {"op": "protection_from_everything_until_next_turn", "player": "$controller"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "exile_cost", "protection", "duration_until_next_turn", "target_prevention", "damage_prevention"],
+      "tests": ["test_stasis_coffin_protection_blocks_targeting_and_damage"],
+      "provenance": {
+        "source_oracle_hash": "45d7187807386be64b9509d1027f03f13cf7cb2ebe28f0bf57adc42e534cb47c",
+        "source_rulings_hash": "3a771979ff08bc732ac593c86b71a96abe952761d0a590547051b1dfd219e79c",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "f9d3b046-0b95-4103-a630-4b3fb88bb60b:spell:front",
+      "label": "Delighted Halfling",
+      "oracle_id": "f9d3b046-0b95-4103-a630-4b3fb88bb60b",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "restricted_mana", "legendary_spell_restriction", "mana_based_uncounterable"],
+      "tests": ["test_delighted_halfling_restricted_mana_makes_legendary_spell_uncounterable"],
+      "provenance": {
+        "source_oracle_hash": "a8cbf012f81463a8a742e7c477856a5eab788c616c1c8acae8f38c4b955cb194",
+        "source_rulings_hash": "cd7d2827967b56638dc52d5fb8781081402595d221f822acdda3f9657335996d",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
     }
   ]
 }

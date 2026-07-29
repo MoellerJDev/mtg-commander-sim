@@ -191,6 +191,7 @@ class ExactZimoneClosureTests(unittest.TestCase):
             "Diabolic Intent",
             "Archway of Innovation",
             "Dauthi Voidwalker",
+            "Delighted Halfling",
             "Elvish Reclaimer",
             "Endurance",
             "Faerie Mastermind",
@@ -220,6 +221,59 @@ class ExactZimoneClosureTests(unittest.TestCase):
                     db=self.db,
                 )
                 self.assertEqual("fully_playable", row["status"], row)
+
+    def test_delighted_halfling_restricted_mana_makes_legendary_spell_uncounterable(
+        self,
+    ):
+        session = self.make_session(1029)
+        engine = session.engine
+        halfling = self.card(engine, "B", "Delighted Halfling")
+        commander = self.card(engine, "B", "Zimone and Dina")
+        engine.move_card(
+            halfling.object_id,
+            "battlefield",
+            controller="B",
+        )
+        halfling.acquired_control_turn_count = -1
+        engine.state.priority_player = "B"
+        engine._activate(
+            "B",
+            {
+                "source": halfling.ref,
+                "ability": "ab2",
+                "mana_choice": "G",
+            },
+        )
+        self.assertFalse(
+            engine._cost_is_affordable(
+                "B",
+                {"G": 1},
+                spend_context="nonartifact_spell",
+            )
+        )
+        self.assertTrue(
+            engine._cost_is_affordable(
+                "B",
+                {"G": 1},
+                spend_context="legendary_spell",
+            )
+        )
+        self.prepare_main(engine, "B")
+        engine.state.players["B"].mana_pool.update({"B": 1, "U": 1})
+        engine._cast(
+            "B",
+            {
+                "card": commander.ref,
+                "from": "command",
+                "pay": "manual",
+                "payment": {"B": 1, "U": 1, "G": 1},
+            },
+        )
+        self.assertTrue(engine.state.stack[-1].context["cant_be_countered"])
+        self.assertNotIn(
+            "restricted_mana",
+            engine.state.players["B"].stats,
+        )
 
     def test_springheart_bestow_landfall_copy_and_unattached_creature_state(
         self,

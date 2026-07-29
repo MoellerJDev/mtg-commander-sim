@@ -498,7 +498,14 @@ class CommanderEngine:
                     f"{left.strip()} {' '.join(additions)}"
                     + (f" — {right.strip()}" if separator else "")
                 )
-        added_subtypes = [
+        added_subtypes = (
+            [
+                str(card.annotations["chosen_creature_type"])
+            ]
+            if card.printed_name == "Roaming Throne"
+            and card.annotations.get("chosen_creature_type")
+            else []
+        ) + [
             str(value).strip()
             for value in dict(
                 card.annotations.get("until_end_of_turn") or {}
@@ -2146,6 +2153,23 @@ class CommanderEngine:
             self.state.last_normal_turn_player = entry.player
         self.state.turn_sequence += 1
         player = self.state.players[entry.player]
+        player.stats.pop(
+            "protection_from_everything_until_next_turn",
+            None,
+        )
+        next_turn_controller = player.stats.pop(
+            "next_turn_controlled_by",
+            None,
+        )
+        if (
+            next_turn_controller in self.active_seats
+            and next_turn_controller != entry.player
+        ):
+            player.stats["turn_controlled_by"] = (
+                next_turn_controller
+            )
+        else:
+            player.stats.pop("turn_controlled_by", None)
         player.turns_begun += 1
         player.land_plays_remaining = 1
         if player.yield_policy.mode != "none":
@@ -2172,6 +2196,7 @@ class CommanderEngine:
             if any(player.mana_pool.values()):
                 lost = dict(player.mana_pool)
                 player.mana_pool = normalize_mana_bundle(None)
+                player.stats.pop("restricted_mana", None)
                 self._log(seat, "mana.empty", f"{seat}'s mana pool emptied.", {"lost": lost, "reason": reason}, importance=0, changed_players=[seat])
 
     def _untap_permanent(
@@ -2418,9 +2443,59 @@ class CommanderEngine:
             player.stats.pop("hexproof_from_colors_until_end", None)
         self._clear_mana(reason="cleanup")
         self._log(active, "turn.cleanup", f"{active} completed cleanup.", importance=0)
+        if active in self.state.players:
+            self.state.players[active].stats.pop(
+                "turn_controlled_by",
+                None,
+            )
         if self.state.game_over:
             return
         self._begin_turn(self._select_next_turn())
+
+    def _end_turn_now(self, *, actor: str, reason: str) -> None:
+        """Perform the special action sequence used by end-the-turn effects."""
+
+        exiled_cards: list[str] = []
+        for stack_item in list(self.state.stack):
+            if not stack_item.card_object_id:
+                continue
+            card = self.state.cards.get(stack_item.card_object_id)
+            if card is None or card.zone != "stack":
+                continue
+            self.move_card(
+                card.object_id,
+                "exile",
+                reason=reason,
+                log=False,
+                semantic_events=False,
+            )
+            exiled_cards.append(card.object_id)
+        removed_stack = [item.ref for item in self.state.stack]
+        self.state.stack.clear()
+        self.state.pending_trigger_batches.clear()
+        self.permissions.invalidate_current()
+        self.state.priority_player = None
+        self.state.priority_passes = []
+        self.state.combat = CombatState()
+        self._log(
+            actor,
+            "turn.ended",
+            f"{actor} ended the turn.",
+            {
+                "stack_objects_exiled": removed_stack,
+                "cards_exiled": [
+                    self.state.cards[object_id].ref
+                    for object_id in exiled_cards
+                ],
+                "reason": reason,
+            },
+            importance=3,
+            changed_objects=exiled_cards,
+        )
+        self.state.phase_index = TURN_STEPS.index(
+            ("ending", "cleanup")
+        )
+        self._enter_step()
 
     def _grant_priority(self, seat: str | None) -> None:
         if self._stabilize():
@@ -3122,7 +3197,174 @@ class CommanderEngine:
             colors.update(self.card_db.by_oracle_id(oracle_id).color_identity)
         return colors
 
-    def available_mana_sources(self, seat: str) -> list[ManaSource]:
+    @staticmethod
+    def _compiled_mana_restriction(restriction: str) -> str | None:
+        lower = restriction.casefold()
+        if (
+            "spend this mana only to cast artifact spells or activate "
+            "abilities of artifacts"
+            in lower
+        ):
+            return "artifact_spell_or_ability"
+        if "this mana can't be spent to cast nonartifact spells" in lower:
+            return "nonartifact_spell_prohibited"
+        if (
+            "spend this mana only to cast a legendary spell"
+            in lower
+            and "that spell can't be countered" in lower
+        ):
+            return "legendary_spell_uncounterable"
+        return None
+
+    @staticmethod
+    def _mana_restriction_allows(
+        restriction: str,
+        spend_context: str | None,
+    ) -> bool:
+        is_spell = bool(spend_context and "spell" in spend_context)
+        is_artifact = bool(
+            spend_context and spend_context.startswith("artifact")
+        )
+        is_legendary = bool(
+            spend_context and "legendary" in spend_context
+        )
+        if restriction == "artifact_spell_or_ability":
+            return (
+                (is_spell and is_artifact)
+                or spend_context == "artifact_ability"
+            )
+        if restriction == "nonartifact_spell_prohibited":
+            return not (is_spell and not is_artifact)
+        if restriction == "legendary_spell_uncounterable":
+            return is_spell and is_legendary
+        return False
+
+    @staticmethod
+    def _mana_mode_has_compiled_activation_condition(
+        restriction: str,
+    ) -> bool:
+        return bool(
+            re.search(
+                r"activate only if you control "
+                r"(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten) "
+                r"or more (?:artifacts?|creatures?|lands?)",
+                restriction.casefold(),
+            )
+        )
+
+    def _spell_mana_spend_context(self, type_line: str) -> str:
+        types, _, supertypes = self._type_parts(type_line)
+        artifact = "artifact" in types
+        legendary = "legendary" in supertypes
+        if artifact and legendary:
+            return "artifact_legendary_spell"
+        if artifact:
+            return "artifact_spell"
+        if legendary:
+            return "legendary_spell"
+        return "nonartifact_spell"
+
+    def _restricted_mana(self, seat: str) -> dict[str, dict[str, int]]:
+        raw = self.state.players[seat].stats.setdefault(
+            "restricted_mana",
+            {},
+        )
+        return {
+            str(key): normalize_mana_bundle(value)
+            for key, value in dict(raw).items()
+        }
+
+    def _store_restricted_mana(
+        self,
+        seat: str,
+        values: Mapping[str, Mapping[str, int]],
+    ) -> None:
+        compact = {
+            key: {
+                color: amount
+                for color, amount in normalize_mana_bundle(bundle).items()
+                if amount
+            }
+            for key, bundle in values.items()
+            if sum(normalize_mana_bundle(bundle).values())
+        }
+        if compact:
+            self.state.players[seat].stats["restricted_mana"] = compact
+        else:
+            self.state.players[seat].stats.pop("restricted_mana", None)
+
+    def _add_restricted_mana(
+        self,
+        seat: str,
+        restriction: str,
+        bundle: Mapping[str, int],
+    ) -> None:
+        values = self._restricted_mana(seat)
+        current = values.setdefault(
+            restriction,
+            normalize_mana_bundle(None),
+        )
+        for color, amount in normalize_mana_bundle(bundle).items():
+            current[color] += amount
+        self._store_restricted_mana(seat, values)
+
+    def _spendable_mana_pool(
+        self,
+        seat: str,
+        spend_context: str | None,
+    ) -> dict[str, int]:
+        pool = normalize_mana_bundle(self.state.players[seat].mana_pool)
+        for restriction, bundle in self._restricted_mana(seat).items():
+            if self._mana_restriction_allows(restriction, spend_context):
+                continue
+            for color, amount in bundle.items():
+                pool[color] = max(0, pool[color] - amount)
+        return pool
+
+    def _apply_mana_spend(
+        self,
+        seat: str,
+        spent: Mapping[str, int],
+        spend_context: str | None,
+    ) -> None:
+        pool = normalize_mana_bundle(self.state.players[seat].mana_pool)
+        restricted = self._restricted_mana(seat)
+        for color, raw_amount in normalize_mana_bundle(spent).items():
+            remaining = raw_amount
+            for restriction in sorted(restricted):
+                if not self._mana_restriction_allows(
+                    restriction,
+                    spend_context,
+                ):
+                    continue
+                restricted_amount = restricted[restriction][color]
+                use = min(remaining, restricted_amount)
+                restricted[restriction][color] -= use
+                if (
+                    use
+                    and restriction
+                    == "legendary_spell_uncounterable"
+                ):
+                    self.state.players[seat].stats[
+                        "next_spell_uncounterable"
+                    ] = True
+                remaining -= use
+                if not remaining:
+                    break
+            pool[color] -= raw_amount
+            if pool[color] < 0:
+                raise GameRuleError(
+                    "Mana payment exceeded the authoritative pool"
+                )
+        self.state.players[seat].mana_pool = pool
+        self._store_restricted_mana(seat, restricted)
+
+    def available_mana_sources(
+        self,
+        seat: str,
+        *,
+        spend_context: str | None = None,
+    ) -> list[ManaSource]:
         identity = self._commander_identity(seat)
         sources: list[ManaSource] = []
         for object_id in self.state.players[seat].zones["battlefield"]:
@@ -3196,11 +3438,52 @@ class CommanderEngine:
                 # spells appear payable.
                 continue
             modes = extract_mana_modes(record, identity)
+            compiled_modes: list[ManaMode] = []
+            for mode in modes:
+                restriction = self._compiled_mana_restriction(
+                    mode.restriction
+                )
+                if restriction is None:
+                    if self._mana_mode_has_compiled_activation_condition(
+                        mode.restriction
+                    ):
+                        compiled_modes.append(
+                            ManaMode(
+                                mode.bundle,
+                                conditional=False,
+                                restriction=mode.restriction,
+                                side_effects=mode.side_effects,
+                                requires_choice=mode.requires_choice,
+                            )
+                        )
+                    else:
+                        compiled_modes.append(mode)
+                    continue
+                if self._mana_restriction_allows(
+                    restriction,
+                    spend_context,
+                ):
+                    compiled_modes.append(
+                        ManaMode(
+                            mode.bundle,
+                            conditional=False,
+                            restriction=mode.restriction,
+                            side_effects=mode.side_effects,
+                            requires_choice=mode.requires_choice,
+                        )
+                    )
+            modes = tuple(compiled_modes)
             if modes:
                 sources.append(ManaSource(object_id, card.ref, self.display_name(object_id), modes))
         return sources
 
-    def _activate_mana_plan(self, seat: str, activations: Sequence[Mapping[str, Any]]) -> None:
+    def _activate_mana_plan(
+        self,
+        seat: str,
+        activations: Sequence[Mapping[str, Any]],
+        *,
+        spend_context: str | None = None,
+    ) -> None:
         for activation in activations:
             card = self._resolve_object(seat, str(activation["source"]), zones={"battlefield"}, controlled_only=True)
             if card.tapped:
@@ -3281,19 +3564,54 @@ class CommanderEngine:
                     f"{card.printed_name}'s mana ability has an unmet or unresolved activation condition"
                 )
             mode = matching[0]
+            compiled_restriction = self._compiled_mana_restriction(
+                mode.restriction
+            )
             if mode.requires_choice:
                 raise GameRuleError(
                     f"{card.printed_name}'s selected mana mode has a nonmana choice/cost; activate that Oracle ability explicitly."
                 )
-            if mode.conditional and self.state.config.strict_mana:
+            if (
+                mode.conditional
+                and self.state.config.strict_mana
+                and not (
+                    compiled_restriction
+                    and self._mana_restriction_allows(
+                        compiled_restriction,
+                        spend_context,
+                    )
+                )
+                and not self._mana_mode_has_compiled_activation_condition(
+                    mode.restriction
+                )
+            ):
                 raise GameRuleError(
                     f"{card.printed_name}'s selected mana mode is conditional/restricted and has no compiled validator."
                 )
-            if mode.conditional and not activation.get("allow_conditional"):
+            if (
+                mode.conditional
+                and not activation.get("allow_conditional")
+                and not (
+                    compiled_restriction
+                    and self._mana_restriction_allows(
+                        compiled_restriction,
+                        spend_context,
+                    )
+                )
+                and not self._mana_mode_has_compiled_activation_condition(
+                    mode.restriction
+                )
+            ):
                 raise GameRuleError(f"{card.printed_name}'s selected mana mode requires an explicit condition")
             card.tapped = True
             for color, amount in bundle.items():
                 self.state.players[seat].mana_pool[color] += amount
+            if compiled_restriction:
+                self._add_restricted_mana(
+                    seat,
+                    compiled_restriction,
+                    bundle,
+                )
             for effect in activation.get("side_effects") or mode.side_effects:
                 if effect.get("op") == "damage_self":
                     self.state.players[seat].life -= int(effect.get("amount", 1))
@@ -3311,6 +3629,7 @@ class CommanderEngine:
         response: Mapping[str, Any],
         *,
         exclude_sources: set[str] | None = None,
+        spend_context: str | None = None,
     ) -> tuple[dict[str, int], list[dict[str, Any]]]:
         activations: list[dict[str, Any]] = []
         pay_mode = response.get("pay", "auto")
@@ -3319,7 +3638,10 @@ class CommanderEngine:
                 requirements,
                 [
                     source
-                    for source in self.available_mana_sources(seat)
+                    for source in self.available_mana_sources(
+                        seat,
+                        spend_context=spend_context,
+                    )
                     if source.object_id not in (exclude_sources or set())
                 ],
                 allow_conditional=(
@@ -3327,20 +3649,39 @@ class CommanderEngine:
                     and not self.state.config.strict_mana
                 ),
                 reserve=normalize_mana_bundle(response.get("reserve")),
-                starting_pool=self.state.players[seat].mana_pool,
+                starting_pool=self._spendable_mana_pool(
+                    seat,
+                    spend_context,
+                ),
             )
             activations = plan.activations
-            self._activate_mana_plan(seat, activations)
+            self._activate_mana_plan(
+                seat,
+                activations,
+                spend_context=spend_context,
+            )
             payment = plan.payment
         else:
             activations = [dict(item) for item in response.get("mana") or []]
-            self._activate_mana_plan(seat, activations)
+            self._activate_mana_plan(
+                seat,
+                activations,
+                spend_context=spend_context,
+            )
             payment = normalize_mana_bundle(response.get("payment"))
         try:
-            new_pool, spent = pay_mana_from_pool(self.state.players[seat].mana_pool, requirements, payment=payment)
+            _, spent = pay_mana_from_pool(
+                self._spendable_mana_pool(seat, spend_context),
+                requirements,
+                payment=payment,
+            )
         except ValueError as exc:
             raise GameRuleError(str(exc)) from exc
-        self.state.players[seat].mana_pool = new_pool
+        self._apply_mana_spend(
+            seat,
+            spent,
+            spend_context,
+        )
         return spent, activations
 
     def _check_priority(self, seat: str) -> None:
@@ -3783,6 +4124,7 @@ class CommanderEngine:
             exclude_sources={
                 tap_card.object_id for tap_card in tap_cost_cards
             },
+            spend_context=self._spell_mana_spend_context(type_line),
         )
         for tap_card in tap_cost_cards:
             tap_card.tapped = True
@@ -4131,6 +4473,7 @@ class CommanderEngine:
                 trigger_batch=cast_trigger_batch,
             )
         self._enqueue_semantic_trigger_batch(cast_trigger_batch)
+        self._queue_ward_triggers_for_targets(item)
         self.state.priority_player = seat
         self.state.priority_passes = []
         self.state.players[seat].yield_policy = YieldPolicy()
@@ -4142,6 +4485,74 @@ class CommanderEngine:
             oracle_text=str(data.get("oracle_text") or ""),
             keywords=tuple(data.get("keywords") or ()),
         )
+
+    def _queue_ward_triggers_for_targets(
+        self,
+        targeted_item: StackItem,
+    ) -> list[str]:
+        queued: list[str] = []
+        seen: set[str] = set()
+        for target_ref in targeted_item.targets:
+            if target_ref in seen:
+                continue
+            seen.add(target_ref)
+            try:
+                permanent = self._resolve_object(
+                    targeted_item.controller,
+                    str(target_ref),
+                    zones={"battlefield"},
+                )
+            except GameRuleError:
+                continue
+            if permanent.controller == targeted_item.controller:
+                continue
+            oracle = str(
+                self._effective_card_data(permanent).get(
+                    "oracle_text"
+                )
+                or ""
+            )
+            match = re.search(
+                r"\bWard\s+\{(?P<generic>\d+)\}",
+                oracle,
+                re.IGNORECASE,
+            )
+            if match is None:
+                continue
+            ref = self._next_ref("S")
+            ward = StackItem(
+                stack_id=self._stable_runtime_id("stack", ref),
+                ref=ref,
+                kind="triggered_ability",
+                controller=permanent.controller,
+                label=f"{self.display_name(permanent.object_id)} — Ward",
+                source_object_id=permanent.object_id,
+                semantic_key="builtin:ward",
+                visibility=list(self.seats),
+                context={
+                    "target_stack": targeted_item.ref,
+                    "payer": targeted_item.controller,
+                    "cost": {
+                        "GENERIC": int(match.group("generic"))
+                    },
+                    "targeted_permanent": permanent.ref,
+                },
+            )
+            self.state.stack.append(ward)
+            queued.append(ward.ref)
+            self._log(
+                permanent.controller,
+                "stack.trigger",
+                f"Queued {ward.ref}: {ward.label}.",
+                {
+                    "stack": ward.ref,
+                    "source": permanent.ref,
+                    "target_stack": targeted_item.ref,
+                    "payer": targeted_item.controller,
+                },
+                importance=2,
+            )
+        return queued
 
     @staticmethod
     def _semantic_key_for_ability(
@@ -4556,7 +4967,22 @@ class CommanderEngine:
         spent: dict[str, int] = {}
         activations: list[dict[str, Any]] = []
         if sum(requirements.values()):
-            spent, activations = self._pay_for_cost(seat, requirements, response)
+            source_types = self._type_parts(
+                str(
+                    self._effective_card_data(source).get("type_line")
+                    or ""
+                )
+            )[0]
+            spent, activations = self._pay_for_cost(
+                seat,
+                requirements,
+                response,
+                spend_context=(
+                    "artifact_ability"
+                    if "artifact" in source_types
+                    else "ability"
+                ),
+            )
 
         if "only once each turn" in ability.effect_text.casefold():
             activation_key = (
@@ -4601,6 +5027,15 @@ class CommanderEngine:
             bundle = self._mana_output_for_ability(seat, source, ability, response)
             for color, amount in bundle.items():
                 self.state.players[seat].mana_pool[color] += amount
+            compiled_restriction = self._compiled_mana_restriction(
+                ability.effect_text
+            )
+            if compiled_restriction:
+                self._add_restricted_mana(
+                    seat,
+                    compiled_restriction,
+                    bundle,
+                )
             self._log(
                 seat,
                 "mana.ability",
@@ -4688,6 +5123,7 @@ class CommanderEngine:
             },
         )
         self.state.stack.append(item)
+        self._queue_ward_triggers_for_targets(item)
         self._log(
             seat,
             "stack.activate",
@@ -5116,9 +5552,10 @@ class CommanderEngine:
         requirements: Mapping[str, int],
         *,
         exclude_sources: set[str] | None = None,
+        spend_context: str | None = None,
     ) -> bool:
         remaining = {key: int(requirements.get(key, 0)) for key in ("GENERIC", "W", "U", "B", "R", "G", "C")}
-        pool = normalize_mana_bundle(self.state.players[seat].mana_pool)
+        pool = self._spendable_mana_pool(seat, spend_context)
         for color in "WUBRGC":
             paid = min(pool[color], remaining[color])
             pool[color] -= paid
@@ -5130,7 +5567,10 @@ class CommanderEngine:
         try:
             sources = [
                 source
-                for source in self.available_mana_sources(seat)
+                for source in self.available_mana_sources(
+                    seat,
+                    spend_context=spend_context,
+                )
                 if source.object_id not in (exclude_sources or set())
             ]
             auto_plan_payment(remaining, sources)
@@ -5342,6 +5782,8 @@ class CommanderEngine:
         requirements: Mapping[str, int],
         mechanic: str,
         candidates: Sequence[CardInstance],
+        *,
+        spend_context: str | None = None,
     ) -> tuple[dict[str, int], list[CardInstance]] | None:
         """Find a payable minimum-card convoke or improvise plan."""
 
@@ -5369,6 +5811,7 @@ class CommanderEngine:
                 seat,
                 reduced,
                 exclude_sources=excluded,
+                spend_context=spend_context,
             ):
                 best = (reduced, list(selected))
                 return
@@ -5552,6 +5995,12 @@ class CommanderEngine:
         *,
         limit: int = 100,
     ) -> int:
+        spend_context = self._spell_mana_spend_context(
+            str(
+                self._effective_card_data(card).get("type_line")
+                or ""
+            )
+        )
         maximum = -1
         for value in range(limit + 1):
             options, _ = self._compiled_printed_cost_options(
@@ -5564,6 +6013,7 @@ class CommanderEngine:
                 self._cost_is_affordable(
                     seat,
                     option["requirements"],
+                    spend_context=spend_context,
                 )
                 for option in options
             ):
@@ -5579,6 +6029,12 @@ class CommanderEngine:
         *,
         limit: int = 100,
     ) -> int:
+        spend_context = self._spell_mana_spend_context(
+            str(
+                self._effective_card_data(card).get("type_line")
+                or ""
+            )
+        )
         maximum = -1
         for value in range(limit + 1):
             options, _ = self._compiled_printed_cost_options(
@@ -5634,6 +6090,7 @@ class CommanderEngine:
                             requirements,
                             kind,
                             candidates,
+                            spend_context=spend_context,
                         )
                         if plan is None:
                             valid = False
@@ -5697,6 +6154,12 @@ class CommanderEngine:
         record = self.card_record(card)
         if record is None:
             return []
+        spend_context = self._spell_mana_spend_context(
+            str(
+                self._effective_card_data(card).get("type_line")
+                or ""
+            )
+        )
         payment_mechanics = self._cost_payment_mechanics(record, schema)
         if (
             self.state.players[seat].stats.get("next_spell_improvise")
@@ -5881,6 +6344,7 @@ class CommanderEngine:
                         option["requirements"],
                         kind,
                         candidates,
+                        spend_context=spend_context,
                     )
                     if plan is None:
                         payment_mechanics_valid = False
@@ -5933,6 +6397,7 @@ class CommanderEngine:
                 seat,
                 option["requirements"],
                 exclude_sources=excluded_tap_sources,
+                spend_context=spend_context,
             ):
                 continue
             if selected_tap_cards:
@@ -6915,6 +7380,43 @@ class CommanderEngine:
                             ).casefold()
                         )
                     )
+                source_types, source_subtypes, _ = self._type_parts(
+                    str(
+                        self._effective_card_data(source).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )
+                if (
+                    "creature" in source_types
+                    and source.printed_name != "Roaming Throne"
+                ):
+                    trigger_count += sum(
+                        1
+                        for permanent_id in self.state.players[
+                            source.controller
+                        ].zones["battlefield"]
+                        if self.state.cards[
+                            permanent_id
+                        ].controller
+                        == source.controller
+                        and not self.state.cards[
+                            permanent_id
+                        ].phased_out
+                        and self.state.cards[
+                            permanent_id
+                        ].printed_name
+                        == "Roaming Throne"
+                        and str(
+                            self.state.cards[
+                                permanent_id
+                            ].annotations.get(
+                                "chosen_creature_type", ""
+                            )
+                        ).casefold()
+                        in source_subtypes
+                    )
                 triggered.append(item)
                 for copy_index in range(1, trigger_count):
                     copy_ref = self._next_ref("S")
@@ -7256,6 +7758,15 @@ class CommanderEngine:
             if row.get("category") == "player"
             else str(row.get("controller") or "")
         )
+        if (
+            as_target
+            and row.get("category") == "player"
+            and protected_seat in self.state.players
+            and self.state.players[protected_seat].stats.get(
+                "protection_from_everything_until_next_turn"
+            )
+        ):
+            return False
         if (
             as_target
             and protected_seat in self.state.players
@@ -8063,6 +8574,21 @@ class CommanderEngine:
                 ],
                 None,
                 note="Map token explore ability resolved",
+            )
+            return
+        if item.semantic_key == "builtin:ward":
+            self._begin_resolve_item(
+                item,
+                [
+                    {
+                        "op": "counter_unless_pay",
+                        "player": str(item.context["payer"]),
+                        "stack": str(item.context["target_stack"]),
+                        "cost": dict(item.context.get("cost") or {}),
+                    }
+                ],
+                None,
+                note="Ward trigger resolved",
             )
             return
         if item.semantic_key == "builtin:optional-mill-one":
@@ -8983,6 +9509,7 @@ class CommanderEngine:
                 return
             if effect.get("op") in {
                 "choose_card_name",
+                "choose_creature_type",
                 "choose_objects",
                 "choose_option",
                 "choose_mana",
@@ -8993,6 +9520,7 @@ class CommanderEngine:
                 "draw_optional_land",
                 "explore",
                 "fabricate",
+                "fomori_vault",
                 "choose_warform",
                 "look_reorder_top",
                 "pay_or_lose",
@@ -9001,6 +9529,7 @@ class CommanderEngine:
                 "put_land_from_hand",
                 "put_artifact_from_hand",
                 "remora_tax",
+                "retarget_stack_item",
                 "scry",
                 "springheart_landfall",
                 "sylvan_library_settle",
@@ -9015,6 +9544,8 @@ class CommanderEngine:
                 )
                 return
             self.apply_effect(effect, actor=item.controller, as_cost=False)
+            if item not in self.state.stack:
+                return
             index += 1
         # Remove the resolving object from stack only when all player choices
         # and effects have completed.
@@ -9190,6 +9721,108 @@ class CommanderEngine:
                     ],
                 }
             )
+        elif op == "retarget_stack_item":
+            target_ref = str(effect.get("stack") or "")
+            target_item = next(
+                (
+                    candidate
+                    for candidate in self.state.stack
+                    if candidate.ref == target_ref
+                    and candidate.ref != item.ref
+                ),
+                None,
+            )
+            if target_item is None:
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            target_program = self.semantics.get(
+                target_item.semantic_key
+            )
+            target_schema = self._stack_target_schema(
+                target_item,
+                target_program,
+            )
+            if not target_schema or not target_item.targets:
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            if available_modes(target_schema):
+                plan = target_plan(
+                    target_schema,
+                    target_item.modes,
+                    require_modes=True,
+                )
+                candidates = self._target_candidate_map(
+                    target_item.controller,
+                    plan,
+                    source_ref=self._stack_source_ref(target_item),
+                )
+                if not self._target_plan_feasible(plan, candidates):
+                    raise GameRuleError(
+                        "The target stack object has no legal new "
+                        "target assignment"
+                    )
+                public_schema = {
+                    "groups": [
+                        group.public_dict(candidates[group.group_id])
+                        for group in plan.groups
+                    ],
+                    "legal_refs": unique_preserving_order(
+                        ref
+                        for group in plan.groups
+                        for ref in candidates[group.group_id]
+                    ),
+                }
+            else:
+                public_schema = self._public_target_schema(
+                    target_item.controller,
+                    target_schema,
+                    source_ref=self._stack_source_ref(target_item),
+                )
+            if public_schema is None:
+                raise GameRuleError(
+                    "The target stack object has no legal new targets"
+                )
+            effect = {
+                **dict(effect),
+                "_target_stack_ref": target_item.ref,
+                "_target_schema": copy.deepcopy(dict(target_schema)),
+                "_default_targets": list(target_item.targets),
+            }
+            context.update(
+                {
+                    "prompt": (
+                        "Choose new targets, or keep the current "
+                        "targets."
+                    ),
+                    "target_stack": target_item.ref,
+                    "default_targets": list(target_item.targets),
+                    "target_schema": public_schema,
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "targets",
+                                "optional": True,
+                                "default": list(target_item.targets),
+                                "target_schema": public_schema,
+                            },
+                        }
+                    ],
+                }
+            )
         elif op == "choose_card_name":
             context.update(
                 {
@@ -9202,6 +9835,24 @@ class CommanderEngine:
                                 "field": "card_name",
                                 "type": "card_name",
                                 "nonempty": True,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "choose_creature_type":
+            context.update(
+                {
+                    "prompt": "Choose a creature type.",
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "creature_type",
+                                "type": "creature_type",
+                                "nonempty": True,
+                                "max_length": 48,
                             },
                         }
                     ],
@@ -9488,6 +10139,79 @@ class CommanderEngine:
                             "choice_schema": {
                                 "field": "choice",
                                 "legal_values": ["graveyard", "top"],
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "fomori_vault":
+            artifact_count = sum(
+                1
+                for object_id in self.state.players[seat].zones[
+                    "battlefield"
+                ]
+                if self.state.cards[object_id].controller == seat
+                and not self.state.cards[object_id].phased_out
+                and "artifact"
+                in self._type_parts(
+                    str(
+                        self._effective_card_data(object_id).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )[0]
+            )
+            looked = self.apply_effect(
+                {
+                    "op": "look_top",
+                    "player": seat,
+                    "viewer": seat,
+                    "count": artifact_count,
+                    "reason": item.label,
+                },
+                actor=item.controller,
+            )
+            options = [str(value) for value in (looked or [])]
+            if not options:
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            effect = {
+                **dict(effect),
+                "_looked_refs": options,
+                "_artifact_count": artifact_count,
+            }
+            context.update(
+                {
+                    "prompt": (
+                        "Choose one looked-at card to put into your "
+                        "hand. The rest go to the bottom at random."
+                    ),
+                    "cards": [
+                        {
+                            "id": ref,
+                            "name": self._resolve_object(
+                                seat,
+                                ref,
+                                zones={"library"},
+                                owned_only=True,
+                            ).printed_name,
+                        }
+                        for ref in options
+                    ],
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "card",
+                                "legal_refs": options,
                             },
                         }
                     ],
@@ -10232,6 +10956,63 @@ class CommanderEngine:
                 target_groups=grouped,
                 reason=item.label,
             )
+        elif op == "retarget_stack_item":
+            target_ref = str(effect.get("_target_stack_ref") or "")
+            target_item = next(
+                (
+                    candidate
+                    for candidate in self.state.stack
+                    if candidate.ref == target_ref
+                ),
+                None,
+            )
+            if target_item is None:
+                raise GameRuleError(
+                    "The stack object selected for retargeting no "
+                    "longer exists"
+                )
+            submitted = response.get("targets")
+            if submitted is None:
+                selected = [
+                    str(value)
+                    for value in effect.get("_default_targets", [])
+                ]
+                grouped = copy.deepcopy(
+                    dict(
+                        target_item.context.get("target_groups", {})
+                    )
+                )
+            else:
+                target_program = self.semantics.get(
+                    target_item.semantic_key
+                )
+                selected, grouped = self._validate_semantic_targets(
+                    target_item.controller,
+                    target_program,
+                    list(submitted or []),
+                    modes=list(target_item.modes),
+                    source_ref=self._stack_source_ref(target_item),
+                    target_schema=dict(
+                        effect.get("_target_schema") or {}
+                    ),
+                )
+            target_item.targets = list(selected)
+            target_item.context["target_groups"] = copy.deepcopy(grouped)
+            target_item.context["target_snapshots"] = {
+                ref: self._target_snapshot(ref) for ref in selected
+            }
+            target_item.context["targets_revalidated"] = False
+            self._log(
+                seat,
+                "stack.retarget",
+                f"{seat} chose targets for {target_item.ref}.",
+                {
+                    "stack": target_item.ref,
+                    "targets": list(selected),
+                    "source": item.ref,
+                },
+                importance=2,
+            )
         elif op == "choose_card_name":
             raw_name = str(response.get("card_name") or "").strip()
             if not raw_name:
@@ -10254,6 +11035,46 @@ class CommanderEngine:
                 "card.name.chosen",
                 f"{seat} chose {chosen} for {source.ref}.",
                 {"source": source.ref, "card_name": chosen},
+                importance=2,
+                changed_objects=[source.object_id],
+            )
+        elif op == "choose_creature_type":
+            creature_type = str(
+                response.get("creature_type")
+                or response.get("choice")
+                or ""
+            ).strip()
+            if (
+                not creature_type
+                or len(creature_type) > 48
+                or not re.fullmatch(
+                    r"[A-Za-z][A-Za-z '\\-]*",
+                    creature_type,
+                )
+            ):
+                raise GameRuleError(
+                    "Choose a valid nonempty creature type"
+                )
+            source_id = item.card_object_id or item.source_object_id
+            if source_id not in self.state.cards:
+                raise GameRuleError(
+                    "The creature-type choice has no source object"
+                )
+            source = self.state.cards[source_id]
+            source.annotations["chosen_creature_type"] = (
+                creature_type.title()
+            )
+            self._log(
+                seat,
+                "creature_type.chosen",
+                (
+                    f"{seat} chose {creature_type.title()} for "
+                    f"{source.ref}."
+                ),
+                {
+                    "source": source.ref,
+                    "creature_type": creature_type.title(),
+                },
                 importance=2,
                 changed_objects=[source.object_id],
             )
@@ -10538,6 +11359,69 @@ class CommanderEngine:
                 },
                 importance=2,
                 changed_objects=[top.object_id],
+                changed_players=[seat],
+            )
+        elif op == "fomori_vault":
+            selected = str(response.get("card") or "")
+            looked = [
+                str(value)
+                for value in effect.get("_looked_refs") or []
+            ]
+            if selected not in looked:
+                raise GameRuleError(
+                    "Choose one of the cards looked at by Fomori Vault"
+                )
+            library = self.state.players[seat].zones["library"]
+            cards = [
+                self._resolve_object(
+                    seat,
+                    ref,
+                    zones={"library"},
+                    owned_only=True,
+                )
+                for ref in looked
+            ]
+            if any(card.object_id not in library for card in cards):
+                raise GameRuleError(
+                    "A looked-at Fomori Vault card left the library"
+                )
+            for card in cards:
+                library.remove(card.object_id)
+            chosen = next(card for card in cards if card.ref == selected)
+            chosen.zone = "hand"
+            chosen.known_to = [seat]
+            chosen.revealed_to = []
+            self.state.players[seat].zones["hand"].append(
+                chosen.object_id
+            )
+            bottom = [
+                card.object_id for card in cards if card is not chosen
+            ]
+            randomizer = random.Random(
+                f"{self.state.config.seed}|{seat}|fomori-vault|"
+                f"{self.state.event_sequence}|{item.ref}"
+            )
+            randomizer.shuffle(bottom)
+            library[0:0] = bottom
+            for object_id in bottom:
+                card = self.state.cards[object_id]
+                card.known_to = [seat]
+                card.revealed_to = []
+            self._log(
+                seat,
+                "fomori_vault.select",
+                (
+                    f"{seat} put one looked-at card into hand and "
+                    f"{len(bottom)} on the bottom at random."
+                ),
+                {
+                    "chosen": chosen.ref,
+                    "bottom_count": len(bottom),
+                    "looked_count": len(looked),
+                },
+                visibility=[seat, "analyst"],
+                importance=2,
+                changed_objects=[card.object_id for card in cards],
                 changed_players=[seat],
             )
         elif op == "choose_objects":
@@ -12197,11 +13081,29 @@ class CommanderEngine:
             target_value = str(assignment["target"])
             if target_value in self.state.players:
                 target = self.state.players[target_value]
-                target.life -= amount
-                changed_players.append(target_value)
-                if source.is_commander:
-                    key = source.oracle_id
-                    target.commander_damage_received[key] = target.commander_damage_received.get(key, 0) + amount
+                if target.stats.get(
+                    "protection_from_everything_until_next_turn"
+                ):
+                    self._log(
+                        target_value,
+                        "combat.damage.prevented",
+                        (
+                            f"Combat damage to {target_value} was "
+                            "prevented by protection."
+                        ),
+                        {
+                            "source": source.ref,
+                            "target": target_value,
+                            "amount": amount,
+                        },
+                        importance=1,
+                    )
+                else:
+                    target.life -= amount
+                    changed_players.append(target_value)
+                    if source.is_commander:
+                        key = source.oracle_id
+                        target.commander_damage_received[key] = target.commander_damage_received.get(key, 0) + amount
             else:
                 target_card = next((card for card in self.state.cards.values() if card.ref == target_value), None)
                 if target_card is None:
@@ -13299,8 +14201,23 @@ class CommanderEngine:
             target = str(effect["target"])
             amount = int(effect.get("amount", 0))
             if target in self.state.players:
-                self.state.players[target].life -= amount
-                self._log(actor, "effect.damage", f"{target} took {amount} damage.", {"target": target, "amount": amount, "reason": reason}, importance=2, changed_players=[target])
+                if self.state.players[target].stats.get(
+                    "protection_from_everything_until_next_turn"
+                ):
+                    self._log(
+                        actor,
+                        "effect.damage.prevented",
+                        f"Damage to {target} was prevented by protection.",
+                        {
+                            "target": target,
+                            "amount": amount,
+                            "reason": "protection from everything",
+                        },
+                        importance=1,
+                    )
+                else:
+                    self.state.players[target].life -= amount
+                    self._log(actor, "effect.damage", f"{target} took {amount} damage.", {"target": target, "amount": amount, "reason": reason}, importance=2, changed_players=[target])
             else:
                 card = self._resolve_object(actor, target, zones={"battlefield"})
                 if self._protection_colors(card).intersection(
@@ -13589,6 +14506,56 @@ class CommanderEngine:
             ).ref
         if op == "extra_turn":
             return self.schedule_extra_turn(str(effect.get("player") or actor), source=str(effect.get("source") or reason)).turn_id
+        if op == "control_next_turn":
+            target = str(effect.get("player") or "")
+            if target not in self.active_seats:
+                raise GameRuleError(
+                    "Turn-control effect requires an active player"
+                )
+            self.state.players[target].stats[
+                "next_turn_controlled_by"
+            ] = actor
+            self._log(
+                actor,
+                "turn.control.scheduled",
+                (
+                    f"{actor} will control {target} during that "
+                    "player's next turn."
+                ),
+                {
+                    "controller": actor,
+                    "player": target,
+                    "reason": reason,
+                },
+                importance=3,
+                changed_players=[actor, target],
+            )
+            return target
+        if op == "protection_from_everything_until_next_turn":
+            seat = str(effect.get("player") or actor)
+            self._require_seat(seat, in_game=True)
+            self.state.players[seat].stats[
+                "protection_from_everything_until_next_turn"
+            ] = True
+            self._log(
+                actor,
+                "player.protection",
+                (
+                    f"{seat} gained protection from everything until "
+                    "their next turn."
+                ),
+                {
+                    "player": seat,
+                    "duration": "until_next_turn",
+                    "reason": reason,
+                },
+                importance=2,
+                changed_players=[seat],
+            )
+            return seat
+        if op == "end_turn":
+            self._end_turn_now(actor=actor, reason=reason)
+            return None
         if op == "delayed_trigger":
             source = effect.get("source")
             source_id = None
@@ -13896,6 +14863,39 @@ class CommanderEngine:
                     "reason": reason,
                 },
                 importance=1,
+                changed_objects=[card.object_id],
+            )
+            return card.ref
+        if op == "modify_stats_until_end_of_turn":
+            card = self._resolve_object(
+                actor,
+                str(effect["card"]),
+                zones={"battlefield"},
+            )
+            until_end = card.annotations.setdefault(
+                "until_end_of_turn",
+                {},
+            )
+            power = int(effect.get("power", 0))
+            toughness = int(effect.get("toughness", 0))
+            until_end["power"] = int(until_end.get("power", 0)) + power
+            until_end["toughness"] = (
+                int(until_end.get("toughness", 0)) + toughness
+            )
+            self._log(
+                actor,
+                "permanent.stats",
+                (
+                    f"{card.ref} got {power:+d}/{toughness:+d} until "
+                    "end of turn."
+                ),
+                {
+                    "object": card.ref,
+                    "power": power,
+                    "toughness": toughness,
+                    "reason": reason,
+                },
+                importance=2,
                 changed_objects=[card.object_id],
             )
             return card.ref

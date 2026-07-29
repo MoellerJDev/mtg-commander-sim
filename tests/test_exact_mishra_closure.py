@@ -3,8 +3,9 @@ from __future__ import annotations
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.model import StackItem
+from mtg_commander_sim.model import StackItem, TurnEntry
 from mtg_commander_sim.preflight import card_semantic_status
+from mtg_commander_sim.projection import ProjectionCursor, StateProjector
 
 
 class ExactMishraClosureTests(unittest.TestCase):
@@ -726,6 +727,483 @@ class ExactMishraClosureTests(unittest.TestCase):
             )
         )
 
+    def test_deflecting_swat_free_cost_and_exact_retarget(self):
+        session = self.make_session(1113)
+        engine = session.engine
+        swat = self.card(engine, "A", "Deflecting Swat")
+        commander = self.card(engine, "A", "Mishra, Eminent One")
+        first = self.card(engine, "A", "Sol Ring")
+        second = self.card(engine, "A", "Lightning Greaves")
+        for card in (commander, first, second):
+            engine.move_card(
+                card.object_id,
+                "battlefield",
+                controller="A",
+            )
+        engine.move_card(swat.object_id, "hand")
+        targeted = self.stack_item(
+            engine,
+            ref="S-retargeted",
+            kind="spell",
+            controller="B",
+            label="Synthetic Assassin's Trophy",
+            semantic_key=(
+                "ac10d218-f9a6-4058-9cda-a15ca1b0b7b5:"
+                "spell:front"
+            ),
+            targets=[first.ref],
+        )
+        engine.state.priority_player = "A"
+        engine._cast(
+            "A",
+            {
+                "card": swat.ref,
+                "targets": [targeted.ref],
+                "cost_option": "commander_free",
+            },
+        )
+        self.assertEqual(0, sum(engine.state.players["A"].mana_pool.values()))
+        self.resolve_top(engine)
+        self.assertEqual("semantic.choice", engine.state.pending_decision.kind)
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "targets": [second.ref],
+                "plan": "REDIRECT_INTERACTION",
+                "reason": "Move the effect to the other legal permanent.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual([second.ref], targeted.targets)
+        self.assertEqual("graveyard", swat.zone)
+
+    def test_fomori_vault_counts_artifacts_and_bottoms_rest_randomly(self):
+        session = self.make_session(1114)
+        engine = session.engine
+        vault = self.card(engine, "A", "Fomori Vault")
+        top = [
+            self.card(engine, "A", name)
+            for name in (
+                "Daretti, Scrap Savant",
+                "Demonic Junker",
+                "Transmute Artifact",
+            )
+        ]
+        discard = self.card(engine, "A", "Lightning Greaves")
+        artifacts = [
+            self.card(engine, "A", "Sol Ring"),
+            self.card(engine, "A", "Sensei's Divining Top"),
+            self.card(engine, "A", "Panharmonicon"),
+        ]
+        for card in (vault, *artifacts):
+            engine.move_card(
+                card.object_id,
+                "battlefield",
+                controller="A",
+            )
+        for card in top:
+            engine.move_card(card.object_id, "library")
+        library = engine.state.players["A"].zones["library"]
+        for card in top:
+            library.remove(card.object_id)
+        library.extend(card.object_id for card in top)
+        engine.move_card(discard.object_id, "hand")
+        engine.state.players["A"].mana_pool["C"] = 3
+        engine.state.priority_player = "A"
+        engine._activate(
+            "A",
+            {
+                "source": vault.ref,
+                "ability": "ab2",
+                "cost_cards": [discard.ref],
+                "pay": "manual",
+                "payment": {"C": 3},
+            },
+        )
+        self.assertEqual("graveyard", discard.zone)
+        self.resolve_top(engine)
+        self.assertEqual("semantic.choice", engine.state.pending_decision.kind)
+        chosen = top[1]
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "card": chosen.ref,
+                "plan": "SELECT_CARD",
+                "reason": "Keep the selected card.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("hand", chosen.zone)
+        self.assertEqual(
+            {top[0].object_id, top[2].object_id},
+            set(library[:2]),
+        )
+
+    def test_mindslaver_routes_controlled_turn_to_controller_pilot(self):
+        session = self.make_session(1115)
+        engine = session.engine
+        mindslaver = self.card(engine, "A", "Mindslaver")
+        engine.move_card(
+            mindslaver.object_id,
+            "battlefield",
+            controller="A",
+        )
+        engine.state.players["A"].mana_pool["C"] = 4
+        engine.state.priority_player = "A"
+        engine._activate(
+            "A",
+            {
+                "source": mindslaver.ref,
+                "ability": "ab1",
+                "targets": ["B"],
+                "pay": "manual",
+                "payment": {"C": 4},
+            },
+        )
+        self.assertEqual("graveyard", mindslaver.zone)
+        self.resolve_top(engine)
+        self.assertEqual(
+            "A",
+            engine.state.players["B"].stats["next_turn_controlled_by"],
+        )
+        engine.state.players["B"].stats["turn_controlled_by"] = "A"
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.permissions.issue(
+            kind="priority",
+            role="pilot",
+            actors=["B"],
+            allowed_actions=["pass"],
+            payload_by_actor={"B": {"legal_actions": []}},
+        )
+        capability = engine.permissions.capability_for("pilot:A")
+        self.assertIsNotNone(capability)
+        self.assertEqual("B", capability.actor)
+        self.assertIsNone(engine.permissions.capability_for("pilot:B"))
+        packet = StateProjector(self.db, engine.state).packet(
+            "pilot:A",
+            ProjectionCursor(),
+            force_full=True,
+        )
+        view = packet["state"]
+        self.assertIn("hand", view["players"]["B"])
+        self.assertNotIn("hand", view["players"]["A"])
+
+    def test_roaming_throne_type_trigger_multiplier_and_ward(self):
+        session = self.make_session(1116)
+        engine = session.engine
+        throne = self.card(engine, "A", "Roaming Throne")
+        engineer = self.card(engine, "A", "Goblin Engineer")
+        engine.move_card(throne.object_id, "hand")
+        self.prepare_main(engine)
+        engine.state.players["A"].mana_pool["C"] = 4
+        engine._cast(
+            "A",
+            {
+                "card": throne.ref,
+                "pay": "manual",
+                "payment": {"C": 4},
+            },
+        )
+        self.resolve_top(engine)
+        self.assertEqual("semantic.choice", engine.state.pending_decision.kind)
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "creature_type": "Goblin",
+                "plan": "SELECT_TYPE",
+                "reason": "Double the Goblin Engineer trigger.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("battlefield", throne.zone)
+        self.assertIn(
+            "goblin",
+            engine._type_parts(
+                str(engine._effective_card_data(throne)["type_line"])
+            )[1],
+        )
+        engine.move_card(
+            engineer.object_id,
+            "battlefield",
+            controller="A",
+        )
+        refs = engine._dispatch_semantic_event(
+            "permanent.enter",
+            {
+                "card": engineer.ref,
+                "controller": "A",
+                "types": ["creature"],
+            },
+            sources=[engineer],
+        )
+        self.assertEqual(2, len(refs))
+
+        engine.state.pending_trigger_batches.clear()
+        targeted = self.stack_item(
+            engine,
+            ref="S-ward-target",
+            kind="activated_ability",
+            controller="B",
+            label="Opponent targets Roaming Throne",
+            semantic_key=(
+                "c1d6cce8-085f-42cb-8b0c-b6fbbf88b16a:"
+                "ability:ab2"
+            ),
+            targets=[throne.ref],
+        )
+        ward_refs = engine._queue_ward_triggers_for_targets(targeted)
+        self.assertEqual(1, len(ward_refs))
+        self.resolve_top(engine)
+        self.assertEqual("semantic.choice", engine.state.pending_decision.kind)
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "pay": False,
+                "plan": "DECLINE_WARD",
+                "reason": "Cannot pay ward.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertNotIn(targeted, engine.state.stack)
+
+    def test_sundial_ends_turn_and_exiles_stack(self):
+        session = self.make_session(1117)
+        engine = session.engine
+        sundial = self.card(engine, "A", "Sundial of the Infinite")
+        stranded = self.card(engine, "A", "Deflecting Swat")
+        buffed = self.card(engine, "A", "Mishra, Eminent One")
+        for card in (sundial, buffed):
+            engine.move_card(
+                card.object_id,
+                "battlefield",
+                controller="A",
+            )
+        buffed.annotations["until_end_of_turn"] = {"power": 3}
+        engine._remove_from_zone(stranded)
+        stranded.zone = "stack"
+        stranded_item = self.stack_item(
+            engine,
+            ref="S-stranded",
+            kind="spell",
+            controller="A",
+            label="Stranded spell",
+            semantic_key=(
+                "ae120613-97d6-4393-b39d-c3e6c076f5d6:"
+                "spell:front"
+            ),
+            card_object_id=stranded.object_id,
+        )
+        self.prepare_main(engine)
+        engine.state.stack.append(stranded_item)
+        engine.state.players["A"].mana_pool["C"] = 1
+        engine._activate(
+            "A",
+            {
+                "source": sundial.ref,
+                "ability": "ab1",
+                "pay": "manual",
+                "payment": {"C": 1},
+            },
+        )
+        self.resolve_top(engine)
+        self.assertEqual("exile", stranded.zone)
+        self.assertFalse(engine.state.stack)
+        self.assertNotIn("until_end_of_turn", buffed.annotations)
+        self.assertEqual("B", engine.state.active_player)
+
+    def test_mightstone_modal_enter_and_restricted_powerstone_mana(self):
+        with self.subTest(mode="draw"):
+            session = self.make_session(1118)
+            engine = session.engine
+            mightstone = self.card(
+                engine, "A", "The Mightstone and Weakstone"
+            )
+            before = len(engine.state.players["A"].zones["hand"])
+            engine.move_card(
+                mightstone.object_id,
+                "battlefield",
+                controller="A",
+                semantic_events=True,
+            )
+            self.assertTrue(engine._stabilize())
+            result = session.act(
+                "pilot:A",
+                {
+                    "action_id": "choose",
+                    "modes": ["draw"],
+                    "targets": [],
+                    "plan": "DRAW_CARDS",
+                    "reason": "Select the draw mode.",
+                },
+            )
+            self.assertTrue(result.ok, result.summary)
+            self.resolve_top(engine)
+            self.assertEqual(
+                before + 2,
+                len(engine.state.players["A"].zones["hand"]),
+            )
+
+        with self.subTest(mode="weaken"):
+            session = self.make_session(1119)
+            engine = session.engine
+            mightstone = self.card(
+                engine, "A", "The Mightstone and Weakstone"
+            )
+            target_ref = engine.create_token(
+                "B",
+                name="Large Test Creature",
+                characteristics={
+                    "type_line": "Token Creature — Giant",
+                    "power": "10",
+                    "toughness": "10",
+                },
+                reason="test setup",
+            )[0]
+            target = engine._resolve_object("A", target_ref)
+            engine.move_card(
+                mightstone.object_id,
+                "battlefield",
+                controller="A",
+                semantic_events=True,
+            )
+            self.assertTrue(engine._stabilize())
+            result = session.act(
+                "pilot:A",
+                {
+                    "action_id": "choose",
+                    "modes": ["weaken"],
+                    "targets": [target.ref],
+                    "plan": "WEAKEN_CREATURE",
+                    "reason": "Apply the temporary reduction.",
+                },
+            )
+            self.assertTrue(result.ok, result.summary)
+            self.resolve_top(engine)
+            self.assertEqual(
+                5, engine._numeric_stat(target.object_id, "power")
+            )
+            self.assertEqual(
+                5, engine._numeric_stat(target.object_id, "toughness")
+            )
+
+        with self.subTest(mode="restricted_mana"):
+            session = self.make_session(1120)
+            engine = session.engine
+            mightstone = self.card(
+                engine, "A", "The Mightstone and Weakstone"
+            )
+            greaves = self.card(engine, "A", "Lightning Greaves")
+            engine.move_card(
+                mightstone.object_id,
+                "battlefield",
+                controller="A",
+            )
+            engine.move_card(greaves.object_id, "hand")
+            engine.state.priority_player = "A"
+            engine._activate(
+                "A",
+                {
+                    "source": mightstone.ref,
+                    "ability": "ab4",
+                },
+            )
+            self.assertEqual(2, engine.state.players["A"].mana_pool["C"])
+            self.assertFalse(
+                engine._cost_is_affordable(
+                    "A",
+                    {"GENERIC": 2},
+                    spend_context="nonartifact_spell",
+                )
+            )
+            self.assertTrue(
+                engine._cost_is_affordable(
+                    "A",
+                    {"GENERIC": 2},
+                    spend_context="artifact_spell",
+                )
+            )
+            self.prepare_main(engine)
+            self.assertIn(
+                greaves.ref,
+                engine._priority_action_hints("A")["cast"],
+            )
+            engine._cast(
+                "A",
+                {
+                    "card": greaves.ref,
+                    "pay": "manual",
+                    "payment": {"C": 2},
+                },
+            )
+            self.assertEqual(0, engine.state.players["A"].mana_pool["C"])
+            self.assertNotIn(
+                "restricted_mana",
+                engine.state.players["A"].stats,
+            )
+
+    def test_stasis_coffin_protection_blocks_targeting_and_damage(self):
+        session = self.make_session(1121)
+        engine = session.engine
+        coffin = self.card(engine, "A", "The Stasis Coffin")
+        engine.move_card(
+            coffin.object_id,
+            "battlefield",
+            controller="A",
+        )
+        engine.state.players["A"].mana_pool["C"] = 2
+        engine.state.priority_player = "A"
+        engine._activate(
+            "A",
+            {
+                "source": coffin.ref,
+                "ability": "ab1",
+                "pay": "manual",
+                "payment": {"C": 2},
+            },
+        )
+        self.assertEqual("exile", coffin.zone)
+        self.resolve_top(engine)
+        self.assertTrue(
+            engine.state.players["A"].stats[
+                "protection_from_everything_until_next_turn"
+            ]
+        )
+        schema = engine._public_target_schema(
+            "B",
+            {
+                "zones": ["player"],
+                "categories": ["player"],
+                "player_relation": "any",
+                "count": 1,
+            },
+            source_ref=None,
+        )
+        self.assertNotIn("A", schema["legal_refs"])
+        before = engine.state.players["A"].life
+        engine.apply_effect(
+            {"op": "damage", "target": "A", "amount": 5},
+            actor="B",
+        )
+        self.assertEqual(before, engine.state.players["A"].life)
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine._begin_turn(
+            TurnEntry(
+                turn_id="N-stasis-expiry",
+                player="A",
+                created_sequence=engine.state.turn_sequence,
+            )
+        )
+        self.assertNotIn(
+            "protection_from_everything_until_next_turn",
+            engine.state.players["A"].stats,
+        )
+
     def test_promoted_mishra_cards_preflight_fully(self):
         engine = self.make_session(1107).engine
         for name in (
@@ -739,6 +1217,13 @@ class ExactMishraClosureTests(unittest.TestCase):
             "Lithoform Engine",
             "Scientist Supreme of A.I.M.",
             "Worldwalker Helm",
+            "Deflecting Swat",
+            "Fomori Vault",
+            "Mindslaver",
+            "Roaming Throne",
+            "Sundial of the Infinite",
+            "The Mightstone and Weakstone",
+            "The Stasis Coffin",
         ):
             with self.subTest(card=name):
                 row = card_semantic_status(

@@ -96,7 +96,7 @@ class SemanticPreflightV2Tests(unittest.TestCase):
     def test_mixed_keyword_and_static_card_is_not_silently_complete(self):
         row = card_semantic_status(
             self.db.lookup("Roaming Throne"),
-            SemanticRegistry(),
+            SemanticRegistry(include_builtin_packs=False),
             db=self.db,
         )
 

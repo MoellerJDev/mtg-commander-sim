@@ -37,10 +37,29 @@ class StateProjector:
     def seat_for(principal: str) -> str | None:
         return principal.split(":", 1)[1] if principal.startswith("pilot:") else None
 
+    def _view_seat_for(self, principal: str) -> str | None:
+        """Return the seat whose decisions and hidden zones are controlled."""
+
+        decision = self.state.pending_decision
+        if decision is not None:
+            capability = next(
+                (
+                    value
+                    for value in self.state.capabilities.values()
+                    if value.decision_id == decision.decision_id
+                    and value.principal == principal
+                    and not value.consumed
+                ),
+                None,
+            )
+            if capability is not None and capability.actor in self.state.players:
+                return capability.actor
+        return self.seat_for(principal)
+
     def _event_visible(self, event: Event, principal: str) -> bool:
         if principal in {"analyst", "admin"}:
             return True
-        seat = self.seat_for(principal)
+        seat = self._view_seat_for(principal)
         if not event.visibility:
             return True
         return principal in event.visibility or (seat is not None and seat in event.visibility)
@@ -49,7 +68,7 @@ class StateProjector:
         if principal in {"analyst", "admin"}:
             return True
         if card.annotations.get("hidden_after_owner_left"):
-            seat = self.seat_for(principal)
+            seat = self._view_seat_for(principal)
             return bool(
                 seat
                 and (
@@ -60,7 +79,7 @@ class StateProjector:
             )
         if card.zone in {"battlefield", "graveyard", "exile", "command", "stack", "outside"}:
             return not card.face_down
-        seat = self.seat_for(principal)
+        seat = self._view_seat_for(principal)
         if seat is None:
             return False
         return seat == card.owner or seat in card.known_to or seat in card.revealed_to
@@ -173,7 +192,7 @@ class StateProjector:
         }
 
     def _snapshot(self, principal: str) -> dict[str, Any]:
-        seat = self.seat_for(principal)
+        seat = self._view_seat_for(principal)
         players: dict[str, Any] = {}
         for player_seat in self.state.turn_order:
             p = self.state.players[player_seat]
@@ -191,6 +210,9 @@ class StateProjector:
                 "ex": self._zone(p.zones["exile"], principal),
                 "cmd": self._zone(p.zones["command"], principal),
             }
+            restricted_mana = p.stats.get("restricted_mana")
+            if restricted_mana:
+                summary["restricted_mana"] = restricted_mana
             if not p.in_game:
                 publicly_known_left = [
                     card

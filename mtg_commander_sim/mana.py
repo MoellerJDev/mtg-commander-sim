@@ -102,10 +102,16 @@ def extract_mana_modes(record: CardRecord, commander_identity: Iterable[str] = (
         clause = match.group("output").strip()
         extra_costs = match.group("costs").casefold()
         lower = clause.casefold()
+        line_end = oracle.find("\n", match.start())
+        ability_line = oracle[
+            match.start() : (line_end if line_end >= 0 else len(oracle))
+        ].strip()
+        ability_lower = ability_line.casefold()
         conditional = any(
-            marker in lower
+            marker in ability_lower
             for marker in (
                 "only",
+                "can't be spent",
                 "if ",
                 "unless",
                 "for each",
@@ -131,24 +137,24 @@ def extract_mana_modes(record: CardRecord, commander_identity: Iterable[str] = (
         if "three mana of any one color" in lower:
             modes.extend(
                 ManaMode(
-                    mode.bundle,
-                    conditional=conditional,
-                    restriction=clause,
-                    side_effects=side_effects,
-                    requires_choice=requires_choice,
-                )
+                        mode.bundle,
+                        conditional=conditional,
+                        restriction=ability_line,
+                        side_effects=side_effects,
+                        requires_choice=requires_choice,
+                    )
                 for mode in _any_color_modes(3)
             )
             continue
         if "two mana of any one color" in lower:
             modes.extend(
                 ManaMode(
-                    mode.bundle,
-                    conditional=conditional,
-                    restriction=clause,
-                    side_effects=side_effects,
-                    requires_choice=requires_choice,
-                )
+                        mode.bundle,
+                        conditional=conditional,
+                        restriction=ability_line,
+                        side_effects=side_effects,
+                        requires_choice=requires_choice,
+                    )
                 for mode in _any_color_modes(2)
             )
             continue
@@ -156,12 +162,12 @@ def extract_mana_modes(record: CardRecord, commander_identity: Iterable[str] = (
             allowed = commander_colors or tuple(color for color in record.color_identity if color in "WUBRG")
             modes.extend(
                 ManaMode(
-                    mode.bundle,
-                    conditional=conditional,
-                    restriction=clause,
-                    side_effects=side_effects,
-                    requires_choice=requires_choice,
-                )
+                        mode.bundle,
+                        conditional=conditional,
+                        restriction=ability_line,
+                        side_effects=side_effects,
+                        requires_choice=requires_choice,
+                    )
                 for mode in _any_color_modes(1, allowed)
             )
             continue
@@ -169,12 +175,12 @@ def extract_mana_modes(record: CardRecord, commander_identity: Iterable[str] = (
             allowed = ("W", "U", "B", "R", "G", "C") if "any type" in lower else ("W", "U", "B", "R", "G")
             modes.extend(
                 ManaMode(
-                    mode.bundle,
-                    conditional=conditional,
-                    restriction=clause,
-                    side_effects=side_effects,
-                    requires_choice=requires_choice,
-                )
+                        mode.bundle,
+                        conditional=conditional,
+                        restriction=ability_line,
+                        side_effects=side_effects,
+                        requires_choice=requires_choice,
+                    )
                 for mode in _any_color_modes(1, allowed)
             )
             continue
@@ -192,7 +198,7 @@ def extract_mana_modes(record: CardRecord, commander_identity: Iterable[str] = (
                         ManaMode(
                             bundle,
                             conditional=conditional,
-                            restriction=clause,
+                            restriction=ability_line,
                             side_effects=side_effects,
                             requires_choice=requires_choice,
                         )
@@ -202,7 +208,7 @@ def extract_mana_modes(record: CardRecord, commander_identity: Iterable[str] = (
                     ManaMode(
                         symbols,
                         conditional=conditional,
-                        restriction=clause,
+                        restriction=ability_line,
                         side_effects=side_effects,
                         requires_choice=requires_choice,
                     )

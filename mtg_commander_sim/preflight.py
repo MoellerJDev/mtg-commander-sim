@@ -231,6 +231,17 @@ def _mana_ability_requires_semantics(
 ) -> bool:
     """Whether generic mana production would lose a restriction or effect."""
 
+    if effect_text is not None and re.search(
+        r"activate only if you control "
+        r"(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten) "
+        r"or more (?:artifacts?|creatures?|lands?)",
+        effect_text,
+        re.IGNORECASE,
+    ):
+        # The authoritative activation-condition grammar validates this
+        # public minimum-permanent predicate before exposing or using the
+        # mana ability.
+        return False
     if effect_text is not None and re.fullmatch(
         r"add (?:\{[WUBRGC0-9]+\})+(?: or (?:\{[WUBRGC0-9]+\})+)*\.",
         effect_text.strip(),
