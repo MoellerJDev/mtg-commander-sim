@@ -14,9 +14,10 @@ from .engine import CommanderEngine
 from .model import Event, GameState
 from .semantics import SemanticRegistry
 from .util import stable_json
+from .version import __version__
 
 RECORD_SCHEMA_VERSION = 3
-ENGINE_VERSION = "0.7.0"
+ENGINE_VERSION = __version__
 TRACE_LEVELS = {"minimal", "standard", "debug"}
 RUN_STATES = {
     "created",

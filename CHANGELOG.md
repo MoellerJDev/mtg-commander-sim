@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 0.8.0 — 2026-07-29
+
+### Exact-list semantic closure
+
+- Closed conservative semantic preflight for both pinned live Commander lists:
+  100 fully playable cards, no partial/unresolved entries, and no expected
+  arbiter calls per list.
+- Added the remaining exact Zimone and Mishra costs, permissions, replacements,
+  delayed effects, linked choices, copy/token engines, restricted mana, Saga,
+  Craft, Crew, loyalty, and tutor families.
+- Added deterministic scenarios for the newly promoted programs while
+  retaining the existing decision-opportunity, replay, and privacy gates.
+- Kept the claim boundary at the validated deck fingerprints; this is not full
+  Oracle-corpus or complete Magic-rules coverage.
+
 ## 0.7.0 — 2026-07-28
 
 ### Exact targets and interaction

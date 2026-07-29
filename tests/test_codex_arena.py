@@ -3,10 +3,12 @@ from __future__ import annotations
 import copy
 import json
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 
 from common import DB_PATH, keep_all, load_assets, make_session
+from mtg_commander_sim import __version__
 from mtg_commander_sim.arena import (
     CodexThreadRegistry,
     CoordinatorTools,
@@ -14,8 +16,10 @@ from mtg_commander_sim.arena import (
     PilotInvocationIdentity,
     SeatScopedPilotTools,
 )
+from mtg_commander_sim.bulk import SCRYFALL_USER_AGENT
 from mtg_commander_sim.deck import DeckDefinition
 from mtg_commander_sim.profiles import DeckProfileCache
+from mtg_commander_sim.record import ENGINE_VERSION
 from mtg_commander_sim.session import CommanderSession
 
 
@@ -27,6 +31,16 @@ class CodexArenaBoundaryTests(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.db.close()
+
+    def test_runtime_and_distribution_versions_match(self):
+        project = tomllib.loads(
+            (Path(__file__).parents[1] / "pyproject.toml").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(project["project"]["version"], __version__)
+        self.assertEqual(__version__, ENGINE_VERSION)
+        self.assertIn(f"/{__version__} ", SCRYFALL_USER_AGENT)
 
     def test_exact_profile_fingerprint_acceptance_and_mismatch_warning(self):
         cache = DeckProfileCache()

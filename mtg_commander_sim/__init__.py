@@ -1,5 +1,6 @@
 """Four-player, LLM-piloted Commander simulation kernel."""
 
+from .version import __version__
 from .carddb import CardDatabase, CardRecord, Ruling
 from .bulk import (
     ScryfallBulkDataError,
@@ -105,5 +106,3 @@ __all__ = [
     "finalize_record",
     "verify_record_integrity",
 ]
-
-__version__ = "0.8.0"

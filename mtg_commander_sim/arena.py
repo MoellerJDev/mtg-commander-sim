@@ -13,7 +13,7 @@ from typing import Any, Iterator, Mapping, TextIO
 
 from .carddb import CardDatabase
 from .pilot import PLAN_CATEGORIES, PilotResponse
-from .record import utc_now
+from .record import ENGINE_VERSION, utc_now
 from .report import derive_review
 from .session import CommanderSession
 from .util import stable_json
@@ -937,7 +937,7 @@ def run_pilot_mcp_stdio(
                     "capabilities": {"tools": {}},
                     "serverInfo": {
                         "name": f"mtg-pilot-{tools.seat}",
-                        "version": "0.7.0",
+                        "version": ENGINE_VERSION,
                     },
                 }
             elif method == "notifications/initialized":

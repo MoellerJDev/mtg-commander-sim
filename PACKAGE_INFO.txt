@@ -1,10 +1,10 @@
-MTG Commander Sim 0.7.0
-Package type: private exact-interaction milestone
+MTG Commander Sim 0.8.0
+Package type: private exact-list semantic-closure milestone
 Built: 2026-07-28
 Card database: ignored local SQLite plus refreshable Scryfall bulk-data importer
 CI data: compact public exact-list JSON fixture, rebuilt during CI
 Live deck source: validated public Moxfield Commander URLs with local cache
 Codex arena: neutral primary coordinator plus four fixed-seat persistent pilots
-Semantic continuation: replayable private-search frames, exact public target plans, and interaction pack
+Semantic continuation: replayable private-search frames, exact target plans, and 100/100 pinned-list preflight
 Record lifecycle: explicit pause/finalize/refresh/verify with journal-derived telemetry
 Distribution license: not selected
