@@ -47,6 +47,12 @@ Loop sequentially even though all four pilot threads remain active:
    boundary—never hand/library cards, private search choices, memory, or raw
    task data. A blocked response may add a sanitized error code/message only
    when it contains no private game data.
+   When the host uses the one-shot `pilot-tool` fallback instead of a persistent
+   MCP attachment, every `submit-action` command must repeat the full actual
+   invocation identity: provider, model, reasoning effort, stable thread
+   ID/label when exposed, `--provider-invoked`, and both available identity
+   verification flags. Never abbreviate the command on later turns. A missing
+   or changed identity is a fidelity error, not an acceptable unverified action.
 4. Submit the response through that seat's fixed MCP server. On rejection,
    return only the compact error/current task to the same thread and retry.
 5. Apply a legal pilot action even when the primary considers it strategically

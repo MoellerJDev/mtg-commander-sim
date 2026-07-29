@@ -80,6 +80,10 @@ def primary_session_prompt(game_dir: str | Path) -> str:
         "its original persistent thread through the fixed-seat MCP tools. "
         "Never pilot a seat, never disclose another seat's hidden information, "
         "and stop immediately if suppressed_meaningful_windows becomes nonzero. "
+        "For the one-shot pilot-tool fallback, repeat the actual provider, "
+        "model, reasoning effort, stable thread ID/label, provider-invoked, "
+        "and identity-verification flags on every submit-action invocation; "
+        "never shorten that command on later turns. "
         "Continue until turn sequence 8, a win, an unresolved material semantic, "
         "or a fidelity failure; then save, replay-verify, and report this only "
         "as pilot_test when lists are duplicated."
@@ -314,6 +318,9 @@ class SeatScopedPilotTools:
                 "Pilot response contains transport/authority fields: "
                 + ", ".join(forbidden),
             )
+        identity_error = self._codex_identity_error()
+        if identity_error:
+            return self._reject_pilot_response(normalized, identity_error)
         if self._identity and self._identity.provider == "codex_subagent":
             missing: list[str] = []
             if not normalized.get("plan"):
@@ -352,6 +359,70 @@ class SeatScopedPilotTools:
             "event_ids": list(result.event_ids),
             "retry": None if result.ok else self._get_task_loaded(),
         }
+
+    def _codex_identity_error(self) -> str | None:
+        """Reject unauditable or drifting Codex transport metadata.
+
+        A one-shot pilot-tool process has no persistent server object, so its
+        invocation identity must be supplied again on every submission.  This
+        check prevents a later abbreviated command from accepting an action
+        while silently losing evidence that the same Codex thread was reused.
+        """
+
+        identity = self._identity
+        if identity is None or identity.provider != "codex_subagent":
+            return None
+        if not identity.provider_invoked:
+            return (
+                "Codex pilot submission is missing --provider-invoked; use "
+                "manual-json for a non-Codex response or repeat the complete "
+                "verified invocation identity"
+            )
+
+        prior = [
+            row
+            for row in self._session.decisions
+            if row.get("principal") == self._principal
+            and row.get("provider_invoked") is True
+        ]
+        if not prior:
+            return None
+
+        continuity_fields = (
+            ("provider", identity.provider),
+            ("model", identity.model),
+            ("reasoning_effort", identity.reasoning_effort),
+            ("thread_id", identity.thread_id),
+            ("thread_label", identity.thread_label),
+        )
+        for field_name, actual in continuity_fields:
+            expected = {
+                row.get(field_name)
+                for row in prior
+                if row.get(field_name) is not None
+            }
+            if len(expected) == 1 and actual != next(iter(expected)):
+                return (
+                    "Codex pilot invocation identity changed for "
+                    f"{field_name}; reuse the original fixed-seat thread "
+                    "and repeat its complete identity flags"
+                )
+
+        if any(
+            row.get("provider_identity_verified") is True for row in prior
+        ) and not identity.provider_identity_verified:
+            return (
+                "Codex pilot provider identity verification was dropped; "
+                "repeat --provider-identity-verified"
+            )
+        if any(
+            row.get("model_identity_verified") is True for row in prior
+        ) and not identity.model_identity_verified:
+            return (
+                "Codex pilot model identity verification was dropped; "
+                "repeat --model-identity-verified"
+            )
+        return None
 
     def _reject_pilot_response(
         self,

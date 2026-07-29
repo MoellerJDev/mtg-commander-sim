@@ -15,6 +15,7 @@ from mtg_commander_sim.arena import (
     PILOT_TOOL_NAMES,
     PilotInvocationIdentity,
     SeatScopedPilotTools,
+    primary_session_prompt,
 )
 from mtg_commander_sim.bulk import SCRYFALL_USER_AGENT
 from mtg_commander_sim.deck import DeckDefinition
@@ -303,6 +304,81 @@ class CodexArenaBoundaryTests(unittest.TestCase):
         self.assertFalse(result["accepted"])
         self.assertIn("reason", result["error"])
         self.assertIn("confidence", result["error"])
+
+    def test_codex_submission_requires_invocation_evidence(self):
+        session = make_session(
+            self.db, self.mishra, self.zimone, seed=412
+        )
+        tools = SeatScopedPilotTools(
+            session,
+            "A",
+            identity=PilotInvocationIdentity(
+                provider="codex_subagent",
+                model="gpt-5.6-sol",
+                reasoning_effort="max",
+                thread_id="/root/pilot-a",
+                thread_label="mtg-pilot-a",
+                provider_invoked=False,
+            ),
+        )
+        result = tools.submit_action(
+            {
+                "action_id": "keep",
+                "plan": "MULLIGAN",
+                "reason": "Keep a functional opening hand.",
+                "confidence": 0.8,
+            }
+        )
+        self.assertFalse(result["accepted"])
+        self.assertIn("--provider-invoked", result["error"])
+        self.assertFalse(session.decisions[-1]["provider_invoked"])
+
+    def test_codex_submission_rejects_dropped_thread_identity(self):
+        session = make_session(
+            self.db, self.mishra, self.zimone, seed=413
+        )
+        session.decisions.append(
+            {
+                "principal": "pilot:A",
+                "provider": "codex_subagent",
+                "model": "gpt-5.6-sol",
+                "reasoning_effort": "max",
+                "thread_id": "/root/pilot-a",
+                "thread_label": "mtg-pilot-a",
+                "provider_invoked": True,
+                "provider_identity_verified": True,
+                "model_identity_verified": True,
+            }
+        )
+        tools = SeatScopedPilotTools(
+            session,
+            "A",
+            identity=PilotInvocationIdentity(
+                provider="codex_subagent",
+                model="gpt-5.6-sol",
+                reasoning_effort="max",
+                thread_id=None,
+                thread_label="mtg-pilot-a",
+                provider_invoked=True,
+                provider_identity_verified=True,
+                model_identity_verified=True,
+            ),
+        )
+        result = tools.submit_action(
+            {
+                "action_id": "keep",
+                "plan": "MULLIGAN",
+                "reason": "Keep a functional opening hand.",
+                "confidence": 0.8,
+            }
+        )
+        self.assertFalse(result["accepted"])
+        self.assertIn("thread_id", result["error"])
+
+    def test_primary_prompt_requires_full_identity_on_every_submission(self):
+        prompt = primary_session_prompt("run/test")
+        self.assertIn("every submit-action invocation", prompt)
+        self.assertIn("never shorten that command", prompt)
 
     def test_pilot_memory_is_seat_isolated(self):
         session = make_session(

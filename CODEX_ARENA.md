@@ -131,7 +131,11 @@ python simctl.py pilot-tool `
 
 Use `submit-action --json '<response>'` for the corresponding submission.
 Never invent an ID or mark `provider-invoked` when no model invocation
-occurred.
+occurred. The one-shot fallback does not retain process arguments: repeat the
+complete identity prefix, including the actual thread ID/label and verification
+flags, on **every** `submit-action`. Do not shorten later calls to only
+`--game-dir` and `--seat`; the server rejects unauditable Codex submissions and
+identity drift.
 
 The MCP submission schema exposes `action_id`/`action`, `actions`, the exact
 plan enum, a 180-character reason, confidence, yield, and a 500-character
