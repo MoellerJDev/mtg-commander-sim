@@ -3895,17 +3895,28 @@ class CommanderEngine:
                 return False
             return True
         controlled_type = re.search(
-            r"enters (?:the battlefield )?tapped unless you control an? "
-            r"(plains|island|swamp|mountain|forest)",
+            r"enters (?:the battlefield )?tapped unless you control "
+            r"(?P<types>[^.\n]+)",
             oracle,
         )
         if controlled_type:
-            required_type = controlled_type.group(1)
+            required_types = set(
+                re.findall(
+                    r"\b(plains|island|swamp|mountain|forest)\b",
+                    controlled_type.group("types"),
+                )
+            )
+            if not required_types:
+                raise GameRuleError(
+                    f"{record.name} has an entry condition the rules engine "
+                    "has not compiled"
+                )
             return not any(
-                required_type
-                in str(
-                    self._effective_card_data(oid).get("type_line") or ""
-                ).casefold()
+                required_types.intersection(
+                    str(
+                        self._effective_card_data(oid).get("type_line") or ""
+                    ).casefold().split()
+                )
                 for oid in self.state.players[seat].zones["battlefield"]
                 if self.state.cards[oid].controller == seat
             )

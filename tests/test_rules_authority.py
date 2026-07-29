@@ -53,6 +53,7 @@ class RulesAuthorityRegressionTests(unittest.TestCase):
         field = self.db.lookup("Field of the Dead")
         training = self.db.lookup("Training Center")
         shifting = self.db.lookup("Shifting Woodland")
+        mistrise = self.db.lookup("Mistrise Village")
         self.assertFalse(duel.engine._land_enters_tapped("A", forest, {}))
         self.assertFalse(duel.engine._land_enters_tapped("A", confluence, {}))
         self.assertFalse(duel.engine._land_enters_tapped("A", strand, {}))
@@ -64,6 +65,30 @@ class RulesAuthorityRegressionTests(unittest.TestCase):
         forest_card = self._card(duel, "B", "Forest")
         duel.engine.move_card(forest_card.object_id, "battlefield", controller="B")
         self.assertFalse(duel.engine._land_enters_tapped("B", shifting, {}))
+        self.assertFalse(duel.engine._land_enters_tapped("B", mistrise, {}))
+
+        mountain_only = self._session(players=2)
+        mountain = next(
+            card
+            for card in mountain_only.state.cards.values()
+            if "Mountain"
+            in self.db.lookup(card.printed_name).type_line.split()
+        )
+        mountain_only.engine.move_card(
+            mountain.object_id,
+            "battlefield",
+            controller="B",
+        )
+        self.assertFalse(
+            mountain_only.engine._land_enters_tapped("B", mistrise, {})
+        )
+        self.assertTrue(
+            self._session(players=2).engine._land_enters_tapped(
+                "B",
+                mistrise,
+                {},
+            )
+        )
 
         multiplayer = self._session(players=4)
         self.assertFalse(multiplayer.engine._land_enters_tapped("A", training, {}))
