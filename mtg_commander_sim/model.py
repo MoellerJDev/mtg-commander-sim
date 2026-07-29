@@ -306,6 +306,7 @@ class GameConfig:
     hidden_information_mode: str = "seat-projected"
     priority_optimization: str = "conservative-yield"
     auto_resolve_registered_semantics: bool = True
+    semantic_policy: str = "arbitrate_or_pause"
     auto_pass_empty_priority: bool = True
     realistic_mulligan_guard: bool = True
     max_players: int = 6

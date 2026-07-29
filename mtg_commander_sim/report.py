@@ -169,6 +169,17 @@ def _semantic_coverage(engine: CommanderEngine) -> dict[str, Any]:
             continue
         registered_programs = engine.semantics.programs_for_oracle(record.oracle_id)
         trust = engine.semantics.trust_for_oracle(record.oracle_id)
+        trusted_programs = [
+            program
+            for program in registered_programs
+            if program.trust_level == "trusted"
+        ]
+        source_hash_match = all(
+            engine.semantic_program_is_current_trusted(program)
+            for program in trusted_programs
+        )
+        if trusted_programs and not source_hash_match:
+            trust = "unresolved"
         oracle = record.oracle_text.casefold()
         builtin_fetch = bool(engine._fetch_land_types(record.oracle_text))
         if trust == "trusted" or ("stack.activate" in operations and builtin_fetch):
@@ -221,11 +232,17 @@ def _semantic_coverage(engine: CommanderEngine) -> dict[str, Any]:
             "status": status,
             "reason": reason,
             "trust_level": effective_trust,
+            "source_hash_match": source_hash_match,
             "semantic_programs": [
                 {
                     "key": program.key,
                     "version": program.version,
                     "trust_level": program.trust_level,
+                    "source_hash_match": (
+                        engine.semantic_program_is_current_trusted(program)
+                        if program.trust_level == "trusted"
+                        else None
+                    ),
                 }
                 for program in registered_programs
             ],
@@ -744,6 +761,94 @@ def derive_review(
     if duplicated_deck_fixture and classification == "deck_review_eligible":
         classification = "pilot_test"
     eligible = classification == "deck_review_eligible" and not fidelity_failures
+    deck_operation_failures: list[str] = []
+    if state.config.semantic_policy != "trusted_only":
+        deck_operation_failures.append(
+            "semantic_policy is not trusted_only"
+        )
+    if state.config.effective_profile(len(state.turn_order)) != (
+        "commander_multiplayer"
+    ):
+        deck_operation_failures.append(
+            "format is not four-player Commander multiplayer"
+        )
+    if len(state.turn_order) != 4:
+        deck_operation_failures.append(
+            "operation evidence requires exactly four seats"
+        )
+    if not state.game_over or not (state.winner or state.draw):
+        deck_operation_failures.append(
+            "game did not reach a natural winner or draw"
+        )
+    if semantics["status"] != "complete":
+        deck_operation_failures.append(
+            "encountered semantics were not fully trusted"
+        )
+    if replay_status != "pass":
+        deck_operation_failures.append(
+            "exact command replay did not pass"
+        )
+    if opportunity_coverage != "pass" or suppressed_meaningful:
+        deck_operation_failures.append(
+            "action-opportunity fidelity did not pass"
+        )
+    if illegal_target_exposure or legal_exposure_stop:
+        deck_operation_failures.append(
+            "legal-action exposure did not pass"
+        )
+    if land_review["conflict_count"]:
+        deck_operation_failures.append(
+            "rules-kernel conflicts were recorded"
+        )
+    if not complete_alternatives or not complete_reasons:
+        deck_operation_failures.append(
+            "pilot decision audit is incomplete"
+        )
+    if profile_match_value is not True:
+        deck_operation_failures.append(
+            "exact profile fingerprints were not verified"
+        )
+    if arena.get("pilot_thread_count") != 4:
+        deck_operation_failures.append(
+            "exactly four persistent pilot threads were not verified"
+        )
+    if arena.get("persistent_thread_reuse") is not True:
+        deck_operation_failures.append(
+            "persistent pilot-thread reuse was not verified"
+        )
+    if arena.get("primary_made_strategic_decision") is not False:
+        deck_operation_failures.append(
+            "the primary coordinator made a strategic seat decision"
+        )
+    if arena.get("seat_projection_verified") is not True:
+        deck_operation_failures.append(
+            "seat projection was not verified"
+        )
+    if arena.get("provider_identity_verified") is not True:
+        deck_operation_failures.append(
+            "pilot provider identity was not verified"
+        )
+    if arena.get("model_identity_verified") is not True:
+        deck_operation_failures.append(
+            "pilot model identity was not verified"
+        )
+    if arena.get("codex_subagent_run") is not True:
+        deck_operation_failures.append(
+            "no actual Codex-subagent run was verified"
+        )
+    if stop_reason and stop_reason.get("kind") not in {
+        "complete",
+        "game_complete",
+        "winner",
+        "draw",
+    }:
+        deck_operation_failures.append(
+            "an infrastructure or fidelity stop was recorded"
+        )
+    deck_operation_evidence = not deck_operation_failures
+    if deck_operation_evidence:
+        classification = "deck_operation_evidence"
+        eligible = True
 
     turns_begun = {seat: state.players[seat].turns_begun for seat in state.turn_order}
     accepted = sum(bool(row.get("accepted")) for row in decisions)
@@ -885,6 +990,8 @@ def derive_review(
     replay_pass = replay_status in {"pass", "snapshot_only"}
     dimensions = {
         "format_match": "pass",
+        "semantic_policy": state.config.semantic_policy,
+        "deck_operation_evidence": deck_operation_evidence,
         "rules_kernel": "fail" if land_review["conflict_count"] else "partial",
         "card_semantics": "pass" if semantics["status"] == "complete" else "fail",
         "pilot_trace": "pass" if legal_action_trace_complete else "fail",
@@ -1381,6 +1488,8 @@ def derive_review(
         "fidelity": {
             "classification": classification,
             "review_eligible": eligible,
+            "deck_operation_evidence": deck_operation_evidence,
+            "deck_operation_failures": deck_operation_failures,
             "matchup_evidence": False,
             "failures": fidelity_failures,
             "dimensions": dimensions,

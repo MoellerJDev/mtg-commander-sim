@@ -64,12 +64,12 @@ and beyond D27 with both `suppressed_meaningful_windows` and
 
 ## Checkpoint 2 — v0.8.0 exact-deck operation MVP
 
-- [ ] Semantic preflight v2 and hash-drift invalidation
+- [x] Semantic preflight v2 and hash-drift invalidation
 - [ ] Trusted material semantic closure for both live exact lists
 - [ ] Reusable exact-list cost, search, trigger, static, replacement, copy,
   loop, and combat families
-- [ ] `semantic_policy=trusted_only`
-- [ ] `deck_operation_evidence` gate
+- [x] `semantic_policy=trusted_only`
+- [x] `deck_operation_evidence` gate
 - [ ] Resumable `review-batch` aggregation and attribution
 - [ ] Deterministic scripted semantic soak
 - [ ] Three consecutive qualifying four-seat persistent-Codex games
@@ -78,6 +78,25 @@ and beyond D27 with both `suppressed_meaningful_windows` and
 - [ ] Complete validation, milestone commit, and branch push
 
 Duplicated-list fixtures must always retain `matchup_evidence=false`.
+
+Current implementation checkpoint: 153 tests pass. Preflight v2 records
+canonical Oracle/rulings provenance, exact list/source fingerprints, material
+categories, scenario witnesses, and fail-closed drift. Rulings hashes are
+content-canonical and are independent of SQLite import order. The trusted-only
+runtime, normalized zone-event dispatch, hybrid/X/convoke/improvise/affinity
+cost plans, mandatory sacrifice/discard costs, multi-zone/aggregate searches,
+Mishra Warform target capture, Gonti energy payment, and simultaneous
+Zulaport drains have focused positive and negative coverage.
+
+Current full-database preflight (100 cards per list):
+
+- Zimone and Dina: 60 fully playable, 8 partial, 32 unresolved, zero source
+  drift.
+- Mishra, Eminent One: 58 fully playable, 3 partial, 39 unresolved, zero
+  source drift.
+
+This is an implementation checkpoint, not semantic closure and not game
+evidence.
 
 ## GitHub finalization
 
@@ -91,8 +110,10 @@ Duplicated-list fixtures must always retain `matchup_evidence=false`.
 
 ## Next work
 
-Begin v0.8 semantic preflight v2 and exact-list semantic closure. Do not run
-live evidence games until both current live lists pass the trusted-material
-preflight gate. After the review-MVP draft PR exists, rules-corpus work moves
-to `agent/rules-completeness` and a stacked draft PR; it does not broaden this
-feature branch.
+Continue dependency-ordered exact-list closure, beginning with generic
+event-condition and simultaneous-trigger/APNAP ordering primitives, then the
+highest-frequency trigger, static, replacement, recursion, copy, and activated
+ability families. Do not run live evidence games until both current live lists
+pass the trusted-material preflight gate. After the review-MVP draft PR exists,
+rules-corpus work moves to `agent/rules-completeness` and a stacked draft PR;
+it does not broaden this feature branch.

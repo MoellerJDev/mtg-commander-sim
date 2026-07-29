@@ -19,10 +19,15 @@
         }
       ],
       "destination": "graveyard",
-      "trust_level": "provisional",
+      "trust_level": "trusted",
       "coverage": ["spell_resolution", "private_library_search", "semantic_continuation"],
       "tests": ["test_entomb_private_search_continuation"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+      "provenance": {
+        "source_oracle_hash": "3e082b70b4048ec72ede4524c57f28e9e04bc4edc1554601a5af32b3fe470c73",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "1b882a0e-0ede-4d1a-bd1a-9b7cffbcde8e:spell:front",
@@ -109,7 +114,7 @@
       "oracle_id": "47a785ed-8095-4685-8daa-02c4e2b0ffcd",
       "ability_id": "trigger:enter",
       "active_zone": "battlefield",
-      "event": "permanent.enter",
+      "event": "permanent.enter.self",
       "effects": [
         {
           "op": "search",
@@ -127,11 +132,11 @@
           "optional": true
         }
       ],
-      "trust_level": "unresolved",
+      "trust_level": "provisional",
       "coverage": ["enters_trigger", "revealed_library_search"],
-      "notes": "The generic selector does not yet combine instant-or-sorcery alternatives.",
+      "notes": "The generic selector authoritatively combines instant-or-sorcery alternatives.",
       "tests": ["test_spellseeker_search_trigger"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "provenance": {"authored_by": "generic-search-v2", "review_status": "provisional"}
     },
     {
       "key": "c1d6cce8-085f-42cb-8b0c-b6fbbf88b16a:spell:front",
@@ -150,7 +155,7 @@
       "oracle_id": "c1d6cce8-085f-42cb-8b0c-b6fbbf88b16a",
       "ability_id": "trigger:enter",
       "active_zone": "battlefield",
-      "event": "permanent.enter",
+      "event": "permanent.enter.self",
       "effects": [
         {
           "op": "search",
@@ -248,75 +253,204 @@
       "key": "0d96b60b-a060-48ee-bb83-93f1c4a10669:spell:front",
       "label": "Green Sun's Zenith",
       "oracle_id": "0d96b60b-a060-48ee-bb83-93f1c4a10669",
-      "effects": [],
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {
+            "types": ["Creature"],
+            "colors": ["G"],
+            "mana_value": {"maximum": "$x"}
+          },
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "battlefield",
+          "reveal": false,
+          "shuffle_after": true
+        },
+        {
+          "op": "shuffle_into_library",
+          "card": "$card"
+        }
+      ],
       "destination": "graveyard",
-      "trust_level": "unresolved",
-      "coverage": ["x_search", "self_shuffle"],
-      "notes": "Search is representable; self-shuffle destination and green creature/X selector need a reviewed compound program.",
-      "tests": ["test_tutor_family_fail_closed"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "trust_level": "trusted",
+      "coverage": ["x_search", "typed_library_search", "self_shuffle"],
+      "notes": "X, green creature restriction, battlefield destination, and self-shuffle are server-derived.",
+      "tests": ["test_green_sun_x_search_and_self_shuffle"],
+      "provenance": {
+        "source_oracle_hash": "db977a166f5cfd39a14527dea38b6749a9e0a0768b9af772701399642bbda574",
+        "source_rulings_hash": "043baae5e3085709fc1b12f4cd6991614735f19320d33a7431e864526f4c6158",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "69872a9a-fe54-4e58-940c-89395af71acd:spell:front",
       "label": "Finale of Devastation",
       "oracle_id": "69872a9a-fe54-4e58-940c-89395af71acd",
-      "effects": [],
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": ["library", "graveyard"],
+          "selector": {
+            "types": ["Creature"],
+            "mana_value": {"maximum": "$x"}
+          },
+          "count": {"minimum": 0, "maximum": 1},
+          "destination": "battlefield",
+          "reveal": false,
+          "shuffle_after": true,
+          "optional": true
+        },
+        {
+          "op": "pump_controlled_creatures",
+          "amount": "$x",
+          "minimum_amount": 10,
+          "keywords": ["Haste"]
+        }
+      ],
       "destination": "graveyard",
-      "trust_level": "unresolved",
+      "trust_level": "trusted",
       "coverage": ["multi_zone_search", "x_restriction", "conditional_continuous_effect"],
-      "notes": "The X>=10 continuous effect remains outside this slice.",
-      "tests": ["test_tutor_family_fail_closed"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "notes": "The selected X controls both the search restriction and the X>=10 team pump and haste effect.",
+      "tests": ["test_finale_multi_zone_search_and_x10_pump"],
+      "provenance": {
+        "source_oracle_hash": "8084fcbf71cb4765a12d38462d6967c57cdad2f47b932a8719d8b6cfed6649a3",
+        "source_rulings_hash": "0287b29472a7f14af1d55c90c765e42374e83e23c5de452cf513612a6e42f49b",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "6789a170-f2c5-4fc0-8a45-2b2361e67410:spell:front",
       "label": "Chord of Calling",
       "oracle_id": "6789a170-f2c5-4fc0-8a45-2b2361e67410",
-      "effects": [],
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {
+            "types": ["Creature"],
+            "mana_value": {"maximum": "$x"}
+          },
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "battlefield",
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
       "destination": "graveyard",
-      "trust_level": "unresolved",
+      "trust_level": "trusted",
       "coverage": ["convoke_cost", "x_search"],
-      "notes": "Convoke cost payment is not compiled in this slice.",
-      "tests": ["test_tutor_family_fail_closed"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "notes": "Convoke is paid by a server-derived tap plan after X is selected.",
+      "tests": ["test_convoke_pays_colored_x_cost_without_using_mana_sources", "test_chord_x_search"],
+      "provenance": {
+        "source_oracle_hash": "d4249d1e121206b7bba399a910d433aff8916a82bea5069df79b1bb0701152d3",
+        "source_rulings_hash": "fe20d88e4a209154b40d7b861bb7a72a7de4d865dbecc5b6ad51c9eb08aaa909",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "10180e2f-90c5-4d41-ba44-16b14948f923:trigger:dies",
       "label": "Protean Hulk dies",
       "oracle_id": "10180e2f-90c5-4d41-ba44-16b14948f923",
       "ability_id": "trigger:dies",
-      "active_zone": "graveyard",
-      "event": "creature.dies",
-      "effects": [],
-      "trust_level": "unresolved",
+      "active_zone": "battlefield",
+      "event": "creature.dies.self",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {
+            "types": ["Creature"],
+            "mana_value_total": {"maximum": 6}
+          },
+          "count": {"minimum": 0, "maximum": 100},
+          "destination": "battlefield",
+          "reveal": false,
+          "shuffle_after": true,
+          "optional": true
+        }
+      ],
+      "trust_level": "trusted",
       "coverage": ["multi_card_total_mana_value_search"],
-      "notes": "The generic search count exists; aggregate mana-value constraints remain unresolved.",
-      "tests": ["test_tutor_family_fail_closed"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "notes": "The dies event uses last-known battlefield state and validates aggregate selected mana value.",
+      "tests": ["test_protean_hulk_aggregate_search_constraint"],
+      "provenance": {
+        "source_oracle_hash": "37b08ed4ebb14e1afe26ec505646ecb581624a6aabb1b99e234b5e4fdb9f93e1",
+        "source_rulings_hash": "f0e16df6ccf64dff6103df015c6673d28f6b906eb8fb3abec5423f1ac09eb65b",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "038519b9-bca8-4b27-b5ac-2409595469d0:spell:front",
       "label": "Diabolic Intent",
       "oracle_id": "038519b9-bca8-4b27-b5ac-2409595469d0",
-      "effects": [],
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {},
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "hand",
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
       "destination": "graveyard",
-      "trust_level": "unresolved",
+      "cost_schema": {
+        "additional_costs": [
+          {"kind": "sacrifice", "count": 1, "types_any": ["Creature"]}
+        ]
+      },
+      "trust_level": "provisional",
       "coverage": ["additional_cost", "private_library_search"],
-      "notes": "Sacrifice-as-additional-cost must be validated before the search can run.",
-      "tests": ["test_tutor_family_fail_closed"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "notes": "Exactly one controlled creature is selected and sacrificed before the spell becomes available to opponents.",
+      "tests": ["test_sacrifice_additional_cost_is_required_and_paid", "test_diabolic_intent_unrestricted_search"],
+      "provenance": {"authored_by": "generic-search-v2", "review_status": "provisional"}
     },
     {
       "key": "42a3855d-25ab-45b3-9e5d-9a0f3da35a05:spell:front",
       "label": "Reshape",
       "oracle_id": "42a3855d-25ab-45b3-9e5d-9a0f3da35a05",
-      "effects": [],
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {
+            "types": ["Artifact"],
+            "mana_value": {"maximum": "$x"}
+          },
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "battlefield",
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
       "destination": "graveyard",
-      "trust_level": "unresolved",
+      "cost_schema": {
+        "additional_costs": [
+          {"kind": "sacrifice", "count": 1, "types_any": ["Artifact"]}
+        ]
+      },
+      "trust_level": "trusted",
       "coverage": ["additional_cost", "x_search"],
-      "notes": "Artifact sacrifice additional cost must be authoritative before resolution.",
-      "tests": ["test_tutor_family_fail_closed"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "notes": "Exactly one controlled artifact is sacrificed as an additional cost and X limits the search.",
+      "tests": ["test_reshape_artifact_cost_and_x_search"],
+      "provenance": {
+        "source_oracle_hash": "db430d875963b22af5dcf895e9252d3deff4a5758f900f4d4935f0e0326c60e5",
+        "source_rulings_hash": "504f1f32258f754348a9f1d8b0dcca4ece3d0b768e3b9fb5ad8dc6f23c7b272e",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "dbe792f9-22be-4972-b418-99a6190c4421:spell:front",
@@ -334,13 +468,32 @@
       "key": "152b91c9-cc07-4ca8-944f-9bc2242a2283:spell:front",
       "label": "Whir of Invention",
       "oracle_id": "152b91c9-cc07-4ca8-944f-9bc2242a2283",
-      "effects": [],
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {
+            "types": ["Artifact"],
+            "mana_value": {"maximum": "$x"}
+          },
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "battlefield",
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
       "destination": "graveyard",
-      "trust_level": "unresolved",
+      "trust_level": "trusted",
       "coverage": ["improvise_cost", "x_search"],
-      "notes": "Improvise payment is not compiled in this slice.",
-      "tests": ["test_tutor_family_fail_closed"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "notes": "Improvise pays generic mana only after X is selected.",
+      "tests": ["test_improvise_only_reduces_generic_mana", "test_whir_x_search"],
+      "provenance": {
+        "source_oracle_hash": "662ebf962260e7e8e253306924a208ec35f0679335dbce7f4c52f481c303f03a",
+        "source_rulings_hash": "e0cb9336fedb10299bda0fc1d3ba55d0c04db59418e89c6a8af0b2171728e509",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "0fdfe986-0216-468b-aac8-bbcf588fd894:ability:ab1",

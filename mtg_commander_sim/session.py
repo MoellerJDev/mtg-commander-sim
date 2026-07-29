@@ -937,6 +937,9 @@ class CommanderSession:
             raise ValueError("An aborted game cannot be resumed")
         self.record_status = "in_progress"
         self.pause_reason = None
+        for annotation in self.state.annotations:
+            if annotation.get("kind") == "semantic_unsupported":
+                annotation["active"] = False
 
     def abort(self, reason: str) -> None:
         if self.state.game_over:

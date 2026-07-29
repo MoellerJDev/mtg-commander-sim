@@ -13,7 +13,7 @@
       "tests": ["test_mishra_warform_and_delayed_sacrifice"],
       "provenance": {
         "source_oracle_hash": "5e5d0dbc6591b03f3531a136ce50a0917416e316f299ce36bf778a0e003ae6fb",
-        "source_rulings_hash": "873d63da353ea5ec1a53f91a4269f585af4b3076b2d5e58c14dbc8de4f5ceb0a",
+        "source_rulings_hash": "4ceef25bb4f10c7adff1d61af5a53f3204c2c46adccf8e5be07991af304ee93e",
         "authored_by": "vertical-slice",
         "review_status": "reviewed"
       }
@@ -25,13 +25,27 @@
       "ability_id": "trigger:beginning-combat",
       "active_zone": "battlefield",
       "event": "step.begin",
-      "effects": [{"op": "choose_warform"}],
+      "effects": [
+        {
+          "op": "create_warform",
+          "controller": "$controller",
+          "card": "$target.0"
+        }
+      ],
+      "target_schema": {
+        "zones": ["battlefield"],
+        "categories": ["permanent"],
+        "controller": "you",
+        "artifact": true,
+        "creature": false,
+        "count": 1
+      },
       "trust_level": "trusted",
       "coverage": ["triggered_ability", "token_copy", "characteristic_override", "delayed_trigger", "player_choice"],
       "tests": ["test_mishra_warform_and_delayed_sacrifice"],
       "provenance": {
         "source_oracle_hash": "5e5d0dbc6591b03f3531a136ce50a0917416e316f299ce36bf778a0e003ae6fb",
-        "source_rulings_hash": "873d63da353ea5ec1a53f91a4269f585af4b3076b2d5e58c14dbc8de4f5ceb0a",
+        "source_rulings_hash": "4ceef25bb4f10c7adff1d61af5a53f3204c2c46adccf8e5be07991af304ee93e",
         "authored_by": "vertical-slice",
         "review_status": "reviewed"
       }
@@ -58,14 +72,14 @@
       "oracle_id": "69428825-3c40-486d-b051-14e97a598ce6",
       "effects": [],
       "destination": "battlefield",
-      "trust_level": "provisional",
+      "trust_level": "trusted",
       "coverage": ["permanent_characteristics", "artifact_enters_trigger", "energy", "extra_turn"],
       "tests": ["test_gonti_heart_extra_turn_accounting"],
       "provenance": {
         "source_oracle_hash": "434bb9416b3dec6147424cf0543adee367220eaf07fad754a1636816ae5506ca",
-        "source_rulings_hash": "ab7ecefd531a51f03dff5c13ca7b5bdfcb30ce28c96da21bbf6c45edd305ef15",
+        "source_rulings_hash": "192873c84c49d6c4f6c40588f896f1277f83a95a892556b6cb65c338f9c0f2e3",
         "authored_by": "vertical-slice",
-        "review_status": "provisional"
+        "review_status": "reviewed"
       }
     },
     {
@@ -81,8 +95,32 @@
       "tests": ["test_gonti_heart_extra_turn_accounting"],
       "provenance": {
         "source_oracle_hash": "434bb9416b3dec6147424cf0543adee367220eaf07fad754a1636816ae5506ca",
-        "source_rulings_hash": "ab7ecefd531a51f03dff5c13ca7b5bdfcb30ce28c96da21bbf6c45edd305ef15",
+        "source_rulings_hash": "192873c84c49d6c4f6c40588f896f1277f83a95a892556b6cb65c338f9c0f2e3",
         "authored_by": "vertical-slice",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "69428825-3c40-486d-b051-14e97a598ce6:ability:ab2",
+      "label": "Gonti's Aether Heart extra turn",
+      "oracle_id": "69428825-3c40-486d-b051-14e97a598ce6",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "extra_turn",
+          "player": "$controller",
+          "source": "$source"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "energy_cost", "exile_cost", "extra_turn"],
+      "tests": ["test_gonti_heart_energy_cost_and_extra_turn"],
+      "provenance": {
+        "source_oracle_hash": "434bb9416b3dec6147424cf0543adee367220eaf07fad754a1636816ae5506ca",
+        "source_rulings_hash": "192873c84c49d6c4f6c40588f896f1277f83a95a892556b6cb65c338f9c0f2e3",
+        "authored_by": "vertical-slice-v2",
         "review_status": "reviewed"
       }
     },

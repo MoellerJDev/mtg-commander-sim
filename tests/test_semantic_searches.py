@@ -49,6 +49,7 @@ class SemanticPrivateSearchTests(unittest.TestCase):
         seat: str,
         name: str,
         program: SemanticProgram | None = None,
+        x_value: int | None = None,
     ):
         engine = session.engine
         engine.permissions.invalidate_current()
@@ -73,6 +74,7 @@ class SemanticPrivateSearchTests(unittest.TestCase):
             label=name,
             card_object_id=card.object_id,
             semantic_key=semantic_key,
+            x_value=x_value,
             default_destination="graveyard",
             visibility=list(engine.seats),
         )
@@ -224,6 +226,187 @@ class SemanticPrivateSearchTests(unittest.TestCase):
         )
         self.assertTrue(result.ok, result.summary)
         self.assertEqual("graveyard", spell.zone)
+
+    def test_green_sun_x_search_and_self_shuffle(self):
+        session = self._session()
+        shaman = self._card(
+            session.engine, "B", "Deathrite Shaman"
+        )
+        if shaman.zone != "library":
+            session.engine.move_card(
+                shaman.object_id, "library", log=False
+            )
+        spell, _ = self._begin_spell(
+            session,
+            seat="B",
+            name="Green Sun's Zenith",
+            x_value=1,
+        )
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "search_card": shaman.ref,
+                "plan": "DEVELOP_ENGINE",
+                "reason": "Find the one-mana green creature.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("battlefield", shaman.zone)
+        self.assertEqual("library", spell.zone)
+        self.assertIn(
+            spell.object_id,
+            session.state.players["B"].zones["library"],
+        )
+
+    def test_finale_multi_zone_search_and_x10_pump(self):
+        session = self._session()
+        engine = session.engine
+        bloodghast = self._card(engine, "B", "Bloodghast")
+        fodder = self._card(engine, "B", "Elves of Deep Shadow")
+        engine.move_card(bloodghast.object_id, "graveyard")
+        engine.move_card(
+            fodder.object_id,
+            "battlefield",
+            controller="B",
+        )
+        spell, _ = self._begin_spell(
+            session,
+            seat="B",
+            name="Finale of Devastation",
+            x_value=10,
+        )
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "search_card": bloodghast.ref,
+                "plan": "WIN_ATTEMPT",
+                "reason": "Return Bloodghast and apply Finale's X-ten bonus.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("battlefield", bloodghast.zone)
+        self.assertEqual("graveyard", spell.zone)
+        for creature in (bloodghast, fodder):
+            until_end = creature.annotations["until_end_of_turn"]
+            self.assertEqual(10, until_end["power"])
+            self.assertEqual(10, until_end["toughness"])
+            self.assertIn("Haste", creature.temporary_keywords)
+
+    def test_chord_reshape_and_whir_x_search_filters(self):
+        scenarios = [
+            ("B", "Chord of Calling", "Deathrite Shaman", 1),
+            ("A", "Reshape", "Sol Ring", 1),
+            ("A", "Whir of Invention", "Sol Ring", 1),
+        ]
+        for seat, spell_name, target_name, x_value in scenarios:
+            with self.subTest(spell=spell_name):
+                session = self._session()
+                target = self._card(
+                    session.engine, seat, target_name
+                )
+                if target.zone != "library":
+                    session.engine.move_card(
+                        target.object_id, "library", log=False
+                    )
+                spell, _ = self._begin_spell(
+                    session,
+                    seat=seat,
+                    name=spell_name,
+                    x_value=x_value,
+                )
+                packet = session.packet(
+                    f"pilot:{seat}", full=True
+                )
+                legal = {
+                    option["id"]
+                    for option in packet["decision"]["ctx"][
+                        "search_cards"
+                    ]
+                }
+                self.assertIn(target.ref, legal)
+                result = session.act(
+                    f"pilot:{seat}",
+                    {
+                        "action_id": "choose",
+                        "search_card": target.ref,
+                        "plan": "DEVELOP_ENGINE",
+                        "reason": f"Resolve {spell_name}'s X-limited search.",
+                    },
+                )
+                self.assertTrue(result.ok, result.summary)
+                self.assertEqual("battlefield", target.zone)
+                self.assertEqual("graveyard", spell.zone)
+
+    def test_protean_hulk_aggregate_search_constraint(self):
+        session = self._session()
+        engine = session.engine
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        hulk = self._card(engine, "B", "Protean Hulk")
+        engine.move_card(
+            hulk.object_id,
+            "battlefield",
+            controller="B",
+        )
+        engine.apply_effect(
+            {"op": "sacrifice", "card": hulk.ref},
+            actor="B",
+        )
+        trigger = next(
+            item
+            for item in engine.state.stack
+            if item.label == "Protean Hulk dies"
+        )
+        self.assertEqual(hulk.object_id, trigger.source_object_id)
+        expensive = self._card(engine, "B", "Seedborn Muse")
+        endurance = self._card(engine, "B", "Endurance")
+        shaman = self._card(engine, "B", "Deathrite Shaman")
+        bloodghast = self._card(engine, "B", "Bloodghast")
+        for candidate in (
+            expensive,
+            endurance,
+            shaman,
+            bloodghast,
+        ):
+            if candidate.zone != "library":
+                engine.move_card(
+                    candidate.object_id, "library", log=False
+                )
+        engine.state.priority_player = None
+        engine._prepare_stack_resolution()
+        self.assertEqual(
+            "semantic.search", engine.state.pending_decision.kind
+        )
+        rejected = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "search_cards": [expensive.ref, endurance.ref],
+                "plan": "DEVELOP_ENGINE",
+                "reason": "Exercise the aggregate mana-value rejection.",
+            },
+        )
+        self.assertFalse(rejected.ok)
+        accepted = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "search_cards": [shaman.ref, bloodghast.ref],
+                "plan": "DEVELOP_ENGINE",
+                "reason": "Select creatures totaling no more than six mana value.",
+            },
+        )
+        self.assertTrue(accepted.ok, accepted.summary)
+        self.assertEqual(
+            "battlefield",
+            self._card(engine, "B", "Deathrite Shaman").zone,
+        )
+        self.assertEqual(
+            "battlefield",
+            self._card(engine, "B", "Bloodghast").zone,
+        )
 
     def test_private_and_revealed_hand_search_visibility(self):
         for reveal in (False, True):

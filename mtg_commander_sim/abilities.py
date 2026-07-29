@@ -17,6 +17,10 @@ from .util import mana_cost_to_vector, normalize_mana_bundle, parse_mana_symbols
 
 _ACTIVATE_ONLY_SORCERY = re.compile(r"activate only as a sorcery", re.IGNORECASE)
 _PAY_LIFE = re.compile(r"^pay\s+(\d+)\s+life$", re.IGNORECASE)
+_PAY_ENERGY = re.compile(
+    r"^pay\s+(?P<count>\d+|one|two|three|four|five|six|seven|eight|nine|ten)$",
+    re.IGNORECASE,
+)
 _SACRIFICE_CHOICE = re.compile(
     r"^sacrifice\s+(?:(?P<another>another)\s+|(?P<count>a|an|one|two|three|\d+)\s+)"
     r"(?P<kind>creature|artifact|enchantment|land|permanent)(?:\s+you\s+control)?$",
@@ -29,6 +33,17 @@ _DISCARD_CHOICE = re.compile(
 )
 
 _NUMBER_WORDS = {"a": 1, "an": 1, "one": 1, "two": 2, "three": 3}
+_NUMBER_WORDS.update(
+    {
+        "four": 4,
+        "five": 5,
+        "six": 6,
+        "seven": 7,
+        "eight": 8,
+        "nine": 9,
+        "ten": 10,
+    }
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,6 +79,7 @@ class ActivatedAbility:
     sacrifice_source: bool = False
     exile_source: bool = False
     life_payment: int = 0
+    energy_payment: int = 0
     choices: tuple[CostChoice, ...] = ()
     uncompiled_costs: tuple[str, ...] = ()
     mana_ability: bool = False
@@ -94,6 +110,8 @@ class ActivatedAbility:
             result["exile_self"] = 1
         if self.life_payment:
             result["life"] = self.life_payment
+        if self.energy_payment:
+            result["energy"] = self.energy_payment
         if self.choices:
             result["choose_cost"] = [choice.compact() for choice in self.choices]
         if not self.compiled_cost:
@@ -198,6 +216,7 @@ def parse_activated_abilities(
         sacrifice_source = False
         exile_source = False
         life_payment = 0
+        energy_payment = 0
         choices: list[CostChoice] = []
         uncompiled: list[str] = []
 
@@ -222,12 +241,27 @@ def parse_activated_abilities(
             }:
                 sacrifice_source = True
                 continue
-            if lower in {"exile this card from your graveyard", "exile this card"}:
+            if lower in {
+                "exile this card from your graveyard",
+                "exile this card",
+                f"exile {card_name.casefold()}",
+            }:
                 exile_source = True
                 continue
             life_match = _PAY_LIFE.match(lower)
             if life_match:
                 life_payment += int(life_match.group(1))
+                continue
+            energy_match = _PAY_ENERGY.match(lower)
+            if energy_match and "E" in symbols:
+                energy_payment += _number(
+                    energy_match.group("count")
+                )
+                complex_symbols = [
+                    symbol
+                    for symbol in complex_symbols
+                    if symbol != "E"
+                ]
                 continue
             sacrifice_match = _SACRIFICE_CHOICE.match(lower)
             if sacrifice_match:
@@ -284,6 +318,7 @@ def parse_activated_abilities(
                 sacrifice_source=sacrifice_source,
                 exile_source=exile_source,
                 life_payment=life_payment,
+                energy_payment=energy_payment,
                 choices=tuple(choices),
                 uncompiled_costs=tuple(uncompiled),
                 mana_ability=mana_ability,

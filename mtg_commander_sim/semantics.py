@@ -29,6 +29,7 @@ VALID_EFFECT_OPERATIONS = {
     "counter_unless_pay",
     "create_token",
     "create_treasure",
+    "create_warform",
     "damage",
     "delayed_mana",
     "delayed_pact_payment",
@@ -38,6 +39,7 @@ VALID_EFFECT_OPERATIONS = {
     "destroy_selected",
     "discard",
     "drain_opponent",
+    "drain_each_opponent",
     "draw",
     "draw_optional_land",
     "energy",
@@ -63,6 +65,7 @@ VALID_EFFECT_OPERATIONS = {
     "untap",
     "pay_or_lose",
     "proliferate",
+    "pump_controlled_creatures",
 }
 
 

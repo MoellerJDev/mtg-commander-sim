@@ -626,7 +626,28 @@ def derive_codex_arena_metadata(
 def pause_reason_for_state(state: GameState) -> dict[str, Any] | None:
     decision = state.pending_decision
     if decision is None:
-        return None
+        semantic_pause = next(
+            (
+                annotation
+                for annotation in reversed(state.annotations)
+                if annotation.get("kind") == "semantic_unsupported"
+                and annotation.get("active", True)
+            ),
+            None,
+        )
+        if semantic_pause is None:
+            return None
+        return {
+            "kind": "semantic_unsupported",
+            "label": semantic_pause.get("label"),
+            "semantic_key": semantic_pause.get("semantic_key"),
+            "trust_level": semantic_pause.get("trust_level"),
+            "stack": semantic_pause.get("stack"),
+            "event": semantic_pause.get("event"),
+            "semantic_policy": semantic_pause.get(
+                "semantic_policy"
+            ),
+        }
     actor = decision.actors[0] if decision.actors else None
     context = decision.payload_by_actor.get(actor, {}) if actor else {}
     label = context.get("label")
