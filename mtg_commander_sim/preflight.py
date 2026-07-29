@@ -227,9 +227,16 @@ def _mana_ability_requires_semantics(
     record: CardRecord,
     *,
     commander_identity: tuple[str, ...] = (),
+    effect_text: str | None = None,
 ) -> bool:
     """Whether generic mana production would lose a restriction or effect."""
 
+    if effect_text is not None and re.fullmatch(
+        r"add (?:\{[WUBRGC0-9]+\})+(?: or (?:\{[WUBRGC0-9]+\})+)*\.",
+        effect_text.strip(),
+        re.IGNORECASE,
+    ):
+        return False
     if (
         "one mana of any color in your commander's color identity"
         in record.oracle_text.casefold()
@@ -462,7 +469,10 @@ def card_semantic_status(
     for ability in abilities:
         if ability.mana_ability:
             if (
-                _mana_ability_requires_semantics(record)
+                _mana_ability_requires_semantics(
+                    record,
+                    effect_text=ability.effect_text,
+                )
                 and f"ability:{ability.ability_id}"
                 not in trusted_ability_ids
                 and "restricted_mana" not in trusted_coverage
@@ -473,7 +483,7 @@ def card_semantic_status(
         builtin_fetch = bool(
             re.search(
                 r"search your library for (?:an?|up to one) "
-                r"(?:plains|island|swamp|mountain|forest)"
+                r"(?:basic land|plains|island|swamp|mountain|forest)"
                 r"(?: or (?:plains|island|swamp|mountain|forest))* card, "
                 r"put (?:it|that card) onto the battlefield",
                 ability.effect_text,

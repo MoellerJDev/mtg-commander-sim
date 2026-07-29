@@ -458,6 +458,30 @@ class CommanderEngine:
             + list(overrides.get("keywords") or [])
             + list(card.temporary_keywords)
         )
+        temporary_types = [
+            str(value).strip()
+            for value in dict(
+                card.annotations.get("until_end_of_turn") or {}
+            ).get("add_types", [])
+            if str(value).strip()
+        ]
+        if temporary_types:
+            type_line = str(base.get("type_line") or "")
+            normalized = type_line.replace("—", "-")
+            left, separator, right = normalized.partition("-")
+            existing = {
+                word.casefold() for word in re.findall(r"[A-Za-z]+", left)
+            }
+            additions = [
+                value
+                for value in temporary_types
+                if value.casefold() not in existing
+            ]
+            if additions:
+                base["type_line"] = (
+                    f"{left.strip()} {' '.join(additions)}"
+                    + (f" — {right.strip()}" if separator else "")
+                )
         conditional_haste = re.search(
             r"has haste as long as an opponent has "
             r"(?P<life>\d+) or less life",
@@ -2951,6 +2975,76 @@ class CommanderEngine:
         ability: ActivatedAbility,
         response: Mapping[str, Any],
     ) -> dict[str, int]:
+        effect_lower = ability.effect_text.casefold()
+        if (
+            "for each color among permanents you control, "
+            "add one mana of that color"
+            in effect_lower
+        ):
+            colors = {
+                str(color).upper()
+                for object_id in self.state.players[seat].zones[
+                    "battlefield"
+                ]
+                if self.state.cards[object_id].controller == seat
+                and not self.state.cards[object_id].phased_out
+                for color in self._effective_card_data(object_id).get(
+                    "colors", []
+                )
+                if str(color).upper() in "WUBRG"
+            }
+            return normalize_mana_bundle(
+                {color: 1 for color in sorted(colors)}
+            )
+        if (
+            "one mana of any color that a land an opponent controls "
+            "could produce"
+            in effect_lower
+        ):
+            legal_colors: set[str] = set()
+            for opponent in self.active_seats:
+                if opponent == seat:
+                    continue
+                for object_id in self.state.players[opponent].zones[
+                    "battlefield"
+                ]:
+                    land = self.state.cards[object_id]
+                    record = self.card_record(land)
+                    if (
+                        land.controller != opponent
+                        or land.phased_out
+                        or record is None
+                        or not record.is_land
+                    ):
+                        continue
+                    for mode in extract_mana_modes(
+                        record,
+                        self._commander_identity(opponent),
+                    ):
+                        legal_colors.update(
+                            color
+                            for color, amount in mode.bundle.items()
+                            if color in "WUBRG" and amount
+                        )
+            raw_choice = str(response.get("mana_choice") or "").upper()
+            declared = normalize_mana_bundle(response.get("mana_output"))
+            if raw_choice in "WUBRG" and len(raw_choice) == 1:
+                declared[raw_choice] += 1
+            selected = [
+                color
+                for color in "WUBRG"
+                if declared[color] == 1
+            ]
+            if (
+                len(selected) != 1
+                or sum(declared.values()) != 1
+                or selected[0] not in legal_colors
+            ):
+                raise GameRuleError(
+                    "Declared Fellwar/Orchard mana is not a color an "
+                    "opponent's land could produce"
+                )
+            return declared
         output_text = ability.effect_text.split(".", 1)[0]
         output, complex_symbols = mana_cost_to_vector(output_text)
         bundle = {color: int(output.get(color, 0)) for color in "WUBRGC"}
@@ -2993,7 +3087,15 @@ class CommanderEngine:
         return tuple(
             part.strip()
             for part in re.split(r"\s+or\s+", value)
-            if part.strip() in {"plains", "island", "swamp", "mountain", "forest"}
+            if part.strip()
+            in {
+                "basic land",
+                "plains",
+                "island",
+                "swamp",
+                "mountain",
+                "forest",
+            }
         )
 
     def _fetch_land_options(self, seat: str, land_types: Sequence[str]) -> list[dict[str, str]]:
@@ -3002,7 +3104,19 @@ class CommanderEngine:
             card = self.state.cards[object_id]
             record = self.card_record(card)
             type_line = record.type_line.casefold() if record else ""
-            if record and record.is_land and any(land_type in type_line for land_type in land_types):
+            matches_basic_land = (
+                "basic land" in land_types
+                and "basic" in self._type_parts(type_line)[2]
+            )
+            matches_land_type = any(
+                land_type != "basic land" and land_type in type_line
+                for land_type in land_types
+            )
+            if (
+                record
+                and record.is_land
+                and (matches_basic_land or matches_land_type)
+            ):
                 options.append({"id": card.ref, "name": record.name})
         return sorted(options, key=lambda item: (item["name"], item["id"]))
 
@@ -3414,6 +3528,39 @@ class CommanderEngine:
 
         effect = ability.effect_text.casefold()
         if "activate only if" not in effect:
+            return "payable", None
+        if "created a token this turn" in effect:
+            created = int(
+                self.state.players[seat].stats.get(
+                    "tokens_created_by_turn", {}
+                ).get(str(self.state.turn_sequence), 0)
+            )
+            if created <= 0:
+                return "unavailable", "requires_token_created_this_turn"
+            return "payable", None
+        if "activate only if it's not your turn" in effect:
+            if self.state.active_player == seat:
+                return "unavailable", "only_during_another_players_turn"
+            return "payable", None
+        if "activate only if you control an artifact" in effect:
+            controls_artifact = any(
+                self.state.cards[object_id].controller == seat
+                and not self.state.cards[object_id].phased_out
+                and "artifact"
+                in self._type_parts(
+                    str(
+                        self._effective_card_data(object_id).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )[0]
+                for object_id in self.state.players[seat].zones[
+                    "battlefield"
+                ]
+            )
+            if not controls_artifact:
+                return "unavailable", "requires_controlled_artifact"
             return "payable", None
         match = re.search(
             r"activate only if you control "
@@ -4916,6 +5063,29 @@ class CommanderEngine:
                         or ""
                     )
                 )[1]
+            )
+        elif field == "source_controller_type_count":
+            card_type = str(condition.get("type") or "").casefold()
+            if not card_type:
+                raise GameRuleError(
+                    "Type-count condition requires a card type"
+                )
+            actual = sum(
+                1
+                for object_id in self.state.players[
+                    source.controller
+                ].zones["battlefield"]
+                if self.state.cards[object_id].controller
+                == source.controller
+                and card_type
+                in self._type_parts(
+                    str(
+                        self._effective_card_data(object_id).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )[0]
             )
         else:
             actual = context.get(field)
@@ -6835,17 +7005,27 @@ class CommanderEngine:
         seat = str(effect.get("player") or item.controller)
         context: dict[str, Any] = {"stack": item.ref, "operation": op}
         if op == "choose_mana":
+            legal_colors = [
+                str(value).upper()
+                for value in effect.get("colors", list("WUBRGC"))
+                if str(value).upper() in "WUBRGC"
+                and len(str(value)) == 1
+            ]
+            if not legal_colors:
+                raise GameRuleError(
+                    "Semantic mana choice requires at least one legal color"
+                )
             context.update(
                 {
                     "prompt": "Choose a mana color.",
-                    "options": list("WUBRGC"),
+                    "options": legal_colors,
                     "legal_actions": [
                         {
                             "id": "choose",
                             "action": "choose",
                             "choice_schema": {
                                 "field": "choice",
-                                "legal_values": list("WUBRGC"),
+                                "legal_values": legal_colors,
                             },
                         }
                     ],
@@ -7278,8 +7458,16 @@ class CommanderEngine:
                 or response.get("mana")
                 or ""
             ).upper()
-            if choice not in "WUBRGC" or len(choice) != 1:
-                raise GameRuleError("Choose one of W, U, B, R, G, or C")
+            legal_colors = [
+                str(value).upper()
+                for value in effect.get("colors", list("WUBRGC"))
+                if str(value).upper() in "WUBRGC"
+                and len(str(value)) == 1
+            ]
+            if choice not in legal_colors:
+                raise GameRuleError(
+                    "Choose one of " + ", ".join(legal_colors)
+                )
             amount = int(effect.get("amount", 1))
             self.state.players[seat].mana_pool[choice] += amount
             self._log(
@@ -9048,6 +9236,7 @@ class CommanderEngine:
                 destination,
                 controller=effect.get("controller"),
                 tapped=bool(effect.get("tapped", False)),
+                position=str(effect.get("position") or "top"),
                 reason=reason,
                 semantic_events=True,
             )
@@ -9061,9 +9250,36 @@ class CommanderEngine:
                 str(effect.get("destination") or "graveyard"),
                 controller=effect.get("controller"),
                 tapped=bool(effect.get("tapped", False)),
+                position=str(effect.get("position") or "top"),
                 reason=reason,
                 semantic_events=True,
             )
+        if op == "mill":
+            seat = str(effect.get("player") or actor)
+            self._require_seat(seat, in_game=True)
+            count = max(0, int(effect.get("count", 1)))
+            library = self.state.players[seat].zones["library"]
+            object_ids = list(reversed(library[-count:])) if count else []
+            moved = self._move_cards_simultaneously(
+                [(object_id, "graveyard") for object_id in object_ids],
+                reason=reason,
+                log=False,
+            )
+            self._log(
+                actor,
+                "card.mill",
+                f"{seat} milled {len(moved)} card(s).",
+                {
+                    "player": seat,
+                    "count": len(moved),
+                    "objects": [card.ref for card in moved],
+                    "reason": reason,
+                },
+                importance=1,
+                changed_objects=[card.object_id for card in moved],
+                changed_players=[seat],
+            )
+            return [card.ref for card in moved]
         if op == "reanimate":
             card = self._resolve_object(
                 actor,
@@ -9429,6 +9645,28 @@ class CommanderEngine:
                 changed_players=[seat],
             )
             return self.state.players[seat].life
+        if op == "lose_life_each_opponent":
+            amount = max(0, int(effect.get("amount", 0)))
+            opponents = [
+                seat
+                for seat in self.active_seats
+                if seat != actor
+            ]
+            for opponent in opponents:
+                self.state.players[opponent].life -= amount
+            self._log(
+                actor,
+                "effect.life",
+                f"Each opponent of {actor} lost {amount} life.",
+                {
+                    "opponents": opponents,
+                    "delta": -amount,
+                    "reason": reason,
+                },
+                importance=2,
+                changed_players=opponents,
+            )
+            return amount
         if op == "lose_life_equal_mana_value":
             seat = str(effect.get("player") or actor)
             card = self._resolve_object(actor, str(effect["card"]))
@@ -9702,6 +9940,35 @@ class CommanderEngine:
                 )
             self._log(actor, f"permanent.{op}", f"{card.ref} was {op}ped.", {"object": card.ref, "reason": reason}, importance=1, changed_objects=[card.object_id])
             return card.ref
+        if op == "add_type_until_end_of_turn":
+            card = self._resolve_object(
+                actor,
+                str(effect["card"]),
+                zones={"battlefield"},
+            )
+            card_type = str(effect.get("type") or "").strip().title()
+            if not card_type:
+                raise GameRuleError("Temporary type effect requires a type")
+            until_end = card.annotations.setdefault("until_end_of_turn", {})
+            until_end["add_types"] = unique_preserving_order(
+                [
+                    *list(until_end.get("add_types") or []),
+                    card_type,
+                ]
+            )
+            self._log(
+                actor,
+                "permanent.type",
+                f"{card.ref} became a {card_type} in addition to its other types until end of turn.",
+                {
+                    "object": card.ref,
+                    "type": card_type,
+                    "reason": reason,
+                },
+                importance=1,
+                changed_objects=[card.object_id],
+            )
+            return card.ref
         if op == "grant_keyword_until_end_of_turn":
             card = self._resolve_object(
                 actor,
@@ -9828,6 +10095,11 @@ class CommanderEngine:
             if attacking:
                 self.state.combat.attackers[object_id] = attacking
             created.append(object_id)
+        tracker = self.state.players[controller].stats.setdefault(
+            "tokens_created_by_turn", {}
+        )
+        turn_key = str(self.state.turn_sequence)
+        tracker[turn_key] = int(tracker.get(turn_key, 0)) + len(created)
         self._log(controller, "token.create", f"{controller} created {quantity} {name} token(s).", {"objects": [self.state.cards[oid].ref for oid in created], "reason": reason}, importance=1, changed_objects=created, changed_players=[controller])
         trigger_batch: list[StackItem] = []
         for object_id in created:

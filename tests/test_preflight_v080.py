@@ -111,7 +111,7 @@ class SemanticPreflightV2Tests(unittest.TestCase):
     def test_each_nonmana_activated_ability_needs_exact_coverage(self):
         row = card_semantic_status(
             self.db.lookup("Deathrite Shaman"),
-            SemanticRegistry(),
+            SemanticRegistry(include_builtin_packs=False),
             db=self.db,
         )
 

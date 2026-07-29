@@ -267,6 +267,220 @@ class ExactDeckInteractionFamilyTests(unittest.TestCase):
             engine.state.players["A"].zones["library"][-1],
         )
 
+    def test_idol_of_oblivion_tracks_token_creation_and_both_abilities(self):
+        session = self.make_session(834)
+        engine = session.engine
+        idol = self.card(engine, "A", "Idol of Oblivion")
+        engine.move_card(
+            idol.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+        )
+        draw_ability = next(
+            ability
+            for ability in engine._activated_abilities(idol)
+            if ability.ability_id == "ab1"
+        )
+        self.assertEqual(
+            "unavailable",
+            engine._activation_condition_status("A", draw_ability)[0],
+        )
+
+        engine.create_token(
+            "A",
+            name="Servo",
+            characteristics={
+                "type_line": "Artifact Creature — Servo",
+                "power": "1",
+                "toughness": "1",
+            },
+            reason="Idol test setup",
+        )
+        self.assertEqual(
+            "payable",
+            engine._activation_condition_status("A", draw_ability)[0],
+        )
+        before_draws = len(engine.state.players["A"].draw_history)
+        engine.state.priority_player = "A"
+        engine._activate(
+            "A",
+            {"source": idol.ref, "ability": "ab1"},
+        )
+        self.resolve_top(engine)
+        self.assertEqual(
+            before_draws + 1,
+            len(engine.state.players["A"].draw_history),
+        )
+
+        idol.tapped = False
+        before_tokens = int(
+            engine.state.players["A"].stats["tokens_created_by_turn"][
+                str(engine.state.turn_sequence)
+            ]
+        )
+        engine.state.players["A"].mana_pool["C"] = 8
+        engine.state.priority_player = "A"
+        engine._activate(
+            "A",
+            {
+                "source": idol.ref,
+                "ability": "ab2",
+                "pay": "manual",
+                "payment": {"C": 8},
+            },
+        )
+        self.resolve_top(engine)
+        self.assertEqual("graveyard", idol.zone)
+        eldrazi = next(
+            card
+            for card in engine.state.cards.values()
+            if card.owner == "A"
+            and card.is_token
+            and card.printed_name == "Eldrazi"
+        )
+        data = engine._effective_card_data(eldrazi)
+        self.assertEqual(("10", "10"), (data["power"], data["toughness"]))
+        self.assertEqual(
+            before_tokens + 1,
+            engine.state.players["A"].stats["tokens_created_by_turn"][
+                str(engine.state.turn_sequence)
+            ],
+        )
+
+    def test_liquimetal_torque_changes_only_nonland_permanents_until_cleanup(
+        self,
+    ):
+        session = self.make_session(835)
+        engine = session.engine
+        torque = self.card(engine, "A", "Liquimetal Torque")
+        target = self.card(engine, "B", "Zimone and Dina")
+        land = self.card(engine, "B", "Island")
+        for card, controller in (
+            (torque, "A"),
+            (target, "B"),
+            (land, "B"),
+        ):
+            engine.move_card(
+                card.object_id,
+                "battlefield",
+                controller=controller,
+                log=False,
+            )
+        engine.state.priority_player = "A"
+        engine._activate(
+            "A",
+            {
+                "source": torque.ref,
+                "ability": "ab2",
+                "targets": [target.ref],
+            },
+        )
+        self.resolve_top(engine)
+        self.assertIn(
+            "artifact",
+            engine._type_parts(
+                engine._effective_card_data(target)["type_line"]
+            )[0],
+        )
+        engine._finish_cleanup()
+        self.assertNotIn(
+            "artifact",
+            engine._type_parts(
+                engine._effective_card_data(target)["type_line"]
+            )[0],
+        )
+
+        torque.tapped = False
+        engine.state.priority_player = "A"
+        with self.assertRaisesRegex(Exception, "target"):
+            engine._activate(
+                "A",
+                {
+                    "source": torque.ref,
+                    "ability": "ab2",
+                    "targets": [land.ref],
+                },
+            )
+
+    def test_deathrite_shaman_executes_all_three_targeted_abilities(self):
+        cases = (
+            ("ab1", "Island", {}, "mana"),
+            ("ab2", "Abrade", {"B": 1}, "opponent_life"),
+            ("ab3", "Goblin Engineer", {"G": 1}, "controller_life"),
+        )
+        for index, (ability_id, target_name, mana, outcome) in enumerate(
+            cases
+        ):
+            with self.subTest(ability=ability_id):
+                session = self.make_session(836 + index)
+                engine = session.engine
+                shaman = self.card(engine, "B", "Deathrite Shaman")
+                target = self.card(engine, "A", target_name)
+                engine.move_card(
+                    shaman.object_id,
+                    "battlefield",
+                    controller="B",
+                    log=False,
+                )
+                shaman.acquired_control_turn_count = (
+                    engine.state.players["B"].turns_begun - 1
+                )
+                engine.move_card(target.object_id, "graveyard", log=False)
+                engine.state.players["B"].mana_pool.update(mana)
+                before_a = engine.state.players["A"].life
+                before_b = engine.state.players["B"].life
+                engine.state.priority_player = "B"
+                response = {
+                    "source": shaman.ref,
+                    "ability": ability_id,
+                    "targets": [target.ref],
+                }
+                if mana:
+                    response.update(
+                        {
+                            "pay": "manual",
+                            "payment": mana,
+                        }
+                    )
+                engine._activate("B", response)
+                self.resolve_top(engine)
+
+                if outcome == "mana":
+                    packet = session.packet("pilot:B", full=True)
+                    self.assertEqual(
+                        ["W", "U", "B", "R", "G"],
+                        packet["decision"]["ctx"]["options"],
+                    )
+                    result = session.act(
+                        "pilot:B",
+                        {
+                            "action_id": "choose",
+                            "choice": "G",
+                            "plan": "DEVELOP_MANA",
+                            "reason": "Choose green from Deathrite Shaman.",
+                        },
+                    )
+                    self.assertTrue(result.ok, result.summary)
+                    self.assertEqual(
+                        1, engine.state.players["B"].mana_pool["G"]
+                    )
+                elif outcome == "opponent_life":
+                    self.assertEqual(
+                        before_a - 2, engine.state.players["A"].life
+                    )
+                    self.assertEqual(
+                        before_b, engine.state.players["B"].life
+                    )
+                else:
+                    self.assertEqual(
+                        before_b + 2, engine.state.players["B"].life
+                    )
+                    self.assertEqual(
+                        before_a, engine.state.players["A"].life
+                    )
+                self.assertEqual("exile", target.zone)
+
 
 if __name__ == "__main__":
     unittest.main()

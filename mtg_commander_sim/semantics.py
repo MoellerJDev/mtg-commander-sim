@@ -18,6 +18,7 @@ SEMANTIC_SCHEMA_VERSION = 3
 BUILTIN_PACK_DIRECTORY = Path(__file__).resolve().parent / "semantic_packs"
 VALID_EFFECT_OPERATIONS = {
     "add_counter_selected",
+    "add_type_until_end_of_turn",
     "bounce",
     "change_control",
     "choose_card_name",
@@ -56,12 +57,14 @@ VALID_EFFECT_OPERATIONS = {
     "field_of_dead_token",
     "life",
     "lose_life",
+    "lose_life_each_opponent",
     "lose_life_equal_mana_value",
     "look_top",
     "look_reorder_top",
     "move",
     "move_if_in_zone",
     "mana",
+    "mill",
     "note",
     "reorder_top",
     "reveal_top_permanent",

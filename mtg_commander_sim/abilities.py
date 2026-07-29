@@ -295,6 +295,7 @@ def parse_activated_abilities(
                 "sacrifice this land",
                 "sacrifice this token",
                 "sacrifice this card",
+                f"sacrifice {card_name.casefold()}",
             }:
                 sacrifice_source = True
                 continue
@@ -350,7 +351,13 @@ def parse_activated_abilities(
             uncompiled.append(residue)
 
         effect_lower = effect_text.casefold()
-        mana_ability = effect_lower.startswith("add ") and "target" not in effect_lower
+        mana_ability = (
+            "target" not in effect_lower
+            and (
+                effect_lower.startswith("add ")
+                or "add one mana" in effect_lower
+            )
+        )
         generic_discount = 0
         if re.search(
             r"this ability costs \{1\} less to activate for each legendary creature you control",
