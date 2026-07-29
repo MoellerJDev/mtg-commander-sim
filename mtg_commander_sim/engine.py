@@ -590,6 +590,58 @@ class CommanderEngine:
                             )
                         except (TypeError, ValueError):
                             pass
+            oracle = str(base.get("oracle_text") or "").casefold()
+            graveyard_ids = self.state.players[card.owner].zones[
+                "graveyard"
+            ]
+            if (
+                "gets +2/+2 as long as there are three or more land "
+                "cards in your graveyard"
+            ) in oracle:
+                land_count = sum(
+                    1
+                    for object_id in graveyard_ids
+                    if "land"
+                    in self._type_parts(
+                        str(
+                            self._effective_card_data(object_id).get(
+                                "type_line"
+                            )
+                            or ""
+                        )
+                    )[0]
+                )
+                if land_count >= 3:
+                    for stat in ("power", "toughness"):
+                        try:
+                            base[stat] = str(int(str(base.get(stat))) + 2)
+                        except (TypeError, ValueError):
+                            pass
+            graveyard_creature_modifier = re.search(
+                r"gets \+1/\+1 for each creature card in your graveyard",
+                oracle,
+            )
+            if graveyard_creature_modifier:
+                creature_count = sum(
+                    1
+                    for object_id in graveyard_ids
+                    if "creature"
+                    in self._type_parts(
+                        str(
+                            self._effective_card_data(object_id).get(
+                                "type_line"
+                            )
+                            or ""
+                        )
+                    )[0]
+                )
+                for stat in ("power", "toughness"):
+                    try:
+                        base[stat] = str(
+                            int(str(base.get(stat))) + creature_count
+                        )
+                    except (TypeError, ValueError):
+                        pass
         return base
 
     def display_name(self, object_id: str) -> str:
@@ -1601,11 +1653,37 @@ class CommanderEngine:
         if step == "untap":
             if self.state.config.auto_untap:
                 changed: list[str] = []
+                intruder_alarm_active = any(
+                    "creatures don't untap during their controllers' "
+                    "untap steps"
+                    in str(
+                        self._effective_card_data(permanent).get(
+                            "oracle_text"
+                        )
+                        or ""
+                    ).casefold()
+                    for permanent in self.state.cards.values()
+                    if permanent.zone == "battlefield"
+                    and not permanent.phased_out
+                )
                 for object_id in list(self.state.players[active].zones["battlefield"]):
                     card = self.state.cards[object_id]
                     if card.controller != active or card.phased_out:
                         continue
                     if card.annotations.pop("does_not_untap_next", False):
+                        continue
+                    if (
+                        intruder_alarm_active
+                        and "creature"
+                        in self._type_parts(
+                            str(
+                                self._effective_card_data(card).get(
+                                    "type_line"
+                                )
+                                or ""
+                            )
+                        )[0]
+                    ):
                         continue
                     if self._untap_permanent(
                         card,
@@ -1615,6 +1693,48 @@ class CommanderEngine:
                         changed.append(object_id)
                 if changed:
                     self._log(active, "permanent.untap", f"{active} untapped {len(changed)} permanent(s).", {"objects": [self.state.cards[oid].ref for oid in changed]}, importance=0, changed_objects=changed, changed_players=[active])
+                for seat in self.active_seats:
+                    if seat == active or not self._controller_has_oracle_text(
+                        seat,
+                        "untap all permanents you control during each "
+                        "other player's untap step",
+                    ):
+                        continue
+                    extra_changed: list[str] = []
+                    for object_id in list(
+                        self.state.players[seat].zones["battlefield"]
+                    ):
+                        card = self.state.cards[object_id]
+                        if (
+                            card.controller == seat
+                            and not card.phased_out
+                            and self._untap_permanent(
+                                card,
+                                actor=seat,
+                                reason="Seedborn Muse",
+                            )
+                        ):
+                            extra_changed.append(object_id)
+                    if extra_changed:
+                        self._log(
+                            seat,
+                            "permanent.untap",
+                            (
+                                f"{seat} untapped {len(extra_changed)} "
+                                "permanent(s) during another player's "
+                                "untap step."
+                            ),
+                            {
+                                "objects": [
+                                    self.state.cards[object_id].ref
+                                    for object_id in extra_changed
+                                ],
+                                "reason": "Seedborn Muse",
+                            },
+                            importance=1,
+                            changed_objects=extra_changed,
+                            changed_players=[seat],
+                        )
             self._advance_step()
             return
 
@@ -1684,6 +1804,9 @@ class CommanderEngine:
             card.attacking = None
             card.blocking = None
             card.annotations.pop("until_end_of_turn", None)
+        for player in self.state.players.values():
+            player.stats.pop("next_spell_improvise", None)
+            player.stats.pop("next_spell_uncounterable", None)
         self._clear_mana(reason="cleanup")
         self._log(active, "turn.cleanup", f"{active} completed cleanup.", importance=0)
         if self.state.game_over:
@@ -2406,7 +2529,12 @@ class CommanderEngine:
                 if ability.mana_ability and card.zone in ability.zones
             ]
             if mana_abilities and not any(
-                self._activation_condition_status(seat, ability)[0] == "payable"
+                self._activation_condition_status(
+                    seat,
+                    ability,
+                    card,
+                )[0]
+                == "payable"
                 for ability in mana_abilities
             ):
                 # A source whose only Oracle mana abilities have an unmet or
@@ -2437,7 +2565,12 @@ class CommanderEngine:
                 if ability.mana_ability and card.zone in ability.zones
             ]
             if mana_abilities and not any(
-                self._activation_condition_status(seat, ability)[0] == "payable"
+                self._activation_condition_status(
+                    seat,
+                    ability,
+                    card,
+                )[0]
+                == "payable"
                 for ability in mana_abilities
             ):
                 raise GameRuleError(
@@ -2518,6 +2651,51 @@ class CommanderEngine:
         if self.state.stack:
             raise GameRuleError("Sorcery-speed action requires an empty stack")
 
+    def _controller_has_oracle_text(
+        self,
+        seat: str,
+        text: str,
+    ) -> bool:
+        needle = text.casefold()
+        return any(
+            permanent.controller == seat
+            and not permanent.phased_out
+            and needle
+            in str(
+                self._effective_card_data(permanent).get("oracle_text")
+                or ""
+            ).casefold()
+            for permanent in (
+                self.state.cards[object_id]
+                for object_id in self.state.players[seat].zones[
+                    "battlefield"
+                ]
+            )
+        )
+
+    def _lands_enter_untapped_for(self, seat: str) -> bool:
+        return self._controller_has_oracle_text(
+            seat,
+            "lands you control enter untapped",
+        )
+
+    def _compiled_land_play_permission(
+        self,
+        seat: str,
+        card: CardInstance,
+    ) -> bool:
+        if card.owner != seat:
+            return False
+        if card.zone == "hand":
+            return True
+        return bool(
+            card.zone == "graveyard"
+            and self._controller_has_oracle_text(
+                seat,
+                "you may play lands from your graveyard",
+            )
+        )
+
     def _land_enters_tapped(
         self,
         seat: str | CardRecord,
@@ -2532,6 +2710,8 @@ class CommanderEngine:
             seat = self.state.active_player or self.seats[0]
         choices = choices or {}
         oracle = record.oracle_text.casefold()
+        if self._lands_enter_untapped_for(str(seat)):
+            return False
         opponents = max(0, len(self.active_seats) - 1)
         if "enters tapped unless you have two or more opponents" in oracle:
             return opponents < 2
@@ -2570,10 +2750,21 @@ class CommanderEngine:
         player = self.state.players[seat]
         if player.land_plays_remaining <= 0:
             raise GameRuleError("No land plays remain")
-        card = self._resolve_object(seat, str(response.get("card") or response.get("id")), zones={"hand"}, owned_only=True)
+        raw_from = str(response.get("from") or "hand")
+        card = self._resolve_object(
+            seat,
+            str(response.get("card") or response.get("id")),
+            zones={raw_from},
+            owned_only=True,
+        )
         record = self.card_record(card)
         if not record or not record.is_land:
             raise GameRuleError(f"{card.printed_name} is not a land")
+        if not self._compiled_land_play_permission(seat, card):
+            raise GameRuleError(
+                f"Playing {card.printed_name} from {card.zone} is not "
+                "authorized by a compiled zone permission."
+            )
         if "enters_tapped" in response or "tapped" in response:
             raise GameRuleError("Land entry state is derived by the rules engine")
         tapped = self._land_enters_tapped(seat, record, response)
@@ -2638,6 +2829,48 @@ class CommanderEngine:
             )
         )
 
+    def _compiled_zone_cast_permission(
+        self,
+        seat: str,
+        card: CardInstance,
+    ) -> bool:
+        """Return whether a trusted static permission allows this zone cast."""
+
+        if card.owner != seat:
+            return False
+        if card.zone in set(card.annotations.get("cast_from") or []):
+            return True
+        record = self.card_record(card)
+        if record is None:
+            return False
+        oracle = record.oracle_text.casefold()
+        if (
+            card.zone == "graveyard"
+            and "you may cast this card from your graveyard as long as "
+            "you control a zombie"
+            in oracle
+        ):
+            return any(
+                candidate.controller == seat
+                and not candidate.phased_out
+                and "zombie"
+                in self._type_parts(
+                    str(
+                        self._effective_card_data(candidate).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )[1]
+                for candidate in (
+                    self.state.cards[object_id]
+                    for object_id in self.state.players[seat].zones[
+                        "battlefield"
+                    ]
+                )
+            )
+        return False
+
     def _cast(self, seat: str, response: Mapping[str, Any]) -> None:
         self._check_priority(seat)
         if response.get("semantic_key") is not None:
@@ -2650,8 +2883,7 @@ class CommanderEngine:
         if card.zone == "command" and not card.is_commander:
             raise GameRuleError("Only this seat's commander cards may be cast from the command zone")
         if card.zone not in {"hand", "command"}:
-            permissions = set(card.annotations.get("cast_from") or [])
-            if card.zone not in permissions:
+            if not self._compiled_zone_cast_permission(seat, card):
                 raise GameRuleError(
                     f"Casting {card.printed_name} from {card.zone} is not authorized by a compiled zone permission."
                 )
@@ -2966,6 +3198,18 @@ class CommanderEngine:
         card.active_face = str(face.get("name")) if face else None
         default_destination = "battlefield" if any(word in type_line.casefold() for word in ("artifact", "battle", "creature", "enchantment", "planeswalker")) else "graveyard"
         ref = self._next_ref("S")
+        used_next_spell_improvise = bool(
+            self.state.players[seat].stats.pop(
+                "next_spell_improvise",
+                False,
+            )
+        )
+        used_next_spell_uncounterable = bool(
+            self.state.players[seat].stats.pop(
+                "next_spell_uncounterable",
+                False,
+            )
+        )
         item = StackItem(
             stack_id=self._stable_runtime_id("stack", ref),
             ref=ref,
@@ -2986,6 +3230,8 @@ class CommanderEngine:
                 "target_snapshots": target_snapshots,
                 "targets_revalidated": False,
                 "targets_chosen_at_creation": True,
+                "cant_be_countered": used_next_spell_uncounterable,
+                "granted_improvise": used_next_spell_improvise,
                 "cost_option": (
                     selected_cost_option["id"]
                     if selected_cost_option
@@ -3189,7 +3435,9 @@ class CommanderEngine:
                     if choice.card_type not in type_line:
                         raise GameRuleError(f"{card.ref} is not a {choice.card_type}")
                 used.append(card.object_id)
-                destination = "graveyard"
+                destination = (
+                    "hand" if choice.kind == "return" else "graveyard"
+                )
                 self.move_card(
                     card.object_id,
                     destination,
@@ -3480,6 +3728,18 @@ class CommanderEngine:
         if sum(requirements.values()):
             spent, activations = self._pay_for_cost(seat, requirements, response)
 
+        if "activate only once each turn" in ability.effect_text.casefold():
+            activation_key = (
+                f"{source.object_id}:{ability.ability_id}:"
+                f"{self.state.turn_sequence}"
+            )
+            activations_once = self.state.players[seat].stats.setdefault(
+                "once_per_turn_activations",
+                [],
+            )
+            if activation_key not in activations_once:
+                activations_once.append(activation_key)
+
         origin = source.zone
         if ability.discard_source:
             if source.zone != "hand":
@@ -3674,7 +3934,7 @@ class CommanderEngine:
         ):
             return "unavailable", "named_ability_prohibition"
         condition_status, condition_reason = self._activation_condition_status(
-            seat, ability
+            seat, ability, card
         )
         if condition_status != "payable":
             return condition_status, condition_reason
@@ -3763,6 +4023,7 @@ class CommanderEngine:
         self,
         seat: str,
         ability: ActivatedAbility,
+        source: CardInstance | None = None,
     ) -> tuple[str, str | None]:
         """Evaluate the small compiled activation-condition grammar.
 
@@ -3772,6 +4033,20 @@ class CommanderEngine:
         """
 
         effect = ability.effect_text.casefold()
+        if "activate only once each turn" in effect:
+            if source is None:
+                return "unresolved", "activation_source_required"
+            activation_key = (
+                f"{source.object_id}:{ability.ability_id}:"
+                f"{self.state.turn_sequence}"
+            )
+            if activation_key in set(
+                self.state.players[seat].stats.get(
+                    "once_per_turn_activations",
+                    [],
+                )
+            ):
+                return "unavailable", "already_activated_this_turn"
         if "activate only if" not in effect:
             return "payable", None
         if "created a token this turn" in effect:
@@ -4493,6 +4768,14 @@ class CommanderEngine:
         if record is None:
             return []
         payment_mechanics = self._cost_payment_mechanics(record, schema)
+        if (
+            self.state.players[seat].stats.get("next_spell_improvise")
+            and not any(
+                str(value.get("kind") or "").casefold() == "improvise"
+                for value in payment_mechanics
+            )
+        ):
+            payment_mechanics.append({"kind": "improvise"})
         base_options: list[dict[str, Any]] = printed_options
         commander_tax = (
             2
@@ -4822,7 +5105,19 @@ class CommanderEngine:
 
     def _priority_action_hints(self, seat: str) -> dict[str, Any]:
         player = self.state.players[seat]
-        candidate_zones = [*player.zones["hand"], *player.zones["command"]]
+        candidate_zones = [
+            *player.zones["hand"],
+            *player.zones["command"],
+            *[
+                object_id
+                for zone in ("graveyard", "exile")
+                for object_id in player.zones[zone]
+                if self._compiled_zone_cast_permission(
+                    seat,
+                    self.state.cards[object_id],
+                )
+            ],
+        ]
         castable: list[str] = []
         cast_target_schemas: dict[str, dict[str, Any]] = {}
         cast_cost_options: dict[str, list[dict[str, Any]]] = {}
@@ -4996,8 +5291,15 @@ class CommanderEngine:
         if seat == self.state.active_player and not self.state.stack and self.state.step == "main" and player.land_plays_remaining:
             lands = [
                 self.state.cards[oid].ref
-                for oid in player.zones["hand"]
+                for oid in [
+                    *player.zones["hand"],
+                    *player.zones["graveyard"],
+                ]
                 if (self.card_record(oid) and self.card_record(oid).is_land)
+                and self._compiled_land_play_permission(
+                    seat,
+                    self.state.cards[oid],
+                )
             ]
         (
             abilities,
@@ -5086,6 +5388,7 @@ class CommanderEngine:
                 "action": "play_land",
                 "kind": "play_land",
                 "card": ref,
+                "from": card.zone,
             }
             if (
                 record
@@ -6485,6 +6788,7 @@ class CommanderEngine:
     def _program_can_auto_resolve(self, item: StackItem) -> bool:
         if item.semantic_key in {
             "builtin:food",
+            "builtin:optional-mill-one",
             "builtin:sacrifice-source",
             "builtin:storm",
         }:
@@ -6616,6 +6920,34 @@ class CommanderEngine:
                 ],
                 None,
                 note="Built-in Food token ability resolved",
+            )
+            return
+        if item.semantic_key == "builtin:optional-mill-one":
+            self._begin_resolve_item(
+                item,
+                [
+                    {
+                        "op": "choose_option",
+                        "player": item.controller,
+                        "prompt": "You may mill a card.",
+                        "options": [
+                            {"id": "mill", "label": "Mill a card"},
+                            {"id": "decline", "label": "Do not mill"},
+                        ],
+                        "then_by_choice": {
+                            "mill": [
+                                {
+                                    "op": "mill",
+                                    "player": item.controller,
+                                    "count": 1,
+                                }
+                            ],
+                            "decline": [],
+                        },
+                    }
+                ],
+                None,
+                note="Moloid attack trigger",
             )
             return
         program = self.semantics.get(item.semantic_key)
@@ -7365,6 +7697,8 @@ class CommanderEngine:
                 "pay_or_lose",
                 "populate_with_haste",
                 "proliferate",
+                "put_land_from_hand",
+                "scry",
             }:
                 self._begin_semantic_choice(
                     item=item,
@@ -7545,6 +7879,64 @@ class CommanderEngine:
                     ],
                 }
             )
+        elif op == "put_land_from_hand":
+            options = [
+                self.state.cards[object_id].ref
+                for object_id in self.state.players[seat].zones["hand"]
+                if "land"
+                in self._type_parts(
+                    str(
+                        self._effective_card_data(object_id).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )[0]
+            ]
+            if not options:
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            effect = {**dict(effect), "_legal_refs": options}
+            context.update(
+                {
+                    "prompt": str(
+                        effect.get("prompt")
+                        or (
+                            "You may put a land card from your hand "
+                            "onto the battlefield."
+                        )
+                    ),
+                    "objects": [
+                        {
+                            "id": ref,
+                            "name": self._resolve_object(
+                                seat,
+                                ref,
+                                zones={"hand"},
+                                owned_only=True,
+                            ).printed_name,
+                        }
+                        for ref in options
+                    ],
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "card",
+                                "legal_refs": options,
+                                "optional": True,
+                            },
+                        }
+                    ],
+                }
+            )
         elif op == "choose_objects":
             selector = dict(effect.get("selector") or {})
             selector.setdefault(
@@ -7658,6 +8050,62 @@ class CommanderEngine:
                             "choice_schema": {
                                 "field": "choice",
                                 "legal_values": legal_values,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "scry":
+            count = max(0, int(effect.get("count", 1)))
+            looked = self.apply_effect(
+                {
+                    "op": "look_top",
+                    "player": seat,
+                    "viewer": seat,
+                    "count": count,
+                    "reason": item.label,
+                },
+                actor=item.controller,
+            )
+            options = [str(value) for value in (looked or [])]
+            if not options:
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            effect = {**dict(effect), "_looked_refs": options}
+            context.update(
+                {
+                    "prompt": (
+                        "Choose which looked-at cards to put on the "
+                        "bottom of your library."
+                    ),
+                    "objects": [
+                        {
+                            "id": ref,
+                            "name": self._resolve_object(
+                                seat,
+                                ref,
+                                zones={"library"},
+                                owned_only=True,
+                            ).printed_name,
+                        }
+                        for ref in options
+                    ],
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "cards",
+                                "legal_refs": options,
+                                "minimum": 0,
+                                "maximum": len(options),
+                                "destination": "library_bottom",
                             },
                         }
                     ],
@@ -8127,6 +8575,64 @@ class CommanderEngine:
                     importance=2,
                     changed_objects=changed,
                 )
+        elif op == "put_land_from_hand":
+            selected = str(response.get("card") or "")
+            legal = {
+                str(value)
+                for value in effect.get("_legal_refs") or []
+            }
+            if selected and selected not in legal:
+                raise GameRuleError(
+                    "Selected card is not an authoritative land option"
+                )
+            if selected:
+                card = self._resolve_object(
+                    seat,
+                    selected,
+                    zones={"hand"},
+                    owned_only=True,
+                )
+                record = self.card_record(card)
+                if record is None or not record.is_land:
+                    raise GameRuleError(
+                        "Selected object is no longer a land card in hand"
+                    )
+                tapped = self._land_enters_tapped(seat, record)
+                self.move_card(
+                    card.object_id,
+                    "battlefield",
+                    controller=seat,
+                    tapped=tapped,
+                    reason=item.label,
+                    semantic_events=True,
+                )
+                _, subtypes, _ = self._type_parts(record.type_line)
+                if (
+                    "cave" in subtypes
+                    and int(effect.get("cave_life", 0))
+                ):
+                    self.apply_effect(
+                        {
+                            "op": "life",
+                            "player": seat,
+                            "delta": int(effect["cave_life"]),
+                            "reason": item.label,
+                        },
+                        actor=seat,
+                    )
+                self._log(
+                    seat,
+                    "land.put",
+                    f"{seat} put {card.ref} onto the battlefield.",
+                    {
+                        "card": card.ref,
+                        "tapped": tapped,
+                        "source": item.ref,
+                    },
+                    importance=2,
+                    changed_objects=[card.object_id],
+                    changed_players=[seat],
+                )
         elif op == "choose_objects":
             selected = [
                 str(value)
@@ -8184,6 +8690,36 @@ class CommanderEngine:
                         },
                         actor=seat,
                     )
+                elif next_op == "life_if_selected_subtype":
+                    subtype = str(
+                        next_effect.get("subtype") or ""
+                    ).casefold()
+                    amount = int(next_effect.get("amount", 0))
+                    matching = any(
+                        subtype
+                        in self._type_parts(
+                            str(
+                                self._effective_card_data(
+                                    self._resolve_object(seat, value)
+                                ).get("type_line")
+                                or ""
+                            )
+                        )[1]
+                        for value in selected
+                    )
+                    if matching and amount:
+                        self.apply_effect(
+                            {
+                                "op": "life",
+                                "player": seat,
+                                "delta": amount,
+                                "reason": str(
+                                    next_effect.get("reason")
+                                    or item.label
+                                ),
+                            },
+                            actor=seat,
+                        )
                 else:
                     raise GameRuleError(
                         f"Unsupported object-choice continuation {next_op!r}"
@@ -8223,6 +8759,51 @@ class CommanderEngine:
                     "choice": choice,
                 },
                 importance=1,
+            )
+        elif op == "scry":
+            looked = [
+                str(value)
+                for value in effect.get("_looked_refs", [])
+            ]
+            bottom = [
+                str(value)
+                for value in response.get("cards", [])
+            ]
+            if (
+                len(bottom) != len(set(bottom))
+                or any(value not in looked for value in bottom)
+            ):
+                raise GameRuleError(
+                    "Scry bottom choices must be distinct looked-at cards"
+                )
+            library = self.state.players[seat].zones["library"]
+            bottom_ids: list[str] = []
+            for ref in bottom:
+                card = self._resolve_object(
+                    seat,
+                    ref,
+                    zones={"library"},
+                    owned_only=True,
+                )
+                if card.object_id not in library:
+                    raise GameRuleError(
+                        "A scry card left the library before the choice"
+                    )
+                library.remove(card.object_id)
+                bottom_ids.append(card.object_id)
+            for object_id in reversed(bottom_ids):
+                library.insert(0, object_id)
+            self._log(
+                seat,
+                "library.scry",
+                f"{seat} put {len(bottom_ids)} card(s) on the bottom.",
+                {
+                    "count": len(looked),
+                    "bottom_count": len(bottom_ids),
+                },
+                visibility=[seat, "analyst"],
+                importance=1,
+                changed_objects=bottom_ids,
             )
         elif op == "look_reorder_top":
             expected = [
@@ -8851,6 +9432,12 @@ class CommanderEngine:
             tapped = bool(effect.get("enters_tapped_override", False))
             if (
                 destination == "battlefield"
+                and tapped
+                and self._lands_enter_untapped_for(seat)
+            ):
+                tapped = False
+            if (
+                destination == "battlefield"
                 and effect.get("enters_tapped_override") is None
             ):
                 record = self.card_record(card)
@@ -9298,6 +9885,36 @@ class CommanderEngine:
         self.state.combat.attackers_declared = True
         self.state.combat.defending_players = [seat for seat in self.apnap_order() if seat in set(self.state.combat.attackers.values())]
         self._log(active, "combat.attack", f"{active} attacked with {len(used)} creature(s).", {"attackers": {self.state.cards[oid].ref: defender for oid, defender in self.state.combat.attackers.items()}}, importance=2, changed_objects=list(used), changed_players=[active])
+        attack_triggers: list[StackItem] = []
+        for object_id in used:
+            attacker = self.state.cards[object_id]
+            if (
+                "whenever this token attacks, you may mill a card"
+                not in str(
+                    self._effective_card_data(attacker).get("oracle_text")
+                    or ""
+                ).casefold()
+            ):
+                continue
+            ref = self._next_ref("S")
+            attack_triggers.append(
+                StackItem(
+                    stack_id=self._stable_runtime_id("stack", ref),
+                    ref=ref,
+                    kind="triggered_ability",
+                    controller=attacker.controller,
+                    label=f"{self.display_name(object_id)} attack trigger",
+                    source_object_id=attacker.object_id,
+                    semantic_key="builtin:optional-mill-one",
+                    visibility=list(self.seats),
+                    context={
+                        "event": "creature.attacks",
+                        "card": attacker.ref,
+                        "defender": attacker.attacking,
+                    },
+                )
+            )
+        self._enqueue_semantic_trigger_batch(attack_triggers)
         self._grant_priority(active)
 
     def _begin_blocker_decisions(self) -> None:
@@ -9717,6 +10334,40 @@ class CommanderEngine:
         reason = str(effect.get("reason") or ("cost" if as_cost else "effect"))
         if op == "draw":
             return self.draw(str(effect.get("player") or actor), int(effect.get("count", 1)), reason=reason)
+        if op == "draw_each_player":
+            count = int(effect.get("count", 1))
+            return {
+                seat: self.draw(
+                    seat,
+                    count,
+                    reason=reason,
+                    private=True,
+                )
+                for seat in self.apnap_order()
+                if seat in self.active_seats
+            }
+        if op in {
+            "next_spell_improvise",
+            "next_spell_uncounterable",
+        }:
+            seat = str(effect.get("player") or actor)
+            self.state.players[seat].stats[op] = True
+            self._log(
+                actor,
+                "effect.next_spell",
+                (
+                    f"{seat}'s next spell has "
+                    + (
+                        "improvise."
+                        if op == "next_spell_improvise"
+                        else "can't be countered."
+                    )
+                ),
+                {"player": seat, "effect": op, "reason": reason},
+                importance=1,
+                changed_players=[seat],
+            )
+            return True
         if op == "add_counter_selected":
             counter = str(effect.get("counter") or "").strip()
             amount = int(effect.get("amount", 1))
@@ -10667,6 +11318,50 @@ class CommanderEngine:
                 )
             self._log(actor, f"permanent.{op}", f"{card.ref} was {op}ped.", {"object": card.ref, "reason": reason}, importance=1, changed_objects=[card.object_id])
             return card.ref
+        if op == "untap_all_creatures":
+            changed: list[str] = []
+            for seat in self.active_seats:
+                for object_id in self.state.players[seat].zones[
+                    "battlefield"
+                ]:
+                    card = self.state.cards[object_id]
+                    if (
+                        card.phased_out
+                        or "creature"
+                        not in self._type_parts(
+                            str(
+                                self._effective_card_data(card).get(
+                                    "type_line"
+                                )
+                                or ""
+                            )
+                        )[0]
+                    ):
+                        continue
+                    if self._untap_permanent(
+                        card,
+                        actor=actor,
+                        reason=reason,
+                    ):
+                        changed.append(card.object_id)
+            if changed:
+                self._log(
+                    actor,
+                    "permanent.untap",
+                    f"Untapped {len(changed)} creature(s).",
+                    {
+                        "objects": [
+                            self.state.cards[object_id].ref
+                            for object_id in changed
+                        ],
+                        "reason": reason,
+                    },
+                    importance=2,
+                    changed_objects=changed,
+                )
+            return [
+                self.state.cards[object_id].ref for object_id in changed
+            ]
         if op == "add_type_until_end_of_turn":
             card = self._resolve_object(
                 actor,

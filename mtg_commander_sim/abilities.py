@@ -31,6 +31,13 @@ _DISCARD_CHOICE = re.compile(
     r"(?:(?P<kind>creature|land|artifact|enchantment|instant|sorcery|planeswalker)\s+)?card(?:s)?$",
     re.IGNORECASE,
 )
+_RETURN_CHOICE = re.compile(
+    r"^return\s+(?:a|an|one)\s+"
+    r"(?P<kind>creature|artifact|enchantment|land|permanent|"
+    r"plains|island|swamp|mountain|forest)"
+    r"(?:\s+you\s+control)?\s+to\s+its\s+owner'?s\s+hand$",
+    re.IGNORECASE,
+)
 
 _NUMBER_WORDS = {"a": 1, "an": 1, "one": 1, "two": 2, "three": 3}
 _NUMBER_WORDS.update(
@@ -352,6 +359,17 @@ def parse_activated_abilities(
                         count=_number(discard_match.group("count")),
                         zone="hand",
                         card_type=(discard_match.group("kind") or None),
+                    )
+                )
+                continue
+            return_match = _RETURN_CHOICE.match(lower)
+            if return_match:
+                choices.append(
+                    CostChoice(
+                        kind="return",
+                        count=1,
+                        zone="battlefield",
+                        card_type=return_match.group("kind").casefold(),
                     )
                 )
                 continue

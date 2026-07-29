@@ -79,7 +79,7 @@ and beyond D27 with both `suppressed_meaningful_windows` and
 
 Duplicated-list fixtures must always retain `matchup_evidence=false`.
 
-Current implementation checkpoint: 216 tests pass. Preflight v2 records
+Current implementation checkpoint: 230 tests pass. Preflight v2 records
 canonical Oracle/rulings provenance, exact list/source fingerprints, material
 categories, scenario witnesses, and fail-closed drift. Rulings hashes are
 content-canonical and are independent of SQLite import order. The trusted-only
@@ -115,12 +115,20 @@ intervening-if revalidation, related multi-target constraints, Fabricate
 choices, exact APNAP sacrifice, persistent type additions, cost-object value
 binding, additional enter-trigger generation, token-copy/populate choices,
 delayed token sacrifice, and authoritative Equipment attachment effects.
+The current deck-closure tranche promotes Diabolic Intent, Elvish Reclaimer,
+Wight of the Reliquary, Gravecrawler, Faerie Mastermind, Intruder Alarm,
+Seedborn Muse, Spelunking, Mole Man, Mistrise Village, Retreat to Coralhelm,
+Scryb Ranger, and Archway of Innovation. It adds conditional graveyard
+casting and land play, dynamic graveyard-based power/toughness, return costs,
+once-per-turn activations, global and opponent-step untaps, private optional
+land placement, attack-triggered optional milling, scry, next-spell
+uncounterability, and temporary granted improvise.
 
 Current full-database preflight (one row per distinct exact-list card):
 
-- Zimone and Dina: 76 fully playable, 4 partial, 20 unresolved, zero source
+- Zimone and Dina: 88 fully playable, 0 partial, 12 unresolved, zero source
   drift.
-- Mishra, Eminent One: 76 fully playable, 0 partial, 23 unresolved, zero
+- Mishra, Eminent One: 77 fully playable, 0 partial, 22 unresolved, zero
   source drift.
 
 This is an implementation checkpoint, not semantic closure and not game

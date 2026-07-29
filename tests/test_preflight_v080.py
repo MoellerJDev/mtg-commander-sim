@@ -189,6 +189,9 @@ class TrustedOnlyPolicyTests(unittest.TestCase):
         session = self.make_session(801)
         engine = session.engine
         intent = self.card(engine, "Diabolic Intent", "B")
+        engine.semantics.get(
+            f"{intent.oracle_id}:spell:front"
+        ).trust_level = "provisional"
         fodder = self.card(engine, "Birds of Paradise", "B")
         engine.move_card(intent.object_id, "hand")
         engine.move_card(
@@ -225,6 +228,7 @@ class TrustedOnlyPolicyTests(unittest.TestCase):
         engine = session.engine
         intent = self.card(engine, "Diabolic Intent", "B")
         program_key = f"{intent.oracle_id}:spell:front"
+        engine.semantics.get(program_key).trust_level = "provisional"
         engine._remove_from_zone(intent)
         intent.zone = "stack"
         item = StackItem(

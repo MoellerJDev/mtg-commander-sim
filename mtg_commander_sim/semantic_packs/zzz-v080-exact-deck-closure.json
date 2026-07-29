@@ -1,0 +1,535 @@
+{
+  "schema_version": 3,
+  "name": "v0.8-exact-deck-closure",
+  "programs": [
+    {
+      "key": "038519b9-bca8-4b27-b5ac-2409595469d0:spell:front",
+      "label": "Diabolic Intent",
+      "oracle_id": "038519b9-bca8-4b27-b5ac-2409595469d0",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "cost_schema": {
+        "additional_costs": [
+          {
+            "kind": "sacrifice",
+            "count": 1,
+            "types_any": ["Creature"]
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {},
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "hand",
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
+      "destination": "graveyard",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "additional_cost", "private_library_search"],
+      "tests": ["test_diabolic_intent_requires_and_pays_creature_sacrifice"],
+      "provenance": {
+        "source_oracle_hash": "8b3882e50101d0f0d683f243fc68c4422ca3a2bd030e14975ed53791c2b4d3f9",
+        "source_rulings_hash": "62be64537fdc25ef38e6a63051ff798d664d744f0c1acf24876d49a97824e060",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "94f01534-7bb3-4b1e-8f77-e84156408686:spell:front",
+      "label": "Elvish Reclaimer",
+      "oracle_id": "94f01534-7bb3-4b1e-8f77-e84156408686",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "dynamic_power_toughness"],
+      "tests": ["test_reclaimer_threshold_and_exact_land_search_cost"],
+      "provenance": {
+        "source_oracle_hash": "3d29541ab1f7a3983347f43d73d0ba2751a9c57659737aaf83d54736895a630e",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "94f01534-7bb3-4b1e-8f77-e84156408686:ability:ab2",
+      "label": "Elvish Reclaimer activation",
+      "oracle_id": "94f01534-7bb3-4b1e-8f77-e84156408686",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {"types": ["Land"]},
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "battlefield",
+          "enters_tapped_override": true,
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "sacrifice_cost", "typed_library_search"],
+      "tests": ["test_reclaimer_threshold_and_exact_land_search_cost"],
+      "provenance": {
+        "source_oracle_hash": "3d29541ab1f7a3983347f43d73d0ba2751a9c57659737aaf83d54736895a630e",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "4507df69-6bf7-43d6-a609-c032b61835d5:spell:front",
+      "label": "Wight of the Reliquary",
+      "oracle_id": "4507df69-6bf7-43d6-a609-c032b61835d5",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "dynamic_power_toughness", "vigilance"],
+      "tests": ["test_wight_counts_graveyard_creatures_and_searches_land"],
+      "provenance": {
+        "source_oracle_hash": "594856fbe86a36c0e0924dd599bbabf8c70743a95ed4ecbf945ed8335a81887d",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "4507df69-6bf7-43d6-a609-c032b61835d5:ability:ab3",
+      "label": "Wight of the Reliquary activation",
+      "oracle_id": "4507df69-6bf7-43d6-a609-c032b61835d5",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {"types": ["Land"]},
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "battlefield",
+          "enters_tapped_override": true,
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "sacrifice_cost", "typed_library_search"],
+      "tests": ["test_wight_counts_graveyard_creatures_and_searches_land"],
+      "provenance": {
+        "source_oracle_hash": "594856fbe86a36c0e0924dd599bbabf8c70743a95ed4ecbf945ed8335a81887d",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "09ff28b1-b6c9-48e6-b12e-2f0e644f709f:spell:front",
+      "label": "Gravecrawler",
+      "oracle_id": "09ff28b1-b6c9-48e6-b12e-2f0e644f709f",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "combat_restriction", "zone_permission", "graveyard_cast_permission"],
+      "tests": ["test_gravecrawler_graveyard_cast_requires_controlled_zombie"],
+      "provenance": {
+        "source_oracle_hash": "3d9bbbc6f080b63067335db047bd58f7f523070fc449842eab9839e4d30ff4d4",
+        "source_rulings_hash": "9d3976945d4e5a1e0ffd625bf5d9621995cbc2c27c2516927fa04756ae1e779b",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "a984db23-40ea-428d-829f-e944267280f8:spell:front",
+      "label": "Faerie Mastermind",
+      "oracle_id": "a984db23-40ea-428d-829f-e944267280f8",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "flash", "flying"],
+      "tests": ["test_faerie_mastermind_tracks_opponent_second_draw_and_draws_each_player"],
+      "provenance": {
+        "source_oracle_hash": "9057053fb56b1a7734ce8ae12241f7eb15814d48df0cd2dc3b13e4994333a438",
+        "source_rulings_hash": "3711981835ba4cb281afa0d3dbea6ac0e738019c4bcc9dda5c910751b09ec5e3",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "a984db23-40ea-428d-829f-e944267280f8:trigger:second-draw",
+      "label": "Faerie Mastermind second-draw trigger",
+      "oracle_id": "a984db23-40ea-428d-829f-e944267280f8",
+      "ability_id": "trigger:second-draw",
+      "active_zone": "battlefield",
+      "event": "card.second_draw",
+      "event_condition": {
+        "field": "player",
+        "op": "ne",
+        "value": "$source.controller"
+      },
+      "effects": [{"op": "draw", "player": "$controller", "count": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "opponent_second_draw", "draw"],
+      "tests": ["test_faerie_mastermind_tracks_opponent_second_draw_and_draws_each_player"],
+      "provenance": {
+        "source_oracle_hash": "9057053fb56b1a7734ce8ae12241f7eb15814d48df0cd2dc3b13e4994333a438",
+        "source_rulings_hash": "3711981835ba4cb281afa0d3dbea6ac0e738019c4bcc9dda5c910751b09ec5e3",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "a984db23-40ea-428d-829f-e944267280f8:ability:ab4",
+      "label": "Faerie Mastermind draw activation",
+      "oracle_id": "a984db23-40ea-428d-829f-e944267280f8",
+      "ability_id": "ability:ab4",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [{"op": "draw_each_player", "count": 1}],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "multiplayer_draw"],
+      "tests": ["test_faerie_mastermind_tracks_opponent_second_draw_and_draws_each_player"],
+      "provenance": {
+        "source_oracle_hash": "9057053fb56b1a7734ce8ae12241f7eb15814d48df0cd2dc3b13e4994333a438",
+        "source_rulings_hash": "3711981835ba4cb281afa0d3dbea6ac0e738019c4bcc9dda5c910751b09ec5e3",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "1e943e04-e213-4781-b1a7-935aad8790e1:spell:front",
+      "label": "Intruder Alarm",
+      "oracle_id": "1e943e04-e213-4781-b1a7-935aad8790e1",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "untap_step_restriction"],
+      "tests": ["test_intruder_alarm_suppresses_controller_untap_and_untaps_on_entry"],
+      "provenance": {
+        "source_oracle_hash": "cf365466a420e2ea25e234279696ce6f4ee0d0099b01265ae156c1c89a079169",
+        "source_rulings_hash": "b9e87cea733eed19ce9ec9fcf291e21c4d3c1f52ecfc86009c404e78b2af70d5",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "1e943e04-e213-4781-b1a7-935aad8790e1:trigger:creature-enter",
+      "label": "Intruder Alarm creature-enter trigger",
+      "oracle_id": "1e943e04-e213-4781-b1a7-935aad8790e1",
+      "ability_id": "trigger:creature-enter",
+      "active_zone": "battlefield",
+      "event": "creature.enter",
+      "effects": [{"op": "untap_all_creatures"}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "creature_enters_trigger", "global_untap"],
+      "tests": ["test_intruder_alarm_suppresses_controller_untap_and_untaps_on_entry"],
+      "provenance": {
+        "source_oracle_hash": "cf365466a420e2ea25e234279696ce6f4ee0d0099b01265ae156c1c89a079169",
+        "source_rulings_hash": "b9e87cea733eed19ce9ec9fcf291e21c4d3c1f52ecfc86009c404e78b2af70d5",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "463865bc-087e-477b-9e86-84e77f1ad931:spell:front",
+      "label": "Seedborn Muse",
+      "oracle_id": "463865bc-087e-477b-9e86-84e77f1ad931",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "opponent_untap"],
+      "tests": ["test_seedborn_muse_untaps_all_permanents_on_opponent_untap"],
+      "provenance": {
+        "source_oracle_hash": "84ce2101743f49d48b84d11795a02ab4961689f77edb2452d93c817aea57153e",
+        "source_rulings_hash": "f6635d531a5f104421c8d5518a981a724ceb8d824d2d1e779fb9140463b107c1",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "2962fe4c-bf48-454b-8a6b-0f8253352ae8:spell:front",
+      "label": "Spelunking",
+      "oracle_id": "2962fe4c-bf48-454b-8a6b-0f8253352ae8",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "land_entry_replacement"],
+      "tests": ["test_spelunking_draws_puts_optional_land_and_forces_untapped_entry"],
+      "provenance": {
+        "source_oracle_hash": "c4f54404f07f1db019d6ade726300d0f788c66c8a52fdcca5b7df7aad7cc8d65",
+        "source_rulings_hash": "704e9f36e72e8833dee71c41ccbd3db0974548c5fa064ee7de73d1e1a8a46dc7",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "2962fe4c-bf48-454b-8a6b-0f8253352ae8:trigger:enter",
+      "label": "Spelunking enter trigger",
+      "oracle_id": "2962fe4c-bf48-454b-8a6b-0f8253352ae8",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [
+        {"op": "draw", "player": "$controller", "count": 1},
+        {
+          "op": "put_land_from_hand",
+          "player": "$controller",
+          "prompt": "You may put a land card from your hand onto the battlefield.",
+          "cave_life": 4
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "draw", "private_choice", "land_put", "conditional_life"],
+      "tests": ["test_spelunking_draws_puts_optional_land_and_forces_untapped_entry"],
+      "provenance": {
+        "source_oracle_hash": "c4f54404f07f1db019d6ade726300d0f788c66c8a52fdcca5b7df7aad7cc8d65",
+        "source_rulings_hash": "704e9f36e72e8833dee71c41ccbd3db0974548c5fa064ee7de73d1e1a8a46dc7",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "34994475-b914-44f6-8ca1-c2747b6d5956:spell:front",
+      "label": "Mole Man, Moloid Master",
+      "oracle_id": "34994475-b914-44f6-8ca1-c2747b6d5956",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "zone_permission", "graveyard_land_permission"],
+      "tests": ["test_mole_man_plays_graveyard_land_and_moloid_attack_may_mill"],
+      "provenance": {
+        "source_oracle_hash": "701639a87af019a5dd4c96c3677ce9b85f0c847dd8a1d5c0af5736b7a0ba6e5b",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "34994475-b914-44f6-8ca1-c2747b6d5956:trigger:landfall",
+      "label": "Mole Man landfall trigger",
+      "oracle_id": "34994475-b914-44f6-8ca1-c2747b6d5956",
+      "ability_id": "trigger:landfall",
+      "active_zone": "battlefield",
+      "event": "land.enter",
+      "event_condition": {
+        "field": "controller",
+        "op": "eq",
+        "value": "$source.controller"
+      },
+      "effects": [
+        {
+          "op": "create_token",
+          "controller": "$controller",
+          "name": "Moloid",
+          "quantity": 1,
+          "characteristics": {
+            "name": "Moloid",
+            "type_line": "Token Creature — Minion",
+            "colors": ["G"],
+            "power": "1",
+            "toughness": "1",
+            "oracle_text": "Whenever this token attacks, you may mill a card."
+          }
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "landfall", "token_creation", "attack_trigger", "optional_mill"],
+      "tests": ["test_mole_man_plays_graveyard_land_and_moloid_attack_may_mill"],
+      "provenance": {
+        "source_oracle_hash": "701639a87af019a5dd4c96c3677ce9b85f0c847dd8a1d5c0af5736b7a0ba6e5b",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "339f5334-b65a-445a-a016-20e997e0b4bb:ability:ab3",
+      "label": "Mistrise Village uncounterable activation",
+      "oracle_id": "339f5334-b65a-445a-a016-20e997e0b4bb",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {"op": "next_spell_uncounterable", "player": "$controller"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "next_spell_effect", "cant_be_countered"],
+      "tests": ["test_mistrise_marks_only_the_next_spell_uncounterable"],
+      "provenance": {
+        "source_oracle_hash": "045052e7be9c8bb937410c811934ec65f9e11d23e0717bdbfda522d81ca265fa",
+        "source_rulings_hash": "6fb83aba185fbc318bb1eb7986935da2c7dcc040ac97456711df301a5fb546ca",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "bfa20bc7-4626-4a52-87f4-6e2763cb8ed5:ability:ab3",
+      "label": "Archway of Innovation improvise activation",
+      "oracle_id": "bfa20bc7-4626-4a52-87f4-6e2763cb8ed5",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {"op": "next_spell_improvise", "player": "$controller"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "next_spell_effect", "improvise", "cost_reduction"],
+      "tests": ["test_archway_grants_improvise_to_exactly_the_next_spell"],
+      "provenance": {
+        "source_oracle_hash": "7ad475ec7a419d53650e8c1126b37223f74d6f991e5bf58ad6d647a60c414fcd",
+        "source_rulings_hash": "8a86e433fae7fbf85436b4b0575b8938791948aa432740e1cc102b3be5bb0563",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c450f6b7-bb2a-4b8c-aec7-d27555137b63:spell:front",
+      "label": "Retreat to Coralhelm",
+      "oracle_id": "c450f6b7-bb2a-4b8c-aec7-d27555137b63",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_retreat_landfall_exposes_tap_untap_decline_and_scry_modes"],
+      "provenance": {
+        "source_oracle_hash": "f5a6efbfe4dfa8754f5e5fb0d384d1081552c4a2df0ba281e3ace288615f1371",
+        "source_rulings_hash": "a72b0c308d34a71874cd8672380b12eb255ddbb3f38dd1fb2d774534c8cd5273",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c450f6b7-bb2a-4b8c-aec7-d27555137b63:trigger:landfall",
+      "label": "Retreat to Coralhelm landfall",
+      "oracle_id": "c450f6b7-bb2a-4b8c-aec7-d27555137b63",
+      "ability_id": "trigger:landfall",
+      "active_zone": "battlefield",
+      "event": "land.enter",
+      "event_condition": {
+        "field": "controller",
+        "op": "eq",
+        "value": "$source.controller"
+      },
+      "effects": [],
+      "target_schema": {
+        "mode_count": 1,
+        "modes": {
+          "tap": {
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "creature": true,
+            "count": 1,
+            "effects": [{"op": "tap", "card": "$target.0"}]
+          },
+          "untap": {
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "creature": true,
+            "count": 1,
+            "effects": [{"op": "untap", "card": "$target.0"}]
+          },
+          "leave": {
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "creature": true,
+            "count": 1,
+            "effects": []
+          },
+          "scry": {
+            "groups": [],
+            "effects": [{"op": "scry", "player": "$controller", "count": 1}]
+          }
+        }
+      },
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "landfall", "mode_selection", "target_validation", "tap", "untap", "scry"],
+      "tests": ["test_retreat_landfall_exposes_tap_untap_decline_and_scry_modes"],
+      "provenance": {
+        "source_oracle_hash": "f5a6efbfe4dfa8754f5e5fb0d384d1081552c4a2df0ba281e3ace288615f1371",
+        "source_rulings_hash": "a72b0c308d34a71874cd8672380b12eb255ddbb3f38dd1fb2d774534c8cd5273",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "d1961110-575b-4a1b-9cee-db0e1f0fdbc1:spell:front",
+      "label": "Scryb Ranger",
+      "oracle_id": "d1961110-575b-4a1b-9cee-db0e1f0fdbc1",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "flash", "flying", "protection_keyword"],
+      "tests": ["test_scryb_ranger_returns_forest_and_enforces_once_each_turn"],
+      "provenance": {
+        "source_oracle_hash": "4944ee151dacf4a1475cb40cef894dc835367a44a462ee389f7be3a6d168db7c",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "d1961110-575b-4a1b-9cee-db0e1f0fdbc1:ability:ab3",
+      "label": "Scryb Ranger untap activation",
+      "oracle_id": "d1961110-575b-4a1b-9cee-db0e1f0fdbc1",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "zones": ["battlefield"],
+        "categories": ["permanent"],
+        "creature": true,
+        "count": 1
+      },
+      "effects": [{"op": "untap", "card": "$target.0"}],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "return_cost", "target_validation", "untap", "once_each_turn"],
+      "tests": ["test_scryb_ranger_returns_forest_and_enforces_once_each_turn"],
+      "provenance": {
+        "source_oracle_hash": "4944ee151dacf4a1475cb40cef894dc835367a44a462ee389f7be3a6d168db7c",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    }
+  ]
+}
