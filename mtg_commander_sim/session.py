@@ -82,6 +82,8 @@ class CommanderSession:
     deck_provenance: dict[str, dict[str, Any]] = field(default_factory=dict)
     profile_validation: dict[str, dict[str, Any]] = field(default_factory=dict)
     arena_metadata: dict[str, Any] = field(default_factory=dict)
+    record_status: str = "created"
+    pause_reason: dict[str, Any] | None = None
 
     @classmethod
     def create(
@@ -229,6 +231,31 @@ class CommanderSession:
                 self.plans[principal] = queue
             else:
                 self.plans.pop(principal, None)
+            future_choices = planned.pop("future_choices", None)
+            if (
+                isinstance(future_choices, Mapping)
+                and str(planned.get("action_id")) != "choose"
+            ):
+                remainder = self.plans.get(principal) or []
+                self.plans[principal] = [
+                    {
+                        "action_id": "choose",
+                        "future_choices": copy.deepcopy(
+                            dict(future_choices)
+                        ),
+                    },
+                    *remainder,
+                ]
+            elif isinstance(future_choices, Mapping):
+                try:
+                    self._resolve_future_choices(
+                        principal,
+                        planned,
+                        dict(future_choices),
+                    )
+                except ValueError:
+                    self.plans.pop(principal, None)
+                    return self.packet(principal, full=full)
             planned.setdefault("automatic", True)
             planned.setdefault("reason", "Execute a still-legal action from the accepted ordered plan.")
             before_stack = tuple(item.ref for item in self.state.stack)
@@ -260,6 +287,40 @@ class CommanderSession:
                 self.plans.pop(principal, None)
         raise RuntimeError("Ordered plan exceeded 64 automatic actions without yielding")
 
+    def _resolve_future_choices(
+        self,
+        principal: str,
+        planned: dict[str, Any],
+        future_choices: Mapping[str, Any],
+    ) -> None:
+        decision = self.state.pending_decision
+        capability = self.engine.permissions.capability_for(principal)
+        if decision is None or capability is None:
+            raise ValueError("Future choice has no current capability")
+        actor = capability.actor or principal
+        context = decision.payload_by_actor.get(actor, {})
+        for key, value in future_choices.items():
+            if key != "search_card_name":
+                planned[str(key)] = copy.deepcopy(value)
+                continue
+            name = str(value).casefold()
+            candidates = list(
+                context.get("search_cards")
+                or context.get("options")
+                or []
+            )
+            matches = [
+                item
+                for item in candidates
+                if isinstance(item, Mapping)
+                and str(item.get("name") or "").casefold() == name
+            ]
+            if len(matches) != 1:
+                raise ValueError(
+                    f"Future search name {value!r} is not one unique legal candidate"
+                )
+            planned["search_card"] = str(matches[0]["id"])
+
     def _install_plan(
         self,
         principal: str,
@@ -284,7 +345,16 @@ class CommanderSession:
             ):
                 actionable.append({"action_id": item})
         if actionable and current_action_id and actionable[0].get("action_id") == current_action_id:
-            actionable.pop(0)
+            completed = actionable.pop(0)
+            future = completed.get("future_choices")
+            if isinstance(future, Mapping):
+                actionable.insert(
+                    0,
+                    {
+                        "action_id": "choose",
+                        "future_choices": copy.deepcopy(dict(future)),
+                    },
+                )
         if actionable:
             self.plans[principal] = actionable
 
@@ -304,12 +374,12 @@ class CommanderSession:
             return False
         pending = self.state.pending_decision
         pending_principals = self.pending_principals()
-        if pending and pending.kind == "search.fetch":
+        if pending and pending.kind in {"search.fetch", "semantic.search"}:
             return (
                 pending_principals == [principal]
                 and str(queue[0].get("action_id")) == "choose"
             )
-        if before_kind == "search.fetch":
+        if before_kind in {"search.fetch", "semantic.search"}:
             return (
                 not pending_principals
                 or pending_principals == [principal]
@@ -353,6 +423,7 @@ class CommanderSession:
             "provider_invoked",
             "reasoning_effort",
             "thread_id",
+            "thread_handle",
             "thread_label",
             "parent_session_id",
             "invoked_at",
@@ -362,6 +433,10 @@ class CommanderSession:
             "fallback",
             "automatic_fallback",
             "memory_update",
+            "provider_identity_verified",
+            "model_identity_verified",
+            "model_configured",
+            "reasoning_effort_configured",
         }
         audit = {key: copy.deepcopy(raw.pop(key)) for key in list(raw) if key in audit_keys}
         action_id = raw.pop("action_id", None)
@@ -475,12 +550,25 @@ class CommanderSession:
                         "reasoning_effort"
                     ),
                     "thread_id": response.get("thread_id"),
+                    "thread_handle": response.get(
+                        "thread_handle", response.get("thread_id")
+                    ),
                     "thread_label": response.get("thread_label"),
                     "parent_session_id": response.get(
                         "parent_session_id"
                     ),
                     "invoked_at": response.get("invoked_at"),
                     "provider_invoked": bool(response.get("provider_invoked", False)),
+                    "provider_identity_verified": bool(
+                        response.get("provider_identity_verified", False)
+                    ),
+                    "model_identity_verified": bool(
+                        response.get("model_identity_verified", False)
+                    ),
+                    "model_configured": response.get("model_configured"),
+                    "reasoning_effort_configured": response.get(
+                        "reasoning_effort_configured"
+                    ),
                     "metrics": {
                         key: response[key]
                         for key in (
@@ -596,10 +684,23 @@ class CommanderSession:
             "invocation_id": audit.get("invocation_id"),
             "reasoning_effort": audit.get("reasoning_effort"),
             "thread_id": audit.get("thread_id"),
+            "thread_handle": audit.get(
+                "thread_handle", audit.get("thread_id")
+            ),
             "thread_label": audit.get("thread_label"),
             "parent_session_id": audit.get("parent_session_id"),
             "invoked_at": audit.get("invoked_at"),
             "provider_invoked": bool(audit.get("provider_invoked", False)),
+            "provider_identity_verified": bool(
+                audit.get("provider_identity_verified", False)
+            ),
+            "model_identity_verified": bool(
+                audit.get("model_identity_verified", False)
+            ),
+            "model_configured": audit.get("model_configured"),
+            "reasoning_effort_configured": audit.get(
+                "reasoning_effort_configured"
+            ),
             "metrics": {
                 key: audit[key]
                 for key in (
@@ -631,6 +732,10 @@ class CommanderSession:
         if not audit.get("automatic"):
             self.decisions.append(decision_row)
         if result.ok:
+            self.record_status = (
+                "complete" if self.state.game_over else "in_progress"
+            )
+            self.pause_reason = None
             selected_refs: list[str] = []
             for key in (
                 "card",
@@ -691,6 +796,19 @@ class CommanderSession:
                         "registry_hash": semantics_fingerprint(self.engine.semantics),
                         "programs_used": programs_used,
                     },
+                    "continuation": (
+                        {
+                            "kind": decision.kind,
+                            "semantic_frame": copy.deepcopy(
+                                decision.continuation.get(
+                                    "semantic_frame"
+                                )
+                            ),
+                        }
+                        if decision
+                        and decision.kind.startswith("semantic.")
+                        else None
+                    ),
                 }
             )
             new_events = [
@@ -752,6 +870,8 @@ class CommanderSession:
         directory.mkdir(parents=True, exist_ok=True)
         if not self.initial_checkpoint:
             self.initial_checkpoint = checkpoint_envelope(self.state)
+        self.engine.semantics.path = directory / "semantics.json"
+        self.engine.semantics.save()
         manifest = write_record(
             directory,
             state=self.state,
@@ -765,6 +885,11 @@ class CommanderSession:
             deck_provenance=self.deck_provenance,
             profile_validation=self.profile_validation,
             codex_arena=self.arena_metadata,
+            status=self.record_status,
+            pause_reason=self.pause_reason,
+        )
+        self.arena_metadata = copy.deepcopy(
+            dict(manifest.get("codex_arena") or {})
         )
         cursor_payload = {
             principal: {
@@ -787,13 +912,40 @@ class CommanderSession:
             json.dumps(self.plans, indent=2, sort_keys=True),
             encoding="utf-8",
         )
-        self.engine.semantics.save()
         write_review_artifacts(
             directory,
             self.engine,
             decisions=self.decisions,
             manifest=manifest,
         )
+
+    def pause(
+        self,
+        reason: Mapping[str, Any] | None = None,
+    ) -> None:
+        from .record import pause_reason_for_state
+
+        self.record_status = "paused"
+        self.pause_reason = copy.deepcopy(
+            dict(reason or pause_reason_for_state(self.state) or {})
+        )
+
+    def resume(self) -> None:
+        if self.state.game_over:
+            raise ValueError("A completed game cannot be resumed")
+        if self.record_status == "aborted":
+            raise ValueError("An aborted game cannot be resumed")
+        self.record_status = "in_progress"
+        self.pause_reason = None
+
+    def abort(self, reason: str) -> None:
+        if self.state.game_over:
+            raise ValueError("A completed game cannot be aborted")
+        self.record_status = "aborted"
+        self.pause_reason = {
+            "kind": "aborted",
+            "label": str(reason)[:500],
+        }
 
     @classmethod
     def load(
@@ -827,6 +979,14 @@ class CommanderSession:
             replay_mode = str(
                 manifest.get("replay", {}).get("mode") or "command_replay"
             )
+            record_status = str(
+                manifest.get("status") or "in_progress"
+            )
+            pause_reason = (
+                dict(manifest["pause_reason"])
+                if isinstance(manifest.get("pause_reason"), Mapping)
+                else None
+            )
         else:
             engine = CommanderEngine.load(card_db, str(directory / "game.json"), semantics)
             initial_checkpoint = checkpoint_envelope(engine.state)
@@ -834,6 +994,8 @@ class CommanderSession:
             decisions = []
             created_at = utc_now()
             replay_mode = "legacy_snapshot"
+            record_status = "in_progress"
+            pause_reason = None
         cursors: dict[str, ProjectionCursor] = {}
         cursor_path = directory / "cursors.json"
         if cursor_path.exists():
@@ -919,4 +1081,6 @@ class CommanderSession:
             deck_provenance=deck_provenance,
             profile_validation=profile_validation,
             arena_metadata=arena_metadata,
+            record_status=record_status,
+            pause_reason=pause_reason,
         )

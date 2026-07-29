@@ -1,118 +1,121 @@
-# MTG Commander Sim 0.5.0 — verification results
+# MTG Commander Sim 0.6.0 — verification results
 
 Date: 2026-07-28
 Python: 3.11
 
-## Compile, schemas, configuration, and skill
+## Compile and protocol demo
 
 PASS: `python -m compileall -q mtg_commander_sim tests scripts simctl.py`
 
-PASS: all 11 JSON schemas and all 5 project Codex TOML files parse.
+PASS:
+`python scripts/demo_four_player_protocol.py --db data/scryfall-current.sqlite3 --out run/demo-0.6-verification --seed 20260736`
 
-PASS: the project-scoped `commander-arena` skill passes the Codex
-`quick_validate.py` validator.
-
-PASS: `python scripts/demo_four_player_protocol.py --out demo`
-
-- bootstrap: 6,213 bytes / 1,549 estimated tokens
-- unchanged live-decision delta: 1,076 bytes / 269 estimated tokens
+- bootstrap: 5,801 bytes / 1,448 estimated tokens
+- unchanged live-decision delta: 1,093 bytes / 273 estimated tokens
 - post-declaration delta: 435 bytes / 108 estimated tokens
 
 ## Unit and integration tests
 
-PASS: 99 tests in 33.138 seconds.
+PASS: 112 tests in 31.858 seconds.
 
-All previous 69 tests remain green. Added coverage includes:
+All previous 99 tests remain green. New coverage includes:
 
-- active-player beginning-phase yields expiring before both main phases
-- private-draw, action-signature, stack, phase, and public-change invalidation
-- opportunity journaling and hard failure for meaningful suppression
-- infrastructure-versus-pilot attribution for undelivered actions
-- exact seed-20260730 delivery regression
-- Boseiju and Sensei's Divining Top payability/availability
-- Mox Opal Metalcraft, reminder-text mana, and land-sacrifice costs
-- exact/mismatched profile fingerprints and reload preservation
-- fixed-seat task/rules/memory/identity boundaries
-- four persistent thread labels and honest unavailable metadata
-- disk-persistent ordered plans and conservative plan-stop conditions
-- Commander multiplayer free mulligan and first-player draw
-- duplicated-list fixtures never becoming matchup evidence
+- versioned semantic-frame suspension and exact continuation replay
+- Entomb to Bloodghast with private candidates and public graveyard result
+- Three Visits to Bayou and tapped/untapped Breeding Pool
+- Nature's Lore template reuse and restrictive hidden-zone fail-to-find
+- private versus revealed hand-search visibility
+- ordered fetch, Entomb, private search, and later-cast execution
+- typed direct MCP schema, exact plan enum, and reason bound
+- deterministic stripping of irrelevant mulligan yield
+- retry grouping without losing decision alternatives
+- journal-derived provider/thread/manifest reconstruction
+- contradiction detection and accepted-command-prefix replay
+- explicit pause reasons, partial reviews, atomic artifacts, and stale locks
 
 ## Corrected deterministic seed-20260730 regression
 
 PASS: `run/native-zimone-vs-mishra-0.5.0`
 
-- game ID: `516d8aad9ef04133b591a62b5ae61ae5`
 - seed: `20260730`
-- Commander duel profile; advanced through turn sequence 8
-- 61 accepted commands and 61 recorded decisions
+- Commander duel through turn sequence 8
+- 61 accepted commands
 - 168 audited priority windows
-- 89 pass-only auto-passes and 24 safe yield covers
+- 89 pass-only skips and 24 safe yield covers
 - 0 suppressed meaningful windows
-- exact profile fingerprints: pass
-- action-opportunity coverage: pass
-- legal-action exposure: pass
+- exact replay hash:
+  `4bb5fdb5d56b86cc4928c2019978331bb16b1f26b66b8b2185ea648bd9a2ff82`
+- incomplete Oracle coverage still prevents deck or matchup evidence
+
+## Refreshed characterized 0.5.0 Codex record
+
+PASS: `run/codex-subagent-four-player-0.5.0-final`
+
+- game ID: `319f6168af9445d1b1aec1edcd1d5e82`
+- seed: `20260735`
+- status: paused at arbiter decision D12 / Entomb
+- 22 provider attempts: 11 accepted and 11 rejected
+- 11 retry calls and 11 accepted commands
+- four stable reused seat handles
+- recorded provider/model retained; identity verification remains false because
+  the historical rows did not carry verification provenance
+- arena stop reason populated
 - hidden-information audit: pass
-- incomplete Oracle semantics remain an explicit fidelity failure
-- classification: `pilot_test`; review eligible: false; matchup evidence: false
+- suppressed meaningful windows: 0
+- exact accepted-prefix replay: pass (11 commands)
+- final state hash:
+  `4f72a3f09c80be8fb144f3d27b7e33371363c8252bcc6da3b8ba0f11f5c67f8b`
 
-PASS: exact command replay:
+## Fresh four-player Codex-subagent record
 
-`4bb5fdb5d56b86cc4928c2019978331bb16b1f26b66b8b2185ea648bd9a2ff82`
+PASS within its declared rules-test boundary:
+`run/codex-subagent-four-player-0.6.0-final`
 
-## Native four-player Codex-subagent protocol record
-
-PASS within the declared protocol-test boundary:
-`run/codex-subagent-four-player-0.5.0`
-
-- game ID: `5a23e4071f654075bf031aec89f0533c`
-- seed: `20260734`
-- Commander review profile: four players, 40 life, first player draws, one free mulligan
-- four distinct persistent seat threads
-- actual provider: `codex_subagent`
-- actual model: `gpt-5.6-sol`
-- actual reasoning effort: `max`
-- 14 recorded pilot invocations and four ordered main-phase responses
-- 192 audited priority windows and 183 pass-only auto-passes
+- game ID: `265e03c8bac84295aa536717725714c1`
+- seed: `20260736`
+- four verified, independently reused GPT-5.6 Sol/max seat handles
+- first mulligan responses had zero schema retries
+- 23 provider attempts: 22 accepted and one rejected main-phase plan envelope
+- 23 game decisions, 26 accepted commands, and three automatic ordered-plan
+  actions
+- 218 priority windows considered and 200 pass-only skips
 - 0 suppressed meaningful windows
-- exact profile fingerprints: pass
-- provider/model/thread identity and seat projection: verified
 - hidden-information audit: pass
-- primary strategic seat decisions: 0
-- stopped at turn sequence 5 on the unresolved Three Visits private search choice
-- provider token counts were unavailable and remain null
-- duplicated A/C and B/D lists force `pilot_test`; never matchup evidence
+- provider/model identity: verified
+- exact profile fingerprints: pass
+- exact accepted-prefix replay: pass (26 commands)
+- final state hash:
+  `21d3e23353c4b3323f1f870a2a2dc94bc64b11ea172929dd1a704199fcdb0787`
+- paused during turn sequence 5 because a targeted counterspell was advertised
+  while the stack was empty
+- classification: `rules_test`
+- legal-action exposure: fail
+- duplicated lists and provisional/incomplete semantics: never matchup evidence
 
-The early live responses did not all include complete reasons, so
-`legal_action_exposure` remains `unavailable` for this historical record.
-Version 0.5.0 now rejects future Codex submissions that omit plan, reason, or
-confidence. This limitation is not rewritten retroactively.
-
-PASS: exact command replay:
-
-`c8b644cd7b9a2ba48f6dc8cb649688c1d0ad7c986e82c7a302a65a33d3006a61`
+The record deliberately stops at this newly discovered target-exactness
+boundary. It does not claim turn-sequence-8 completion or that the real-pilot
+run exercised the full fetch/search/cast ordered chain; that chain is covered
+by deterministic integration replay.
 
 ## Package
 
-PASS: built `dist/mtg_commander_sim-0.5.0-py3-none-any.whl`.
+PASS: built `dist/mtg_commander_sim-0.6.0-py3-none-any.whl`.
 
-- size: 153,674 bytes
+- size: 167,941 bytes
 - SHA-256:
-  `6a1bd100738e3a604d7058cde41ef2168d0ddedf81fc9cbc867fb473da86e7b1`
-- contains the arena module, fixed-seat tools, profile data, semantic packs,
-  and ordered-plan persistence
+  `58b99f9b79d5763cb8b1c45f8ed9c89ee95f50c5ec671786c525f3a247bfbd05`
 
-PASS: installed the wheel into a fresh virtual environment with
+PASS: installed the wheel into a fresh virtual environment using
 `--no-index --no-deps`.
 
-PASS: the installed package reports `0.5.0`, imports the arena APIs, contains
-`plans.json` persistence, and exposes `pilot-mcp`, `pilot-tool`,
-`arena-create`, `arena-status`, and `coordinator-tool`.
+PASS: the installed package reports `0.6.0` and exposes the typed pilot tools,
+record refresh/finalize/verify commands, and grouped arena lifecycle commands.
 
 ## Fidelity statement
 
-These results establish decision-opportunity delivery, safe-yield telemetry,
-payability filtering for the tested costs, fixed-seat Codex orchestration,
-exact profile validation, hidden-information projection, and deterministic
-command replay. They do not establish full Magic rules coverage, terminal deck
-review eligibility, deck superiority, or statistical matchup evidence.
+These results establish resumable private-search execution for the tested
+templates, typed fixed-seat orchestration, honest journal-derived telemetry,
+explicit pause/finalization, hidden-information projection, and exact prefix
+replay. They do not establish full Magic rules coverage, a completed
+four-player result, deck-review eligibility, deck superiority, or statistical
+matchup evidence.

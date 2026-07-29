@@ -1,0 +1,402 @@
+{
+  "schema_version": 3,
+  "name": "generic-private-searches",
+  "programs": [
+    {
+      "key": "299fc083-0834-4064-8344-f895aff68867:spell:front",
+      "label": "Entomb",
+      "oracle_id": "299fc083-0834-4064-8344-f895aff68867",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {},
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "graveyard",
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
+      "destination": "graveyard",
+      "trust_level": "provisional",
+      "coverage": ["spell_resolution", "private_library_search", "semantic_continuation"],
+      "tests": ["test_entomb_private_search_continuation"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+    },
+    {
+      "key": "1b882a0e-0ede-4d1a-bd1a-9b7cffbcde8e:spell:front",
+      "label": "Three Visits",
+      "oracle_id": "1b882a0e-0ede-4d1a-bd1a-9b7cffbcde8e",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {"subtypes": ["Forest"]},
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "battlefield",
+          "enters_tapped_override": null,
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
+      "destination": "graveyard",
+      "trust_level": "provisional",
+      "coverage": ["spell_resolution", "typed_library_search", "natural_land_entry", "semantic_continuation"],
+      "tests": ["test_three_visits_search_template"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+    },
+    {
+      "key": "78826359-fe63-44ad-adc4-a17ffcd710e4:spell:front",
+      "label": "Nature's Lore",
+      "oracle_id": "78826359-fe63-44ad-adc4-a17ffcd710e4",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {"subtypes": ["Forest"]},
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "battlefield",
+          "enters_tapped_override": null,
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
+      "destination": "graveyard",
+      "trust_level": "provisional",
+      "coverage": ["spell_resolution", "typed_library_search", "natural_land_entry", "semantic_continuation"],
+      "tests": ["test_natures_lore_reuses_search_template"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+    },
+    {
+      "key": "422e1869-134f-463d-9fa1-86b66a998b3e:spell:front",
+      "label": "Fabricate",
+      "oracle_id": "422e1869-134f-463d-9fa1-86b66a998b3e",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {"types": ["Artifact"]},
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "hand",
+          "reveal": true,
+          "shuffle_after": true
+        }
+      ],
+      "destination": "graveyard",
+      "trust_level": "provisional",
+      "coverage": ["spell_resolution", "revealed_library_search", "semantic_continuation"],
+      "tests": ["test_revealed_search_target_is_public"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+    },
+    {
+      "key": "47a785ed-8095-4685-8daa-02c4e2b0ffcd:spell:front",
+      "label": "Spellseeker permanent spell",
+      "oracle_id": "47a785ed-8095-4685-8daa-02c4e2b0ffcd",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "provisional",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_spellseeker_search_trigger"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+    },
+    {
+      "key": "47a785ed-8095-4685-8daa-02c4e2b0ffcd:trigger:enter",
+      "label": "Spellseeker enters",
+      "oracle_id": "47a785ed-8095-4685-8daa-02c4e2b0ffcd",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {
+            "types": [],
+            "mana_value": {"maximum": 2},
+            "predicate": "instant_or_sorcery"
+          },
+          "count": {"minimum": 0, "maximum": 1},
+          "destination": "hand",
+          "reveal": true,
+          "shuffle_after": true,
+          "optional": true
+        }
+      ],
+      "trust_level": "unresolved",
+      "coverage": ["enters_trigger", "revealed_library_search"],
+      "notes": "The generic selector does not yet combine instant-or-sorcery alternatives.",
+      "tests": ["test_spellseeker_search_trigger"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+    },
+    {
+      "key": "c1d6cce8-085f-42cb-8b0c-b6fbbf88b16a:spell:front",
+      "label": "Goblin Engineer permanent spell",
+      "oracle_id": "c1d6cce8-085f-42cb-8b0c-b6fbbf88b16a",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "provisional",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_goblin_engineer_search_trigger"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+    },
+    {
+      "key": "c1d6cce8-085f-42cb-8b0c-b6fbbf88b16a:trigger:enter",
+      "label": "Goblin Engineer enters",
+      "oracle_id": "c1d6cce8-085f-42cb-8b0c-b6fbbf88b16a",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {"types": ["Artifact"]},
+          "count": {"minimum": 0, "maximum": 1},
+          "destination": "graveyard",
+          "reveal": false,
+          "shuffle_after": true,
+          "optional": true
+        }
+      ],
+      "trust_level": "provisional",
+      "coverage": ["enters_trigger", "private_library_search", "semantic_continuation"],
+      "tests": ["test_goblin_engineer_search_trigger"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+    },
+    {
+      "key": "119d719d-e965-45b4-9bc9-ac03211b10c2:ability:ab1",
+      "label": "Survival of the Fittest activation",
+      "oracle_id": "119d719d-e965-45b4-9bc9-ac03211b10c2",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {"types": ["Creature"]},
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "hand",
+          "reveal": true,
+          "shuffle_after": true
+        }
+      ],
+      "trust_level": "provisional",
+      "coverage": ["activated_ability", "additional_cost", "library_search"],
+      "notes": "The generic ability grammar authoritatively validates and pays the creature-card discard cost.",
+      "tests": ["test_survival_search_after_authoritative_cost"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+    },
+    {
+      "key": "94f01534-7bb3-4b1e-8f77-e84156408686:ability:ab2",
+      "label": "Elvish Reclaimer activation",
+      "oracle_id": "94f01534-7bb3-4b1e-8f77-e84156408686",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {"types": ["Land"]},
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "battlefield",
+          "enters_tapped_override": true,
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
+      "trust_level": "provisional",
+      "coverage": ["activated_ability", "sacrifice_cost", "typed_library_search"],
+      "tests": ["test_elvish_reclaimer_search_after_authoritative_cost"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+    },
+    {
+      "key": "4507df69-6bf7-43d6-a609-c032b61835d5:ability:ab3",
+      "label": "Wight of the Reliquary activation",
+      "oracle_id": "4507df69-6bf7-43d6-a609-c032b61835d5",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {"types": ["Land"]},
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "battlefield",
+          "enters_tapped_override": true,
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
+      "trust_level": "provisional",
+      "coverage": ["activated_ability", "sacrifice_cost", "typed_library_search"],
+      "tests": ["test_wight_search_after_authoritative_cost"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+    },
+    {
+      "key": "0d96b60b-a060-48ee-bb83-93f1c4a10669:spell:front",
+      "label": "Green Sun's Zenith",
+      "oracle_id": "0d96b60b-a060-48ee-bb83-93f1c4a10669",
+      "effects": [],
+      "destination": "graveyard",
+      "trust_level": "unresolved",
+      "coverage": ["x_search", "self_shuffle"],
+      "notes": "Search is representable; self-shuffle destination and green creature/X selector need a reviewed compound program.",
+      "tests": ["test_tutor_family_fail_closed"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+    },
+    {
+      "key": "69872a9a-fe54-4e58-940c-89395af71acd:spell:front",
+      "label": "Finale of Devastation",
+      "oracle_id": "69872a9a-fe54-4e58-940c-89395af71acd",
+      "effects": [],
+      "destination": "graveyard",
+      "trust_level": "unresolved",
+      "coverage": ["multi_zone_search", "x_restriction", "conditional_continuous_effect"],
+      "notes": "The X>=10 continuous effect remains outside this slice.",
+      "tests": ["test_tutor_family_fail_closed"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+    },
+    {
+      "key": "6789a170-f2c5-4fc0-8a45-2b2361e67410:spell:front",
+      "label": "Chord of Calling",
+      "oracle_id": "6789a170-f2c5-4fc0-8a45-2b2361e67410",
+      "effects": [],
+      "destination": "graveyard",
+      "trust_level": "unresolved",
+      "coverage": ["convoke_cost", "x_search"],
+      "notes": "Convoke cost payment is not compiled in this slice.",
+      "tests": ["test_tutor_family_fail_closed"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+    },
+    {
+      "key": "10180e2f-90c5-4d41-ba44-16b14948f923:trigger:dies",
+      "label": "Protean Hulk dies",
+      "oracle_id": "10180e2f-90c5-4d41-ba44-16b14948f923",
+      "ability_id": "trigger:dies",
+      "active_zone": "graveyard",
+      "event": "creature.dies",
+      "effects": [],
+      "trust_level": "unresolved",
+      "coverage": ["multi_card_total_mana_value_search"],
+      "notes": "The generic search count exists; aggregate mana-value constraints remain unresolved.",
+      "tests": ["test_tutor_family_fail_closed"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+    },
+    {
+      "key": "038519b9-bca8-4b27-b5ac-2409595469d0:spell:front",
+      "label": "Diabolic Intent",
+      "oracle_id": "038519b9-bca8-4b27-b5ac-2409595469d0",
+      "effects": [],
+      "destination": "graveyard",
+      "trust_level": "unresolved",
+      "coverage": ["additional_cost", "private_library_search"],
+      "notes": "Sacrifice-as-additional-cost must be validated before the search can run.",
+      "tests": ["test_tutor_family_fail_closed"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+    },
+    {
+      "key": "42a3855d-25ab-45b3-9e5d-9a0f3da35a05:spell:front",
+      "label": "Reshape",
+      "oracle_id": "42a3855d-25ab-45b3-9e5d-9a0f3da35a05",
+      "effects": [],
+      "destination": "graveyard",
+      "trust_level": "unresolved",
+      "coverage": ["additional_cost", "x_search"],
+      "notes": "Artifact sacrifice additional cost must be authoritative before resolution.",
+      "tests": ["test_tutor_family_fail_closed"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+    },
+    {
+      "key": "dbe792f9-22be-4972-b418-99a6190c4421:spell:front",
+      "label": "Transmute Artifact",
+      "oracle_id": "dbe792f9-22be-4972-b418-99a6190c4421",
+      "effects": [],
+      "destination": "graveyard",
+      "trust_level": "unresolved",
+      "coverage": ["resolution_sacrifice", "difference_payment", "library_search"],
+      "notes": "Post-selection difference payment remains unresolved.",
+      "tests": ["test_tutor_family_fail_closed"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+    },
+    {
+      "key": "152b91c9-cc07-4ca8-944f-9bc2242a2283:spell:front",
+      "label": "Whir of Invention",
+      "oracle_id": "152b91c9-cc07-4ca8-944f-9bc2242a2283",
+      "effects": [],
+      "destination": "graveyard",
+      "trust_level": "unresolved",
+      "coverage": ["improvise_cost", "x_search"],
+      "notes": "Improvise payment is not compiled in this slice.",
+      "tests": ["test_tutor_family_fail_closed"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+    },
+    {
+      "key": "0fdfe986-0216-468b-aac8-bbcf588fd894:ability:ab1",
+      "label": "Arcum Dagsson activation",
+      "oracle_id": "0fdfe986-0216-468b-aac8-bbcf588fd894",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [],
+      "trust_level": "unresolved",
+      "coverage": ["target_controller_search", "resolution_sacrifice"],
+      "notes": "The searching player depends on target controller at resolution.",
+      "tests": ["test_tutor_family_fail_closed"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+    },
+    {
+      "key": "91d4a5fe-fd6d-4b14-a63f-61b4d0ecd9c4:ability:ab3",
+      "label": "Inventors' Fair activation",
+      "oracle_id": "91d4a5fe-fd6d-4b14-a63f-61b4d0ecd9c4",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [],
+      "trust_level": "unresolved",
+      "coverage": ["activation_restriction", "revealed_library_search"],
+      "notes": "Three-artifact activation restriction must be verified in the ability grammar.",
+      "tests": ["test_tutor_family_fail_closed"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+    },
+    {
+      "key": "4c6a0c30-b547-4eff-8ff4-0ca25803c076:trigger:chapter-3",
+      "label": "Urza's Saga chapter III",
+      "oracle_id": "4c6a0c30-b547-4eff-8ff4-0ca25803c076",
+      "ability_id": "trigger:chapter-3",
+      "active_zone": "battlefield",
+      "event": "saga.chapter.3",
+      "effects": [],
+      "trust_level": "unresolved",
+      "coverage": ["saga_chapter", "mana_cost_selector", "library_search"],
+      "notes": "Saga chapter scheduling remains unresolved.",
+      "tests": ["test_tutor_family_fail_closed"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+    },
+    {
+      "key": "1787ac2f-762d-4f3a-b7e5-12db6d3d470d:ability:ab1",
+      "label": "Repurposing Bay activation",
+      "oracle_id": "1787ac2f-762d-4f3a-b7e5-12db6d3d470d",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [],
+      "trust_level": "unresolved",
+      "coverage": ["sacrifice_cost", "derived_exact_mana_value_search"],
+      "notes": "The sacrificed artifact's mana value must be bound into the continuation frame.",
+      "tests": ["test_tutor_family_fail_closed"],
+      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+    }
+  ]
+}

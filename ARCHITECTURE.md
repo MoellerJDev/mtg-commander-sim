@@ -196,9 +196,18 @@ Generic operations include draw, move, sacrifice, destroy, exile, bounce, discar
 
 Runtime placeholders such as `$controller`, `$source`, `$stack`, and `$target.0` prevent semantics from hard-coding physical game object IDs.
 
+Version 0.6.0 makes `search` a resumable semantic operation. Resolution stores
+a versioned `semantic_frame` on the stack object (program/version, instruction
+pointer, controller, locals, and pending choice). The searching seat alone
+receives filtered private candidates. After its scoped choice, the engine
+validates the frame, performs reveal/destination/shuffle/entry handling, and
+continues at the next instruction. Public events do not reveal a nonrevealed
+card moved to hand. Restrictive or optional hidden-zone searches permit
+fail-to-find; an unrestricted mandatory search does not.
+
 ### Pack trust and provenance
 
-Version 0.5.0 loads semantic packs as data. A program identifies its Oracle ID,
+Version 0.6.0 loads semantic packs as data. A program identifies its Oracle ID,
 ability/face, active zone, event, schema version, coverage, tests, source Oracle
 hash, source-rulings hash, authoring provenance, review status, and trust level:
 
@@ -218,6 +227,12 @@ threshold, Warren Soultrader's activation, Mishra's Warform and delayed
 sacrifice, Gonti's Aether Heart energy triggers, and Red Elemental Blast.
 Several supporting cards are deliberately provisional. The preflight artifacts,
 not this summary, are the definitive coverage inventory.
+
+The generic tutor pack adds provisional reusable templates for Entomb, Three
+Visits, Nature's Lore, Fabricate, Goblin Engineer's entry trigger, Survival of
+the Fittest, Elvish Reclaimer, and Wight of the Reliquary. More complex tutors
+remain explicit unresolved stubs. Provisional coverage permits a protocol
+pilot test but never matchup evidence.
 
 ### Deterministic shortcuts
 
@@ -277,6 +292,13 @@ The manifest pins engine, semantic registry, Scryfall metadata, decks, seed, and
 the explicit Commander profile. Replay fails closed on a version/fingerprint or
 transition hash mismatch. V2 migrations use a separately named snapshot-only
 mode because their command payloads cannot be reconstructed.
+
+Record lifecycle is explicit (`created`, `in_progress`, `paused`, `complete`,
+`aborted`, `corrupt`). Saves replace journals/checkpoint atomically and write
+the manifest last. A paused record verifies the accepted-command prefix and
+retains its structured stop reason; prefix verification is not a terminal-game
+claim. Provider counters and Codex thread/identity summaries are rebuilt from
+durable decision and command rows, never incremented by convention.
 
 Review is derived rather than authoritative. Its fidelity gate prevents a
 rules-incomplete smoke run from silently becoming deck-performance evidence.

@@ -1,6 +1,6 @@
 # Codex Commander Arena
 
-Version 0.5.0 supports one neutral primary Codex task coordinating exactly four
+Version 0.6.0 supports one neutral primary Codex task coordinating exactly four
 persistent, seat-isolated strategic pilot tasks.
 
 ## Roles
@@ -91,7 +91,7 @@ python simctl.py pilot-mcp --game-dir run/codex-arena --seat A
 It exposes exactly:
 
 1. `get_task()`
-2. `submit_action(response)`
+2. `submit_action(...)` with a typed action/ordered-plan union
 3. `get_rules(refs)`
 4. `get_profile()`
 5. `get_memory()`
@@ -125,6 +125,11 @@ python simctl.py pilot-tool `
 Use `submit-action --json '<response>'` for the corresponding submission.
 Never invent an ID or mark `provider-invoked` when no model invocation
 occurred.
+
+The MCP submission schema exposes `action_id`/`action`, `actions`, the exact
+plan enum, a 180-character reason, confidence, yield, and a 500-character
+memory update directly. Schema-invalid output is journaled against the same
+decision with its full legal alternatives and compact retry context.
 
 ## Primary loop
 
@@ -172,22 +177,34 @@ A single action is:
 A main-phase plan uses top-level `actions`. The server derives ordinary mana
 payments. Remaining validated actions are persisted in `plans.json`, so a
 one-shot fixed-seat tool process can resume the same plan safely. Execution
-stops on another principal's response, stack change, hidden draw, invalid
-target, changed cost, new player/search/trigger-order choice, combat, semantic
-uncertainty, or fidelity failure.
+may include `future_choices` for a later seat-private search result; card names
+are resolved only after the private choice exists. Execution stops on another
+principal's response, material stack change, hidden draw, invalid target,
+changed cost, an unsupplied new player/search/trigger-order choice, combat,
+semantic uncertainty, or fidelity failure.
 
 ## Stop, resume, inspect, and verify
 
-Every accepted action saves the record. To stop, cease routing new tasks; do
-not fabricate a game result. To resume, reopen the same run, restore the same
-seat-to-thread registry, and route only to the recorded original thread IDs. A
+Every accepted action saves the record. To pause, cease routing new tasks and
+finalize the accepted prefix; do not fabricate a game result. To resume, reopen
+the same run, restore the same seat-to-thread registry, and route only to the
+recorded original thread IDs. A
 failed thread resume is a restart event and a persistence-fidelity failure, not
 permission to silently spawn a replacement.
 
 Inspect public progress and artifacts:
 
 ```powershell
-python simctl.py arena-status --game run/codex-arena
+python simctl.py arena status run/codex-arena --db data/scryfall-current.sqlite3
+python simctl.py arena pause run/codex-arena `
+  --db data/scryfall-current.sqlite3 --kind fidelity_failure `
+  --reason "material rule boundary requires code work"
+python simctl.py arena resume run/codex-arena --db data/scryfall-current.sqlite3
+python simctl.py arena abort run/codex-arena `
+  --db data/scryfall-current.sqlite3 --reason "operator requested"
+python simctl.py arena finalize run/codex-arena --db data/scryfall-current.sqlite3
+python simctl.py refresh-record run/codex-arena --db data/scryfall-current.sqlite3
+python simctl.py verify-record run/codex-arena --db data/scryfall-current.sqlite3
 python simctl.py inspect-game run/codex-arena --pretty
 python simctl.py inspect-decisions run/codex-arena
 python simctl.py report run/codex-arena --db data/scryfall-20260728-compact.sqlite3
@@ -198,7 +215,10 @@ python simctl.py replay run/codex-arena `
 The manifest records actual thread labels/IDs, invocation counts/timestamps,
 reuse, provider, model, reasoning effort, retries, interruptions, and restarts.
 If the host does not expose a parent session ID or token counts, those values
-remain `null`.
+remain `null`. It also records one of `created`, `in_progress`, `paused`,
+`complete`, `aborted`, or `corrupt`. A paused run has a structured
+`pause_reason`/arena stop reason. Passing replay on that record verifies only
+the accepted-command prefix, not a completed game.
 
 ## Provider and evidence labels
 
@@ -214,6 +234,8 @@ requires trusted material semantics, terminal replay-verified games,
 legal-action exposure, exact profiles, genuine strategic pilots, and a
 predeclared multi-game sample methodology.
 
-The bundled live record stops at turn sequence 5 on the uncompiled Three Visits
-search choice. This is an honest semantic boundary, not a pilot error or a
-result about either deck.
+The characterized 0.5.0 record remains paused at its original Entomb arbiter
+boundary after refresh; identity values that lacked provenance remain
+unverified. Version 0.6.0 can execute the generic private searches covered by
+its provisional tutor pack, but provisional or unresolved material semantics
+still prevent matchup evidence.

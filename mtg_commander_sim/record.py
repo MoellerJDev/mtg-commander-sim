@@ -16,8 +16,16 @@ from .semantics import SemanticRegistry
 from .util import stable_json
 
 RECORD_SCHEMA_VERSION = 3
-ENGINE_VERSION = "0.5.0"
+ENGINE_VERSION = "0.6.0"
 TRACE_LEVELS = {"minimal", "standard", "debug"}
+RUN_STATES = {
+    "created",
+    "in_progress",
+    "paused",
+    "complete",
+    "aborted",
+    "corrupt",
+}
 
 _STANDARD_OMIT = {
     "decision.response",
@@ -223,6 +231,424 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
     ]
 
 
+def provider_telemetry(
+    decisions: Sequence[Mapping[str, Any]],
+    commands: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    provider_rows = [
+        row for row in decisions if row.get("provider_invoked") is True
+    ]
+    attempt_indexes: dict[tuple[str, str, str], int] = {}
+    retry_calls = 0
+    for row in provider_rows:
+        key = (
+            str(row.get("role") or ""),
+            str(row.get("principal") or ""),
+            str(row.get("decision_id") or ""),
+        )
+        index = attempt_indexes.get(key, 0)
+        if index > 0 or int(row.get("retry_count") or 0) > 0:
+            retry_calls += 1
+        attempt_indexes[key] = index + 1
+    decision_ids = {
+        str(row.get("decision_id"))
+        for row in decisions
+        if row.get("decision_id")
+    }
+    pilot_handles = {
+        str(row.get("thread_handle") or row.get("thread_id"))
+        for row in provider_rows
+        if row.get("role") == "pilot"
+        and (row.get("thread_handle") or row.get("thread_id"))
+    }
+    return {
+        "game_decisions_created": len(decision_ids),
+        "provider_calls_attempted": len(provider_rows),
+        "provider_calls_accepted": sum(
+            bool(row.get("accepted")) for row in provider_rows
+        ),
+        "provider_calls_rejected": sum(
+            row.get("accepted") is False for row in provider_rows
+        ),
+        "retry_provider_calls": retry_calls,
+        "accepted_commands": len(commands),
+        "automatic_decisions": sum(
+            row.get("execution") == "planned_automatic"
+            for row in commands
+        ),
+        "arbiter_calls_attempted": sum(
+            row.get("role") == "arbiter" for row in provider_rows
+        ),
+        "unique_pilot_threads": len(pilot_handles),
+        "persistent_threads_reused": None,
+        "ordered_plans_submitted": sum(
+            bool(row.get("accepted"))
+            and isinstance(row.get("plan"), list)
+            and len(row.get("plan") or []) > 1
+            for row in decisions
+        ),
+        "ordered_plan_actions_executed": sum(
+            row.get("execution") == "planned_automatic"
+            for row in commands
+        ),
+    }
+
+
+def hidden_information_audit(
+    decisions: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Audit durable pilot inputs for direct cross-seat private-zone exposure."""
+
+    findings: list[dict[str, Any]] = []
+    forbidden_keys = {
+        "authoritative_state",
+        "checkpoint",
+        "initial_checkpoint",
+        "library_order",
+        "analyst",
+    }
+
+    def inspect(
+        value: Any,
+        *,
+        seat: str,
+        decision_id: str,
+        path: tuple[str, ...] = (),
+    ) -> None:
+        if isinstance(value, Mapping):
+            for key, child in value.items():
+                key_text = str(key)
+                child_path = (*path, key_text)
+                if key_text.lower() in forbidden_keys:
+                    findings.append(
+                        {
+                            "decision_id": decision_id,
+                            "seat": seat,
+                            "path": ".".join(child_path),
+                            "reason": "forbidden authoritative or analyst field",
+                        }
+                    )
+                inspect(
+                    child,
+                    seat=seat,
+                    decision_id=decision_id,
+                    path=child_path,
+                )
+            return
+        if isinstance(value, list):
+            for index, child in enumerate(value):
+                inspect(
+                    child,
+                    seat=seat,
+                    decision_id=decision_id,
+                    path=(*path, str(index)),
+                )
+            return
+        if (
+            isinstance(value, str)
+            and path
+            and path[-1] == "id"
+            and any(
+                private_key in path
+                for private_key in ("hand", "search_cards", "candidates")
+            )
+            and value
+            and not value.startswith(seat)
+        ):
+            findings.append(
+                {
+                    "decision_id": decision_id,
+                    "seat": seat,
+                    "path": ".".join(path),
+                    "reason": f"private candidate belongs to another seat: {value}",
+                }
+            )
+
+    audited = 0
+    for row in decisions:
+        if row.get("role") != "pilot":
+            continue
+        seat = str(row.get("seat") or "")
+        context = row.get("decision_context")
+        if not seat or not isinstance(context, Mapping):
+            continue
+        audited += 1
+        inspect(
+            context,
+            seat=seat,
+            decision_id=str(row.get("decision_id") or ""),
+        )
+    return {
+        "schema_version": 1,
+        "source": "durable_pilot_decision_contexts",
+        "pilot_rows_audited": audited,
+        "seat_projection_verified": not findings,
+        "findings": findings,
+    }
+
+
+def derive_codex_arena_metadata(
+    decisions: Sequence[Mapping[str, Any]],
+    commands: Sequence[Mapping[str, Any]],
+    seats: Sequence[str],
+    *,
+    existing: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    prior = dict(existing or {})
+    threads: list[dict[str, Any]] = []
+    for seat in seats:
+        rows = [
+            row
+            for row in decisions
+            if row.get("principal") == f"pilot:{seat}"
+            and row.get("provider_invoked") is True
+        ]
+        handles = {
+            str(row.get("thread_handle") or row.get("thread_id"))
+            for row in rows
+            if row.get("thread_handle") or row.get("thread_id")
+        }
+        labels = {
+            str(row.get("thread_label"))
+            for row in rows
+            if row.get("thread_label")
+        }
+        providers = {
+            str(row.get("provider"))
+            for row in rows
+            if row.get("provider")
+        }
+        models = {
+            str(row.get("model"))
+            for row in rows
+            if row.get("model")
+        }
+        configured_models = {
+            str(row.get("model_configured"))
+            for row in rows
+            if row.get("model_configured")
+        }
+        reasoning_reported = {
+            str(row.get("reasoning_effort"))
+            for row in rows
+            if row.get("reasoning_effort")
+        }
+        reasoning_configured = {
+            str(row.get("reasoning_effort_configured"))
+            for row in rows
+            if row.get("reasoning_effort_configured")
+        }
+        decision_ids = {
+            str(row.get("decision_id"))
+            for row in rows
+            if row.get("decision_id")
+        }
+        retry_calls = 0
+        per_decision: Counter[str] = Counter()
+        for row in rows:
+            key = str(row.get("decision_id") or "")
+            if per_decision[key] or int(row.get("retry_count") or 0) > 0:
+                retry_calls += 1
+            per_decision[key] += 1
+        timestamps = sorted(
+            str(row.get("invoked_at"))
+            for row in rows
+            if row.get("invoked_at")
+        )
+        prior_thread = next(
+            (
+                item
+                for item in prior.get("threads", [])
+                if str(item.get("seat")) == seat
+            ),
+            {},
+        )
+        reused = len(decision_ids) > 1 or (
+            not decision_ids and len(rows) > 1
+        )
+        threads.append(
+            {
+                "seat": seat,
+                "thread_label": (
+                    next(iter(labels))
+                    if len(labels) == 1
+                    else prior_thread.get("thread_label")
+                    or f"mtg-pilot-{seat.lower()}"
+                ),
+                "thread_handle": (
+                    next(iter(handles)) if len(handles) == 1 else None
+                ),
+                "provider": (
+                    next(iter(providers))
+                    if len(providers) == 1
+                    else "unavailable"
+                ),
+                "provider_recorded": bool(rows and len(providers) == 1),
+                "model_configured": (
+                    next(iter(configured_models))
+                    if len(configured_models) == 1
+                    else None
+                ),
+                "model_reported": (
+                    next(iter(models)) if len(models) == 1 else None
+                ),
+                "reasoning_effort_configured": (
+                    next(iter(reasoning_configured))
+                    if len(reasoning_configured) == 1
+                    else None
+                ),
+                "reasoning_effort_reported": (
+                    next(iter(reasoning_reported))
+                    if len(reasoning_reported) == 1
+                    else None
+                ),
+                "first_provider_call_at": (
+                    timestamps[0] if timestamps else None
+                ),
+                "last_provider_call_at": (
+                    timestamps[-1] if timestamps else None
+                ),
+                "total_calls": len(rows),
+                "accepted_calls": sum(
+                    bool(row.get("accepted")) for row in rows
+                ),
+                "rejected_calls": sum(
+                    row.get("accepted") is False for row in rows
+                ),
+                "retry_calls": retry_calls,
+                "decisions_served": len(decision_ids),
+                "reused": reused,
+                "interruption_events": int(
+                    prior_thread.get("interruption_events", 0)
+                ),
+                "restart_events": int(
+                    prior_thread.get("restart_events", 0)
+                ),
+                "provider_identity_verified": bool(rows)
+                and all(
+                    bool(row.get("provider_identity_verified"))
+                    for row in rows
+                ),
+                "model_identity_verified": bool(rows)
+                and all(
+                    bool(row.get("model_identity_verified"))
+                    for row in rows
+                ),
+            }
+        )
+    active = [row for row in threads if row["total_calls"] > 0]
+    all_independent = (
+        len(active) == len(seats)
+        and len(
+            {
+                row["thread_handle"]
+                for row in active
+                if row["thread_handle"]
+            }
+        )
+        == len(seats)
+    )
+    codex_recorded = bool(active) and len(active) == len(seats) and all(
+        row["provider"] == "codex_subagent" for row in active
+    )
+    persistent_reuse = bool(active) and all(
+        row["reused"] for row in active
+    )
+    telemetry = provider_telemetry(decisions, commands)
+    telemetry["persistent_threads_reused"] = persistent_reuse
+    return {
+        "parent_session_id": prior.get("parent_session_id"),
+        "pilot_thread_count": len(active),
+        "unique_pilot_threads": telemetry["unique_pilot_threads"],
+        "persistent_thread_reuse": persistent_reuse,
+        "persistent_threads_reused": persistent_reuse,
+        "primary_made_strategic_decision": bool(
+            prior.get(
+                "primary_made_strategic_decision",
+                prior.get("parent_made_strategic_decision", False),
+            )
+        ),
+        "parent_made_strategic_decision": bool(
+            prior.get(
+                "parent_made_strategic_decision",
+                prior.get("primary_made_strategic_decision", False),
+            )
+        ),
+        "provider_recorded": bool(active)
+        and all(row["provider_recorded"] for row in active),
+        "provider_identity_verified": bool(active)
+        and all(row["provider_identity_verified"] for row in active),
+        "model_configured": sorted(
+            {
+                row["model_configured"]
+                for row in active
+                if row["model_configured"]
+            }
+        ),
+        "model_reported": sorted(
+            {
+                row["model_reported"]
+                for row in active
+                if row["model_reported"]
+            }
+        ),
+        "model_identity_verified": bool(active)
+        and all(row["model_identity_verified"] for row in active),
+        "reasoning_effort_configured": sorted(
+            {
+                row["reasoning_effort_configured"]
+                for row in active
+                if row["reasoning_effort_configured"]
+            }
+        ),
+        "reasoning_effort_reported": sorted(
+            {
+                row["reasoning_effort_reported"]
+                for row in active
+                if row["reasoning_effort_reported"]
+            }
+        ),
+        "seat_projection_verified": bool(
+            prior.get("seat_projection_verified", True)
+        ),
+        "all_active_seats_independently_piloted": all_independent,
+        "codex_subagent_run_recorded": codex_recorded,
+        "codex_subagent_run": codex_recorded,
+        "threads": threads,
+        "nested_pilot_subagents": bool(
+            prior.get("nested_pilot_subagents", False)
+        ),
+        "telemetry": telemetry,
+        "stop_reason": prior.get("stop_reason"),
+    }
+
+
+def pause_reason_for_state(state: GameState) -> dict[str, Any] | None:
+    decision = state.pending_decision
+    if decision is None:
+        return None
+    actor = decision.actors[0] if decision.actors else None
+    context = decision.payload_by_actor.get(actor, {}) if actor else {}
+    label = context.get("label")
+    if not label and state.stack:
+        label = state.stack[-1].label
+    return {
+        "kind": (
+            "arbiter_required"
+            if decision.role == "arbiter"
+            else "pilot_required"
+        ),
+        "decision_id": decision.decision_id,
+        "decision_kind": decision.kind,
+        "principal": (
+            decision.role
+            if decision.role != "pilot"
+            else f"pilot:{actor}"
+        ),
+        "label": label,
+    }
+
+
 def write_initial_checkpoint(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
@@ -247,8 +673,18 @@ def build_manifest(
     deck_provenance: Mapping[str, Mapping[str, Any]] | None = None,
     profile_validation: Mapping[str, Mapping[str, Any]] | None = None,
     codex_arena: Mapping[str, Any] | None = None,
+    provider_metrics: Mapping[str, Any] | None = None,
+    status: str | None = None,
+    pause_reason: Mapping[str, Any] | None = None,
     migrated_from: str | None = None,
 ) -> dict[str, Any]:
+    effective_status = (
+        "complete"
+        if state.game_over
+        else str(status or "in_progress")
+    )
+    if effective_status not in RUN_STATES:
+        raise ValueError(f"Unknown record status {effective_status!r}")
     list_fingerprints = deck_list_fingerprints(state)
     provenance = dict(deck_provenance or {})
     validations = dict(profile_validation or {})
@@ -309,8 +745,22 @@ def build_manifest(
         "created_at": created_at,
         "started_at": created_at,
         "updated_at": updated_at,
-        "ended_at": updated_at if state.game_over else None,
-        "status": "complete" if state.game_over else "in_progress",
+        "ended_at": (
+            updated_at
+            if effective_status in {"complete", "aborted"}
+            else None
+        ),
+        "status": effective_status,
+        **(
+            {"pause_reason": copy.deepcopy(dict(pause_reason))}
+            if effective_status == "paused" and pause_reason
+            else {}
+        ),
+        **(
+            {"abort_reason": copy.deepcopy(dict(pause_reason))}
+            if effective_status == "aborted" and pause_reason
+            else {}
+        ),
         "winner": state.winner,
         "draw": state.draw,
         "final_state_hash": authoritative_state_hash(state),
@@ -327,6 +777,11 @@ def build_manifest(
         **(
             {"codex_arena": copy.deepcopy(dict(codex_arena))}
             if codex_arena
+            else {}
+        ),
+        **(
+            {"provider_telemetry": copy.deepcopy(dict(provider_metrics))}
+            if provider_metrics is not None
             else {}
         ),
         **({"migrated_from": migrated_from} if migrated_from else {}),
@@ -347,6 +802,8 @@ def write_record(
     deck_provenance: Mapping[str, Mapping[str, Any]] | None = None,
     profile_validation: Mapping[str, Mapping[str, Any]] | None = None,
     codex_arena: Mapping[str, Any] | None = None,
+    status: str | None = None,
+    pause_reason: Mapping[str, Any] | None = None,
     migrated_from: str | None = None,
 ) -> dict[str, Any]:
     directory = Path(directory)
@@ -361,6 +818,18 @@ def write_record(
                 f"Record directory belongs to game {prior_game_id}, not {state.game_id}"
             )
     updated_at = utc_now()
+    derived_arena = derive_codex_arena_metadata(
+        decisions,
+        commands,
+        state.turn_order,
+        existing=codex_arena,
+    )
+    if status == "paused" and pause_reason is not None:
+        derived_arena["stop_reason"] = copy.deepcopy(pause_reason)
+    metrics = provider_telemetry(decisions, commands)
+    metrics["persistent_threads_reused"] = derived_arena[
+        "persistent_threads_reused"
+    ]
     manifest = build_manifest(
         state=state,
         card_db=card_db,
@@ -370,7 +839,10 @@ def write_record(
         replay_mode=replay_mode,
         deck_provenance=deck_provenance,
         profile_validation=profile_validation,
-        codex_arena=codex_arena,
+        codex_arena=derived_arena,
+        provider_metrics=metrics,
+        status=status,
+        pause_reason=pause_reason,
         migrated_from=migrated_from,
     )
     if prior_manifest:
@@ -385,7 +857,6 @@ def write_record(
             and prior_replay.get("semantics_fingerprint") == manifest["semantics_fingerprint"]
         ):
             manifest["replay"]["verification"] = prior_replay.get("verification", "not_run")
-    _atomic_json(directory / "manifest.json", manifest)
     _atomic_json(directory / "checkpoint.json", checkpoint_envelope(state))
     _atomic_jsonl(directory / "commands.jsonl", commands)
     _atomic_jsonl(
@@ -401,9 +872,46 @@ def write_record(
         directory / "opportunities.jsonl",
         state.action_opportunities,
     )
+    optimization_keys = (
+        "priority_windows_considered",
+        "pass_only_windows_skipped",
+        "yield_covered_windows",
+        "suppressed_empty_windows",
+        "suppressed_meaningful_windows",
+        "yields_invalidated_by_phase",
+        "yields_invalidated_by_draw",
+        "yields_invalidated_by_action_change",
+        "yields_invalidated_by_stack",
+        "yields_invalidated_by_public_change",
+    )
+    optimization = {
+        key: sum(
+            int(
+                player.stats.get("decision_optimization", {}).get(key, 0)
+            )
+            for player in state.players.values()
+        )
+        for key in optimization_keys
+    }
+    _atomic_json(
+        directory / "call-benchmark.json",
+        {
+            "schema_version": 1,
+            "source": "durable_decision_and_command_journals",
+            "provider_telemetry": metrics,
+            "decision_optimization": optimization,
+        },
+    )
+    _atomic_json(
+        directory / "hidden-information-audit.json",
+        hidden_information_audit(decisions),
+    )
     initial_path = directory / "initial-checkpoint.json.gz"
     if not initial_path.exists():
         write_initial_checkpoint(initial_path, initial_checkpoint)
+    # The manifest is the commit marker for this atomically replaced component
+    # set, so write it after every journal and checkpoint.
+    _atomic_json(directory / "manifest.json", manifest)
     return manifest
 
 
@@ -503,6 +1011,261 @@ def replay_record(
         "commands": applied,
         "final_state_hash": actual,
         "expected_state_hash": expected,
+    }
+
+
+def _rebase_command_semantics(
+    directory: Path,
+    registry: SemanticRegistry,
+) -> None:
+    fingerprint = semantics_fingerprint(registry)
+    rows = _read_jsonl(directory / "commands.jsonl")
+    for row in rows:
+        row["semantics_fingerprint"] = fingerprint
+        semantics = dict(row.get("semantics") or {})
+        semantics["registry_hash"] = fingerprint
+        row["semantics"] = semantics
+    _atomic_jsonl(directory / "commands.jsonl", rows)
+
+
+def refresh_record(
+    directory: str | Path,
+    card_db: CardDatabase,
+    *,
+    status: str | None = None,
+    verify_replay: bool = False,
+) -> dict[str, Any]:
+    """Rebuild every derived field from durable journals and checkpoint state."""
+
+    from .report import write_review_artifacts
+    from .session import CommanderSession
+
+    directory = Path(directory)
+    session = CommanderSession.load(
+        card_db,
+        directory,
+        semantics_path=directory / "semantics.json",
+    )
+    if status is not None:
+        if status not in RUN_STATES:
+            raise ValueError(f"Unknown record status {status!r}")
+        session.record_status = status
+    if session.state.game_over:
+        session.record_status = "complete"
+        session.pause_reason = None
+    elif (
+        session.record_status == "paused"
+        or status == "paused"
+        or (status is None and session.state.pending_decision is not None)
+    ):
+        session.pause(
+            session.pause_reason
+            or pause_reason_for_state(session.state)
+        )
+    session.save(directory)
+    replay_result: dict[str, Any] | None = None
+    if verify_replay:
+        # A semantic-pack refresh may change the registry hash while leaving an
+        # accepted command prefix behavior-identical. Rebase only after a full
+        # unchecked prefix run reproduces the recorded checkpoint hash.
+        replay_result = replay_record(
+            directory,
+            card_db,
+            semantics_path=directory / "semantics.json",
+            verify=False,
+        )
+        if (
+            not replay_result["ok"]
+            and session.state.pending_decision is not None
+            and session.state.pending_decision.role == "arbiter"
+            and session.state.stack
+        ):
+            # Preserve the exact unresolved boundary of a paused older record.
+            # A newly shipped built-in pack must not retroactively turn the
+            # recorded arbiter checkpoint into a different private choice.
+            semantic_key = session.state.stack[-1].semantic_key
+            program = session.engine.semantics.get(semantic_key)
+            if (
+                program is not None
+                and program.provenance.get("authored_by")
+                == "generic-search-v1"
+            ):
+                session.engine.semantics.remove(str(semantic_key))
+                session.save(directory)
+                replay_result = replay_record(
+                    directory,
+                    card_db,
+                    semantics_path=directory / "semantics.json",
+                    verify=False,
+                )
+        if replay_result["ok"]:
+            _rebase_command_semantics(directory, session.engine.semantics)
+            replay_result = replay_record(
+                directory,
+                card_db,
+                semantics_path=directory / "semantics.json",
+                verify=True,
+            )
+        manifest_path = directory / "manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["replay"]["verification"] = (
+            "pass" if replay_result["ok"] else "fail"
+        )
+        manifest["replay"]["scope"] = (
+            "accepted_command_prefix"
+            if not session.state.game_over
+            else "complete_game"
+        )
+        _atomic_json(manifest_path, manifest)
+        write_review_artifacts(
+            directory,
+            session.engine,
+            decisions=session.decisions,
+            manifest=manifest,
+        )
+    manifest = json.loads(
+        (directory / "manifest.json").read_text(encoding="utf-8")
+    )
+    return {
+        "record": str(directory),
+        "status": manifest.get("status"),
+        "pause_reason": manifest.get("pause_reason"),
+        "provider_telemetry": manifest.get("provider_telemetry"),
+        "codex_arena": manifest.get("codex_arena"),
+        "replay": manifest.get("replay"),
+        "replay_result": replay_result,
+    }
+
+
+def finalize_record(
+    directory: str | Path,
+    card_db: CardDatabase,
+) -> dict[str, Any]:
+    directory = Path(directory)
+    checkpoint = json.loads(
+        (directory / "checkpoint.json").read_text(encoding="utf-8")
+    )
+    state = GameState.from_dict(checkpoint["state"])
+    status = "complete" if state.game_over else "paused"
+    return refresh_record(
+        directory,
+        card_db,
+        status=status,
+        verify_replay=True,
+    )
+
+
+def verify_record_integrity(
+    directory: str | Path,
+    card_db: CardDatabase,
+    *,
+    replay: bool = True,
+) -> dict[str, Any]:
+    directory = Path(directory)
+    manifest = json.loads(
+        (directory / "manifest.json").read_text(encoding="utf-8")
+    )
+    checkpoint = json.loads(
+        (directory / "checkpoint.json").read_text(encoding="utf-8")
+    )
+    decisions = _read_jsonl(directory / "decisions.jsonl")
+    commands = _read_jsonl(directory / "commands.jsonl")
+    state = GameState.from_dict(checkpoint["state"])
+    errors: list[str] = []
+    checkpoint_hash = authoritative_state_hash(state)
+    if checkpoint.get("state_hash") != checkpoint_hash:
+        errors.append("checkpoint state_hash does not match checkpoint state")
+    if manifest.get("final_state_hash") != checkpoint_hash:
+        errors.append("manifest final_state_hash does not match checkpoint")
+    expected_metrics = provider_telemetry(decisions, commands)
+    expected_arena = derive_codex_arena_metadata(
+        decisions,
+        commands,
+        state.turn_order,
+        existing=manifest.get("codex_arena"),
+    )
+    expected_metrics["persistent_threads_reused"] = expected_arena[
+        "persistent_threads_reused"
+    ]
+    if manifest.get("provider_telemetry") != expected_metrics:
+        errors.append(
+            "manifest provider_telemetry disagrees with durable journals"
+        )
+    actual_arena = dict(manifest.get("codex_arena") or {})
+    for key in (
+        "codex_subagent_run_recorded",
+        "provider_identity_verified",
+        "model_identity_verified",
+        "unique_pilot_threads",
+        "persistent_thread_reuse",
+        "persistent_threads_reused",
+        "all_active_seats_independently_piloted",
+        "threads",
+    ):
+        if actual_arena.get(key) != expected_arena.get(key):
+            errors.append(
+                f"manifest codex_arena.{key} disagrees with durable journals"
+            )
+    if (
+        actual_arena.get("persistent_thread_reuse") is True
+        and any(
+            row.get("reused") is False
+            for row in actual_arena.get("threads", [])
+            if int(row.get("total_calls", 0)) > 0
+        )
+    ):
+        errors.append(
+            "global persistent reuse contradicts a per-thread reused=false"
+        )
+    replay_result: dict[str, Any] | None = None
+    if replay:
+        try:
+            replay_result = replay_record(
+                directory,
+                card_db,
+                semantics_path=directory / "semantics.json",
+                verify=True,
+            )
+            if not replay_result["ok"]:
+                errors.append("accepted command prefix replay failed")
+        except Exception as exc:
+            errors.append(f"accepted command prefix replay failed: {exc}")
+    if manifest.get("status") == "paused":
+        expected_pause = pause_reason_for_state(state)
+        actual_pause = manifest.get("pause_reason")
+        inferred_kinds = {"pilot_required", "arbiter_required"}
+        if (
+            isinstance(actual_pause, Mapping)
+            and actual_pause.get("kind") not in inferred_kinds
+        ):
+            if not actual_pause.get("kind") or not actual_pause.get("label"):
+                errors.append(
+                    "explicit paused manifest reason is incomplete"
+                )
+            if (
+                actual_pause.get("decision_id")
+                and state.pending_decision
+                and actual_pause.get("decision_id")
+                != state.pending_decision.decision_id
+            ):
+                errors.append(
+                    "explicit paused manifest decision_id disagrees with checkpoint"
+                )
+            if actual_arena.get("stop_reason") != actual_pause:
+                errors.append(
+                    "codex_arena stop_reason disagrees with explicit pause_reason"
+                )
+        elif actual_pause != expected_pause:
+            errors.append(
+                "paused manifest pause_reason disagrees with checkpoint"
+            )
+    return {
+        "ok": not errors,
+        "record": str(directory),
+        "status": manifest.get("status"),
+        "errors": errors,
+        "replay": replay_result,
+        "expected_provider_telemetry": expected_metrics,
     }
 
 

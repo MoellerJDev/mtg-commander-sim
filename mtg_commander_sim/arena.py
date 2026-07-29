@@ -3,14 +3,16 @@ from __future__ import annotations
 import copy
 import json
 import os
+import socket
 import sys
+import time
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterator, Mapping, TextIO
 
 from .carddb import CardDatabase
-from .pilot import PilotResponse
+from .pilot import PLAN_CATEGORIES, PilotResponse
 from .record import utc_now
 from .report import derive_review
 from .session import CommanderSession
@@ -93,17 +95,22 @@ class PilotInvocationIdentity:
     thread_label: str | None = None
     parent_session_id: str | None = None
     provider_invoked: bool = False
+    provider_identity_verified: bool = False
+    model_identity_verified: bool = False
+    model_configured: str | None = None
+    reasoning_effort_configured: str | None = None
 
     def audit_fields(self) -> dict[str, Any]:
         return {
             **asdict(self),
-            "invocation_id": self.thread_id,
+            "thread_handle": self.thread_id,
+            "invocation_id": None,
         }
 
 
 @contextmanager
 def _record_lock(directory: Path) -> Iterator[None]:
-    """Serialize the four seat façades around one authoritative record."""
+    """Serialize seat façades and replace stale legacy locks with a PID lease."""
 
     path = directory / ".arena.lock"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -117,8 +124,30 @@ def _record_lock(directory: Path) -> Iterator[None]:
 
             msvcrt.locking(handle.fileno(), msvcrt.LK_LOCK, 1)
             try:
+                handle.seek(0)
+                raw = handle.read().decode("utf-8", errors="replace").strip()
+                recovered = bool(raw and not raw.startswith("{"))
+                lease = {
+                    "schema_version": 1,
+                    "active": True,
+                    "pid": os.getpid(),
+                    "host": socket.gethostname(),
+                    "acquired_at": utc_now(),
+                    "expires_unix": time.time() + 120,
+                    "recovered_from_stale": recovered,
+                }
+                handle.seek(0)
+                handle.truncate()
+                handle.write(stable_json(lease).encode("utf-8"))
+                handle.flush()
                 yield
             finally:
+                lease["active"] = False
+                lease["released_at"] = utc_now()
+                handle.seek(0)
+                handle.truncate()
+                handle.write(stable_json(lease).encode("utf-8"))
+                handle.flush()
                 handle.seek(0)
                 msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
         else:
@@ -126,8 +155,30 @@ def _record_lock(directory: Path) -> Iterator[None]:
 
             fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
             try:
+                handle.seek(0)
+                raw = handle.read().decode("utf-8", errors="replace").strip()
+                recovered = bool(raw and not raw.startswith("{"))
+                lease = {
+                    "schema_version": 1,
+                    "active": True,
+                    "pid": os.getpid(),
+                    "host": socket.gethostname(),
+                    "acquired_at": utc_now(),
+                    "expires_unix": time.time() + 120,
+                    "recovered_from_stale": recovered,
+                }
+                handle.seek(0)
+                handle.truncate()
+                handle.write(stable_json(lease).encode("utf-8"))
+                handle.flush()
                 yield
             finally:
+                lease["active"] = False
+                lease["released_at"] = utc_now()
+                handle.seek(0)
+                handle.truncate()
+                handle.write(stable_json(lease).encode("utf-8"))
+                handle.flush()
                 fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
@@ -250,32 +301,38 @@ class SeatScopedPilotTools:
                 "error": f"{self._seat} has no current task",
                 "retry": None,
             }
-        forbidden = sorted(set(_forbidden_response_paths(response)))
+        normalized = copy.deepcopy(dict(response))
+        if "yield_mode" in normalized and "yield" not in normalized:
+            normalized["yield"] = normalized.pop("yield_mode")
+        decision = self._session.state.pending_decision
+        if decision and decision.kind != "priority":
+            normalized.pop("yield", None)
+        forbidden = sorted(set(_forbidden_response_paths(normalized)))
         if forbidden:
             return self._reject_pilot_response(
-                response,
+                normalized,
                 "Pilot response contains transport/authority fields: "
                 + ", ".join(forbidden),
             )
         if self._identity and self._identity.provider == "codex_subagent":
             missing: list[str] = []
-            if not response.get("plan"):
+            if not normalized.get("plan"):
                 missing.append("plan")
-            if not str(response.get("reason") or "").strip():
+            if not str(normalized.get("reason") or "").strip():
                 missing.append("reason")
-            if response.get("confidence") is None:
+            if normalized.get("confidence") is None:
                 missing.append("confidence")
             if missing:
                 return self._reject_pilot_response(
-                    response,
+                    normalized,
                     "Codex pilot response is missing required audit fields: "
                     + ", ".join(missing),
                 )
         try:
-            payload = PilotResponse.from_mapping(response).engine_response()
+            payload = PilotResponse.from_mapping(normalized).engine_response()
         except (TypeError, ValueError) as exc:
             return self._reject_pilot_response(
-                response, f"Invalid pilot response: {exc}"
+                normalized, f"Invalid pilot response: {exc}"
             )
         decision_id = self._session.state.pending_decision.decision_id
         payload["retry_count"] = sum(
@@ -303,6 +360,14 @@ class SeatScopedPilotTools:
     ) -> dict[str, Any]:
         decision = self._session.state.pending_decision
         identity = self._identity
+        capability = self._session.engine.permissions.capability_for(
+            self._principal
+        )
+        actor_context = copy.deepcopy(
+            decision.payload_by_actor.get(self._seat, {})
+            if decision
+            else {}
+        )
         self._session.decisions.append(
             {
                 "sequence": len(self._session.decisions) + 1,
@@ -338,6 +403,27 @@ class SeatScopedPilotTools:
                 "provider_invoked": (
                     bool(identity.provider_invoked) if identity else False
                 ),
+                "provider_identity_verified": (
+                    bool(identity.provider_identity_verified)
+                    if identity
+                    else False
+                ),
+                "model_identity_verified": (
+                    bool(identity.model_identity_verified)
+                    if identity
+                    else False
+                ),
+                "model_configured": (
+                    identity.model_configured if identity else None
+                ),
+                "reasoning_effort_configured": (
+                    identity.reasoning_effort_configured
+                    if identity
+                    else None
+                ),
+                "thread_handle": (
+                    identity.thread_id if identity else None
+                ),
                 "invoked_at": utc_now(),
                 "retry_count": sum(
                     1
@@ -350,6 +436,14 @@ class SeatScopedPilotTools:
                 "phase": self._session.state.phase,
                 "step": self._session.state.step,
                 "turn": self._session.state.turn_sequence,
+                "legal_alternatives": (
+                    self._session._legal_alternatives(
+                        capability, actor_context
+                    )
+                    if capability is not None
+                    else []
+                ),
+                "decision_context": actor_context,
             }
         )
         return {
@@ -700,11 +794,84 @@ def _tool_specs() -> list[dict[str, Any]]:
         },
         {
             "name": "submit_action",
-            "description": "Submit strict JSON for this fixed seat's current task.",
+            "description": (
+                "Submit a typed action for this fixed seat. Plan casing and "
+                "reason/memory bounds are enforced before game mutation."
+            ),
             "inputSchema": {
                 "type": "object",
-                "required": ["response"],
-                "properties": {"response": {"type": "object"}},
+                "required": ["plan", "reason"],
+                "properties": {
+                    "action_id": {"type": "string", "minLength": 1},
+                    "actions": {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 8,
+                        "items": {
+                            "type": "object",
+                            "required": ["action_id"],
+                            "properties": {
+                                "action_id": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                },
+                                "choices": {"type": "object"},
+                                "future_choices": {
+                                    "type": "object",
+                                    "properties": {
+                                        "search_card_name": {
+                                            "type": "string"
+                                        },
+                                        "entry_pay_life": {
+                                            "type": "boolean"
+                                        },
+                                    },
+                                    "additionalProperties": False,
+                                },
+                            },
+                            "additionalProperties": False,
+                        },
+                    },
+                    "choices": {"type": "object"},
+                    "plan": {
+                        "type": "string",
+                        "enum": list(PLAN_CATEGORIES),
+                    },
+                    "reason": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 180,
+                    },
+                    "confidence": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                    },
+                    "yield_mode": {
+                        "type": ["string", "null"],
+                        "enum": [
+                            None,
+                            "none",
+                            "until_public_change",
+                            "until_my_turn",
+                            "auto_if_no_response",
+                        ],
+                    },
+                    "memory_update": {
+                        "type": "string",
+                        "maxLength": 500,
+                    },
+                },
+                "oneOf": [
+                    {
+                        "required": ["action_id"],
+                        "not": {"required": ["actions"]},
+                    },
+                    {
+                        "required": ["actions"],
+                        "not": {"required": ["action_id"]},
+                    },
+                ],
                 "additionalProperties": False,
             },
         },
@@ -770,7 +937,7 @@ def run_pilot_mcp_stdio(
                     "capabilities": {"tools": {}},
                     "serverInfo": {
                         "name": f"mtg-pilot-{tools.seat}",
-                        "version": "0.5.0",
+                        "version": "0.6.0",
                     },
                 }
             elif method == "notifications/initialized":
@@ -785,7 +952,7 @@ def run_pilot_mcp_stdio(
                 if name == "get_task":
                     value = tools.get_task()
                 elif name == "submit_action":
-                    value = tools.submit_action(arguments["response"])
+                    value = tools.submit_action(arguments)
                 elif name == "get_rules":
                     value = tools.get_rules(list(arguments["refs"]))
                 elif name == "get_profile":

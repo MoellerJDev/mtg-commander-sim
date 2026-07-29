@@ -37,6 +37,12 @@ from .protocol import PROTOCOL_VERSION, ProtocolError, apply_json_patch, json_pa
 from .semantics import SemanticProgram, SemanticRegistry
 from .service import CommandEnvelope, GameService
 from .session import CommanderSession
+from .record import (
+    finalize_record,
+    provider_telemetry,
+    refresh_record,
+    verify_record_integrity,
+)
 from .arena import (
     CodexThreadRegistry,
     CoordinatorTools,
@@ -94,6 +100,10 @@ __all__ = [
     "CoordinatorTools",
     "PilotInvocationIdentity",
     "SeatScopedPilotTools",
+    "provider_telemetry",
+    "refresh_record",
+    "finalize_record",
+    "verify_record_integrity",
 ]
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"

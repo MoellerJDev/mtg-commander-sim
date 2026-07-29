@@ -1,8 +1,8 @@
 # Roadmap
 
-Version 0.5.0 adds the fixed-seat Codex arena, persistent thread identity,
-meaningful-action/yield auditing, exact profile validation, payable-action
-filtering, and native command-replay fixtures. The phases below describe
+Version 0.6.0 adds resumable private-search semantics, typed Codex output,
+ordered future choices, explicit record lifecycle/finalization, and
+journal-derived provider telemetry on top of the fixed-seat arena. The phases below describe
 remaining production depth; neither the scripted regression nor duplicated
 four-seat pilot fixture claims a complete Oracle corpus or matchup evidence.
 

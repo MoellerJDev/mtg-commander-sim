@@ -1,4 +1,4 @@
-# MTG Commander Sim 0.5.0
+# MTG Commander Sim 0.6.0
 
 A persistent, four-player-first Commander simulation kernel designed for LLM pilots, rules arbitration, matchup testing, and a future graphical/network client.
 
@@ -19,7 +19,7 @@ The complete bundle can run directly from its source tree. To install the prebui
 ```bash
 python -m venv .venv
 . .venv/bin/activate        # Windows PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install --no-index dist/mtg_commander_sim-0.5.0-py3-none-any.whl
+python -m pip install --no-index dist/mtg_commander_sim-0.6.0-py3-none-any.whl
 ```
 
 For editable development, use `python -m pip install -e . --no-build-isolation` in an environment that already has setuptools 68 or newer. Running `python simctl.py`, `make test`, and `make demo` from the repository does not require installation.
@@ -77,6 +77,8 @@ advertised `.jsonl.gz` files. Network access remains outside the game engine.
 - seat-private projections
 - opaque single-use decision capabilities
 - reusable semantic programs for card/ability resolutions
+- resumable semantic frames for private library searches and later player
+  choices, with deterministic continuation after the choice
 - local Oracle text and Scryfall rulings; no card API calls during play
 - plain-text and defensive Moxfield deck loading
 - protocol v2.1 bootstrap plus hash-checked JSON patches
@@ -94,11 +96,14 @@ advertised `.jsonl.gz` files. Network access remains outside the game engine.
   commander/archetype fallback warnings
 - a fixed-seat MCP/CLI pilot surface that never exposes raw capabilities,
   checkpoints, analyst data, or another seat's hidden objects
+- typed Codex pilot submissions with exact plan enums and bounded
+  reason/memory fields
 - project-scoped GPT-5.6 Sol pilot-agent configuration and a
   `commander-arena` Codex skill
 - schema-validated semantic packs with trust and source provenance
 - trust-aware semantic preflight for files and live Moxfield URLs
-- compact cast, land, activation, target, and resolution-time search templates
+- compact cast, land, activation, target, and generic resolution-time search
+  templates
 - native-v3 pilot runs that can stop, save, resume, and command-replay
 - validated aggregate shortcuts for the vertical-slice Soultrader and Gonti's Aether Heart lines
 
@@ -123,14 +128,18 @@ The corrected seed-20260730 duel under
 pass-only skips, 24 safe yield covers, and zero suppressed meaningful windows.
 Its 61 accepted commands replay exactly.
 
-The live four-seat Codex protocol record under
-`run/codex-subagent-four-player-0.5.0` records four distinct persistent
-GPT-5.6 Sol/max thread identities, 14 actual pilot invocations, four ordered
-main-phase plans, 192 audited priority windows, 183 pass-only skips, and zero
-suppressed meaningful windows. It stopped at turn sequence 5 because Three
-Visits requires an uncompiled hidden-library choice. The duplicated lists make
-this a `pilot_test`, never matchup evidence. Provider token counts were not
-exposed and remain `null`.
+Version 0.6.0 refreshes the characterized four-seat record at
+`run/codex-subagent-four-player-0.5.0-final` without inventing provider
+provenance. Its accepted-command prefix replays exactly and its Entomb boundary
+remains an explicit paused arbiter task. The fresh duplicated-list arena under
+`run/codex-subagent-four-player-0.6.0-final` used four verified persistent
+GPT-5.6 Sol/max handles, 23 provider attempts (22 accepted, one typed-plan
+retry), three ordered plans/automatic actions, and 26 accepted replay
+commands. It paused during turn sequence 5 after exposing a targeted
+counterspell with no legal target; the review correctly classifies that as a
+legal-action exposure failure and `rules_test`. Its accepted prefix replays
+exactly, hidden-information audit passes, and suppressed meaningful windows
+remain zero. This is protocol/rules evidence only, never matchup evidence.
 
 ## Deliberate rules boundary
 
@@ -309,7 +318,7 @@ the review fidelity gate.
 
 See `PILOT_PROVIDERS.md` for provider contracts and isolation guarantees, and
 `SEMANTIC_PACKS.md` for pack provenance, trust, preflight, and the deliberately
-bounded 0.5.0 card coverage. See `CODEX_ARENA.md` for the persistent four-pilot
+bounded 0.6.0 card coverage. See `CODEX_ARENA.md` for the persistent four-pilot
 workflow.
 
 Create the default four-seat Codex arena:
@@ -336,6 +345,20 @@ The primary reads only public routing/fidelity data and scoped arbiter tasks:
 ```bash
 python simctl.py coordinator-tool --game run/codex-arena status
 python simctl.py coordinator-tool --game run/codex-arena get-arbiter-task
+```
+
+Pause, resume, inspect, or finalize without confusing an accepted-command
+prefix with a completed game:
+
+```bash
+python simctl.py arena status run/codex-arena --db data/scryfall-current.sqlite3
+python simctl.py arena pause run/codex-arena --db data/scryfall-current.sqlite3 \
+  --kind fidelity_failure --reason "target exactness requires code work"
+python simctl.py arena resume run/codex-arena --db data/scryfall-current.sqlite3
+python simctl.py arena abort run/codex-arena --db data/scryfall-current.sqlite3 \
+  --reason "operator requested"
+python simctl.py arena finalize run/codex-arena --db data/scryfall-current.sqlite3
+python simctl.py verify-record run/codex-arena --db data/scryfall-current.sqlite3
 ```
 
 Read the next scoped task:

@@ -17,6 +17,12 @@
 - The primary Codex task may arbitrate public rules context but must never choose a strategic seat action or silently repair a legal poor choice.
 - Never label provider/model/thread identity as observed unless it came from an actual invocation. Preserve `null` when the platform does not expose a value.
 - Never promote a duplicated-deck fixture or a run with incomplete material semantics to matchup evidence.
+- Semantic choices that suspend resolution must persist a versioned,
+  replayable frame. Private search candidates go only to the searching seat;
+  public records must not reveal a nonrevealed result moved to hand.
+- Record summaries and provider counters are derived from journals. Never
+  upgrade recorded provider/model identity to verified by inference, and never
+  describe accepted-prefix replay as a completed game.
 
 ## Before committing
 
@@ -25,6 +31,7 @@ python -m compileall -q mtg_commander_sim tests scripts simctl.py
 python -m unittest discover -s tests -p 'test_*.py' -v
 python scripts/demo_four_player_protocol.py --out demo
 python simctl.py replay --db data/scryfall-20260728-compact.sqlite3 --verify run/native-zimone-vs-mishra-0.5.0
+python simctl.py verify-record --db data/scryfall-current.sqlite3 run/codex-subagent-four-player-0.6.0-final
 ```
 
 Set `MTG_CARD_DB` when the database is outside `data/`.

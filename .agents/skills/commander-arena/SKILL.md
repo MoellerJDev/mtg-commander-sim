@@ -40,7 +40,8 @@ Loop sequentially even though all four pilot threads remain active:
 2. Stop immediately if `suppressed_meaningful_windows` is nonzero or another
    material fidelity gate requires code work.
 3. For `pilot:A` through `pilot:D`, route the task only to that seat's existing
-   thread. Ask for strict JSON matching the compact pilot response schema.
+   thread. Ask for strict JSON matching the typed action/ordered-plan union,
+   exact plan enum, and bounded reason/memory fields.
 4. Submit the response through that seat's fixed MCP server. On rejection,
    return only the compact error/current task to the same thread and retry.
 5. Apply a legal pilot action even when the primary considers it strategically
@@ -51,7 +52,9 @@ Loop sequentially even though all four pilot threads remain active:
    pilot to answer every priority window.
 8. Allow ordered plans for normal development. Stop a plan on an opposing
    response, material stack/state change, hidden draw, invalid target, changed
-   cost, new player choice, combat, semantic uncertainty, or fidelity failure.
+   cost, an unsupplied new player choice, combat, semantic uncertainty, or
+   fidelity failure. A plan may supply a future private-search card name, but
+   only the fixed-seat server may resolve it after that private choice exists.
 9. Save/checkpoint periodically and after every accepted external action.
 
 Never continue after a suppressed meaningful window. Never grant pilots raw
@@ -78,8 +81,11 @@ Never label a mock, unavailable provider, or manual response as
 
 1. Stop at the requested turn, a win, an unresolved material semantic, or a
    fidelity failure.
-2. Save the final checkpoint and opportunity journal.
-3. Run exact command replay verification.
+2. Mark an unfinished run `paused` with its exact structured stop reason; never
+   imply that stopping coordination ended the game.
+3. Save the final checkpoint and opportunity journal, atomically rebuild
+   derived artifacts, and run exact accepted-command-prefix replay
+   verification (`complete_game` scope only for a terminal game).
 4. Generate the review and hidden-information audit.
 5. Report infrastructure failures separately from deck and pilot findings.
 6. Confirm `suppressed_meaningful_windows == 0` before claiming call reduction.

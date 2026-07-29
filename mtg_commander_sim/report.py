@@ -44,6 +44,12 @@ LEGACY_PLACEHOLDERS = {
 }
 
 
+def _atomic_text(path: Path, text: str) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(text, encoding="utf-8")
+    temporary.replace(path)
+
+
 def _card_by_ref(engine: CommanderEngine) -> dict[str, Any]:
     return {card.ref: card for card in engine.state.cards.values()}
 
@@ -604,6 +610,14 @@ def derive_review(
         else "pass"
     )
     arena = dict((manifest or {}).get("codex_arena") or {})
+    stop_reason = dict(
+        arena.get("stop_reason")
+        or (manifest or {}).get("pause_reason")
+        or {}
+    )
+    legal_exposure_stop = (
+        stop_reason.get("kind") == "legal_action_exposure_failure"
+    )
     manifest_deck_fingerprints = [
         str(
             player.get("deck_list_fingerprint")
@@ -624,15 +638,36 @@ def derive_review(
         fidelity_failures.append("land-entry conflicts")
     if semantics["status"] != "complete":
         fidelity_failures.append("incomplete relevant Oracle semantics")
-    complete_alternatives = bool(decisions) and not legacy_decisions and all(
-        isinstance(row.get("legal_alternatives"), list)
-        and bool(row.get("legal_alternatives"))
-        for row in decisions
+    decision_groups: dict[str, list[Mapping[str, Any]]] = defaultdict(list)
+    for index, row in enumerate(decisions):
+        key = str(row.get("decision_id") or f"attempt:{index}")
+        decision_groups[key].append(row)
+    complete_alternatives = (
+        bool(decision_groups)
+        and not legacy_decisions
+        and all(
+            any(
+                isinstance(row.get("legal_alternatives"), list)
+                and bool(row.get("legal_alternatives"))
+                for row in rows
+            )
+            for rows in decision_groups.values()
+        )
     )
-    complete_reasons = bool(decisions) and not legacy_decisions and all(
-        isinstance(row.get("reason"), str)
-        and row.get("reason", "").strip().casefold() not in LEGACY_PLACEHOLDERS
+    accepted_rows = [
+        row
         for row in decisions
+        if row.get("accepted") and row.get("role") == "pilot"
+    ]
+    complete_reasons = (
+        bool(accepted_rows)
+        and not legacy_decisions
+        and all(
+            isinstance(row.get("reason"), str)
+            and row.get("reason", "").strip().casefold()
+            not in LEGACY_PLACEHOLDERS
+            for row in accepted_rows
+        )
     )
     if not complete_alternatives or not complete_reasons:
         fidelity_failures.append("incomplete pilot decision alternatives/reasons")
@@ -645,6 +680,10 @@ def derive_review(
     if suppressed_meaningful:
         fidelity_failures.append(
             f"{suppressed_meaningful} meaningful decision window(s) were suppressed"
+        )
+    if legal_exposure_stop:
+        fidelity_failures.append(
+            "legal-action exposure failed at the recorded arena stop boundary"
         )
     if profile_match_value is False:
         fidelity_failures.append("pilot profile deck-list fingerprint mismatch")
@@ -667,7 +706,7 @@ def derive_review(
         arena.get("seat_projection_verified") is False,
         arena.get("provider_identity_verified") is False,
     ]
-    if suppressed_meaningful:
+    if suppressed_meaningful or legal_exposure_stop:
         classification = "rules_test"
     elif not state.game_over:
         classification = (
@@ -832,7 +871,7 @@ def derive_review(
         "pilot_trace": "pass" if legal_action_trace_complete else "fail",
         "legal_action_exposure": (
             "fail"
-            if suppressed_meaningful
+            if suppressed_meaningful or legal_exposure_stop
             else "pass"
             if legal_action_trace_complete
             else "unavailable"
@@ -865,9 +904,11 @@ def derive_review(
         ),
         "codex_subagent_run": arena.get("codex_subagent_run", False),
         "ordered_plan_responses": int(
-            arena.get("ordered_plan_responses", 0)
+            (manifest or {})
+            .get("provider_telemetry", {})
+            .get("ordered_plans_submitted", 0)
         ),
-        "arena_stop_reason": arena.get("stop_reason"),
+        "arena_stop_reason": stop_reason or None,
     }
     provider_rows = [
         row for row in decisions if row.get("provider_invoked") is True
@@ -991,7 +1032,13 @@ def derive_review(
         "schema_version": 1,
         "game_id": state.game_id,
         "outcome": {
-            "status": "complete" if state.game_over else "in_progress",
+            "status": str(
+                (manifest or {}).get("status")
+                or ("complete" if state.game_over else "in_progress")
+            ),
+            "pause_reason": copy.deepcopy(
+                (manifest or {}).get("pause_reason")
+            ),
             "winner": state.winner,
             "draw": state.draw,
             "eliminations": [
@@ -1174,6 +1221,9 @@ def derive_review(
         },
         "semantic_coverage": semantics,
         "pilot_audit": {
+            **copy.deepcopy(
+                dict((manifest or {}).get("provider_telemetry") or {})
+            ),
             "decision_records_observed": len(decisions),
             "pilot_invocations_observed": pilot_invocations,
             "arbiter_invocations_observed": arbiter_invocations,
@@ -1415,6 +1465,17 @@ def review_markdown(review: Mapping[str, Any]) -> str:
             f"- Semantic coverage: {review['semantic_coverage']['status']}.",
         ]
     )
+    pause = review["outcome"].get("pause_reason")
+    if review["outcome"].get("status") == "paused" and pause:
+        lines.extend(
+            [
+                f"- Infrastructure status: paused for {pause.get('kind')} "
+                f"at {pause.get('decision_id')} "
+                f"({pause.get('label') or 'unlabeled decision'}).",
+                "- Replay verification applies to the accepted-command prefix; "
+                "it does not imply that the game ended.",
+            ]
+        )
     lines.extend(["", "### Fidelity dimensions", ""])
     lines.extend(
         f"- {name}: {value}"
@@ -1526,19 +1587,15 @@ def write_review_artifacts(
             "eligible": review["fidelity"]["review_eligible"],
             "matchup_evidence": review["fidelity"]["matchup_evidence"],
         }
-        (directory / "manifest.json").write_text(stable_json(updated), encoding="utf-8")
+        _atomic_text(directory / "manifest.json", stable_json(updated))
         manifest = updated
     # Size fields include the derived artifacts themselves. Iterate until their
     # decimal byte counts stabilize so review.json and review.md use the same
     # definitions and values.
     previous_sizes: Mapping[str, Any] | None = None
     for _ in range(5):
-        (directory / "review.json").write_text(
-            stable_json(review), encoding="utf-8"
-        )
-        (directory / "review.md").write_text(
-            review_markdown(review), encoding="utf-8"
-        )
+        _atomic_text(directory / "review.json", stable_json(review))
+        _atomic_text(directory / "review.md", review_markdown(review))
         refreshed = derive_review(
             engine,
             decisions=decisions,
@@ -1550,10 +1607,8 @@ def write_review_artifacts(
         if sizes == previous_sizes:
             break
         previous_sizes = sizes
-    (directory / "review.json").write_text(stable_json(review), encoding="utf-8")
-    (directory / "review.md").write_text(
-        review_markdown(review), encoding="utf-8"
-    )
+    _atomic_text(directory / "review.json", stable_json(review))
+    _atomic_text(directory / "review.md", review_markdown(review))
     return review
 
 

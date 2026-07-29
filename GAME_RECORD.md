@@ -61,6 +61,35 @@ Fresh native records use `manifest.replay.mode = "command_replay"`. The
 separate `legacy_snapshot` mode is reserved for migrated records whose accepted
 commands cannot be reconstructed honestly.
 
+An unfinished record replays its accepted-command prefix. A passing prefix
+proves that every accepted transition reproduced the saved checkpoint; it does
+not imply that the game ended. Version 0.6.0 uses explicit lifecycle states:
+`created`, `in_progress`, `paused`, `complete`, `aborted`, and `corrupt`.
+Paused records carry a structured `pause_reason`, and Codex arenas copy that
+reason into `codex_arena.stop_reason`.
+
+An operator may preserve a discovered boundary explicitly:
+
+```bash
+python simctl.py arena pause run/game --db data/scryfall-current.sqlite3 \
+  --kind legal_action_exposure_failure \
+  --reason "targeted action advertised without a legal target"
+```
+
+Derived artifacts can be reconstructed and verified from the durable
+checkpoint and journals:
+
+```bash
+python simctl.py refresh-record run/game --db data/scryfall-current.sqlite3
+python simctl.py finalize-record run/game --db data/scryfall-current.sqlite3
+python simctl.py verify-record run/game --db data/scryfall-current.sqlite3
+```
+
+`finalize-record` marks a terminal game complete or an unfinished game paused,
+then verifies exact replay. Record components are atomically replaced and the
+manifest is written last as the commit marker. Integrity verification rejects
+manifest/journal counter contradictions rather than trusting stale summaries.
+
 ## Legacy migration
 
 Version 2 `game.json` files contain decision names but not the submitted
@@ -111,7 +140,7 @@ requires a terminal game, replay verification, complete historical
 alternatives/reasons, trusted materially relevant semantics, the requested
 format, no material rules conflict, and a genuinely strategic pilot.
 
-Version 0.5.0 fails legal-action exposure when any meaningful window is
+Version 0.6.0 fails legal-action exposure when any meaningful window is
 incorrectly suppressed. The report records `profile_fingerprint_match`,
 `action_opportunity_coverage`, `suppressed_meaningful_windows`,
 `yields_invalidated_by_reason`, `pilot_thread_count`,
@@ -152,6 +181,18 @@ when exposed; immutable seat/thread labels and IDs; provider, model, and
 reasoning effort; invocation count; first/last timestamps; reuse; retries; and
 restart/interruption counters. Unknown token counts or opaque platform IDs are
 stored as `null`, never estimated as observed.
+
+`manifest.json.provider_telemetry` is derived from durable rows and keeps these
+counts distinct: game decisions created, provider calls attempted/accepted/
+rejected, retry calls, accepted commands, automatic decisions, arbiter calls,
+unique pilot threads, persistent reuse, ordered plans submitted, and ordered
+plan actions executed. A thread handle is routing identity; an invocation ID is
+an individual call identity and is never synthesized from that handle.
+
+Provider/model values have separate recorded, configured, and verified
+dimensions. A genuine Codex submission can attest the configured and observed
+values; an older record without that provenance remains recorded-but-unverified
+after refresh. Refresh never upgrades identity by inference.
 
 ## Size definitions
 

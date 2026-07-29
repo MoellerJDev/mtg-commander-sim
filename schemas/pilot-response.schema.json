@@ -5,11 +5,13 @@
   "type": "object",
   "oneOf": [
     {"required": ["action_id"]},
+    {"required": ["action"]},
     {"required": ["actions"]}
   ],
   "required": ["plan", "reason"],
   "properties": {
     "action_id": {"type": "string"},
+    "action": {"type": "string"},
     "choices": {"type": "object"},
     "actions": {
       "type": "array",
@@ -20,7 +22,8 @@
         "required": ["action_id"],
         "properties": {
           "action_id": {"type": "string"},
-          "choices": {"type": "object"}
+          "choices": {"type": "object"},
+          "future_choices": {"type": "object"}
         },
         "additionalProperties": true
       }

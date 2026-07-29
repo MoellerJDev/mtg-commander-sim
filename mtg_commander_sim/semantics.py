@@ -14,7 +14,7 @@ TRUST_LEVELS = {
     "unresolved",
     "intentionally_ignored",
 }
-SEMANTIC_SCHEMA_VERSION = 2
+SEMANTIC_SCHEMA_VERSION = 3
 BUILTIN_PACK_DIRECTORY = Path(__file__).resolve().parent / "semantic_packs"
 VALID_EFFECT_OPERATIONS = {
     "bounce",
@@ -43,6 +43,7 @@ VALID_EFFECT_OPERATIONS = {
     "move",
     "note",
     "reorder_top",
+    "search",
     "sacrifice",
     "sacrifice_if_present",
     "tap",
@@ -188,6 +189,11 @@ class SemanticRegistry:
         if not self.path:
             return
         raw = json.loads(self.path.read_text(encoding="utf-8"))
+        if raw.get("include_builtin_packs") is False:
+            # A saved game carries a complete registry snapshot. Clearing the
+            # runtime built-ins prevents a newer package from silently changing
+            # the semantics used to replay an older accepted-command prefix.
+            self._programs.clear()
         programs = raw.get("programs", raw)
         for key, value in programs.items():
             self._programs[str(key)] = SemanticProgram.from_dict(value)
@@ -240,6 +246,7 @@ class SemanticRegistry:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
             "schema_version": SEMANTIC_SCHEMA_VERSION,
+            "include_builtin_packs": False,
             "programs": {
                 key: program.to_dict() for key, program in sorted(self._programs.items())
             },

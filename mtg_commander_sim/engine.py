@@ -694,6 +694,8 @@ class CommanderEngine:
             self._complete_semantic_target(decision)
         elif kind == "semantic.choice":
             self._complete_semantic_choice(decision)
+        elif kind == "semantic.search":
+            self._complete_semantic_search(decision)
         else:
             raise GameRuleError(f"Unsupported completed decision {kind}")
 
@@ -3244,7 +3246,42 @@ class CommanderEngine:
             effects=[dict(effect) for effect in effects],
             destination=destination,
             note=note,
+            instruction_pointer=0,
         )
+
+    def _semantic_frame(
+        self,
+        item: StackItem,
+        *,
+        instruction_pointer: int,
+        locals: Mapping[str, Any] | None = None,
+        pending_choice_id: str | None = None,
+    ) -> dict[str, Any]:
+        program = self.semantics.get(item.semantic_key)
+        return {
+            "schema_version": 1,
+            "semantic_program_id": item.semantic_key,
+            "semantic_program_version": program.version if program else None,
+            "stack_object": item.ref,
+            "instruction_pointer": instruction_pointer,
+            "locals": copy.deepcopy(dict(locals or {})),
+            "controller": item.controller,
+            "pending_choice_id": pending_choice_id,
+        }
+
+    def _validate_semantic_frame(
+        self,
+        frame: Mapping[str, Any],
+        item: StackItem,
+    ) -> None:
+        if str(frame.get("stack_object") or "") != item.ref:
+            raise GameRuleError("Semantic continuation stack object changed")
+        if frame.get("semantic_program_id") != item.semantic_key:
+            raise GameRuleError("Semantic continuation program changed")
+        program = self.semantics.get(item.semantic_key)
+        expected_version = program.version if program else None
+        if frame.get("semantic_program_version") != expected_version:
+            raise GameRuleError("Semantic continuation program version changed")
 
     def _semantic_value(self, value: Any, item: StackItem) -> Any:
         """Resolve transport-safe runtime placeholders in cached semantics.
@@ -3288,6 +3325,7 @@ class CommanderEngine:
         effects: list[dict[str, Any]],
         destination: str | None,
         note: str,
+        instruction_pointer: int = 0,
     ) -> None:
         item = next((candidate for candidate in self.state.stack if candidate.ref == stack_ref), None)
         if item is None:
@@ -3303,7 +3341,21 @@ class CommanderEngine:
                         "effects": effects[index + 1 :],
                         "destination": destination,
                         "note": note,
+                        "semantic_frame": self._semantic_frame(
+                            item,
+                            instruction_pointer=instruction_pointer + index,
+                        ),
                     },
+                )
+                return
+            if effect.get("op") == "search":
+                self._begin_semantic_search(
+                    item=item,
+                    effect=effect,
+                    remaining=effects[index + 1 :],
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + index,
                 )
                 return
             if effect.get("op") in {
@@ -3317,6 +3369,7 @@ class CommanderEngine:
                     remaining=effects[index + 1 :],
                     destination=destination,
                     note=note,
+                    instruction_pointer=instruction_pointer + index,
                 )
                 return
             self.apply_effect(effect, actor=item.controller, as_cost=False)
@@ -3359,6 +3412,7 @@ class CommanderEngine:
         remaining: Sequence[Mapping[str, Any]],
         destination: str | None,
         note: str,
+        instruction_pointer: int = 0,
     ) -> None:
         op = str(effect["op"])
         seat = str(effect.get("player") or item.controller)
@@ -3470,7 +3524,7 @@ class CommanderEngine:
                     ],
                 }
             )
-        self.permissions.issue(
+        decision = self.permissions.issue(
             kind="semantic.choice",
             role="pilot",
             actors=[seat],
@@ -3482,7 +3536,14 @@ class CommanderEngine:
                 "remaining": copy.deepcopy(list(remaining)),
                 "destination": destination,
                 "note": note,
+                "semantic_frame": self._semantic_frame(
+                    item,
+                    instruction_pointer=instruction_pointer,
+                ),
             },
+        )
+        decision.continuation["semantic_frame"]["pending_choice_id"] = (
+            decision.decision_id
         )
 
     def _complete_semantic_choice(self, decision: Any) -> None:
@@ -3496,6 +3557,9 @@ class CommanderEngine:
         )
         if item is None:
             raise GameRuleError("The semantic choice's stack object no longer exists")
+        frame = dict(continuation.get("semantic_frame") or {})
+        if frame:
+            self._validate_semantic_frame(frame, item)
         effect = dict(continuation["effect"])
         op = str(effect["op"])
         if op == "choose_mana":
@@ -3594,6 +3658,427 @@ class CommanderEngine:
             effects=remaining,
             destination=continuation.get("destination"),
             note=str(continuation.get("note") or ""),
+            instruction_pointer=int(frame.get("instruction_pointer", 0)) + 1,
+        )
+
+    @staticmethod
+    def _search_type_words(type_line: str) -> tuple[set[str], set[str]]:
+        normalized = type_line.replace("—", "-")
+        left, _, right = normalized.partition("-")
+        return (
+            {word.casefold() for word in re.findall(r"[A-Za-z]+", left)},
+            {word.casefold() for word in re.findall(r"[A-Za-z]+", right)},
+        )
+
+    def _search_candidate_matches(
+        self,
+        card: CardInstance,
+        selector: Mapping[str, Any],
+    ) -> bool:
+        record = self.card_record(card)
+        if record is None:
+            return False
+        type_words, subtype_words = self._search_type_words(record.type_line)
+        required_types = {
+            str(value).casefold() for value in selector.get("types") or []
+        }
+        required_subtypes = {
+            str(value).casefold() for value in selector.get("subtypes") or []
+        }
+        required_supertypes = {
+            str(value).casefold()
+            for value in selector.get("supertypes") or []
+        }
+        if not required_types.issubset(type_words):
+            return False
+        if not required_subtypes.issubset(subtype_words):
+            return False
+        if not required_supertypes.issubset(type_words):
+            return False
+        names = {
+            str(value).casefold() for value in selector.get("names") or []
+        }
+        if names and record.name.casefold() not in names:
+            return False
+        colors = {str(value).upper() for value in selector.get("colors") or []}
+        if colors and not colors.issubset(set(record.colors)):
+            return False
+        mana_value = selector.get("mana_value")
+        if mana_value is not None:
+            constraint = (
+                dict(mana_value)
+                if isinstance(mana_value, Mapping)
+                else {"equal": mana_value}
+            )
+            if (
+                constraint.get("equal") is not None
+                and record.mana_value != float(constraint["equal"])
+            ):
+                return False
+            if (
+                constraint.get("minimum") is not None
+                and record.mana_value < float(constraint["minimum"])
+            ):
+                return False
+            if (
+                constraint.get("maximum") is not None
+                and record.mana_value > float(constraint["maximum"])
+            ):
+                return False
+        predicate = selector.get("predicate")
+        if predicate in {None, ""}:
+            return True
+        if predicate == "noncreature":
+            return "creature" not in type_words
+        if predicate == "mana_cost_0_or_1":
+            return record.mana_cost in {"{0}", "{1}"}
+        raise GameRuleError(f"Unsupported search predicate {predicate!r}")
+
+    def _semantic_search_options(
+        self,
+        seat: str,
+        effect: Mapping[str, Any],
+    ) -> list[dict[str, Any]]:
+        zone = str(effect.get("zone") or "library")
+        if zone not in {"library", "graveyard", "hand", "exile"}:
+            raise GameRuleError(f"Unsupported semantic search zone {zone!r}")
+        selector = dict(effect.get("selector") or {})
+        return [
+            {
+                "id": self.state.cards[object_id].ref,
+                "name": self.state.cards[object_id].printed_name,
+            }
+            for object_id in self.state.players[seat].zones[zone]
+            if self._search_candidate_matches(
+                self.state.cards[object_id], selector
+            )
+        ]
+
+    @staticmethod
+    def _search_is_restrictive(selector: Mapping[str, Any]) -> bool:
+        return any(
+            selector.get(key)
+            for key in (
+                "types",
+                "subtypes",
+                "supertypes",
+                "colors",
+                "names",
+                "mana_value",
+                "predicate",
+            )
+        )
+
+    def _begin_semantic_search(
+        self,
+        *,
+        item: StackItem,
+        effect: Mapping[str, Any],
+        remaining: Sequence[Mapping[str, Any]],
+        destination: str | None,
+        note: str,
+        instruction_pointer: int,
+    ) -> None:
+        seat = str(effect.get("searching_player") or item.controller)
+        self._require_seat(seat, in_game=True)
+        options = self._semantic_search_options(seat, effect)
+        count = dict(effect.get("count") or {})
+        minimum = max(0, int(count.get("minimum", 1)))
+        maximum = max(minimum, int(count.get("maximum", minimum)))
+        maximum = min(maximum, len(options))
+        selector = dict(effect.get("selector") or {})
+        rules_may_fail = bool(effect.get("optional", False)) or (
+            str(effect.get("zone") or "library") == "library"
+            and self._search_is_restrictive(selector)
+        )
+        minimum_choice = 0 if rules_may_fail else min(minimum, len(options))
+        entry_choice = any(
+            (
+                (record := self.card_record(
+                    next(
+                        card.object_id
+                        for card in self.state.cards.values()
+                        if card.ref == option["id"]
+                    )
+                ))
+                is not None
+                and "you may pay 2 life. if you don't, it enters tapped"
+                in record.oracle_text.casefold()
+            )
+            for option in options
+        )
+        choice_schema: dict[str, Any] = {
+            "field": "search_cards",
+            "minimum": minimum_choice,
+            "maximum": maximum,
+            "legal_refs": [option["id"] for option in options],
+            "rules_may_fail_to_find": rules_may_fail,
+        }
+        if entry_choice and str(effect.get("destination")) == "battlefield":
+            choice_schema["entry_pay_life"] = "boolean"
+        frame = self._semantic_frame(
+            item,
+            instruction_pointer=instruction_pointer,
+            locals={
+                "searching_player": seat,
+                "source_object": (
+                    self.state.cards[item.source_object_id].ref
+                    if item.source_object_id in self.state.cards
+                    else (
+                        self.state.cards[item.card_object_id].ref
+                        if item.card_object_id in self.state.cards
+                        else None
+                    )
+                ),
+            },
+        )
+        decision = self.permissions.issue(
+            kind="semantic.search",
+            role="pilot",
+            actors=[seat],
+            allowed_actions=["choose"],
+            payload_by_actor={
+                seat: {
+                    "stack": item.ref,
+                    "operation": "search",
+                    "instruction": str(
+                        effect.get("instruction")
+                        or "Choose card(s) matching the search specification."
+                    ),
+                    "search_cards": options,
+                    "search_spec": {
+                        "zone": str(effect.get("zone") or "library"),
+                        "selector": selector,
+                        "count": {
+                            "minimum": minimum_choice,
+                            "maximum": maximum,
+                        },
+                        "destination": effect.get("destination"),
+                        "reveal": bool(effect.get("reveal", False)),
+                        "shuffle_after": bool(
+                            effect.get("shuffle_after", True)
+                        ),
+                        "rules_may_fail_to_find": rules_may_fail,
+                    },
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": choice_schema,
+                        }
+                    ],
+                }
+            },
+            continuation={
+                "stack_ref": item.ref,
+                "effect": copy.deepcopy(dict(effect)),
+                "remaining": copy.deepcopy(list(remaining)),
+                "destination": destination,
+                "note": note,
+                "semantic_frame": frame,
+            },
+        )
+        decision.continuation["semantic_frame"]["pending_choice_id"] = (
+            decision.decision_id
+        )
+
+    def _complete_semantic_search(self, decision: Any) -> None:
+        seat = decision.actors[0]
+        response = decision.responses[seat]
+        continuation = decision.continuation
+        stack_ref = str(continuation.get("stack_ref") or "")
+        item = next(
+            (
+                candidate
+                for candidate in self.state.stack
+                if candidate.ref == stack_ref
+            ),
+            None,
+        )
+        if item is None:
+            raise GameRuleError(
+                "The semantic search's stack object no longer exists"
+            )
+        frame = dict(continuation.get("semantic_frame") or {})
+        self._validate_semantic_frame(frame, item)
+        effect = dict(continuation.get("effect") or {})
+        options = {
+            option["id"]
+            for option in self._semantic_search_options(seat, effect)
+        }
+        raw_values = (
+            response.get("search_cards")
+            or response.get("cards")
+            or (
+                [response.get("search_card") or response.get("card")]
+                if response.get("search_card") is not None
+                or response.get("card") is not None
+                else []
+            )
+        )
+        values = [str(value) for value in raw_values if value is not None]
+        if len(values) != len(set(values)) or any(
+            value not in options for value in values
+        ):
+            raise GameRuleError(
+                "Selected search result is no longer a legal candidate"
+            )
+        count = dict(effect.get("count") or {})
+        minimum = max(0, int(count.get("minimum", 1)))
+        maximum = max(minimum, int(count.get("maximum", minimum)))
+        selector = dict(effect.get("selector") or {})
+        rules_may_fail = bool(effect.get("optional", False)) or (
+            str(effect.get("zone") or "library") == "library"
+            and self._search_is_restrictive(selector)
+        )
+        required = 0 if rules_may_fail else min(minimum, len(options))
+        if not required <= len(values) <= min(maximum, len(options)):
+            raise GameRuleError(
+                f"Search requires between {required} and "
+                f"{min(maximum, len(options))} selection(s)"
+            )
+        destination_spec = str(effect.get("destination") or "hand")
+        position = str(effect.get("destination_position") or "top")
+        destination = destination_spec
+        if destination_spec in {"library_top", "top_of_library"}:
+            destination, position = "library", "top"
+        elif destination_spec in {"library_bottom", "bottom_of_library"}:
+            destination, position = "library", "bottom"
+        if destination not in {
+            "hand",
+            "battlefield",
+            "graveyard",
+            "exile",
+            "library",
+        }:
+            raise GameRuleError(
+                f"Unsupported semantic search destination {destination_spec!r}"
+            )
+        reveal = bool(effect.get("reveal", False))
+        moved: list[CardInstance] = []
+        for ref in values:
+            card = self._resolve_object(
+                seat,
+                ref,
+                zones={str(effect.get("zone") or "library")},
+                owned_only=True,
+            )
+            tapped = bool(effect.get("enters_tapped_override", False))
+            if (
+                destination == "battlefield"
+                and effect.get("enters_tapped_override") is None
+            ):
+                record = self.card_record(card)
+                tapped = bool(
+                    record
+                    and record.is_land
+                    and self._land_enters_tapped(
+                        seat,
+                        record,
+                        {
+                            "pay_life": bool(
+                                response.get(
+                                    "entry_pay_life",
+                                    response.get("pay_life", False),
+                                )
+                            )
+                        },
+                    )
+                )
+                if (
+                    record
+                    and "you may pay 2 life. if you don't, it enters tapped"
+                    in record.oracle_text.casefold()
+                    and bool(
+                        response.get(
+                            "entry_pay_life",
+                            response.get("pay_life", False),
+                        )
+                    )
+                    and not tapped
+                ):
+                    self.state.players[seat].life -= 2
+            moved.append(
+                self.move_card(
+                    card.object_id,
+                    destination,
+                    controller=seat if destination == "battlefield" else None,
+                    tapped=tapped,
+                    position=position,
+                    reveal_to=self.seats if reveal else None,
+                    reason=f"{item.label} search",
+                    log=False,
+                )
+            )
+            if destination == "battlefield":
+                record = self.card_record(card)
+                if record and record.is_land:
+                    self._dispatch_semantic_event(
+                        "land.enter",
+                        {
+                            "card": card.ref,
+                            "controller": seat,
+                            "tapped": card.tapped,
+                            "source": item.ref,
+                        },
+                    )
+        public_choice = reveal or destination in {
+            "battlefield",
+            "graveyard",
+            "exile",
+        }
+        public_details: dict[str, Any] = {
+            "source": item.ref,
+            "destination": destination_spec,
+            "count": len(moved),
+            "revealed": reveal,
+        }
+        if public_choice:
+            public_details["objects"] = [card.ref for card in moved]
+            if len(moved) == 1:
+                public_details["object"] = moved[0].ref
+        self._log(
+            seat,
+            "library.search",
+            f"{seat} searched {effect.get('zone', 'library')} and found "
+            f"{len(moved)} card(s).",
+            public_details,
+            importance=2,
+            changed_objects=[card.object_id for card in moved],
+            changed_players=[seat],
+        )
+        self._log(
+            seat,
+            "library.search.private",
+            f"{seat} selected {len(moved)} private search object(s).",
+            {
+                **public_details,
+                "objects": [card.ref for card in moved],
+            },
+            visibility=[seat, "analyst"],
+            importance=0,
+            changed_objects=[card.object_id for card in moved],
+            changed_players=[seat],
+        )
+        if bool(effect.get("shuffle_after", True)):
+            self.shuffle_library(seat, reason=f"{item.label} resolved")
+        item.context.setdefault("semantic_continuations", []).append(
+            {
+                **frame,
+                "pending_choice_id": decision.decision_id,
+                "choice_result": [card.ref for card in moved],
+                "resumed": True,
+            }
+        )
+        self._continue_resolution(
+            stack_ref=stack_ref,
+            effects=[
+                dict(value)
+                for value in continuation.get("remaining", [])
+            ],
+            destination=continuation.get("destination"),
+            note=str(continuation.get("note") or ""),
+            instruction_pointer=int(frame.get("instruction_pointer", 0)) + 1,
         )
 
     def _counter_stack_item(self, value: str, *, destination: str = "graveyard", reason: str = "countered") -> StackItem:

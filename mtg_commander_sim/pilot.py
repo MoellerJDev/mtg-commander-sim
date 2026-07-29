@@ -177,7 +177,7 @@ class PilotResponse:
                 **{
                     key: copy.deepcopy(value)
                     for key, value in first.items()
-                    if key not in {"action_id", "choices"}
+                    if key not in {"action_id", "choices", "future_choices"}
                 },
                 **selected_choices,
             }

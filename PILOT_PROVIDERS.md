@@ -1,6 +1,6 @@
 # Pilot providers
 
-Version 0.5.0 separates strategic inference from the authoritative game. A
+Version 0.6.0 separates strategic inference from the authoritative game. A
 provider implements:
 
 ```python
@@ -45,7 +45,9 @@ rejected and journaled.
 
 ## Response contract
 
-Responses validate against `schemas/pilot-response.schema.json`. The preferred
+Responses validate against `schemas/pilot-response.schema.json`. The Codex MCP
+tool exposes these fields directly as a typed union; it does not accept a
+nested untyped `response` blob. The preferred
 single-action shape is:
 
 ```json
@@ -80,11 +82,15 @@ and confidence. Missing audit fields are rejected rather than silently filled
 by the parent.
 
 An ordered response may instead provide `actions`, each containing an
-`action_id` and choices. Only the first action is initially submitted. Later
+`action_id`, immediate `choices`, and optional `future_choices`. A future
+private search choice may name the desired card; the server resolves that name
+to a physical ref only after the searching seat receives the candidate list.
+Only the first action is initially submitted. Later
 entries execute without another provider invocation only if the same principal
 immediately receives another decision and the exact action ID is still legal.
-Responses, stack changes, new hidden draws, resolution-time searches, delegated
-choices, combat, rejection, save/load, or stale IDs stop the plan.
+Opposing responses, material stack/cost/target changes, new hidden draws,
+unsupplied searches or delegated choices, combat, semantic uncertainty,
+fidelity failure, rejection, save/load, or stale IDs stop the plan.
 
 Invalid output and rejected actions use the existing same-capability compact
 retry. The full projected state is not resent. Rejections remain in
@@ -96,7 +102,7 @@ The decision audit can persist:
 
 - provider
 - model or implementation ID
-- invocation ID
+- stable thread handle/label and separate per-call invocation ID
 - input/output tokens
 - latency
 - retry count
@@ -108,6 +114,9 @@ Only a call made through a provider is counted as an invocation. A decision
 record is not assumed to be a model call. Token counts are `null` with
 `token_measurement_status: "unavailable"` when the provider does not report
 them; packet-size token estimates remain separately labeled estimates.
+Configured, reported, and verified provider/model fields remain distinct.
+Refresh reconstructs summaries from the durable journal and never promotes an
+older recorded value to verified.
 
 ## Profiles and memory
 

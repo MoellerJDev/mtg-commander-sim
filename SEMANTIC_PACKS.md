@@ -36,7 +36,7 @@ by Oracle/ability keys and runtime events, not printed-name branches. Runtime
 placeholders such as `$controller` and `$target.0` are resolved against the
 current stack object.
 
-## Version 0.5.0 vertical slice
+## Version 0.6.0 vertical slice
 
 The bundled packs characterize:
 
@@ -52,6 +52,9 @@ The bundled packs characterize:
 - provisional Ichor Wellspring coverage
 - provisional Gonti's Aether Heart permanent plus trusted artifact-entry energy
 - trusted Red Elemental Blast and provisional Pyroblast target/resolution
+- provisional generic hidden-library searches for Entomb, Three Visits,
+  Nature's Lore, Fabricate, Goblin Engineer's entry trigger, Survival of the
+  Fittest, Elvish Reclaimer, and Wight of the Reliquary
 
 This is not complete coverage of either 100-card deck. In particular, the
 preflight reports retain unresolved costs, activated abilities, triggers, and
@@ -59,7 +62,7 @@ replacement effects rather than silently treating them as vanilla. The
 generated reports under `run/semantic-preflight-*.json` are the authoritative
 inventory for this snapshot.
 
-Version 0.5.0 improves legal-action exactness without claiming broad Oracle
+Version 0.6.0 improves legal-action and continuation exactness without claiming broad Oracle
 coverage:
 
 - mandatory activated costs must be currently payable before an action is
@@ -70,11 +73,23 @@ coverage:
   can pay another action
 - fully parenthesized basic-land reminder abilities are normalized
 - `Sacrifice a land` is a compiled delegated mandatory cost
+- a resolving program can suspend on a seat-private search, persist its
+  versioned semantic frame, then resume exactly after the choice
+- restrictive and optional hidden-zone searches support legal fail-to-find
+- destination, reveal, shuffle, typed-land entry, and shockland life choices
+  are server-controlled
 
-Other activation conditions remain unresolved rather than guessed. The live
-Codex fixture stops at Three Visits because its hidden-library search choice is
-outside this semantic slice; the primary coordinator does not choose the land
-for the player.
+Ordered plans may name a future private search choice without knowing its
+physical object reference. The server resolves that name only after the scoped
+choice exists. Execution stops on a response, stack/cost/target change, hidden
+draw, new unsupplied choice, combat, semantic uncertainty, or fidelity failure.
+
+Other activation conditions and complex tutors remain unresolved rather than
+guessed. Green Sun's Zenith, Finale of Devastation, Chord of Calling, Protean
+Hulk, Diabolic Intent, Reshape, Transmute Artifact, Whir of Invention, Arcum
+Dagsson, Inventors' Fair, Urza's Saga, Repurposing Bay, and Spellseeker still
+require additional cost/selection/linked-effect compilation. The primary
+coordinator never chooses a private search result for the player.
 
 ## Preflight
 

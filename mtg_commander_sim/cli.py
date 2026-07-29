@@ -25,7 +25,14 @@ from .pilot import (
     SubprocessJsonPilot,
 )
 from .preflight import semantic_preflight
-from .record import inspect_game, migrate_v2_game, replay_record
+from .record import (
+    finalize_record,
+    inspect_game,
+    migrate_v2_game,
+    refresh_record,
+    replay_record,
+    verify_record_integrity,
+)
 from .report import review_markdown, write_review_artifacts
 from .session import CommanderSession
 from .util import stable_json
@@ -75,12 +82,25 @@ def _scripted_choice(
             "plan": "MULLIGAN",
             "reason": "Bottom the least immediately useful cards after the counted redraw.",
         }
-    if kind == "search.fetch":
+    if kind in {"search.fetch", "semantic.search"}:
         choices = list(context.get("search_cards") or [])
         selected = choices[0]["id"] if choices else None
+        maximum = int(
+            context.get("search_spec", {})
+            .get("count", {})
+            .get("maximum", 1)
+        )
         return {
             "action_id": "choose",
-            "search_card": selected,
+            **(
+                {"search_card": selected}
+                if maximum == 1
+                else {
+                    "search_cards": [
+                        item["id"] for item in choices[:maximum]
+                    ]
+                }
+            ),
             "entry_pay_life": False,
             "plan": "FIX_COLORS",
             "reason": "Choose a legal typed source and preserve life unless untapped mana is required.",
@@ -341,6 +361,14 @@ def build_parser() -> argparse.ArgumentParser:
     pilot_mcp.add_argument("--thread-label")
     pilot_mcp.add_argument("--parent-session-id")
     pilot_mcp.add_argument("--provider-invoked", action="store_true")
+    pilot_mcp.add_argument(
+        "--provider-identity-verified", action="store_true"
+    )
+    pilot_mcp.add_argument(
+        "--model-identity-verified", action="store_true"
+    )
+    pilot_mcp.add_argument("--model-configured")
+    pilot_mcp.add_argument("--reasoning-effort-configured")
 
     pilot_tool = sub.add_parser(
         "pilot-tool",
@@ -358,6 +386,14 @@ def build_parser() -> argparse.ArgumentParser:
     pilot_tool.add_argument("--thread-label")
     pilot_tool.add_argument("--parent-session-id")
     pilot_tool.add_argument("--provider-invoked", action="store_true")
+    pilot_tool.add_argument(
+        "--provider-identity-verified", action="store_true"
+    )
+    pilot_tool.add_argument(
+        "--model-identity-verified", action="store_true"
+    )
+    pilot_tool.add_argument("--model-configured")
+    pilot_tool.add_argument("--reasoning-effort-configured")
     pilot_tool.add_argument(
         "operation",
         choices=(
@@ -411,6 +447,52 @@ def build_parser() -> argparse.ArgumentParser:
     )
     coordinator_tool.add_argument("--json")
 
+    for command, help_text in (
+        (
+            "refresh-record",
+            "Rebuild manifest/review metadata from durable journals",
+        ),
+        (
+            "finalize-record",
+            "Pause or complete, replay-verify, and finalize a record",
+        ),
+        (
+            "verify-record",
+            "Check manifest/journal integrity and exact prefix replay",
+        ),
+    ):
+        lifecycle = sub.add_parser(command, help=help_text)
+        lifecycle.add_argument("record")
+        lifecycle.add_argument(
+            "--db", default="data/scryfall-20260728-compact.sqlite3"
+        )
+
+    arena = sub.add_parser(
+        "arena", help="Inspect or change a persistent arena lifecycle"
+    )
+    arena_sub = arena.add_subparsers(dest="arena_cmd", required=True)
+    for operation in ("status", "resume", "finalize"):
+        child = arena_sub.add_parser(operation)
+        child.add_argument("record")
+        child.add_argument(
+            "--db", default="data/scryfall-20260728-compact.sqlite3"
+        )
+    arena_pause = arena_sub.add_parser("pause")
+    arena_pause.add_argument("record")
+    arena_pause.add_argument("--reason", required=True)
+    arena_pause.add_argument(
+        "--kind", default="fidelity_failure"
+    )
+    arena_pause.add_argument(
+        "--db", default="data/scryfall-20260728-compact.sqlite3"
+    )
+    arena_abort = arena_sub.add_parser("abort")
+    arena_abort.add_argument("record")
+    arena_abort.add_argument("--reason", required=True)
+    arena_abort.add_argument(
+        "--db", default="data/scryfall-20260728-compact.sqlite3"
+    )
+
     return parser
 
 
@@ -429,6 +511,14 @@ def main(argv: list[str] | None = None) -> int:
             thread_label=args.thread_label,
             parent_session_id=args.parent_session_id,
             provider_invoked=bool(args.provider_invoked),
+            provider_identity_verified=bool(
+                args.provider_identity_verified
+            ),
+            model_identity_verified=bool(args.model_identity_verified),
+            model_configured=args.model_configured,
+            reasoning_effort_configured=(
+                args.reasoning_effort_configured
+            ),
         )
         tools = SeatScopedPilotTools.open(
             game_dir=args.game_dir,
@@ -447,6 +537,14 @@ def main(argv: list[str] | None = None) -> int:
             thread_label=args.thread_label,
             parent_session_id=args.parent_session_id,
             provider_invoked=bool(args.provider_invoked),
+            provider_identity_verified=bool(
+                args.provider_identity_verified
+            ),
+            model_identity_verified=bool(args.model_identity_verified),
+            model_configured=args.model_configured,
+            reasoning_effort_configured=(
+                args.reasoning_effort_configured
+            ),
         )
         tools = SeatScopedPilotTools.open(
             game_dir=args.game_dir,
@@ -478,6 +576,70 @@ def main(argv: list[str] | None = None) -> int:
                 raise SystemExit("update-memory requires --text")
             value = tools.update_memory(args.text)
         print(stable_json(value))
+        return 0
+    if args.cmd in {
+        "refresh-record",
+        "finalize-record",
+        "verify-record",
+    }:
+        db = CardDatabase(args.db)
+        try:
+            if args.cmd == "refresh-record":
+                value = refresh_record(
+                    args.record, db, verify_replay=False
+                )
+            elif args.cmd == "finalize-record":
+                value = finalize_record(args.record, db)
+            else:
+                value = verify_record_integrity(args.record, db)
+            print(stable_json(value))
+            return 0 if value.get("ok", True) else 2
+        finally:
+            db.close()
+    if args.cmd == "arena":
+        db = CardDatabase(args.db)
+        try:
+            if args.arena_cmd == "status":
+                value = {
+                    **inspect_game(args.record),
+                    "integrity": verify_record_integrity(
+                        args.record, db, replay=False
+                    ),
+                }
+            elif args.arena_cmd == "finalize":
+                value = finalize_record(args.record, db)
+            else:
+                session = CommanderSession.load(
+                    db,
+                    args.record,
+                    semantics_path=Path(args.record) / "semantics.json",
+                )
+                if args.arena_cmd == "resume":
+                    session.resume()
+                elif args.arena_cmd == "pause":
+                    session.pause(
+                        {
+                            "kind": str(args.kind)[:100],
+                            "label": str(args.reason)[:500],
+                            "decision_id": (
+                                session.state.pending_decision.decision_id
+                                if session.state.pending_decision
+                                else None
+                            ),
+                            "decision_kind": (
+                                session.state.pending_decision.kind
+                                if session.state.pending_decision
+                                else None
+                            ),
+                        }
+                    )
+                else:
+                    session.abort(args.reason)
+                session.save(args.record)
+                value = inspect_game(args.record)
+            print(stable_json(value))
+        finally:
+            db.close()
         return 0
     if args.cmd == "arena-create":
         sources = _seat_values(args.deck)
@@ -768,27 +930,17 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "replay":
         db = CardDatabase(args.db)
         try:
-            result = replay_record(
-                args.record,
-                db,
-                semantics_path=Path(args.record) / "semantics.json",
-                verify=args.verify,
-            )
             if args.verify:
-                manifest_path = Path(args.record) / "manifest.json"
-                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-                manifest["replay"]["verification"] = "pass" if result["ok"] else "fail"
-                manifest_path.write_text(stable_json(manifest), encoding="utf-8")
-                session = CommanderSession.load(
-                    db,
-                    args.record,
-                    semantics_path=Path(args.record) / "semantics.json",
+                refreshed = refresh_record(
+                    args.record, db, verify_replay=True
                 )
-                write_review_artifacts(
+                result = dict(refreshed["replay_result"] or {})
+            else:
+                result = replay_record(
                     args.record,
-                    session.engine,
-                    decisions=session.decisions,
-                    manifest=manifest,
+                    db,
+                    semantics_path=Path(args.record) / "semantics.json",
+                    verify=False,
                 )
             print(stable_json(result))
             return 0 if result["ok"] else 2
