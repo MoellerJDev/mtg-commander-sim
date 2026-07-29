@@ -248,6 +248,14 @@ class CodexCliArenaRunnerTests(unittest.TestCase):
             self.assertEqual("command_replay", benchmark["stop_reason"])
 
     def test_response_envelope_decodes_choices_but_rejects_two_action_modes(self):
+        decision_prompt = CodexCliArenaRunner._decision_prompt(
+            "A",
+            {"decision": {"kind": "semantic.choice"}},
+            profile=None,
+            memory="",
+        )
+        self.assertIn('shape "object_map"', decision_prompt)
+        self.assertIn("top-first order", decision_prompt)
         value = CodexCliArenaRunner.normalize_response(
             stable_json(
                 {

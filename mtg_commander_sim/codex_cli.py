@@ -748,7 +748,12 @@ class CodexCliArenaRunner:
             "empty actions array. For an ordered plan use action_id null and "
             "the actions array. Each choices_json is a compact JSON object "
             'encoded as a string, normally "{}". Do not restate server-derived '
-            "mana payments. Include a plan category, reason under 180 "
+            "mana payments. Match every choice_schema exactly. A schema with "
+            'field "decisions" and shape "object_map" requires choices_json '
+            'like {"decisions":{"REF":"legal_value"}}. If its top_order '
+            "contract applies, also include a top_order array containing "
+            "exactly every ref mapped to top, in top-first order. "
+            "Include a plan category, reason under 180 "
             "characters, confidence, yield (normally null), and bounded "
             "memory_update. Follow realistic Commander mulligans without "
             "chasing an ideal hand.\n"

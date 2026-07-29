@@ -567,6 +567,34 @@ class ExactZimoneClosureTests(unittest.TestCase):
             "semantic.choice",
             engine.state.pending_decision.kind,
         )
+        choice_schema = (
+            engine.state.pending_decision.payload_by_actor["B"][
+                "legal_actions"
+            ][0]["choice_schema"]
+        )
+        self.assertEqual("object_map", choice_schema["shape"])
+        self.assertEqual(
+            "top_order",
+            choice_schema["top_order"]["field"],
+        )
+        self.assertEqual(
+            "top-first",
+            choice_schema["top_order"]["order"],
+        )
+        self.assertEqual(
+            choice_schema["required"],
+            len(choice_schema["example"]["decisions"]),
+        )
+        self.assertEqual(
+            {
+                ref
+                for ref, decision in choice_schema["example"][
+                    "decisions"
+                ].items()
+                if decision == "top"
+            },
+            set(choice_schema["example"]["top_order"]),
+        )
         additional = [
             entry["object"]
             for entry in engine.state.players["B"].draw_history[-2:]

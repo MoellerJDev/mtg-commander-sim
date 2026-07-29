@@ -186,6 +186,17 @@ replay failure instead of leaving an ambiguous in-progress record. The full
 suite is 282 passing tests. The failed run is infrastructure evidence only and
 does not count toward the three-game gate.
 
+The next fresh attempt (`seed=20260743`) reached 62 accepted replay-verified
+commands with zero suppressed meaningful windows before a Sylvan Library
+settlement exhausted three transport retries. The engine rejected every
+malformed choice and accepted no illegal state. The seat packet described the
+legal refs and values but did not state clearly enough that `decisions` was a
+ref-to-value object map accompanied by an exact top-first `top_order` array.
+That choice schema now publishes its precise shape and a legal example, and
+the Codex prompt explains the same generic contract. Focused positive coverage
+and the full 282-test suite pass. This is another infrastructure-only stop and
+does not count toward the qualifying streak.
+
 ## GitHub finalization
 
 - [ ] Full branch security/large-file audit
@@ -198,11 +209,11 @@ does not count toward the three-game gate.
 
 ## Next work
 
-Commit the durable yield/replay fix, then restart fresh natural trusted-only
-four-player games through `arena-codex-run`. Stop and fix any runtime semantic
-or fidelity defect, and count only three consecutive natural games passing
-every `deck_operation_evidence` gate. Implement `review-batch` and linked
-per-deck operation reports after qualifying records exist. After the review-MVP
-draft PR exists, rules-corpus work moves to
+Commit the explicit complex-choice contract, then restart fresh natural
+trusted-only four-player games through `arena-codex-run`. Stop and fix any
+runtime semantic or fidelity defect, and count only three consecutive natural
+games passing every `deck_operation_evidence` gate. Implement `review-batch`
+and linked per-deck operation reports after qualifying records exist. After the
+review-MVP draft PR exists, rules-corpus work moves to
 `agent/rules-completeness` and a stacked draft PR; it does not broaden this
 feature branch.

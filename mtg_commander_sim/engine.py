@@ -11086,13 +11086,36 @@ class CommanderEngine:
                             "action": "choose",
                             "choice_schema": {
                                 "field": "decisions",
+                                "shape": "object_map",
                                 "legal_refs": eligible,
                                 "required": required,
                                 "legal_values": [
                                     "pay_life",
                                     "top",
                                 ],
-                                "top_order": "top-first",
+                                "top_order": {
+                                    "field": "top_order",
+                                    "required_when_value": "top",
+                                    "contains": (
+                                        "exactly every ref mapped to top"
+                                    ),
+                                    "order": "top-first",
+                                },
+                                "example": {
+                                    "decisions": {
+                                        ref: (
+                                            "pay_life"
+                                            if index == 0
+                                            else "top"
+                                        )
+                                        for index, ref in enumerate(
+                                            eligible[:required]
+                                        )
+                                    },
+                                    "top_order": list(
+                                        eligible[1:required]
+                                    ),
+                                },
                             },
                         }
                     ],
