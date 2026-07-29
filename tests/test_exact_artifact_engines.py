@@ -286,6 +286,11 @@ class ExactArtifactEngineTests(unittest.TestCase):
         engine.move_card(graveyard_artifact.object_id, "graveyard")
         welder.acquired_control_turn_count = -1
         engine.state.priority_player = "A"
+        hints = engine._priority_action_hints("A")
+        self.assertIn(
+            f"activate:{welder.ref}:ab1",
+            {action["id"] for action in hints["actions"]},
+        )
         with self.assertRaisesRegex(Exception, "same player"):
             engine._activate(
                 "A",

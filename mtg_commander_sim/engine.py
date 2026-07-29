@@ -8408,8 +8408,8 @@ class CommanderEngine:
             for group in plan.groups
         }
 
-    @staticmethod
     def _target_plan_feasible(
+        self,
         plan: TargetPlan,
         candidates: Mapping[str, Sequence[str]],
     ) -> bool:
