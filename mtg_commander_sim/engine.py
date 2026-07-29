@@ -12,7 +12,14 @@ from typing import Any, Iterable, Iterator, Mapping, Sequence
 from .abilities import ActivatedAbility, choose_ability, parse_activated_abilities, reduced_requirements
 from .carddb import CardDatabase, CardRecord
 from .deck import DeckDefinition
-from .mana import ManaPlanError, ManaSource, auto_plan_payment, extract_mana_modes, parsed_cost
+from .mana import (
+    ManaMode,
+    ManaPlanError,
+    ManaSource,
+    auto_plan_payment,
+    extract_mana_modes,
+    parsed_cost,
+)
 from .model import (
     CardInstance,
     CombatState,
@@ -590,6 +597,22 @@ class CommanderEngine:
                             )
                         except (TypeError, ValueError):
                             pass
+                if "equipped creature has" in equipment_oracle.casefold():
+                    granted_lines = [
+                        value.strip()
+                        for value in re.findall(
+                            r'["“]([^"”]+)["”]',
+                            equipment_oracle,
+                        )
+                        if value.strip()
+                    ]
+                    if granted_lines:
+                        base["oracle_text"] = "\n".join(
+                            [
+                                str(base.get("oracle_text") or ""),
+                                *granted_lines,
+                            ]
+                        ).strip()
             oracle = str(base.get("oracle_text") or "").casefold()
             graveyard_ids = self.state.players[card.owner].zones[
                 "graveyard"
@@ -820,6 +843,45 @@ class CommanderEngine:
             if destination != "stack":
                 card.active_face = None
 
+    def _compiled_graveyard_replacement(
+        self,
+        card: CardInstance,
+        destination: str,
+        *,
+        sources: Sequence[CardInstance] | None = None,
+        source_zones: Mapping[str, str] | None = None,
+    ) -> tuple[str, str | None]:
+        """Apply the exact Dauthi Voidwalker graveyard replacement.
+
+        Replacement effects are determined before the move.  Callers that move
+        several objects simultaneously pass the shared pre-move source/zone
+        snapshot so the outcome cannot depend on iteration order.
+        """
+
+        if destination != "graveyard" or card.is_token:
+            return destination, None
+        candidates = (
+            list(sources)
+            if sources is not None
+            else self._semantic_event_sources(zones={"battlefield"})
+        )
+        for source in candidates:
+            active_zone = (
+                source_zones.get(source.object_id, source.zone)
+                if source_zones is not None
+                else source.zone
+            )
+            if (
+                active_zone == "battlefield"
+                and not source.phased_out
+                and source.oracle_id
+                == "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786"
+                and source.controller in self.active_seats
+                and source.controller != card.owner
+            ):
+                return "exile", source.ref
+        return destination, None
+
     def move_card(
         self,
         object_id: str,
@@ -832,10 +894,21 @@ class CommanderEngine:
         reason: str = "",
         log: bool = True,
         semantic_events: bool = False,
+        replacement_sources: Sequence[CardInstance] | None = None,
+        replacement_source_zones: Mapping[str, str] | None = None,
     ) -> CardInstance:
         if destination not in {"library", "hand", "battlefield", "graveyard", "exile", "command", "outside"}:
             raise GameRuleError(f"Unsupported destination {destination}")
         card = self.state.cards[object_id]
+        requested_destination = destination
+        destination, replacement_source = (
+            self._compiled_graveyard_replacement(
+                card,
+                destination,
+                sources=replacement_sources,
+                source_zones=replacement_source_zones,
+            )
+        )
         origin = card.zone
         origin_controller = card.controller
         origin_attachments = [
@@ -890,6 +963,8 @@ class CommanderEngine:
                     known = {card.owner, *(reveal_to or [])}
                     card.known_to = sorted(known)
                     card.revealed_to = sorted(set(reveal_to or []))
+        if replacement_source is not None and card.zone == "exile":
+            card.counters["void"] = 1
         if card.is_token and destination not in {"battlefield", "stack"}:
             if card.object_id in self.state.players[card.owner].zones.get(destination, []):
                 self.state.players[card.owner].zones[destination].remove(card.object_id)
@@ -902,6 +977,24 @@ class CommanderEngine:
                 {"object": card.ref, "from": origin, "to": card.zone, "reason": reason, "tapped": card.tapped},
                 changed_objects=[object_id],
                 changed_players=[card.owner, card.controller],
+            )
+        if replacement_source is not None:
+            self._log(
+                None,
+                "replacement.apply",
+                (
+                    f"{replacement_source} exiled {card.ref} with a void "
+                    "counter instead of putting it into a graveyard."
+                ),
+                {
+                    "source": replacement_source,
+                    "object": card.ref,
+                    "replaced_destination": requested_destination,
+                    "destination": card.zone,
+                    "counter": "void",
+                },
+                importance=2,
+                changed_objects=[object_id],
             )
         if semantic_events:
             self._dispatch_zone_change_events(
@@ -982,6 +1075,7 @@ class CommanderEngine:
             "reason": reason,
             "token": card.is_token,
             "attachments": list(origin_attachments),
+            "types": sorted(origin_types),
         }
         if origin == "battlefield" and event_destination != "battlefield":
             departure_context = {
@@ -1010,6 +1104,52 @@ class CommanderEngine:
                     source_zones=departure_source_zones,
                     trigger_batch=event_triggers,
                 )
+            if (
+                event_destination == "graveyard"
+                and "creature" in origin_types
+            ):
+                for source in departure_sources:
+                    source_data = self._effective_card_data(source)
+                    source_types, _, _ = self._type_parts(
+                        str(source_data.get("type_line") or "")
+                    )
+                    if "creature" not in source_types:
+                        continue
+                    has_thornbite_staff = any(
+                        (
+                            equipment := self.state.cards.get(
+                                attachment_id
+                            )
+                        )
+                        is not None
+                        and equipment.printed_name == "Thornbite Staff"
+                        for attachment_id in source.attachments
+                    )
+                    if not has_thornbite_staff:
+                        continue
+                    ref = self._next_ref("S")
+                    event_triggers.append(
+                        StackItem(
+                            stack_id=self._stable_runtime_id(
+                                "stack",
+                                ref,
+                            ),
+                            ref=ref,
+                            kind="triggered_ability",
+                            controller=source.controller,
+                            label=(
+                                f"{self.display_name(source.object_id)} "
+                                "Thornbite Staff untap trigger"
+                            ),
+                            source_object_id=source.object_id,
+                            semantic_key="builtin:thornbite-untap",
+                            visibility=list(self.seats),
+                            context={
+                                "event": "creature.dies",
+                                "card": card.ref,
+                            },
+                        )
+                    )
         if origin == "graveyard" and event_destination != "graveyard":
             self._dispatch_semantic_event(
                 "card.leave_graveyard",
@@ -1027,13 +1167,14 @@ class CommanderEngine:
                 self._enqueue_semantic_trigger_batch(event_triggers)
             return
         entered_data = self._effective_card_data(card)
-        entered_types, _, _ = self._type_parts(
+        entered_types, entered_subtypes, _ = self._type_parts(
             str(entered_data.get("type_line") or "")
         )
         entered_context = {
             **common,
             "controller": card.controller,
             "types": sorted(entered_types),
+            "subtypes": sorted(entered_subtypes),
             "tapped": card.tapped,
         }
         self._dispatch_semantic_event(
@@ -1074,6 +1215,12 @@ class CommanderEngine:
         ] = []
         for object_id, destination in changes:
             card = self.state.cards[object_id]
+            actual_destination, _ = self._compiled_graveyard_replacement(
+                card,
+                destination,
+                sources=sources,
+                source_zones=source_zones,
+            )
             snapshots.append(
                 (
                     card,
@@ -1085,7 +1232,7 @@ class CommanderEngine:
                         for attachment_id in card.attachments
                         if attachment_id in self.state.cards
                     ],
-                    destination,
+                    actual_destination,
                 )
             )
             self.move_card(
@@ -1094,6 +1241,8 @@ class CommanderEngine:
                 reason=reason,
                 log=log,
                 semantic_events=False,
+                replacement_sources=sources,
+                replacement_source_zones=source_zones,
             )
         trigger_batch: list[StackItem] = []
         for (
@@ -1803,10 +1952,26 @@ class CommanderEngine:
             card.temporary_keywords.clear()
             card.attacking = None
             card.blocking = None
+            until_end = dict(
+                card.annotations.get("until_end_of_turn") or {}
+            )
+            if "copy_overrides_previous" in until_end:
+                previous = until_end["copy_overrides_previous"]
+                if previous is None:
+                    card.annotations.pop("copy_overrides", None)
+                else:
+                    card.annotations["copy_overrides"] = copy.deepcopy(
+                        previous
+                    )
             card.annotations.pop("until_end_of_turn", None)
         for player in self.state.players.values():
             player.stats.pop("next_spell_improvise", None)
             player.stats.pop("next_spell_uncounterable", None)
+            player.stats.pop(
+                "spells_cant_be_countered_until_end",
+                None,
+            )
+            player.stats.pop("hexproof_from_colors_until_end", None)
         self._clear_mana(reason="cleanup")
         self._log(active, "turn.cleanup", f"{active} completed cleanup.", importance=0)
         if self.state.game_over:
@@ -2520,6 +2685,44 @@ class CommanderEngine:
             card = self.state.cards[object_id]
             if card.controller != seat or card.tapped or card.phased_out:
                 continue
+            data = self._effective_card_data(card)
+            card_types, _, _ = self._type_parts(
+                str(data.get("type_line") or "")
+            )
+            if (
+                "creature" in card_types
+                and self._is_summoning_sick(card)
+                and "Haste" not in data.get("keywords", [])
+            ):
+                continue
+            granted_token_mana = bool(
+                card.is_token
+                and "creature" in card_types
+                and self._controller_has_oracle_text(
+                    seat,
+                    'creature tokens you control have "{t}: add one '
+                    'mana of any color."',
+                )
+            )
+            if granted_token_mana:
+                modes = tuple(
+                    ManaMode(
+                        {
+                            **normalize_mana_bundle(None),
+                            color: 1,
+                        }
+                    )
+                    for color in "WUBRG"
+                )
+                sources.append(
+                    ManaSource(
+                        object_id,
+                        card.ref,
+                        self.display_name(object_id),
+                        modes,
+                    )
+                )
+                continue
             record = self.card_record(card)
             if not record:
                 continue
@@ -2528,6 +2731,13 @@ class CommanderEngine:
                 for ability in self._activated_abilities(card)
                 if ability.mana_ability and card.zone in ability.zones
             ]
+            if (
+                not mana_abilities
+                and not record.is_land
+                and "creature tokens you control have"
+                in record.oracle_text.casefold()
+            ):
+                continue
             if mana_abilities and not any(
                 self._activation_condition_status(
                     seat,
@@ -2553,9 +2763,59 @@ class CommanderEngine:
                 raise GameRuleError(f"{card.ref} is already tapped")
             bundle = normalize_mana_bundle(activation.get("bundle"))
             record = self.card_record(card)
-            if not record:
-                raise GameRuleError(f"{card.ref} is not a card-backed mana source")
-            modes = extract_mana_modes(record, self._commander_identity(seat))
+            data = self._effective_card_data(card)
+            card_types, _, _ = self._type_parts(
+                str(data.get("type_line") or "")
+            )
+            if (
+                "creature" in card_types
+                and self._is_summoning_sick(card)
+                and "Haste" not in data.get("keywords", [])
+            ):
+                raise GameRuleError(f"{card.ref} is summoning sick")
+            granted_token_mana = bool(
+                card.is_token
+                and "creature" in card_types
+                and self._controller_has_oracle_text(
+                    seat,
+                    'creature tokens you control have "{t}: add one '
+                    'mana of any color."',
+                )
+            )
+            if granted_token_mana:
+                modes = tuple(
+                    ManaMode(
+                        {
+                            **normalize_mana_bundle(None),
+                            color: 1,
+                        }
+                    )
+                    for color in "WUBRG"
+                )
+            else:
+                record = self.card_record(card)
+                if not record:
+                    raise GameRuleError(
+                        f"{card.ref} is not a card-backed mana source"
+                    )
+                mana_abilities = [
+                    ability
+                    for ability in self._activated_abilities(card)
+                    if ability.mana_ability and card.zone in ability.zones
+                ]
+                if (
+                    not mana_abilities
+                    and not record.is_land
+                    and "creature tokens you control have"
+                    in record.oracle_text.casefold()
+                ):
+                    raise GameRuleError(
+                        f"{card.ref} does not itself have that mana ability"
+                    )
+                modes = extract_mana_modes(
+                    record,
+                    self._commander_identity(seat),
+                )
             matching = [mode for mode in modes if normalize_mana_bundle(mode.bundle) == bundle]
             if not matching:
                 raise GameRuleError(f"Declared output is not a recognized mana mode of {card.printed_name}")
@@ -2679,11 +2939,33 @@ class CommanderEngine:
             "lands you control enter untapped",
         )
 
+    def _temporary_play_permission(
+        self,
+        seat: str,
+        card: CardInstance,
+    ) -> Mapping[str, Any] | None:
+        permission = card.annotations.get("temporary_play_permission")
+        if not isinstance(permission, Mapping):
+            return None
+        if (
+            str(permission.get("player") or "") != seat
+            or int(permission.get("turn_sequence", -1))
+            != self.state.turn_sequence
+            or str(permission.get("zone") or "") != card.zone
+        ):
+            return None
+        return permission
+
     def _compiled_land_play_permission(
         self,
         seat: str,
         card: CardInstance,
     ) -> bool:
+        permission = self._temporary_play_permission(seat, card)
+        if permission is not None and bool(
+            permission.get("allow_land", True)
+        ):
+            return True
         if card.owner != seat:
             return False
         if card.zone == "hand":
@@ -2755,7 +3037,7 @@ class CommanderEngine:
             seat,
             str(response.get("card") or response.get("id")),
             zones={raw_from},
-            owned_only=True,
+            owned_only=False,
         )
         record = self.card_record(card)
         if not record or not record.is_land:
@@ -2770,6 +3052,7 @@ class CommanderEngine:
         tapped = self._land_enters_tapped(seat, record, response)
         if response.get("pay_life"):
             player.life -= 2
+        card.annotations.pop("temporary_play_permission", None)
         self.move_card(
             card.object_id,
             "battlefield",
@@ -2836,6 +3119,11 @@ class CommanderEngine:
     ) -> bool:
         """Return whether a trusted static permission allows this zone cast."""
 
+        permission = self._temporary_play_permission(seat, card)
+        if permission is not None and bool(
+            permission.get("allow_spell", True)
+        ):
+            return True
         if card.owner != seat:
             return False
         if card.zone in set(card.annotations.get("cast_from") or []):
@@ -2879,7 +3167,16 @@ class CommanderEngine:
             )
         raw_from = response.get("from")
         zones = ({str(raw_from)} if isinstance(raw_from, str) else set(raw_from or ["hand", "command"]))
-        card = self._resolve_object(seat, str(response.get("card") or response.get("id")), zones=zones, owned_only=True)
+        card = self._resolve_object(
+            seat,
+            str(response.get("card") or response.get("id")),
+            zones=zones,
+            owned_only=False,
+        )
+        if card.zone in {"hand", "command"} and card.owner != seat:
+            raise GameRuleError(
+                "A player may cast only their own cards from this zone"
+            )
         if card.zone == "command" and not card.is_commander:
             raise GameRuleError("Only this seat's commander cards may be cast from the command zone")
         if card.zone not in {"hand", "command"}:
@@ -3192,6 +3489,7 @@ class CommanderEngine:
                         changed_players=[seat],
                     )
         origin = card.zone
+        card.annotations.pop("temporary_play_permission", None)
         self._remove_from_zone(card)
         card.zone = "stack"
         card.controller = seat
@@ -3314,6 +3612,12 @@ class CommanderEngine:
             {
                 "stack": item.ref,
                 "object": card.ref,
+                "colors": [
+                    str(value).upper()
+                    for value in self._effective_card_data(card).get(
+                        "colors", []
+                    )
+                ],
                 "from": origin,
                 "requirements": requirements,
                 "payment": {k:v for k,v in spent.items() if v},
@@ -3390,6 +3694,21 @@ class CommanderEngine:
             oracle_text=str(data.get("oracle_text") or ""),
             keywords=tuple(data.get("keywords") or ()),
         )
+
+    @staticmethod
+    def _semantic_key_for_ability(
+        source: CardInstance,
+        ability: ActivatedAbility,
+    ) -> str:
+        if (
+            ability.effect_text.casefold().strip(" .")
+            == "this creature deals 1 damage to any target"
+        ):
+            return (
+                "dae4815e-9025-4993-ab46-52a3f1a7219e:"
+                "granted:damage"
+            )
+        return f"{source.oracle_id}:ability:{ability.ability_id}"
 
     def _legendary_creatures_controlled(self, seat: str) -> int:
         total = 0
@@ -3674,8 +3993,9 @@ class CommanderEngine:
         if ability.sorcery_speed:
             self._sorcery_timing(seat)
 
-        candidate_semantic_key = (
-            f"{source.oracle_id}:ability:{ability.ability_id}"
+        candidate_semantic_key = self._semantic_key_for_ability(
+            source,
+            ability,
         )
         target_program = self.semantics.get(candidate_semantic_key)
         selected_modes = [str(value) for value in response.get("modes") or []]
@@ -3797,7 +4117,7 @@ class CommanderEngine:
             )
         )
         builtin_food = (
-            self.card_record(source) is None
+            source.is_token
             and "artifact" in source_types
             and "food" in source_subtypes
             and "you gain 3 life"
@@ -4081,6 +4401,25 @@ class CommanderEngine:
             )
             if not controls_artifact:
                 return "unavailable", "requires_controlled_artifact"
+            return "payable", None
+        if (
+            "activate only if there are four or more card types among "
+            "cards in your graveyard"
+        ) in effect:
+            card_types: set[str] = set()
+            for object_id in self.state.players[seat].zones["graveyard"]:
+                card_types.update(
+                    self._type_parts(
+                        str(
+                            self._effective_card_data(object_id).get(
+                                "type_line"
+                            )
+                            or ""
+                        )
+                    )[0]
+                )
+            if len(card_types) < 4:
+                return "unavailable", "requires_delirium"
             return "payable", None
         match = re.search(
             r"activate only if you control "
@@ -4757,12 +5096,30 @@ class CommanderEngine:
 
         response = dict(response or {})
         x_value = response.get("x")
-        printed_options, has_x = self._compiled_printed_cost_options(
-            seat,
-            card,
-            x_value=(int(x_value) if x_value is not None else None),
-            hint=hint,
+        temporary_permission = self._temporary_play_permission(seat, card)
+        cast_without_mana = bool(
+            temporary_permission
+            and temporary_permission.get("without_mana_cost")
         )
+        if cast_without_mana:
+            if x_value is not None and int(x_value) != 0:
+                return []
+            printed_options = [
+                {
+                    "id": "without_mana_cost",
+                    "kind": "alternate",
+                    "label": "Cast without paying its mana cost",
+                    "requirements": self._mana_vector({}),
+                }
+            ]
+            has_x = False
+        else:
+            printed_options, has_x = self._compiled_printed_cost_options(
+                seat,
+                card,
+                x_value=(int(x_value) if x_value is not None else None),
+                hint=hint,
+            )
         schema = dict(program.cost_schema or {}) if program else {}
         record = self.card_record(card)
         if record is None:
@@ -4783,7 +5140,11 @@ class CommanderEngine:
             if card.zone == "command" and card.is_commander
             else 0
         )
-        for raw in schema.get("alternate_costs", []):
+        for raw in (
+            []
+            if cast_without_mana
+            else schema.get("alternate_costs", [])
+        ):
             alternative = dict(raw)
             if not self._alternate_cost_condition_met(
                 seat, dict(alternative.get("condition") or {})
@@ -5105,19 +5466,20 @@ class CommanderEngine:
 
     def _priority_action_hints(self, seat: str) -> dict[str, Any]:
         player = self.state.players[seat]
-        candidate_zones = [
+        candidate_zones = unique_preserving_order([
             *player.zones["hand"],
             *player.zones["command"],
             *[
                 object_id
                 for zone in ("graveyard", "exile")
-                for object_id in player.zones[zone]
+                for zone_owner in self.active_seats
+                for object_id in self.state.players[zone_owner].zones[zone]
                 if self._compiled_zone_cast_permission(
                     seat,
                     self.state.cards[object_id],
                 )
             ],
-        ]
+        ])
         castable: list[str] = []
         cast_target_schemas: dict[str, dict[str, Any]] = {}
         cast_cost_options: dict[str, list[dict[str, Any]]] = {}
@@ -5293,7 +5655,14 @@ class CommanderEngine:
                 self.state.cards[oid].ref
                 for oid in [
                     *player.zones["hand"],
-                    *player.zones["graveyard"],
+                    *[
+                        object_id
+                        for zone in ("graveyard", "exile")
+                        for zone_owner in self.active_seats
+                        for object_id in self.state.players[
+                            zone_owner
+                        ].zones[zone]
+                    ],
                 ]
                 if (self.card_record(oid) and self.card_record(oid).is_land)
                 and self._compiled_land_play_permission(
@@ -5326,7 +5695,17 @@ class CommanderEngine:
             )
             program = (
                 self.semantics.get(
-                    f"{source.oracle_id}:ability:{ability_hint['a']}"
+                    self._semantic_key_for_ability(
+                        source,
+                        next(
+                            ability
+                            for ability in self._activated_abilities(
+                                source
+                            )
+                            if ability.ability_id
+                            == ability_hint["a"]
+                        ),
+                    )
                 )
                 if source
                 else None
@@ -5662,6 +6041,10 @@ class CommanderEngine:
                 controlled_values
                 and max(controlled_values) == max(all_values)
             )
+        elif field.startswith("source_annotation."):
+            actual = source.annotations.get(
+                field.removeprefix("source_annotation.")
+            )
         else:
             actual = context.get(field)
         expected = self._semantic_event_value(
@@ -5817,6 +6200,18 @@ class CommanderEngine:
                         ),
                     },
                 )
+                if (
+                    trigger_batch is not None
+                    and "one_or_more_event_batch" in program.coverage
+                    and any(
+                        existing.semantic_key == item.semantic_key
+                        and existing.source_object_id
+                        == item.source_object_id
+                        and existing.context.get("event") == event
+                        for existing in trigger_batch
+                    )
+                ):
+                    continue
                 trigger_count = 1
                 entering_types = {
                     str(value).casefold()
@@ -5882,6 +6277,8 @@ class CommanderEngine:
                         "additional_trigger_copy": copy_index,
                     }
                     triggered.append(copied)
+                if "consume_evoked_marker" in program.coverage:
+                    source.annotations.pop("evoked", None)
         if trigger_batch is not None:
             trigger_batch.extend(triggered)
         elif triggered:
@@ -6190,6 +6587,26 @@ class CommanderEngine:
         ref = str(row["ref"])
         if (group.source_exclusion or group.another) and ref == source_ref:
             return False
+        source_colors = self._source_colors_for_ref(source_ref)
+        protected_seat = (
+            str(row["ref"])
+            if row.get("category") == "player"
+            else str(row.get("controller") or "")
+        )
+        if (
+            as_target
+            and protected_seat in self.state.players
+            and protected_seat != controller
+            and source_colors.intersection(
+                {
+                    str(value).upper()
+                    for value in self.state.players[
+                        protected_seat
+                    ].stats.get("hexproof_from_colors_until_end", [])
+                }
+            )
+        ):
+            return False
         card = row.get("card")
         if as_target and row.get("zone") == "battlefield" and isinstance(
             card, CardInstance
@@ -6208,7 +6625,7 @@ class CommanderEngine:
             ):
                 return False
             if self._protection_colors(card).intersection(
-                self._source_colors_for_ref(source_ref)
+                source_colors
             ):
                 return False
         if group.categories and str(row["category"]) not in {
@@ -6310,6 +6727,33 @@ class CommanderEngine:
                         derived["land"]
                         and "basic" not in supertypes
                     )
+                ):
+                    return False
+            elif group.predicate == "permanent_card":
+                if not types.intersection(
+                    {
+                        "artifact",
+                        "battle",
+                        "creature",
+                        "enchantment",
+                        "land",
+                        "planeswalker",
+                    }
+                ):
+                    return False
+            elif group.predicate == "damageable":
+                if (
+                    row["category"] != "player"
+                    and not types.intersection(
+                        {"battle", "creature", "planeswalker"}
+                    )
+                ):
+                    return False
+            elif group.predicate == "void_counter":
+                if (
+                    not isinstance(card, CardInstance)
+                    or row.get("zone") != "exile"
+                    or int(card.counters.get("void", 0)) <= 0
                 ):
                     return False
             else:
@@ -6791,6 +7235,7 @@ class CommanderEngine:
             "builtin:optional-mill-one",
             "builtin:sacrifice-source",
             "builtin:storm",
+            "builtin:thornbite-untap",
         }:
             return True
         program = self.semantics.get(item.semantic_key)
@@ -6948,6 +7393,20 @@ class CommanderEngine:
                 ],
                 None,
                 note="Moloid attack trigger",
+            )
+            return
+        if item.semantic_key == "builtin:thornbite-untap":
+            source = self.state.cards.get(item.source_object_id or "")
+            self._begin_resolve_item(
+                item,
+                (
+                    [{"op": "untap", "card": "$source"}]
+                    if source is not None
+                    and source.zone == "battlefield"
+                    else []
+                ),
+                None,
+                note="Thornbite Staff granted trigger",
             )
             return
         program = self.semantics.get(item.semantic_key)
@@ -7718,6 +8177,8 @@ class CommanderEngine:
         if item.card_object_id:
             card = self.state.cards[item.card_object_id]
             if card.zone == "stack":
+                if item.context.get("cost_option") == "evoke":
+                    card.annotations["evoked"] = True
                 entered = self.move_card(
                     card.object_id,
                     destination or item.default_destination or "graveyard",
@@ -9545,6 +10006,10 @@ class CommanderEngine:
     def _stack_item_can_be_countered(self, item: StackItem) -> bool:
         if item.context.get("cant_be_countered"):
             return False
+        if self.state.players[item.controller].stats.get(
+            "spells_cant_be_countered_until_end"
+        ):
+            return False
         if item.card_object_id:
             card = self.state.cards[item.card_object_id]
             if card.annotations.get("cant_be_countered"):
@@ -10368,6 +10833,39 @@ class CommanderEngine:
                 changed_players=[seat],
             )
             return True
+        if op == "veil_of_summer":
+            seat = str(effect.get("player") or actor)
+            opponent_cast_blue_or_black = any(
+                event.turn_sequence == self.state.turn_sequence
+                and event.code == "stack.cast"
+                and event.actor in self.active_seats
+                and event.actor != seat
+                and {"U", "B"}.intersection(
+                    {
+                        str(value).upper()
+                        for value in event.details.get("colors", [])
+                    }
+                )
+                for event in self.state.events
+            )
+            if opponent_cast_blue_or_black:
+                self.draw(seat, 1, reason=reason)
+            player = self.state.players[seat]
+            player.stats["spells_cant_be_countered_until_end"] = True
+            player.stats["hexproof_from_colors_until_end"] = ["U", "B"]
+            self._log(
+                actor,
+                "effect.veil",
+                f"{seat} gained Veil of Summer's turn-long effects.",
+                {
+                    "player": seat,
+                    "drew": opponent_cast_blue_or_black,
+                    "colors": ["U", "B"],
+                },
+                importance=2,
+                changed_players=[seat],
+            )
+            return opponent_cast_blue_or_black
         if op == "add_counter_selected":
             counter = str(effect.get("counter") or "").strip()
             amount = int(effect.get("amount", 1))
@@ -10914,6 +11412,70 @@ class CommanderEngine:
             )
             self.shuffle_library(owner, reason=reason)
             return moved.ref
+        if op == "shuffle_graveyard_bottom_random":
+            raw_players = effect.get("players")
+            players = (
+                [str(value) for value in raw_players]
+                if isinstance(raw_players, Sequence)
+                and not isinstance(raw_players, (str, bytes))
+                else (
+                    [str(raw_players)]
+                    if raw_players
+                    else []
+                )
+            )
+            moved_by_player: dict[str, list[str]] = {}
+            for seat in players:
+                if seat not in self.active_seats:
+                    continue
+                graveyard_ids = list(
+                    self.state.players[seat].zones["graveyard"]
+                )
+                if not graveyard_ids:
+                    moved_by_player[seat] = []
+                    continue
+                randomizer = random.Random(
+                    f"{self.state.config.seed}|{self.state.turn_sequence}|"
+                    f"{seat}|graveyard-bottom|{self.state.event_sequence}"
+                )
+                randomizer.shuffle(graveyard_ids)
+                self._move_cards_simultaneously(
+                    [
+                        (object_id, "library")
+                        for object_id in graveyard_ids
+                    ],
+                    reason=reason,
+                    log=False,
+                )
+                library = self.state.players[seat].zones["library"]
+                moved_set = set(graveyard_ids)
+                remaining_ids = [
+                    object_id
+                    for object_id in library
+                    if object_id not in moved_set
+                ]
+                library[:] = [*graveyard_ids, *remaining_ids]
+                moved_by_player[seat] = [
+                    self.state.cards[object_id].ref
+                    for object_id in graveyard_ids
+                ]
+                self._log(
+                    actor,
+                    "graveyard.bottom",
+                    (
+                        f"{seat} put {len(graveyard_ids)} graveyard "
+                        "card(s) on the bottom in a random order."
+                    ),
+                    {
+                        "player": seat,
+                        "count": len(graveyard_ids),
+                        "reason": reason,
+                    },
+                    importance=2,
+                    changed_objects=graveyard_ids,
+                    changed_players=[seat],
+                )
+            return moved_by_player
         if op == "reveal_top_permanent":
             seat = str(effect.get("player") or actor)
             library = self.state.players[seat].zones["library"]
@@ -11391,6 +11953,44 @@ class CommanderEngine:
                 changed_objects=[card.object_id],
             )
             return card.ref
+        if op == "copy_until_end_of_turn":
+            source = self._resolve_object(
+                actor,
+                str(effect.get("source") or effect.get("card")),
+                zones={"battlefield"},
+            )
+            target = self._resolve_object(
+                actor,
+                str(effect.get("target")),
+            )
+            until_end = source.annotations.setdefault(
+                "until_end_of_turn",
+                {},
+            )
+            if "copy_overrides_previous" not in until_end:
+                until_end["copy_overrides_previous"] = copy.deepcopy(
+                    source.annotations.get("copy_overrides")
+                )
+            source.annotations["copy_overrides"] = (
+                self._copyable_characteristics(target)
+            )
+            self._log(
+                actor,
+                "permanent.copy",
+                (
+                    f"{source.ref} became a copy of {target.ref} until "
+                    "end of turn."
+                ),
+                {
+                    "source": source.ref,
+                    "target": target.ref,
+                    "duration": "until_end_of_turn",
+                    "reason": reason,
+                },
+                importance=2,
+                changed_objects=[source.object_id],
+            )
+            return source.ref
         if op == "add_type":
             card = self._resolve_object(
                 actor,
@@ -11451,6 +12051,49 @@ class CommanderEngine:
                 changed_objects=[card.object_id],
             )
             return card.ref
+        if op == "grant_play_without_mana_cost":
+            card = self._resolve_object(
+                actor,
+                str(effect["card"]),
+                zones={"exile"},
+            )
+            if card.owner == actor:
+                raise GameRuleError(
+                    "Dauthi Voidwalker can choose only a card an opponent owns"
+                )
+            if int(card.counters.get("void", 0)) <= 0:
+                raise GameRuleError(
+                    "The chosen exiled card does not have a void counter"
+                )
+            card.annotations["temporary_play_permission"] = {
+                "player": actor,
+                "zone": "exile",
+                "turn_sequence": self.state.turn_sequence,
+                "without_mana_cost": True,
+                "allow_land": True,
+                "allow_spell": True,
+                "source": str(effect.get("source") or ""),
+            }
+            self._log(
+                actor,
+                "permission.play",
+                (
+                    f"{actor} may play {card.ref} from exile this turn "
+                    "without paying its mana cost."
+                ),
+                {
+                    "player": actor,
+                    "object": card.ref,
+                    "zone": "exile",
+                    "turn_sequence": self.state.turn_sequence,
+                    "without_mana_cost": True,
+                    "reason": reason,
+                },
+                importance=2,
+                changed_objects=[card.object_id],
+                changed_players=[actor],
+            )
+            return card.ref
         if op == "counter":
             card = self._resolve_object(actor, str(effect["card"]), zones={"battlefield"})
             name = str(effect.get("counter") or "+1/+1")
@@ -11458,6 +12101,57 @@ class CommanderEngine:
             card.counters[name] = card.counters.get(name, 0) + delta
             self._log(actor, "permanent.counter", f"{card.ref} {name} changed by {delta}.", {"object": card.ref, "counter": name, "delta": delta}, importance=1, changed_objects=[card.object_id])
             return card.counters[name]
+        if op == "counter_all_subtype":
+            seat = str(effect.get("player") or actor)
+            subtype = str(effect.get("subtype") or "").casefold()
+            counter_name = str(effect.get("counter") or "+1/+1")
+            amount = int(effect.get("amount", 1))
+            changed: list[str] = []
+            for object_id in self.state.players[seat].zones[
+                "battlefield"
+            ]:
+                card = self.state.cards[object_id]
+                if (
+                    card.controller != seat
+                    or card.phased_out
+                    or subtype
+                    not in self._type_parts(
+                        str(
+                            self._effective_card_data(card).get(
+                                "type_line"
+                            )
+                            or ""
+                        )
+                    )[1]
+                ):
+                    continue
+                card.counters[counter_name] = (
+                    int(card.counters.get(counter_name, 0)) + amount
+                )
+                changed.append(card.object_id)
+            if changed:
+                self._log(
+                    actor,
+                    "counter.add",
+                    (
+                        f"Added {amount} {counter_name} counter(s) to "
+                        f"{len(changed)} {subtype} permanent(s)."
+                    ),
+                    {
+                        "objects": [
+                            self.state.cards[object_id].ref
+                            for object_id in changed
+                        ],
+                        "counter": counter_name,
+                        "subtype": subtype,
+                        "amount": amount,
+                    },
+                    importance=2,
+                    changed_objects=changed,
+                )
+            return [
+                self.state.cards[object_id].ref for object_id in changed
+            ]
         if op == "look_top":
             seat = str(effect.get("player") or actor)
             viewer = str(effect.get("viewer") or actor)

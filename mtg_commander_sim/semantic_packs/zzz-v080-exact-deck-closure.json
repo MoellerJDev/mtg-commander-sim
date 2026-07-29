@@ -530,6 +530,410 @@
         "authored_by": "v0.8-exact-deck-closure",
         "review_status": "reviewed"
       }
+    },
+    {
+      "key": "002965be-a36f-4a09-9ce0-c6535bca1703:spell:front",
+      "label": "Veil of Summer",
+      "oracle_id": "002965be-a36f-4a09-9ce0-c6535bca1703",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [{"op": "veil_of_summer", "player": "$controller"}],
+      "destination": "graveyard",
+      "trust_level": "trusted",
+      "coverage": ["spell_resolution", "conditional_draw", "cant_be_countered", "temporary_hexproof"],
+      "tests": ["test_veil_draws_from_prior_opponent_color_and_protects_targets"],
+      "provenance": {
+        "source_oracle_hash": "dfc84fd927efe4676722069b1b002726f8697e37837c8f24c91aac708c3ba247",
+        "source_rulings_hash": "f3ddfe3abc5713edd248169b200a8f9c71ddd35d4e0a272905147aaf69878bf0",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "7c2a4fe5-43e8-4e20-bef2-0278d18afc4b:ability:ab3",
+      "label": "Shifting Woodland delirium copy",
+      "oracle_id": "7c2a4fe5-43e8-4e20-bef2-0278d18afc4b",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "zones": ["graveyard"],
+        "categories": ["card"],
+        "owner_relation": "you",
+        "predicate": "permanent_card",
+        "count": 1
+      },
+      "effects": [
+        {
+          "op": "copy_until_end_of_turn",
+          "source": "$source",
+          "target": "$target.0"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "delirium", "target_validation", "temporary_copy", "keyword:delirium"],
+      "tests": ["test_shifting_woodland_requires_delirium_and_restores_copy"],
+      "provenance": {
+        "source_oracle_hash": "4c8d0c5304ad83c5511e88819c6c89453b2537af5d260d9525c414a94058a767",
+        "source_rulings_hash": "9987074bef41761358658310bab4b9d300da12f32f6329d481d841730a75b000",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "d75b2b8e-05c9-47da-b359-a867256d78ea:spell:front",
+      "label": "Insidious Roots",
+      "oracle_id": "d75b2b8e-05c9-47da-b359-a867256d78ea",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "granted_mana_ability"],
+      "tests": ["test_insidious_roots_batches_graveyard_departures_and_grants_token_mana"],
+      "provenance": {
+        "source_oracle_hash": "66b469bfd33f2bab444f06de7d72683d962aac1a24b8353e0b15e7d99e6d6687",
+        "source_rulings_hash": "e01931103debb822831b09d066581d2fc704b248a757cf04eff91c3c87edc3fa",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "d75b2b8e-05c9-47da-b359-a867256d78ea:trigger:graveyard-leave",
+      "label": "Insidious Roots graveyard-leave trigger",
+      "oracle_id": "d75b2b8e-05c9-47da-b359-a867256d78ea",
+      "ability_id": "trigger:graveyard-leave",
+      "active_zone": "battlefield",
+      "event": "card.leave_graveyard",
+      "event_condition": {
+        "all": [
+          {
+            "field": "owner",
+            "op": "eq",
+            "value": "$source.controller"
+          },
+          {
+            "field": "types",
+            "op": "contains_any",
+            "value": ["creature"]
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "create_token",
+          "controller": "$controller",
+          "name": "Plant",
+          "quantity": 1,
+          "characteristics": {
+            "type_line": "Token Creature — Plant",
+            "colors": ["G"],
+            "power": "0",
+            "toughness": "1"
+          }
+        },
+        {
+          "op": "counter_all_subtype",
+          "player": "$controller",
+          "subtype": "Plant",
+          "counter": "+1/+1",
+          "amount": 1
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "graveyard_leave", "one_or_more_event_batch", "token_creation", "counter_distribution"],
+      "tests": ["test_insidious_roots_batches_graveyard_departures_and_grants_token_mana"],
+      "provenance": {
+        "source_oracle_hash": "66b469bfd33f2bab444f06de7d72683d962aac1a24b8353e0b15e7d99e6d6687",
+        "source_rulings_hash": "e01931103debb822831b09d066581d2fc704b248a757cf04eff91c3c87edc3fa",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "dae4815e-9025-4993-ab46-52a3f1a7219e:spell:front",
+      "label": "Thornbite Staff",
+      "oracle_id": "dae4815e-9025-4993-ab46-52a3f1a7219e",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "granted_activated_ability", "granted_triggered_ability"],
+      "tests": ["test_thornbite_staff_grants_damage_death_untap_and_shaman_attach"],
+      "provenance": {
+        "source_oracle_hash": "00a18bf359265622865f3f1791dba43ba2a7967a4b9c77594cf3d9eca6290242",
+        "source_rulings_hash": "0716c69497a1e7fc602e27aa49294a102b40c0a720408817c6427c507812e0b1",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "dae4815e-9025-4993-ab46-52a3f1a7219e:ability:ab3",
+      "label": "Thornbite Staff equip",
+      "oracle_id": "dae4815e-9025-4993-ab46-52a3f1a7219e",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "zones": ["battlefield"],
+        "categories": ["permanent"],
+        "creature": true,
+        "controller_relation": "you",
+        "count": 1
+      },
+      "effects": [
+        {
+          "op": "attach",
+          "equipment": "$source",
+          "creature": "$target.0"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "equip", "keyword_ability", "target_validation", "attachment"],
+      "tests": ["test_thornbite_staff_grants_damage_death_untap_and_shaman_attach"],
+      "provenance": {
+        "source_oracle_hash": "00a18bf359265622865f3f1791dba43ba2a7967a4b9c77594cf3d9eca6290242",
+        "source_rulings_hash": "0716c69497a1e7fc602e27aa49294a102b40c0a720408817c6427c507812e0b1",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "dae4815e-9025-4993-ab46-52a3f1a7219e:trigger:shaman-enter",
+      "label": "Thornbite Staff Shaman-enter trigger",
+      "oracle_id": "dae4815e-9025-4993-ab46-52a3f1a7219e",
+      "ability_id": "trigger:shaman-enter",
+      "active_zone": "battlefield",
+      "event": "creature.enter",
+      "event_condition": {
+        "field": "subtypes",
+        "op": "contains_any",
+        "value": ["shaman"]
+      },
+      "effects": [
+        {
+          "op": "choose_option",
+          "player": "$controller",
+          "prompt": "You may attach Thornbite Staff to the Shaman that entered.",
+          "options": [
+            {"id": "attach", "label": "Attach Thornbite Staff"},
+            {"id": "decline", "label": "Do not attach"}
+          ],
+          "then_by_choice": {
+            "attach": [
+              {
+                "op": "attach",
+                "equipment": "$source",
+                "creature": "$context.card"
+              }
+            ],
+            "decline": []
+          }
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "shaman_enters", "optional_attachment"],
+      "tests": ["test_thornbite_staff_grants_damage_death_untap_and_shaman_attach"],
+      "provenance": {
+        "source_oracle_hash": "00a18bf359265622865f3f1791dba43ba2a7967a4b9c77594cf3d9eca6290242",
+        "source_rulings_hash": "0716c69497a1e7fc602e27aa49294a102b40c0a720408817c6427c507812e0b1",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "dae4815e-9025-4993-ab46-52a3f1a7219e:granted:damage",
+      "label": "Thornbite Staff granted damage ability",
+      "oracle_id": "dae4815e-9025-4993-ab46-52a3f1a7219e",
+      "ability_id": "granted:damage",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "groups": [
+          {
+            "id": "any_target",
+            "zones": ["player", "battlefield"],
+            "categories": ["player", "permanent"],
+            "predicate": "damageable",
+            "count": 1
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "damage",
+          "source": "$source",
+          "target": "$target.0",
+          "amount": 1
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["granted_activated_ability", "target_validation", "damage"],
+      "tests": ["test_thornbite_staff_grants_damage_death_untap_and_shaman_attach"],
+      "provenance": {
+        "source_oracle_hash": "00a18bf359265622865f3f1791dba43ba2a7967a4b9c77594cf3d9eca6290242",
+        "source_rulings_hash": "0716c69497a1e7fc602e27aa49294a102b40c0a720408817c6427c507812e0b1",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c85d824b-c190-4d04-ab99-918ad0e6516c:spell:front",
+      "label": "Endurance",
+      "oracle_id": "c85d824b-c190-4d04-ab99-918ad0e6516c",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "cost_schema": {
+        "alternate_costs": [
+          {
+            "id": "evoke",
+            "kind": "alternate",
+            "requirements": {},
+            "exile_from_hand": {
+              "colors_any": ["G"],
+              "exclude_source": true
+            }
+          }
+        ]
+      },
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "flash", "reach", "evoke", "alternate_cost"],
+      "tests": ["test_endurance_evoke_exiles_green_card_shuffles_target_and_sacrifices"],
+      "provenance": {
+        "source_oracle_hash": "d984d44d84f5a77044e5c399235ef3e0cb16bbb5ffa8b5d1740920089f0e696f",
+        "source_rulings_hash": "760b67485de1345b10070157086ebfe66126af0fc3e0384f568e722a770f1b89",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c85d824b-c190-4d04-ab99-918ad0e6516c:trigger:enter",
+      "label": "Endurance enter trigger",
+      "oracle_id": "c85d824b-c190-4d04-ab99-918ad0e6516c",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "target_schema": {
+        "groups": [
+          {
+            "id": "player",
+            "zones": ["player"],
+            "categories": ["player"],
+            "min": 0,
+            "max": 1
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "shuffle_graveyard_bottom_random",
+          "players": "$targets"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "optional_target", "graveyard_bottom_random"],
+      "tests": ["test_endurance_evoke_exiles_green_card_shuffles_target_and_sacrifices"],
+      "provenance": {
+        "source_oracle_hash": "d984d44d84f5a77044e5c399235ef3e0cb16bbb5ffa8b5d1740920089f0e696f",
+        "source_rulings_hash": "760b67485de1345b10070157086ebfe66126af0fc3e0384f568e722a770f1b89",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c85d824b-c190-4d04-ab99-918ad0e6516c:trigger:evoke",
+      "label": "Endurance evoke sacrifice trigger",
+      "oracle_id": "c85d824b-c190-4d04-ab99-918ad0e6516c",
+      "ability_id": "trigger:evoke",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "event_condition": {
+        "field": "source_annotation.evoked",
+        "op": "truthy"
+      },
+      "effects": [
+        {"op": "sacrifice_if_present", "card": "$source"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "evoke", "consume_evoked_marker", "sacrifice"],
+      "tests": ["test_endurance_evoke_exiles_green_card_shuffles_target_and_sacrifices"],
+      "provenance": {
+        "source_oracle_hash": "d984d44d84f5a77044e5c399235ef3e0cb16bbb5ffa8b5d1740920089f0e696f",
+        "source_rulings_hash": "760b67485de1345b10070157086ebfe66126af0fc3e0384f568e722a770f1b89",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786:spell:front",
+      "label": "Dauthi Voidwalker",
+      "oracle_id": "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": [
+        "permanent_characteristics",
+        "replacement_effect",
+        "static_ability",
+        "zone_permission"
+      ],
+      "tests": [
+        "test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free"
+      ],
+      "provenance": {
+        "source_oracle_hash": "4b06872ea50b96e3ccb086b7d3ea8ef704e79f8c5b2204ebf40039c2082d5e26",
+        "source_rulings_hash": "eabf6f80038038b896b32569979c3490c6cc9cde492a2bb7d8113b8ef70920a2",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786:ability:ab3",
+      "label": "Dauthi Voidwalker play permission",
+      "oracle_id": "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "zones": ["exile"],
+        "categories": ["card"],
+        "owner_relation": "opponent",
+        "predicate": "void_counter",
+        "count": 1
+      },
+      "effects": [
+        {
+          "op": "grant_play_without_mana_cost",
+          "card": "$target.0",
+          "source": "$source"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": [
+        "activated_ability",
+        "cost_option",
+        "target_validation",
+        "zone_permission"
+      ],
+      "tests": [
+        "test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free"
+      ],
+      "provenance": {
+        "source_oracle_hash": "4b06872ea50b96e3ccb086b7d3ea8ef704e79f8c5b2204ebf40039c2082d5e26",
+        "source_rulings_hash": "eabf6f80038038b896b32569979c3490c6cc9cde492a2bb7d8113b8ef70920a2",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
     }
   ]
 }

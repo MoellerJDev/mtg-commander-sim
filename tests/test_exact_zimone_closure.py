@@ -4,8 +4,9 @@ import unittest
 from types import SimpleNamespace
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.model import CombatState
+from mtg_commander_sim.model import CombatState, StackItem
 from mtg_commander_sim.preflight import card_semantic_status
+from mtg_commander_sim.targets import TargetGroup
 
 
 class ExactZimoneClosureTests(unittest.TestCase):
@@ -188,17 +189,23 @@ class ExactZimoneClosureTests(unittest.TestCase):
         for name in (
             "Diabolic Intent",
             "Archway of Innovation",
+            "Dauthi Voidwalker",
             "Elvish Reclaimer",
+            "Endurance",
             "Faerie Mastermind",
             "Gravecrawler",
+            "Insidious Roots",
             "Intruder Alarm",
             "Mole Man, Moloid Master",
             "Mistrise Village",
             "Retreat to Coralhelm",
             "Scryb Ranger",
             "Seedborn Muse",
+            "Shifting Woodland",
             "Spelunking",
+            "Thornbite Staff",
             "Wight of the Reliquary",
+            "Veil of Summer",
         ):
             with self.subTest(card=name):
                 row = card_semantic_status(
@@ -207,6 +214,388 @@ class ExactZimoneClosureTests(unittest.TestCase):
                     db=self.db,
                 )
                 self.assertEqual("fully_playable", row["status"], row)
+
+    def test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free(
+        self,
+    ):
+        session = self.make_session(1019)
+        engine = session.engine
+        dauthi = self.card(engine, "B", "Dauthi Voidwalker")
+        opponent_spell = self.card(engine, "A", "Sol Ring")
+        engine.move_card(dauthi.object_id, "battlefield", controller="B")
+        dauthi.acquired_control_turn_count = -1
+
+        engine.move_card(
+            opponent_spell.object_id,
+            "graveyard",
+            reason="test discard",
+            semantic_events=True,
+        )
+        self.assertEqual("exile", opponent_spell.zone)
+        self.assertEqual(1, opponent_spell.counters.get("void"))
+        self.assertFalse(
+            any(
+                event.code == "permanent.dies"
+                and event.details.get("object") == opponent_spell.ref
+                for event in engine.state.events
+            )
+        )
+
+        engine.state.priority_player = "B"
+        engine._activate(
+            "B",
+            {
+                "source": dauthi.ref,
+                "ability": "ab3",
+                "targets": [opponent_spell.ref],
+            },
+        )
+        self.assertEqual("graveyard", dauthi.zone)
+        self.resolve_top(engine)
+
+        self.prepare_main(engine, "B")
+        action = next(
+            action
+            for action in engine._priority_action_hints("B")["actions"]
+            if action["id"] == f"cast:{opponent_spell.ref}"
+        )
+        self.assertEqual("exile", action["from"])
+        self.assertEqual(
+            "without_mana_cost",
+            action["cost_options"][0]["id"],
+        )
+        engine._cast(
+            "B",
+            {
+                "card": opponent_spell.ref,
+                "from": "exile",
+                "cost_option": "without_mana_cost",
+                "pay": "manual",
+                "payment": {},
+            },
+        )
+        self.assertEqual("stack", opponent_spell.zone)
+        self.assertEqual("B", engine.state.stack[-1].controller)
+        self.resolve_top(engine)
+        self.assertEqual("battlefield", opponent_spell.zone)
+        self.assertEqual("B", opponent_spell.controller)
+        self.assertNotIn(
+            "temporary_play_permission",
+            opponent_spell.annotations,
+        )
+
+    def test_endurance_evoke_exiles_green_card_shuffles_target_and_sacrifices(
+        self,
+    ):
+        session = self.make_session(1018)
+        engine = session.engine
+        endurance = self.card(engine, "B", "Endurance")
+        green_card = self.card(engine, "B", "Birds of Paradise")
+        grave_one = self.card(engine, "A", "Sol Ring")
+        grave_two = self.card(engine, "A", "Panharmonicon")
+        engine.move_card(endurance.object_id, "hand")
+        engine.move_card(green_card.object_id, "hand")
+        engine.move_card(grave_one.object_id, "graveyard")
+        engine.move_card(grave_two.object_id, "graveyard")
+        engine.state.priority_player = "B"
+
+        action = next(
+            action
+            for action in engine._priority_action_hints("B")["actions"]
+            if action["id"] == f"cast:{endurance.ref}"
+        )
+        evoke = next(
+            option
+            for option in action["cost_options"]
+            if option["id"] == "evoke"
+        )
+        self.assertIn(
+            green_card.ref,
+            evoke["choice_schema"]["exile_card"]["legal_refs"],
+        )
+        engine._cast(
+            "B",
+            {
+                "card": endurance.ref,
+                "cost_option": "evoke",
+                "exile_card": green_card.ref,
+                "pay": "manual",
+                "payment": {},
+            },
+        )
+        self.assertEqual("exile", green_card.zone)
+        self.resolve_top(engine)
+        self.assertEqual("trigger.order", engine.state.pending_decision.kind)
+        triggers = engine.state.pending_decision.payload_by_actor["B"][
+            "triggers"
+        ]
+        enter_ref = next(
+            value["id"]
+            for value in triggers
+            if value["label"] == "Endurance enter trigger"
+        )
+        evoke_ref = next(
+            value["id"]
+            for value in triggers
+            if "evoke sacrifice" in value["label"]
+        )
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "order",
+                "order": [evoke_ref, enter_ref],
+                "plan": "RESOLVE_TRIGGERS",
+                "reason": "Put the graveyard trigger above evoke.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("semantic.target", engine.state.pending_decision.kind)
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "targets": ["A"],
+                "plan": "DISRUPT_GRAVEYARD",
+                "reason": "Put the opponent's graveyard on the bottom.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.resolve_top(engine)
+        self.assertFalse(engine.state.players["A"].zones["graveyard"])
+        self.resolve_top(engine)
+        self.assertEqual("graveyard", endurance.zone)
+
+    def test_thornbite_staff_grants_damage_death_untap_and_shaman_attach(
+        self,
+    ):
+        session = self.make_session(1017)
+        engine = session.engine
+        staff = self.card(engine, "B", "Thornbite Staff")
+        shaman = self.card(engine, "B", "Deathrite Shaman")
+        victim = self.card(engine, "B", "Birds of Paradise")
+        engine.move_card(staff.object_id, "battlefield", controller="B")
+        engine.move_card(
+            shaman.object_id,
+            "battlefield",
+            controller="B",
+            semantic_events=True,
+        )
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "choice": "attach",
+                "plan": "BUILD_ENGINE",
+                "reason": "Attach the Staff to the entering Shaman.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(shaman.object_id, staff.attached_to)
+
+        granted = next(
+            ability
+            for ability in engine._activated_abilities(shaman)
+            if "deals 1 damage to any target"
+            in ability.effect_text.casefold()
+        )
+        shaman.acquired_control_turn_count = -1
+        before_life = engine.state.players["A"].life
+        engine.state.players["B"].mana_pool["C"] = 2
+        engine.state.priority_player = "B"
+        engine._activate(
+            "B",
+            {
+                "source": shaman.ref,
+                "ability": granted.ability_id,
+                "targets": ["A"],
+                "pay": "manual",
+                "payment": {"C": 2},
+            },
+        )
+        self.resolve_top(engine)
+        self.assertEqual(before_life - 1, engine.state.players["A"].life)
+        self.assertTrue(shaman.tapped)
+
+        engine.move_card(victim.object_id, "battlefield", controller="B")
+        engine.move_card(
+            victim.object_id,
+            "graveyard",
+            reason="test creature death",
+            semantic_events=True,
+        )
+        self.assertFalse(engine._stabilize())
+        self.resolve_top(engine)
+        self.assertFalse(shaman.tapped)
+
+    def test_veil_draws_from_prior_opponent_color_and_protects_targets(
+        self,
+    ):
+        session = self.make_session(1014)
+        engine = session.engine
+        veil = self.card(engine, "B", "Veil of Summer")
+        blue_source = self.card(engine, "A", "Emry, Lurker of the Loch")
+        protected = self.card(engine, "B", "Birds of Paradise")
+        engine.move_card(protected.object_id, "battlefield", controller="B")
+        engine._log(
+            "A",
+            "stack.cast",
+            "A cast a blue spell.",
+            {
+                "object": blue_source.ref,
+                "colors": ["U"],
+            },
+        )
+        before_hand = len(engine.state.players["B"].zones["hand"])
+        engine._remove_from_zone(veil)
+        veil.zone = "stack"
+        item = StackItem(
+            stack_id="veil-test",
+            ref="S-veil",
+            kind="spell",
+            controller="B",
+            label=veil.printed_name,
+            card_object_id=veil.object_id,
+            semantic_key=f"{veil.oracle_id}:spell:front",
+            default_destination="graveyard",
+            visibility=list(engine.seats),
+        )
+        engine.state.stack.append(item)
+        self.resolve_top(engine)
+        self.assertEqual(
+            before_hand + 1,
+            len(engine.state.players["B"].zones["hand"]),
+        )
+        engine.move_card(
+            blue_source.object_id,
+            "battlefield",
+            controller="A",
+        )
+        group = TargetGroup.from_mapping(
+            {
+                "zones": ["battlefield"],
+                "categories": ["permanent"],
+                "count": 1,
+            }
+        )
+        self.assertNotIn(
+            protected.ref,
+            engine._target_candidates(
+                "A",
+                group,
+                source_ref=blue_source.ref,
+            ),
+        )
+        test_stack = StackItem(
+            stack_id="protected-spell",
+            ref="S-protected",
+            kind="spell",
+            controller="B",
+            label="Protected spell",
+            visibility=list(engine.seats),
+        )
+        self.assertFalse(engine._stack_item_can_be_countered(test_stack))
+
+    def test_shifting_woodland_requires_delirium_and_restores_copy(self):
+        session = self.make_session(1015)
+        engine = session.engine
+        woodland = self.card(engine, "B", "Shifting Woodland")
+        target = self.card(engine, "B", "Birds of Paradise")
+        instant = self.card(engine, "B", "Veil of Summer")
+        artifact = self.card(engine, "B", "Sol Ring")
+        land = self.card(engine, "B", "Island")
+        engine.move_card(
+            woodland.object_id, "battlefield", controller="B"
+        )
+        engine.move_card(target.object_id, "graveyard")
+        ability = next(
+            ability
+            for ability in engine._activated_abilities(woodland)
+            if ability.ability_id == "ab3"
+        )
+        self.assertEqual(
+            ("unavailable", "requires_delirium"),
+            engine._ability_availability("B", woodland, ability),
+        )
+        for card in (instant, artifact, land):
+            engine.move_card(card.object_id, "graveyard")
+        engine.state.players["B"].mana_pool.update({"C": 2, "G": 2})
+        engine.state.priority_player = "B"
+        engine._activate(
+            "B",
+            {
+                "source": woodland.ref,
+                "ability": "ab3",
+                "targets": [target.ref],
+                "pay": "manual",
+                "payment": {"C": 2, "G": 2},
+            },
+        )
+        self.resolve_top(engine)
+        self.assertEqual(
+            "Birds of Paradise",
+            engine._effective_card_data(woodland)["name"],
+        )
+        engine._finish_cleanup()
+        self.assertEqual(
+            "Shifting Woodland",
+            engine._effective_card_data(woodland)["name"],
+        )
+
+    def test_insidious_roots_batches_graveyard_departures_and_grants_token_mana(
+        self,
+    ):
+        session = self.make_session(1016)
+        engine = session.engine
+        roots = self.card(engine, "B", "Insidious Roots")
+        first = self.card(engine, "B", "Birds of Paradise")
+        second = self.card(engine, "B", "Elves of Deep Shadow")
+        engine.move_card(roots.object_id, "battlefield", controller="B")
+        engine.move_card(first.object_id, "graveyard")
+        engine.move_card(second.object_id, "graveyard")
+
+        engine._move_cards_simultaneously(
+            [
+                (first.object_id, "exile"),
+                (second.object_id, "hand"),
+            ],
+            reason="test simultaneous graveyard departure",
+        )
+        self.assertFalse(engine._stabilize())
+        self.assertEqual(1, len(engine.state.stack))
+        self.resolve_top(engine)
+        plants = [
+            card
+            for card in engine.state.cards.values()
+            if card.is_token
+            and card.controller == "B"
+            and card.printed_name == "Plant"
+            and card.zone == "battlefield"
+        ]
+        self.assertEqual(1, len(plants))
+        self.assertEqual(1, plants[0].counters["+1/+1"])
+        plants[0].acquired_control_turn_count = -1
+        source = next(
+            source
+            for source in engine.available_mana_sources("B")
+            if source.ref == plants[0].ref
+        )
+        self.assertEqual(
+            {"W", "U", "B", "R", "G"},
+            {
+                color
+                for mode in source.modes
+                for color, amount in mode.bundle.items()
+                if amount
+            },
+        )
+        engine._activate_mana_plan(
+            "B",
+            [{"source": plants[0].ref, "bundle": {"G": 1}}],
+        )
+        self.assertTrue(plants[0].tapped)
+        self.assertEqual(1, engine.state.players["B"].mana_pool["G"])
 
     def test_mistrise_marks_only_the_next_spell_uncounterable(self):
         session = self.make_session(1010)

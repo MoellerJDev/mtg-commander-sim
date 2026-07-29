@@ -79,7 +79,7 @@ and beyond D27 with both `suppressed_meaningful_windows` and
 
 Duplicated-list fixtures must always retain `matchup_evidence=false`.
 
-Current implementation checkpoint: 230 tests pass. Preflight v2 records
+Current implementation checkpoint: 236 tests pass. Preflight v2 records
 canonical Oracle/rulings provenance, exact list/source fingerprints, material
 categories, scenario witnesses, and fail-closed drift. Rulings hashes are
 content-canonical and are independent of SQLite import order. The trusted-only
@@ -123,10 +123,18 @@ casting and land play, dynamic graveyard-based power/toughness, return costs,
 once-per-turn activations, global and opponent-step untaps, private optional
 land placement, attack-triggered optional milling, scry, next-spell
 uncounterability, and temporary granted improvise.
+The next closure slice promotes Endurance, Veil of Summer, Shifting Woodland,
+Insidious Roots, Thornbite Staff, and Dauthi Voidwalker. It adds exact evoke
+and hand-exile alternate costs, deterministic graveyard-to-library placement,
+turn-long color protection, delirium-gated temporary copying, batched
+one-or-more graveyard triggers, granted token mana, Equipment-granted
+abilities, death-triggered untapping, pre-zone-change graveyard replacement,
+void counters, and temporary opponent-owned exile play permissions with
+server-derived no-mana casting costs.
 
 Current full-database preflight (one row per distinct exact-list card):
 
-- Zimone and Dina: 88 fully playable, 0 partial, 12 unresolved, zero source
+- Zimone and Dina: 94 fully playable, 0 partial, 6 unresolved, zero source
   drift.
 - Mishra, Eminent One: 77 fully playable, 0 partial, 22 unresolved, zero
   source drift.

@@ -29,8 +29,10 @@ VALID_EFFECT_OPERATIONS = {
     "choose_cards_apnap",
     "choose_mana",
     "copy_all_tokens",
+    "copy_until_end_of_turn",
     "choose_warform",
     "counter",
+    "counter_all_subtype",
     "counter_or_destroy_blue",
     "counter_stack",
     "counter_unless_pay",
@@ -79,6 +81,7 @@ VALID_EFFECT_OPERATIONS = {
     "scry",
     "scute_swarm_token",
     "shuffle_into_library",
+    "shuffle_graveyard_bottom_random",
     "sacrifice",
     "sacrifice_if_present",
     "tap",
@@ -86,6 +89,7 @@ VALID_EFFECT_OPERATIONS = {
     "untap",
     "untap_all_creatures",
     "welder_exchange",
+    "veil_of_summer",
     "pay_or_lose",
     "populate_with_haste",
     "put_land_from_hand",
@@ -93,6 +97,7 @@ VALID_EFFECT_OPERATIONS = {
     "pump_controlled_creatures",
     "reanimate",
     "grant_keyword_until_end_of_turn",
+    "grant_play_without_mana_cost",
 }
 
 
