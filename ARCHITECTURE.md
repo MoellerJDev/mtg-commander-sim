@@ -232,6 +232,16 @@ delayed moves carry an expected incarnation, preventing the same physical card
 from leaving and returning to satisfy the old link. These authoritative values
 are omitted from seat projections.
 
+`CardInstance.zone_timestamp` records the serialized moment at which its
+current zone incarnation began; a simultaneous destination batch shares one
+moment. `world_supertype_timestamp` separately records when a battlefield
+object most recently gained World, since losing and regaining that supertype
+changes its CR 704.5k duration without changing zones. The fixed-point state
+check synchronizes those values before taking its immutable snapshot. The
+unique newest World permanent survives; a tie for newest moves every World
+permanent simultaneously. The global sequence and both object timestamps are
+authoritative replay state but remain absent from seat projections.
+
 A token leaving the battlefield first exists in the destination long enough
 for the move and its triggers to be observed. The next shared SBA snapshot
 causes it to cease without a second zone-change event, and CR 111.8 prevents a
@@ -470,16 +480,19 @@ The new rules primitives sit below both generated and hand-authored semantics:
 - `state_based_actions.py` evaluates the deterministic permanent subset of CR
   704 plus token cessation from one immutable snapshot. The engine applies the
   resulting batch, captures last-known information before mutation, and
-  repeats until stable.
+  repeats until stable. The reviewed subset includes the CR 704.5k world rule
+  and serialized World-since timestamps.
 
 All three contracts remain partial. Legacy static abilities have not all moved
 into the layer evaluator, not every zone/draw/damage/enters producer routes
 through the replacement engine, and the state-action evaluator does not yet
-cover spell/card-copy cessation, the world rule, Sagas, dungeons, battles,
-Roles, speed, or complete simultaneous loss replacement. CR 400 object
-identity also remains partial until its complete exception matrix and
-specialized object forms use typed continuation policies. Coverage and
-contracts describe those integration gaps explicitly.
+cover spell/card-copy cessation, maximum-counter restrictions, Sagas,
+dungeons, battles, Roles, speed, or complete simultaneous loss replacement.
+CR 400 object identity also remains partial until its complete exception
+matrix and specialized object forms use typed continuation policies. The
+serialized timestamp moments are not yet consumed by every continuous-effect
+source, and complete CR 613.7m APNAP relative ordering remains blocked.
+Coverage and contracts describe those integration gaps explicitly.
 
 ## Remaining scope
 

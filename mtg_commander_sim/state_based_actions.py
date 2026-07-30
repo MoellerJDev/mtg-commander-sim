@@ -24,6 +24,8 @@ class PermanentSnapshot:
     loyalty: int | None = None
     defense: int | None = None
     battle_trigger_pending: bool = False
+    world: bool = False
+    world_timestamp: int | None = None
     attached_to: str | None = None
     attachment_legal: bool | None = None
     counters: Mapping[str, int] = field(default_factory=dict)
@@ -49,6 +51,7 @@ class StateBasedActionBatch:
     detach: tuple[str, ...] = ()
     counter_pairs_to_remove: tuple[tuple[str, int], ...] = ()
     cease: tuple[str, ...] = ()
+    world_rule: tuple[str, ...] = ()
 
     @property
     def changed(self) -> bool:
@@ -58,6 +61,7 @@ class StateBasedActionBatch:
             or self.detach
             or self.counter_pairs_to_remove
             or self.cease
+            or self.world_rule
         )
 
 
@@ -75,6 +79,7 @@ def evaluate_permanent_state_based_actions(
     destroy: set[str] = set()
     detach: set[str] = set()
     counter_pairs: dict[str, int] = {}
+    world_permanents: list[PermanentSnapshot] = []
 
     for permanent in permanents:
         card_types = {
@@ -88,6 +93,12 @@ def evaluate_permanent_state_based_actions(
         is_aura = "aura" in subtypes
         is_equipment = "equipment" in subtypes
         is_fortification = "fortification" in subtypes
+        if permanent.world:
+            if permanent.world_timestamp is None:
+                raise ValueError(
+                    "World permanent requires a World-since timestamp"
+                )
+            world_permanents.append(permanent)
 
         if is_creature and permanent.toughness is not None:
             if permanent.toughness <= 0:
@@ -145,14 +156,40 @@ def evaluate_permanent_state_based_actions(
                 positive, negative
             )
 
+    world_rule: set[str] = set()
+    if len(world_permanents) >= 2:
+        newest_timestamp = max(
+            int(permanent.world_timestamp)
+            for permanent in world_permanents
+        )
+        newest = [
+            permanent
+            for permanent in world_permanents
+            if int(permanent.world_timestamp) == newest_timestamp
+        ]
+        if len(newest) == 1:
+            world_rule.update(
+                permanent.object_id
+                for permanent in world_permanents
+                if permanent is not newest[0]
+            )
+        else:
+            # CR 704.5k: if the shortest-held duration is tied, every World
+            # permanent goes to its owner's graveyard.
+            world_rule.update(
+                permanent.object_id
+                for permanent in world_permanents
+            )
+
     # A permanent moving zones is detached as part of that zone change.  Do
     # not emit a second independent detach operation for the same object.
-    moving = put_in_graveyard | destroy
+    moving = put_in_graveyard | destroy | world_rule
     return StateBasedActionBatch(
         put_in_graveyard=tuple(sorted(put_in_graveyard)),
         destroy=tuple(sorted(destroy - put_in_graveyard)),
         detach=tuple(sorted(detach - moving)),
         counter_pairs_to_remove=tuple(sorted(counter_pairs.items())),
+        world_rule=tuple(sorted(world_rule)),
     )
 
 
@@ -191,4 +228,5 @@ def evaluate_state_based_actions(
             permanent_batch.counter_pairs_to_remove
         ),
         cease=tuple(sorted(cease)),
+        world_rule=permanent_batch.world_rule,
     )

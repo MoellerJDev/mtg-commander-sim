@@ -181,14 +181,16 @@ effect/event for typed events. It is not yet connected to every zone, draw,
 damage, and enters event producer, so its contract also remains partial.
 
 The zone kernel implements a stable physical card identity plus a serialized
-logical-incarnation counter. Ordinary cross-zone moves, draws, casts, and
-same-zone exile/command moves create new incarnations; target snapshots and
-implemented linked delayed moves require the recorded incarnation. State that
-cannot survive CR 400.7 is cleared, while implemented stack-to-battlefield
-continuations such as as-enters choices are explicit. The contract remains
-partial because the full CR 400.7 exception matrix, merged/melded and
-face-down objects, stickers, and all legacy physical-reference links have not
-yet migrated to typed policies.
+logical-incarnation counter and zone-entry timestamp moment. Ordinary
+cross-zone moves, draws, casts, and same-zone exile/command moves create new
+incarnations; objects moved simultaneously to one destination share a
+timestamp moment. Target snapshots and implemented linked delayed moves
+require the recorded incarnation. State that cannot survive CR 400.7 is
+cleared, while implemented stack-to-battlefield continuations such as
+as-enters choices are explicit. The contract remains partial because the full
+CR 400.7 exception matrix, merged/melded and face-down objects, stickers, all
+legacy physical-reference links, and complete CR 613.7m relative timestamp
+choices have not yet migrated to typed policies.
 
 `state_based_actions.py` implements an order-invariant CR 704 permanent
 snapshot and distinguishes non-destruction graveyard moves, destruction,
@@ -197,10 +199,12 @@ The engine integrates that batch into its fixed-point loop, reuses declarative
 attachment predicates, and preserves pre-batch last-known information for
 simultaneous moves. Tokens first reach their destination, cannot move again
 after leaving the battlefield, and cease during the next SBA check without a
-second zone-change event. Player loss, poison, empty draw, commander damage,
-planeswalker loyalty, and the legend rule remain integrated in
-`CommanderEngine`. The contract is partial: spell/card-copy cessation still
-lacks a transient noncard representation, and the world rule, counter caps,
+second zone-change event. A separate serialized World-since timestamp supports
+CR 704.5k: the unique newest World permanent survives, while a newest-duration
+tie moves every World permanent simultaneously. Player loss, poison, empty
+draw, commander damage, planeswalker loyalty, and the legend rule remain
+integrated in `CommanderEngine`. The contract is partial: spell/card-copy
+cessation still lacks a transient noncard representation, and counter caps,
 Sagas, dungeons, space sculptor, battles, Roles, speed, complete
 enchant-quality grammar, regeneration, and simultaneous loss-event
 replacement still block trust.

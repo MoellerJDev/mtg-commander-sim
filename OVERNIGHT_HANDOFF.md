@@ -23,9 +23,9 @@ remote branch identify the exact immutable hash.
 
 ## Current rules checkpoint
 
-The checkpoint adds a versioned partial CR 400 contract, upgrades the partial
-CR 111 and CR 704 contracts, and implements logical card incarnations plus
-token lifecycle. It now:
+The checkpoint adds versioned partial CR 400/613/704 contract updates and
+implements serialized object timestamps plus the World rule on top of the
+logical-incarnation/token-lifecycle foundation. It now:
 
 - serializes a monotonically increasing logical incarnation beside stable
   physical card identity;
@@ -38,7 +38,13 @@ token lifecycle. It now:
   continuations;
 - lets a token reach its first destination, prevents another move, and causes
   it to cease in the next shared CR 704 snapshot;
+- allocates a serialized timestamp moment for each new zone incarnation;
+- assigns one shared moment to objects moved simultaneously to a destination;
+- separately records when a battlefield object most recently gained World;
+- enforces CR 704.5k by keeping the unique newest World permanent or moving
+  every World permanent when the newest duration is tied;
 - omits physical/incarnation identifiers from seat projections;
+- omits authoritative zone/World timestamps from seat projections;
 - preserves exact command replay with the new authoritative fields.
 
 The prior permanent snapshot behavior remains: toughness, lethal/deathtouch,
@@ -49,9 +55,11 @@ batch and repeats before priority.
 This is not complete CR 400/111/704 support. Spell/card-copy cessation still
 needs a transient noncard representation. The complete CR 400.7 exception
 matrix, merged/melded and face-down identity, stickers, all legacy linked
-references, world timestamps, counter caps, Sagas, dungeons, space sculptor,
-battles, Roles, speed, player-attached Auras, full enchant qualities,
-regeneration, and simultaneous replaceable loss/action events remain blockers.
+references, complete CR 613.7m APNAP relative timestamps, consumption of
+serialized timestamps by every continuous-effect source, counter caps, Sagas,
+dungeons, space sculptor, battles, Roles, speed, player-attached Auras, full
+enchant qualities, regeneration, and simultaneous replaceable loss/action
+events remain blockers.
 
 ## Pinned coverage
 
@@ -75,9 +83,9 @@ regeneration, and simultaneous replaceable loss/action events remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 351 passed
+- Unit/integration tests: 357 passed
 - Focused object identity/token lifecycle tests: 14 passed
-- Focused CR 704 tests: 12 passed
+- Focused CR 704 tests: 18 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
 - Seed-20260730 hidden-information audit: pass
@@ -96,7 +104,7 @@ regeneration, and simultaneous replaceable loss/action events remain blockers.
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `6b1f9391c1316fff0e95c6e2c36eca7318dfc334f9500e61f84c1ed1b8d3b5f6`
+  `5ebf356bfa6927364a2a31c9789d32eb3189a3b10aac8d9f66f4a5684c2275d3`
 
 ## Deck-review evidence state
 
@@ -125,9 +133,11 @@ next dependency-ordered object/SBA slice:
 1. add transient spell/card-copy objects and CR 704.5e cessation;
 2. migrate remaining physical-reference links to typed incarnation/LKI
    handles and finish CR 400.7 continuation policies;
-3. model battlefield/world timestamps and the world rule;
-4. integrate destruction/loss with typed replacement and regeneration;
-5. add the remaining ordinary CR 704.5 actions and interaction tests;
+3. integrate destruction/loss with typed replacement and regeneration;
+4. add maximum-counter restrictions and the remaining ordinary CR 704.5
+   actions and interaction tests;
+5. integrate serialized object timestamps into every continuous-effect source
+   and implement CR 613.7m APNAP relative ordering;
 6. rerun full coverage and every validation gate.
 
 The review-MVP branch still separately lacks three consecutive qualifying

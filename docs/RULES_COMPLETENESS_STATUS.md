@@ -27,10 +27,10 @@ coverage.
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
 | Mechanic contracts | In progress | 12 partial/untrusted contracts; 413 mechanics unclassified; 0 trusted |
 | Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
-| Object and zone identity | Partial | CR 400 logical incarnations, target revalidation, and selected linked-effect guards |
+| Object and zone identity | Partial | CR 400 logical incarnations, serialized zone timestamps, target revalidation, and selected linked-effect guards |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
 | Replacement/prevention ordering | Partial | CR 616 typed ordering primitive; event-producer integration incomplete |
-| State-based actions | Partial | CR 704 snapshot evaluator, token cessation, and fixed-point engine integration for the reviewed subset |
+| State-based actions | Partial | CR 704 snapshot evaluator, token cessation, World rule, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
 | Official-source conformance/property/mutation gates | In progress | source hashes and selected order/mutation tests exist; corpus-wide gates do not |
@@ -52,8 +52,10 @@ coverage.
 - [x] Added serialized CR 400 logical incarnations, target identity
   revalidation, selected linked-effect identity guards, and CR 111 token
   lifecycle integration.
+- [x] Added serialized zone/World-since timestamp moments and the CR 704.5k
+  World rule, including simultaneous-entry ties.
 
-## Current CR 400/111/704 slice
+## Current CR 400/613/111/704 slice
 
 Every card retains a stable physical `object_id`, while a serialized
 `zone_change_counter` identifies its current logical incarnation. The
@@ -64,6 +66,15 @@ entry continuations. Targets compare their selected incarnation at
 resolution. Daretti's delayed emblem return carries the recorded graveyard
 incarnation, so the effect does not follow a card that leaves and reenters.
 Neither physical IDs nor counters are projected to pilots.
+
+Every new zone incarnation also receives an authoritative timestamp moment.
+Objects moved simultaneously to one destination share that moment. A separate
+World-since timestamp records when a battlefield object most recently gained
+the World supertype; losing and regaining World allocates a new moment even
+without a zone change. The CR 704.5k action keeps the unique newest World
+permanent and moves all World permanents when the newest duration is tied.
+Timestamp fields and the global allocator are serialized for exact replay and
+omitted from pilot projections.
 
 The engine now discovers the following permanent actions from one immutable
 snapshot before applying mutations:
@@ -77,7 +88,8 @@ snapshot before applying mutations:
 - illegal Equipment/Fortification attachment;
 - attached creatures, battles, and nonattachment permanents becoming
   unattached;
-- pairwise removal of +1/+1 and -1/-1 counters.
+- pairwise removal of +1/+1 and -1/-1 counters;
+- older World permanents, or all World permanents on a newest-duration tie.
 
 Aura restrictions reuse the declarative target-domain evaluator without
 incorrectly treating shroud or hexproof as attachment restrictions.
@@ -98,7 +110,8 @@ Outstanding blockers include:
 - the complete CR 400.7 exception matrix needs typed continuation policies;
 - merged permanents, meld components, stickers, complete face-down identity,
   and migration of all legacy physical references;
-- world permanents and simultaneous timestamps;
+- complete CR 613.7m APNAP relative timestamps and consumption of serialized
+  timestamp moments by every continuous-effect source;
 - maximum-counter restrictions;
 - Sagas, dungeons, space sculptor, battles, Roles, and speed;
 - Aura attachment to players and complete enchant-quality grammar;
@@ -108,13 +121,15 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 351 unit/integration tests pass.
+- 357 unit/integration tests pass.
 - Fourteen focused object/token tests cover monotonic incarnations, draws,
-  identity-sensitive targets and delayed links, private projection, token
-  destination timing, move prevention, cessation, and exact replay.
-- Twelve focused CR 704 tests cover positive, negative, fixed-point,
-  order-mutation, shared pre-action LKI, attachment/protection, counter,
-  contract, and source-hash behavior.
+  timestamp moments, identity-sensitive targets and delayed links, private
+  projection, token destination timing, move prevention, cessation, and exact
+  replay.
+- Eighteen focused CR 704 tests cover positive, negative, fixed-point,
+  order-mutation, shared pre-action LKI, attachment/protection, counters,
+  sequential and simultaneous World behavior, contract, and source-hash
+  behavior.
 - Exact Zimone closure: 27 tests pass.
 - Exact Mishra closure: 23 tests pass.
 - The seed-20260730 regression reaches its corrected main-phase opportunities,
@@ -133,7 +148,8 @@ checkpoint validation.
    CR 704.5e cessation.
 2. Replace remaining physical-reference links with typed incarnation/LKI
    handles and implement the remaining CR 400.7 continuation policies.
-3. Implement world timestamps and the remaining ordinary CR 704.5 actions.
+3. Implement the remaining ordinary CR 704.5 actions, beginning with maximum
+   counter restrictions and specialized permanent/layout state.
 4. Integrate state-action destruction/loss with typed replacement and
    regeneration events.
 5. Continue CR 603 trigger ordering and state-action interaction coverage.

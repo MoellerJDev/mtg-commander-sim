@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "cr-400-general",
   "official_name": "Zones and New Object Identity",
   "effective_date": "2026-06-19",
@@ -25,7 +25,9 @@
     "400.8",
     "400.9",
     "400.10",
-    "400.11"
+    "400.11",
+    "613.7d",
+    "613.7m"
   ],
   "glossary_references": [
     "object",
@@ -74,6 +76,7 @@
     "state_writes": [
       "zone membership",
       "logical incarnation counter",
+      "serialized zone-entry timestamp moment",
       "new-object characteristics and counters",
       "last-known-information event snapshot"
     ],
@@ -83,7 +86,8 @@
     "timing": [
       "replacement effects are selected before mutation",
       "last-known information is captured before mutation",
-      "the destination incarnation exists after mutation"
+      "the destination incarnation exists after mutation",
+      "objects moved simultaneously to one destination share one timestamp moment"
     ],
     "targets": [
       "a target is tied to the selected logical incarnation and does not follow the same physical card through a zone change"
@@ -121,7 +125,9 @@
     "target leaves and returns before resolution",
     "same physical card leaves and returns before a linked delayed effect",
     "exile-to-exile reentry",
-    "spell-to-permanent continuation"
+    "spell-to-permanent continuation",
+    "sequential zone entries receive increasing timestamp moments",
+    "simultaneous zone entries share a timestamp moment"
   ],
   "witness_cards": [
     {
@@ -154,18 +160,20 @@
     "test_daretti_ruling_does_not_follow_a_reentered_card",
     "test_logical_identity_metadata_is_not_projected_to_pilots",
     "test_token_cost_cessation_replays_exactly",
-    "test_simultaneous_move_captures_all_lki_before_mutation"
+    "test_simultaneous_move_captures_all_lki_before_mutation",
+    "test_worlds_entering_simultaneously_are_tied_and_all_leave"
   ],
   "implementation": {
-    "component": "CardInstance.zone_change_counter, CommanderEngine.move_card, target revalidation, and identity-guarded semantic moves",
-    "version": "object-incarnation-v1"
+    "component": "CardInstance.zone_change_counter and zone_timestamp, GameState.timestamp_sequence, CommanderEngine.move_card, target revalidation, and identity-guarded semantic moves",
+    "version": "object-incarnation-v2"
   },
   "known_blockers": [
     "the complete CR 400.7a-m exception matrix is not represented as typed continuation policies",
     "merged permanents, meld components, stickers, and complete face-down object identity are not implemented",
     "turning a face-up command-zone object face down does not yet create a new incarnation",
     "all legacy semantic references have not yet migrated from physical refs to typed logical handles",
-    "all simultaneous replacement choices are not yet routed through the CR 616 ordering engine"
+    "all simultaneous replacement choices are not yet routed through the CR 616 ordering engine",
+    "complete CR 613.7m APNAP relative-timestamp choices are not represented"
   ],
   "review_status": "reviewed"
 }

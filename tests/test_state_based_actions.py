@@ -222,6 +222,76 @@ class StateBasedActionPrimitiveTests(unittest.TestCase):
             batch.cease,
         )
 
+    def test_world_rule_keeps_only_the_unique_newest_world(self):
+        batch = evaluate_permanent_state_based_actions(
+            [
+                PermanentSnapshot(
+                    "old-world",
+                    world=True,
+                    world_timestamp=10,
+                ),
+                PermanentSnapshot(
+                    "new-world",
+                    world=True,
+                    world_timestamp=20,
+                ),
+                PermanentSnapshot("ordinary"),
+            ]
+        )
+
+        self.assertEqual(("old-world",), batch.world_rule)
+
+    def test_tied_newest_world_permanents_all_leave_order_independently(
+        self,
+    ):
+        values = [
+            PermanentSnapshot(
+                "world-b",
+                world=True,
+                world_timestamp=20,
+            ),
+            PermanentSnapshot(
+                "world-a",
+                world=True,
+                world_timestamp=20,
+            ),
+            PermanentSnapshot(
+                "older-world",
+                world=True,
+                world_timestamp=10,
+            ),
+        ]
+        expected = ("older-world", "world-a", "world-b")
+
+        self.assertEqual(
+            expected,
+            evaluate_permanent_state_based_actions(values).world_rule,
+        )
+        values.reverse()
+        self.assertEqual(
+            expected,
+            evaluate_permanent_state_based_actions(values).world_rule,
+        )
+
+    def test_world_rule_requires_a_since_timestamp(self):
+        with self.assertRaisesRegex(
+            ValueError,
+            "World permanent requires",
+        ):
+            evaluate_permanent_state_based_actions(
+                [
+                    PermanentSnapshot(
+                        "missing-world-time",
+                        world=True,
+                    ),
+                    PermanentSnapshot(
+                        "other-world",
+                        world=True,
+                        world_timestamp=1,
+                    ),
+                ]
+            )
+
 
 class StateBasedActionEngineTests(unittest.TestCase):
     @classmethod
@@ -485,6 +555,131 @@ class StateBasedActionEngineTests(unittest.TestCase):
         )[0]
         aura = self.card(engine, aura_ref)
         self.assertIsNone(engine._enchant_target_schema(aura))
+
+    @staticmethod
+    def stage_as_world(engine, card):
+        engine._remove_from_zone(card)
+        engine._reset_zone_change(card, "stack")
+        card.zone = "stack"
+        card.controller = card.owner
+        card.annotations["copy_overrides"] = {
+            "type_line": "World Enchantment",
+        }
+
+    def test_new_world_moves_the_older_world_to_graveyard(self):
+        engine = self.make_engine(7047)
+        object_ids = list(
+            engine.state.players["A"].zones["library"][:2]
+        )
+        old_world, new_world = [
+            engine.state.cards[object_id] for object_id in object_ids
+        ]
+        self.stage_as_world(engine, old_world)
+        engine.move_card(
+            old_world.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+        )
+        self.assertFalse(engine._stabilize())
+
+        self.stage_as_world(engine, new_world)
+        engine.move_card(
+            new_world.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+        )
+        self.assertLess(
+            old_world.world_supertype_timestamp,
+            new_world.world_supertype_timestamp,
+        )
+        self.assertFalse(engine._stabilize())
+
+        self.assertEqual("graveyard", old_world.zone)
+        self.assertEqual("battlefield", new_world.zone)
+        event = next(
+            event
+            for event in reversed(engine.state.events)
+            if event.code == "state.world_rule"
+        )
+        self.assertEqual(
+            [old_world.ref],
+            [item["object"] for item in event.details["moved"]],
+        )
+        self.assertEqual([new_world.ref], event.details["survivors"])
+
+    def test_worlds_entering_simultaneously_are_tied_and_all_leave(self):
+        engine = self.make_engine(7048)
+        object_ids = list(
+            engine.state.players["A"].zones["library"][:2]
+        )
+        worlds = [
+            engine.state.cards[object_id] for object_id in object_ids
+        ]
+        for card in worlds:
+            self.stage_as_world(engine, card)
+
+        engine._move_cards_simultaneously(
+            [
+                (card.object_id, "battlefield")
+                for card in worlds
+            ],
+            reason="simultaneous World entry",
+            log=False,
+        )
+
+        self.assertEqual(
+            1, len({card.zone_timestamp for card in worlds})
+        )
+        self.assertEqual(
+            1,
+            len(
+                {
+                    card.world_supertype_timestamp
+                    for card in worlds
+                }
+            ),
+        )
+        self.assertFalse(engine._stabilize())
+        self.assertEqual(
+            {"graveyard"},
+            {card.zone for card in worlds},
+        )
+        event = next(
+            event
+            for event in reversed(engine.state.events)
+            if event.code == "state.world_rule"
+        )
+        self.assertEqual([], event.details["survivors"])
+
+    def test_losing_and_regaining_world_gets_a_new_since_time(self):
+        engine = self.make_engine(7049)
+        card = engine.state.cards[
+            engine.state.players["A"].zones["library"][0]
+        ]
+        engine.move_card(
+            card.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+        )
+        card.annotations["copy_overrides"] = {
+            "type_line": "World Enchantment",
+        }
+        self.assertFalse(engine._stabilize())
+        first = card.world_supertype_timestamp
+        self.assertIsNotNone(first)
+
+        card.annotations.pop("copy_overrides")
+        self.assertFalse(engine._stabilize())
+        self.assertIsNone(card.world_supertype_timestamp)
+
+        card.annotations["copy_overrides"] = {
+            "type_line": "World Enchantment",
+        }
+        self.assertFalse(engine._stabilize())
+        self.assertGreater(card.world_supertype_timestamp, first)
 
 
 if __name__ == "__main__":

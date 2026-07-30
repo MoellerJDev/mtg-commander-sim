@@ -223,6 +223,14 @@ effects retain the selected incarnation, so a card that leaves and returns is
 not silently treated as the old object. Pilot projections never expose the
 physical identifier or incarnation counter.
 
+Each new zone incarnation also receives a serialized timestamp moment.
+Objects entering a destination simultaneously share that moment. Battlefield
+objects separately retain when they most recently gained the World supertype,
+allowing the CR 704.5k world rule to keep the unique newest World permanent or
+move every World permanent when the newest duration is tied. These
+authoritative timestamps are also omitted from pilot projections. Full CR
+613.7m APNAP relative-timestamp choices remain outside this reviewed slice.
+
 Tokens now reach their first nonbattlefield destination, generate the
 appropriate zone-change events, and cease to exist only at the next
 state-based-action check. A token that has left the battlefield cannot move

@@ -33,6 +33,7 @@ MEANINGFUL_CODES = {
     "state.attachments_unattached",
     "state.counters_annihilated",
     "state.objects_ceased",
+    "state.world_rule",
     "effect.linked_object_missing",
     "effect.damage",
     "effect.life",
@@ -483,6 +484,21 @@ def _event_description(engine: CommanderEngine, event: Event) -> str:
         return (
             "Token or copy objects ceased to exist"
             + (f": {values}." if values else ".")
+        )
+    if event.code == "state.world_rule":
+        moved = ", ".join(
+            _name(engine, str(item.get("object")))
+            for item in details.get("moved") or []
+        )
+        survivors = ", ".join(
+            _name(engine, str(ref))
+            for ref in details.get("survivors") or []
+        )
+        return (
+            "The world rule moved "
+            + (moved or "the tied World permanents")
+            + " to their owners' graveyards"
+            + (f"; {survivors} remained." if survivors else ".")
         )
     if event.code == "effect.linked_object_missing":
         return (

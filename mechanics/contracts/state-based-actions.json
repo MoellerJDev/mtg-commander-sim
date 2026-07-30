@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "cr-704-state-based-actions",
   "official_name": "State-Based Actions",
   "effective_date": "2026-06-19",
@@ -22,6 +22,7 @@
     "704.5h",
     "704.5i",
     "704.5j",
+    "704.5k",
     "704.5m",
     "704.5n",
     "704.5p",
@@ -58,6 +59,7 @@
       "creatures",
       "planeswalkers",
       "legendary permanents",
+      "World permanents",
       "Auras",
       "Equipment",
       "Fortifications"
@@ -66,11 +68,13 @@
       "priority would be granted",
       "cleanup state check",
       "simultaneous state-based action batch",
+      "World-rule batch",
       "fixed-point recheck"
     ],
     "state_reads": [
       "life, poison, empty draw, and commander damage",
       "derived types, subtypes, keywords, toughness, loyalty, and damage",
+      "the timestamp from which each permanent has continuously had the World supertype",
       "attachment restriction and protected qualities",
       "+1/+1 and -1/-1 counter counts"
     ],
@@ -78,6 +82,7 @@
       "player elimination",
       "token cessation",
       "simultaneous graveyard moves or destruction",
+      "simultaneous World-rule graveyard moves",
       "legend choice",
       "unattachment",
       "opposing counter-pair removal"
@@ -123,6 +128,8 @@
     "normal multiplayer",
     "Commander loss by commander damage",
     "legend rule",
+    "the unique newest World permanent survives",
+    "World permanents tied for newest all leave simultaneously",
     "Aura, Equipment, and Fortification cleanup",
     "opposing +1/+1 and -1/-1 counters"
   ],
@@ -138,9 +145,19 @@
     {
       "name": "Pacifism",
       "oracle_id": "5f5e0b10-c8cf-450c-bfd3-bcb0528ec330"
+    },
+    {
+      "name": "Concordant Crossroads",
+      "oracle_id": "ff01b408-6d17-40a3-9efd-a1b341ec1307"
+    },
+    {
+      "name": "Gravity Sphere",
+      "oracle_id": "8ddf93fe-980b-4dc4-b56f-6a2ee50100a6"
     }
   ],
-  "rulings": [],
+  "rulings": [
+    "Gravity Sphere 2008-10-01: a newer World permanent causes the older one to be put into its owner's graveyard, while World permanents entering simultaneously are all put there"
+  ],
   "test_ids": [
     "test_snapshot_distinguishes_put_into_graveyard_from_destroy",
     "test_attachment_and_counter_actions_are_snapshot_based",
@@ -155,15 +172,20 @@
     "test_token_changes_zone_before_ceasing_at_next_state_check",
     "test_legend_rule_asks_controller_to_keep_one",
     "test_player_elimination_keeps_multiplayer_game_running",
-    "test_last_player_wins_after_simultaneous_losses"
+    "test_last_player_wins_after_simultaneous_losses",
+    "test_world_rule_keeps_only_the_unique_newest_world",
+    "test_tied_newest_world_permanents_all_leave_order_independently",
+    "test_world_rule_requires_a_since_timestamp",
+    "test_new_world_moves_the_older_world_to_graveyard",
+    "test_worlds_entering_simultaneously_are_tied_and_all_leave",
+    "test_losing_and_regaining_world_gets_a_new_since_time"
   ],
   "implementation": {
     "component": "state_based_actions.evaluate_permanent_state_based_actions and CommanderEngine._stabilize",
-    "version": "state-based-actions-v3"
+    "version": "state-based-actions-v4"
   },
   "known_blockers": [
     "spell-copy and card-copy cessation lacks a transient noncard object representation in destination zones",
-    "the world rule and simultaneous world timestamps are not implemented",
     "maximum-counter restrictions, Sagas, dungeons, space sculptor, battles, Roles, and speed state actions are not implemented",
     "Aura attachment to players and the complete enchant-quality grammar are not implemented",
     "regeneration and complete loss-event replacement ordering are not integrated",

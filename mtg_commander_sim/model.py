@@ -34,6 +34,8 @@ class CardInstance:
     is_token: bool = False
     is_commander: bool = False
     zone_change_counter: int = 0
+    zone_timestamp: int = 0
+    world_supertype_timestamp: int | None = None
     has_left_battlefield: bool = False
     tapped: bool = False
     face_down: bool = False
@@ -377,6 +379,7 @@ class GameState:
     annotations: list[dict[str, Any]] = field(default_factory=list)
     action_opportunities: list[dict[str, Any]] = field(default_factory=list)
     opportunity_sequence: int = 0
+    timestamp_sequence: int = 0
     pending_decision: DecisionGroup | None = None
     capabilities: dict[str, Capability] = field(default_factory=dict)
     started: bool = False
@@ -425,6 +428,7 @@ class GameState:
             "annotations": copy.deepcopy(self.annotations),
             "action_opportunities": copy.deepcopy(self.action_opportunities),
             "opportunity_sequence": self.opportunity_sequence,
+            "timestamp_sequence": self.timestamp_sequence,
             "pending_decision": self.pending_decision.to_dict() if self.pending_decision else None,
             "capabilities": {token: cap.to_dict() for token, cap in self.capabilities.items()},
             "started": self.started,
@@ -470,6 +474,7 @@ class GameState:
             annotations=list(data.get("annotations", [])),
             action_opportunities=list(data.get("action_opportunities", [])),
             opportunity_sequence=int(data.get("opportunity_sequence", 0)),
+            timestamp_sequence=int(data.get("timestamp_sequence", 0)),
             pending_decision=(DecisionGroup.from_dict(data["pending_decision"]) if data.get("pending_decision") else None),
             capabilities={token: Capability.from_dict(cap) for token, cap in data.get("capabilities", {}).items()},
             started=bool(data.get("started", False)),

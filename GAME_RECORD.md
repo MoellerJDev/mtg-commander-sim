@@ -64,6 +64,15 @@ authoritative state and therefore participates in command hashes and replay;
 it is not a capability and is not exposed in pilot projections. This is an
 additive state-field extension to v3, not a new record layout.
 
+The same checkpoint serializes `GameState.timestamp_sequence`,
+`CardInstance.zone_timestamp`, and `CardInstance.world_supertype_timestamp`.
+The first two establish deterministic CR 613.7d zone-entry moments, including
+shared moments for simultaneous moves. The last records the separate time from
+which a battlefield object has continuously had World for CR 704.5k. They
+participate in state hashes and exact replay but are not included in a seat
+projection. This remains an additive v3 state extension; it does not redesign
+the record format.
+
 Fresh native records use `manifest.replay.mode = "command_replay"`. The
 separate `legacy_snapshot` mode is reserved for migrated records whose accepted
 commands cannot be reconstructed honestly.

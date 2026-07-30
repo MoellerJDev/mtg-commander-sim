@@ -358,6 +358,12 @@ class CommanderEngine:
             f"mtg-commander-sim:{self.state.game_id}:{kind}:{ref}",
         ).hex
 
+    def _next_zone_timestamp(self) -> int:
+        """Allocate one authoritative timestamp moment."""
+
+        self.state.timestamp_sequence += 1
+        return self.state.timestamp_sequence
+
     def _log(
         self,
         actor: str | None,
@@ -1244,7 +1250,13 @@ class CommanderEngine:
         if card.zone != "outside":
             raise StateInvariantError(f"Could not remove {card.ref} from {card.zone}")
 
-    def _reset_zone_change(self, card: CardInstance, destination: str) -> None:
+    def _reset_zone_change(
+        self,
+        card: CardInstance,
+        destination: str,
+        *,
+        zone_timestamp: int | None = None,
+    ) -> None:
         origin = card.zone
         creates_new_object = (
             origin != destination
@@ -1254,6 +1266,12 @@ class CommanderEngine:
             return
 
         card.zone_change_counter += 1
+        card.zone_timestamp = (
+            int(zone_timestamp)
+            if zone_timestamp is not None
+            else self._next_zone_timestamp()
+        )
+        card.world_supertype_timestamp = None
         if (
             card.is_token
             and origin == "battlefield"
@@ -1384,6 +1402,7 @@ class CommanderEngine:
         controller: str | None = None,
         tapped: bool | None = None,
         enter_face: str | None = None,
+        zone_timestamp: int | None = None,
         position: str = "top",
         reveal_to: Iterable[str] | None = None,
         reason: str = "",
@@ -1456,7 +1475,11 @@ class CommanderEngine:
         }
         if origin != "stack":
             self._remove_from_zone(card)
-        self._reset_zone_change(card, destination)
+        self._reset_zone_change(
+            card,
+            destination,
+            zone_timestamp=zone_timestamp,
+        )
         card.zone = destination
         if enter_face is not None:
             card.active_face = enter_face
@@ -1506,6 +1529,10 @@ class CommanderEngine:
                         aura_target.attachments.append(card.object_id)
             card.known_to = list(self.seats)
             card.revealed_to = list(self.seats)
+            self._refresh_world_supertype_timestamp(
+                card,
+                gained_at=card.zone_timestamp,
+            )
         elif destination == "outside":
             card.known_to = list(self.seats)
             card.revealed_to = list(self.seats)
@@ -1909,10 +1936,12 @@ class CommanderEngine:
         # CR 704.8 last-known information comes from the state before any
         # object in the batch moves.  Keep discovery and mutation in separate
         # loops so a departing static source cannot change a later snapshot.
+        destination_timestamp = self._next_zone_timestamp()
         for object_id, destination in changes:
             self.move_card(
                 object_id,
                 destination,
+                zone_timestamp=destination_timestamp,
                 reason=reason,
                 log=log,
                 semantic_events=False,
@@ -14968,6 +14997,57 @@ class CommanderEngine:
             return False
         return True
 
+    def _has_world_supertype(self, card: CardInstance) -> bool:
+        _, _, supertypes = self._type_parts(
+            str(
+                self._effective_card_data(card).get("type_line")
+                or ""
+            )
+        )
+        return "world" in supertypes
+
+    def _refresh_world_supertype_timestamp(
+        self,
+        card: CardInstance,
+        *,
+        gained_at: int | None = None,
+    ) -> bool:
+        """Synchronize how long one battlefield object has been World."""
+
+        if card.zone != "battlefield":
+            card.world_supertype_timestamp = None
+            return False
+        if not self._has_world_supertype(card):
+            card.world_supertype_timestamp = None
+            return False
+        if card.world_supertype_timestamp is None:
+            card.world_supertype_timestamp = (
+                int(gained_at)
+                if gained_at is not None
+                else self._next_zone_timestamp()
+            )
+            return True
+        return False
+
+    def _synchronize_world_supertype_timestamps(self) -> None:
+        """Observe simultaneous gains/losses of the World supertype."""
+
+        newly_world: list[CardInstance] = []
+        for card in self.state.cards.values():
+            if card.zone != "battlefield":
+                if card.world_supertype_timestamp is not None:
+                    card.world_supertype_timestamp = None
+                continue
+            if self._has_world_supertype(card):
+                if card.world_supertype_timestamp is None:
+                    newly_world.append(card)
+            else:
+                card.world_supertype_timestamp = None
+        if newly_world:
+            timestamp = self._next_zone_timestamp()
+            for card in newly_world:
+                card.world_supertype_timestamp = timestamp
+
     def _permanent_sba_snapshots(
         self,
     ) -> list[PermanentSnapshot]:
@@ -14982,7 +15062,7 @@ class CommanderEngine:
                 if card.zone != "battlefield" or card.phased_out:
                     continue
                 data = self._effective_card_data(card)
-                card_types, subtypes, _ = self._type_parts(
+                card_types, subtypes, supertypes = self._type_parts(
                     str(data.get("type_line") or "")
                 )
                 keywords = {
@@ -14994,6 +15074,10 @@ class CommanderEngine:
                         object_id=card.object_id,
                         card_types=frozenset(card_types),
                         subtypes=frozenset(subtypes),
+                        world="world" in supertypes,
+                        world_timestamp=(
+                            card.world_supertype_timestamp
+                        ),
                         toughness=(
                             self._numeric_stat(object_id, "toughness")
                             if "creature" in card_types
@@ -15087,17 +15171,41 @@ class CommanderEngine:
                     return True
                 continue
 
+            self._synchronize_world_supertype_timestamps()
             sba_batch = evaluate_state_based_actions(
                 permanents=self._permanent_sba_snapshots(),
                 objects=self._object_sba_snapshots(),
             )
-            move_to_grave = unique_preserving_order(
+            ordinary_move_to_grave = unique_preserving_order(
                 [
                     *sba_batch.put_in_graveyard,
                     *sba_batch.destroy,
                 ]
             )
+            move_to_grave = unique_preserving_order(
+                [
+                    *ordinary_move_to_grave,
+                    *sba_batch.world_rule,
+                ]
+            )
             if sba_batch.changed:
+                world_rule_rows = [
+                    {
+                        "object": self.state.cards[object_id].ref,
+                    }
+                    for object_id in sba_batch.world_rule
+                    if self.state.cards[object_id].zone
+                    == "battlefield"
+                ]
+                world_rule_ids = set(sba_batch.world_rule)
+                world_survivors = [
+                    card.ref
+                    for card in self.state.cards.values()
+                    if card.zone == "battlefield"
+                    and not card.phased_out
+                    and card.world_supertype_timestamp is not None
+                    and card.object_id not in world_rule_ids
+                ]
                 simultaneous = [
                     (object_id, "graveyard")
                     for object_id in move_to_grave
@@ -15173,7 +15281,7 @@ class CommanderEngine:
                         }
                     )
                     ceased_object_ids.append(card.object_id)
-                if move_to_grave:
+                if ordinary_move_to_grave:
                     self._log(
                         None,
                         "state.creatures_died",
@@ -15185,7 +15293,7 @@ class CommanderEngine:
                         {
                             "objects": [
                                 self.state.cards[object_id].ref
-                                for object_id in move_to_grave
+                                for object_id in ordinary_move_to_grave
                             ],
                             "put_in_graveyard": [
                                 self.state.cards[object_id].ref
@@ -15199,7 +15307,31 @@ class CommanderEngine:
                             ],
                         },
                         importance=2,
-                        changed_objects=move_to_grave,
+                        changed_objects=ordinary_move_to_grave,
+                    )
+                if world_rule_rows:
+                    self._log(
+                        None,
+                        "state.world_rule",
+                        (
+                            "The world rule moved "
+                            f"{len(world_rule_rows)} permanent(s) to "
+                            "their owners' graveyards."
+                        ),
+                        {
+                            "moved": world_rule_rows,
+                            "survivors": world_survivors,
+                        },
+                        importance=2,
+                        changed_objects=list(sba_batch.world_rule),
+                        changed_players=sorted(
+                            {
+                                self.state.cards[object_id].owner
+                                for object_id in (
+                                    sba_batch.world_rule
+                                )
+                            }
+                        ),
                     )
                 if detached:
                     self._log(
@@ -17326,6 +17458,7 @@ class CommanderEngine:
         *,
         name: str,
         characteristics: Mapping[str, Any],
+        zone_timestamp: int | None = None,
     ) -> str:
         """Create one token object without dispatching its enter events."""
 
@@ -17343,6 +17476,11 @@ class CommanderEngine:
             controller=controller,
             zone="battlefield",
             is_token=True,
+            zone_timestamp=(
+                int(zone_timestamp)
+                if zone_timestamp is not None
+                else self._next_zone_timestamp()
+            ),
             annotations={
                 "token_characteristics": copy.deepcopy(
                     dict(characteristics)
@@ -17358,6 +17496,10 @@ class CommanderEngine:
         self.state.cards[object_id] = card
         self.state.players[controller].zones["battlefield"].append(
             object_id
+        )
+        self._refresh_world_supertype_timestamp(
+            card,
+            gained_at=card.zone_timestamp,
         )
         return object_id
 
@@ -17403,6 +17545,9 @@ class CommanderEngine:
             quantity > 0 and "artifact" in created_types
         )
         created: list[str] = []
+        creation_timestamp = (
+            self._next_zone_timestamp() if quantity > 0 else None
+        )
         for _ in range(quantity):
             if copy_of:
                 original = self._resolve_object(controller, str(copy_of), zones={"battlefield"})
@@ -17441,6 +17586,7 @@ class CommanderEngine:
                 controller=controller,
                 zone="battlefield",
                 is_token=True,
+                zone_timestamp=int(creation_timestamp or 0),
                 tapped=tapped,
                 temporary_keywords=list(temporary_keywords),
                 annotations=annotations,
@@ -17452,6 +17598,10 @@ class CommanderEngine:
             )
             self.state.cards[object_id] = card
             self.state.players[controller].zones["battlefield"].append(object_id)
+            self._refresh_world_supertype_timestamp(
+                card,
+                gained_at=card.zone_timestamp,
+            )
             if attacking:
                 self.state.combat.attackers[object_id] = attacking
             created.append(object_id)
@@ -17472,6 +17622,7 @@ class CommanderEngine:
                         self._create_replacement_token_instance(
                             controller,
                             name="Thopter",
+                            zone_timestamp=creation_timestamp,
                             characteristics={
                                 "type_line": (
                                     "Token Artifact Creature — Thopter"

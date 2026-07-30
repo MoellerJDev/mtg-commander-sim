@@ -16,8 +16,8 @@
     {
       "mechanic_id": "cr-613-interaction-of-continuous-effects",
       "path": "mechanics/contracts/continuous-layers.json",
-      "sha256": "e02a8ca685dbdddbfea8a72b2bb6935171392d332c14150387327e31956ecff8",
-      "version": 1
+      "sha256": "d134497c32d15cce341bb720aa46f8506562770cdd1e9c0cd0bfaf8c7455fbf9",
+      "version": 2
     },
     {
       "mechanic_id": "deathtouch",
@@ -34,8 +34,8 @@
     {
       "mechanic_id": "cr-400-general",
       "path": "mechanics/contracts/object-zone-identity.json",
-      "sha256": "125cddcd59828f29e378ee34bddd850b363829709913aa1f66bf6d6ef85640be",
-      "version": 1
+      "sha256": "58c5ecd1731ab21c28f65f3c509074986041053e9f373bc939f497f1636632c2",
+      "version": 2
     },
     {
       "mechanic_id": "protection",
@@ -64,8 +64,8 @@
     {
       "mechanic_id": "cr-704-state-based-actions",
       "path": "mechanics/contracts/state-based-actions.json",
-      "sha256": "103c35d7b907f3df70b5ae28a5a1c2919d0f34a42401a507018be19d68278f3f",
-      "version": 2
+      "sha256": "07731f4335e5bd0f66a71591fbff9e978aff1b24ebdf35a5cb847f37ef275715",
+      "version": 3
     },
     {
       "mechanic_id": "cr-614-replacement-effects",
@@ -5671,19 +5671,20 @@
     {
       "category": "zones",
       "contract_path": "mechanics/contracts/object-zone-identity.json",
-      "contract_sha256": "125cddcd59828f29e378ee34bddd850b363829709913aa1f66bf6d6ef85640be",
-      "contract_version": 1,
+      "contract_sha256": "58c5ecd1731ab21c28f65f3c509074986041053e9f373bc939f497f1636632c2",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "CardInstance.zone_change_counter, CommanderEngine.move_card, target revalidation, and identity-guarded semantic moves",
-      "implementation_version": "object-incarnation-v1",
+      "implementation_component": "CardInstance.zone_change_counter and zone_timestamp, GameState.timestamp_sequence, CommanderEngine.move_card, target revalidation, and identity-guarded semantic moves",
+      "implementation_version": "object-incarnation-v2",
       "kind": "rules_section",
       "known_blockers": [
         "the complete CR 400.7a-m exception matrix is not represented as typed continuation policies",
         "merged permanents, meld components, stickers, and complete face-down object identity are not implemented",
         "turning a face-up command-zone object face down does not yet create a new incarnation",
         "all legacy semantic references have not yet migrated from physical refs to typed logical handles",
-        "all simultaneous replacement choices are not yet routed through the CR 616 ordering engine"
+        "all simultaneous replacement choices are not yet routed through the CR 616 ordering engine",
+        "complete CR 613.7m APNAP relative-timestamp choices are not represented"
       ],
       "mechanic_id": "cr-400-general",
       "official_name": "General",
@@ -5702,7 +5703,8 @@
         "test_daretti_ruling_does_not_follow_a_reentered_card",
         "test_logical_identity_metadata_is_not_projected_to_pilots",
         "test_token_cost_cessation_replays_exactly",
-        "test_simultaneous_move_captures_all_lki_before_mutation"
+        "test_simultaneous_move_captures_all_lki_before_mutation",
+        "test_worlds_entering_simultaneously_are_tied_and_all_leave"
       ],
       "trust_level": "untrusted"
     },
@@ -6272,17 +6274,18 @@
     {
       "category": "spells_abilities_effects",
       "contract_path": "mechanics/contracts/continuous-layers.json",
-      "contract_sha256": "e02a8ca685dbdddbfea8a72b2bb6935171392d332c14150387327e31956ecff8",
-      "contract_version": 1,
+      "contract_sha256": "d134497c32d15cce341bb720aa46f8506562770cdd1e9c0cd0bfaf8c7455fbf9",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "continuous_effects.evaluate_continuous_effects and CommanderEngine._apply_layered_characteristic_annotations",
-      "implementation_version": "continuous-layers-v1",
+      "implementation_component": "continuous_effects.evaluate_continuous_effects, CommanderEngine._apply_layered_characteristic_annotations, and serialized object timestamp allocation",
+      "implementation_version": "continuous-layers-v2",
       "kind": "rules_section",
       "known_blockers": [
         "not every existing ad hoc static ability has been converted to a declarative effect",
         "dependency discovery is supplied by the compiler rather than inferred from arbitrary effect programs",
-        "player/game-rule effects and APNAP timestamp decisions are not integrated",
+        "serialized zone timestamp moments are not yet consumed by every continuous-effect source",
+        "player/game-rule effects and APNAP relative-timestamp decisions are not integrated",
         "full face-down, merged permanent, and sticker copiable values are not integrated"
       ],
       "mechanic_id": "cr-613-interaction-of-continuous-effects",
@@ -6294,7 +6297,9 @@
         "test_layer_order_dominates_timestamp",
         "test_power_toughness_sublayers_set_modify_then_switch",
         "test_dependency_overrides_timestamp_and_cycles_are_audited",
-        "test_effect_order_is_stable_under_input_mutation"
+        "test_effect_order_is_stable_under_input_mutation",
+        "test_zone_changes_create_serialized_logical_incarnations",
+        "test_losing_and_regaining_world_gets_a_new_since_time"
       ],
       "trust_level": "untrusted"
     },
@@ -6430,16 +6435,15 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/state-based-actions.json",
-      "contract_sha256": "103c35d7b907f3df70b5ae28a5a1c2919d0f34a42401a507018be19d68278f3f",
-      "contract_version": 2,
+      "contract_sha256": "07731f4335e5bd0f66a71591fbff9e978aff1b24ebdf35a5cb847f37ef275715",
+      "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "state_based_actions.evaluate_permanent_state_based_actions and CommanderEngine._stabilize",
-      "implementation_version": "state-based-actions-v3",
+      "implementation_version": "state-based-actions-v4",
       "kind": "rules_section",
       "known_blockers": [
         "spell-copy and card-copy cessation lacks a transient noncard object representation in destination zones",
-        "the world rule and simultaneous world timestamps are not implemented",
         "maximum-counter restrictions, Sagas, dungeons, space sculptor, battles, Roles, and speed state actions are not implemented",
         "Aura attachment to players and the complete enchant-quality grammar are not implemented",
         "regeneration and complete loss-event replacement ordering are not integrated",
@@ -6464,7 +6468,13 @@
         "test_token_changes_zone_before_ceasing_at_next_state_check",
         "test_legend_rule_asks_controller_to_keep_one",
         "test_player_elimination_keeps_multiplayer_game_running",
-        "test_last_player_wins_after_simultaneous_losses"
+        "test_last_player_wins_after_simultaneous_losses",
+        "test_world_rule_keeps_only_the_unique_newest_world",
+        "test_tied_newest_world_permanents_all_leave_order_independently",
+        "test_world_rule_requires_a_since_timestamp",
+        "test_new_world_moves_the_older_world_to_graveyard",
+        "test_worlds_entering_simultaneously_are_tied_and_all_leave",
+        "test_losing_and_regaining_world_gets_a_new_since_time"
       ],
       "trust_level": "untrusted"
     },

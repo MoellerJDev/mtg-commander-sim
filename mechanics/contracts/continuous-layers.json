@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "cr-613-interaction-of-continuous-effects",
   "official_name": "Interaction of Continuous Effects",
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
-  "rule_references": ["613", "613.1", "613.2", "613.3", "613.4", "613.7", "613.8"],
+  "rule_references": ["613", "613.1", "613.2", "613.3", "613.4", "613.7", "613.7d", "613.7m", "613.8"],
   "glossary_references": [],
   "dependencies": ["continuous-effects", "copying-objects", "characteristic-defining-ability"],
   "coverage_status": "partial",
@@ -14,8 +14,8 @@
     "zones": ["all zones in which a continuous effect applies"],
     "objects": ["objects, players, and game rules affected by continuous effects"],
     "events": ["continuous reevaluation after every relevant state change"],
-    "state_reads": ["printed or copiable characteristics", "timestamps", "dependency graph", "effect applicability"],
-    "state_writes": ["derived characteristics only; no authoritative zone mutation"],
+    "state_reads": ["printed or copiable characteristics", "serialized zone and World-since timestamp moments", "effect timestamps", "dependency graph", "effect applicability"],
+    "state_writes": ["derived characteristics only; authoritative object timestamps are maintained by the zone and supertype boundary"],
     "costs": ["cost-changing effects are delegated to the casting and activation cost pipeline"],
     "timing": ["layers 1 through 7", "sublayers 1a/1b and 7a/7b/7c/7d", "timestamp order"],
     "targets": [],
@@ -36,16 +36,19 @@
     "test_layer_order_dominates_timestamp",
     "test_power_toughness_sublayers_set_modify_then_switch",
     "test_dependency_overrides_timestamp_and_cycles_are_audited",
-    "test_effect_order_is_stable_under_input_mutation"
+    "test_effect_order_is_stable_under_input_mutation",
+    "test_zone_changes_create_serialized_logical_incarnations",
+    "test_losing_and_regaining_world_gets_a_new_since_time"
   ],
   "implementation": {
-    "component": "continuous_effects.evaluate_continuous_effects and CommanderEngine._apply_layered_characteristic_annotations",
-    "version": "continuous-layers-v1"
+    "component": "continuous_effects.evaluate_continuous_effects, CommanderEngine._apply_layered_characteristic_annotations, and serialized object timestamp allocation",
+    "version": "continuous-layers-v2"
   },
   "known_blockers": [
     "not every existing ad hoc static ability has been converted to a declarative effect",
     "dependency discovery is supplied by the compiler rather than inferred from arbitrary effect programs",
-    "player/game-rule effects and APNAP timestamp decisions are not integrated",
+    "serialized zone timestamp moments are not yet consumed by every continuous-effect source",
+    "player/game-rule effects and APNAP relative-timestamp decisions are not integrated",
     "full face-down, merged permanent, and sticker copiable values are not integrated"
   ],
   "review_status": "draft"

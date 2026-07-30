@@ -52,20 +52,35 @@ class ObjectIdentityAndTokenLifecycleTests(unittest.TestCase):
         engine = self.make_engine(4007)
         card = self.card(engine, "A", "Sol Ring")
         initial = card.zone_change_counter
+        initial_timestamp = card.zone_timestamp
 
         engine.move_card(card.object_id, "hand", log=False)
         self.assertEqual(initial + 1, card.zone_change_counter)
+        self.assertGreater(card.zone_timestamp, initial_timestamp)
+        hand_timestamp = card.zone_timestamp
         engine.move_card(card.object_id, "hand", log=False)
         self.assertEqual(initial + 1, card.zone_change_counter)
+        self.assertEqual(hand_timestamp, card.zone_timestamp)
         engine.move_card(card.object_id, "exile", log=False)
         self.assertEqual(initial + 2, card.zone_change_counter)
+        self.assertGreater(card.zone_timestamp, hand_timestamp)
+        first_exile_timestamp = card.zone_timestamp
         engine.move_card(card.object_id, "exile", log=False)
         self.assertEqual(initial + 3, card.zone_change_counter)
+        self.assertGreater(card.zone_timestamp, first_exile_timestamp)
 
         restored = GameState.from_dict(engine.state.to_dict())
         self.assertEqual(
             card.zone_change_counter,
             restored.cards[card.object_id].zone_change_counter,
+        )
+        self.assertEqual(
+            card.zone_timestamp,
+            restored.cards[card.object_id].zone_timestamp,
+        )
+        self.assertEqual(
+            engine.state.timestamp_sequence,
+            restored.timestamp_sequence,
         )
 
     def test_incarnation_counter_is_monotonic_under_zone_mutation(self):
@@ -295,6 +310,8 @@ class ObjectIdentityAndTokenLifecycleTests(unittest.TestCase):
 
         self.assertNotIn(card.object_id, packet_text)
         self.assertNotIn("zone_change_counter", packet_text)
+        self.assertNotIn("zone_timestamp", packet_text)
+        self.assertNotIn("world_supertype_timestamp", packet_text)
         self.assertNotIn("logical_object_id", packet_text)
 
     def test_token_changes_zone_before_ceasing_at_next_state_check(self):
