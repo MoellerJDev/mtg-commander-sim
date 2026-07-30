@@ -33,7 +33,9 @@ Recognized whole-text templates lower into the same generic DSL and kernel
 primitives used by current packs.
 
 At deck creation, generated programs are added only when their stable
-Oracle/face/ability key is not already supplied by a reviewed pack. A
+Oracle/face/ability key is not already supplied by a reviewed pack. Reviewed
+trigger event handlers also shadow equivalent generated event handlers even
+when their author-defined keys differ; this prevents duplicate triggers. A
 generated program records source line offsets, Oracle/rulings hashes, compiler
 and template IDs, and a semantic hash. It is `provisional` and
 `requires_arbiter=true` until every mechanic dependency is trusted. Under

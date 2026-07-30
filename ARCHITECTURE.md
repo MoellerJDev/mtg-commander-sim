@@ -202,9 +202,12 @@ compact derived indexes. The raw document remains ignored. The manifest pins
 the CR, Oracle, and rulings inputs, while coverage remains false until reviewed
 contracts and tests establish behavioral trust.
 
-The future Oracle compiler preserves source spans and emits typed ability,
-cost, target, trigger, replacement, continuous-effect, copy, search, and
-choice nodes. A material residual prevents trusted preflight. Card-specific
+The Oracle compiler preserves source spans and emits typed ability, cost,
+target, trigger, replacement, and effect nodes. Oracle IR v2 lowers simple
+self enters/dies/leaves triggers, unconditional enters-tapped text, fixed
+self/target effects, and basic creature-token creation. Generated handlers
+remain provisional, and reviewed trigger handlers shadow equivalent generated
+events. A material residual prevents trusted preflight. Card-specific
 overrides are a reviewed escape hatch for irreducible exceptions, not a
 substitute for generic mechanics or a printed-name branch in
 `CommanderEngine`.

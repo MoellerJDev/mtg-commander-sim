@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-111-tokens",
+  "official_name": "Tokens",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": ["111", "111.1", "111.2"],
+  "glossary_references": [],
+  "dependencies": ["cr-110-permanents", "cr-403-battlefield"],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["battlefield and outside after a token leaves"],
+    "objects": ["basic creature tokens with fixed printed characteristics"],
+    "events": ["token creation and permanent entry"],
+    "state_reads": ["controller and compiled token characteristics"],
+    "state_writes": ["new token object and battlefield membership"],
+    "costs": [],
+    "timing": ["during semantic effect resolution"],
+    "targets": [],
+    "choices": [],
+    "hidden_information": [],
+    "apnap": [],
+    "layers": ["token base characteristics become copiable values"],
+    "replacement_effects": ["token-doubling and token-replacement effects may modify creation"],
+    "copy": ["copy tokens require a separate characteristic snapshot path"],
+    "control_change": ["created token enters under the instructed controller"],
+    "zone_change": ["a token that leaves the battlefield ceases to exist"],
+    "source_leaves": []
+  },
+  "variants": ["fixed power/toughness colored creature token", "fixed artifact creature token"],
+  "witness_cards": [
+    {
+      "name": "Sprout",
+      "oracle_id": "424c6f5e-b386-47e9-b3fe-25b263097d40"
+    }
+  ],
+  "rulings": [],
+  "test_ids": ["test_self_pump_and_basic_token_creation_lower_generically"],
+  "implementation": {
+    "component": "oracle_ir._effect_template and CommanderEngine.create_token",
+    "version": "basic-token-template-v1"
+  },
+  "known_blockers": [
+    "tokens with abilities, dynamic values, predefined named characteristics, or linked choices remain residual",
+    "generic replacement ordering for token multipliers is incomplete",
+    "copy-token characteristic and entry replacement coverage is incomplete"
+  ],
+  "review_status": "draft"
+}

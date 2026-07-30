@@ -30,8 +30,13 @@ from mtg_commander_sim.oracle_ir import (
     compile_oracle_card,
     generated_programs,
     oracle_corpus_coverage,
+    register_generated_programs,
 )
 from mtg_commander_sim.rules_corpus import verify_rules_corpus
+from mtg_commander_sim.semantics import (
+    SemanticProgram,
+    SemanticRegistry,
+)
 from mtg_commander_sim.util import normalize_card_name
 
 
@@ -62,6 +67,11 @@ class MechanicContractTests(unittest.TestCase):
             {
                 "cr-613-interaction-of-continuous-effects",
                 "cr-616-interaction-of-replacement-and-or-prevention-effects",
+                "cr-111-tokens",
+                "cr-122-counters",
+                "cr-603-handling-triggered-abilities",
+                "cr-611-continuous-effects",
+                "cr-614-replacement-effects",
                 "deathtouch",
                 "flying",
                 "protection",
@@ -190,6 +200,74 @@ class OracleIRTests(unittest.TestCase):
                 "keywords": ["Mana Ability"],
                 "produced_mana": ["G"],
             },
+            {
+                "oracle_id": "00000000-0000-4000-8000-000000000007",
+                "name": "Elvish Visionary",
+                "mana_cost": "{1}{G}",
+                "mana_value": 2.0,
+                "type_line": "Creature — Elf Shaman",
+                "oracle_text": (
+                    "When this creature enters, draw a card."
+                ),
+                "power": "1",
+                "toughness": "1",
+                "colors": ["G"],
+                "color_identity": ["G"],
+            },
+            {
+                "oracle_id": "00000000-0000-4000-8000-000000000008",
+                "name": "Kingfisher",
+                "mana_cost": "{3}{U}",
+                "mana_value": 4.0,
+                "type_line": "Creature — Bird",
+                "oracle_text": (
+                    "Flying\nWhen this creature dies, draw a card."
+                ),
+                "power": "2",
+                "toughness": "2",
+                "colors": ["U"],
+                "color_identity": ["U"],
+                "keywords": ["Flying"],
+            },
+            {
+                "oracle_id": "00000000-0000-4000-8000-000000000009",
+                "name": "Moss Diamond",
+                "mana_cost": "{2}",
+                "mana_value": 2.0,
+                "type_line": "Artifact",
+                "oracle_text": (
+                    "This artifact enters tapped.\n{T}: Add {G}."
+                ),
+                "produced_mana": ["G"],
+                "color_identity": ["G"],
+                "keywords": ["Mana Ability"],
+            },
+            {
+                "oracle_id": "00000000-0000-4000-8000-000000000010",
+                "name": "Sprout",
+                "mana_cost": "{G}",
+                "mana_value": 1.0,
+                "type_line": "Instant",
+                "oracle_text": (
+                    "Create a 1/1 green Saproling creature token."
+                ),
+                "colors": ["G"],
+                "color_identity": ["G"],
+            },
+            {
+                "oracle_id": "00000000-0000-4000-8000-000000000011",
+                "name": "Whispering Shade",
+                "mana_cost": "{3}{B}",
+                "mana_value": 4.0,
+                "type_line": "Creature — Shade",
+                "oracle_text": (
+                    "{B}: This creature gets +1/+1 until end of turn."
+                ),
+                "power": "1",
+                "toughness": "1",
+                "colors": ["B"],
+                "color_identity": ["B"],
+            },
         ]
         with sqlite3.connect(path) as connection:
             for card in cards:
@@ -284,7 +362,10 @@ class OracleIRTests(unittest.TestCase):
     def test_trusted_dependency_set_promotes_only_the_matching_template(self):
         bolt = compile_oracle_card(
             self.db.lookup("Lightning Bolt"),
-            trusted_mechanics={"damage", "target"},
+            trusted_mechanics={
+                "cr-120-damage",
+                "cr-115-targets",
+            },
         )
         self.assertEqual("exact", bolt.status)
         self.assertEqual(0, len(bolt.material_residuals))
@@ -318,6 +399,178 @@ class OracleIRTests(unittest.TestCase):
             program.provenance["dependency_trust"],
         )
 
+    def test_simple_self_trigger_compiles_to_normalized_engine_event(self):
+        record = self.db.lookup("Elvish Visionary")
+        ir = compile_oracle_card(record)
+        node = ir.faces[0].nodes[0]
+        self.assertEqual("triggered_ability", node.kind)
+        self.assertEqual("permanent.enter.self", node.event)
+        self.assertEqual("draw-controller-v1", node.template_id)
+        self.assertTrue(node.lowerable)
+        self.assertFalse(node.exact)
+        self.assertEqual(
+            (
+                "cr-603-handling-triggered-abilities",
+                "cr-121-drawing-a-card",
+            ),
+            node.mechanics,
+        )
+        programs = generated_programs(self.db, record)
+        self.assertEqual(1, len(programs))
+        self.assertEqual("permanent.enter.self", programs[0].event)
+        self.assertEqual(
+            [{"op": "draw", "player": "$controller", "count": 1,
+              "private": True}],
+            programs[0].effects,
+        )
+
+    def test_trigger_with_uncompiled_condition_remains_residual(self):
+        record = replace(
+            self.db.lookup("Elvish Visionary"),
+            oracle_text=(
+                "When this creature enters, if you control an Elf, "
+                "draw a card."
+            ),
+        )
+        ir = compile_oracle_card(record)
+        self.assertEqual("unresolved", ir.status)
+        self.assertEqual("trigger", ir.material_residuals[0].kind)
+        self.assertFalse(generated_programs(self.db, record))
+
+    def test_self_pump_and_basic_token_creation_lower_generically(self):
+        shade_program = generated_programs(
+            self.db,
+            self.db.lookup("Whispering Shade"),
+        )[0]
+        self.assertEqual(
+            [
+                {
+                    "op": "modify_stats_until_end_of_turn",
+                    "card": "$source",
+                    "power": 1,
+                    "toughness": 1,
+                }
+            ],
+            shade_program.effects,
+        )
+        sprout_program = generated_programs(
+            self.db,
+            self.db.lookup("Sprout"),
+        )[0]
+        token = sprout_program.effects[0]
+        self.assertEqual("create_token", token["op"])
+        self.assertEqual("Saproling", token["name"])
+        self.assertEqual(
+            "Token Creature — Saproling",
+            token["characteristics"]["type_line"],
+        )
+        self.assertEqual(["G"], token["characteristics"]["colors"])
+        counter_record = replace(
+            self.db.lookup("Whispering Shade"),
+            oracle_text=(
+                "{T}: Put a +1/+1 counter on target creature."
+            ),
+        )
+        counter_program = generated_programs(
+            self.db,
+            counter_record,
+        )[0]
+        self.assertEqual(
+            {
+                "op": "add_counter_selected",
+                "cards": ["$target.0"],
+                "counter": "+1/+1",
+                "amount": 1,
+            },
+            counter_program.effects[0],
+        )
+        self.assertEqual(
+            ["creature"],
+            counter_program.target_schema["types_any"],
+        )
+
+    def test_new_templates_remain_whole_text_anchored(self):
+        cases = [
+            (
+                self.db.lookup("Sprout"),
+                (
+                    "Create a 1/1 green Saproling creature token "
+                    "with flying."
+                ),
+            ),
+            (
+                self.db.lookup("Whispering Shade"),
+                (
+                    "{B}: This creature gets +1/+1 until end of turn. "
+                    "Activate only once each turn."
+                ),
+            ),
+            (
+                self.db.lookup("Moss Diamond"),
+                (
+                    "This artifact enters tapped unless you control "
+                    "a Forest.\n{T}: Add {G}."
+                ),
+            ),
+        ]
+        for base, oracle_text in cases:
+            with self.subTest(base.name):
+                ir = compile_oracle_card(
+                    replace(base, oracle_text=oracle_text)
+                )
+                self.assertTrue(ir.material_residuals)
+                self.assertNotEqual("exact", ir.status)
+
+    def test_generated_trust_cannot_bypass_material_residuals(self):
+        with self.assertRaisesRegex(
+            ValueError,
+            "material Oracle residuals remain",
+        ):
+            generated_programs(
+                self.db,
+                self.db.lookup("Lightning Bolt"),
+                trust_level="trusted",
+            )
+
+    def test_reviewed_trigger_shadows_equivalent_generated_event(self):
+        record = self.db.lookup("Elvish Visionary")
+        registry = SemanticRegistry(include_builtin_packs=False)
+        reviewed = SemanticProgram(
+            key=f"{record.oracle_id}:reviewed:enter",
+            label="Reviewed Elvish Visionary trigger",
+            effects=[
+                {
+                    "op": "draw",
+                    "player": "$controller",
+                    "count": 1,
+                }
+            ],
+            oracle_id=record.oracle_id,
+            ability_id="reviewed:enter",
+            active_zone="battlefield",
+            event="permanent.enter.self",
+            trust_level="trusted",
+            provenance={
+                "source_oracle_hash": "reviewed-oracle-hash",
+                "source_rulings_hash": "reviewed-rulings-hash",
+                "authored_by": "test",
+                "review_status": "reviewed",
+            },
+            tests=["test_reviewed_trigger"],
+        )
+        registry.put(reviewed)
+        result = register_generated_programs(
+            self.db,
+            registry,
+            [record],
+        )
+        self.assertEqual(0, result["programs_generated"])
+        self.assertEqual(1, result["programs_skipped_existing"])
+        self.assertEqual(
+            [reviewed.key],
+            [program.key for program in registry.programs()],
+        )
+
     def test_template_mutation_cannot_be_silently_discarded(self):
         record = self.db.lookup("Lightning Bolt")
         mutated = replace(
@@ -329,7 +582,10 @@ class OracleIRTests(unittest.TestCase):
         )
         ir = compile_oracle_card(
             mutated,
-            trusted_mechanics={"damage", "target"},
+            trusted_mechanics={
+                "cr-120-damage",
+                "cr-115-targets",
+            },
         )
         self.assertNotEqual("exact", ir.status)
         self.assertTrue(ir.material_residuals)
@@ -405,6 +661,122 @@ class OracleIRTests(unittest.TestCase):
         self.assertIsNotNone(program)
         self.assertEqual("provisional", program.trust_level)
         self.assertTrue(program.requires_arbiter)
+
+    def _trigger_session(self):
+        deck_a = DeckDefinition(
+            name="A",
+            commanders=["Zimone and Dina"],
+            entries=[
+                DeckEntry("Zimone and Dina", board="commander"),
+                DeckEntry("Elvish Visionary"),
+                DeckEntry("Kingfisher"),
+                DeckEntry("Moss Diamond"),
+            ],
+        )
+        deck_b = DeckDefinition(
+            name="B",
+            commanders=["Mishra, Eminent One"],
+            entries=[
+                DeckEntry("Mishra, Eminent One", board="commander"),
+                DeckEntry("Island"),
+            ],
+        )
+        session = CommanderSession.create(
+            self.db,
+            {"A": deck_a, "B": deck_b},
+            first_player="A",
+            seed=9393,
+        )
+        engine = session.engine
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.priority_player = None
+        for player in engine.state.players.values():
+            player.attempted_empty_draw = False
+        return session
+
+    def test_generated_enters_trigger_reaches_arbiter_fail_closed(self):
+        session = self._trigger_session()
+        engine = session.engine
+        visionary = next(
+            card
+            for card in engine.state.cards.values()
+            if card.printed_name == "Elvish Visionary"
+        )
+        engine.move_card(
+            visionary.object_id,
+            "battlefield",
+            controller="A",
+            semantic_events=True,
+        )
+        self.assertTrue(engine.state.pending_trigger_batches)
+        self.assertFalse(engine._stabilize())
+        trigger = engine.state.stack[-1]
+        self.assertEqual("A", trigger.controller)
+        self.assertEqual(
+            "permanent.enter",
+            trigger.context["event"],
+        )
+        engine._prepare_stack_resolution()
+        self.assertEqual(
+            "arbiter.resolve",
+            engine.state.pending_decision.kind,
+        )
+
+    def test_self_dies_trigger_uses_last_known_controller(self):
+        session = self._trigger_session()
+        engine = session.engine
+        kingfisher = next(
+            card
+            for card in engine.state.cards.values()
+            if card.printed_name == "Kingfisher"
+        )
+        engine.move_card(
+            kingfisher.object_id,
+            "battlefield",
+            controller="B",
+        )
+        engine.move_card(
+            kingfisher.object_id,
+            "graveyard",
+            semantic_events=True,
+        )
+        self.assertTrue(engine.state.pending_trigger_batches)
+        self.assertFalse(engine._stabilize())
+        trigger = engine.state.stack[-1]
+        self.assertEqual("B", trigger.controller)
+        self.assertEqual("creature.dies", trigger.context["event"])
+        self.assertEqual("A", kingfisher.controller)
+
+    def test_unconditional_entry_tapped_is_engine_derived(self):
+        session = self._trigger_session()
+        engine = session.engine
+        diamond = next(
+            card
+            for card in engine.state.cards.values()
+            if card.printed_name == "Moss Diamond"
+        )
+        ir = compile_oracle_card(self.db.lookup("Moss Diamond"))
+        entry = next(
+            node
+            for node in ir.faces[0].nodes
+            if node.template_id == "enters-tapped-self-v1"
+        )
+        self.assertTrue(entry.lowerable)
+        engine.move_card(
+            diamond.object_id,
+            "battlefield",
+            controller="A",
+        )
+        self.assertTrue(diamond.tapped)
+        engine.move_card(diamond.object_id, "hand")
+        engine.move_card(
+            diamond.object_id,
+            "battlefield",
+            controller="A",
+            tapped=False,
+        )
+        self.assertFalse(diamond.tapped)
 
     def _generated_spell_session(self, *, trusted_only=False):
         deck_a = DeckDefinition(

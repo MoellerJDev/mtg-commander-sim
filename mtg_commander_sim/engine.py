@@ -1306,13 +1306,37 @@ class CommanderEngine:
                 return "exile", source.ref
         return destination, None
 
+    def _unconditionally_enters_tapped(
+        self,
+        card: CardInstance,
+    ) -> bool:
+        """Recognize the exact unconditional entry replacement template.
+
+        Conditional entry text remains in the dedicated land entry planner or
+        fails closed. Matching whole Oracle lines here prevents a phrase in
+        reminder text or a conditional sentence from changing entry state.
+        """
+
+        data = self._effective_card_data(card)
+        name = re.escape(str(data.get("name") or card.printed_name))
+        pattern = re.compile(
+            rf"(?:this (?:artifact|creature|enchantment|land|permanent)"
+            rf"|{name}) enters tapped\.?",
+            re.IGNORECASE,
+        )
+        return any(
+            pattern.fullmatch(line.strip()) is not None
+            for line in str(data.get("oracle_text") or "").splitlines()
+            if line.strip()
+        )
+
     def move_card(
         self,
         object_id: str,
         destination: str,
         *,
         controller: str | None = None,
-        tapped: bool = False,
+        tapped: bool | None = None,
         position: str = "top",
         reveal_to: Iterable[str] | None = None,
         reason: str = "",
@@ -1365,7 +1389,11 @@ class CommanderEngine:
         if destination == "battlefield":
             card.controller = controller or card.owner
             self._require_seat(card.controller)
-            card.tapped = tapped
+            card.tapped = (
+                self._unconditionally_enters_tapped(card)
+                if tapped is None
+                else bool(tapped)
+            )
             card.acquired_control_turn_count = self.state.players[card.controller].turns_begun
             card.entered_battlefield_turn_sequence = self.state.turn_sequence
             record = self.card_record(card)
@@ -7853,7 +7881,22 @@ class CommanderEngine:
             return False
         if self_event and str(context.get("card") or "") != source.ref:
             return False
-        if source.controller not in self.active_seats:
+        trigger_controller = (
+            str(context.get("previous_controller"))
+            if (
+                self_event
+                and context.get("previous_controller") is not None
+                and event
+                in {
+                    "artifact.graveyard",
+                    "creature.dies",
+                    "permanent.graveyard",
+                    "permanent.leave",
+                }
+            )
+            else source.controller
+        )
+        if trigger_controller not in self.active_seats:
             return False
         if program.event_condition is not None:
             return self._semantic_event_condition_matches(
@@ -7882,7 +7925,7 @@ class CommanderEngine:
                 zones={"battlefield"},
             )
             return entered.controller == source.controller
-        if event == "creature.dies":
+        if event == "creature.dies" and not self_event:
             return (
                 context.get("previous_controller")
                 == source.controller
@@ -7932,12 +7975,29 @@ class CommanderEngine:
                         source=source,
                     )
                     return [item.ref for item in triggered]
+                trigger_controller = (
+                    str(context.get("previous_controller"))
+                    if (
+                        program.event.endswith(".self")
+                        and str(context.get("card") or "")
+                        == source.ref
+                        and context.get("previous_controller") is not None
+                        and event
+                        in {
+                            "artifact.graveyard",
+                            "creature.dies",
+                            "permanent.graveyard",
+                            "permanent.leave",
+                        }
+                    )
+                    else source.controller
+                )
                 ref = self._next_ref("S")
                 item = StackItem(
                     stack_id=self._stable_runtime_id("stack", ref),
                     ref=ref,
                     kind="triggered_ability",
-                    controller=source.controller,
+                    controller=trigger_controller,
                     label=program.label,
                     source_object_id=source.object_id,
                     semantic_key=program.key,
@@ -7986,12 +8046,12 @@ class CommanderEngine:
                     trigger_count += sum(
                         1
                         for permanent_id in self.state.players[
-                            source.controller
+                            item.controller
                         ].zones["battlefield"]
                         if self.state.cards[
                             permanent_id
                         ].controller
-                        == source.controller
+                        == item.controller
                         and not self.state.cards[
                             permanent_id
                         ].phased_out
@@ -8031,12 +8091,12 @@ class CommanderEngine:
                     trigger_count += sum(
                         1
                         for permanent_id in self.state.players[
-                            source.controller
+                            item.controller
                         ].zones["battlefield"]
                         if self.state.cards[
                             permanent_id
                         ].controller
-                        == source.controller
+                        == item.controller
                         and not self.state.cards[
                             permanent_id
                         ].phased_out
@@ -14969,7 +15029,11 @@ class CommanderEngine:
                 card.object_id,
                 destination,
                 controller=effect.get("controller"),
-                tapped=bool(effect.get("tapped", False)),
+                tapped=(
+                    bool(effect["tapped"])
+                    if "tapped" in effect
+                    else None
+                ),
                 position=str(effect.get("position") or "top"),
                 reason=reason,
                 semantic_events=True,
@@ -14983,7 +15047,11 @@ class CommanderEngine:
                 card.object_id,
                 str(effect.get("destination") or "graveyard"),
                 controller=effect.get("controller"),
-                tapped=bool(effect.get("tapped", False)),
+                tapped=(
+                    bool(effect["tapped"])
+                    if "tapped" in effect
+                    else None
+                ),
                 position=str(effect.get("position") or "top"),
                 reason=reason,
                 semantic_events=True,

@@ -129,6 +129,8 @@ generated documentation fixtures with bearer capabilities redacted. See
   fail-closed material residuals
 - automatic deck-time generic compilation into provisional, arbiter-gated
   semantic programs
+- Oracle IR v2 simple self-trigger, unconditional-entry, counter, pump, and
+  basic creature-token templates with reviewed-handler precedence
 - CR 613 layer/sublayer, timestamp, dependency, and cycle-audit primitives,
   now used for common copy/type/keyword annotations
 - CR 616 replacement/prevention priority and affected-player-choice
@@ -220,8 +222,8 @@ python simctl.py oracle coverage \
 ```
 
 This is still not a completeness declaration. The measured compact snapshot
-has 38,362 Oracle IDs: 2,957 exact, 13,684 partially lowerable, and 21,721
-unresolved under current dependency gates. All 69,823 material residuals must
+has 38,373 Oracle IDs: 2,957 exact, 15,691 partially lowerable, and 19,725
+unresolved under current dependency gates. All 69,664 material residuals must
 be eliminated or covered by reviewed, hash-pinned overrides before complete
 Oracle support can be claimed. Genuinely unique cards may use reviewed
 overrides; common cards and mechanics compile through reusable primitives.

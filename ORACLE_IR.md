@@ -33,16 +33,24 @@ until damage and targeting dependencies are trusted.
 ## Runtime behavior
 
 `CommanderSession.create` scans unique cards in all loaded decks. Lowerable
-spell and activated-ability nodes are registered under the same stable keys as
-hand-authored semantics. Existing reviewed programs win on key collision.
+spell, activated-ability, and simple self-trigger nodes are registered under
+stable keys alongside hand-authored semantics. Existing reviewed programs win
+on key collision or equivalent trigger event ownership.
 
-Generated programs are currently:
+Generated spell, activated-ability, and simple self-trigger programs are
+currently:
 
 - `trust_level = provisional`
 - `requires_arbiter = true`
 - pinned to Oracle and rulings hashes
 - annotated with compiler, template, source span, semantic hash, and
   dependency status
+
+Reviewed event handlers shadow equivalent generated triggers. This prevents a
+reviewed card from triggering twice merely because its reviewed ability key
+uses a different author-defined name. Simple unconditional "enters tapped"
+text is applied by the authoritative zone-move path rather than by a pilot or
+generated effect.
 
 Thus an unfamiliar deck can be parsed and partially compiled automatically,
 but an unreviewed match cannot silently execute guessed rules. A

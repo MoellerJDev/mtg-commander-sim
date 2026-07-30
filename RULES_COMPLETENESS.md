@@ -15,17 +15,23 @@ complete rules or Oracle coverage. The current June 19, 2026 CR / July 28,
 - 156 rules sections indexed
 - 733 glossary entries indexed
 - 425 CR section, keyword-action, and keyword-ability mechanics discovered
-- 5 mechanics under versioned partial contracts and 420 unclassified
+- 10 mechanics under versioned partial contracts and 415 unclassified
 - 0 rules or mechanics promoted to trusted by the new registry
-- 38,362 Oracle IDs and 41,569 faces scanned
-- 2,957 exact (primarily textless), 13,684 partially lowerable, and 21,721
+- 38,373 Oracle IDs and 41,582 faces scanned
+- 2,957 exact (primarily textless), 15,691 partially lowerable, and 19,725
   unresolved Oracle IDs
-- 69,823 material residuals, including untrusted dependencies
+- 69,664 material residuals, including untrusted dependencies
 - `current_snapshot_complete = false`
 
 Existing reviewed engine behavior and semantic packs remain available, but the
 new corpus does not retroactively label them trusted until contracts, rule
 references, and conformance tests are linked.
+
+Oracle IR v2 additionally structures exact whole-line forms for simple self
+enters/dies/leaves triggers, unconditional enters-tapped replacements, fixed
+self pumps and keyword grants, one-counter instructions, and basic creature
+token creation. These remain provisional wherever a dependency contract is
+partial.
 
 ## New decks: generic compilation, not one branch per card
 

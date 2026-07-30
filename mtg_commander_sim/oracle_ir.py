@@ -15,7 +15,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v1"
+ORACLE_COMPILER_VERSION = "oracle-ir-v2"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 
 _NUMBER_WORDS = {
@@ -44,7 +44,7 @@ _ABILITY_WORD = re.compile(
     r"^(?P<word>[A-Za-z][A-Za-z ']+)\s+[—-]\s+(?P<body>.+)$"
 )
 _KEYWORD_WITH_VALUE = re.compile(
-    r"^(?P<name>ward|equip|cycling|crew|kicker|"
+    r"^(?P<name>ward|equip|enchant|cycling|crew|kicker|"
     r"cumulative upkeep|echo|morph|bestow|evoke|unearth)"
     r"(?:\s+(?P<value>.+))?$",
     re.IGNORECASE,
@@ -278,7 +278,7 @@ def _effect_template(
                 },
             ),
             None,
-            ("drawing-a-card",),
+            ("cr-121-drawing-a-card",),
         )
     match = re.fullmatch(
         r"target (?P<relation>player|opponent) draws "
@@ -307,7 +307,7 @@ def _effect_template(
                 ),
                 "count": 1,
             },
-            ("drawing-a-card", "target"),
+            ("cr-121-drawing-a-card", "cr-115-targets"),
         )
     match = re.fullmatch(
         r"each player draws (?P<count>a|one|two|three|four|five|six|"
@@ -325,7 +325,10 @@ def _effect_template(
                 },
             ),
             None,
-            ("drawing-a-card", "apnap"),
+            (
+                "cr-121-drawing-a-card",
+                "cr-101-the-magic-golden-rules",
+            ),
         )
     match = re.fullmatch(
         r"you gain (?P<count>\d+) life\.?",
@@ -343,7 +346,7 @@ def _effect_template(
                 },
             ),
             None,
-            ("life",),
+            ("cr-119-life",),
         )
     match = re.fullmatch(
         r"each opponent loses (?P<count>\d+) life\.?",
@@ -360,7 +363,10 @@ def _effect_template(
                 },
             ),
             None,
-            ("life", "apnap"),
+            (
+                "cr-119-life",
+                "cr-101-the-magic-golden-rules",
+            ),
         )
     match = re.fullmatch(
         rf"(?:{name}|this spell) deals (?P<count>\d+) damage to any target\.?",
@@ -383,7 +389,32 @@ def _effect_template(
                 "predicate": "damageable",
                 "count": 1,
             },
-            ("damage", "target"),
+            ("cr-120-damage", "cr-115-targets"),
+        )
+    match = re.fullmatch(
+        r"this (?P<kind>artifact|creature|enchantment|permanent) deals "
+        r"(?P<count>\d+) damage to any target\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    if match:
+        return (
+            f"damage-any-target-self-{match.group('kind').casefold()}-v1",
+            (
+                {
+                    "op": "damage",
+                    "target": "$target.0",
+                    "amount": int(match.group("count")),
+                    "source": "$source",
+                },
+            ),
+            {
+                "zones": ["player", "battlefield"],
+                "categories": ["player", "permanent"],
+                "predicate": "damageable",
+                "count": 1,
+            },
+            ("cr-120-damage", "cr-115-targets"),
         )
     match = re.fullmatch(
         r"destroy target (?P<kinds>artifact|creature|enchantment|land|"
@@ -405,7 +436,7 @@ def _effect_template(
             f"destroy-target-{kind}-v1",
             ({"op": "destroy", "card": "$target.0"},),
             schema,
-            ("destroy", "target"),
+            ("destroy", "cr-115-targets"),
         )
     match = re.fullmatch(
         r"exile target (?P<kinds>artifact|creature|enchantment|land|"
@@ -427,7 +458,7 @@ def _effect_template(
             f"exile-target-{kind}-v1",
             ({"op": "exile", "card": "$target.0"},),
             schema,
-            ("exile", "target"),
+            ("exile", "cr-115-targets"),
         )
     match = re.fullmatch(
         r"return target (?P<kind>creature|artifact|enchantment|land|"
@@ -448,7 +479,7 @@ def _effect_template(
             f"bounce-target-{kind}-v1",
             ({"op": "bounce", "card": "$target.0"},),
             schema,
-            ("return", "target"),
+            ("cr-400-general", "cr-115-targets"),
         )
     match = re.fullmatch(
         r"counter target spell\.?",
@@ -464,7 +495,7 @@ def _effect_template(
                 "categories": ["spell"],
                 "count": 1,
             },
-            ("counter", "target"),
+            ("counter", "cr-115-targets"),
         )
     match = re.fullmatch(
         r"target player mills (?P<count>\d+) cards?\.?",
@@ -486,7 +517,7 @@ def _effect_template(
                 "categories": ["player"],
                 "count": 1,
             },
-            ("mill", "target"),
+            ("mill", "cr-115-targets"),
         )
     match = re.fullmatch(
         r"(?P<action>tap|untap) target (?P<kind>artifact|creature|land|"
@@ -508,7 +539,10 @@ def _effect_template(
             f"{action}-target-{kind}-v1",
             ({"op": action, "card": "$target.0"},),
             schema,
-            (action, "target"),
+            (
+                "cr-701-keyword-actions",
+                "cr-115-targets",
+            ),
         )
     match = re.fullmatch(
         r"target creature gets (?P<power>[+-]\d+)/(?P<toughness>[+-]\d+) "
@@ -533,7 +567,163 @@ def _effect_template(
                 "types_any": ["creature"],
                 "count": 1,
             },
-            ("continuous-effects", "target"),
+            (
+                "cr-611-continuous-effects",
+                "cr-115-targets",
+            ),
+        )
+    match = re.fullmatch(
+        r"this (?P<kind>artifact|creature|enchantment|permanent) gets "
+        r"(?P<power>[+-]\d+)/(?P<toughness>[+-]\d+) until end of turn\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    if match:
+        return (
+            f"modify-self-{match.group('kind').casefold()}-stats-eot-v1",
+            (
+                {
+                    "op": "modify_stats_until_end_of_turn",
+                    "card": "$source",
+                    "power": int(match.group("power")),
+                    "toughness": int(match.group("toughness")),
+                },
+            ),
+            None,
+            ("cr-611-continuous-effects",),
+        )
+    match = re.fullmatch(
+        r"this (?P<kind>artifact|creature|enchantment|permanent) gains "
+        r"(?P<keyword>deathtouch|double strike|first strike|flying|haste|"
+        r"hexproof|indestructible|lifelink|menace|reach|trample|vigilance) "
+        r"until end of turn\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    if match:
+        keyword = match.group("keyword").casefold()
+        return (
+            f"grant-self-{keyword.replace(' ', '-')}-eot-v1",
+            (
+                {
+                    "op": "grant_keyword_until_end_of_turn",
+                    "card": "$source",
+                    "keyword": keyword.title(),
+                },
+            ),
+            None,
+            ("cr-611-continuous-effects", keyword),
+        )
+    counter_pattern = (
+        r"(?P<counter>[+-]\d+/[+-]\d+|[A-Za-z][A-Za-z-]*)"
+    )
+    match = re.fullmatch(
+        rf"put (?:a|an|one) {counter_pattern} counter on this "
+        r"(?P<kind>artifact|creature|enchantment|permanent)\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    if match:
+        counter = match.group("counter")
+        return (
+            f"counter-self-{match.group('kind').casefold()}-v1",
+            (
+                {
+                    "op": "add_counter_selected",
+                    "cards": ["$source"],
+                    "counter": counter,
+                    "amount": 1,
+                },
+            ),
+            None,
+            ("cr-122-counters",),
+        )
+    match = re.fullmatch(
+        rf"put (?:a|an|one) {counter_pattern} counter on target "
+        r"(?P<kind>artifact|creature|enchantment|land|permanent)\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    if match:
+        kind = match.group("kind").casefold()
+        schema: dict[str, Any] = {
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "count": 1,
+        }
+        if kind != "permanent":
+            schema["types_any"] = [kind]
+        return (
+            f"counter-target-{kind}-v1",
+            (
+                {
+                    "op": "add_counter_selected",
+                    "cards": ["$target.0"],
+                    "counter": match.group("counter"),
+                    "amount": 1,
+                },
+            ),
+            schema,
+            ("cr-122-counters", "cr-115-targets"),
+        )
+    match = re.fullmatch(
+        r"return this (?P<kind>artifact|creature|enchantment|permanent) "
+        r"to its owner'?s hand\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    if match:
+        return (
+            f"bounce-self-{match.group('kind').casefold()}-v1",
+            ({"op": "bounce", "card": "$source"},),
+            None,
+            ("cr-400-general",),
+        )
+    match = re.fullmatch(
+        r"create (?P<count>a|one|two|three|four|five|six|seven|eight|"
+        r"nine|ten|\d+) (?P<power>\d+)/(?P<toughness>\d+) "
+        r"(?P<color>white|blue|black|red|green|colorless) "
+        r"(?P<subtypes>[A-Za-z][A-Za-z -]*?) "
+        r"(?P<artifact>artifact )?creature tokens?\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    if match:
+        colors = {
+            "white": ["W"],
+            "blue": ["U"],
+            "black": ["B"],
+            "red": ["R"],
+            "green": ["G"],
+            "colorless": [],
+        }[match.group("color").casefold()]
+        subtypes = " ".join(
+            word.capitalize()
+            for word in match.group("subtypes").split()
+        )
+        artifact = bool(match.group("artifact"))
+        return (
+            "create-basic-creature-token-v1",
+            (
+                {
+                    "op": "create_token",
+                    "controller": "$controller",
+                    "name": subtypes,
+                    "quantity": _number(match.group("count")),
+                    "characteristics": {
+                        "type_line": (
+                            "Token "
+                            + ("Artifact " if artifact else "")
+                            + f"Creature — {subtypes}"
+                        ),
+                        "colors": colors,
+                        "power": match.group("power"),
+                        "toughness": match.group("toughness"),
+                    },
+                },
+            ),
+            None,
+            ("cr-111-tokens",),
         )
     match = re.fullmatch(
         r"scry (?P<count>\d+)\.?",
@@ -741,7 +931,7 @@ def _compile_face(
             dependencies = (
                 mechanics
                 if template is not None
-                else ("mana-abilities",)
+                else ("cr-605-mana-abilities",)
             )
             missing = sorted(
                 set(dependencies) - trusted_mechanics
@@ -792,48 +982,143 @@ def _compile_face(
             continue
 
         if _TRIGGER_PREFIX.match(line):
-            trigger_body = re.split(r",\s*", line, maxsplit=1)
+            source_name = re.escape(face_name or record.name)
+            trigger = re.fullmatch(
+                rf"(?:when|whenever) "
+                rf"(?P<subject>this (?:artifact|aura|card|creature|"
+                rf"enchantment|equipment|land|permanent)|{source_name}) "
+                rf"(?P<event>enters|dies|leaves the battlefield), "
+                rf"(?P<body>.+)",
+                line,
+                re.IGNORECASE,
+            )
             template = None
             effects: tuple[Mapping[str, Any], ...] = ()
             target_schema = None
             mechanics: tuple[str, ...] = ()
-            if len(trigger_body) == 2:
+            event = "unresolved"
+            if trigger:
                 template, effects, target_schema, mechanics = (
                     _effect_template(
-                        trigger_body[1],
+                        trigger.group("body"),
                         card_name=face_name or record.name,
                     )
                 )
-            residual_id = _residual(
-                residuals,
-                kind="trigger",
-                text=line,
-                span=span,
-                reason=(
-                    "trigger condition/event binding is not exact"
-                    if template is not None
-                    else "trigger condition and effect are not compiled"
-                ),
-                blockers=(
-                    "normalized event binding",
-                    "intervening-if and reflexive-trigger grammar",
-                ),
+                event = {
+                    "enters": "permanent.enter.self",
+                    "dies": "creature.dies.self",
+                    "leaves the battlefield": "permanent.leave.self",
+                }[trigger.group("event").casefold()]
+            dependencies = (
+                "cr-603-handling-triggered-abilities",
+                *mechanics,
             )
+            missing = sorted(set(dependencies) - trusted_mechanics)
+            residual_ids: tuple[str, ...]
+            if trigger is not None and template is not None:
+                residual_ids = (
+                    (
+                        _residual(
+                            residuals,
+                            kind="dependency_contract",
+                            text=line,
+                            span=span,
+                            reason=(
+                                "lowerable trigger depends on untrusted "
+                                "mechanic contracts"
+                            ),
+                            blockers=tuple(
+                                f"mechanic:{mechanic}"
+                                for mechanic in missing
+                            ),
+                        ),
+                    )
+                    if missing
+                    else ()
+                )
+            else:
+                residual_ids = (
+                    _residual(
+                        residuals,
+                        kind="trigger",
+                        text=line,
+                        span=span,
+                        reason=(
+                            "trigger effect has no exact generic template"
+                            if trigger is not None
+                            else "trigger condition/event binding is not exact"
+                        ),
+                        blockers=(
+                            "normalized event binding",
+                            "intervening-if and reflexive-trigger grammar",
+                        ),
+                    ),
+                )
             nodes.append(
                 OracleNode(
                     node_id=node_id,
                     kind="triggered_ability",
                     text=line,
                     span=span,
-                    active_zone="battlefield" if permanent else "stack",
-                    event="unresolved",
-                    lowerable=False,
-                    exact=False,
+                    active_zone="battlefield",
+                    event=event,
+                    lowerable=trigger is not None and template is not None,
+                    exact=(
+                        trigger is not None
+                        and template is not None
+                        and not missing
+                    ),
                     template_id=template,
                     effects=effects,
                     target_schema=target_schema,
-                    mechanics=mechanics,
-                    residual_ids=(residual_id,),
+                    mechanics=dependencies,
+                    residual_ids=residual_ids,
+                )
+            )
+            continue
+
+        enters_tapped = re.fullmatch(
+            rf"(?:this (?:artifact|creature|enchantment|land|permanent)"
+            rf"|{re.escape(face_name or record.name)}) enters tapped\.?",
+            line,
+            re.IGNORECASE,
+        )
+        if enters_tapped:
+            dependencies = ("cr-614-replacement-effects",)
+            missing = sorted(set(dependencies) - trusted_mechanics)
+            residual_ids = (
+                (
+                    _residual(
+                        residuals,
+                        kind="dependency_contract",
+                        text=line,
+                        span=span,
+                        reason=(
+                            "lowerable entry replacement depends on an "
+                            "untrusted mechanic contract"
+                        ),
+                        blockers=tuple(
+                            f"mechanic:{mechanic}"
+                            for mechanic in missing
+                        ),
+                    ),
+                )
+                if missing
+                else ()
+            )
+            nodes.append(
+                OracleNode(
+                    node_id=node_id,
+                    kind="replacement_effect",
+                    text=line,
+                    span=span,
+                    active_zone="all",
+                    event="permanent.enter.self",
+                    lowerable=True,
+                    exact=not missing,
+                    template_id="enters-tapped-self-v1",
+                    mechanics=dependencies,
+                    residual_ids=residual_ids,
                 )
             )
             continue
@@ -1034,6 +1319,7 @@ def generated_programs(
     record: CardRecord,
     *,
     trust_level: str = "provisional",
+    trusted_mechanics: Iterable[str] = (),
 ) -> list[SemanticProgram]:
     """Lower exact IR nodes into the existing generic effect DSL.
 
@@ -1043,20 +1329,27 @@ def generated_programs(
     correctness.
     """
 
-    ir = compile_oracle_card(record)
+    ir = compile_oracle_card(
+        record,
+        trusted_mechanics=trusted_mechanics,
+    )
+    if trust_level == "trusted" and ir.status != "exact":
+        raise ValueError(
+            f"{record.name} cannot be promoted to trusted generated "
+            "semantics while material Oracle residuals remain"
+        )
     programs: list[SemanticProgram] = []
     rulings_hash = _rulings_hash(db, record)
     for face in ir.faces:
-        activated_index = 0
         for node in face.nodes:
-            if node.kind in {"activated_ability", "mana_ability"}:
-                activated_index += 1
             if not node.lowerable or not node.effects:
                 continue
             if node.kind == "spell_ability":
                 ability_id = f"spell:{face.face_id}"
             elif node.kind == "activated_ability":
                 ability_id = f"ability:ab{node.span.line}"
+            elif node.kind == "triggered_ability":
+                ability_id = f"trigger:{face.face_id}:n{node.span.line}"
             else:
                 continue
             key = f"{record.oracle_id}:{ability_id}"
@@ -1107,7 +1400,11 @@ def generated_programs(
                         "generated_oracle_ir",
                         "spell_resolution"
                         if node.kind == "spell_ability"
-                        else "activated_ability",
+                        else (
+                            "triggered_ability"
+                            if node.kind == "triggered_ability"
+                            else "activated_ability"
+                        ),
                         *node.mechanics,
                     ],
                 )
@@ -1121,6 +1418,7 @@ def register_generated_programs(
     records: Iterable[CardRecord],
     *,
     trust_level: str = "provisional",
+    trusted_mechanics: Iterable[str] = (),
 ) -> dict[str, Any]:
     generated = 0
     skipped_existing = 0
@@ -1133,8 +1431,28 @@ def register_generated_programs(
             db,
             record,
             trust_level=trust_level,
+            trusted_mechanics=trusted_mechanics,
         ):
             if registry.get(program.key) is not None:
+                skipped_existing += 1
+                continue
+            if (
+                program.ability_id.startswith("trigger:")
+                and any(
+                    existing.trust_level == "trusted"
+                    and existing.active_zone == program.active_zone
+                    and existing.event == program.event
+                    for existing in registry.programs_for_oracle(
+                        record.oracle_id
+                    )
+                )
+            ):
+                # Reviewed event handlers take precedence. Trigger program
+                # keys are author-defined, so key equality alone cannot
+                # detect that a reviewed pack already owns this event family.
+                # Conservatively skipping avoids duplicate triggers; cards
+                # with multiple same-event abilities remain dependent on their
+                # reviewed pack until source-span identities are standardized.
                 skipped_existing += 1
                 continue
             registry.put(program)

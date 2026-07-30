@@ -1,6 +1,18 @@
 {
-  "contract_count": 5,
+  "contract_count": 10,
   "contracts": [
+    {
+      "mechanic_id": "cr-122-counters",
+      "path": "mechanics/contracts/basic-counters.json",
+      "sha256": "dccd844fce35de233cf7b59244beea52cf17ece39ae6f6106b2ba8ed56065f1d",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-111-tokens",
+      "path": "mechanics/contracts/basic-token-creation.json",
+      "sha256": "d5976f020569419700d8d0a29b8eb8121c05cfac46e8086ebf8e40b73c6f4213",
+      "version": 1
+    },
     {
       "mechanic_id": "cr-613-interaction-of-continuous-effects",
       "path": "mechanics/contracts/continuous-layers.json",
@@ -29,6 +41,24 @@
       "mechanic_id": "cr-616-interaction-of-replacement-and-or-prevention-effects",
       "path": "mechanics/contracts/replacement-ordering.json",
       "sha256": "300df49bb52c302f96c0a03c2baad26e86c2962a8a91a9fcf3451e1d5722268d",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-603-handling-triggered-abilities",
+      "path": "mechanics/contracts/simple-self-triggers.json",
+      "sha256": "f424aa567e55ea4b23a018c06af19dde73bf762e7870f8738d3f2043e5f40a3b",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-611-continuous-effects",
+      "path": "mechanics/contracts/simple-until-end-of-turn.json",
+      "sha256": "7a0747f0f5dd88a44bfa58746dad611b2db8ed4c7eb5e0aebeada351054aa2c9",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-614-replacement-effects",
+      "path": "mechanics/contracts/unconditional-enters-tapped.json",
+      "sha256": "910990b5f2ed47e9ecbb794bdd03cd8bcf40f82e444d98a9adb73cab522f4633",
       "version": 1
     }
   ],
@@ -4958,17 +4988,27 @@
     },
     {
       "category": "game_concepts",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/basic-token-creation.json",
+      "contract_sha256": "d5976f020569419700d8d0a29b8eb8121c05cfac46e8086ebf8e40b73c6f4213",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "oracle_ir._effect_template and CommanderEngine.create_token",
+      "implementation_version": "basic-token-template-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "tokens with abilities, dynamic values, predefined named characteristics, or linked choices remain residual",
+        "generic replacement ordering for token multipliers is incomplete",
+        "copy-token characteristic and entry replacement coverage is incomplete"
+      ],
       "mechanic_id": "cr-111-tokens",
       "official_name": "Tokens",
       "rule_references": [
         "111"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_self_pump_and_basic_token_creation_lower_generically"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -5123,17 +5163,27 @@
     },
     {
       "category": "game_concepts",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/basic-counters.json",
+      "contract_sha256": "dccd844fce35de233cf7b59244beea52cf17ece39ae6f6106b2ba8ed56065f1d",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "oracle_ir._effect_template and CommanderEngine.apply_effect",
+      "implementation_version": "basic-counter-template-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "variable and distributed counter instructions remain residual",
+        "counter replacement, doubling, and prevention effects are not integrated",
+        "counter type rules beyond existing power/toughness and loyalty consumers are incomplete"
+      ],
       "mechanic_id": "cr-122-counters",
       "official_name": "Counters",
       "rule_references": [
         "122"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_self_pump_and_basic_token_creation_lower_generically"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -6008,17 +6058,29 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/simple-self-triggers.json",
+      "contract_sha256": "f424aa567e55ea4b23a018c06af19dde73bf762e7870f8738d3f2043e5f40a3b",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "oracle_ir._compile_face and CommanderEngine._dispatch_semantic_event",
+      "implementation_version": "simple-self-triggers-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "intervening-if, reflexive, delayed, and leaves-the-graveyard trigger grammar is not generic",
+        "trigger instructions with multiple clauses or player choices remain residual",
+        "generated trigger effects remain provisional until every effect dependency is trusted"
+      ],
       "mechanic_id": "cr-603-handling-triggered-abilities",
       "official_name": "Handling Triggered Abilities",
       "rule_references": [
         "603"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_simple_self_trigger_compiles_to_normalized_engine_event",
+        "test_generated_enters_trigger_reaches_arbiter_fail_closed",
+        "test_self_dies_trigger_uses_last_known_controller"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -6128,17 +6190,28 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/simple-until-end-of-turn.json",
+      "contract_sha256": "7a0747f0f5dd88a44bfa58746dad611b2db8ed4c7eb5e0aebeada351054aa2c9",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "oracle_ir._effect_template and CommanderEngine._apply_layered_characteristic_annotations",
+      "implementation_version": "simple-until-eot-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "dynamic values, effect dependencies, and player/game-rule continuous effects remain residual",
+        "not every legacy turn-scoped annotation is represented as a ContinuousEffect",
+        "full copy, face-down, and characteristic-defining interactions are incomplete"
+      ],
       "mechanic_id": "cr-611-continuous-effects",
       "official_name": "Continuous Effects",
       "rule_references": [
         "611"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_self_pump_and_basic_token_creation_lower_generically",
+        "test_power_toughness_sublayers_set_modify_then_switch"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -6187,17 +6260,27 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/unconditional-enters-tapped.json",
+      "contract_sha256": "910990b5f2ed47e9ecbb794bdd03cd8bcf40f82e444d98a9adb73cab522f4633",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine._unconditionally_enters_tapped and CommanderEngine.move_card",
+      "implementation_version": "unconditional-entry-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "conditional entry replacements remain in dedicated handlers or require arbitration",
+        "generic affected-player replacement ordering is not wired into every move",
+        "copy-token entry text is not yet evaluated through move_card"
+      ],
       "mechanic_id": "cr-614-replacement-effects",
       "official_name": "Replacement Effects",
       "rule_references": [
         "614"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_unconditional_entry_tapped_is_engine_derived"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -7035,17 +7118,17 @@
       "database_schema_version": "1",
       "oracle_bulk": {
         "download_uri": null,
-        "oracle_id_count": 38362,
-        "sha256": null,
-        "source_filename": "oracle-cards-20260728.jsonl",
-        "updated_at": null
+        "oracle_id_count": 38373,
+        "sha256": "54749845bcf510fa343f1a7d11636a75bbb6a8ea1e8872c8e0d2f86cc2b4df5e",
+        "source_filename": "oracle-cards-20260728201120.jsonl.gz",
+        "updated_at": "2026-07-28T20:11:20.685+00:00"
       },
       "rulings_bulk": {
         "download_uri": null,
         "ruling_count": 77999,
-        "sha256": null,
-        "source_filename": "rulings-20260728.jsonl",
-        "updated_at": null
+        "sha256": "9fd7a5a886426c1fc5907cb9ee5719d9ede3ad768385ed06a9e589d8016b0a7c",
+        "source_filename": "rulings-20260728090036.jsonl.gz",
+        "updated_at": "2026-07-28T09:00:36.114+00:00"
       }
     },
     "comprehensive_rules": "indexed",
