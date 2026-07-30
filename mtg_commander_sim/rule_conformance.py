@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import json
 from collections import Counter
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -8,6 +9,7 @@ from typing import Any, Mapping, Sequence
 
 RULE_CONFORMANCE_SCHEMA_VERSION = 1
 RULE_CONFORMANCE_GENERATOR_VERSION = "cr-conformance-v1"
+RULE_CONFORMANCE_REVIEW_SCHEMA_VERSION = 1
 
 CASE_STATUSES = {
     "unreviewed",
@@ -40,7 +42,7 @@ SCENARIO_KINDS = {
     "hidden_information",
 }
 
-_REVIEW_FIELDS = (
+REVIEW_FIELDS = (
     "classification",
     "status",
     "assertion_kind",
@@ -91,6 +93,7 @@ def build_rule_conformance(
     rule_index: Mapping[str, Any],
     *,
     previous: Mapping[str, Any] | None = None,
+    reviews: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Build one source-pinned conformance case for every indexed CR rule."""
 
@@ -113,11 +116,25 @@ def build_rule_conformance(
             and prior.get("source_sha256") == source_sha256
             and prior.get("rule_text_sha256") == rule.get("text_sha256")
         ):
-            for field in _REVIEW_FIELDS:
+            for field in REVIEW_FIELDS:
                 if field in prior:
                     value = prior[field]
                     case[field] = list(value) if isinstance(value, list) else value
             case["case_version"] = int(prior.get("case_version") or 1)
+        review = (reviews or {}).get(str(rule["rule_id"]))
+        if (
+            review is not None
+            and review.get("rule_text_sha256")
+            == rule.get("text_sha256")
+        ):
+            for field in REVIEW_FIELDS:
+                if field in review:
+                    value = review[field]
+                    case[field] = (
+                        list(value)
+                        if isinstance(value, list)
+                        else value
+                    )
         cases.append(case)
     return {
         "schema_version": RULE_CONFORMANCE_SCHEMA_VERSION,
@@ -127,6 +144,138 @@ def build_rule_conformance(
         "case_count": len(cases),
         "cases": cases,
     }
+
+
+def load_rule_conformance_reviews(
+    root: str | Path,
+    rule_index: Mapping[str, Any],
+) -> tuple[dict[str, dict[str, Any]], list[str]]:
+    """Load compact, source-pinned semantic-review overlays.
+
+    Generated conformance cases remain the complete machine-consumed corpus.
+    Review files are the maintainable human-authored source for promoted,
+    blocked, skipped, or definition-only records.  A stale review is never
+    inherited across a changed source or rule-text hash.
+    """
+
+    root = Path(root)
+    directory = root / "rules" / "conformance-reviews"
+    if not directory.is_dir():
+        return {}, []
+    rules = {
+        str(rule["rule_id"]): rule
+        for rule in rule_index.get("rules", [])
+    }
+    effective_date = str(rule_index.get("effective_date") or "")
+    source_sha256 = str(rule_index.get("source_sha256") or "")
+    allowed_case_fields = {
+        "rule_id",
+        "rule_text_sha256",
+        *REVIEW_FIELDS,
+    }
+    reviews: dict[str, dict[str, Any]] = {}
+    errors: list[str] = []
+    for path in sorted(directory.glob("*.json")):
+        relative = path.relative_to(root).as_posix()
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            errors.append(f"{relative} is not valid JSON: {exc}")
+            continue
+        if not isinstance(document, Mapping):
+            errors.append(f"{relative} must contain a JSON object")
+            continue
+        header_errors: list[str] = []
+        unknown_document_fields = sorted(
+            set(document)
+            - {
+                "schema_version",
+                "effective_date",
+                "source_sha256",
+                "family",
+                "cases",
+            }
+        )
+        if unknown_document_fields:
+            header_errors.append(
+                f"{relative} has unknown fields: "
+                + ", ".join(unknown_document_fields)
+            )
+        if (
+            document.get("schema_version")
+            != RULE_CONFORMANCE_REVIEW_SCHEMA_VERSION
+        ):
+            header_errors.append(
+                f"{relative} has an unsupported review schema version"
+            )
+        if document.get("effective_date") != effective_date:
+            header_errors.append(
+                f"{relative} points to a different effective date"
+            )
+        if document.get("source_sha256") != source_sha256:
+            header_errors.append(
+                f"{relative} points to a different source snapshot"
+            )
+        if not isinstance(document.get("family"), str) or not str(
+            document.get("family") or ""
+        ).strip():
+            header_errors.append(
+                f"{relative} has no nonempty family label"
+            )
+        raw_cases = document.get("cases")
+        if not isinstance(raw_cases, list):
+            header_errors.append(f"{relative} has no review case array")
+        errors.extend(header_errors)
+        if header_errors:
+            continue
+        for index, raw in enumerate(raw_cases):
+            prefix = f"{relative} review case {index + 1}"
+            row_errors: list[str] = []
+            if not isinstance(raw, Mapping):
+                errors.append(f"{prefix} must be an object")
+                continue
+            unknown_fields = sorted(set(raw) - allowed_case_fields)
+            if unknown_fields:
+                row_errors.append(
+                    f"{prefix} has unknown fields: "
+                    + ", ".join(unknown_fields)
+                )
+            missing_fields = [
+                field
+                for field in ("rule_id", "rule_text_sha256", *REVIEW_FIELDS)
+                if field not in raw
+            ]
+            if missing_fields:
+                row_errors.append(
+                    f"{prefix} is missing fields: "
+                    + ", ".join(missing_fields)
+                )
+            rule_id = str(raw.get("rule_id") or "")
+            rule = rules.get(rule_id)
+            if rule is None:
+                row_errors.append(
+                    f"{prefix} references unknown rule {rule_id!r}"
+                )
+            elif raw.get("rule_text_sha256") != rule.get("text_sha256"):
+                row_errors.append(
+                    f"{prefix} points to changed rule text"
+                )
+            if rule_id in reviews:
+                row_errors.append(
+                    f"{prefix} duplicates review for rule {rule_id}"
+                )
+            errors.extend(row_errors)
+            if row_errors:
+                continue
+            reviews[rule_id] = {
+                key: (
+                    list(value)
+                    if isinstance(value, list)
+                    else value
+                )
+                for key, value in raw.items()
+            }
+    return reviews, errors
 
 
 def validate_rule_conformance(

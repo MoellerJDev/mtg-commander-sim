@@ -255,6 +255,147 @@ class RulesCorpusTests(unittest.TestCase):
         )
         self.assertTrue(delta["requires_review"])
 
+    def test_sync_applies_reviews_and_invalidates_stale_overlays(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "fixture.txt"
+            source.write_text(RULES_FIXTURE, encoding="utf-8")
+            sync_rules_corpus(root, source_file=source)
+            rule_index = json.loads(
+                (root / "rules/rule-index.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            rule = next(
+                row
+                for row in rule_index["rules"]
+                if row["rule_id"] == "100.1"
+            )
+            review_case = {
+                "rule_id": "100.1",
+                "rule_text_sha256": rule["text_sha256"],
+                "classification": "behavioral",
+                "status": "blocked",
+                "assertion_kind": "unsupported_fail_closed",
+                "reviewed": True,
+                "implementation_components": ["CommanderEngine"],
+                "executable_test_ids": [],
+                "required_scenarios": ["positive"],
+                "covered_scenarios": [],
+                "blockers": ["fixture blocker"],
+                "notes": ["Pinned review fixture."],
+            }
+            review_directory = root / "rules/conformance-reviews"
+            review_directory.mkdir(parents=True)
+            review_path = review_directory / "cr-100.json"
+
+            def write_review(rule_text_sha256: str) -> None:
+                review_path.write_text(
+                    json.dumps(
+                        {
+                            "schema_version": 1,
+                            "effective_date": rule_index[
+                                "effective_date"
+                            ],
+                            "source_sha256": rule_index[
+                                "source_sha256"
+                            ],
+                            "family": "CR 100 fixture",
+                            "cases": [
+                                {
+                                    **review_case,
+                                    "rule_text_sha256": (
+                                        rule_text_sha256
+                                    ),
+                                }
+                            ],
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+
+            write_review(rule["text_sha256"])
+            reviewed_result = sync_rules_corpus(
+                root,
+                source_file=source,
+            )
+            self.assertTrue(
+                reviewed_result["ok"],
+                reviewed_result["review_errors"],
+            )
+            conformance = json.loads(
+                (root / "rules/conformance-cases.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            reviewed = next(
+                row
+                for row in conformance["cases"]
+                if row["rule_id"] == "100.1"
+            )
+            self.assertEqual("blocked", reviewed["status"])
+
+            review_path.unlink()
+            deleted_verification = verify_rules_corpus(root)
+            self.assertFalse(deleted_verification["ok"])
+            self.assertTrue(
+                any(
+                    "absent from authoritative overlays" in error
+                    for error in deleted_verification["errors"]
+                ),
+                deleted_verification["errors"],
+            )
+
+            write_review("f" * 64)
+            stale_result = sync_rules_corpus(
+                root,
+                source_file=source,
+            )
+            self.assertFalse(stale_result["ok"])
+            self.assertTrue(
+                any(
+                    "points to changed rule text" in error
+                    for error in stale_result["review_errors"]
+                ),
+                stale_result["review_errors"],
+            )
+            conformance = json.loads(
+                (root / "rules/conformance-cases.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            invalidated = next(
+                row
+                for row in conformance["cases"]
+                if row["rule_id"] == "100.1"
+            )
+            self.assertEqual("unreviewed", invalidated["status"])
+            self.assertFalse(invalidated["reviewed"])
+
+            write_review(rule["text_sha256"])
+            document = json.loads(
+                review_path.read_text(encoding="utf-8")
+            )
+            document["cases"][0]["status"] = "invented"
+            review_path.write_text(
+                json.dumps(document),
+                encoding="utf-8",
+            )
+            invalid_result = sync_rules_corpus(
+                root,
+                source_file=source,
+            )
+            self.assertFalse(invalid_result["ok"])
+            self.assertTrue(
+                any(
+                    "unknown status" in error
+                    for error in invalid_result[
+                        "conformance_errors"
+                    ]
+                ),
+                invalid_result["conformance_errors"],
+            )
+
     def test_sync_pins_available_oracle_and_rulings_bulk_metadata(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

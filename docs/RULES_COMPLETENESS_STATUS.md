@@ -32,11 +32,11 @@ coverage.
 | Object and zone identity | Partial | CR 400 logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, and selected linked-effect guards |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
 | Replacement/prevention ordering | Partial | CR 616 typed ordering primitive; event-producer integration incomplete |
-| Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, copied defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
+| Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, counter-derived battlefield defense, copied printed defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 0 are semantic passes |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; all 24 CR 310 cases are reviewed, with 5 semantic passes, 13 blocked cases, and 6 definition-only cases |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -68,21 +68,33 @@ coverage.
 - [x] Added a versioned conformance case and generated source-linkage test for
   all 3,300 pinned rule IDs, with separate semantic, failing, blocked,
   skipped, definition-only, unreviewed, and inventory-only reporting.
+- [x] Added source-pinned family review overlays whose stale or deleted
+  reviews cannot survive through the generated conformance artifact.
+- [x] Reviewed all 24 CR 310 cases without promoting partial behavior:
+  5 executable passes, 13 dependency-blocked cases, and 6 definition-only
+  cases.
 
 ## Current CR 120/210/310/704 Battle slice
 
 Battle behavior is derived from the effective card type, subtype, defense
 characteristic, counters, controller, and protector. It contains no
-printed-name branch. A Battle entering as itself or as a copy receives its
-printed defense count rather than copying the source permanent's counters.
-Damage marks a creature, removes planeswalker loyalty, and removes Battle
-defense for every applicable type on a multi-typed permanent.
+printed-name branch. Off the battlefield, a Battle exposes its printed or
+copied defense. On the battlefield, its effective defense is its current
+defense-counter count. A Battle entering as itself or as a copy initializes
+from printed entry characteristics rather than copying the source permanent's
+current counters. Damage marks a creature, removes planeswalker loyalty, and
+removes Battle defense for every applicable type on a multi-typed permanent.
 
 For the pinned rules snapshot, a Siege chooses an opponent as protector while
 the spell resolves. Every player other than the protector may attack it; only
 the protector receives the corresponding blocker task. Missing or invalid
-protectors are repaired through a replayable controller choice, subject to the
-being-attacked exception. Removing the last defense counter queues the
+protectors are repaired through a replayable controller choice. A missing
+protector waits while the Battle is attacked, while a Siege whose controller
+is its protector is repaired even during that attack under CR 704.5x. A
+Battle with no Battle type designates its controller. If no legal protector
+exists, the Battle goes to its owner's graveyard. Protector designations
+survive the permanent ceasing to be a Battle and becoming a copy of another
+Battle. Removing the last defense counter queues the
 intrinsic Siege trigger with the source's exact logical incarnation. A trigger
 from an old incarnation does not prevent the zero-defense state action.
 
@@ -179,7 +191,7 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,698 unit/integration tests pass: 398 ordinary tests plus 3,300 generated
+- 3,708 unit/integration tests pass: 408 ordinary tests plus 3,300 generated
   inventory/source-linkage tests. The latter are not semantic passes.
 - Fifteen focused object/token tests cover monotonic incarnations, draws,
   timestamp moments, identity-sensitive targets and delayed links, private
@@ -188,11 +200,12 @@ Outstanding blockers include:
 - Eight focused copy-object tests cover serialized spell/card copies,
   counter/destination timing, card-versus-noncard targeting, same-object
   permanent resolution, projection privacy, and exact replay.
-- Forty-two focused CR 120/210/310/704 tests cover positive, negative,
+- Fifty focused CR 120/210/310/704 tests cover positive, negative,
   fixed-point, order-mutation, shared pre-action LKI,
   attachment/protection, counters, maximum-counter
   extraction/overlap/replay, sequential and simultaneous World behavior,
-  defense entry/copy/damage, Battle-creature combat restrictions,
+  printed-versus-battlefield defense, Battle-creature damage and combat
+  restrictions,
   exact-incarnation triggers, protector choice/repair, projection, native
   transformed casting, decline/token/changed-object behavior, compiled and
   unresolved targets, contract pinning, and three command-replay paths.
@@ -203,8 +216,9 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. CR 310.11b is reviewed but blocked, the
-  other 3,299 cases are unreviewed, and semantic passes remain 0.
+  establish inventory linkage only. All 24 CR 310 cases are source-reviewed:
+  5 pass with executable engine evidence, 13 remain blocked, and 6 are
+  definition-only. The other 3,276 cases remain unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
 final push evidence are recorded in `OVERNIGHT_HANDOFF.md` after the complete
@@ -212,9 +226,11 @@ checkpoint validation.
 
 ## Next dependency-ordered work
 
-1. Review and promote conformance cases by dependency-ordered rules family;
-   keep exposed but unimplemented edge cases failing or blocked.
-2. Complete CR 310.11b replacement ordering and cast grammar outside compiled
+1. Continue reviewing and promoting conformance cases by
+   dependency-ordered rules family; keep exposed but unimplemented edge cases
+   failing or blocked.
+2. Complete the blocked CR 310 dependencies, beginning with 310.11b
+   replacement ordering and cast grammar outside compiled
    cost/target schemas, then re-evaluate its blocked status.
 3. Replace remaining physical-reference links with typed incarnation/LKI
    handles and implement the remaining CR 400.7 continuation policies.

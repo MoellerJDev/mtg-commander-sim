@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -7,6 +9,7 @@ from mtg_commander_sim.rule_conformance import (
     build_rule_conformance,
     discover_unittest_ids,
     inventory_case_errors,
+    load_rule_conformance_reviews,
     rule_conformance_coverage,
     validate_rule_conformance,
 )
@@ -87,6 +90,89 @@ class RuleConformanceTests(unittest.TestCase):
         self.assertEqual(
             ["semantic_review_not_completed"],
             invalidated["cases"][1]["blockers"],
+        )
+
+    def test_source_pinned_review_overlay_is_loaded_and_applied(self):
+        rule = self.rule_index["rules"][1]
+        review_case = {
+            "rule_id": rule["rule_id"],
+            "rule_text_sha256": rule["text_sha256"],
+            "classification": "behavioral",
+            "status": "blocked",
+            "assertion_kind": "unsupported_fail_closed",
+            "reviewed": True,
+            "implementation_components": ["CommanderEngine"],
+            "executable_test_ids": [],
+            "required_scenarios": ["positive"],
+            "covered_scenarios": [],
+            "blockers": ["missing_generic_semantics"],
+            "notes": ["Reviewed against the pinned fixture."],
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            directory = root / "rules" / "conformance-reviews"
+            directory.mkdir(parents=True)
+            path = directory / "fixture.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "effective_date": self.rule_index[
+                            "effective_date"
+                        ],
+                        "source_sha256": self.rule_index[
+                            "source_sha256"
+                        ],
+                        "family": "fixture",
+                        "cases": [review_case],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            reviews, errors = load_rule_conformance_reviews(
+                root,
+                self.rule_index,
+            )
+            self.assertEqual([], errors)
+            corpus = build_rule_conformance(
+                self.rule_index,
+                reviews=reviews,
+            )
+            self.assertEqual(
+                "blocked",
+                corpus["cases"][1]["status"],
+            )
+
+            review_case["rule_text_sha256"] = "f" * 64
+            path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "effective_date": self.rule_index[
+                            "effective_date"
+                        ],
+                        "source_sha256": self.rule_index[
+                            "source_sha256"
+                        ],
+                        "family": "fixture",
+                        "cases": [review_case],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            stale_reviews, stale_errors = (
+                load_rule_conformance_reviews(
+                    root,
+                    self.rule_index,
+                )
+            )
+        self.assertEqual({}, stale_reviews)
+        self.assertTrue(
+            any(
+                "points to changed rule text" in error
+                for error in stale_errors
+            ),
+            stale_errors,
         )
 
     def test_passing_case_requires_real_evidence_and_scenario_coverage(self):

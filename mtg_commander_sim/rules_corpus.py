@@ -18,8 +18,10 @@ from .mechanic_contracts import (
     load_mechanic_contracts,
 )
 from .rule_conformance import (
+    REVIEW_FIELDS,
     build_rule_conformance,
     discover_unittest_ids,
+    load_rule_conformance_reviews,
     rule_conformance_coverage,
     validate_rule_conformance,
 )
@@ -818,9 +820,29 @@ def sync_rules_corpus(
         card_data_snapshot=card_data_snapshot,
         root=root,
     )
+    conformance_reviews, review_errors = (
+        load_rule_conformance_reviews(
+            root,
+            documents["rule-index.json"],
+        )
+    )
+    # Once the review directory exists, its source-pinned overlays are the
+    # authoritative review source.  Falling back to the generated artifact
+    # would make a deleted or stale overlay survive indefinitely.
+    previous_for_build = (
+        None
+        if (root / "rules" / "conformance-reviews").is_dir()
+        else previous_conformance
+    )
     conformance = build_rule_conformance(
         documents["rule-index.json"],
-        previous=previous_conformance,
+        previous=previous_for_build,
+        reviews=conformance_reviews,
+    )
+    conformance_errors = validate_rule_conformance(
+        conformance,
+        documents["rule-index.json"],
+        known_test_ids=discover_unittest_ids(root),
     )
     documents["conformance-cases.json"] = conformance
     documents["manifest.json"]["derived_hashes"][
@@ -864,7 +886,9 @@ def sync_rules_corpus(
         ]
         _write_delta(root, delta)
     return {
-        "ok": True,
+        "ok": not review_errors and not conformance_errors,
+        "review_errors": review_errors,
+        "conformance_errors": conformance_errors,
         "rules_dir": str(rules_dir),
         "cache_file": str(cached_path),
         "manifest": documents["manifest.json"],
@@ -1350,6 +1374,47 @@ def verify_rules_corpus(
             known_test_ids=discover_unittest_ids(root),
         )
     )
+    conformance_reviews, review_errors = (
+        load_rule_conformance_reviews(root, rule_index)
+    )
+    errors.extend(review_errors)
+    conformance_by_rule = {
+        str(case.get("rule_id")): case
+        for case in conformance.get("cases", [])
+    }
+    if (root / "rules" / "conformance-reviews").is_dir():
+        reviewed_rule_ids = {
+            rule_id
+            for rule_id, case in conformance_by_rule.items()
+            if case.get("reviewed") is True
+        }
+        if reviewed_rule_ids != set(conformance_reviews):
+            missing_reviews = sorted(
+                reviewed_rule_ids - set(conformance_reviews)
+            )
+            missing_cases = sorted(
+                set(conformance_reviews) - reviewed_rule_ids
+            )
+            if missing_reviews:
+                errors.append(
+                    "Generated conformance cases retain reviews absent "
+                    "from authoritative overlays: "
+                    + ", ".join(missing_reviews[:10])
+                )
+            if missing_cases:
+                errors.append(
+                    "Authoritative conformance overlays are absent from "
+                    "generated cases: "
+                    + ", ".join(missing_cases[:10])
+                )
+    for rule_id, review in conformance_reviews.items():
+        case = conformance_by_rule.get(rule_id, {})
+        for field in REVIEW_FIELDS:
+            if case.get(field) != review.get(field):
+                errors.append(
+                    f"Conformance case {rule_id} is not synchronized "
+                    f"with its review field {field}"
+                )
     mechanic_ids = [
         str(mechanic.get("mechanic_id"))
         for mechanic in mechanics_registry.get("mechanics", [])

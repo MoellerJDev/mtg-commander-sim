@@ -55,6 +55,9 @@ maximum-counter foundation. It now:
   text and enforces them in the shared CR 704 snapshot;
 - derives Battle and planeswalker printed defense/loyalty through the
   continuous-characteristic path;
+- reports a battlefield Battle's effective defense from its current defense
+  counters while retaining printed defense off the battlefield and for its
+  intrinsic entry replacement;
 - initializes defense and loyalty counters on battlefield entry, including
   copied Battle defense rather than copied current counters;
 - applies typed permanent damage results: marked creature damage, removed
@@ -65,6 +68,9 @@ maximum-counter foundation. It now:
   blocker decisions to the protector;
 - prohibits Battle creatures from being declared as attackers or blockers;
 - repairs invalid Siege protectors through replayable controller choices;
+- preserves a Battle's single protector through type and copy changes,
+  handles the distinct attacked-Battle repair branches, and moves a Battle
+  with no legal protector to its owner's graveyard;
 - queues the intrinsic Siege trigger on last-defense removal and matches
   pending source triggers to the represented logical incarnation;
 - exiles that exact Siege incarnation and offers a replayable optional cast of
@@ -78,6 +84,9 @@ maximum-counter foundation. It now:
   for every one of the 3,300 numbered rules;
 - invalidates reviewed conformance metadata when the pinned source or
   individual rule-text hash changes;
+- uses source-pinned family review overlays as the authoritative semantic
+  review source, so stale or deleted reviews cannot persist through the
+  generated case file;
 - keeps inventory-only cases separate from executable semantic passes.
 
 The prior permanent snapshot behavior remains: toughness, lethal/deathtouch,
@@ -108,9 +117,10 @@ events also remain blockers.
   `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
 - Indexed rules: 3,300
 - Conformance cases: 3,300
-- Inventory-only cases: 3,299
-- Reviewed blocked cases: 1 (CR 310.11b)
-- Executable semantic passes: 0
+- Inventory-only cases: 3,276
+- Reviewed blocked cases: 13
+- Reviewed definition-only cases: 6
+- Executable semantic passes: 5
 - Indexed sections: 156
 - Glossary entries: 733
 - Discovered mechanics: 425
@@ -127,12 +137,12 @@ events also remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 3,698 passed
-- Noninventory unit/integration tests: 398 passed
+- Unit/integration tests: 3,708 passed
+- Noninventory unit/integration tests: 408 passed
 - Generated per-rule inventory/source-linkage tests: 3,300 passed
 - Focused object identity/token lifecycle tests: 15 passed
 - Focused copy-object lifecycle tests: 8 passed
-- Focused CR 120/210/310/704 tests: 42 passed
+- Focused CR 120/210/310/704 tests: 50 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
 - Seed-20260730 hidden-information audit: pass
@@ -145,14 +155,14 @@ events also remain blockers.
 - Protocol packet benchmark: 1,549 bootstrap / 269 repeated / 108
   declaration estimated tokens
 - Repository/history/secret/artifact validation: pass
-- JSON schemas checked: 13
+- JSON schemas checked: 14
 - Pinned rules verification: 3,300 rules, 3,300 conformance cases, and 425
   mechanics pass
 - Wheel clean installation/import/CLI smoke: pass
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `46fdde6f2aec4e24687d029fffe41e36f0c36589e2d38803d2383b2962119e34`
+  `5a076298356795a4a7f2d0a7fdc1745bfc6d6c1f14139c764ba7131851e4d5b5`
 
 ## Deck-review evidence state
 
@@ -171,33 +181,35 @@ not broad Oracle completeness and not game/deck-quality evidence.
 - Open pull requests at handoff preparation: stacked draft PR #1.
 - Draft rules-completeness PR:
   `https://github.com/MoellerJDev/mtg-commander-sim/pull/1`
-- CI for this local checkpoint: pending commit/push; all required local gates
-  above pass.
+- Exact-SHA CI evidence is reported from the remote checks after push; this
+  document avoids embedding the hash of the commit that contains it. All
+  required local gates above pass.
 
 ## Known limitations and next step
 
-There is no external blocker. The rule-by-rule conformance scaffold requested
-after the Battle checkpoint now exists:
+There is no external blocker. The rule-by-rule conformance program has moved
+from scaffold to its first complete family review:
 
 1. all 3,300 pinned rules have a versioned stable case and generated
    inventory/source-linkage test;
-2. semantic passes, failures, blocked, skipped, definition-only, unreviewed,
-   and inventory-only counts are separate; the current semantic pass count is
-   0;
-3. CR 310.11b is the first reviewed case and remains blocked after adding its
-   native replayable Siege continuation because replacement ordering and
-   broader cast grammar are incomplete;
-4. continue reviewing and promoting cases by dependency-ordered rules family;
-5. migrate remaining physical-reference links to typed incarnation/LKI
+2. source-pinned family overlays are authoritative and fail closed when their
+   source or rule-text hashes change;
+3. all 24 CR 310 cases are reviewed: 5 narrow rules pass with executable
+   evidence, 13 expose recorded dependency gaps, and 6 are definition-only;
+4. CR 310.11b remains blocked after adding its native replayable Siege
+   continuation because replacement ordering and broader cast grammar are
+   incomplete;
+5. continue reviewing and promoting cases by dependency-ordered rules family;
+6. migrate remaining physical-reference links to typed incarnation/LKI
    handles and finish CR 400.7 continuation policies;
-6. integrate destruction/loss with typed replacement and regeneration;
-7. add the remaining specialized CR 704.5 permanent/layout actions and
+7. integrate destruction/loss with typed replacement and regeneration;
+8. add the remaining specialized CR 704.5 permanent/layout actions and
    interaction tests;
-8. integrate serialized object timestamps into every continuous-effect source
+9. integrate serialized object timestamps into every continuous-effect source
    and implement CR 613.7m APNAP relative ordering;
-9. implement complete copiable-value, card-copy casting, Prepare, and
+10. implement complete copiable-value, card-copy casting, Prepare, and
    specialized copy interactions behind the CR 707 contract;
-10. rerun full coverage and every validation gate.
+11. rerun full coverage and every validation gate.
 
 The review-MVP branch still separately lacks three consecutive qualifying
 persistent-Codex games, review-batch aggregation, and per-deck operation

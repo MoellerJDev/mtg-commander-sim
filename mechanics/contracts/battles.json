@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "cr-310-battles",
   "official_name": "Battles",
   "effective_date": "2026-06-19",
@@ -82,7 +82,8 @@
     ],
     "state_reads": [
       "derived Battle type and subtype",
-      "printed defense",
+      "printed defense outside the battlefield",
+      "current defense counters as battlefield defense",
       "defense counters",
       "controller and active opponents",
       "protector",
@@ -132,10 +133,12 @@
     ],
     "copy": [
       "copies entering as Battles initialize copied printed defense",
-      "a copied Siege with no final defense-counter removal does not receive the defeated trigger"
+      "a copied Siege with no final defense-counter removal does not receive the defeated trigger",
+      "the protector designation persists if a Battle becomes a copy of another Battle"
     ],
     "control_change": [
-      "a Siege controller who is also its protector must choose an opponent as the new protector"
+      "a Siege controller who is also its protector must choose an opponent as the new protector even while it is being attacked",
+      "a Battle with no Battle subtype has its controller as protector"
     ],
     "zone_change": [
       "protector is cleared on ordinary zone changes and preserved from the stack through Battle entry",
@@ -169,8 +172,16 @@
     "Invasion of Gobakhan 2023-04-14: a Siege whose last defense counter is removed exiles and may be cast transformed"
   ],
   "test_ids": [
+    "test_battle_contract_traces_every_cr_310_rule",
     "test_battle_enters_with_printed_defense_and_copies_reset_it",
+    "test_typeless_battle_controller_is_its_protector",
+    "test_battle_protector_persists_through_type_and_copy_changes",
+    "test_attached_battle_becomes_unattached",
+    "test_invalid_battle_protector_waits_while_it_is_attacked",
+    "test_controller_protector_is_repaired_even_while_attacked",
+    "test_siege_without_legal_protector_goes_to_owner_graveyard",
     "test_battle_damage_removes_defense_instead_of_marking_damage",
+    "test_damage_to_battle_creature_applies_both_results",
     "test_battle_trigger_from_same_incarnation_defers_state_action",
     "test_old_incarnation_trigger_does_not_defer_battle_state_action",
     "test_last_siege_defense_counter_queues_intrinsic_trigger",
@@ -190,7 +201,7 @@
   ],
   "implementation": {
     "component": "CommanderEngine Battle entry, combat, trigger, damage, and protector state paths",
-    "version": "battles-v2"
+    "version": "battles-v3"
   },
   "known_blockers": [
     "nonspell and token Battle entry paths do not yet suspend for an as-enters protector choice unless a trusted caller supplies the selected protector",

@@ -100,6 +100,49 @@ class StateBasedActionPrimitiveTests(unittest.TestCase):
                 registry_row["contract_path"],
             )
 
+    def test_battle_contract_traces_every_cr_310_rule(self):
+        root = Path(__file__).resolve().parents[1]
+        contract = json.loads(
+            (
+                root / "mechanics" / "contracts" / "battles.json"
+            ).read_text(encoding="utf-8")
+        )
+        expected = {
+            "310",
+            "310.1",
+            "310.2",
+            "310.3",
+            "310.4",
+            "310.4a",
+            "310.4b",
+            "310.4c",
+            "310.5",
+            "310.6",
+            "310.7",
+            "310.8",
+            "310.8a",
+            "310.8b",
+            "310.8c",
+            "310.8d",
+            "310.8e",
+            "310.8f",
+            "310.8g",
+            "310.9",
+            "310.10",
+            "310.11",
+            "310.11a",
+            "310.11b",
+        }
+
+        self.assertEqual(
+            expected,
+            {
+                rule_id
+                for rule_id in contract["rule_references"]
+                if str(rule_id).startswith("310")
+            },
+        )
+
     def test_snapshot_distinguishes_put_into_graveyard_from_destroy(self):
         batch = evaluate_permanent_state_based_actions(
             [
@@ -538,6 +581,10 @@ class StateBasedActionEngineTests(unittest.TestCase):
         original = self.card(engine, original_ref)
         self.assertEqual(4, original.counters["defense"])
         engine._change_permanent_counter(original, "defense", -3)
+        self.assertEqual(
+            "1",
+            engine._effective_card_data(original)["defense"],
+        )
 
         copied_ref = engine.create_token(
             "A",
@@ -552,6 +599,205 @@ class StateBasedActionEngineTests(unittest.TestCase):
             "4",
             engine._effective_card_data(copied)["defense"],
         )
+        engine.move_card(
+            original.object_id,
+            "graveyard",
+            reason="off-battlefield defense test",
+            semantic_events=False,
+        )
+        self.assertEqual(
+            "4",
+            engine._effective_card_data(original)["defense"],
+        )
+
+    def test_typeless_battle_controller_is_its_protector(self):
+        engine = self.make_engine(7071)
+        battle_ref = engine.create_token(
+            "A",
+            name="Typeless Battle",
+            characteristics={
+                "type_line": "Token Battle",
+                "defense": "3",
+            },
+        )[0]
+        battle = self.card(engine, battle_ref)
+
+        self.assertEqual("A", battle.battle_protector)
+        self.assertNotIn(
+            battle.ref,
+            {
+                candidate["id"]
+                for candidate in engine._attackable_battles("A")
+            },
+        )
+        self.assertIn(
+            battle.ref,
+            {
+                candidate["id"]
+                for candidate in engine._attackable_battles("B")
+            },
+        )
+
+    def test_battle_protector_persists_through_type_and_copy_changes(self):
+        engine = self.make_engine(7072)
+        battle_ref = engine.create_token(
+            "A",
+            name="Persistent Protector Siege",
+            battle_protector="B",
+            characteristics={
+                "type_line": "Token Battle — Siege",
+                "defense": "3",
+            },
+        )[0]
+        battle = self.card(engine, battle_ref)
+
+        battle.annotations["copy_overrides"] = {
+            "name": "Temporary Creature",
+            "type_line": "Creature — Shapeshifter",
+            "power": "2",
+            "toughness": "2",
+        }
+        self.assertIsNone(engine._repair_battle_protectors())
+        self.assertEqual("B", battle.battle_protector)
+
+        battle.annotations["copy_overrides"] = {
+            "name": "Different Siege",
+            "type_line": "Battle — Siege",
+            "defense": "5",
+        }
+        self.assertIsNone(engine._repair_battle_protectors())
+        self.assertEqual("B", battle.battle_protector)
+
+    def test_attached_battle_becomes_unattached(self):
+        engine = self.make_engine(7073)
+        target_ref = engine.create_token(
+            "A",
+            name="Attachment Target",
+            characteristics={
+                "type_line": "Token Creature — Soldier",
+                "power": "2",
+                "toughness": "2",
+            },
+        )[0]
+        battle_ref = engine.create_token(
+            "A",
+            name="Attached Battle",
+            characteristics={
+                "type_line": "Token Battle",
+                "defense": "3",
+            },
+        )[0]
+        target = self.card(engine, target_ref)
+        battle = self.card(engine, battle_ref)
+        battle.attached_to = target.object_id
+        target.attachments.append(battle.object_id)
+
+        self.assertFalse(engine._stabilize())
+
+        self.assertIsNone(battle.attached_to)
+        self.assertNotIn(battle.object_id, target.attachments)
+        self.assertEqual("battlefield", battle.zone)
+
+    def test_invalid_battle_protector_waits_while_it_is_attacked(self):
+        engine = self.make_engine(7074)
+        attacker_ref = engine.create_token(
+            "C",
+            name="Protector Repair Attacker",
+            characteristics={
+                "type_line": "Token Creature — Soldier",
+                "power": "2",
+                "toughness": "2",
+                "keywords": ["Haste"],
+            },
+        )[0]
+        battle_ref = engine.create_token(
+            "A",
+            name="Attacked Siege",
+            battle_protector="B",
+            characteristics={
+                "type_line": "Token Battle — Siege",
+                "defense": "3",
+            },
+        )[0]
+        attacker = self.card(engine, attacker_ref)
+        battle = self.card(engine, battle_ref)
+        engine.state.players["B"].in_game = False
+        engine.state.combat.attackers[attacker.object_id] = battle.ref
+
+        self.assertIsNone(engine._repair_battle_protectors())
+        self.assertEqual("B", battle.battle_protector)
+        self.assertIsNone(engine.state.pending_decision)
+
+        engine.state.combat.attackers.clear()
+        self.assertEqual(
+            "waiting",
+            engine._repair_battle_protectors(),
+        )
+        self.assertEqual(
+            ["C", "D"],
+            engine.state.pending_decision.payload_by_actor["A"][
+                "protectors"
+            ],
+        )
+
+    def test_controller_protector_is_repaired_even_while_attacked(self):
+        engine = self.make_engine(7075)
+        attacker_ref = engine.create_token(
+            "B",
+            name="Controller Protector Attacker",
+            characteristics={
+                "type_line": "Token Creature — Soldier",
+                "power": "2",
+                "toughness": "2",
+                "keywords": ["Haste"],
+            },
+        )[0]
+        battle_ref = engine.create_token(
+            "A",
+            name="Controller-Protected Siege",
+            battle_protector="B",
+            characteristics={
+                "type_line": "Token Battle — Siege",
+                "defense": "3",
+            },
+        )[0]
+        attacker = self.card(engine, attacker_ref)
+        battle = self.card(engine, battle_ref)
+        battle.battle_protector = "A"
+        engine.state.combat.attackers[attacker.object_id] = battle.ref
+
+        self.assertEqual(
+            "waiting",
+            engine._repair_battle_protectors(),
+        )
+        self.assertEqual(
+            ["B", "C", "D"],
+            engine.state.pending_decision.payload_by_actor["A"][
+                "protectors"
+            ],
+        )
+
+    def test_siege_without_legal_protector_goes_to_owner_graveyard(self):
+        engine = self.make_engine(7076)
+        battle_ref = engine.create_token(
+            "A",
+            name="Opponentless Siege",
+            battle_protector="B",
+            characteristics={
+                "type_line": "Token Battle — Siege",
+                "defense": "3",
+            },
+        )[0]
+        battle = self.card(engine, battle_ref)
+        for seat in ("B", "C", "D"):
+            engine.state.players[seat].in_game = False
+
+        self.assertEqual(
+            "changed",
+            engine._repair_battle_protectors(),
+        )
+        self.assertEqual("graveyard", battle.zone)
+        self.assertIsNone(engine.state.pending_decision)
 
     def test_battle_damage_removes_defense_instead_of_marking_damage(self):
         engine = self.make_engine(7053)
@@ -586,6 +832,31 @@ class StateBasedActionEngineTests(unittest.TestCase):
 
         self.assertEqual(3, battle.counters["defense"])
         self.assertEqual(0, battle.marked_damage)
+
+    def test_damage_to_battle_creature_applies_both_results(self):
+        engine = self.make_engine(7077)
+        battle_ref = engine.create_token(
+            "A",
+            name="Animated Siege",
+            battle_protector="B",
+            characteristics={
+                "type_line": "Token Battle Creature — Siege",
+                "power": "3",
+                "toughness": "4",
+                "defense": "5",
+            },
+        )[0]
+        battle = self.card(engine, battle_ref)
+
+        result = engine._apply_damage_results_to_permanent(
+            battle,
+            2,
+        )
+
+        self.assertEqual(2, result["marked_damage"])
+        self.assertEqual(2, result["defense_removed"])
+        self.assertEqual(2, battle.marked_damage)
+        self.assertEqual(3, battle.counters["defense"])
 
     def test_planeswalker_damage_removes_loyalty_counters(self):
         engine = self.make_engine(7061)
@@ -1344,6 +1615,13 @@ class StateBasedActionEngineTests(unittest.TestCase):
                 self.card(engine, attacker_ref).object_id
             ],
         )
+        self.assertNotIn(
+            siege.ref,
+            {
+                candidate["id"]
+                for candidate in engine._attackable_battles("B")
+            },
+        )
 
     def test_battle_creature_cannot_attack_or_block(self):
         engine = self.make_engine(7063)
@@ -1462,7 +1740,7 @@ class StateBasedActionEngineTests(unittest.TestCase):
             power=None,
             toughness=None,
             loyalty=None,
-            defense=None,
+            defense="3",
             colors=(),
             color_identity=(),
             keywords=(),
@@ -1511,8 +1789,8 @@ class StateBasedActionEngineTests(unittest.TestCase):
             return original_card_record(value)
 
         engine.state.active_player = "A"
-        engine.state.phase = "precombat_main"
-        engine.state.step = "main"
+        engine.state.phase = "beginning"
+        engine.state.step = "upkeep"
         engine.state.priority_player = "A"
         engine.state.players["A"].mana_pool["C"] = 1
         with patch.object(
@@ -1520,6 +1798,24 @@ class StateBasedActionEngineTests(unittest.TestCase):
             "card_record",
             side_effect=staged_record,
         ):
+            self.assertEqual(
+                "3",
+                engine._effective_card_data(card)["defense"],
+            )
+            with self.assertRaisesRegex(
+                GameRuleError,
+                "requires a main phase",
+            ):
+                engine._cast(
+                    "A",
+                    {
+                        "card": card.ref,
+                        "from": "hand",
+                        "auto_pay": True,
+                    },
+                )
+            engine.state.phase = "precombat_main"
+            engine.state.step = "main"
             hints = engine._priority_action_hints("A")
             action = next(
                 value

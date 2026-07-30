@@ -16,8 +16,8 @@
     {
       "mechanic_id": "cr-310-battles",
       "path": "mechanics/contracts/battles.json",
-      "sha256": "9d50c3ab33eca5b6d33d6a8753371cd5e3cd1be969805688cbe92bcd95e031a0",
-      "version": 2
+      "sha256": "3973811786f826f28220d96dd2e5e1a57373299875d7c5ddac22b218d4400171",
+      "version": 3
     },
     {
       "mechanic_id": "cr-613-interaction-of-continuous-effects",
@@ -5632,12 +5632,12 @@
     {
       "category": "card_types",
       "contract_path": "mechanics/contracts/battles.json",
-      "contract_sha256": "9d50c3ab33eca5b6d33d6a8753371cd5e3cd1be969805688cbe92bcd95e031a0",
-      "contract_version": 2,
+      "contract_sha256": "3973811786f826f28220d96dd2e5e1a57373299875d7c5ddac22b218d4400171",
+      "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "CommanderEngine Battle entry, combat, trigger, damage, and protector state paths",
-      "implementation_version": "battles-v2",
+      "implementation_version": "battles-v3",
       "kind": "rules_section",
       "known_blockers": [
         "nonspell and token Battle entry paths do not yet suspend for an as-enters protector choice unless a trusted caller supplies the selected protector",
@@ -5654,8 +5654,16 @@
         "310"
       ],
       "test_ids": [
+        "test_battle_contract_traces_every_cr_310_rule",
         "test_battle_enters_with_printed_defense_and_copies_reset_it",
+        "test_typeless_battle_controller_is_its_protector",
+        "test_battle_protector_persists_through_type_and_copy_changes",
+        "test_attached_battle_becomes_unattached",
+        "test_invalid_battle_protector_waits_while_it_is_attacked",
+        "test_controller_protector_is_repaired_even_while_attacked",
+        "test_siege_without_legal_protector_goes_to_owner_graveyard",
         "test_battle_damage_removes_defense_instead_of_marking_damage",
+        "test_damage_to_battle_creature_applies_both_results",
         "test_battle_trigger_from_same_incarnation_defers_state_action",
         "test_old_incarnation_trigger_does_not_defer_battle_state_action",
         "test_last_siege_defense_counter_queues_intrinsic_trigger",

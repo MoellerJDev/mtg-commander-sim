@@ -8,7 +8,11 @@ implemented.
 ## Artifacts
 
 - `rules/conformance-cases.json` contains the source-pinned case records.
+- `rules/conformance-reviews/*.json` contains the maintainable, family-scoped
+  semantic-review overlays.
 - `schemas/rule-conformance-case.schema.json` defines case version 1.
+- `schemas/rule-conformance-review.schema.json` defines review-overlay
+  version 1.
 - `tests/test_rule_conformance_inventory.py` generates one source-linkage
   unittest for every record.
 - `coverage/rules-conformance.json` and `.md` report semantic and
@@ -53,10 +57,18 @@ or complete scenario coverage.
 ## Regeneration and invalidation
 
 `rules sync` regenerates the complete case set from `rule-index.json`.
-Reviewed fields survive only when both the pinned CR source hash and that
-rule's text hash are unchanged. Changed, added, or renumbered rules return to
-the unreviewed inventory state. Missing, duplicate, stale, or source-mismatched
-cases fail `rules verify`.
+When `rules/conformance-reviews/` exists, those overlays are the authoritative
+source of every reviewed field; the generated case file is never used as a
+fallback. Each overlay pins the effective date, complete source hash, and
+individual rule-text hash. Deleting an overlay therefore returns its cases to
+the unreviewed inventory state. A stale, duplicate, malformed, or
+source-mismatched overlay fails `rules sync` and `rules verify`, and its
+reviews are not applied.
+
+Repositories without an overlay directory retain the compatibility behavior:
+reviewed fields survive regeneration only when both the complete source hash
+and the individual rule-text hash are unchanged. Changed, added, or
+renumbered rules always return to the unreviewed inventory state.
 
 ```bash
 python simctl.py rules sync --root .
@@ -89,10 +101,15 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-CR 310.11b is the first semantically reviewed case. It is `blocked` with
-linked native-engine and replay tests because replacement ordering and cast
-grammar outside compiled target/cost schemas remain incomplete. The other
-3,299 cases remain unreviewed and inventory-only. The executable semantic pass
-count is therefore still 0 and snapshot completeness remains false.
-Subsequent work promotes cases family by family while preserving this
-denominator.
+All 24 cases in CR 310 are source-reviewed: 5 narrow behavioral rules pass
+with generic executable evidence, 13 are blocked with exact missing
+dependencies, and 6 are definition-only with contract traceability. The
+remaining 3,276 cases are unreviewed and inventory-only.
+
+The passing CR 310 rules are battlefield defense (310.4c), Battle damage
+(310.6), the zero-defense state action (310.7), single-protector replacement
+(310.8f), and protector persistence through type/copy changes (310.8g).
+Broader Battle casting, entry replacement ordering, arbitrary
+defending-player Oracle bindings, attachment interactions, nonspell entry,
+future Battle types, and the complete defeated-Siege transformed cast remain
+blocked. Snapshot completeness remains false.

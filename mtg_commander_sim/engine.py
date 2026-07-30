@@ -799,7 +799,12 @@ class CommanderEngine:
             )
         return result
 
-    def _effective_card_data(self, value: str | CardInstance) -> dict[str, Any]:
+    def _effective_card_data(
+        self,
+        value: str | CardInstance,
+        *,
+        printed_entry_characteristics: bool = False,
+    ) -> dict[str, Any]:
         card = value if isinstance(value, CardInstance) else self.state.cards[value]
         record = self.card_record(card)
         if record is None:
@@ -1115,6 +1120,21 @@ class CommanderEngine:
                         )
                     except (TypeError, ValueError):
                         pass
+        if (
+            card.zone == "battlefield"
+            and not printed_entry_characteristics
+            and "battle"
+            in self._type_parts(
+                str(base.get("type_line") or "")
+            )[0]
+        ):
+            # CR 310.4c makes a battlefield Battle's defense equal to
+            # its defense-counter count.  The printed number remains the
+            # copiable/off-battlefield characteristic and is read explicitly
+            # while applying the intrinsic as-enters counter effect.
+            base["defense"] = str(
+                max(0, int(card.counters.get("defense", 0)))
+            )
         return base
 
     def display_name(self, object_id: str) -> str:
@@ -1440,7 +1460,10 @@ class CommanderEngine:
 
         if card.zone != "battlefield":
             return
-        data = self._effective_card_data(card)
+        data = self._effective_card_data(
+            card,
+            printed_entry_characteristics=True,
+        )
         card_types, subtypes, _ = self._type_parts(
             str(data.get("type_line") or "")
         )
