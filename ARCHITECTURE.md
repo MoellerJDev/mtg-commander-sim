@@ -183,6 +183,32 @@ auto-pass, ordered plan, or incorrect suppression. A nonzero
 `suppressed_meaningful_windows` fails fidelity and caps classification at
 `rules_test`.
 
+## Versioned rules and Oracle compilation
+
+Rules completeness is a separate, fail-closed pipeline above the existing
+kernel:
+
+```text
+Official CR TXT ─┐
+Oracle bulk ─────┼─> snapshot hashes -> mechanics contracts -> typed Oracle IR
+Rulings bulk ────┘                                      │
+                                                        ▼
+                                       generic engine primitives + DSL
+```
+
+`rules_corpus.py` discovers the official TXT only through allowlisted Wizards
+HTTPS endpoints, parses numbered IDs/sections/glossary locally, and writes
+compact derived indexes. The raw document remains ignored. The manifest pins
+the CR, Oracle, and rulings inputs, while coverage remains false until reviewed
+contracts and tests establish behavioral trust.
+
+The future Oracle compiler preserves source spans and emits typed ability,
+cost, target, trigger, replacement, continuous-effect, copy, search, and
+choice nodes. A material residual prevents trusted preflight. Card-specific
+overrides are a reviewed escape hatch for irreducible exceptions, not a
+substitute for generic mechanics or a printed-name branch in
+`CommanderEngine`.
+
 ## Rules arbitration and semantic programs
 
 The engine should not infer arbitrary card behavior from prose during a state transition.

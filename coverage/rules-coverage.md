@@ -1,0 +1,10 @@
+# Comprehensive Rules coverage
+
+- Effective date: `2026-06-19`
+- Source SHA-256: `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
+- Indexed rules: 3300
+- Trusted rules: 0
+- Trusted fraction: 0.00%
+- Current snapshot complete: false
+
+A green completeness claim is blocked until every behavioral rule and mechanic contract in the pinned snapshot is trusted.

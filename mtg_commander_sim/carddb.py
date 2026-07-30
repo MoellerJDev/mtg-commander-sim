@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import difflib
+import hashlib
 import json
 import sqlite3
 from dataclasses import dataclass
@@ -10,6 +11,14 @@ from typing import Any, Iterable, Iterator, Sequence
 from .util import iter_jsonl, normalize_card_name, stable_json, truncate
 
 SCHEMA_VERSION = 1
+
+
+def file_sha256(path: str | Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as source:
+        while chunk := source.read(1024 * 1024):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 @dataclass(frozen=True, slots=True)
@@ -218,7 +227,9 @@ def build_card_database(
         [
             ("schema_version", str(SCHEMA_VERSION)),
             ("oracle_source", str(oracle_cards_path)),
+            ("oracle_source_sha256", file_sha256(oracle_cards_path)),
             ("rulings_source", str(rulings_path)),
+            ("rulings_source_sha256", file_sha256(rulings_path)),
             ("include_raw", "1" if include_raw else "0"),
         ],
     )

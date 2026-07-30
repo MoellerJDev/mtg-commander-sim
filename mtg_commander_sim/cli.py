@@ -35,6 +35,11 @@ from .record import (
     verify_record_integrity,
 )
 from .report import review_markdown, write_review_artifacts
+from .rules_corpus import (
+    CORPUS_OPERATIONS,
+    RulesCorpusError,
+    execute_rules_corpus_operation,
+)
 from .session import CommanderSession
 from .util import stable_json
 
@@ -384,10 +389,43 @@ def build_parser() -> argparse.ArgumentParser:
     action_group.add_argument("--json")
     action_group.add_argument("--file")
 
-    rules = sub.add_parser("rules", help="Read local Oracle text and rulings by name or object ref")
-    rules.add_argument("--db", required=True)
-    rules.add_argument("--game", required=True)
-    rules.add_argument("cards", nargs="+")
+    rules = sub.add_parser(
+        "rules",
+        help=(
+            "Read seat-visible Oracle/rulings or manage the pinned "
+            "Comprehensive Rules corpus"
+        ),
+    )
+    rules.add_argument("--db")
+    rules.add_argument("--game")
+    rules.add_argument(
+        "cards",
+        nargs="+",
+        help=(
+            "Card names/refs, or one of: sync, inventory, diff, coverage, "
+            "next, verify, report"
+        ),
+    )
+    rules.add_argument(
+        "--root",
+        default=".",
+        help="Repository/output root containing rules/ and coverage/",
+    )
+    rules.add_argument("--cache-dir")
+    rules.add_argument(
+        "--source-file",
+        help="Parse a local CR TXT fixture instead of downloading",
+    )
+    rules.add_argument(
+        "--source-url",
+        help="Explicit official Wizards HTTPS TXT URL",
+    )
+    rules.add_argument(
+        "--against",
+        help="Prior corpus root for rules diff",
+    )
+    rules.add_argument("--limit", type=int, default=20)
+    rules.add_argument("--output")
 
     report = sub.add_parser("report", help="Produce the derived Game Record review")
     report.add_argument("--db", required=True)
@@ -960,6 +998,29 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
 
+    if (
+        args.cmd == "rules"
+        and len(args.cards) == 1
+        and args.cards[0] in CORPUS_OPERATIONS
+        and not args.game
+    ):
+        try:
+            value = execute_rules_corpus_operation(
+                args.cards[0],
+                root=args.root,
+                cache_dir=args.cache_dir,
+                source_file=args.source_file,
+                source_url=args.source_url,
+                against=args.against,
+                limit=args.limit,
+                output=args.output,
+                card_db_path=args.db,
+            )
+        except RulesCorpusError as exc:
+            raise SystemExit(str(exc)) from exc
+        print(value if isinstance(value, str) else stable_json(value))
+        return 0 if not isinstance(value, dict) or value.get("ok", True) else 2
+
     if args.cmd == "pilot-run":
         output = Path(args.output)
         output.mkdir(parents=True, exist_ok=True)
@@ -1172,6 +1233,11 @@ def main(argv: list[str] | None = None) -> int:
             db.close()
         return 0
 
+    if args.cmd == "rules" and (not args.db or not args.game):
+        raise SystemExit(
+            "Card rules lookup requires --db and --game; corpus operations "
+            "use `simctl rules <operation>`"
+        )
     game_path = (args.game or args.record) if args.cmd == "report" else args.game
     if not game_path:
         raise SystemExit("report requires a record directory (positional or --game)")

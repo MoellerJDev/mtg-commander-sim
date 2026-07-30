@@ -23,6 +23,20 @@ The source hashes pin the Scryfall snapshot used for review. An empty rulings
 list still has the deterministic SHA-256 hash of its serialized empty array.
 Pack files are included as package data in the wheel.
 
+## Transition to corpus compilation
+
+Hand-authored packs remain valid reviewed artifacts, but they are not the
+scaling architecture for arbitrary new decks. The rules-completeness pipeline
+pins the official CR, Oracle, and rulings snapshots, generates mechanic
+contracts, and will compile Oracle text into a typed intermediate
+representation. Common templates then lower into the same generic DSL and
+kernel primitives used by current packs.
+
+Any material unparsed Oracle span, untrusted mechanic dependency, or source
+hash mismatch fails trusted preflight. A card-specific override must record why
+generic compilation failed and pin its Oracle/rulings/rule/test provenance.
+See `RULES_COMPLETENESS.md`.
+
 ## Trust
 
 `trusted` means the declared behavior is reviewed and characterized for this

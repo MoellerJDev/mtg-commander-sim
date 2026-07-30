@@ -8,6 +8,10 @@
 - Hidden information must be projected by principal. Never solve a UI issue by exposing full state.
 - No Scryfall network calls during a game. Use local SQLite data.
 - Unknown Oracle semantics must fail into an arbiter decision; never guess silently.
+- Rules/Oracle completeness is snapshot-scoped. Pin CR, Oracle, rulings,
+  compiler, mechanic-contract, and semantic hashes before promoting coverage.
+- A material typed-Oracle compiler residual or untrusted mechanic dependency
+  must fail trusted preflight; never discard unsupported Oracle text.
 - A yield is an optimization, never authority to suppress a changed meaningful-action signature. `suppressed_meaningful_windows` must remain zero.
 - Pilots select server-advertised ability/cost options. Never restore arbitrary `declared_cost`, `cost_effects`, or uncompiled cast-from-zone input in strict mode.
 - Treat `principal` as authenticated transport metadata, never as a seat chosen inside a client command body.
@@ -33,6 +37,7 @@ python scripts/build_test_database.py build --fixture tests/fixtures/scryfall-ex
 python -m unittest discover -s tests -p 'test_*.py' -v
 python scripts/demo_four_player_protocol.py --db data/test-ci.sqlite3 --out demo
 python scripts/validate_repository.py
+python simctl.py rules verify --root .
 python -m build --wheel
 python scripts/verify_wheel.py
 ```

@@ -177,6 +177,30 @@ That boundary is safer and more auditable than silently guessing at card text, w
 
 The same rule applies to costs. Ordinary printed costs and a conservative set of explicit activated costs are derived by the server. A pilot may choose an advertised ability and the physical cards that pay delegated costs, but it cannot submit an arbitrary cheaper `declared_cost`, invent a sacrifice, or claim that a graveyard card is castable. Alternate costs, restricted mana, and unusual zone permissions must be compiled before use rather than trusted from player input.
 
+## Rules corpus and arbitrary decks
+
+The rules-completeness program uses generic mechanics and a typed Oracle
+compiler rather than one code branch per card. `simctl rules sync` now locates
+the official Wizards TXT, preserves the raw file only in ignored local cache,
+and commits compact CR/glossary/mechanics indexes with exact source hashes.
+When supplied `--db`, it also pins the local Oracle and rulings bulk timestamps
+and archive hashes.
+
+```bash
+python simctl.py rules sync \
+  --root . \
+  --db data/scryfall-current.sqlite3
+python simctl.py rules verify --root .
+python simctl.py rules coverage --root .
+```
+
+This is the foundation, not a completeness declaration: the generated
+coverage files remain red until every material rule and mechanic contract in
+the pinned snapshot is trusted and the future typed Oracle compiler reports no
+material residuals. Genuinely unique cards may use reviewed, hash-pinned
+overrides; common cards and mechanics should compile through reusable
+primitives. See `RULES_COMPLETENESS.md`.
+
 ## Quick Python loop
 
 ```python
