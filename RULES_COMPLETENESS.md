@@ -230,14 +230,18 @@ damage, and removes defense according to every applicable permanent type.
 Siege protectors are chosen during resolution, exposed publicly without
 authoritative object identity, used for attack/block routing, and repaired by
 state-based action. The last-defense trigger and zero-defense exception are
-logical-incarnation-aware and replayable.
+logical-incarnation-aware and replayable. That trigger now exiles the exact
+source incarnation and offers a replayable cast-or-decline choice for the
+transformed face without paying its mana cost. Tokens cease after exile.
+Compiled target schemas are exposed to the pilot, while unresolved mandatory
+target grammar stops for arbitration.
 
-This is not complete Battle support. The Siege trigger currently stops at the
-existing arbiter boundary instead of natively exiling and offering a
-transformed free cast. Type/control changes during combat, full damage-event
-replacement ordering, nonspell as-enters protector continuations, and future
-Battle-type protector predicates remain blocked. Post-snapshot Control Point
-previews are rejected rather than guessed.
+This is not complete Battle support. Replacement ordering for the defeated
+trigger's exile, cast-time modes/targets/additional costs outside compiled
+schemas, type/control changes during combat, full damage-event replacement
+ordering, nonspell as-enters protector continuations, and future Battle-type
+protector predicates remain blocked. Post-snapshot Control Point previews are
+rejected rather than guessed.
 
 The Oracle compiler currently recognizes whole-sentence templates for simple
 draw, life, damage, destroy, exile, return, counter, mill, tap/untap, scry,

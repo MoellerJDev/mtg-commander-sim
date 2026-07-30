@@ -503,7 +503,10 @@ The new rules primitives sit below both generated and hand-authored semantics:
   effective type line, subtype, and copied defense characteristic. Siege
   entry choices occur during resolution, attack/block routing uses the live
   protector, damage removes defense counters, and pending source triggers are
-  matched to the exact logical incarnation.
+  matched to the exact logical incarnation. The intrinsic defeated trigger
+  exiles that exact incarnation and uses a seat-scoped continuation for the
+  optional transformed cast. Compiled target schemas are projected while
+  unresolved mandatory target grammar fails closed.
 - `CardInstance.object_kind` and the copy-object helpers represent stack spell
   copies and card copies without pretending they are cards. The reviewed
   partial CR 707 path preserves supported stack choices, treats spell copies
@@ -515,7 +518,8 @@ into the layer evaluator, not every zone/draw/damage/enters producer routes
 through the replacement engine, and the state-action evaluator does not yet
 cover Sagas, dungeons, Roles, speed, maximum-counter wording outside the
 reviewed self-restriction family, or complete simultaneous loss replacement.
-Battle support still lacks native Siege transformed-cast resolution,
+Battle support still lacks complete replacement ordering for the defeated
+trigger's exile, transformed cast grammar beyond compiled cost/target schemas,
 combat-removal interactions after type/control changes, and future subtype
 predicates. CR 707 remains partial for complete
 copiable values, card-copy casting/playing, Prepare, face-down and linked

@@ -213,10 +213,10 @@ python simctl.py rules conformance --root .
 ```
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
-generated source-linkage tests. They intentionally report 0 executable
-semantic passes: every case starts unreviewed, and a generated inventory test
-cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
-invalidation, and reporting policy.
+generated source-linkage tests. They currently report 0 executable semantic
+passes: 3,299 cases remain unreviewed and CR 310.11b is reviewed but blocked.
+A generated inventory test cannot prove rules behavior. See
+`RULE_CONFORMANCE.md` for the promotion, invalidation, and reporting policy.
 
 Deck creation now invokes the typed Oracle compiler automatically. Exact
 whole-text templates lower into the generic effect DSL without a printed-name
@@ -269,13 +269,17 @@ and route blockers to that protector. Invalid protectors are repaired through
 a replayable controller choice.
 
 This is a partial CR 120/210/310/704 implementation. Removing a Siege's last
-defense counter queues the intrinsic trigger, but its exile-and-optional-
-transformed-cast resolution deliberately pauses at the arbiter boundary until
-the native transformed-cast continuation is implemented. Unknown future
-Battle subtypes and nonspell entries that require an unrepresented as-enters
-choice fail closed. In particular, the two Control Point previews in the July
-28 Oracle corpus postdate the June 19 pinned rules and are not silently
-treated as Sieges.
+defense counter queues the intrinsic trigger. Native resolution follows the
+exact source incarnation, exiles it, and offers its controller a replayable
+choice to cast the transformed face without paying its mana cost or decline.
+Tokens cease after exile, and ordinary casts cannot select a transforming
+card's back face. Compiled target schemas are exposed when a transformed
+instant or sorcery needs targets; unresolved target or cost grammar fails
+closed rather than advertising an illegal cast. Complete exile-replacement
+ordering remains blocked. Unknown future Battle subtypes and nonspell entries
+that require an unrepresented as-enters choice also fail closed. In
+particular, the two Control Point previews in the July 28 Oracle corpus
+postdate the June 19 pinned rules and are not silently treated as Sieges.
 
 ```bash
 python simctl.py oracle parse "Lightning Bolt" \

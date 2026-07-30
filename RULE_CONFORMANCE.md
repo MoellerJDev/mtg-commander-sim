@@ -88,7 +88,11 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 
 ## Current checkpoint
 
-All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass. All
-3,300 cases remain unreviewed and inventory-only, so the executable semantic
-pass count is 0 and snapshot completeness remains false. Subsequent work
-promotes cases family by family while preserving this denominator.
+All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
+CR 310.11b is the first semantically reviewed case. It is `blocked` with
+linked native-engine and replay tests because replacement ordering and cast
+grammar outside compiled target/cost schemas remain incomplete. The other
+3,299 cases remain unreviewed and inventory-only. The executable semantic pass
+count is therefore still 0 and snapshot completeness remains false.
+Subsequent work promotes cases family by family while preserving this
+denominator.

@@ -11,6 +11,8 @@ Last updated: 2026-07-30
 - Default branch: `main`
 - Review-MVP branch: `agent/review-mvp`
 - Rules branch: `agent/rules-completeness`
+- Stacked draft PR:
+  `https://github.com/MoellerJDev/mtg-commander-sim/pull/1`
 - Rules-program base: `d099fe4`
 - This continuation started at:
   `6517dc0870ee9344ea6a2be89bf3b2ea36b61d37`
@@ -65,8 +67,10 @@ maximum-counter foundation. It now:
 - repairs invalid Siege protectors through replayable controller choices;
 - queues the intrinsic Siege trigger on last-defense removal and matches
   pending source triggers to the represented logical incarnation;
-- sends native-unimplemented Siege transformed-cast resolution to the arbiter
-  boundary instead of guessing;
+- exiles that exact Siege incarnation and offers a replayable optional cast of
+  its transformed face without paying its mana cost;
+- exposes compiled target schemas for transformed spells and stops for
+  arbitration when mandatory target grammar is unresolved;
 - omits physical/incarnation identifiers from seat projections;
 - omits authoritative zone/World timestamps from seat projections;
 - preserves exact command replay with the new authoritative fields.
@@ -81,10 +85,11 @@ loyalty, supported attachment legality, and opposing counter pairs are
 detected from one immutable snapshot. `CommanderEngine` applies the combined
 batch and repeats before priority.
 
-This is not complete CR 120/210/310/400/111/704/707 support. Native Siege
-exile-and-optional-transformed-cast resolution, nonspell Battle entry choices,
-Battle type/control changes during combat, complete damage replacement/
-prevention, and future Battle subtype predicates remain blocked. Complete
+This is not complete CR 120/210/310/400/111/704/707 support. Complete
+replacement ordering for the defeated-Siege exile, transformed cast grammar
+outside compiled target/cost schemas, nonspell Battle entry choices, Battle
+type/control changes during combat, complete damage replacement/prevention,
+and future Battle subtype predicates remain blocked. Complete
 copiable values, card-copy casting and playing, Prepare's exile exception,
 face-down and linked copy interactions, and copied choice/cost/target
 exceptions also remain blocked.
@@ -103,7 +108,8 @@ events also remain blockers.
   `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
 - Indexed rules: 3,300
 - Conformance cases: 3,300
-- Inventory-only cases: 3,300
+- Inventory-only cases: 3,299
+- Reviewed blocked cases: 1 (CR 310.11b)
 - Executable semantic passes: 0
 - Indexed sections: 156
 - Glossary entries: 733
@@ -121,12 +127,12 @@ events also remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 3,690 passed
-- Noninventory unit/integration tests: 390 passed
+- Unit/integration tests: 3,698 passed
+- Noninventory unit/integration tests: 398 passed
 - Generated per-rule inventory/source-linkage tests: 3,300 passed
 - Focused object identity/token lifecycle tests: 15 passed
 - Focused copy-object lifecycle tests: 8 passed
-- Focused CR 120/210/310/704 tests: 35 passed
+- Focused CR 120/210/310/704 tests: 42 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
 - Seed-20260730 hidden-information audit: pass
@@ -146,7 +152,7 @@ events also remain blockers.
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `e250f36406d7e2fb1e70130021916998a4efbf0de4993eb32dec43ac8696a31e`
+  `46fdde6f2aec4e24687d029fffe41e36f0c36589e2d38803d2383b2962119e34`
 
 ## Deck-review evidence state
 
@@ -162,8 +168,9 @@ not broad Oracle completeness and not game/deck-quality evidence.
 ## GitHub state
 
 - Authentication: active as `MoellerJDev`; no credential value was recorded.
-- Open pull requests at handoff preparation: none.
-- Draft rules-completeness PR: not yet opened.
+- Open pull requests at handoff preparation: stacked draft PR #1.
+- Draft rules-completeness PR:
+  `https://github.com/MoellerJDev/mtg-commander-sim/pull/1`
 - CI for this local checkpoint: pending commit/push; all required local gates
   above pass.
 
@@ -177,21 +184,22 @@ after the Battle checkpoint now exists:
 2. semantic passes, failures, blocked, skipped, definition-only, unreviewed,
    and inventory-only counts are separate; the current semantic pass count is
    0;
-3. continue reviewing and promoting cases by rules family, then implement
-   native Siege defeated-trigger exile and optional transformed
-   casting as a replayable continuation;
-4. migrate remaining physical-reference links to typed incarnation/LKI
+3. CR 310.11b is the first reviewed case and remains blocked after adding its
+   native replayable Siege continuation because replacement ordering and
+   broader cast grammar are incomplete;
+4. continue reviewing and promoting cases by dependency-ordered rules family;
+5. migrate remaining physical-reference links to typed incarnation/LKI
    handles and finish CR 400.7 continuation policies;
-5. integrate destruction/loss with typed replacement and regeneration;
-6. add the remaining specialized CR 704.5 permanent/layout actions and
+6. integrate destruction/loss with typed replacement and regeneration;
+7. add the remaining specialized CR 704.5 permanent/layout actions and
    interaction tests;
-7. integrate serialized object timestamps into every continuous-effect source
+8. integrate serialized object timestamps into every continuous-effect source
    and implement CR 613.7m APNAP relative ordering;
-8. implement complete copiable-value, card-copy casting, Prepare, and
+9. implement complete copiable-value, card-copy casting, Prepare, and
    specialized copy interactions behind the CR 707 contract;
-9. rerun full coverage and every validation gate.
+10. rerun full coverage and every validation gate.
 
 The review-MVP branch still separately lacks three consecutive qualifying
-persistent-Codex games, review-batch aggregation, per-deck operation reports,
-and its draft PR. Those requirements remain active and must not be inferred
-from this rules checkpoint.
+persistent-Codex games, review-batch aggregation, and per-deck operation
+reports. Those requirements remain active and must not be inferred from this
+rules checkpoint.

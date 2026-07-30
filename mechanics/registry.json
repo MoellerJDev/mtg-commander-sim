@@ -16,8 +16,8 @@
     {
       "mechanic_id": "cr-310-battles",
       "path": "mechanics/contracts/battles.json",
-      "sha256": "a96a4adb6d225add643dd0ab6537f3757bcf15544d6a5360201b624bdaf3497c",
-      "version": 1
+      "sha256": "9d50c3ab33eca5b6d33d6a8753371cd5e3cd1be969805688cbe92bcd95e031a0",
+      "version": 2
     },
     {
       "mechanic_id": "cr-613-interaction-of-continuous-effects",
@@ -5632,19 +5632,20 @@
     {
       "category": "card_types",
       "contract_path": "mechanics/contracts/battles.json",
-      "contract_sha256": "a96a4adb6d225add643dd0ab6537f3757bcf15544d6a5360201b624bdaf3497c",
-      "contract_version": 1,
+      "contract_sha256": "9d50c3ab33eca5b6d33d6a8753371cd5e3cd1be969805688cbe92bcd95e031a0",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "CommanderEngine Battle entry, combat, trigger, damage, and protector state paths",
-      "implementation_version": "battles-v1",
+      "implementation_version": "battles-v2",
       "kind": "rules_section",
       "known_blockers": [
-        "native Siege defeated-trigger resolution does not yet exile and offer the exact transformed free cast; it fails closed to arbiter resolution",
         "nonspell and token Battle entry paths do not yet suspend for an as-enters protector choice unless a trusted caller supplies the selected protector",
         "attacking or blocking creatures becoming Battles and Battles changing controller during combat are not yet removed from combat by every continuous-effect path",
         "future Battle subtypes are rejected until their protector predicates are present in a pinned Comprehensive Rules snapshot",
         "complete simultaneous/APNAP protector choices and all Battle-targeting interactions are not implemented",
+        "the transformed-cast choice exposes compiled cost and target schemas; a nonpermanent back face with target text but no compiled target schema fails closed, and cast-time grammar outside those schemas remains blocked",
+        "complete replacement ordering for the defeated-trigger exile and the native semantic resolution of every transformed back face remain separate incomplete dependencies",
         "the current Oracle snapshot contains two not-yet-Commander-legal Control Point previews that postdate the pinned rules snapshot and remain unsupported"
       ],
       "mechanic_id": "cr-310-battles",
@@ -5663,6 +5664,13 @@
         "test_siege_is_attackable_and_its_protector_blocks",
         "test_battle_creature_cannot_attack_or_block",
         "test_siege_protector_is_chosen_as_the_spell_resolves",
+        "test_siege_defeated_casts_back_face_for_free_during_resolution",
+        "test_siege_defeated_may_be_declined_after_exile",
+        "test_siege_targeted_back_without_schema_fails_closed",
+        "test_siege_targeted_back_uses_compiled_target_schema",
+        "test_siege_trigger_does_not_follow_a_changed_object",
+        "test_transform_back_face_cannot_be_cast_without_permission",
+        "test_siege_transformed_cast_choice_replays_exactly",
         "test_battle_damage_and_state_action_replay_exactly"
       ],
       "trust_level": "untrusted"

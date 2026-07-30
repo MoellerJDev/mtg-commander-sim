@@ -1585,7 +1585,7 @@ class CommanderEngine:
                         "source_logical_object_id": (
                             battle.logical_object_id
                         ),
-                        "requires_native_transformed_cast": True,
+                        "native_transformed_cast": True,
                     },
                 )
             ]
@@ -2620,6 +2620,8 @@ class CommanderEngine:
             self._complete_battle_protector_choice(decision)
         elif kind == "battle.enter_protector":
             self._complete_battle_entry_protector_choice(decision)
+        elif kind == "battle.siege_defeated":
+            self._complete_siege_defeated_choice(decision)
         elif kind == "choice.apnap":
             self._complete_apnap_choice(decision)
         elif kind == "trigger.order":
@@ -4746,8 +4748,20 @@ class CommanderEngine:
             )
         return False
 
-    def _cast(self, seat: str, response: Mapping[str, Any]) -> None:
-        self._check_priority(seat)
+    def _cast(
+        self,
+        seat: str,
+        response: Mapping[str, Any],
+        *,
+        authorized_from_zone: str | None = None,
+        required_face: str | None = None,
+        force_without_mana_cost: bool = False,
+        ignore_priority: bool = False,
+        ignore_timing: bool = False,
+        during_resolution: bool = False,
+    ) -> None:
+        if not ignore_priority:
+            self._check_priority(seat)
         if response.get("semantic_key") is not None:
             raise GameRuleError(
                 "Pilots cannot select semantic program identifiers"
@@ -4766,7 +4780,14 @@ class CommanderEngine:
             )
         if card.zone == "command" and not card.is_commander:
             raise GameRuleError("Only this seat's commander cards may be cast from the command zone")
-        if card.zone not in {"hand", "command"}:
+        internally_authorized_zone = (
+            authorized_from_zone is not None
+            and card.zone == authorized_from_zone
+        )
+        if (
+            card.zone not in {"hand", "command"}
+            and not internally_authorized_zone
+        ):
             if not self._compiled_zone_cast_permission(seat, card):
                 raise GameRuleError(
                     f"Casting {card.printed_name} from {card.zone} is not authorized by a compiled zone permission."
@@ -4774,7 +4795,35 @@ class CommanderEngine:
         record = self.card_record(card)
         if not record:
             raise GameRuleError("Cannot cast a custom token")
-        face = self._select_cast_face(record, response.get("face"))
+        requested_face = (
+            required_face
+            if required_face is not None
+            else response.get("face")
+        )
+        face = self._select_cast_face(record, requested_face)
+        if (
+            required_face is None
+            and record.layout == "transform"
+            and face is not None
+            and record.faces
+            and str(face.get("name") or "").casefold()
+            != str(record.faces[0].get("name") or "").casefold()
+        ):
+            raise GameRuleError(
+                "A transforming double-faced card's back face cannot be "
+                "cast without a rules effect that specifically allows it"
+            )
+        if (
+            required_face is not None
+            and (
+                face is None
+                or str(face.get("name") or "").casefold()
+                != required_face.casefold()
+            )
+        ):
+            raise GameRuleError(
+                "The rules effect no longer identifies that cast face"
+            )
         type_line = str(face.get("type_line") or "") if face else record.type_line
         mana_cost = str(face.get("mana_cost") or "") if face else record.mana_cost
         if response.get("protector") is not None:
@@ -4784,7 +4833,11 @@ class CommanderEngine:
             )
         is_instant = "instant" in type_line.casefold()
         has_flash = record.has_flash
-        if self.state.config.strict_timing and not (is_instant or has_flash):
+        if (
+            not ignore_timing
+            and self.state.config.strict_timing
+            and not (is_instant or has_flash)
+        ):
             self._sorcery_timing(seat)
         commander_tax = 0
         if card.zone == "command" and card.is_commander:
@@ -4836,6 +4889,7 @@ class CommanderEngine:
             program,
             response=response,
             hint=False,
+            force_without_mana_cost=force_without_mana_cost,
         )
         if options:
             requested_option = str(
@@ -5286,6 +5340,9 @@ class CommanderEngine:
             )
         self._enqueue_semantic_trigger_batch(cast_trigger_batch)
         self._queue_ward_triggers_for_targets(item)
+        self.state.players[seat].yield_policy = YieldPolicy()
+        if during_resolution:
+            return
         # Casting is followed by a state-based-action check before any
         # player receives priority (CR 117.5, 704.3).  This is observable for
         # token and copy objects paid as additional costs.
@@ -5293,7 +5350,6 @@ class CommanderEngine:
             return
         self.state.priority_player = seat
         self.state.priority_passes = []
-        self.state.players[seat].yield_policy = YieldPolicy()
 
     def _activated_abilities(self, card: CardInstance) -> tuple[ActivatedAbility, ...]:
         data = self._effective_card_data(card)
@@ -7168,6 +7224,7 @@ class CommanderEngine:
         *,
         response: Mapping[str, Any] | None = None,
         hint: bool,
+        force_without_mana_cost: bool = False,
     ) -> list[dict[str, Any]]:
         """Compile server-authoritative payable casting-cost alternatives.
 
@@ -7179,7 +7236,7 @@ class CommanderEngine:
         response = dict(response or {})
         x_value = response.get("x")
         temporary_permission = self._temporary_play_permission(seat, card)
-        cast_without_mana = bool(
+        cast_without_mana = force_without_mana_cost or bool(
             temporary_permission
             and temporary_permission.get("without_mana_cost")
         )
@@ -9822,6 +9879,346 @@ class CommanderEngine:
         )
         self._prepare_stack_resolution()
 
+    def _finish_siege_defeated_resolution(
+        self,
+        item: StackItem,
+        *,
+        outcome: str,
+        card: CardInstance | None = None,
+        cast_stack_ref: str | None = None,
+    ) -> None:
+        if item in self.state.stack:
+            self.state.stack.remove(item)
+        self._log(
+            item.controller,
+            "battle.siege_defeated.resolve",
+            f"Resolved {item.ref}: {item.label} ({outcome}).",
+            {
+                "stack": item.ref,
+                "battle": card.ref if card is not None else None,
+                "outcome": outcome,
+                "cast_stack": cast_stack_ref,
+            },
+            importance=2,
+            changed_objects=(
+                [card.object_id] if card is not None else []
+            ),
+            changed_players=[item.controller],
+        )
+        if self._stabilize():
+            return
+        self._grant_priority(self.state.active_player)
+
+    def _begin_siege_defeated_resolution(
+        self,
+        item: StackItem,
+    ) -> None:
+        """Resolve the intrinsic CR 310.11b Siege ability natively."""
+
+        card = self.state.cards.get(item.source_object_id or "")
+        expected_logical_object_id = str(
+            item.context.get("source_logical_object_id") or ""
+        )
+        if (
+            card is None
+            or card.zone != "battlefield"
+            or card.logical_object_id != expected_logical_object_id
+        ):
+            self._finish_siege_defeated_resolution(
+                item,
+                outcome="source_unavailable",
+                card=card,
+            )
+            return
+
+        self.move_card(
+            card.object_id,
+            "exile",
+            reason="Siege defeated trigger",
+            semantic_events=True,
+        )
+        if card.zone != "exile":
+            self._finish_siege_defeated_resolution(
+                item,
+                outcome="exile_failed",
+                card=card,
+            )
+            return
+
+        record = self.card_record(card)
+        can_cast_transformed = bool(
+            card.is_card_object
+            and record is not None
+            and record.layout == "transform"
+            and len(record.faces) >= 2
+            and str(record.faces[1].get("name") or "")
+        )
+        if not can_cast_transformed:
+            self._finish_siege_defeated_resolution(
+                item,
+                outcome="exiled_not_castable_transformed",
+                card=card,
+            )
+            return
+
+        transformed_face_data = dict(record.faces[1])
+        transformed_face = str(transformed_face_data["name"])
+        semantic_key = (
+            f"{record.oracle_id}:spell:{transformed_face}"
+        )
+        program = self.semantics.get(semantic_key)
+        transformed_types, _, _ = self._type_parts(
+            str(transformed_face_data.get("type_line") or "")
+        )
+        if (
+            transformed_types.intersection({"instant", "sorcery"})
+            and re.search(
+                r"\btarget\b",
+                str(transformed_face_data.get("oracle_text") or ""),
+                re.IGNORECASE,
+            )
+            and (
+                program is None
+                or program.target_schema is None
+            )
+        ):
+            self.permissions.issue(
+                kind="arbiter.resolve",
+                role="arbiter",
+                actors=["arbiter"],
+                allowed_actions=[
+                    "resolve",
+                    "register_and_resolve",
+                    "counter_as_rule",
+                    "fizzle",
+                ],
+                payload_by_actor={
+                    "arbiter": {
+                        "stack": item.ref,
+                        "label": item.label,
+                        "controller": item.controller,
+                        "semantic_key": item.semantic_key,
+                        "default_destination": None,
+                        "reason": (
+                            "transformed Siege spell has unresolved "
+                            "mandatory target semantics"
+                        ),
+                        "battle": card.ref,
+                        "transformed_face": transformed_face,
+                    }
+                },
+            )
+            return
+
+        options = self._cast_cost_options(
+            item.controller,
+            card,
+            program,
+            hint=True,
+            force_without_mana_cost=True,
+        )
+        public_options: list[dict[str, Any]] = []
+        for option in options:
+            target_specification = (
+                dict(option["target_schema"])
+                if isinstance(
+                    option.get("target_schema"), Mapping
+                )
+                else (
+                    program.target_schema
+                    if program is not None
+                    else None
+                )
+            )
+            public_target_schema = None
+            if target_specification is not None:
+                public_target_schema = self._public_target_schema(
+                    item.controller,
+                    target_specification,
+                    source_ref=card.ref,
+                )
+                if public_target_schema is None:
+                    continue
+            public_option = {
+                key: copy.deepcopy(value)
+                for key, value in option.items()
+                if key
+                in {
+                    "id",
+                    "kind",
+                    "requirements",
+                    "choice_schema",
+                    "label",
+                }
+            }
+            if public_target_schema is not None:
+                public_option["target_schema"] = (
+                    public_target_schema
+                )
+            public_options.append(public_option)
+        if not public_options:
+            self._finish_siege_defeated_resolution(
+                item,
+                outcome="exiled_cast_unavailable",
+                card=card,
+            )
+            return
+
+        self.permissions.issue(
+            kind="battle.siege_defeated",
+            role="pilot",
+            actors=[item.controller],
+            allowed_actions=["choose"],
+            payload_by_actor={
+                item.controller: {
+                    "stack": item.ref,
+                    "battle": card.ref,
+                    "name": record.name,
+                    "transformed_face": transformed_face,
+                    "cast_options": public_options,
+                    "prompt": (
+                        "Cast this card transformed without paying its "
+                        "mana cost?"
+                    ),
+                    "legal_actions": [
+                        {
+                            "id": "cast",
+                            "action": "choose",
+                            "choice": "cast",
+                            "choice_schema": {
+                                "choice": "cast",
+                                "cast_options": public_options,
+                            },
+                        },
+                        {
+                            "id": "decline",
+                            "action": "choose",
+                            "choice": "decline",
+                            "choice_schema": {
+                                "choice": "decline",
+                            },
+                        },
+                    ],
+                }
+            },
+            continuation={
+                "stack_ref": item.ref,
+                "object_id": card.object_id,
+                "exile_logical_object_id": card.logical_object_id,
+                "transformed_face": transformed_face,
+            },
+        )
+
+    def _complete_siege_defeated_choice(
+        self,
+        decision: Any,
+    ) -> None:
+        seat = decision.actors[0]
+        stack_ref = str(decision.continuation.get("stack_ref") or "")
+        item = next(
+            (
+                candidate
+                for candidate in self.state.stack
+                if candidate.ref == stack_ref
+                and candidate.semantic_key
+                == "builtin:siege-defeated"
+            ),
+            None,
+        )
+        card = self.state.cards.get(
+            str(decision.continuation.get("object_id") or "")
+        )
+        if item is None:
+            raise GameRuleError(
+                "The Siege defeated trigger is no longer on the stack"
+            )
+        if (
+            card is None
+            or card.zone != "exile"
+            or card.logical_object_id
+            != str(
+                decision.continuation.get(
+                    "exile_logical_object_id"
+                )
+                or ""
+            )
+        ):
+            raise GameRuleError(
+                "The exiled Siege is no longer the object offered for "
+                "the transformed cast"
+            )
+        choice = str(
+            decision.responses[seat].get("choice")
+            or decision.responses[seat].get("option")
+            or ""
+        )
+        if choice not in {"cast", "decline"}:
+            raise GameRuleError(
+                "Choose whether to cast the defeated Siege transformed"
+            )
+        if choice == "decline":
+            self._finish_siege_defeated_resolution(
+                item,
+                outcome="declined",
+                card=card,
+            )
+            return
+
+        transformed_face = str(
+            decision.continuation.get("transformed_face") or ""
+        )
+        before_stack_refs = {
+            candidate.ref for candidate in self.state.stack
+        }
+        cast_response = dict(
+            decision.responses[seat].get("cast") or {}
+        )
+        cast_response.update(
+            {
+                key: copy.deepcopy(value)
+                for key, value in decision.responses[seat].items()
+                if key not in {"action", "cast", "choice", "option"}
+            }
+        )
+        cast_response.update(
+            {
+                "card": card.ref,
+                "from": "exile",
+                "face": transformed_face,
+                "auto_pay": True,
+            }
+        )
+        self._cast(
+            seat,
+            cast_response,
+            authorized_from_zone="exile",
+            required_face=transformed_face,
+            force_without_mana_cost=True,
+            ignore_priority=True,
+            ignore_timing=True,
+            during_resolution=True,
+        )
+        cast_item = next(
+            (
+                candidate
+                for candidate in reversed(self.state.stack)
+                if candidate.ref not in before_stack_refs
+                and candidate.kind == "spell"
+                and candidate.card_object_id == card.object_id
+            ),
+            None,
+        )
+        if cast_item is None:
+            raise StateInvariantError(
+                "The transformed Siege cast did not create a spell"
+            )
+        self._finish_siege_defeated_resolution(
+            item,
+            outcome="cast_transformed",
+            card=card,
+            cast_stack_ref=cast_item.ref,
+        )
+
     def _prepare_stack_resolution(self) -> None:
         if self.state.pending_trigger_batches and self._stabilize():
             return
@@ -9830,6 +10227,9 @@ class CommanderEngine:
             return
         item = self.state.stack[-1]
         if self._begin_battle_entry_protector_choice(item):
+            return
+        if item.semantic_key == "builtin:siege-defeated":
+            self._begin_siege_defeated_resolution(item)
             return
         if item.semantic_key == "builtin:storm":
             self._prepare_storm_resolution(item)

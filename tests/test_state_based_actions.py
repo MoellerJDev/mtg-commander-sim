@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 import json
 from pathlib import Path
 import random
@@ -439,6 +440,63 @@ class StateBasedActionEngineTests(unittest.TestCase):
         attachment.attached_to = target.object_id
         target.attachments.append(attachment.object_id)
 
+    def transforming_siege(self, engine):
+        card = next(
+            candidate
+            for candidate in engine.state.cards.values()
+            if candidate.oracle_id
+            == "883a4180-9ede-4249-a4b8-3a29c998fb63"
+            and candidate.owner == "A"
+        )
+        engine.move_card(
+            card.object_id,
+            "battlefield",
+            controller="A",
+            reason="CR 310.11b test setup",
+            semantic_events=False,
+        )
+        card.annotations["copy_overrides"] = {
+            "name": "Test Invasion",
+            "type_line": "Battle — Siege",
+            "defense": "1",
+            "oracle_text": "",
+        }
+        card.battle_protector = "B"
+        card.counters["defense"] = 1
+        return card
+
+    def transforming_siege_record(
+        self,
+        engine,
+        siege,
+        *,
+        back_name,
+        back_type_line,
+        back_oracle_text,
+    ):
+        record = engine.card_record(siege)
+        self.assertIsNotNone(record)
+        front = dict(record.faces[0])
+        back = {
+            "name": back_name,
+            "mana_cost": "",
+            "type_line": back_type_line,
+            "oracle_text": back_oracle_text,
+            "power": None,
+            "toughness": None,
+            "loyalty": None,
+            "defense": None,
+            "colors": [],
+        }
+        return replace(
+            record,
+            name=f"{front['name']} // {back_name}",
+            type_line=f"{front['type_line']} // {back_type_line}",
+            oracle_text=f"{front.get('oracle_text', '')} // {back_oracle_text}",
+            layout="transform",
+            faces=(front, back),
+        )
+
     def test_opposing_power_toughness_counters_cancel_in_pairs(self):
         engine = self.make_engine(7041)
         ref = engine.create_token(
@@ -661,16 +719,411 @@ class StateBasedActionEngineTests(unittest.TestCase):
         )
         self.assertEqual("battlefield", siege.zone)
         engine._prepare_stack_resolution()
+        self.assertEqual("outside", siege.zone)
+        self.assertIsNone(engine.state.pending_decision)
+        self.assertEqual(
+            "exiled_not_castable_transformed",
+            next(
+                event
+                for event in reversed(engine.state.events)
+                if event.code
+                == "battle.siege_defeated.resolve"
+            ).details["outcome"],
+        )
+
+    def test_siege_defeated_casts_back_face_for_free_during_resolution(self):
+        engine = self.make_engine(7064)
+        siege = self.transforming_siege(engine)
+        engine.state.active_player = "B"
+        engine.state.phase = "combat"
+        engine.state.step = "combat_damage"
+        engine._change_permanent_counter(siege, "defense", -1)
+        self.assertFalse(engine._stabilize())
+
+        trigger = next(
+            item
+            for item in engine.state.stack
+            if item.semantic_key == "builtin:siege-defeated"
+        )
+        engine._prepare_stack_resolution()
+
+        self.assertEqual("exile", siege.zone)
+        self.assertEqual(
+            "battle.siege_defeated",
+            engine.state.pending_decision.kind,
+        )
+        payload = engine.state.pending_decision.payload_by_actor["A"]
+        self.assertEqual("Consuming Sepulcher", payload["transformed_face"])
+        mana_before = dict(engine.state.players["A"].mana_pool)
+        capability = next(
+            value
+            for value in engine.state.capabilities.values()
+            if (
+                value.decision_id
+                == engine.state.pending_decision.decision_id
+                and value.principal == "pilot:A"
+                and not value.consumed
+            )
+        )
+
+        result = engine.try_submit(
+            token=capability.token,
+            principal="pilot:A",
+            action="choose",
+            payload={"choice": "cast"},
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("stack", siege.zone)
+        self.assertEqual("Consuming Sepulcher", siege.active_face)
+        self.assertFalse(
+            any(item.ref == trigger.ref for item in engine.state.stack)
+        )
+        cast_item = next(
+            item
+            for item in engine.state.stack
+            if item.card_object_id == siege.object_id
+        )
+        self.assertEqual("spell", cast_item.kind)
+        self.assertEqual(
+            "without_mana_cost",
+            cast_item.context["cost_option"],
+        )
+        self.assertEqual(
+            mana_before,
+            dict(engine.state.players["A"].mana_pool),
+        )
+        cast_event = next(
+            event
+            for event in reversed(engine.state.events)
+            if event.code == "stack.cast"
+            and event.details.get("object") == siege.ref
+        )
+        self.assertEqual("exile", cast_event.details["from"])
+        self.assertEqual({}, cast_event.details["payment"])
+        self.assertEqual(
+            "cast_transformed",
+            next(
+                event
+                for event in reversed(engine.state.events)
+                if event.code
+                == "battle.siege_defeated.resolve"
+            ).details["outcome"],
+        )
+
+    def test_siege_defeated_may_be_declined_after_exile(self):
+        engine = self.make_engine(7065)
+        siege = self.transforming_siege(engine)
+        engine._change_permanent_counter(siege, "defense", -1)
+        self.assertFalse(engine._stabilize())
+        engine._prepare_stack_resolution()
+        capability = next(
+            value
+            for value in engine.state.capabilities.values()
+            if (
+                value.decision_id
+                == engine.state.pending_decision.decision_id
+                and value.principal == "pilot:A"
+                and not value.consumed
+            )
+        )
+
+        result = engine.try_submit(
+            token=capability.token,
+            principal="pilot:A",
+            action="choose",
+            payload={"choice": "decline"},
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("exile", siege.zone)
+        self.assertIsNone(siege.active_face)
+        self.assertFalse(
+            any(
+                item.semantic_key == "builtin:siege-defeated"
+                for item in engine.state.stack
+            )
+        )
+        self.assertEqual(
+            "declined",
+            next(
+                event
+                for event in reversed(engine.state.events)
+                if event.code
+                == "battle.siege_defeated.resolve"
+            ).details["outcome"],
+        )
+
+    def test_siege_targeted_back_without_schema_fails_closed(self):
+        engine = self.make_engine(7069)
+        siege = self.transforming_siege(engine)
+        original_card_record = engine.card_record
+        targeted_record = self.transforming_siege_record(
+            engine,
+            siege,
+            back_name="Uncompiled Victory",
+            back_type_line="Sorcery",
+            back_oracle_text="Target player draws two cards.",
+        )
+
+        def staged_record(value):
+            candidate = (
+                value
+                if hasattr(value, "object_id")
+                else engine.state.cards.get(str(value))
+            )
+            if (
+                candidate is not None
+                and candidate.object_id == siege.object_id
+            ):
+                return targeted_record
+            return original_card_record(value)
+
+        engine._change_permanent_counter(siege, "defense", -1)
+        self.assertFalse(engine._stabilize())
+        with patch.object(
+            engine,
+            "card_record",
+            side_effect=staged_record,
+        ):
+            engine._prepare_stack_resolution()
+
+        self.assertEqual("exile", siege.zone)
         self.assertEqual(
             "arbiter.resolve",
             engine.state.pending_decision.kind,
         )
+        payload = engine.state.pending_decision.payload_by_actor[
+            "arbiter"
+        ]
+        self.assertEqual("Uncompiled Victory", payload["transformed_face"])
         self.assertEqual(
-            "builtin:siege-defeated",
-            engine.state.pending_decision.payload_by_actor["arbiter"][
-                "semantic_key"
-            ],
+            (
+                "transformed Siege spell has unresolved mandatory "
+                "target semantics"
+            ),
+            payload["reason"],
         )
+        self.assertTrue(
+            any(
+                item.semantic_key == "builtin:siege-defeated"
+                for item in engine.state.stack
+            )
+        )
+
+    def test_siege_targeted_back_uses_compiled_target_schema(self):
+        engine = self.make_engine(7070)
+        siege = self.transforming_siege(engine)
+        original_card_record = engine.card_record
+        targeted_record = self.transforming_siege_record(
+            engine,
+            siege,
+            back_name="Compiled Victory",
+            back_type_line="Sorcery",
+            back_oracle_text="Target player draws two cards.",
+        )
+        program = SemanticProgram(
+            key=(
+                f"{targeted_record.oracle_id}:spell:"
+                "Compiled Victory"
+            ),
+            label="Compiled Victory",
+            effects=[
+                {
+                    "op": "draw",
+                    "player": "$target.0",
+                    "count": 2,
+                    "private": True,
+                }
+            ],
+            destination="graveyard",
+            target_schema={
+                "zones": ["player"],
+                "categories": ["player"],
+                "player_relation": "any",
+                "count": 1,
+            },
+            trust_level="provisional",
+        )
+        engine.semantics.put(program)
+
+        def staged_record(value):
+            candidate = (
+                value
+                if hasattr(value, "object_id")
+                else engine.state.cards.get(str(value))
+            )
+            if (
+                candidate is not None
+                and candidate.object_id == siege.object_id
+            ):
+                return targeted_record
+            return original_card_record(value)
+
+        engine._change_permanent_counter(siege, "defense", -1)
+        self.assertFalse(engine._stabilize())
+        with patch.object(
+            engine,
+            "card_record",
+            side_effect=staged_record,
+        ):
+            engine._prepare_stack_resolution()
+            self.assertEqual(
+                "battle.siege_defeated",
+                engine.state.pending_decision.kind,
+            )
+            public_option = engine.state.pending_decision.payload_by_actor[
+                "A"
+            ]["cast_options"][0]
+            self.assertIn("B", public_option["target_schema"]["legal_refs"])
+            capability = next(
+                value
+                for value in engine.state.capabilities.values()
+                if (
+                    value.decision_id
+                    == engine.state.pending_decision.decision_id
+                    and value.principal == "pilot:A"
+                    and not value.consumed
+                )
+            )
+            result = engine.try_submit(
+                token=capability.token,
+                principal="pilot:A",
+                action="choose",
+                payload={
+                    "choice": "cast",
+                    "targets": ["B"],
+                },
+            )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("stack", siege.zone)
+        cast_item = next(
+            item
+            for item in engine.state.stack
+            if item.card_object_id == siege.object_id
+        )
+        self.assertEqual(["B"], cast_item.targets)
+        self.assertEqual(program.key, cast_item.semantic_key)
+
+    def test_siege_trigger_does_not_follow_a_changed_object(self):
+        engine = self.make_engine(7066)
+        siege = self.transforming_siege(engine)
+        engine._change_permanent_counter(siege, "defense", -1)
+        self.assertFalse(engine._stabilize())
+        engine.move_card(
+            siege.object_id,
+            "graveyard",
+            reason="source removed before defeated trigger",
+        )
+        departed_logical_object_id = siege.logical_object_id
+        engine.move_card(
+            siege.object_id,
+            "battlefield",
+            controller="A",
+            reason="source returned before defeated trigger",
+            semantic_events=False,
+        )
+        siege.annotations["copy_overrides"] = {
+            "name": "Returned Test Invasion",
+            "type_line": "Battle — Siege",
+            "defense": "1",
+            "oracle_text": "",
+        }
+        siege.battle_protector = "B"
+        siege.counters["defense"] = 1
+        self.assertNotEqual(
+            departed_logical_object_id,
+            siege.logical_object_id,
+        )
+
+        engine._prepare_stack_resolution()
+
+        self.assertEqual("battlefield", siege.zone)
+        self.assertFalse(
+            any(
+                item.semantic_key == "builtin:siege-defeated"
+                for item in engine.state.stack
+            )
+        )
+        self.assertEqual(
+            "source_unavailable",
+            next(
+                event
+                for event in reversed(engine.state.events)
+                if event.code
+                == "battle.siege_defeated.resolve"
+            ).details["outcome"],
+        )
+
+    def test_transform_back_face_cannot_be_cast_without_permission(self):
+        engine = self.make_engine(7067)
+        card = next(
+            candidate
+            for candidate in engine.state.cards.values()
+            if candidate.oracle_id
+            == "883a4180-9ede-4249-a4b8-3a29c998fb63"
+            and candidate.owner == "A"
+        )
+        engine.move_card(card.object_id, "hand", reason="test setup")
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine.state.priority_player = "A"
+
+        with self.assertRaisesRegex(
+            GameRuleError,
+            "back face cannot be cast",
+        ):
+            engine._cast(
+                "A",
+                {
+                    "card": card.ref,
+                    "from": "hand",
+                    "face": "Consuming Sepulcher",
+                },
+            )
+
+    def test_siege_transformed_cast_choice_replays_exactly(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            seed=7068,
+        )
+        keep_all(session)
+        engine = session.engine
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        siege = self.transforming_siege(engine)
+        engine._change_permanent_counter(siege, "defense", -1)
+        self.assertFalse(engine._stabilize())
+        engine._prepare_stack_resolution()
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "cast",
+                "reason": "Cast the defeated Siege transformed.",
+                "plan": "RULES_CHOICE",
+            },
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("stack", siege.zone)
+        self.assertEqual("Consuming Sepulcher", siege.active_face)
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "siege-cast-record"
+            session.save(record_dir)
+            replay = replay_record(
+                record_dir,
+                self.db,
+                verify=True,
+            )
+        self.assertTrue(replay["ok"], replay)
 
     def test_departed_combat_source_deals_no_damage(self):
         engine = self.make_engine(7062)

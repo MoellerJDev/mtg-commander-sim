@@ -305,8 +305,24 @@ def validate_rule_conformance(
                         f"{prefix} references unknown traceability tests: "
                         + ", ".join(unknown_tests)
                     )
-        if status in {"blocked", "skipped"} and not blockers:
-            errors.append(f"{prefix} is {status} without a recorded reason")
+        if status in {"blocked", "skipped"}:
+            if not reviewed:
+                errors.append(
+                    f"{prefix} is {status} without completed review"
+                )
+            if not blockers:
+                errors.append(
+                    f"{prefix} is {status} without a recorded reason"
+                )
+            if known_test_ids is not None and test_ids:
+                unknown_tests = sorted(
+                    set(test_ids) - known_test_ids
+                )
+                if unknown_tests:
+                    errors.append(
+                        f"{prefix} references unknown reviewed tests: "
+                        + ", ".join(unknown_tests)
+                    )
     return errors
 
 

@@ -11,6 +11,8 @@ coverage.
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Branch: `agent/rules-completeness`
+- Stacked draft PR:
+  `https://github.com/MoellerJDev/mtg-commander-sim/pull/1`
 - Rules-program base: `d099fe4`
 - Continuation start: `6517dc0`
 - Package version: `0.8.0`
@@ -30,7 +32,7 @@ coverage.
 | Object and zone identity | Partial | CR 400 logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, and selected linked-effect guards |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
 | Replacement/prevention ordering | Partial | CR 616 typed ordering primitive; event-producer integration incomplete |
-| Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, copied defense, Siege protector/combat routing, and fail-closed defeated-trigger boundary |
+| Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, copied defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
@@ -61,7 +63,8 @@ coverage.
   enforcement, including overlap with opposing-counter removal.
 - [x] Added partial CR 120/210/310 and CR 704.5v/w/x Battle behavior:
   copied/entry defense, typed damage results, exact-incarnation defeated
-  triggers, replayable Siege protector choices, and protector-aware combat.
+  triggers, replayable Siege protector and transformed-cast choices, and
+  protector-aware combat.
 - [x] Added a versioned conformance case and generated source-linkage test for
   all 3,300 pinned rule IDs, with separate semantic, failing, blocked,
   skipped, definition-only, unreviewed, and inventory-only reporting.
@@ -83,9 +86,13 @@ being-attacked exception. Removing the last defense counter queues the
 intrinsic Siege trigger with the source's exact logical incarnation. A trigger
 from an old incarnation does not prevent the zero-defense state action.
 
-Native Siege trigger resolution remains deliberately unavailable: the engine
-issues `arbiter.resolve` instead of guessing the exile and optional transformed
-free cast. The two Control Point previews in the July 28 Oracle corpus are
+Native Siege trigger resolution exiles the exact source incarnation and gives
+its controller a replayable choice to cast the transformed face without paying
+its mana cost or decline. Tokens cease after exile, an object that left and
+returned is not followed, and an ordinary cast cannot select a transforming
+card's back face. A compiled target schema is projected for a transformed
+instant or sorcery; unresolved mandatory target grammar stops for arbitration.
+The two Control Point previews in the July 28 Oracle corpus are
 not-yet-Commander-legal and postdate the June 19 CR snapshot, so their
 protector rules fail closed.
 
@@ -162,8 +169,9 @@ Outstanding blockers include:
 - maximum-counter wording outside the reviewed numeric self-restriction
   sentence family;
 - Sagas, dungeons, space sculptor, Roles, and speed;
-- native Siege transformed-cast resolution, Battle type/control changes
-  during combat, and future Battle-subtype protector predicates;
+- complete exile-replacement ordering and transformed cast grammar outside
+  compiled cost/target schemas, Battle type/control changes during combat,
+  and future Battle-subtype protector predicates;
 - Aura attachment to players and complete enchant-quality grammar;
 - regeneration;
 - one simultaneous replaceable event spanning every player loss and permanent
@@ -171,7 +179,7 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,690 unit/integration tests pass: 390 ordinary tests plus 3,300 generated
+- 3,698 unit/integration tests pass: 398 ordinary tests plus 3,300 generated
   inventory/source-linkage tests. The latter are not semantic passes.
 - Fifteen focused object/token tests cover monotonic incarnations, draws,
   timestamp moments, identity-sensitive targets and delayed links, private
@@ -180,13 +188,14 @@ Outstanding blockers include:
 - Eight focused copy-object tests cover serialized spell/card copies,
   counter/destination timing, card-versus-noncard targeting, same-object
   permanent resolution, projection privacy, and exact replay.
-- Thirty-five focused CR 120/210/310/704 tests cover positive, negative,
+- Forty-two focused CR 120/210/310/704 tests cover positive, negative,
   fixed-point, order-mutation, shared pre-action LKI,
   attachment/protection, counters, maximum-counter
   extraction/overlap/replay, sequential and simultaneous World behavior,
   defense entry/copy/damage, Battle-creature combat restrictions,
-  exact-incarnation triggers, protector choice/repair, projection, arbiter
-  pause, contract pinning, and two command-replay paths.
+  exact-incarnation triggers, protector choice/repair, projection, native
+  transformed casting, decline/token/changed-object behavior, compiled and
+  unresolved targets, contract pinning, and three command-replay paths.
 - Exact Zimone closure: 27 tests pass.
 - Exact Mishra closure: 23 tests pass.
 - The seed-20260730 regression reaches its corrected main-phase opportunities,
@@ -194,7 +203,8 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only; semantic passes remain 0.
+  establish inventory linkage only. CR 310.11b is reviewed but blocked, the
+  other 3,299 cases are unreviewed, and semantic passes remain 0.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
 final push evidence are recorded in `OVERNIGHT_HANDOFF.md` after the complete
@@ -204,8 +214,8 @@ checkpoint validation.
 
 1. Review and promote conformance cases by dependency-ordered rules family;
    keep exposed but unimplemented edge cases failing or blocked.
-2. Implement native Siege defeated-trigger exile and optional transformed
-   casting as a replayable resolution continuation.
+2. Complete CR 310.11b replacement ordering and cast grammar outside compiled
+   cost/target schemas, then re-evaluate its blocked status.
 3. Replace remaining physical-reference links with typed incarnation/LKI
    handles and implement the remaining CR 400.7 continuation policies.
 4. Implement the remaining ordinary CR 704.5 specialized permanent/layout

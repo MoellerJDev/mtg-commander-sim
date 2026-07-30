@@ -141,6 +141,35 @@ class RuleConformanceTests(unittest.TestCase):
             errors,
         )
 
+    def test_blocked_case_requires_review_and_real_test_evidence(self):
+        corpus = build_rule_conformance(self.rule_index)
+        case = corpus["cases"][1]
+        case.update(
+            {
+                "classification": "behavioral",
+                "status": "blocked",
+                "assertion_kind": "unsupported_fail_closed",
+                "reviewed": False,
+                "executable_test_ids": [
+                    "tests.missing.Case.test_rule"
+                ],
+                "blockers": ["missing_generic_semantics"],
+            }
+        )
+        errors = validate_rule_conformance(
+            corpus,
+            self.rule_index,
+            known_test_ids=set(),
+        )
+        self.assertTrue(
+            any("without completed review" in error for error in errors),
+            errors,
+        )
+        self.assertTrue(
+            any("unknown reviewed tests" in error for error in errors),
+            errors,
+        )
+
     def test_test_id_discovery_uses_fully_qualified_static_methods(self):
         discovered = discover_unittest_ids(
             Path(__file__).resolve().parents[1]
