@@ -358,6 +358,19 @@ class CodexCliArenaRunnerTests(unittest.TestCase):
         self.assertIn('shape "ref_array"', decision_prompt)
         self.assertIn("never the display objects", decision_prompt)
         self.assertIn("legal_refs always means raw ref strings", decision_prompt)
+        self.assertIn(
+            '{"modes":["MODE"],"targets":{"GROUP_ID":["REF"]}}',
+            decision_prompt,
+        )
+        self.assertIn(
+            "top-level legal_refs is a union across modes",
+            decision_prompt,
+        )
+        self.assertIn('Never use a singular "mode" field', decision_prompt)
+        self.assertIn(
+            "rebuild choices_json from the current schema",
+            decision_prompt,
+        )
         value = CodexCliArenaRunner.normalize_response(
             stable_json(
                 {

@@ -237,7 +237,21 @@ registry, and the final hash must match the saved checkpoint. The manifest
 records the verified command count and `verified_prefix_suffix` strategy.
 Full-from-initial replay remains available for final/manual verification, while
 the transitive proof chain keeps routine checkpoints bounded. The full
-284-test suite passes.
+285-test suite passes.
+
+Fresh seed `20260747` proved the bounded replay path in a live arena: the first
+20-command checkpoint passed a full replay, the next 20-command checkpoint
+verified only commands 21 through 40 from the prior state hash, all four
+provider/model identities and persistent thread IDs remained verified, the
+hidden-information audit passed, and suppressed meaningful windows stayed at
+zero. The continuation stopped when seat D exhausted three retries for
+Abrade. The pilot selected the damage mode but reused a ref that appeared only
+in the top-level cross-mode union and was legal only for the destroy mode. The
+engine correctly rejected every invalid payload. The generic pilot contract
+now requires the plural `modes` field and targets drawn only from the selected
+`mode_schemas` entry, and tells a retry to rebuild choices rather than preserve
+a rejected shape or target. This run is infrastructure/pilot-contract evidence
+only and does not count toward the qualifying streak.
 
 ## GitHub finalization
 
@@ -251,11 +265,11 @@ the transitive proof chain keeps routine checkpoints bounded. The full
 
 ## Next work
 
-Commit the explicit private-search ref-array contract, then restart fresh
-natural trusted-only four-player games through `arena-codex-run`. Stop and fix
-any runtime semantic or fidelity defect, and count only three consecutive
-natural games passing every `deck_operation_evidence` gate. Implement
-`review-batch` and linked per-deck operation reports after qualifying records
-exist. After the review-MVP draft PR exists, rules-corpus work moves to
-`agent/rules-completeness` and a stacked draft PR; it does not broaden this
+Restart fresh natural trusted-only four-player games through
+`arena-codex-run`. Stop and fix any runtime semantic or fidelity defect, and
+count only three consecutive natural games passing every
+`deck_operation_evidence` gate. Implement `review-batch` and linked per-deck
+operation reports after qualifying records exist. After the review-MVP draft
+PR exists, rules-corpus work moves to `agent/rules-completeness` and a stacked
+draft PR; it does not broaden this
 feature branch.

@@ -789,6 +789,14 @@ class CodexCliArenaRunner:
             "More generally, legal_refs always means raw ref strings: use one "
             "string for a singular field and an array of strings for plural "
             "fields such as cards, objects, targets, or search_cards. "
+            "For a modal target_schema, choices_json must use "
+            '{"modes":["MODE"],"targets":{"GROUP_ID":["REF"]}}. '
+            "Use only group IDs and legal_refs inside the selected entry of "
+            "mode_schemas; the top-level legal_refs is a union across modes "
+            "and does not make a ref legal for every mode. Never use a "
+            'singular "mode" field. On retry, rebuild choices_json from the '
+            "current schema instead of preserving a rejected target or "
+            "choice shape. "
             "Include a plan category, reason under 180 "
             "characters, confidence, yield (normally null), and bounded "
             "memory_update. Follow realistic Commander mulligans without "
