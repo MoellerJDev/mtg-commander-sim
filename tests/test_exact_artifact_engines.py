@@ -542,6 +542,42 @@ class ExactArtifactEngineTests(unittest.TestCase):
         self.assertIn("Haste", keywords)
         self.assertIn("Shroud", keywords)
 
+    def test_equip_resolves_without_effect_after_equipment_leaves(self):
+        session = self.make_session(9101)
+        engine = session.engine
+        greaves = self.card(engine, "A", "Lightning Greaves")
+        mishra = self.card(engine, "A", "Mishra, Eminent One")
+        engine.move_card(greaves.object_id, "battlefield", controller="A")
+        engine.move_card(mishra.object_id, "battlefield", controller="A")
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine.state.priority_player = "A"
+        engine._activate(
+            "A",
+            {
+                "source": greaves.ref,
+                "ability": "ab2",
+                "targets": [mishra.ref],
+            },
+        )
+
+        engine.move_card(greaves.object_id, "graveyard")
+        self.resolve_top(engine)
+
+        self.assertEqual("graveyard", greaves.zone)
+        self.assertIsNone(greaves.attached_to)
+        self.assertNotIn(greaves.object_id, mishra.attachments)
+        self.assertFalse(engine.state.stack)
+        self.assertTrue(
+            any(
+                event.code == "attachment.no_effect"
+                and event.details.get("result")
+                == "equipment_not_on_battlefield"
+                for event in engine.state.events
+            )
+        )
+
     def test_skullclamp_modifier_and_attached_death_draw(self):
         session = self.make_session(911)
         engine = session.engine

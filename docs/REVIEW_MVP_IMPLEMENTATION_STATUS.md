@@ -208,6 +208,18 @@ generically that `legal_refs` always means raw ref strings. The private-search
 transaction/replay regression and the full 282-test suite pass. This stopped
 run is not evidence.
 
+Fresh seed `20260745` reached 288 accepted replay-verified commands with four
+stable Codex pilot sessions and zero suppressed meaningful windows before
+exposing an equip-resolution defect. Skullclamp left the battlefield while its
+equip ability was on the stack; the engine then rejected every later pass
+while trying to find the former source on the battlefield. An activated
+ability is independent of its source once activated, so an attach instruction
+now resolves without effect when its Equipment (or its attachment object in a
+non-targeted instruction) is no longer on the battlefield. The exact
+source-leaves-before-resolution case is covered by a regression, and the full
+283-test suite passes. This stopped run is infrastructure evidence only and
+does not count toward the qualifying streak.
+
 ## GitHub finalization
 
 - [ ] Full branch security/large-file audit

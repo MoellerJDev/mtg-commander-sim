@@ -14831,16 +14831,62 @@ class CommanderEngine:
             )
             return creature.ref
         if op == "attach":
-            equipment = self._resolve_object(
-                actor,
-                str(effect.get("equipment") or effect.get("source")),
-                zones={"battlefield"},
+            equipment_value = str(
+                effect.get("equipment") or effect.get("source")
             )
-            creature = self._resolve_object(
-                actor,
-                str(effect["creature"]),
-                zones={"battlefield"},
-            )
+            creature_value = str(effect["creature"])
+
+            def attachment_object(value: str) -> CardInstance:
+                identity_matches = [
+                    card
+                    for card in self.state.cards.values()
+                    if card.object_id == value
+                    or card.ref.casefold() == value.casefold()
+                ]
+                if len(identity_matches) == 1:
+                    return identity_matches[0]
+                return self._resolve_object(
+                    actor,
+                    value,
+                    zones={"battlefield"},
+                )
+
+            equipment = attachment_object(equipment_value)
+            if equipment.zone != "battlefield":
+                self._log(
+                    actor,
+                    "attachment.no_effect",
+                    (
+                        f"{equipment.ref} could not become attached because "
+                        "it was no longer on the battlefield."
+                    ),
+                    {
+                        "equipment": equipment.ref,
+                        "creature": creature_value,
+                        "reason": reason,
+                        "result": "equipment_not_on_battlefield",
+                    },
+                    importance=2,
+                )
+                return None
+            creature = attachment_object(creature_value)
+            if creature.zone != "battlefield":
+                self._log(
+                    actor,
+                    "attachment.no_effect",
+                    (
+                        f"{equipment.ref} could not become attached because "
+                        f"{creature.ref} was no longer on the battlefield."
+                    ),
+                    {
+                        "equipment": equipment.ref,
+                        "creature": creature.ref,
+                        "reason": reason,
+                        "result": "creature_not_on_battlefield",
+                    },
+                    importance=2,
+                )
+                return None
             equipment_types, equipment_subtypes, _ = self._type_parts(
                 str(
                     self._effective_card_data(equipment).get("type_line")
