@@ -4276,7 +4276,7 @@ class CommanderEngine:
         validated_targets, target_groups = self._validate_semantic_targets(
             seat,
             program,
-            list(response.get("targets") or []),
+            self._normalize_target_submission(response.get("targets")),
             modes=selected_modes,
             source_ref=card.ref,
             target_schema=target_schema_override,
@@ -5176,7 +5176,7 @@ class CommanderEngine:
         validated_targets, target_groups = self._validate_semantic_targets(
             seat,
             target_program,
-            list(response.get("targets") or []),
+            self._normalize_target_submission(response.get("targets")),
             modes=selected_modes,
             source_ref=source.ref,
             target_schema=target_schema_override,
@@ -8628,6 +8628,47 @@ class CommanderEngine:
         return result
 
     @staticmethod
+    def _normalize_target_submission(targets: Any) -> list[Any]:
+        """Normalize flat refs or a typed group map for target validation."""
+
+        if targets is None:
+            return []
+        if isinstance(targets, Mapping):
+            normalized: list[dict[str, str]] = []
+            for group_id, raw_refs in targets.items():
+                if isinstance(raw_refs, str):
+                    refs: Sequence[Any] = [raw_refs]
+                elif isinstance(raw_refs, Sequence) and not isinstance(
+                    raw_refs,
+                    (str, bytes, bytearray),
+                ):
+                    refs = raw_refs
+                else:
+                    raise GameRuleError(
+                        "Target group values must be a ref or an array of refs"
+                    )
+                for ref in refs:
+                    if isinstance(ref, Mapping) or ref is None:
+                        raise GameRuleError(
+                            "Target group values must contain only refs"
+                        )
+                    normalized.append(
+                        {
+                            "group": str(group_id),
+                            "ref": str(ref),
+                        }
+                    )
+            return normalized
+        if isinstance(targets, Sequence) and not isinstance(
+            targets,
+            (str, bytes, bytearray),
+        ):
+            return list(targets)
+        raise GameRuleError(
+            "Targets must be an array of refs or a group-to-refs object"
+        )
+
+    @staticmethod
     def _group_target_submission(
         plan: TargetPlan,
         targets: Sequence[Any],
@@ -9340,9 +9381,15 @@ class CommanderEngine:
         target_schema = template.get("target_schema")
         copies: list[StackItem] = []
         for index, raw_targets in enumerate(submitted):
-            selected = [
-                str(value) for value in (raw_targets or [])
-            ]
+            normalized = self._normalize_target_submission(raw_targets)
+            selected = (
+                [str(value) for value in normalized]
+                if all(
+                    not isinstance(value, Mapping)
+                    for value in normalized
+                )
+                else []
+            )
             defaults = [
                 str(value)
                 for value in template.get("targets") or []
@@ -9355,7 +9402,7 @@ class CommanderEngine:
                 selected, grouped = self._validate_semantic_targets(
                     seat,
                     program,
-                    selected,
+                    normalized,
                     modes=list(template.get("modes") or []),
                     source_ref=trigger.ref,
                     target_schema=(
@@ -9530,7 +9577,9 @@ class CommanderEngine:
         if item is None:
             raise GameRuleError("The targeted semantic object is no longer on the stack")
         program = self.semantics.get(item.semantic_key)
-        targets = list(response.get("targets") or [])
+        targets = self._normalize_target_submission(
+            response.get("targets")
+        )
         modes = [str(value) for value in response.get("modes") or []]
         validated, grouped = self._validate_semantic_targets(
             seat,
@@ -11707,7 +11756,7 @@ class CommanderEngine:
                 selected, grouped = self._validate_semantic_targets(
                     seat,
                     target_program,
-                    list(submitted or []),
+                    self._normalize_target_submission(submitted),
                     modes=list(target_item.modes),
                     source_ref=self._stack_source_ref(target_item),
                     target_schema=dict(
@@ -11754,7 +11803,7 @@ class CommanderEngine:
                 selected, grouped = self._validate_semantic_targets(
                     target_item.controller,
                     target_program,
-                    list(submitted or []),
+                    self._normalize_target_submission(submitted),
                     modes=list(target_item.modes),
                     source_ref=self._stack_source_ref(target_item),
                     target_schema=dict(

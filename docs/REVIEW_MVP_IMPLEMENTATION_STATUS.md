@@ -253,6 +253,20 @@ now requires the plural `modes` field and targets drawn only from the selected
 a rejected shape or target. This run is infrastructure/pilot-contract evidence
 only and does not count toward the qualifying streak.
 
+Fresh seed `20260748` reached 57 accepted commands with exact prefix/suffix
+replay, four stable verified sessions, and zero suppressed meaningful windows
+before exposing a target-submission normalization defect. Loki's Scepter
+published a correct single-group target schema and three legal creature refs,
+but the pilot returned the typed form
+`{"targets":{"target_0":["REF"]}}`. The semantic continuation converted the
+mapping to `["target_0"]`, so it rejected refs that the same task had advertised
+as legal. Target input is now normalized centrally: a flat ref array and a
+group-to-ref-array object both become the engine's grouped target sequence.
+The common path covers casting, activation, trigger target selection, storm
+copies, stack copies, and retargeting. The exact Loki's Scepter regression and
+the targeting suite pass. This stopped run is infrastructure evidence only and
+does not count toward the qualifying streak.
+
 ## GitHub finalization
 
 - [ ] Full branch security/large-file audit

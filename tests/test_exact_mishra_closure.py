@@ -166,7 +166,7 @@ class ExactMishraClosureTests(unittest.TestCase):
             "pilot:A",
             {
                 "action_id": "choose",
-                "targets": [victim.ref],
+                "targets": {"target_0": [victim.ref]},
                 "plan": "TEMPORARY_THEFT",
                 "reason": "Take the opposing creature for the turn.",
             },
