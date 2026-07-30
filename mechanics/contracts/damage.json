@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "cr-120-damage",
   "official_name": "Damage",
   "effective_date": "2026-06-19",
@@ -14,12 +14,24 @@
     "120.2b",
     "120.3",
     "120.3a",
+    "120.3b",
     "120.3c",
+    "120.3d",
     "120.3e",
+    "120.3f",
+    "120.3g",
     "120.3h",
     "120.4",
+    "120.4a",
+    "120.4b",
+    "120.4c",
+    "120.4d",
     "120.5",
-    "120.8"
+    "120.6",
+    "120.7",
+    "120.8",
+    "120.9",
+    "120.10"
   ],
   "glossary_references": [
     "Damage"
@@ -49,7 +61,9 @@
     "events": [
       "combat damage assignment",
       "represented spell or ability damage",
-      "damage-result processing"
+      "damage-result processing",
+      "zero damage is suppressed before a damage event exists",
+      "negative damage amounts fail closed"
     ],
     "state_reads": [
       "source and recipient characteristics",
@@ -68,7 +82,9 @@
     "costs": [],
     "timing": [
       "simple combat assignments are applied as one batch before state-based actions",
-      "semantic damage is processed during the resolving effect"
+      "semantic damage is processed during the resolving effect",
+      "damage results do not destroy a permanent before state-based actions",
+      "marked damage persists through loss of creature type until cleanup"
     ],
     "targets": [
       "represented permanent damage rejects recipients that are not creatures, planeswalkers, or battles",
@@ -123,20 +139,29 @@
     "Invasion of Gobakhan 2023-04-14: damage to a battle removes that many defense counters"
   ],
   "test_ids": [
+    "test_damage_contract_traces_every_cr_120_rule",
+    "test_damage_rejects_nondamageable_permanent",
+    "test_zero_damage_creates_no_results_or_damage_event",
+    "test_negative_damage_fails_closed",
+    "test_negative_power_combat_source_assigns_zero_damage",
+    "test_damage_results_do_not_destroy_before_state_actions",
+    "test_damage_to_multityped_permanent_applies_every_result",
+    "test_marked_damage_survives_type_loss_until_cleanup",
     "test_battle_damage_removes_defense_instead_of_marking_damage",
+    "test_damage_to_battle_creature_applies_both_results",
     "test_planeswalker_damage_removes_loyalty_counters",
     "test_departed_combat_source_deals_no_damage",
     "test_battle_damage_and_state_action_replay_exactly"
   ],
   "implementation": {
     "component": "CommanderEngine._apply_damage_results_to_permanent and CommanderEngine._apply_combat_assignments",
-    "version": "damage-results-v2"
+    "version": "damage-results-v3"
   },
   "known_blockers": [
     "the complete CR 120.4 damage-event pipeline, excess damage, replacement, and prevention ordering are not implemented",
     "infect, wither, lifelink, toxic, and all source-result combinations are not implemented generically",
-    "zero-damage event suppression and damage-trigger generation are not complete",
-    "combat assignment order, first strike, double strike, and trample remain incomplete"
+    "damage-trigger generation and source-specific event correlation are not complete",
+    "combat assignment order, first strike, double strike, trample, regeneration, and damage-source selection remain incomplete"
   ],
   "review_status": "reviewed"
 }

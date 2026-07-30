@@ -34,8 +34,8 @@
     {
       "mechanic_id": "cr-120-damage",
       "path": "mechanics/contracts/damage.json",
-      "sha256": "92a638046eb0de057424575a226bf3d674943c3fd901ea9cd507e5810b25aa50",
-      "version": 1
+      "sha256": "dc73fe9e4c881139f07a08eb6411b815f7b0a2ee31d5ff23facd09d450a8ec79",
+      "version": 2
     },
     {
       "mechanic_id": "deathtouch",
@@ -5175,18 +5175,18 @@
     {
       "category": "game_concepts",
       "contract_path": "mechanics/contracts/damage.json",
-      "contract_sha256": "92a638046eb0de057424575a226bf3d674943c3fd901ea9cd507e5810b25aa50",
-      "contract_version": 1,
+      "contract_sha256": "dc73fe9e4c881139f07a08eb6411b815f7b0a2ee31d5ff23facd09d450a8ec79",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "CommanderEngine._apply_damage_results_to_permanent and CommanderEngine._apply_combat_assignments",
-      "implementation_version": "damage-results-v2",
+      "implementation_version": "damage-results-v3",
       "kind": "rules_section",
       "known_blockers": [
         "the complete CR 120.4 damage-event pipeline, excess damage, replacement, and prevention ordering are not implemented",
         "infect, wither, lifelink, toxic, and all source-result combinations are not implemented generically",
-        "zero-damage event suppression and damage-trigger generation are not complete",
-        "combat assignment order, first strike, double strike, and trample remain incomplete"
+        "damage-trigger generation and source-specific event correlation are not complete",
+        "combat assignment order, first strike, double strike, trample, regeneration, and damage-source selection remain incomplete"
       ],
       "mechanic_id": "cr-120-damage",
       "official_name": "Damage",
@@ -5194,7 +5194,16 @@
         "120"
       ],
       "test_ids": [
+        "test_damage_contract_traces_every_cr_120_rule",
+        "test_damage_rejects_nondamageable_permanent",
+        "test_zero_damage_creates_no_results_or_damage_event",
+        "test_negative_damage_fails_closed",
+        "test_negative_power_combat_source_assigns_zero_damage",
+        "test_damage_results_do_not_destroy_before_state_actions",
+        "test_damage_to_multityped_permanent_applies_every_result",
+        "test_marked_damage_survives_type_loss_until_cleanup",
         "test_battle_damage_removes_defense_instead_of_marking_damage",
+        "test_damage_to_battle_creature_applies_both_results",
         "test_planeswalker_damage_removes_loyalty_counters",
         "test_departed_combat_source_deals_no_damage",
         "test_battle_damage_and_state_action_replay_exactly"

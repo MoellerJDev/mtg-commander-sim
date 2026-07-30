@@ -160,6 +160,51 @@ class StateBasedActionPrimitiveTests(unittest.TestCase):
             },
         )
 
+    def test_damage_contract_traces_every_cr_120_rule(self):
+        root = Path(__file__).resolve().parents[1]
+        contract = json.loads(
+            (
+                root / "mechanics" / "contracts" / "damage.json"
+            ).read_text(encoding="utf-8")
+        )
+        expected = {
+            "120",
+            "120.1",
+            "120.1a",
+            "120.2",
+            "120.2a",
+            "120.2b",
+            "120.3",
+            "120.3a",
+            "120.3b",
+            "120.3c",
+            "120.3d",
+            "120.3e",
+            "120.3f",
+            "120.3g",
+            "120.3h",
+            "120.4",
+            "120.4a",
+            "120.4b",
+            "120.4c",
+            "120.4d",
+            "120.5",
+            "120.6",
+            "120.7",
+            "120.8",
+            "120.9",
+            "120.10",
+        }
+
+        self.assertEqual(
+            expected,
+            {
+                rule_id
+                for rule_id in contract["rule_references"]
+                if str(rule_id).startswith("120")
+            },
+        )
+
     def test_snapshot_distinguishes_put_into_graveyard_from_destroy(self):
         batch = evaluate_permanent_state_based_actions(
             [
@@ -905,6 +950,271 @@ class StateBasedActionEngineTests(unittest.TestCase):
         self.assertEqual(2, result["defense_removed"])
         self.assertEqual(2, battle.marked_damage)
         self.assertEqual(3, battle.counters["defense"])
+
+    def test_damage_rejects_nondamageable_permanent(self):
+        engine = self.make_engine(7083)
+        artifact_ref = engine.create_token(
+            "A",
+            name="Nondamageable Relic",
+            characteristics={
+                "type_line": "Token Artifact",
+            },
+        )[0]
+        artifact = self.card(engine, artifact_ref)
+
+        with self.assertRaisesRegex(
+            GameRuleError,
+            "is not a Battle, creature, or planeswalker",
+        ):
+            engine._apply_damage_results_to_permanent(
+                artifact,
+                1,
+            )
+
+    def test_zero_damage_creates_no_results_or_damage_event(self):
+        engine = self.make_engine(7084)
+        creature_ref = engine.create_token(
+            "A",
+            name="Zero Damage Creature",
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "power": "0",
+                "toughness": "2",
+            },
+        )[0]
+        creature = self.card(engine, creature_ref)
+        creature.is_commander = True
+        before_life = engine.state.players["B"].life
+        before_events = len(engine.state.events)
+
+        result = engine._apply_damage_results_to_permanent(
+            creature,
+            0,
+            deathtouch=True,
+        )
+        engine.apply_effect(
+            {
+                "op": "damage",
+                "target": "B",
+                "amount": 0,
+            },
+            actor="A",
+        )
+        engine.apply_effect(
+            {
+                "op": "damage_each_opponent",
+                "amount": 0,
+            },
+            actor="A",
+        )
+        engine._apply_combat_assignments(
+            [
+                {
+                    "source": creature.ref,
+                    "target": "B",
+                    "amount": 0,
+                }
+            ]
+        )
+
+        self.assertEqual(
+            {"amount": 0, "types": ["creature"]},
+            result,
+        )
+        self.assertEqual(0, creature.marked_damage)
+        self.assertFalse(creature.deathtouch_damage)
+        self.assertEqual(before_life, engine.state.players["B"].life)
+        self.assertEqual(
+            {},
+            engine.state.players["B"].commander_damage_received,
+        )
+        self.assertFalse(
+            any(
+                event.code == "effect.damage"
+                for event in engine.state.events[before_events:]
+            )
+        )
+        combat_event = next(
+            event
+            for event in reversed(engine.state.events)
+            if event.code == "combat.damage"
+        )
+        self.assertEqual([], combat_event.details["assignments"])
+
+    def test_negative_damage_fails_closed(self):
+        engine = self.make_engine(7085)
+        creature_ref = engine.create_token(
+            "A",
+            name="Negative Damage Creature",
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "power": "1",
+                "toughness": "2",
+            },
+        )[0]
+        creature = self.card(engine, creature_ref)
+
+        with self.assertRaisesRegex(
+            GameRuleError,
+            "Damage cannot be negative",
+        ):
+            engine._apply_damage_results_to_permanent(
+                creature,
+                -1,
+            )
+        with self.assertRaisesRegex(
+            GameRuleError,
+            "Damage cannot be negative",
+        ):
+            engine.apply_effect(
+                {
+                    "op": "damage",
+                    "target": "B",
+                    "amount": -1,
+                },
+                actor="A",
+            )
+        with self.assertRaisesRegex(
+            GameRuleError,
+            "Damage cannot be negative",
+        ):
+            engine.apply_effect(
+                {
+                    "op": "damage_each_opponent",
+                    "amount": -1,
+                },
+                actor="A",
+            )
+        with self.assertRaisesRegex(
+            GameRuleError,
+            "Damage cannot be negative",
+        ):
+            engine._apply_combat_assignments(
+                [
+                    {
+                        "source": creature.ref,
+                        "target": "B",
+                        "amount": -1,
+                    }
+                ]
+            )
+
+    def test_negative_power_combat_source_assigns_zero_damage(self):
+        engine = self.make_engine(7088)
+        creature_ref = engine.create_token(
+            "A",
+            name="Negative Power Attacker",
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "power": "-1",
+                "toughness": "2",
+            },
+        )[0]
+        creature = self.card(engine, creature_ref)
+        engine.state.active_player = "A"
+        engine.state.combat.attackers[creature.object_id] = "B"
+        before_life = engine.state.players["B"].life
+
+        engine._begin_combat_damage()
+
+        self.assertEqual(before_life, engine.state.players["B"].life)
+        self.assertEqual(
+            [
+                {
+                    "source": creature.ref,
+                    "target": "B",
+                    "amount": 0,
+                }
+            ],
+            engine.state.combat.damage_assignments,
+        )
+        combat_event = next(
+            event
+            for event in reversed(engine.state.events)
+            if event.code == "combat.damage"
+        )
+        self.assertEqual([], combat_event.details["assignments"])
+
+    def test_damage_results_do_not_destroy_before_state_actions(self):
+        engine = self.make_engine(7086)
+        creature_ref = engine.create_token(
+            "A",
+            name="Lethally Damaged Creature",
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "power": "2",
+                "toughness": "2",
+            },
+        )[0]
+        creature = self.card(engine, creature_ref)
+
+        engine._apply_damage_results_to_permanent(
+            creature,
+            2,
+        )
+
+        self.assertEqual("battlefield", creature.zone)
+        self.assertEqual(2, creature.marked_damage)
+        self.assertFalse(engine._stabilize())
+        self.assertEqual("outside", creature.zone)
+
+    def test_damage_to_multityped_permanent_applies_every_result(self):
+        engine = self.make_engine(7089)
+        permanent_ref = engine.create_token(
+            "A",
+            name="Every Damageable Type",
+            battle_protector="B",
+            characteristics={
+                "type_line": (
+                    "Token Creature Planeswalker Battle — Siege"
+                ),
+                "power": "3",
+                "toughness": "4",
+                "loyalty": "5",
+                "defense": "6",
+            },
+        )[0]
+        permanent = self.card(engine, permanent_ref)
+
+        result = engine._apply_damage_results_to_permanent(
+            permanent,
+            2,
+        )
+
+        self.assertEqual(2, result["marked_damage"])
+        self.assertEqual(2, result["loyalty_removed"])
+        self.assertEqual(2, result["defense_removed"])
+        self.assertEqual(2, permanent.marked_damage)
+        self.assertEqual(3, permanent.counters["loyalty"])
+        self.assertEqual(4, permanent.counters["defense"])
+
+    def test_marked_damage_survives_type_loss_until_cleanup(self):
+        engine = self.make_engine(7087)
+        creature_ref = engine.create_token(
+            "A",
+            name="Temporarily Animated Relic",
+            characteristics={
+                "type_line": "Token Creature — Construct",
+                "power": "3",
+                "toughness": "4",
+            },
+        )[0]
+        creature = self.card(engine, creature_ref)
+        engine._apply_damage_results_to_permanent(
+            creature,
+            2,
+        )
+        creature.annotations["copy_overrides"] = {
+            "name": "Dormant Relic",
+            "type_line": "Artifact",
+        }
+
+        self.assertFalse(engine._stabilize())
+        self.assertEqual(2, creature.marked_damage)
+
+        engine._finish_cleanup()
+
+        self.assertEqual(0, creature.marked_damage)
 
     def test_planeswalker_damage_removes_loyalty_counters(self):
         engine = self.make_engine(7061)

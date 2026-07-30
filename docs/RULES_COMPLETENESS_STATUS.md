@@ -36,7 +36,7 @@ coverage.
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; all CR 210/310 cases are reviewed, with 5 semantic passes, 14 blocked cases, and 7 definition-only cases |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; all CR 120/210/310 cases are reviewed, with 10 semantic passes, 33 blocked cases, and 9 definition-only cases |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -76,6 +76,9 @@ coverage.
 - [x] Reviewed both CR 210 Defense cases, including fail-closed tests for
   absent, malformed, and negative printed defense; 210.1 remains blocked on
   replacement ordering and broader face/copy interactions.
+- [x] Reviewed all 26 CR 120 Damage cases, fixed zero/negative damage
+  boundaries, and recorded the unresolved source-keyword, replacement,
+  prevention, excess, trigger, regeneration, and advanced-combat families.
 
 ## Current CR 120/210/310/704 Battle slice
 
@@ -87,6 +90,12 @@ defense-counter count. A Battle entering as itself or as a copy initializes
 from printed entry characteristics rather than copying the source permanent's
 current counters. Damage marks a creature, removes planeswalker loyalty, and
 removes Battle defense for every applicable type on a multi-typed permanent.
+Negative damage fails closed. A source with negative power assigns zero combat
+damage, and zero is suppressed before life, counters, marked damage,
+commander attribution, or a damage event can occur. Damage results do not
+destroy or move a permanent directly; the subsequent immutable state-action
+batch does that work. Marked damage survives loss of creature type and clears
+at cleanup.
 
 For the pinned rules snapshot, a Siege chooses an opponent as protector while
 the spell resolves. Every player other than the protector may attack it; only
@@ -194,7 +203,7 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,710 unit/integration tests pass: 410 ordinary tests plus 3,300 generated
+- 3,718 unit/integration tests pass: 418 ordinary tests plus 3,300 generated
   inventory/source-linkage tests. The latter are not semantic passes.
 - Fifteen focused object/token tests cover monotonic incarnations, draws,
   timestamp moments, identity-sensitive targets and delayed links, private
@@ -203,7 +212,7 @@ Outstanding blockers include:
 - Eight focused copy-object tests cover serialized spell/card copies,
   counter/destination timing, card-versus-noncard targeting, same-object
   permanent resolution, projection privacy, and exact replay.
-- Fifty-two focused CR 120/210/310/704 tests cover positive, negative,
+- Sixty focused CR 120/210/310/704 tests cover positive, negative,
   fixed-point, order-mutation, shared pre-action LKI,
   attachment/protection, counters, maximum-counter
   extraction/overlap/replay, sequential and simultaneous World behavior,
@@ -219,9 +228,10 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 26 CR 210/310 cases are
-  source-reviewed: 5 pass with executable engine evidence, 14 remain blocked,
-  and 7 are definition-only. The other 3,274 cases remain unreviewed.
+  establish inventory linkage only. All 52 CR 120/210/310 cases are
+  source-reviewed: 10 pass with executable engine evidence, 33 remain
+  blocked, and 9 are definition-only. The other 3,248 cases remain
+  unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
 final push evidence are recorded in `OVERNIGHT_HANDOFF.md` after the complete
@@ -232,9 +242,9 @@ checkpoint validation.
 1. Continue reviewing and promoting conformance cases by
    dependency-ordered rules family; keep exposed but unimplemented edge cases
    failing or blocked.
-2. Complete the blocked CR 310 dependencies, beginning with 310.11b
-   replacement ordering and cast grammar outside compiled
-   cost/target schemas, then re-evaluate its blocked status.
+2. Complete the shared CR 120/310 replacement and prevention event pipeline,
+   then re-evaluate the blocked damage sequence and 310.11b exile/cast
+   continuation.
 3. Replace remaining physical-reference links with typed incarnation/LKI
    handles and implement the remaining CR 400.7 continuation policies.
 4. Implement the remaining ordinary CR 704.5 specialized permanent/layout

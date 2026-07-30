@@ -89,6 +89,12 @@ maximum-counter foundation. It now:
   generated case file;
 - source-reviews both CR 210 Defense cases and fails closed for absent,
   malformed, or negative represented printed defense;
+- source-reviews all 26 CR 120 Damage cases, rejects negative damage, clamps
+  negative combat power to zero damage, and suppresses zero before any damage
+  result or commander attribution;
+- preserves marked damage through loss of creature type until cleanup and
+  leaves destruction or graveyard movement to the subsequent state-action
+  pass;
 - keeps inventory-only cases separate from executable semantic passes.
 
 The prior permanent snapshot behavior remains: toughness, lethal/deathtouch,
@@ -119,10 +125,10 @@ events also remain blockers.
   `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
 - Indexed rules: 3,300
 - Conformance cases: 3,300
-- Inventory-only cases: 3,274
-- Reviewed blocked cases: 14
-- Reviewed definition-only cases: 7
-- Executable semantic passes: 5
+- Inventory-only cases: 3,248
+- Reviewed blocked cases: 33
+- Reviewed definition-only cases: 9
+- Executable semantic passes: 10
 - Indexed sections: 156
 - Glossary entries: 733
 - Discovered mechanics: 425
@@ -139,12 +145,12 @@ events also remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 3,710 passed
-- Noninventory unit/integration tests: 410 passed
+- Unit/integration tests: 3,718 passed
+- Noninventory unit/integration tests: 418 passed
 - Generated per-rule inventory/source-linkage tests: 3,300 passed
 - Focused object identity/token lifecycle tests: 15 passed
 - Focused copy-object lifecycle tests: 8 passed
-- Focused CR 120/210/310/704 tests: 52 passed
+- Focused CR 120/210/310/704 tests: 60 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
 - Seed-20260730 hidden-information audit: pass
@@ -164,7 +170,7 @@ events also remain blockers.
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `ce758c2c84c66f6a26fe640201efce6156b2cd95c89c177301ee3d12097f67fb`
+  `72165f6aa770ac798026d3609ef9bf0432874fa99b7fd9c5eb2da0cf4d2f9ec0`
 
 ## Deck-review evidence state
 
@@ -196,9 +202,9 @@ from scaffold to its first complete family review:
    inventory/source-linkage test;
 2. source-pinned family overlays are authoritative and fail closed when their
    source or rule-text hashes change;
-3. all 24 CR 310 cases and both CR 210 cases are reviewed: 5 narrow
-   rules pass with executable evidence, 14 expose recorded dependency gaps,
-   and 7 are definition-only;
+3. all CR 120/210/310 cases are reviewed: 10 narrow rules pass with
+   executable evidence, 33 expose recorded dependency gaps, and 9 are
+   definition-only;
 4. CR 310.11b remains blocked after adding its native replayable Siege
    continuation because replacement ordering and broader cast grammar are
    incomplete;

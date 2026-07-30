@@ -15845,7 +15845,10 @@ class CommanderEngine:
         if self._combat_is_simple():
             assignments: list[dict[str, Any]] = []
             for attacker_id, defender in self.state.combat.attackers.items():
-                power = self._numeric_stat(attacker_id, "power")
+                power = max(
+                    0,
+                    self._numeric_stat(attacker_id, "power"),
+                )
                 blockers = self.state.combat.blockers.get(attacker_id, [])
                 if not blockers:
                     assignments.append({"source": self.state.cards[attacker_id].ref, "target": defender, "amount": power})
@@ -15887,11 +15890,19 @@ class CommanderEngine:
     def _apply_combat_assignments(self, assignments: Sequence[Mapping[str, Any]]) -> None:
         changed_objects: list[str] = []
         changed_players: list[str] = []
+        dealt_assignments: list[dict[str, Any]] = []
         for assignment in assignments:
             source = next((card for card in self.state.cards.values() if card.ref == str(assignment["source"])), None)
             if source is None:
                 raise GameRuleError(f"Unknown damage source {assignment['source']}")
             amount = int(assignment.get("amount", 0))
+            if amount < 0:
+                raise GameRuleError("Damage cannot be negative")
+            if amount == 0:
+                # CR 120.8: this is no damage event. In particular it
+                # cannot create commander damage, damage triggers, or a
+                # replacement/prevention opportunity.
+                continue
             target_value = str(assignment["target"])
             if source.zone != "battlefield":
                 self._log(
@@ -15934,6 +15945,7 @@ class CommanderEngine:
                     if source.is_commander:
                         key = source.oracle_id
                         target.commander_damage_received[key] = target.commander_damage_received.get(key, 0) + amount
+                    dealt_assignments.append(dict(assignment))
             else:
                 target_card = next((card for card in self.state.cards.values() if card.ref == target_value), None)
                 if target_card is None or target_card.zone != "battlefield":
@@ -15993,8 +16005,26 @@ class CommanderEngine:
                     ),
                 )
                 changed_objects.append(target_card.object_id)
+                dealt_assignments.append(dict(assignment))
         self.state.combat.damage_assignments.extend(dict(item) for item in assignments)
-        self._log(None, "combat.damage", "Combat damage was dealt.", {"assignments": list(assignments)}, importance=2, changed_objects=changed_objects, changed_players=changed_players)
+        self._log(
+            None,
+            "combat.damage",
+            (
+                "Combat damage was dealt."
+                if dealt_assignments
+                else "No combat damage was dealt."
+            ),
+            {
+                "assignments": dealt_assignments,
+                "declared_assignments": [
+                    dict(item) for item in assignments
+                ],
+            },
+            importance=2,
+            changed_objects=changed_objects,
+            changed_players=changed_players,
+        )
         self._stabilize()
 
     # ------------------------------------------------------------------
@@ -17947,6 +17977,10 @@ class CommanderEngine:
         if op == "damage":
             target = str(effect["target"])
             amount = int(effect.get("amount", 0))
+            if amount < 0:
+                raise GameRuleError("Damage cannot be negative")
+            if amount == 0:
+                return 0
             if target in self.state.players:
                 if self.state.players[target].stats.get(
                     "protection_from_everything_until_next_turn"
@@ -18005,7 +18039,11 @@ class CommanderEngine:
                 )
             return amount
         if op == "damage_each_opponent":
-            amount = max(0, int(effect.get("amount", 0)))
+            amount = int(effect.get("amount", 0))
+            if amount < 0:
+                raise GameRuleError("Damage cannot be negative")
+            if amount == 0:
+                return 0
             opponents = [
                 seat
                 for seat in self.active_seats
