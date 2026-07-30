@@ -128,6 +128,8 @@ generated documentation fixtures with bearer capabilities redacted. See
 - schema-validated semantic packs with trust and source provenance
 - pinned Comprehensive Rules inventory, diff, verification, dependency, and
   mechanic-contract artifacts
+- one source-pinned conformance case and inventory-linkage test for every
+  numbered rule, with inventory kept separate from semantic passes
 - typed, source-spanned Oracle IR with deterministic semantic hashes and
   fail-closed material residuals
 - automatic deck-time generic compilation into provisional, arbiter-gated
@@ -207,7 +209,14 @@ python simctl.py rules sync \
   --db data/scryfall-current.sqlite3
 python simctl.py rules verify --root .
 python simctl.py rules coverage --root .
+python simctl.py rules conformance --root .
 ```
+
+The pinned snapshot currently has 3,300 stable conformance cases and 3,300
+generated source-linkage tests. They intentionally report 0 executable
+semantic passes: every case starts unreviewed, and a generated inventory test
+cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
+invalidation, and reporting policy.
 
 Deck creation now invokes the typed Oracle compiler automatically. Exact
 whole-text templates lower into the generic effect DSL without a printed-name

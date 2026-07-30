@@ -6,6 +6,11 @@ The official downloaded TXT is stored under ignored `local/rules/`. Tracked
 indexes contain IDs, short headings, hashes, source line spans, dependencies,
 coverage fields, and reviewed-summary placeholders—not the rules prose.
 
+`conformance-cases.json` contains one stable, source-pinned work item per rule.
+Its default inventory-only status proves neither implementation nor rules
+correctness. See `RULE_CONFORMANCE.md` and
+`coverage/rules-conformance.json`.
+
 Run `simctl rules verify --root .` after regeneration. A successful structural
 verification is not a completeness claim; see `coverage/rules-coverage.json`
 and `RULES_COMPLETENESS.md`.

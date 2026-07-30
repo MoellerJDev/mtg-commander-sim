@@ -70,6 +70,11 @@ maximum-counter foundation. It now:
 - omits physical/incarnation identifiers from seat projections;
 - omits authoritative zone/World timestamps from seat projections;
 - preserves exact command replay with the new authoritative fields.
+- generates one source-pinned conformance record and inventory-linkage test
+  for every one of the 3,300 numbered rules;
+- invalidates reviewed conformance metadata when the pinned source or
+  individual rule-text hash changes;
+- keeps inventory-only cases separate from executable semantic passes.
 
 The prior permanent snapshot behavior remains: toughness, lethal/deathtouch,
 loyalty, supported attachment legality, and opposing counter pairs are
@@ -97,6 +102,9 @@ events also remain blockers.
 - CR SHA-256:
   `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
 - Indexed rules: 3,300
+- Conformance cases: 3,300
+- Inventory-only cases: 3,300
+- Executable semantic passes: 0
 - Indexed sections: 156
 - Glossary entries: 733
 - Discovered mechanics: 425
@@ -113,7 +121,9 @@ events also remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 383 passed
+- Unit/integration tests: 3,690 passed
+- Noninventory unit/integration tests: 390 passed
+- Generated per-rule inventory/source-linkage tests: 3,300 passed
 - Focused object identity/token lifecycle tests: 15 passed
 - Focused copy-object lifecycle tests: 8 passed
 - Focused CR 120/210/310/704 tests: 35 passed
@@ -129,13 +139,14 @@ events also remain blockers.
 - Protocol packet benchmark: 1,549 bootstrap / 269 repeated / 108
   declaration estimated tokens
 - Repository/history/secret/artifact validation: pass
-- JSON schemas checked: 12
-- Pinned rules verification: 3,300 rules and 425 mechanics pass
+- JSON schemas checked: 13
+- Pinned rules verification: 3,300 rules, 3,300 conformance cases, and 425
+  mechanics pass
 - Wheel clean installation/import/CLI smoke: pass
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `66c2960210a9885fd214981d91e9c772c1b6a816cd55d82db41405caa6e724ae`
+  `e250f36406d7e2fb1e70130021916998a4efbf0de4993eb32dec43ac8696a31e`
 
 ## Deck-review evidence state
 
@@ -158,15 +169,16 @@ not broad Oracle completeness and not game/deck-quality evidence.
 
 ## Known limitations and next step
 
-There is no external blocker. Continue on `agent/rules-completeness` with the
-rule-by-rule conformance corpus requested after this Battle checkpoint:
+There is no external blocker. The rule-by-rule conformance scaffold requested
+after the Battle checkpoint now exists:
 
-1. create a versioned schema and stable generated case ID for every one of the
-   3,300 rules in the pinned rule index;
-2. report semantic passes, failures, blocked cases, skipped cases, and
-   definition-only cases separately so inventory presence cannot masquerade as
-   correctness;
-3. implement native Siege defeated-trigger exile and optional transformed
+1. all 3,300 pinned rules have a versioned stable case and generated
+   inventory/source-linkage test;
+2. semantic passes, failures, blocked, skipped, definition-only, unreviewed,
+   and inventory-only counts are separate; the current semantic pass count is
+   0;
+3. continue reviewing and promoting cases by rules family, then implement
+   native Siege defeated-trigger exile and optional transformed
    casting as a replayable continuation;
 4. migrate remaining physical-reference links to typed incarnation/LKI
    handles and finish CR 400.7 continuation policies;

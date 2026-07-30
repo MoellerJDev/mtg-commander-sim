@@ -404,7 +404,7 @@ def build_parser() -> argparse.ArgumentParser:
         nargs="+",
         help=(
             "Card names/refs, or one of: sync, inventory, diff, coverage, "
-            "next, verify, report"
+            "conformance, next, verify, report"
         ),
     )
     rules.add_argument(

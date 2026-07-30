@@ -88,8 +88,10 @@ Tracked derived files contain no rules prose:
 - `rules/glossary-index.json`
 - `rules/mechanic-index.json`
 - `rules/dependency-graph.json`
+- `rules/conformance-cases.json`
 - `mechanics/registry.json`
 - `coverage/rules-coverage.json`
+- `coverage/rules-conformance.json`
 - `coverage/mechanics-coverage.json`
 - `coverage/rules-delta.json`
 - `coverage/oracle-coverage.json`
@@ -122,6 +124,7 @@ Inspect and verify:
 ```bash
 python simctl.py rules inventory --root .
 python simctl.py rules coverage --root .
+python simctl.py rules conformance --root .
 python simctl.py rules next --root . --limit 20
 python simctl.py rules verify --root .
 python simctl.py rules report --root . --output local/rules-report.md
@@ -138,6 +141,13 @@ python simctl.py rules diff \
 The diff identifies added, removed, changed, and hash-identical renumbered
 rules, writes JSON/Markdown artifacts, and blocks completeness until the delta
 is reviewed.
+
+The conformance corpus contains one record for every numbered rule. Newly
+generated records are `unreviewed` and `inventory_only`; their generated
+source-linkage tests do not count as semantic correctness. A passing case must
+link reviewed implementation components and executable tests and cover every
+scenario declared for that rule. A changed rule-text hash invalidates its
+review fields. See `RULE_CONFORMANCE.md`.
 
 The older in-game lookup remains available:
 

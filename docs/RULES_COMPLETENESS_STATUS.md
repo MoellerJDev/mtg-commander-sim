@@ -34,7 +34,7 @@ coverage.
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | source hashes and selected order/mutation tests exist; corpus-wide gates do not |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 0 are semantic passes |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -62,6 +62,9 @@ coverage.
 - [x] Added partial CR 120/210/310 and CR 704.5v/w/x Battle behavior:
   copied/entry defense, typed damage results, exact-incarnation defeated
   triggers, replayable Siege protector choices, and protector-aware combat.
+- [x] Added a versioned conformance case and generated source-linkage test for
+  all 3,300 pinned rule IDs, with separate semantic, failing, blocked,
+  skipped, definition-only, unreviewed, and inventory-only reporting.
 
 ## Current CR 120/210/310/704 Battle slice
 
@@ -168,7 +171,8 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 383 unit/integration tests pass.
+- 3,690 unit/integration tests pass: 390 ordinary tests plus 3,300 generated
+  inventory/source-linkage tests. The latter are not semantic passes.
 - Fifteen focused object/token tests cover monotonic incarnations, draws,
   timestamp moments, identity-sensitive targets and delayed links, private
   projection, token destination timing, move prevention, cessation, and exact
@@ -188,8 +192,9 @@ Outstanding blockers include:
 - The seed-20260730 regression reaches its corrected main-phase opportunities,
   keeps `suppressed_meaningful_windows=0`, passes seat projection, and exact
   command replay.
-- Rules corpus verification passes for all 3,300 indexed rules and 425
-  mechanics.
+- Rules corpus verification passes for all 3,300 indexed rules, 3,300
+  conformance records, and 425 mechanics. The 3,300 generated per-rule tests
+  establish inventory linkage only; semantic passes remain 0.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
 final push evidence are recorded in `OVERNIGHT_HANDOFF.md` after the complete
@@ -197,9 +202,8 @@ checkpoint validation.
 
 ## Next dependency-ordered work
 
-1. Add a versioned generated conformance case and explicit status for every
-   one of the 3,300 pinned rule IDs. Placeholder inventory checks must remain
-   distinct from semantic passes.
+1. Review and promote conformance cases by dependency-ordered rules family;
+   keep exposed but unimplemented edge cases failing or blocked.
 2. Implement native Siege defeated-trigger exile and optional transformed
    casting as a replayable resolution continuation.
 3. Replace remaining physical-reference links with typed incarnation/LKI

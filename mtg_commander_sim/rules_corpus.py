@@ -17,6 +17,12 @@ from .mechanic_contracts import (
     apply_contracts_to_registry,
     load_mechanic_contracts,
 )
+from .rule_conformance import (
+    build_rule_conformance,
+    discover_unittest_ids,
+    rule_conformance_coverage,
+    validate_rule_conformance,
+)
 
 RULES_CORPUS_SCHEMA_VERSION = 1
 RULES_PARSER_VERSION = "cr-index-v1"
@@ -38,6 +44,7 @@ CORPUS_OPERATIONS = {
     "inventory",
     "diff",
     "coverage",
+    "conformance",
     "next",
     "verify",
     "report",
@@ -765,6 +772,9 @@ def sync_rules_corpus(
         else root / "local" / "rules"
     )
     previous = _load_json_if_exists(rules_dir / "rule-index.json")
+    previous_conformance = _load_json_if_exists(
+        rules_dir / "conformance-cases.json"
+    )
     previous_manifest = _load_json_if_exists(
         rules_dir / "manifest.json"
     )
@@ -808,6 +818,14 @@ def sync_rules_corpus(
         card_data_snapshot=card_data_snapshot,
         root=root,
     )
+    conformance = build_rule_conformance(
+        documents["rule-index.json"],
+        previous=previous_conformance,
+    )
+    documents["conformance-cases.json"] = conformance
+    documents["manifest.json"]["derived_hashes"][
+        "conformance-cases.json"
+    ] = _json_hash(conformance)
     documents["manifest.json"]["derived_hashes"][
         "mechanics/registry.json"
     ] = _json_hash(mechanics_registry)
@@ -830,6 +848,8 @@ def sync_rules_corpus(
         root,
         _mechanics_coverage(mechanics_registry),
     )
+    conformance_coverage = rule_conformance_coverage(conformance)
+    _write_conformance_coverage(root, conformance_coverage)
 
     coverage = rules_coverage(root)
     _write_coverage(root, coverage)
@@ -936,6 +956,10 @@ def rules_inventory(root: str | Path) -> dict[str, Any]:
     rule_index = _load_required(root, "rules/rule-index.json")
     glossary = _load_required(root, "rules/glossary-index.json")
     mechanics = _load_required(root, "rules/mechanic-index.json")
+    conformance = _load_required(
+        root, "rules/conformance-cases.json"
+    )
+    conformance_coverage = rule_conformance_coverage(conformance)
     statuses = Counter(
         str(rule.get("coverage_status") or "unclassified")
         for rule in rule_index.get("rules", [])
@@ -950,6 +974,11 @@ def rules_inventory(root: str | Path) -> dict[str, Any]:
         "glossary_entries": len(glossary.get("entries", [])),
         "mechanics": len(mechanics.get("mechanics", [])),
         "coverage_statuses": dict(sorted(statuses.items())),
+        "conformance_cases": conformance_coverage["total_cases"],
+        "semantic_passing_cases": conformance_coverage[
+            "semantic_passing_cases"
+        ],
+        "unreviewed_cases": conformance_coverage["unreviewed_cases"],
     }
 
 
@@ -1043,6 +1072,10 @@ def _write_delta(root: str | Path, delta: Mapping[str, Any]) -> None:
 def rules_coverage(root: str | Path) -> dict[str, Any]:
     rule_index = _load_required(root, "rules/rule-index.json")
     mechanics = _load_required(root, "rules/mechanic-index.json")
+    conformance = _load_required(
+        root, "rules/conformance-cases.json"
+    )
+    conformance_coverage = rule_conformance_coverage(conformance)
     rules = list(rule_index.get("rules", []))
     status_counts = Counter(
         str(rule.get("coverage_status") or "unclassified")
@@ -1050,6 +1083,11 @@ def rules_coverage(root: str | Path) -> dict[str, Any]:
     )
     invalid = sorted(set(status_counts) - COVERAGE_STATUSES)
     trusted = int(status_counts.get("trusted", 0))
+    rules_complete = (
+        bool(rules)
+        and trusted == len(rules)
+        and not invalid
+    )
     return {
         "schema_version": RULES_CORPUS_SCHEMA_VERSION,
         "effective_date": rule_index.get("effective_date"),
@@ -1062,9 +1100,12 @@ def rules_coverage(root: str | Path) -> dict[str, Any]:
         ),
         "total_mechanics": len(mechanics.get("mechanics", [])),
         "invalid_statuses": invalid,
-        "current_snapshot_complete": bool(rules)
-        and trusted == len(rules)
-        and not invalid,
+        "conformance": conformance_coverage,
+        "current_snapshot_complete": rules_complete
+        and conformance_coverage["current_snapshot_complete"],
+        "conformance_snapshot_complete": conformance_coverage[
+            "current_snapshot_complete"
+        ],
     }
 
 
@@ -1080,6 +1121,22 @@ def _write_coverage(root: str | Path, coverage: Mapping[str, Any]) -> None:
         f"- Trusted rules: {coverage.get('trusted_rules', 0)}",
         f"- Trusted fraction: {coverage.get('trusted_fraction', 0.0):.2%}",
         (
+            "- Semantic conformance passes: "
+            + str(
+                coverage.get("conformance", {}).get(
+                    "semantic_passing_cases", 0
+                )
+            )
+        ),
+        (
+            "- Unreviewed conformance cases: "
+            + str(
+                coverage.get("conformance", {}).get(
+                    "unreviewed_cases", 0
+                )
+            )
+        ),
+        (
             "- Current snapshot complete: "
             + str(
                 bool(coverage.get("current_snapshot_complete"))
@@ -1093,27 +1150,88 @@ def _write_coverage(root: str | Path, coverage: Mapping[str, Any]) -> None:
     _atomic_text(coverage_dir / "rules-coverage.md", "\n".join(lines))
 
 
+def _write_conformance_coverage(
+    root: str | Path,
+    coverage: Mapping[str, Any],
+) -> None:
+    coverage_dir = Path(root) / "coverage"
+    _atomic_json(
+        coverage_dir / "rules-conformance.json",
+        coverage,
+    )
+    counts = coverage.get("status_counts", {})
+    lines = [
+        "# Comprehensive Rules conformance cases",
+        "",
+        f"- Effective date: `{coverage.get('effective_date')}`",
+        f"- Source SHA-256: `{coverage.get('source_sha256')}`",
+        f"- Total case records: {coverage.get('total_cases', 0)}",
+        (
+            "- Executable semantic passes: "
+            + str(coverage.get("semantic_passing_cases", 0))
+        ),
+        (
+            "- Executable semantic failures: "
+            + str(coverage.get("semantic_failing_cases", 0))
+        ),
+        f"- Blocked: {coverage.get('blocked_cases', 0)}",
+        f"- Skipped: {coverage.get('skipped_cases', 0)}",
+        f"- Unreviewed: {coverage.get('unreviewed_cases', 0)}",
+        f"- Definition-only: {coverage.get('definition_only_cases', 0)}",
+        f"- Inventory-only: {coverage.get('inventory_only_cases', 0)}",
+        (
+            "- Current snapshot complete: "
+            + str(
+                bool(coverage.get("current_snapshot_complete"))
+            ).lower()
+        ),
+        "",
+        "Status detail:",
+        "",
+    ]
+    lines.extend(
+        f"- `{status}`: {count}"
+        for status, count in sorted(counts.items())
+    )
+    lines.extend(
+        [
+            "",
+            "Inventory-only records prove source linkage and case existence; "
+            "they do not prove that the engine implements the rule.",
+            "",
+        ]
+    )
+    _atomic_text(
+        coverage_dir / "rules-conformance.md",
+        "\n".join(lines),
+    )
+
+
 def rules_next(
     root: str | Path,
     *,
     limit: int = 20,
 ) -> dict[str, Any]:
     rule_index = _load_required(root, "rules/rule-index.json")
+    conformance = _load_required(
+        root, "rules/conformance-cases.json"
+    )
+    cases_by_rule = {
+        str(case["rule_id"]): case
+        for case in conformance.get("cases", [])
+    }
     rules = list(rule_index.get("rules", []))
     children: Counter[str] = Counter()
     for rule in rules:
         for dependency in rule.get("dependency_ids", []):
             children[str(dependency)] += 1
     rank = {
-        "partial": 0,
-        "planned": 1,
-        "unclassified": 2,
-        "implemented": 3,
-        "tested": 4,
+        "failing": 0,
+        "blocked": 1,
+        "unreviewed": 2,
+        "skipped": 3,
+        "passing": 4,
         "definition_only": 5,
-        "not_applicable_to_profile": 6,
-        "non_rules_governed": 7,
-        "trusted": 8,
     }
     candidates = sorted(
         (
@@ -1121,14 +1239,26 @@ def rules_next(
                 "rule_id": rule["rule_id"],
                 "section": rule.get("section"),
                 "coverage_status": rule.get("coverage_status"),
+                "conformance_status": cases_by_rule.get(
+                    str(rule["rule_id"]), {}
+                ).get("status"),
+                "classification": cases_by_rule.get(
+                    str(rule["rule_id"]), {}
+                ).get("classification"),
+                "assertion_kind": cases_by_rule.get(
+                    str(rule["rule_id"]), {}
+                ).get("assertion_kind"),
                 "dependent_rule_count": children[str(rule["rule_id"])],
                 "source_span": rule.get("source_span"),
             }
             for rule in rules
-            if rule.get("coverage_status") != "trusted"
+            if cases_by_rule.get(str(rule["rule_id"]), {}).get(
+                "status"
+            )
+            not in {"passing", "definition_only"}
         ),
         key=lambda row: (
-            rank.get(str(row["coverage_status"]), 99),
+            rank.get(str(row["conformance_status"]), 99),
             -int(row["dependent_rule_count"]),
             str(row["rule_id"]),
         ),
@@ -1154,6 +1284,9 @@ def verify_rules_corpus(
         root, "mechanics/registry.json"
     )
     graph = _load_required(root, "rules/dependency-graph.json")
+    conformance = _load_required(
+        root, "rules/conformance-cases.json"
+    )
     errors: list[str] = []
     source_sha256 = str(manifest.get("source_sha256") or "")
 
@@ -1162,6 +1295,7 @@ def verify_rules_corpus(
         "glossary-index.json": glossary,
         "mechanic-index.json": mechanics,
         "dependency-graph.json": graph,
+        "conformance-cases.json": conformance,
     }
     for name, value in documents.items():
         expected = manifest.get("derived_hashes", {}).get(name)
@@ -1209,6 +1343,13 @@ def verify_rules_corpus(
                     f"Mechanic {mechanic.get('mechanic_id')} references "
                     f"missing rule {rule_id}"
                 )
+    errors.extend(
+        validate_rule_conformance(
+            conformance,
+            rule_index,
+            known_test_ids=discover_unittest_ids(root),
+        )
+    )
     mechanic_ids = [
         str(mechanic.get("mechanic_id"))
         for mechanic in mechanics_registry.get("mechanics", [])
@@ -1285,6 +1426,9 @@ def verify_rules_corpus(
         "source_sha256": source_sha256,
         "rules_verified": len(rules),
         "mechanics_verified": len(mechanics.get("mechanics", [])),
+        "conformance_cases_verified": len(
+            conformance.get("cases", [])
+        ),
         "raw_source_verified": raw_source_verified,
         "current_snapshot_complete": coverage[
             "current_snapshot_complete"
@@ -1307,6 +1451,15 @@ def rules_report(root: str | Path) -> str:
             f"- Sections: {inventory['sections']}",
             f"- Glossary entries: {inventory['glossary_entries']}",
             f"- Mechanics: {inventory['mechanics']}",
+            f"- Conformance cases: {inventory['conformance_cases']}",
+            (
+                "- Executable semantic passes: "
+                + str(inventory["semantic_passing_cases"])
+            ),
+            (
+                "- Unreviewed conformance cases: "
+                + str(inventory["unreviewed_cases"])
+            ),
             f"- Corpus verification: {'pass' if verification['ok'] else 'fail'}",
             (
                 "- Pinned-snapshot completeness: "
@@ -1349,6 +1502,12 @@ def execute_rules_corpus_operation(
     if operation == "coverage":
         value = rules_coverage(root)
         _write_coverage(root, value)
+        return value
+    if operation == "conformance":
+        value = rule_conformance_coverage(
+            _load_required(root, "rules/conformance-cases.json")
+        )
+        _write_conformance_coverage(root, value)
         return value
     if operation == "next":
         return rules_next(root, limit=limit)

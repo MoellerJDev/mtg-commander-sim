@@ -202,6 +202,14 @@ compact derived indexes. The raw document remains ignored. The manifest pins
 the CR, Oracle, and rulings inputs, while coverage remains false until reviewed
 contracts and tests establish behavioral trust.
 
+`rule_conformance.py` derives one stable case from every indexed rule ID. Its
+generated unittest surface checks only source linkage. Semantic status is a
+separate reviewed field: passing requires an implementation component, real
+test IDs, declared scenarios, and complete scenario coverage. Regeneration
+preserves review only for an unchanged source and rule-text hash, so a rules
+update cannot inherit stale conformance. Missing or duplicate cases fail
+corpus verification.
+
 The Oracle compiler preserves source spans and emits typed ability, cost,
 target, trigger, replacement, and effect nodes. Oracle IR v2 lowers simple
 self enters/dies/leaves triggers, unconditional enters-tapped text, fixed

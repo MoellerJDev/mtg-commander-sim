@@ -126,12 +126,15 @@ class RulesCorpusTests(unittest.TestCase):
             for relative in (
                 "rules/manifest.json",
                 "rules/rule-index.json",
+                "rules/conformance-cases.json",
                 "rules/glossary-index.json",
                 "rules/mechanic-index.json",
                 "rules/dependency-graph.json",
                 "mechanics/registry.json",
                 "coverage/rules-coverage.json",
                 "coverage/rules-coverage.md",
+                "coverage/rules-conformance.json",
+                "coverage/rules-conformance.md",
                 "coverage/mechanics-coverage.json",
                 "coverage/mechanics-coverage.md",
             ):
@@ -149,9 +152,21 @@ class RulesCorpusTests(unittest.TestCase):
             coverage = rules_coverage(root)
             self.assertFalse(coverage["current_snapshot_complete"])
             self.assertEqual(11, coverage["status_counts"]["unclassified"])
+            self.assertEqual(
+                11,
+                coverage["conformance"]["inventory_only_cases"],
+            )
+            self.assertEqual(
+                0,
+                coverage["conformance"]["semantic_passing_cases"],
+            )
             verification = verify_rules_corpus(root)
             self.assertTrue(verification["ok"], verification["errors"])
             self.assertTrue(verification["raw_source_verified"])
+            self.assertEqual(
+                11,
+                verification["conformance_cases_verified"],
+            )
             mechanic_coverage = json.loads(
                 (root / "coverage/mechanics-coverage.json").read_text(
                     encoding="utf-8"
@@ -180,6 +195,26 @@ class RulesCorpusTests(unittest.TestCase):
             self.assertEqual(
                 second_delta,
                 (root / "coverage/rules-delta.json").read_bytes(),
+            )
+
+            conformance_path = root / "rules/conformance-cases.json"
+            conformance = json.loads(
+                conformance_path.read_text(encoding="utf-8")
+            )
+            conformance["cases"].pop()
+            conformance["case_count"] -= 1
+            conformance_path.write_text(
+                json.dumps(conformance),
+                encoding="utf-8",
+            )
+            failed = verify_rules_corpus(root)
+            self.assertFalse(failed["ok"])
+            self.assertTrue(
+                any(
+                    "missing rule IDs" in error
+                    for error in failed["errors"]
+                ),
+                failed["errors"],
             )
 
     def test_diff_detects_changed_and_renumbered_rules(self):
@@ -305,6 +340,42 @@ class RulesCorpusTests(unittest.TestCase):
                     main(["rules", "inventory", "--root", str(root)]),
                 )
             self.assertEqual(11, json.loads(output.getvalue())["rules"])
+
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                self.assertEqual(
+                    0,
+                    main(
+                        [
+                            "rules",
+                            "conformance",
+                            "--root",
+                            str(root),
+                        ]
+                    ),
+                )
+            conformance = json.loads(output.getvalue())
+            self.assertEqual(11, conformance["total_cases"])
+            self.assertEqual(11, conformance["unreviewed_cases"])
+
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                self.assertEqual(
+                    0,
+                    main(
+                        [
+                            "rules",
+                            "next",
+                            "--root",
+                            str(root),
+                            "--limit",
+                            "1",
+                        ]
+                    ),
+                )
+            next_case = json.loads(output.getvalue())["next"][0]
+            self.assertEqual("unreviewed", next_case["conformance_status"])
+            self.assertEqual("inventory_only", next_case["assertion_kind"])
 
             output = io.StringIO()
             with contextlib.redirect_stdout(output):
