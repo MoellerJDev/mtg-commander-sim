@@ -15,7 +15,7 @@ complete rules or Oracle coverage. The current June 19, 2026 CR / July 28,
 - 156 rules sections indexed
 - 733 glossary entries indexed
 - 425 CR section, keyword-action, and keyword-ability mechanics discovered
-- 10 mechanics under versioned partial contracts and 415 unclassified
+- 11 mechanics under versioned partial contracts and 414 unclassified
 - 0 rules or mechanics promoted to trusted by the new registry
 - 38,373 Oracle IDs and 41,582 faces scanned
 - 2,957 exact (primarily textless), 15,691 partially lowerable, and 19,725
@@ -180,6 +180,18 @@ player choice, optional decline, rechecking, and one application per
 effect/event for typed events. It is not yet connected to every zone, draw,
 damage, and enters event producer, so its contract also remains partial.
 
+`state_based_actions.py` implements an order-invariant CR 704 permanent
+snapshot and distinguishes non-destruction graveyard moves, destruction,
+unattachment, and opposing +1/+1 and -1/-1 counter removal. The engine integrates
+that batch into its fixed-point loop, reuses declarative attachment predicates,
+and preserves pre-batch last-known information for simultaneous moves. Player
+loss, poison, empty draw, commander damage, planeswalker loyalty, and the
+legend rule remain integrated in `CommanderEngine`. The contract is partial:
+token/copy cessation has not moved into the shared evaluator, and the world
+rule, counter caps, Sagas, dungeons, space sculptor, battles, Roles, speed,
+complete enchant-quality grammar, regeneration, and simultaneous loss-event
+replacement still block trust.
+
 The Oracle compiler currently recognizes whole-sentence templates for simple
 draw, life, damage, destroy, exile, return, counter, mill, tap/untap, scry,
 power/toughness modification, printed keyword lists, and intrinsic mana
@@ -210,7 +222,7 @@ The remaining work proceeds by dependency and blocked-card impact:
 2. Object identity, zones, last-known information, faces, and copies.
 3. Casting, costs, restricted mana, and cost modification ordering.
 4. Targeting, modes, distributions, resolution, and linked choices.
-5. Trigger detection/order and state-based actions.
+5. Complete trigger detection/order and the remaining state-based actions.
 6. Migrate all continuous effects to the new evaluator, including CDA
    discovery, face-down/merged objects, players/game rules, and APNAP
    timestamps.

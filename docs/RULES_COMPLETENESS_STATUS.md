@@ -1,0 +1,117 @@
+# Rules completeness implementation status
+
+Last updated: 2026-07-30
+
+This is the durable execution ledger for the snapshot-scoped rules
+completeness program. It records implementation evidence without claiming
+Arena parity, complete Comprehensive Rules enforcement, or complete Oracle
+coverage.
+
+## Pinned baseline
+
+- Repository: private `MoellerJDev/mtg-commander-sim`
+- Branch: `agent/rules-completeness`
+- Rules-program base: `d099fe4`
+- Continuation start: `6517dc0`
+- Package version: `0.8.0`
+- Comprehensive Rules effective date: 2026-06-19
+- CR SHA-256:
+  `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
+- Oracle bulk snapshot: 2026-07-28, 38,373 Oracle IDs
+- Rulings bulk snapshot: 2026-07-28, 77,999 rulings
+
+## Program gates
+
+| Workstream | Status | Current evidence |
+|---|---|---|
+| Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
+| Mechanic contracts | In progress | 11 partial/untrusted contracts; 414 mechanics unclassified; 0 trusted |
+| Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
+| Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
+| Replacement/prevention ordering | Partial | CR 616 typed ordering primitive; event-producer integration incomplete |
+| State-based actions | Partial | CR 704 snapshot evaluator and fixed-point engine integration for the reviewed subset |
+| Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
+| Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
+| Official-source conformance/property/mutation gates | In progress | source hashes and selected order/mutation tests exist; corpus-wide gates do not |
+| Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
+
+## Completed rules-program checkpoints
+
+- [x] Pinned official CR/Oracle/rulings corpus and deterministic indexes.
+- [x] Added `rules sync`, `inventory`, `diff`, `coverage`, `next`, `verify`,
+  and `report`.
+- [x] Added versioned mechanic-contract validation and generated registry
+  overlays.
+- [x] Added typed, source-spanned Oracle IR with material residuals.
+- [x] Added generic whole-text lowering for selected common effect, keyword,
+  mana, trigger, entry, counter, token, and temporary-modifier families.
+- [x] Added CR 613 continuous-effect ordering primitives.
+- [x] Added CR 616 replacement/prevention ordering primitives.
+- [x] Added a CR 704 permanent snapshot and deterministic action batch.
+
+## Current CR 704 slice
+
+The engine now discovers the following permanent actions from one immutable
+snapshot before applying mutations:
+
+- creature toughness 0 or less;
+- lethal marked damage and deathtouch destruction, with indestructible
+  distinguished from non-destruction graveyard moves;
+- planeswalker loyalty 0;
+- unattached or illegally attached Auras for supported enchant predicates;
+- illegal Equipment/Fortification attachment;
+- attached creatures, battles, and nonattachment permanents becoming
+  unattached;
+- pairwise removal of +1/+1 and -1/-1 counters.
+
+Aura restrictions reuse the declarative target-domain evaluator without
+incorrectly treating shroud or hexproof as attachment restrictions.
+Protection from supported color qualities is rechecked. Animate Dead records
+its changed enchant restriction as data instead of relying on a
+printed-name-only state-action branch. The engine applies the batch, preserves
+pre-move last-known information, and repeats to a fixed point.
+
+The CR 704 contract remains partial and untrusted. Outstanding blockers are:
+
+- token and spell-copy cessation in the shared snapshot path;
+- world permanents and simultaneous timestamps;
+- maximum-counter restrictions;
+- Sagas, dungeons, space sculptor, battles, Roles, and speed;
+- Aura attachment to players and complete enchant-quality grammar;
+- regeneration;
+- one simultaneous replaceable event spanning every player loss and permanent
+  action.
+
+## Verification at this checkpoint
+
+- 335 unit/integration tests pass.
+- Ten focused CR 704 tests cover positive, negative, fixed-point,
+  order-mutation, shared pre-action LKI, attachment/protection, counter,
+  contract, and source-hash behavior.
+- Exact Zimone closure: 27 tests pass.
+- Exact Mishra closure: 23 tests pass.
+- The seed-20260730 regression reaches its corrected main-phase opportunities,
+  keeps `suppressed_meaningful_windows=0`, passes seat projection, and exact
+  command replay.
+- Rules corpus verification passes for all 3,300 indexed rules and 425
+  mechanics.
+
+Repository demo, repository audit, wheel build, clean wheel installation, and
+final push evidence are recorded in `OVERNIGHT_HANDOFF.md` after the complete
+checkpoint validation.
+
+## Next dependency-ordered work
+
+1. Finish object/zone/LKI identity primitives, including token and copy
+   cessation in the CR 704 snapshot.
+2. Implement world timestamps and the remaining ordinary CR 704.5 actions.
+3. Integrate state-action destruction/loss with typed replacement and
+   regeneration events.
+4. Continue CR 603 trigger ordering and state-action interaction coverage.
+5. Continue migrating static characteristics to CR 613 and all replaceable
+   event producers to CR 616.
+6. Recompute full and Commander-legal Oracle coverage after each generic
+   compiler/mechanic slice.
+
+No deck list has been modified, and no current game result is promoted to
+matchup evidence.

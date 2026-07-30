@@ -81,7 +81,10 @@ generated documentation fixtures with bearer capabilities redacted. See
 - attacks split among multiple defenders and defender-by-defender blocking
 - extra-turn scheduling in most-recent-created-first order
 - native upkeep/end-step delayed triggers
-- automatic core state-based actions, including lethal damage, zero toughness, the legend rule, poison, commander damage, and player elimination
+- snapshot-based state-action stabilization for lethal/deathtouch damage, zero
+  toughness, planeswalker loyalty, the legend rule, poison, commander damage,
+  player elimination, opposing +1/+1 and -1/-1 counters, and common
+  Aura/Equipment/Fortification attachment cleanup
 - multiplayer continuation after a player leaves
 - conservative Oracle-informed automatic mana payment with exact source logging
 - server-extracted explicit activated abilities, including hand-zone Channel abilities and validated nonmana cost selections
@@ -511,6 +514,8 @@ and empty pilot workspace when filesystem-level isolation must also be proven.
 - `mtg_commander_sim/profiles.py` — fingerprinted advisory deck profiles
 - `mtg_commander_sim/preflight.py` — trust-aware deck semantic coverage
 - `mtg_commander_sim/shortcuts.py` — validated aggregate loop fixtures
+- `mtg_commander_sim/state_based_actions.py` — snapshot-based CR 704
+  permanent-action evaluation
 - `mtg_commander_sim/record.py` — Game Record v3 hashing, journals, migration, inspection, and replay
 - `mtg_commander_sim/report.py` — derived review and fidelity classification
 - `mtg_commander_sim/carddb.py` — local Oracle/rulings database

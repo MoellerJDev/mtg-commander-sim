@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-704-state-based-actions",
+  "official_name": "State-Based Actions",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "704",
+    "704.1",
+    "704.2",
+    "704.3",
+    "704.4",
+    "704.5",
+    "704.5a",
+    "704.5b",
+    "704.5c",
+    "704.5f",
+    "704.5g",
+    "704.5h",
+    "704.5i",
+    "704.5j",
+    "704.5m",
+    "704.5n",
+    "704.5p",
+    "704.5q",
+    "704.6c",
+    "704.8"
+  ],
+  "glossary_references": [
+    "state-based action",
+    "dies",
+    "lethal damage"
+  ],
+  "dependencies": [
+    "zones",
+    "continuous-effects",
+    "replacement-effects",
+    "last-known-information",
+    "attachments",
+    "counters",
+    "commander"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "graveyard",
+      "outside"
+    ],
+    "objects": [
+      "players",
+      "creatures",
+      "planeswalkers",
+      "legendary permanents",
+      "Auras",
+      "Equipment",
+      "Fortifications"
+    ],
+    "events": [
+      "priority would be granted",
+      "cleanup state check",
+      "simultaneous state-based action batch",
+      "fixed-point recheck"
+    ],
+    "state_reads": [
+      "life, poison, empty draw, and commander damage",
+      "derived types, subtypes, keywords, toughness, loyalty, and damage",
+      "attachment restriction and protected qualities",
+      "+1/+1 and -1/-1 counter counts"
+    ],
+    "state_writes": [
+      "player elimination",
+      "simultaneous graveyard moves or destruction",
+      "legend choice",
+      "unattachment",
+      "opposing counter-pair removal"
+    ],
+    "costs": [],
+    "timing": [
+      "after resolution and before priority",
+      "all applicable actions from one snapshot happen simultaneously",
+      "repeat until no actions or waiting triggers remain"
+    ],
+    "targets": [
+      "attachment legality reuses declarative target-domain predicates without applying targeting-only shroud or hexproof"
+    ],
+    "choices": [
+      "the controller chooses one permanent for the legend rule"
+    ],
+    "hidden_information": [
+      "state checks consume authoritative state but expose only public choices"
+    ],
+    "apnap": [
+      "simultaneous choices outside the implemented legend choice remain blocked"
+    ],
+    "layers": [
+      "derived characteristics are evaluated before each snapshot"
+    ],
+    "replacement_effects": [
+      "destruction and graveyard moves use the authoritative zone-change path"
+    ],
+    "copy": [
+      "copied names, types, supertypes, and abilities affect state checks"
+    ],
+    "control_change": [
+      "current controller determines legend groups and attachment relations"
+    ],
+    "zone_change": [
+      "zone changes create new objects and detach attached permanents before the next check"
+    ],
+    "source_leaves": [
+      "last-known information is captured from the shared pre-action snapshot"
+    ]
+  },
+  "variants": [
+    "normal multiplayer",
+    "Commander loss by commander damage",
+    "legend rule",
+    "Aura, Equipment, and Fortification cleanup",
+    "opposing +1/+1 and -1/-1 counters"
+  ],
+  "witness_cards": [
+    {
+      "name": "Young Wolf",
+      "oracle_id": "8b492764-10b6-4506-be11-22daa9220a91"
+    },
+    {
+      "name": "Darksteel Myr",
+      "oracle_id": "f90fe86c-5cca-483b-93c2-6e856fa01c88"
+    },
+    {
+      "name": "Pacifism",
+      "oracle_id": "5f5e0b10-c8cf-450c-bfd3-bcb0528ec330"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_snapshot_distinguishes_put_into_graveyard_from_destroy",
+    "test_attachment_and_counter_actions_are_snapshot_based",
+    "test_input_mutation_cannot_change_batch",
+    "test_opposing_power_toughness_counters_cancel_in_pairs",
+    "test_unattached_and_illegally_attached_auras_leave",
+    "test_equipment_detaches_from_illegal_or_protected_object",
+    "test_fixed_point_moves_aura_after_enchanted_creature_dies",
+    "test_simultaneous_move_captures_all_lki_before_mutation",
+    "test_legend_rule_asks_controller_to_keep_one",
+    "test_player_elimination_keeps_multiplayer_game_running",
+    "test_last_player_wins_after_simultaneous_losses"
+  ],
+  "implementation": {
+    "component": "state_based_actions.evaluate_permanent_state_based_actions and CommanderEngine._stabilize",
+    "version": "state-based-actions-v2"
+  },
+  "known_blockers": [
+    "token and spell-copy cessation still occurs in zone/stack paths rather than the shared snapshot evaluator",
+    "the world rule and simultaneous world timestamps are not implemented",
+    "maximum-counter restrictions, Sagas, dungeons, space sculptor, battles, Roles, and speed state actions are not implemented",
+    "Aura attachment to players and the complete enchant-quality grammar are not implemented",
+    "regeneration and complete loss-event replacement ordering are not integrated",
+    "all player losses and permanent actions are not yet transformed as one shared simultaneous replaceable event"
+  ],
+  "review_status": "reviewed"
+}

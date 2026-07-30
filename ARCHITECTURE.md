@@ -212,6 +212,15 @@ overrides are a reviewed escape hatch for irreducible exceptions, not a
 substitute for generic mechanics or a printed-name branch in
 `CommanderEngine`.
 
+CR 704 stabilization derives a public permanent snapshot before mutating
+anything. `state_based_actions.py` classifies non-destruction graveyard moves,
+destruction, unattachment, and opposing-counter removal; the engine applies
+the batch and rechecks before granting priority. Aura legality reuses the
+declarative target domain without applying targeting-only shroud or hexproof,
+while protection remains an attachment restriction. Unsupported enchant
+quality grammar stays unresolved. The contract is partial until every CR
+704.5/704.6 variant and simultaneous loss/replacement interaction is covered.
+
 ## Rules arbitration and semantic programs
 
 The engine should not infer arbitrary card behavior from prose during a state transition.
@@ -389,7 +398,9 @@ Untaps, pass bookkeeping, and mana clearing remain in server history but are nor
 
 ### Deterministic automation
 
-The kernel handles shuffling, drawing, turn-based actions, state-based actions, ordinary mana payment, empty priority, turn progression, and registered semantics without a model call.
+The kernel handles shuffling, drawing, turn-based actions, the implemented
+snapshot-based state actions, ordinary mana payment, empty priority, turn
+progression, and registered semantics without a model call.
 
 ### Separate strategy and rules contexts
 
@@ -439,10 +450,15 @@ The new rules primitives sit below both generated and hand-authored semantics:
 - `replacement_effects.py` orders CR 616 replacement/prevention priority
   classes, affected-player choices, optional declines, and repeated
   applicability for typed events.
+- `state_based_actions.py` evaluates the deterministic permanent subset of CR
+  704 from one immutable snapshot. The engine applies the resulting batch,
+  captures last-known information before mutation, and repeats until stable.
 
-Both contracts remain partial. Legacy static abilities have not all moved into
-the layer evaluator, and not every zone/draw/damage/enters producer routes
-through the replacement engine. Coverage and contracts describe those
+All three contracts remain partial. Legacy static abilities have not all moved
+into the layer evaluator, not every zone/draw/damage/enters producer routes
+through the replacement engine, and the state-action evaluator does not yet
+cover the world rule, Sagas, dungeons, battles, Roles, speed, or complete
+simultaneous loss replacement. Coverage and contracts describe those
 integration gaps explicitly.
 
 ## Remaining scope

@@ -30,6 +30,8 @@ MEANINGFUL_CODES = {
     "game.draw",
     "action.rejected",
     "state.creatures_died",
+    "state.attachments_unattached",
+    "state.counters_annihilated",
     "effect.damage",
     "effect.life",
     "effect.energy",
@@ -447,6 +449,27 @@ def _event_description(engine: CommanderEngine, event: Event) -> str:
             _name(engine, str(ref)) for ref in details.get("objects") or []
         )
         return f"{names or 'Permanents'} died or were put into graveyards."
+    if event.code == "state.attachments_unattached":
+        names = ", ".join(
+            _name(engine, str(ref))
+            for ref in details.get("objects") or []
+        )
+        return (
+            f"{names or 'Permanents'} became unattached due to "
+            "state-based actions."
+        )
+    if event.code == "state.counters_annihilated":
+        values = ", ".join(
+            (
+                f"{_name(engine, str(item.get('object')))} "
+                f"({item.get('pairs_removed')} pair(s))"
+            )
+            for item in details.get("changes") or []
+        )
+        return (
+            "Opposing +1/+1 and -1/-1 counters were removed"
+            + (f": {values}." if values else ".")
+        )
     if event.code == "token.create":
         names = ", ".join(
             _name(engine, str(ref)) for ref in details.get("objects") or []

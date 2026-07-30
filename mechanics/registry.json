@@ -1,5 +1,5 @@
 {
-  "contract_count": 10,
+  "contract_count": 11,
   "contracts": [
     {
       "mechanic_id": "cr-122-counters",
@@ -53,6 +53,12 @@
       "mechanic_id": "cr-611-continuous-effects",
       "path": "mechanics/contracts/simple-until-end-of-turn.json",
       "sha256": "7a0747f0f5dd88a44bfa58746dad611b2db8ed4c7eb5e0aebeada351054aa2c9",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-704-state-based-actions",
+      "path": "mechanics/contracts/state-based-actions.json",
+      "sha256": "68aa6e6ea769f4c26a4ff06773fa29ac7542d584f0b66c95fd186f5071c371bd",
       "version": 1
     },
     {
@@ -6389,17 +6395,40 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/state-based-actions.json",
+      "contract_sha256": "68aa6e6ea769f4c26a4ff06773fa29ac7542d584f0b66c95fd186f5071c371bd",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "state_based_actions.evaluate_permanent_state_based_actions and CommanderEngine._stabilize",
+      "implementation_version": "state-based-actions-v2",
       "kind": "rules_section",
+      "known_blockers": [
+        "token and spell-copy cessation still occurs in zone/stack paths rather than the shared snapshot evaluator",
+        "the world rule and simultaneous world timestamps are not implemented",
+        "maximum-counter restrictions, Sagas, dungeons, space sculptor, battles, Roles, and speed state actions are not implemented",
+        "Aura attachment to players and the complete enchant-quality grammar are not implemented",
+        "regeneration and complete loss-event replacement ordering are not integrated",
+        "all player losses and permanent actions are not yet transformed as one shared simultaneous replaceable event"
+      ],
       "mechanic_id": "cr-704-state-based-actions",
       "official_name": "State-Based Actions",
       "rule_references": [
         "704"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_snapshot_distinguishes_put_into_graveyard_from_destroy",
+        "test_attachment_and_counter_actions_are_snapshot_based",
+        "test_input_mutation_cannot_change_batch",
+        "test_opposing_power_toughness_counters_cancel_in_pairs",
+        "test_unattached_and_illegally_attached_auras_leave",
+        "test_equipment_detaches_from_illegal_or_protected_object",
+        "test_fixed_point_moves_aura_after_enchanted_creature_dies",
+        "test_simultaneous_move_captures_all_lki_before_mutation",
+        "test_legend_rule_asks_controller_to_keep_one",
+        "test_player_elimination_keeps_multiplayer_game_running",
+        "test_last_player_wins_after_simultaneous_losses"
+      ],
       "trust_level": "untrusted"
     },
     {

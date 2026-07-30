@@ -18,8 +18,9 @@ Contracts use `mechanics/contract.schema.json` plus cross-field validation in
 cards and tests, and have no known blockers. A partial contract links evidence
 without allowing a happy-path test to be mistaken for complete support.
 
-Current partial contracts cover Flying, deathtouch, protection, CR 613
-continuous-effect ordering, and CR 616 replacement/prevention ordering.
+Current partial contracts cover Flying, deathtouch, protection, simple
+compiler families, CR 613 continuous-effect ordering, CR 616 replacement/
+prevention ordering, and the implemented CR 704 state-based-action subset.
 
 Run `simctl rules sync` after changing a contract so its hash and status are
 overlaid into `mechanics/registry.json`, then run `simctl rules verify`.

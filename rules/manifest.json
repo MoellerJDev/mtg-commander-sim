@@ -22,11 +22,11 @@
     "dependency-graph.json": "0c2c5095e0875c278e26d58d601246bcc597183ab96be167dec64bc0fe0ae956",
     "glossary-index.json": "576fad18aaf10a2f1c0f1f257837eae95057721b668fe38740d2182ce9aebb7d",
     "mechanic-index.json": "72998332705128357f9adc1ba7f20b73a6f5b97ccdda9fc46a95edc5f5ff7fcb",
-    "mechanics/registry.json": "c57b6674e8be79fbeef2ec06c821cd0ac1ede7abb424099142fb43d29d91cce7",
+    "mechanics/registry.json": "0424a4ed73c27c34fc3c522f401486349b3f390a682b620313a17fa5758e17ea",
     "rule-index.json": "ae20b6961f35621fe5f9cec5e784416ca14a7723a4f0ffb5d2326aa5555f4347"
   },
   "effective_date": "2026-06-19",
-  "generated_at": "2026-07-30T17:48:03.992063+00:00",
+  "generated_at": "2026-07-30T19:28:59.167814+00:00",
   "glossary_count": 733,
   "mechanic_count": 425,
   "parser_version": "cr-index-v1",

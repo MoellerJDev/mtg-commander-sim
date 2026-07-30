@@ -47,6 +47,10 @@ from .model import (
 )
 from .permissions import AuthorizedCommand, CapabilityManager, PermissionDenied
 from .semantics import SemanticProgram, SemanticRegistry
+from .state_based_actions import (
+    PermanentSnapshot,
+    evaluate_permanent_state_based_actions,
+)
 from .targets import (
     TargetGroup,
     TargetPlan,
@@ -1258,6 +1262,7 @@ class CommanderEngine:
         card.phased_out = False
         card.annotations.pop("continuous_add_types", None)
         if destination != "battlefield":
+            card.annotations.pop("enchant_target_schema", None)
             if destination != "stack":
                 card.annotations.pop("bestowed", None)
                 card.annotations.pop("pending_aura_target", None)
@@ -1403,7 +1408,7 @@ class CommanderEngine:
                 and record.loyalty is not None
             ):
                 card.counters["loyalty"] = int(record.loyalty)
-                card.counters["loyalty_initialized"] = 1
+                card.annotations["loyalty_initialized"] = True
             self.state.players[card.controller].zones["battlefield"].append(
                 object_id
             )
@@ -1831,6 +1836,10 @@ class CommanderEngine:
                     actual_destination,
                 )
             )
+        # CR 704.8 last-known information comes from the state before any
+        # object in the batch moves.  Keep discovery and mutation in separate
+        # loops so a departing static source cannot change a later snapshot.
+        for object_id, destination in changes:
             self.move_card(
                 object_id,
                 destination,
@@ -5479,7 +5488,7 @@ class CommanderEngine:
             source.counters["loyalty"] = (
                 current_loyalty + ability.loyalty_delta
             )
-            source.counters["loyalty_initialized"] = 1
+            source.annotations["loyalty_initialized"] = True
             source.annotations["loyalty_activated_turn_sequence"] = (
                 self.state.turn_sequence
             )
@@ -14637,6 +14646,252 @@ class CommanderEngine:
         )
         return base
 
+    def _enchant_target_schema(
+        self,
+        aura: CardInstance,
+    ) -> dict[str, Any] | None:
+        override = aura.annotations.get("enchant_target_schema")
+        if isinstance(override, Mapping):
+            return copy.deepcopy(dict(override))
+
+        oracle = str(
+            self._effective_card_data(aura).get("oracle_text") or ""
+        )
+        match = next(
+            (
+                re.fullmatch(
+                    r"enchant (?P<restriction>.+?)\.?",
+                    line.strip(),
+                    re.IGNORECASE,
+                )
+                for line in oracle.splitlines()
+                if line.strip().casefold().startswith("enchant ")
+            ),
+            None,
+        )
+        if match is None:
+            return None
+        restriction = match.group("restriction").strip().casefold()
+        controller_relation = "any"
+        for suffix, relation in (
+            (" an opponent controls", "opponent"),
+            (" opponent controls", "opponent"),
+            (" you control", "you"),
+        ):
+            if restriction.endswith(suffix):
+                restriction = restriction[: -len(suffix)].strip()
+                controller_relation = relation
+                break
+
+        schema: dict[str, Any] = {
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "controller": controller_relation,
+            "count": 1,
+        }
+        if restriction in {
+            "creature card in a graveyard",
+            "creature card in your graveyard",
+        }:
+            schema.update(
+                {
+                    "zones": ["graveyard"],
+                    "categories": ["card"],
+                    "creature": True,
+                    "owner": (
+                        "you"
+                        if restriction.endswith("your graveyard")
+                        else "any"
+                    ),
+                }
+            )
+            return schema
+        if restriction == "card in a graveyard":
+            schema.update(
+                {
+                    "zones": ["graveyard"],
+                    "categories": ["card"],
+                }
+            )
+            return schema
+        if restriction == "nonland permanent":
+            schema.update({"permanent": True, "land": False})
+            return schema
+
+        type_words = {
+            "artifact",
+            "battle",
+            "creature",
+            "enchantment",
+            "land",
+            "planeswalker",
+        }
+        alternatives = [
+            value.strip()
+            for value in re.split(r"\s+or\s+", restriction)
+        ]
+        if alternatives and all(
+            value in type_words for value in alternatives
+        ):
+            schema["types_any"] = alternatives
+            return schema
+        all_types = restriction.split()
+        if all_types and all(value in type_words for value in all_types):
+            schema["types_all"] = all_types
+            return schema
+        if restriction == "permanent":
+            schema["permanent"] = True
+            return schema
+        if restriction in {"player", "opponent"}:
+            # Player attachment needs a non-card attachment identity and is
+            # intentionally outside the currently reviewed subset.
+            return None
+        # A single subtype restriction (for example, "Shrine") can use the
+        # same declarative target query.  More elaborate quality grammar stays
+        # unresolved rather than being guessed.
+        if re.fullmatch(r"[a-z][a-z'-]*", restriction):
+            schema["subtypes_any"] = [restriction]
+            return schema
+        return None
+
+    def _attachment_is_legal(
+        self,
+        attachment: CardInstance,
+        *,
+        subtypes: set[str],
+    ) -> bool | None:
+        if attachment.attached_to is None:
+            return False
+        target = self.state.cards.get(attachment.attached_to)
+        if target is None or target.zone == "outside":
+            return False
+
+        schema: dict[str, Any] | None
+        if "aura" in subtypes:
+            schema = self._enchant_target_schema(attachment)
+        elif "equipment" in subtypes:
+            schema = {
+                "zones": ["battlefield"],
+                "categories": ["permanent"],
+                "creature": True,
+                "count": 1,
+            }
+        elif "fortification" in subtypes:
+            schema = {
+                "zones": ["battlefield"],
+                "categories": ["permanent"],
+                "land": True,
+                "count": 1,
+            }
+        else:
+            return target.zone == "battlefield"
+        if schema is None:
+            return None
+        try:
+            group = TargetGroup.from_mapping(schema)
+        except ValueError:
+            return None
+        row = next(
+            (
+                candidate
+                for candidate in self._target_candidate_rows(
+                    attachment.controller,
+                    group,
+                )
+                if str(candidate["ref"]) == target.ref
+            ),
+            None,
+        )
+        if row is None or not self._target_row_matches(
+            attachment.controller,
+            group,
+            row,
+            source_ref=attachment.ref,
+            as_target=False,
+        ):
+            return False
+
+        target_oracle = str(
+            self._effective_card_data(target).get("oracle_text") or ""
+        ).casefold()
+        if "protection from everything" in target_oracle:
+            return False
+        if self._protection_colors(target).intersection(
+            self._source_colors_for_ref(attachment.ref)
+        ):
+            return False
+        return True
+
+    def _permanent_sba_snapshots(
+        self,
+    ) -> list[PermanentSnapshot]:
+        snapshots: list[PermanentSnapshot] = []
+        seen: set[str] = set()
+        for seat in self.active_seats:
+            for object_id in self.state.players[seat].zones["battlefield"]:
+                if object_id in seen:
+                    continue
+                seen.add(object_id)
+                card = self.state.cards[object_id]
+                if card.zone != "battlefield" or card.phased_out:
+                    continue
+                data = self._effective_card_data(card)
+                card_types, subtypes, _ = self._type_parts(
+                    str(data.get("type_line") or "")
+                )
+                keywords = {
+                    str(value).casefold()
+                    for value in data.get("keywords", [])
+                }
+                snapshots.append(
+                    PermanentSnapshot(
+                        object_id=card.object_id,
+                        card_types=frozenset(card_types),
+                        subtypes=frozenset(subtypes),
+                        toughness=(
+                            self._numeric_stat(object_id, "toughness")
+                            if "creature" in card_types
+                            else None
+                        ),
+                        marked_damage=card.marked_damage,
+                        deathtouch_damage=card.deathtouch_damage,
+                        indestructible="indestructible" in keywords,
+                        loyalty=(
+                            int(card.counters.get("loyalty", 0))
+                            if (
+                                "planeswalker" in card_types
+                                and (
+                                    "loyalty" in card.counters
+                                    or card.annotations.get(
+                                        "loyalty_initialized"
+                                    )
+                                    or card.counters.get(
+                                        "loyalty_initialized"
+                                    )
+                                )
+                            )
+                            else None
+                        ),
+                        attached_to=card.attached_to,
+                        attachment_legal=(
+                            self._attachment_is_legal(
+                                card,
+                                subtypes=subtypes,
+                            )
+                            if card.attached_to is not None
+                            else False
+                        ),
+                        counters=dict(card.counters),
+                    )
+                )
+        return snapshots
+
+    def _detach_permanent(self, card: CardInstance) -> None:
+        target = self.state.cards.get(card.attached_to or "")
+        if target is not None and card.object_id in target.attachments:
+            target.attachments.remove(card.object_id)
+        card.attached_to = None
+
     def _legend_groups(self) -> list[tuple[str, str, list[str]]]:
         groups: dict[tuple[str, str], list[str]] = {}
         for seat in self.active_seats:
@@ -14675,38 +14930,125 @@ class CommanderEngine:
                     return True
                 continue
 
-            move_to_grave: list[str] = []
-            for seat in self.active_seats:
-                for object_id in list(self.state.players[seat].zones["battlefield"]):
-                    card = self.state.cards[object_id]
-                    data = self._effective_card_data(card)
-                    type_line = str(data.get("type_line") or "").casefold()
-                    keywords = set(data.get("keywords") or [])
-                    if "creature" in type_line:
-                        toughness = self._numeric_stat(object_id, "toughness")
-                        if toughness <= 0:
-                            move_to_grave.append(object_id)
-                        elif (card.marked_damage >= toughness or card.deathtouch_damage) and "Indestructible" not in keywords:
-                            move_to_grave.append(object_id)
-                    elif (
-                        card.printed_name == "Animate Dead"
-                        and card.attached_to is None
-                    ):
-                        move_to_grave.append(object_id)
-                    elif "planeswalker" in type_line and card.counters.get("loyalty", 0) <= 0 and card.counters.get("loyalty_initialized"):
-                        move_to_grave.append(object_id)
-            if move_to_grave:
+            sba_batch = evaluate_permanent_state_based_actions(
+                self._permanent_sba_snapshots()
+            )
+            move_to_grave = unique_preserving_order(
+                [
+                    *sba_batch.put_in_graveyard,
+                    *sba_batch.destroy,
+                ]
+            )
+            if sba_batch.changed:
                 simultaneous = [
                     (object_id, "graveyard")
-                    for object_id in unique_preserving_order(move_to_grave)
+                    for object_id in move_to_grave
                     if self.state.cards[object_id].zone == "battlefield"
                 ]
-                self._move_cards_simultaneously(
-                    simultaneous,
-                    reason="state-based action",
-                    log=False,
-                )
-                self._log(None, "state.creatures_died", f"State-based actions moved {len(move_to_grave)} permanent(s) to graveyards.", {"objects": [self.state.cards[oid].ref for oid in move_to_grave]}, importance=2, changed_objects=move_to_grave)
+                if simultaneous:
+                    self._move_cards_simultaneously(
+                        simultaneous,
+                        reason="state-based action",
+                        log=False,
+                    )
+                detached: list[str] = []
+                for object_id in sba_batch.detach:
+                    card = self.state.cards[object_id]
+                    if (
+                        card.zone == "battlefield"
+                        and card.attached_to is not None
+                    ):
+                        self._detach_permanent(card)
+                        detached.append(object_id)
+                counter_changes: list[dict[str, Any]] = []
+                for object_id, count in (
+                    sba_batch.counter_pairs_to_remove
+                ):
+                    card = self.state.cards[object_id]
+                    if card.zone != "battlefield":
+                        continue
+                    card.counters["+1/+1"] = max(
+                        0,
+                        int(card.counters.get("+1/+1", 0)) - count,
+                    )
+                    card.counters["-1/-1"] = max(
+                        0,
+                        int(card.counters.get("-1/-1", 0)) - count,
+                    )
+                    if card.counters["+1/+1"] == 0:
+                        card.counters.pop("+1/+1", None)
+                    if card.counters["-1/-1"] == 0:
+                        card.counters.pop("-1/-1", None)
+                    counter_changes.append(
+                        {
+                            "object": card.ref,
+                            "pairs_removed": count,
+                        }
+                    )
+                if move_to_grave:
+                    self._log(
+                        None,
+                        "state.creatures_died",
+                        (
+                            "State-based actions moved "
+                            f"{len(move_to_grave)} permanent(s) to "
+                            "graveyards."
+                        ),
+                        {
+                            "objects": [
+                                self.state.cards[object_id].ref
+                                for object_id in move_to_grave
+                            ],
+                            "put_in_graveyard": [
+                                self.state.cards[object_id].ref
+                                for object_id in (
+                                    sba_batch.put_in_graveyard
+                                )
+                            ],
+                            "destroyed": [
+                                self.state.cards[object_id].ref
+                                for object_id in sba_batch.destroy
+                            ],
+                        },
+                        importance=2,
+                        changed_objects=move_to_grave,
+                    )
+                if detached:
+                    self._log(
+                        None,
+                        "state.attachments_unattached",
+                        (
+                            "State-based actions unattached "
+                            f"{len(detached)} permanent(s)."
+                        ),
+                        {
+                            "objects": [
+                                self.state.cards[object_id].ref
+                                for object_id in detached
+                            ]
+                        },
+                        importance=2,
+                        changed_objects=detached,
+                    )
+                if counter_changes:
+                    self._log(
+                        None,
+                        "state.counters_annihilated",
+                        (
+                            "State-based actions removed opposing "
+                            "+1/+1 and -1/-1 counters."
+                        ),
+                        {"changes": counter_changes},
+                        importance=2,
+                        changed_objects=[
+                            object_id
+                            for object_id, _ in (
+                                sba_batch.counter_pairs_to_remove
+                            )
+                            if self.state.cards[object_id].zone
+                            == "battlefield"
+                        ],
+                    )
                 continue
 
             legends = self._legend_groups()
@@ -15141,6 +15483,12 @@ class CommanderEngine:
             aura.attached_to = creature.object_id
             if aura.object_id not in creature.attachments:
                 creature.attachments.append(aura.object_id)
+            aura.annotations["enchant_target_schema"] = {
+                "zones": ["battlefield"],
+                "categories": ["permanent"],
+                "creature": True,
+                "count": 1,
+            }
             aura.annotations["animate_dead_creature"] = (
                 creature.object_id
             )
