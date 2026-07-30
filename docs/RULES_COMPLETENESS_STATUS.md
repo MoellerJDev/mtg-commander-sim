@@ -25,12 +25,13 @@ coverage.
 | Workstream | Status | Current evidence |
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
-| Mechanic contracts | In progress | 13 partial/untrusted contracts; 412 mechanics unclassified; 0 trusted |
+| Mechanic contracts | In progress | 16 partial/untrusted contracts; 409 mechanics unclassified; 0 trusted |
 | Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
 | Object and zone identity | Partial | CR 400 logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, and selected linked-effect guards |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
 | Replacement/prevention ordering | Partial | CR 616 typed ordering primitive; event-producer integration incomplete |
-| State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, and fixed-point engine integration for the reviewed subset |
+| Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, copied defense, Siege protector/combat routing, and fail-closed defeated-trigger boundary |
+| State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
 | Official-source conformance/property/mutation gates | In progress | source hashes and selected order/mutation tests exist; corpus-wide gates do not |
@@ -58,8 +59,34 @@ coverage.
   same-object token conversion for permanent-spell copies.
 - [x] Added CR 704.5r numeric maximum-counter extraction and snapshot
   enforcement, including overlap with opposing-counter removal.
+- [x] Added partial CR 120/210/310 and CR 704.5v/w/x Battle behavior:
+  copied/entry defense, typed damage results, exact-incarnation defeated
+  triggers, replayable Siege protector choices, and protector-aware combat.
 
-## Current CR 400/613/111/704/707 slice
+## Current CR 120/210/310/704 Battle slice
+
+Battle behavior is derived from the effective card type, subtype, defense
+characteristic, counters, controller, and protector. It contains no
+printed-name branch. A Battle entering as itself or as a copy receives its
+printed defense count rather than copying the source permanent's counters.
+Damage marks a creature, removes planeswalker loyalty, and removes Battle
+defense for every applicable type on a multi-typed permanent.
+
+For the pinned rules snapshot, a Siege chooses an opponent as protector while
+the spell resolves. Every player other than the protector may attack it; only
+the protector receives the corresponding blocker task. Missing or invalid
+protectors are repaired through a replayable controller choice, subject to the
+being-attacked exception. Removing the last defense counter queues the
+intrinsic Siege trigger with the source's exact logical incarnation. A trigger
+from an old incarnation does not prevent the zero-defense state action.
+
+Native Siege trigger resolution remains deliberately unavailable: the engine
+issues `arbiter.resolve` instead of guessing the exile and optional transformed
+free cast. The two Control Point previews in the July 28 Oracle corpus are
+not-yet-Commander-legal and postdate the June 19 CR snapshot, so their
+protector rules fail closed.
+
+## Prior CR 400/613/111/704/707 foundation
 
 Every card retains a stable physical `object_id`, while a serialized
 `zone_change_counter` identifies its current logical incarnation. The
@@ -131,7 +158,9 @@ Outstanding blockers include:
   timestamp moments by every continuous-effect source;
 - maximum-counter wording outside the reviewed numeric self-restriction
   sentence family;
-- Sagas, dungeons, space sculptor, battles, Roles, and speed;
+- Sagas, dungeons, space sculptor, Roles, and speed;
+- native Siege transformed-cast resolution, Battle type/control changes
+  during combat, and future Battle-subtype protector predicates;
 - Aura attachment to players and complete enchant-quality grammar;
 - regeneration;
 - one simultaneous replaceable event spanning every player loss and permanent
@@ -139,7 +168,7 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 369 unit/integration tests pass.
+- 383 unit/integration tests pass.
 - Fifteen focused object/token tests cover monotonic incarnations, draws,
   timestamp moments, identity-sensitive targets and delayed links, private
   projection, token destination timing, move prevention, cessation, and exact
@@ -147,10 +176,13 @@ Outstanding blockers include:
 - Eight focused copy-object tests cover serialized spell/card copies,
   counter/destination timing, card-versus-noncard targeting, same-object
   permanent resolution, projection privacy, and exact replay.
-- Twenty-one focused CR 704 tests cover positive, negative, fixed-point,
-  order-mutation, shared pre-action LKI, attachment/protection, counters,
-  maximum-counter extraction/overlap/replay, sequential and simultaneous
-  World behavior, contract, and source-hash behavior.
+- Thirty-five focused CR 120/210/310/704 tests cover positive, negative,
+  fixed-point, order-mutation, shared pre-action LKI,
+  attachment/protection, counters, maximum-counter
+  extraction/overlap/replay, sequential and simultaneous World behavior,
+  defense entry/copy/damage, Battle-creature combat restrictions,
+  exact-incarnation triggers, protector choice/repair, projection, arbiter
+  pause, contract pinning, and two command-replay paths.
 - Exact Zimone closure: 27 tests pass.
 - Exact Mishra closure: 23 tests pass.
 - The seed-20260730 regression reaches its corrected main-phase opportunities,
@@ -165,18 +197,23 @@ checkpoint validation.
 
 ## Next dependency-ordered work
 
-1. Replace remaining physical-reference links with typed incarnation/LKI
+1. Add a versioned generated conformance case and explicit status for every
+   one of the 3,300 pinned rule IDs. Placeholder inventory checks must remain
+   distinct from semantic passes.
+2. Implement native Siege defeated-trigger exile and optional transformed
+   casting as a replayable resolution continuation.
+3. Replace remaining physical-reference links with typed incarnation/LKI
    handles and implement the remaining CR 400.7 continuation policies.
-2. Implement the remaining ordinary CR 704.5 specialized permanent/layout
+4. Implement the remaining ordinary CR 704.5 specialized permanent/layout
    state actions.
-3. Integrate state-action destruction/loss with typed replacement and
+5. Integrate state-action destruction/loss with typed replacement and
    regeneration events.
-4. Continue CR 603 trigger ordering and state-action interaction coverage.
-5. Continue migrating static characteristics to CR 613 and all replaceable
+6. Continue CR 603 trigger ordering and state-action interaction coverage.
+7. Continue migrating static characteristics to CR 613 and all replaceable
    event producers to CR 616.
-6. Implement the remaining CR 707 copiable-value, card-copy casting, and
+8. Implement the remaining CR 707 copiable-value, card-copy casting, and
    specialized copy-object exceptions.
-7. Recompute full and Commander-legal Oracle coverage after each generic
+9. Recompute full and Commander-legal Oracle coverage after each generic
    compiler/mechanic slice.
 
 No deck list has been modified, and no current game result is promoted to

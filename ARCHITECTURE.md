@@ -489,7 +489,13 @@ The new rules primitives sit below both generated and hand-authored semantics:
   snapshot. The engine applies the resulting batch, captures last-known
   information before mutation, and repeats until stable. The reviewed subset
   includes CR 704.5e, the CR 704.5k world rule, CR 704.5r numeric
-  maximum-counter abilities, and serialized World-since timestamps.
+  maximum-counter abilities, CR 704.5v/w/x Battle checks, and serialized
+  World-since timestamps.
+- `CommanderEngine` derives Battle defense and protector behavior from the
+  effective type line, subtype, and copied defense characteristic. Siege
+  entry choices occur during resolution, attack/block routing uses the live
+  protector, damage removes defense counters, and pending source triggers are
+  matched to the exact logical incarnation.
 - `CardInstance.object_kind` and the copy-object helpers represent stack spell
   copies and card copies without pretending they are cards. The reviewed
   partial CR 707 path preserves supported stack choices, treats spell copies
@@ -499,9 +505,11 @@ The new rules primitives sit below both generated and hand-authored semantics:
 All of these contracts remain partial. Legacy static abilities have not all moved
 into the layer evaluator, not every zone/draw/damage/enters producer routes
 through the replacement engine, and the state-action evaluator does not yet
-cover Sagas, dungeons, battles, Roles, speed, maximum-counter wording outside
-the reviewed self-restriction family, or complete simultaneous loss
-replacement. CR 707 remains partial for complete
+cover Sagas, dungeons, Roles, speed, maximum-counter wording outside the
+reviewed self-restriction family, or complete simultaneous loss replacement.
+Battle support still lacks native Siege transformed-cast resolution,
+combat-removal interactions after type/control changes, and future subtype
+predicates. CR 707 remains partial for complete
 copiable values, card-copy casting/playing, Prepare, face-down and linked
 interactions, and the full copied-choice/cost matrix. CR 400 object identity
 also remains partial until its complete exception matrix and specialized

@@ -23,7 +23,10 @@ compiler families, CR 613 continuous-effect ordering, CR 616 replacement/
 prevention ordering, CR 400 logical object incarnation, CR 111 token
 lifecycle, CR 707 represented copy-object lifecycle, serialized
 zone/World-since timestamp moments, and the implemented CR 704
-state-based-action subset including the world rule.
+state-based-action subset including the world rule. Separate CR 120, 210, and
+310 contracts describe the implemented permanent-damage results, defense
+characteristic, and Siege entry/protector/combat/trigger subset without
+claiming native transformed-cast resolution.
 
 Run `simctl rules sync` after changing a contract so its hash and status are
 overlaid into `mechanics/registry.json`, then run `simctl rules verify`.

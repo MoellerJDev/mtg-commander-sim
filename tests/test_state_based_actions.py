@@ -8,7 +8,10 @@ import unittest
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.model import StackItem
+from mtg_commander_sim.carddb import CardRecord
+from mtg_commander_sim.engine import GameRuleError
+from mtg_commander_sim.model import DecisionGroup, StackItem
+from mtg_commander_sim.projection import StateProjector
 from mtg_commander_sim.record import (
     checkpoint_envelope,
     replay_record,
@@ -52,6 +55,9 @@ class StateBasedActionPrimitiveTests(unittest.TestCase):
         )
         self.assertIn("704.5q", contract["rule_references"])
         self.assertIn("704.5r", contract["rule_references"])
+        self.assertIn("704.5v", contract["rule_references"])
+        self.assertIn("704.5w", contract["rule_references"])
+        self.assertIn("704.5x", contract["rule_references"])
         row = next(
             item
             for item in registry["mechanics"]
@@ -63,6 +69,35 @@ class StateBasedActionPrimitiveTests(unittest.TestCase):
             "mechanics/contracts/state-based-actions.json",
             row["contract_path"],
         )
+        for mechanic_id, filename, rule_id in (
+            ("cr-120-damage", "damage.json", "120.3h"),
+            ("cr-210-defense", "defense.json", "210.1"),
+            ("cr-310-battles", "battles.json", "310.11b"),
+        ):
+            related = json.loads(
+                (
+                    root / "mechanics" / "contracts" / filename
+                ).read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                manifest["source_sha256"],
+                related["source_sha256"],
+            )
+            self.assertEqual(
+                manifest["effective_date"],
+                related["effective_date"],
+            )
+            self.assertIn(rule_id, related["rule_references"])
+            registry_row = next(
+                item
+                for item in registry["mechanics"]
+                if item["mechanic_id"] == mechanic_id
+            )
+            self.assertEqual("partial", registry_row["coverage_status"])
+            self.assertEqual(
+                f"mechanics/contracts/{filename}",
+                registry_row["contract_path"],
+            )
 
     def test_snapshot_distinguishes_put_into_graveyard_from_destroy(self):
         batch = evaluate_permanent_state_based_actions(
@@ -102,6 +137,30 @@ class StateBasedActionPrimitiveTests(unittest.TestCase):
         self.assertEqual(("walker", "zero"), batch.put_in_graveyard)
         self.assertEqual(("deathtouch", "lethal"), batch.destroy)
         self.assertNotIn("indestructible", batch.destroy)
+
+    def test_zero_defense_battle_waits_for_its_pending_trigger(self):
+        batch = evaluate_permanent_state_based_actions(
+            [
+                PermanentSnapshot(
+                    "defeated",
+                    card_types=frozenset({"battle"}),
+                    defense=0,
+                ),
+                PermanentSnapshot(
+                    "trigger-pending",
+                    card_types=frozenset({"battle"}),
+                    defense=0,
+                    battle_trigger_pending=True,
+                ),
+                PermanentSnapshot(
+                    "defended",
+                    card_types=frozenset({"battle"}),
+                    defense=1,
+                ),
+            ]
+        )
+
+        self.assertEqual(("defeated",), batch.put_in_graveyard)
 
     def test_attachment_and_counter_actions_are_snapshot_based(self):
         batch = evaluate_permanent_state_based_actions(
@@ -408,6 +467,741 @@ class StateBasedActionEngineTests(unittest.TestCase):
             event.details["changes"],
         )
 
+    def test_battle_enters_with_printed_defense_and_copies_reset_it(self):
+        engine = self.make_engine(7052)
+        original_ref = engine.create_token(
+            "A",
+            name="Test Battle",
+            characteristics={
+                "type_line": "Token Battle",
+                "defense": "4",
+            },
+        )[0]
+        original = self.card(engine, original_ref)
+        self.assertEqual(4, original.counters["defense"])
+        engine._change_permanent_counter(original, "defense", -3)
+
+        copied_ref = engine.create_token(
+            "A",
+            name="Test Battle Copy",
+            copy_of=original.ref,
+        )[0]
+        copied = self.card(engine, copied_ref)
+
+        self.assertEqual(1, original.counters["defense"])
+        self.assertEqual(4, copied.counters["defense"])
+        self.assertEqual(
+            "4",
+            engine._effective_card_data(copied)["defense"],
+        )
+
+    def test_battle_damage_removes_defense_instead_of_marking_damage(self):
+        engine = self.make_engine(7053)
+        source_ref = engine.create_token(
+            "A",
+            name="Battle Tester",
+            characteristics={
+                "type_line": "Token Creature — Wizard",
+                "power": "2",
+                "toughness": "2",
+            },
+        )[0]
+        battle_ref = engine.create_token(
+            "B",
+            name="Test Battle",
+            characteristics={
+                "type_line": "Token Battle",
+                "defense": "5",
+            },
+        )[0]
+        battle = self.card(engine, battle_ref)
+
+        engine._apply_combat_assignments(
+            [
+                {
+                    "source": source_ref,
+                    "target": battle_ref,
+                    "amount": 2,
+                }
+            ]
+        )
+
+        self.assertEqual(3, battle.counters["defense"])
+        self.assertEqual(0, battle.marked_damage)
+
+    def test_planeswalker_damage_removes_loyalty_counters(self):
+        engine = self.make_engine(7061)
+        walker_ref = engine.create_token(
+            "A",
+            name="Test Planeswalker",
+            characteristics={
+                "type_line": "Token Planeswalker — Test",
+                "loyalty": "4",
+            },
+        )[0]
+        walker = self.card(engine, walker_ref)
+        self.assertEqual(4, walker.counters["loyalty"])
+
+        result = engine._apply_damage_results_to_permanent(
+            walker,
+            2,
+        )
+
+        self.assertEqual(2, result["loyalty_removed"])
+        self.assertEqual(2, walker.counters["loyalty"])
+        self.assertEqual(0, walker.marked_damage)
+
+    def test_battle_trigger_from_same_incarnation_defers_state_action(self):
+        engine = self.make_engine(7054)
+        battle_ref = engine.create_token(
+            "A",
+            name="Triggered Battle",
+            characteristics={
+                "type_line": "Token Battle",
+                "defense": "1",
+            },
+        )[0]
+        battle = self.card(engine, battle_ref)
+        trigger = StackItem(
+            stack_id="battle-trigger",
+            ref="S-battle-trigger",
+            kind="triggered_ability",
+            controller="A",
+            label="Battle trigger",
+            source_object_id=battle.object_id,
+            visibility=["A", "B"],
+            context={
+                "source_logical_object_id": battle.logical_object_id,
+            },
+        )
+        engine.state.stack.append(trigger)
+        engine._change_permanent_counter(battle, "defense", -1)
+
+        self.assertFalse(engine._stabilize())
+        self.assertEqual("battlefield", battle.zone)
+
+        engine.state.stack.remove(trigger)
+        self.assertFalse(engine._stabilize())
+        self.assertEqual("outside", battle.zone)
+
+    def test_old_incarnation_trigger_does_not_defer_battle_state_action(self):
+        engine = self.make_engine(7061)
+        battle_ref = engine.create_token(
+            "A",
+            name="Reentered Battle",
+            characteristics={
+                "type_line": "Token Battle",
+                "defense": "1",
+            },
+        )[0]
+        battle = self.card(engine, battle_ref)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="old-battle-trigger",
+                ref="S-old-battle-trigger",
+                kind="triggered_ability",
+                controller="A",
+                label="Trigger from an old object incarnation",
+                source_object_id=battle.object_id,
+                visibility=["A", "B", "C", "D"],
+                context={
+                    "source_logical_object_id": "old-incarnation",
+                },
+            )
+        )
+        engine._change_permanent_counter(battle, "defense", -1)
+
+        self.assertFalse(engine._battle_trigger_pending(battle))
+        self.assertFalse(engine._stabilize())
+        self.assertEqual("outside", battle.zone)
+
+    def test_last_siege_defense_counter_queues_intrinsic_trigger(self):
+        engine = self.make_engine(7055)
+        siege_ref = engine.create_token(
+            "A",
+            name="Test Siege",
+            battle_protector="B",
+            characteristics={
+                "type_line": "Token Battle — Siege",
+                "defense": "2",
+            },
+        )[0]
+        siege = self.card(engine, siege_ref)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="other-siege-trigger",
+                ref="S-other-siege-trigger",
+                kind="triggered_ability",
+                controller="A",
+                label="Unrelated Siege trigger",
+                source_object_id=siege.object_id,
+                semantic_key="test:other-siege-trigger",
+                visibility=["A", "B", "C", "D"],
+                context={
+                    "source_logical_object_id": (
+                        siege.logical_object_id
+                    )
+                },
+            )
+        )
+
+        result = engine._apply_damage_results_to_permanent(siege, 2)
+        self.assertEqual(2, result["defense_removed"])
+        self.assertFalse(engine._stabilize())
+
+        trigger = next(
+            item
+            for item in engine.state.stack
+            if item.semantic_key == "builtin:siege-defeated"
+        )
+        self.assertEqual(siege.object_id, trigger.source_object_id)
+        self.assertEqual(
+            siege.logical_object_id,
+            trigger.context["source_logical_object_id"],
+        )
+        self.assertEqual("battlefield", siege.zone)
+        engine._prepare_stack_resolution()
+        self.assertEqual(
+            "arbiter.resolve",
+            engine.state.pending_decision.kind,
+        )
+        self.assertEqual(
+            "builtin:siege-defeated",
+            engine.state.pending_decision.payload_by_actor["arbiter"][
+                "semantic_key"
+            ],
+        )
+
+    def test_departed_combat_source_deals_no_damage(self):
+        engine = self.make_engine(7062)
+        source_ref = engine.create_token(
+            "A",
+            name="Departed Attacker",
+            characteristics={
+                "type_line": "Token Creature — Soldier",
+                "power": "2",
+                "toughness": "2",
+            },
+        )[0]
+        source = self.card(engine, source_ref)
+        engine.move_card(source.object_id, "graveyard")
+        life_before = engine.state.players["B"].life
+
+        engine._apply_combat_assignments(
+            [
+                {
+                    "source": source_ref,
+                    "target": "B",
+                    "amount": 2,
+                }
+            ]
+        )
+
+        self.assertEqual(life_before, engine.state.players["B"].life)
+        self.assertEqual(
+            "combat.damage.no_source",
+            next(
+                event
+                for event in reversed(engine.state.events)
+                if event.code == "combat.damage.no_source"
+            ).code,
+        )
+
+
+    def test_invalid_siege_protector_is_repaired_by_its_controller(self):
+        engine = self.make_engine(7057)
+        siege_ref = engine.create_token(
+            "A",
+            name="Protector Test Siege",
+            battle_protector="B",
+            characteristics={
+                "type_line": "Token Battle — Siege",
+                "defense": "3",
+            },
+        )[0]
+        siege = self.card(engine, siege_ref)
+        engine.state.players["B"].in_game = False
+
+        self.assertTrue(engine._stabilize())
+        self.assertEqual(
+            "state.battle_protector",
+            engine.state.pending_decision.kind,
+        )
+        payload = engine.state.pending_decision.payload_by_actor["A"]
+        self.assertEqual(["C", "D"], payload["protectors"])
+        capability = next(
+            value
+            for value in engine.state.capabilities.values()
+            if (
+                value.decision_id
+                == engine.state.pending_decision.decision_id
+                and value.principal == "pilot:A"
+                and not value.consumed
+            )
+        )
+
+        result = engine.try_submit(
+            token=capability.token,
+            principal="pilot:A",
+            action="choose",
+            payload={"protector": "C"},
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("C", siege.battle_protector)
+        projected = StateProjector(self.db, engine.state)._obj(
+            siege,
+            "pilot:A",
+        )
+        self.assertEqual("C", projected["protect"])
+        self.assertNotIn("object_id", projected)
+        self.assertNotIn("logical_object_id", projected)
+
+    def test_battle_protector_choice_replays_exactly(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            seed=7060,
+        )
+        keep_all(session)
+        engine = session.engine
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        siege_ref = engine.create_token(
+            "A",
+            name="Replay Protector Siege",
+            battle_protector="B",
+            characteristics={
+                "type_line": "Token Battle — Siege",
+                "defense": "3",
+            },
+        )[0]
+        siege = self.card(engine, siege_ref)
+        engine.state.players["B"].in_game = False
+        self.assertTrue(engine._stabilize())
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "choices": {"protector": "C"},
+                "reason": "Choose a legal replacement protector.",
+                "plan": "RULES_CHOICE",
+            },
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("C", siege.battle_protector)
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "battle-protector-record"
+            session.save(record_dir)
+            replay = replay_record(
+                record_dir,
+                self.db,
+                verify=True,
+            )
+        self.assertTrue(replay["ok"], replay)
+
+    def test_siege_is_attackable_and_its_protector_blocks(self):
+        engine = self.make_engine(7058)
+        attacker_ref = engine.create_token(
+            "A",
+            name="Siege Attacker",
+            characteristics={
+                "type_line": "Token Creature — Soldier",
+                "power": "1",
+                "toughness": "1",
+                "keywords": ["Haste"],
+            },
+        )[0]
+        siege_ref = engine.create_token(
+            "A",
+            name="Attackable Siege",
+            battle_protector="B",
+            characteristics={
+                "type_line": "Token Battle — Siege",
+                "defense": "3",
+            },
+        )[0]
+        blocker_ref = engine.create_token(
+            "B",
+            name="Siege Blocker",
+            characteristics={
+                "type_line": "Token Creature — Soldier",
+                "power": "1",
+                "toughness": "1",
+            },
+        )[0]
+        engine.state.active_player = "A"
+        engine.state.phase = "combat"
+        engine.state.step = "declare_attackers"
+        engine._complete_attackers(
+            DecisionGroup(
+                decision_id="attack-siege",
+                kind="combat.attackers",
+                role="pilot",
+                actors=["A"],
+                allowed_actions=["attack"],
+                responses={
+                    "A": {
+                        "attackers": {
+                            attacker_ref: siege_ref,
+                        }
+                    }
+                },
+            )
+        )
+
+        attacker = self.card(engine, attacker_ref)
+        siege = self.card(engine, siege_ref)
+        self.assertEqual(siege.ref, attacker.attacking)
+        self.assertEqual(["B"], engine.state.combat.defending_players)
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine._issue_next_blocker()
+        payload = engine.state.pending_decision.payload_by_actor["B"]
+        self.assertIn(attacker_ref, payload["attackers"])
+        self.assertEqual(
+            [attacker_ref],
+            payload["legal_blocks"][blocker_ref],
+        )
+        engine._complete_blockers(
+            DecisionGroup(
+                decision_id="block-siege",
+                kind="combat.blockers",
+                role="pilot",
+                actors=["B"],
+                allowed_actions=["block"],
+                responses={
+                    "B": {
+                        "blocks": {
+                            blocker_ref: attacker_ref,
+                        }
+                    }
+                },
+            )
+        )
+        self.assertEqual(
+            [self.card(engine, blocker_ref).object_id],
+            engine.state.combat.blockers[
+                self.card(engine, attacker_ref).object_id
+            ],
+        )
+
+    def test_battle_creature_cannot_attack_or_block(self):
+        engine = self.make_engine(7063)
+        battle_creature_ref = engine.create_token(
+            "A",
+            name="Animated Battle",
+            characteristics={
+                "type_line": "Token Battle Creature",
+                "power": "3",
+                "toughness": "3",
+                "defense": "3",
+                "keywords": ["Haste"],
+            },
+        )[0]
+        attacker_ref = engine.create_token(
+            "A",
+            name="Ordinary Attacker",
+            characteristics={
+                "type_line": "Token Creature — Soldier",
+                "power": "2",
+                "toughness": "2",
+                "keywords": ["Haste"],
+            },
+        )[0]
+        battle_blocker_ref = engine.create_token(
+            "B",
+            name="Animated Blocking Battle",
+            characteristics={
+                "type_line": "Token Battle Creature",
+                "power": "3",
+                "toughness": "3",
+                "defense": "3",
+            },
+        )[0]
+        engine.state.active_player = "A"
+        engine.state.phase = "combat"
+        engine.state.step = "declare_attackers"
+
+        engine._issue_attackers()
+        candidates = engine.state.pending_decision.payload_by_actor["A"][
+            "candidates"
+        ]
+        self.assertNotIn(
+            battle_creature_ref,
+            [candidate["id"] for candidate in candidates],
+        )
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        with self.assertRaisesRegex(
+            GameRuleError,
+            "cannot attack because it is a Battle",
+        ):
+            engine._complete_attackers(
+                DecisionGroup(
+                    decision_id="illegal-battle-attack",
+                    kind="combat.attackers",
+                    role="pilot",
+                    actors=["A"],
+                    allowed_actions=["attack"],
+                    responses={
+                        "A": {
+                            "attackers": {
+                                battle_creature_ref: "B",
+                            }
+                        }
+                    },
+                )
+            )
+
+        engine._complete_attackers(
+            DecisionGroup(
+                decision_id="ordinary-attack",
+                kind="combat.attackers",
+                role="pilot",
+                actors=["A"],
+                allowed_actions=["attack"],
+                responses={
+                    "A": {
+                        "attackers": {
+                            attacker_ref: "B",
+                        }
+                    }
+                },
+            )
+        )
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine._issue_next_blocker()
+        blocker_payload = (
+            engine.state.pending_decision.payload_by_actor["B"]
+        )
+        self.assertNotIn(
+            battle_blocker_ref,
+            blocker_payload["blockers"],
+        )
+        self.assertEqual(
+            (False, "blocker_is_battle"),
+            engine._can_block(
+                self.card(engine, attacker_ref),
+                self.card(engine, battle_blocker_ref),
+            ),
+        )
+
+    def test_siege_protector_is_chosen_as_the_spell_resolves(self):
+        engine = self.make_engine(7059)
+        object_id = engine.state.players["A"].zones["hand"][0]
+        card = engine.state.cards[object_id]
+        original_card_record = engine.card_record
+        siege_record = CardRecord(
+            oracle_id=card.oracle_id,
+            name="Invasion of Test // Test Victor",
+            mana_cost="{1}",
+            mana_value=1,
+            type_line="Battle — Siege // Creature — Soldier",
+            oracle_text="",
+            power=None,
+            toughness=None,
+            loyalty=None,
+            defense=None,
+            colors=(),
+            color_identity=(),
+            keywords=(),
+            produced_mana=(),
+            layout="transform",
+            released_at="2023-04-21",
+            legalities={"commander": "legal"},
+            faces=(
+                {
+                    "name": "Invasion of Test",
+                    "mana_cost": "{1}",
+                    "type_line": "Battle — Siege",
+                    "oracle_text": "",
+                    "power": None,
+                    "toughness": None,
+                    "loyalty": None,
+                    "defense": "3",
+                    "colors": [],
+                },
+                {
+                    "name": "Test Victor",
+                    "mana_cost": "",
+                    "type_line": "Creature — Soldier",
+                    "oracle_text": "",
+                    "power": "3",
+                    "toughness": "3",
+                    "loyalty": None,
+                    "defense": None,
+                    "colors": [],
+                },
+            ),
+            raw={},
+        )
+
+        def staged_record(value):
+            candidate = (
+                value
+                if hasattr(value, "object_id")
+                else engine.state.cards.get(str(value))
+            )
+            if (
+                candidate is not None
+                and candidate.object_id == card.object_id
+            ):
+                return siege_record
+            return original_card_record(value)
+
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine.state.priority_player = "A"
+        engine.state.players["A"].mana_pool["C"] = 1
+        with patch.object(
+            engine,
+            "card_record",
+            side_effect=staged_record,
+        ):
+            hints = engine._priority_action_hints("A")
+            action = next(
+                value
+                for value in hints["actions"]
+                if value["id"] == f"cast:{card.ref}"
+            )
+            self.assertNotIn("choice_schema", action)
+            engine._cast(
+                "A",
+                {
+                    "card": card.ref,
+                    "from": "hand",
+                    "auto_pay": True,
+                },
+            )
+            self.assertEqual("stack", card.zone)
+            self.assertEqual("Invasion of Test", card.active_face)
+            self.assertIsNone(card.battle_protector)
+            self.assertTrue(
+                engine._begin_battle_entry_protector_choice(
+                    engine.state.stack[-1]
+                )
+            )
+            self.assertEqual(
+                "battle.enter_protector",
+                engine.state.pending_decision.kind,
+            )
+            self.assertEqual(
+                ["B", "C", "D"],
+                engine.state.pending_decision.payload_by_actor["A"][
+                    "protectors"
+                ],
+            )
+            capability = next(
+                value
+                for value in engine.state.capabilities.values()
+                if (
+                    value.decision_id
+                    == engine.state.pending_decision.decision_id
+                    and value.principal == "pilot:A"
+                    and not value.consumed
+                )
+            )
+            result = engine.try_submit(
+                token=capability.token,
+                principal="pilot:A",
+                action="choose",
+                payload={"protector": "B"},
+            )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("battlefield", card.zone)
+        self.assertEqual("B", card.battle_protector)
+        self.assertEqual(3, card.counters["defense"])
+
+    def test_battle_damage_and_state_action_replay_exactly(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            seed=7056,
+        )
+        keep_all(session)
+        engine = session.engine
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        battle_ref = engine.create_token(
+            "B",
+            name="Replay Battle",
+            characteristics={
+                "type_line": "Token Battle",
+                "defense": "2",
+            },
+        )[0]
+        battle = self.card(engine, battle_ref)
+        program = SemanticProgram(
+            key="test:defeat-battle",
+            label="Deal two damage to a Battle",
+            effects=[
+                {
+                    "op": "damage",
+                    "target": battle.ref,
+                    "amount": 2,
+                }
+            ],
+            trust_level="provisional",
+        )
+        engine.semantics.put(program)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="defeat-battle",
+                ref="S-defeat-battle",
+                kind="triggered_ability",
+                controller="A",
+                label=program.label,
+                semantic_key=program.key,
+                visibility=["A", "B"],
+            )
+        )
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine._grant_priority("A")
+        engine._issue_priority("A")
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        for principal in (
+            "pilot:A",
+            "pilot:B",
+            "pilot:C",
+            "pilot:D",
+        ):
+            result = session.act(
+                principal,
+                {
+                    "action_id": "pass",
+                    "reason": "Allow Battle damage to resolve.",
+                    "plan": "HOLD",
+                },
+            )
+            self.assertTrue(result.ok, result.summary)
+        self.assertEqual("outside", battle.zone)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "battle-sba-record"
+            session.save(record_dir)
+            replay = replay_record(
+                record_dir,
+                self.db,
+                verify=True,
+            )
+        self.assertTrue(replay["ok"], replay)
+
     def test_counter_maximum_overlaps_opposing_pair_removal(self):
         engine = self.make_engine(7050)
         ref = engine.create_token(
@@ -512,24 +1306,21 @@ class StateBasedActionEngineTests(unittest.TestCase):
         session.commands.clear()
         session.decisions.clear()
 
-        first = session.act(
+        for principal in (
             "pilot:A",
-            {
-                "action_id": "pass",
-                "reason": "Pass priority on the test trigger.",
-                "plan": "HOLD",
-            },
-        )
-        self.assertTrue(first.ok, first.summary)
-        second = session.act(
             "pilot:B",
-            {
-                "action_id": "pass",
-                "reason": "Allow the test trigger to resolve.",
-                "plan": "HOLD",
-            },
-        )
-        self.assertTrue(second.ok, second.summary)
+            "pilot:C",
+            "pilot:D",
+        ):
+            result = session.act(
+                principal,
+                {
+                    "action_id": "pass",
+                    "reason": "Allow the test trigger to resolve.",
+                    "plan": "HOLD",
+                },
+            )
+            self.assertTrue(result.ok, result.summary)
         self.assertEqual(7, rasputin.counters["dream"])
 
         with tempfile.TemporaryDirectory() as temporary:

@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-310-battles",
+  "official_name": "Battles",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "310",
+    "310.1",
+    "310.2",
+    "310.3",
+    "310.4",
+    "310.4a",
+    "310.4b",
+    "310.4c",
+    "310.5",
+    "310.6",
+    "310.7",
+    "310.8",
+    "310.8a",
+    "310.8b",
+    "310.8c",
+    "310.8d",
+    "310.8e",
+    "310.8f",
+    "310.8g",
+    "310.9",
+    "310.10",
+    "310.11",
+    "310.11a",
+    "310.11b",
+    "506.3f",
+    "506.3g",
+    "508.1a",
+    "509.1a",
+    "704.5v",
+    "704.5w",
+    "704.5x"
+  ],
+  "glossary_references": [
+    "Battle",
+    "Defense",
+    "Siege"
+  ],
+  "dependencies": [
+    "casting",
+    "combat",
+    "counters",
+    "damage",
+    "double-faced-cards",
+    "state-based-actions",
+    "triggers",
+    "zone-changes"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "hand",
+      "stack",
+      "battlefield",
+      "graveyard",
+      "exile"
+    ],
+    "objects": [
+      "battle cards and spells",
+      "battle permanents",
+      "Sieges",
+      "permanents with no battle subtype"
+    ],
+    "events": [
+      "Battle spell resolution",
+      "as-Battle-enters protector choice",
+      "Battle attack and block declarations",
+      "damage to a Battle",
+      "last defense counter removed",
+      "protector invalidation",
+      "zero-defense state check"
+    ],
+    "state_reads": [
+      "derived Battle type and subtype",
+      "printed defense",
+      "defense counters",
+      "controller and active opponents",
+      "protector",
+      "current attackers",
+      "pending trigger source incarnation"
+    ],
+    "state_writes": [
+      "defense counters",
+      "protector designation",
+      "Battle combat target",
+      "intrinsic Siege defeated trigger",
+      "graveyard move when no defeating trigger is pending"
+    ],
+    "costs": [
+      "ordinary represented spell casting costs"
+    ],
+    "timing": [
+      "protector is chosen after priority passes as the Battle enters, not when it is cast",
+      "protector repair occurs as a state-based action except while the Battle is being attacked",
+      "the intrinsic Siege trigger is queued when the last defense counter is removed"
+    ],
+    "targets": [
+      "a Battle may be selected as a combat defender by any attacking player other than its protector",
+      "Battle damage and any-target support use derived Battle type"
+    ],
+    "choices": [
+      "the controller chooses a legal protector as the Battle enters",
+      "the controller chooses a replacement legal protector when required"
+    ],
+    "hidden_information": [
+      "Battle, protector, defense, attack, and trigger state are public",
+      "the transformed face remains card-definition information rather than hidden game state"
+    ],
+    "apnap": [
+      "each Battle's controller makes its own protector choice",
+      "complete simultaneous protector-choice ordering remains blocked"
+    ],
+    "layers": [
+      "derived card types, subtypes, and copied defense are consulted at every relevant event"
+    ],
+    "replacement_effects": [
+      "intrinsic defense counters are initialized on battlefield entry",
+      "complete replacement ordering for the Siege exile and transformed cast remains blocked"
+    ],
+    "copy": [
+      "copies entering as Battles initialize copied printed defense",
+      "a copied Siege with no final defense-counter removal does not receive the defeated trigger"
+    ],
+    "control_change": [
+      "a Siege controller who is also its protector must choose an opponent as the new protector"
+    ],
+    "zone_change": [
+      "protector is cleared on ordinary zone changes and preserved from the stack through Battle entry",
+      "Siege defeated resolution must use the exact source incarnation"
+    ],
+    "source_leaves": [
+      "an exact-incarnation pending trigger defers the zero-defense state action",
+      "a trigger from an old object incarnation does not protect the current Battle"
+    ]
+  },
+  "variants": [
+    "Battle with no subtype",
+    "Siege",
+    "copied Battle",
+    "Battle controlled by its protector",
+    "protector leaves a multiplayer game",
+    "Battle attacked by its controller",
+    "zero-defense Battle with and without a pending source trigger"
+  ],
+  "witness_cards": [
+    {
+      "name": "Invasion of Gobakhan // Lightshield Array",
+      "oracle_id": "86c32a56-3272-4738-b0b3-a8aa49a17ce4"
+    }
+  ],
+  "rulings": [
+    "Invasion of Gobakhan 2023-04-14: a Siege controller chooses an opponent as protector while it enters",
+    "Invasion of Gobakhan 2023-04-14: players other than the protector may attack the Battle and only the protector's creatures may block for it",
+    "Invasion of Gobakhan 2023-04-14: a zero-defense Battle remains only while its own triggered ability is pending",
+    "Invasion of Gobakhan 2023-04-14: a Siege whose last defense counter is removed exiles and may be cast transformed"
+  ],
+  "test_ids": [
+    "test_battle_enters_with_printed_defense_and_copies_reset_it",
+    "test_battle_damage_removes_defense_instead_of_marking_damage",
+    "test_battle_trigger_from_same_incarnation_defers_state_action",
+    "test_old_incarnation_trigger_does_not_defer_battle_state_action",
+    "test_last_siege_defense_counter_queues_intrinsic_trigger",
+    "test_invalid_siege_protector_is_repaired_by_its_controller",
+    "test_battle_protector_choice_replays_exactly",
+    "test_siege_is_attackable_and_its_protector_blocks",
+    "test_battle_creature_cannot_attack_or_block",
+    "test_siege_protector_is_chosen_as_the_spell_resolves",
+    "test_battle_damage_and_state_action_replay_exactly"
+  ],
+  "implementation": {
+    "component": "CommanderEngine Battle entry, combat, trigger, damage, and protector state paths",
+    "version": "battles-v1"
+  },
+  "known_blockers": [
+    "native Siege defeated-trigger resolution does not yet exile and offer the exact transformed free cast; it fails closed to arbiter resolution",
+    "nonspell and token Battle entry paths do not yet suspend for an as-enters protector choice unless a trusted caller supplies the selected protector",
+    "attacking or blocking creatures becoming Battles and Battles changing controller during combat are not yet removed from combat by every continuous-effect path",
+    "future Battle subtypes are rejected until their protector predicates are present in a pinned Comprehensive Rules snapshot",
+    "complete simultaneous/APNAP protector choices and all Battle-targeting interactions are not implemented",
+    "the current Oracle snapshot contains two not-yet-Commander-legal Control Point previews that postdate the pinned rules snapshot and remain unsupported"
+  ],
+  "review_status": "reviewed"
+}

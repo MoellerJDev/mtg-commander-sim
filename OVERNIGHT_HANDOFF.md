@@ -23,9 +23,10 @@ remote branch identify the exact immutable hash.
 
 ## Current rules checkpoint
 
-The checkpoint adds versioned partial CR 400/613/704/707 contract updates and
-implements serialized copy objects on top of the logical-incarnation,
-timestamp, World-rule, and token-lifecycle foundation. It now:
+The checkpoint adds versioned partial CR 120/210/310/704 contracts and generic
+Battle defense/protector behavior on top of the existing
+logical-incarnation, timestamp, World-rule, token/copy-lifecycle, and
+maximum-counter foundation. It now:
 
 - serializes a monotonically increasing logical incarnation beside stable
   physical card identity;
@@ -50,6 +51,22 @@ timestamp, World-rule, and token-lifecycle foundation. It now:
   without emitting a token-creation event;
 - derives reviewed numeric maximum-counter abilities from effective Oracle
   text and enforces them in the shared CR 704 snapshot;
+- derives Battle and planeswalker printed defense/loyalty through the
+  continuous-characteristic path;
+- initializes defense and loyalty counters on battlefield entry, including
+  copied Battle defense rather than copied current counters;
+- applies typed permanent damage results: marked creature damage, removed
+  planeswalker loyalty, and removed Battle defense;
+- chooses a Siege protector during resolution rather than during casting;
+- exposes only the public protector seat in pilot projections;
+- permits every player other than the protector to attack a Battle and routes
+  blocker decisions to the protector;
+- prohibits Battle creatures from being declared as attackers or blockers;
+- repairs invalid Siege protectors through replayable controller choices;
+- queues the intrinsic Siege trigger on last-defense removal and matches
+  pending source triggers to the represented logical incarnation;
+- sends native-unimplemented Siege transformed-cast resolution to the arbiter
+  boundary instead of guessing;
 - omits physical/incarnation identifiers from seat projections;
 - omits authoritative zone/World timestamps from seat projections;
 - preserves exact command replay with the new authoritative fields.
@@ -59,14 +76,18 @@ loyalty, supported attachment legality, and opposing counter pairs are
 detected from one immutable snapshot. `CommanderEngine` applies the combined
 batch and repeats before priority.
 
-This is not complete CR 400/111/704/707 support. Complete copiable values,
-card-copy casting and playing, Prepare's exile exception, face-down and linked
-copy interactions, and copied choice/cost/target exceptions remain blocked.
+This is not complete CR 120/210/310/400/111/704/707 support. Native Siege
+exile-and-optional-transformed-cast resolution, nonspell Battle entry choices,
+Battle type/control changes during combat, complete damage replacement/
+prevention, and future Battle subtype predicates remain blocked. Complete
+copiable values, card-copy casting and playing, Prepare's exile exception,
+face-down and linked copy interactions, and copied choice/cost/target
+exceptions also remain blocked.
 The complete CR 400.7 exception matrix, merged/melded identity, stickers, all
 legacy linked references, complete CR 613.7m APNAP relative timestamps,
 consumption of serialized timestamps by every continuous-effect source,
 maximum-counter wording outside the reviewed self-restriction family, Sagas,
-dungeons, space sculptor, battles, Roles, speed, player-attached Auras, full
+dungeons, space sculptor, Roles, speed, player-attached Auras, full
 enchant qualities, regeneration, and simultaneous replaceable loss/action
 events also remain blockers.
 
@@ -79,8 +100,8 @@ events also remain blockers.
 - Indexed sections: 156
 - Glossary entries: 733
 - Discovered mechanics: 425
-- Partial/untrusted mechanic contracts: 13
-- Unclassified mechanics: 412
+- Partial/untrusted mechanic contracts: 16
+- Unclassified mechanics: 409
 - Trusted mechanics in the new corpus registry: 0
 - `current_snapshot_complete`: false
 - Full Oracle snapshot: 2,957 exact; 15,691 partial; 19,725 unresolved;
@@ -92,10 +113,10 @@ events also remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 369 passed
+- Unit/integration tests: 383 passed
 - Focused object identity/token lifecycle tests: 15 passed
 - Focused copy-object lifecycle tests: 8 passed
-- Focused CR 704 tests: 21 passed
+- Focused CR 120/210/310/704 tests: 35 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
 - Seed-20260730 hidden-information audit: pass
@@ -114,7 +135,7 @@ events also remain blockers.
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `e280ebb72e9ad4f809d28e5151e7e2ae1b4e98dc78466478e15e9b2927b1e477`
+  `66c2960210a9885fd214981d91e9c772c1b6a816cd55d82db41405caa6e724ae`
 
 ## Deck-review evidence state
 
@@ -138,18 +159,25 @@ not broad Oracle completeness and not game/deck-quality evidence.
 ## Known limitations and next step
 
 There is no external blocker. Continue on `agent/rules-completeness` with the
-next dependency-ordered object/SBA slice:
+rule-by-rule conformance corpus requested after this Battle checkpoint:
 
-1. migrate remaining physical-reference links to typed incarnation/LKI
+1. create a versioned schema and stable generated case ID for every one of the
+   3,300 rules in the pinned rule index;
+2. report semantic passes, failures, blocked cases, skipped cases, and
+   definition-only cases separately so inventory presence cannot masquerade as
+   correctness;
+3. implement native Siege defeated-trigger exile and optional transformed
+   casting as a replayable continuation;
+4. migrate remaining physical-reference links to typed incarnation/LKI
    handles and finish CR 400.7 continuation policies;
-2. integrate destruction/loss with typed replacement and regeneration;
-3. add the remaining specialized CR 704.5 permanent/layout actions and
+5. integrate destruction/loss with typed replacement and regeneration;
+6. add the remaining specialized CR 704.5 permanent/layout actions and
    interaction tests;
-4. integrate serialized object timestamps into every continuous-effect source
+7. integrate serialized object timestamps into every continuous-effect source
    and implement CR 613.7m APNAP relative ordering;
-5. implement complete copiable-value, card-copy casting, Prepare, and
+8. implement complete copiable-value, card-copy casting, Prepare, and
    specialized copy interactions behind the CR 707 contract;
-6. rerun full coverage and every validation gate.
+9. rerun full coverage and every validation gate.
 
 The review-MVP branch still separately lacks three consecutive qualifying
 persistent-Codex games, review-batch aggregation, per-deck operation reports,

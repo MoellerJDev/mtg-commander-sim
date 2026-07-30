@@ -1,5 +1,5 @@
 {
-  "contract_count": 13,
+  "contract_count": 16,
   "contracts": [
     {
       "mechanic_id": "cr-122-counters",
@@ -14,6 +14,12 @@
       "version": 2
     },
     {
+      "mechanic_id": "cr-310-battles",
+      "path": "mechanics/contracts/battles.json",
+      "sha256": "a96a4adb6d225add643dd0ab6537f3757bcf15544d6a5360201b624bdaf3497c",
+      "version": 1
+    },
+    {
       "mechanic_id": "cr-613-interaction-of-continuous-effects",
       "path": "mechanics/contracts/continuous-layers.json",
       "sha256": "d134497c32d15cce341bb720aa46f8506562770cdd1e9c0cd0bfaf8c7455fbf9",
@@ -26,9 +32,21 @@
       "version": 1
     },
     {
+      "mechanic_id": "cr-120-damage",
+      "path": "mechanics/contracts/damage.json",
+      "sha256": "92a638046eb0de057424575a226bf3d674943c3fd901ea9cd507e5810b25aa50",
+      "version": 1
+    },
+    {
       "mechanic_id": "deathtouch",
       "path": "mechanics/contracts/deathtouch.json",
       "sha256": "9c3c4b6ed7f7a54ff49d8cdfd7c9bfe112cac135aaa126a1a7b8a87d0df7f8e9",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-210-defense",
+      "path": "mechanics/contracts/defense.json",
+      "sha256": "80a4c05326e3df844f1f82a20af7c519860a8d91eba8bd1617999425b650ff4f",
       "version": 1
     },
     {
@@ -70,8 +88,8 @@
     {
       "mechanic_id": "cr-704-state-based-actions",
       "path": "mechanics/contracts/state-based-actions.json",
-      "sha256": "5592b47eeb82f41b00d707bd222cd3c48bbe89dc1478d470366abfb5dbafbd85",
-      "version": 5
+      "sha256": "2ebd4a0dd11e2bf308a4251d2534ac5d2c6179dad0ef67b3052797e700fef20c",
+      "version": 6
     },
     {
       "mechanic_id": "cr-614-replacement-effects",
@@ -5156,17 +5174,31 @@
     },
     {
       "category": "game_concepts",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/damage.json",
+      "contract_sha256": "92a638046eb0de057424575a226bf3d674943c3fd901ea9cd507e5810b25aa50",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine._apply_damage_results_to_permanent and CommanderEngine._apply_combat_assignments",
+      "implementation_version": "damage-results-v2",
       "kind": "rules_section",
+      "known_blockers": [
+        "the complete CR 120.4 damage-event pipeline, excess damage, replacement, and prevention ordering are not implemented",
+        "infect, wither, lifelink, toxic, and all source-result combinations are not implemented generically",
+        "zero-damage event suppression and damage-trigger generation are not complete",
+        "combat assignment order, first strike, double strike, and trample remain incomplete"
+      ],
       "mechanic_id": "cr-120-damage",
       "official_name": "Damage",
       "rule_references": [
         "120"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_battle_damage_removes_defense_instead_of_marking_damage",
+        "test_planeswalker_damage_removes_loyalty_counters",
+        "test_departed_combat_source_deals_no_damage",
+        "test_battle_damage_and_state_action_replay_exactly"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -5376,17 +5408,30 @@
     },
     {
       "category": "card_characteristics",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/defense.json",
+      "contract_sha256": "80a4c05326e3df844f1f82a20af7c519860a8d91eba8bd1617999425b650ff4f",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CharacteristicState, CommanderEngine._initialize_intrinsic_entry_counters, and CommanderEngine._apply_damage_results_to_permanent",
+      "implementation_version": "defense-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "complete replacement-effect ordering for modified battlefield entry counters is not implemented",
+        "effects that directly set or switch a battle's defense outside ordinary counter changes are not implemented",
+        "the current Oracle snapshot contains provisional post-rules-snapshot Control Point battles whose final defense rules are not present in the pinned CR"
+      ],
       "mechanic_id": "cr-210-defense",
       "official_name": "Defense",
       "rule_references": [
         "210"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_battle_enters_with_printed_defense_and_copies_reset_it",
+        "test_battle_damage_removes_defense_instead_of_marking_damage",
+        "test_zero_defense_battle_waits_for_its_pending_trigger",
+        "test_battle_damage_and_state_action_replay_exactly"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -5586,17 +5631,40 @@
     },
     {
       "category": "card_types",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/battles.json",
+      "contract_sha256": "a96a4adb6d225add643dd0ab6537f3757bcf15544d6a5360201b624bdaf3497c",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine Battle entry, combat, trigger, damage, and protector state paths",
+      "implementation_version": "battles-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "native Siege defeated-trigger resolution does not yet exile and offer the exact transformed free cast; it fails closed to arbiter resolution",
+        "nonspell and token Battle entry paths do not yet suspend for an as-enters protector choice unless a trusted caller supplies the selected protector",
+        "attacking or blocking creatures becoming Battles and Battles changing controller during combat are not yet removed from combat by every continuous-effect path",
+        "future Battle subtypes are rejected until their protector predicates are present in a pinned Comprehensive Rules snapshot",
+        "complete simultaneous/APNAP protector choices and all Battle-targeting interactions are not implemented",
+        "the current Oracle snapshot contains two not-yet-Commander-legal Control Point previews that postdate the pinned rules snapshot and remain unsupported"
+      ],
       "mechanic_id": "cr-310-battles",
       "official_name": "Battles",
       "rule_references": [
         "310"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_battle_enters_with_printed_defense_and_copies_reset_it",
+        "test_battle_damage_removes_defense_instead_of_marking_damage",
+        "test_battle_trigger_from_same_incarnation_defers_state_action",
+        "test_old_incarnation_trigger_does_not_defer_battle_state_action",
+        "test_last_siege_defense_counter_queues_intrinsic_trigger",
+        "test_invalid_siege_protector_is_repaired_by_its_controller",
+        "test_battle_protector_choice_replays_exactly",
+        "test_siege_is_attackable_and_its_protector_blocks",
+        "test_battle_creature_cannot_attack_or_block",
+        "test_siege_protector_is_chosen_as_the_spell_resolves",
+        "test_battle_damage_and_state_action_replay_exactly"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -6445,16 +6513,17 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/state-based-actions.json",
-      "contract_sha256": "5592b47eeb82f41b00d707bd222cd3c48bbe89dc1478d470366abfb5dbafbd85",
-      "contract_version": 5,
+      "contract_sha256": "2ebd4a0dd11e2bf308a4251d2534ac5d2c6179dad0ef67b3052797e700fef20c",
+      "contract_version": 6,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "state_based_actions.evaluate_permanent_state_based_actions and CommanderEngine._stabilize",
-      "implementation_version": "state-based-actions-v6",
+      "implementation_version": "state-based-actions-v7",
       "kind": "rules_section",
       "known_blockers": [
         "specialized copy-object exceptions such as Prepare copies in exile are not implemented",
-        "Sagas, dungeons, space sculptor, battles, Roles, and speed state actions are not implemented",
+        "Sagas, dungeons, space sculptor, Roles, speed, and several other specialized state actions are not implemented",
+        "native Siege defeated-trigger transformed casting and future Battle subtypes remain unresolved",
         "maximum-counter abilities outside the reviewed numeric self-restriction sentence family remain unresolved",
         "Aura attachment to players and the complete enchant-quality grammar are not implemented",
         "regeneration and complete loss-event replacement ordering are not integrated",
@@ -6473,6 +6542,11 @@
         "test_counter_maximum_sentence_and_snapshot_action",
         "test_counter_maximum_overlaps_opposing_pair_removal",
         "test_rasputin_counter_maximum_replays_exactly",
+        "test_zero_defense_battle_waits_for_its_pending_trigger",
+        "test_battle_trigger_from_same_incarnation_defers_state_action",
+        "test_old_incarnation_trigger_does_not_defer_battle_state_action",
+        "test_invalid_siege_protector_is_repaired_by_its_controller",
+        "test_battle_protector_choice_replays_exactly",
         "test_unattached_and_illegally_attached_auras_leave",
         "test_equipment_detaches_from_illegal_or_protected_object",
         "test_fixed_point_moves_aura_after_enchanted_creature_dies",

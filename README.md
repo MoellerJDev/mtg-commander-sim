@@ -250,6 +250,24 @@ kind and numeric maximum from effective Oracle text rather than a card-name
 branch, and combines overlapping maximum and opposing +1/+1/-1/-1 removals
 without double-removing the same indistinguishable counters.
 
+Battle support is likewise type-driven rather than card-name-driven. A Battle
+entering the battlefield initializes defense counters from its derived
+copiable defense characteristic; damage removes defense, and the state-action
+snapshot distinguishes a zero-defense Battle whose exact-incarnation trigger
+is still pending. For the pinned rules snapshot, Sieges choose an opponent as
+protector while the spell resolves, may be attacked by every other player,
+and route blockers to that protector. Invalid protectors are repaired through
+a replayable controller choice.
+
+This is a partial CR 120/210/310/704 implementation. Removing a Siege's last
+defense counter queues the intrinsic trigger, but its exile-and-optional-
+transformed-cast resolution deliberately pauses at the arbiter boundary until
+the native transformed-cast continuation is implemented. Unknown future
+Battle subtypes and nonspell entries that require an unrepresented as-enters
+choice fail closed. In particular, the two Control Point previews in the July
+28 Oracle corpus postdate the June 19 pinned rules and are not silently
+treated as Sieges.
+
 ```bash
 python simctl.py oracle parse "Lightning Bolt" \
   --db data/scryfall-current.sqlite3

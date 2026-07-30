@@ -84,6 +84,8 @@ class CharacteristicState:
     abilities: list[str] = field(default_factory=list)
     power: int | None = None
     toughness: int | None = None
+    loyalty: int | None = None
+    defense: int | None = None
     copiable_values: dict[str, Any] = field(default_factory=dict)
 
     def snapshot(self) -> dict[str, Any]:
@@ -100,6 +102,8 @@ class CharacteristicState:
             "abilities": list(self.abilities),
             "power": self.power,
             "toughness": self.toughness,
+            "loyalty": self.loyalty,
+            "defense": self.defense,
             "copiable_values": dict(self.copiable_values),
         }
 

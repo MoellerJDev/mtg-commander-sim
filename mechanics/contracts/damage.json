@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-120-damage",
+  "official_name": "Damage",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "120",
+    "120.1",
+    "120.1a",
+    "120.2",
+    "120.2a",
+    "120.2b",
+    "120.3",
+    "120.3a",
+    "120.3c",
+    "120.3e",
+    "120.3h",
+    "120.4",
+    "120.5",
+    "120.8"
+  ],
+  "glossary_references": [
+    "Damage"
+  ],
+  "dependencies": [
+    "characteristics",
+    "counters",
+    "continuous-effects",
+    "replacement-effects",
+    "prevention-effects",
+    "state-based-actions"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "stack"
+    ],
+    "objects": [
+      "players",
+      "creatures",
+      "planeswalkers",
+      "battles",
+      "objects with multiple damageable permanent types"
+    ],
+    "events": [
+      "combat damage assignment",
+      "represented spell or ability damage",
+      "damage-result processing"
+    ],
+    "state_reads": [
+      "source and recipient characteristics",
+      "recipient life",
+      "marked damage",
+      "loyalty counters",
+      "defense counters"
+    ],
+    "state_writes": [
+      "player life loss",
+      "creature marked damage",
+      "planeswalker loyalty-counter removal",
+      "battle defense-counter removal",
+      "deathtouch damage marker"
+    ],
+    "costs": [],
+    "timing": [
+      "simple combat assignments are applied as one batch before state-based actions",
+      "semantic damage is processed during the resolving effect"
+    ],
+    "targets": [
+      "represented permanent damage rejects recipients that are not creatures, planeswalkers, or battles",
+      "departed combat sources and departed permanent recipients deal no combat damage"
+    ],
+    "choices": [
+      "complex combat assignment remains a player choice"
+    ],
+    "hidden_information": [
+      "damage recipients and results are public"
+    ],
+    "apnap": [
+      "simultaneous simple combat assignments are collected before state stabilization"
+    ],
+    "layers": [
+      "derived recipient card types and source colors or keywords are read before applying represented results"
+    ],
+    "replacement_effects": [
+      "complete CR 120.4 damage-event replacement and prevention sequencing remains blocked"
+    ],
+    "copy": [
+      "copied card types and keywords participate through derived characteristics"
+    ],
+    "control_change": [
+      "current source controller is used for damage metadata and commander attribution"
+    ],
+    "zone_change": [
+      "a source absent from the battlefield at the combat-damage event deals no combat damage"
+    ],
+    "source_leaves": [
+      "the simple combat path verifies the source is still on the battlefield before applying its assignment"
+    ]
+  },
+  "variants": [
+    "damage to a creature",
+    "damage to a planeswalker",
+    "damage to a battle",
+    "damage to a permanent with multiple applicable card types",
+    "combat source leaves before damage"
+  ],
+  "witness_cards": [
+    {
+      "name": "Lightning Bolt",
+      "oracle_id": "4457ed35-7c10-48c8-9776-456485fdf070"
+    },
+    {
+      "name": "Invasion of Gobakhan // Lightshield Array",
+      "oracle_id": "86c32a56-3272-4738-b0b3-a8aa49a17ce4"
+    }
+  ],
+  "rulings": [
+    "Invasion of Gobakhan 2023-04-14: damage to a battle removes that many defense counters"
+  ],
+  "test_ids": [
+    "test_battle_damage_removes_defense_instead_of_marking_damage",
+    "test_planeswalker_damage_removes_loyalty_counters",
+    "test_departed_combat_source_deals_no_damage",
+    "test_battle_damage_and_state_action_replay_exactly"
+  ],
+  "implementation": {
+    "component": "CommanderEngine._apply_damage_results_to_permanent and CommanderEngine._apply_combat_assignments",
+    "version": "damage-results-v2"
+  },
+  "known_blockers": [
+    "the complete CR 120.4 damage-event pipeline, excess damage, replacement, and prevention ordering are not implemented",
+    "infect, wither, lifelink, toxic, and all source-result combinations are not implemented generically",
+    "zero-damage event suppression and damage-trigger generation are not complete",
+    "combat assignment order, first strike, double strike, and trample remain incomplete"
+  ],
+  "review_status": "reviewed"
+}

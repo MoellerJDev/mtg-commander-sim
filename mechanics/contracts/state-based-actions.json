@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 5,
+  "contract_version": 6,
   "mechanic_id": "cr-704-state-based-actions",
   "official_name": "State-Based Actions",
   "effective_date": "2026-06-19",
@@ -28,6 +28,9 @@
     "704.5p",
     "704.5q",
     "704.5r",
+    "704.5v",
+    "704.5w",
+    "704.5x",
     "704.6c",
     "704.8",
     "122",
@@ -61,6 +64,7 @@
       "represented spell and card copies",
       "creatures",
       "planeswalkers",
+      "battles",
       "legendary permanents",
       "World permanents",
       "Auras",
@@ -76,7 +80,8 @@
     ],
     "state_reads": [
       "life, poison, empty draw, and commander damage",
-      "derived types, subtypes, keywords, toughness, loyalty, and damage",
+      "derived types, subtypes, keywords, toughness, loyalty, defense, and damage",
+      "Battle protector, current attackers, and exact-incarnation pending triggers",
       "the timestamp from which each permanent has continuously had the World supertype",
       "attachment restriction and protected qualities",
       "+1/+1 and -1/-1 counter counts",
@@ -91,7 +96,9 @@
       "legend choice",
       "unattachment",
       "opposing counter-pair removal",
-      "counters above a permanent's stated maximum removed"
+      "counters above a permanent's stated maximum removed",
+      "zero-defense Battle graveyard moves",
+      "Battle protector repair or no-protector graveyard moves"
     ],
     "costs": [],
     "timing": [
@@ -136,6 +143,8 @@
     "legend rule",
     "the unique newest World permanent survives",
     "World permanents tied for newest all leave simultaneously",
+    "zero-defense Battle with and without a pending source trigger",
+    "Siege protector repair in multiplayer",
     "Aura, Equipment, and Fortification cleanup",
     "opposing +1/+1 and -1/-1 counters",
     "Rasputin Dreamweaver dream-counter maximum",
@@ -179,6 +188,11 @@
     "test_counter_maximum_sentence_and_snapshot_action",
     "test_counter_maximum_overlaps_opposing_pair_removal",
     "test_rasputin_counter_maximum_replays_exactly",
+    "test_zero_defense_battle_waits_for_its_pending_trigger",
+    "test_battle_trigger_from_same_incarnation_defers_state_action",
+    "test_old_incarnation_trigger_does_not_defer_battle_state_action",
+    "test_invalid_siege_protector_is_repaired_by_its_controller",
+    "test_battle_protector_choice_replays_exactly",
     "test_unattached_and_illegally_attached_auras_leave",
     "test_equipment_detaches_from_illegal_or_protected_object",
     "test_fixed_point_moves_aura_after_enchanted_creature_dies",
@@ -201,11 +215,12 @@
   ],
   "implementation": {
     "component": "state_based_actions.evaluate_permanent_state_based_actions and CommanderEngine._stabilize",
-    "version": "state-based-actions-v6"
+    "version": "state-based-actions-v7"
   },
   "known_blockers": [
     "specialized copy-object exceptions such as Prepare copies in exile are not implemented",
-    "Sagas, dungeons, space sculptor, battles, Roles, and speed state actions are not implemented",
+    "Sagas, dungeons, space sculptor, Roles, speed, and several other specialized state actions are not implemented",
+    "native Siege defeated-trigger transformed casting and future Battle subtypes remain unresolved",
     "maximum-counter abilities outside the reviewed numeric self-restriction sentence family remain unresolved",
     "Aura attachment to players and the complete enchant-quality grammar are not implemented",
     "regeneration and complete loss-event replacement ordering are not integrated",

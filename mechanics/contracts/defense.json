@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-210-defense",
+  "official_name": "Defense",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "210",
+    "210.1",
+    "310.4",
+    "310.4a",
+    "310.4b",
+    "310.4c",
+    "310.6",
+    "704.5v"
+  ],
+  "glossary_references": [
+    "Defense"
+  ],
+  "dependencies": [
+    "battles",
+    "counters",
+    "copying",
+    "replacement-effects",
+    "state-based-actions"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "library",
+      "hand",
+      "stack",
+      "battlefield",
+      "graveyard",
+      "exile",
+      "command"
+    ],
+    "objects": [
+      "battle cards",
+      "battle permanents",
+      "permanents entering as copies of battles"
+    ],
+    "events": [
+      "battle enters the battlefield",
+      "battle receives damage",
+      "defense counter changes",
+      "state-based action snapshot"
+    ],
+    "state_reads": [
+      "printed defense number outside the battlefield",
+      "derived copiable defense value",
+      "defense-counter count on the battlefield"
+    ],
+    "state_writes": [
+      "intrinsic entry defense counters",
+      "defense-counter removal from damage"
+    ],
+    "costs": [],
+    "timing": [
+      "printed defense initializes counters as the permanent enters",
+      "state-based actions inspect the resulting defense after trigger collection"
+    ],
+    "targets": [
+      "a battle is a represented damageable permanent"
+    ],
+    "choices": [],
+    "hidden_information": [
+      "printed and battlefield defense are public for visible battle objects"
+    ],
+    "apnap": [],
+    "layers": [
+      "copyable defense is derived before entry counters are initialized"
+    ],
+    "replacement_effects": [
+      "the intrinsic enters-with-defense behavior is applied by the authoritative battlefield-entry path"
+    ],
+    "copy": [
+      "a permanent entering as a copy of a battle receives the copied printed defense count rather than the source permanent's current counters"
+    ],
+    "control_change": [
+      "control changes do not change defense counters"
+    ],
+    "zone_change": [
+      "defense counters do not survive a zone change and a later battlefield entry initializes a new count"
+    ],
+    "source_leaves": [
+      "a departed battle is a new object and does not retain its former defense counters"
+    ]
+  },
+  "variants": [
+    "printed defense outside the battlefield",
+    "battlefield defense from counters",
+    "copy of a battle entering",
+    "damage removing defense"
+  ],
+  "witness_cards": [
+    {
+      "name": "Invasion of Gobakhan // Lightshield Array",
+      "oracle_id": "86c32a56-3272-4738-b0b3-a8aa49a17ce4"
+    }
+  ],
+  "rulings": [
+    "Invasion of Gobakhan 2023-04-14: battles and permanents entering as copies of battles enter with the printed number of defense counters",
+    "Invasion of Gobakhan 2023-04-14: damage removes that many defense counters"
+  ],
+  "test_ids": [
+    "test_battle_enters_with_printed_defense_and_copies_reset_it",
+    "test_battle_damage_removes_defense_instead_of_marking_damage",
+    "test_zero_defense_battle_waits_for_its_pending_trigger",
+    "test_battle_damage_and_state_action_replay_exactly"
+  ],
+  "implementation": {
+    "component": "CharacteristicState, CommanderEngine._initialize_intrinsic_entry_counters, and CommanderEngine._apply_damage_results_to_permanent",
+    "version": "defense-v1"
+  },
+  "known_blockers": [
+    "complete replacement-effect ordering for modified battlefield entry counters is not implemented",
+    "effects that directly set or switch a battle's defense outside ordinary counter changes are not implemented",
+    "the current Oracle snapshot contains provisional post-rules-snapshot Control Point battles whose final defense rules are not present in the pinned CR"
+  ],
+  "review_status": "reviewed"
+}

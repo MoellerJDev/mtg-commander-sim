@@ -56,6 +56,7 @@ class CardInstance:
     known_to: list[str] = field(default_factory=list)
     attacking: str | None = None
     blocking: str | None = None
+    battle_protector: str | None = None
     object_kind: ObjectKind = "card"
 
     def __post_init__(self) -> None:

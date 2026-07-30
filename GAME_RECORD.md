@@ -81,6 +81,12 @@ participate in state hashes and exact replay but are not included in a seat
 projection. This remains an additive v3 state extension; it does not redesign
 the record format.
 
+`CardInstance.battle_protector` is another additive public game-state field.
+It is serialized and hashed so Siege entry choices, combat routing, protector
+repair, and command replay agree exactly. Seat projections expose only the
+protector seat as `protect`; they do not expose the physical card identifier,
+logical-incarnation counter, or capability data.
+
 Fresh native records use `manifest.replay.mode = "command_replay"`. The
 separate `legacy_snapshot` mode is reserved for migrated records whose accepted
 commands cannot be reconstructed honestly.

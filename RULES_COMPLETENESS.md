@@ -15,7 +15,7 @@ complete rules or Oracle coverage. The current June 19, 2026 CR / July 28,
 - 156 rules sections indexed
 - 733 glossary entries indexed
 - 425 CR section, keyword-action, and keyword-ability mechanics discovered
-- 12 mechanics under versioned partial contracts and 413 unclassified
+- 16 mechanics under versioned partial contracts and 409 unclassified
 - 0 rules or mechanics promoted to trusted by the new registry
 - 38,373 Oracle IDs and 41,582 faces scanned
 - 2,957 exact (primarily textless), 15,691 partially lowerable, and 19,725
@@ -209,9 +209,25 @@ Player loss, poison, empty draw, commander damage, planeswalker loyalty, and
 the legend rule remain integrated in `CommanderEngine`. The contracts remain
 partial: complete copiable values, card-copy casting/playing, Prepare,
 specialized copy interactions, maximum-counter wording outside the reviewed
-numeric self-restriction family, Sagas, dungeons, space sculptor, battles,
-Roles, speed, complete enchant-quality grammar, regeneration, and simultaneous
+numeric self-restriction family, Sagas, dungeons, space sculptor, Roles,
+speed, complete enchant-quality grammar, regeneration, and simultaneous
 loss-event replacement still block trust.
+
+The partial CR 120/210/310 contracts add generic Battle state. Derived
+characteristics carry printed defense through copying; battlefield entry
+initializes new defense counters; damage removes loyalty, marks creature
+damage, and removes defense according to every applicable permanent type.
+Siege protectors are chosen during resolution, exposed publicly without
+authoritative object identity, used for attack/block routing, and repaired by
+state-based action. The last-defense trigger and zero-defense exception are
+logical-incarnation-aware and replayable.
+
+This is not complete Battle support. The Siege trigger currently stops at the
+existing arbiter boundary instead of natively exiling and offering a
+transformed free cast. Type/control changes during combat, full damage-event
+replacement ordering, nonspell as-enters protector continuations, and future
+Battle-type protector predicates remain blocked. Post-snapshot Control Point
+previews are rejected rather than guessed.
 
 The Oracle compiler currently recognizes whole-sentence templates for simple
 draw, life, damage, destroy, exile, return, counter, mill, tap/untap, scry,

@@ -150,6 +150,8 @@ class StateProjector:
             obj["at"] = attached.ref if attached else card.attached_to
         if card.attacking:
             obj["atk"] = card.attacking
+        if card.battle_protector:
+            obj["protect"] = card.battle_protector
         return obj
 
     def _zone(self, object_ids: Iterable[str], principal: str) -> list[dict[str, Any]]:

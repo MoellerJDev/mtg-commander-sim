@@ -596,6 +596,8 @@ class CommanderEngine:
             ],
             power=numeric(result.get("power")),
             toughness=numeric(result.get("toughness")),
+            loyalty=numeric(result.get("loyalty")),
+            defense=numeric(result.get("defense")),
         )
         effects: list[ContinuousEffect] = []
         timestamp = 0
@@ -609,13 +611,20 @@ class CommanderEngine:
                 "oracle_text": "text",
                 "power": "power",
                 "toughness": "toughness",
+                "loyalty": "loyalty",
+                "defense": "defense",
                 "colors": "colors",
                 "keywords": "abilities",
             }
             for source_field, target_field in field_map.items():
                 if source_field in overrides:
                     value = copy.deepcopy(overrides[source_field])
-                    if target_field in {"power", "toughness"}:
+                    if target_field in {
+                        "power",
+                        "toughness",
+                        "loyalty",
+                        "defense",
+                    }:
                         parsed = numeric(value)
                         if parsed is None:
                             continue
@@ -734,6 +743,10 @@ class CommanderEngine:
             result["power"] = str(values["power"])
         if values["toughness"] is not None:
             result["toughness"] = str(values["toughness"])
+        if values["loyalty"] is not None:
+            result["loyalty"] = str(values["loyalty"])
+        if values["defense"] is not None:
+            result["defense"] = str(values["defense"])
 
         supertype_order = ["Basic", "Legendary", "Snow", "World"]
         type_order = [
@@ -807,6 +820,8 @@ class CommanderEngine:
                 ),
                 "power": token_characteristics.get("power"),
                 "toughness": token_characteristics.get("toughness"),
+                "loyalty": token_characteristics.get("loyalty"),
+                "defense": token_characteristics.get("defense"),
                 "keywords": list(
                     token_characteristics.get("keywords", [])
                 ),
@@ -833,6 +848,7 @@ class CommanderEngine:
                 "power": face.get("power") if face else record.power,
                 "toughness": face.get("toughness") if face else record.toughness,
                 "loyalty": face.get("loyalty") if face else record.loyalty,
+                "defense": face.get("defense") if face else record.defense,
                 "keywords": list(record.keywords),
                 "colors": list(record.colors),
                 "produced_mana": list(record.produced_mana),
@@ -1164,6 +1180,16 @@ class CommanderEngine:
                     if face is not None
                     else record.toughness
                 ),
+                "loyalty": (
+                    face.get("loyalty")
+                    if face is not None
+                    else record.loyalty
+                ),
+                "defense": (
+                    face.get("defense")
+                    if face is not None
+                    else record.defense
+                ),
                 "keywords": list(record.keywords),
                 "colors": list(record.colors),
                 "produced_mana": list(record.produced_mana),
@@ -1305,6 +1331,8 @@ class CommanderEngine:
         card.attached_to = None
         card.attachments.clear()
         card.phased_out = False
+        if not stack_to_battlefield:
+            card.battle_protector = None
 
         # CR 400.7 gives the destination a new logical object.  Retain only
         # state covered by an implemented exception or by the token's initial
@@ -1404,6 +1432,238 @@ class CommanderEngine:
             if line.strip()
         )
 
+    def _initialize_intrinsic_entry_counters(
+        self,
+        card: CardInstance,
+    ) -> None:
+        """Apply counter entry abilities intrinsic to represented card types."""
+
+        if card.zone != "battlefield":
+            return
+        data = self._effective_card_data(card)
+        card_types, subtypes, _ = self._type_parts(
+            str(data.get("type_line") or "")
+        )
+        if "planeswalker" in card_types:
+            try:
+                loyalty = int(str(data.get("loyalty")))
+            except (TypeError, ValueError):
+                raise GameRuleError(
+                    f"{self.display_name(card.object_id)} is a "
+                    "planeswalker without represented starting loyalty"
+                )
+            if loyalty < 0:
+                raise GameRuleError(
+                    "Starting loyalty cannot be negative"
+                )
+            card.counters["loyalty"] = loyalty
+            card.annotations["loyalty_initialized"] = True
+        if "battle" not in card_types:
+            card.battle_protector = None
+            return
+        if "siege" in subtypes:
+            if (
+                card.battle_protector not in self.active_seats
+                or card.battle_protector == card.controller
+            ):
+                raise GameRuleError(
+                    f"{self.display_name(card.object_id)} must enter with "
+                    "one of its controller's opponents as protector"
+                )
+        elif subtypes:
+            raise GameRuleError(
+                "The protector predicate for Battle type(s) "
+                f"{sorted(subtypes)} is not compiled"
+            )
+        else:
+            card.battle_protector = card.controller
+        try:
+            defense = int(str(data.get("defense")))
+        except (TypeError, ValueError):
+            raise GameRuleError(
+                f"{self.display_name(card.object_id)} is a Battle without "
+                "a represented printed defense number"
+            )
+        if defense < 0:
+            raise GameRuleError("Battle defense cannot be negative")
+        card.counters["defense"] = defense
+
+    @staticmethod
+    def _trigger_item_matches_incarnation(
+        card: CardInstance,
+        item: StackItem | Mapping[str, Any],
+    ) -> bool:
+        """Whether one pending trigger was sourced by this exact object."""
+
+        if isinstance(item, StackItem):
+            source_object_id = item.source_object_id
+            kind = item.kind
+            context = item.context
+        else:
+            source_object_id = item.get("source_object_id")
+            kind = str(item.get("kind") or "")
+            context = dict(item.get("context") or {})
+        if (
+            source_object_id != card.object_id
+            or "triggered" not in str(kind).casefold()
+        ):
+            return False
+        source_incarnation = context.get("source_logical_object_id")
+        return (
+            source_incarnation is None
+            or str(source_incarnation) == card.logical_object_id
+        )
+
+    def _battle_trigger_pending(self, card: CardInstance) -> bool:
+        if any(
+            self._trigger_item_matches_incarnation(card, item)
+            for item in self.state.stack
+        ):
+            return True
+        return any(
+            self._trigger_item_matches_incarnation(card, item)
+            for batch in self.state.pending_trigger_batches
+            for group in batch.get("groups", [])
+            for item in group.get("items", [])
+        )
+
+    def _queue_siege_defeated_trigger(
+        self,
+        battle: CardInstance,
+    ) -> None:
+        """Queue the intrinsic Siege trigger after its last defense counter."""
+
+        if (
+            battle.zone != "battlefield"
+            or battle.phased_out
+            or battle.controller not in self.active_seats
+        ):
+            return
+        _, subtypes, _ = self._type_parts(
+            str(
+                self._effective_card_data(battle).get("type_line")
+                or ""
+            )
+        )
+        if "siege" not in subtypes:
+            return
+        pending_items: list[StackItem | Mapping[str, Any]] = [
+            *self.state.stack,
+            *[
+                item
+                for batch in self.state.pending_trigger_batches
+                for group in batch.get("groups", [])
+                for item in group.get("items", [])
+            ],
+        ]
+        if any(
+            self._trigger_item_matches_incarnation(battle, item)
+            and (
+                item.semantic_key
+                if isinstance(item, StackItem)
+                else item.get("semantic_key")
+            )
+            == "builtin:siege-defeated"
+            for item in pending_items
+        ):
+            return
+        ref = self._next_ref("S")
+        self._enqueue_semantic_trigger_batch(
+            [
+                StackItem(
+                    stack_id=self._stable_runtime_id("stack", ref),
+                    ref=ref,
+                    kind="triggered_ability",
+                    controller=battle.controller,
+                    label=f"{self.display_name(battle.object_id)} defeated",
+                    source_object_id=battle.object_id,
+                    semantic_key="builtin:siege-defeated",
+                    visibility=list(self.seats),
+                    context={
+                        "event": "battle.last_defense_removed",
+                        "battle": battle.ref,
+                        "source_logical_object_id": (
+                            battle.logical_object_id
+                        ),
+                        "requires_native_transformed_cast": True,
+                    },
+                )
+            ]
+        )
+
+    def _change_permanent_counter(
+        self,
+        card: CardInstance,
+        name: str,
+        delta: int,
+    ) -> tuple[int, int]:
+        """Change one counter kind without permitting negative counters."""
+
+        counter = " ".join(str(name).casefold().split())
+        if not counter:
+            raise GameRuleError("Counter effects require a counter name")
+        before = max(0, int(card.counters.get(counter, 0)))
+        after = max(0, before + int(delta))
+        if after:
+            card.counters[counter] = after
+        else:
+            card.counters.pop(counter, None)
+        if counter == "defense" and before > 0 and after == 0:
+            self._queue_siege_defeated_trigger(card)
+        return before, after
+
+    def _apply_damage_results_to_permanent(
+        self,
+        card: CardInstance,
+        amount: int,
+        *,
+        deathtouch: bool = False,
+    ) -> dict[str, Any]:
+        """Apply the represented CR 120.3 results of permanent damage."""
+
+        damage = int(amount)
+        if damage < 0:
+            raise GameRuleError("Damage cannot be negative")
+        data = self._effective_card_data(card)
+        card_types, _, _ = self._type_parts(
+            str(data.get("type_line") or "")
+        )
+        damageable_types = card_types.intersection(
+            {"battle", "creature", "planeswalker"}
+        )
+        if not damageable_types:
+            raise GameRuleError(
+                f"Damage cannot be dealt to {card.ref}; it is not a "
+                "Battle, creature, or planeswalker"
+            )
+        result: dict[str, Any] = {
+            "amount": damage,
+            "types": sorted(damageable_types),
+        }
+        if damage == 0:
+            return result
+        if "creature" in card_types:
+            card.marked_damage += damage
+            card.deathtouch_damage = (
+                card.deathtouch_damage or deathtouch
+            )
+            result["marked_damage"] = damage
+        if "planeswalker" in card_types:
+            before, after = self._change_permanent_counter(
+                card,
+                "loyalty",
+                -damage,
+            )
+            result["loyalty_removed"] = before - after
+        if "battle" in card_types:
+            before, after = self._change_permanent_counter(
+                card,
+                "defense",
+                -damage,
+            )
+            result["defense_removed"] = before - after
+        return result
+
     def move_card(
         self,
         object_id: str,
@@ -1412,6 +1672,7 @@ class CommanderEngine:
         controller: str | None = None,
         tapped: bool | None = None,
         enter_face: str | None = None,
+        battle_protector: str | None = None,
         zone_timestamp: int | None = None,
         position: str = "top",
         reveal_to: Iterable[str] | None = None,
@@ -1503,17 +1764,12 @@ class CommanderEngine:
             )
             card.acquired_control_turn_count = self.state.players[card.controller].turns_begun
             card.entered_battlefield_turn_sequence = self.state.turn_sequence
-            record = self.card_record(card)
-            if (
-                record is not None
-                and "planeswalker" in record.type_line.casefold()
-                and record.loyalty is not None
-            ):
-                card.counters["loyalty"] = int(record.loyalty)
-                card.annotations["loyalty_initialized"] = True
+            if battle_protector is not None:
+                card.battle_protector = str(battle_protector)
             self.state.players[card.controller].zones["battlefield"].append(
                 object_id
             )
+            self._initialize_intrinsic_entry_counters(card)
             pending_aura_target = card.annotations.pop(
                 "pending_aura_target",
                 None,
@@ -2360,6 +2616,10 @@ class CommanderEngine:
             self._complete_cleanup_discard(decision)
         elif kind == "state.legend":
             self._complete_legend_choice(decision)
+        elif kind == "state.battle_protector":
+            self._complete_battle_protector_choice(decision)
+        elif kind == "battle.enter_protector":
+            self._complete_battle_entry_protector_choice(decision)
         elif kind == "choice.apnap":
             self._complete_apnap_choice(decision)
         elif kind == "trigger.order":
@@ -4517,6 +4777,11 @@ class CommanderEngine:
         face = self._select_cast_face(record, response.get("face"))
         type_line = str(face.get("type_line") or "") if face else record.type_line
         mana_cost = str(face.get("mana_cost") or "") if face else record.mana_cost
+        if response.get("protector") is not None:
+            raise GameRuleError(
+                "A Battle protector is chosen as the Battle enters, not "
+                "while its spell is cast"
+            )
         is_instant = "instant" in type_line.casefold()
         has_flash = record.has_flash
         if self.state.config.strict_timing and not (is_instant or has_flash):
@@ -8137,6 +8402,9 @@ class CommanderEngine:
                     context={
                         "event": event,
                         **copy.deepcopy(dict(context)),
+                        "source_logical_object_id": (
+                            source.logical_object_id
+                        ),
                         **(
                             {"trigger_target_selection_pending": True}
                             if program.target_schema
@@ -9407,6 +9675,153 @@ class CommanderEngine:
                 return not any(marker in oracle for marker in semantic_markers)
         return False
 
+    def _begin_battle_entry_protector_choice(
+        self,
+        item: StackItem,
+    ) -> bool:
+        """Request the CR 310.8a protector choice as a Battle enters."""
+
+        if (
+            item.default_destination != "battlefield"
+            or item.card_object_id not in self.state.cards
+        ):
+            return False
+        card = self.state.cards[item.card_object_id]
+        if card.zone != "stack":
+            return False
+        card_types, subtypes, _ = self._type_parts(
+            str(
+                self._effective_card_data(card).get("type_line")
+                or ""
+            )
+        )
+        if "battle" not in card_types:
+            return False
+        if not subtypes:
+            card.battle_protector = card.controller
+            return False
+        if "siege" not in subtypes:
+            raise GameRuleError(
+                "The protector predicate for Battle type(s) "
+                f"{sorted(subtypes)} is not compiled"
+            )
+        if (
+            card.battle_protector in self.active_seats
+            and card.battle_protector != card.controller
+        ):
+            return False
+        candidates = [
+            opponent
+            for opponent in self.active_seats
+            if opponent != card.controller
+        ]
+        if not candidates:
+            raise GameRuleError(
+                "No opponent is available to protect this Siege"
+            )
+        self.permissions.issue(
+            kind="battle.enter_protector",
+            role="pilot",
+            actors=[card.controller],
+            allowed_actions=["choose"],
+            payload_by_actor={
+                card.controller: {
+                    "stack": item.ref,
+                    "battle": card.ref,
+                    "name": self.display_name(card.object_id),
+                    "protectors": candidates,
+                    "instruction": (
+                        "Choose an opponent to protect this Siege as "
+                        "it enters."
+                    ),
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "protector": {
+                                    "type": "seat",
+                                    "legal_seats": candidates,
+                                    "required": True,
+                                }
+                            },
+                        }
+                    ],
+                }
+            },
+            continuation={
+                "stack_ref": item.ref,
+                "object_id": card.object_id,
+                "source_logical_object_id": card.logical_object_id,
+                "candidates": candidates,
+            },
+        )
+        return True
+
+    def _complete_battle_entry_protector_choice(
+        self,
+        decision: Any,
+    ) -> None:
+        seat = decision.actors[0]
+        stack_ref = str(decision.continuation["stack_ref"])
+        item = next(
+            (
+                candidate
+                for candidate in self.state.stack
+                if candidate.ref == stack_ref
+            ),
+            None,
+        )
+        card = self.state.cards.get(
+            str(decision.continuation["object_id"])
+        )
+        if (
+            item is None
+            or card is None
+            or item.card_object_id != card.object_id
+            or card.zone != "stack"
+            or card.controller != seat
+            or card.logical_object_id
+            != str(
+                decision.continuation[
+                    "source_logical_object_id"
+                ]
+            )
+        ):
+            raise GameRuleError(
+                "The Battle entry choice no longer matches that spell"
+            )
+        protector = str(
+            decision.responses[seat].get("protector")
+            or decision.responses[seat].get("player")
+            or ""
+        )
+        candidates = {
+            str(value)
+            for value in decision.continuation.get(
+                "candidates", []
+            )
+        }
+        if protector not in candidates or protector not in self.active_seats:
+            raise GameRuleError(
+                "Choose one of the legal Siege protectors"
+            )
+        card.battle_protector = protector
+        self._log(
+            seat,
+            "battle.protector.chosen",
+            f"{seat} chose {protector} to protect {card.ref}.",
+            {
+                "stack": item.ref,
+                "battle": card.ref,
+                "protector": protector,
+            },
+            importance=2,
+            changed_objects=[card.object_id],
+            changed_players=[seat, protector],
+        )
+        self._prepare_stack_resolution()
+
     def _prepare_stack_resolution(self) -> None:
         if self.state.pending_trigger_batches and self._stabilize():
             return
@@ -9414,6 +9829,8 @@ class CommanderEngine:
             self._advance_step()
             return
         item = self.state.stack[-1]
+        if self._begin_battle_entry_protector_choice(item):
+            return
         if item.semantic_key == "builtin:storm":
             self._prepare_storm_resolution(item)
             return
@@ -14632,6 +15049,11 @@ class CommanderEngine:
             str(value).casefold()
             for value in blocker_data.get("keywords", [])
         }
+        blocker_types, _, _ = self._type_parts(
+            str(blocker_data.get("type_line") or "")
+        )
+        if "battle" in blocker_types:
+            return False, "blocker_is_battle"
         if "can't block" in str(
             blocker_data.get("oracle_text") or ""
         ).casefold():
@@ -14662,7 +15084,16 @@ class CommanderEngine:
         for oid in self.state.players[active].zones["battlefield"]:
             card = self.state.cards[oid]
             data = self._effective_card_data(card)
-            if card.controller == active and not card.tapped and not card.phased_out and "creature" in str(data.get("type_line") or "").casefold():
+            card_types, _, _ = self._type_parts(
+                str(data.get("type_line") or "")
+            )
+            if (
+                card.controller == active
+                and not card.tapped
+                and not card.phased_out
+                and "creature" in card_types
+                and "battle" not in card_types
+            ):
                 candidates.append({"id": card.ref, "name": self.display_name(oid), "sick": self._is_summoning_sick(card), "haste": "Haste" in data.get("keywords", [])})
         if not any(
             not candidate["sick"] or candidate["haste"]
@@ -14677,8 +15108,90 @@ class CommanderEngine:
             role="pilot",
             actors=[active],
             allowed_actions=["attack"],
-            payload_by_actor={active: {"candidates": candidates, "defenders": [seat for seat in self.active_seats if seat != active]}},
+            payload_by_actor={
+                active: {
+                    "candidates": candidates,
+                    "defenders": [
+                        *[
+                            seat
+                            for seat in self.active_seats
+                            if seat != active
+                        ],
+                        *[
+                            battle["id"]
+                            for battle in self._attackable_battles(
+                                active
+                            )
+                        ],
+                    ],
+                    "battle_defenders": self._attackable_battles(
+                        active
+                    ),
+                }
+            },
         )
+
+    def _attackable_battles(self, attacker: str) -> list[dict[str, Any]]:
+        battles: list[dict[str, Any]] = []
+        for card in self.state.cards.values():
+            if (
+                card.zone != "battlefield"
+                or card.phased_out
+                or card.battle_protector not in self.active_seats
+                or card.battle_protector == attacker
+            ):
+                continue
+            card_types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(card).get("type_line")
+                    or ""
+                )
+            )
+            if "battle" not in card_types:
+                continue
+            battles.append(
+                {
+                    "id": card.ref,
+                    "name": self.display_name(card.object_id),
+                    "controller": card.controller,
+                    "protector": card.battle_protector,
+                    "defense": int(
+                        card.counters.get("defense", 0)
+                    ),
+                }
+            )
+        return sorted(battles, key=lambda value: value["id"])
+
+    def _battle_for_attack_target(
+        self,
+        value: str,
+    ) -> CardInstance | None:
+        battle = next(
+            (
+                card
+                for card in self.state.cards.values()
+                if card.ref == value and card.zone == "battlefield"
+            ),
+            None,
+        )
+        if battle is None:
+            return None
+        card_types, _, _ = self._type_parts(
+            str(
+                self._effective_card_data(battle).get("type_line")
+                or ""
+            )
+        )
+        return battle if "battle" in card_types else None
+
+    def _defending_player_for_attack_target(
+        self,
+        value: str,
+    ) -> str | None:
+        if value in self.active_seats:
+            return value
+        battle = self._battle_for_attack_target(value)
+        return battle.battle_protector if battle is not None else None
 
     def _complete_attackers(self, decision: Any) -> None:
         active = decision.actors[0]
@@ -14711,11 +15224,33 @@ class CommanderEngine:
             card = self._resolve_object(active, str(value), zones={"battlefield"}, controlled_only=True)
             if card.object_id in used:
                 raise GameRuleError("A creature cannot be declared twice")
-            if defender not in self.active_seats or defender == active:
-                raise GameRuleError(f"Invalid defending player {defender}")
+            defender = str(defender)
+            if defender in self.active_seats:
+                if defender == active:
+                    raise GameRuleError(
+                        f"Invalid defending player {defender}"
+                    )
+            else:
+                battle = self._battle_for_attack_target(defender)
+                if (
+                    battle is None
+                    or battle.battle_protector not in self.active_seats
+                    or battle.battle_protector == active
+                ):
+                    raise GameRuleError(
+                        f"Invalid Battle defender {defender}"
+                    )
+                defender = battle.ref
             data = self._effective_card_data(card)
-            if "creature" not in str(data.get("type_line") or "").casefold():
+            card_types, _, _ = self._type_parts(
+                str(data.get("type_line") or "")
+            )
+            if "creature" not in card_types:
                 raise GameRuleError(f"{card.ref} is not a creature")
+            if "battle" in card_types:
+                raise GameRuleError(
+                    f"{card.ref} cannot attack because it is a Battle"
+                )
             if card.tapped:
                 raise GameRuleError(f"{card.ref} is tapped")
             if self._is_summoning_sick(card) and "Haste" not in data.get("keywords", []):
@@ -14726,7 +15261,15 @@ class CommanderEngine:
             self.state.combat.attackers[card.object_id] = str(defender)
             used.add(card.object_id)
         self.state.combat.attackers_declared = True
-        self.state.combat.defending_players = [seat for seat in self.apnap_order() if seat in set(self.state.combat.attackers.values())]
+        defending_players = {
+            self._defending_player_for_attack_target(target)
+            for target in self.state.combat.attackers.values()
+        }
+        self.state.combat.defending_players = [
+            seat
+            for seat in self.apnap_order()
+            if seat in defending_players
+        ]
         self._log(active, "combat.attack", f"{active} attacked with {len(used)} creature(s).", {"attackers": {self.state.cards[oid].ref: defender for oid, defender in self.state.combat.attackers.items()}}, importance=2, changed_objects=list(used), changed_players=[active])
         attack_triggers: list[StackItem] = []
         for object_id in used:
@@ -14778,7 +15321,8 @@ class CommanderEngine:
         attacker_cards = [
             self.state.cards[oid]
             for oid, target in self.state.combat.attackers.items()
-            if target == defender
+            if self._defending_player_for_attack_target(target)
+            == defender
         ]
         attackers = [card.ref for card in attacker_cards]
         blockers = []
@@ -14787,7 +15331,13 @@ class CommanderEngine:
             card = self.state.cards[oid]
             if card.controller != defender or card.tapped or card.phased_out:
                 continue
-            if "creature" in str(self._effective_card_data(card).get("type_line") or "").casefold():
+            card_types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(card).get("type_line")
+                    or ""
+                )
+            )
+            if "creature" in card_types and "battle" not in card_types:
                 legal_attackers = [
                     attacker.ref
                     for attacker in attacker_cards
@@ -14820,10 +15370,29 @@ class CommanderEngine:
             attacker = self._resolve_object(defender, str(attacker_value), zones={"battlefield"})
             if blocker.object_id in used_blockers:
                 raise GameRuleError("A blocker cannot block more than one attacker without an explicit rule")
-            if attacker.object_id not in self.state.combat.attackers or self.state.combat.attackers[attacker.object_id] != defender:
+            attack_target = self.state.combat.attackers.get(
+                attacker.object_id
+            )
+            if (
+                attack_target is None
+                or self._defending_player_for_attack_target(
+                    attack_target
+                )
+                != defender
+            ):
                 raise GameRuleError(f"{attacker.ref} is not attacking {defender}")
-            if blocker.tapped or "creature" not in str(self._effective_card_data(blocker).get("type_line") or "").casefold():
+            blocker_types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(blocker).get("type_line")
+                    or ""
+                )
+            )
+            if blocker.tapped or "creature" not in blocker_types:
                 raise GameRuleError(f"{blocker.ref} cannot block")
+            if "battle" in blocker_types:
+                raise GameRuleError(
+                    f"{blocker.ref} cannot block because it is a Battle"
+                )
             can_block, reason = self._can_block(attacker, blocker)
             if not can_block:
                 raise GameRuleError(
@@ -14901,6 +15470,22 @@ class CommanderEngine:
                 raise GameRuleError(f"Unknown damage source {assignment['source']}")
             amount = int(assignment.get("amount", 0))
             target_value = str(assignment["target"])
+            if source.zone != "battlefield":
+                self._log(
+                    source.controller,
+                    "combat.damage.no_source",
+                    (
+                        f"{source.ref} assigned no combat damage because "
+                        "it was no longer on the battlefield."
+                    ),
+                    {
+                        "source": source.ref,
+                        "target": target_value,
+                        "amount": amount,
+                    },
+                    importance=1,
+                )
+                continue
             if target_value in self.state.players:
                 target = self.state.players[target_value]
                 if target.stats.get(
@@ -14928,8 +15513,23 @@ class CommanderEngine:
                         target.commander_damage_received[key] = target.commander_damage_received.get(key, 0) + amount
             else:
                 target_card = next((card for card in self.state.cards.values() if card.ref == target_value), None)
-                if target_card is None:
-                    raise GameRuleError(f"Unknown combat target {target_value}")
+                if target_card is None or target_card.zone != "battlefield":
+                    self._log(
+                        source.controller,
+                        "combat.damage.no_target",
+                        (
+                            f"{source.ref} assigned no combat damage; "
+                            f"{target_value} was no longer on the "
+                            "battlefield."
+                        ),
+                        {
+                            "source": source.ref,
+                            "target": target_value,
+                            "amount": amount,
+                        },
+                        importance=1,
+                    )
+                    continue
                 source_colors = {
                     str(color).upper()
                     for color in self._effective_card_data(source).get(
@@ -14962,10 +15562,12 @@ class CommanderEngine:
                         "keywords", []
                     )
                 }
-                target_card.marked_damage += amount
-                target_card.deathtouch_damage = (
-                    target_card.deathtouch_damage
-                    or (amount > 0 and "deathtouch" in source_keywords)
+                self._apply_damage_results_to_permanent(
+                    target_card,
+                    amount,
+                    deathtouch=(
+                        amount > 0 and "deathtouch" in source_keywords
+                    ),
                 )
                 changed_objects.append(target_card.object_id)
         self.state.combat.damage_assignments.extend(dict(item) for item in assignments)
@@ -15298,6 +15900,16 @@ class CommanderEngine:
                             )
                             else None
                         ),
+                        defense=(
+                            int(card.counters.get("defense", 0))
+                            if "battle" in card_types
+                            else None
+                        ),
+                        battle_trigger_pending=(
+                            self._battle_trigger_pending(card)
+                            if "battle" in card_types
+                            else False
+                        ),
                         attached_to=card.attached_to,
                         attachment_legal=(
                             self._attachment_is_legal(
@@ -15350,6 +15962,132 @@ class CommanderEngine:
                 key = (seat, str(data.get("name") or card.printed_name))
                 groups.setdefault(key, []).append(object_id)
         return [(seat, name, ids) for (seat, name), ids in groups.items() if len(ids) > 1]
+
+    def _repair_battle_protectors(self) -> str | None:
+        """Apply or request the represented CR 704.5w-x protector repair."""
+
+        attacked_targets = set(self.state.combat.attackers.values())
+        for seat in self.active_seats:
+            for object_id in list(
+                self.state.players[seat].zones["battlefield"]
+            ):
+                battle = self.state.cards[object_id]
+                if battle.zone != "battlefield" or battle.phased_out:
+                    continue
+                card_types, subtypes, _ = self._type_parts(
+                    str(
+                        self._effective_card_data(battle).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )
+                if "battle" not in card_types:
+                    continue
+                if not subtypes:
+                    if battle.battle_protector != battle.controller:
+                        battle.battle_protector = battle.controller
+                        self._log(
+                            battle.controller,
+                            "state.battle_protector",
+                            (
+                                f"{battle.controller} became protector "
+                                f"of {battle.ref}."
+                            ),
+                            {
+                                "battle": battle.ref,
+                                "protector": battle.controller,
+                                "reason": "Battle has no Battle type",
+                            },
+                            importance=2,
+                            changed_objects=[battle.object_id],
+                            changed_players=[battle.controller],
+                        )
+                        return "changed"
+                    continue
+                if "siege" not in subtypes:
+                    raise GameRuleError(
+                        "The protector predicate for Battle type(s) "
+                        f"{sorted(subtypes)} is not compiled"
+                    )
+                protector_valid = (
+                    battle.battle_protector in self.active_seats
+                    and battle.battle_protector != battle.controller
+                )
+                if protector_valid:
+                    continue
+                if (
+                    battle.battle_protector != battle.controller
+                    and battle.ref in attacked_targets
+                ):
+                    # CR 704.5w waits until no creature is attacking this
+                    # Battle. CR 704.5x has no such exception when a Siege's
+                    # controller is also its protector.
+                    continue
+                candidates = [
+                    opponent
+                    for opponent in self.active_seats
+                    if opponent != battle.controller
+                ]
+                if not candidates:
+                    self._move_cards_simultaneously(
+                        [(battle.object_id, "graveyard")],
+                        reason="no legal Battle protector",
+                        log=False,
+                    )
+                    self._log(
+                        battle.controller,
+                        "state.battle_protector",
+                        (
+                            f"{battle.ref} had no legal protector and "
+                            "went to its owner's graveyard."
+                        ),
+                        {
+                            "battle": battle.ref,
+                            "protector": None,
+                            "reason": "no_legal_protector",
+                        },
+                        importance=2,
+                        changed_objects=[battle.object_id],
+                    )
+                    return "changed"
+                self.permissions.issue(
+                    kind="state.battle_protector",
+                    role="pilot",
+                    actors=[battle.controller],
+                    allowed_actions=["choose"],
+                    payload_by_actor={
+                        battle.controller: {
+                            "battle": battle.ref,
+                            "name": self.display_name(
+                                battle.object_id
+                            ),
+                            "protectors": candidates,
+                            "legal_actions": [
+                                {
+                                    "id": "choose",
+                                    "action": "choose",
+                                    "choice_schema": {
+                                        "protector": {
+                                            "type": "seat",
+                                            "legal_seats": candidates,
+                                            "required": True,
+                                        }
+                                    },
+                                }
+                            ],
+                        }
+                    },
+                    continuation={
+                        "object_id": battle.object_id,
+                        "source_logical_object_id": (
+                            battle.logical_object_id
+                        ),
+                        "candidates": candidates,
+                    },
+                )
+                return "waiting"
+        return None
 
     def _stabilize(self) -> bool:
         """Perform state-based actions until stable.
@@ -15685,6 +16423,12 @@ class CommanderEngine:
                     )
                 continue
 
+            protector_repair = self._repair_battle_protectors()
+            if protector_repair == "waiting":
+                return True
+            if protector_repair == "changed":
+                continue
+
             legends = self._legend_groups()
             if legends:
                 seat, name, ids = legends[0]
@@ -15724,6 +16468,59 @@ class CommanderEngine:
             log=False,
         )
         self._log(seat, "state.legend", f"{seat} kept {card.ref}; {len(moved)} legendary permanent(s) went to graveyards.", {"kept": card.ref, "moved": [self.state.cards[oid].ref for oid in moved]}, importance=2, changed_objects=[card.object_id, *moved])
+        self._stabilize()
+
+    def _complete_battle_protector_choice(
+        self,
+        decision: Any,
+    ) -> None:
+        seat = decision.actors[0]
+        object_id = str(decision.continuation["object_id"])
+        battle = self.state.cards.get(object_id)
+        if (
+            battle is None
+            or battle.zone != "battlefield"
+            or battle.controller != seat
+            or battle.logical_object_id
+            != str(
+                decision.continuation[
+                    "source_logical_object_id"
+                ]
+            )
+        ):
+            raise GameRuleError(
+                "The Battle protector choice no longer matches that "
+                "battlefield object"
+            )
+        protector = str(
+            decision.responses[seat].get("protector")
+            or decision.responses[seat].get("player")
+            or ""
+        )
+        candidates = {
+            str(value)
+            for value in decision.continuation.get(
+                "candidates", []
+            )
+        }
+        if protector not in candidates or protector not in self.active_seats:
+            raise GameRuleError(
+                "Choose one of the legal Battle protectors"
+            )
+        battle.battle_protector = protector
+        self._log(
+            seat,
+            "state.battle_protector",
+            f"{protector} became protector of {battle.ref}.",
+            {
+                "battle": battle.ref,
+                "protector": protector,
+                "reason": "state-based protector repair",
+            },
+            importance=2,
+            changed_objects=[battle.object_id],
+            changed_players=[seat, protector],
+        )
         self._stabilize()
 
     def _eliminate_players(self, seats: Sequence[str], *, reason: str) -> None:
@@ -16765,9 +17562,24 @@ class CommanderEngine:
                         changed_objects=[card.object_id],
                     )
                     return 0
-                card.marked_damage += amount
-                card.deathtouch_damage = card.deathtouch_damage or bool(effect.get("deathtouch"))
-                self._log(actor, "effect.damage", f"{card.ref} took {amount} damage.", {"target": card.ref, "amount": amount, "reason": reason}, importance=2, changed_objects=[card.object_id])
+                damage_results = self._apply_damage_results_to_permanent(
+                    card,
+                    amount,
+                    deathtouch=bool(effect.get("deathtouch")),
+                )
+                self._log(
+                    actor,
+                    "effect.damage",
+                    f"{card.ref} took {amount} damage.",
+                    {
+                        "target": card.ref,
+                        "amount": amount,
+                        "reason": reason,
+                        "results": damage_results,
+                    },
+                    importance=2,
+                    changed_objects=[card.object_id],
+                )
             return amount
         if op == "damage_each_opponent":
             amount = max(0, int(effect.get("amount", 0)))
@@ -17660,9 +18472,27 @@ class CommanderEngine:
             card = self._resolve_object(actor, str(effect["card"]), zones={"battlefield"})
             name = str(effect.get("counter") or "+1/+1")
             delta = int(effect.get("delta", 1))
-            card.counters[name] = card.counters.get(name, 0) + delta
-            self._log(actor, "permanent.counter", f"{card.ref} {name} changed by {delta}.", {"object": card.ref, "counter": name, "delta": delta}, importance=1, changed_objects=[card.object_id])
-            return card.counters[name]
+            before, after = self._change_permanent_counter(
+                card,
+                name,
+                delta,
+            )
+            self._log(
+                actor,
+                "permanent.counter",
+                f"{card.ref} {name} changed by {after - before}.",
+                {
+                    "object": card.ref,
+                    "counter": " ".join(name.casefold().split()),
+                    "requested_delta": delta,
+                    "delta": after - before,
+                    "before": before,
+                    "after": after,
+                },
+                importance=1,
+                changed_objects=[card.object_id],
+            )
+            return after
         if op == "counter_all_subtype":
             seat = str(effect.get("player") or actor)
             subtype = str(effect.get("subtype") or "").casefold()
@@ -17792,6 +18622,7 @@ class CommanderEngine:
         self.state.players[controller].zones["battlefield"].append(
             object_id
         )
+        self._initialize_intrinsic_entry_counters(card)
         self._refresh_world_supertype_timestamp(
             card,
             gained_at=card.zone_timestamp,
@@ -17806,6 +18637,7 @@ class CommanderEngine:
         quantity: int = 1,
         tapped: bool = False,
         attacking: str | None = None,
+        battle_protector: str | None = None,
         copy_of: str | None = None,
         characteristics: Mapping[str, Any] | None = None,
         temporary_keywords: Sequence[str] = (),
@@ -17890,9 +18722,11 @@ class CommanderEngine:
                 known_to=list(self.seats),
                 revealed_to=list(self.seats),
                 attacking=attacking,
+                battle_protector=battle_protector,
             )
             self.state.cards[object_id] = card
             self.state.players[controller].zones["battlefield"].append(object_id)
+            self._initialize_intrinsic_entry_counters(card)
             self._refresh_world_supertype_timestamp(
                 card,
                 gained_at=card.zone_timestamp,
