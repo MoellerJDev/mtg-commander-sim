@@ -4,6 +4,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from common import DB_PATH, load_assets, make_session
 from mtg_commander_sim.arena import (
@@ -16,6 +17,7 @@ from mtg_commander_sim.record import (
     finalize_record,
     provider_telemetry,
     refresh_record,
+    replay_record,
     verify_record_integrity,
 )
 from mtg_commander_sim.model import Event
@@ -294,7 +296,13 @@ class RecordLifecycleAndTypedToolTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             record = Path(temporary) / "paused"
             session.save(record)
-            finalized = finalize_record(record, self.db)
+            with patch(
+                "mtg_commander_sim.record.replay_record",
+                wraps=replay_record,
+            ) as replay:
+                finalized = finalize_record(record, self.db)
+            self.assertEqual(1, replay.call_count)
+            self.assertTrue(replay.call_args.kwargs["verify"])
             self.assertEqual("paused", finalized["status"])
             self.assertEqual(
                 "pilot_required",

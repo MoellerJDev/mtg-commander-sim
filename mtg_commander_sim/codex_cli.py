@@ -13,7 +13,7 @@ from typing import Any, Mapping, Protocol, Sequence
 
 from .arena import PilotInvocationIdentity, SeatScopedPilotTools
 from .carddb import CardDatabase
-from .record import refresh_record, utc_now
+from .record import refresh_record, utc_now, verify_record_suffix
 from .session import CommanderSession
 from .util import stable_json
 
@@ -458,6 +458,35 @@ class CodexCliArenaRunner:
             semantics_path=self.game_dir / "semantics.json",
         )
         return db, session
+
+    def _verified_replay_baseline(
+        self,
+    ) -> tuple[dict[str, Any], int] | None:
+        manifest = json.loads(
+            (self.game_dir / "manifest.json").read_text(encoding="utf-8")
+        )
+        replay = dict(manifest.get("replay") or {})
+        if replay.get("verification") != "pass":
+            return None
+        checkpoint = json.loads(
+            (self.game_dir / "checkpoint.json").read_text(encoding="utf-8")
+        )
+        if checkpoint.get("state_hash") != manifest.get("final_state_hash"):
+            return None
+        db, session = self._session()
+        try:
+            command_count = len(session.commands)
+            verified_commands = replay.get("verified_commands")
+            if (
+                verified_commands is not None
+                and int(verified_commands) != command_count
+            ):
+                return None
+            state = copy.deepcopy(session.state.to_dict())
+            state["capabilities"] = {}
+            return state, command_count
+        finally:
+            db.close()
 
     def _write_registry(self) -> None:
         if self.registry is None:
@@ -1021,6 +1050,7 @@ class CodexCliArenaRunner:
         verify_replay: bool = True,
     ) -> dict[str, Any]:
         self.ensure_sessions()
+        replay_baseline = self._verified_replay_baseline()
         invocations = 0
         stop_reason = "unknown"
         try:
@@ -1096,25 +1126,34 @@ class CodexCliArenaRunner:
             try:
                 db = CardDatabase(self.db_path)
                 try:
-                    current = CommanderSession.load(
-                        db,
-                        self.game_dir,
-                        semantics_path=self.game_dir / "semantics.json",
-                    )
-                    preserved_status = (
-                        None
-                        if current.state.game_over
-                        else current.record_status
-                    )
-                    refreshed = refresh_record(
-                        self.game_dir,
-                        db,
-                        status=preserved_status,
-                        verify_replay=True,
-                    )
-                    replay_result = dict(
-                        refreshed.get("replay_result") or {}
-                    )
+                    if replay_baseline is not None:
+                        baseline_state, baseline_commands = replay_baseline
+                        replay_result = verify_record_suffix(
+                            self.game_dir,
+                            db,
+                            baseline_state=baseline_state,
+                            baseline_commands=baseline_commands,
+                        )
+                    else:
+                        current = CommanderSession.load(
+                            db,
+                            self.game_dir,
+                            semantics_path=self.game_dir / "semantics.json",
+                        )
+                        preserved_status = (
+                            None
+                            if current.state.game_over
+                            else current.record_status
+                        )
+                        refreshed = refresh_record(
+                            self.game_dir,
+                            db,
+                            status=preserved_status,
+                            verify_replay=True,
+                        )
+                        replay_result = dict(
+                            refreshed.get("replay_result") or {}
+                        )
                 finally:
                     db.close()
             except Exception as exc:

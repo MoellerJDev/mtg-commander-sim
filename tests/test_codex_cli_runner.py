@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 import tempfile
 import unittest
@@ -13,6 +14,7 @@ from mtg_commander_sim.codex_cli import (
     CodexExecClient,
     CodexTurnResult,
 )
+from mtg_commander_sim.record import verify_record_suffix
 from mtg_commander_sim.session import CommanderSession
 from mtg_commander_sim.util import stable_json
 
@@ -207,6 +209,103 @@ class CodexCliArenaRunnerTests(unittest.TestCase):
             self.assertEqual("paused", reloaded.record_status)
             self.assertEqual("codex_transport", reloaded.pause_reason["kind"])
             self.assertFalse(reloaded.decisions)
+
+    def test_verified_resume_replays_only_the_new_command_suffix(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            record = self._record(Path(temporary), seed=8021)
+            client = FakeCodexClient()
+            first = CodexCliArenaRunner(
+                game_dir=record,
+                db_path=DB_PATH,
+                client=client,
+            )
+            first_result = first.run(
+                through_turn=0,
+                max_invocations=1,
+                verify_replay=True,
+            )
+            self.assertTrue(first_result["replay"]["ok"])
+            self.assertEqual(1, first_result["replay"]["commands"])
+
+            second = CodexCliArenaRunner(
+                game_dir=record,
+                db_path=DB_PATH,
+                client=client,
+            )
+            with mock.patch(
+                "mtg_commander_sim.codex_cli.refresh_record",
+                side_effect=AssertionError(
+                    "verified resume must not replay the initial prefix"
+                ),
+            ), mock.patch(
+                "mtg_commander_sim.codex_cli.verify_record_suffix",
+                wraps=verify_record_suffix,
+            ) as suffix_replay:
+                second_result = second.run(
+                    through_turn=0,
+                    max_invocations=1,
+                    verify_replay=True,
+                )
+
+            suffix_replay.assert_called_once()
+            self.assertTrue(second_result["replay"]["ok"])
+            self.assertEqual(2, second_result["replay"]["commands"])
+            self.assertEqual(1, second_result["replay"]["suffix_commands"])
+            self.assertEqual(
+                "verified_prefix_suffix",
+                second_result["replay"]["verification_strategy"],
+            )
+            manifest = json.loads(
+                (record / "manifest.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual("pass", manifest["replay"]["verification"])
+            self.assertEqual(2, manifest["replay"]["verified_commands"])
+            self.assertEqual(
+                "verified_prefix_suffix",
+                manifest["replay"]["verification_strategy"],
+            )
+
+    def test_suffix_replay_rejects_a_tampered_verified_baseline(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            record = self._record(Path(temporary), seed=8022)
+            client = FakeCodexClient()
+            first = CodexCliArenaRunner(
+                game_dir=record,
+                db_path=DB_PATH,
+                client=client,
+            )
+            first.run(
+                through_turn=0,
+                max_invocations=1,
+                verify_replay=True,
+            )
+
+            second = CodexCliArenaRunner(
+                game_dir=record,
+                db_path=DB_PATH,
+                client=client,
+            )
+            baseline = second._verified_replay_baseline()
+            self.assertIsNotNone(baseline)
+            baseline_state, baseline_commands = baseline
+            second.run(
+                through_turn=0,
+                max_invocations=1,
+                verify_replay=False,
+            )
+
+            tampered = copy.deepcopy(baseline_state)
+            tampered["players"]["A"]["life"] -= 1
+            with self.assertRaisesRegex(
+                ValueError,
+                "baseline does not match",
+            ):
+                verify_record_suffix(
+                    record,
+                    self.db,
+                    baseline_state=tampered,
+                    baseline_commands=baseline_commands,
+                )
 
     def test_replay_failure_pauses_and_disqualifies_the_run(self):
         with tempfile.TemporaryDirectory() as temporary:

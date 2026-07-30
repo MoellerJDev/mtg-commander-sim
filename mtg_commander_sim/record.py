@@ -879,6 +879,17 @@ def write_record(
             and prior_replay.get("semantics_fingerprint") == manifest["semantics_fingerprint"]
         ):
             manifest["replay"]["verification"] = prior_replay.get("verification", "not_run")
+            for field in (
+                "scope",
+                "verification_strategy",
+                "verified_commands",
+                "verified_from_command",
+                "base_state_hash",
+            ):
+                if field in prior_replay:
+                    manifest["replay"][field] = copy.deepcopy(
+                        prior_replay[field]
+                    )
     _atomic_json(directory / "checkpoint.json", checkpoint_envelope(state))
     _atomic_jsonl(directory / "commands.jsonl", commands)
     _atomic_jsonl(
@@ -985,14 +996,43 @@ def replay_record(
     state = GameState.from_dict(initial["state"])
     engine = CommanderEngine(card_db, state, semantics)
     engine.permissions.reissue_pending()
+    applied = _apply_replay_commands(
+        engine,
+        _read_jsonl(directory / "commands.jsonl"),
+        semantics,
+        verify=verify,
+    )
+    actual = authoritative_state_hash(engine.state)
+    expected = str(manifest["final_state_hash"])
+    ok = actual == expected
+    if verify and not ok:
+        raise ValueError(
+            f"Final state hash mismatch: expected {expected}, got {actual}"
+        )
+    return {
+        "ok": ok,
+        "mode": mode,
+        "commands": applied,
+        "final_state_hash": actual,
+        "expected_state_hash": expected,
+    }
+
+
+def _apply_replay_commands(
+    engine: CommanderEngine,
+    commands: Iterable[Mapping[str, Any]],
+    semantics: SemanticRegistry,
+    *,
+    verify: bool,
+) -> int:
     applied = 0
-    for command in _read_jsonl(directory / "commands.jsonl"):
+    current_registry = semantics_fingerprint(semantics)
+    for command in commands:
         command_semantics = command.get("semantics", {})
         recorded_registry = (
             command_semantics.get("registry_hash")
             or command.get("semantics_fingerprint")
         )
-        current_registry = semantics_fingerprint(semantics)
         if verify and recorded_registry and recorded_registry != current_registry:
             raise ValueError(
                 f"Semantic registry mismatch at command {command.get('sequence')}"
@@ -1022,18 +1062,118 @@ def replay_record(
                 f"expected {command.get('after_state_hash')}, got {after}"
             )
         applied += 1
+    return applied
+
+
+def verify_record_suffix(
+    directory: str | Path,
+    card_db: CardDatabase,
+    *,
+    baseline_state: Mapping[str, Any],
+    baseline_commands: int,
+) -> dict[str, Any]:
+    """Verify newly appended commands from an already verified checkpoint.
+
+    The caller must capture ``baseline_state`` while the record manifest still
+    reports a passing replay for exactly ``baseline_commands`` commands. The
+    previous command's recorded after-hash anchors that checkpoint to the
+    existing proof chain; every appended command is then checked normally.
+    """
+
+    from .report import write_review_artifacts
+    from .session import CommanderSession
+
+    directory = Path(directory)
+    manifest_path = directory / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if int(manifest.get("schema_version", 0)) != RECORD_SCHEMA_VERSION:
+        raise ValueError("Replay requires a Game Record v3 directory")
+    semantics = SemanticRegistry(directory / "semantics.json")
+    if manifest.get("engine_version") != ENGINE_VERSION:
+        raise ValueError(
+            f"Engine version mismatch: record={manifest.get('engine_version')} "
+            f"runtime={ENGINE_VERSION}"
+        )
+    if manifest.get("semantics_fingerprint") != semantics_fingerprint(
+        semantics
+    ):
+        raise ValueError("Semantic registry fingerprint does not match record")
+
+    commands = list(_read_jsonl(directory / "commands.jsonl"))
+    if baseline_commands < 0 or baseline_commands > len(commands):
+        raise ValueError("Verified replay baseline command count is invalid")
+    state_payload = copy.deepcopy(dict(baseline_state))
+    state_payload["capabilities"] = {}
+    state = GameState.from_dict(state_payload)
+    base_state_hash = authoritative_state_hash(state)
+    if baseline_commands:
+        recorded_base_hash = commands[baseline_commands - 1].get(
+            "after_state_hash"
+        )
+    else:
+        initial = read_initial_checkpoint(
+            directory / "initial-checkpoint.json.gz"
+        )
+        recorded_base_hash = authoritative_state_hash(initial["state"])
+    if base_state_hash != recorded_base_hash:
+        raise ValueError(
+            "Verified replay baseline does not match its command-prefix hash"
+        )
+
+    engine = CommanderEngine(card_db, state, semantics)
+    engine.permissions.reissue_pending()
+    suffix_commands = commands[baseline_commands:]
+    applied = _apply_replay_commands(
+        engine,
+        suffix_commands,
+        semantics,
+        verify=True,
+    )
     actual = authoritative_state_hash(engine.state)
     expected = str(manifest["final_state_hash"])
-    ok = actual == expected
-    if verify and not ok:
-        raise ValueError(f"Final state hash mismatch: expected {expected}, got {actual}")
-    return {
-        "ok": ok,
-        "mode": mode,
-        "commands": applied,
+    if actual != expected:
+        raise ValueError(
+            f"Final state hash mismatch: expected {expected}, got {actual}"
+        )
+    result = {
+        "ok": True,
+        "mode": "command_replay",
+        "commands": len(commands),
+        "suffix_commands": applied,
+        "verified_from_command": baseline_commands,
+        "verification_strategy": "verified_prefix_suffix",
+        "base_state_hash": base_state_hash,
         "final_state_hash": actual,
         "expected_state_hash": expected,
     }
+
+    manifest["replay"].update(
+        {
+            "verification": "pass",
+            "scope": (
+                "complete_game"
+                if manifest.get("status") == "complete"
+                else "accepted_command_prefix"
+            ),
+            "verification_strategy": "verified_prefix_suffix",
+            "verified_commands": len(commands),
+            "verified_from_command": baseline_commands,
+            "base_state_hash": base_state_hash,
+        }
+    )
+    _atomic_json(manifest_path, manifest)
+    session = CommanderSession.load(
+        card_db,
+        directory,
+        semantics_path=directory / "semantics.json",
+    )
+    write_review_artifacts(
+        directory,
+        session.engine,
+        decisions=session.decisions,
+        manifest=manifest,
+    )
+    return result
 
 
 def _rebase_command_semantics(
@@ -1087,47 +1227,73 @@ def refresh_record(
     session.save(directory)
     replay_result: dict[str, Any] | None = None
     if verify_replay:
-        # A semantic-pack refresh may change the registry hash while leaving an
-        # accepted command prefix behavior-identical. Rebase only after a full
-        # unchecked prefix run reproduces the recorded checkpoint hash.
-        replay_result = replay_record(
-            directory,
-            card_db,
-            semantics_path=directory / "semantics.json",
-            verify=False,
-        )
-        if (
-            not replay_result["ok"]
-            and session.state.pending_decision is not None
-            and session.state.pending_decision.role == "arbiter"
-            and session.state.stack
-        ):
-            # Preserve the exact unresolved boundary of a paused older record.
-            # A newly shipped built-in pack must not retroactively turn the
-            # recorded arbiter checkpoint into a different private choice.
-            semantic_key = session.state.stack[-1].semantic_key
-            program = session.engine.semantics.get(semantic_key)
+        current_registry = semantics_fingerprint(session.engine.semantics)
+        registry_drift = False
+        for command in _read_jsonl(directory / "commands.jsonl"):
+            recorded_registry = (
+                command.get("semantics", {}).get("registry_hash")
+                or command.get("semantics_fingerprint")
+            )
             if (
-                program is not None
-                and program.provenance.get("authored_by")
-                == "generic-search-v1"
+                recorded_registry
+                and recorded_registry != current_registry
             ):
-                session.engine.semantics.remove(str(semantic_key))
-                session.save(directory)
-                replay_result = replay_record(
-                    directory,
-                    card_db,
-                    semantics_path=directory / "semantics.json",
-                    verify=False,
-                )
-        if replay_result["ok"]:
-            _rebase_command_semantics(directory, session.engine.semantics)
+                registry_drift = True
+                break
+        if not registry_drift:
             replay_result = replay_record(
                 directory,
                 card_db,
                 semantics_path=directory / "semantics.json",
                 verify=True,
             )
+        else:
+            # A semantic-pack refresh may change the registry hash while
+            # leaving an accepted command prefix behavior-identical. Rebase
+            # only after a full unchecked prefix run reproduces the recorded
+            # checkpoint hash.
+            replay_result = replay_record(
+                directory,
+                card_db,
+                semantics_path=directory / "semantics.json",
+                verify=False,
+            )
+            if (
+                not replay_result["ok"]
+                and session.state.pending_decision is not None
+                and session.state.pending_decision.role == "arbiter"
+                and session.state.stack
+            ):
+                # Preserve the exact unresolved boundary of a paused older
+                # record. A newly shipped built-in pack must not retroactively
+                # turn the recorded arbiter checkpoint into a different
+                # private choice.
+                semantic_key = session.state.stack[-1].semantic_key
+                program = session.engine.semantics.get(semantic_key)
+                if (
+                    program is not None
+                    and program.provenance.get("authored_by")
+                    == "generic-search-v1"
+                ):
+                    session.engine.semantics.remove(str(semantic_key))
+                    session.save(directory)
+                    replay_result = replay_record(
+                        directory,
+                        card_db,
+                        semantics_path=directory / "semantics.json",
+                        verify=False,
+                    )
+            if replay_result["ok"]:
+                _rebase_command_semantics(
+                    directory,
+                    session.engine.semantics,
+                )
+                replay_result = replay_record(
+                    directory,
+                    card_db,
+                    semantics_path=directory / "semantics.json",
+                    verify=True,
+                )
         manifest_path = directory / "manifest.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         manifest["replay"]["verification"] = (

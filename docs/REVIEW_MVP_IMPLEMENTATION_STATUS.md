@@ -220,6 +220,25 @@ source-leaves-before-resolution case is covered by a regression, and the full
 283-test suite passes. This stopped run is infrastructure evidence only and
 does not count toward the qualifying streak.
 
+Fresh seed `20260746` reached a 199-command fully replay-verified checkpoint
+with four stable sessions and zero suppressed meaningful windows. The user
+then stopped the runner while a segment was active; 18 additional accepted
+commands were saved but not checkpoint-verified. A one-call resume saved
+command 218, then exposed replay scaling: routine refresh replayed the entire
+prefix twice and exceeded the ten-minute process bound. The record is
+infrastructure-only and does not count toward the qualifying streak.
+
+Routine refresh now computes the semantic-registry hash once and performs a
+single verified full replay when no registry drift exists. More importantly,
+arena resumes capture the last verified checkpoint and verify only newly
+appended commands from that checkpoint. The prior after-state hash anchors the
+baseline, every suffix command still checks its before/after hash and semantic
+registry, and the final hash must match the saved checkpoint. The manifest
+records the verified command count and `verified_prefix_suffix` strategy.
+Full-from-initial replay remains available for final/manual verification, while
+the transitive proof chain keeps routine checkpoints bounded. The full
+284-test suite passes.
+
 ## GitHub finalization
 
 - [ ] Full branch security/large-file audit
