@@ -256,6 +256,9 @@ class CodexCliArenaRunnerTests(unittest.TestCase):
         )
         self.assertIn('shape "object_map"', decision_prompt)
         self.assertIn("top-first order", decision_prompt)
+        self.assertIn('shape "ref_array"', decision_prompt)
+        self.assertIn("never the display objects", decision_prompt)
+        self.assertIn("legal_refs always means raw ref strings", decision_prompt)
         value = CodexCliArenaRunner.normalize_response(
             stable_json(
                 {

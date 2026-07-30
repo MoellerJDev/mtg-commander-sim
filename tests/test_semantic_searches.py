@@ -101,6 +101,16 @@ class SemanticPrivateSearchTests(unittest.TestCase):
         self.assertIn(
             bloodghast.ref, {item["id"] for item in candidates}
         )
+        search_schema = task["decision"]["legal_actions"][0][
+            "choice_schema"
+        ]
+        self.assertEqual("ref_array", search_schema["shape"])
+        self.assertEqual("string", search_schema["element_type"])
+        self.assertTrue(
+            set(search_schema["example"]["search_cards"]).issubset(
+                set(search_schema["legal_refs"])
+            )
+        )
         serialized_other = json.dumps(
             session.packet("pilot:A", full=True)
         )
@@ -122,6 +132,27 @@ class SemanticPrivateSearchTests(unittest.TestCase):
         )
         before_shuffle = session.state.players["B"].stats.get(
             "shuffle_count", 0
+        )
+        malformed = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "search_cards": [{"id": bloodghast.ref}],
+                "plan": "DEVELOP_ENGINE",
+                "reason": "Exercise strict private-search choice typing.",
+            },
+        )
+        self.assertFalse(malformed.ok)
+        self.assertIn(
+            "array of card-ref strings",
+            malformed.summary,
+        )
+        # A rejected transactional command restores fresh state objects.
+        entomb = self._card(session.engine, "B", "Entomb")
+        bloodghast = self._card(
+            session.engine,
+            "B",
+            "Bloodghast",
         )
         result = session.act(
             "pilot:B",

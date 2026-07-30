@@ -753,6 +753,13 @@ class CodexCliArenaRunner:
             'like {"decisions":{"REF":"legal_value"}}. If its top_order '
             "contract applies, also include a top_order array containing "
             "exactly every ref mapped to top, in top-first order. "
+            'A schema with field "search_cards" and shape "ref_array" '
+            'requires {"search_cards":["REF"]}; use only ref strings from '
+            "legal_refs, never the display objects, and put entry_pay_life "
+            "beside search_cards when that boolean is offered. "
+            "More generally, legal_refs always means raw ref strings: use one "
+            "string for a singular field and an array of strings for plural "
+            "fields such as cards, objects, targets, or search_cards. "
             "Include a plan category, reason under 180 "
             "characters, confidence, yield (normally null), and bounded "
             "memory_update. Follow realistic Commander mulligans without "

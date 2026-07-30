@@ -13301,13 +13301,23 @@ class CommanderEngine:
         )
         choice_schema: dict[str, Any] = {
             "field": "search_cards",
+            "shape": "ref_array",
+            "element_type": "string",
             "minimum": minimum_choice,
             "maximum": maximum,
             "legal_refs": [option["id"] for option in options],
             "rules_may_fail_to_find": rules_may_fail,
+            "example": {
+                "search_cards": (
+                    [options[0]["id"]]
+                    if options and maximum > 0
+                    else []
+                ),
+            },
         }
         if entry_choice and str(effect.get("destination")) == "battlefield":
             choice_schema["entry_pay_life"] = "boolean"
+            choice_schema["example"]["entry_pay_life"] = False
         frame = self._semantic_frame(
             item,
             instruction_pointer=instruction_pointer,
@@ -13398,8 +13408,21 @@ class CommanderEngine:
             option["id"]
             for option in self._semantic_search_options(seat, effect)
         }
+        explicit_search_cards = response.get("search_cards")
+        if explicit_search_cards is not None and (
+            not isinstance(explicit_search_cards, Sequence)
+            or isinstance(explicit_search_cards, (str, bytes))
+            or any(
+                not isinstance(value, str)
+                for value in explicit_search_cards
+            )
+        ):
+            raise GameRuleError(
+                "search_cards must be an array of card-ref strings from "
+                "choice_schema.legal_refs"
+            )
         raw_values = (
-            response.get("search_cards")
+            explicit_search_cards
             or response.get("cards")
             or (
                 [response.get("search_card") or response.get("card")]

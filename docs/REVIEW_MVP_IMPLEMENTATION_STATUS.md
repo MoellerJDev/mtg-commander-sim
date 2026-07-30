@@ -197,6 +197,17 @@ the Codex prompt explains the same generic contract. Focused positive coverage
 and the full 282-test suite pass. This is another infrastructure-only stop and
 does not count toward the qualifying streak.
 
+Fresh seed `20260744` stopped after the engine rejected three malformed
+Nature's Lore search submissions. `search_cards` is an array of private
+candidate ref strings, but the task displayed candidate objects beside an
+underspecified executable field, so the pilot copied those objects instead of
+their IDs. The semantic-search schema now declares `shape=ref_array` and
+`element_type=string`, includes a legal private example, and produces a
+specific type error before candidate validation. The pilot contract now states
+generically that `legal_refs` always means raw ref strings. The private-search
+transaction/replay regression and the full 282-test suite pass. This stopped
+run is not evidence.
+
 ## GitHub finalization
 
 - [ ] Full branch security/large-file audit
@@ -209,11 +220,11 @@ does not count toward the qualifying streak.
 
 ## Next work
 
-Commit the explicit complex-choice contract, then restart fresh natural
-trusted-only four-player games through `arena-codex-run`. Stop and fix any
-runtime semantic or fidelity defect, and count only three consecutive natural
-games passing every `deck_operation_evidence` gate. Implement `review-batch`
-and linked per-deck operation reports after qualifying records exist. After the
-review-MVP draft PR exists, rules-corpus work moves to
+Commit the explicit private-search ref-array contract, then restart fresh
+natural trusted-only four-player games through `arena-codex-run`. Stop and fix
+any runtime semantic or fidelity defect, and count only three consecutive
+natural games passing every `deck_operation_evidence` gate. Implement
+`review-batch` and linked per-deck operation reports after qualifying records
+exist. After the review-MVP draft PR exists, rules-corpus work moves to
 `agent/rules-completeness` and a stacked draft PR; it does not broaden this
 feature branch.
