@@ -7,7 +7,7 @@ Comprehensive Rules and Oracle corpus for any supported deck, without writing
 one engine branch per card.
 
 This branch establishes the versioned corpus, typed Oracle IR, mechanic
-contracts, and the first generic CR 613/616 primitives. It does not yet claim
+contracts, and generic CR 400/613/616/704 primitives. It does not yet claim
 complete rules or Oracle coverage. The current June 19, 2026 CR / July 28,
 2026 compact Oracle snapshot deliberately reports:
 
@@ -15,7 +15,7 @@ complete rules or Oracle coverage. The current June 19, 2026 CR / July 28,
 - 156 rules sections indexed
 - 733 glossary entries indexed
 - 425 CR section, keyword-action, and keyword-ability mechanics discovered
-- 11 mechanics under versioned partial contracts and 414 unclassified
+- 12 mechanics under versioned partial contracts and 413 unclassified
 - 0 rules or mechanics promoted to trusted by the new registry
 - 38,373 Oracle IDs and 41,582 faces scanned
 - 2,957 exact (primarily textless), 15,691 partially lowerable, and 19,725
@@ -180,16 +180,29 @@ player choice, optional decline, rechecking, and one application per
 effect/event for typed events. It is not yet connected to every zone, draw,
 damage, and enters event producer, so its contract also remains partial.
 
+The zone kernel implements a stable physical card identity plus a serialized
+logical-incarnation counter. Ordinary cross-zone moves, draws, casts, and
+same-zone exile/command moves create new incarnations; target snapshots and
+implemented linked delayed moves require the recorded incarnation. State that
+cannot survive CR 400.7 is cleared, while implemented stack-to-battlefield
+continuations such as as-enters choices are explicit. The contract remains
+partial because the full CR 400.7 exception matrix, merged/melded and
+face-down objects, stickers, and all legacy physical-reference links have not
+yet migrated to typed policies.
+
 `state_based_actions.py` implements an order-invariant CR 704 permanent
 snapshot and distinguishes non-destruction graveyard moves, destruction,
-unattachment, and opposing +1/+1 and -1/-1 counter removal. The engine integrates
-that batch into its fixed-point loop, reuses declarative attachment predicates,
-and preserves pre-batch last-known information for simultaneous moves. Player
-loss, poison, empty draw, commander damage, planeswalker loyalty, and the
-legend rule remain integrated in `CommanderEngine`. The contract is partial:
-token/copy cessation has not moved into the shared evaluator, and the world
-rule, counter caps, Sagas, dungeons, space sculptor, battles, Roles, speed,
-complete enchant-quality grammar, regeneration, and simultaneous loss-event
+unattachment, opposing +1/+1 and -1/-1 counter removal, and token cessation.
+The engine integrates that batch into its fixed-point loop, reuses declarative
+attachment predicates, and preserves pre-batch last-known information for
+simultaneous moves. Tokens first reach their destination, cannot move again
+after leaving the battlefield, and cease during the next SBA check without a
+second zone-change event. Player loss, poison, empty draw, commander damage,
+planeswalker loyalty, and the legend rule remain integrated in
+`CommanderEngine`. The contract is partial: spell/card-copy cessation still
+lacks a transient noncard representation, and the world rule, counter caps,
+Sagas, dungeons, space sculptor, battles, Roles, speed, complete
+enchant-quality grammar, regeneration, and simultaneous loss-event
 replacement still block trust.
 
 The Oracle compiler currently recognizes whole-sentence templates for simple
@@ -219,7 +232,8 @@ completeness.
 The remaining work proceeds by dependency and blocked-card impact:
 
 1. Strict server-issued action/choice schemas.
-2. Object identity, zones, last-known information, faces, and copies.
+2. Complete object-identity continuation policies, last-known information,
+   faces, transient copies, merged objects, and linked abilities.
 3. Casting, costs, restricted mana, and cost modification ordering.
 4. Targeting, modes, distributions, resolution, and linked choices.
 5. Complete trigger detection/order and the remaining state-based actions.

@@ -69,6 +69,7 @@ class MechanicContractTests(unittest.TestCase):
                 "cr-616-interaction-of-replacement-and-or-prevention-effects",
                 "cr-111-tokens",
                 "cr-122-counters",
+                "cr-400-general",
                 "cr-603-handling-triggered-abilities",
                 "cr-611-continuous-effects",
                 "cr-614-replacement-effects",
@@ -814,6 +815,11 @@ class OracleIRTests(unittest.TestCase):
         engine = session.engine
         engine.permissions.invalidate_current()
         engine.state.pending_decision = None
+        # This deliberately tiny compiler fixture exhausts both libraries
+        # during setup. Clear that unrelated loss marker before exercising
+        # post-cast semantic arbitration.
+        for player in engine.state.players.values():
+            player.attempted_empty_draw = False
         bolt = next(
             card
             for card in engine.state.cards.values()

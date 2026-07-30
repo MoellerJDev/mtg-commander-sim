@@ -30,6 +30,17 @@ class PermanentSnapshot:
 
 
 @dataclass(frozen=True, slots=True)
+class ObjectSnapshot:
+    """The object-kind and zone facts needed for CR 704.5d-e."""
+
+    object_id: str
+    zone: str
+    is_token: bool = False
+    is_spell_copy: bool = False
+    is_card_copy: bool = False
+
+
+@dataclass(frozen=True, slots=True)
 class StateBasedActionBatch:
     """All deterministic permanent actions found in one CR 704.3 check."""
 
@@ -37,6 +48,7 @@ class StateBasedActionBatch:
     destroy: tuple[str, ...] = ()
     detach: tuple[str, ...] = ()
     counter_pairs_to_remove: tuple[tuple[str, int], ...] = ()
+    cease: tuple[str, ...] = ()
 
     @property
     def changed(self) -> bool:
@@ -45,6 +57,7 @@ class StateBasedActionBatch:
             or self.destroy
             or self.detach
             or self.counter_pairs_to_remove
+            or self.cease
         )
 
 
@@ -140,4 +153,42 @@ def evaluate_permanent_state_based_actions(
         destroy=tuple(sorted(destroy - put_in_graveyard)),
         detach=tuple(sorted(detach - moving)),
         counter_pairs_to_remove=tuple(sorted(counter_pairs.items())),
+    )
+
+
+def evaluate_state_based_actions(
+    *,
+    permanents: Iterable[PermanentSnapshot],
+    objects: Iterable[ObjectSnapshot],
+) -> StateBasedActionBatch:
+    """Evaluate the implemented CR 704 object and permanent subset.
+
+    Every input must be captured from the same authoritative state.  Tokens
+    and noncard copies cease to exist; they do not move to ``outside`` as a
+    second zone-change event.
+    """
+
+    permanent_batch = evaluate_permanent_state_based_actions(permanents)
+    cease: set[str] = set()
+    for value in objects:
+        zone = str(value.zone).casefold()
+        if zone == "outside":
+            continue
+        if value.is_token and zone != "battlefield":
+            cease.add(value.object_id)
+        if value.is_spell_copy and zone != "stack":
+            cease.add(value.object_id)
+        if (
+            value.is_card_copy
+            and zone not in {"stack", "battlefield"}
+        ):
+            cease.add(value.object_id)
+    return StateBasedActionBatch(
+        put_in_graveyard=permanent_batch.put_in_graveyard,
+        destroy=permanent_batch.destroy,
+        detach=permanent_batch.detach,
+        counter_pairs_to_remove=(
+            permanent_batch.counter_pairs_to_remove
+        ),
+        cease=tuple(sorted(cease)),
     )

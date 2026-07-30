@@ -33,6 +33,8 @@ class CardInstance:
     zone: str
     is_token: bool = False
     is_commander: bool = False
+    zone_change_counter: int = 0
+    has_left_battlefield: bool = False
     tapped: bool = False
     face_down: bool = False
     active_face: str | None = None
@@ -50,6 +52,12 @@ class CardInstance:
     known_to: list[str] = field(default_factory=list)
     attacking: str | None = None
     blocking: str | None = None
+
+    @property
+    def logical_object_id(self) -> str:
+        """Authoritative identity for the object's current incarnation."""
+
+        return f"{self.object_id}@{self.zone_change_counter}"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

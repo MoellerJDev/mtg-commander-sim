@@ -215,6 +215,21 @@ branch, but generated programs stay provisional and arbiter-gated while any
 mechanic dependency is untrusted. Unknown suffixes, costs, triggers,
 replacement effects, or static text remain material residuals.
 
+The generic zone kernel now distinguishes a stable physical card identifier
+from its logical incarnation. Every ordinary zone change, including a draw or
+a cast, advances an authoritative incarnation counter; same-zone moves through
+exile or the command zone do as well. Targets and implemented linked delayed
+effects retain the selected incarnation, so a card that leaves and returns is
+not silently treated as the old object. Pilot projections never expose the
+physical identifier or incarnation counter.
+
+Tokens now reach their first nonbattlefield destination, generate the
+appropriate zone-change events, and cease to exist only at the next
+state-based-action check. A token that has left the battlefield cannot move
+again. This is a reviewed partial CR 111/400/704 slice, not complete support
+for spell copies, card copies, merged permanents, meld, stickers, or every CR
+400.7 exception.
+
 ```bash
 python simctl.py oracle parse "Lightning Bolt" \
   --db data/scryfall-current.sqlite3
@@ -515,7 +530,7 @@ and empty pilot workspace when filesystem-level isolation must also be proven.
 - `mtg_commander_sim/preflight.py` — trust-aware deck semantic coverage
 - `mtg_commander_sim/shortcuts.py` — validated aggregate loop fixtures
 - `mtg_commander_sim/state_based_actions.py` — snapshot-based CR 704
-  permanent-action evaluation
+  permanent-action and token-cessation evaluation
 - `mtg_commander_sim/record.py` — Game Record v3 hashing, journals, migration, inspection, and replay
 - `mtg_commander_sim/report.py` — derived review and fidelity classification
 - `mtg_commander_sim/carddb.py` — local Oracle/rulings database

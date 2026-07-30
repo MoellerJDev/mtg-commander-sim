@@ -48,8 +48,9 @@ from .model import (
 from .permissions import AuthorizedCommand, CapabilityManager, PermissionDenied
 from .semantics import SemanticProgram, SemanticRegistry
 from .state_based_actions import (
+    ObjectSnapshot,
     PermanentSnapshot,
-    evaluate_permanent_state_based_actions,
+    evaluate_state_based_actions,
 )
 from .targets import (
     TargetGroup,
@@ -1244,6 +1245,22 @@ class CommanderEngine:
             raise StateInvariantError(f"Could not remove {card.ref} from {card.zone}")
 
     def _reset_zone_change(self, card: CardInstance, destination: str) -> None:
+        origin = card.zone
+        creates_new_object = (
+            origin != destination
+            or origin in {"exile", "command"}
+        )
+        if not creates_new_object:
+            return
+
+        card.zone_change_counter += 1
+        if (
+            card.is_token
+            and origin == "battlefield"
+            and destination != "battlefield"
+        ):
+            card.has_left_battlefield = True
+
         if card.attached_to and card.attached_to in self.state.cards:
             target = self.state.cards[card.attached_to]
             if card.object_id in target.attachments:
@@ -1260,17 +1277,41 @@ class CommanderEngine:
         card.attached_to = None
         card.attachments.clear()
         card.phased_out = False
-        card.annotations.pop("continuous_add_types", None)
+
+        # CR 400.7 gives the destination a new logical object.  Retain only
+        # state covered by an implemented exception or by the token's initial
+        # copiable characteristics.
+        retained_annotation_keys = {"token_characteristics"}
+        stack_to_battlefield = (
+            origin == "stack" and destination == "battlefield"
+        )
+        if card.is_token:
+            retained_annotation_keys.update(
+                {"copied_from", "copy_overrides"}
+            )
+        if stack_to_battlefield:
+            retained_annotation_keys.update(
+                {
+                    "bestowed",
+                    "chosen_creature_type",
+                    "chosen_name",
+                    "copy_overrides",
+                    "evoked",
+                    "pending_aura_target",
+                    "pending_aura_zone",
+                }
+            )
+        card.annotations = {
+            key: value
+            for key, value in card.annotations.items()
+            if key in retained_annotation_keys
+        }
+        card.counters.clear()
+        if not stack_to_battlefield:
+            card.active_face = None
+            card.face_down = False
         if destination != "battlefield":
-            card.annotations.pop("enchant_target_schema", None)
-            if destination != "stack":
-                card.annotations.pop("bestowed", None)
-                card.annotations.pop("pending_aura_target", None)
-                card.annotations.pop("pending_aura_zone", None)
             card.controller = card.owner
-            card.counters.clear()
-            if destination != "stack":
-                card.active_face = None
 
     def _compiled_graveyard_replacement(
         self,
@@ -1342,6 +1383,7 @@ class CommanderEngine:
         *,
         controller: str | None = None,
         tapped: bool | None = None,
+        enter_face: str | None = None,
         position: str = "top",
         reveal_to: Iterable[str] | None = None,
         reason: str = "",
@@ -1354,6 +1396,32 @@ class CommanderEngine:
             raise GameRuleError(f"Unsupported destination {destination}")
         card = self.state.cards[object_id]
         requested_destination = destination
+        origin = card.zone
+        if (
+            card.is_token
+            and card.has_left_battlefield
+            and origin not in {"battlefield", "outside"}
+            and requested_destination not in {origin, "outside"}
+        ):
+            if log:
+                self._log(
+                    None,
+                    "zone.move.prevented",
+                    (
+                        f"{card.ref} remained in {origin}; a token that "
+                        "left the battlefield cannot move again."
+                    ),
+                    {
+                        "object": card.ref,
+                        "from": origin,
+                        "requested_destination": requested_destination,
+                        "rule": "111.8",
+                    },
+                    importance=2,
+                    changed_objects=[card.object_id],
+                    changed_players=[card.owner],
+                )
+            return card
         destination, replacement_source = (
             self._compiled_graveyard_replacement(
                 card,
@@ -1362,7 +1430,6 @@ class CommanderEngine:
                 source_zones=replacement_source_zones,
             )
         )
-        origin = card.zone
         origin_controller = card.controller
         origin_attachments = [
             self.state.cards[attachment_id].ref
@@ -1391,6 +1458,8 @@ class CommanderEngine:
             self._remove_from_zone(card)
         self._reset_zone_change(card, destination)
         card.zone = destination
+        if enter_face is not None:
+            card.active_face = enter_face
         if destination == "battlefield":
             card.controller = controller or card.owner
             self._require_seat(card.controller)
@@ -1460,10 +1529,6 @@ class CommanderEngine:
                     card.revealed_to = sorted(set(reveal_to or []))
         if replacement_source is not None and card.zone == "exile":
             card.counters["void"] = 1
-        if card.is_token and destination not in {"battlefield", "stack"}:
-            if card.object_id in self.state.players[card.owner].zones.get(destination, []):
-                self.state.players[card.owner].zones[destination].remove(card.object_id)
-            card.zone = "outside"
         if log:
             self._log(
                 None,
@@ -1564,6 +1629,8 @@ class CommanderEngine:
         event_destination = destination or card.zone
         common = {
             "card": card.ref,
+            "card_object_identity": card.logical_object_id,
+            "card_zone_change_counter": card.zone_change_counter,
             "owner": card.owner,
             "controller": card.controller,
             "previous_controller": origin_controller,
@@ -1632,6 +1699,9 @@ class CommanderEngine:
                             context={
                                 "event": "artifact.graveyard",
                                 "card": card.ref,
+                                "card_zone_change_counter": (
+                                    card.zone_change_counter
+                                ),
                             },
                         )
                     )
@@ -1896,13 +1966,13 @@ class CommanderEngine:
             if not player.zones["library"]:
                 player.attempted_empty_draw = True
                 break
-            object_id = player.zones["library"].pop()
-            card = self.state.cards[object_id]
-            card.zone = "hand"
-            card.controller = card.owner
-            card.known_to = [seat]
-            card.revealed_to = []
-            player.zones["hand"].append(object_id)
+            object_id = player.zones["library"][-1]
+            card = self.move_card(
+                object_id,
+                "hand",
+                reason=reason,
+                log=False,
+            )
             player.draw_history.append(
                 {"turn_sequence": self.state.turn_sequence, "card": card.printed_name, "object": card.ref, "reason": reason}
             )
@@ -4714,6 +4784,7 @@ class CommanderEngine:
         origin = card.zone
         card.annotations.pop("temporary_play_permission", None)
         self._remove_from_zone(card)
+        self._reset_zone_change(card, "stack")
         card.zone = "stack"
         card.controller = seat
         card.active_face = str(face.get("name")) if face else None
@@ -4907,6 +4978,11 @@ class CommanderEngine:
             )
         self._enqueue_semantic_trigger_batch(cast_trigger_batch)
         self._queue_ward_triggers_for_targets(item)
+        # Casting is followed by a state-based-action check before any
+        # player receives priority (CR 117.5, 704.3).  This is observable for
+        # token and copy objects paid as additional costs.
+        if self._stabilize():
+            return
         self.state.priority_player = seat
         self.state.priority_passes = []
         self.state.players[seat].yield_policy = YieldPolicy()
@@ -5600,6 +5676,8 @@ class CommanderEngine:
                 changed_objects=[source.object_id, *paid_objects],
                 changed_players=[seat],
             )
+            if self._stabilize():
+                return
             self.state.priority_player = seat
             self.state.priority_passes = []
             return
@@ -5695,6 +5773,8 @@ class CommanderEngine:
             changed_objects=[source.object_id, *paid_objects],
             changed_players=[seat],
         )
+        if self._stabilize():
+            return
         self.state.priority_player = seat
         self.state.priority_passes = []
         self.state.players[seat].yield_policy = YieldPolicy()
@@ -8487,6 +8567,14 @@ class CommanderEngine:
         ):
             return False
         card = row.get("card")
+        if (
+            row.get("category") == "card"
+            and isinstance(card, CardInstance)
+            and card.is_token
+        ):
+            # CR 111.6: a token may briefly exist in another zone before the
+            # next state check, but it is never a card.
+            return False
         if as_target and row.get("zone") == "battlefield" and isinstance(
             card, CardInstance
         ):
@@ -8715,6 +8803,7 @@ class CommanderEngine:
             data = self._effective_card_data(card) if card else {}
             return {
                 "ref": ref,
+                "stack_id": item.stack_id,
                 "category": (
                     "spell" if item.kind == "spell" else "ability"
                 ),
@@ -8739,6 +8828,9 @@ class CommanderEngine:
         data = self._effective_card_data(card)
         return {
             "ref": ref,
+            "object_id": card.object_id,
+            "zone_change_counter": card.zone_change_counter,
+            "zone": card.zone,
             "category": (
                 "permanent" if card.zone == "battlefield" else "card"
             ),
@@ -8750,6 +8842,31 @@ class CommanderEngine:
             ),
             "type_line": str(data.get("type_line") or ""),
         }
+
+    def _target_identity_matches_snapshot(
+        self,
+        ref: str,
+        snapshot: Mapping[str, Any],
+    ) -> bool:
+        """Return whether ``ref`` is still the originally selected object."""
+
+        stack_id = snapshot.get("stack_id")
+        if stack_id is not None:
+            return any(
+                item.ref == ref and item.stack_id == stack_id
+                for item in self.state.stack
+            )
+        object_id = snapshot.get("object_id")
+        incarnation = snapshot.get("zone_change_counter")
+        if object_id is None or incarnation is None:
+            # Backward-compatible records predate explicit incarnations.
+            return True
+        card = self.state.cards.get(str(object_id))
+        return bool(
+            card is not None
+            and card.ref == ref
+            and card.zone_change_counter == int(incarnation)
+        )
 
     def _target_candidate_map(
         self,
@@ -9386,6 +9503,9 @@ class CommanderEngine:
             return
         if item.semantic_key == "builtin:daretti-emblem":
             card_ref = str(item.context.get("card") or "")
+            card_zone_change_counter = item.context.get(
+                "card_zone_change_counter"
+            )
             self._begin_resolve_item(
                 item,
                 [
@@ -9412,6 +9532,9 @@ class CommanderEngine:
                                         "from": "graveyard",
                                         "destination": "battlefield",
                                         "controller": item.controller,
+                                        "expected_zone_change_counter": (
+                                            card_zone_change_counter
+                                        ),
                                     }
                                 ]
                             },
@@ -10054,7 +10177,18 @@ class CommanderEngine:
             for raw_ref in grouped.get(group.group_id, []):
                 selected_count += 1
                 ref = str(raw_ref)
-                if ref in legal:
+                original_snapshot = dict(
+                    item.context.get("target_snapshots", {}).get(
+                        ref, {}
+                    )
+                )
+                identity_matches = (
+                    self._target_identity_matches_snapshot(
+                        ref,
+                        original_snapshot,
+                    )
+                )
+                if ref in legal and identity_matches:
                     current.append(ref)
                     updated.append(ref)
                     valid_count += 1
@@ -10073,7 +10207,11 @@ class CommanderEngine:
                         "stack": item.ref,
                         "target": ref,
                         "group": group.group_id,
-                        "reason": "candidate_no_longer_matches",
+                        "reason": (
+                            "object_identity_changed"
+                            if ref in legal and not identity_matches
+                            else "candidate_no_longer_matches"
+                        ),
                     },
                     importance=2,
                 )
@@ -12481,14 +12619,15 @@ class CommanderEngine:
                 raise GameRuleError(
                     "A looked-at Fomori Vault card left the library"
                 )
-            for card in cards:
-                library.remove(card.object_id)
             chosen = next(card for card in cards if card.ref == selected)
-            chosen.zone = "hand"
-            chosen.known_to = [seat]
-            chosen.revealed_to = []
-            self.state.players[seat].zones["hand"].append(
-                chosen.object_id
+            for card in cards:
+                if card is not chosen:
+                    library.remove(card.object_id)
+            self.move_card(
+                chosen.object_id,
+                "hand",
+                reason="Fomori Vault selection",
+                log=False,
             )
             bottom = [
                 card.object_id for card in cards if card is not chosen
@@ -12951,7 +13090,6 @@ class CommanderEngine:
                     "returned exactly once"
                 )
             top_ids: list[str] = []
-            hand = self.state.players[seat].zones["hand"]
             for ref in top_order:
                 card = self._resolve_object(
                     seat,
@@ -12959,10 +13097,18 @@ class CommanderEngine:
                     zones={"hand"},
                     owned_only=True,
                 )
-                hand.remove(card.object_id)
-                card.zone = "library"
-                card.known_to = [seat]
-                card.revealed_to = []
+                self.move_card(
+                    card.object_id,
+                    "library",
+                    position="top",
+                    reason="Sylvan Library",
+                    log=False,
+                )
+                # Assemble the simultaneous ordered return after each move
+                # has crossed the canonical CR 400.7 identity boundary.
+                self.state.players[seat].zones["library"].remove(
+                    card.object_id
+                )
                 top_ids.append(card.object_id)
             self.state.players[seat].zones["library"].extend(
                 reversed(top_ids)
@@ -14886,6 +15032,17 @@ class CommanderEngine:
                 )
         return snapshots
 
+    def _object_sba_snapshots(self) -> list[ObjectSnapshot]:
+        return [
+            ObjectSnapshot(
+                object_id=card.object_id,
+                zone=card.zone,
+                is_token=card.is_token,
+            )
+            for card in self.state.cards.values()
+            if card.zone != "outside"
+        ]
+
     def _detach_permanent(self, card: CardInstance) -> None:
         target = self.state.cards.get(card.attached_to or "")
         if target is not None and card.object_id in target.attachments:
@@ -14930,8 +15087,9 @@ class CommanderEngine:
                     return True
                 continue
 
-            sba_batch = evaluate_permanent_state_based_actions(
-                self._permanent_sba_snapshots()
+            sba_batch = evaluate_state_based_actions(
+                permanents=self._permanent_sba_snapshots(),
+                objects=self._object_sba_snapshots(),
             )
             move_to_grave = unique_preserving_order(
                 [
@@ -14985,6 +15143,36 @@ class CommanderEngine:
                             "pairs_removed": count,
                         }
                     )
+                ceased: list[dict[str, Any]] = []
+                ceased_object_ids: list[str] = []
+                for object_id in sba_batch.cease:
+                    card = self.state.cards[object_id]
+                    if card.zone == "outside":
+                        continue
+                    previous_zone = card.zone
+                    if previous_zone == "stack":
+                        self.state.stack = [
+                            item
+                            for item in self.state.stack
+                            if item.card_object_id != card.object_id
+                        ]
+                    else:
+                        self._remove_from_zone(card)
+                    card.zone = "outside"
+                    card.known_to = list(self.seats)
+                    card.revealed_to = list(self.seats)
+                    ceased.append(
+                        {
+                            "object": card.ref,
+                            "kind": (
+                                "token"
+                                if card.is_token
+                                else "copy"
+                            ),
+                            "zone": previous_zone,
+                        }
+                    )
+                    ceased_object_ids.append(card.object_id)
                 if move_to_grave:
                     self._log(
                         None,
@@ -15048,6 +15236,25 @@ class CommanderEngine:
                             if self.state.cards[object_id].zone
                             == "battlefield"
                         ],
+                    )
+                if ceased:
+                    self._log(
+                        None,
+                        "state.objects_ceased",
+                        (
+                            "State-based actions caused "
+                            f"{len(ceased)} token or copy object(s) to "
+                            "cease to exist."
+                        ),
+                        {"objects": ceased},
+                        importance=2,
+                        changed_objects=ceased_object_ids,
+                        changed_players=sorted(
+                            {
+                                self.state.cards[object_id].owner
+                                for object_id in ceased_object_ids
+                            }
+                        ),
                     )
                 continue
 
@@ -15382,8 +15589,57 @@ class CommanderEngine:
             )
         if op == "move_if_in_zone":
             expected_zone = str(effect.get("from") or "")
-            card = self._resolve_object(actor, str(effect["card"]))
+            try:
+                card = self._resolve_object(
+                    actor,
+                    str(effect["card"]),
+                )
+            except GameRuleError:
+                self._log(
+                    actor,
+                    "effect.linked_object_missing",
+                    "A linked object no longer exists in the game.",
+                    {
+                        "object": str(effect["card"]),
+                        "expected_zone": expected_zone,
+                        "reason": "object_absent",
+                    },
+                    importance=2,
+                )
+                return None
             if not expected_zone or card.zone != expected_zone:
+                return None
+            expected_counter = effect.get(
+                "expected_zone_change_counter"
+            )
+            expected_identity = effect.get(
+                "expected_object_identity"
+            )
+            identity_mismatch = (
+                expected_counter is not None
+                and card.zone_change_counter
+                != int(expected_counter)
+            ) or (
+                expected_identity is not None
+                and card.logical_object_id
+                != str(expected_identity)
+            )
+            if identity_mismatch:
+                self._log(
+                    actor,
+                    "effect.linked_object_missing",
+                    (
+                        f"{card.ref} is no longer the object linked by "
+                        "the effect."
+                    ),
+                    {
+                        "object": card.ref,
+                        "expected_zone": expected_zone,
+                        "reason": "object_identity_changed",
+                    },
+                    importance=2,
+                    changed_objects=[card.object_id],
+                )
                 return None
             return self.move_card(
                 card.object_id,
@@ -16461,11 +16717,11 @@ class CommanderEngine:
                 raise GameRuleError(
                     "Return transformed requires a transforming card"
                 )
-            source.active_face = str(record.faces[1].get("name") or "")
             self.move_card(
                 source.object_id,
                 "battlefield",
                 controller=source.owner,
+                enter_face=str(record.faces[1].get("name") or ""),
                 reason=reason,
                 semantic_events=True,
             )

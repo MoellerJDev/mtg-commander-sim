@@ -57,6 +57,13 @@ python simctl.py replay run/duel --db data/scryfall-current.sqlite3 --verify
 A mismatch fails closed at the first divergent command. Event text and
 capability tokens do not participate in the authoritative hash.
 
+Game Record v3 checkpoints now serialize both a card's stable physical
+`object_id` and its `zone_change_counter`. Together they identify the logical
+object selected by a target or implemented linked effect. The counter is
+authoritative state and therefore participates in command hashes and replay;
+it is not a capability and is not exposed in pilot projections. This is an
+additive state-field extension to v3, not a new record layout.
+
 Fresh native records use `manifest.replay.mode = "command_replay"`. The
 separate `legacy_snapshot` mode is reserved for migrated records whose accepted
 commands cannot be reconstructed honestly.

@@ -711,9 +711,14 @@ class NormalizedZoneEventTests(unittest.TestCase):
         )
         self.assertEqual("outside", fodder.zone)
         self.assertEqual("stack", intent.zone)
+        cast_event = next(
+            event
+            for event in reversed(engine.state.events)
+            if event.code == "stack.cast"
+        )
         self.assertIn(
             fodder_ref,
-            engine.state.events[-1].details.get(
+            cast_event.details.get(
                 "additional_cost_objects", []
             ),
         )

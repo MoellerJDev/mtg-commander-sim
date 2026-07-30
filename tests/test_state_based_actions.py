@@ -8,7 +8,9 @@ from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim.state_based_actions import (
+    ObjectSnapshot,
     PermanentSnapshot,
+    evaluate_state_based_actions,
     evaluate_permanent_state_based_actions,
 )
 
@@ -161,6 +163,64 @@ class StateBasedActionPrimitiveTests(unittest.TestCase):
                 expected,
                 evaluate_permanent_state_based_actions(values),
             )
+
+    def test_nonbattlefield_tokens_cease_from_the_shared_snapshot(self):
+        batch = evaluate_state_based_actions(
+            permanents=[],
+            objects=[
+                ObjectSnapshot(
+                    "grave-token",
+                    zone="graveyard",
+                    is_token=True,
+                ),
+                ObjectSnapshot(
+                    "battlefield-token",
+                    zone="battlefield",
+                    is_token=True,
+                ),
+                ObjectSnapshot(
+                    "ordinary-card",
+                    zone="graveyard",
+                ),
+            ],
+        )
+        self.assertEqual(("grave-token",), batch.cease)
+
+    def test_noncard_copies_cease_only_outside_their_valid_zones(self):
+        batch = evaluate_state_based_actions(
+            permanents=[],
+            objects=[
+                ObjectSnapshot(
+                    "resolved-spell-copy",
+                    zone="graveyard",
+                    is_spell_copy=True,
+                ),
+                ObjectSnapshot(
+                    "stack-spell-copy",
+                    zone="stack",
+                    is_spell_copy=True,
+                ),
+                ObjectSnapshot(
+                    "exiled-card-copy",
+                    zone="exile",
+                    is_card_copy=True,
+                ),
+                ObjectSnapshot(
+                    "stack-card-copy",
+                    zone="stack",
+                    is_card_copy=True,
+                ),
+                ObjectSnapshot(
+                    "permanent-card-copy",
+                    zone="battlefield",
+                    is_card_copy=True,
+                ),
+            ],
+        )
+        self.assertEqual(
+            ("exiled-card-copy", "resolved-spell-copy"),
+            batch.cease,
+        )
 
 
 class StateBasedActionEngineTests(unittest.TestCase):

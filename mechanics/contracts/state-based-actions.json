@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "cr-704-state-based-actions",
   "official_name": "State-Based Actions",
   "effective_date": "2026-06-19",
@@ -15,6 +15,8 @@
     "704.5a",
     "704.5b",
     "704.5c",
+    "704.5d",
+    "704.5e",
     "704.5f",
     "704.5g",
     "704.5h",
@@ -51,6 +53,8 @@
     ],
     "objects": [
       "players",
+      "tokens in nonbattlefield zones",
+      "represented spell and card copies",
       "creatures",
       "planeswalkers",
       "legendary permanents",
@@ -72,6 +76,7 @@
     ],
     "state_writes": [
       "player elimination",
+      "token cessation",
       "simultaneous graveyard moves or destruction",
       "legend choice",
       "unattachment",
@@ -145,16 +150,19 @@
     "test_equipment_detaches_from_illegal_or_protected_object",
     "test_fixed_point_moves_aura_after_enchanted_creature_dies",
     "test_simultaneous_move_captures_all_lki_before_mutation",
+    "test_nonbattlefield_tokens_cease_from_the_shared_snapshot",
+    "test_noncard_copies_cease_only_outside_their_valid_zones",
+    "test_token_changes_zone_before_ceasing_at_next_state_check",
     "test_legend_rule_asks_controller_to_keep_one",
     "test_player_elimination_keeps_multiplayer_game_running",
     "test_last_player_wins_after_simultaneous_losses"
   ],
   "implementation": {
     "component": "state_based_actions.evaluate_permanent_state_based_actions and CommanderEngine._stabilize",
-    "version": "state-based-actions-v2"
+    "version": "state-based-actions-v3"
   },
   "known_blockers": [
-    "token and spell-copy cessation still occurs in zone/stack paths rather than the shared snapshot evaluator",
+    "spell-copy and card-copy cessation lacks a transient noncard object representation in destination zones",
     "the world rule and simultaneous world timestamps are not implemented",
     "maximum-counter restrictions, Sagas, dungeons, space sculptor, battles, Roles, and speed state actions are not implemented",
     "Aura attachment to players and the complete enchant-quality grammar are not implemented",

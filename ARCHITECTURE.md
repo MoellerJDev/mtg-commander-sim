@@ -214,12 +214,29 @@ substitute for generic mechanics or a printed-name branch in
 
 CR 704 stabilization derives a public permanent snapshot before mutating
 anything. `state_based_actions.py` classifies non-destruction graveyard moves,
-destruction, unattachment, and opposing-counter removal; the engine applies
-the batch and rechecks before granting priority. Aura legality reuses the
-declarative target domain without applying targeting-only shroud or hexproof,
-while protection remains an attachment restriction. Unsupported enchant
-quality grammar stays unresolved. The contract is partial until every CR
-704.5/704.6 variant and simultaneous loss/replacement interaction is covered.
+destruction, unattachment, opposing-counter removal, and token cessation; the
+engine applies the batch and rechecks before granting priority. Aura legality
+reuses the declarative target domain without applying targeting-only shroud or
+hexproof, while protection remains an attachment restriction. Unsupported
+enchant quality grammar stays unresolved. The contract is partial until every
+CR 704.5/704.6 variant and simultaneous loss/replacement interaction is
+covered.
+
+`CardInstance.object_id` is stable physical identity. Its serialized
+`zone_change_counter` identifies the current logical incarnation under CR
+400.7. The canonical move path advances that counter for cross-zone moves and
+same-zone exile/command moves, clears state that cannot survive, and preserves
+only implemented entry continuations such as an as-enters choice. Target
+snapshots compare the selected incarnation at resolution. Implemented linked
+delayed moves carry an expected incarnation, preventing the same physical card
+from leaving and returning to satisfy the old link. These authoritative values
+are omitted from seat projections.
+
+A token leaving the battlefield first exists in the destination long enough
+for the move and its triggers to be observed. The next shared SBA snapshot
+causes it to cease without a second zone-change event, and CR 111.8 prevents a
+later move. Spell-copy and card-copy cessation still require a transient
+noncard object representation.
 
 ## Rules arbitration and semantic programs
 
@@ -451,15 +468,18 @@ The new rules primitives sit below both generated and hand-authored semantics:
   classes, affected-player choices, optional declines, and repeated
   applicability for typed events.
 - `state_based_actions.py` evaluates the deterministic permanent subset of CR
-  704 from one immutable snapshot. The engine applies the resulting batch,
-  captures last-known information before mutation, and repeats until stable.
+  704 plus token cessation from one immutable snapshot. The engine applies the
+  resulting batch, captures last-known information before mutation, and
+  repeats until stable.
 
 All three contracts remain partial. Legacy static abilities have not all moved
 into the layer evaluator, not every zone/draw/damage/enters producer routes
 through the replacement engine, and the state-action evaluator does not yet
-cover the world rule, Sagas, dungeons, battles, Roles, speed, or complete
-simultaneous loss replacement. Coverage and contracts describe those
-integration gaps explicitly.
+cover spell/card-copy cessation, the world rule, Sagas, dungeons, battles,
+Roles, speed, or complete simultaneous loss replacement. CR 400 object
+identity also remains partial until its complete exception matrix and
+specialized object forms use typed continuation policies. Coverage and
+contracts describe those integration gaps explicitly.
 
 ## Remaining scope
 

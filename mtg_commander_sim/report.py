@@ -32,6 +32,8 @@ MEANINGFUL_CODES = {
     "state.creatures_died",
     "state.attachments_unattached",
     "state.counters_annihilated",
+    "state.objects_ceased",
+    "effect.linked_object_missing",
     "effect.damage",
     "effect.life",
     "effect.energy",
@@ -469,6 +471,23 @@ def _event_description(engine: CommanderEngine, event: Event) -> str:
         return (
             "Opposing +1/+1 and -1/-1 counters were removed"
             + (f": {values}." if values else ".")
+        )
+    if event.code == "state.objects_ceased":
+        values = ", ".join(
+            (
+                f"{_name(engine, str(item.get('object')))} "
+                f"from {item.get('zone')}"
+            )
+            for item in details.get("objects") or []
+        )
+        return (
+            "Token or copy objects ceased to exist"
+            + (f": {values}." if values else ".")
+        )
+    if event.code == "effect.linked_object_missing":
+        return (
+            f"{_name(engine, str(details.get('object')))} was no "
+            "longer the object linked by the resolving effect."
         )
     if event.code == "token.create":
         names = ", ".join(

@@ -25,11 +25,12 @@ coverage.
 | Workstream | Status | Current evidence |
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
-| Mechanic contracts | In progress | 11 partial/untrusted contracts; 414 mechanics unclassified; 0 trusted |
+| Mechanic contracts | In progress | 12 partial/untrusted contracts; 413 mechanics unclassified; 0 trusted |
 | Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
+| Object and zone identity | Partial | CR 400 logical incarnations, target revalidation, and selected linked-effect guards |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
 | Replacement/prevention ordering | Partial | CR 616 typed ordering primitive; event-producer integration incomplete |
-| State-based actions | Partial | CR 704 snapshot evaluator and fixed-point engine integration for the reviewed subset |
+| State-based actions | Partial | CR 704 snapshot evaluator, token cessation, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
 | Official-source conformance/property/mutation gates | In progress | source hashes and selected order/mutation tests exist; corpus-wide gates do not |
@@ -48,12 +49,26 @@ coverage.
 - [x] Added CR 613 continuous-effect ordering primitives.
 - [x] Added CR 616 replacement/prevention ordering primitives.
 - [x] Added a CR 704 permanent snapshot and deterministic action batch.
+- [x] Added serialized CR 400 logical incarnations, target identity
+  revalidation, selected linked-effect identity guards, and CR 111 token
+  lifecycle integration.
 
-## Current CR 704 slice
+## Current CR 400/111/704 slice
+
+Every card retains a stable physical `object_id`, while a serialized
+`zone_change_counter` identifies its current logical incarnation. The
+canonical zone path advances the incarnation for ordinary cross-zone moves,
+including draws and casts, and for same-zone exile/command moves. It clears
+state that does not survive the move and preserves only explicitly implemented
+entry continuations. Targets compare their selected incarnation at
+resolution. Daretti's delayed emblem return carries the recorded graveyard
+incarnation, so the effect does not follow a card that leaves and reenters.
+Neither physical IDs nor counters are projected to pilots.
 
 The engine now discovers the following permanent actions from one immutable
 snapshot before applying mutations:
 
+- tokens outside the battlefield cease to exist;
 - creature toughness 0 or less;
 - lethal marked damage and deathtouch destruction, with indestructible
   distinguished from non-destruction graveyard moves;
@@ -71,9 +86,18 @@ its changed enchant restriction as data instead of relying on a
 printed-name-only state-action branch. The engine applies the batch, preserves
 pre-move last-known information, and repeats to a fixed point.
 
-The CR 704 contract remains partial and untrusted. Outstanding blockers are:
+Tokens reach their first nonbattlefield destination before the next state
+check, so zone-change triggers observe the move. They cannot move again after
+leaving the battlefield and cease without generating a second zone-change
+event.
 
-- token and spell-copy cessation in the shared snapshot path;
+The CR 400, CR 111, and CR 704 contracts remain partial and untrusted.
+Outstanding blockers include:
+
+- spell-copy and card-copy cessation need a transient noncard object model;
+- the complete CR 400.7 exception matrix needs typed continuation policies;
+- merged permanents, meld components, stickers, complete face-down identity,
+  and migration of all legacy physical references;
 - world permanents and simultaneous timestamps;
 - maximum-counter restrictions;
 - Sagas, dungeons, space sculptor, battles, Roles, and speed;
@@ -84,8 +108,11 @@ The CR 704 contract remains partial and untrusted. Outstanding blockers are:
 
 ## Verification at this checkpoint
 
-- 335 unit/integration tests pass.
-- Ten focused CR 704 tests cover positive, negative, fixed-point,
+- 351 unit/integration tests pass.
+- Fourteen focused object/token tests cover monotonic incarnations, draws,
+  identity-sensitive targets and delayed links, private projection, token
+  destination timing, move prevention, cessation, and exact replay.
+- Twelve focused CR 704 tests cover positive, negative, fixed-point,
   order-mutation, shared pre-action LKI, attachment/protection, counter,
   contract, and source-hash behavior.
 - Exact Zimone closure: 27 tests pass.
@@ -102,15 +129,17 @@ checkpoint validation.
 
 ## Next dependency-ordered work
 
-1. Finish object/zone/LKI identity primitives, including token and copy
-   cessation in the CR 704 snapshot.
-2. Implement world timestamps and the remaining ordinary CR 704.5 actions.
-3. Integrate state-action destruction/loss with typed replacement and
+1. Add a transient spell/card-copy object representation and shared
+   CR 704.5e cessation.
+2. Replace remaining physical-reference links with typed incarnation/LKI
+   handles and implement the remaining CR 400.7 continuation policies.
+3. Implement world timestamps and the remaining ordinary CR 704.5 actions.
+4. Integrate state-action destruction/loss with typed replacement and
    regeneration events.
-4. Continue CR 603 trigger ordering and state-action interaction coverage.
-5. Continue migrating static characteristics to CR 613 and all replaceable
+5. Continue CR 603 trigger ordering and state-action interaction coverage.
+6. Continue migrating static characteristics to CR 613 and all replaceable
    event producers to CR 616.
-6. Recompute full and Commander-legal Oracle coverage after each generic
+7. Recompute full and Commander-legal Oracle coverage after each generic
    compiler/mechanic slice.
 
 No deck list has been modified, and no current game result is promoted to
