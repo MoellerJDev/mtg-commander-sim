@@ -69,6 +69,16 @@ For new card semantics:
 3. delegate strategic player choices
 4. include a deterministic rules test
 5. do not hard-code a deck name or commander into the kernel
+6. add anchored whole-text templates to `oracle_ir.py`, preserving unmatched
+   material text as a residual
+7. keep generated programs provisional until every mechanic dependency has a
+   trusted contract
+8. add positive, negative, runtime, mutation, and source-hash tests
+
+Put reusable CR 613 operations in `continuous_effects.py` and CR 616 event
+transformations in `replacement_effects.py`. Record evidence and blockers in a
+versioned mechanic contract, regenerate the registry, and verify the pinned
+rules corpus.
 
 ## Performance targets
 

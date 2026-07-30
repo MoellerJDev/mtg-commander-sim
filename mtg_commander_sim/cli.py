@@ -18,6 +18,7 @@ from .arena import (
     run_pilot_mcp_stdio,
 )
 from .model import GameConfig
+from .oracle_ir import ORACLE_OPERATIONS, execute_oracle_operation
 from .pilot import (
     ManualJsonPilot,
     PilotMemory,
@@ -459,6 +460,31 @@ def build_parser() -> argparse.ArgumentParser:
     preflight.add_argument("--cache-dir")
     preflight.add_argument("--refresh-decks", action="store_true")
     preflight.add_argument("--output")
+
+    oracle = sub.add_parser(
+        "oracle",
+        help=(
+            "Compile pinned Oracle text into typed IR and inspect "
+            "fail-closed residual coverage"
+        ),
+    )
+    oracle_sub = oracle.add_subparsers(
+        dest="oracle_cmd",
+        required=True,
+    )
+    for operation in sorted(ORACLE_OPERATIONS):
+        child = oracle_sub.add_parser(operation)
+        child.add_argument(
+            "card",
+            nargs=("?" if operation in {"parse", "explain"} else "*"),
+        )
+        child.add_argument(
+            "--db",
+            default="data/scryfall-20260728-compact.sqlite3",
+        )
+        child.add_argument("--commander-legal-only", action="store_true")
+        child.add_argument("--limit", type=int)
+        child.add_argument("--output")
 
     pilot_run = sub.add_parser(
         "pilot-run", help="Create or resume a provider-piloted native v3 run"
@@ -961,6 +987,31 @@ def main(argv: list[str] | None = None) -> int:
             print(stable_json(result))
         finally:
             db.close()
+        return 0
+    if args.cmd == "oracle":
+        card = args.card
+        if isinstance(card, list):
+            if args.oracle_cmd not in {"parse", "explain"} and card:
+                raise SystemExit(
+                    f"oracle {args.oracle_cmd} does not accept a card name"
+                )
+            if len(card) > 1:
+                raise SystemExit(
+                    "oracle parse/explain accept exactly one card name"
+                )
+            card = card[0] if card else None
+        try:
+            value = execute_oracle_operation(
+                args.oracle_cmd,
+                db_path=args.db,
+                card=card,
+                commander_legal_only=args.commander_legal_only,
+                limit=args.limit,
+                output=args.output,
+            )
+        except (KeyError, ValueError) as exc:
+            raise SystemExit(str(exc)) from exc
+        print(stable_json(value))
         return 0
 
     if args.cmd == "inspect-decisions":

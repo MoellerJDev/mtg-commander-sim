@@ -1,6 +1,39 @@
 {
+  "contract_count": 5,
+  "contracts": [
+    {
+      "mechanic_id": "cr-613-interaction-of-continuous-effects",
+      "path": "mechanics/contracts/continuous-layers.json",
+      "sha256": "e02a8ca685dbdddbfea8a72b2bb6935171392d332c14150387327e31956ecff8",
+      "version": 1
+    },
+    {
+      "mechanic_id": "deathtouch",
+      "path": "mechanics/contracts/deathtouch.json",
+      "sha256": "9c3c4b6ed7f7a54ff49d8cdfd7c9bfe112cac135aaa126a1a7b8a87d0df7f8e9",
+      "version": 1
+    },
+    {
+      "mechanic_id": "flying",
+      "path": "mechanics/contracts/flying.json",
+      "sha256": "e75cae496f5ecaa720ef71ae1c7d73eab1066fd69b5f2e9ca98c12128b4b35c2",
+      "version": 1
+    },
+    {
+      "mechanic_id": "protection",
+      "path": "mechanics/contracts/protection.json",
+      "sha256": "c686682ab64c723b4f1bf53c4b18687fbefeed612229a9469847f89f789bf337",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-616-interaction-of-replacement-and-or-prevention-effects",
+      "path": "mechanics/contracts/replacement-ordering.json",
+      "sha256": "300df49bb52c302f96c0a03c2baad26e86c2962a8a91a9fcf3451e1d5722268d",
+      "version": 1
+    }
+  ],
   "effective_date": "2026-06-19",
-  "generation_status": "cr_index_only",
+  "generation_status": "cr_index_with_contracts",
   "mechanics": [
     {
       "category": "additional_rules",
@@ -684,19 +717,29 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/deathtouch.json",
+      "contract_sha256": "9c3c4b6ed7f7a54ff49d8cdfd7c9bfe112cac135aaa126a1a7b8a87d0df7f8e9",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine.combat_damage and CommanderEngine._stabilize",
+      "implementation_version": "combat-keywords-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "full continuous-effect layers and last-known-information",
+        "complete replacement and prevention ordering",
+        "complete combat assignment edge cases"
+      ],
       "mechanic_id": "deathtouch",
       "official_name": "Deathtouch",
       "rule_references": [
         "702.2"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_deathtouch_is_derived_from_source_not_pilot_claim"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -1330,19 +1373,28 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/flying.json",
+      "contract_sha256": "e75cae496f5ecaa720ef71ae1c7d73eab1066fd69b5f2e9ca98c12128b4b35c2",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine._block_pair_legality",
+      "implementation_version": "combat-keywords-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "full continuous-effect layer and dependency evaluation",
+        "complete copy and face-down characteristic evaluation"
+      ],
       "mechanic_id": "flying",
       "official_name": "Flying",
       "rule_references": [
         "702.9"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_flying_attacker_exposes_only_flying_or_reach_blockers"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -2469,19 +2521,30 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/protection.json",
+      "contract_sha256": "c686682ab64c723b4f1bf53c4b18687fbefeed612229a9469847f89f789bf337",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine protection target, damage, and blocking checks",
+      "implementation_version": "protection-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "protection quality grammar is not complete",
+        "attachment state-based actions are not complete",
+        "full layers and replacement/prevention ordering are not complete"
+      ],
       "mechanic_id": "protection",
       "official_name": "Protection",
       "rule_references": [
         "702.16"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_protection_removes_colored_source_from_target_candidates",
+        "test_shadow_and_protection_restrict_blocking"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -6095,17 +6158,31 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/continuous-layers.json",
+      "contract_sha256": "e02a8ca685dbdddbfea8a72b2bb6935171392d332c14150387327e31956ecff8",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "continuous_effects.evaluate_continuous_effects and CommanderEngine._apply_layered_characteristic_annotations",
+      "implementation_version": "continuous-layers-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "not every existing ad hoc static ability has been converted to a declarative effect",
+        "dependency discovery is supplied by the compiler rather than inferred from arbitrary effect programs",
+        "player/game-rule effects and APNAP timestamp decisions are not integrated",
+        "full face-down, merged permanent, and sticker copiable values are not integrated"
+      ],
       "mechanic_id": "cr-613-interaction-of-continuous-effects",
       "official_name": "Interaction of Continuous Effects",
       "rule_references": [
         "613"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_layer_order_dominates_timestamp",
+        "test_power_toughness_sublayers_set_modify_then_switch",
+        "test_dependency_overrides_timestamp_and_cycles_are_audited",
+        "test_effect_order_is_stable_under_input_mutation"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -6140,17 +6217,31 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/replacement-ordering.json",
+      "contract_sha256": "300df49bb52c302f96c0a03c2baad26e86c2962a8a91a9fcf3451e1d5722268d",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "replacement_effects.replacement_choice and replacement_effects.apply_replacement",
+      "implementation_version": "replacement-ordering-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "generic replacement choice packets are not yet wired into all engine event producers",
+        "nested event ordering and simultaneous APNAP choice collection are not integrated",
+        "legacy Dauthi and draw replacement paths are not yet expressed entirely through the generic registry"
+      ],
       "mechanic_id": "cr-616-interaction-of-replacement-and-or-prevention-effects",
       "official_name": "Interaction of Replacement and/or Prevention Effects",
       "rule_references": [
         "616"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_self_replacement_must_be_chosen_before_other_effects",
+        "test_each_effect_applies_at_most_once_to_one_event",
+        "test_optional_decline_is_recorded_and_not_offered_again",
+        "test_mandatory_replacement_cannot_be_declined",
+        "test_prevention_never_prevents_more_than_remaining_damage"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -6944,17 +7035,17 @@
       "database_schema_version": "1",
       "oracle_bulk": {
         "download_uri": null,
-        "oracle_id_count": 38373,
-        "sha256": "54749845bcf510fa343f1a7d11636a75bbb6a8ea1e8872c8e0d2f86cc2b4df5e",
-        "source_filename": "oracle-cards-20260728201120.jsonl.gz",
-        "updated_at": "2026-07-28T20:11:20.685+00:00"
+        "oracle_id_count": 38362,
+        "sha256": null,
+        "source_filename": "oracle-cards-20260728.jsonl",
+        "updated_at": null
       },
       "rulings_bulk": {
         "download_uri": null,
         "ruling_count": 77999,
-        "sha256": "9fd7a5a886426c1fc5907cb9ee5719d9ede3ad768385ed06a9e589d8016b0a7c",
-        "source_filename": "rulings-20260728090036.jsonl.gz",
-        "updated_at": "2026-07-28T09:00:36.114+00:00"
+        "sha256": null,
+        "source_filename": "rulings-20260728.jsonl",
+        "updated_at": null
       }
     },
     "comprehensive_rules": "indexed",

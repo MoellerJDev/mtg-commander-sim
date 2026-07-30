@@ -436,6 +436,31 @@ class CardDatabase:
             raise KeyError(f"Unknown oracle_id: {oracle_id}")
         return self._row_to_card(row)
 
+    def iter_cards(
+        self,
+        *,
+        commander_legal_only: bool = False,
+        limit: int | None = None,
+    ) -> Iterable[CardRecord]:
+        """Iterate the pinned Oracle corpus without loading it all in memory."""
+
+        query = "SELECT * FROM cards ORDER BY oracle_id"
+        parameters: tuple[Any, ...] = ()
+        if commander_legal_only:
+            query = (
+                "SELECT * FROM cards "
+                "WHERE json_extract(legalities_json, '$.commander') = 'legal' "
+                "ORDER BY oracle_id"
+            )
+        if limit is not None:
+            if int(limit) < 0:
+                raise ValueError("limit must be nonnegative")
+            query += " LIMIT ?"
+            parameters = (int(limit),)
+        cursor = self.connection.execute(query, parameters)
+        for row in cursor:
+            yield self._row_to_card(row)
+
     def lookup(self, name: str, *, fuzzy: bool = True) -> CardRecord:
         normalized = normalize_card_name(name)
         row = self.connection.execute(

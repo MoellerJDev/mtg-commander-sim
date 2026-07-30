@@ -123,6 +123,16 @@ generated documentation fixtures with bearer capabilities redacted. See
 - project-scoped GPT-5.6 Sol pilot-agent configuration and a
   `commander-arena` Codex skill
 - schema-validated semantic packs with trust and source provenance
+- pinned Comprehensive Rules inventory, diff, verification, dependency, and
+  mechanic-contract artifacts
+- typed, source-spanned Oracle IR with deterministic semantic hashes and
+  fail-closed material residuals
+- automatic deck-time generic compilation into provisional, arbiter-gated
+  semantic programs
+- CR 613 layer/sublayer, timestamp, dependency, and cycle-audit primitives,
+  now used for common copy/type/keyword annotations
+- CR 616 replacement/prevention priority and affected-player-choice
+  primitives
 - trust-aware semantic preflight for files and live Moxfield URLs
 - compact cast, land, activation, target, and generic resolution-time search
   templates
@@ -194,12 +204,28 @@ python simctl.py rules verify --root .
 python simctl.py rules coverage --root .
 ```
 
-This is the foundation, not a completeness declaration: the generated
-coverage files remain red until every material rule and mechanic contract in
-the pinned snapshot is trusted and the future typed Oracle compiler reports no
-material residuals. Genuinely unique cards may use reviewed, hash-pinned
-overrides; common cards and mechanics should compile through reusable
-primitives. See `RULES_COMPLETENESS.md`.
+Deck creation now invokes the typed Oracle compiler automatically. Exact
+whole-text templates lower into the generic effect DSL without a printed-name
+branch, but generated programs stay provisional and arbiter-gated while any
+mechanic dependency is untrusted. Unknown suffixes, costs, triggers,
+replacement effects, or static text remain material residuals.
+
+```bash
+python simctl.py oracle parse "Lightning Bolt" \
+  --db data/scryfall-current.sqlite3
+python simctl.py oracle explain "Rest in Peace" \
+  --db data/scryfall-current.sqlite3
+python simctl.py oracle coverage \
+  --db data/scryfall-current.sqlite3
+```
+
+This is still not a completeness declaration. The measured compact snapshot
+has 38,362 Oracle IDs: 2,957 exact, 13,684 partially lowerable, and 21,721
+unresolved under current dependency gates. All 69,823 material residuals must
+be eliminated or covered by reviewed, hash-pinned overrides before complete
+Oracle support can be claimed. Genuinely unique cards may use reviewed
+overrides; common cards and mechanics compile through reusable primitives.
+See `RULES_COMPLETENESS.md` and `ORACLE_IR.md`.
 
 ## Quick Python loop
 

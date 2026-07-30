@@ -12,6 +12,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from .mechanic_contracts import (
+    MechanicContractError,
+    apply_contracts_to_registry,
+    load_mechanic_contracts,
+)
+
 RULES_CORPUS_SCHEMA_VERSION = 1
 RULES_PARSER_VERSION = "cr-index-v1"
 OFFICIAL_RULES_PAGE = "https://magic.wizards.com/en/rules"
@@ -612,6 +618,7 @@ def _mechanics_registry_document(
     parsed: Mapping[str, Any],
     *,
     card_data_snapshot: Mapping[str, Any],
+    root: str | Path | None = None,
 ) -> dict[str, Any]:
     mechanics = list(parsed["mechanics"])
     taxonomy = [
@@ -624,7 +631,7 @@ def _mechanics_registry_document(
         for mechanic in mechanics
         if mechanic["kind"] == "rules_section"
     ]
-    return {
+    registry = {
         "schema_version": RULES_CORPUS_SCHEMA_VERSION,
         "registry_version": "mechanics-registry-v1",
         "effective_date": parsed["effective_date"],
@@ -649,6 +656,21 @@ def _mechanics_registry_document(
             for mechanic in mechanics
         ),
     }
+    if root is None:
+        return registry
+    contracts = load_mechanic_contracts(
+        root,
+        expected_effective_date=str(parsed["effective_date"]),
+        expected_source_sha256=(
+            str(parsed["rules"][0]["source_sha256"])
+            if parsed["rules"]
+            else None
+        ),
+        known_rule_ids={
+            str(rule["rule_id"]) for rule in parsed["rules"]
+        },
+    )
+    return apply_contracts_to_registry(registry, contracts)
 
 
 def _mechanics_coverage(
@@ -784,6 +806,7 @@ def sync_rules_corpus(
     mechanics_registry = _mechanics_registry_document(
         parsed,
         card_data_snapshot=card_data_snapshot,
+        root=root,
     )
     documents["manifest.json"]["derived_hashes"][
         "mechanics/registry.json"
@@ -1198,6 +1221,47 @@ def verify_rules_corpus(
                 f"Mechanic {mechanic.get('mechanic_id')} has an unknown "
                 "coverage status"
             )
+    try:
+        contracts = load_mechanic_contracts(
+            root,
+            expected_effective_date=str(
+                mechanics_registry.get("effective_date") or ""
+            ),
+            expected_source_sha256=str(
+                mechanics_registry.get("source_sha256") or ""
+            ),
+            known_rule_ids=known_rules,
+        )
+        expected_contracts = {
+            str(contract["mechanic_id"]): contract
+            for contract in contracts
+        }
+        registry_contracts = {
+            str(row.get("mechanic_id")): row
+            for row in mechanics_registry.get("mechanics", [])
+            if row.get("contract_path")
+        }
+        if set(expected_contracts) != set(registry_contracts):
+            errors.append(
+                "mechanics/registry.json contract set is stale"
+            )
+        for mechanic_id, contract in expected_contracts.items():
+            row = registry_contracts.get(mechanic_id, {})
+            if (
+                row.get("contract_path")
+                != contract.get("_contract_path")
+                or row.get("contract_sha256")
+                != contract.get("_contract_sha256")
+                or row.get("coverage_status")
+                != contract.get("coverage_status")
+                or row.get("trust_level")
+                != contract.get("trust_level")
+            ):
+                errors.append(
+                    f"Mechanic {mechanic_id} does not match its contract"
+                )
+    except MechanicContractError as exc:
+        errors.append(str(exc))
 
     cache = (
         Path(cache_dir)

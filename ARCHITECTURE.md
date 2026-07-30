@@ -419,18 +419,43 @@ Pilots do not spend tokens restating card behavior. The arbiter does not receive
 | fetchland cost/effect unresolved | sacrifice-this-land cost plus legal private search choices and built-in search/shuffle resolution |
 | giant save mixed state, events, and credentials | Game Record v3 checkpoint and replay/audit journals; raw capabilities never persist |
 
+## Generic rules compilation
+
+Deck loading now compiles each unique pinned Oracle card into typed,
+source-spanned IR before the engine is created. Reviewed semantic packs keep
+priority on stable key collision. Newly lowerable programs record Oracle,
+rulings, compiler, template, source-span, and semantic hashes, but remain
+provisional and require the arbiter until all mechanic dependencies are
+trusted. Material residuals are never discarded.
+
+The new rules primitives sit below both generated and hand-authored semantics:
+
+- `continuous_effects.py` orders CR 613 layers, sublayers, CDAs, timestamps,
+  dependencies, and cycles. The engine already routes common copy/type/
+  subtype/temporary-keyword annotations through it.
+- `replacement_effects.py` orders CR 616 replacement/prevention priority
+  classes, affected-player choices, optional declines, and repeated
+  applicability for typed events.
+
+Both contracts remain partial. Legacy static abilities have not all moved into
+the layer evaluator, and not every zone/draw/damage/enters producer routes
+through the replacement engine. Coverage and contracts describe those
+integration gaps explicitly.
+
 ## Remaining scope
 
 The architecture is suitable for a serious project, but complete Magic coverage is incremental. Major future modules include:
 
-- continuous-effect layers and dependencies
-- replacement/prevention ordering
+- complete migration to continuous-effect layers, dependency discovery,
+  player/game-rule effects, and APNAP timestamps
+- replacement/prevention integration for every replaceable and nested event
 - complete alternate/additional cost grammar and restricted-mana predicates
 - all special actions and zone-based casting permissions
 - copy, face-down, linked-ability, and characteristic edge cases
 - first/double-strike damage substeps and complete assignment validation
 - multiplayer shortcut and deterministic loop negotiation
-- generated semantic coverage for the full Oracle corpus
+- elimination or reviewed override of every material full-corpus Oracle
+  residual
 - durable database persistence, authentication, and WebSocket delivery
 
 These modules fit behind the current `CommanderEngine`/`GameService` boundary. They do not require granting pilots broader permissions or replacing the command protocol.

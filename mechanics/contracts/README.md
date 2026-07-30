@@ -12,3 +12,14 @@ implementation version, and trust level.
 Card-specific overrides live in a separate reviewed registry and must explain
 why the typed generic compiler is insufficient. Do not add printed-name
 branches to core engine modules.
+
+Contracts use `mechanics/contract.schema.json` plus cross-field validation in
+`mechanic_contracts.py`. A trusted contract must be reviewed, have witness
+cards and tests, and have no known blockers. A partial contract links evidence
+without allowing a happy-path test to be mistaken for complete support.
+
+Current partial contracts cover Flying, deathtouch, protection, CR 613
+continuous-effect ordering, and CR 616 replacement/prevention ordering.
+
+Run `simctl rules sync` after changing a contract so its hash and status are
+overlaid into `mechanics/registry.json`, then run `simctl rules verify`.

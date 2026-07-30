@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-616-interaction-of-replacement-and-or-prevention-effects",
+  "official_name": "Interaction of Replacement and/or Prevention Effects",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": ["616", "616.1", "616.1a", "616.1b", "616.1c", "616.1d", "616.1e", "616.1f", "616.1g", "616.2"],
+  "glossary_references": [],
+  "dependencies": ["replacement-effects", "prevention-effect", "apnap-order"],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["all zones touched by a replaceable event"],
+    "objects": ["affected object or affected player"],
+    "events": ["typed replaceable events"],
+    "state_reads": ["applicability conditions", "already applied effects", "affected player or object controller"],
+    "state_writes": ["a transformed event payload and an applied-effect journal"],
+    "costs": [],
+    "timing": ["before the original event occurs", "repeat until no effect applies"],
+    "targets": [],
+    "choices": ["affected player or object controller chooses among the current priority class"],
+    "hidden_information": ["choice packets may expose only legally known replacement options"],
+    "apnap": ["simultaneous affected-player choices are collected in APNAP order"],
+    "layers": ["as-enters copy/control effects interact with continuous-effect layer 1 or 2 after the event"],
+    "replacement_effects": ["self replacement", "enters control", "enters copy", "enters back face", "other"],
+    "copy": ["enters-copy replacements have priority before other replacements"],
+    "control_change": ["enters-control replacements have priority before enters-copy replacements"],
+    "zone_change": ["destination replacements transform the same zone-change event"],
+    "source_leaves": ["applicability is rechecked after every chosen replacement"]
+  },
+  "variants": ["optional replacement", "prevention shield", "nested event", "newly applicable effect"],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_self_replacement_must_be_chosen_before_other_effects",
+    "test_each_effect_applies_at_most_once_to_one_event",
+    "test_optional_decline_is_recorded_and_not_offered_again",
+    "test_mandatory_replacement_cannot_be_declined",
+    "test_prevention_never_prevents_more_than_remaining_damage"
+  ],
+  "implementation": {
+    "component": "replacement_effects.replacement_choice and replacement_effects.apply_replacement",
+    "version": "replacement-ordering-v1"
+  },
+  "known_blockers": [
+    "generic replacement choice packets are not yet wired into all engine event producers",
+    "nested event ordering and simultaneous APNAP choice collection are not integrated",
+    "legacy Dauthi and draw replacement paths are not yet expressed entirely through the generic registry"
+  ],
+  "review_status": "draft"
+}

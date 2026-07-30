@@ -11,6 +11,11 @@ from .abilities import parse_activated_abilities
 from .carddb import CardDatabase, CardRecord
 from .deck import DeckDefinition, DeckLoader
 from .mana import ManaPlanError, extract_mana_modes, parsed_cost
+from .oracle_ir import (
+    ORACLE_COMPILER_VERSION,
+    compile_oracle_card,
+    register_generated_programs,
+)
 from .profiles import (
     deck_list_fingerprint,
     deck_source_fingerprint,
@@ -405,6 +410,7 @@ def card_semantic_status(
     *,
     db: CardDatabase | None = None,
 ) -> dict[str, Any]:
+    oracle_ir = compile_oracle_card(record)
     programs = registry.programs_for_oracle(record.oracle_id)
     oracle_hash, rulings_hash = (
         _card_source_hashes(db, record)
@@ -676,6 +682,31 @@ def card_semantic_status(
         "intentionally_ignored_reasons": ignored_reasons,
         "unresolved": unresolved,
         "programs": program_rows,
+        "oracle_ir": {
+            "schema_version": oracle_ir.schema_version,
+            "compiler_version": oracle_ir.compiler_version,
+            "semantic_hash": oracle_ir.semantic_hash,
+            "status": oracle_ir.status,
+            "material_residual_count": len(
+                oracle_ir.material_residuals
+            ),
+            "material_residuals": [
+                {
+                    "kind": residual.kind,
+                    "reason": residual.reason,
+                    "source_line": residual.span.line,
+                    "blockers": list(residual.blockers),
+                }
+                for residual in oracle_ir.material_residuals
+            ],
+            "covered_by_trusted_card_semantics": (
+                status == "fully_playable"
+                and bool(trusted_programs)
+            ),
+            "covered_by_existing_trusted_runtime": (
+                status == "fully_playable"
+            ),
+        },
     }
 
 
@@ -694,6 +725,16 @@ def semantic_preflight(
         else DeckLoader(db, cache_dir=cache_dir).load(
             deck_or_source, force_refresh=force_refresh
         )
+    )
+    generation = register_generated_programs(
+        db,
+        registry,
+        (
+            db.lookup(entry.name)
+            for entry in deck.entries
+            if entry.board in {"mainboard", "commander"}
+        ),
+        trust_level="provisional",
     )
     cards = []
     for entry in deck.entries:
@@ -736,6 +777,17 @@ def semantic_preflight(
         if row["trust_level"] == "intentionally_ignored"
         and not row["intentionally_ignored_reasons"]
     ]
+    oracle_ir_statuses = Counter(
+        row["oracle_ir"]["status"] for row in cards
+    )
+    uncovered_oracle_residual_cards = [
+        row["name"]
+        for row in cards
+        if row["oracle_ir"]["material_residual_count"]
+        and not row["oracle_ir"][
+            "covered_by_existing_trusted_runtime"
+        ]
+    ]
     return {
         "schema_version": PREFLIGHT_SCHEMA_VERSION,
         "deck": deck.name,
@@ -770,4 +822,19 @@ def semantic_preflight(
         ),
         "cards": cards,
         "semantic_packs": list(registry.loaded_packs),
+        "oracle_compiler_version": ORACLE_COMPILER_VERSION,
+        "oracle_ir_status_counts": dict(
+            sorted(oracle_ir_statuses.items())
+        ),
+        "oracle_ir_uncovered_residual_cards": sorted(
+            set(uncovered_oracle_residual_cards)
+        ),
+        "generated_semantics": generation,
+        "generic_oracle_compiler_ready": all(
+            row["oracle_ir"]["status"] == "exact"
+            for row in cards
+        ),
+        "oracle_residual_gate_pass": not (
+            uncovered_oracle_residual_cards
+        ),
     }

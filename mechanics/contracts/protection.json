@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "protection",
+  "official_name": "Protection",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": ["702.16"],
+  "glossary_references": ["protection"],
+  "dependencies": ["damage", "targeting", "blocking", "attachments", "continuous-effects"],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["battlefield", "player"],
+    "objects": ["object or player with protection", "quality-bearing source"],
+    "events": ["damage", "attachment legality", "blocking legality", "target selection and revalidation"],
+    "state_reads": ["current protection qualities", "source characteristics"],
+    "state_writes": ["prevent qualifying damage", "remove illegal attachments"],
+    "costs": [],
+    "timing": ["target legality at announcement and resolution", "state-based attachment checks"],
+    "targets": ["objects with protection cannot be targeted by matching sources"],
+    "choices": [],
+    "hidden_information": [],
+    "apnap": [],
+    "layers": ["ability and characteristic layers determine both protection and source qualities"],
+    "replacement_effects": ["damage prevention can interact with other prevention and replacement effects"],
+    "copy": ["copied characteristics can change protected qualities"],
+    "control_change": ["controller relation may appear in the protection quality"],
+    "zone_change": ["new objects lose prior continuous protection effects"],
+    "source_leaves": ["continuous grants may end when their source leaves"]
+  },
+  "variants": ["protection from colors", "protection from card types", "protection from everything"],
+  "witness_cards": [
+    {
+      "name": "Mother of Runes",
+      "oracle_id": "d8679a92-eeb6-4ae8-9a3d-7f85b8d545fc"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_protection_removes_colored_source_from_target_candidates",
+    "test_shadow_and_protection_restrict_blocking"
+  ],
+  "implementation": {
+    "component": "CommanderEngine protection target, damage, and blocking checks",
+    "version": "protection-v1"
+  },
+  "known_blockers": [
+    "protection quality grammar is not complete",
+    "attachment state-based actions are not complete",
+    "full layers and replacement/prevention ordering are not complete"
+  ],
+  "review_status": "draft"
+}
