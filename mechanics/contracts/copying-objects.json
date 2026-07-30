@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-707-copying-objects",
+  "official_name": "Copying Objects",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "400.7a",
+    "608.3f",
+    "704.5e",
+    "707",
+    "707.2",
+    "707.9",
+    "707.10",
+    "707.10a",
+    "707.10f",
+    "707.12"
+  ],
+  "glossary_references": [
+    "copy"
+  ],
+  "dependencies": [
+    "cr-400-general",
+    "cr-601-casting-spells",
+    "cr-608-resolving-spells-and-abilities",
+    "cr-704-state-based-actions"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "stack",
+      "battlefield",
+      "the first invalid destination before the next state check",
+      "outside after cessation"
+    ],
+    "objects": [
+      "spell copies represented by serialized noncard objects",
+      "card copies represented by serialized noncard objects",
+      "copied activated and triggered abilities represented by stack items",
+      "token permanents resulting from copied permanent spells"
+    ],
+    "events": [
+      "copy a stack item",
+      "choose permitted new targets",
+      "resolve or counter a spell copy",
+      "permanent spell copy becomes a token",
+      "spell-copy or card-copy cessation"
+    ],
+    "state_reads": [
+      "source copiable-characteristic snapshot",
+      "copied modes, targets, X value, and selected face",
+      "copy object kind and current zone"
+    ],
+    "state_writes": [
+      "serialized copy object and stack association",
+      "copied stack choices and target snapshots",
+      "same-object token conversion for a resolving permanent spell copy",
+      "outside tombstone after cessation"
+    ],
+    "costs": [
+      "costs paid for an original stack object are not paid again merely to create its copy"
+    ],
+    "timing": [
+      "a stack copy is created directly on the stack and is not cast or activated",
+      "state-based actions make invalid-zone copies cease before priority"
+    ],
+    "targets": [
+      "a spell copy is a spell target rather than an ability target",
+      "new targets are selected only through the compiled copy effect",
+      "noncard copies are never legal card targets"
+    ],
+    "choices": [
+      "implemented copies preserve modes, X, selected face, and unchanged targets",
+      "supported effects may choose legal new targets"
+    ],
+    "hidden_information": [
+      "authoritative copy-object identity is omitted from pilot projections",
+      "a hidden-zone card copy is known only to its controller"
+    ],
+    "apnap": [],
+    "layers": [
+      "the source copiable-characteristic snapshot supplies the represented base values"
+    ],
+    "replacement_effects": [
+      "a noncard copy is not affected by replacements restricted to cards",
+      "replacement and prevention effects modifying the copy operation remain incomplete"
+    ],
+    "copy": [
+      "copying a represented spell copy creates another independent spell-copy object",
+      "copied external effects and the complete copiable-values rules remain outside this partial contract"
+    ],
+    "control_change": [
+      "the effect creating a stack copy determines its controller",
+      "a resolving permanent spell copy enters under that controller"
+    ],
+    "zone_change": [
+      "a permanent spell and its resulting permanent are one logical object",
+      "a copied permanent spell becomes the same represented object as a token permanent",
+      "a spell copy outside the stack and a card copy outside the stack or battlefield cease as state-based actions"
+    ],
+    "source_leaves": [
+      "a stack copy remains independent of the original after creation"
+    ]
+  },
+  "variants": [
+    "copy an instant or sorcery spell",
+    "copy an activated or triggered ability",
+    "copy a permanent spell",
+    "storm creates multiple spell copies",
+    "countered spell copy reaches its destination before ceasing",
+    "card copy remains a nontoken permanent on the battlefield"
+  ],
+  "witness_cards": [
+    {
+      "name": "Lithoform Engine",
+      "oracle_id": "0bf299da-1854-4153-baea-3cee2eb01ee8"
+    },
+    {
+      "name": "Flusterstorm",
+      "oracle_id": "86bf58f2-7f25-4e10-b797-25e0e8e67769"
+    }
+  ],
+  "rulings": [
+    "Lithoform Engine 2020-09-25: a resolving permanent-spell copy becomes a token under the rules for a permanent spell becoming a permanent",
+    "Lithoform Engine 2020-09-25: that token is not said to have been created",
+    "Flusterstorm 2022-12-08: a spell copy can be countered individually like any other spell"
+  ],
+  "test_ids": [
+    "test_spell_copy_has_a_serialized_stack_object",
+    "test_countered_spell_copy_reaches_graveyard_then_ceases",
+    "test_card_copy_is_not_a_card_and_ceases_from_graveyard",
+    "test_card_copy_on_battlefield_is_a_nontoken_permanent",
+    "test_permanent_spell_copy_becomes_the_same_token_object",
+    "test_spell_copy_is_a_spell_target_not_an_ability",
+    "test_copy_object_identity_is_not_projected_to_pilots",
+    "test_spell_copy_cessation_replays_exactly",
+    "test_permanent_spell_keeps_its_logical_incarnation",
+    "test_lithoform_engine_copies_triggered_ability_and_spell_types",
+    "test_lithoform_engine_permanent_spell_copy_becomes_token",
+    "test_flusterstorm_storm_copies_are_individual_stack_objects"
+  ],
+  "implementation": {
+    "component": "CardInstance.object_kind, CommanderEngine._create_copy_object/_copy_stack_item/_begin_resolve_item, and state_based_actions.evaluate_state_based_actions",
+    "version": "copy-object-lifecycle-v1"
+  },
+  "known_blockers": [
+    "the complete CR 707.2 copiable-values and layer-1 interaction matrix is not implemented",
+    "copying cards and casting or playing those copies under CR 707.12 is not integrated with the full casting and land-play workflows",
+    "Prepare copy objects that remain in exile under CR 722.3c are not represented",
+    "face-down, mutate, meld, stickers, linked abilities, and copy-effect exception interactions remain incomplete",
+    "copied choices, alternative and additional cost facts, divisions, and all target-retention exceptions are not represented generically",
+    "external effects affecting an original stack object are not completely distinguished from its copiable characteristics"
+  ],
+  "review_status": "reviewed"
+}

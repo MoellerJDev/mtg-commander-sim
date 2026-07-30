@@ -1,5 +1,5 @@
 {
-  "contract_count": 12,
+  "contract_count": 13,
   "contracts": [
     {
       "mechanic_id": "cr-122-counters",
@@ -20,6 +20,12 @@
       "version": 2
     },
     {
+      "mechanic_id": "cr-707-copying-objects",
+      "path": "mechanics/contracts/copying-objects.json",
+      "sha256": "6c3620b6ef7d267679778eff709af9d574117e65ba9254464034b1ea8b377e0a",
+      "version": 1
+    },
+    {
       "mechanic_id": "deathtouch",
       "path": "mechanics/contracts/deathtouch.json",
       "sha256": "9c3c4b6ed7f7a54ff49d8cdfd7c9bfe112cac135aaa126a1a7b8a87d0df7f8e9",
@@ -34,8 +40,8 @@
     {
       "mechanic_id": "cr-400-general",
       "path": "mechanics/contracts/object-zone-identity.json",
-      "sha256": "58c5ecd1731ab21c28f65f3c509074986041053e9f373bc939f497f1636632c2",
-      "version": 2
+      "sha256": "325de592aa5bbcdda02dbe73f6160ba68ab2bdb1d09d6f7a078315411a73b382",
+      "version": 3
     },
     {
       "mechanic_id": "protection",
@@ -64,8 +70,8 @@
     {
       "mechanic_id": "cr-704-state-based-actions",
       "path": "mechanics/contracts/state-based-actions.json",
-      "sha256": "07731f4335e5bd0f66a71591fbff9e978aff1b24ebdf35a5cb847f37ef275715",
-      "version": 3
+      "sha256": "aad26b78e392a6d02c7d1447e493645d2a4331c27d985fcb6a64f20a97220f04",
+      "version": 4
     },
     {
       "mechanic_id": "cr-614-replacement-effects",
@@ -5671,12 +5677,12 @@
     {
       "category": "zones",
       "contract_path": "mechanics/contracts/object-zone-identity.json",
-      "contract_sha256": "58c5ecd1731ab21c28f65f3c509074986041053e9f373bc939f497f1636632c2",
-      "contract_version": 2,
+      "contract_sha256": "325de592aa5bbcdda02dbe73f6160ba68ab2bdb1d09d6f7a078315411a73b382",
+      "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "CardInstance.zone_change_counter and zone_timestamp, GameState.timestamp_sequence, CommanderEngine.move_card, target revalidation, and identity-guarded semantic moves",
-      "implementation_version": "object-incarnation-v2",
+      "implementation_version": "object-incarnation-v3",
       "kind": "rules_section",
       "known_blockers": [
         "the complete CR 400.7a-m exception matrix is not represented as typed continuation policies",
@@ -5703,6 +5709,10 @@
         "test_daretti_ruling_does_not_follow_a_reentered_card",
         "test_logical_identity_metadata_is_not_projected_to_pilots",
         "test_token_cost_cessation_replays_exactly",
+        "test_spell_copy_has_a_serialized_stack_object",
+        "test_permanent_spell_copy_becomes_the_same_token_object",
+        "test_spell_copy_cessation_replays_exactly",
+        "test_permanent_spell_keeps_its_logical_incarnation",
         "test_simultaneous_move_captures_all_lki_before_mutation",
         "test_worlds_entering_simultaneously_are_tied_and_all_leave"
       ],
@@ -6435,15 +6445,15 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/state-based-actions.json",
-      "contract_sha256": "07731f4335e5bd0f66a71591fbff9e978aff1b24ebdf35a5cb847f37ef275715",
-      "contract_version": 3,
+      "contract_sha256": "aad26b78e392a6d02c7d1447e493645d2a4331c27d985fcb6a64f20a97220f04",
+      "contract_version": 4,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "state_based_actions.evaluate_permanent_state_based_actions and CommanderEngine._stabilize",
-      "implementation_version": "state-based-actions-v4",
+      "implementation_version": "state-based-actions-v5",
       "kind": "rules_section",
       "known_blockers": [
-        "spell-copy and card-copy cessation lacks a transient noncard object representation in destination zones",
+        "specialized copy-object exceptions such as Prepare copies in exile are not implemented",
         "maximum-counter restrictions, Sagas, dungeons, space sculptor, battles, Roles, and speed state actions are not implemented",
         "Aura attachment to players and the complete enchant-quality grammar are not implemented",
         "regeneration and complete loss-event replacement ordering are not integrated",
@@ -6465,6 +6475,9 @@
         "test_simultaneous_move_captures_all_lki_before_mutation",
         "test_nonbattlefield_tokens_cease_from_the_shared_snapshot",
         "test_noncard_copies_cease_only_outside_their_valid_zones",
+        "test_countered_spell_copy_reaches_graveyard_then_ceases",
+        "test_card_copy_is_not_a_card_and_ceases_from_graveyard",
+        "test_card_copy_on_battlefield_is_a_nontoken_permanent",
         "test_token_changes_zone_before_ceasing_at_next_state_check",
         "test_legend_rule_asks_controller_to_keep_one",
         "test_player_elimination_keeps_multiplayer_game_running",
@@ -6510,17 +6523,41 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/copying-objects.json",
+      "contract_sha256": "6c3620b6ef7d267679778eff709af9d574117e65ba9254464034b1ea8b377e0a",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CardInstance.object_kind, CommanderEngine._create_copy_object/_copy_stack_item/_begin_resolve_item, and state_based_actions.evaluate_state_based_actions",
+      "implementation_version": "copy-object-lifecycle-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "the complete CR 707.2 copiable-values and layer-1 interaction matrix is not implemented",
+        "copying cards and casting or playing those copies under CR 707.12 is not integrated with the full casting and land-play workflows",
+        "Prepare copy objects that remain in exile under CR 722.3c are not represented",
+        "face-down, mutate, meld, stickers, linked abilities, and copy-effect exception interactions remain incomplete",
+        "copied choices, alternative and additional cost facts, divisions, and all target-retention exceptions are not represented generically",
+        "external effects affecting an original stack object are not completely distinguished from its copiable characteristics"
+      ],
       "mechanic_id": "cr-707-copying-objects",
       "official_name": "Copying Objects",
       "rule_references": [
         "707"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_spell_copy_has_a_serialized_stack_object",
+        "test_countered_spell_copy_reaches_graveyard_then_ceases",
+        "test_card_copy_is_not_a_card_and_ceases_from_graveyard",
+        "test_card_copy_on_battlefield_is_a_nontoken_permanent",
+        "test_permanent_spell_copy_becomes_the_same_token_object",
+        "test_spell_copy_is_a_spell_target_not_an_ability",
+        "test_copy_object_identity_is_not_projected_to_pilots",
+        "test_spell_copy_cessation_replays_exactly",
+        "test_permanent_spell_keeps_its_logical_incarnation",
+        "test_lithoform_engine_copies_triggered_ability_and_spell_types",
+        "test_lithoform_engine_permanent_spell_copy_becomes_token",
+        "test_flusterstorm_storm_copies_are_individual_stack_objects"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -7190,22 +7227,7 @@
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "sources": {
     "card_data_snapshot": {
-      "available": true,
-      "database_schema_version": "1",
-      "oracle_bulk": {
-        "download_uri": null,
-        "oracle_id_count": 38373,
-        "sha256": "54749845bcf510fa343f1a7d11636a75bbb6a8ea1e8872c8e0d2f86cc2b4df5e",
-        "source_filename": "oracle-cards-20260728201120.jsonl.gz",
-        "updated_at": "2026-07-28T20:11:20.685+00:00"
-      },
-      "rulings_bulk": {
-        "download_uri": null,
-        "ruling_count": 77999,
-        "sha256": "9fd7a5a886426c1fc5907cb9ee5719d9ede3ad768385ed06a9e589d8016b0a7c",
-        "source_filename": "rulings-20260728090036.jsonl.gz",
-        "updated_at": "2026-07-28T09:00:36.114+00:00"
-      }
+      "available": false
     },
     "comprehensive_rules": "indexed",
     "official_set_mechanics": "planned",

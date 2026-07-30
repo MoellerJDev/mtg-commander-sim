@@ -218,9 +218,11 @@ replacement effects, or static text remain material residuals.
 The generic zone kernel now distinguishes a stable physical card identifier
 from its logical incarnation. Every ordinary zone change, including a draw or
 a cast, advances an authoritative incarnation counter; same-zone moves through
-exile or the command zone do as well. Targets and implemented linked delayed
-effects retain the selected incarnation, so a card that leaves and returns is
-not silently treated as the old object. Pilot projections never expose the
+exile or the command zone do as well. CR 400.7a is explicit: a permanent spell
+keeps its logical incarnation when it becomes a permanent, while receiving a
+new battlefield timestamp. Targets and implemented linked delayed effects
+retain the selected incarnation, so a card that leaves and returns is not
+silently treated as the old object. Pilot projections never expose the
 physical identifier or incarnation counter.
 
 Each new zone incarnation also receives a serialized timestamp moment.
@@ -234,9 +236,13 @@ authoritative timestamps are also omitted from pilot projections. Full CR
 Tokens now reach their first nonbattlefield destination, generate the
 appropriate zone-change events, and cease to exist only at the next
 state-based-action check. A token that has left the battlefield cannot move
-again. This is a reviewed partial CR 111/400/704 slice, not complete support
-for spell copies, card copies, merged permanents, meld, stickers, or every CR
-400.7 exception.
+again. Spell and card copies now use serialized noncard objects. A spell copy
+outside the stack, or a card copy outside the stack or battlefield, reaches
+that invalid destination before CR 704.5e makes it cease. A copied permanent
+spell becomes that same object as a token permanent and does not emit a token
+creation event. This is a reviewed partial CR 111/400/704/707 slice, not
+complete copiable-value, card-copy casting, Prepare, merged-permanent, meld,
+sticker, face-down, or linked-ability support.
 
 ```bash
 python simctl.py oracle parse "Lightning Bolt" \

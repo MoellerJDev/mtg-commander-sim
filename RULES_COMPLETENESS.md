@@ -186,28 +186,31 @@ cross-zone moves, draws, casts, and same-zone exile/command moves create new
 incarnations; objects moved simultaneously to one destination share a
 timestamp moment. Target snapshots and implemented linked delayed moves
 require the recorded incarnation. State that cannot survive CR 400.7 is
-cleared, while implemented stack-to-battlefield continuations such as
-as-enters choices are explicit. The contract remains partial because the full
-CR 400.7 exception matrix, merged/melded and face-down objects, stickers, all
-legacy physical-reference links, and complete CR 613.7m relative timestamp
-choices have not yet migrated to typed policies.
+cleared, while a permanent spell retains its logical incarnation under CR
+400.7a and implemented stack-to-battlefield continuations such as as-enters
+choices are explicit. The contract remains partial because the full CR 400.7
+exception matrix, merged/melded and face-down objects, stickers, all legacy
+physical-reference links, and complete CR 613.7m relative timestamp choices
+have not yet migrated to typed policies.
 
 `state_based_actions.py` implements an order-invariant CR 704 permanent
 snapshot and distinguishes non-destruction graveyard moves, destruction,
-unattachment, opposing +1/+1 and -1/-1 counter removal, and token cessation.
-The engine integrates that batch into its fixed-point loop, reuses declarative
-attachment predicates, and preserves pre-batch last-known information for
-simultaneous moves. Tokens first reach their destination, cannot move again
-after leaving the battlefield, and cease during the next SBA check without a
-second zone-change event. A separate serialized World-since timestamp supports
-CR 704.5k: the unique newest World permanent survives, while a newest-duration
-tie moves every World permanent simultaneously. Player loss, poison, empty
-draw, commander damage, planeswalker loyalty, and the legend rule remain
-integrated in `CommanderEngine`. The contract is partial: spell/card-copy
-cessation still lacks a transient noncard representation, and counter caps,
-Sagas, dungeons, space sculptor, battles, Roles, speed, complete
-enchant-quality grammar, regeneration, and simultaneous loss-event
-replacement still block trust.
+unattachment, opposing +1/+1 and -1/-1 counter removal, and token or copy
+cessation. The engine integrates that batch into its fixed-point loop, reuses
+declarative attachment predicates, and preserves pre-batch last-known
+information for simultaneous moves. Tokens and invalid-zone copies first reach
+their destination, then cease during the next SBA check without a second
+zone-change event. Spell copies, card copies, and tokens are distinct typed
+objects; copied permanent spells become the same represented object as token
+permanents without a token-creation event. A separate serialized World-since
+timestamp supports CR 704.5k: the unique newest World permanent survives,
+while a newest-duration tie moves every World permanent simultaneously.
+Player loss, poison, empty draw, commander damage, planeswalker loyalty, and
+the legend rule remain integrated in `CommanderEngine`. The contracts remain
+partial: complete copiable values, card-copy casting/playing, Prepare,
+specialized copy interactions, counter caps, Sagas, dungeons, space sculptor,
+battles, Roles, speed, complete enchant-quality grammar, regeneration, and
+simultaneous loss-event replacement still block trust.
 
 The Oracle compiler currently recognizes whole-sentence templates for simple
 draw, life, damage, destroy, exile, return, counter, mill, tap/untap, scry,
@@ -237,7 +240,7 @@ The remaining work proceeds by dependency and blocked-card impact:
 
 1. Strict server-issued action/choice schemas.
 2. Complete object-identity continuation policies, last-known information,
-   faces, transient copies, merged objects, and linked abilities.
+   faces, merged objects, and linked abilities.
 3. Casting, costs, restricted mana, and cost modification ordering.
 4. Targeting, modes, distributions, resolution, and linked choices.
 5. Complete trigger detection/order and the remaining state-based actions.

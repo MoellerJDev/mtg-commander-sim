@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "cr-400-general",
   "official_name": "Zones and New Object Identity",
   "effective_date": "2026-06-19",
@@ -56,6 +56,8 @@
     "objects": [
       "cards",
       "tokens",
+      "spell copies",
+      "card copies",
       "permanents",
       "spells",
       "abilities"
@@ -75,6 +77,7 @@
     ],
     "state_writes": [
       "zone membership",
+      "typed card, token, spell-copy, or card-copy kind",
       "logical incarnation counter",
       "serialized zone-entry timestamp moment",
       "new-object characteristics and counters",
@@ -115,7 +118,8 @@
     ],
     "zone_change": [
       "ordinary cross-zone moves create a new logical incarnation",
-      "exile-to-exile and command-to-command create new logical incarnations"
+      "exile-to-exile and command-to-command create new logical incarnations",
+      "a permanent spell retains its logical incarnation as it becomes a permanent"
     ],
     "source_leaves": [
       "stack abilities use last-known information, while targets and linked delayed effects retain only the relationships allowed by CR 400.7"
@@ -160,12 +164,16 @@
     "test_daretti_ruling_does_not_follow_a_reentered_card",
     "test_logical_identity_metadata_is_not_projected_to_pilots",
     "test_token_cost_cessation_replays_exactly",
+    "test_spell_copy_has_a_serialized_stack_object",
+    "test_permanent_spell_copy_becomes_the_same_token_object",
+    "test_spell_copy_cessation_replays_exactly",
+    "test_permanent_spell_keeps_its_logical_incarnation",
     "test_simultaneous_move_captures_all_lki_before_mutation",
     "test_worlds_entering_simultaneously_are_tied_and_all_leave"
   ],
   "implementation": {
     "component": "CardInstance.zone_change_counter and zone_timestamp, GameState.timestamp_sequence, CommanderEngine.move_card, target revalidation, and identity-guarded semantic moves",
-    "version": "object-incarnation-v2"
+    "version": "object-incarnation-v3"
   },
   "known_blockers": [
     "the complete CR 400.7a-m exception matrix is not represented as typed continuation policies",

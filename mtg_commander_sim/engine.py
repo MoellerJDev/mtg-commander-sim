@@ -504,7 +504,9 @@ class CommanderEngine:
 
     def card_record(self, value: str | CardInstance) -> CardRecord | None:
         card = value if isinstance(value, CardInstance) else self.state.cards[value]
-        if card.oracle_id.startswith("custom-token:"):
+        if card.oracle_id.startswith(
+            ("custom-token:", "custom-copy:")
+        ):
             return None
         return self.card_db.by_oracle_id(card.oracle_id)
 
@@ -1265,7 +1267,14 @@ class CommanderEngine:
         if not creates_new_object:
             return
 
-        card.zone_change_counter += 1
+        # CR 400.7a: a permanent spell that resolves remains the same
+        # logical object as the permanent it becomes.  It still receives a
+        # battlefield timestamp and has the ordinary spell-only state reset.
+        stack_to_battlefield = (
+            origin == "stack" and destination == "battlefield"
+        )
+        if not stack_to_battlefield:
+            card.zone_change_counter += 1
         card.zone_timestamp = (
             int(zone_timestamp)
             if zone_timestamp is not None
@@ -1300,10 +1309,10 @@ class CommanderEngine:
         # state covered by an implemented exception or by the token's initial
         # copiable characteristics.
         retained_annotation_keys = {"token_characteristics"}
-        stack_to_battlefield = (
-            origin == "stack" and destination == "battlefield"
-        )
-        if card.is_token:
+        if card.is_token or card.object_kind in {
+            "spell_copy",
+            "card_copy",
+        }:
             retained_annotation_keys.update(
                 {"copied_from", "copy_overrides"}
             )
@@ -1346,7 +1355,7 @@ class CommanderEngine:
         snapshot so the outcome cannot depend on iteration order.
         """
 
-        if destination != "graveyard" or card.is_token:
+        if destination != "graveyard" or not card.is_card_object:
             return destination, None
         candidates = (
             list(sources)
@@ -1699,7 +1708,7 @@ class CommanderEngine:
             if (
                 event_destination == "graveyard"
                 and "artifact" in origin_types
-                and not card.is_token
+                and card.is_card_object
                 and card.owner in self.active_seats
             ):
                 emblem_count = int(
@@ -4899,10 +4908,14 @@ class CommanderEngine:
                     "copy_template": {
                         "label": item.label,
                         "controller": item.controller,
+                        "card_object_id": item.card_object_id,
                         "semantic_key": item.semantic_key,
                         "targets": copy.deepcopy(item.targets),
                         "modes": copy.deepcopy(item.modes),
                         "x_value": item.x_value,
+                        "default_destination": (
+                            item.default_destination
+                        ),
                         "target_groups": copy.deepcopy(target_groups),
                         "target_snapshots": copy.deepcopy(
                             target_snapshots
@@ -8476,7 +8489,9 @@ class CommanderEngine:
                         "ref": item.ref,
                         "zone": "stack",
                         "category": (
-                            "spell" if item.kind == "spell" else "ability"
+                            "spell"
+                            if item.kind in {"spell", "spell_copy"}
+                            else "ability"
                         ),
                         "controller": item.controller,
                         "owner": card.owner if card else item.controller,
@@ -8599,10 +8614,10 @@ class CommanderEngine:
         if (
             row.get("category") == "card"
             and isinstance(card, CardInstance)
-            and card.is_token
+            and not card.is_card_object
         ):
-            # CR 111.6: a token may briefly exist in another zone before the
-            # next state check, but it is never a card.
+            # CR 111.6/707.10: tokens and noncard copies may briefly exist in
+            # another zone before the next state check, but are never cards.
             return False
         if as_target and row.get("zone") == "battlefield" and isinstance(
             card, CardInstance
@@ -8834,7 +8849,9 @@ class CommanderEngine:
                 "ref": ref,
                 "stack_id": item.stack_id,
                 "category": (
-                    "spell" if item.kind == "spell" else "ability"
+                    "spell"
+                    if item.kind in {"spell", "spell_copy"}
+                    else "ability"
                 ),
                 "controller": item.controller,
                 "owner": card.owner if card else item.controller,
@@ -9859,6 +9876,9 @@ class CommanderEngine:
                     targets=selected,
                     modes=list(template.get("modes") or []),
                     x_value=template.get("x_value"),
+                    default_destination=template.get(
+                        "default_destination"
+                    ),
                     visibility=list(self.seats),
                     context={
                         "target_groups": grouped,
@@ -9871,6 +9891,26 @@ class CommanderEngine:
                     },
                 )
             )
+        source_card = self.state.cards.get(
+            str(template.get("card_object_id") or "")
+        )
+        source_data = (
+            self._copyable_characteristics(source_card)
+            if source_card is not None
+            else {
+                "name": str(template.get("label") or "Spell"),
+                "type_line": "Instant",
+            }
+        )
+        for copy_item in copies:
+            copy_object = self._create_copy_object(
+                controller=seat,
+                source=source_card,
+                characteristics=source_data,
+                object_kind="spell_copy",
+                zone="stack",
+            )
+            copy_item.card_object_id = copy_object.object_id
         self.state.stack.remove(trigger)
         self.state.stack.extend(copies)
         self._log(
@@ -9888,6 +9928,129 @@ class CommanderEngine:
             importance=2,
         )
         self._grant_priority(self.state.active_player)
+
+    def _create_copy_object(
+        self,
+        *,
+        controller: str,
+        source: CardInstance | None,
+        characteristics: Mapping[str, Any],
+        object_kind: str,
+        zone: str,
+    ) -> CardInstance:
+        """Create one serialized noncard copy object.
+
+        Stack copies are associated with a ``StackItem`` by their caller.
+        Copies in ordinary zones use normal owner-zone membership until the
+        next state-based-action check makes them cease.
+        """
+
+        self._require_seat(controller, in_game=True)
+        if object_kind not in {"spell_copy", "card_copy"}:
+            raise GameRuleError("A copy object needs a typed copy kind")
+        if zone not in {
+            "library",
+            "hand",
+            "battlefield",
+            "graveyard",
+            "exile",
+            "command",
+            "stack",
+        }:
+            raise GameRuleError(f"Unsupported copy-object zone {zone}")
+        ref = self._next_ref("O")
+        object_id = self._stable_runtime_id("copy-object", ref)
+        copied_values = copy.deepcopy(dict(characteristics))
+        name = str(
+            copied_values.get("name")
+            or (source.printed_name if source is not None else "Copy")
+        )
+        oracle_id = (
+            source.oracle_id
+            if source is not None
+            else (
+                "custom-copy:"
+                f"{self._stable_runtime_id('copy-oracle', ref)}"
+            )
+        )
+        public = zone in PUBLIC_ZONES or zone in {
+            "battlefield",
+            "stack",
+        }
+        card = CardInstance(
+            object_id=object_id,
+            ref=ref,
+            oracle_id=oracle_id,
+            printed_name=name,
+            owner=controller,
+            controller=controller,
+            zone=zone,
+            object_kind=object_kind,
+            zone_timestamp=self._next_zone_timestamp(),
+            active_face=(
+                source.active_face if source is not None else None
+            ),
+            annotations={
+                "copy_overrides": copied_values,
+                **(
+                    {"copied_from": source.object_id}
+                    if source is not None
+                    else {
+                        "token_characteristics": copied_values,
+                    }
+                ),
+            },
+            known_to=(
+                list(self.seats) if public else [controller]
+            ),
+            revealed_to=(
+                list(self.seats) if public else []
+            ),
+        )
+        self.state.cards[object_id] = card
+        if zone != "stack":
+            self.state.players[controller].zones[zone].append(
+                object_id
+            )
+        if zone == "battlefield":
+            card.acquired_control_turn_count = self.state.players[
+                controller
+            ].turns_begun
+            card.entered_battlefield_turn_sequence = (
+                self.state.turn_sequence
+            )
+            self._refresh_world_supertype_timestamp(
+                card,
+                gained_at=card.zone_timestamp,
+            )
+        return card
+
+    def create_card_copy(
+        self,
+        controller: str,
+        source: str,
+        *,
+        zone: str | None = None,
+    ) -> CardInstance:
+        """Create a noncard copy for a compiled CR 707 effect.
+
+        Casting that copy during the resolving effect remains a separate
+        casting operation. Callers cannot create an unattached stack object.
+        """
+
+        original = self._resolve_object(controller, source)
+        destination = str(zone or original.zone)
+        if destination == "stack":
+            raise GameRuleError(
+                "A card copy becomes a stack object only through casting"
+            )
+        return self._create_copy_object(
+            controller=controller,
+            source=original,
+            characteristics=self._copyable_characteristics(original),
+            object_kind="card_copy",
+            zone=destination,
+        )
 
     def _copy_stack_item(
         self,
@@ -9917,6 +10080,23 @@ class CommanderEngine:
             and original_types
             and not original_types.intersection({"instant", "sorcery"})
         )
+        copy_object = (
+            self._create_copy_object(
+                controller=controller,
+                source=original_card,
+                characteristics=(
+                    original_data
+                    or {
+                        "name": target.label,
+                        "type_line": "Instant",
+                    }
+                ),
+                object_kind="spell_copy",
+                zone="stack",
+            )
+            if target.kind in {"spell", "spell_copy"}
+            else None
+        )
         copied = StackItem(
             stack_id=self._stable_runtime_id("stack", ref),
             ref=ref,
@@ -9927,6 +10107,11 @@ class CommanderEngine:
             ),
             controller=controller,
             label=f"{target.label} copy",
+            card_object_id=(
+                copy_object.object_id
+                if copy_object is not None
+                else None
+            ),
             source_object_id=target.source_object_id,
             semantic_key=target.semantic_key,
             targets=[str(value) for value in targets],
@@ -10521,6 +10706,15 @@ class CommanderEngine:
         self._maybe_sacrifice_completed_saga(item)
         entered: CardInstance | None = None
         if item.context.get("copy_permanent_spell"):
+            if not item.card_object_id:
+                raise StateInvariantError(
+                    "A permanent spell copy requires a copy object"
+                )
+            card = self.state.cards[item.card_object_id]
+            if not card.is_spell_copy or card.zone != "stack":
+                raise StateInvariantError(
+                    "Permanent spell-copy object left the stack early"
+                )
             characteristics = copy.deepcopy(
                 dict(
                     item.context.get(
@@ -10532,20 +10726,21 @@ class CommanderEngine:
                 item.context.get("copy_permanent_name")
                 or item.label.removesuffix(" copy")
             )
-            created_ref = self.create_token(
-                item.controller,
-                name=name,
-                characteristics=characteristics,
-                reason=f"{item.label} resolved",
-            )[0]
-            entered = self._resolve_object(
-                item.controller,
-                created_ref,
-                zones={"battlefield"},
-                controlled_only=True,
+            card.printed_name = name
+            card.annotations["copy_overrides"] = characteristics
+            # CR 608.3f/707.10f: this same spell-copy object becomes a token
+            # permanent. It is not a newly created token.
+            card.object_kind = "token"
+            card.is_token = True
+            entered = self.move_card(
+                card.object_id,
+                "battlefield",
+                controller=item.controller,
+                reason="permanent spell copy resolved",
+                log=False,
+                semantic_events=True,
             )
-            entered.annotations["copy_overrides"] = characteristics
-        if item.card_object_id:
+        elif item.card_object_id:
             card = self.state.cards[item.card_object_id]
             if card.zone == "stack":
                 if item.context.get("cost_option") == "evoke":
@@ -15122,6 +15317,8 @@ class CommanderEngine:
                 object_id=card.object_id,
                 zone=card.zone,
                 is_token=card.is_token,
+                is_spell_copy=card.is_spell_copy,
+                is_card_copy=card.is_card_copy,
             )
             for card in self.state.cards.values()
             if card.zone != "outside"
@@ -15275,7 +15472,7 @@ class CommanderEngine:
                             "kind": (
                                 "token"
                                 if card.is_token
-                                else "copy"
+                                else card.object_kind
                             ),
                             "zone": previous_zone,
                         }

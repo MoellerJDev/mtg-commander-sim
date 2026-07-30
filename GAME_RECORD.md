@@ -64,6 +64,14 @@ authoritative state and therefore participates in command hashes and replay;
 it is not a capability and is not exposed in pilot projections. This is an
 additive state-field extension to v3, not a new record layout.
 
+`CardInstance.object_kind` is also serialized and hashed. It distinguishes a
+card, token, spell copy, or card copy while retaining compatibility with older
+token checkpoints. Represented copy-object IDs remain authoritative only; a
+seat sees the ordinary public stack/permanent projection, not the underlying
+copy container. Copy cessation and permanent-spell-copy resolution therefore
+command-replay exactly without exposing new hidden identity. This is another
+additive v3 state extension.
+
 The same checkpoint serializes `GameState.timestamp_sequence`,
 `CardInstance.zone_timestamp`, and `CardInstance.world_supertype_timestamp`.
 The first two establish deterministic CR 613.7d zone-entry moments, including

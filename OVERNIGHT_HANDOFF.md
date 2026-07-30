@@ -23,9 +23,9 @@ remote branch identify the exact immutable hash.
 
 ## Current rules checkpoint
 
-The checkpoint adds versioned partial CR 400/613/704 contract updates and
-implements serialized object timestamps plus the World rule on top of the
-logical-incarnation/token-lifecycle foundation. It now:
+The checkpoint adds versioned partial CR 400/613/704/707 contract updates and
+implements serialized copy objects on top of the logical-incarnation,
+timestamp, World-rule, and token-lifecycle foundation. It now:
 
 - serializes a monotonically increasing logical incarnation beside stable
   physical card identity;
@@ -43,6 +43,11 @@ logical-incarnation/token-lifecycle foundation. It now:
 - separately records when a battlefield object most recently gained World;
 - enforces CR 704.5k by keeping the unique newest World permanent or moving
   every World permanent when the newest duration is tied;
+- preserves a permanent spell's logical incarnation under CR 400.7a;
+- represents spell copies and card copies as serialized noncard objects;
+- enforces CR 704.5e when those copies enter invalid zones;
+- converts a resolving copied permanent spell into the same token object,
+  without emitting a token-creation event;
 - omits physical/incarnation identifiers from seat projections;
 - omits authoritative zone/World timestamps from seat projections;
 - preserves exact command replay with the new authoritative fields.
@@ -52,14 +57,15 @@ loyalty, supported attachment legality, and opposing counter pairs are
 detected from one immutable snapshot. `CommanderEngine` applies the combined
 batch and repeats before priority.
 
-This is not complete CR 400/111/704 support. Spell/card-copy cessation still
-needs a transient noncard representation. The complete CR 400.7 exception
-matrix, merged/melded and face-down identity, stickers, all legacy linked
-references, complete CR 613.7m APNAP relative timestamps, consumption of
-serialized timestamps by every continuous-effect source, counter caps, Sagas,
-dungeons, space sculptor, battles, Roles, speed, player-attached Auras, full
-enchant qualities, regeneration, and simultaneous replaceable loss/action
-events remain blockers.
+This is not complete CR 400/111/704/707 support. Complete copiable values,
+card-copy casting and playing, Prepare's exile exception, face-down and linked
+copy interactions, and copied choice/cost/target exceptions remain blocked.
+The complete CR 400.7 exception matrix, merged/melded identity, stickers, all
+legacy linked references, complete CR 613.7m APNAP relative timestamps,
+consumption of serialized timestamps by every continuous-effect source,
+counter caps, Sagas, dungeons, space sculptor, battles, Roles, speed,
+player-attached Auras, full enchant qualities, regeneration, and simultaneous
+replaceable loss/action events also remain blockers.
 
 ## Pinned coverage
 
@@ -70,8 +76,8 @@ events remain blockers.
 - Indexed sections: 156
 - Glossary entries: 733
 - Discovered mechanics: 425
-- Partial/untrusted mechanic contracts: 12
-- Unclassified mechanics: 413
+- Partial/untrusted mechanic contracts: 13
+- Unclassified mechanics: 412
 - Trusted mechanics in the new corpus registry: 0
 - `current_snapshot_complete`: false
 - Full Oracle snapshot: 2,957 exact; 15,691 partial; 19,725 unresolved;
@@ -83,8 +89,9 @@ events remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 357 passed
-- Focused object identity/token lifecycle tests: 14 passed
+- Unit/integration tests: 366 passed
+- Focused object identity/token lifecycle tests: 15 passed
+- Focused copy-object lifecycle tests: 8 passed
 - Focused CR 704 tests: 18 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
@@ -104,7 +111,7 @@ events remain blockers.
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `5ebf356bfa6927364a2a31c9789d32eb3189a3b10aac8d9f66f4a5684c2275d3`
+  `07e1d64086a7851a2bfe824741491ad06df2666188434e9baaeb04998741620b`
 
 ## Deck-review evidence state
 
@@ -130,14 +137,15 @@ not broad Oracle completeness and not game/deck-quality evidence.
 There is no external blocker. Continue on `agent/rules-completeness` with the
 next dependency-ordered object/SBA slice:
 
-1. add transient spell/card-copy objects and CR 704.5e cessation;
-2. migrate remaining physical-reference links to typed incarnation/LKI
+1. migrate remaining physical-reference links to typed incarnation/LKI
    handles and finish CR 400.7 continuation policies;
-3. integrate destruction/loss with typed replacement and regeneration;
-4. add maximum-counter restrictions and the remaining ordinary CR 704.5
+2. integrate destruction/loss with typed replacement and regeneration;
+3. add maximum-counter restrictions and the remaining ordinary CR 704.5
    actions and interaction tests;
-5. integrate serialized object timestamps into every continuous-effect source
+4. integrate serialized object timestamps into every continuous-effect source
    and implement CR 613.7m APNAP relative ordering;
+5. implement complete copiable-value, card-copy casting, Prepare, and
+   specialized copy interactions behind the CR 707 contract;
 6. rerun full coverage and every validation gate.
 
 The review-MVP branch still separately lacks three consecutive qualifying

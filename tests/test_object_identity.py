@@ -159,6 +159,28 @@ class ObjectIdentityAndTokenLifecycleTests(unittest.TestCase):
         )
         self.assertNotIn("until_end_of_turn", card.annotations)
 
+    def test_permanent_spell_keeps_its_logical_incarnation(self):
+        engine = self.make_engine(4017)
+        card = self.card(engine, "A", "Sol Ring")
+        engine._remove_from_zone(card)
+        engine._reset_zone_change(card, "stack")
+        card.zone = "stack"
+        stack_incarnation = card.logical_object_id
+        stack_timestamp = card.zone_timestamp
+
+        engine.move_card(
+            card.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+        )
+
+        self.assertEqual(
+            stack_incarnation,
+            card.logical_object_id,
+        )
+        self.assertGreater(card.zone_timestamp, stack_timestamp)
+
         card.counters["test"] = 1
         engine.move_card(card.object_id, "graveyard", log=False)
 

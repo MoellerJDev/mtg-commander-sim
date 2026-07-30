@@ -25,12 +25,12 @@ coverage.
 | Workstream | Status | Current evidence |
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
-| Mechanic contracts | In progress | 12 partial/untrusted contracts; 413 mechanics unclassified; 0 trusted |
+| Mechanic contracts | In progress | 13 partial/untrusted contracts; 412 mechanics unclassified; 0 trusted |
 | Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
-| Object and zone identity | Partial | CR 400 logical incarnations, serialized zone timestamps, target revalidation, and selected linked-effect guards |
+| Object and zone identity | Partial | CR 400 logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, and selected linked-effect guards |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
 | Replacement/prevention ordering | Partial | CR 616 typed ordering primitive; event-producer integration incomplete |
-| State-based actions | Partial | CR 704 snapshot evaluator, token cessation, World rule, and fixed-point engine integration for the reviewed subset |
+| State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
 | Official-source conformance/property/mutation gates | In progress | source hashes and selected order/mutation tests exist; corpus-wide gates do not |
@@ -54,15 +54,18 @@ coverage.
   lifecycle integration.
 - [x] Added serialized zone/World-since timestamp moments and the CR 704.5k
   World rule, including simultaneous-entry ties.
+- [x] Added serialized spell/card-copy objects, CR 704.5e cessation, and
+  same-object token conversion for permanent-spell copies.
 
-## Current CR 400/613/111/704 slice
+## Current CR 400/613/111/704/707 slice
 
 Every card retains a stable physical `object_id`, while a serialized
 `zone_change_counter` identifies its current logical incarnation. The
 canonical zone path advances the incarnation for ordinary cross-zone moves,
 including draws and casts, and for same-zone exile/command moves. It clears
 state that does not survive the move and preserves only explicitly implemented
-entry continuations. Targets compare their selected incarnation at
+entry continuations. A permanent spell keeps that incarnation when it becomes
+a permanent under CR 400.7a. Targets compare their selected incarnation at
 resolution. Daretti's delayed emblem return carries the recorded graveyard
 incarnation, so the effect does not follow a card that leaves and reenters.
 Neither physical IDs nor counters are projected to pilots.
@@ -103,10 +106,21 @@ check, so zone-change triggers observe the move. They cannot move again after
 leaving the battlefield and cease without generating a second zone-change
 event.
 
-The CR 400, CR 111, and CR 704 contracts remain partial and untrusted.
+Spell and card copies now have serialized noncard object kinds. Spell copies
+are spell targets on the stack; countered copies reach the instructed zone and
+then cease under CR 704.5e. Card copies cease outside the stack or battlefield
+and are never treated as card targets. A copied permanent spell becomes that
+same object as a token permanent and does not generate a token-creation event.
+The underlying object identity remains outside seat projections, and the
+lifecycle command-replays exactly.
+
+The CR 400, CR 111, CR 704, and CR 707 contracts remain partial and untrusted.
 Outstanding blockers include:
 
-- spell-copy and card-copy cessation need a transient noncard object model;
+- complete CR 707.2 copiable values and layer-1 interactions;
+- casting or playing card copies, including complete cost and timing grammar;
+- Prepare's exile exception and specialized copy/face-down/linked objects;
+- copied-choice, target-retention, division, and cost-fact exceptions;
 - the complete CR 400.7 exception matrix needs typed continuation policies;
 - merged permanents, meld components, stickers, complete face-down identity,
   and migration of all legacy physical references;
@@ -121,11 +135,14 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 357 unit/integration tests pass.
-- Fourteen focused object/token tests cover monotonic incarnations, draws,
+- 366 unit/integration tests pass.
+- Fifteen focused object/token tests cover monotonic incarnations, draws,
   timestamp moments, identity-sensitive targets and delayed links, private
   projection, token destination timing, move prevention, cessation, and exact
   replay.
+- Eight focused copy-object tests cover serialized spell/card copies,
+  counter/destination timing, card-versus-noncard targeting, same-object
+  permanent resolution, projection privacy, and exact replay.
 - Eighteen focused CR 704 tests cover positive, negative, fixed-point,
   order-mutation, shared pre-action LKI, attachment/protection, counters,
   sequential and simultaneous World behavior, contract, and source-hash
@@ -144,17 +161,17 @@ checkpoint validation.
 
 ## Next dependency-ordered work
 
-1. Add a transient spell/card-copy object representation and shared
-   CR 704.5e cessation.
-2. Replace remaining physical-reference links with typed incarnation/LKI
+1. Replace remaining physical-reference links with typed incarnation/LKI
    handles and implement the remaining CR 400.7 continuation policies.
-3. Implement the remaining ordinary CR 704.5 actions, beginning with maximum
+2. Implement the remaining ordinary CR 704.5 actions, beginning with maximum
    counter restrictions and specialized permanent/layout state.
-4. Integrate state-action destruction/loss with typed replacement and
+3. Integrate state-action destruction/loss with typed replacement and
    regeneration events.
-5. Continue CR 603 trigger ordering and state-action interaction coverage.
-6. Continue migrating static characteristics to CR 613 and all replaceable
+4. Continue CR 603 trigger ordering and state-action interaction coverage.
+5. Continue migrating static characteristics to CR 613 and all replaceable
    event producers to CR 616.
+6. Implement the remaining CR 707 copiable-value, card-copy casting, and
+   specialized copy-object exceptions.
 7. Recompute full and Commander-legal Oracle coverage after each generic
    compiler/mechanic slice.
 

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 3,
+  "contract_version": 4,
   "mechanic_id": "cr-704-state-based-actions",
   "official_name": "State-Based Actions",
   "effective_date": "2026-06-19",
@@ -81,6 +81,7 @@
     "state_writes": [
       "player elimination",
       "token cessation",
+      "spell-copy and card-copy cessation",
       "simultaneous graveyard moves or destruction",
       "simultaneous World-rule graveyard moves",
       "legend choice",
@@ -169,6 +170,9 @@
     "test_simultaneous_move_captures_all_lki_before_mutation",
     "test_nonbattlefield_tokens_cease_from_the_shared_snapshot",
     "test_noncard_copies_cease_only_outside_their_valid_zones",
+    "test_countered_spell_copy_reaches_graveyard_then_ceases",
+    "test_card_copy_is_not_a_card_and_ceases_from_graveyard",
+    "test_card_copy_on_battlefield_is_a_nontoken_permanent",
     "test_token_changes_zone_before_ceasing_at_next_state_check",
     "test_legend_rule_asks_controller_to_keep_one",
     "test_player_elimination_keeps_multiplayer_game_running",
@@ -182,10 +186,10 @@
   ],
   "implementation": {
     "component": "state_based_actions.evaluate_permanent_state_based_actions and CommanderEngine._stabilize",
-    "version": "state-based-actions-v4"
+    "version": "state-based-actions-v5"
   },
   "known_blockers": [
-    "spell-copy and card-copy cessation lacks a transient noncard object representation in destination zones",
+    "specialized copy-object exceptions such as Prepare copies in exile are not implemented",
     "maximum-counter restrictions, Sagas, dungeons, space sculptor, battles, Roles, and speed state actions are not implemented",
     "Aura attachment to players and the complete enchant-quality grammar are not implemented",
     "regeneration and complete loss-event replacement ordering are not integrated",

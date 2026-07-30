@@ -19,6 +19,8 @@ ZoneName = Literal[
     "outside",
 ]
 
+ObjectKind = Literal["card", "token", "spell_copy", "card_copy"]
+
 PrincipalRole = Literal["pilot", "arbiter", "analyst", "spectator", "admin"]
 
 
@@ -54,12 +56,42 @@ class CardInstance:
     known_to: list[str] = field(default_factory=list)
     attacking: str | None = None
     blocking: str | None = None
+    object_kind: ObjectKind = "card"
+
+    def __post_init__(self) -> None:
+        """Keep legacy token state compatible with the typed object kind."""
+
+        if self.is_token:
+            self.object_kind = "token"
+        elif self.object_kind == "token":
+            self.is_token = True
+        if self.object_kind not in {
+            "card",
+            "token",
+            "spell_copy",
+            "card_copy",
+        }:
+            raise ValueError(
+                f"Unsupported game object kind {self.object_kind!r}"
+            )
 
     @property
     def logical_object_id(self) -> str:
         """Authoritative identity for the object's current incarnation."""
 
         return f"{self.object_id}@{self.zone_change_counter}"
+
+    @property
+    def is_card_object(self) -> bool:
+        return self.object_kind == "card"
+
+    @property
+    def is_spell_copy(self) -> bool:
+        return self.object_kind == "spell_copy"
+
+    @property
+    def is_card_copy(self) -> bool:
+        return self.object_kind == "card_copy"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

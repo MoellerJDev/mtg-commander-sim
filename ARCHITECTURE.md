@@ -222,11 +222,15 @@ enchant quality grammar stays unresolved. The contract is partial until every
 CR 704.5/704.6 variant and simultaneous loss/replacement interaction is
 covered.
 
-`CardInstance.object_id` is stable physical identity. Its serialized
+`CardInstance.object_id` is stable physical identity for a card container or
+represented copy object. `object_kind` distinguishes cards, tokens, spell
+copies, and card copies. Its serialized
 `zone_change_counter` identifies the current logical incarnation under CR
 400.7. The canonical move path advances that counter for cross-zone moves and
 same-zone exile/command moves, clears state that cannot survive, and preserves
-only implemented entry continuations such as an as-enters choice. Target
+only implemented entry continuations such as an as-enters choice. A permanent
+spell keeps its incarnation as it becomes a permanent under CR 400.7a, while
+still receiving a new battlefield timestamp. Target
 snapshots compare the selected incarnation at resolution. Implemented linked
 delayed moves carry an expected incarnation, preventing the same physical card
 from leaving and returning to satisfy the old link. These authoritative values
@@ -245,8 +249,11 @@ authoritative replay state but remain absent from seat projections.
 A token leaving the battlefield first exists in the destination long enough
 for the move and its triggers to be observed. The next shared SBA snapshot
 causes it to cease without a second zone-change event, and CR 111.8 prevents a
-later move. Spell-copy and card-copy cessation still require a transient
-noncard object representation.
+later move. Spell and card copies likewise have serialized noncard
+representations. A spell copy outside the stack and a card copy outside the
+stack or battlefield cease in the shared CR 704.5e snapshot. A permanent-spell
+copy becomes the same object as a token permanent on resolution; it is not a
+newly created token.
 
 ## Rules arbitration and semantic programs
 
@@ -478,21 +485,29 @@ The new rules primitives sit below both generated and hand-authored semantics:
   classes, affected-player choices, optional declines, and repeated
   applicability for typed events.
 - `state_based_actions.py` evaluates the deterministic permanent subset of CR
-  704 plus token cessation from one immutable snapshot. The engine applies the
-  resulting batch, captures last-known information before mutation, and
-  repeats until stable. The reviewed subset includes the CR 704.5k world rule
-  and serialized World-since timestamps.
+  704 plus token and represented spell/card-copy cessation from one immutable
+  snapshot. The engine applies the resulting batch, captures last-known
+  information before mutation, and repeats until stable. The reviewed subset
+  includes CR 704.5e, the CR 704.5k world rule, and serialized World-since
+  timestamps.
+- `CardInstance.object_kind` and the copy-object helpers represent stack spell
+  copies and card copies without pretending they are cards. The reviewed
+  partial CR 707 path preserves supported stack choices, treats spell copies
+  as spell targets, and converts a resolving permanent-spell copy into the
+  same token object.
 
-All three contracts remain partial. Legacy static abilities have not all moved
+All of these contracts remain partial. Legacy static abilities have not all moved
 into the layer evaluator, not every zone/draw/damage/enters producer routes
 through the replacement engine, and the state-action evaluator does not yet
-cover spell/card-copy cessation, maximum-counter restrictions, Sagas,
-dungeons, battles, Roles, speed, or complete simultaneous loss replacement.
-CR 400 object identity also remains partial until its complete exception
-matrix and specialized object forms use typed continuation policies. The
-serialized timestamp moments are not yet consumed by every continuous-effect
-source, and complete CR 613.7m APNAP relative ordering remains blocked.
-Coverage and contracts describe those integration gaps explicitly.
+cover maximum-counter restrictions, Sagas, dungeons, battles, Roles, speed, or
+complete simultaneous loss replacement. CR 707 remains partial for complete
+copiable values, card-copy casting/playing, Prepare, face-down and linked
+interactions, and the full copied-choice/cost matrix. CR 400 object identity
+also remains partial until its complete exception matrix and specialized
+object forms use typed continuation policies. The serialized timestamp
+moments are not yet consumed by every continuous-effect source, and complete
+CR 613.7m APNAP relative ordering remains blocked. Coverage and contracts
+describe those integration gaps explicitly.
 
 ## Remaining scope
 
