@@ -70,8 +70,8 @@
     {
       "mechanic_id": "cr-704-state-based-actions",
       "path": "mechanics/contracts/state-based-actions.json",
-      "sha256": "aad26b78e392a6d02c7d1447e493645d2a4331c27d985fcb6a64f20a97220f04",
-      "version": 4
+      "sha256": "5592b47eeb82f41b00d707bd222cd3c48bbe89dc1478d470366abfb5dbafbd85",
+      "version": 5
     },
     {
       "mechanic_id": "cr-614-replacement-effects",
@@ -6445,16 +6445,17 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/state-based-actions.json",
-      "contract_sha256": "aad26b78e392a6d02c7d1447e493645d2a4331c27d985fcb6a64f20a97220f04",
-      "contract_version": 4,
+      "contract_sha256": "5592b47eeb82f41b00d707bd222cd3c48bbe89dc1478d470366abfb5dbafbd85",
+      "contract_version": 5,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "state_based_actions.evaluate_permanent_state_based_actions and CommanderEngine._stabilize",
-      "implementation_version": "state-based-actions-v5",
+      "implementation_version": "state-based-actions-v6",
       "kind": "rules_section",
       "known_blockers": [
         "specialized copy-object exceptions such as Prepare copies in exile are not implemented",
-        "maximum-counter restrictions, Sagas, dungeons, space sculptor, battles, Roles, and speed state actions are not implemented",
+        "Sagas, dungeons, space sculptor, battles, Roles, and speed state actions are not implemented",
+        "maximum-counter abilities outside the reviewed numeric self-restriction sentence family remain unresolved",
         "Aura attachment to players and the complete enchant-quality grammar are not implemented",
         "regeneration and complete loss-event replacement ordering are not integrated",
         "all player losses and permanent actions are not yet transformed as one shared simultaneous replaceable event"
@@ -6469,6 +6470,9 @@
         "test_attachment_and_counter_actions_are_snapshot_based",
         "test_input_mutation_cannot_change_batch",
         "test_opposing_power_toughness_counters_cancel_in_pairs",
+        "test_counter_maximum_sentence_and_snapshot_action",
+        "test_counter_maximum_overlaps_opposing_pair_removal",
+        "test_rasputin_counter_maximum_replays_exactly",
         "test_unattached_and_illegally_attached_auras_leave",
         "test_equipment_detaches_from_illegal_or_protected_object",
         "test_fixed_point_moves_aura_after_enchanted_creature_dies",

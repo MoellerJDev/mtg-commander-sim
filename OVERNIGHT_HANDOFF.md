@@ -48,6 +48,8 @@ timestamp, World-rule, and token-lifecycle foundation. It now:
 - enforces CR 704.5e when those copies enter invalid zones;
 - converts a resolving copied permanent spell into the same token object,
   without emitting a token-creation event;
+- derives reviewed numeric maximum-counter abilities from effective Oracle
+  text and enforces them in the shared CR 704 snapshot;
 - omits physical/incarnation identifiers from seat projections;
 - omits authoritative zone/World timestamps from seat projections;
 - preserves exact command replay with the new authoritative fields.
@@ -63,9 +65,10 @@ copy interactions, and copied choice/cost/target exceptions remain blocked.
 The complete CR 400.7 exception matrix, merged/melded identity, stickers, all
 legacy linked references, complete CR 613.7m APNAP relative timestamps,
 consumption of serialized timestamps by every continuous-effect source,
-counter caps, Sagas, dungeons, space sculptor, battles, Roles, speed,
-player-attached Auras, full enchant qualities, regeneration, and simultaneous
-replaceable loss/action events also remain blockers.
+maximum-counter wording outside the reviewed self-restriction family, Sagas,
+dungeons, space sculptor, battles, Roles, speed, player-attached Auras, full
+enchant qualities, regeneration, and simultaneous replaceable loss/action
+events also remain blockers.
 
 ## Pinned coverage
 
@@ -89,10 +92,10 @@ replaceable loss/action events also remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 366 passed
+- Unit/integration tests: 369 passed
 - Focused object identity/token lifecycle tests: 15 passed
 - Focused copy-object lifecycle tests: 8 passed
-- Focused CR 704 tests: 18 passed
+- Focused CR 704 tests: 21 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
 - Seed-20260730 hidden-information audit: pass
@@ -111,7 +114,7 @@ replaceable loss/action events also remain blockers.
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `07e1d64086a7851a2bfe824741491ad06df2666188434e9baaeb04998741620b`
+  `e280ebb72e9ad4f809d28e5151e7e2ae1b4e98dc78466478e15e9b2927b1e477`
 
 ## Deck-review evidence state
 
@@ -140,8 +143,8 @@ next dependency-ordered object/SBA slice:
 1. migrate remaining physical-reference links to typed incarnation/LKI
    handles and finish CR 400.7 continuation policies;
 2. integrate destruction/loss with typed replacement and regeneration;
-3. add maximum-counter restrictions and the remaining ordinary CR 704.5
-   actions and interaction tests;
+3. add the remaining specialized CR 704.5 permanent/layout actions and
+   interaction tests;
 4. integrate serialized object timestamps into every continuous-effect source
    and implement CR 613.7m APNAP relative ordering;
 5. implement complete copiable-value, card-copy casting, Prepare, and

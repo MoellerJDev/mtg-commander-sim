@@ -244,6 +244,12 @@ creation event. This is a reviewed partial CR 111/400/704/707 slice, not
 complete copiable-value, card-copy casting, Prepare, merged-permanent, meld,
 sticker, face-down, or linked-ability support.
 
+The same immutable CR 704 snapshot enforces the reviewed maximum-counter
+sentence family exemplified by Rasputin Dreamweaver. It derives the counter
+kind and numeric maximum from effective Oracle text rather than a card-name
+branch, and combines overlapping maximum and opposing +1/+1/-1/-1 removals
+without double-removing the same indistinguishable counters.
+
 ```bash
 python simctl.py oracle parse "Lightning Bolt" \
   --db data/scryfall-current.sqlite3

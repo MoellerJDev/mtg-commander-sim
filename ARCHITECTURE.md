@@ -488,8 +488,8 @@ The new rules primitives sit below both generated and hand-authored semantics:
   704 plus token and represented spell/card-copy cessation from one immutable
   snapshot. The engine applies the resulting batch, captures last-known
   information before mutation, and repeats until stable. The reviewed subset
-  includes CR 704.5e, the CR 704.5k world rule, and serialized World-since
-  timestamps.
+  includes CR 704.5e, the CR 704.5k world rule, CR 704.5r numeric
+  maximum-counter abilities, and serialized World-since timestamps.
 - `CardInstance.object_kind` and the copy-object helpers represent stack spell
   copies and card copies without pretending they are cards. The reviewed
   partial CR 707 path preserves supported stack choices, treats spell copies
@@ -499,8 +499,9 @@ The new rules primitives sit below both generated and hand-authored semantics:
 All of these contracts remain partial. Legacy static abilities have not all moved
 into the layer evaluator, not every zone/draw/damage/enters producer routes
 through the replacement engine, and the state-action evaluator does not yet
-cover maximum-counter restrictions, Sagas, dungeons, battles, Roles, speed, or
-complete simultaneous loss replacement. CR 707 remains partial for complete
+cover Sagas, dungeons, battles, Roles, speed, maximum-counter wording outside
+the reviewed self-restriction family, or complete simultaneous loss
+replacement. CR 707 remains partial for complete
 copiable values, card-copy casting/playing, Prepare, face-down and linked
 interactions, and the full copied-choice/cost matrix. CR 400 object identity
 also remains partial until its complete exception matrix and specialized

@@ -30,7 +30,7 @@ coverage.
 | Object and zone identity | Partial | CR 400 logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, and selected linked-effect guards |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
 | Replacement/prevention ordering | Partial | CR 616 typed ordering primitive; event-producer integration incomplete |
-| State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, and fixed-point engine integration for the reviewed subset |
+| State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
 | Official-source conformance/property/mutation gates | In progress | source hashes and selected order/mutation tests exist; corpus-wide gates do not |
@@ -56,6 +56,8 @@ coverage.
   World rule, including simultaneous-entry ties.
 - [x] Added serialized spell/card-copy objects, CR 704.5e cessation, and
   same-object token conversion for permanent-spell copies.
+- [x] Added CR 704.5r numeric maximum-counter extraction and snapshot
+  enforcement, including overlap with opposing-counter removal.
 
 ## Current CR 400/613/111/704/707 slice
 
@@ -92,6 +94,7 @@ snapshot before applying mutations:
 - attached creatures, battles, and nonattachment permanents becoming
   unattached;
 - pairwise removal of +1/+1 and -1/-1 counters;
+- counters above a permanent's reviewed numeric self-restriction;
 - older World permanents, or all World permanents on a newest-duration tie.
 
 Aura restrictions reuse the declarative target-domain evaluator without
@@ -126,7 +129,8 @@ Outstanding blockers include:
   and migration of all legacy physical references;
 - complete CR 613.7m APNAP relative timestamps and consumption of serialized
   timestamp moments by every continuous-effect source;
-- maximum-counter restrictions;
+- maximum-counter wording outside the reviewed numeric self-restriction
+  sentence family;
 - Sagas, dungeons, space sculptor, battles, Roles, and speed;
 - Aura attachment to players and complete enchant-quality grammar;
 - regeneration;
@@ -135,7 +139,7 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 366 unit/integration tests pass.
+- 369 unit/integration tests pass.
 - Fifteen focused object/token tests cover monotonic incarnations, draws,
   timestamp moments, identity-sensitive targets and delayed links, private
   projection, token destination timing, move prevention, cessation, and exact
@@ -143,10 +147,10 @@ Outstanding blockers include:
 - Eight focused copy-object tests cover serialized spell/card copies,
   counter/destination timing, card-versus-noncard targeting, same-object
   permanent resolution, projection privacy, and exact replay.
-- Eighteen focused CR 704 tests cover positive, negative, fixed-point,
+- Twenty-one focused CR 704 tests cover positive, negative, fixed-point,
   order-mutation, shared pre-action LKI, attachment/protection, counters,
-  sequential and simultaneous World behavior, contract, and source-hash
-  behavior.
+  maximum-counter extraction/overlap/replay, sequential and simultaneous
+  World behavior, contract, and source-hash behavior.
 - Exact Zimone closure: 27 tests pass.
 - Exact Mishra closure: 23 tests pass.
 - The seed-20260730 regression reaches its corrected main-phase opportunities,
@@ -163,8 +167,8 @@ checkpoint validation.
 
 1. Replace remaining physical-reference links with typed incarnation/LKI
    handles and implement the remaining CR 400.7 continuation policies.
-2. Implement the remaining ordinary CR 704.5 actions, beginning with maximum
-   counter restrictions and specialized permanent/layout state.
+2. Implement the remaining ordinary CR 704.5 specialized permanent/layout
+   state actions.
 3. Integrate state-action destruction/loss with typed replacement and
    regeneration events.
 4. Continue CR 603 trigger ordering and state-action interaction coverage.

@@ -208,9 +208,10 @@ while a newest-duration tie moves every World permanent simultaneously.
 Player loss, poison, empty draw, commander damage, planeswalker loyalty, and
 the legend rule remain integrated in `CommanderEngine`. The contracts remain
 partial: complete copiable values, card-copy casting/playing, Prepare,
-specialized copy interactions, counter caps, Sagas, dungeons, space sculptor,
-battles, Roles, speed, complete enchant-quality grammar, regeneration, and
-simultaneous loss-event replacement still block trust.
+specialized copy interactions, maximum-counter wording outside the reviewed
+numeric self-restriction family, Sagas, dungeons, space sculptor, battles,
+Roles, speed, complete enchant-quality grammar, regeneration, and simultaneous
+loss-event replacement still block trust.
 
 The Oracle compiler currently recognizes whole-sentence templates for simple
 draw, life, damage, destroy, exile, return, counter, mill, tap/untap, scry,

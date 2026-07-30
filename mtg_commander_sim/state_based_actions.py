@@ -1,7 +1,54 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import re
 from typing import Iterable, Mapping
+
+
+_NUMBER_WORDS = {
+    "zero": 0,
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+}
+_COUNTER_MAXIMUM_PATTERN = re.compile(
+    r"\bcan['’]t have more than "
+    r"(?P<count>\d+|zero|one|two|three|four|five|six|seven|eight|"
+    r"nine|ten) "
+    r"(?P<kind>[a-z0-9+/\- ]+?) counters? on (?:it|him|her)\b",
+    re.IGNORECASE,
+)
+
+
+def counter_maximums_from_oracle(
+    oracle_text: str,
+) -> dict[str, int]:
+    """Extract the reviewed CR 704.5r maximum-counter sentence family."""
+
+    maximums: dict[str, int] = {}
+    for match in _COUNTER_MAXIMUM_PATTERN.finditer(str(oracle_text or "")):
+        raw_count = match.group("count").casefold()
+        count = (
+            int(raw_count)
+            if raw_count.isdigit()
+            else _NUMBER_WORDS[raw_count]
+        )
+        kind = " ".join(
+            match.group("kind").casefold().split()
+        )
+        if kind:
+            maximums[kind] = min(
+                maximums.get(kind, count),
+                count,
+            )
+    return maximums
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,6 +76,9 @@ class PermanentSnapshot:
     attached_to: str | None = None
     attachment_legal: bool | None = None
     counters: Mapping[str, int] = field(default_factory=dict)
+    counter_maximums: Mapping[str, int] = field(
+        default_factory=dict
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,6 +100,9 @@ class StateBasedActionBatch:
     destroy: tuple[str, ...] = ()
     detach: tuple[str, ...] = ()
     counter_pairs_to_remove: tuple[tuple[str, int], ...] = ()
+    counter_maximums_to_remove: tuple[
+        tuple[str, str, int], ...
+    ] = ()
     cease: tuple[str, ...] = ()
     world_rule: tuple[str, ...] = ()
 
@@ -60,6 +113,7 @@ class StateBasedActionBatch:
             or self.destroy
             or self.detach
             or self.counter_pairs_to_remove
+            or self.counter_maximums_to_remove
             or self.cease
             or self.world_rule
         )
@@ -79,6 +133,7 @@ def evaluate_permanent_state_based_actions(
     destroy: set[str] = set()
     detach: set[str] = set()
     counter_pairs: dict[str, int] = {}
+    counter_maximums: dict[tuple[str, str], int] = {}
     world_permanents: list[PermanentSnapshot] = []
 
     for permanent in permanents:
@@ -155,6 +210,21 @@ def evaluate_permanent_state_based_actions(
             counter_pairs[permanent.object_id] = min(
                 positive, negative
             )
+        for raw_kind, raw_maximum in permanent.counter_maximums.items():
+            kind = " ".join(str(raw_kind).casefold().split())
+            maximum = int(raw_maximum)
+            if not kind or maximum < 0:
+                raise ValueError(
+                    "Counter maximums require a kind and "
+                    "nonnegative value"
+                )
+            current = max(
+                0, int(permanent.counters.get(kind, 0))
+            )
+            if current > maximum:
+                counter_maximums[
+                    (permanent.object_id, kind)
+                ] = current - maximum
 
     world_rule: set[str] = set()
     if len(world_permanents) >= 2:
@@ -189,6 +259,16 @@ def evaluate_permanent_state_based_actions(
         destroy=tuple(sorted(destroy - put_in_graveyard)),
         detach=tuple(sorted(detach - moving)),
         counter_pairs_to_remove=tuple(sorted(counter_pairs.items())),
+        counter_maximums_to_remove=tuple(
+            (
+                object_id,
+                kind,
+                count,
+            )
+            for (object_id, kind), count in sorted(
+                counter_maximums.items()
+            )
+        ),
         world_rule=tuple(sorted(world_rule)),
     )
 
@@ -226,6 +306,9 @@ def evaluate_state_based_actions(
         detach=permanent_batch.detach,
         counter_pairs_to_remove=(
             permanent_batch.counter_pairs_to_remove
+        ),
+        counter_maximums_to_remove=(
+            permanent_batch.counter_maximums_to_remove
         ),
         cease=tuple(sorted(cease)),
         world_rule=permanent_batch.world_rule,

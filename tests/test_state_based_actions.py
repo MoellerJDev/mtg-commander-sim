@@ -3,13 +3,21 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import random
+import tempfile
 import unittest
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim.model import StackItem
+from mtg_commander_sim.record import (
+    checkpoint_envelope,
+    replay_record,
+)
+from mtg_commander_sim.semantics import SemanticProgram
 from mtg_commander_sim.state_based_actions import (
     ObjectSnapshot,
     PermanentSnapshot,
+    counter_maximums_from_oracle,
     evaluate_state_based_actions,
     evaluate_permanent_state_based_actions,
 )
@@ -43,6 +51,7 @@ class StateBasedActionPrimitiveTests(unittest.TestCase):
             manifest["effective_date"], contract["effective_date"]
         )
         self.assertIn("704.5q", contract["rule_references"])
+        self.assertIn("704.5r", contract["rule_references"])
         row = next(
             item
             for item in registry["mechanics"]
@@ -145,13 +154,59 @@ class StateBasedActionPrimitiveTests(unittest.TestCase):
             (("counters", 2),), batch.counter_pairs_to_remove
         )
 
+    def test_counter_maximum_sentence_and_snapshot_action(self):
+        self.assertEqual(
+            {"dream": 7},
+            counter_maximums_from_oracle(
+                "Rasputin can't have more than seven dream "
+                "counters on it."
+            ),
+        )
+        self.assertEqual(
+            {"+1/+1": 2},
+            counter_maximums_from_oracle(
+                "This creature can’t have more than 2 +1/+1 "
+                "counters on it."
+            ),
+        )
+        self.assertEqual(
+            {},
+            counter_maximums_from_oracle(
+                "Remove up to seven dream counters from it."
+            ),
+        )
+
+        batch = evaluate_permanent_state_based_actions(
+            [
+                PermanentSnapshot(
+                    "rasputin",
+                    counters={"dream": 9},
+                    counter_maximums={"dream": 7},
+                ),
+                PermanentSnapshot(
+                    "at-limit",
+                    counters={"dream": 7},
+                    counter_maximums={"dream": 7},
+                ),
+            ]
+        )
+        self.assertEqual(
+            (("rasputin", "dream", 2),),
+            batch.counter_maximums_to_remove,
+        )
+
     def test_input_mutation_cannot_change_batch(self):
         values = [
             PermanentSnapshot(
                 f"counter-{index}",
                 card_types=frozenset({"creature"}),
                 toughness=2,
-                counters={"+1/+1": index + 1, "-1/-1": 1},
+                counters={
+                    "+1/+1": index + 1,
+                    "-1/-1": 1,
+                    "charge": index,
+                },
+                counter_maximums={"charge": 3},
             )
             for index in range(20)
         ]
@@ -352,6 +407,140 @@ class StateBasedActionEngineTests(unittest.TestCase):
             [{"object": ref, "pairs_removed": 1}],
             event.details["changes"],
         )
+
+    def test_counter_maximum_overlaps_opposing_pair_removal(self):
+        engine = self.make_engine(7050)
+        ref = engine.create_token(
+            "A",
+            name="Counter-Limited Bear",
+            characteristics={
+                "type_line": "Token Creature — Bear",
+                "oracle_text": (
+                    "This creature can't have more than two +1/+1 "
+                    "counters on it."
+                ),
+                "power": "2",
+                "toughness": "2",
+            },
+        )[0]
+        creature = self.card(engine, ref)
+        creature.counters.update({"+1/+1": 10, "-1/-1": 4})
+
+        self.assertFalse(engine._stabilize())
+
+        self.assertEqual(2, creature.counters["+1/+1"])
+        self.assertNotIn("-1/-1", creature.counters)
+        event = next(
+            event
+            for event in reversed(engine.state.events)
+            if event.code == "state.counter_maximums"
+        )
+        self.assertEqual(
+            [
+                {
+                    "object": ref,
+                    "counter": "+1/+1",
+                    "before": 10,
+                    "maximum": 2,
+                    "required_removal": 8,
+                    "after": 2,
+                }
+            ],
+            event.details["changes"],
+        )
+
+    def test_rasputin_counter_maximum_replays_exactly(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            seed=7051,
+        )
+        keep_all(session)
+        engine = session.engine
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        rasputin_ref = engine.create_token(
+            "A",
+            name="Rasputin Dreamweaver Copy",
+            characteristics={
+                "type_line": (
+                    "Token Legendary Creature — Human Wizard"
+                ),
+                "oracle_text": (
+                    "Rasputin can't have more than seven dream "
+                    "counters on it."
+                ),
+                "power": "4",
+                "toughness": "1",
+            },
+        )[0]
+        rasputin = self.card(engine, rasputin_ref)
+        rasputin.counters["dream"] = 7
+        program = SemanticProgram(
+            key="test:rasputin-counter-overflow",
+            label="Put two dream counters on Rasputin",
+            effects=[
+                {
+                    "op": "counter",
+                    "card": rasputin_ref,
+                    "counter": "dream",
+                    "delta": 2,
+                }
+            ],
+            trust_level="provisional",
+        )
+        engine.semantics.put(program)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="rasputin-counter-overflow",
+                ref="S-rasputin-counter-overflow",
+                kind="triggered",
+                controller="A",
+                label=program.label,
+                source_object_id=rasputin.object_id,
+                semantic_key=program.key,
+                visibility=["A", "B"],
+            )
+        )
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine._grant_priority("A")
+        engine._issue_priority("A")
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        first = session.act(
+            "pilot:A",
+            {
+                "action_id": "pass",
+                "reason": "Pass priority on the test trigger.",
+                "plan": "HOLD",
+            },
+        )
+        self.assertTrue(first.ok, first.summary)
+        second = session.act(
+            "pilot:B",
+            {
+                "action_id": "pass",
+                "reason": "Allow the test trigger to resolve.",
+                "plan": "HOLD",
+            },
+        )
+        self.assertTrue(second.ok, second.summary)
+        self.assertEqual(7, rasputin.counters["dream"])
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "counter-maximum-record"
+            session.save(record_dir)
+            replay = replay_record(
+                record_dir,
+                self.db,
+                verify=True,
+            )
+        self.assertTrue(replay["ok"], replay)
 
     def test_unattached_and_illegally_attached_auras_leave(self):
         engine = self.make_engine(7042)

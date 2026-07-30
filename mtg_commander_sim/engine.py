@@ -50,6 +50,7 @@ from .semantics import SemanticProgram, SemanticRegistry
 from .state_based_actions import (
     ObjectSnapshot,
     PermanentSnapshot,
+    counter_maximums_from_oracle,
     evaluate_state_based_actions,
 )
 from .targets import (
@@ -15307,6 +15308,11 @@ class CommanderEngine:
                             else False
                         ),
                         counters=dict(card.counters),
+                        counter_maximums=(
+                            counter_maximums_from_oracle(
+                                str(data.get("oracle_text") or "")
+                            )
+                        ),
                     )
                 )
         return snapshots
@@ -15424,28 +15430,101 @@ class CommanderEngine:
                         self._detach_permanent(card)
                         detached.append(object_id)
                 counter_changes: list[dict[str, Any]] = []
+                maximum_counter_changes: list[dict[str, Any]] = []
+                counter_removals: dict[
+                    tuple[str, str], int
+                ] = {}
+                for object_id, count in (
+                    sba_batch.counter_pairs_to_remove
+                ):
+                    for kind in ("+1/+1", "-1/-1"):
+                        key = (object_id, kind)
+                        counter_removals[key] = max(
+                            counter_removals.get(key, 0),
+                            count,
+                        )
+                for object_id, kind, count in (
+                    sba_batch.counter_maximums_to_remove
+                ):
+                    key = (object_id, kind)
+                    # Counter-removal actions discovered from the same
+                    # snapshot can name the same indistinguishable counters.
+                    # Satisfy the greatest required removal for that kind
+                    # rather than adding overlapping requirements.
+                    counter_removals[key] = max(
+                        counter_removals.get(key, 0),
+                        count,
+                    )
+                counter_values_before: dict[
+                    str, dict[str, int]
+                ] = {}
+                for object_id, _ in (
+                    sba_batch.counter_pairs_to_remove
+                ):
+                    card = self.state.cards[object_id]
+                    if card.zone != "battlefield":
+                        continue
+                    counter_values_before.setdefault(
+                        object_id,
+                        dict(card.counters),
+                    )
+                for object_id, _, _ in (
+                    sba_batch.counter_maximums_to_remove
+                ):
+                    card = self.state.cards[object_id]
+                    if card.zone != "battlefield":
+                        continue
+                    counter_values_before.setdefault(
+                        object_id,
+                        dict(card.counters),
+                    )
+                for (object_id, kind), count in sorted(
+                    counter_removals.items()
+                ):
+                    card = self.state.cards[object_id]
+                    if card.zone != "battlefield":
+                        continue
+                    remaining = max(
+                        0,
+                        int(card.counters.get(kind, 0)) - count,
+                    )
+                    if remaining:
+                        card.counters[kind] = remaining
+                    else:
+                        card.counters.pop(kind, None)
                 for object_id, count in (
                     sba_batch.counter_pairs_to_remove
                 ):
                     card = self.state.cards[object_id]
                     if card.zone != "battlefield":
                         continue
-                    card.counters["+1/+1"] = max(
-                        0,
-                        int(card.counters.get("+1/+1", 0)) - count,
-                    )
-                    card.counters["-1/-1"] = max(
-                        0,
-                        int(card.counters.get("-1/-1", 0)) - count,
-                    )
-                    if card.counters["+1/+1"] == 0:
-                        card.counters.pop("+1/+1", None)
-                    if card.counters["-1/-1"] == 0:
-                        card.counters.pop("-1/-1", None)
                     counter_changes.append(
                         {
                             "object": card.ref,
                             "pairs_removed": count,
+                        }
+                    )
+                for object_id, kind, count in (
+                    sba_batch.counter_maximums_to_remove
+                ):
+                    card = self.state.cards[object_id]
+                    if card.zone != "battlefield":
+                        continue
+                    before = int(
+                        counter_values_before[object_id].get(
+                            kind, 0
+                        )
+                    )
+                    maximum_counter_changes.append(
+                        {
+                            "object": card.ref,
+                            "counter": kind,
+                            "before": before,
+                            "maximum": before - count,
+                            "required_removal": count,
+                            "after": int(
+                                card.counters.get(kind, 0)
+                            ),
                         }
                     )
                 ceased: list[dict[str, Any]] = []
@@ -15561,6 +15640,25 @@ class CommanderEngine:
                             object_id
                             for object_id, _ in (
                                 sba_batch.counter_pairs_to_remove
+                            )
+                            if self.state.cards[object_id].zone
+                            == "battlefield"
+                        ],
+                    )
+                if maximum_counter_changes:
+                    self._log(
+                        None,
+                        "state.counter_maximums",
+                        (
+                            "State-based actions enforced "
+                            "maximum-counter abilities."
+                        ),
+                        {"changes": maximum_counter_changes},
+                        importance=2,
+                        changed_objects=[
+                            object_id
+                            for object_id, _, _ in (
+                                sba_batch.counter_maximums_to_remove
                             )
                             if self.state.cards[object_id].zone
                             == "battlefield"
