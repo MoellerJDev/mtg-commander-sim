@@ -143,6 +143,23 @@ class StateBasedActionPrimitiveTests(unittest.TestCase):
             },
         )
 
+    def test_defense_contract_traces_every_cr_210_rule(self):
+        root = Path(__file__).resolve().parents[1]
+        contract = json.loads(
+            (
+                root / "mechanics" / "contracts" / "defense.json"
+            ).read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(
+            {"210", "210.1"},
+            {
+                rule_id
+                for rule_id in contract["rule_references"]
+                if str(rule_id).startswith("210")
+            },
+        )
+
     def test_snapshot_distinguishes_put_into_graveyard_from_destroy(self):
         batch = evaluate_permanent_state_based_actions(
             [
@@ -609,6 +626,37 @@ class StateBasedActionEngineTests(unittest.TestCase):
             "4",
             engine._effective_card_data(original)["defense"],
         )
+
+    def test_battle_without_valid_printed_defense_fails_closed(self):
+        for index, defense in enumerate((None, "not-a-number", "-1")):
+            with self.subTest(defense=defense):
+                engine = self.make_engine(7080 + index)
+                permanent_ref = engine.create_token(
+                    "A",
+                    name="Future Battle",
+                    characteristics={
+                        "type_line": "Token Artifact",
+                    },
+                )[0]
+                permanent = self.card(engine, permanent_ref)
+                permanent.annotations["copy_overrides"] = {
+                    "name": "Malformed Battle",
+                    "type_line": "Battle",
+                    "defense": defense,
+                }
+                permanent.battle_protector = "A"
+
+                with self.assertRaisesRegex(
+                    GameRuleError,
+                    (
+                        "without a represented printed defense number"
+                        if defense != "-1"
+                        else "defense cannot be negative"
+                    ),
+                ):
+                    engine._initialize_intrinsic_entry_counters(
+                        permanent
+                    )
 
     def test_typeless_battle_controller_is_its_protector(self):
         engine = self.make_engine(7071)

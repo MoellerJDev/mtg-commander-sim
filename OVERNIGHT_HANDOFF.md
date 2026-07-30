@@ -87,6 +87,8 @@ maximum-counter foundation. It now:
 - uses source-pinned family review overlays as the authoritative semantic
   review source, so stale or deleted reviews cannot persist through the
   generated case file;
+- source-reviews both CR 210 Defense cases and fails closed for absent,
+  malformed, or negative represented printed defense;
 - keeps inventory-only cases separate from executable semantic passes.
 
 The prior permanent snapshot behavior remains: toughness, lethal/deathtouch,
@@ -117,9 +119,9 @@ events also remain blockers.
   `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
 - Indexed rules: 3,300
 - Conformance cases: 3,300
-- Inventory-only cases: 3,276
-- Reviewed blocked cases: 13
-- Reviewed definition-only cases: 6
+- Inventory-only cases: 3,274
+- Reviewed blocked cases: 14
+- Reviewed definition-only cases: 7
 - Executable semantic passes: 5
 - Indexed sections: 156
 - Glossary entries: 733
@@ -137,12 +139,12 @@ events also remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 3,708 passed
-- Noninventory unit/integration tests: 408 passed
+- Unit/integration tests: 3,710 passed
+- Noninventory unit/integration tests: 410 passed
 - Generated per-rule inventory/source-linkage tests: 3,300 passed
 - Focused object identity/token lifecycle tests: 15 passed
 - Focused copy-object lifecycle tests: 8 passed
-- Focused CR 120/210/310/704 tests: 50 passed
+- Focused CR 120/210/310/704 tests: 52 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
 - Seed-20260730 hidden-information audit: pass
@@ -162,7 +164,7 @@ events also remain blockers.
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `5a076298356795a4a7f2d0a7fdc1745bfc6d6c1f14139c764ba7131851e4d5b5`
+  `ce758c2c84c66f6a26fe640201efce6156b2cd95c89c177301ee3d12097f67fb`
 
 ## Deck-review evidence state
 
@@ -194,8 +196,9 @@ from scaffold to its first complete family review:
    inventory/source-linkage test;
 2. source-pinned family overlays are authoritative and fail closed when their
    source or rule-text hashes change;
-3. all 24 CR 310 cases are reviewed: 5 narrow rules pass with executable
-   evidence, 13 expose recorded dependency gaps, and 6 are definition-only;
+3. all 24 CR 310 cases and both CR 210 cases are reviewed: 5 narrow
+   rules pass with executable evidence, 14 expose recorded dependency gaps,
+   and 7 are definition-only;
 4. CR 310.11b remains blocked after adding its native replayable Siege
    continuation because replacement ordering and broader cast grammar are
    incomplete;

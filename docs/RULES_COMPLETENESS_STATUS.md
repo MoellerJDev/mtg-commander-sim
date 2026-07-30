@@ -36,7 +36,7 @@ coverage.
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; all 24 CR 310 cases are reviewed, with 5 semantic passes, 13 blocked cases, and 6 definition-only cases |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; all CR 210/310 cases are reviewed, with 5 semantic passes, 14 blocked cases, and 7 definition-only cases |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -73,6 +73,9 @@ coverage.
 - [x] Reviewed all 24 CR 310 cases without promoting partial behavior:
   5 executable passes, 13 dependency-blocked cases, and 6 definition-only
   cases.
+- [x] Reviewed both CR 210 Defense cases, including fail-closed tests for
+  absent, malformed, and negative printed defense; 210.1 remains blocked on
+  replacement ordering and broader face/copy interactions.
 
 ## Current CR 120/210/310/704 Battle slice
 
@@ -191,7 +194,7 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,708 unit/integration tests pass: 408 ordinary tests plus 3,300 generated
+- 3,710 unit/integration tests pass: 410 ordinary tests plus 3,300 generated
   inventory/source-linkage tests. The latter are not semantic passes.
 - Fifteen focused object/token tests cover monotonic incarnations, draws,
   timestamp moments, identity-sensitive targets and delayed links, private
@@ -200,7 +203,7 @@ Outstanding blockers include:
 - Eight focused copy-object tests cover serialized spell/card copies,
   counter/destination timing, card-versus-noncard targeting, same-object
   permanent resolution, projection privacy, and exact replay.
-- Fifty focused CR 120/210/310/704 tests cover positive, negative,
+- Fifty-two focused CR 120/210/310/704 tests cover positive, negative,
   fixed-point, order-mutation, shared pre-action LKI,
   attachment/protection, counters, maximum-counter
   extraction/overlap/replay, sequential and simultaneous World behavior,
@@ -216,9 +219,9 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 24 CR 310 cases are source-reviewed:
-  5 pass with executable engine evidence, 13 remain blocked, and 6 are
-  definition-only. The other 3,276 cases remain unreviewed.
+  establish inventory linkage only. All 26 CR 210/310 cases are
+  source-reviewed: 5 pass with executable engine evidence, 14 remain blocked,
+  and 7 are definition-only. The other 3,274 cases remain unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
 final push evidence are recorded in `OVERNIGHT_HANDOFF.md` after the complete

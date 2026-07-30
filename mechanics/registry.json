@@ -46,8 +46,8 @@
     {
       "mechanic_id": "cr-210-defense",
       "path": "mechanics/contracts/defense.json",
-      "sha256": "80a4c05326e3df844f1f82a20af7c519860a8d91eba8bd1617999425b650ff4f",
-      "version": 1
+      "sha256": "d91f723c5f4cc92a3201fb51ef88145a896e08f1dc967e3bb89e122294f6e6f4",
+      "version": 2
     },
     {
       "mechanic_id": "flying",
@@ -5409,12 +5409,12 @@
     {
       "category": "card_characteristics",
       "contract_path": "mechanics/contracts/defense.json",
-      "contract_sha256": "80a4c05326e3df844f1f82a20af7c519860a8d91eba8bd1617999425b650ff4f",
-      "contract_version": 1,
+      "contract_sha256": "d91f723c5f4cc92a3201fb51ef88145a896e08f1dc967e3bb89e122294f6e6f4",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "CharacteristicState, CommanderEngine._initialize_intrinsic_entry_counters, and CommanderEngine._apply_damage_results_to_permanent",
-      "implementation_version": "defense-v1",
+      "implementation_version": "defense-v2",
       "kind": "rules_section",
       "known_blockers": [
         "complete replacement-effect ordering for modified battlefield entry counters is not implemented",
@@ -5427,7 +5427,9 @@
         "210"
       ],
       "test_ids": [
+        "test_defense_contract_traces_every_cr_210_rule",
         "test_battle_enters_with_printed_defense_and_copies_reset_it",
+        "test_battle_without_valid_printed_defense_fails_closed",
         "test_battle_damage_removes_defense_instead_of_marking_damage",
         "test_zero_defense_battle_waits_for_its_pending_trigger",
         "test_battle_damage_and_state_action_replay_exactly"

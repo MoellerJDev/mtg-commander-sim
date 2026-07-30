@@ -101,10 +101,11 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 24 cases in CR 310 are source-reviewed: 5 narrow behavioral rules pass
-with generic executable evidence, 13 are blocked with exact missing
-dependencies, and 6 are definition-only with contract traceability. The
-remaining 3,276 cases are unreviewed and inventory-only.
+All 24 cases in CR 310 and both cases in CR 210 are source-reviewed:
+5 narrow behavioral rules pass with generic executable evidence, 14 are
+blocked with exact missing dependencies, and 7 are definition-only with
+contract traceability. The remaining 3,274 cases are unreviewed and
+inventory-only.
 
 The passing CR 310 rules are battlefield defense (310.4c), Battle damage
 (310.6), the zero-defense state action (310.7), single-protector replacement
@@ -112,4 +113,7 @@ The passing CR 310 rules are battlefield defense (310.4c), Battle damage
 Broader Battle casting, entry replacement ordering, arbitrary
 defending-player Oracle bindings, attachment interactions, nonspell entry,
 future Battle types, and the complete defeated-Siege transformed cast remain
-blocked. Snapshot completeness remains false.
+blocked. CR 210.1 additionally records that represented printed defense and
+fail-closed validation are tested, but it cannot pass while complete intrinsic
+entry-replacement ordering and face/copy interactions remain incomplete.
+Snapshot completeness remains false.
