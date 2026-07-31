@@ -1,5 +1,5 @@
 {
-  "contract_count": 19,
+  "contract_count": 20,
   "contracts": [
     {
       "mechanic_id": "cr-122-counters",
@@ -59,6 +59,12 @@
       "mechanic_id": "flying",
       "path": "mechanics/contracts/flying.json",
       "sha256": "e75cae496f5ecaa720ef71ae1c7d73eab1066fd69b5f2e9ca98c12128b4b35c2",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-607-linked-abilities",
+      "path": "mechanics/contracts/linked-abilities.json",
+      "sha256": "62e669b98c3cb4c34961faea034759a87235e3b025b777906529d06261571349",
       "version": 1
     },
     {
@@ -6295,17 +6301,35 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/linked-abilities.json",
+      "contract_sha256": "62e669b98c3cb4c34961faea034759a87235e3b025b777906529d06261571349",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CardInstance annotations and logical incarnation guards in CommanderEngine",
+      "implementation_version": "linked-ability-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "the Oracle IR does not assign stable ability-pair and link identifiers",
+        "linked exiled-card sets, noted information, chosen words, and cost facts are not represented generically",
+        "copy, double-faced, token, emblem, and cross-object linked relationships are incomplete",
+        "multiple-card link expansion and sum semantics are not implemented generically",
+        "jointly granted ability-pair provenance is not tracked",
+        "undefined choice behavior is implemented only by selected consumers"
+      ],
       "mechanic_id": "cr-607-linked-abilities",
       "official_name": "Linked Abilities",
       "rule_references": [
         "607"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_607_rule",
+        "test_undefined_chosen_name_has_no_effect",
+        "test_pithing_needle_name_and_ability_suppression",
+        "test_linked_move_requires_the_recorded_incarnation",
+        "test_linked_move_accepts_the_current_incarnation",
+        "test_daretti_ruling_does_not_follow_a_reentered_card"
+      ],
       "trust_level": "untrusted"
     },
     {

@@ -146,6 +146,9 @@ generated documentation fixtures with bearer capabilities redacted. See
 - source-reviewed CR 608 resolution ordering with executable top-of-stack,
   untargeted permanent, and permanent-spell-copy behavior, while incomplete
   choice, LKI, Aura, mutate, and resolution-trigger families stay blocked
+- source-reviewed CR 607 linked-ability taxonomy with exact-incarnation and
+  undefined-choice witnesses; generic pair IDs, linked sets/facts, and
+  copied, granted, cross-face, and cross-object links remain blocked
 - trust-aware semantic preflight for files and live Moxfield URLs
 - compact cast, land, activation, target, and generic resolution-time search
   templates

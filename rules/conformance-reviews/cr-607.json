@@ -1,0 +1,475 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 607 — Linked Abilities",
+  "cases": [
+    {
+      "rule_id": "607",
+      "rule_text_sha256": "09fe751beb349399a4985a3598069f6e05cbcdcb83acf882cd3921f7c3878562",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/linked-abilities.json"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Section heading; every numbered CR 607 record is pinned by the Linked Abilities contract."]
+    },
+    {
+      "rule_id": "607.1",
+      "rule_text_sha256": "19dd4284c37711640b76617bb1077ddf54bf7dfc821024094877af00af09e8fd",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["CardInstance.annotations", "oracle_ir.OracleIRCompiler"],
+      "executable_test_ids": [
+        "tests.test_linked_abilities.LinkedAbilityRuleTests.test_undefined_chosen_name_has_no_effect",
+        "tests.test_interactions_v070.InteractionKernelTests.test_pithing_needle_name_and_ability_suppression"
+      ],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": ["positive", "negative"],
+      "blockers": [
+        "the Oracle IR does not identify and assign stable IDs to generic linked ability pairs",
+        "consumers do not universally restrict references to facts created by their paired ability",
+        "ability-copy and zone-change behavior lacks one typed link record"
+      ],
+      "notes": ["Selected chosen-value consumers store a fact on their own source, but this is not generic pair recognition or isolation."]
+    },
+    {
+      "rule_id": "607.1a",
+      "rule_text_sha256": "43ac5fe772fc75e333fe49b424109b72396e68e9831e4b375bc9a24a27010fa7",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["oracle_ir.OracleIRCompiler"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction"],
+      "covered_scenarios": [],
+      "blockers": [
+        "granted quoted abilities are not parsed into nested printed-ability identities",
+        "the compiler cannot link an ability printed inside the ability that grants it"
+      ],
+      "notes": ["Nested granted-ability printed status remains a material Oracle residual."]
+    },
+    {
+      "rule_id": "607.1b",
+      "rule_text_sha256": "6b435686711e24a22b4c76445154edccbb7b0e25f807aa6deb3bdec7b536e097",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["CardInstance.active_face", "oracle_ir.OracleIRCompiler"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "linked abilities are not compiled across both faces of a nonmodal double-faced object",
+        "face changes do not preserve a generic printed-object link registry"
+      ],
+      "notes": ["Individual exact double-faced programs do not establish cross-face linked-ability recognition."]
+    },
+    {
+      "rule_id": "607.1c",
+      "rule_text_sha256": "6bf8ef970eecce6f34e8c50a6459522211ee49fff69e6e4a79d3e54f7eaa503a",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["oracle_ir.OracleIRCompiler"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction"],
+      "covered_scenarios": [],
+      "blockers": [
+        "self-linked ability recognition is not represented in the semantic IR",
+        "a single ability cannot attach produced facts to its own later references generically"
+      ],
+      "notes": ["No self-linked template is promoted."]
+    },
+    {
+      "rule_id": "607.1d",
+      "rule_text_sha256": "472ac6f8685407e93310ae7c304b76847c1a9c658c61f397dd388a1254bf21a0",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["CardInstance.object_kind", "DelayedTrigger"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "cross-object links from a source to a created token, emblem, or placed permanent are not represented",
+        "the creating event does not stamp a stable pair identity onto both objects",
+        "copy and control-change behavior for the cross-object link is unimplemented"
+      ],
+      "notes": ["Existing token and emblem state is not evidence for cross-object linked abilities."]
+    },
+    {
+      "rule_id": "607.2",
+      "rule_text_sha256": "95d7ba72681f1a6852fe5921cf2b8bb7391567ca97d9d918fdb54054e237c1d4",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/linked-abilities.json"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Introduces the linked-ability kind taxonomy; each operative kind is classified separately."]
+    },
+    {
+      "rule_id": "607.2a",
+      "rule_text_sha256": "f4fc1e08b7c4ce75e4e8e5239bf2cacbf33a3f73efb084d4eed586309516a89b",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["CardInstance.logical_object_id", "CommanderEngine.apply_effect"],
+      "executable_test_ids": [
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_linked_move_requires_the_recorded_incarnation",
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_linked_move_accepts_the_current_incarnation"
+      ],
+      "required_scenarios": ["positive", "negative", "interaction", "hidden_information", "replay"],
+      "covered_scenarios": ["positive", "negative"],
+      "blockers": [
+        "activated and triggered exile operations do not populate a generic per-ability linked object set",
+        "the second ability cannot generically enumerate only objects exiled by its paired instruction",
+        "hidden face-down exile identity is not integrated"
+      ],
+      "notes": ["A supplied exact-incarnation guard prevents following a reentered object, but linked exile-set creation and consumption remain absent."]
+    },
+    {
+      "rule_id": "607.2b",
+      "rule_text_sha256": "179e65ef03dc1ab866849873b1d3c397dd2df001e2036641d1c5f6ffabe9d9a9",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["replacement_effects.ReplaceableEvent", "mechanics/contracts/linked-abilities.json"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "replacement applications do not write a generic link fact identifying the exact cards they exile",
+        "active replacement effects are not registered from complete Oracle semantics",
+        "the consuming ability cannot query a replacement-event-specific object set"
+      ],
+      "notes": ["Reviewed replacement primitives do not claim linked-exile support."]
+    },
+    {
+      "rule_id": "607.2c",
+      "rule_text_sha256": "910605830387068508831a97ecdf5029e2863ad8772bd6df9732448eda87b252",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["CommanderEngine.create_token", "CommanderEngine.move_card"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "created and put-onto-battlefield objects do not receive a generic creating-ability link ID",
+        "the second ability cannot distinguish objects from its paired first ability from other entries or creations",
+        "token cessation and object control changes are not linked-set aware"
+      ],
+      "notes": ["Creation and entry events exist, but their provenance is not a CR 607 link record."]
+    },
+    {
+      "rule_id": "607.2d",
+      "rule_text_sha256": "017aaed3dd238d1730d4d6460fe0f2f675daef59c566765e4ba98563a0340073",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["CardInstance.annotations", "CommanderEngine._complete_semantic_choice"],
+      "executable_test_ids": [
+        "tests.test_interactions_v070.InteractionKernelTests.test_pithing_needle_name_and_ability_suppression",
+        "tests.test_linked_abilities.LinkedAbilityRuleTests.test_undefined_chosen_name_has_no_effect"
+      ],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": [
+        "chosen-value producer and consumer abilities are not paired by stable semantic IDs",
+        "last-chosen and multiple-choice variants are not generic",
+        "copy, control-change, and acquired-ability interactions are unimplemented"
+      ],
+      "notes": ["Pithing Needle records and consumes its own chosen name, and an absent choice has no effect, but the universal chosen-value link family remains incomplete."]
+    },
+    {
+      "rule_id": "607.2e",
+      "rule_text_sha256": "a9bf628347a4e3ba1fdf649ee7a846fa1cd644d4e864263a42693e7d05245171",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["CardInstance.annotations"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "noted information has no typed value schema or ability-pair provenance",
+        "generic consumers cannot distinguish information noted by the paired ability from unrelated annotations"
+      ],
+      "notes": ["Ad hoc annotations are not promoted as CR 607.2e support."]
+    },
+    {
+      "rule_id": "607.2f",
+      "rule_text_sha256": "9abdd1e27d93bc4defe3b18bdf291c1a82008690d4fa82e2b662a95cf782f7c2",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["oracle_ir.OracleIRCompiler"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "rules-meaningless word choices are not a typed semantic choice family",
+        "word-choice consumers are not linked to their exact producer ability"
+      ],
+      "notes": ["Unsupported word-choice templates remain unresolved."]
+    },
+    {
+      "rule_id": "607.2g",
+      "rule_text_sha256": "61888ba6dcc730de7340f5ccb91e1e447eae251d3b69f807239d7b02b95d9d85",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["CommanderEngine.move_card", "CardInstance.annotations"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "as-enters cost payment is not a generic pre-entry choice and payment record",
+        "the resulting permanent cannot generically query the exact paid cost",
+        "entry replacement ordering is incomplete"
+      ],
+      "notes": ["Individual shock-land choices do not implement linked as-enters cost facts."]
+    },
+    {
+      "rule_id": "607.2h",
+      "rule_text_sha256": "47d82c46df3c5e5696e2aaf16d9bf4af9f68a7296ca8c40797fa13f590178994",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["oracle_ir.OracleIRCompiler", "CommanderEngine._dispatch_semantic_event"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "paragraph boundaries are not preserved as linked static/trigger provenance in the IR",
+        "trigger consumers cannot query only actions caused by the paired static ability",
+        "CR 603.11 families are incomplete"
+      ],
+      "notes": ["No same-paragraph static/trigger pair is promoted."]
+    },
+    {
+      "rule_id": "607.2i",
+      "rule_text_sha256": "909bb6981cfe9ea82612897c994d2d26e2cfb461dfd44f7d33dfdaf330a86646",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["StackItem.context", "CommanderEngine._cast"],
+      "executable_test_ids": [
+        "tests.test_interactions_v070.InteractionKernelTests.test_tear_asunder_and_vandalblast_cost_options_change_targets"
+      ],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": ["positive", "negative"],
+      "blockers": [
+        "additional-cost declarations are stored as cost-option labels rather than generic linked cost facts",
+        "multiple additional costs and their distinct consumers are not paired by ID",
+        "the fact is not universally retained by copies or the resolving permanent"
+      ],
+      "notes": ["Reviewed kicker and overload options affect their exact programs, but do not establish generic linked additional-cost semantics."]
+    },
+    {
+      "rule_id": "607.2j",
+      "rule_text_sha256": "4df63ddcb6b1629e96350ac70ac05d6c017bb56d96c1af82f1be15f3c123bc91",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["StackItem.x_value", "StackItem.context"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "variable additional costs are not distinguished from other X values by a linked cost ID",
+        "permanent and resolving consumers cannot generically query the exact cast-time variable cost",
+        "copy and alternate-cost interactions are incomplete"
+      ],
+      "notes": ["An x_value field alone is insufficient to identify the linked cost described by CR 607.2j."]
+    },
+    {
+      "rule_id": "607.2k",
+      "rule_text_sha256": "a6aa04cc073b8d62578ddc2c5da15e69cb6c26b4db1560a7c2202b5398228221",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/linked-abilities.json"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "champion is not implemented as a generic linked keyword pair",
+        "exile and return relationships lack exact link-set identity",
+        "copy, control change, and leaves-battlefield interactions are incomplete"
+      ],
+      "notes": ["Champion remains unresolved in trusted-only preflight."]
+    },
+    {
+      "rule_id": "607.2m",
+      "rule_text_sha256": "1b8c4f82f78daa454c509e90209324df5e94a809ad5f585a57c9e4b3264ee970",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["replacement_effects.ReplacementEffect", "oracle_ir.OracleIRCompiler"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "anchor-word selection and identity are not represented in the IR",
+        "replacement abilities cannot query an anchor-word-specific link",
+        "CR 614.12b anchor behavior is not implemented"
+      ],
+      "notes": ["Anchor words remain unsupported."]
+    },
+    {
+      "rule_id": "607.2n",
+      "rule_text_sha256": "1af1ce09e251d6c4be8752564bf4ab2b939655b9131af96362dcb6e5c5251057",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["CommanderEngine.start_game", "mechanics/contracts/linked-abilities.json"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "hidden_information", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "pre-game named-card exile abilities are not implemented",
+        "links spanning multiple same-named objects before the game are not represented",
+        "pre-game hidden-card records and replay are absent"
+      ],
+      "notes": ["This pre-game link family is profile-independent and remains blocked."]
+    },
+    {
+      "rule_id": "607.2p",
+      "rule_text_sha256": "e5929d23156b9874343085944bc1e00a2555d9eaf82cc891aeb450850c9eb29c",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["CommanderEngine.start_game", "CardInstance.annotations"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "hidden_information", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "pre-game characteristic-defining choices are not collected generically",
+        "the choice has no explicit cross-zone continuation policy",
+        "characteristic-defining ability consumption and copy behavior are incomplete"
+      ],
+      "notes": ["Ordinary annotations are reset on zone changes and cannot model this explicit persistence exception."]
+    },
+    {
+      "rule_id": "607.2q",
+      "rule_text_sha256": "54b361b47d130cb3fa1872d59334959e97f942a7212713bf798832eaa82a06b8",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["CommanderEngine._cast", "CardInstance.logical_object_id"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "cards exiled to cast a permanent spell are not stored as a link set on the spell",
+        "the permanent-spell continuation does not transfer a generic cast-cost link record to the permanent",
+        "multiple cards and alternate-cost interactions are incomplete"
+      ],
+      "notes": ["Spell-to-permanent logical incarnation continuity exists, but linked exile-cost facts do not."]
+    },
+    {
+      "rule_id": "607.3",
+      "rule_text_sha256": "f79e1ac0c40eafbef53a5e5aeb55bc1db0aab17b869a8504050b45a5c6502a07",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/linked-abilities.json"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "linked object sets are not represented generically",
+        "copied exile abilities cannot append multiple objects to one exact link",
+        "information aggregation, sum, each-card action, token-per-card, and controller-choice semantics are absent"
+      ],
+      "notes": ["No singular-word/multiple-linked-object behavior is approximated."]
+    },
+    {
+      "rule_id": "607.4",
+      "rule_text_sha256": "0f4478ae4b99bb56b0a10233b4832a2af38a69fb5b3969cdd9efa3cdfb1aa60f",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["oracle_ir.OracleIRCompiler"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction"],
+      "covered_scenarios": [],
+      "blockers": [
+        "abilities have no set of stable link-pair memberships",
+        "one ability cannot be proven to participate in multiple independent pairs without cross-contamination"
+      ],
+      "notes": ["Multiple-pair membership requires the missing typed link registry."]
+    },
+    {
+      "rule_id": "607.5",
+      "rule_text_sha256": "98cc10223d8a64e7805524d7ce7a248cedb72f21525981e7417c442fafd2fd4f",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["continuous_effects.ContinuousEffect", "oracle_ir.OracleIRCompiler"],
+      "executable_test_ids": ["tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": [],
+      "blockers": [
+        "one effect granting multiple abilities does not assign shared link provenance",
+        "granted abilities cannot be prevented from linking to preexisting or historical abilities generically",
+        "copy and ability-removal interactions are incomplete"
+      ],
+      "notes": ["Jointly acquired linked pairs remain unsupported."]
+    },
+    {
+      "rule_id": "607.5a",
+      "rule_text_sha256": "de70cc3fc62a3583fb36cc8af6282957cf7ba3c19e565f351fafaf07704b6b81",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["CardInstance.annotations", "CommanderEngine._nonmana_ability_prohibited_by_name"],
+      "executable_test_ids": [
+        "tests.test_linked_abilities.LinkedAbilityRuleTests.test_undefined_chosen_name_has_no_effect"
+      ],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": ["negative"],
+      "blockers": [
+        "undefined choice is not a typed value shared by all linked-choice consumers",
+        "gained-ability provenance and copied-pair choice creation are not represented",
+        "only selected consumers explicitly no-op when their annotation is absent"
+      ],
+      "notes": ["Pithing Needle's consumer has no effect without chosen_name, but generic acquired and copied linked-choice behavior remains incomplete."]
+    }
+  ]
+}

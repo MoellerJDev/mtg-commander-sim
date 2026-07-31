@@ -31,7 +31,9 @@ but remains partial because replacement ordering and cast grammar outside
 compiled cost/target schemas are blocked. CR 608 and 609 contracts trace the
 resolution and effect pipelines while keeping incomplete target, choice, LKI,
 APNAP, `as though`, source-selection, Aura, mutate, and resolution-trigger
-families explicitly untrusted.
+families explicitly untrusted. CR 607 traces linked abilities while keeping
+generic ability-pair IDs, linked object sets and facts, copied/acquired pairs,
+cross-face links, and cross-object token/emblem links explicitly untrusted.
 
 Run `simctl rules sync` after changing a contract so its hash and status are
 overlaid into `mechanics/registry.json`, then run `simctl rules verify`.
