@@ -47,6 +47,7 @@ class ExactCombatKeywordTests(unittest.TestCase):
                 controller="B",
                 tapped=False,
             )
+        engine.state.active_player = "A"
         engine.state.combat.attackers = {bird.object_id: "B"}
         bird.attacking = "B"
         engine.state.combat.defending_players = ["B"]

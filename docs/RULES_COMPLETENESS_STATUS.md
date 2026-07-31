@@ -27,7 +27,7 @@ coverage.
 | Workstream | Status | Current evidence |
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
-| Mechanic contracts | In progress | 32 partial/untrusted contracts; 393 mechanics unclassified; 0 trusted |
+| Mechanic contracts | In progress | 33 partial/untrusted contracts; 392 mechanics unclassified; 0 trusted |
 | Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
 | Object and zone identity | Partial | CR 400 logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, and selected linked-effect guards |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
@@ -36,7 +36,7 @@ coverage.
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 357 cases in CR 120/210/310/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 53 semantic passes, 249 blocked cases, and 55 definition-only cases |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 396 cases in CR 120/210/310/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 58 semantic passes, 281 blocked cases, and 57 definition-only cases |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -170,6 +170,13 @@ coverage.
   matrix, multi-attacker blocker assignment, simultaneous replacement and
   prevention batching, post-damage APNAP triggers, first/double strike,
   trample, and lifelink remain dependency-blocked.
+- [x] Reviewed all 39 CR 508 Declare Attackers Step records. Ordinary
+  eligibility, current target validation, tapping/vigilance, attacking-state
+  lifetime, active-player priority, atomic rejection, exact replay, and
+  empty-combat step skipping pass for the represented boundary. Planeswalkers,
+  restrictions, requirements, banding, attack costs, declaration triggers,
+  entry-attacking effects, defending-player LKI, and target reselection remain
+  dependency-blocked.
 - [x] Reviewed all 24 CR 509 Declare Blockers Step records. Ordinary
   eligible-blocker derivation, declaration state, lifetime, priority handoff,
   atomic rejection, multiplayer sequencing, and exact replay pass for the
@@ -177,7 +184,19 @@ coverage.
   declaration triggers, multi-attacker blocking, blocked-status effects, and
   entry-blocking remain dependency-blocked.
 
-## Current CR 120/210/310/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
+## Current CR 120/210/310/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
+
+Ordinary attacker declarations are server-derived from current public combat
+state. Only controlled, untapped, present, nonphased creature permanents that
+are not Battles and are not summoning sick without haste are offered and
+revalidated. Opponent and opponent-protected Battle destinations are
+validated, ordinary attackers tap while vigilance is preserved, illegal mixed
+declarations roll back atomically, and attacking relationships last through
+combat. If combat has no attackers after the required priority window, declare
+blockers and combat damage are skipped. Planeswalkers, complete restrictions
+and requirements, banding, attack costs, generic declaration triggers,
+entry-attacking effects, defending-player LKI, and target reselection remain
+blocked.
 
 Ordinary blocker declarations are server-derived from current public combat
 state. Only untapped, present, nonphased creature permanents that are not
@@ -319,8 +338,13 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,810 unit/integration tests pass: 510 ordinary tests plus 3,300 generated
+- 3,818 unit/integration tests pass: 518 ordinary tests plus 3,300 generated
   inventory/source-linkage tests. The latter are not semantic passes.
+- Eight focused CR 508 tests cover all-rule traceability, legal attacker
+  exposure, tapping and vigilance, attacking-state lifetime, phased attacker
+  and Battle-target rejection, duplicate rejection, atomic rollback,
+  empty-combat step skipping, zero meaningful suppression, and exact command
+  replay.
 - Five focused CR 509 tests cover all-rule traceability, ordinary declaration
   and exact replay, phased/tapped exclusion, atomic malicious-declaration
   rollback, blocking-state lifetime, and the ordinary priority handoff.
@@ -366,10 +390,10 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 357 CR
-  120/210/310/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
-  cases are source-reviewed: 53 pass with executable engine evidence, 249
-  remain blocked, and 55 are definition-only. The other 2,943 cases remain
+  establish inventory linkage only. All 396 CR
+  120/210/310/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
+  cases are source-reviewed: 58 pass with executable engine evidence, 281
+  remain blocked, and 57 are definition-only. The other 2,904 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -380,9 +404,9 @@ checkpoint validation.
 
 1. Continue reviewing and promoting conformance cases by
    dependency-ordered rules family; keep exposed but unimplemented edge cases
-   failing or blocked. CR 509 Declare Blockers is the current bounded family;
-   retain its requirement, cost, trigger, multi-attacker, blocked-status
-   effect, and entry-blocking dependencies and the deeper CR
+   failing or blocked. CR 508 Declare Attackers is the current bounded family;
+   retain its planeswalker, restriction, requirement, banding, cost, trigger,
+   entry-attacking, LKI, and reselection dependencies and the deeper CR
    601.2a-i stack-first casting frame as an implementation blocker.
 2. Wire the reviewed CR 614/615/616 primitives into the shared CR 120/310
    replacement and prevention event pipeline, including stateful shields and

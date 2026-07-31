@@ -10,7 +10,7 @@ or provider session data.
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/cr-509-declare-blockers`
+- Active branch: `agent/cr-508-declare-attackers`
 - Stage A merge commit on `main`:
   `bd89201be44de85aa9b85fcc9f0baacb0ee76dbe`
 - Stage A PR:
@@ -20,9 +20,9 @@ or provider session data.
 - Package version: `0.8.0`
 - Existing tags: `v0.6.0`, `v0.7.0`
 
-PR #2, PR #1, and focused CR 512/511/510 PRs #3-5 passed their exact-SHA
+PR #2, PR #1, and focused CR 512/511/510/509 PRs #3-6 passed their exact-SHA
 matrices and merged into `main` through ordinary merge commits. Main commit
-`5a7d87840cf0615f14b03ac76bb3eeaa9f738ed5` then passed run 30608853469.
+`47c67b94bd51a38d2babe3b6aa78ce3aa2a3c568` then passed run 30609935545.
 
 ## Deterministic product boundary
 
@@ -57,16 +57,16 @@ It generates one source-linked conformance case for each of 3,300 numbered
 rules and preserves reviewed status only while the source and rule-text hashes
 remain unchanged.
 
-Current reviewed inventory after the CR 509 synchronization:
+Current reviewed inventory after the CR 508 synchronization:
 
-- 357 reviewed cases
-- 53 executable semantic passes
-- 249 reviewed blocked cases
-- 55 definition-only cases
-- 2,943 unreviewed inventory cases
+- 396 reviewed cases
+- 58 executable semantic passes
+- 281 reviewed blocked cases
+- 57 definition-only cases
+- 2,904 unreviewed inventory cases
 - 425 discovered mechanics
-- 32 partial/untrusted mechanic contracts
-- 393 unclassified mechanics
+- 33 partial/untrusted mechanic contracts
+- 392 unclassified mechanics
 - 0 corpus-wide trusted mechanics
 
 Implemented reviewed families include narrow contracts for damage, defense,
@@ -105,7 +105,7 @@ Stage A exact evidence:
 - deterministic four-player micro-pool reached a natural winner with zero
   suppressed meaningful windows, passed seat projection, and exact-replayed
 
-The focused CR 509 local test gate passed atop the green CR 510 baseline:
+The focused CR 508 local test gate passed atop the green CR 509 baseline:
 
 - generated platform, rules, mechanics, and Oracle status checks
 - all noninventory and all generated per-rule tests
@@ -114,17 +114,17 @@ The focused CR 509 local test gate passed atop the green CR 510 baseline:
 - protocol demo and packet benchmark
 - repository/history/secret/artifact scans
 - wheel build, clean installation, imported version, and CLI smoke
-- the five focused CR 509 declaration/rollback/lifetime/replay tests
+- the eight focused CR 508 eligibility/rollback/lifetime/skip/replay tests
 - exact-SHA four-job GitHub Actions for the focused commit remains pending
   until push
 
-The local test gate ran 3,810 tests in 214.354 seconds, verified all 3,300 pinned
+The local test gate ran 3,818 tests in 188.131 seconds, verified all 3,300 pinned
 rules cases and 425 mechanics, checked 14 schemas and repository history,
 completed the protocol demo, and built and clean-installed the wheel. The
 four-player natural-winner soak exact-replayed after eliminating insertion-order
-dependence from authoritative zone timestamps. The repository scan covered 253
-tracked files and 11,259,832 bytes. Main commit
-`5a7d87840cf0615f14b03ac76bb3eeaa9f738ed5` already passed run 30608853469;
+dependence from authoritative zone timestamps. The repository scan covered 256
+tracked files and 11,310,630 bytes. Main commit
+`47c67b94bd51a38d2babe3b6aa78ce3aa2a3c568` already passed run 30609935545;
 no exact-SHA CI pass is claimed for the focused commit until it is pushed.
 
 ## Evidence boundaries
@@ -138,6 +138,7 @@ no exact-SHA CI pass is claimed for the focused commit until it is pushed.
 
 ## Exact next step
 
-Publish the green CR 509 focused branch and wait for its exact-SHA matrix.
-CR 509.1a, 509.1g, and 509.2 may be claimed for the represented ordinary
-declaration boundary; the remaining CR 509 records retain their dependencies.
+Publish the green CR 508 focused branch and wait for its exact-SHA matrix.
+CR 508.1a, 508.1f, 508.1k, 508.2, and 508.8 may be claimed for the represented
+ordinary declaration boundary; the remaining CR 508 records retain their
+dependencies.

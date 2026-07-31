@@ -28617,21 +28617,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-508",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_contract_traces_every_cr_508_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/declare-attackers-step.json"
+      ],
+      "notes": [
+        "Section heading; CR 508.1-8 carry the behavioral requirements."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "508",
       "rule_text_sha256": "70b813fd4128065e5a938d7c9acf250ba733a556ecc23da6f480db44866b4623",
       "schema_version": 1,
@@ -28640,26 +28644,40 @@
         "end_line": 2259,
         "start_line": 2258
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "complete_ordered_declaration_cost_requirement_and_trigger_sequence_not_implemented"
       ],
       "case_id": "cr-508.1",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "508"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_malicious_phased_attacker_rolls_back_valid_partial_attack"
+      ],
+      "implementation_components": [
+        "CommanderEngine._complete_attackers",
+        "CommanderEngine.transaction"
+      ],
+      "notes": [
+        "Represented declarations roll back atomically, but the full CR 508.1a-m sequence is not implemented."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "508.1",
       "rule_text_sha256": "250d861db92a8a71374026c35fccaad0ec1aee0b01b14d4721a8e0d28eff2eee",
       "schema_version": 1,
@@ -28668,26 +28686,46 @@
         "end_line": 2261,
         "start_line": 2260
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-508.1a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "508.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_only_currently_eligible_creatures_are_offered",
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_malicious_phased_attacker_rolls_back_valid_partial_attack",
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_duplicate_structured_attacker_is_rejected",
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_attackers_tap_except_vigilance_then_active_player_gets_priority"
+      ],
+      "implementation_components": [
+        "CommanderEngine._attack_declaration_error",
+        "CommanderEngine._issue_attackers",
+        "CommanderEngine._complete_attackers",
+        "CommanderEngine.transaction"
+      ],
+      "notes": [
+        "The server offers and revalidates only controlled, untapped, non-Battle, nonphased creatures that are not summoning sick unless they have haste; an illegal mixed declaration rolls back and a legal declaration replays exactly."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "508.1a",
       "rule_text_sha256": "885c31372e9489a4304daaa6f4a38592d85e0d0c3c82924215119a14057dc5bb",
       "schema_version": 1,
@@ -28696,26 +28734,45 @@
         "end_line": 2263,
         "start_line": 2262
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "planeswalker_attack_targets_and_nondefault_attack_options_not_implemented"
       ],
       "case_id": "cr-508.1b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "508.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_multiplayer_rules.MultiplayerRuleTests.test_structured_attack_list_reaches_authoritative_combat_state",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_is_attackable_and_its_protector_blocks",
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_phased_out_battle_is_not_an_attack_target"
+      ],
+      "implementation_components": [
+        "CommanderEngine._attackable_battles",
+        "CommanderEngine._battle_for_attack_target",
+        "CommanderEngine._complete_attackers"
+      ],
+      "notes": [
+        "Opposing players and opponent-protected Battles are represented, including split multiplayer attacks and phased-target rejection; planeswalkers and the full option matrix remain absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.1b",
       "rule_text_sha256": "2c1d8209e25a7245d0a4daa1ea6eb89bde1688798a17ef5634a4b171a52bfe05",
       "schema_version": 1,
@@ -28724,16 +28781,16 @@
         "end_line": 2265,
         "start_line": 2264
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "complete_cumulative_attack_restriction_grammar_not_implemented"
       ],
       "case_id": "cr-508.1c",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.1"
@@ -28741,9 +28798,16 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Conditional and group attack restrictions require a generic constraint solver."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.1c",
       "rule_text_sha256": "17c9c2e472ba9b6aa9ec3273f625a581a32dd227edb9cdca72a03cb438f76d3e",
       "schema_version": 1,
@@ -28752,16 +28816,16 @@
         "end_line": 2268,
         "start_line": 2266
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "attack_requirement_maximization_solver_not_implemented"
       ],
       "case_id": "cr-508.1d",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.1"
@@ -28769,9 +28833,16 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "The maximum satisfiable attack-requirement algorithm, paid exceptions, and repeated-combat behavior are absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.1d",
       "rule_text_sha256": "f8f8f8cb9c6d4e93b7aabb6c0323aff8fa337af9e2c7eed99b21dac93a355df0",
       "schema_version": 1,
@@ -28780,16 +28851,16 @@
         "end_line": 2271,
         "start_line": 2269
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "banding_declaration_and_band_identity_not_implemented"
       ],
       "case_id": "cr-508.1e",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.1"
@@ -28797,9 +28868,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "The attacker payload has no authoritative band declaration."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "508.1e",
       "rule_text_sha256": "413d56b63c2293e63b8fbd3aaaa6cb6304925c53e140f2311e491eca85c0926b",
       "schema_version": 1,
@@ -28808,26 +28885,38 @@
         "end_line": 2273,
         "start_line": 2272
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-508.1f",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "508.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_attackers_tap_except_vigilance_then_active_player_gets_priority"
+      ],
+      "implementation_components": [
+        "CommanderEngine._complete_attackers"
+      ],
+      "notes": [
+        "Ordinary declared attackers tap as a declaration result; vigilance attackers remain untapped, and the command replays exactly."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "508.1f",
       "rule_text_sha256": "d5f15c7011376db26d034257d9cc7100720c0b0a8de1d5a3c83dcc36b0437255",
       "schema_version": 1,
@@ -28836,16 +28925,16 @@
         "end_line": 2275,
         "start_line": 2274
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "optional_as_attacks_cost_grammar_not_implemented"
       ],
       "case_id": "cr-508.1g",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.1"
@@ -28853,9 +28942,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Optional as-attacks costs cannot yet be selected."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "508.1g",
       "rule_text_sha256": "bc0a91b4f0228e58b8938bd373eba6f73fb01464b8d60f7f56066fc29dbf38a6",
       "schema_version": 1,
@@ -28864,16 +28959,16 @@
         "end_line": 2277,
         "start_line": 2276
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "attack_cost_grammar_modification_and_locking_not_implemented"
       ],
       "case_id": "cr-508.1h",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.1"
@@ -28881,9 +28976,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Generic mana, tap, sacrifice, discard, aggregate modification, and locked attack costs are absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "508.1h",
       "rule_text_sha256": "08017930104cb945cf22c95f81b56c697067dad090d3f78f24a0d91705212d00",
       "schema_version": 1,
@@ -28892,16 +28993,16 @@
         "end_line": 2279,
         "start_line": 2278
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "attack_cost_mana_ability_window_not_implemented"
       ],
       "case_id": "cr-508.1i",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.1"
@@ -28909,9 +29010,14 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "The CR 605 mana-ability window is not connected to attack costs."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "508.1i",
       "rule_text_sha256": "4f4805b08a288e13a977e23e45b647d8147a2edfcbc5a30dea6563d13d9e99fd",
       "schema_version": 1,
@@ -28920,16 +29026,16 @@
         "end_line": 2281,
         "start_line": 2280
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "ordered_atomic_attack_cost_payment_not_implemented"
       ],
       "case_id": "cr-508.1j",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.1"
@@ -28937,9 +29043,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "There is no generic all-or-nothing payment transaction for attack costs."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "508.1j",
       "rule_text_sha256": "f03538755ad7dd389b0f402fbaab333940bde752453962fad4b95286d0a7464f",
       "schema_version": 1,
@@ -28948,26 +29060,40 @@
         "end_line": 2283,
         "start_line": 2282
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-508.1k",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "508.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_attackers_tap_except_vigilance_then_active_player_gets_priority",
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_attacking_marker_clears_when_combat_phase_ends"
+      ],
+      "implementation_components": [
+        "CommanderEngine._complete_attackers",
+        "CommanderEngine._finish_combat_phase"
+      ],
+      "notes": [
+        "Each still-controlled declared creature receives an authoritative attacking relationship that remains until removal from combat or combat-phase finalization."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "508.1k",
       "rule_text_sha256": "843002c80670390c7df887164c25a0c286e44b47d5c19b307f8fa43cc68ac5e1",
       "schema_version": 1,
@@ -28976,26 +29102,35 @@
         "end_line": 2285,
         "start_line": 2284
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "generic_attack_declaration_trigger_detection_not_implemented"
       ],
       "case_id": "cr-508.1m",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.1"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "implementation_components": [
+        "CommanderEngine._complete_attackers"
+      ],
+      "notes": [
+        "One exact semantic witness is insufficient for the complete trigger family."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.1m",
       "rule_text_sha256": "866df58da4326a88501afae4a1f01282e5ccd37895aa72b3c4d8756ad574522e",
       "schema_version": 1,
@@ -29004,26 +29139,37 @@
         "end_line": 2287,
         "start_line": 2286
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-508.2",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "508"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_attackers_tap_except_vigilance_then_active_player_gets_priority"
+      ],
+      "implementation_components": [
+        "CommanderEngine._complete_attackers",
+        "CommanderEngine._grant_priority"
+      ],
+      "notes": [
+        "After the represented declaration and trigger batch, the active player receives priority; the transition replays exactly."
+      ],
+      "required_scenarios": [
+        "positive",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "508.2",
       "rule_text_sha256": "dfb29e9864cd503f27d987c942be79b891458729ecc34067f6aadcfc7fcc20ab",
       "schema_version": 1,
@@ -29032,16 +29178,16 @@
         "end_line": 2289,
         "start_line": 2288
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "attack_trigger_condition_snapshot_not_implemented"
       ],
       "case_id": "cr-508.2a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.2"
@@ -29049,9 +29195,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "The engine does not capture a general declaration-time characteristic snapshot for attack triggers."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "508.2a",
       "rule_text_sha256": "72a68c3f042ebc45352eeefa43497a51bcf0993f3c394d8c8aafc6cccb842cac",
       "schema_version": 1,
@@ -29060,26 +29212,34 @@
         "end_line": 2292,
         "start_line": 2290
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "complete_attack_trigger_batch_and_apnap_ordering_not_implemented"
       ],
       "case_id": "cr-508.2b",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.2"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "implementation_components": [
+        "CommanderEngine._enqueue_semantic_trigger_batch"
+      ],
+      "notes": [
+        "The generic before-priority batch for every trigger created during CR 508.1 is incomplete."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.2b",
       "rule_text_sha256": "d072ce5ee9ef4217d928ad29eb98a58af6734d0a6d7513484be819ed9ab0850b",
       "schema_version": 1,
@@ -29088,26 +29248,30 @@
         "end_line": 2294,
         "start_line": 2293
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-508.3",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_contract_traces_every_cr_508_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/declare-attackers-step.json"
+      ],
+      "notes": [
+        "Taxonomy introduction for the trigger-condition rules in CR 508.3a-f."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "508.3",
       "rule_text_sha256": "7c7d598f9f9b4cd914c7fdfa88576ade56336a15ad04e8cc4c3ccd44117e3c99",
       "schema_version": 1,
@@ -29116,16 +29280,16 @@
         "end_line": 2296,
         "start_line": 2295
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "declared_attacker_trigger_provenance_not_implemented"
       ],
       "case_id": "cr-508.3a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.3"
@@ -29133,9 +29297,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Declared attacking and put-onto-battlefield attacking provenance are not modeled generically for trigger matching."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "508.3a",
       "rule_text_sha256": "22ebe11be3761b973e4920fe897989d833ecb1c431656f4cb3ce97c7f973c347",
       "schema_version": 1,
@@ -29144,16 +29314,16 @@
         "end_line": 2298,
         "start_line": 2297
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "attacked_object_trigger_grouping_not_implemented"
       ],
       "case_id": "cr-508.3b",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.3"
@@ -29161,9 +29331,16 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "One-or-more declared attackers per attacked object and effect-created attackers are not distinguished."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.3b",
       "rule_text_sha256": "e8125ebd2db777836bb21e93f5db74738292c876a5846602c48ed21766170845",
       "schema_version": 1,
@@ -29172,16 +29349,16 @@
         "end_line": 2300,
         "start_line": 2299
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "player_attacks_with_trigger_provenance_not_implemented"
       ],
       "case_id": "cr-508.3c",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.3"
@@ -29189,9 +29366,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "The general player-attacks-with trigger grammar is absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "508.3c",
       "rule_text_sha256": "a9cb3bd307b0e454f234aeb9fb84e4489948d3fefd72c9f453980fd4a894a158",
       "schema_version": 1,
@@ -29200,16 +29383,16 @@
         "end_line": 2302,
         "start_line": 2301
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "player_attacks_trigger_grouping_not_implemented"
       ],
       "case_id": "cr-508.3d",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.3"
@@ -29217,9 +29400,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "The once-per-declaration player-attacks trigger event is absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.3d",
       "rule_text_sha256": "6ecf6179f49ae981c7848f5985114430cdfb9a6f7a69ac0b7f33e9f2d91ab0d2",
       "schema_version": 1,
@@ -29228,16 +29417,16 @@
         "end_line": 2304,
         "start_line": 2303
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "player_attacks_player_trigger_provenance_not_implemented"
       ],
       "case_id": "cr-508.3e",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.3"
@@ -29245,9 +29434,16 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Player, planeswalker, and Battle destinations are not distinguished in a generic trigger event."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.3e",
       "rule_text_sha256": "c8863ec530a5ba634a8d0b994413822a50d974390798432324266e0923a80296",
       "schema_version": 1,
@@ -29256,26 +29452,34 @@
         "end_line": 2306,
         "start_line": 2305
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "attacks_and_isnt_blocked_trigger_event_not_implemented"
       ],
       "case_id": "cr-508.3f",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.3"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "implementation_components": [
+        "CombatState.blockers"
+      ],
+      "notes": [
+        "The declare-blockers-time trigger event is not emitted generically."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "508.3f",
       "rule_text_sha256": "7a8f0a8b615ed9d720e3da231a8805d4043c81b60e039705f63105c31c590317",
       "schema_version": 1,
@@ -29284,26 +29488,35 @@
         "end_line": 2308,
         "start_line": 2307
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "generic_enters_or_becomes_attacking_choice_and_provenance_not_implemented"
       ],
       "case_id": "cr-508.4",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "implementation_components": [
+        "CommanderEngine.create_token"
+      ],
+      "notes": [
+        "A low-level token field exists, but there is no validated generic semantic operation implementing this rule."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.4",
       "rule_text_sha256": "a12a40a1a50c3da7343570b76279a51c32b3a833e681b2d1bfae400f220c4b04",
       "schema_version": 1,
@@ -29312,16 +29525,16 @@
         "end_line": 2310,
         "start_line": 2309
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "enters_attacking_destination_revalidation_not_implemented"
       ],
       "case_id": "cr-508.4a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.4"
@@ -29329,9 +29542,16 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Player and permanent departure/type/control/protector changes are not revalidated for entry attacking."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.4a",
       "rule_text_sha256": "5b787e69deb203b3ce69ad680bfd8abaa522ac547075fd7df4a90850f81fc4c7",
       "schema_version": 1,
@@ -29340,16 +29560,16 @@
         "end_line": 2312,
         "start_line": 2311
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "becomes_attacking_destination_revalidation_not_implemented"
       ],
       "case_id": "cr-508.4b",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.4"
@@ -29357,9 +29577,16 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Effect-resolution revalidation for a specified attack destination is absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.4b",
       "rule_text_sha256": "258c19f1396d5fcd6bfd5f5cfacf221f772848458700ff99c015521e91594b2a",
       "schema_version": 1,
@@ -29368,16 +29595,16 @@
         "end_line": 2314,
         "start_line": 2313
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "entry_attacking_bypass_of_declaration_constraints_not_implemented"
       ],
       "case_id": "cr-508.4c",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.4"
@@ -29385,9 +29612,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "No generic entry-attacking operation exists on which to enforce the declaration-only exception."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "508.4c",
       "rule_text_sha256": "44eca6c65c088cdad71819dcbde8ace8d5ab7ff289ea3ee022fb9ed258960d0d",
       "schema_version": 1,
@@ -29396,16 +29629,16 @@
         "end_line": 2316,
         "start_line": 2315
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "late_entry_unblocked_status_lifecycle_not_implemented"
       ],
       "case_id": "cr-508.4d",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.4"
@@ -29413,9 +29646,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Late entry attacking and explicit becomes-blocked effects are not represented."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "508.4d",
       "rule_text_sha256": "c4adca9e87c17f154e234ef43b7fa4a2a6bf7a728bc69e8aec1afcb6a65e2392",
       "schema_version": 1,
@@ -29424,26 +29663,40 @@
         "end_line": 2318,
         "start_line": 2317
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "planeswalker_and_removed_from_combat_defender_lki_not_implemented"
       ],
       "case_id": "cr-508.5",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "508"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_is_attackable_and_its_protector_blocks"
+      ],
+      "implementation_components": [
+        "CommanderEngine._defending_player_for_attack_target"
+      ],
+      "notes": [
+        "Current player and Battle targets derive a defending player, but planeswalkers and the required last-known attacked object relationship are absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.5",
       "rule_text_sha256": "3ac32f5afb969565981110201c524ad3f12bcbdd70c3797f79392ff8f589aa17",
       "schema_version": 1,
@@ -29452,26 +29705,39 @@
         "end_line": 2320,
         "start_line": 2319
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "generic_per_attacker_defending_player_binding_and_choice_not_implemented"
       ],
       "case_id": "cr-508.5a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "508.5"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_multiplayer_rules.MultiplayerRuleTests.test_structured_attack_list_reaches_authoritative_combat_state"
+      ],
+      "implementation_components": [
+        "CommanderEngine._defending_player_for_attack_target"
+      ],
+      "notes": [
+        "Split attacks derive individual current defenders, but generic spell/ability binding and controller choice among several possible defenders are absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.5a",
       "rule_text_sha256": "c73fd114e1991249d6a641cf8ae32022c15eb23ba54cc8145955839161c325d5",
       "schema_version": 1,
@@ -29480,26 +29746,35 @@
         "end_line": 2322,
         "start_line": 2321
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "attacked_provenance_and_player_level_query_not_implemented"
       ],
       "case_id": "cr-508.6",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "implementation_components": [
+        "CombatState.attackers"
+      ],
+      "notes": [
+        "Current attacking relationships exist, but the distinction between is attacking and has attacked is not a durable queryable provenance model."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.6",
       "rule_text_sha256": "d6ff7ec4dd2dc500417be03359e5a5e3eaedbc1d8709db375c5d2bb521c203d5",
       "schema_version": 1,
@@ -29508,16 +29783,16 @@
         "end_line": 2324,
         "start_line": 2323
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "attack_target_reselection_operation_not_implemented"
       ],
       "case_id": "cr-508.7",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508"
@@ -29525,9 +29800,16 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "There is no authoritative reselect-attack-target operation."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.7",
       "rule_text_sha256": "c208e5c87a234750657982ef2c00f731f324bd0c93b11bbf389066771764a4aa",
       "schema_version": 1,
@@ -29536,16 +29818,16 @@
         "end_line": 2326,
         "start_line": 2325
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "original_and_reselected_attack_provenance_not_implemented"
       ],
       "case_id": "cr-508.7a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.7"
@@ -29553,9 +29835,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "The engine cannot preserve the original attacked object while updating the current destination."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "508.7a",
       "rule_text_sha256": "abe3cbcf5cebfd04466874b3a7411bde20ea791e63c52f55329cb98720a9e9dc",
       "schema_version": 1,
@@ -29564,16 +29852,16 @@
         "end_line": 2328,
         "start_line": 2327
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "attack_target_reselection_operation_not_implemented"
       ],
       "case_id": "cr-508.7b",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.7"
@@ -29581,9 +29869,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "The declaration-constraint exception cannot be enforced without reselection semantics."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "508.7b",
       "rule_text_sha256": "672a091bb7282b1edb9469ffdebac48eee4da8cf67922ce9151d85b6bff19ac5",
       "schema_version": 1,
@@ -29592,16 +29886,16 @@
         "end_line": 2330,
         "start_line": 2329
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "reselected_opponent_permanent_and_protector_validation_not_implemented"
       ],
       "case_id": "cr-508.7c",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.7"
@@ -29609,9 +29903,16 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Reselection legality for opponents, planeswalkers, and Battle protectors is absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.7c",
       "rule_text_sha256": "40c6a9b33e0991ad16da24316cb6983539e64d115b145552da515169d5c15e71",
       "schema_version": 1,
@@ -29620,16 +29921,16 @@
         "end_line": 2332,
         "start_line": 2331
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "single_defending_player_multiplayer_option_not_implemented"
       ],
       "case_id": "cr-508.7d",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.7"
@@ -29637,9 +29938,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "The attack-multiple-players option and its reselection boundary are not configurable."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.7d",
       "rule_text_sha256": "bf991ecf23b36140db29c1331e1f31dc4a0ba30b839cc12dc3f236bcac74e694",
       "schema_version": 1,
@@ -29648,16 +29955,16 @@
         "end_line": 2334,
         "start_line": 2333
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "limited_range_of_influence_option_not_implemented"
       ],
       "case_id": "cr-508.7e",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "508.7"
@@ -29665,9 +29972,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Range-of-influence validation is outside the implemented multiplayer profile."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "508.7e",
       "rule_text_sha256": "b80755b645b8ec1f22721ba89b718676d5771cf509da36698ddd4cdb484bcf3f",
       "schema_version": 1,
@@ -29676,26 +29989,38 @@
         "end_line": 2336,
         "start_line": 2335
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-508.8",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "508"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_no_attackers_skips_blockers_and_combat_damage_steps"
+      ],
+      "implementation_components": [
+        "CommanderEngine._advance_step"
+      ],
+      "notes": [
+        "After the required post-declaration priority window, a combat with no represented attacking creatures jumps directly to end of combat; neither skipped step emits a boundary event, and replay is exact."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "508.8",
       "rule_text_sha256": "d1874fb42eca51204032a7e108c308284c33e3a360ce928efb2d85e9f1494d5b",
       "schema_version": 1,
@@ -29704,7 +30029,7 @@
         "end_line": 2338,
         "start_line": 2337
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "static_traceability",

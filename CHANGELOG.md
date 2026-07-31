@@ -18,6 +18,13 @@
   blocker validation, with atomic malicious-submission rollback.
 - Added exact ordinary blocker declaration/replay and blocking-lifetime
   evidence for the partial CR 509 contract.
+- Made attacker alternatives authoritative for the ordinary CR 508.1a
+  boundary: tapped, phased-out, summoning-sick nonhaste, and Battle creatures
+  are no longer advertised, and every submitted attacker is revalidated.
+- Rejected duplicate structured attackers and phased-out attackers or Battle
+  targets transactionally, with exact one-command replay for legal attacks.
+- Corrected CR 508.8 so a combat with no attacking creatures skips the declare
+  blockers and combat damage steps after the declare-attackers priority window.
 - Corrected the CR 511.3 boundary so attacking and blocking markers and the
   combat snapshot clear after end-of-combat priority, before postcombat main.
 - Added source-linked end-of-combat priority, trigger-coexistence, multiplayer,

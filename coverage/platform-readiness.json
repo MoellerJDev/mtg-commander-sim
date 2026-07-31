@@ -9,10 +9,10 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "rules_family_cr_509_declare_blockers",
-    "branch": "agent/cr-509-declare-blockers",
+    "active_phase": "rules_family_cr_508_declare_attackers",
+    "branch": "agent/cr-508-declare-attackers",
     "branch_ancestry": {
-      "focused_branch_base": "5a7d87840cf0615f14b03ac76bb3eeaa9f738ed5",
+      "focused_branch_base": "47c67b94bd51a38d2babe3b6aa78ce3aa2a3c568",
       "focused_branch_unique_commits_over_main": 1
     },
     "commit_reference": "the commit containing this ledger",
@@ -51,6 +51,13 @@
         "number": 5,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/5"
+      },
+      {
+        "base": "main",
+        "head": "agent/cr-509-declare-blockers",
+        "number": 6,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/6"
       }
     ],
     "tags": [
@@ -66,7 +73,7 @@
   },
   "milestones": [
     {
-      "evidence": "Both integration PRs merged through ordinary merge commits; main passed its exact-SHA 3,788-test matrix.",
+      "evidence": "Both integration PRs and focused CR 512-509 slices merged through ordinary merge commits; main passed the exact-SHA CR 509 matrix.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete"
@@ -78,7 +85,7 @@
       "status": "not_started"
     },
     {
-      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 510-512 slices are on main; CR 509 is the current focused family.",
+      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 509-512 slices are on main; CR 508 is the current focused family.",
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main"
@@ -90,7 +97,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Finish the CR 509 full gate and publish ordinary blocker declaration without promoting blocked requirement, cost, trigger, or entry-blocking families.",
+  "next_task": "Finish the CR 508 full gate and publish ordinary attacker declaration without promoting blocked planeswalker, restriction, requirement, cost, trigger, entry-attacking, or reselection families.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -130,8 +137,8 @@
     "manifest_present": true,
     "mechanics": {
       "status_counts": {
-        "partial": 32,
-        "unclassified": 393
+        "partial": 33,
+        "unclassified": 392
       },
       "total": 425,
       "trusted": 0
@@ -146,11 +153,11 @@
       "total": 38373
     },
     "rules": {
-      "blocked": 249,
-      "definition_only": 55,
-      "passing": 53,
+      "blocked": 281,
+      "definition_only": 57,
+      "passing": 58,
       "total": 3300,
-      "unreviewed": 2943
+      "unreviewed": 2904
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -173,24 +180,24 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 3810,
+    "deterministic_cases_discovered": 3818,
     "migration_files": 0,
     "schema_files": 14,
     "server_files": 0,
     "web_files": 0
   },
   "validation": {
-    "baseline_commit": "5a7d87840cf0615f14b03ac76bb3eeaa9f738ed5",
+    "baseline_commit": "47c67b94bd51a38d2babe3b6aa78ce3aa2a3c568",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30608853469,
+      "run_id": 30609935545,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30608853469"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30609935545"
     },
     "local": {
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "pass_3810",
+      "deterministic_tests": "pass_3818",
       "four_player_protocol_demo": "pass",
       "repository_history_security_audit": "pass",
       "wheel_build_and_clean_install": "pass"

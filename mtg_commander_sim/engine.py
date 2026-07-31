@@ -3274,6 +3274,20 @@ class CommanderEngine:
             self.state.step,
         ) == ("combat", "end_combat"):
             self._finish_combat_phase()
+        if (
+            self.state.phase,
+            self.state.step,
+        ) == ("combat", "declare_attackers") and not (
+            self.state.combat.attackers
+        ):
+            # CR 508.8 skips both intervening combat steps when combat has
+            # no attacking creatures. The post-declaration priority window
+            # still happens; this branch runs only after that window ends.
+            self.state.phase_index = TURN_STEPS.index(
+                ("combat", "end_combat")
+            )
+            self._enter_step()
+            return
         self.state.phase_index += 1
         if self.state.phase_index >= len(TURN_STEPS):
             if (
@@ -15676,6 +15690,32 @@ class CommanderEngine:
             return False
         return self.state.players[card.controller].turns_begun <= card.acquired_control_turn_count
 
+    def _attack_declaration_error(
+        self,
+        card: CardInstance,
+        active: str,
+    ) -> str | None:
+        data = self._effective_card_data(card)
+        card_types, _, _ = self._type_parts(
+            str(data.get("type_line") or "")
+        )
+        if card.controller != active:
+            return f"{card.ref} is not controlled by {active}"
+        if card.phased_out:
+            return f"{card.ref} is phased out"
+        if "creature" not in card_types:
+            return f"{card.ref} is not a creature"
+        if "battle" in card_types:
+            return f"{card.ref} cannot attack because it is a Battle"
+        if card.tapped:
+            return f"{card.ref} is tapped"
+        if (
+            self._is_summoning_sick(card)
+            and "Haste" not in data.get("keywords", [])
+        ):
+            return f"{card.ref} is summoning sick"
+        return None
+
     def _protection_colors(self, card: CardInstance) -> set[str]:
         oracle = str(
             self._effective_card_data(card).get("oracle_text") or ""
@@ -15780,21 +15820,16 @@ class CommanderEngine:
         for oid in self.state.players[active].zones["battlefield"]:
             card = self.state.cards[oid]
             data = self._effective_card_data(card)
-            card_types, _, _ = self._type_parts(
-                str(data.get("type_line") or "")
-            )
-            if (
-                card.controller == active
-                and not card.tapped
-                and not card.phased_out
-                and "creature" in card_types
-                and "battle" not in card_types
-            ):
-                candidates.append({"id": card.ref, "name": self.display_name(oid), "sick": self._is_summoning_sick(card), "haste": "Haste" in data.get("keywords", [])})
-        if not any(
-            not candidate["sick"] or candidate["haste"]
-            for candidate in candidates
-        ):
+            if self._attack_declaration_error(card, active) is None:
+                candidates.append(
+                    {
+                        "id": card.ref,
+                        "name": self.display_name(oid),
+                        "sick": self._is_summoning_sick(card),
+                        "haste": "Haste" in data.get("keywords", []),
+                    }
+                )
+        if not candidates:
             self.state.combat.attackers_declared = True
             self.state.combat.defending_players = []
             self._grant_priority(active)
@@ -15866,7 +15901,9 @@ class CommanderEngine:
             (
                 card
                 for card in self.state.cards.values()
-                if card.ref == value and card.zone == "battlefield"
+                if card.ref == value
+                and card.zone == "battlefield"
+                and not card.phased_out
             ),
             None,
         )
@@ -15906,7 +15943,12 @@ class CommanderEngine:
                         raise GameRuleError(
                             "Each attack declaration needs attacker and defender"
                         )
-                    normalized[str(attacker)] = defender
+                    attacker_ref = str(attacker)
+                    if attacker_ref in normalized:
+                        raise GameRuleError(
+                            "A creature cannot be declared twice"
+                        )
+                    normalized[attacker_ref] = defender
                 declarations = normalized
             else:
                 default_defender = response.get("defender")
@@ -15938,19 +15980,12 @@ class CommanderEngine:
                     )
                 defender = battle.ref
             data = self._effective_card_data(card)
-            card_types, _, _ = self._type_parts(
-                str(data.get("type_line") or "")
+            declaration_error = self._attack_declaration_error(
+                card,
+                active,
             )
-            if "creature" not in card_types:
-                raise GameRuleError(f"{card.ref} is not a creature")
-            if "battle" in card_types:
-                raise GameRuleError(
-                    f"{card.ref} cannot attack because it is a Battle"
-                )
-            if card.tapped:
-                raise GameRuleError(f"{card.ref} is tapped")
-            if self._is_summoning_sick(card) and "Haste" not in data.get("keywords", []):
-                raise GameRuleError(f"{card.ref} is summoning sick")
+            if declaration_error is not None:
+                raise GameRuleError(declaration_error)
             if "Vigilance" not in data.get("keywords", []):
                 card.tapped = True
             card.attacking = str(defender)
@@ -15999,8 +16034,29 @@ class CommanderEngine:
         self._enqueue_semantic_trigger_batch(attack_triggers)
         self._grant_priority(active)
 
+    def _current_attacker_cards(self) -> list[CardInstance]:
+        attackers: list[CardInstance] = []
+        for object_id in self.state.combat.attackers:
+            card = self.state.cards.get(object_id)
+            if (
+                card is None
+                or card.zone != "battlefield"
+                or card.controller != self.state.active_player
+                or card.phased_out
+            ):
+                continue
+            card_types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(card).get("type_line")
+                    or ""
+                )
+            )
+            if "creature" in card_types and "battle" not in card_types:
+                attackers.append(card)
+        return attackers
+
     def _begin_blocker_decisions(self) -> None:
-        if not self.state.combat.attackers:
+        if not self._current_attacker_cards():
             self.state.combat.blockers_declared = True
             self._grant_priority(self.state.active_player)
             return
@@ -16015,9 +16071,11 @@ class CommanderEngine:
             return
         defender = defenders[self.state.combat.blocker_cursor]
         attacker_cards = [
-            self.state.cards[oid]
-            for oid, target in self.state.combat.attackers.items()
-            if self._defending_player_for_attack_target(target)
+            card
+            for card in self._current_attacker_cards()
+            if self._defending_player_for_attack_target(
+                self.state.combat.attackers[card.object_id]
+            )
             == defender
         ]
         attackers = [card.ref for card in attacker_cards]
