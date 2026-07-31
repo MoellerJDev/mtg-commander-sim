@@ -1,5 +1,5 @@
 {
-  "contract_count": 43,
+  "contract_count": 44,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -137,6 +137,12 @@
       "mechanic_id": "flying",
       "path": "mechanics/contracts/flying.json",
       "sha256": "e75cae496f5ecaa720ef71ae1c7d73eab1066fd69b5f2e9ca98c12128b4b35c2",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-404-graveyard",
+      "path": "mechanics/contracts/graveyard.json",
+      "sha256": "af5de20be216a5752642a745758762d98b49a232bc083f57cf36c23aed02d1d1",
       "version": 1
     },
     {
@@ -6093,17 +6099,37 @@
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/graveyard.json",
+      "contract_sha256": "af5de20be216a5752642a745758762d98b49a232bc083f57cf36c23aed02d1d1",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine owner-zone movement, graveyard ordering and replacement preflight; StateProjector public graveyard projection; stack counter and resolution paths",
+      "implementation_version": "graveyard-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "a player-owned ordering decision is not issued when two or more cards enter the same graveyard simultaneously",
+        "complete replacement-effect choice and ordering is not implemented",
+        "complete state-based-action and simultaneous-effect producers are not implemented",
+        "graveyard-order-changing tournament policy is not modeled",
+        "the full Oracle corpus has not been proven to use only trusted graveyard movement and target schemas"
+      ],
       "mechanic_id": "cr-404-graveyard",
       "official_name": "Graveyard",
       "rule_references": [
         "404"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_404_rule",
+        "test_graveyards_start_empty_and_common_causes_use_owner_top",
+        "test_rules_countered_permanent_spell_uses_graveyard_not_resolution_destination",
+        "test_graveyard_is_face_up_public_ordered_and_not_reordered_by_same_zone_move",
+        "test_graveyard_owner_index_is_an_authoritative_invariant",
+        "test_graveyard_replacement_is_decided_before_the_move",
+        "test_simultaneous_same_owner_order_is_still_caller_determined",
+        "test_countered_spell_copy_reaches_graveyard_then_ceases",
+        "test_an_offer_empty_stack_and_treasure_resolution"
+      ],
       "trust_level": "untrusted"
     },
     {

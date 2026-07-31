@@ -76,6 +76,7 @@ class MechanicContractTests(unittest.TestCase):
                 "cr-401-library",
                 "cr-402-hand",
                 "cr-403-battlefield",
+                "cr-404-graveyard",
                 "cr-405-stack",
                 "cr-500-general",
                 "cr-501-beginning-phase",

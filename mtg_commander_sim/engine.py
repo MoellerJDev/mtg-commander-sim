@@ -505,6 +505,15 @@ class CommanderEngine:
                     f"{card.ref} is indexed under {locations[0][0]} "
                     f"but controlled by {card.controller}"
                 )
+            elif (
+                card.zone
+                in {"library", "hand", "graveyard", "exile", "command"}
+                and locations[0][0] != card.owner
+            ):
+                raise StateInvariantError(
+                    f"{card.ref} is indexed under {locations[0][0]} "
+                    f"but owned by {card.owner}"
+                )
         if self.state.priority_player is not None and self.state.priority_player not in self.active_seats:
             raise StateInvariantError("Priority belongs to a player who is not in the game")
         for player in self.state.players.values():
@@ -10449,7 +10458,6 @@ class CommanderEngine:
             if public_schema is None:
                 self._counter_stack_item(
                     item.ref,
-                    destination=item.default_destination or "graveyard",
                     reason="no legal targets",
                     as_rule=True,
                     countered_by=item.controller,
@@ -11961,7 +11969,6 @@ class CommanderEngine:
         except (ValueError, GameRuleError):
             self._counter_stack_item(
                 item.ref,
-                destination=item.default_destination or "graveyard",
                 reason="target schema invalid at resolution",
                 as_rule=True,
                 countered_by=item.controller,
@@ -12035,7 +12042,6 @@ class CommanderEngine:
                 return True
             self._counter_stack_item(
                 item.ref,
-                destination=item.default_destination or "graveyard",
                 reason="all targets illegal on resolution",
                 as_rule=True,
                 countered_by=item.controller,

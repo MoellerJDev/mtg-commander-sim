@@ -202,6 +202,12 @@ generated documentation fixtures with bearer capabilities redacted. See
   destroy/sacrifice/bounce effects are battlefield-scoped, permanent status
   follows battlefield membership, and ordinary reentry creates a new logical
   object; the complete CR 400.7 exception matrix remains blocked
+- source-reviewed CR 404 graveyard boundaries: ordinary counter, discard,
+  destroy, sacrifice, and completed instant-or-sorcery paths append to the
+  owner's public face-up pile, including a rules-countered permanent spell;
+  owner/index divergence is invariant-checked and same-graveyard moves do not
+  reorder the pile, while simultaneous same-owner ordering choices remain
+  explicitly blocked
 - source-reviewed CR 405 stack structure: new objects are placed on top,
   complete priority rounds resolve only the top object, direct effects,
   represented static abilities, and represented state actions bypass the
@@ -353,9 +359,9 @@ python simctl.py rules conformance --root .
 ```
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
-generated source-linkage tests. Of those cases, 519 are source-reviewed:
-92 have narrow executable semantic evidence, 354 are explicitly blocked, and
-73 are definition-only; 2,781 remain unreviewed. A generated inventory test
+generated source-linkage tests. Of those cases, 523 are source-reviewed:
+94 have narrow executable semantic evidence, 355 are explicitly blocked, and
+74 are definition-only; 2,777 remain unreviewed. A generated inventory test
 cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
 invalidation, and reporting policy.
 

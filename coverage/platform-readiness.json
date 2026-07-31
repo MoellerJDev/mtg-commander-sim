@@ -236,8 +236,8 @@
     "manifest_present": true,
     "mechanics": {
       "status_counts": {
-        "partial": 43,
-        "unclassified": 382
+        "partial": 44,
+        "unclassified": 381
       },
       "total": 425,
       "trusted": 0
@@ -252,11 +252,11 @@
       "total": 38373
     },
     "rules": {
-      "blocked": 354,
-      "definition_only": 73,
-      "passing": 92,
+      "blocked": 355,
+      "definition_only": 74,
+      "passing": 94,
       "total": 3300,
-      "unreviewed": 2781
+      "unreviewed": 2777
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -279,7 +279,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 3882,
+    "deterministic_cases_discovered": 3889,
     "migration_files": 0,
     "schema_files": 14,
     "server_files": 0,
