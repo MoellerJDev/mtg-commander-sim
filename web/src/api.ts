@@ -48,6 +48,31 @@ export interface Room {
   seats: Seat[];
 }
 
+export interface GameLifecycle {
+  game_id: string;
+  room_id: string;
+  status: "active" | "paused" | "complete" | "aborted";
+  state_revision: number;
+  format_profile: string;
+  seat: string;
+  owner: boolean;
+  can_stop: boolean;
+  can_resume: boolean;
+  created_at: string;
+  updated_at: string;
+  turn_sequence: number;
+  active_player: string;
+  phase: string;
+  step: string;
+  pending_principals: string[];
+  game_over: boolean;
+  winner: string | null;
+  pause_reason: { kind?: string; label?: string } | null;
+  commands: number;
+  decisions: number;
+  events: number;
+}
+
 export const api = {
   me: () => request<{ guest: Guest }>("/api/v1/me"),
   guest: (display_name: string) =>
@@ -73,6 +98,18 @@ export const api = {
     ),
   start: (roomId: string) =>
     request<{ game_id: string }>(`/api/v1/rooms/${roomId}/start`, {
+      method: "POST",
+      body: JSON.stringify({}),
+    }),
+  game: (gameId: string) =>
+    request<{ game: GameLifecycle }>(`/api/v1/games/${gameId}`),
+  stop: (gameId: string, reason: string) =>
+    request<{ game: GameLifecycle }>(`/api/v1/games/${gameId}/stop`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
+  resume: (gameId: string) =>
+    request<{ game: GameLifecycle }>(`/api/v1/games/${gameId}/resume`, {
       method: "POST",
       body: JSON.stringify({}),
     }),

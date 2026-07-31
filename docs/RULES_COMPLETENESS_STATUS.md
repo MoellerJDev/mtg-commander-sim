@@ -587,11 +587,13 @@ Broad sequential rules review is frozen after the CR 400–408 and CR 500–512
 integration reached `main`. The first authoritative server/browser slice now
 has a shared, versioned form adapter for the engine's current choice schemas,
 four-context private mulligan coverage, and process-restart recovery with exact
-replay. The next steps are:
+replay. The owner-only administrative stop/resume and seated-member safe
+inspection slice is now implemented. It preserves exact replay through process
+restart and cannot override a material rules/fidelity pause. The next steps are:
 
-1. Continue server lifecycle and operations hardening: explicit administrative
-   stop/resume inspection, expiry/rate limits, and deployment boundaries.
-2. Harden browser accessibility, retry/resume presentation, spectators, and any
+1. Continue server operations hardening: expiry/rate limits, deployment
+   boundaries, and multi-process ownership design.
+2. Harden browser accessibility, command-retry presentation, spectators, and any
    new choice-schema family only when the engine introduces it.
 3. Resume rules work for defects that block those slices; defer broad
    CR-number traversal until it has concrete executable evidence.

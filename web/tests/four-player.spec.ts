@@ -108,6 +108,38 @@ test("four isolated browser contexts play through authoritative mulligans and re
     const handB = await pages[1].getByTestId("own-hand").textContent();
     expect(handA).not.toEqual(handB);
 
+    for (const page of pages) {
+      await expect(page.getByTestId("game-status")).toHaveText("ACTIVE");
+    }
+    await expect(pages[0].getByTestId("stop-game")).toBeVisible();
+    for (const member of pages.slice(1)) {
+      await expect(member.getByTestId("stop-game")).toHaveCount(0);
+    }
+    await pages[1].getByTestId("inspect-game").click();
+    await expect(pages[1].getByTestId("game-inspection")).toContainText("active");
+    await pages[0].getByTestId("stop-reason").fill("Browser lifecycle regression");
+    await pages[0].getByTestId("stop-game").click();
+    for (const page of pages) {
+      await expect(page.getByTestId("game-status")).toHaveText("PAUSED");
+      await expect(page.getByTestId("paused-banner")).toContainText("Browser lifecycle regression");
+    }
+    await expect(pages[0].getByTestId("action-keep")).toBeDisabled();
+    for (const waitingSeat of pages.slice(1)) {
+      await expect(waitingSeat.locator('[data-testid^="action-"]')).toHaveCount(0);
+      await expect(waitingSeat.getByTestId("decision-panel")).toContainText(
+        "Waiting for another player’s decision.",
+      );
+    }
+    await pages[1].reload();
+    await expect(pages[1].getByText("LIVE", { exact: true })).toBeVisible();
+    await expect(pages[1].getByTestId("game-status")).toHaveText("PAUSED");
+    await expect(pages[0].getByTestId("resume-game")).toBeVisible();
+    await pages[0].getByTestId("resume-game").click();
+    for (const page of pages) {
+      await expect(page.getByTestId("game-status")).toHaveText("ACTIVE");
+      await expect(page.getByTestId("paused-banner")).toHaveCount(0);
+    }
+
     for (let index = 0; index < 4; index += 1) {
       const revisions = await Promise.all(pages.map(viewRevision));
       await expect(pages[index].getByTestId("action-keep")).toBeVisible();

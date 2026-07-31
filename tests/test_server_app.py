@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import sqlite3
 import tempfile
 import unittest
 
@@ -346,6 +347,184 @@ class ServerApplicationTests(unittest.TestCase):
         )
         self.assertEqual(200, accepted_b.status_code, accepted_b.text)
         self.assertTrue(accepted_b.json()["receipt"]["ok"])
+
+        database = CardDatabase(DB_PATH)
+        try:
+            replay = replay_record(
+                self.settings.game_root / game_id,
+                database,
+                verify=True,
+            )
+        finally:
+            database.close()
+        self.assertTrue(replay["ok"])
+
+    def test_owner_stop_resume_inspection_and_restart_are_durable(self):
+        game_id, tokens, _ = self.create_ready_game()
+        owner_inspection = self.client.get(
+            f"/api/v1/games/{game_id}", headers=self.auth(tokens[0])
+        )
+        self.assertEqual(200, owner_inspection.status_code, owner_inspection.text)
+        owner_game = owner_inspection.json()["game"]
+        self.assertEqual("active", owner_game["status"])
+        self.assertTrue(owner_game["owner"])
+        self.assertTrue(owner_game["can_stop"])
+        self.assertNotIn("record_path", owner_game)
+        self.assertNotIn("hand", json.dumps(owner_game).casefold())
+
+        member_inspection = self.client.get(
+            f"/api/v1/games/{game_id}", headers=self.auth(tokens[1])
+        )
+        self.assertEqual(200, member_inspection.status_code)
+        self.assertFalse(member_inspection.json()["game"]["owner"])
+        self.assertFalse(member_inspection.json()["game"]["can_stop"])
+
+        forbidden = self.client.post(
+            f"/api/v1/games/{game_id}/stop",
+            headers=self.auth(tokens[1]),
+            json={"reason": "Seat B cannot stop the match"},
+        )
+        self.assertEqual(403, forbidden.status_code, forbidden.text)
+
+        packet_response = self.client.get(
+            f"/api/v1/games/{game_id}/state?full=true",
+            headers=self.auth(tokens[0]),
+        )
+        self.assertEqual(200, packet_response.status_code)
+        packet = packet_response.json()["packet"]
+        paused_envelope = {
+            "protocol_version": "3.0",
+            "game_id": game_id,
+            "command_id": "paused-A-0001",
+            "decision_id": packet["decision"]["id"],
+            "action_id": "keep",
+            "capability": packet["decision"]["cap"],
+            "expected_view_revision": packet["view_revision"],
+            "choices": {},
+        }
+        stopped = self.client.post(
+            f"/api/v1/games/{game_id}/stop",
+            headers=self.auth(tokens[0]),
+            json={"reason": "Table break"},
+        )
+        self.assertEqual(200, stopped.status_code, stopped.text)
+        stopped_game = stopped.json()["game"]
+        self.assertEqual("paused", stopped_game["status"])
+        self.assertTrue(stopped_game["can_resume"])
+        self.assertEqual("Table break", stopped_game["pause_reason"]["label"])
+        self.assertEqual(
+            {"kind", "label"}, set(stopped_game["pause_reason"])
+        )
+        repeated_stop = self.client.post(
+            f"/api/v1/games/{game_id}/stop",
+            headers=self.auth(tokens[0]),
+            json={"reason": "A retry must not replace the first reason"},
+        )
+        self.assertEqual(200, repeated_stop.status_code, repeated_stop.text)
+        self.assertEqual(
+            "Table break",
+            repeated_stop.json()["game"]["pause_reason"]["label"],
+        )
+
+        rejected = self.client.post(
+            f"/api/v1/games/{game_id}/commands",
+            headers=self.auth(tokens[0]),
+            json=paused_envelope,
+        )
+        self.assertEqual(200, rejected.status_code, rejected.text)
+        self.assertFalse(rejected.json()["receipt"]["ok"])
+        self.assertEqual("game_paused", rejected.json()["receipt"]["code"])
+        manifest_path = self.settings.game_root / game_id / "manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        self.assertEqual("paused", manifest["status"])
+        self.assertEqual("administrative_stop", manifest["pause_reason"]["kind"])
+
+        # Simulate a crash after the Game Record commit but before the
+        # denormalized SQLite status update. The record remains authoritative.
+        connection = sqlite3.connect(self.settings.database)
+        try:
+            connection.execute(
+                "UPDATE games SET status = 'active' WHERE game_id = ?",
+                (game_id,),
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+        self.restart_client()
+        recovered = self.client.get(
+            f"/api/v1/games/{game_id}", headers=self.auth(tokens[1])
+        )
+        self.assertEqual(200, recovered.status_code, recovered.text)
+        self.assertEqual("paused", recovered.json()["game"]["status"])
+        connection = sqlite3.connect(self.settings.database)
+        try:
+            status = connection.execute(
+                "SELECT status FROM games WHERE game_id = ?", (game_id,)
+            ).fetchone()[0]
+        finally:
+            connection.close()
+        self.assertEqual("paused", status)
+        forbidden_resume = self.client.post(
+            f"/api/v1/games/{game_id}/resume",
+            headers=self.auth(tokens[1]),
+            json={},
+        )
+        self.assertEqual(403, forbidden_resume.status_code)
+
+        resumed = self.client.post(
+            f"/api/v1/games/{game_id}/resume",
+            headers=self.auth(tokens[0]),
+            json={},
+        )
+        self.assertEqual(200, resumed.status_code, resumed.text)
+        self.assertEqual("active", resumed.json()["game"]["status"])
+        self.assertFalse(resumed.json()["game"]["can_resume"])
+        repeated_resume = self.client.post(
+            f"/api/v1/games/{game_id}/resume",
+            headers=self.auth(tokens[0]),
+            json={},
+        )
+        self.assertEqual(200, repeated_resume.status_code, repeated_resume.text)
+        self.assertEqual("active", repeated_resume.json()["game"]["status"])
+        malformed_resume = self.client.post(
+            f"/api/v1/games/{game_id}/resume",
+            headers=self.auth(tokens[0]),
+            json={"seat": "B"},
+        )
+        self.assertEqual(422, malformed_resume.status_code)
+
+        replayed_rejection = self.client.post(
+            f"/api/v1/games/{game_id}/commands",
+            headers=self.auth(tokens[0]),
+            json=paused_envelope,
+        )
+        self.assertEqual(200, replayed_rejection.status_code)
+        self.assertEqual(
+            "game_paused", replayed_rejection.json()["receipt"]["code"]
+        )
+        self.assertTrue(replayed_rejection.json()["receipt"]["replayed"])
+
+        fresh = self.client.get(
+            f"/api/v1/games/{game_id}/state?full=true",
+            headers=self.auth(tokens[0]),
+        ).json()["packet"]
+        accepted = self.client.post(
+            f"/api/v1/games/{game_id}/commands",
+            headers=self.auth(tokens[0]),
+            json={
+                "protocol_version": "3.0",
+                "game_id": game_id,
+                "command_id": "resumed-A-0002",
+                "decision_id": fresh["decision"]["id"],
+                "action_id": "keep",
+                "capability": fresh["decision"]["cap"],
+                "expected_view_revision": fresh["view_revision"],
+                "choices": {},
+            },
+        )
+        self.assertEqual(200, accepted.status_code, accepted.text)
+        self.assertTrue(accepted.json()["receipt"]["ok"])
 
         database = CardDatabase(DB_PATH)
         try:

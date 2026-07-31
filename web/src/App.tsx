@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { api, type Guest, type Room, streamUrl } from "./api";
+import { api, type GameLifecycle, type Guest, type Room, streamUrl } from "./api";
 import { ChoiceFormView } from "./ChoiceForm";
 import {
   executableChoices,
@@ -300,6 +300,10 @@ function GameView({ gameId }: { gameId: string }) {
   const [choiceValues, setChoiceValues] = useState<ChoiceValues>({});
   const [choiceErrors, setChoiceErrors] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [lifecycle, setLifecycle] = useState<GameLifecycle | null>(null);
+  const [stopReason, setStopReason] = useState("Pause for a table break");
+  const [showInspection, setShowInspection] = useState(false);
+  const [controlling, setControlling] = useState(false);
 
   useEffect(() => {
     let stopped = false;
@@ -315,7 +319,12 @@ function GameView({ gameId }: { gameId: string }) {
         setConnection("LIVE");
       };
       socket.onmessage = (event) => {
-        const message = JSON.parse(String(event.data)) as { type: string; packet?: DecisionPacket };
+        const message = JSON.parse(String(event.data)) as {
+          type: string;
+          packet?: DecisionPacket;
+          game?: GameLifecycle;
+        };
+        if (message.game) setLifecycle(message.game);
         if (message.type !== "projection" || !message.packet) return;
         ingestChain.current = ingestChain.current
           .then(async () => {
@@ -335,6 +344,9 @@ function GameView({ gameId }: { gameId: string }) {
         retry = Math.min(retry * 2, 5000);
       };
     }
+    api.game(gameId)
+      .then((result) => setLifecycle(result.game))
+      .catch((caught) => setNotice(caught instanceof Error ? caught.message : String(caught)));
     connect();
     return () => {
       stopped = true;
@@ -351,7 +363,7 @@ function GameView({ gameId }: { gameId: string }) {
   }, [view?.decision?.id]);
 
   async function act(action: LegalAction, choices: ChoiceValues = {}) {
-    if (!view?.decision) return;
+    if (!view?.decision || lifecycle?.status !== "active") return;
     const envelope: CommandEnvelope = {
       protocol_version: "3.0",
       game_id: gameId,
@@ -377,6 +389,32 @@ function GameView({ gameId }: { gameId: string }) {
       setNotice(caught instanceof Error ? caught.message : String(caught));
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function stopMatch() {
+    setControlling(true);
+    try {
+      const result = await api.stop(gameId, stopReason.trim());
+      setLifecycle(result.game);
+      setNotice("Match stopped. The authoritative record is saved and resumable.");
+    } catch (caught) {
+      setNotice(caught instanceof Error ? caught.message : String(caught));
+    } finally {
+      setControlling(false);
+    }
+  }
+
+  async function resumeMatch() {
+    setControlling(true);
+    try {
+      const result = await api.resume(gameId);
+      setLifecycle(result.game);
+      setNotice("Match resumed from the preserved decision boundary.");
+    } catch (caught) {
+      setNotice(caught instanceof Error ? caught.message : String(caught));
+    } finally {
+      setControlling(false);
     }
   }
 
@@ -418,8 +456,66 @@ function GameView({ gameId }: { gameId: string }) {
       <header className="game-topbar">
         <div><span className={`connection ${connection.toLowerCase()}`} /> {connection}</div>
         <strong>GAME {String(game.id ?? gameId).slice(0, 8)}</strong>
-        <div>Turn {String(turn.n ?? turn.turn ?? 0)} · {String(turn.phase ?? "setup")} {String(turn.step ?? "")}</div>
+        <div className="game-status-line">
+          <span data-testid="game-status" className={`game-status ${lifecycle?.status ?? "loading"}`}>
+            {(lifecycle?.status ?? "loading").toUpperCase()}
+          </span>
+          Turn {String(turn.n ?? turn.turn ?? 0)} · {String(turn.phase ?? "setup")} {String(turn.step ?? "")}
+        </div>
       </header>
+      <section className="operations-panel" aria-label="Match operations">
+        <button
+          type="button"
+          className="secondary-button"
+          data-testid="inspect-game"
+          aria-expanded={showInspection}
+          onClick={() => setShowInspection((value) => !value)}
+        >Inspect match</button>
+        {lifecycle?.owner && lifecycle.can_stop && (
+          <label className="stop-control">
+            Stop reason
+            <input
+              data-testid="stop-reason"
+              value={stopReason}
+              maxLength={500}
+              onChange={(event) => setStopReason(event.target.value)}
+            />
+            <button
+              type="button"
+              data-testid="stop-game"
+              disabled={controlling || !stopReason.trim()}
+              onClick={stopMatch}
+            >Stop match</button>
+          </label>
+        )}
+        {lifecycle?.owner && lifecycle.can_resume && (
+          <button
+            type="button"
+            data-testid="resume-game"
+            disabled={controlling}
+            onClick={resumeMatch}
+          >Resume match</button>
+        )}
+      </section>
+      {showInspection && lifecycle && (
+        <section className="inspection-panel" data-testid="game-inspection">
+          <h2>Match record</h2>
+          <dl>
+            <div><dt>Status</dt><dd>{lifecycle.status}</dd></div>
+            <div><dt>Revision</dt><dd>{lifecycle.state_revision}</dd></div>
+            <div><dt>Commands</dt><dd>{lifecycle.commands}</dd></div>
+            <div><dt>Decisions</dt><dd>{lifecycle.decisions}</dd></div>
+            <div><dt>Events</dt><dd>{lifecycle.events}</dd></div>
+            <div><dt>Pending seats</dt><dd>{lifecycle.pending_principals.map((value) => value.split(":").at(-1)).join(", ") || "None"}</dd></div>
+          </dl>
+        </section>
+      )}
+      {lifecycle?.status === "paused" && (
+        <div className="paused-banner" role="status" data-testid="paused-banner">
+          <strong>Match stopped</strong>
+          <span>{lifecycle.pause_reason?.label ?? "Waiting for the room owner to resume."}</span>
+        </div>
+      )}
       <section className="boards-grid">
         {Object.entries(players).map(([seat, player]) => <PlayerBoard key={seat} seat={seat} player={asRecord(player)} />)}
       </section>
@@ -439,7 +535,7 @@ function GameView({ gameId }: { gameId: string }) {
             <div><span className="eyebrow">DECISION {view.decision.id}</span><h2>{view.decision.kind}</h2></div>
             <div className="action-row">
               {view.decision.legal_actions.map((action) => (
-                <button key={action.id} data-testid={`action-${action.id}`} disabled={submitting} onClick={() => chooseAction(action)}>{action.label ?? action.kind ?? action.action}</button>
+                <button key={action.id} data-testid={`action-${action.id}`} disabled={submitting || lifecycle?.status !== "active"} onClick={() => chooseAction(action)}>{action.label ?? action.kind ?? action.action}</button>
               ))}
             </div>
           </>
@@ -447,11 +543,11 @@ function GameView({ gameId }: { gameId: string }) {
       </section>
       {selectedAction?.form && (
         <div className="choice-overlay" role="presentation">
-          <form className="choice-dialog" data-testid="choice-dialog" onSubmit={submitChoice}>
+          <form className="choice-dialog" role="dialog" aria-modal="true" aria-labelledby="choice-dialog-title" data-testid="choice-dialog" onSubmit={submitChoice}>
             <header>
               <div>
                 <span className="eyebrow">SERVER-ISSUED CHOICES</span>
-                <h2>{selectedAction.label ?? selectedAction.action}</h2>
+                <h2 id="choice-dialog-title">{selectedAction.label ?? selectedAction.action}</h2>
               </div>
               <button
                 type="button"
@@ -480,7 +576,7 @@ function GameView({ gameId }: { gameId: string }) {
           </form>
         </div>
       )}
-      {notice && <div className="toast">{notice}</div>}
+      {notice && <div className="toast" role="status" aria-live="polite">{notice}</div>}
     </main>
   );
 }

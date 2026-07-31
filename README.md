@@ -14,8 +14,11 @@ validation/preflight, a serialized single-writer game actor, SQLite control
 plane, durable Game Record v3 acknowledgement, strict idempotent protocol 3.0
 commands, seat-scoped WebSockets, reconnect and process-restart recovery, and a
 TypeScript/React table. The browser renders the engine's current generic choice
-vocabulary and is end-to-end tested with four isolated seats; future choice
-schemas, accessibility polish, and production operations remain incomplete.
+vocabulary and provides owner-only durable stop/resume controls plus a
+seat-safe record inspection panel. Those lifecycle transitions are serialized
+through the same game actor, survive a process restart, and are end-to-end
+tested with four isolated seats. Future choice schemas, accessibility polish,
+expiry/rate limits, and production operations remain incomplete.
 The generated platform ledger records the exact current test and coverage
 counts.
 

@@ -49,7 +49,10 @@ with comma-separated `MTG_ALLOWED_ORIGINS`, and production cookie security with
 | `GET /api/v1/rooms/{room_id}` | Read public lobby readiness |
 | `PUT /api/v1/rooms/{room_id}/deck` | Resolve, validate, fingerprint, and preflight a deck |
 | `POST /api/v1/rooms/{room_id}/start` | Start one multiplayer Commander game |
+| `GET /api/v1/games/{game_id}` | Inspect safe lifecycle and journal counters for a seated member |
 | `GET /api/v1/games/{game_id}/state` | Request the caller's seat projection |
+| `POST /api/v1/games/{game_id}/stop` | Owner-only durable administrative stop |
+| `POST /api/v1/games/{game_id}/resume` | Owner-only resume of an administrative stop |
 | `POST /api/v1/games/{game_id}/commands` | Submit a strict protocol 3.0 command |
 | `WS /api/v1/games/{game_id}/stream` | Receive full and delta seat projections |
 
@@ -80,12 +83,42 @@ server derives `pilot:A`–`pilot:D` from the authenticated room seat.
   Record, issues fresh opaque capabilities for the surviving decision, and
   preserves durable idempotency receipts. The application-level recovery test
   submits before and after restart and verifies exact command replay.
+- Stop, resume, inspect, commands, and projections all cross the same actor
+  mailbox. A stop writes Game Record status `paused` with an
+  `administrative_stop` reason before it is acknowledged; a resume restores the
+  same pending decision boundary. New commands fail with `game_paused` while
+  stopped, but a retry of an already recorded command still returns its exact
+  idempotent receipt.
+- Browser resume is deliberately narrower than record-level rules arbitration:
+  it can resume only `administrative_stop`. It cannot clear a semantic,
+  fidelity, corruption, abort, or completed-game boundary.
 
 SQLite holds guest, room, seat, deck, game-index, and idempotency control-plane
 records. Authoritative game truth remains the existing checksummed Game Record
 v3 directory. PostgreSQL, multi-process actor ownership, background expiry,
 rate limiting, spectators, accounts, and deployment containers remain later
 operations work.
+
+## Stop, resume, and inspect
+
+Every seated player can open **Inspect match**. The response contains only
+control-plane and public record metadata: lifecycle status, state revision,
+turn/phase, pending principal labels, and command/decision/event counts. It
+does not contain a record path, checkpoint, hand, library order, capability,
+or analyst artifact.
+
+Only the room owner receives the stop/resume controls. **Stop match** is a
+resumable administrative pause, not a concession, abort, rules override, or
+game action. The reason is public to the table. The server saves the exact
+accepted-command prefix before responding and broadcasts the lifecycle update
+on the existing seat-scoped stream. All rendered actions are disabled while
+paused, and the application layer also rejects direct command submissions.
+
+Refreshing a browser or restarting the server while stopped reloads the
+checksummed paused record. The owner can then resume from the preserved
+decision; other seats cannot invoke either lifecycle mutation. The current
+slice does not provide a permanent delete/abort button, platform-wide admin
+console, scheduled expiry, or multi-process game ownership.
 
 ## Browser verification
 
@@ -101,10 +134,12 @@ npm run e2e
 The end-to-end suite opens four isolated Chromium contexts per scenario,
 creates four guest sessions, atomically fills seats A–D, uploads the two
 duplicated exact-list fixtures, and starts a game. One scenario submits all four
-keep decisions, records the exact projected hand count and decision, reloads
-seat A, and requires the full reconnect projection to match those values. A
-second scenario takes a post-free mulligan, selects a private card to bottom
-through the generic form, proves that the other three DOMs never receive that
+keep decisions, proves owner-only stop controls, propagates a durable paused
+status to all four contexts, disables the current decision, reloads a nonowner
+while paused, resumes, records the exact projected hand count and decision,
+then requires a later full reconnect projection to match those values. A second
+scenario takes a post-free mulligan, selects a private card to bottom through
+the generic form, proves that the other three DOMs never receive that
 seat-scoped control, and submits the resulting six-card keep. The duplicated
 pod is protocol evidence only, never matchup evidence.
 
@@ -135,5 +170,5 @@ fail closed until both the adapter and UI support them; the client never guesses
 rules behavior.
 
 Production accounts, multi-process ownership, rate limiting, containers,
-spectators, accessibility hardening, and richer retry/resume presentation remain
-later server/browser work.
+spectators, broader accessibility hardening, and richer command-retry
+presentation remain later server/browser work.
