@@ -77,8 +77,24 @@ class StateProjector:
                     or seat in card.revealed_to
                 )
             )
-        if card.zone in {"battlefield", "graveyard", "exile", "command", "stack", "outside"}:
-            return not card.face_down
+        if card.zone in {
+            "battlefield",
+            "graveyard",
+            "exile",
+            "command",
+            "stack",
+        }:
+            if not card.face_down:
+                return True
+            seat = self._view_seat_for(principal)
+            return bool(
+                seat
+                and (
+                    seat == card.owner
+                    or seat in card.known_to
+                    or seat in card.revealed_to
+                )
+            )
         seat = self._view_seat_for(principal)
         if seat is None:
             return False

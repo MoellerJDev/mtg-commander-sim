@@ -24143,21 +24143,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-400",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_contract_traces_every_cr_400_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/object-zone-identity.json"
+      ],
+      "notes": [
+        "Section heading; CR 400.1-12 carry the zone and object-identity requirements."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "400",
       "rule_text_sha256": "c910d474dcd724bff83ddedeb06bf1eceaf9fb3af7c76bb282be057f36e6dffa",
       "schema_version": 1,
@@ -24166,26 +24170,44 @@
         "end_line": 1932,
         "start_line": 1931
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-400.1",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "structural",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "400"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_zone_topology_and_visibility_match_the_pinned_rules",
+        "tests.test_permissions_projection.PermissionProjectionTests.test_private_hands_are_seat_projected"
+      ],
+      "implementation_components": [
+        "model.ZONES",
+        "PlayerState.zones",
+        "GameState.stack",
+        "CommanderEngine._target_candidates"
+      ],
+      "notes": [
+        "The seven normal zones are represented; each seat owns separate library, hand, and graveyard order, while battlefield, exile, command, and stack queries operate as shared game zones across seats. Ante is outside the supported Commander profile."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "400.1",
       "rule_text_sha256": "ee16e62fcbea61f1510230fd03548aec78a7a06121391996b4fafbef3a923088",
       "schema_version": 1,
@@ -24194,26 +24216,44 @@
         "end_line": 1934,
         "start_line": 1933
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-400.2",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "structural",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "400"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_zone_topology_and_visibility_match_the_pinned_rules",
+        "tests.test_native_v3_slice.NativeV3AuditAndPilotTests.test_elimination_preserves_hidden_identity_and_public_knowledge"
+      ],
+      "implementation_components": [
+        "PUBLIC_ZONES",
+        "HIDDEN_ZONES",
+        "StateProjector._card_visible",
+        "StateProjector._obj"
+      ],
+      "notes": [
+        "Hand and library remain hidden-zone categories even when individual cards are known. Graveyard, battlefield, stack, exile, and command are public, with face-down identity visible only to an authorized viewer. Outside the game is no longer misclassified as public."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "400.2",
       "rule_text_sha256": "feb11c5251141c7a09d2b0a6a82e8e691ab45b8aed24c85c09deb1eb3f4f2cec",
       "schema_version": 1,
@@ -24222,26 +24262,41 @@
         "end_line": 1936,
         "start_line": 1935
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-400.3",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "400"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_nonbattlefield_destination_uses_the_owners_zone"
+      ],
+      "implementation_components": [
+        "CommanderEngine.move_card",
+        "CommanderEngine._reset_zone_change"
+      ],
+      "notes": [
+        "A card controlled by another seat on the battlefield is inserted into its owner's hand, library, or graveyard and its controller resets to its owner."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "400.3",
       "rule_text_sha256": "19bf4557216249733bfe390d6b5cb823ff634ea8f0f2b47813ae4e4613d23a12",
       "schema_version": 1,
@@ -24250,26 +24305,30 @@
         "end_line": 1938,
         "start_line": 1937
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-400.4",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "400"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_contract_traces_every_cr_400_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/object-zone-identity.json"
+      ],
+      "notes": [
+        "Introductory taxonomy sentence; CR 400.4a-b define the prohibited card-type moves."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "400.4",
       "rule_text_sha256": "22dc2cc14a5481efc47381d1d7410ae41255565aaa68e7b85592de64b7edd3be",
       "schema_version": 1,
@@ -24278,26 +24337,41 @@
         "end_line": 1940,
         "start_line": 1939
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-400.4a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "400.4"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_instant_or_sorcery_cannot_enter_battlefield"
+      ],
+      "implementation_components": [
+        "CommanderEngine.move_card",
+        "CommanderEngine._effective_card_data"
+      ],
+      "notes": [
+        "An instant or sorcery card requested to enter the battlefield remains in its previous zone. The rejection occurs before membership, incarnation, timestamp, visibility, or event mutation."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "400.4a",
       "rule_text_sha256": "2cba36e970d0f9084336d58407380a1bb0f70728b8ca6eab0510f37d61ad61ff",
       "schema_version": 1,
@@ -24306,26 +24380,40 @@
         "end_line": 1942,
         "start_line": 1941
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "nontraditional_command_zone_card_types_not_represented",
+        "command_zone_type_immobility_guard_not_implemented"
       ],
       "case_id": "cr-400.4b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "400.4"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_contract_traces_every_cr_400_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine.move_card",
+        "semantic preflight"
+      ],
+      "notes": [
+        "Conspiracy, phenomenon, plane, scheme, and vanguard objects are outside the supported profile and their command-zone immobility is not represented as a generic type guard."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "400.4b",
       "rule_text_sha256": "771839031e46a8170a41ae822ebd0fc1a6d456dfd1ccf7f133e05c7d2557d6a0",
       "schema_version": 1,
@@ -24334,26 +24422,44 @@
         "end_line": 1944,
         "start_line": 1943
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-400.5",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "structural",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "400"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_same_graveyard_move_is_a_no_op",
+        "tests.test_stack_rules.StackRuleTests.test_stack_is_last_in_first_out_and_replays_exactly"
+      ],
+      "implementation_components": [
+        "PlayerState.zones",
+        "GameState.stack",
+        "CommanderEngine.move_card",
+        "CommanderEngine.shuffle_library"
+      ],
+      "notes": [
+        "Library, graveyard, and stack use authoritative ordered lists changed only by typed moves, shuffle, or stack operations. A same-graveyard request is now a no-op instead of silently moving the card to the top."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "400.5",
       "rule_text_sha256": "917f10be5e1a48d7b218c7379de852b1d9a0004470fa802022eeaa9b8ed7d1f2",
       "schema_version": 1,
@@ -24362,26 +24468,49 @@
         "end_line": 1946,
         "start_line": 1945
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "universal_zone_move_replacement_discovery_not_implemented",
+        "contradictory_effect_choice_not_integrated",
+        "complete_apnap_replacement_collection_not_integrated"
       ],
       "case_id": "cr-400.6",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "400"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_simultaneous_move_captures_all_lki_before_mutation",
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_affected_player_chooses_from_current_priority_class"
+      ],
+      "implementation_components": [
+        "CommanderEngine.move_card",
+        "CommanderEngine._move_cards_simultaneously",
+        "CommanderEngine._compiled_graveyard_replacement",
+        "replacement_effects"
+      ],
+      "notes": [
+        "Represented simultaneous moves capture all pre-move information and selected graveyard replacements before mutation. Universal self-inspection, battlefield destination inspection, contradictory effect choice, and CR 616 ordering are not wired into every zone event."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "400.6",
       "rule_text_sha256": "9b8d78a91e5c0b8f7d7a807e3b13d36ca89cd48e6f4edddea422a6594a6e7ff6",
       "schema_version": 1,
@@ -24390,26 +24519,47 @@
         "end_line": 1949,
         "start_line": 1947
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-400.7",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "400"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_zone_changes_create_serialized_logical_incarnations",
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_draw_crosses_the_canonical_incarnation_boundary",
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_target_that_leaves_and_returns_is_a_new_illegal_object"
+      ],
+      "implementation_components": [
+        "CardInstance.logical_object_id",
+        "CommanderEngine._reset_zone_change",
+        "CommanderEngine.move_card",
+        "CommanderEngine._target_identity_matches_snapshot"
+      ],
+      "notes": [
+        "Ordinary cross-zone moves advance a serialized logical incarnation, clear noncontinued state, and invalidate a target tied to the old incarnation. The separately enumerated CR 400.7a-m continuations retain independent statuses."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "400.7",
       "rule_text_sha256": "9ec31ef2bc4244570c9ac4c0b6b4f61f858c0a9ae38050673fcf46553310b94a",
       "schema_version": 1,
@@ -24418,26 +24568,43 @@
         "end_line": 1951,
         "start_line": 1950
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "complete_spell_characteristic_continuation_not_implemented",
+        "complete_spell_control_effect_continuation_not_implemented"
       ],
       "case_id": "cr-400.7a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "400.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_permanent_spell_keeps_its_logical_incarnation",
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_new_incarnation_forgets_state_except_entry_continuations"
+      ],
+      "implementation_components": [
+        "CommanderEngine._reset_zone_change",
+        "CommanderEngine._continue_resolution"
+      ],
+      "notes": [
+        "The resolving permanent spell keeps its logical incarnation and selected represented entry annotations. Arbitrary characteristic-changing and control-changing spell effects do not use a typed continuation policy."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "400.7a",
       "rule_text_sha256": "f31e8019bd99c254e41714b158ac3c1c483fac9415febb11e57f53629ce98df2",
       "schema_version": 1,
@@ -24446,26 +24613,39 @@
         "end_line": 1953,
         "start_line": 1952
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "static_granted_ability_spell_to_permanent_continuation_not_implemented"
       ],
       "case_id": "cr-400.7b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "400.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_static_abilities.StaticAbilityRuleTests.test_battlefield_static_effect_stops_when_source_leaves"
+      ],
+      "implementation_components": [
+        "continuous_effects",
+        "CommanderEngine._reset_zone_change"
+      ],
+      "notes": [
+        "Battlefield static effects are represented, but a static ability granting a battlefield-functioning ability to a permanent spell is not retained through resolution generically."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "400.7b",
       "rule_text_sha256": "1791c7cb60387c7a3dd34ecdc554cba7923330a80563aeea28d16925c85acc86",
       "schema_version": 1,
@@ -24474,26 +24654,39 @@
         "end_line": 1955,
         "start_line": 1954
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "permanent_spell_damage_prevention_continuation_not_implemented"
       ],
       "case_id": "cr-400.7c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "400.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_prevention_never_prevents_more_than_remaining_damage"
+      ],
+      "implementation_components": [
+        "prevention_effects",
+        "CommanderEngine._reset_zone_change"
+      ],
+      "notes": [
+        "Typed damage-prevention primitives exist, but prevention tied to damage from a permanent spell does not continue onto the permanent through a generic identity relationship."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "400.7c",
       "rule_text_sha256": "90277894761aee739520e482ebb6ff7b7f302f0b962a07c12777c6ad15a23c35",
       "schema_version": 1,
@@ -24502,26 +24695,40 @@
         "end_line": 1957,
         "start_line": 1956
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "complete_cast_cost_and_spent_mana_provenance_not_retained_on_permanent"
       ],
       "case_id": "cr-400.7d",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "400.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_casting_spells_rules.CastingSpellRuleTests.test_mana_abilities_run_after_cost_choice_and_before_payment"
+      ],
+      "implementation_components": [
+        "StackItem.context",
+        "CardInstance.annotations",
+        "CommanderEngine._cast"
+      ],
+      "notes": [
+        "The stack item records selected cost options and payments are authoritative, but complete paid-cost and spent-mana provenance is not transferred to the permanent for later ability queries."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "400.7d",
       "rule_text_sha256": "60c9cb9e1ad56c71a8f3d1d94ef5722e8c924a12547c1bc2b121e4264fe5a464",
       "schema_version": 1,
@@ -24530,26 +24737,43 @@
         "end_line": 1959,
         "start_line": 1958
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-400.7e",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "400.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_daretti_ruling_does_not_follow_a_reentered_card",
+        "tests.test_oracle_ir.OracleIRTests.test_self_dies_trigger_uses_last_known_controller"
+      ],
+      "implementation_components": [
+        "CommanderEngine._dispatch_zone_change_events",
+        "CommanderEngine._dispatch_semantic_event",
+        "StackItem.context"
+      ],
+      "notes": [
+        "Represented zone-change triggers receive the new public-zone object reference and its logical incarnation while retaining the source's pre-move controller and information."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "400.7e",
       "rule_text_sha256": "102cc8ad19d14a7e08f9cf17ac5f1082157a3351243591efdf4d6d933c83d47c",
       "schema_version": 1,
@@ -24558,26 +24782,42 @@
         "end_line": 1961,
         "start_line": 1960
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "generic_enchanted_permanent_aura_pairing_across_simultaneous_moves_not_implemented",
+        "sba_detached_aura_followup_lookup_not_implemented"
       ],
       "case_id": "cr-400.7f",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "400.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_animate_dead_reanimates_attaches_modifies_power_and_sacrifices_on_leave"
+      ],
+      "implementation_components": [
+        "CommanderEngine._dispatch_zone_change_events",
+        "state_based_actions"
+      ],
+      "notes": [
+        "Selected attachment interactions are compiled, but the complete simultaneous enchanted-permanent/Aura lookup and later unattached-Aura state-action exception are not typed generically."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "400.7f",
       "rule_text_sha256": "2f23f5bcec3c2fa681df5929e85ae2ca88607cbdd1c93394822e6b8362922ec2",
       "schema_version": 1,
@@ -24586,26 +24826,40 @@
         "end_line": 1963,
         "start_line": 1962
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "generic_granted_cast_ability_continuation_to_stack_not_implemented"
       ],
       "case_id": "cr-400.7g",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "400.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_gravecrawler_graveyard_cast_requires_controlled_zombie"
+      ],
+      "implementation_components": [
+        "CommanderEngine._compiled_zone_cast_permission",
+        "CommanderEngine._cast"
+      ],
+      "notes": [
+        "Selected graveyard cast permissions are validated, but an arbitrary effect-granted cast ability is not retained as an ability of the new stack object."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "400.7g",
       "rule_text_sha256": "6a1de1899598d894c69cbe4d842e6e7ad6105416ee1b466848c6604fef9403e7",
       "schema_version": 1,
@@ -24614,26 +24868,41 @@
         "end_line": 1965,
         "start_line": 1964
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "cast_permission_effect_cannot_generically_find_new_stack_object"
       ],
       "case_id": "cr-400.7h",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "400.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_gravecrawler_graveyard_cast_requires_controlled_zombie"
+      ],
+      "implementation_components": [
+        "CommanderEngine._compiled_zone_cast_permission",
+        "CommanderEngine._cast",
+        "semantic effects"
+      ],
+      "notes": [
+        "The physical card reference remains stable internally, but other clauses of an arbitrary cast-permission effect do not receive a typed continuation to the new stack incarnation."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "400.7h",
       "rule_text_sha256": "1448738aab9db7afea1687953a23062bdfafb0abc51979f5767bc5b9ea83fc2f",
       "schema_version": 1,
@@ -24642,26 +24911,40 @@
         "end_line": 1967,
         "start_line": 1966
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "land_play_permission_effect_cannot_generically_find_new_battlefield_object"
       ],
       "case_id": "cr-400.7i",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "400.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_mole_man_plays_graveyard_land_and_moloid_attack_may_mill"
+      ],
+      "implementation_components": [
+        "CommanderEngine._play_land",
+        "CommanderEngine._compiled_land_play_permission"
+      ],
+      "notes": [
+        "Selected graveyard land-play permissions work, but other clauses of an arbitrary effect do not receive a typed continuation to the new battlefield incarnation."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "400.7i",
       "rule_text_sha256": "e004c0d3863e7377ffb00da318ddd0d8c1929399867ace4e883cd4d8c88349f6",
       "schema_version": 1,
@@ -24670,26 +24953,46 @@
         "end_line": 1969,
         "start_line": 1968
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "generic_public_zone_move_continuation_not_implemented",
+        "complete_cost_object_continuation_not_implemented"
       ],
       "case_id": "cr-400.7j",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "400.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_linked_move_accepts_the_current_incarnation",
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_token_cost_cessation_replays_exactly"
+      ],
+      "implementation_components": [
+        "CommanderEngine.apply_effect",
+        "CommanderEngine._pay_for_cost",
+        "CommanderEngine._dispatch_zone_change_events"
+      ],
+      "notes": [
+        "Represented effects and selected cost snapshots can find a moved public-zone incarnation. The full Oracle effect and cost grammar does not create typed continuation handles for every such move."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "400.7j",
       "rule_text_sha256": "5bc40e92dfdd3c3b749948ab6e6667672f915b0264639725c6c286c3d9fdde00",
       "schema_version": 1,
@@ -24698,26 +25001,38 @@
         "end_line": 1971,
         "start_line": 1970
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "madness_action_and_post_resolution_continuation_not_implemented"
       ],
       "case_id": "cr-400.7k",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "400.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_contract_traces_every_cr_400_rule"
+      ],
+      "implementation_components": [
+        "semantic preflight"
+      ],
+      "notes": [
+        "Madness and its discarded-card continuation are not represented and remain unavailable under semantic preflight."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "400.7k",
       "rule_text_sha256": "340b337886070c6e1b92d95edaee3ece2887c8ddb288716ae92455d9cc743b44",
       "schema_version": 1,
@@ -24726,26 +25041,38 @@
         "end_line": 1973,
         "start_line": 1972
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "stickers_not_implemented"
       ],
       "case_id": "cr-400.7m",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "400.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_contract_traces_every_cr_400_rule"
+      ],
+      "implementation_components": [
+        "semantic preflight"
+      ],
+      "notes": [
+        "Sticker state and public-zone continuation are not represented."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "400.7m",
       "rule_text_sha256": "643dba4801cc97be10adadbe952d0671efc612846b95e2b4b112e1840867d507",
       "schema_version": 1,
@@ -24754,26 +25081,42 @@
         "end_line": 1975,
         "start_line": 1974
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-400.8",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "400"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_zone_changes_create_serialized_logical_incarnations",
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_incarnation_counter_is_monotonic_under_zone_mutation"
+      ],
+      "implementation_components": [
+        "CommanderEngine._reset_zone_change",
+        "CardInstance.logical_object_id"
+      ],
+      "notes": [
+        "Exile-to-exile advances the logical incarnation and timestamp even though zone membership remains exile; serialization preserves both."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "400.8",
       "rule_text_sha256": "74ca7005720d6d9ae33d97dd0b1cb1364588b0dfed690163c95a9cc4688062b3",
       "schema_version": 1,
@@ -24782,26 +25125,41 @@
         "end_line": 1977,
         "start_line": 1976
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "command_zone_face_down_transition_not_implemented"
       ],
       "case_id": "cr-400.9",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "400"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_zone_topology_and_visibility_match_the_pinned_rules"
+      ],
+      "implementation_components": [
+        "CardInstance.face_down",
+        "CommanderEngine._reset_zone_change"
+      ],
+      "notes": [
+        "Face-down projection is private, but no supported command turns a face-up command-zone object face down and advances its incarnation."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "400.9",
       "rule_text_sha256": "890d008c1be3013e304425ef57634165a2bafc4f68d22974e13e883894c432d0",
       "schema_version": 1,
@@ -24810,26 +25168,41 @@
         "end_line": 1979,
         "start_line": 1978
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-400.10",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "400"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_incarnation_counter_is_monotonic_under_zone_mutation"
+      ],
+      "implementation_components": [
+        "CommanderEngine._reset_zone_change",
+        "CardInstance.logical_object_id"
+      ],
+      "notes": [
+        "Command-to-command advances the logical incarnation and timestamp even though zone membership remains command."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "400.10",
       "rule_text_sha256": "e4cdada65459e53f5019eaf86a166dc2e5a4abacb81861cdd14b7e7b436f7860",
       "schema_version": 1,
@@ -24838,26 +25211,42 @@
         "end_line": 1981,
         "start_line": 1980
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-400.11",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "structural",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "hidden_information",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "400"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_hidden_card_moved_outside_is_not_revealed_or_targetable"
+      ],
+      "implementation_components": [
+        "CommanderEngine.move_card",
+        "CommanderEngine.validate_state",
+        "StateProjector._card_visible"
+      ],
+      "notes": [
+        "An outside-game object has no membership in any player's zone list. Outside is not classified as public; authoritative identity and existing viewer knowledge are retained without inventing zone membership."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "hidden_information",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "400.11",
       "rule_text_sha256": "8a7f35107bb269db5c69a6e73b900ade41214610eee21269cb05ec46a124896b",
       "schema_version": 1,
@@ -24866,26 +25255,31 @@
         "end_line": 1983,
         "start_line": 1982
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-400.11a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "400.11"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_contract_traces_every_cr_400_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/object-zone-identity.json",
+        "GameConfig supported profiles"
+      ],
+      "notes": [
+        "Sideboard cards are outside the game by definition. The supported Commander profiles do not include a sideboard, so this record creates no independent runtime behavior claim."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "400.11a",
       "rule_text_sha256": "e7d22d64ee88543c86d54d9971b97646d5db93bbfe5a8f32a6b81271efdafda9",
       "schema_version": 1,
@@ -24894,26 +25288,43 @@
         "end_line": 1985,
         "start_line": 1984
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "outside_game_import_effects_not_implemented",
+        "imported_card_lifecycle_not_implemented"
       ],
       "case_id": "cr-400.11b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "400.11"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_hidden_card_moved_outside_is_not_revealed_or_targetable"
+      ],
+      "implementation_components": [
+        "semantic preflight",
+        "CommanderEngine._eliminate_players"
+      ],
+      "notes": [
+        "Effects that bring cards into the game from outside and the imported card's end-of-game, owner-leaves, and removal lifecycle are not represented."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "400.11b",
       "rule_text_sha256": "f34391f4b96548e0324d76e284169830ca11890afb8510aec9ff5aa32f029099",
       "schema_version": 1,
@@ -24922,26 +25333,40 @@
         "end_line": 1987,
         "start_line": 1986
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-400.11c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "400.11"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_hidden_card_moved_outside_is_not_revealed_or_targetable"
+      ],
+      "implementation_components": [
+        "CommanderEngine._resolve_object",
+        "StateProjector._card_visible",
+        "semantic preflight"
+      ],
+      "notes": [
+        "Ordinary object resolution excludes outside-game cards regardless of raw reference, and no ordinary legal action exposes them. Printed characteristics remain queryable authoritatively without making the object affectable."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "400.11c",
       "rule_text_sha256": "ae411d9330c614a624416bbc2d2bfa911aa7768973b5d2632ce5df46a9262e3e",
       "schema_version": 1,
@@ -24950,26 +25375,45 @@
         "end_line": 1989,
         "start_line": 1988
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "generic_whole_zone_instruction_grammar_not_implemented"
       ],
       "case_id": "cr-400.12",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "hidden_information",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "400"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_mulligan_and_turns.MulliganAndTurnTests.test_multiplayer_first_mulligan_is_free_and_redraws_seven"
+      ],
+      "implementation_components": [
+        "PlayerState.zones",
+        "CommanderEngine.shuffle_library",
+        "CommanderEngine mulligan paths",
+        "semantic effects"
+      ],
+      "notes": [
+        "Represented mulligan and shuffle operations iterate card members without mutating a zone object. The generic Oracle grammar for arbitrary instructions that act on every card in a zone is incomplete."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "400.12",
       "rule_text_sha256": "6358fb2caa276afd1f91d8df21a13d887e129126e3898c6a5bb2c203bd9864e8",
       "schema_version": 1,
@@ -24978,7 +25422,7 @@
         "end_line": 1991,
         "start_line": 1990
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
       "assertion_kind": "inventory_only",

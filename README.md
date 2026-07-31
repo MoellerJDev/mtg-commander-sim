@@ -175,6 +175,13 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 400 zone and object-identity invariants: the seven normal
+  zones, owner-zone routing, logical incarnation changes, permanent-spell
+  continuation, authorized face-down visibility, and outside-game secrecy
+  pass; same-graveyard movement is now a no-op and instant or sorcery cards
+  cannot enter the battlefield, while the complete CR 400.7 exception matrix,
+  special command-zone objects, sideboards, and whole-zone instruction
+  grammar remain blocked
 - source-reviewed CR 405 stack structure: new objects are placed on top,
   complete priority rounds resolve only the top object, direct effects,
   represented static abilities, and represented state actions bypass the
@@ -326,9 +333,9 @@ python simctl.py rules conformance --root .
 ```
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
-generated source-linkage tests. Of those cases, 471 are source-reviewed:
-71 have narrow executable semantic evidence, 334 are explicitly blocked, and
-66 are definition-only; 2,829 remain unreviewed. A generated inventory test
+generated source-linkage tests. Of those cases, 501 are source-reviewed:
+82 have narrow executable semantic evidence, 350 are explicitly blocked, and
+69 are definition-only; 2,799 remain unreviewed. A generated inventory test
 cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
 invalidation, and reporting policy.
 
@@ -347,6 +354,15 @@ new battlefield timestamp. Targets and implemented linked delayed effects
 retain the selected incarnation, so a card that leaves and returns is not
 silently treated as the old object. Pilot projections never expose the
 physical identifier or incarnation counter.
+
+CR 400 review also enforces three generic boundaries before mutation:
+same-zone graveyard moves cannot reorder that graveyard, instant and sorcery
+cards cannot be moved onto the battlefield, and moving a hidden card outside
+the game does not reveal it. Face-down objects in otherwise public zones remain
+visible only to their owner or another explicitly authorized viewer. Complete
+special-object command-zone rules, the remaining new-object exceptions,
+sideboards and wish effects, and generic whole-zone instructions remain
+fail-closed or explicitly blocked.
 
 Each new zone incarnation also receives a serialized timestamp moment.
 Objects entering a destination simultaneously share that moment. Battlefield

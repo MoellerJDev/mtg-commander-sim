@@ -27,16 +27,16 @@ coverage.
 | Workstream | Status | Current evidence |
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
-| Mechanic contracts | In progress | 38 partial/untrusted contracts; 387 mechanics unclassified; 0 trusted |
+| Mechanic contracts | In progress | 40 partial/untrusted contracts; 385 mechanics unclassified; 0 trusted |
 | Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
-| Object and zone identity | Partial | CR 400 logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, and selected linked-effect guards |
+| Object and zone identity | Partial | All 30 CR 400 records reviewed; owner-zone routing, logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, hidden outside-game movement, and selected linked-effect guards |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
 | Replacement/prevention ordering | Partial | CR 615/616 typed primitives; stateful shields and event-producer integration incomplete |
 | Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, counter-derived battlefield defense, copied printed defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 440 cases in CR 120/210/310/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 62 semantic passes, 316 blocked cases, and 62 definition-only cases |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 501 cases in CR 120/210/310/400/405/500/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 82 semantic passes, 350 blocked cases, and 69 definition-only cases |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -192,6 +192,14 @@ coverage.
   action catalogs, concession outside priority, and complete player-leaves-
   game ordering remain dependency-blocked; two taxonomy records are
   definition-only.
+- [x] Reviewed all 30 CR 400 General records. Zone topology, owner routing,
+  logical incarnation changes, permanent-spell continuation, represented LKI,
+  authorized face-down identity, and hidden outside-game movement pass.
+  Same-graveyard moves are no-ops and instant or sorcery battlefield entry is
+  rejected transactionally. The complete new-object exception matrix,
+  special command-zone objects, sideboards and wish effects, simultaneous
+  replacement integration, and whole-zone grammar remain blocked; three
+  taxonomy records are definition-only.
 - [x] Reviewed all 6 CR 502 Untap Step records. Ordinary stackless untaps,
   represented stun and next-untap restrictions, held-trigger handoff, and
   exact replay are characterized. Phasing and global maximum-untap choices now
@@ -323,7 +331,7 @@ The two Control Point previews in the July 28 Oracle corpus are
 not-yet-Commander-legal and postdate the June 19 CR snapshot, so their
 protector rules fail closed.
 
-## Prior CR 400/613/111/704/707 foundation
+## CR 400/613/111/704/707 foundation
 
 Every card retains a stable physical `object_id`, while a serialized
 `zone_change_counter` identifies its current logical incarnation. The
@@ -335,6 +343,14 @@ a permanent under CR 400.7a. Targets compare their selected incarnation at
 resolution. Daretti's delayed emblem return carries the recorded graveyard
 incarnation, so the effect does not follow a card that leaves and reenters.
 Neither physical IDs nor counters are projected to pilots.
+
+The completed CR 400 family review additionally prevents an instant or sorcery
+card from entering the battlefield before any mutation, treats an ordinary
+same-zone graveyard move as a true no-op rather than a reorder, routes
+nonbattlefield destinations to the owner's corresponding zone, and preserves
+the visibility of a hidden card moved outside the game instead of revealing it
+globally. A face-down object in a public zone is identifiable only to its owner
+or another viewer who is explicitly authorized to know it.
 
 Every new zone incarnation also receives an authoritative timestamp moment.
 Objects moved simultaneously to one destination share that moment. A separate
@@ -406,8 +422,11 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,854 unit/integration tests pass: 554 ordinary tests plus 3,300 generated
+- 3,860 unit/integration tests pass: 560 ordinary tests plus 3,300 generated
   inventory/source-linkage tests. The latter are not semantic passes.
+- Six focused CR 400 tests cover exact source traceability, zone topology and
+  visibility, owner-zone routing, transactional instant/sorcery battlefield
+  rejection, same-graveyard no-op behavior, and hidden outside-game movement.
 - Six focused CR 405 tests cover exact source traceability, two-object LIFO
   priority and replay, transactional non-top rejection, immediate activated
   mana, direct effect/state-action execution, and leaving-player stack
@@ -485,10 +504,10 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 471 CR
-  120/210/310/405/500/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
-  cases are source-reviewed: 71 pass with executable engine evidence, 334
-  remain blocked, and 66 are definition-only. The other 2,829 cases remain
+  establish inventory linkage only. All 501 CR
+  120/210/310/400/405/500/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
+  cases are source-reviewed: 82 pass with executable engine evidence, 350
+  remain blocked, and 69 are definition-only. The other 2,799 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -499,12 +518,12 @@ checkpoint validation.
 
 1. Continue reviewing and promoting conformance cases by
    dependency-ordered rules family; keep exposed but unimplemented edge cases
-   failing or blocked. CR 405 Stack is the current bounded family; retain
-   stack-first casting, complete simultaneous-object APNAP ordering, stack
-   characteristics, special actions, concession, and multiplayer leaving-game
-   semantics as explicit dependencies. The next bounded dependency-unblocking
-   review should be CR 400 General zone identity without promoting incomplete
-   zone-change semantics.
+   failing or blocked. CR 400 General zones is the current bounded family;
+   retain its complete new-object exception matrix, specialized command-zone
+   objects, sideboards, outside-game actions, ordered face-down piles,
+   simultaneous replacement integration, and whole-zone grammar as explicit
+   dependencies. The next bounded dependency-unblocking review should be CR
+   401 Library without promoting incomplete hidden-zone semantics.
 2. Wire the reviewed CR 614/615/616 primitives into the shared CR 120/310
    replacement and prevention event pipeline, including stateful shields and
    typed nested events, then re-evaluate the blocked damage sequence and

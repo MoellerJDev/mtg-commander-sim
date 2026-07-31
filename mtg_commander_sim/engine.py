@@ -84,7 +84,7 @@ TURN_STEPS: list[tuple[str, str]] = [
     ("ending", "cleanup"),
 ]
 
-PUBLIC_ZONES = {"battlefield", "graveyard", "exile", "command", "stack", "outside"}
+PUBLIC_ZONES = {"battlefield", "graveyard", "exile", "command", "stack"}
 HIDDEN_ZONES = {"hand", "library"}
 
 
@@ -1716,6 +1716,11 @@ class CommanderEngine:
         requested_destination = destination
         origin = card.zone
         if (
+            origin == requested_destination
+            and origin not in {"library", "exile", "command"}
+        ):
+            return card
+        if (
             card.is_token
             and card.has_left_battlefield
             and origin not in {"battlefield", "outside"}
@@ -1734,6 +1739,32 @@ class CommanderEngine:
                         "from": origin,
                         "requested_destination": requested_destination,
                         "rule": "111.8",
+                    },
+                    importance=2,
+                    changed_objects=[card.object_id],
+                    changed_players=[card.owner],
+                )
+            return card
+        if (
+            destination == "battlefield"
+            and card.is_card_object
+            and self._type_parts(
+                str(self._effective_card_data(card).get("type_line") or "")
+            )[0].intersection({"instant", "sorcery"})
+        ):
+            if log:
+                self._log(
+                    None,
+                    "zone.move.prevented",
+                    (
+                        f"{card.ref} remained in {origin}; an instant or "
+                        "sorcery card cannot enter the battlefield."
+                    ),
+                    {
+                        "object": card.ref,
+                        "from": origin,
+                        "requested_destination": requested_destination,
+                        "rule": "400.4a",
                     },
                     importance=2,
                     changed_objects=[card.object_id],
@@ -1828,8 +1859,14 @@ class CommanderEngine:
                 gained_at=card.zone_timestamp,
             )
         elif destination == "outside":
-            card.known_to = list(self.seats)
-            card.revealed_to = list(self.seats)
+            known = set(card.known_to)
+            known.add(card.owner)
+            card.known_to = sorted(known)
+            card.revealed_to = sorted(
+                viewer
+                for viewer in set(card.revealed_to)
+                if viewer in known
+            )
         else:
             owner_zone = self.state.players[card.owner].zones[destination]
             if destination == "library":

@@ -166,8 +166,8 @@
     {
       "mechanic_id": "cr-400-general",
       "path": "mechanics/contracts/object-zone-identity.json",
-      "sha256": "325de592aa5bbcdda02dbe73f6160ba68ab2bdb1d09d6f7a078315411a73b382",
-      "version": 3
+      "sha256": "cec27688887e90bcdbf3d591c4cdc63316caae94833fd04a065d3ffa5be278c3",
+      "version": 4
     },
     {
       "mechanic_id": "cr-615-prevention-effects",
@@ -5916,19 +5916,23 @@
     {
       "category": "zones",
       "contract_path": "mechanics/contracts/object-zone-identity.json",
-      "contract_sha256": "325de592aa5bbcdda02dbe73f6160ba68ab2bdb1d09d6f7a078315411a73b382",
-      "contract_version": 3,
+      "contract_sha256": "cec27688887e90bcdbf3d591c4cdc63316caae94833fd04a065d3ffa5be278c3",
+      "contract_version": 4,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "CardInstance.zone_change_counter and zone_timestamp, GameState.timestamp_sequence, CommanderEngine.move_card, target revalidation, and identity-guarded semantic moves",
-      "implementation_version": "object-incarnation-v3",
+      "implementation_version": "object-incarnation-v4",
       "kind": "rules_section",
       "known_blockers": [
         "the complete CR 400.7a-m exception matrix is not represented as typed continuation policies",
+        "conspiracy, phenomenon, plane, scheme, and vanguard command-zone immobility is not represented",
+        "complete ordered-zone mutation authorization and face-down pile ordering are not represented",
         "merged permanents, meld components, stickers, and complete face-down object identity are not implemented",
         "turning a face-up command-zone object face down does not yet create a new incarnation",
         "all legacy semantic references have not yet migrated from physical refs to typed logical handles",
         "all simultaneous replacement choices are not yet routed through the CR 616 ordering engine",
+        "sideboards, outside-the-game wish effects, and their lifecycle are not represented",
+        "complete effects that instruct actions over every card in a zone are not compiled generically",
         "complete CR 613.7m APNAP relative-timestamp choices are not represented"
       ],
       "mechanic_id": "cr-400-general",
@@ -5937,6 +5941,12 @@
         "400"
       ],
       "test_ids": [
+        "test_contract_traces_every_cr_400_rule",
+        "test_zone_topology_and_visibility_match_the_pinned_rules",
+        "test_nonbattlefield_destination_uses_the_owners_zone",
+        "test_instant_or_sorcery_cannot_enter_battlefield",
+        "test_same_graveyard_move_is_a_no_op",
+        "test_hidden_card_moved_outside_is_not_revealed_or_targetable",
         "test_zone_changes_create_serialized_logical_incarnations",
         "test_incarnation_counter_is_monotonic_under_zone_mutation",
         "test_draw_crosses_the_canonical_incarnation_boundary",

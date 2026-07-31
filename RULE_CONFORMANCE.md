@@ -101,11 +101,11 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 471 cases in CR 120, CR 210, CR 310, CR 405, CR 500, CR 501, CR 502, CR 503, CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
+All 501 cases in CR 120, CR 210, CR 310, CR 400, CR 405, CR 500, CR 501, CR 502, CR 503, CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
 CR 602, CR 603, CR 604, CR 605, CR 606, CR 607, CR 608, CR 609, CR 614,
-CR 615, and CR 616 are source-reviewed: 71 narrow behavioral or structural rules pass with
-generic executable evidence, 334 are blocked with exact missing dependencies,
-and 66 are definition-only with contract traceability. The remaining 2,829
+CR 615, and CR 616 are source-reviewed: 82 narrow behavioral or structural rules pass with
+generic executable evidence, 350 are blocked with exact missing dependencies,
+and 69 are definition-only with contract traceability. The remaining 2,799
 cases are
 unreviewed and
 inventory-only.
@@ -175,6 +175,16 @@ frozen proposals, and opponent-made choices remain blocked.
 CR 600 contains only the General section heading. It is source-reviewed as a
 definition-only taxonomy record linked to the dependent CR 601-609 contracts;
 it makes no independent engine-behavior claim.
+CR 400 records the seven normal zones, per-player versus shared zone topology,
+owner-zone routing, cross-zone logical incarnations, the permanent-spell
+continuation, represented last-known information, authorized face-down
+visibility, and hidden outside-game movement as passing invariants. Same-zone
+graveyard movement now leaves both state and ordering unchanged, and an
+instant or sorcery card cannot enter the battlefield. The complete CR 400.7
+exception matrix, specialized command-zone objects, command-zone face-down
+changes, ordered face-down piles, sideboards and wish effects, full
+simultaneous replacement integration, and whole-zone instruction grammar
+remain explicitly blocked.
 CR 405 records top-of-stack insertion, LIFO resolution after a complete
 priority round, direct represented effects, static abilities, and state-based
 actions as passing invariants. Resolution now rejects a non-top object before

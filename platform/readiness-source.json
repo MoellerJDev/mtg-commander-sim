@@ -6,12 +6,12 @@
     "visibility": "private"
   },
   "integration": {
-    "active_phase": "rules_family_cr_405_stack",
-    "branch": "agent/cr-405-stack",
+    "active_phase": "rules_family_cr_400_general_zones",
+    "branch": "agent/cr-400-general-zone-identity",
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
-      "focused_branch_base": "fe02df3429e9ed4c77dbdf94f7656ec93ea44fce",
-      "focused_branch_unique_commits_over_main": 9
+      "focused_branch_base": "5c354b8a1a87859269e9d8f7c33f58f4b513376d",
+      "focused_branch_unique_commits_over_main": 11
     },
     "pull_requests": [
       {
@@ -172,7 +172,7 @@
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main",
-      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 405 is dependency-staged atop draft CR 500 PR #15, CR 501 PR #14, CR 502 PR #13, and CR 503 PR #12; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI."
+      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 400 is dependency-staged atop draft CR 405 PR #16, CR 500 PR #15, CR 501 PR #14, CR 502 PR #13, and CR 503 PR #12; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI."
     },
     {
       "id": "oracle_snapshot",
@@ -205,7 +205,7 @@
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "pass_3854",
+      "deterministic_tests": "pass_3860",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "repository_history_security_audit": "pass",
@@ -220,5 +220,5 @@
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete",
     "GitHub Actions is not allocating runners for current draft PRs because of an account billing or spending-limit failure; no exact-SHA result may be inferred from those pre-run failures"
   ],
-  "next_task": "Keep dependency-staged CR 405 PR #16 in draft while GitHub cannot allocate runners, and begin CR 400 General zone identity without promoting incomplete zone-change semantics."
+  "next_task": "Publish the bounded CR 400 General zones slice as a dependency-staged draft atop CR 405, keep it unmerged while exact-SHA runners are unavailable, then begin CR 401 Library without promoting incomplete hidden-zone semantics."
 }
