@@ -101,11 +101,11 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 316 cases in CR 120, CR 210, CR 310, CR 513, CR 514, CR 600, CR 601,
+All 318 cases in CR 120, CR 210, CR 310, CR 512, CR 513, CR 514, CR 600, CR 601,
 CR 602, CR 603, CR 604, CR 605, CR 606, CR 607, CR 608, CR 609, CR 614,
-CR 615, and CR 616 are source-reviewed: 44 narrow behavioral rules pass with
+CR 615, and CR 616 are source-reviewed: 45 narrow behavioral or structural rules pass with
 generic executable evidence, 222 are blocked with exact missing dependencies,
-and 50 are definition-only with contract traceability. The remaining 2,984
+and 51 are definition-only with contract traceability. The remaining 2,982
 cases are
 unreviewed and
 inventory-only.
@@ -175,6 +175,11 @@ frozen proposals, and opponent-made choices remain blocked.
 CR 600 contains only the General section heading. It is source-reviewed as a
 definition-only taxonomy record linked to the dependent CR 601-609 contracts;
 it makes no independent engine-behavior claim.
+CR 512.1 passes as a structural rule: the authoritative turn table contains
+exactly the end step followed by cleanup, ordinary passage reaches the next
+turn only after cleanup, and a cleanup discard decision prevents premature
+advancement. Exact command replay covers the ordinary path. This does not
+promote the broader partial CR 513 or CR 514 behavior.
 CR 513 adds passing evidence that the end step performs no turn-based action,
 collects represented permanent and delayed boundary triggers before active-
 player priority, does not back up for a permanent or delayed trigger created

@@ -30793,21 +30793,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-512",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_ending_phase_rules.EndingPhaseRuleTests.test_contract_traces_every_cr_512_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/ending-phase.json"
+      ],
+      "notes": [
+        "Section heading; CR 512.1 carries the executable two-step phase structure."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "512",
       "rule_text_sha256": "1bbaf560b419751579f01d7af17c8b0df2ed16275c26e1764a0f3decff39bb6d",
       "schema_version": 1,
@@ -30816,26 +30820,43 @@
         "end_line": 2423,
         "start_line": 2422
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-512.1",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "structural",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "512"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_ending_phase_rules.EndingPhaseRuleTests.test_ending_phase_has_exactly_end_then_cleanup",
+        "tests.test_ending_phase_rules.EndingPhaseRuleTests.test_end_then_cleanup_then_next_turn_order_replays_exactly",
+        "tests.test_ending_phase_rules.EndingPhaseRuleTests.test_cleanup_discard_prevents_ending_phase_from_skipping_cleanup"
+      ],
+      "implementation_components": [
+        "TURN_STEPS",
+        "CommanderEngine._enter_step",
+        "CommanderEngine._advance_step",
+        "CommanderEngine._finish_cleanup"
+      ],
+      "notes": [
+        "The authoritative turn table contains exactly end then cleanup. Ordinary passage command-replays through cleanup before the next turn, and a cleanup discard decision prevents premature turn advancement."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "512.1",
       "rule_text_sha256": "045ca032af27b39a9830051122ed67db8124e4d36da7a2a1367b920fd0b4504a",
       "schema_version": 1,
@@ -30844,7 +30865,7 @@
         "end_line": 2425,
         "start_line": 2424
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "static_traceability",

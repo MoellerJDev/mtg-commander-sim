@@ -9,6 +9,10 @@
 - Removed AI/Codex runs from product, rules, merge, and release completion
   criteria while retaining existing adapters as optional untrusted clients.
 - Added a generated platform readiness ledger and CI stale-artifact check.
+- Source-reviewed CR 512 as an exact structural ending-phase contract: end
+  step, then cleanup, with no next-turn transition before cleanup completes.
+- Added exact command replay and cleanup-discard handoff coverage for that
+  structure while retaining the partial CR 513/514 claim boundary.
 
 ## 0.8.0 — 2026-07-29
 
