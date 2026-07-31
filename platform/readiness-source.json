@@ -11,7 +11,7 @@
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
       "focused_branch_base": "d67f03366a5b2ab2eea011bad2f15283fbe6209b",
-      "focused_branch_unique_commits_over_main": 14
+      "focused_branch_unique_commits_over_main": 15
     },
     "pull_requests": [
       {
@@ -139,6 +139,13 @@
         "number": 18,
         "state": "draft",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/18"
+      },
+      {
+        "base": "agent/cr-401-library",
+        "head": "agent/cr-402-hand",
+        "number": 19,
+        "state": "draft",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/19"
       }
     ],
     "tags": [
@@ -186,7 +193,7 @@
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main",
-      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 402 is dependency-staged atop draft CR 401 PR #18, CR 400 PR #17, CR 405 PR #16, CR 500 PR #15, CR 501 PR #14, CR 502 PR #13, and CR 503 PR #12; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI."
+      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 402 PR #19 is dependency-staged atop draft CR 401 PR #18, CR 400 PR #17, CR 405 PR #16, CR 500 PR #15, CR 501 PR #14, CR 502 PR #13, and CR 503 PR #12; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI."
     },
     {
       "id": "oracle_snapshot",
@@ -234,5 +241,5 @@
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete",
     "GitHub Actions is not allocating runners for current draft PRs because of an account billing or spending-limit failure; no exact-SHA result may be inferred from those pre-run failures"
   ],
-  "next_task": "Publish dependency-staged CR 402 Hand as a focused draft PR, retain it while GitHub cannot allocate runners, and begin CR 403 Battlefield without promoting incomplete battlefield semantics."
+  "next_task": "Keep dependency-staged CR 402 PR #19 in draft while GitHub cannot allocate runners, and begin CR 403 Battlefield without promoting incomplete battlefield semantics."
 }

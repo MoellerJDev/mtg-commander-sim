@@ -29,8 +29,8 @@ dependency parent for CR 502 PR #13, which is the parent for CR 501 PR #14.
 CR 500 PR #15 is a dependency-staged draft based on
 `agent/cr-501-beginning-phase`; CR 405 PR #16 is based on CR 500, CR 400
 PR #17 is based on CR 405, CR 401 PR #18 is based on CR 400, and the CR 402
-branch is based on the final CR 401 evidence commit. Their jobs did not
-receive runners because
+PR #19 is based on the final CR 401 evidence commit. Their jobs did not receive
+runners because
 GitHub reported an account billing or spending-limit failure; those pre-run
 failures are neither code passes nor code failures.
 
@@ -136,11 +136,14 @@ rules cases and 425 mechanics, checked 14 schemas and repository history,
 completed the protocol demo, and built and clean-installed the wheel. The
 full suite reran the seed-20260730 and four-player natural-winner regressions
 with exact replay and zero suppressed meaningful windows. The repository
-scan covered 285 tracked files and 11,748,185 bytes. Main commit
-`c8a52711dc9294957fc0f437a4aaeab72da213aa` already passed run 30615647165;
-the CR 402 implementation commit and draft PR evidence will be recorded after
-publication. No exact-SHA CI pass is claimed for the focused branches until
-their jobs receive runners and pass.
+scan covered 288 tracked files and 11,770,596 bytes. Main commit
+`c8a52711dc9294957fc0f437a4aaeab72da213aa` already passed run 30615647165.
+CR 402 implementation commit
+`f0ff9355fe794851f14ecbb9d8e0cabc4ec4bd11` produced push run
+30628066122 and pull-request run 30628078831. All eight jobs had
+`runner_id=0`, zero steps, and GitHub's billing/spending-limit annotation. No
+exact-SHA CI pass is claimed for the focused branches until their jobs receive
+runners and pass.
 
 ## Evidence boundaries
 
@@ -153,8 +156,8 @@ their jobs receive runners and pass.
 
 ## Exact next step
 
-Publish dependency-staged CR 402 Hand as a focused draft PR, retain it while
-GitHub Actions cannot allocate runners, and begin CR 403 Battlefield. CR 402
+Keep dependency-staged CR 402 PR #19 in draft while GitHub Actions cannot
+allocate runners, and begin CR 403 Battlefield. CR 402
 passes configured starting hands, finite maximum size and cleanup discard,
 public counts, scoped identities, redacted hidden moves, directly observed
 public-to-hand knowledge, and controller dual-hand projection. Continuous
