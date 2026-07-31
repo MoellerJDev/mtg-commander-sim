@@ -1,5 +1,9 @@
 # Pilot providers
 
+Pilot providers are optional automation clients. The authoritative platform,
+ordinary gameplay, tests, rules enforcement, persistence, replay, and releases
+must operate without them or any AI dependency.
+
 Version 0.6.0 separates strategic inference from the authoritative game. A
 provider implements:
 

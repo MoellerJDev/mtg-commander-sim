@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "repository": {
+    "default_branch": "main",
+    "name": "MoellerJDev/mtg-commander-sim",
+    "visibility": "private"
+  },
+  "integration": {
+    "active_phase": "stage_a_integrate_review_mvp",
+    "branch": "agent/review-mvp",
+    "commit_reference": "the commit containing this ledger",
+    "branch_ancestry": {
+      "agent/review-mvp_unique_commits_over_main": 30,
+      "agent/rules-completeness_unique_commits_over_review_mvp": 29,
+      "main_unique_commits_over_review_mvp": 0
+    },
+    "pull_requests": [
+      {
+        "base": "main",
+        "head": "agent/review-mvp",
+        "number": 2,
+        "state": "draft",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/2"
+      },
+      {
+        "base": "agent/review-mvp",
+        "head": "agent/rules-completeness",
+        "number": 1,
+        "state": "draft_stacked",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/1"
+      }
+    ],
+    "tags": [
+      {
+        "name": "v0.6.0",
+        "commit": "4dc3feb625f824b9062e162808fd74b07e97c404"
+      },
+      {
+        "name": "v0.7.0",
+        "commit": "bed4179e702caccd6e9f3cfb7b313b2dadcb0000"
+      }
+    ]
+  },
+  "snapshots": {
+    "comprehensive_rules": {
+      "effective_date": null,
+      "sha256": null,
+      "status": "not_present_until_rules_completeness_integration"
+    },
+    "oracle": {
+      "scope": "sanitized_exact_list_fixture",
+      "status": "pinned_by_card_and_semantic_source_hashes",
+      "updated_at": "2026-07-28"
+    },
+    "rulings": {
+      "scope": "sanitized_exact_list_fixture",
+      "status": "pinned_by_semantic_source_hashes",
+      "updated_at": "2026-07-28"
+    }
+  },
+  "milestones": [
+    {
+      "id": "integrated_foundation",
+      "name": "Integrated deterministic foundation",
+      "status": "in_progress",
+      "evidence": "Review MVP is green on its feature branch; rules completeness remains stacked and unmerged."
+    },
+    {
+      "id": "browser_commander_mvp",
+      "name": "Browser Commander MVP",
+      "status": "not_started",
+      "evidence": "No server/, web/, or migrations/ subsystem is present on this branch."
+    },
+    {
+      "id": "rules_snapshot",
+      "name": "Active Comprehensive Rules snapshot",
+      "status": "pending_integration",
+      "evidence": "The versioned rules corpus exists on agent/rules-completeness and is not yet in main."
+    },
+    {
+      "id": "oracle_snapshot",
+      "name": "Current Oracle snapshot",
+      "status": "partial",
+      "evidence": "Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed."
+    }
+  ],
+  "platform": {
+    "authoritative_kernel": "implemented_partial",
+    "transport_neutral_service": "implemented_in_process",
+    "single_writer_game_actor": "not_implemented",
+    "durable_database": "not_implemented",
+    "http_websocket_server": "not_implemented",
+    "browser_client": "not_implemented",
+    "guest_or_account_identity": "not_implemented",
+    "rooms_and_lobbies": "not_implemented",
+    "replay": "implemented_command_replay",
+    "hidden_information": "implemented_projected_protocol",
+    "security": "repository_and_capability_baseline_only",
+    "ai_dependency": "none_for_core_tests_or_runtime"
+  },
+  "validation": {
+    "baseline_commit": "d099fe4ca4f8d09523887935af769b42710ce74f",
+    "ci": {
+      "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
+      "run_id": 30560259007,
+      "status": "pass",
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30560259007"
+    },
+    "local": {
+      "compile": "pass",
+      "deterministic_tests": "pass",
+      "deterministic_four_player_full_game": "pass_micro_pool_natural_winner",
+      "four_player_protocol_demo": "pass",
+      "repository_history_security_audit": "pass",
+      "wheel_build_and_clean_install": "pass"
+    },
+    "replay": "pass_for_seed_20260730_and_native_v3_regressions",
+    "privacy": "pass_for_projected_protocol_and_sanitized_fixtures",
+    "semantic_preflight": "trusted_only_for_two_pinned_exact_lists"
+  },
+  "blockers": [
+    "agent/review-mvp has not yet been merged into main",
+    "agent/rules-completeness has not yet been rebased by merge from updated main or retargeted to main",
+    "no authoritative ASGI server, single-writer GameActor, durable persistence, or browser client exists",
+    "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
+  ],
+  "next_task": "Finish deterministic Stage A evidence, merge PR #2 into main, then merge updated main into agent/rules-completeness and retarget PR #1."
+}

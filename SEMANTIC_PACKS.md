@@ -26,10 +26,12 @@ Pack files are included as package data in the wheel.
 ## Trust
 
 `trusted` means the declared behavior is reviewed and characterized for this
-implementation. `provisional` can support a native pilot test but cannot make a
-material interaction eligible as matchup evidence. `unresolved` requires the
-arbiter or a future compiler. `intentionally_ignored` is only appropriate when
-the omitted ability is demonstrably irrelevant to the recorded operation.
+implementation. `provisional` can support development characterization but
+cannot make a material interaction eligible as conformance or release evidence.
+`unresolved` fails closed in strict mode and requires future implementation.
+Development arbitration can help author a reviewed fixture, but it is never
+production legality. `intentionally_ignored` is only appropriate when the
+omitted ability is demonstrably irrelevant to the recorded operation.
 
 The executor accepts validated DSL operations only. The kernel selects programs
 by Oracle/ability keys and runtime events, not printed-name branches. Runtime

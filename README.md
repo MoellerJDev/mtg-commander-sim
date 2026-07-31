@@ -1,19 +1,26 @@
 # MTG Commander Sim 0.8.0
 
-An experimental, persistent, four-player-first Commander simulation kernel
-designed for LLM pilots, rules arbitration, auditable testing, and a future
-graphical/network client. The current release is a research/development
-baseline, not a complete implementation of Magic's rules or Oracle corpus.
+An experimental, deterministic, server-authoritative Commander platform under
+active development. Four-player Free-for-All Commander is the primary product
+target, with a browser client, durable game runtime, exact replay, and
+snapshot-scoped rules enforcement. The current release is a kernel and protocol
+foundation, not a complete implementation of Magic's rules or Oracle corpus.
 
 This is a structural rewrite of the earlier two-player duel lab. The server-side game kernel is now separate from:
 
-- per-seat strategic pilots
-- card-text/rules arbitration
+- untrusted browser, scripted, manual, subprocess, and optional AI clients
+- semantic compilation and development-only rules arbitration
 - hidden-information projections
 - client transport and authentication
 - reporting and deck-performance analysis
 
-The engine is authoritative. Pilots choose legal actions through short-lived capabilities; they never write zones, life, mana, triggers, or effects directly.
+The engine is authoritative. Clients choose server-issued legal actions through
+short-lived capabilities; they never write zones, life, mana, triggers, or
+effects directly. Ordinary gameplay, rules enforcement, CI, and releases do not
+require an LLM, Codex runtime, provider credential, or live AI ruling.
+
+See `docs/PLATFORM_IMPLEMENTATION_STATUS.md` for the generated integration,
+rules, server, browser, persistence, replay, privacy, and validation ledger.
 
 ## Local setup
 
@@ -144,9 +151,13 @@ effects, linked choices, copy/token engines, Saga chapters, Craft, Crew,
 restricted mana, extra-turn control, and deterministic characterization
 scenarios. It remains exact-list coverage, not full Oracle-corpus coverage.
 
-## Why this runs faster with an LLM
+## Compact projected-client protocol
 
-The engine does not call a model for deterministic bookkeeping or a priority window in which the implemented action grammar exposes no action. When a call is necessary, the pilot receives a seat-projected packet with short object references and only the current capability.
+The engine does not ask any client to perform deterministic bookkeeping or
+respond to a priority window in which the implemented action grammar exposes no
+meaningful action. A browser, scripted test client, or optional AI adapter
+receives the same seat-projected packet with short object references and only
+the current capability.
 
 For the bundled four-seat Mishra/Zimone benchmark:
 
@@ -171,7 +182,12 @@ evidence and never a basis for changing either deck.
 
 This project does **not** claim that arbitrary Magic Oracle prose has been converted into a complete deterministic rules implementation.
 
-The kernel handles general game mechanics and a generic effect DSL. When an uncompiled spell or ability resolves, a separate `arbiter` receives a narrowly scoped resolution capability. The arbiter may resolve that object once or register a reusable semantic program. Player pilots cannot submit arbitrary effects.
+The kernel handles general game mechanics and a generic effect DSL. Strict
+games use `semantic_policy=trusted_only` and stop or withhold an action when a
+material spell or ability is unsupported. A development-only `arbiter` adapter
+can characterize a narrowly scoped resolution and register a reusable semantic
+program, but that path is not production legality or release evidence. Player
+clients cannot submit arbitrary effects.
 
 That boundary is safer and more auditable than silently guessing at card text, while allowing semantic coverage to grow from cards actually encountered in simulations.
 
@@ -211,8 +227,8 @@ while not session.state.game_over:
         break
 
     principal = packet["principal"]
-    # Route only this packet to the model/context assigned to the principal.
-    response = your_llm_call(principal, packet)
+    # Route only this packet to the authenticated client assigned to the principal.
+    response = your_client_decision(principal, packet)
     result = session.act(principal, response)
     if not result.ok:
         raise RuntimeError(result.summary)
@@ -359,9 +375,10 @@ python simctl.py arena-create \
   --refresh-decks --output run/codex-arena
 ```
 
-Run the primary Codex task in GPT-5.6 Sol with Ultra reasoning, then use the
-generated `PRIMARY_CODEX_PROMPT.md`. Start four persistent fast pilot sessions
-and drive the requested prefix with:
+The Codex arena is an optional client-adapter experiment retained for protocol
+characterization. It is not required for gameplay, tests, merge gates, release
+gates, or rules decisions. If explicitly testing that adapter, use the generated
+`PRIMARY_CODEX_PROMPT.md` and start four persistent pilot sessions with:
 
 ```bash
 python simctl.py arena-codex-run \
@@ -429,18 +446,17 @@ python simctl.py rules \
 
 ## Strict hidden information
 
-A single ChatGPT conversation can obey seat projections, but it cannot literally forget a hand shown while it was previously acting as another player.
+Every connection receives only its authenticated principal's projection. A
+browser process, scripted client, subprocess, or optional AI client must never
+read an authoritative checkpoint or another seat's packet.
 
-For strict live isolation, use four persistent pilot contexts plus the neutral
-primary coordinator against one `GameService`. Each pilot process fixes its
-seat at startup. The primary is the arbiter rather than a fifth strategic
-pilot. Projected packets, per-seat memory files, server-injected provider
-identity, and exact-ref rules lookup prevent protocol-level leakage.
+For optional multi-client automation, use one fixed-seat context per client
+against one `GameService`. Projected packets, server-derived principal identity,
+and exact-ref rules lookup preserve protocol-level isolation.
 
-Custom-agent instructions are not an operating-system sandbox when a parent
-Codex session overrides them with `danger-full-access`. The MCP/CLI façade is
-the enforced game-state boundary; use a dedicated read-only permission profile
-and empty pilot workspace when filesystem-level isolation must also be proven.
+Client instructions are not an operating-system sandbox. The capability,
+projection, and transport boundaries enforce game authority; use process or
+container isolation when filesystem-level isolation must also be proven.
 
 ## Project map
 

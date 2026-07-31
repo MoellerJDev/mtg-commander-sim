@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mtg-commander-sim"
 version = "0.8.0"
-description = "Persistent, permission-scoped multiplayer Commander simulation for LLM pilots"
+description = "Deterministic, server-authoritative multiplayer Commander platform"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [{name = "OpenAI"}]
