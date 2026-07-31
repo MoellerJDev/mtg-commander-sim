@@ -108,6 +108,15 @@ not imply that the game ended. Version 0.6.0 uses explicit lifecycle states:
 Paused records carry a structured `pause_reason`, and Codex arenas copy that
 reason into `codex_arena.stop_reason`.
 
+The browser server uses the same record lifecycle without adding a new Game
+Record schema. An owner stop saves `status = "paused"` with
+`pause_reason.kind = "administrative_stop"` through the serialized game actor.
+It does not append a synthetic game command or alter the authoritative state
+revision. Resume clears that administrative reason and preserves the pending
+decision. A browser resume cannot clear any other pause kind. Exact replay
+continues to verify the accepted-command prefix across stop, process restart,
+resume, and later accepted commands.
+
 An operator may preserve a discovered boundary explicitly:
 
 ```bash

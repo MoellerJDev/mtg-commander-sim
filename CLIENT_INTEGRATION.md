@@ -40,10 +40,20 @@ POST /api/v1/rooms
 POST /api/v1/rooms/join
 PUT  /api/v1/rooms/{room_id}/deck
 POST /api/v1/rooms/{room_id}/start
+GET  /api/v1/games/{game_id}
 GET  /api/v1/games/{game_id}/state?full=true
+POST /api/v1/games/{game_id}/stop
+POST /api/v1/games/{game_id}/resume
 POST /api/v1/games/{game_id}/commands
 WS   /api/v1/games/{game_id}/stream
 ```
+
+The game-inspection response is an application projection containing only safe
+lifecycle metadata and journal counts. Stop/resume are room-owner operations,
+not pilot actions: they never accept a seat or principal in the body and never
+mint an engine capability. The WebSocket carries the same lifecycle projection
+beside each ordinary seat packet. Clients must disable action submission while
+status is not `active`; the service independently enforces that rule.
 
 Example command body:
 
@@ -142,7 +152,8 @@ and accepted-command replay truth.
 - Do not use capability tokens as long-lived session authentication.
 - Rate-limit rejected commands.
 - Log capability issuance and consumption without logging private hand contents to public telemetry.
-- Keep analyst/admin endpoints separate from player transport.
+- Keep analyst access separate from the safe seated-member lifecycle
+  projection; never turn inspection into a record-path or checkpoint endpoint.
 
 ## Why the GUI does not require a permission refactor
 

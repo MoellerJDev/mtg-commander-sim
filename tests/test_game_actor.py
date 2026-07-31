@@ -12,6 +12,7 @@ from mtg_commander_sim import (
     GameService,
     PROTOCOL_VERSION,
 )
+from mtg_commander_sim.runtime import GameLifecycleConflict
 
 
 class GameActorTests(unittest.IsolatedAsyncioTestCase):
@@ -141,6 +142,55 @@ class GameActorTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn(second_key, session.cursors)
         finally:
             await manager.close()
+
+    async def test_browser_resume_cannot_override_a_rules_pause(self):
+        session, service = self.make_service(32006)
+        session.pause(
+            {
+                "kind": "semantic_unsupported",
+                "label": "Material rules semantics require arbitration",
+            }
+        )
+        manager = GameManager()
+        actor = await manager.add(service)
+        try:
+            with self.assertRaisesRegex(
+                GameLifecycleConflict,
+                "Only an administrative stop",
+            ):
+                await asyncio.wait_for(actor.resume(), timeout=5)
+            inspection = await asyncio.wait_for(actor.inspect(), timeout=5)
+            self.assertEqual("paused", inspection["status"])
+            self.assertEqual(
+                "semantic_unsupported",
+                inspection["pause_reason"]["kind"],
+            )
+        finally:
+            await asyncio.wait_for(manager.close(), timeout=5)
+
+    async def test_lifecycle_persistence_failure_fails_actor_closed(self):
+        class BrokenPersistence:
+            def save(self, service):
+                raise OSError("record volume unavailable")
+
+        _, service = self.make_service(32007)
+        manager = GameManager()
+        actor = await manager.add(service, persistence=BrokenPersistence())
+        try:
+            with self.assertRaisesRegex(
+                GameActorUnavailable,
+                "failed durable lifecycle commit",
+            ):
+                await asyncio.wait_for(
+                    actor.pause("Persistence boundary"), timeout=5
+                )
+            with self.assertRaisesRegex(
+                GameActorUnavailable,
+                "requires recovery",
+            ):
+                await asyncio.wait_for(actor.inspect(), timeout=5)
+        finally:
+            await asyncio.wait_for(manager.close(), timeout=5)
 
 
 if __name__ == "__main__":

@@ -34,7 +34,11 @@ from mtg_commander_sim import (
     parse_deck_text,
 )
 from mtg_commander_sim.preflight import semantic_preflight
-from mtg_commander_sim.runtime import GameActor, GamePersistence
+from mtg_commander_sim.runtime import (
+    GameActor,
+    GameLifecycleConflict,
+    GamePersistence,
+)
 from mtg_commander_sim.deck import MoxfieldFetchError, is_moxfield_source
 
 from .store import (
@@ -121,6 +125,35 @@ class DeckRequest(StrictModel):
         return self
 
 
+class StopGameRequest(StrictModel):
+    reason: str = Field(
+        default="Match stopped by the room owner",
+        min_length=1,
+        max_length=500,
+    )
+
+    @field_validator("reason")
+    @classmethod
+    def normalize_reason(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("Stop reason cannot be blank")
+        return normalized
+
+
+class ResumeGameRequest(StrictModel):
+    pass
+
+
+def _server_game_status(service: GameService) -> str:
+    session = service.session
+    if session.state.game_over:
+        return "complete"
+    if session.record_status in {"created", "in_progress"}:
+        return "active"
+    return session.record_status
+
+
 class _StoreGamePersistence(GamePersistence):
     def __init__(
         self, records: DirectoryGamePersistence, store: ServerStore
@@ -130,9 +163,10 @@ class _StoreGamePersistence(GamePersistence):
 
     def save(self, service: GameService) -> None:
         self.records.save(service)
-        self.store.update_game_revision(
+        self.store.update_game_state(
             service.session.state.game_id,
             service.session.state.revision,
+            _server_game_status(service),
         )
 
 
@@ -186,9 +220,36 @@ class ServerRuntime:
                     game_id,
                     idempotency=self.idempotency,
                 )
+                self.store.update_game_state(
+                    game_id,
+                    service.session.state.revision,
+                    _server_game_status(service),
+                )
                 return await self.manager.add(
                     service, persistence=self.persistence
                 )
+
+    async def game_summary(
+        self, game_id: str, guest_id: str
+    ) -> dict[str, Any]:
+        # Authorize before a request can cause a persisted game to be loaded.
+        self.store.game_access(game_id, guest_id)
+        actor = await self.actor(game_id)
+        control = self.store.game_summary(game_id, guest_id)
+        lifecycle = await actor.inspect()
+        return {
+            **control,
+            **lifecycle,
+            "can_stop": bool(
+                control["owner"] and lifecycle["status"] == "active"
+            ),
+            "can_resume": bool(
+                control["owner"]
+                and lifecycle["status"] == "paused"
+                and (lifecycle.get("pause_reason") or {}).get("kind")
+                == "administrative_stop"
+            ),
+        }
 
     async def close(self) -> None:
         await self.manager.close()
@@ -463,9 +524,83 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         principal = await game_principal(game_id, guest, runtime)
         try:
             actor = await runtime.actor(game_id)
-            return {"packet": await actor.observe(principal, full=full)}
+            return {
+                "packet": await actor.observe(principal, full=full),
+                "game": await runtime.game_summary(
+                    game_id, guest["guest_id"]
+                ),
+            }
         except (KeyError, ValueError) as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/api/v1/games/{game_id}")
+    async def inspect_game(
+        game_id: str,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, Any]:
+        try:
+            return {
+                "game": await runtime.game_summary(
+                    game_id, guest["guest_id"]
+                )
+            }
+        except (StoreForbidden, StoreNotFound) as exc:
+            raise _translate_store_error(exc) from exc
+        except (KeyError, ValueError) as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/games/{game_id}/stop",
+        dependencies=[Depends(_csrf)],
+    )
+    async def stop_game(
+        game_id: str,
+        body: StopGameRequest,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, Any]:
+        try:
+            runtime.store.require_game_owner(game_id, guest["guest_id"])
+            actor = await runtime.actor(game_id)
+            result = await actor.pause(body.reason)
+            if result["changed"]:
+                await runtime.hub.notify(game_id)
+            return {
+                "game": await runtime.game_summary(
+                    game_id, guest["guest_id"]
+                )
+            }
+        except (StoreForbidden, StoreNotFound) as exc:
+            raise _translate_store_error(exc) from exc
+        except GameLifecycleConflict as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @app.post(
+        "/api/v1/games/{game_id}/resume",
+        dependencies=[Depends(_csrf)],
+    )
+    async def resume_game(
+        game_id: str,
+        body: ResumeGameRequest,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, Any]:
+        try:
+            runtime.store.require_game_owner(game_id, guest["guest_id"])
+            actor = await runtime.actor(game_id)
+            result = await actor.resume()
+            if result["changed"]:
+                await runtime.hub.notify(game_id)
+            return {
+                "game": await runtime.game_summary(
+                    game_id, guest["guest_id"]
+                )
+            }
+        except (StoreForbidden, StoreNotFound) as exc:
+            raise _translate_store_error(exc) from exc
+        except GameLifecycleConflict as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @app.post(
         "/api/v1/games/{game_id}/commands",
@@ -514,7 +649,15 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
             packet = await actor.observe(
                 principal, full=True, cursor_key=cursor_key
             )
-            await websocket.send_json({"type": "projection", "packet": packet})
+            await websocket.send_json(
+                {
+                    "type": "projection",
+                    "packet": packet,
+                    "game": await runtime.game_summary(
+                        game_id, guest["guest_id"]
+                    ),
+                }
+            )
             receive_task = asyncio.create_task(websocket.receive())
             while True:
                 hub_task = asyncio.create_task(
@@ -539,7 +682,13 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
                         principal, cursor_key=cursor_key
                     )
                     await websocket.send_json(
-                        {"type": "projection", "packet": packet}
+                        {
+                            "type": "projection",
+                            "packet": packet,
+                            "game": await runtime.game_summary(
+                                game_id, guest["guest_id"]
+                            ),
+                        },
                     )
                 except TimeoutError:
                     await websocket.send_json(

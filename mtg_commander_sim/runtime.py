@@ -15,18 +15,32 @@ class GameActorUnavailable(RuntimeError):
     """Raised after an actor can no longer promise durable acknowledgements."""
 
 
+class GameLifecycleConflict(ValueError):
+    """Raised when an administrative lifecycle transition is not allowed."""
+
+
 class GamePersistence(Protocol):
     def save(self, service: GameService) -> None: ...
 
 
 @dataclass(slots=True)
 class _ActorMessage:
-    kind: Literal["observe", "drop_cursor", "command", "poll", "stop"]
+    kind: Literal[
+        "observe",
+        "drop_cursor",
+        "command",
+        "poll",
+        "inspect",
+        "pause",
+        "resume",
+        "stop",
+    ]
     future: asyncio.Future[Any]
     principal: str | None = None
     full: bool = False
     cursor_key: str | None = None
     envelope: CommandEnvelope | None = None
+    reason: str | None = None
 
 
 class GameActor:
@@ -120,6 +134,63 @@ class GameActor:
             _ActorMessage(kind="poll", future=loop.create_future())
         )
 
+    def _lifecycle_summary(self) -> dict[str, Any]:
+        session = self.service.session
+        state = session.state
+        pause_reason = session.pause_reason or {}
+        status = (
+            "complete"
+            if state.game_over
+            else "active"
+            if session.record_status in {"created", "in_progress"}
+            else session.record_status
+        )
+        return {
+            "game_id": state.game_id,
+            "status": status,
+            "state_revision": state.revision,
+            "turn_sequence": state.turn_sequence,
+            "active_player": state.active_player,
+            "phase": state.phase,
+            "step": state.step,
+            "pending_principals": session.pending_principals(),
+            "game_over": state.game_over,
+            "winner": state.winner,
+            "pause_reason": (
+                {
+                    "kind": str(pause_reason.get("kind") or "paused"),
+                    "label": str(pause_reason.get("label") or "Game paused"),
+                }
+                if session.pause_reason is not None
+                else None
+            ),
+            "commands": len(session.commands),
+            "decisions": len(session.decisions),
+            "events": len(state.events),
+        }
+
+    async def inspect(self) -> dict[str, Any]:
+        loop = asyncio.get_running_loop()
+        return await self._request(
+            _ActorMessage(kind="inspect", future=loop.create_future())
+        )
+
+    async def pause(self, reason: str) -> dict[str, Any]:
+        loop = asyncio.get_running_loop()
+        return await self._request(
+            _ActorMessage(
+                kind="pause",
+                future=loop.create_future(),
+                reason=reason,
+            )
+        )
+
+    async def resume(self) -> dict[str, Any]:
+        loop = asyncio.get_running_loop()
+        return await self._request(
+            _ActorMessage(kind="resume", future=loop.create_future())
+        )
+
     async def _run(self) -> None:
         while True:
             message = await self._mailbox.get()
@@ -166,24 +237,112 @@ class GameActor:
                         )
                 elif message.kind == "poll":
                     result = self.service.poll()
+                elif message.kind == "inspect":
+                    result = self._lifecycle_summary()
+                elif message.kind == "pause":
+                    session = self.service.session
+                    if (
+                        session.state.game_over
+                        or session.record_status
+                        not in {"created", "in_progress", "paused"}
+                    ):
+                        raise GameLifecycleConflict(
+                            "A finished, aborted, or corrupt game cannot be "
+                            "stopped"
+                        )
+                    if session.record_status == "paused":
+                        if (session.pause_reason or {}).get("kind") != (
+                            "administrative_stop"
+                        ):
+                            raise GameLifecycleConflict(
+                                "A fidelity or rules pause cannot be replaced "
+                                "by an administrative stop"
+                            )
+                        result = {
+                            **self._lifecycle_summary(),
+                            "changed": False,
+                        }
+                    else:
+                        session.pause(
+                            {
+                                "kind": "administrative_stop",
+                                "label": str(message.reason or "Match stopped")[
+                                    :500
+                                ],
+                            }
+                        )
+                        if self.persistence is not None:
+                            self.persistence.save(self.service)
+                        result = {
+                            **self._lifecycle_summary(),
+                            "changed": True,
+                        }
+                elif message.kind == "resume":
+                    session = self.service.session
+                    if session.state.game_over or session.record_status in {
+                        "complete",
+                        "aborted",
+                    }:
+                        raise GameLifecycleConflict(
+                            "A finished game cannot be resumed"
+                        )
+                    if session.record_status in {"created", "in_progress"}:
+                        result = {
+                            **self._lifecycle_summary(),
+                            "changed": False,
+                        }
+                    else:
+                        if (session.pause_reason or {}).get("kind") != (
+                            "administrative_stop"
+                        ):
+                            raise GameLifecycleConflict(
+                                "Only an administrative stop can be resumed "
+                                "from the browser"
+                            )
+                        session.resume()
+                        if self.persistence is not None:
+                            self.persistence.save(self.service)
+                        result = {
+                            **self._lifecycle_summary(),
+                            "changed": True,
+                        }
                 else:  # pragma: no cover - Literal and constructor guard this.
                     raise RuntimeError(f"Unknown actor message {message.kind}")
                 self.processed_messages += 1
                 if not message.future.done():
                     message.future.set_result(result)
             except BaseException as exc:
-                response_exception = exc
-                if message.kind == "command" and not isinstance(
-                    exc, GameActorUnavailable
-                ):
+                # A recoverable lifecycle conflict crosses from the actor task
+                # into the requester's Future while the actor keeps running.
+                # Do not forward the caught instance with this coroutine's
+                # active traceback attached; construct a clean boundary error.
+                response_exception: BaseException = (
+                    GameLifecycleConflict(str(exc))
+                    if isinstance(exc, GameLifecycleConflict)
+                    else exc
+                )
+                durable_failure = (
+                    message.kind == "command"
+                    or (
+                        message.kind in {"pause", "resume"}
+                        and not isinstance(exc, GameLifecycleConflict)
+                    )
+                ) and not isinstance(exc, GameActorUnavailable)
+                if durable_failure:
                     # A command exception can occur after in-memory mutation
                     # but before durable save/idempotency completion. Stop all
                     # further traffic until a fresh actor reloads durable state.
                     self._failure = exc
-                    response_exception = GameActorUnavailable(
-                        f"Game actor {self.game_id} failed durable command "
-                        "commit and requires recovery"
-                    )
+                    if message.kind == "command":
+                        response_exception = GameActorUnavailable(
+                            f"Game actor {self.game_id} failed durable command "
+                            "commit and requires recovery"
+                        )
+                    else:
+                        response_exception = GameActorUnavailable(
+                            f"Game actor {self.game_id} failed durable "
+                            "lifecycle commit and requires recovery"
+                        )
                 if not message.future.done():
                     message.future.set_exception(response_exception)
             finally:

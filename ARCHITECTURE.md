@@ -453,6 +453,23 @@ application-tested by accepting a command, replacing the complete ASGI runtime,
 resuming the next seat's decision, replaying the earlier command ID, accepting
 the next command, and verifying exact Game Record replay.
 
+Administrative lifecycle changes are serialized through that same mailbox.
+The room owner may create an `administrative_stop`; persistence writes the
+paused manifest and synchronized SQLite game/room status before acknowledgement.
+The actor rejects new commands while paused after first consulting durable
+idempotency, so an already accepted or rejected delivery can still replay its
+exact receipt. Resume is idempotent and allowed only for an administrative stop;
+it cannot clear a rules/fidelity pause, abort, corruption marker, or completed
+game. A process restart reconciles the SQLite index from the checksummed record
+before recreating the actor.
+
+Lifecycle inspection is a separate application projection, not access to Game
+Record files. It exposes seated members to public/control-plane fields and
+journal counts only. It never returns `record_path`, a checkpoint, hidden zones,
+capabilities, or analyst artifacts. The WebSocket attaches this metadata to the
+existing seat projection message, preserving one authenticated seat and one
+connection-scoped projection cursor.
+
 ## Browser choice adapter
 
 `choice_forms.py` translates an already legal, seat-projected action and its
@@ -650,8 +667,8 @@ The architecture is suitable for a serious project, but complete Magic coverage 
 - elimination or reviewed override of every material full-corpus Oracle
   residual
 - multi-process actor ownership/leases, PostgreSQL, production accounts,
-  rate limits, deployment containers, and operational monitoring
-- browser spectators, accessibility hardening, richer retry/resume
+  expiry/rate limits, deployment containers, and operational monitoring
+- browser spectators, broader accessibility hardening, richer command-retry
   presentation, and explicit controls for future choice-schema families
 
 These modules fit behind the current `CommanderEngine`/`GameService` boundary.

@@ -26,6 +26,8 @@ The following are treated as security defects:
 - acknowledging a state-changing command before durable Game Record save
 - persisting raw guest tokens, invite codes, or decision capabilities
 - sharing a delta cursor between independent network connections
+- allowing a nonowner to stop or resume a game
+- allowing browser resume to clear a rules, fidelity, abort, or corruption pause
 
 Custom-agent instructions are not an operating-system sandbox. The fixed-seat
 tool and projection layers enforce the application boundary; use an isolated,
@@ -42,10 +44,14 @@ guest. Decision capabilities remain separate short-lived grants and are never
 login credentials.
 
 Set `MTG_SECURE_COOKIES=1` behind HTTPS. Restrict `MTG_ALLOWED_ORIGINS` to the
-deployed browser origin. The current development server does not yet provide
-accounts, password recovery, administrative endpoints, rate limiting, reverse
-proxy hardening, secret rotation, multi-process actor leases, or an independent
-security assessment; it should not be exposed directly to the public Internet.
+deployed browser origin. Seated members may inspect only whitelisted lifecycle
+metadata; the room owner alone may durably stop/resume an
+`administrative_stop`. Those endpoints never expose the backing record path or
+accept a client-selected principal. The current development server does not yet
+provide production accounts, password recovery, platform-wide administration,
+rate limiting, reverse proxy hardening, secret rotation, multi-process actor
+leases, or an independent security assessment; it should not be exposed
+directly to the public Internet.
 
 ## Supported version
 

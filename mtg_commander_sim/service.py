@@ -383,6 +383,37 @@ class GameService:
                 )
             return replace(prior.receipt, replayed=True)
 
+        if self.session.record_status not in {"created", "in_progress"}:
+            status = self.session.record_status
+            administrative_stop = (
+                status == "paused"
+                and (self.session.pause_reason or {}).get("kind")
+                == "administrative_stop"
+            )
+            receipt = self._receipt(
+                envelope,
+                ok=False,
+                code=(
+                    "game_paused"
+                    if status == "paused"
+                    else "game_not_active"
+                ),
+                summary=(
+                    "Game is administratively stopped; resume it before "
+                    "submitting a new command"
+                    if administrative_stop
+                    else "Game is paused at a rules or fidelity boundary and "
+                    "cannot accept new commands"
+                    if status == "paused"
+                    else f"Game is {status} and cannot accept new commands"
+                ),
+            )
+            return (
+                self.remember(envelope, principal, receipt)
+                if commit_idempotency
+                else receipt
+            )
+
         decision = self.session.state.pending_decision
         if decision is None or decision.decision_id != envelope.decision_id:
             receipt = self._receipt(
@@ -491,5 +522,7 @@ class GameService:
         )
 
     def poll(self) -> list[str]:
+        if self.session.record_status not in {"created", "in_progress"}:
+            return []
         self.session.engine.pump()
         return self.session.pending_principals()

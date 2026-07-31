@@ -15,6 +15,7 @@ from mtg_commander_sim.persistence import initialize_sqlite
 
 
 SEATS = ("A", "B", "C", "D")
+GAME_STATUSES = {"active", "paused", "complete", "aborted"}
 
 
 class StoreConflict(ValueError):
@@ -409,6 +410,53 @@ class ServerStore:
             raise StoreForbidden("Guest cannot access this game")
         return str(row["room_id"]), str(row["seat"])
 
+    def game_summary(self, game_id: str, guest_id: str) -> dict[str, Any]:
+        """Return control-plane metadata safe for a seated player."""
+
+        with self._connection() as connection:
+            row = connection.execute(
+                """
+                SELECT g.game_id, g.room_id, g.status, g.state_revision,
+                       g.created_at, g.updated_at, r.owner_guest_id,
+                       r.format_profile, s.seat
+                FROM games g
+                JOIN rooms r ON r.room_id = g.room_id
+                JOIN room_seats s ON s.room_id = g.room_id
+                WHERE g.game_id = ? AND s.guest_id = ?
+                """,
+                (game_id, guest_id),
+            ).fetchone()
+        if row is None:
+            raise StoreForbidden("Guest cannot access this game")
+        return {
+            "game_id": str(row["game_id"]),
+            "room_id": str(row["room_id"]),
+            "status": str(row["status"]),
+            "state_revision": int(row["state_revision"]),
+            "created_at": str(row["created_at"]),
+            "updated_at": str(row["updated_at"]),
+            "format_profile": str(row["format_profile"]),
+            "seat": str(row["seat"]),
+            "owner": row["owner_guest_id"] == guest_id,
+        }
+
+    def require_game_owner(self, game_id: str, guest_id: str) -> None:
+        with self._connection() as connection:
+            row = connection.execute(
+                """
+                SELECT r.owner_guest_id
+                FROM games g JOIN rooms r ON r.room_id = g.room_id
+                WHERE g.game_id = ?
+                """,
+                (game_id,),
+            ).fetchone()
+        if row is None:
+            raise StoreNotFound("Game not found")
+        if row["owner_guest_id"] != guest_id:
+            raise StoreForbidden(
+                "Only the room owner can control the game lifecycle"
+            )
+
     def game_row(self, game_id: str) -> dict[str, Any]:
         with self._connection() as connection:
             row = connection.execute(
@@ -418,15 +466,41 @@ class ServerStore:
             raise StoreNotFound("Game not found")
         return dict(row)
 
-    def update_game_revision(self, game_id: str, revision: int) -> None:
+    def update_game_state(
+        self, game_id: str, revision: int, status: str
+    ) -> None:
+        if status not in GAME_STATUSES:
+            raise ValueError(f"Unknown server game status {status!r}")
         with self._connection(write=True) as connection:
-            connection.execute(
+            updated = connection.execute(
                 """
-                UPDATE games SET state_revision = ?, updated_at = ?
+                UPDATE games SET state_revision = ?, status = ?, updated_at = ?
                 WHERE game_id = ?
                 """,
-                (revision, utc_now(), game_id),
+                (revision, status, utc_now(), game_id),
             )
+            if updated.rowcount != 1:
+                raise StoreNotFound("Game not found")
+            connection.execute(
+                """
+                UPDATE rooms SET status = ?, updated_at = ?
+                WHERE room_id = (
+                    SELECT room_id FROM games WHERE game_id = ?
+                )
+                """,
+                (status, utc_now(), game_id),
+            )
+
+    def update_game_revision(self, game_id: str, revision: int) -> None:
+        """Compatibility wrapper for callers that do not change lifecycle."""
+
+        with self._connection() as connection:
+            row = connection.execute(
+                "SELECT status FROM games WHERE game_id = ?", (game_id,)
+            ).fetchone()
+        if row is None:
+            raise StoreNotFound("Game not found")
+        self.update_game_state(game_id, revision, str(row["status"]))
 
     def count_rows(self, table: str) -> int:
         if table not in {
