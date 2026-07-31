@@ -66,7 +66,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 3835
+- Tests discovered: 3838
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
 - Baseline CI: [30615647165](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30615647165) — `pass`
 - Compile: `pass`

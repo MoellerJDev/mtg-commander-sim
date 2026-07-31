@@ -49,6 +49,21 @@ In PowerShell, set the variable with
 compact fixture covers the bundled Zimone and Dina and Mishra, Eminent One
 lists; it is not a substitute for the complete Oracle corpus.
 
+For an exact-commit merge candidate, use the reusable gate after committing all
+intended changes:
+
+```powershell
+py -3.11 scripts/local_merge_gate.py `
+  --expected-branch <branch> `
+  --expected-sha <full-sha>
+```
+
+It rebuilds its database, runs the complete deterministic and focused
+replay/privacy/game gates, creates a sanitized protocol demo, audits the
+repository, builds and clean-installs the wheel, verifies a clean exit, and
+writes ignored logs plus `summary.json` under
+`local/merge-gates/<full-sha>/`.
+
 To discover Scryfall's current timestamped Oracle and rulings exports and
 atomically rebuild the local database before a game:
 
