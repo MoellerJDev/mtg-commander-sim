@@ -17,6 +17,16 @@ python scripts/build_test_database.py build \
 ```
 
 Set `MTG_CARD_DB=data/test-ci.sqlite3`, then run the commands in `AGENTS.md`.
+Before merging a clean committed branch, run:
+
+```powershell
+py -3.11 scripts/local_merge_gate.py `
+  --expected-branch <branch> `
+  --expected-sha <full-sha>
+```
+
+The ignored exact-SHA summary is written below `local/merge-gates/`; do not
+commit its logs or database.
 
 ## Change boundaries
 
