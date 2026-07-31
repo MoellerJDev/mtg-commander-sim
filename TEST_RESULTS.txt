@@ -2,44 +2,43 @@ MTG Commander Sim 0.8.0 - Integration Verification Ledger
 ===========================================================
 
 Repository: MoellerJDev/mtg-commander-sim (public)
-Active branch: agent/cr-501-beginning-phase
-Main before candidate: 78e81dde54e72766f7a9725c805f3c094ce37a3a
-Active PR: #14 (CR 501 Beginning Phase)
+Active branch: agent/cr-500-turn-structure
+Main before candidate: f93a04deb07ab8e8897b48d6e6336e4049c26d33
+Active PR: #15 (CR 500 Turn Structure)
 
 LAST EXACT VERIFIED CANDIDATE
 -----------------------------
 
-CR 502 refreshed head
-  SHA: 1efd1c760873b65e87cb3b22e7ad6e69d0e4c38a
-  Full suite: 3,857 tests passed
-  Focused merge-gate tests: 22 passed
+CR 501 refreshed head
+  SHA: 5d381adc7e7c6ebf1ba4dd8744242f4ccdc6d25c
+  Full suite: 3,860 tests passed
   Rules/replay/privacy/protocol/repository/package gates: passed
   Working-tree clean exit: passed
   GitHub push and pull-request matrices: passed (8/8)
 
-PR #13 merged to main
-  Main SHA: 78e81dde54e72766f7a9725c805f3c094ce37a3a
+PR #14 merged to main
+  Main SHA: f93a04deb07ab8e8897b48d6e6336e4049c26d33
 
 CURRENT UNVERIFIED CANDIDATE
 ----------------------------
 
-CR 501 is being combined with merged CR 502-505.
-Expected discovered tests after regeneration: 3,860.
-The exact-SHA local gate and fresh GitHub matrices must pass before PR #14 is
-merged. This section is not a claim that the candidate has passed.
+CR 500 is being combined with merged CR 501-505.
+Expected discovered tests after regeneration: 3,865.
+The exact-SHA local gate and fresh GitHub matrices must pass before PR #15 is
+merged.
 
 Combined rule-review totals:
   Pinned CR release: 2026-06-19
   Numbered rules: 3,300
-  Reviewed: 454
-  Passing: 68
-  Blocked: 322
-  Definition-only: 64
-  Unreviewed: 2,846
+  Reviewed: 470
+  Passing: 72
+  Blocked: 332
+  Definition-only: 66
+  Unreviewed: 2,830
 
 Combined mechanic totals:
-  Partial: 40
-  Unclassified: 385
+  Partial: 41
+  Unclassified: 384
 
 INTERPRETATION BOUNDARY
 -----------------------
@@ -58,5 +57,5 @@ Every updated candidate must receive fresh green push and pull-request runs.
 NEXT
 ----
 
-Run the exact CR 501 merge gate, merge PR #14 normally after green CI, and
-continue with PR #15.
+Run the exact CR 500 merge gate, merge PR #15 normally after green CI, and
+continue with PR #16.
