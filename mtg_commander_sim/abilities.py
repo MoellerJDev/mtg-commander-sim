@@ -295,6 +295,7 @@ def parse_activated_abilities(
         life_payment = 0
         energy_payment = 0
         loyalty_delta: int | None = None
+        loyalty_cost_clauses = 0
         choices: list[CostChoice] = []
         uncompiled: list[str] = []
 
@@ -311,11 +312,25 @@ def parse_activated_abilities(
             )
             if loyalty_match:
                 amount = int(loyalty_match.group("amount"))
-                loyalty_delta = (
+                parsed_loyalty_delta = (
                     amount
                     if loyalty_match.group("sign") == "+"
                     else -amount
                 )
+                loyalty_cost_clauses += 1
+                if loyalty_cost_clauses == 1:
+                    loyalty_delta = parsed_loyalty_delta
+                else:
+                    # CR 606.5 combines multiple loyalty-symbol costs into
+                    # one net cost.  Until cost-modification ordering carries
+                    # those components explicitly, do not silently keep only
+                    # the last clause and advertise the wrong activation.
+                    loyalty_delta = None
+                    if loyalty_cost_clauses == 2:
+                        uncompiled.append(
+                            "multiple loyalty-symbol costs require "
+                            "combined-cost semantics"
+                        )
                 continue
             if lower.startswith("channel"):
                 continue

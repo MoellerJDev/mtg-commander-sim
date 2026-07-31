@@ -1,5 +1,5 @@
 {
-  "contract_count": 20,
+  "contract_count": 21,
   "contracts": [
     {
       "mechanic_id": "cr-122-counters",
@@ -65,6 +65,12 @@
       "mechanic_id": "cr-607-linked-abilities",
       "path": "mechanics/contracts/linked-abilities.json",
       "sha256": "62e669b98c3cb4c34961faea034759a87235e3b025b777906529d06261571349",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-606-loyalty-abilities",
+      "path": "mechanics/contracts/loyalty-abilities.json",
+      "sha256": "95c229e66174b9bd897c4f218fcc998db7a8e621a21191012692571952addc4e",
       "version": 1
     },
     {
@@ -6286,17 +6292,35 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/loyalty-abilities.json",
+      "contract_sha256": "95c229e66174b9bd897c4f218fcc998db7a8e621a21191012692571952addc4e",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "ActivatedAbility loyalty costs and CommanderEngine activation availability/payment",
+      "implementation_version": "loyalty-ability-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "generic loyalty-cost modification and ordering are not represented",
+        "multiple loyalty-symbol cost components fail closed rather than combine",
+        "granted loyalty abilities are recognized from effective Oracle text only where the continuous-effect layer represents that grant",
+        "not every effect that changes the number of loyalty activations per turn is implemented"
+      ],
       "mechanic_id": "cr-606-loyalty-abilities",
       "official_name": "Loyalty Abilities",
       "rule_references": [
         "606"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_606_rule",
+        "test_loyalty_symbol_defines_ability_on_any_permanent",
+        "test_loyalty_timing_control_and_once_per_permanent",
+        "test_negative_loyalty_cost_requires_enough_counters",
+        "test_visible_loyalty_cost_modifier_fails_closed",
+        "test_multiple_loyalty_costs_fail_closed_until_combined",
+        "test_tyvar_initializes_loyalty_grants_activation_haste_and_resolves_both_abilities",
+        "test_daretti_loyalty_exchange_and_emblem_return"
+      ],
       "trust_level": "untrusted"
     },
     {

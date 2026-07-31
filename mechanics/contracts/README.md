@@ -34,6 +34,9 @@ APNAP, `as though`, source-selection, Aura, mutate, and resolution-trigger
 families explicitly untrusted. CR 607 traces linked abilities while keeping
 generic ability-pair IDs, linked object sets and facts, copied/acquired pairs,
 cross-face links, and cross-object token/emblem links explicitly untrusted.
+CR 606 traces loyalty abilities and verifies their base permanent, timing,
+activation-limit, and payability behavior while modified and combined loyalty
+costs remain fail-closed and explicitly untrusted.
 
 Run `simctl rules sync` after changing a contract so its hash and status are
 overlaid into `mechanics/registry.json`, then run `simctl rules verify`.

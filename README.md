@@ -149,6 +149,9 @@ generated documentation fixtures with bearer capabilities redacted. See
 - source-reviewed CR 607 linked-ability taxonomy with exact-incarnation and
   undefined-choice witnesses; generic pair IDs, linked sets/facts, and
   copied, granted, cross-face, and cross-object links remain blocked
+- source-reviewed CR 606 loyalty abilities with generic permanent support,
+  exact base timing/activation limits, and fail-closed modified or combined
+  loyalty costs
 - trust-aware semantic preflight for files and live Moxfield URLs
 - compact cast, land, activation, target, and generic resolution-time search
   templates

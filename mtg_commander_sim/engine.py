@@ -6336,11 +6336,8 @@ class CommanderEngine:
         ):
             return "unavailable", "sorcery_timing"
         if ability.loyalty_delta is not None:
-            data = self._effective_card_data(card)
-            if "planeswalker" not in str(
-                data.get("type_line") or ""
-            ).casefold():
-                return "unavailable", "loyalty_source_not_planeswalker"
+            if self._loyalty_cost_modifier_present():
+                return "unresolved", "unresolved_loyalty_cost_modification"
             if not (
                 seat == self.state.active_player
                 and not self.state.stack
@@ -6411,6 +6408,33 @@ class CommanderEngine:
         ):
             return "unpayable", "insufficient_mana"
         return "payable", None
+
+    def _loyalty_cost_modifier_present(self) -> bool:
+        """Fail closed when a public effect modifies loyalty costs.
+
+        Loyalty abilities can belong to any permanent, not only a
+        planeswalker (CR 606.2-3).  The base loyalty-symbol cost is compiled,
+        but the generic cost-modification ordering needed by CR 606.4-5 is not
+        yet represented.  A visible modifier therefore makes the activation
+        unresolved instead of executable at an incorrect cost.
+        """
+
+        for owner in self.active_seats:
+            for object_id in self.state.players[owner].zones["battlefield"]:
+                permanent = self.state.cards[object_id]
+                if permanent.phased_out:
+                    continue
+                oracle_text = str(
+                    self._effective_card_data(permanent).get("oracle_text")
+                    or ""
+                ).casefold()
+                if (
+                    "loyalty abilities" in oracle_text
+                    and "cost" in oracle_text
+                    and "activate" in oracle_text
+                ):
+                    return True
+        return False
 
     def _may_activate_creature_as_haste(
         self,

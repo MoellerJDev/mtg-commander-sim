@@ -34443,21 +34443,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-606",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_loyalty_abilities.LoyaltyAbilityRuleTests.test_contract_traces_every_cr_606_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/loyalty-abilities.json"
+      ],
+      "notes": [
+        "Section heading; every numbered CR 606 record is pinned by the Loyalty Abilities contract."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "606",
       "rule_text_sha256": "b4c3ac428d6e9a1ff59d393b6806d4a4f8b608613d2ef5b2d7e27c215ba51689",
       "schema_version": 1,
@@ -34466,26 +34470,31 @@
         "end_line": 2710,
         "start_line": 2709
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-606.1",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "606"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_loyalty_abilities.LoyaltyAbilityRuleTests.test_contract_traces_every_cr_606_rule"
+      ],
+      "implementation_components": [
+        "abilities.ActivatedAbility",
+        "mechanics/contracts/loyalty-abilities.json"
+      ],
+      "notes": [
+        "Defines loyalty abilities as a special activated-ability family; the numbered rules below carry the behavioral requirements."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "606.1",
       "rule_text_sha256": "134aa902879c57af8f9612059149670ce978446fee25eae9f19c284b5b98d200",
       "schema_version": 1,
@@ -34494,26 +34503,42 @@
         "end_line": 2712,
         "start_line": 2711
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-606.2",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "606"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_loyalty_abilities.LoyaltyAbilityRuleTests.test_loyalty_symbol_defines_ability_on_any_permanent",
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_tyvar_initializes_loyalty_grants_activation_haste_and_resolves_both_abilities",
+        "tests.test_exact_mishra_closure.ExactMishraClosureTests.test_daretti_loyalty_exchange_and_emblem_return"
+      ],
+      "implementation_components": [
+        "abilities.parse_activated_abilities",
+        "abilities.ActivatedAbility.loyalty_delta",
+        "CommanderEngine._activated_abilities"
+      ],
+      "notes": [
+        "The parser identifies plus and minus loyalty-symbol costs, ordinary activated abilities have no loyalty delta, and the engine accepts a compiled loyalty ability on a nonplaneswalker permanent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "606.2",
       "rule_text_sha256": "09dabadfd921e0a25ee1796b1a18d4d8ae93cd409fe3b0d0699f13283ba5a84a",
       "schema_version": 1,
@@ -34522,26 +34547,41 @@
         "end_line": 2714,
         "start_line": 2713
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-606.3",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "606"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_loyalty_abilities.LoyaltyAbilityRuleTests.test_loyalty_timing_control_and_once_per_permanent",
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_tyvar_initializes_loyalty_grants_activation_haste_and_resolves_both_abilities"
+      ],
+      "implementation_components": [
+        "CommanderEngine._ability_availability",
+        "CommanderEngine._activate",
+        "CardInstance.annotations.loyalty_activated_turn_sequence"
+      ],
+      "notes": [
+        "The current controller alone receives the action; activation requires that player's main phase, priority, and an empty stack, and one activation prevents every other loyalty ability of the same permanent that turn."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "606.3",
       "rule_text_sha256": "5fb19da272675a3617658976a0342561f607c10609412bca22249d2d69be1630",
       "schema_version": 1,
@@ -34550,26 +34590,47 @@
         "end_line": 2716,
         "start_line": 2715
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "loyalty-cost changes are not represented in the generic cost-modification and ordering pipeline",
+        "recognized public loyalty-cost modifiers deliberately make the activation unresolved rather than applying an incorrect base cost",
+        "no exact replay case yet exercises a modified loyalty cost"
       ],
       "case_id": "cr-606.4",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "606"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_loyalty_abilities.LoyaltyAbilityRuleTests.test_loyalty_timing_control_and_once_per_permanent",
+        "tests.test_loyalty_abilities.LoyaltyAbilityRuleTests.test_negative_loyalty_cost_requires_enough_counters",
+        "tests.test_loyalty_abilities.LoyaltyAbilityRuleTests.test_visible_loyalty_cost_modifier_fails_closed"
+      ],
+      "implementation_components": [
+        "CommanderEngine._activate",
+        "CommanderEngine._ability_availability",
+        "CommanderEngine._loyalty_cost_modifier_present"
+      ],
+      "notes": [
+        "Unmodified positive and negative loyalty costs are paid immediately, before resolution. This does not establish the rule's cost-modification clause."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "606.4",
       "rule_text_sha256": "482d4358db073fcafdd3944116b9487155a1e7551debb87a1e5c30af00840d3d",
       "schema_version": 1,
@@ -34578,26 +34639,40 @@
         "end_line": 2718,
         "start_line": 2717
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "multiple loyalty-symbol cost components are not retained as typed components and combined into one net loyalty cost",
+        "the parser now marks such a cost unresolved instead of silently keeping only the final component"
       ],
       "case_id": "cr-606.5",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "606"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_loyalty_abilities.LoyaltyAbilityRuleTests.test_multiple_loyalty_costs_fail_closed_until_combined"
+      ],
+      "implementation_components": [
+        "abilities.parse_activated_abilities",
+        "abilities.ActivatedAbility.uncompiled_costs"
+      ],
+      "notes": [
+        "Fail-closed parsing prevents an illegal advertised action but is not implementation of combined-cost semantics."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "606.5",
       "rule_text_sha256": "0bc7488128fa410adcbe9169b2bd1f666d5605458f245b2ac787c6486bb38661",
       "schema_version": 1,
@@ -34606,26 +34681,42 @@
         "end_line": 2721,
         "start_line": 2719
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "the base negative cost checks available loyalty exactly, but the rule requires the check after every applicable additional cost and modifier",
+        "generic additional loyalty costs and their ordering are not implemented"
       ],
       "case_id": "cr-606.6",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "606"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_loyalty_abilities.LoyaltyAbilityRuleTests.test_negative_loyalty_cost_requires_enough_counters",
+        "tests.test_loyalty_abilities.LoyaltyAbilityRuleTests.test_visible_loyalty_cost_modifier_fails_closed"
+      ],
+      "implementation_components": [
+        "CommanderEngine._ability_availability",
+        "CommanderEngine._loyalty_cost_modifier_present"
+      ],
+      "notes": [
+        "A base minus-two ability is unpayable at one loyalty and payable at two; recognized modifier interactions fail closed."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "606.6",
       "rule_text_sha256": "c675dfc1dc6216dda0ff860f886949ffc7bc2aa5f68f7b5af42024f9b63651ff",
       "schema_version": 1,
@@ -34634,7 +34725,7 @@
         "end_line": 2723,
         "start_line": 2722
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
       "assertion_kind": "static_traceability",
