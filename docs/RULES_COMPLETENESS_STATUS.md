@@ -123,8 +123,13 @@ coverage.
   behaviors remain blocked, and 5 framework records are definition-only.
   Targeted and loyalty abilities are no longer misclassified as mana
   abilities.
+- [x] Reviewed all 9 CR 604 Handling Static Abilities cases: 7 behavioral
+  records remain dependency-blocked and 2 taxonomy records are
+  definition-only. Padeem source-lifetime, moved Lightning Greaves, stack
+  uncounterability, and Gravecrawler zone permission are partial witnesses
+  only; no generic CDA or static-effect compiler is claimed.
 
-## Current CR 120/210/310/605/606/607/608/609/614/615/616/704 slice
+## Current CR 120/210/310/604/605/606/607/608/609/614/615/616/704 slice
 
 Battle behavior is derived from the effective card type, subtype, defense
 characteristic, counters, controller, and protector. It contains no
@@ -272,10 +277,10 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 201 CR
-  120/210/310/605/606/607/608/609/614/615/616 cases are source-reviewed: 30
-  pass with executable engine evidence, 137 remain blocked, and 34 are
-  definition-only. The other 3,099 cases remain unreviewed.
+  establish inventory linkage only. All 210 CR
+  120/210/310/604/605/606/607/608/609/614/615/616 cases are source-reviewed:
+  30 pass with executable engine evidence, 144 remain blocked, and 36 are
+  definition-only. The other 3,090 cases remain unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
 final push evidence are recorded in `OVERNIGHT_HANDOFF.md` after the complete
@@ -285,8 +290,9 @@ checkpoint validation.
 
 1. Continue reviewing and promoting conformance cases by
    dependency-ordered rules family; keep exposed but unimplemented edge cases
-   failing or blocked. Review CR 604 Handling Static Abilities next as the
-   adjacent ability-function and continuous-effect dependency family.
+   failing or blocked. Review CR 603 Handling Triggered Abilities next as the
+   adjacent trigger, APNAP, delayed/reflexive, LKI, and stack dependency
+   family.
 2. Wire the reviewed CR 614/615/616 primitives into the shared CR 120/310
    replacement and prevention event pipeline, including stateful shields and
    typed nested events, then re-evaluate the blocked damage sequence and

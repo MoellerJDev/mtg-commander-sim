@@ -40,6 +40,9 @@ costs remain fail-closed and explicitly untrusted.
 CR 605 traces mana abilities and verifies stackless activated-mana resolution
 and spell-payment use while possible-output grammar, generic triggered mana
 abilities, and arbitrary nested payment windows remain explicitly untrusted.
+CR 604 traces static-ability handling with battlefield source-lifetime and
+moved-Equipment witnesses while characteristic-defining, attachment, stack,
+zone-permission, and current-information/LKI coverage remains untrusted.
 
 Run `simctl rules sync` after changing a contract so its hash and status are
 overlaid into `mechanics/registry.json`, then run `simctl rules verify`.

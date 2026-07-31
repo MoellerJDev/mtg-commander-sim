@@ -101,11 +101,11 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 201 cases in CR 120, CR 210, CR 310, CR 605, CR 606, CR 607, CR 608,
-CR 609, CR 614, CR 615, and CR 616 are source-reviewed: 30 narrow behavioral
-rules pass with generic executable evidence, 137 are blocked with exact
-missing dependencies, and 34 are definition-only with contract traceability.
-The remaining 3,099 cases are unreviewed and inventory-only.
+All 210 cases in CR 120, CR 210, CR 310, CR 604, CR 605, CR 606, CR 607,
+CR 608, CR 609, CR 614, CR 615, and CR 616 are source-reviewed: 30 narrow
+behavioral rules pass with generic executable evidence, 144 are blocked with
+exact missing dependencies, and 36 are definition-only with contract
+traceability. The remaining 3,090 cases are unreviewed and inventory-only.
 
 The passing CR 310 rules are battlefield defense (310.4c), Battle damage
 (310.6), the zero-defense state action (310.7), single-protector replacement
@@ -150,4 +150,8 @@ CR 605 adds passing stackless activated-mana resolution and spell
 classification. Target/loyalty exclusions are corrected, while complete
 possible-output recognition, arbitrary payment windows, activation reentry,
 and generic triggered mana abilities remain blocked.
+CR 604 records partial source-lifetime, moved-attachment, stack-static, and
+zone-permission witnesses. Generic characteristic-defining abilities, static
+Oracle compilation, broad attachment modifiers, and universal
+current-information rather than LKI queries remain blocked.
 Snapshot completeness remains false.

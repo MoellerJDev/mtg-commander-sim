@@ -155,6 +155,9 @@ generated documentation fixtures with bearer capabilities redacted. See
 - source-reviewed CR 605 mana abilities with corrected target/loyalty
   exclusions, immediate activated-mana resolution, payment-path witnesses,
   and explicit blockers for generic triggered mana abilities
+- source-reviewed CR 604 static-ability scope with source-leaves and
+  moved-attachment witnesses; generic CDA, attachment, stack, zone-permission,
+  and current-information/LKI handling remain blocked
 - trust-aware semantic preflight for files and live Moxfield URLs
 - compact cast, land, activation, target, and generic resolution-time search
   templates

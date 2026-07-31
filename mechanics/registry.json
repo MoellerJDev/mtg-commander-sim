@@ -1,5 +1,5 @@
 {
-  "contract_count": 22,
+  "contract_count": 23,
   "contracts": [
     {
       "mechanic_id": "cr-122-counters",
@@ -59,6 +59,12 @@
       "mechanic_id": "flying",
       "path": "mechanics/contracts/flying.json",
       "sha256": "e75cae496f5ecaa720ef71ae1c7d73eab1066fd69b5f2e9ca98c12128b4b35c2",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-604-handling-static-abilities",
+      "path": "mechanics/contracts/handling-static-abilities.json",
+      "sha256": "9cbc8a8b82f46da4b1303421ee4b03e1312df2b618b3d04f750fece85215414e",
       "version": 1
     },
     {
@@ -6268,17 +6274,35 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/handling-static-abilities.json",
+      "contract_sha256": "9cbc8a8b82f46da4b1303421ee4b03e1312df2b618b3d04f750fece85215414e",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine effective-characteristic, attachment, cost, and zone-permission paths",
+      "implementation_version": "static-ability-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "static Oracle text is not compiled into one generic continuous-effect model",
+        "characteristic-defining ability recognition and all-zone evaluation are incomplete",
+        "Aura, Equipment, and Fortification modifiers use a narrow grammar plus exact handlers",
+        "stack-applicable costs and permissions do not cover the complete Oracle grammar",
+        "nonbattlefield cast/play permissions cover selected trusted templates only",
+        "static-effect current-information versus LKI is not represented by a universal typed query boundary"
+      ],
       "mechanic_id": "cr-604-handling-static-abilities",
       "official_name": "Handling Static Abilities",
       "rule_references": [
         "604"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_604_rule",
+        "test_battlefield_static_effect_stops_when_source_leaves",
+        "test_moving_equipment_moves_its_static_effect",
+        "test_padeem_hexproof_and_intervening_upkeep_condition",
+        "test_lightning_greaves_equip_grants_haste_and_shroud",
+        "test_gravecrawler_graveyard_cast_requires_controlled_zombie"
+      ],
       "trust_level": "untrusted"
     },
     {
