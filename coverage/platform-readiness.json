@@ -1,6 +1,5 @@
 {
   "blockers": [
-    "agent/rules-completeness has not yet passed exact-SHA CI or merged into main",
     "no authoritative ASGI server, single-writer GameActor, durable persistence, or browser client exists",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
@@ -10,12 +9,11 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "stage_b_integrate_rules_completeness",
-    "branch": "agent/rules-completeness",
+    "active_phase": "rules_family_cr_512_ending_phase",
+    "branch": "agent/cr-512-ending-phase",
     "branch_ancestry": {
-      "agent/review-mvp_unique_commits_over_main": 0,
-      "agent/rules-completeness_unique_commits_over_review_mvp": 29,
-      "main_unique_commits_over_review_mvp": 0
+      "focused_branch_base": "390aeaa15dc19f64d8ec6ac6e37d3a0195043d86",
+      "focused_branch_unique_commits_over_main": 1
     },
     "commit_reference": "the commit containing this ledger",
     "pull_requests": [
@@ -30,7 +28,7 @@
         "base": "main",
         "head": "agent/rules-completeness",
         "number": 1,
-        "state": "draft_pending_stage_b_gate",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/1"
       }
     ],
@@ -47,10 +45,10 @@
   },
   "milestones": [
     {
-      "evidence": "Review MVP merged to main after exact-SHA CI; the combined rules branch passed its 3,788-test local gate and awaits exact-SHA CI.",
+      "evidence": "Both integration PRs merged through ordinary merge commits; main passed its exact-SHA 3,788-test matrix.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
-      "status": "stage_b_local_gate_pass"
+      "status": "complete"
     },
     {
       "evidence": "No server/, web/, or migrations/ subsystem is present on this branch.",
@@ -59,10 +57,10 @@
       "status": "not_started"
     },
     {
-      "evidence": "The versioned 2026-06-19 rules corpus is present on agent/rules-completeness and awaits the combined Stage B gate before main.",
+      "evidence": "The versioned 2026-06-19 rules corpus is on main; CR 512 is the current focused family.",
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
-      "status": "integrated_on_feature_branch"
+      "status": "active_on_main"
     },
     {
       "evidence": "Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed.",
@@ -71,7 +69,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Commit and push the verified Stage B merge, retarget PR #1 to main, verify exact-SHA CI, and merge.",
+  "next_task": "Publish the green CR 512 focused branch, then select the next dependency-bounded rules family without overstating full rulebook completeness.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -111,8 +109,8 @@
     "manifest_present": true,
     "mechanics": {
       "status_counts": {
-        "partial": 28,
-        "unclassified": 397
+        "partial": 29,
+        "unclassified": 396
       },
       "total": 425,
       "trusted": 0
@@ -128,10 +126,10 @@
     },
     "rules": {
       "blocked": 222,
-      "definition_only": 50,
-      "passing": 44,
+      "definition_only": 51,
+      "passing": 45,
       "total": 3300,
-      "unreviewed": 2984
+      "unreviewed": 2982
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -140,7 +138,7 @@
     "comprehensive_rules": {
       "effective_date": "2026-06-19",
       "sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
-      "status": "pinned_corpus_integrated_on_feature_branch"
+      "status": "pinned_corpus_on_main"
     },
     "oracle": {
       "scope": "full_and_commander_legal_oracle_snapshots_plus_exact_list_fixture",
@@ -154,24 +152,24 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 3788,
+    "deterministic_cases_discovered": 3792,
     "migration_files": 0,
     "schema_files": 14,
     "server_files": 0,
     "web_files": 0
   },
   "validation": {
-    "baseline_commit": "ead8fa2eecfa79b989a741daa58e103347b45a66",
+    "baseline_commit": "390aeaa15dc19f64d8ec6ac6e37d3a0195043d86",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30603752523,
+      "run_id": 30604498260,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30603752523"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30604498260"
     },
     "local": {
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "pass_3788",
+      "deterministic_tests": "pass_3792",
       "four_player_protocol_demo": "pass",
       "repository_history_security_audit": "pass",
       "wheel_build_and_clean_install": "pass"

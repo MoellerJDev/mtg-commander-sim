@@ -10,7 +10,7 @@ or provider session data.
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/rules-completeness`
+- Active branch: `agent/cr-512-ending-phase`
 - Stage A merge commit on `main`:
   `bd89201be44de85aa9b85fcc9f0baacb0ee76dbe`
 - Stage A PR:
@@ -20,15 +20,10 @@ or provider session data.
 - Package version: `0.8.0`
 - Existing tags: `v0.6.0`, `v0.7.0`
 
-PR #2 passed both exact-SHA four-job CI matrices and merged into `main` with an
-ordinary merge commit. Stage B merges that updated `main` into
-`agent/rules-completeness`, regenerates the combined platform/rules ledgers,
-retargets PR #1 to `main`, and verifies the combined branch before merge.
-
-The unfinished CR 512 ending-phase draft is preserved outside the integration
-worktree in the named stash
-`wip/cr-512-ending-phase-before-stage-b-integration`. It must be recovered only
-after the combined branch is green.
+PR #2 and PR #1 passed their exact-SHA matrices and merged into `main` through
+ordinary merge commits. Main commit `390aeaa15dc19f64d8ec6ac6e37d3a0195043d86`
+then passed its own four-job matrix. The CR 512 draft was recovered intact onto
+the focused branch; its temporary stash was removed after verification.
 
 ## Deterministic product boundary
 
@@ -63,16 +58,16 @@ It generates one source-linked conformance case for each of 3,300 numbered
 rules and preserves reviewed status only while the source and rule-text hashes
 remain unchanged.
 
-Current reviewed inventory before the Stage B regeneration:
+Current reviewed inventory after the CR 512 synchronization:
 
-- 316 reviewed cases
-- 44 executable semantic passes
+- 318 reviewed cases
+- 45 executable semantic passes
 - 222 reviewed blocked cases
-- 50 definition-only cases
-- 2,984 unreviewed inventory cases
+- 51 definition-only cases
+- 2,982 unreviewed inventory cases
 - 425 discovered mechanics
-- 28 partial/untrusted mechanic contracts
-- 397 unclassified mechanics
+- 29 partial/untrusted mechanic contracts
+- 396 unclassified mechanics
 - 0 corpus-wide trusted mechanics
 
 Implemented reviewed families include narrow contracts for damage, defense,
@@ -111,7 +106,7 @@ Stage A exact evidence:
 - deterministic four-player micro-pool reached a natural winner with zero
   suppressed meaningful windows, passed seat projection, and exact-replayed
 
-The combined Stage B local gate passed:
+The focused CR 512 local gate passed atop the combined Stage B baseline:
 
 - generated platform, rules, mechanics, and Oracle status checks
 - all noninventory and all generated per-rule tests
@@ -120,14 +115,18 @@ The combined Stage B local gate passed:
 - protocol demo and packet benchmark
 - repository/history/secret/artifact scans
 - wheel build, clean installation, imported version, and CLI smoke
-- exact-SHA four-job GitHub Actions remains pending until push
+- the four focused CR 512 contract/order/replay/cleanup tests
+- exact-SHA four-job GitHub Actions for the focused commit remains pending
+  until push
 
-The local gate ran 3,788 tests in 184.335 seconds, verified all 3,300 pinned
+The local gate ran 3,792 tests in 177.855 seconds, verified all 3,300 pinned
 rules cases and 425 mechanics, checked 14 schemas and repository history,
 completed the protocol demo, and built and clean-installed the wheel. The
 four-player natural-winner soak exact-replayed after eliminating insertion-order
-dependence from authoritative zone timestamps. No exact-SHA CI pass is claimed
-until the integration merge is pushed.
+dependence from authoritative zone timestamps. The repository scan covered 244
+tracked files and 11,165,988 bytes. Main commit
+`390aeaa15dc19f64d8ec6ac6e37d3a0195043d86` already passed run 30604498260;
+no exact-SHA CI pass is claimed for the focused commit until it is pushed.
 
 ## Evidence boundaries
 
@@ -140,6 +139,6 @@ until the integration merge is pushed.
 
 ## Exact next step
 
-Commit and push the ordinary Stage B integration merge, retarget PR #1 to
-`main`, update its exact evidence, wait for exact-SHA CI, and merge. Recover the
-CR 512 draft only after that integration completes.
+Publish the green CR 512 focused branch and wait for its exact-SHA matrix.
+CR 512.1 may be claimed as a passing structural rule; the broader end-step and
+cleanup behavior remains bounded by the partial CR 513 and CR 514 contracts.

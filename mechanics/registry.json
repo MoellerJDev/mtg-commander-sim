@@ -1,5 +1,5 @@
 {
-  "contract_count": 28,
+  "contract_count": 29,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -77,6 +77,12 @@
       "mechanic_id": "cr-513-end-step",
       "path": "mechanics/contracts/end-step.json",
       "sha256": "92350699072900a3115dec49ff7643c484ba3ee647bb7b007799f1d8b0d30e7e",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-512-ending-phase",
+      "path": "mechanics/contracts/ending-phase.json",
+      "sha256": "50e3dfac37b7a9619c7dcdef09a05cc83fc694527be6ae06381f44485cb2526c",
       "version": 1
     },
     {
@@ -6187,17 +6193,30 @@
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/ending-phase.json",
+      "contract_sha256": "50e3dfac37b7a9619c7dcdef09a05cc83fc694527be6ae06381f44485cb2526c",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "TURN_STEPS and CommanderEngine step-entry, step-advance, cleanup, and next-turn paths",
+      "implementation_version": "ending-phase-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "complete end-step behavior remains bounded by the partial CR 513 contract",
+        "complete cleanup behavior remains bounded by the partial CR 514 contract",
+        "complete replacement, trigger, APNAP, hidden-information, and multiplayer interactions inside the component steps remain incomplete"
+      ],
       "mechanic_id": "cr-512-ending-phase",
       "official_name": "Ending Phase",
       "rule_references": [
         "512"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_512_rule",
+        "test_ending_phase_has_exactly_end_then_cleanup",
+        "test_end_then_cleanup_then_next_turn_order_replays_exactly",
+        "test_cleanup_discard_prevents_ending_phase_from_skipping_cleanup"
+      ],
       "trust_level": "untrusted"
     },
     {

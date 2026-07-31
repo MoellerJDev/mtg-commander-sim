@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-512-ending-phase",
+  "official_name": "Ending Phase",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "512",
+    "512.1"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "turn-structure",
+    "end-step",
+    "cleanup-step",
+    "priority",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [],
+    "objects": [
+      "active turn",
+      "end step",
+      "cleanup step"
+    ],
+    "events": [
+      "ending phase begins with the end step",
+      "end step completes",
+      "cleanup step begins",
+      "cleanup completes or repeats under its exception rule",
+      "the next turn begins"
+    ],
+    "state_reads": [
+      "current phase and step",
+      "turn sequence",
+      "active player",
+      "pending decision",
+      "stack and priority state"
+    ],
+    "state_writes": [
+      "phase and step",
+      "turn sequence",
+      "active player",
+      "priority and cleanup continuation state"
+    ],
+    "costs": [],
+    "timing": [
+      "the ending phase contains exactly the end step followed by the cleanup step",
+      "the next turn cannot begin before cleanup completes",
+      "an exceptional additional cleanup remains within the same ending phase"
+    ],
+    "targets": [],
+    "choices": [
+      "choices created by end-step or cleanup rules are delegated to their owning step contracts"
+    ],
+    "hidden_information": [
+      "the phase transition itself reveals no hidden information",
+      "cleanup discard remains private under the cleanup-step contract"
+    ],
+    "apnap": [
+      "priority and trigger ordering within the component steps are delegated to the end-step and cleanup-step contracts"
+    ],
+    "layers": [
+      "turn-duration expiration is delegated to the cleanup-step contract"
+    ],
+    "replacement_effects": [
+      "replacement behavior inside either step is delegated to that step and the replacement-effect contracts"
+    ],
+    "copy": [
+      "copy status does not alter the two-step phase structure"
+    ],
+    "control_change": [
+      "control changes do not alter the two-step phase structure"
+    ],
+    "zone_change": [
+      "zone changes within the phase are handled by the component step contracts"
+    ],
+    "source_leaves": [
+      "source departure does not alter the two-step phase structure"
+    ]
+  },
+  "variants": [
+    "ordinary end step followed by ordinary cleanup",
+    "cleanup discard decision",
+    "cleanup exception and additional cleanup",
+    "transition to the next player in a multiplayer turn order"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_512_rule",
+    "test_ending_phase_has_exactly_end_then_cleanup",
+    "test_end_then_cleanup_then_next_turn_order_replays_exactly",
+    "test_cleanup_discard_prevents_ending_phase_from_skipping_cleanup"
+  ],
+  "implementation": {
+    "component": "TURN_STEPS and CommanderEngine step-entry, step-advance, cleanup, and next-turn paths",
+    "version": "ending-phase-v1"
+  },
+  "known_blockers": [
+    "complete end-step behavior remains bounded by the partial CR 513 contract",
+    "complete cleanup behavior remains bounded by the partial CR 514 contract",
+    "complete replacement, trigger, APNAP, hidden-information, and multiplayer interactions inside the component steps remain incomplete"
+  ],
+  "review_status": "draft"
+}

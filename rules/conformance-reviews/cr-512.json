@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 512 — Ending Phase",
+  "cases": [
+    {
+      "rule_id": "512",
+      "rule_text_sha256": "1bbaf560b419751579f01d7af17c8b0df2ed16275c26e1764a0f3decff39bb6d",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/ending-phase.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_ending_phase_rules.EndingPhaseRuleTests.test_contract_traces_every_cr_512_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; CR 512.1 carries the executable two-step phase structure."
+      ]
+    },
+    {
+      "rule_id": "512.1",
+      "rule_text_sha256": "045ca032af27b39a9830051122ed67db8124e4d36da7a2a1367b920fd0b4504a",
+      "classification": "structural",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "TURN_STEPS",
+        "CommanderEngine._enter_step",
+        "CommanderEngine._advance_step",
+        "CommanderEngine._finish_cleanup"
+      ],
+      "executable_test_ids": [
+        "tests.test_ending_phase_rules.EndingPhaseRuleTests.test_ending_phase_has_exactly_end_then_cleanup",
+        "tests.test_ending_phase_rules.EndingPhaseRuleTests.test_end_then_cleanup_then_next_turn_order_replays_exactly",
+        "tests.test_ending_phase_rules.EndingPhaseRuleTests.test_cleanup_discard_prevents_ending_phase_from_skipping_cleanup"
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "The authoritative turn table contains exactly end then cleanup. Ordinary passage command-replays through cleanup before the next turn, and a cleanup discard decision prevents premature turn advancement."
+      ]
+    }
+  ]
+}
