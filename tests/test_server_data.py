@@ -222,6 +222,38 @@ class ManagedScryfallDataTests(unittest.IsolatedAsyncioTestCase):
             finally:
                 await manager.close()
 
+    async def test_startup_uses_current_database_when_pending_activation_is_locked(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            database = _build_database(root)
+            manager = ManagedScryfallData(
+                database,
+                root / "bulk",
+                root / "snapshots",
+                root / "games",
+                enabled=False,
+            )
+            shutil.copy2(database, manager.pending_database)
+            ready_paths = []
+
+            async def on_ready(path: Path) -> None:
+                ready_paths.append(path)
+
+            with patch.object(
+                manager,
+                "_activate_pending",
+                side_effect=PermissionError(32, "database is in use"),
+            ):
+                await manager.start(on_ready)
+
+            status = manager.status()
+            self.assertTrue(manager.ready)
+            self.assertTrue(manager.restart_required)
+            self.assertEqual("update_ready", manager.phase)
+            self.assertEqual([database], ready_paths)
+            self.assertTrue(manager.pending_database.exists())
+            self.assertIn("locked by another process", status["last_error"])
+
     async def test_missing_database_becomes_ready_after_managed_build(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

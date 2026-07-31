@@ -15,6 +15,9 @@
   before deck import becomes ready, and added exact-fingerprint confirmation
   for future-dated preview legality without weakening semantic fail-closed
   behavior or ordinary Commander construction errors.
+- Kept an existing card database available when Windows prevents pending-update
+  activation because another local server still has the SQLite file open; the
+  system status now identifies the lock and requests a clean restart.
 - Indexed Scryfall image references in SQLite and added a host-restricted,
   size-bounded, atomic local image cache with bounded deck prefetch and
   per-visible-card browser requests; bulk card data never enters the browser.

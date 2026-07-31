@@ -43,6 +43,14 @@ If the first-run network request fails, the setup page keeps the error visible
 and offers a local retry. If an update check fails after a database exists, the
 server remains usable with a warning and the pinned database.
 
+On Windows, a second Commander Arena process can keep the active SQLite file
+open while a pending update is being activated. When a usable current database
+already exists, startup now serves it in an `update_ready` state and reports
+the lock instead of failing the application lifespan. Stop every other local
+server with `Ctrl+C`, then restart once to activate the staged database. If no
+current database exists, activation still fails closed rather than pretending
+card data is ready.
+
 Choose a display name to create an expiring guest session. A host creates a
 1v1 `commander_duel` or four-seat `commander_multiplayer` room and shares its
 invite code. Each browser tab receives a distinct HttpOnly guest binding even

@@ -68,6 +68,7 @@ class ManagedScryfallData:
         self.last_checked_at: datetime | None = None
         self.next_check_at: datetime | None = None
         self.last_error: str | None = None
+        self._activation_warning: str | None = None
         self.metadata: dict[str, str] = {}
         self._task: asyncio.Task[None] | None = None
         self._wake = asyncio.Event()
@@ -125,13 +126,27 @@ class ManagedScryfallData:
     async def start(self, on_ready: Callable[[Path], Awaitable[None]]) -> None:
         self._on_ready = on_ready
         if self.pending_database.exists():
-            await asyncio.to_thread(self._activate_pending)
+            try:
+                await asyncio.to_thread(self._activate_pending)
+            except PermissionError:
+                if not self.database.exists():
+                    raise
+                self._activation_warning = (
+                    "A newer card database is ready, but the active database is locked by "
+                    "another process. The existing card database remains available; close "
+                    "other Commander Arena servers and restart to activate the update."
+                )
+                self.restart_required = True
         if self.database.exists():
             self.metadata = await asyncio.to_thread(self._read_metadata, self.database)
-            if not self.enabled:
+            if not self.enabled or self._activation_warning is not None:
                 self.ready = True
-                self.phase = "ready"
-                self.detail = "Local card database is ready."
+                if self._activation_warning is not None:
+                    self.phase = "update_ready"
+                    self.detail = self._activation_warning
+                else:
+                    self.phase = "ready"
+                    self.detail = "Local card database is ready."
                 await self._notify_ready()
         elif not self.enabled:
             self.phase = "error"
@@ -269,6 +284,13 @@ class ManagedScryfallData:
                 self.last_checked_at = _utc_now()
 
     def status(self) -> dict[str, Any]:
+        errors = tuple(
+            dict.fromkeys(
+                value
+                for value in (self._activation_warning, self.last_error)
+                if value
+            )
+        )
         return {
             "ready": self.ready,
             "phase": self.phase,
@@ -279,7 +301,7 @@ class ManagedScryfallData:
             "restart_required": self.restart_required,
             "last_checked_at": _iso(self.last_checked_at),
             "next_check_at": _iso(self.next_check_at),
-            "last_error": self.last_error,
+            "last_error": " ".join(errors) or None,
             "database": {
                 "cards": int(self.metadata.get("card_count", "0")),
                 "rulings": int(self.metadata.get("ruling_count", "0")),
