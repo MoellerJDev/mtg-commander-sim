@@ -1,5 +1,10 @@
 # Codex Commander Arena
 
+This is an optional protocol-adapter experiment, not the product execution
+plan. Codex sessions are untrusted clients and are not required for gameplay,
+legality, CI, merges, releases, or rules decisions. Current platform work must
+not optimize prompts, models, provider routing, or live AI games.
+
 Version 0.8.0 supports one neutral primary Codex task coordinating exactly four
 persistent, seat-isolated strategic pilot tasks.
 

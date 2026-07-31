@@ -1,4 +1,4 @@
-"""Four-player, LLM-piloted Commander simulation kernel."""
+"""Deterministic, server-authoritative multiplayer Commander kernel."""
 
 from .version import __version__
 from .carddb import CardDatabase, CardRecord, Ruling

@@ -37,6 +37,10 @@ jobs:
         run: python -m compileall -q mtg_commander_sim tests scripts simctl.py
       - name: Test
         run: python -m unittest discover -s tests -p "test_*.py" -v
+      - name: Verify generated platform status
+        run: python scripts/update_platform_status.py --check
+      - name: Verify pinned rules corpus
+        run: python simctl.py rules verify --root .
       - name: Validate repository and history policy
         run: python scripts/validate_repository.py
       - name: Build wheel

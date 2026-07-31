@@ -2,7 +2,10 @@
 
 ## Goal
 
-A future desktop/web MTG client should reuse the simulation service without changing how game actions are authorized. UI code may render richer state, animations, card images, clocks, and prompts, but it never receives direct mutation access.
+The browser client reuses the simulation service without changing how game
+actions are authorized. UI code may render richer state, animations, card
+presentation, clocks, and prompts, but it never receives direct mutation
+access.
 
 ## Transport-neutral core
 
@@ -121,4 +124,7 @@ A client reconnect can request a full projection, so cursors are an optimization
 
 ## Why the GUI does not require a permission refactor
 
-The client speaks the same projected-state and capability-command protocol as an LLM pilot. A native client replaces the model callback and renders packets; it does not replace the engine, permissions, state projection, or command envelope.
+Every browser, native, scripted, subprocess, or optional AI client speaks the
+same projected-state and capability-command protocol. A new client renders and
+submits packets; it does not replace the engine, permissions, state projection,
+or command envelope.

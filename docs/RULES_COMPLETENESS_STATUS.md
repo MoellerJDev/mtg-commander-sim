@@ -11,7 +11,7 @@ coverage.
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Branch: `agent/rules-completeness`
-- Stacked draft PR:
+- Rules integration PR:
   `https://github.com/MoellerJDev/mtg-commander-sim/pull/1`
 - Rules-program base: `d099fe4`
 - Continuation start: `6517dc0`
@@ -287,7 +287,7 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,785 unit/integration tests pass: 485 ordinary tests plus 3,300 generated
+- 3,788 unit/integration tests pass: 488 ordinary tests plus 3,300 generated
   inventory/source-linkage tests. The latter are not semantic passes.
 - Fifteen focused object/token tests cover monotonic incarnations, draws,
   timestamp moments, identity-sensitive targets and delayed links, private

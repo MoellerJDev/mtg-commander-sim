@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Platform direction
+
+- Made the deterministic, server-authoritative browser platform the primary
+  product target.
+- Removed AI/Codex runs from product, rules, merge, and release completion
+  criteria while retaining existing adapters as optional untrusted clients.
+- Added a generated platform readiness ledger and CI stale-artifact check.
+
 ## 0.8.0 — 2026-07-29
 
 ### Exact-list semantic closure

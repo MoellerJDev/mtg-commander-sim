@@ -27,6 +27,13 @@
 - Record summaries and provider counters are derived from journals. Never
   upgrade recorded provider/model identity to verified by inference, and never
   describe accepted-prefix replay as a completed game.
+- Product gameplay, rules enforcement, CI, merge gates, and releases must not
+  require an LLM, Codex runtime, provider credential, or live AI ruling. An AI
+  client is optional and has no authority beyond the ordinary projected client
+  protocol.
+- Do not spend product slices improving AI strategy, model routing, prompts, or
+  provider sessions. Keep existing provider-specific adapters isolated from the
+  authoritative rules and application layers.
 
 ## Before committing
 
@@ -36,6 +43,7 @@ python scripts/build_test_database.py build --fixture tests/fixtures/scryfall-ex
 # Set MTG_CARD_DB=data/test-ci.sqlite3 for the remaining commands.
 python -m unittest discover -s tests -p 'test_*.py' -v
 python scripts/demo_four_player_protocol.py --db data/test-ci.sqlite3 --out demo
+python scripts/update_platform_status.py --check
 python scripts/validate_repository.py
 python simctl.py rules verify --root .
 python -m build --wheel

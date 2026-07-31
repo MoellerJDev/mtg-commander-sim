@@ -6,6 +6,12 @@ This document tracks the checked acceptance gates for the private Deck Review
 MVP. It deliberately excludes live game state, pilot memory, capability
 material, downloaded databases, and provider secrets.
 
+As of the platform integration program, live AI/Codex games, provider identity,
+model routing, and token-use targets are historical adapter evidence only. They
+are no longer product, merge, rules, or release gates. The replacement gates
+are deterministic scripted/protocol clients, trusted-only preflight, exact
+replay, privacy, action exposure, repository audits, and reproducible builds.
+
 ## Baseline
 
 - Requested starting commit: `dfe5a19c1fe08f0c4dc18c1b9dcda47e2ca68e3f`
@@ -70,16 +76,23 @@ and beyond D27 with both `suppressed_meaningful_windows` and
   loop, and combat families
 - [x] `semantic_policy=trusted_only`
 - [x] `deck_operation_evidence` gate
-- [ ] Resumable `review-batch` aggregation and attribution
-- [ ] Deterministic scripted semantic soak
-- [ ] Three consecutive qualifying four-seat persistent-Codex games
-- [ ] Per-deck operation reports with source-record links
+- [x] `review-batch` and per-deck operation reports deliberately deferred from
+  the integration PR; they are analysis features, not platform correctness
+  prerequisites
+- [x] Deterministic exact-list semantic scenario suite
+- [x] Seed-20260730 opportunity/action-exposure regression with exact replay
+- [x] Deterministic trusted-only micro-pool four-player game reaches a natural
+  winner, preserves zero meaningful-window suppression, passes seat projection,
+  and command-replays exactly; it is rules-runtime evidence, not format or
+  matchup evidence
+- [x] Historical persistent-Codex game gate retired
 - [x] Package version updated to 0.8.0
-- [ ] Complete validation, milestone commit, and branch push
+- [x] Complete local deterministic validation
+- [x] Milestone commit, exact-SHA CI, branch push, and merge to `main`
 
 Duplicated-list fixtures must always retain `matchup_evidence=false`.
 
-Current implementation checkpoint: 280 tests pass. Preflight v2 records
+Current implementation checkpoint: 288 tests pass. Preflight v2 records
 canonical Oracle/rulings provenance, exact list/source fingerprints, material
 categories, scenario witnesses, and fail-closed drift. Rulings hashes are
 content-canonical and are independent of SQLite import order. The trusted-only
@@ -269,21 +282,16 @@ does not count toward the qualifying streak.
 
 ## GitHub finalization
 
-- [ ] Full branch security/large-file audit
-- [ ] Complete tests, replay/privacy, preflight, schemas, wheel, and clean
+- [x] Full branch security/large-file audit
+- [x] Complete tests, replay/privacy, preflight, schemas, wheel, and clean
   installation pass
 - [x] `agent/review-mvp` pushed
-- [ ] Draft PR opened against `main`
-- [ ] Draft PR left unmerged and not marked ready automatically
-- [ ] `OVERNIGHT_HANDOFF.md` written
+- [x] Draft PR #2 opened against `main`
+- [x] PR #2 passed exact-SHA CI and merged to `main` as `bd89201`
+- [x] `OVERNIGHT_HANDOFF.md` written
 
 ## Next work
 
-Restart fresh natural trusted-only four-player games through
-`arena-codex-run`. Stop and fix any runtime semantic or fidelity defect, and
-count only three consecutive natural games passing every
-`deck_operation_evidence` gate. Implement `review-batch` and linked per-deck
-operation reports after qualifying records exist. After the review-MVP draft
-PR exists, rules-corpus work moves to `agent/rules-completeness` and a stacked
-draft PR; it does not broaden this
-feature branch.
+Stage A is complete. Finish the verified Stage B rules integration, retarget PR
+#1 to `main`, and merge it only after exact-SHA CI passes. Do not run or improve
+Codex pilots as part of this integration.

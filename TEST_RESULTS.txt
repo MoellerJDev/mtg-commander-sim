@@ -1,56 +1,77 @@
-# MTG Commander Sim 0.7.0 — exact-interaction verification
+# MTG Commander Sim 0.8.0 — combined platform/rules verification
 
-Date: 2026-07-28
-Python: 3.11
+Date: 2026-07-30
+Python: 3.11.9
 
-## Compile, tests, and corrected record
+## Compile, tests, and deterministic game evidence
 
 PASS: `python -m compileall -q mtg_commander_sim tests scripts simctl.py`
 
-PASS: 132 unit/integration tests in 39.180 seconds using the rebuilt compact
-Scryfall database.
+PASS: 3,788 unit/integration tests in 184.335 seconds using the rebuilt compact
+Scryfall database:
 
-The v0.7 additions cover:
+- 3,300 generated per-rule inventory/source-linkage tests
+- 488 ordinary rules, engine, protocol, replay, privacy, and platform tests
 
-- declarative target groups, modes, counts, distinctness, visibility, and
-  submission/resolution revalidation
-- empty-stack counterspell withholding and target-exposure fidelity failure
-- exact counterspell, storm, pitch, delayed-cost/mana, removal, Channel,
-  graveyard, proliferate, and naming scenarios
-- server-issued kicker, overload, alternate, commander-dependent, and life-X
-  costs
-- trigger target selection at stack creation
-- both payable and unpaid Pact of Negation delayed costs
+Generated source linkage is not a claim that every rule has executable semantic
+coverage. The reviewed ledger remains fail-closed about passing, blocked,
+definition-only, and unreviewed cases.
 
-PASS: the reconstructed seed-20260730 run advanced through turn sequence 8 and
-past decision D27. It recorded zero suppressed meaningful windows and zero
-advertised illegal target actions, passed the seat-projection audit, and
-command-replayed exactly.
+PASS: the trusted-only four-seat micro-pool reached a natural winner with zero
+incorrectly suppressed meaningful windows, passed the seat-projection audit,
+and exact command-replayed.
 
-## Repository validation
+The integration soak exposed and fixed a replay defect: player elimination
+allocated authoritative zone timestamps from incidental mapping insertion
+order. Elimination now processes objects in stable reference/identity order, so
+continuous execution and checkpoint replay produce identical timestamps.
+
+The full-game fixture is rules-runtime and protocol evidence. Its repeated
+micro-pool is not Commander format-legality, deck-quality, or matchup evidence.
+
+## Pinned rules corpus
+
+PASS: `python simctl.py rules verify --root .`
+
+- effective date: 2026-06-19
+- source SHA-256:
+  `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
+- numbered rules verified: 3,300
+- conformance cases verified: 3,300
+- mechanics verified: 425
+- current snapshot complete: false
+
+## Protocol and repository validation
+
+PASS: the four-player protocol demo completed with protocol version 2.1,
+four players, seed 20260728, and compact delta packets smaller than bootstrap.
 
 PASS:
 
-- 11 JSON schemas checked
+- generated platform status stale check
+- 14 JSON schemas checked
 - complete tracked-source credential and raw-capability scan
 - forbidden runtime/database/build artifact scan
 - reachable-history path and oversized-blob scan
-- sanitized replay-fixture policy check
+- sanitized public replay-fixture policy check
+
+The scan covered 244 tracked files and 11,163,212 tracked bytes.
 
 ## Package
 
-PASS: built `mtg_commander_sim-0.7.0-py3-none-any.whl`.
+PASS: built `mtg_commander_sim-0.8.0-py3-none-any.whl`.
 
-PASS: installed the wheel into a fresh virtual environment using
-`--no-index --no-deps`; the installed package reported version 0.7.0 and its
-CLI help command completed.
-
-Wheel SHA-256:
-`8d3083c7db3f11aec5c8cee380d7cd529657c828db11595af9222f2ed6644d76`
+PASS: installed the wheel into a fresh virtual environment; the installed
+package reported version 0.8.0 and its CLI smoke test completed.
 
 ## Evidence boundary
 
-These checks establish the 0.7.0 target/action invariant, reviewed interaction
-programs, replay, and privacy boundary. They do not establish full semantic
-closure for either 100-card list, a completed four-player operation review,
-deck superiority, or statistical matchup evidence.
+These checks establish the local combined platform/rules branch, including
+source pinning, replay, privacy, action opportunity, packaging, and repository
+gates. They do not establish a production ASGI server, browser client, durable
+database, complete Comprehensive Rules behavior, Oracle-corpus semantic
+closure, Commander deck legality for the micro-pool, deck superiority, or
+statistical matchup evidence.
+
+Exact-SHA GitHub Actions evidence is recorded on pull request #1 after this
+ordinary integration merge is committed and pushed.

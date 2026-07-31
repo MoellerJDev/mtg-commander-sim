@@ -1,71 +1,70 @@
 # Roadmap
 
-Version 0.7.0 adds exact public target generation, mode-aware action exposure,
-resolution revalidation, and the reviewed interaction slice on top of the
-resumable private-search and fixed-seat arena baseline. The phases below
-describe remaining production depth; neither the scripted regression nor a
-duplicated four-seat pilot fixture claims a complete Oracle corpus or matchup
-evidence.
+The product target is a deterministic, server-authoritative, browser-based
+four-player Commander platform. The current 0.8.x line is a rules-kernel,
+semantic, protocol, replay, and privacy foundation. It is not a complete
+Comprehensive Rules or Oracle implementation and does not yet include a network
+server, durable production database, or browser client.
 
-## Phase 1 — stabilize the multiplayer kernel
+The generated current ledger is
+`docs/PLATFORM_IMPLEMENTATION_STATUS.md`.
 
-- maintain passing regression suite for turns, priority, combat, mulligans, state-based actions, and permissions
-- add replay fixtures for real four-player games
-- add property tests for zone membership and patch round trips
-- add server-side timeouts/default actions for disconnected pilots
+## Phase 0 — integrate the deterministic foundation
 
-## Phase 2 — semantic coverage from actual games
+- [x] merge `agent/review-mvp` into `main` through an ordinary merge commit
+- [x] merge updated `main` into `agent/rules-completeness` without rewriting history
+- retarget and merge the rules branch into `main`
+- retain exact replay, privacy, repository, schema, and packaging gates
+- remove AI-run games and provider identity from product completion criteria
 
-- record arbiter misses by Oracle/ability key
-- compile the highest-frequency spell, ETB, death, landfall, and activated-ability templates
-- add deterministic tests using local Oracle text and rulings
-- add choice templates rather than encoding choices inside arbiter effects
+## Phase 1 — strict command and domain boundaries
 
-## Phase 3 — deeper rules modules
+- versioned browser command envelopes and strict choice schemas
+- server-derived authenticated principals
+- idempotent commands and stale revision rejection
+- canonical public versus authoritative object identities
+- transaction rollback and architecture dependency tests
 
-- continuous-effect layers and dependencies
-- replacement/prevention chooser
-- alternate/additional costs, cost reducers, and a server-issued cost-option compiler
-- restricted/conditional mana lots with spending predicates (rather than a color-only pool)
-- special actions and non-hand casting permissions
-- first/double-strike damage and trample assignment
-- copied/face-down/linked-object edge cases
-- general deterministic loop/shortcut negotiation beyond the two validated shortcut fixtures
+## Phase 2 — single-writer server and persistence
 
-## Phase 4 — arena and batch hardening
+- `GameManager` with one serialized `GameActor` per active game
+- ASGI HTTP/WebSocket gateway
+- guest identities, rooms, seats, deck selection, readiness, and lifecycle
+- persistence ports with in-memory, SQLite development, and PostgreSQL adapters
+- migrations, durable command acknowledgement, checkpoints, reconnect, and
+  process-restart recovery
 
-- OS/process isolation for remote seat contexts beyond the implemented fixed-seat projection/tool boundary
-- arbiter model tier separate from pilots
-- model timeout/retry policy
-- deterministic seeds and replay IDs
-- batch metrics: win rate, turn of elimination, interaction exchanges, and mulligan outcomes; native call/yield/opportunity/retry metrics are implemented
-- parallel game workers over immutable deck definitions and local card data
+## Phase 3 — browser Commander MVP
 
-## Phase 5 — native/web client
+- TypeScript browser client generated from versioned schemas
+- four-player table, local hand, public zones, stack, combat, decisions, and log
+- generic modes, targets, costs, searches, ordering, replacement, trigger, and
+  combat choices
+- safe yields, reconnect/resync, spectators, accessibility, and independent
+  text-forward visual design
+- four isolated browser-context end-to-end tests
 
-- authenticated seat assignment
-- HTTP command endpoint and WebSocket projection stream
-- `ProjectedClientView` reducer in TypeScript
-- card image/zone/combat UI
-- reconnect/full-resync path
-- spectator and postgame analyst views
+## Phase 4 — rules and Oracle expansion
 
-## Version 0.7.0 — interaction correctness
+- dependency-ordered Comprehensive Rules conformance families
+- typed events, universal replacement/prevention, layers, triggers, state-based
+  actions, casting/costs, combat, card forms, and Commander multiplayer
+- typed Oracle compilation, reviewed overrides, rulings linkage, and source-hash
+  invalidation
+- trusted-only declared pools first, then Commander-legal corpus expansion
 
-- data-driven exact target domains across stack and public zones
-- mode-aware target generation before an action is advertised
-- authoritative target revalidation on submission and resolution
-- counterspell and removal characterization for the two exact review lists
-- exact replay and target-fidelity telemetry
+## Phase 5 — deterministic assurance and operations
 
-## Version 0.8.0 — review MVP
+- property, seeded fuzz, mutation, protocol, browser, load, and soak suites
+- security threat model, legal/content boundary, dependency audit, and
+  observability without private-state leakage
+- containerized reproducible development and single-node deployment
+- performance baselines and regression budgets that never suppress legal
+  actions
 
-- exact-list semantic preflight closure for the two review decks
-- batch review aggregation with explicit sample-size and fidelity gates
-- three complete four-seat Codex pilot games only after preflight passes
-- auditable draft-PR evidence without publishing private Game Records
+Existing scripted, manual, subprocess, and optional AI adapters may continue to
+use the ordinary public protocol. No AI system is required for gameplay,
+legality, testing, persistence, replay, merge gates, or releases.
 
-No roadmap phase should expand pilot permissions. New rules and UI features
-remain behind the existing capability and projection boundaries. A duplicated
-deck pod, an incomplete semantic pack, or an undersized sample can never be
-promoted to matchup evidence.
+No roadmap phase modifies either pinned regression deck based on test results or
+promotes a duplicate-list fixture to matchup evidence.

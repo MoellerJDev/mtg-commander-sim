@@ -2,22 +2,25 @@
 
 ## Objective
 
-Run repeatable four-player Commander games in which independent LLM pilots maximize their own chance to win while:
+Host complete four-player Commander games in which independent human or
+automated clients act through a central authoritative server while:
 
 - authoritative state remains deterministic and auditable
 - private information is limited to the correct seat
 - rules interpretation is separate from strategic play
-- model calls occur only at meaningful decisions
-- a future native/web MTG client can reuse the same command and permission model
+- clients are contacted only at meaningful decisions
+- browser, native, scripted, and optional AI clients reuse one command and
+  permission model
 
-The key decision is to stop treating one ChatGPT context as the player, judge, state store, and client simultaneously.
+The key decision is to keep clients untrusted and make the server the sole
+state and rules authority.
 
 ## Layered design
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│ PilotProvider A / B / C / D               Rules arbiter      │
-│ isolated memory + deck profile             semantics only      │
+│ Browser / scripted / manual / subprocess / optional AI clients│
+│ one authenticated principal and projected view per connection │
 └───────────────┬──────────────────────────────────┬───────────┘
                 │ compact action + capability      │
                 ▼                                  ▼
@@ -54,12 +57,13 @@ The key decision is to stop treating one ChatGPT context as the player, judge, s
 └──────────────────────────────────────────────────────────────┘
 ```
 
-`SequentialPilotRunner` is an orchestration adapter, not a source of rules.
+`SequentialPilotRunner` is an optional automation adapter, not a source of rules.
 Each `PilotProvider` receives only the packet already projected for its
 principal, the current decision, and that principal's private `PilotMemory`.
 The runner validates the compact response, records actual provider metadata,
-and submits it through `CommanderSession` and `GameService`. Scripted, manual
-JSON, subprocess JSON, and future hosted-model providers all use this boundary.
+and submits it through `CommanderSession` and `GameService`. Browser, scripted,
+manual JSON, subprocess JSON, and future optional AI providers all use this
+boundary.
 
 Fingerprint-keyed deck profiles are advisory and loaded once into the matching
 seat memory. They never enter `CommanderEngine`, determine legality, or replace
@@ -91,18 +95,14 @@ inspect the preserved authoritative objects after the game.
 | Principal | Default visibility | May decide | Direct state mutation |
 |---|---|---|---|
 | `pilot:A`–`pilot:F` | own private zones, known cards, public state | legal actions/choices for that seat | never |
-| `arbiter` | public state plus resolving-object context | generic effect program, rule-counter/fizzle | only through resolution capability |
+| `arbiter` | development-only public resolving context | characterize unsupported semantics | only through a scoped development capability; prohibited as production rules authority |
 | `analyst` | complete read-only state | none | never |
 | `spectator` | public state | none | never |
 | server/admin process | persistence and lifecycle | administrative operations | not through pilot API |
 
-In a Codex arena, four persistent `gpt-5.6-sol` pilot sessions own seats A–D.
-The primary GPT-5.6 Sol/Ultra task is the neutral coordinator and arbiter. The
-default fast transport uses low reasoning on the priority tier and starts the
-four sessions outside the desktop child-agent pool, because that pool counts
-the primary against its active-slot limit. A neutral broker routes one
-fixed-seat projection to the corresponding stable session and never substitutes
-its judgment for a legal pilot action.
+Optional automation adapters may retain one isolated context per seat, but they
+have no privileged action or state interface. Production strict rooms require
+trusted compiled semantics and do not consult an arbiter or model for legality.
 
 A capability token is:
 
@@ -129,15 +129,16 @@ Capabilities are **decision authorization**, not login credentials. A future ser
 6. The command is committed transactionally.
 7. Deterministic transitions run until the next genuine decision.
 
-If a model action is illegal, the transaction rolls back and the capability remains live. `SequentialPilotRunner` may retry a bounded number of times with a compact rejection message rather than resending a full state or silently repairing the move.
+If a client action is illegal, the transaction rolls back and the capability
+remains live. An automation adapter may retry a bounded number of times with a
+compact rejection message rather than resending a full state or silently
+repairing the move.
 
-Four pilot threads remain alive concurrently for memory isolation, but game
-decisions are invoked sequentially because Magic grants one principal (or one
-ordered decision group) authority at a time. `SeatScopedPilotTools` fixes the
-seat at process startup and exposes only `get_task`, `submit_action`,
-`get_rules`, `get_profile`, `get_memory`, and `update_memory`.
-`CoordinatorTools` separately exposes public progress, fidelity, and arbiter
-tasks and contains no seat-action method.
+Connections may remain alive concurrently, but game decisions commit
+sequentially because Magic grants one principal (or one ordered decision group)
+authority at a time. The future network gateway derives the principal from the
+authenticated connection and routes commands through the same `GameService`
+transaction boundary.
 
 ### Multiplayer mulligans
 
@@ -265,7 +266,8 @@ newly created token.
 
 ## Rules arbitration and semantic programs
 
-The engine should not infer arbitrary card behavior from prose during a state transition.
+The engine must not infer arbitrary card behavior from prose during a state
+transition. Strict production games execute only trusted compiled semantics.
 
 ### Exact target plans
 
@@ -297,13 +299,17 @@ and delayed effects, copy/token engines, and the remaining exact Mishra
 artifact families. This is a closed reviewed slice behind `CommanderEngine`,
 not a claim that arbitrary Oracle text or the complete layer system is solved.
 
-When the top stack object lacks registered semantics:
+In development mode only, when the top stack object lacks registered semantics:
 
 1. the kernel creates an `arbiter.resolve` capability
 2. the arbiter receives public state, the resolving object, targets, modes, X, and local card text
 3. the arbiter returns generic DSL effects or a rule-fizzle/counter decision
 4. stable semantics may be registered under an Oracle/ability key
-5. future occurrences resolve without another rules call
+5. future occurrences may be characterized after review
+
+This development path never counts as a production rule decision, conformance
+evidence, or release evidence. Under `semantic_policy=trusted_only`, the engine
+fails closed before an unsupported material behavior can mutate state.
 
 Generic operations include draw, move, sacrifice, destroy, exile, bounce, discard, tap/untap, damage, counter, search, mill, token creation, copy, attachment, control change, delayed trigger scheduling, and player choice delegation.
 
@@ -416,7 +422,7 @@ durable decision and command rows, never incremented by convention.
 Review is derived rather than authoritative. Its fidelity gate prevents a
 rules-incomplete smoke run from silently becoming deck-performance evidence.
 
-## Token minimization
+## Protocol and bandwidth efficiency
 
 ### Bootstrap once, patch thereafter
 
@@ -444,9 +450,11 @@ The kernel handles shuffling, drawing, turn-based actions, the implemented
 snapshot-based state actions, ordinary mana payment, empty priority, turn
 progression, and registered semantics without a model call.
 
-### Separate strategy and rules contexts
+### Separate client strategy and rules authority
 
-Pilots do not spend tokens restating card behavior. The arbiter does not receive unrelated private hands. Analysts receive complete data only after or outside live strategic decisions.
+Clients do not restate card behavior. The server derives legality from pinned
+rules and semantic data. Analysts receive complete data only after or outside
+live strategic decisions.
 
 ## Resolved failures from the duel prototype
 
@@ -544,6 +552,11 @@ The architecture is suitable for a serious project, but complete Magic coverage 
 - multiplayer shortcut and deterministic loop negotiation
 - elimination or reviewed override of every material full-corpus Oracle
   residual
-- durable database persistence, authentication, and WebSocket delivery
+- single-writer game actors, durable database persistence, authentication, and
+  WebSocket delivery
+- browser rooms, seats, reconnect, spectators, generic decisions, and
+  accessibility
 
-These modules fit behind the current `CommanderEngine`/`GameService` boundary. They do not require granting pilots broader permissions or replacing the command protocol.
+These modules fit behind the current `CommanderEngine`/`GameService` boundary.
+They do not require granting clients broader permissions, replacing the command
+protocol, or introducing an AI rules authority.

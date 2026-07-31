@@ -1,5 +1,11 @@
 # LLM Pilot and Arbiter Protocol
 
+This document describes an optional untrusted client adapter retained for
+experimentation. It is not the product architecture, a rules authority, or a
+CI/merge/release gate. Browser, scripted, manual, subprocess, and future AI
+clients must use the same projected-state and capability-command boundary.
+Strict production games never require a model-authored ruling.
+
 ## Recommended process layout
 
 For strict hidden information, use five independent contexts:

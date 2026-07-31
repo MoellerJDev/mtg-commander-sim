@@ -17222,7 +17222,14 @@ class CommanderEngine:
             player.in_game = False
             self.state.eliminated_players.append(seat)
             # Objects owned by the player leave the game.
-            for card in list(self.state.cards.values()):
+            # Checkpoints are serialized with sorted mapping keys, while a
+            # continuously running game retains construction order. Zone
+            # timestamps are authoritative, so elimination must not allocate
+            # them according to incidental dictionary insertion order.
+            for card in sorted(
+                self.state.cards.values(),
+                key=lambda value: (value.ref, value.object_id),
+            ):
                 if card.owner == seat and card.zone != "outside":
                     hidden_identity = card.zone in HIDDEN_ZONES or card.face_down
                     if card.zone == "stack":
@@ -17247,7 +17254,10 @@ class CommanderEngine:
             # A conservative baseline for ended control effects: surviving
             # objects owned by others return to their owners; any leftovers are
             # exiled. A compiled continuous-effect layer may refine this later.
-            for card in list(self.state.cards.values()):
+            for card in sorted(
+                self.state.cards.values(),
+                key=lambda value: (value.ref, value.object_id),
+            ):
                 if card.zone == "battlefield" and card.controller == seat and card.owner != seat:
                     owner = card.owner
                     if self.state.players[owner].in_game:
