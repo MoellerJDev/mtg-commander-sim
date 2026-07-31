@@ -1,5 +1,5 @@
 {
-  "contract_count": 39,
+  "contract_count": 40,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -203,6 +203,12 @@
       "mechanic_id": "cr-600-general",
       "path": "mechanics/contracts/spells-abilities-effects-general.json",
       "sha256": "28106ee4bc9f6d04a0448f540672dac75f90b370f2d79c1b4ecc549b8059130c",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-405-stack",
+      "path": "mechanics/contracts/stack.json",
+      "sha256": "b3c6bcb76fd2a50771de29327cb41a63dbb9461135a6c837c6a701a181ec20cb",
       "version": 1
     },
     {
@@ -6013,17 +6019,41 @@
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/stack.json",
+      "contract_sha256": "b3c6bcb76fd2a50771de29327cb41a63dbb9461135a6c837c6a701a181ec20cb",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "GameState.stack, StackItem, CommanderEngine cast/activate/trigger placement, priority pass, resolution, mana, stabilization, and player-elimination paths",
+      "implementation_version": "stack-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "casting currently moves the card to the stack after choices and payment rather than at CR 601.2a's first announcement step",
+        "complete simultaneous effect-created stack-object placement and same-controller ordering are not represented",
+        "spell and ability characteristics on the stack do not use a complete typed characteristics model",
+        "triggered mana abilities and complete mana-ability side-effect grammar remain incomplete",
+        "the full CR 116 special-action catalog is not represented",
+        "the full CR 703 turn-based-action catalog is not represented",
+        "concession is currently exposed only through a priority decision rather than at any time",
+        "complete CR 800.4a player-leaves-game ordering, control effects, and all multiplayer variants remain incomplete"
+      ],
       "mechanic_id": "cr-405-stack",
       "official_name": "Stack",
       "rule_references": [
         "405"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_405_rule",
+        "test_stack_is_last_in_first_out_and_replays_exactly",
+        "test_non_top_stack_object_cannot_begin_resolution",
+        "test_activated_mana_ability_is_immediate_and_preserves_priority",
+        "test_effect_and_state_action_execute_without_stack_objects",
+        "test_player_leaving_removes_owned_spell_and_controlled_ability",
+        "test_cast_trigger_is_queued_above_spell_before_priority_returns",
+        "test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
+        "test_battlefield_static_effect_stops_when_source_leaves",
+        "test_ordinary_untap_is_stackless_and_advances_directly_to_upkeep"
+      ],
       "trust_level": "untrusted"
     },
     {

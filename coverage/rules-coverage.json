@@ -1,38 +1,38 @@
 {
   "conformance": {
     "assertion_kind_counts": {
-      "executable_engine": 66,
-      "inventory_only": 2844,
-      "static_traceability": 64,
-      "unsupported_fail_closed": 326
+      "executable_engine": 71,
+      "inventory_only": 2829,
+      "static_traceability": 66,
+      "unsupported_fail_closed": 334
     },
-    "behavioral_cases": 387,
-    "behavioral_passing_cases": 61,
-    "behavioral_passing_fraction": 0.157623,
-    "blocked_cases": 326,
+    "behavioral_cases": 396,
+    "behavioral_passing_cases": 62,
+    "behavioral_passing_fraction": 0.156566,
+    "blocked_cases": 334,
     "classification_counts": {
-      "behavioral": 387,
-      "definition_only": 64,
-      "structural": 5,
-      "unclassified": 2844
+      "behavioral": 396,
+      "definition_only": 66,
+      "structural": 9,
+      "unclassified": 2829
     },
     "current_snapshot_complete": false,
-    "definition_only_cases": 64,
+    "definition_only_cases": 66,
     "effective_date": "2026-06-19",
-    "inventory_only_cases": 2844,
+    "inventory_only_cases": 2829,
     "schema_version": 1,
     "semantic_failing_cases": 0,
-    "semantic_passing_cases": 66,
+    "semantic_passing_cases": 71,
     "skipped_cases": 0,
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
     "status_counts": {
-      "blocked": 326,
-      "definition_only": 64,
-      "passing": 66,
-      "unreviewed": 2844
+      "blocked": 334,
+      "definition_only": 66,
+      "passing": 71,
+      "unreviewed": 2829
     },
     "total_cases": 3300,
-    "unreviewed_cases": 2844
+    "unreviewed_cases": 2829
   },
   "conformance_snapshot_complete": false,
   "current_snapshot_complete": false,
