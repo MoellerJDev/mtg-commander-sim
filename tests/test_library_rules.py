@@ -9,6 +9,18 @@ from mtg_commander_sim.engine import GameRuleError
 from mtg_commander_sim.record import authoritative_state_hash
 
 
+def _json_strings(value):
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            yield str(key)
+            yield from _json_strings(item)
+    elif isinstance(value, (list, tuple)):
+        for item in value:
+            yield from _json_strings(item)
+
+
 class LibraryRuleTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -95,7 +107,6 @@ class LibraryRuleTests(unittest.TestCase):
         session = self.make_session(40102, players=4)
         engine = session.engine
         packet = session.packet("pilot:A", full=True)
-        encoded = json.dumps(packet, sort_keys=True)
 
         for seat in engine.seats:
             self.assertEqual(
@@ -106,8 +117,12 @@ class LibraryRuleTests(unittest.TestCase):
             "known_top",
             packet["state"]["players"]["B"],
         )
+        projected_strings = set(_json_strings(packet))
         for object_id in engine.state.players["B"].zones["library"]:
-            self.assertNotIn(engine.state.cards[object_id].ref, encoded)
+            self.assertNotIn(
+                engine.state.cards[object_id].ref,
+                projected_strings,
+            )
 
     def test_look_top_zero_is_empty_and_negative_fails_atomically(self):
         session = self.make_session(40120)
