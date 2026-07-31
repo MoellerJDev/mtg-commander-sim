@@ -58,6 +58,11 @@ permissions, division, and opponent-made choices remain explicitly untrusted.
 CR 600 pins the Spells, Abilities, and Effects section taxonomy to the
 dependent CR 601-609 contracts. Because CR 600 contains only a heading, it is
 definition-only and does not create a standalone behavioral claim.
+CR 513 traces the end-step boundary, represented permanent and delayed trigger
+collection before priority, exact replay, the no-backing-up rule, and duration
+handoff to cleanup. It remains partial because the two trigger families do not
+yet share one universal same-controller/APNAP ordering batch and complete
+Oracle trigger grammar remains untrusted.
 CR 514 traces cleanup discard, represented damage and turn-duration clearing,
 ordinary no-priority advancement, stabilization, delayed cleanup triggers,
 exceptional priority, and the required additional cleanup step. It remains

@@ -168,6 +168,9 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 513 end-step boundary with no turn-based action,
+  permanent and delayed trigger collection before priority, exact replay, and
+  no retroactive triggers for objects or abilities created later in the step
 - source-reviewed CR 514 cleanup sequencing with private simultaneous discard,
   ordinary no-priority advancement, and repeat-cleanup handling after an
   exceptional priority window; universal turn-duration expiration and complete

@@ -3198,6 +3198,30 @@ class CommanderEngine:
             self._finish_cleanup()
             return
 
+        if step == "end_step":
+            # The end step has no turn-based action.  Collect both
+            # permanent-based and delayed beginning-of-step triggers before
+            # granting priority.  A delayed trigger must not cause the
+            # semantic event dispatch to be skipped.
+            context = {
+                "phase": phase,
+                "step": step,
+                "player": active,
+            }
+            self._dispatch_semantic_event("step.begin", context)
+            delayed = self._matching_delayed_triggers(
+                "step.begin",
+                context,
+            )
+            if delayed:
+                self._start_trigger_batch(
+                    delayed,
+                    after="grant_priority",
+                )
+                return
+            self._grant_priority(active)
+            return
+
         delayed = self._matching_delayed_triggers("step.begin", {"phase": phase, "step": step, "player": active})
         if delayed:
             self._start_trigger_batch(delayed, after="grant_priority")
@@ -4055,7 +4079,10 @@ class CommanderEngine:
                 if self.state.turn_sequence <= int(expected):
                     return False
                 continue
-            if key == "player" and expected == "controller":
+            if (
+                key == "player"
+                and expected in {"controller", "$controller"}
+            ):
                 expected = trigger.controller
             if isinstance(expected, (list, tuple, set)):
                 if context.get(key) not in expected:

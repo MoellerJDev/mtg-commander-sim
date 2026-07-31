@@ -1,5 +1,5 @@
 {
-  "contract_count": 27,
+  "contract_count": 28,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -71,6 +71,12 @@
       "mechanic_id": "cr-609-effects",
       "path": "mechanics/contracts/effects.json",
       "sha256": "f1360921a4ab49d10db14a3055c71ba6b8385ca606b407159fe23d0144d784c9",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-513-end-step",
+      "path": "mechanics/contracts/end-step.json",
+      "sha256": "92350699072900a3115dec49ff7643c484ba3ee647bb7b007799f1d8b0d30e7e",
       "version": 1
     },
     {
@@ -6196,17 +6202,34 @@
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/end-step.json",
+      "contract_sha256": "92350699072900a3115dec49ff7643c484ba3ee647bb7b007799f1d8b0d30e7e",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine end-step entry, semantic and delayed trigger collection, trigger stabilization, priority, delayed-condition matching, and cleanup duration paths",
+      "implementation_version": "end-step-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "permanent and delayed trigger families are not merged into one universal same-controller and APNAP ordering batch",
+        "the Oracle compiler does not recognize every beginning-of-end-step wording, condition, target, mode, or optional choice",
+        "the triggered-ability engine does not cover every source, look-back, intervening-condition, and multiplayer interaction",
+        "the complete turn-duration continuous-effect registry remains incomplete under CR 514"
+      ],
       "mechanic_id": "cr-513-end-step",
       "official_name": "End Step",
       "rule_references": [
         "513"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_513_rule",
+        "test_end_step_has_no_turn_action_then_active_gets_priority_and_replays",
+        "test_permanent_and_delayed_end_step_triggers_both_precede_priority",
+        "test_late_permanent_and_delayed_trigger_wait_for_next_end_step",
+        "test_end_step_created_turn_duration_survives_until_cleanup",
+        "test_determined_iteration_populates_with_haste_and_delayed_sacrifice",
+        "test_daretti_delayed_return_requires_same_logical_object"
+      ],
       "trust_level": "untrusted"
     },
     {

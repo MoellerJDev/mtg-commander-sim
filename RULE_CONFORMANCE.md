@@ -101,11 +101,12 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 312 cases in CR 120, CR 210, CR 310, CR 514, CR 600, CR 601, CR 602,
-CR 603, CR 604, CR 605, CR 606, CR 607, CR 608, CR 609, CR 614, CR 615,
-and CR 616 are source-reviewed: 42 narrow behavioral rules pass with generic
-executable evidence, 222 are blocked with exact missing dependencies, and 48
-are definition-only with contract traceability. The remaining 2,988 cases are
+All 316 cases in CR 120, CR 210, CR 310, CR 513, CR 514, CR 600, CR 601,
+CR 602, CR 603, CR 604, CR 605, CR 606, CR 607, CR 608, CR 609, CR 614,
+CR 615, and CR 616 are source-reviewed: 44 narrow behavioral rules pass with
+generic executable evidence, 222 are blocked with exact missing dependencies,
+and 50 are definition-only with contract traceability. The remaining 2,984
+cases are
 unreviewed and
 inventory-only.
 
@@ -174,6 +175,13 @@ frozen proposals, and opponent-made choices remain blocked.
 CR 600 contains only the General section heading. It is source-reviewed as a
 definition-only taxonomy record linked to the dependent CR 601-609 contracts;
 it makes no independent engine-behavior claim.
+CR 513 adds passing evidence that the end step performs no turn-based action,
+collects represented permanent and delayed boundary triggers before active-
+player priority, does not back up for a permanent or delayed trigger created
+later in the step, and leaves turn-duration effects active until cleanup.
+Ordinary command passage through the step replays exactly. Historical printed
+`at end of turn` wording is definition-only because the engine consumes current
+Oracle text.
 CR 514 adds passing evidence for exact private discard to maximum hand size and
 for the ordinary rule that cleanup grants no priority. Represented state
 actions and delayed cleanup triggers now stabilize before exceptional priority,

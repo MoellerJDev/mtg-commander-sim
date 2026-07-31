@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-513-end-step",
+  "official_name": "End Step",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "513",
+    "513.1",
+    "513.1a",
+    "513.2"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "turn-structure",
+    "priority",
+    "triggered-abilities",
+    "delayed-triggered-abilities",
+    "apnap",
+    "stack",
+    "continuous-effect-durations",
+    "oracle-reference",
+    "multiplayer",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "stack"
+    ],
+    "objects": [
+      "active player",
+      "permanents with represented beginning-of-end-step abilities",
+      "represented delayed beginning-of-next-end-step triggers",
+      "turn-duration effects"
+    ],
+    "events": [
+      "end step begins",
+      "permanent-based end-step triggers are detected",
+      "matching delayed triggers are detected",
+      "waiting triggers are put on the stack",
+      "active player receives priority",
+      "a trigger created after the boundary waits for the next end step",
+      "turn-duration effects continue until cleanup"
+    ],
+    "state_reads": [
+      "current phase and step",
+      "active player",
+      "battlefield semantic trigger sources",
+      "active delayed triggers and their conditions",
+      "stack and pending trigger batches"
+    ],
+    "state_writes": [
+      "semantic trigger batches",
+      "delayed trigger active state",
+      "triggered ability stack objects",
+      "priority player and pass state"
+    ],
+    "costs": [],
+    "timing": [
+      "the end step performs no turn-based action",
+      "the beginning boundary is dispatched exactly once",
+      "all represented waiting trigger families are collected before priority",
+      "the active player receives the first priority window",
+      "the event boundary is not repeated for a trigger created later in the step",
+      "until-end-of-turn and this-turn durations end in cleanup, not in the end step"
+    ],
+    "targets": [
+      "represented triggered abilities retain their compiled target schemas"
+    ],
+    "choices": [
+      "represented same-controller trigger groups use trigger-order decisions",
+      "complete cross-family ordering remains a dependency"
+    ],
+    "hidden_information": [
+      "the step boundary itself reveals no hidden information",
+      "trigger payload visibility remains governed by the compiled semantic program"
+    ],
+    "apnap": [
+      "represented semantic and delayed trigger families are each grouped in active-player/nonactive-player order",
+      "complete cross-family APNAP merging remains incomplete"
+    ],
+    "layers": [
+      "turn-duration continuous effects remain active through the end step and expire in cleanup"
+    ],
+    "replacement_effects": [
+      "the end-step boundary performs no replaceable turn-based action"
+    ],
+    "copy": [
+      "copy status does not cause the beginning boundary to repeat"
+    ],
+    "control_change": [
+      "trigger controller is captured by the trigger subsystem at trigger time"
+    ],
+    "zone_change": [
+      "a permanent entering after the beginning boundary does not receive a retroactive trigger"
+    ],
+    "source_leaves": [
+      "a represented delayed trigger is independent of its source unless its compiled condition says otherwise"
+    ]
+  },
+  "variants": [
+    "ordinary end step with no waiting triggers",
+    "permanent-based beginning-of-end-step trigger",
+    "delayed beginning-of-next-end-step trigger",
+    "both represented trigger families waiting at the boundary",
+    "permanent enters after the boundary",
+    "delayed trigger is created after the boundary",
+    "turn-duration effect is created during the end step",
+    "multiplayer priority"
+  ],
+  "witness_cards": [
+    {
+      "name": "Daretti, Scrap Savant",
+      "oracle_id": "ea9f4de3-fc35-435a-8dff-a5657d14a9bd"
+    },
+    {
+      "name": "Determined Iteration",
+      "oracle_id": "e4ed7935-0263-4cde-8118-ac18fffce3ef"
+    },
+    {
+      "name": "Mishra, Eminent One",
+      "oracle_id": "d3438037-3efd-4ce0-88ec-6d48ab521992"
+    }
+  ],
+  "rulings": [
+    "Daretti, Scrap Savant — 2014-11-07 — The emblem returns the artifact only if that same card remains in the graveyard when the delayed ability resolves at the beginning of the next end step."
+  ],
+  "test_ids": [
+    "test_contract_traces_every_cr_513_rule",
+    "test_end_step_has_no_turn_action_then_active_gets_priority_and_replays",
+    "test_permanent_and_delayed_end_step_triggers_both_precede_priority",
+    "test_late_permanent_and_delayed_trigger_wait_for_next_end_step",
+    "test_end_step_created_turn_duration_survives_until_cleanup",
+    "test_determined_iteration_populates_with_haste_and_delayed_sacrifice",
+    "test_daretti_delayed_return_requires_same_logical_object"
+  ],
+  "implementation": {
+    "component": "CommanderEngine end-step entry, semantic and delayed trigger collection, trigger stabilization, priority, delayed-condition matching, and cleanup duration paths",
+    "version": "end-step-v1"
+  },
+  "known_blockers": [
+    "permanent and delayed trigger families are not merged into one universal same-controller and APNAP ordering batch",
+    "the Oracle compiler does not recognize every beginning-of-end-step wording, condition, target, mode, or optional choice",
+    "the triggered-ability engine does not cover every source, look-back, intervening-condition, and multiplayer interaction",
+    "the complete turn-duration continuous-effect registry remains incomplete under CR 514"
+  ],
+  "review_status": "draft"
+}
