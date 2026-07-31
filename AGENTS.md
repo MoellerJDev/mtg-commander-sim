@@ -55,6 +55,21 @@ Never stage `run/`, a SQLite database, a raw deck cache, a capability-bearing
 packet, or a live Game Record. Regression records must be generated in a
 temporary directory from sanitized recipes.
 
+## Before merging
+
+Run the reusable gate from a clean, committed branch:
+
+```bash
+python scripts/local_merge_gate.py \
+  --expected-branch <branch> \
+  --expected-sha <full-sha>
+```
+
+It orchestrates the commands above plus the focused opportunity, replay,
+privacy, deterministic four-player, protocol-demo, dependency, and clean-exit
+checks. Its logs and summary stay under ignored
+`local/merge-gates/<full-sha>/`.
+
 ## Architecture tests required
 
 Changes touching turns, priority, combat, state-based actions, mulligans, permissions, projection patches, or semantic resolution require regression tests.
