@@ -16025,7 +16025,11 @@ class CommanderEngine:
         legal_blocks: dict[str, list[str]] = {}
         for oid in self.state.players[defender].zones["battlefield"]:
             card = self.state.cards[oid]
-            if card.controller != defender or card.tapped or card.phased_out:
+            if (
+                card.controller != defender
+                or card.tapped
+                or card.phased_out
+            ):
                 continue
             card_types, _, _ = self._type_parts(
                 str(
@@ -16083,7 +16087,11 @@ class CommanderEngine:
                     or ""
                 )
             )
-            if blocker.tapped or "creature" not in blocker_types:
+            if (
+                blocker.tapped
+                or blocker.phased_out
+                or "creature" not in blocker_types
+            ):
                 raise GameRuleError(f"{blocker.ref} cannot block")
             if "battle" in blocker_types:
                 raise GameRuleError(

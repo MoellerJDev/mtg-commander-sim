@@ -62,6 +62,10 @@ CR 510 traces combat-damage assignment authority, legal recipients, exact
 power totals, atomic rollback, and ordinary simultaneous dealing. First/double
 strike, trample, lifelink, APNAP damage triggers, and the universal simultaneous
 replacement/prevention batch remain blocked.
+CR 509 traces ordinary blocker eligibility, defending-player routing, atomic
+declaration rollback, blocking-state lifetime, multiplayer declaration order,
+and the priority handoff. Requirements, block costs, declaration triggers,
+multi-attacker blocks, and entry-blocking effects remain blocked.
 CR 511 traces end-of-combat priority, represented boundary triggers, and the
 removal-from-combat handoff into postcombat main. The complete grammar for
 effects lasting until end of combat remains blocked.

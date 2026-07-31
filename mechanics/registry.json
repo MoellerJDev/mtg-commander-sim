@@ -1,5 +1,5 @@
 {
-  "contract_count": 31,
+  "contract_count": 32,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -65,6 +65,12 @@
       "mechanic_id": "deathtouch",
       "path": "mechanics/contracts/deathtouch.json",
       "sha256": "9c3c4b6ed7f7a54ff49d8cdfd7c9bfe112cac135aaa126a1a7b8a87d0df7f8e9",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-509-declare-blockers-step",
+      "path": "mechanics/contracts/declare-blockers-step.json",
+      "sha256": "31b5402e1adab1ffe9459e0eee1ca2841dd2e5e7f9ea9eb75debbe251a2272f1",
       "version": 1
     },
     {
@@ -6160,17 +6166,40 @@
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/declare-blockers-step.json",
+      "contract_sha256": "31b5402e1adab1ffe9459e0eee1ca2841dd2e5e7f9ea9eb75debbe251a2272f1",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine blocker declaration and combat-state transition",
+      "implementation_version": "declare-blockers-step-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "the complete restriction and evasion grammar is not implemented",
+        "block requirements and maximum-requirement solving are not implemented",
+        "block costs, cost locking, mana abilities, and ordered payment are not implemented",
+        "declare-blockers trigger generation and APNAP placement are incomplete",
+        "effects that cause blocks or put creatures onto the battlefield blocking are not implemented",
+        "one creature blocking several attackers is not supported"
+      ],
       "mechanic_id": "cr-509-declare-blockers-step",
       "official_name": "Declare Blockers Step",
       "rule_references": [
         "509"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_509_rule",
+        "test_ordinary_block_becomes_blocking_then_grants_priority",
+        "test_phased_or_tapped_creature_is_not_offered_as_blocker",
+        "test_malicious_phased_block_rolls_back_valid_partial_block",
+        "test_blocking_marker_clears_when_combat_phase_ends",
+        "test_multiple_defenders_block_sequentially",
+        "test_flying_attacker_exposes_only_flying_or_reach_blockers",
+        "test_shadow_and_protection_restrict_blocking",
+        "test_siege_is_attackable_and_its_protector_blocks",
+        "test_battle_creature_cannot_attack_or_block",
+        "test_blocked_attacker_assigns_nothing_after_blocker_leaves"
+      ],
       "trust_level": "untrusted"
     },
     {

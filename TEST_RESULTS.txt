@@ -7,19 +7,18 @@ Python: 3.11.9
 
 PASS: `python -m compileall -q mtg_commander_sim tests scripts simctl.py`
 
-PASS: 3,805 unit/integration tests in 208.373 seconds using the rebuilt compact
+PASS: 3,810 unit/integration tests in 214.354 seconds using the rebuilt compact
 Scryfall database:
 
 - 3,300 generated per-rule inventory/source-linkage tests
-- 505 ordinary rules, engine, protocol, replay, privacy, and platform tests
+- 510 ordinary rules, engine, protocol, replay, privacy, and platform tests
 
-The nine new CR 510 tests verify source traceability, authoritative
-multi-blocker assignment, excessive-total rejection, noncombat-source
-rejection, nonpositive-power nonassignment, departed-blocker nonassignment,
-unrelated-recipient rejection, strict assignment fields, atomic rollback,
-exact replay, and fail-closed first strike. First/double strike, trample,
-lifelink, universal simultaneous replacement/prevention handling, and
-post-damage APNAP trigger ordering remain blocked.
+The five new CR 509 tests verify source traceability, ordinary blocker
+declaration and exact replay, phased/tapped exclusion, transactional rejection
+of a malicious partial declaration, blocking-state lifetime, and the ordinary
+priority handoff. Requirements, complete restrictions, block costs,
+declaration triggers, multi-attacker blocking, blocked-status effects, and
+entry-blocking remain blocked.
 
 Generated source linkage is not a claim that every rule has executable semantic
 coverage. The reviewed ledger remains fail-closed about passing, blocked,
@@ -63,7 +62,7 @@ PASS:
 - reachable-history path and oversized-blob scan
 - sanitized public replay-fixture policy check
 
-The scan covered 250 tracked files and 11,219,209 tracked bytes.
+The scan covered 253 tracked files and 11,259,832 tracked bytes.
 
 ## Package
 
@@ -74,15 +73,15 @@ package reported version 0.8.0 and its CLI smoke test completed.
 
 ## Evidence boundary
 
-These checks establish the local CR 510 focused branch atop the green CR 511
-main baseline, including source pinning, combat-assignment authority, replay,
+These checks establish the local CR 509 focused branch atop the green CR 510
+main baseline, including source pinning, blocker-declaration authority, replay,
 privacy, action opportunity, packaging, and repository gates. They do not
-establish first/double strike, trample, lifelink, complete simultaneous-event
-or APNAP damage-trigger semantics, a production ASGI server, browser client,
+establish requirements, generic block costs, complete restriction or
+declaration-trigger semantics, entry-blocking effects, a production ASGI server, browser client,
 durable database, complete Comprehensive Rules behavior,
 Oracle-corpus semantic closure, Commander deck legality for the micro-pool,
 deck superiority, or statistical matchup evidence.
 
 The baseline main commit's exact-SHA GitHub Actions matrix is recorded on pull
-request #4 and run 30606644835. Exact-SHA CI for the focused CR 510 commit is
+request #5 and run 30608853469. Exact-SHA CI for the focused CR 509 commit is
 not claimed until that commit is pushed.

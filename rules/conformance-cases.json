@@ -29707,21 +29707,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-509",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_contract_traces_every_cr_509_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/declare-blockers-step.json"
+      ],
+      "notes": [
+        "Section heading; CR 509.1-4 carry the behavioral requirements."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "509",
       "rule_text_sha256": "88c008d0680bee8d3c1965eff08bc52aa31dab54f4cb369584d9d4f9a1ba0ccf",
       "schema_version": 1,
@@ -29730,26 +29734,40 @@
         "end_line": 2340,
         "start_line": 2339
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "complete_ordered_declaration_cost_requirement_and_trigger_sequence_not_implemented"
       ],
       "case_id": "cr-509.1",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "509"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_malicious_phased_block_rolls_back_valid_partial_block"
+      ],
+      "implementation_components": [
+        "CommanderEngine._complete_blockers",
+        "CommanderEngine.transaction"
+      ],
+      "notes": [
+        "Represented declarations roll back atomically, but the full CR 509.1a-i sequence is not implemented."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.1",
       "rule_text_sha256": "35cfca82aad4c314f04e12ca5c06e37f4d411fd590e5b18cc0634b232a3d0a28",
       "schema_version": 1,
@@ -29758,26 +29776,44 @@
         "end_line": 2342,
         "start_line": 2341
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-509.1a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "509.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_ordinary_block_becomes_blocking_then_grants_priority",
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_phased_or_tapped_creature_is_not_offered_as_blocker",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_creature_cannot_attack_or_block",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_is_attackable_and_its_protector_blocks"
+      ],
+      "implementation_components": [
+        "CommanderEngine._issue_next_blocker",
+        "CommanderEngine._complete_blockers"
+      ],
+      "notes": [
+        "The server derives untapped non-Battle creatures and only attackers assigned to the declaring defender; a legal declaration command-replays exactly."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "509.1a",
       "rule_text_sha256": "66ce9109114e388b377660ecb252011fcf7e84cae24f6314216753a45f358f35",
       "schema_version": 1,
@@ -29786,26 +29822,40 @@
         "end_line": 2344,
         "start_line": 2343
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "complete_cumulative_block_restriction_and_evasion_grammar_not_implemented"
       ],
       "case_id": "cr-509.1b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "509.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_exact_combat_keywords.ExactCombatKeywordTests.test_flying_attacker_exposes_only_flying_or_reach_blockers",
+        "tests.test_exact_combat_keywords.ExactCombatKeywordTests.test_shadow_and_protection_restrict_blocking"
+      ],
+      "implementation_components": [
+        "CommanderEngine._can_block"
+      ],
+      "notes": [
+        "Flying, reach, shadow, protection, and an exact cannot-block subset are witnesses only; cumulative and conditional restrictions remain incomplete."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.1b",
       "rule_text_sha256": "ce3612ce3603396d17c816bccee7094071ccdc6fad352686b5fa0d4bc7935970",
       "schema_version": 1,
@@ -29814,16 +29864,16 @@
         "end_line": 2348,
         "start_line": 2345
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "block_requirement_maximization_solver_not_implemented"
       ],
       "case_id": "cr-509.1c",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509.1"
@@ -29831,9 +29881,16 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Must-block requirements, menace interactions, optional block costs, and repeated-combat requirements need a shared constraint solver."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "509.1c",
       "rule_text_sha256": "4a38f04957afd3814357938a4110046539082b45db15d649a42f8a200c113393",
       "schema_version": 1,
@@ -29842,16 +29899,16 @@
         "end_line": 2351,
         "start_line": 2349
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "block_cost_grammar_and_locked_total_not_implemented"
       ],
       "case_id": "cr-509.1d",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509.1"
@@ -29859,9 +29916,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Generic mana, tap, sacrifice, discard, and other block-cost collection and locking are absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.1d",
       "rule_text_sha256": "210622edf50480713c1f095c628a587f6a27503c80c970ee77461d6050829ccc",
       "schema_version": 1,
@@ -29870,16 +29933,16 @@
         "end_line": 2353,
         "start_line": 2352
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "block_cost_mana_ability_window_not_implemented"
       ],
       "case_id": "cr-509.1e",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509.1"
@@ -29887,9 +29950,14 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "The CR 605 mana-ability payment window is not connected to blocker costs."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.1e",
       "rule_text_sha256": "df82a3766c97922c6da1143c8be1ef0decf3f9e43359ce440c32983ed5df053e",
       "schema_version": 1,
@@ -29898,16 +29966,16 @@
         "end_line": 2355,
         "start_line": 2354
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "ordered_atomic_block_cost_payment_not_implemented"
       ],
       "case_id": "cr-509.1f",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509.1"
@@ -29915,9 +29983,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "There is no generic all-or-nothing payment transaction for blocker costs."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.1f",
       "rule_text_sha256": "f03538755ad7dd389b0f402fbaab333940bde752453962fad4b95286d0a7464f",
       "schema_version": 1,
@@ -29926,26 +30000,38 @@
         "end_line": 2357,
         "start_line": 2356
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-509.1g",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "509.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_ordinary_block_becomes_blocking_then_grants_priority",
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_blocking_marker_clears_when_combat_phase_ends"
+      ],
+      "implementation_components": [
+        "CommanderEngine._complete_blockers",
+        "CommanderEngine._finish_combat_phase"
+      ],
+      "notes": [
+        "A still-controlled chosen creature receives the authoritative blocking relationship and keeps it until removal from combat or combat-phase finalization."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.1g",
       "rule_text_sha256": "4fa1dd1e2ee47d6a415e5c7a9b286de99ee469b4865c33548d3b704771323683",
       "schema_version": 1,
@@ -29954,26 +30040,39 @@
         "end_line": 2359,
         "start_line": 2358
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "effects_that_make_attackers_blocked_or_unblocked_not_implemented"
       ],
       "case_id": "cr-509.1h",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "509.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_blocked_attacker_assigns_nothing_after_blocker_leaves"
+      ],
+      "implementation_components": [
+        "CombatState.blockers"
+      ],
+      "notes": [
+        "A represented attacker remains blocked when its blockers leave, but generic effects that change blocked status are absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.1h",
       "rule_text_sha256": "84b7ad119915503003dbeccc31733341cb7560a7c28f83b7d2d40ff38d1b4a25",
       "schema_version": 1,
@@ -29982,16 +30081,16 @@
         "end_line": 2361,
         "start_line": 2360
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "declare_blockers_trigger_event_generation_not_implemented"
       ],
       "case_id": "cr-509.1i",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509.1"
@@ -29999,9 +30098,14 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "The blocker declaration path does not emit the complete trigger-event family."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.1i",
       "rule_text_sha256": "384d458e1f3e2bb589a0f4caeef208012d6b9761f8d79c52969ff8ae2bf6bb73",
       "schema_version": 1,
@@ -30010,26 +30114,38 @@
         "end_line": 2363,
         "start_line": 2362
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-509.2",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "509"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_ordinary_block_becomes_blocking_then_grants_priority",
+        "tests.test_multiplayer_rules.MultiplayerRuleTests.test_multiple_defenders_block_sequentially"
+      ],
+      "implementation_components": [
+        "CommanderEngine._issue_next_blocker",
+        "CommanderEngine._grant_priority"
+      ],
+      "notes": [
+        "After every represented defending player declares, the active player receives the ordinary priority window."
+      ],
+      "required_scenarios": [
+        "positive",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "509.2",
       "rule_text_sha256": "dfb29e9864cd503f27d987c942be79b891458729ecc34067f6aadcfc7fcc20ab",
       "schema_version": 1,
@@ -30038,26 +30154,34 @@
         "end_line": 2365,
         "start_line": 2364
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "declare_blockers_trigger_apnap_batch_not_implemented"
       ],
       "case_id": "cr-509.2a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509.2"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "implementation_components": [
+        "CommanderEngine._enqueue_semantic_trigger_batch"
+      ],
+      "notes": [
+        "Complete collection and APNAP ordering of declaration-process triggers before priority is absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "509.2a",
       "rule_text_sha256": "0884d94e20b5fbe0f73fd28454f82d70ee3d3a9b006dae325f3aa3edd8a920a9",
       "schema_version": 1,
@@ -30066,26 +30190,30 @@
         "end_line": 2367,
         "start_line": 2366
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-509.3",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_contract_traces_every_cr_509_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/declare-blockers-step.json"
+      ],
+      "notes": [
+        "Taxonomy introduction for the trigger-condition rules in CR 509.3a-g."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "509.3",
       "rule_text_sha256": "d24ffcdb400d11375b70289dda40ebec5574ae8ef1b7e7bf24408a589dd7dd60",
       "schema_version": 1,
@@ -30094,16 +30222,16 @@
         "end_line": 2369,
         "start_line": 2368
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "blocks_trigger_provenance_and_once_per_combat_not_implemented"
       ],
       "case_id": "cr-509.3a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509.3"
@@ -30111,9 +30239,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Declared, effect-created, and enters-blocking provenance is not modeled for this trigger family."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.3a",
       "rule_text_sha256": "305fa722e100214ee1dc341f4aa1864004be9dd3392b71d99472494fca2a9e4a",
       "schema_version": 1,
@@ -30122,16 +30256,16 @@
         "end_line": 2371,
         "start_line": 2370
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "per_attacker_blocks_trigger_provenance_not_implemented"
       ],
       "case_id": "cr-509.3b",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509.3"
@@ -30139,9 +30273,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "One blocker blocking several attackers and per-relationship trigger provenance are absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.3b",
       "rule_text_sha256": "e0975e181aeeb9bbb64793ba392e2428d339a5d111ff3575186b295754bd6b67",
       "schema_version": 1,
@@ -30150,16 +30290,16 @@
         "end_line": 2373,
         "start_line": 2372
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "becomes_blocked_transition_trigger_not_implemented"
       ],
       "case_id": "cr-509.3c",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509.3"
@@ -30167,9 +30307,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "The unblocked-to-blocked transition is represented as state, not as the complete trigger event."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.3c",
       "rule_text_sha256": "34933c196ef4a96a371ad963ea74cd4dbf57a04edac35acfa7b2f3ce6949352e",
       "schema_version": 1,
@@ -30178,16 +30324,16 @@
         "end_line": 2375,
         "start_line": 2374
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "per_blocker_becomes_blocked_trigger_not_implemented"
       ],
       "case_id": "cr-509.3d",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509.3"
@@ -30195,9 +30341,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Declared, effect-created, and enters-blocking relationship events are not distinguished."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.3d",
       "rule_text_sha256": "f8ce3e0848233fbc7868caf702dea33f09d118bbca9b290adee1503016f1cce9",
       "schema_version": 1,
@@ -30206,16 +30358,16 @@
         "end_line": 2377,
         "start_line": 2376
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "numeric_block_count_trigger_conditions_not_implemented"
       ],
       "case_id": "cr-509.3e",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509.3"
@@ -30223,9 +30375,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Exact and at-least blocker-count trigger conditions and later relationship changes are absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.3e",
       "rule_text_sha256": "4d9e10beb7263a3367d3f106b41a65c2841a7b6b6768924ea1899cbcbad8baea",
       "schema_version": 1,
@@ -30234,16 +30392,16 @@
         "end_line": 2379,
         "start_line": 2378
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "block_trigger_characteristic_snapshot_not_implemented"
       ],
       "case_id": "cr-509.3f",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509.3"
@@ -30251,9 +30409,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "The engine does not capture a trigger-time characteristic snapshot for blocker events."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.3f",
       "rule_text_sha256": "d40d826c499f10b6b0eabe205245f16f558e6a5f0244b01055991fbf1c402b72",
       "schema_version": 1,
@@ -30262,26 +30426,38 @@
         "end_line": 2382,
         "start_line": 2380
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "attacks_and_isnt_blocked_trigger_event_not_implemented"
       ],
       "case_id": "cr-509.3g",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "509.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_blocked_attacker_assigns_nothing_after_blocker_leaves"
+      ],
+      "implementation_components": [
+        "CombatState.blockers"
+      ],
+      "notes": [
+        "Blocked status persists after blockers leave, but the corresponding declaration-time trigger family is absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.3g",
       "rule_text_sha256": "4a7d67b9f382724d245dc83cfa11ed05a233561a0d872263bf772333035c2059",
       "schema_version": 1,
@@ -30290,16 +30466,16 @@
         "end_line": 2384,
         "start_line": 2383
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "put_onto_battlefield_blocking_choice_and_provenance_not_implemented"
       ],
       "case_id": "cr-509.4",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509"
@@ -30307,9 +30483,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "Generic entry blocking, controller choice, and the distinction between blocking and having blocked are absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.4",
       "rule_text_sha256": "1a17bf4673661a8ce4831acc093072bfd69aafb51eafe8e37dd51ab7e969e1de",
       "schema_version": 1,
@@ -30318,16 +30500,16 @@
         "end_line": 2386,
         "start_line": 2385
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "entry_blocking_attacker_and_defender_revalidation_not_implemented"
       ],
       "case_id": "cr-509.4a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509.4"
@@ -30335,9 +30517,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "The specified attacker and defending-player relationship are not revalidated for entry blocking."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "509.4a",
       "rule_text_sha256": "1ee9897784187269e43efff804d4ddd9c881305ee31eb76b6ed91b36ede2fc35",
       "schema_version": 1,
@@ -30346,16 +30534,16 @@
         "end_line": 2388,
         "start_line": 2387
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "entry_blocking_bypass_of_declaration_constraints_not_implemented"
       ],
       "case_id": "cr-509.4b",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "509.4"
@@ -30363,9 +30551,14 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [],
       "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "notes": [
+        "No generic entry-blocking operation exists on which to enforce this declaration-only exception."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "509.4b",
       "rule_text_sha256": "62a9f970cde4e8f1cc817425dc86724f538c3ce31060244bed9aa4684e37b6f8",
       "schema_version": 1,
@@ -30374,7 +30567,7 @@
         "end_line": 2390,
         "start_line": 2389
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
       "assertion_kind": "static_traceability",

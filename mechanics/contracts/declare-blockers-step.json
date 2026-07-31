@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-509-declare-blockers-step",
+  "official_name": "Declare Blockers Step",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "509",
+    "509.1",
+    "509.1a",
+    "509.1b",
+    "509.1c",
+    "509.1d",
+    "509.1e",
+    "509.1f",
+    "509.1g",
+    "509.1h",
+    "509.1i",
+    "509.2",
+    "509.2a",
+    "509.3",
+    "509.3a",
+    "509.3b",
+    "509.3c",
+    "509.3d",
+    "509.3e",
+    "509.3f",
+    "509.3g",
+    "509.4",
+    "509.4a",
+    "509.4b"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "combat",
+    "illegal-actions",
+    "priority",
+    "triggers",
+    "mana-abilities",
+    "cost-payment",
+    "continuous-effects"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["battlefield"],
+    "objects": [
+      "attacking creature",
+      "blocking creature",
+      "attacked player",
+      "attacked planeswalker",
+      "attacked battle"
+    ],
+    "events": [
+      "blockers are declared",
+      "blocking relationships become fixed",
+      "declare-blockers triggers are created",
+      "active player receives priority"
+    ],
+    "state_reads": [
+      "controller",
+      "tapped and phased-out state",
+      "creature and battle types",
+      "attack target and defending player",
+      "supported evasion and protection restrictions"
+    ],
+    "state_writes": [
+      "blocking relationship",
+      "blocked or unblocked combat state",
+      "blockers-declared marker",
+      "priority player"
+    ],
+    "costs": [
+      "generic blocker costs and their mana-ability window remain blocked"
+    ],
+    "timing": [
+      "ordinary declaration is a turn-based action",
+      "all defending players declare in turn order",
+      "active player receives priority after declarations"
+    ],
+    "targets": [
+      "a blocker may be assigned only to an attacker attacking that defender or an object they defend"
+    ],
+    "choices": [
+      "each defending player chooses zero or more legal blocks"
+    ],
+    "hidden_information": [
+      "blocker declarations use public combat and battlefield information"
+    ],
+    "apnap": [
+      "multiplayer defending players are prompted sequentially in turn order"
+    ],
+    "layers": [
+      "effective types, keywords, colors, and protection are read through derived characteristics"
+    ],
+    "replacement_effects": [],
+    "copy": [
+      "copies use their effective combat characteristics"
+    ],
+    "control_change": [
+      "a submitted blocker must still be controlled by the declaring defender"
+    ],
+    "zone_change": [
+      "a blocker must still be on the battlefield when the declaration is validated"
+    ],
+    "source_leaves": [
+      "a blocked attacker remains blocked after all its blockers leave"
+    ]
+  },
+  "variants": [
+    "no blockers",
+    "ordinary legal blocker",
+    "tapped, phased-out, and battle nonblockers",
+    "flying, reach, shadow, protection, and cannot-block restrictions",
+    "multiplayer sequential defenders",
+    "illegal declaration rollback",
+    "blocked attacker whose blockers leave"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_509_rule",
+    "test_ordinary_block_becomes_blocking_then_grants_priority",
+    "test_phased_or_tapped_creature_is_not_offered_as_blocker",
+    "test_malicious_phased_block_rolls_back_valid_partial_block",
+    "test_blocking_marker_clears_when_combat_phase_ends",
+    "test_multiple_defenders_block_sequentially",
+    "test_flying_attacker_exposes_only_flying_or_reach_blockers",
+    "test_shadow_and_protection_restrict_blocking",
+    "test_siege_is_attackable_and_its_protector_blocks",
+    "test_battle_creature_cannot_attack_or_block",
+    "test_blocked_attacker_assigns_nothing_after_blocker_leaves"
+  ],
+  "implementation": {
+    "component": "CommanderEngine blocker declaration and combat-state transition",
+    "version": "declare-blockers-step-v1"
+  },
+  "known_blockers": [
+    "the complete restriction and evasion grammar is not implemented",
+    "block requirements and maximum-requirement solving are not implemented",
+    "block costs, cost locking, mana abilities, and ordered payment are not implemented",
+    "declare-blockers trigger generation and APNAP placement are incomplete",
+    "effects that cause blocks or put creatures onto the battlefield blocking are not implemented",
+    "one creature blocking several attackers is not supported"
+  ],
+  "review_status": "draft"
+}

@@ -179,6 +179,10 @@ generated documentation fixtures with bearer capabilities redacted. See
   derives sources, recipients, and exact power totals, rejects client-supplied
   semantics, and rolls illegal assignments back atomically; complex keyword
   and simultaneous-event dependencies remain blocked
+- source-reviewed CR 509 ordinary blocker declaration: the server derives
+  eligible blockers and defended attackers, rejects phased-out submissions,
+  preserves blocking relationships through combat, and command-replays the
+  declaration; requirements, costs, triggers, and entry-blocking remain blocked
 - source-reviewed CR 511 end-of-combat priority, trigger coexistence, and exact
   removal-from-combat handoff into postcombat main; generic effects lasting
   until end of combat remain explicitly blocked
