@@ -101,14 +101,14 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 539 cases in CR 120, CR 210, CR 310, CR 400, CR 401, CR 402, CR 403,
-CR 404, CR 405, CR 406, CR 407, CR 500, CR 501, CR 502, CR 503, CR 506,
-CR 507, CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600,
-CR 601, CR 602, CR 603, CR 604, CR 605, CR 606, CR 607, CR 608, CR 609,
-CR 614, CR 615, and CR 616 are source-reviewed: 98 narrow behavioral or
-structural rules pass with generic executable evidence, 364 are blocked with
-exact missing dependencies, and 77 are definition-only with contract
-traceability. The remaining 2,761
+All 543 cases in CR 120, CR 210, CR 310, CR 400, CR 401, CR 402, CR 403,
+CR 404, CR 405, CR 406, CR 407, CR 408, CR 500, CR 501, CR 502, CR 503,
+CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514,
+CR 600, CR 601, CR 602, CR 603, CR 604, CR 605, CR 606, CR 607, CR 608,
+CR 609, CR 614, CR 615, and CR 616 are source-reviewed: 100 narrow
+behavioral or structural rules pass with generic executable evidence, 365
+are blocked with exact missing dependencies, and 78 are definition-only with
+contract traceability. The remaining 2,757
 cases are
 unreviewed and
 inventory-only.
@@ -253,6 +253,16 @@ Commander deck validation now checks the pinned legality of every mainboard,
 commander, companion, and sideboard entry, rejecting the ante cards
 generically without a printed-name branch, while outside-game imports remain
 unavailable.
+CR 408 records the public command area for represented Commander cards and
+typed emblem objects. Generic emblem creation now writes a persistent
+noncard, nonpermanent command object owned and controlled by the receiving
+player; its serialized characteristics contain only the created abilities,
+and every seat receives the same public display identity. Daretti's exact
+effect uses that path and binds each artifact trigger to the exact emblem
+source, while legacy count-only checkpoints retain compatibility. Command
+objects remain outside ordinary destroy scope, and emblem creation
+exact-replays. Planechase, Vanguard, Archenemy, Conspiracy Draft, arbitrary
+emblem compilation, and complete Commander replacement rules remain blocked.
 CR 500 records the ordinary five-phase turn table, the all-player empty-stack
 pass condition, ordinary no-priority untap and cleanup boundaries, mana
 emptying before the next step begins, and atomic step/phase transitions as

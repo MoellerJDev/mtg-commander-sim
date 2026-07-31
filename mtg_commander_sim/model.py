@@ -19,7 +19,13 @@ ZoneName = Literal[
     "outside",
 ]
 
-ObjectKind = Literal["card", "token", "spell_copy", "card_copy"]
+ObjectKind = Literal[
+    "card",
+    "token",
+    "spell_copy",
+    "card_copy",
+    "emblem",
+]
 
 PrincipalRole = Literal["pilot", "arbiter", "analyst", "spectator", "admin"]
 
@@ -71,6 +77,7 @@ class CardInstance:
             "token",
             "spell_copy",
             "card_copy",
+            "emblem",
         }:
             raise ValueError(
                 f"Unsupported game object kind {self.object_kind!r}"

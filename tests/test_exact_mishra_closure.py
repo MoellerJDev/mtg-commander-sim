@@ -1283,6 +1283,13 @@ class ExactMishraClosureTests(unittest.TestCase):
         self.assertEqual(
             1, engine.state.players["A"].stats["daretti_emblems"]
         )
+        daretti_emblems = [
+            engine.state.cards[object_id]
+            for object_id in engine.state.players["A"].zones["command"]
+            if engine.state.cards[object_id].object_kind == "emblem"
+        ]
+        self.assertEqual(1, len(daretti_emblems))
+        self.assertEqual("A", daretti_emblems[0].controller)
         engine.move_card(
             returned.object_id,
             "graveyard",
@@ -1293,6 +1300,8 @@ class ExactMishraClosureTests(unittest.TestCase):
         self.assertTrue(
             any(
                 item.semantic_key == "builtin:daretti-emblem"
+                and item.source_object_id
+                == daretti_emblems[0].object_id
                 for item in engine.state.stack
             )
         )

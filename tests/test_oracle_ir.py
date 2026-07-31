@@ -80,6 +80,7 @@ class MechanicContractTests(unittest.TestCase):
                 "cr-405-stack",
                 "cr-406-exile",
                 "cr-407-ante",
+                "cr-408-command",
                 "cr-500-general",
                 "cr-501-beginning-phase",
                 "cr-502-untap-step",

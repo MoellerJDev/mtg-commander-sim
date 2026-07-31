@@ -1,5 +1,5 @@
 {
-  "contract_count": 46,
+  "contract_count": 47,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -71,6 +71,12 @@
       "mechanic_id": "cr-506-combat-phase",
       "path": "mechanics/contracts/combat-phase.json",
       "sha256": "b00a1774a8c461d0d7377ad7e96f9fd00d769d4808c09b20cc8561a4950152f3",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-408-command",
+      "path": "mechanics/contracts/command-zone.json",
+      "sha256": "e90bd65d12a1e39a0450a82d71d4f60a1d495c7b3042d4816d1767cfaf3395cc",
       "version": 1
     },
     {
@@ -6255,17 +6261,40 @@
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/command-zone.json",
+      "contract_sha256": "e90bd65d12a1e39a0450a82d71d4f60a1d495c7b3042d4816d1767cfaf3395cc",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CardInstance emblem object kind, CommanderEngine.create_emblem and command-source trigger binding, StateProjector command object projection",
+      "implementation_version": "command-zone-emblems-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "Planechase plane and phenomenon cards are not represented",
+        "Vanguard cards are not represented",
+        "Archenemy scheme cards are not represented",
+        "Conspiracy Draft conspiracies are not represented",
+        "generic arbitrary emblem ability compilation is incomplete",
+        "emblem continuous, replacement, activated, and triggered ability coverage is not corpus-complete",
+        "face-down command-zone object transitions remain incomplete",
+        "complete Commander command-zone replacement and casting rules remain separate CR 903 dependencies"
+      ],
       "mechanic_id": "cr-408-command",
       "official_name": "Command",
       "rule_references": [
         "408"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_408_rule",
+        "test_command_zone_is_public_across_all_commander_seats",
+        "test_generic_emblem_is_a_persistent_noncard_command_object",
+        "test_command_zone_objects_are_not_destroyable_permanents",
+        "test_daretti_emblem_triggers_from_its_exact_command_object",
+        "test_daretti_emblem_creation_exact_replays",
+        "test_noncommander_command_variants_remain_fail_closed",
+        "test_daretti_loyalty_exchange_and_emblem_return",
+        "test_daretti_ruling_does_not_follow_a_reentered_card"
+      ],
       "trust_level": "untrusted"
     },
     {

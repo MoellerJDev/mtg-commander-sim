@@ -424,6 +424,13 @@ same object as a token permanent and does not generate a token-creation event.
 The underlying object identity remains outside seat projections, and the
 lifecycle command-replays exactly.
 
+Emblems now have a distinct serialized noncard object kind. The generic
+creation primitive puts one in the receiving player's public command-zone
+presentation with only its created abilities as characteristics. Daretti's
+reviewed emblem uses this primitive, and its artifact trigger records the exact
+emblem source. Other emblem programs and Planechase, Vanguard, Archenemy, and
+Conspiracy Draft command objects remain unimplemented and fail closed.
+
 The CR 400, CR 111, CR 704, and CR 707 contracts remain partial and untrusted.
 Outstanding blockers include:
 

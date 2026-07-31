@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-408-command",
+  "official_name": "Command",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "408",
+    "408.1",
+    "408.2",
+    "408.3",
+    "114.1",
+    "114.2",
+    "114.3",
+    "114.4",
+    "114.5"
+  ],
+  "glossary_references": [
+    "emblem"
+  ],
+  "dependencies": [
+    "zones",
+    "objects",
+    "emblems",
+    "commander",
+    "casual-variants",
+    "hidden-information",
+    "persistence",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "one public command-zone target domain",
+      "owner-indexed command-zone presentation"
+    ],
+    "objects": [
+      "commander card",
+      "emblem noncard object",
+      "unsupported nontraditional variant card"
+    ],
+    "events": [
+      "designated commander starts in command",
+      "an effect creates an emblem in command",
+      "an emblem ability triggers from command"
+    ],
+    "state_reads": [
+      "object kind",
+      "owner",
+      "controller",
+      "command-zone membership",
+      "emblem ability and semantic identity"
+    ],
+    "state_writes": [
+      "public emblem object identity",
+      "owner-indexed command membership",
+      "stable emblem ability payload"
+    ],
+    "costs": [
+      "commander casting costs remain delegated to CR 601 and CR 903",
+      "emblems have no mana cost"
+    ],
+    "timing": [
+      "commanders are placed during game construction",
+      "emblems are created as their effect resolves",
+      "represented emblem abilities function while the object remains in command"
+    ],
+    "targets": [
+      "command-zone objects are not permanents",
+      "ordinary destroy and battlefield target domains exclude them"
+    ],
+    "choices": [
+      "no command-zone arrangement choice changes rules-significant state"
+    ],
+    "hidden_information": [
+      "face-up commanders and emblems are public to every seat",
+      "unsupported face-down command objects remain blocked"
+    ],
+    "apnap": [
+      "the public command-zone view spans every owner in multiplayer",
+      "variant-specific simultaneous setup remains blocked"
+    ],
+    "layers": [
+      "emblems have no characteristics other than their created abilities",
+      "complete continuous effects from arbitrary emblems remain a CR 114 and CR 613 dependency"
+    ],
+    "replacement_effects": [
+      "Commander return replacement remains delegated to CR 903",
+      "arbitrary command-zone replacement abilities remain blocked"
+    ],
+    "copy": [
+      "copying emblems is not represented"
+    ],
+    "control_change": [
+      "a created emblem is owned and controlled by the receiving player"
+    ],
+    "zone_change": [
+      "commander cards may leave command through reviewed Commander actions",
+      "emblem objects persist in command unless their owner leaves the game"
+    ],
+    "source_leaves": [
+      "a represented emblem trigger records the exact command-zone emblem source",
+      "legacy records with only the historical Daretti count retain compatibility"
+    ]
+  },
+  "variants": [
+    "two-player Commander command zone",
+    "four-player Commander command zone",
+    "one commander per seat",
+    "multiple public owner-indexed command objects",
+    "generic emblem creation",
+    "Daretti emblem creation and trigger",
+    "checkpoint round trip",
+    "unsupported Planechase profile",
+    "unsupported Vanguard profile",
+    "unsupported Archenemy profile",
+    "unsupported Conspiracy Draft profile"
+  ],
+  "witness_cards": [
+    {
+      "name": "Daretti, Scrap Savant",
+      "oracle_id": "ea9f4de3-fc35-435a-8dff-a5657d14a9bd"
+    },
+    {
+      "name": "Mishra, Eminent One",
+      "oracle_id": "d3438037-3efd-4ce0-88ec-6d48ab521992"
+    },
+    {
+      "name": "Zimone and Dina",
+      "oracle_id": "5bc66b18-22ac-4138-b527-fa711116e298"
+    }
+  ],
+  "rulings": [
+    "Daretti, Scrap Savant — 2014-11-07 — Its emblem returns the artifact only if the same card remains in the graveyard when the delayed ability resolves."
+  ],
+  "test_ids": [
+    "test_contract_traces_every_cr_408_rule",
+    "test_command_zone_is_public_across_all_commander_seats",
+    "test_generic_emblem_is_a_persistent_noncard_command_object",
+    "test_command_zone_objects_are_not_destroyable_permanents",
+    "test_daretti_emblem_triggers_from_its_exact_command_object",
+    "test_daretti_emblem_creation_exact_replays",
+    "test_noncommander_command_variants_remain_fail_closed",
+    "test_daretti_loyalty_exchange_and_emblem_return",
+    "test_daretti_ruling_does_not_follow_a_reentered_card"
+  ],
+  "implementation": {
+    "component": "CardInstance emblem object kind, CommanderEngine.create_emblem and command-source trigger binding, StateProjector command object projection",
+    "version": "command-zone-emblems-v1"
+  },
+  "known_blockers": [
+    "Planechase plane and phenomenon cards are not represented",
+    "Vanguard cards are not represented",
+    "Archenemy scheme cards are not represented",
+    "Conspiracy Draft conspiracies are not represented",
+    "generic arbitrary emblem ability compilation is incomplete",
+    "emblem continuous, replacement, activated, and triggered ability coverage is not corpus-complete",
+    "face-down command-zone object transitions remain incomplete",
+    "complete Commander command-zone replacement and casting rules remain separate CR 903 dependencies"
+  ],
+  "review_status": "draft"
+}

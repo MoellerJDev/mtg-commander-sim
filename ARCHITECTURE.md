@@ -232,8 +232,8 @@ CR 704.5/704.6 variant and simultaneous loss/replacement interaction is
 covered.
 
 `CardInstance.object_id` is stable physical identity for a card container or
-represented copy object. `object_kind` distinguishes cards, tokens, spell
-copies, and card copies. Its serialized
+represented noncard object. `object_kind` distinguishes cards, tokens, spell
+copies, card copies, and emblems. Its serialized
 `zone_change_counter` identifies the current logical incarnation under CR
 400.7. The canonical move path advances that counter for cross-zone moves and
 same-zone exile/command moves, clears state that cannot survive, and preserves
@@ -263,6 +263,15 @@ representations. A spell copy outside the stack and a card copy outside the
 stack or battlefield cease in the shared CR 704.5e snapshot. A permanent-spell
 copy becomes the same object as a token permanent on resolution; it is not a
 newly created token.
+
+Emblems use a separate serialized noncard object kind. Generic creation puts
+the object in its owner's public command-zone presentation, records only the
+abilities supplied by the creating effect as characteristics, and makes the
+receiving player both owner and controller. The projected display label is UI
+metadata rather than an emblem name characteristic. Represented emblem
+triggers retain the exact command-object source, while legacy Daretti
+checkpoints that stored only a count remain readable. Arbitrary emblem ability
+compilation and non-Commander casual-variant command objects remain blocked.
 
 ## Rules arbitration and semantic programs
 
@@ -520,6 +529,10 @@ The new rules primitives sit below both generated and hand-authored semantics:
   partial CR 707 path preserves supported stack choices, treats spell copies
   as spell targets, and converts a resolving permanent-spell copy into the
   same token object.
+- The emblem object kind and `CommanderEngine.create_emblem` represent public
+  noncard, nonpermanent CR 408 command objects. Daretti's reviewed effect
+  binds its trigger to the exact emblem source and command-replays, without
+  implying generic emblem or casual-variant coverage.
 
 All of these contracts remain partial. Legacy static abilities have not all moved
 into the layer evaluator, not every zone/draw/damage/enters producer routes

@@ -70,12 +70,14 @@ characterization scenarios and exact Oracle/rulings hashes in
 `zzz-v080-exact-deck-closure.json`.
 
 The final Mishra families include Daretti's loyalty, exchange, and emblem
-return; Demonic Junker's per-player destroy and Crew 2; both faces of Tithing
-Blade including Craft; Transmute Artifact's staged sacrifice/search/payment;
-and Urza's Saga's lore progression, granted abilities, restricted chapter-III
-search, and final sacrifice. The exact-list pack also covers the remaining
-Zimone engines, alternate/additional costs, restricted mana, copy/token
-engines, linked choices, replacement effects, and turn-control effects.
+return; its emblem effect now creates a typed public command-zone object and
+binds the return trigger to that exact source. They also include Demonic
+Junker's per-player destroy and Crew 2; both faces of Tithing Blade including
+Craft; Transmute Artifact's staged sacrifice/search/payment; and Urza's
+Saga's lore progression, granted abilities, restricted chapter-III search,
+and final sacrifice. The exact-list pack also covers the remaining Zimone
+engines, alternate/additional costs, restricted mana, copy/token engines,
+linked choices, replacement effects, and turn-control effects.
 
 This result is intentionally bounded to the two validated deck-list
 fingerprints. It does not imply that similarly worded cards outside those

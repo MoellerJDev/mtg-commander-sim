@@ -65,12 +65,15 @@ it is not a capability and is not exposed in pilot projections. This is an
 additive state-field extension to v3, not a new record layout.
 
 `CardInstance.object_kind` is also serialized and hashed. It distinguishes a
-card, token, spell copy, or card copy while retaining compatibility with older
-token checkpoints. Represented copy-object IDs remain authoritative only; a
-seat sees the ordinary public stack/permanent projection, not the underlying
-copy container. Copy cessation and permanent-spell-copy resolution therefore
-command-replay exactly without exposing new hidden identity. This is another
-additive v3 state extension.
+card, token, spell copy, card copy, or emblem while retaining compatibility
+with older token and count-only Daretti checkpoints. Represented copy-object
+IDs remain authoritative only; a seat sees the ordinary public
+stack/permanent projection, not the underlying copy container. An emblem is
+projected as a public command-zone object with a display label, while its
+internal source identity and semantic key remain authoritative. Copy
+cessation, permanent-spell-copy resolution, and represented emblem creation
+therefore command-replay exactly. This is another additive v3 state
+extension.
 
 The same checkpoint serializes `GameState.timestamp_sequence`,
 `CardInstance.zone_timestamp`, and `CardInstance.world_supertype_timestamp`.

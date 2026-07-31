@@ -541,7 +541,7 @@ class CommanderEngine:
     def card_record(self, value: str | CardInstance) -> CardRecord | None:
         card = value if isinstance(value, CardInstance) else self.state.cards[value]
         if card.oracle_id.startswith(
-            ("custom-token:", "custom-copy:")
+            ("custom-token:", "custom-copy:", "custom-emblem:")
         ):
             return None
         return self.card_db.by_oracle_id(card.oracle_id)
@@ -843,33 +843,39 @@ class CommanderEngine:
         card = value if isinstance(value, CardInstance) else self.state.cards[value]
         record = self.card_record(card)
         if record is None:
-            token_characteristics = dict(
-                card.annotations.get("token_characteristics", {})
+            object_characteristics = dict(
+                card.annotations.get("object_characteristics")
+                or card.annotations.get("token_characteristics")
+                or {}
             )
             base = {
-                "name": card.printed_name,
+                "name": (
+                    ""
+                    if card.object_kind == "emblem"
+                    else card.printed_name
+                ),
                 "mana_cost": "",
-                "mana_value": token_characteristics.get(
+                "mana_value": object_characteristics.get(
                     "mana_value", 0
                 ),
                 "type_line": str(
-                    token_characteristics.get("type_line", "Token")
+                    object_characteristics.get("type_line", "Token")
                 ),
                 "oracle_text": str(
-                    token_characteristics.get("oracle_text", "")
+                    object_characteristics.get("oracle_text", "")
                 ),
-                "power": token_characteristics.get("power"),
-                "toughness": token_characteristics.get("toughness"),
-                "loyalty": token_characteristics.get("loyalty"),
-                "defense": token_characteristics.get("defense"),
+                "power": object_characteristics.get("power"),
+                "toughness": object_characteristics.get("toughness"),
+                "loyalty": object_characteristics.get("loyalty"),
+                "defense": object_characteristics.get("defense"),
                 "keywords": list(
-                    token_characteristics.get("keywords", [])
+                    object_characteristics.get("keywords", [])
                 ),
                 "colors": list(
-                    token_characteristics.get("colors", [])
+                    object_characteristics.get("colors", [])
                 ),
                 "produced_mana": list(
-                    token_characteristics.get("produced_mana", [])
+                    object_characteristics.get("produced_mana", [])
                 ),
             }
         else:
@@ -1397,7 +1403,10 @@ class CommanderEngine:
         # CR 400.7 gives the destination a new logical object.  Retain only
         # state covered by an implemented exception or by the token's initial
         # copiable characteristics.
-        retained_annotation_keys = {"token_characteristics"}
+        retained_annotation_keys = {
+            "object_characteristics",
+            "token_characteristics",
+        }
         if card.is_token or card.object_kind in {
             "spell_copy",
             "card_copy",
@@ -2203,12 +2212,29 @@ class CommanderEngine:
                 and card.is_card_object
                 and card.owner in self.active_seats
             ):
-                emblem_count = int(
-                    self.state.players[card.owner].stats.get(
-                        "daretti_emblems", 0
+                emblem_owner = self.state.players[card.owner]
+                emblem_sources: list[CardInstance | None] = [
+                    self.state.cards[object_id]
+                    for object_id in emblem_owner.zones["command"]
+                    if (
+                        self.state.cards[object_id].object_kind
+                        == "emblem"
+                        and self.state.cards[object_id].annotations.get(
+                            "emblem_semantic_key"
+                        )
+                        == "builtin:daretti-emblem"
                     )
-                )
-                for _ in range(emblem_count):
+                ]
+                if not emblem_owner.stats.get("emblem_objects_v1"):
+                    emblem_sources.extend(
+                        [None]
+                        * int(
+                            emblem_owner.stats.get(
+                                "daretti_emblems", 0
+                            )
+                        )
+                    )
+                for emblem in emblem_sources:
                     ref = self._next_ref("S")
                     event_triggers.append(
                         StackItem(
@@ -2223,6 +2249,11 @@ class CommanderEngine:
                                 "the next end step"
                             ),
                             semantic_key="builtin:daretti-emblem",
+                            source_object_id=(
+                                emblem.object_id
+                                if emblem is not None
+                                else None
+                            ),
                             visibility=list(self.seats),
                             context={
                                 "event": "artifact.graveyard",
@@ -19508,20 +19539,22 @@ class CommanderEngine:
             return None
         if op == "create_daretti_emblem":
             player = self.state.players[actor]
+            self.create_emblem(
+                actor,
+                abilities=[
+                    (
+                        "Whenever an artifact is put into your "
+                        "graveyard from the battlefield, return that "
+                        "card to the battlefield at the beginning of "
+                        "the next end step."
+                    )
+                ],
+                display_label="Daretti, Scrap Savant emblem",
+                semantic_key="builtin:daretti-emblem",
+                reason=reason,
+            )
             player.stats["daretti_emblems"] = (
                 int(player.stats.get("daretti_emblems", 0)) + 1
-            )
-            self._log(
-                actor,
-                "emblem.create",
-                f"{actor} created a Daretti, Scrap Savant emblem.",
-                {
-                    "name": "Daretti, Scrap Savant",
-                    "count": player.stats["daretti_emblems"],
-                    "reason": reason,
-                },
-                importance=3,
-                changed_players=[actor],
             )
             return player.stats["daretti_emblems"]
         if op == "grant_urzas_saga_chapter":
@@ -20274,6 +20307,77 @@ class CommanderEngine:
             gained_at=card.zone_timestamp,
         )
         return object_id
+
+    def create_emblem(
+        self,
+        owner: str,
+        *,
+        abilities: Sequence[str],
+        display_label: str = "Emblem",
+        semantic_key: str | None = None,
+        reason: str = "emblem effect",
+    ) -> str:
+        """Create a public noncard, nonpermanent command-zone object."""
+
+        self._require_seat(owner, in_game=True)
+        normalized_abilities = [
+            str(ability).strip() for ability in abilities
+        ]
+        if (
+            not normalized_abilities
+            or any(not ability for ability in normalized_abilities)
+        ):
+            raise GameRuleError(
+                "An emblem must have at least one nonempty ability"
+            )
+        ref = self._next_ref("E")
+        object_id = self._stable_runtime_id("emblem-object", ref)
+        emblem = CardInstance(
+            object_id=object_id,
+            ref=ref,
+            oracle_id=(
+                "custom-emblem:"
+                + self._stable_runtime_id("emblem-oracle", ref)
+            ),
+            printed_name=str(display_label or "Emblem"),
+            owner=owner,
+            controller=owner,
+            zone="command",
+            object_kind="emblem",
+            zone_timestamp=self._next_zone_timestamp(),
+            annotations={
+                "display_label": str(display_label or "Emblem"),
+                "emblem_abilities": normalized_abilities,
+                "emblem_semantic_key": semantic_key,
+                "object_characteristics": {
+                    "type_line": "",
+                    "oracle_text": "\n".join(normalized_abilities),
+                    "colors": [],
+                    "keywords": [],
+                },
+            },
+            known_to=list(self.seats),
+            revealed_to=list(self.seats),
+        )
+        self.state.cards[object_id] = emblem
+        self.state.players[owner].zones["command"].append(object_id)
+        self.state.players[owner].stats["emblem_objects_v1"] = True
+        self._log(
+            owner,
+            "emblem.create",
+            f"{owner} created {emblem.printed_name}.",
+            {
+                "object": ref,
+                "label": emblem.printed_name,
+                "abilities": list(normalized_abilities),
+                "semantic_key": semantic_key,
+                "reason": reason,
+            },
+            importance=3,
+            changed_objects=[object_id],
+            changed_players=[owner],
+        )
+        return ref
 
     def create_token(
         self,

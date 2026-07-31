@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 408 — Command",
+  "cases": [
+    {
+      "rule_id": "408",
+      "rule_text_sha256": "713166971d730f81fcf8b757f2ea239d1a0360d9f74e8f5afe60fba97105879c",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/command-zone.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_command_zone_rules.CommandZoneRuleTests.test_contract_traces_every_cr_408_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; CR 408.1-3 define the command area, emblem creation, and variant-specific starting objects."
+      ]
+    },
+    {
+      "rule_id": "408.1",
+      "rule_text_sha256": "098156a6604cf48c34f11e1479e633efeed7918db6dcb339a85f5ccb943e51c3",
+      "classification": "structural",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "PlayerState.zones",
+        "CardInstance.object_kind",
+        "CommanderEngine.create_emblem",
+        "StateProjector._snapshot"
+      ],
+      "executable_test_ids": [
+        "tests.test_command_zone_rules.CommandZoneRuleTests.test_command_zone_is_public_across_all_commander_seats",
+        "tests.test_command_zone_rules.CommandZoneRuleTests.test_generic_emblem_is_a_persistent_noncard_command_object",
+        "tests.test_command_zone_rules.CommandZoneRuleTests.test_command_zone_objects_are_not_destroyable_permanents"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "Owner-indexed lists form one public command-zone view. Commander cards and typed emblem objects are not battlefield permanents, so ordinary destroy resolution cannot find them. Emblem identity and abilities survive a canonical state round trip."
+      ]
+    },
+    {
+      "rule_id": "408.2",
+      "rule_text_sha256": "14e30cef793f2252d28faa064da0c82db1e24de64d9f3f19037121e48971b839",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CardInstance.object_kind",
+        "CommanderEngine.create_emblem",
+        "CommanderEngine._dispatch_zone_change_events",
+        "StateProjector._obj"
+      ],
+      "executable_test_ids": [
+        "tests.test_command_zone_rules.CommandZoneRuleTests.test_generic_emblem_is_a_persistent_noncard_command_object",
+        "tests.test_command_zone_rules.CommandZoneRuleTests.test_daretti_emblem_triggers_from_its_exact_command_object",
+        "tests.test_command_zone_rules.CommandZoneRuleTests.test_daretti_emblem_creation_exact_replays",
+        "tests.test_exact_mishra_closure.ExactMishraClosureTests.test_daretti_loyalty_exchange_and_emblem_return"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "The generic creation path produces a public noncard, nonpermanent object in its owner's command presentation with only an ability payload. Daretti now creates such an object, and its artifact trigger names that exact command object as its source. This does not promote arbitrary emblem Oracle compilation."
+      ]
+    },
+    {
+      "rule_id": "408.3",
+      "rule_text_sha256": "009d4573a2e36027343e80a2aa5c0784ad9059638ed2804d2ed22a3361664caa",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine.create",
+        "CommanderSession.create",
+        "GameConfig.profile",
+        "mechanics/contracts/command-zone.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_command_zone_rules.CommandZoneRuleTests.test_command_zone_is_public_across_all_commander_seats",
+        "tests.test_command_zone_rules.CommandZoneRuleTests.test_noncommander_command_variants_remain_fail_closed"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer",
+        "hidden_information"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer",
+        "hidden_information"
+      ],
+      "blockers": [
+        "planechase_command_objects_not_implemented",
+        "vanguard_command_objects_not_implemented",
+        "archenemy_command_objects_not_implemented",
+        "conspiracy_draft_command_objects_not_implemented"
+      ],
+      "notes": [
+        "Supported Commander construction places each designated commander in command and projects it publicly. Every other casual-variant profile named by this rule is rejected before state construction, so the composite rule remains blocked rather than being generalized from Commander."
+      ]
+    }
+  ]
+}

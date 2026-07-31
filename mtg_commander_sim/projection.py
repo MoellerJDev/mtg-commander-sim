@@ -134,7 +134,11 @@ class StateProjector:
                 "k": list(record.keywords),
             }
         except KeyError:
-            token = card.annotations.get("token_characteristics") or {}
+            token = (
+                card.annotations.get("object_characteristics")
+                or card.annotations.get("token_characteristics")
+                or {}
+            )
             data = {
                 "n": card.printed_name,
                 "m": token.get("mana_cost", ""),
@@ -162,7 +166,12 @@ class StateProjector:
     def _obj(self, card: CardInstance, principal: str) -> dict[str, Any]:
         visible = self._card_visible(card, principal)
         obj: dict[str, Any] = {"id": card.ref}
-        if visible:
+        if visible and card.object_kind == "emblem":
+            obj["n"] = str(
+                card.annotations.get("display_label") or "Emblem"
+            )
+            obj["kind"] = "emblem"
+        elif visible:
             obj["cid"] = card.oracle_id[:8]
             obj["n"] = self._effective(card)["n"]
         else:
