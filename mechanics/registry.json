@@ -1,5 +1,5 @@
 {
-  "contract_count": 21,
+  "contract_count": 22,
   "contracts": [
     {
       "mechanic_id": "cr-122-counters",
@@ -71,6 +71,12 @@
       "mechanic_id": "cr-606-loyalty-abilities",
       "path": "mechanics/contracts/loyalty-abilities.json",
       "sha256": "95c229e66174b9bd897c4f218fcc998db7a8e621a21191012692571952addc4e",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-605-mana-abilities",
+      "path": "mechanics/contracts/mana-abilities.json",
+      "sha256": "49ffe857dd9506aeeece0b53982b284a43eee8967dd28f144412ede22f558fbe",
       "version": 1
     },
     {
@@ -6277,17 +6283,36 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/mana-abilities.json",
+      "contract_sha256": "49ffe857dd9506aeeece0b53982b284a43eee8967dd28f144412ede22f558fbe",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "ActivatedAbility mana classification and CommanderEngine immediate mana/payment paths",
+      "implementation_version": "mana-ability-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "triggered mana abilities are not generically identified or dispatched outside the stack",
+        "possible mana-output grammar is incomplete across the Oracle corpus",
+        "explicit mana activation during arbitrary rule/effect payment windows is not exposed as a general nested decision",
+        "activation reentrancy is not represented as a state that can be independently tested",
+        "mana-production replacement and trigger integration is incomplete"
+      ],
       "mechanic_id": "cr-605-mana-abilities",
       "official_name": "Mana Abilities",
       "rule_references": [
         "605"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_605_rule",
+        "test_activated_mana_ability_excludes_targets_and_loyalty",
+        "test_mana_classification_survives_zero_output_or_unavailability",
+        "test_activated_mana_ability_resolves_without_using_stack",
+        "test_mana_ability_can_activate_during_spell_payment",
+        "test_mana_producing_spell_is_not_a_mana_ability",
+        "test_token_reminder_text_does_not_create_source_mana_ability",
+        "test_mana_drain_schedules_exact_next_main_phase_mana"
+      ],
       "trust_level": "untrusted"
     },
     {

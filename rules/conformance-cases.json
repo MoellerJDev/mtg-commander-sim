@@ -34053,21 +34053,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-605",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_contract_traces_every_cr_605_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/mana-abilities.json"
+      ],
+      "notes": [
+        "Section heading; every numbered CR 605 record is pinned by the Mana Abilities contract."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "605",
       "rule_text_sha256": "2ec8cfd054506baf7de3a815805cf050efe539eb986838c4773080b07c50b7a7",
       "schema_version": 1,
@@ -34076,26 +34080,31 @@
         "end_line": 2680,
         "start_line": 2679
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-605.1",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "605"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_contract_traces_every_cr_605_rule"
+      ],
+      "implementation_components": [
+        "abilities.ActivatedAbility.mana_ability",
+        "mechanics/contracts/mana-abilities.json"
+      ],
+      "notes": [
+        "Introduces the two exhaustive criteria sets; CR 605.1a and 605.1b carry their behavioral requirements."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "605.1",
       "rule_text_sha256": "e17fa82d119179fa7d205d768e991030c20c089480b9876cf06a95b2159e8a18",
       "schema_version": 1,
@@ -34104,26 +34113,42 @@
         "end_line": 2682,
         "start_line": 2681
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "the possible-mana-output Oracle grammar is not complete across conditional, delayed, granted, and multi-instruction activated abilities",
+        "target and loyalty exclusions are exact for parsed abilities, but that does not prove complete ability discovery"
       ],
       "case_id": "cr-605.1a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "605.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_activated_mana_ability_excludes_targets_and_loyalty",
+        "tests.test_activated_abilities.ActivatedAbilityAndCostTests.test_token_reminder_text_does_not_create_source_mana_ability"
+      ],
+      "implementation_components": [
+        "abilities.parse_activated_abilities",
+        "abilities.ActivatedAbility.mana_ability"
+      ],
+      "notes": [
+        "A target-free basic mana ability is recognized, while a targeted or loyalty-symbol ability is excluded. The family remains blocked on complete possible-output recognition."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "605.1a",
       "rule_text_sha256": "fb1b636d76dced65f402d80a6c6d9d8d2c49cfa14c2d70025790d650a7537837",
       "schema_version": 1,
@@ -34132,26 +34157,40 @@
         "end_line": 2684,
         "start_line": 2683
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "trigger IR does not generically classify target-free triggers caused by activated mana abilities, their resolution, or mana addition",
+        "possible mana output from a triggered ability is not represented as a typed classifier",
+        "no generic triggered-mana replay witness exists"
       ],
       "case_id": "cr-605.1b",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "605.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_contract_traces_every_cr_605_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._enqueue_semantic_trigger_batch",
+        "CommanderEngine._matching_delayed_triggers"
+      ],
+      "notes": [
+        "Ordinary and delayed triggers are represented, but no partial trigger is promoted to a mana-ability classification."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "605.1b",
       "rule_text_sha256": "ef007d1bf1c92ff0224b543ada88a31f512ee020690d8f470cc4f772b790a765",
       "schema_version": 1,
@@ -34160,26 +34199,41 @@
         "end_line": 2686,
         "start_line": 2685
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "simple conditional output and a tapped source retain classification, but the incomplete possible-output grammar prevents a universal claim",
+        "generic triggered mana abilities are not classified independently of current output"
       ],
       "case_id": "cr-605.2",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "605"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_mana_classification_survives_zero_output_or_unavailability"
+      ],
+      "implementation_components": [
+        "abilities.parse_activated_abilities",
+        "CommanderEngine._ability_availability"
+      ],
+      "notes": [
+        "Availability and classification are separate for represented activated abilities; broader activated and triggered grammar remains blocked."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "605.2",
       "rule_text_sha256": "7c5411a3681c383415c018d6f94d901d1c8aadea7137945d415b678abd284374",
       "schema_version": 1,
@@ -34188,26 +34242,31 @@
         "end_line": 2689,
         "start_line": 2687
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-605.3",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "605"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_contract_traces_every_cr_605_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._activate",
+        "mechanics/contracts/mana-abilities.json"
+      ],
+      "notes": [
+        "Structural introduction to the activated-mana exceptions in CR 605.3a-c."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "605.3",
       "rule_text_sha256": "11d107dcf1c6c9092160665f4e64c25da271473f1331d9965374176b5c2cce20",
       "schema_version": 1,
@@ -34216,26 +34275,45 @@
         "end_line": 2691,
         "start_line": 2690
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "automatic payment can activate represented mana sources while casting, but explicit activation still requires an ordinary priority task",
+        "arbitrary ability-payment and rule/effect payment windows do not expose a generic nested mana-activation decision",
+        "resolution-time payment has no complete replay scenario"
       ],
       "case_id": "cr-605.3a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "605.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_activated_mana_ability_resolves_without_using_stack",
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_mana_ability_can_activate_during_spell_payment"
+      ],
+      "implementation_components": [
+        "CommanderEngine._activate",
+        "CommanderEngine._activate_mana_plan",
+        "CommanderEngine._pay_for_cost"
+      ],
+      "notes": [
+        "Priority and automatic spell-payment paths are witnessed without claiming all mid-cast, mid-activation, or mid-resolution windows."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "605.3a",
       "rule_text_sha256": "bf0a9c292820fc993aff2b53ac98628968295a6491a5677c46070b97e8e16a25",
       "schema_version": 1,
@@ -34244,26 +34322,38 @@
         "end_line": 2693,
         "start_line": 2692
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-605.3b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "605.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_activated_mana_ability_resolves_without_using_stack",
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_mana_ability_can_activate_during_spell_payment"
+      ],
+      "implementation_components": [
+        "CommanderEngine._activate",
+        "CommanderEngine._activate_mana_plan"
+      ],
+      "notes": [
+        "A compiled activated mana ability pays costs and adds mana immediately without changing an existing stack; automatic payment likewise creates only the paid-for spell."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "605.3b",
       "rule_text_sha256": "edb5aea1e190332933d0e0869ebbca93a11f1404704d2f90c0bf0e47a5d15d2f",
       "schema_version": 1,
@@ -34272,26 +34362,36 @@
         "end_line": 2695,
         "start_line": 2694
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "activation and immediate resolution occur within one synchronous call, with no serialized activation-in-progress guard",
+        "recursive or replacement-driven attempts to reactivate the same ability cannot be independently expressed and audited"
       ],
       "case_id": "cr-605.3c",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "605.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_activated_mana_ability_resolves_without_using_stack"
+      ],
+      "implementation_components": [
+        "CommanderEngine._activate"
+      ],
+      "notes": [
+        "Synchronous execution makes ordinary reentry impossible incidentally; that is not a modeled CR 605.3c invariant."
+      ],
+      "required_scenarios": [
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "605.3c",
       "rule_text_sha256": "100dd12af4df160ebf1b71be2a1c9b5f0511e790fad3b8e3d02dc425ba9d3eb7",
       "schema_version": 1,
@@ -34300,26 +34400,30 @@
         "end_line": 2697,
         "start_line": 2696
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-605.4",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "605"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_contract_traces_every_cr_605_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/mana-abilities.json"
+      ],
+      "notes": [
+        "Structural introduction to the triggered-mana exception in CR 605.4a."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "605.4",
       "rule_text_sha256": "7f3317a0ad03ef42991446ecb8b5fb2d01c86541239636aa34a4c1bbd4e9c067",
       "schema_version": 1,
@@ -34328,26 +34432,38 @@
         "end_line": 2699,
         "start_line": 2698
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "trigger batches currently create stack objects rather than a classified immediate triggered-mana continuation",
+        "no generic trigger-from-mana event pipeline adds the triggered mana before priority or during payment"
       ],
       "case_id": "cr-605.4a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "605.4"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_contract_traces_every_cr_605_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._enqueue_semantic_trigger_batch",
+        "CommanderEngine._start_trigger_batch"
+      ],
+      "notes": [
+        "This exception remains unimplemented rather than approximated as an ordinary trigger."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "605.4a",
       "rule_text_sha256": "58f40fffd902b03ddee4b3f0fc7dd42519f98ab91604ccc9b83bf114e23e1af2",
       "schema_version": 1,
@@ -34356,26 +34472,31 @@
         "end_line": 2702,
         "start_line": 2700
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-605.5",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "605"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_contract_traces_every_cr_605_rule"
+      ],
+      "implementation_components": [
+        "abilities.ActivatedAbility.mana_ability",
+        "mechanics/contracts/mana-abilities.json"
+      ],
+      "notes": [
+        "Defines the complement of CR 605.1a-b; the targeted-ability and spell cases are reviewed separately below."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "605.5",
       "rule_text_sha256": "62837bd780911ed28a65e20dcdac764873897f777b6d0d1e451dd04bf6e5e02b",
       "schema_version": 1,
@@ -34384,26 +34505,42 @@
         "end_line": 2704,
         "start_line": 2703
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "targeted activated mana production is correctly nonmana, but generic triggered-ability cause and possible-output classification are absent",
+        "the Mana Drain delayed mana trigger is an ordinary stack trigger witness only, not exhaustive trigger classification"
       ],
       "case_id": "cr-605.5a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "605.5"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_activated_mana_ability_excludes_targets_and_loyalty",
+        "tests.test_interactions_v070.InteractionKernelTests.test_mana_drain_schedules_exact_next_main_phase_mana"
+      ],
+      "implementation_components": [
+        "abilities.parse_activated_abilities",
+        "CommanderEngine._matching_delayed_triggers"
+      ],
+      "notes": [
+        "Partial activated and delayed-trigger witnesses do not establish all three negative criteria in this rule."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "605.5a",
       "rule_text_sha256": "671d39e126cfef6b698e3c1d47586c87ddf92ed055fca708139a6e3f9ffba387",
       "schema_version": 1,
@@ -34412,26 +34549,38 @@
         "end_line": 2706,
         "start_line": 2705
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-605.5b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "605.5"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_mana_producing_spell_is_not_a_mana_ability",
+        "tests.test_interactions_v070.InteractionKernelTests.test_mana_drain_schedules_exact_next_main_phase_mana"
+      ],
+      "implementation_components": [
+        "CommanderEngine._cast",
+        "StackItem.kind"
+      ],
+      "notes": [
+        "Mana Drain is cast as a spell on the stack, remains respondable, and produces mana only through its later ordinary delayed trigger."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "605.5b",
       "rule_text_sha256": "92f706d08855dae2af231751dc38bec2c0e3e6d6dd500a25ba1c31d2e956c892",
       "schema_version": 1,
@@ -34440,7 +34589,7 @@
         "end_line": 2708,
         "start_line": 2707
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "static_traceability",

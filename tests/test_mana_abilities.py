@@ -1,0 +1,242 @@
+from __future__ import annotations
+
+import json
+import unittest
+from pathlib import Path
+
+from common import keep_all, load_assets, make_session
+from mtg_commander_sim.abilities import parse_activated_abilities
+from mtg_commander_sim.model import StackItem
+
+
+class ManaAbilityRuleTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.db, cls.mishra, cls.zimone = load_assets()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.db.close()
+
+    def make_engine(self, seed: int):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=2,
+            seed=seed,
+        )
+        keep_all(session)
+        session.engine.permissions.invalidate_current()
+        session.engine.state.pending_decision = None
+        session.engine.state.priority_player = "A"
+        return session.engine
+
+    @staticmethod
+    def card(engine, owner: str, name: str):
+        return next(
+            card
+            for card in engine.state.cards.values()
+            if card.owner == owner
+            and card.is_card_object
+            and card.printed_name == name
+        )
+
+    @staticmethod
+    def prepare_main(engine, seat: str = "A") -> None:
+        engine.state.active_player = seat
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine.state.stack.clear()
+        engine.state.priority_player = seat
+        engine.state.priority_passes = []
+        engine.state.pending_decision = None
+
+    def test_contract_traces_every_cr_605_rule(self):
+        root = Path(__file__).resolve().parents[1]
+        contract = json.loads(
+            (
+                root
+                / "mechanics"
+                / "contracts"
+                / "mana-abilities.json"
+            ).read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(
+            {
+                "605",
+                "605.1",
+                "605.1a",
+                "605.1b",
+                "605.2",
+                "605.3",
+                "605.3a",
+                "605.3b",
+                "605.3c",
+                "605.4",
+                "605.4a",
+                "605.5",
+                "605.5a",
+                "605.5b",
+            },
+            {
+                rule_id
+                for rule_id in contract["rule_references"]
+                if str(rule_id).startswith("605")
+            },
+        )
+
+    def test_activated_mana_ability_excludes_targets_and_loyalty(self):
+        ordinary = parse_activated_abilities(
+            card_name="Mana Relic",
+            oracle_text="{T}: Add {G}.",
+        )[0]
+        targeted = parse_activated_abilities(
+            card_name="Targeted Mana Relic",
+            oracle_text="{T}: Target player adds {G}.",
+        )[0]
+        loyalty = parse_activated_abilities(
+            card_name="Loyalty Mana Relic",
+            oracle_text="+1: Add {G}.",
+        )[0]
+        nonmana = parse_activated_abilities(
+            card_name="Drawing Relic",
+            oracle_text="{T}: Draw a card.",
+        )[0]
+
+        self.assertTrue(ordinary.mana_ability)
+        self.assertFalse(targeted.mana_ability)
+        self.assertEqual(1, loyalty.loyalty_delta)
+        self.assertFalse(loyalty.mana_ability)
+        self.assertFalse(nonmana.mana_ability)
+
+    def test_mana_classification_survives_zero_output_or_unavailability(self):
+        conditional = parse_activated_abilities(
+            card_name="Conditional Mana Relic",
+            oracle_text="{T}: Add {G} for each creature you control.",
+        )[0]
+        self.assertTrue(conditional.mana_ability)
+
+        engine = self.make_engine(60501)
+        island = self.card(engine, "A", "Island")
+        engine.move_card(
+            island.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+        )
+        island.tapped = True
+        ability = engine._activated_abilities(island)[0]
+        self.assertTrue(ability.mana_ability)
+        self.assertEqual(
+            ("unavailable", "source_tapped"),
+            engine._ability_availability("A", island, ability),
+        )
+
+    def test_activated_mana_ability_resolves_without_using_stack(self):
+        engine = self.make_engine(60502)
+        island = self.card(engine, "A", "Island")
+        engine.move_card(
+            island.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+        )
+        self.prepare_main(engine)
+        existing = StackItem(
+            stack_id="S-existing",
+            ref="S-existing",
+            kind="spell",
+            controller="B",
+            label="Existing spell",
+        )
+        engine.state.stack.append(existing)
+        ability = engine._activated_abilities(island)[0]
+        before = engine.state.players["A"].mana_pool["U"]
+
+        engine._activate(
+            "A",
+            {"source": island.ref, "ability": ability.ability_id},
+        )
+
+        self.assertEqual([existing], engine.state.stack)
+        self.assertEqual(
+            before + 1,
+            engine.state.players["A"].mana_pool["U"],
+        )
+        self.assertTrue(island.tapped)
+
+    def test_mana_ability_can_activate_during_spell_payment(self):
+        engine = self.make_engine(60503)
+        island = self.card(engine, "A", "Island")
+        ring = self.card(engine, "A", "Sol Ring")
+        engine.move_card(
+            island.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+        )
+        engine.move_card(ring.object_id, "hand", log=False)
+        self.prepare_main(engine)
+
+        engine._cast("A", {"card": ring.ref, "pay": "auto"})
+
+        self.assertTrue(island.tapped)
+        self.assertEqual(1, len(engine.state.stack))
+        self.assertEqual(ring.object_id, engine.state.stack[0].card_object_id)
+        self.assertEqual(
+            0,
+            sum(engine.state.players["A"].mana_pool.values()),
+        )
+
+    def test_mana_producing_spell_is_not_a_mana_ability(self):
+        engine = self.make_engine(60504)
+        drain = self.card(engine, "A", "Mana Drain")
+        target_card = self.card(engine, "B", "Sol Ring")
+        engine._remove_from_zone(target_card)
+        engine._reset_zone_change(target_card, "stack")
+        target_card.zone = "stack"
+        target_card.controller = "B"
+        target = StackItem(
+            stack_id="S-mana-drain-target",
+            ref="S-mana-drain-target",
+            kind="spell",
+            controller="B",
+            label="Sol Ring",
+            card_object_id=target_card.object_id,
+            default_destination="battlefield",
+            visibility=list(engine.seats),
+        )
+        engine.state.stack.append(target)
+        engine.move_card(drain.object_id, "hand", log=False)
+        engine.state.players["A"].mana_pool["U"] = 2
+        engine.state.active_player = "B"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine.state.priority_player = "A"
+        engine.state.priority_passes = []
+
+        engine._cast(
+            "A",
+            {"card": drain.ref, "targets": [target.ref]},
+        )
+
+        self.assertEqual(2, len(engine.state.stack))
+        self.assertEqual("spell", engine.state.stack[-1].kind)
+        self.assertEqual(
+            drain.object_id,
+            engine.state.stack[-1].card_object_id,
+        )
+        self.assertEqual(
+            [],
+            [
+                ability
+                for ability in engine._activated_abilities(drain)
+                if ability.mana_ability
+            ],
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

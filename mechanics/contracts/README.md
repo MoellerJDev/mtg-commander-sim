@@ -37,6 +37,9 @@ cross-face links, and cross-object token/emblem links explicitly untrusted.
 CR 606 traces loyalty abilities and verifies their base permanent, timing,
 activation-limit, and payability behavior while modified and combined loyalty
 costs remain fail-closed and explicitly untrusted.
+CR 605 traces mana abilities and verifies stackless activated-mana resolution
+and spell-payment use while possible-output grammar, generic triggered mana
+abilities, and arbitrary nested payment windows remain explicitly untrusted.
 
 Run `simctl rules sync` after changing a contract so its hash and status are
 overlaid into `mechanics/registry.json`, then run `simctl rules verify`.

@@ -137,6 +137,12 @@ maximum-counter foundation. It now:
   negative-cost payability, and makes recognized cost modifiers or multiple
   loyalty-symbol costs fail closed until their ordering and combination are
   represented;
+- source-reviews all 14 CR 605 mana-ability records, excludes targeted and
+  loyalty abilities from the activated-mana classifier, and verifies immediate
+  stackless activation plus automatic activation during spell payment;
+- keeps incomplete possible-output grammar, arbitrary nested payment windows,
+  activation reentry, and all generic triggered-mana classification and
+  immediate dispatch explicitly blocked;
 - keeps inventory-only cases separate from executable semantic passes.
 
 The prior permanent snapshot behavior remains: toughness, lethal/deathtouch,
@@ -167,15 +173,15 @@ events also remain blockers.
   `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
 - Indexed rules: 3,300
 - Conformance cases: 3,300
-- Inventory-only cases: 3,113
-- Reviewed blocked cases: 130
-- Reviewed definition-only cases: 29
-- Executable semantic passes: 28
+- Inventory-only cases: 3,099
+- Reviewed blocked cases: 137
+- Reviewed definition-only cases: 34
+- Executable semantic passes: 30
 - Indexed sections: 156
 - Glossary entries: 733
 - Discovered mechanics: 425
-- Partial/untrusted mechanic contracts: 21
-- Unclassified mechanics: 404
+- Partial/untrusted mechanic contracts: 22
+- Unclassified mechanics: 403
 - Trusted mechanics in the new corpus registry: 0
 - `current_snapshot_complete`: false
 - Full Oracle snapshot: 2,957 exact; 15,691 partial; 19,725 unresolved;
@@ -187,8 +193,8 @@ events also remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 3,750 passed
-- Noninventory unit/integration tests: 450 passed
+- Unit/integration tests: 3,756 passed
+- Noninventory unit/integration tests: 456 passed
 - Generated per-rule inventory/source-linkage tests: 3,300 passed
 - Focused object identity/token lifecycle tests: 15 passed
 - Focused copy-object lifecycle tests: 8 passed
@@ -200,6 +206,7 @@ events also remain blockers.
 - Focused CR 608 resolution-rule tests: 4 passed
 - Focused CR 607 linked-ability tests: 2 passed
 - Focused CR 606 loyalty-ability tests: 6 passed
+- Focused CR 605 mana-ability tests: 6 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
 - Seed-20260730 hidden-information audit: pass
@@ -219,7 +226,7 @@ events also remain blockers.
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `6c148893bd97e2586a06432715933de4ba182b5a9bbb15b6d1ec178e0fdfdb43`
+  `8b3038e8666c7aff9807bfe2304218499d34198d125891e9da6e2f8ab1d3773b`
 
 ## Deck-review evidence state
 

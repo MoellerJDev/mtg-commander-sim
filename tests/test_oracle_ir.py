@@ -74,6 +74,7 @@ class MechanicContractTests(unittest.TestCase):
                 "cr-310-battles",
                 "cr-400-general",
                 "cr-603-handling-triggered-abilities",
+                "cr-605-mana-abilities",
                 "cr-606-loyalty-abilities",
                 "cr-607-linked-abilities",
                 "cr-608-resolving-spells-and-abilities",

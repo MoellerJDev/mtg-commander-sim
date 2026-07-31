@@ -412,7 +412,8 @@ def parse_activated_abilities(
 
         effect_lower = effect_text.casefold()
         mana_ability = (
-            "target" not in effect_lower
+            loyalty_delta is None
+            and "target" not in effect_lower
             and (
                 effect_lower.startswith("add ")
                 or "add one mana" in effect_lower
