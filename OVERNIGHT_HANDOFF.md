@@ -10,7 +10,7 @@ or provider session data.
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/cr-512-ending-phase`
+- Active branch: `agent/cr-511-end-of-combat`
 - Stage A merge commit on `main`:
   `bd89201be44de85aa9b85fcc9f0baacb0ee76dbe`
 - Stage A PR:
@@ -20,10 +20,9 @@ or provider session data.
 - Package version: `0.8.0`
 - Existing tags: `v0.6.0`, `v0.7.0`
 
-PR #2 and PR #1 passed their exact-SHA matrices and merged into `main` through
-ordinary merge commits. Main commit `390aeaa15dc19f64d8ec6ac6e37d3a0195043d86`
-then passed its own four-job matrix. The CR 512 draft was recovered intact onto
-the focused branch; its temporary stash was removed after verification.
+PR #2, PR #1, and focused CR 512 PR #3 passed their exact-SHA matrices and
+merged into `main` through ordinary merge commits. Main commit
+`9762c655b0f068ce24469e6476902a05de79c9d3` then passed run 30605533169.
 
 ## Deterministic product boundary
 
@@ -58,16 +57,16 @@ It generates one source-linked conformance case for each of 3,300 numbered
 rules and preserves reviewed status only while the source and rule-text hashes
 remain unchanged.
 
-Current reviewed inventory after the CR 512 synchronization:
+Current reviewed inventory after the CR 511 synchronization:
 
-- 318 reviewed cases
-- 45 executable semantic passes
-- 222 reviewed blocked cases
-- 51 definition-only cases
-- 2,982 unreviewed inventory cases
+- 322 reviewed cases
+- 47 executable semantic passes
+- 223 reviewed blocked cases
+- 52 definition-only cases
+- 2,978 unreviewed inventory cases
 - 425 discovered mechanics
-- 29 partial/untrusted mechanic contracts
-- 396 unclassified mechanics
+- 30 partial/untrusted mechanic contracts
+- 395 unclassified mechanics
 - 0 corpus-wide trusted mechanics
 
 Implemented reviewed families include narrow contracts for damage, defense,
@@ -106,7 +105,7 @@ Stage A exact evidence:
 - deterministic four-player micro-pool reached a natural winner with zero
   suppressed meaningful windows, passed seat projection, and exact-replayed
 
-The focused CR 512 local gate passed atop the combined Stage B baseline:
+The focused CR 511 local test gate passed atop the green CR 512 baseline:
 
 - generated platform, rules, mechanics, and Oracle status checks
 - all noninventory and all generated per-rule tests
@@ -115,17 +114,17 @@ The focused CR 512 local gate passed atop the combined Stage B baseline:
 - protocol demo and packet benchmark
 - repository/history/secret/artifact scans
 - wheel build, clean installation, imported version, and CLI smoke
-- the four focused CR 512 contract/order/replay/cleanup tests
+- the four focused CR 511 priority/trigger/combat-finalization/replay tests
 - exact-SHA four-job GitHub Actions for the focused commit remains pending
   until push
 
-The local gate ran 3,792 tests in 177.855 seconds, verified all 3,300 pinned
+The local test gate ran 3,796 tests in 179.631 seconds, verified all 3,300 pinned
 rules cases and 425 mechanics, checked 14 schemas and repository history,
 completed the protocol demo, and built and clean-installed the wheel. The
 four-player natural-winner soak exact-replayed after eliminating insertion-order
 dependence from authoritative zone timestamps. The repository scan covered 244
-tracked files and 11,165,988 bytes. Main commit
-`390aeaa15dc19f64d8ec6ac6e37d3a0195043d86` already passed run 30604498260;
+tracked files and 11,183,790 bytes. Main commit
+`9762c655b0f068ce24469e6476902a05de79c9d3` already passed run 30605533169;
 no exact-SHA CI pass is claimed for the focused commit until it is pushed.
 
 ## Evidence boundaries
@@ -139,6 +138,6 @@ no exact-SHA CI pass is claimed for the focused commit until it is pushed.
 
 ## Exact next step
 
-Publish the green CR 512 focused branch and wait for its exact-SHA matrix.
-CR 512.1 may be claimed as a passing structural rule; the broader end-step and
-cleanup behavior remains bounded by the partial CR 513 and CR 514 contracts.
+Publish the green CR 511 focused branch and wait for its exact-SHA matrix.
+CR 511.1 and CR 511.3 may be claimed for the represented boundary; CR 511.2
+remains blocked on generic until-end-of-combat duration semantics.

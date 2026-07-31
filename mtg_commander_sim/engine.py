@@ -3198,10 +3198,10 @@ class CommanderEngine:
             self._finish_cleanup()
             return
 
-        if step == "end_step":
-            # The end step has no turn-based action.  Collect both
+        if step in {"end_step", "end_combat"}:
+            # Neither boundary has a turn-based action. Collect both
             # permanent-based and delayed beginning-of-step triggers before
-            # granting priority.  A delayed trigger must not cause the
+            # granting priority. A delayed trigger must not cause the
             # semantic event dispatch to be skipped.
             context = {
                 "phase": phase,
@@ -3269,6 +3269,11 @@ class CommanderEngine:
 
     def _advance_step(self) -> None:
         self._clear_mana(reason="step or phase ended")
+        if (
+            self.state.phase,
+            self.state.step,
+        ) == ("combat", "end_combat"):
+            self._finish_combat_phase()
         self.state.phase_index += 1
         if self.state.phase_index >= len(TURN_STEPS):
             if (
@@ -3286,6 +3291,37 @@ class CommanderEngine:
             self._finish_cleanup()
             return
         self._enter_step()
+
+    def _finish_combat_phase(self) -> None:
+        """Remove every represented object from combat at the CR 511.3 boundary."""
+
+        changed_objects: list[str] = []
+        for card in sorted(
+            self.state.cards.values(),
+            key=lambda candidate: (candidate.ref, candidate.object_id),
+        ):
+            if card.attacking is None and card.blocking is None:
+                continue
+            card.attacking = None
+            card.blocking = None
+            changed_objects.append(card.object_id)
+        previous = self.state.combat
+        self.state.combat = CombatState()
+        self._log(
+            None,
+            "combat.end",
+            "The combat phase ended and all objects were removed from combat.",
+            {
+                "attackers": len(previous.attackers),
+                "blockers": sum(
+                    len(blockers)
+                    for blockers in previous.blockers.values()
+                ),
+                "defending_players": list(previous.defending_players),
+            },
+            importance=0,
+            changed_objects=changed_objects,
+        )
 
     def _active_cleanup_frame(self) -> dict[str, Any] | None:
         return next(

@@ -30683,21 +30683,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-511",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_end_of_combat_rules.EndOfCombatRuleTests.test_contract_traces_every_cr_511_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/end-of-combat.json"
+      ],
+      "notes": [
+        "Section heading; CR 511.1-3 carry the executable and blocked behavior."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "511",
       "rule_text_sha256": "9193c811a65ede788c18a8276bd82573cf6b1e5daaf76d9e79993ef7bde37cb8",
       "schema_version": 1,
@@ -30706,26 +30710,35 @@
         "end_line": 2415,
         "start_line": 2414
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-511.1",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "511"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_end_of_combat_rules.EndOfCombatRuleTests.test_end_of_combat_has_no_turn_action_then_active_gets_priority"
+      ],
+      "implementation_components": [
+        "CommanderEngine._enter_step",
+        "CommanderEngine._grant_priority"
+      ],
+      "notes": [
+        "The step emits only its boundary event before the active player receives priority; it performs no turn-based action."
+      ],
+      "required_scenarios": [
+        "positive"
+      ],
+      "reviewed": true,
       "rule_id": "511.1",
       "rule_text_sha256": "e815eae7d0e193a525b3ddfcec1ac8e552b9cb5461b82c61b8968ca921a2023a",
       "schema_version": 1,
@@ -30734,26 +30747,41 @@
         "end_line": 2417,
         "start_line": 2416
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "until_end_of_combat_duration_registry_not_implemented"
       ],
       "case_id": "cr-511.2",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "511"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_end_of_combat_rules.EndOfCombatRuleTests.test_permanent_and_delayed_end_of_combat_triggers_precede_priority"
+      ],
+      "implementation_components": [
+        "CommanderEngine._enter_step",
+        "CommanderEngine._dispatch_semantic_event",
+        "CommanderEngine._matching_delayed_triggers"
+      ],
+      "notes": [
+        "Represented permanent and delayed at-end-of-combat triggers coexist before priority. The rule remains blocked because arbitrary effects lasting until end of combat do not yet use a complete generic duration registry."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "negative"
+      ],
+      "reviewed": true,
       "rule_id": "511.2",
       "rule_text_sha256": "db02f1352723bb03ea78c3fd9dc63c071a186d74b07b858fce58e4205c5382f2",
       "schema_version": 1,
@@ -30762,26 +30790,41 @@
         "end_line": 2419,
         "start_line": 2418
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-511.3",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "511"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_end_of_combat_rules.EndOfCombatRuleTests.test_objects_leave_combat_only_after_step_ends_and_replay_exactly"
+      ],
+      "implementation_components": [
+        "CommanderEngine._advance_step",
+        "CommanderEngine._finish_combat_phase"
+      ],
+      "notes": [
+        "Attackers, blockers, attacked nonplayer permanents, and the combat snapshot remain live through priority, then are cleared before the postcombat main step begins. The four-player path command-replays exactly."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "511.3",
       "rule_text_sha256": "ad38066de0f1ab89914589567ab07d846a4c928017af6362f6b30f9694649db3",
       "schema_version": 1,
@@ -30790,7 +30833,7 @@
         "end_line": 2421,
         "start_line": 2420
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "static_traceability",

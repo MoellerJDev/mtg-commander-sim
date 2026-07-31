@@ -9,6 +9,10 @@
 - Removed AI/Codex runs from product, rules, merge, and release completion
   criteria while retaining existing adapters as optional untrusted clients.
 - Added a generated platform readiness ledger and CI stale-artifact check.
+- Corrected the CR 511.3 boundary so attacking and blocking markers and the
+  combat snapshot clear after end-of-combat priority, before postcombat main.
+- Added source-linked end-of-combat priority, trigger-coexistence, multiplayer,
+  and exact-replay tests while leaving generic duration expiry blocked.
 - Source-reviewed CR 512 as an exact structural ending-phase contract: end
   step, then cleanup, with no next-turn transition before cleanup completes.
 - Added exact command replay and cleanup-discard handoff coverage for that

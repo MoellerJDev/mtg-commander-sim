@@ -1,5 +1,5 @@
 {
-  "contract_count": 29,
+  "contract_count": 30,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -71,6 +71,12 @@
       "mechanic_id": "cr-609-effects",
       "path": "mechanics/contracts/effects.json",
       "sha256": "f1360921a4ab49d10db14a3055c71ba6b8385ca606b407159fe23d0144d784c9",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-511-end-of-combat-step",
+      "path": "mechanics/contracts/end-of-combat.json",
+      "sha256": "93c1854eb2c5929f09287a13da9fb119749fdffb80ac1b229bba698bac238776",
       "version": 1
     },
     {
@@ -6178,17 +6184,29 @@
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/end-of-combat.json",
+      "contract_sha256": "93c1854eb2c5929f09287a13da9fb119749fdffb80ac1b229bba698bac238776",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "TURN_STEPS and CommanderEngine end-of-combat entry, priority, trigger, combat-finalization, and step-advance paths",
+      "implementation_version": "end-of-combat-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "the complete continuous-effect grammar and duration registry for effects lasting until end of combat is not implemented",
+        "complete trigger ordering, replacement, control-change, extra-combat, and multiplayer interaction coverage remains incomplete"
+      ],
       "mechanic_id": "cr-511-end-of-combat-step",
       "official_name": "End of Combat Step",
       "rule_references": [
         "511"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_511_rule",
+        "test_end_of_combat_has_no_turn_action_then_active_gets_priority",
+        "test_permanent_and_delayed_end_of_combat_triggers_precede_priority",
+        "test_objects_leave_combat_only_after_step_ends_and_replay_exactly"
+      ],
       "trust_level": "untrusted"
     },
     {

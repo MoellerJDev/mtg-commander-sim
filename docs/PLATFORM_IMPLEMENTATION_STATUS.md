@@ -6,9 +6,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/cr-512-ending-phase`
+- Active branch: `agent/cr-511-end-of-combat`
 - Current commit: the commit containing this ledger
-- Active phase: `rules_family_cr_512_ending_phase`
+- Active phase: `rules_family_cr_511_end_of_combat`
 - Package version: `0.8.0`
 
 ### Pull requests
@@ -17,6 +17,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 |---|---|---|---|
 | [#2](https://github.com/MoellerJDev/mtg-commander-sim/pull/2) | `agent/review-mvp` | `main` | `merged` |
 | [#1](https://github.com/MoellerJDev/mtg-commander-sim/pull/1) | `agent/rules-completeness` | `main` | `merged` |
+| [#3](https://github.com/MoellerJDev/mtg-commander-sim/pull/3) | `agent/cr-512-ending-phase` | `main` | `merged` |
 
 ## Pinned snapshots and coverage
 
@@ -26,8 +27,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 - Rules manifest present on this branch: yes
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
-- Rules cases: blocked=222, definition_only=51, passing=45, total=3300, unreviewed=2982
-- Mechanics: status_counts={'partial': 29, 'unclassified': 396}, total=425, trusted=0
+- Rules cases: blocked=223, definition_only=52, passing=47, total=3300, unreviewed=2978
+- Mechanics: status_counts={'partial': 30, 'unclassified': 395}, total=425, trusted=0
 - Oracle coverage: material_residuals=69664, status_counts={'exact': 2957, 'partial': 15691, 'unresolved': 19725}, total=38373
 - Commander-legal Oracle coverage: material_residuals=61212, status_counts={'exact': 338, 'partial': 14354, 'unresolved': 16930}, total=31622
 - Current rules/Oracle snapshot complete: no
@@ -38,7 +39,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 |---|---|---|
 | Integrated deterministic foundation | `complete` | Both integration PRs merged through ordinary merge commits; main passed its exact-SHA 3,788-test matrix. |
 | Browser Commander MVP | `not_started` | No server/, web/, or migrations/ subsystem is present on this branch. |
-| Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 rules corpus is on main; CR 512 is the current focused family. |
+| Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 rules corpus and reviewed CR 512 slice are on main; CR 511 is the current focused family. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
 ## Runtime and product boundaries
@@ -58,11 +59,11 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 3792
+- Tests discovered: 3796
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30604498260](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30604498260) — `pass`
+- Baseline CI: [30605533169](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30605533169) — `pass`
 - Compile: `pass`
-- Deterministic tests: `pass_3792`
+- Deterministic tests: `pass_3796`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
 - Four-player protocol demo: `pass`
 - Repository/history/security audit: `pass`
@@ -80,7 +81,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Publish the green CR 512 focused branch, then select the next dependency-bounded rules family without overstating full rulebook completeness.
+Publish the green CR 511 focused slice without promoting the blocked generic until-end-of-combat duration grammar.
 
 ## Regeneration
 
