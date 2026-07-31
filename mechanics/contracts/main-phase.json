@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-505-main-phase",
+  "official_name": "Main Phase",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "505",
+    "505.1",
+    "505.1a",
+    "505.1b",
+    "505.2",
+    "505.3",
+    "505.4",
+    "505.5",
+    "505.6",
+    "505.6a",
+    "505.6b"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "turn-structure",
+    "priority",
+    "casting-spells",
+    "playing-lands",
+    "saga-cards",
+    "triggered-abilities",
+    "archenemy",
+    "attractions",
+    "continuous-effects",
+    "replacement-effects",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "hand",
+      "battlefield",
+      "stack"
+    ],
+    "objects": [
+      "active player",
+      "nonactive player",
+      "spell",
+      "land card",
+      "Saga",
+      "scheme",
+      "Attraction"
+    ],
+    "events": [
+      "precombat main phase begins",
+      "postcombat main phase begins",
+      "Saga lore counters are added",
+      "active player receives priority",
+      "spell is cast",
+      "land is played",
+      "main phase ends"
+    ],
+    "state_reads": [
+      "active player",
+      "phase boundary",
+      "priority player",
+      "stack emptiness",
+      "land plays remaining",
+      "effective card types and subtypes",
+      "Saga lore counters"
+    ],
+    "state_writes": [
+      "phase boundary",
+      "priority and pass sequence",
+      "stack",
+      "battlefield",
+      "land plays remaining",
+      "Saga lore counters"
+    ],
+    "costs": [
+      "ordinary spell costs are paid through the casting pipeline",
+      "playing a land has no mana cost and consumes one land-play allowance"
+    ],
+    "timing": [
+      "ordinary turns contain precombat and postcombat main boundaries separated by combat",
+      "the main boundary has no rules substeps",
+      "an empty-stack all-player pass ends the phase",
+      "sorcery-speed actions require the active player's main phase and an empty stack",
+      "extra-combat and ordinal-main-phase timing remain blocked"
+    ],
+    "targets": [
+      "main-phase rules add no target grammar"
+    ],
+    "choices": [
+      "the active player chooses legal priority actions",
+      "the active player chooses a legal land to play"
+    ],
+    "hidden_information": [
+      "only the acting seat receives its hand-derived cast and land alternatives"
+    ],
+    "apnap": [
+      "ordinary priority rotates from the active player",
+      "complete simultaneous Saga-trigger ordering remains a triggered-ability dependency"
+    ],
+    "layers": [
+      "effective Saga subtype and chapter-ability state are not completely derived"
+    ],
+    "replacement_effects": [
+      "simultaneous lore-counter replacement ordering remains incomplete"
+    ],
+    "copy": [
+      "effective copied Saga characteristics are consulted only through the partial characteristic pipeline"
+    ],
+    "control_change": [
+      "only Sagas controlled by the active player receive represented precombat lore counters"
+    ],
+    "zone_change": [
+      "playing a land moves it directly from an authorized zone to the battlefield without using the stack"
+    ],
+    "source_leaves": [
+      "a Saga that leaves before the precombat main action is not advanced"
+    ]
+  },
+  "variants": [
+    "ordinary precombat main phase",
+    "ordinary postcombat main phase",
+    "stack resolution within a main phase",
+    "represented Saga advancement",
+    "sorcery-speed casting",
+    "one or more authoritative land-play allowances",
+    "unsupported Archenemy scheme action",
+    "unsupported Attraction visit roll",
+    "unsupported skipped and additional combat/main phases"
+  ],
+  "witness_cards": [
+    {
+      "name": "Sol Ring",
+      "oracle_id": "6ad8011d-3471-4369-9d68-b264cc027487"
+    },
+    {
+      "name": "Urza's Saga",
+      "oracle_id": "4c6a0c30-b547-4eff-8ff4-0ca25803c076"
+    },
+    {
+      "name": "Island",
+      "oracle_id": "b2c6aa39-2d2a-459c-a555-fb48ba993373"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_505_rule",
+    "test_ordinary_turn_has_two_main_boundaries_separated_by_combat",
+    "test_main_phase_ends_only_after_empty_stack_passes_and_replays",
+    "test_resolving_stack_does_not_end_main_phase",
+    "test_saga_lore_precedes_main_phase_priority",
+    "test_active_player_gets_main_priority_and_sorcery_timing_is_exact",
+    "test_land_play_is_stackless_atomic_and_uses_allowance",
+    "test_land_hints_require_the_actual_active_main_phase"
+  ],
+  "implementation": {
+    "component": "TURN_STEPS and CommanderEngine main-phase entry, Saga, priority, casting, land-play, action-hint, and phase-advance paths",
+    "version": "main-phase-v1"
+  },
+  "known_blockers": [
+    "skipped combat and generic additional combat/main phase scheduling are not implemented",
+    "main-phase ordinal identity within a turn is not serialized",
+    "Archenemy scheme decks and set-in-motion actions are not implemented",
+    "Attractions and visit rolls are not implemented",
+    "Saga qualification by current chapter abilities and simultaneous lore-counter replacement ordering are incomplete",
+    "generic effects that increase or relocate land-play permissions are incomplete",
+    "the complete continuous-effect, replacement, trigger, multiplayer, and replay interaction matrix remains incomplete"
+  ],
+  "review_status": "draft"
+}

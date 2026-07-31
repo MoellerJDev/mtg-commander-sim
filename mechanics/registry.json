@@ -1,5 +1,5 @@
 {
-  "contract_count": 38,
+  "contract_count": 40,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -104,6 +104,12 @@
       "version": 2
     },
     {
+      "mechanic_id": "cr-504-draw-step",
+      "path": "mechanics/contracts/draw-step.json",
+      "sha256": "48c692a22bb7e6e6e3c79689318c4ff404466d5c1c71a52cbf0f5a4c7fbf6564",
+      "version": 1
+    },
+    {
       "mechanic_id": "cr-609-effects",
       "path": "mechanics/contracts/effects.json",
       "sha256": "f1360921a4ab49d10db14a3055c71ba6b8385ca606b407159fe23d0144d784c9",
@@ -155,6 +161,12 @@
       "mechanic_id": "cr-606-loyalty-abilities",
       "path": "mechanics/contracts/loyalty-abilities.json",
       "sha256": "95c229e66174b9bd897c4f218fcc998db7a8e621a21191012692571952addc4e",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-505-main-phase",
+      "path": "mechanics/contracts/main-phase.json",
+      "sha256": "d5a92206c1a151b69efe809ec56cb27357637f8d0bfa01c251755f178d528e01",
       "version": 1
     },
     {
@@ -6181,32 +6193,68 @@
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/draw-step.json",
+      "contract_sha256": "48c692a22bb7e6e6e3c79689318c4ff404466d5c1c71a52cbf0f5a4c7fbf6564",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine draw, draw-replacement, draw-step trigger batching, state stabilization, priority, format-profile, and replay paths",
+      "implementation_version": "draw-step-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "the complete draw-replacement and draw-prevention Oracle corpus is not compiled",
+        "generic effects that skip a draw step or replace the turn-based draw with multiple or conditional events are incomplete",
+        "the complete continuous-effect, replacement, trigger-target, multiplayer-elimination, and replay interaction matrix remains incomplete"
+      ],
       "mechanic_id": "cr-504-draw-step",
       "official_name": "Draw Step",
       "rule_references": [
         "504"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_504_rule",
+        "test_turn_draw_is_stackless_and_precedes_active_priority",
+        "test_draw_step_triggers_wait_until_after_the_turn_draw",
+        "test_trusted_draw_replacement_finishes_before_priority",
+        "test_empty_library_loss_is_checked_before_draw_step_priority",
+        "test_first_turn_profile_modifier_and_exact_replay"
+      ],
       "trust_level": "untrusted"
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/main-phase.json",
+      "contract_sha256": "d5a92206c1a151b69efe809ec56cb27357637f8d0bfa01c251755f178d528e01",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "TURN_STEPS and CommanderEngine main-phase entry, Saga, priority, casting, land-play, action-hint, and phase-advance paths",
+      "implementation_version": "main-phase-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "skipped combat and generic additional combat/main phase scheduling are not implemented",
+        "main-phase ordinal identity within a turn is not serialized",
+        "Archenemy scheme decks and set-in-motion actions are not implemented",
+        "Attractions and visit rolls are not implemented",
+        "Saga qualification by current chapter abilities and simultaneous lore-counter replacement ordering are incomplete",
+        "generic effects that increase or relocate land-play permissions are incomplete",
+        "the complete continuous-effect, replacement, trigger, multiplayer, and replay interaction matrix remains incomplete"
+      ],
       "mechanic_id": "cr-505-main-phase",
       "official_name": "Main Phase",
       "rule_references": [
         "505"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_505_rule",
+        "test_ordinary_turn_has_two_main_boundaries_separated_by_combat",
+        "test_main_phase_ends_only_after_empty_stack_passes_and_replays",
+        "test_resolving_stack_does_not_end_main_phase",
+        "test_saga_lore_precedes_main_phase_priority",
+        "test_active_player_gets_main_priority_and_sorcery_timing_is_exact",
+        "test_land_play_is_stackless_atomic_and_uses_allowance",
+        "test_land_hints_require_the_actual_active_main_phase"
+      ],
       "trust_level": "untrusted"
     },
     {
