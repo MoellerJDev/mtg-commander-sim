@@ -132,6 +132,13 @@
         "number": 17,
         "state": "draft",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/17"
+      },
+      {
+        "base": "agent/cr-400-general-zone-identity",
+        "head": "agent/cr-401-library",
+        "number": 18,
+        "state": "draft",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/18"
       }
     ],
     "tags": [
@@ -227,5 +234,5 @@
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete",
     "GitHub Actions is not allocating runners for current draft PRs because of an account billing or spending-limit failure; no exact-SHA result may be inferred from those pre-run failures"
   ],
-  "next_task": "Publish the bounded CR 401 Library slice as a dependency-staged draft atop CR 400, keep it unmerged while exact-SHA runners are unavailable, then begin CR 402 Hand without promoting incomplete hidden-zone semantics."
+  "next_task": "Keep dependency-staged CR 401 PR #18 in draft while GitHub cannot allocate runners, and begin CR 402 Hand without promoting incomplete hidden-zone semantics."
 }

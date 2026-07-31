@@ -10,7 +10,7 @@ or provider session data.
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/cr-400-general-zone-identity`
+- Active branch: `agent/cr-401-library`
 - Stage A merge commit on `main`:
   `bd89201be44de85aa9b85fcc9f0baacb0ee76dbe`
 - Stage A PR:
@@ -27,8 +27,9 @@ commits. Main commit
 CR 505 PR #10 and CR 504 PR #11 are independent drafts. CR 503 PR #12 is the
 dependency parent for CR 502 PR #13, which is the parent for CR 501 PR #14.
 CR 500 PR #15 is a dependency-staged draft based on
-`agent/cr-501-beginning-phase`; CR 405 PR #16 is based on CR 500, and CR 400
-PR #17 is based on CR 405. Their jobs did not receive runners because
+`agent/cr-501-beginning-phase`; CR 405 PR #16 is based on CR 500, CR 400
+PR #17 is based on CR 405, and CR 401 PR #18 is based on CR 400. Their jobs
+did not receive runners because
 GitHub reported an account billing or spending-limit failure; those pre-run
 failures are neither code passes nor code failures.
 
@@ -65,23 +66,23 @@ It generates one source-linked conformance case for each of 3,300 numbered
 rules and preserves reviewed status only while the source and rule-text hashes
 remain unchanged.
 
-Current reviewed inventory after the CR 400 synchronization:
+Current reviewed inventory after the CR 401 synchronization:
 
-- 501 reviewed cases
-- 82 executable semantic passes
-- 350 reviewed blocked cases
-- 69 definition-only cases
-- 2,799 unreviewed inventory cases
+- 509 reviewed cases
+- 86 executable semantic passes
+- 353 reviewed blocked cases
+- 70 definition-only cases
+- 2,791 unreviewed inventory cases
 - 425 discovered mechanics
-- 40 partial/untrusted mechanic contracts
-- 385 unclassified mechanics
+- 41 partial/untrusted mechanic contracts
+- 384 unclassified mechanics
 - 0 corpus-wide trusted mechanics
 
 Implemented reviewed families include narrow contracts for damage, defense,
 Battles, state-based actions, replacement/prevention ordering, effects,
 resolution, linked abilities, loyalty abilities, mana abilities, static and
 triggered abilities, casting, activating abilities, general zones and logical
-object identity, stack, general turn structure,
+object identity, library ordering and hidden projection, stack, general turn structure,
 beginning phase, untap,
 upkeep, end step, cleanup,
 logical zone incarnations, timestamps, World, token/copy lifecycle, and
@@ -116,7 +117,7 @@ Stage A exact evidence:
 - deterministic four-player micro-pool reached a natural winner with zero
   suppressed meaningful windows, passed seat projection, and exact-replayed
 
-The focused CR 400 local test gate passed atop the validated CR 405 dependency:
+The focused CR 401 local test gate passed atop the validated CR 400 dependency:
 
 - generated platform, rules, mechanics, and Oracle status checks
 - all noninventory and all generated per-rule tests
@@ -125,19 +126,19 @@ The focused CR 400 local test gate passed atop the validated CR 405 dependency:
 - protocol demo and packet benchmark
 - repository/history/secret/artifact scans
 - wheel build, clean installation, imported version, and CLI smoke
-- the six focused CR 400 source/topology/identity/visibility/no-op/prevention
-  tests
+- the seven focused CR 401 source/setup/count/visibility/look/reorder/Nth/
+  shuffle tests
 
-The local test gate ran 3,860 tests in 197.987 seconds, verified all 3,300 pinned
+The local test gate ran 3,867 tests in 197.904 seconds, verified all 3,300 pinned
 rules cases and 425 mechanics, checked 14 schemas and repository history,
 completed the protocol demo, and built and clean-installed the wheel. The
 seed-20260730 and four-player natural-winner regressions were independently
 rerun with exact replay and zero suppressed meaningful windows. The repository
-scan covered 282 tracked files and 11,694,066 bytes. Main commit
+scan covered 285 tracked files and 11,736,966 bytes. Main commit
 `c8a52711dc9294957fc0f437a4aaeab72da213aa` already passed run 30615647165;
-CR 400 implementation commit
-`980f27e9468089b0984a8368d275867e24d40bc6` produced push run
-30625303005 and pull-request run 30625317823. All eight jobs had
+CR 401 implementation commit
+`f445e67e009be4934fd03fe5ee1b7dc07de29b85` produced push run
+30626290382 and pull-request run 30626302543. All eight jobs had
 `runner_id=0`, zero steps, and GitHub's billing/spending-limit annotation. No
 exact-SHA CI pass is claimed for the focused branches until their jobs receive
 runners and pass.
@@ -153,11 +154,10 @@ runners and pass.
 
 ## Exact next step
 
-Keep dependency-staged CR 400 PR #17 in draft while GitHub Actions cannot
-allocate runners, and begin CR 401 Library. CR 400 passes only the reviewed
-zone topology, owner routing, logical-incarnation, permanent-spell
-continuation, represented LKI, authorized face-down visibility, and hidden
-outside-game paths. The complete CR 400.7 exception matrix, special
-command-zone objects, ordered face-down piles, sideboards and wishes,
-simultaneous replacement integration, and whole-zone instruction grammar
+Keep dependency-staged CR 401 PR #18 in draft while GitHub Actions cannot
+allocate runners, and begin CR 402 Hand. CR 401 passes only deck-to-library
+initialization, public counts with hidden order, bounded look/reorder and
+shuffle knowledge, and Nth-from-top insertion. Generic simultaneous owner-
+secret insertion ordering, continuous top-card reveal/look permissions,
+procedure-time visibility freezing, and reveal-continuity new-object identity
 remain blocked. Do not merge or promote those gaps.
