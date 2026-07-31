@@ -158,6 +158,10 @@ generated documentation fixtures with bearer capabilities redacted. See
 - source-reviewed CR 604 static-ability scope with source-leaves and
   moved-attachment witnesses; generic CDA, attachment, stack, zone-permission,
   and current-information/LKI handling remain blocked
+- source-reviewed CR 603 trigger handling with executable pending-to-stack,
+  controller-at-trigger-time, intervening-condition, and delayed-object-
+  incarnation invariants; complete trigger grammar, two-part APNAP ordering,
+  state/reflexive triggers, and the look-back exception matrix remain blocked
 - trust-aware semantic preflight for files and live Moxfield URLs
 - compact cast, land, activation, target, and generic resolution-time search
   templates

@@ -32461,21 +32461,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-603",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/handling-triggered-abilities.json"
+      ],
+      "notes": [
+        "Section heading; every numbered CR 603 record is pinned by the Handling Triggered Abilities contract."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "603",
       "rule_text_sha256": "27a6b11e4b193ac081e376682ccb43fe409d5f1ec4af5e521c1c500c915984b2",
       "schema_version": 1,
@@ -32484,26 +32488,31 @@
         "end_line": 2554,
         "start_line": 2553
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-603.1",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler",
+        "mechanics/contracts/handling-triggered-abilities.json"
+      ],
+      "notes": [
+        "Defines the when, whenever, and at syntax; behavioral recognition is reviewed by the following clauses."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "603.1",
       "rule_text_sha256": "42f8ad453b8803dc72bf63a0399c34b36020c8eb571e9a78abddcae51e1453e0",
       "schema_version": 1,
@@ -32512,26 +32521,38 @@
         "end_line": 2556,
         "start_line": 2555
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "post-effect targeting restrictions and uncounterability instructions are not generically separated from trigger effects",
+        "trigger stack characteristics do not carry a universal typed instruction model"
       ],
       "case_id": "cr-603.1a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler",
+        "StackItem.context"
+      ],
+      "notes": [
+        "Selected target schemas and uncounterability facts exist, but do not establish this complete instruction grammar."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.1a",
       "rule_text_sha256": "0db8240310e8dfeaf49087ee1c94a4ce9e3b6331890a5fc9c8347208f69ab710",
       "schema_version": 1,
@@ -32540,26 +32561,37 @@
         "end_line": 2558,
         "start_line": 2557
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "the engine has no period-scoped history accumulator for multi-condition all instructions",
+        "the Oracle compiler leaves this sentence family residual"
       ],
       "case_id": "cr-603.1b",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler"
+      ],
+      "notes": [
+        "Ordinary event journals are not a substitute for the rule's typed historical condition."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.1b",
       "rule_text_sha256": "03d917ca6da403a458b1854fe8b7b912eeae55a63cbf9ab7d5bf9246e1fc72e6",
       "schema_version": 1,
@@ -32568,26 +32600,41 @@
         "end_line": 2560,
         "start_line": 2559
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "authoritative normalized events and compiled trigger programs cover only selected event and wording families",
+        "uncompiled material trigger text fails to arbitration rather than triggering generically"
       ],
       "case_id": "cr-603.2",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "603"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_trigger_waits_for_stabilization_then_becomes_top_stack_object"
+      ],
+      "implementation_components": [
+        "CommanderEngine._dispatch_semantic_event",
+        "oracle_ir.OracleIRCompiler"
+      ],
+      "notes": [
+        "A represented event automatically creates a pending trigger without executing its effect, but universal event matching is incomplete."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "603.2",
       "rule_text_sha256": "334c5da040a0084e89f350489734586736be172a7ac93a9247a75393d310637e",
       "schema_version": 1,
@@ -32596,26 +32643,40 @@
         "end_line": 2562,
         "start_line": 2561
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "activation prohibitions and cast timing restrictions do not share a generic negative-interaction test with every trigger source",
+        "trigger compiler coverage remains partial"
       ],
       "case_id": "cr-603.2a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "603.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_trigger_waits_for_stabilization_then_becomes_top_stack_object"
+      ],
+      "implementation_components": [
+        "CommanderEngine._dispatch_semantic_event",
+        "CommanderEngine._grant_priority"
+      ],
+      "notes": [
+        "Represented triggers are dispatched independently of the cast and activation action generator."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.2a",
       "rule_text_sha256": "31bc73adf22cd93e41aec02e032b00370eb6ba8f8b1fac5a5cb9ec4abfb623a0",
       "schema_version": 1,
@@ -32624,26 +32685,43 @@
         "end_line": 2564,
         "start_line": 2563
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "not every beginning-of-phase or beginning-of-step Oracle trigger compiles to the normalized step event",
+        "no complete command-replay matrix covers all phases, steps, skipped steps, and extra phases"
       ],
       "case_id": "cr-603.2b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "603.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_preflight_v080.NormalizedZoneEventTests.test_declarative_event_condition_matches_normalized_context",
+        "tests.test_multiplayer_rules.MultiplayerRuleTests.test_delayed_trigger_queues_at_matching_step"
+      ],
+      "implementation_components": [
+        "CommanderEngine._enter_step",
+        "CommanderEngine._dispatch_semantic_event"
+      ],
+      "notes": [
+        "The turn engine emits represented step-begin events and delayed triggers match them exactly."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "603.2b",
       "rule_text_sha256": "0dde4b2efe2d2af808669ff16428f151100a92fd8173e9567d03ddb004932543",
       "schema_version": 1,
@@ -32652,26 +32730,38 @@
         "end_line": 2566,
         "start_line": 2565
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "normalized events do not carry a generic occurrence list that can create one trigger per occurrence",
+        "selected batch suppression handles one-or-more wording but not the general multiple-occurrence rule"
       ],
       "case_id": "cr-603.2c",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._dispatch_semantic_event",
+        "CommanderEngine._enqueue_semantic_trigger_batch"
+      ],
+      "notes": [
+        "One dispatch normally creates one trigger per matching program; the exception requires a typed occurrence model."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.2c",
       "rule_text_sha256": "a179f0d0e4f494d94bdda6c07a099183d94bbf2c31c8babcfa9a857d4e66375a",
       "schema_version": 1,
@@ -32680,26 +32770,41 @@
         "end_line": 2569,
         "start_line": 2567
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "additional-trigger evaluation uses selected Panharmonicon and Roaming Throne wording rather than a generic nonrecursive count pipeline",
+        "delayed and reflexive exclusions and multiple modifier interactions are not universally represented"
       ],
       "case_id": "cr-603.2d",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "603.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_exact_artifact_engines.ExactArtifactEngineTests.test_panharmonicon_adds_one_matching_enter_trigger"
+      ],
+      "implementation_components": [
+        "CommanderEngine._dispatch_semantic_event"
+      ],
+      "notes": [
+        "Exact represented cards add trigger copies, but the broad rule remains blocked."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "603.2d",
       "rule_text_sha256": "7e7b0a393c51c1d4c3c684aedbcfbeb569cb63292669437fbc709f78bd5733e1",
       "schema_version": 1,
@@ -32708,26 +32813,37 @@
         "end_line": 2571,
         "start_line": 2570
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "becomes-attached, becomes-blocked, tapped, and untapped transitions do not use one edge-sensitive trigger detector",
+        "entry-state versus battlefield-transition distinction is not generic"
       ],
       "case_id": "cr-603.2e",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._dispatch_semantic_event"
+      ],
+      "notes": [
+        "Status mutation exists, but no universal becomes-event boundary is claimed."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.2e",
       "rule_text_sha256": "e01bf94a72980745f53544e9eeadd904af2e6e008fc1dfcd0100fa9f58b0b081",
       "schema_version": 1,
@@ -32736,26 +32852,38 @@
         "end_line": 2574,
         "start_line": 2572
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "trigger detection does not carry a universal all-players-visibility predicate",
+        "private-zone sources use selected active-zone programs rather than a complete visibility rule"
       ],
       "case_id": "cr-603.2f",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "StateProjector",
+        "CommanderEngine._semantic_event_sources"
+      ],
+      "notes": [
+        "Projection secrecy is enforced separately and is not evidence that hidden sources cannot trigger."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "603.2f",
       "rule_text_sha256": "161ed04ec0bec1126fd7ecea64c554cccb83f24cb05d88ebe22a40aa66213ef8",
       "schema_version": 1,
@@ -32764,26 +32892,39 @@
         "end_line": 2576,
         "start_line": 2575
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "not every event producer dispatches only after the complete replacement and prevention pipeline",
+        "stateful prevention and nested replacement events remain incomplete"
       ],
       "case_id": "cr-603.2g",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "replacement_effects.apply_replacement",
+        "CommanderEngine._dispatch_semantic_event"
+      ],
+      "notes": [
+        "Selected producers dispatch their final event, but a universal prevented-or-replaced event invariant is not yet proved."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "603.2g",
       "rule_text_sha256": "a23be5d81fe08c58d81817100cbae776e12aa73cfc796935090b99f9b3e565b6",
       "schema_version": 1,
@@ -32792,26 +32933,38 @@
         "end_line": 2579,
         "start_line": 2577
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "the source controller's indicated-action history is not represented as a typed per-turn trigger fact",
+        "the complete do-this-only-once-each-turn grammar remains residual"
       ],
       "case_id": "cr-603.2h",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler"
+      ],
+      "notes": [
+        "Per-turn activation limits elsewhere do not implement this trigger instruction."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "603.2h",
       "rule_text_sha256": "087ed766c44c8353b9c796932e7b70c4a9f81367a7a60d1d39d4e3987a51a64b",
       "schema_version": 1,
@@ -32820,26 +32973,38 @@
         "end_line": 2581,
         "start_line": 2580
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-603.3",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "603"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_trigger_waits_for_stabilization_then_becomes_top_stack_object"
+      ],
+      "implementation_components": [
+        "CommanderEngine._enqueue_semantic_trigger_batch",
+        "CommanderEngine._stabilize",
+        "CommanderEngine._place_semantic_trigger_items"
+      ],
+      "notes": [
+        "A represented trigger remains pending during its event, is placed as a noncard triggered-ability object above the existing stack during stabilization, and priority is granted afterward."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.3",
       "rule_text_sha256": "9d020e82ffb4b20f2b4c6777e838317df808679a09c525a0464274cb3da432e3",
       "schema_version": 1,
@@ -32848,26 +33013,38 @@
         "end_line": 2583,
         "start_line": 2582
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-603.3a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "603.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_trigger_controller_is_frozen_at_trigger_time",
+        "tests.test_oracle_ir.OracleIRTests.test_self_dies_trigger_uses_last_known_controller"
+      ],
+      "implementation_components": [
+        "CommanderEngine._dispatch_semantic_event",
+        "StackItem.controller"
+      ],
+      "notes": [
+        "Ordinary and self-departure triggers capture the source controller at trigger time; later control changes do not rewrite the stack object's controller. Delayed-trigger provenance is reviewed separately."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.3a",
       "rule_text_sha256": "42ccba743a88febd66b4bbe16b8ab49722d8299957e96669c81935d82eec54d5",
       "schema_version": 1,
@@ -32876,26 +33053,44 @@
         "end_line": 2585,
         "start_line": 2584
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "trigger batches do not separate ordinary triggers from abilities triggered by another ability triggering",
+        "the complete repeat-SBA-then-new-trigger two-part loop lacks exact replay coverage"
       ],
       "case_id": "cr-603.3b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "603.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_preflight_v080.NormalizedZoneEventTests.test_simultaneous_semantic_triggers_use_apnap_and_owner_order"
+      ],
+      "implementation_components": [
+        "CommanderEngine._enqueue_semantic_trigger_batch",
+        "CommanderEngine._begin_pending_semantic_trigger_batch",
+        "CommanderEngine._stabilize"
+      ],
+      "notes": [
+        "Represented simultaneous triggers use APNAP controller groups and controller-selected order, but only the first part of the rule is modeled."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "603.3b",
       "rule_text_sha256": "2428e9ee2a9ba8c21c8cf78420b4ac976be9698bb264891c46d4e33d2d848087",
       "schema_version": 1,
@@ -32904,26 +33099,38 @@
         "end_line": 2587,
         "start_line": 2586
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "generic modal triggered abilities and per-mode target legality are not compiled",
+        "no-mode removal is not represented for every modal trigger"
       ],
       "case_id": "cr-603.3c",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._begin_pending_trigger_target_selection",
+        "oracle_ir.OracleIRCompiler"
+      ],
+      "notes": [
+        "Modal spell infrastructure cannot be inferred to cover triggered abilities."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.3c",
       "rule_text_sha256": "0fa5851f6e7b75a69e079c7bdea3f252bf65d2281945e9c52d3a4bd3224c9326",
       "schema_version": 1,
@@ -32932,26 +33139,39 @@
         "end_line": 2589,
         "start_line": 2588
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "complete CR 601.2c-d choices, division, targets, and legality are not shared by all triggered abilities",
+        "illegal ability removal is only represented for selected target schemas"
       ],
       "case_id": "cr-603.3d",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._begin_pending_trigger_target_selection",
+        "targeting.target_plan"
+      ],
+      "notes": [
+        "Unsupported mandatory target grammar stops for arbitration instead of advertising an executable trigger choice."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "603.3d",
       "rule_text_sha256": "c15931bc71387fe813de89726d6fcec89b09ac248920d3bc49be5bc49bf0cb59",
       "schema_version": 1,
@@ -32960,26 +33180,39 @@
         "end_line": 2591,
         "start_line": 2590
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-603.4",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "603"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_exact_artifact_engines.ExactArtifactEngineTests.test_padeem_hexproof_and_intervening_upkeep_condition"
+      ],
+      "implementation_components": [
+        "CommanderEngine._semantic_event_condition_matches",
+        "CommanderEngine._prepare_stack_resolution"
+      ],
+      "notes": [
+        "Represented intervening conditions are checked before trigger creation and again immediately before resolution; a false second check removes the trigger without its effect."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.4",
       "rule_text_sha256": "c57ce6976bd9876973161658bb46c2497a34f07f5e7bab4a5ea30fec6db77a08",
       "schema_version": 1,
@@ -32988,26 +33221,38 @@
         "end_line": 2594,
         "start_line": 2592
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "may and unless trigger effects do not share one generic resolution-time choice grammar",
+        "selected optional effects cannot establish that intention never suppresses trigger creation"
       ],
       "case_id": "cr-603.5",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._prepare_stack_resolution",
+        "oracle_ir.OracleIRCompiler"
+      ],
+      "notes": [
+        "The rule remains blocked until optional choice timing is generic across triggers."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.5",
       "rule_text_sha256": "add6ba67a96cef774aa097ca83dbc197b5ebe3a37a36c41d4cc8293880ead6c1",
       "schema_version": 1,
@@ -33016,26 +33261,44 @@
         "end_line": 2596,
         "start_line": 2595
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "zone-change trigger effects do not use one typed destination-object handle across all visible and hidden zones",
+        "generic unable-to-find behavior and first-destination lookup are incomplete"
       ],
       "case_id": "cr-603.6",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "603"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_daretti_ruling_does_not_follow_a_reentered_card"
+      ],
+      "implementation_components": [
+        "CardInstance.logical_object_id",
+        "CommanderEngine._dispatch_semantic_event",
+        "CommanderEngine.move_card"
+      ],
+      "notes": [
+        "Exact-incarnation delayed movement rejects a card that left and returned, providing a partial object-finding witness."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "603.6",
       "rule_text_sha256": "2dbb317dd762b185587e22e98c2e0afecfd464de677a5367c899711083b57a91",
       "schema_version": 1,
@@ -33044,26 +33307,41 @@
         "end_line": 2598,
         "start_line": 2597
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "not every entering permanent and existing permanent is evaluated through complete effective characteristics and trigger text",
+        "simultaneous multi-entry and ability-loss interactions remain incomplete"
       ],
       "case_id": "cr-603.6a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "603.6"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_oracle_ir.OracleIRTests.test_generated_enters_trigger_reaches_arbiter_fail_closed"
+      ],
+      "implementation_components": [
+        "CommanderEngine.move_card",
+        "CommanderEngine._dispatch_semantic_event"
+      ],
+      "notes": [
+        "A generated self-entry trigger is detected and then fails closed at untrusted resolution."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "603.6a",
       "rule_text_sha256": "f35af5f055e7735423ea54df1cc784ef07fdcbe303cd42af7b71baec814276e4",
       "schema_version": 1,
@@ -33072,26 +33350,39 @@
         "end_line": 2600,
         "start_line": 2599
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "complete continuous-effect layers and dependencies are not applied to every entering object before trigger discovery",
+        "generic ability-adding and ability-removing entry interactions are absent"
       ],
       "case_id": "cr-603.6b",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.6"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._effective_card_data",
+        "continuous_effects.evaluate_continuous_effects",
+        "CommanderEngine._dispatch_semantic_event"
+      ],
+      "notes": [
+        "Selected effective characteristics are available, but they do not establish the complete entry snapshot."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.6b",
       "rule_text_sha256": "b06e624c08ed71532de959a5e7ce1e04102e98066dcfa20ad2344d8808bbe067",
       "schema_version": 1,
@@ -33100,26 +33391,42 @@
         "end_line": 2603,
         "start_line": 2601
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "phased-in permanents leaving with an owner and all from-anywhere distinctions are not generically compiled",
+        "first-destination-only object finding is not universal"
       ],
       "case_id": "cr-603.6c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "603.6"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_oracle_ir.OracleIRTests.test_self_dies_trigger_uses_last_known_controller"
+      ],
+      "implementation_components": [
+        "CommanderEngine._move_cards_simultaneously",
+        "CommanderEngine._dispatch_semantic_event"
+      ],
+      "notes": [
+        "Represented dies and self-leaves events capture pre-move controller and zone."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "603.6c",
       "rule_text_sha256": "bc98ffbf46456bd9a68f3bbb5bfbf0297d0a4144ba8620220f79f3aa57880c10",
       "schema_version": 1,
@@ -33128,26 +33435,41 @@
         "end_line": 2605,
         "start_line": 2604
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "enters-with, as-enters, and enters-as replacement/static families are not completely compiled",
+        "entry replacement ordering with other effects remains partial"
       ],
       "case_id": "cr-603.6d",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "603.6"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_oracle_ir.OracleIRTests.test_unconditional_entry_tapped_is_engine_derived"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler",
+        "CommanderEngine._entry_state"
+      ],
+      "notes": [
+        "Unconditional enters-tapped text is derived during entry rather than queued as a trigger, but the complete wording family is broader."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.6d",
       "rule_text_sha256": "87e4db9d78c46255dfde61960a89763c11edc75fbe2024f40ba00a7a78cae199",
       "schema_version": 1,
@@ -33156,26 +33478,40 @@
         "end_line": 2607,
         "start_line": 2606
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "Aura and enchanted-permanent paired LKI handles are not universally captured before state-based actions",
+        "generic lookup of both resulting objects after the move is absent"
       ],
       "case_id": "cr-603.6e",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.6"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CardInstance.attached_to",
+        "CommanderEngine._dispatch_semantic_event",
+        "CommanderEngine._stabilize"
+      ],
+      "notes": [
+        "Attachment state alone is insufficient for this paired-object exception."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "603.6e",
       "rule_text_sha256": "8f1e5bf1a4b0e2d9ff7b968557a91eefbfd33d88c9062ec55045fde16963cfab",
       "schema_version": 1,
@@ -33184,26 +33520,32 @@
         "end_line": 2609,
         "start_line": 2608
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-603.7",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "DelayedTrigger",
+        "CommanderEngine.schedule_delayed_trigger",
+        "mechanics/contracts/handling-triggered-abilities.json"
+      ],
+      "notes": [
+        "Defines delayed triggered abilities; creation, matching, duration, object identity, and provenance are reviewed below."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "603.7",
       "rule_text_sha256": "ea0f49d419d336fc18d7dfd95c9a51ff29f081cf9fac12b5c8ab89e7690515e8",
       "schema_version": 1,
@@ -33212,26 +33554,41 @@
         "end_line": 2611,
         "start_line": 2610
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "delayed triggers created by replacement effects and action-permitting static abilities do not share one typed creation boundary",
+        "no generic negative test proves a pre-creation event is ignored for every event kind"
       ],
       "case_id": "cr-603.7a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "603.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_multiplayer_rules.MultiplayerRuleTests.test_delayed_trigger_queues_at_matching_step"
+      ],
+      "implementation_components": [
+        "CommanderEngine.schedule_delayed_trigger",
+        "CommanderEngine._matching_delayed_triggers"
+      ],
+      "notes": [
+        "Scheduled triggers match only later calls, but creation provenance is incomplete."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "603.7a",
       "rule_text_sha256": "d82c06b952051d2e51f76d91b4469ae96a33a0aca55d0165647b500c39c3d6c1",
       "schema_version": 1,
@@ -33240,26 +33597,41 @@
         "end_line": 2615,
         "start_line": 2612
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "stated durations are represented only by selected explicit expiry data",
+        "simultaneous multiple matching events do not ask the controller which event causes a nonduration trigger"
       ],
       "case_id": "cr-603.7b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "603.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_multiplayer_rules.MultiplayerRuleTests.test_delayed_trigger_queues_at_matching_step"
+      ],
+      "implementation_components": [
+        "DelayedTrigger.once",
+        "DelayedTrigger.expires_turn_sequence",
+        "CommanderEngine._matching_delayed_triggers"
+      ],
+      "notes": [
+        "The default once flag consumes a represented delayed trigger after matching."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.7b",
       "rule_text_sha256": "10e78f9853a413a6bfb70766d811243f3f73485b6de4f5b8c3abbd82a6d0c992",
       "schema_version": 1,
@@ -33268,26 +33640,39 @@
         "end_line": 2617,
         "start_line": 2616
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-603.7c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "603.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_daretti_ruling_does_not_follow_a_reentered_card"
+      ],
+      "implementation_components": [
+        "CardInstance.logical_object_id",
+        "CardInstance.zone_change_counter",
+        "CommanderEngine.schedule_delayed_trigger",
+        "CommanderEngine.apply_effect"
+      ],
+      "notes": [
+        "The delayed effect records the graveyard incarnation and refuses to affect the physical card after it leaves and returns, even though its printed characteristics and reference remain recognizable."
+      ],
+      "required_scenarios": [
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.7c",
       "rule_text_sha256": "2d79fa72256d26d4e59d52ed743be097b84ae40d7ea3280426c261dcdbcb6ddd",
       "schema_version": 1,
@@ -33296,26 +33681,40 @@
         "end_line": 2620,
         "start_line": 2618
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "spell-source provenance is supplied by exact handlers rather than derived universally at resolution",
+        "controller-at-resolution is not a required typed input to every spell-created delayed trigger"
       ],
       "case_id": "cr-603.7d",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "603.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_interactions_v070.InteractionKernelTests.test_mana_drain_schedules_exact_next_main_phase_mana"
+      ],
+      "implementation_components": [
+        "CommanderEngine.schedule_delayed_trigger",
+        "DelayedTrigger.source_object_id"
+      ],
+      "notes": [
+        "Mana Drain supplies its controller explicitly, providing only a card-family witness."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.7d",
       "rule_text_sha256": "1b82ab59a096e91a688f26609e03e525547d5f80aa85cff4aa2cec9945bd73aa",
       "schema_version": 1,
@@ -33324,26 +33723,40 @@
         "end_line": 2622,
         "start_line": 2621
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "activated and triggered ability source provenance is not universally copied into delayed triggers",
+        "controller-at-resolution is supplied by selected handlers"
       ],
       "case_id": "cr-603.7e",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "603.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_daretti_ruling_does_not_follow_a_reentered_card"
+      ],
+      "implementation_components": [
+        "CommanderEngine.schedule_delayed_trigger",
+        "DelayedTrigger.source_object_id"
+      ],
+      "notes": [
+        "Daretti's represented emblem trigger retains enough source context for its exact effect, not the complete provenance rule."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.7e",
       "rule_text_sha256": "ef23bcc43047f453d9428f1b479d3b2e9f82dbde642c8d93ab61d00c49ad8086",
       "schema_version": 1,
@@ -33352,26 +33765,38 @@
         "end_line": 2624,
         "start_line": 2623
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "replacement-effect results cannot generically create delayed triggers with static-source provenance",
+        "source controller at application time is not universally captured"
       ],
       "case_id": "cr-603.7f",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "replacement_effects.apply_replacement",
+        "CommanderEngine.schedule_delayed_trigger"
+      ],
+      "notes": [
+        "No broad claim is made from exact card handlers."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.7f",
       "rule_text_sha256": "71d333b48e4473c4ebe78ebf4014d7258d2637f493016eecf88253becff6e8aa",
       "schema_version": 1,
@@ -33380,26 +33805,38 @@
         "end_line": 2626,
         "start_line": 2625
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "static action permissions and their conditional delayed-trigger creation are not represented generically",
+        "source and controller provenance at action time are absent"
       ],
       "case_id": "cr-603.7g",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine.schedule_delayed_trigger",
+        "oracle_ir.OracleIRCompiler"
+      ],
+      "notes": [
+        "This remains an explicit compiler and runtime gap."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.7g",
       "rule_text_sha256": "037e74cce91559b8a9ad4d9f47a0aa8639e5ef2f697f353f4688c546a9865805",
       "schema_version": 1,
@@ -33408,26 +33845,38 @@
         "end_line": 2628,
         "start_line": 2627
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "per-turn ability-resolution counts are not exposed to a generic delayed-trigger creation predicate",
+        "create-exactly-once behavior has no typed representation"
       ],
       "case_id": "cr-603.7h",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine.schedule_delayed_trigger"
+      ],
+      "notes": [
+        "Invocation counters elsewhere are provider telemetry, not Magic ability-resolution counts."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "603.7h",
       "rule_text_sha256": "3e8336cf11ee87b4741ffc2633ec49fe7daf07584b9c249e0c46ccab8dae2863",
       "schema_version": 1,
@@ -33436,26 +33885,39 @@
         "end_line": 2630,
         "start_line": 2629
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "state-trigger predicates and source-zone identities are not represented generically",
+        "the suppression latch while the same state trigger remains on the stack is absent"
       ],
       "case_id": "cr-603.8",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._stabilize",
+        "oracle_ir.OracleIRCompiler"
+      ],
+      "notes": [
+        "State-based actions do not imply state-trigger support."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "603.8",
       "rule_text_sha256": "452cac9ee49b2a38a644c907dfe1070c7baf18934253cb8836e73521d9bc7461",
       "schema_version": 1,
@@ -33464,26 +33926,40 @@
         "end_line": 2633,
         "start_line": 2631
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "player elimination does not dispatch a generic player-loses event to compiled triggers",
+        "draw-result exclusion and multi-player departure ordering are not represented"
       ],
       "case_id": "cr-603.9",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._eliminate_players",
+        "CommanderEngine._dispatch_semantic_event"
+      ],
+      "notes": [
+        "Commander game continuation after elimination is separate from loss-trigger semantics."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "603.9",
       "rule_text_sha256": "a604025698828e2eb6e83152607d46133569fcb128848ac4c25757337fe31d78",
       "schema_version": 1,
@@ -33492,26 +33968,31 @@
         "end_line": 2635,
         "start_line": 2634
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-603.10",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._dispatch_semantic_event",
+        "mechanics/contracts/handling-triggered-abilities.json"
+      ],
+      "notes": [
+        "Introduces the default post-event trigger snapshot and the enumerated look-back exceptions; each exception is reviewed below."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "603.10",
       "rule_text_sha256": "7569473024dea13b4236186de5b4471e15e8a80868066f5a623813a641826f5b",
       "schema_version": 1,
@@ -33520,26 +34001,43 @@
         "end_line": 2637,
         "start_line": 2636
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "look-back scanning is not generic for sacrifices, cards leaving graveyards, and visible objects entering hands or libraries",
+        "simultaneous source departure plus multiple matching objects lacks a complete pre-event effective snapshot"
       ],
       "case_id": "cr-603.10a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "603.10"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_preflight_v080.NormalizedZoneEventTests.test_self_dies_trigger_uses_last_known_battlefield_zone",
+        "tests.test_oracle_ir.OracleIRTests.test_self_dies_trigger_uses_last_known_controller"
+      ],
+      "implementation_components": [
+        "CommanderEngine._move_cards_simultaneously",
+        "CommanderEngine._dispatch_semantic_event"
+      ],
+      "notes": [
+        "Self-dies triggers use pre-move zone and controller, providing one narrow look-back witness."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "603.10a",
       "rule_text_sha256": "59452fa42dec82f78926a750bff5d322ab709976100ebb6c8609ca00e054c5ae",
       "schema_version": 1,
@@ -33548,26 +34046,38 @@
         "end_line": 2640,
         "start_line": 2638
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "phasing transitions do not dispatch a generic pre-transition trigger event",
+        "pre-phase-out effective abilities are not snapshotted for trigger discovery"
       ],
       "case_id": "cr-603.10b",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.10"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CardInstance.phased_out",
+        "CommanderEngine._dispatch_semantic_event"
+      ],
+      "notes": [
+        "Phased-out filtering elsewhere is not look-back trigger handling."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.10b",
       "rule_text_sha256": "694b2897dcbf5e193b3de0254c28fcc76d41e4b466cd4609b609be6a797e4ba4",
       "schema_version": 1,
@@ -33576,26 +34086,38 @@
         "end_line": 2642,
         "start_line": 2641
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "becomes-unattached events do not carry a pre-event attachment snapshot into generic trigger discovery",
+        "state-action and effect-driven unattaching are not unified as trigger events"
       ],
       "case_id": "cr-603.10c",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.10"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CardInstance.attached_to",
+        "CommanderEngine._stabilize"
+      ],
+      "notes": [
+        "Attachment repair behavior is not evidence for this trigger exception."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.10c",
       "rule_text_sha256": "17489b2fbe3443fb51730975060c3bb1134010673ab3658ea9358b6be5c40f01",
       "schema_version": 1,
@@ -33604,26 +34126,39 @@
         "end_line": 2644,
         "start_line": 2643
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "control changes do not dispatch generic loses-control or opponent-gains-control trigger events",
+        "pre-change opponent relationships are not captured for trigger matching"
       ],
       "case_id": "cr-603.10d",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.10"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_trigger_controller_is_frozen_at_trigger_time"
+      ],
+      "implementation_components": [
+        "CommanderEngine.change_control",
+        "CommanderEngine._dispatch_semantic_event"
+      ],
+      "notes": [
+        "Freezing an already-created trigger's controller is distinct from discovering a loses-control trigger."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "603.10d",
       "rule_text_sha256": "a4b20438404b89287432f6e4b9b52cf6cf671e63dbd8e486baab28eb8b2651ac",
       "schema_version": 1,
@@ -33632,26 +34167,38 @@
         "end_line": 2646,
         "start_line": 2645
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "countering does not dispatch a generic event carrying the pre-counter spell and ability snapshot",
+        "spell-copy and uncounterable interactions lack a look-back trigger matrix"
       ],
       "case_id": "cr-603.10e",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.10"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._counter_stack_item",
+        "CommanderEngine._dispatch_semantic_event"
+      ],
+      "notes": [
+        "Moving a countered object is implemented, but its trigger exception is not."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "603.10e",
       "rule_text_sha256": "0cfbabc2b7bacc000aaaedce933c14276fd94b18a809cf85801e4960fb0f083a",
       "schema_version": 1,
@@ -33660,26 +34207,39 @@
         "end_line": 2648,
         "start_line": 2647
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "loss-trigger sources and opponent relations are not snapshotted before player objects leave the game",
+        "loss events are not generically dispatched"
       ],
       "case_id": "cr-603.10f",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.10"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._eliminate_players",
+        "CommanderEngine._dispatch_semantic_event"
+      ],
+      "notes": [
+        "This remains blocked with CR 603.9."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "603.10f",
       "rule_text_sha256": "752ebedf9cb730d0e7fb8a8613762f09fd3db9188419622daee45d1826ee177e",
       "schema_version": 1,
@@ -33688,26 +34248,38 @@
         "end_line": 2650,
         "start_line": 2649
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "Plane cards, planar decks, and planeswalk-away events are outside the implemented game model",
+        "no pre-event plane snapshot exists"
       ],
       "case_id": "cr-603.10g",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.10"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler"
+      ],
+      "notes": [
+        "Commander profile support does not imply Planechase support."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "603.10g",
       "rule_text_sha256": "372bf32533ab22054b47514d904f4664e432647093e320edaf133a80c6b722d2",
       "schema_version": 1,
@@ -33716,26 +34288,39 @@
         "end_line": 2652,
         "start_line": 2651
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "paragraph-level static-to-trigger links and middle-sentence trigger conditions are not generically parsed",
+        "linked facts do not use stable generic ability-pair IDs"
       ],
       "case_id": "cr-603.11",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler",
+        "mechanics/contracts/linked-abilities.json"
+      ],
+      "notes": [
+        "CR 607 remains partial and untrusted, so this syntax cannot be promoted."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "603.11",
       "rule_text_sha256": "711e5fc6af6ea5da122609b4e8615af3838fc43817d0d41afb737ee354848435",
       "schema_version": 1,
@@ -33744,26 +34329,39 @@
         "end_line": 2655,
         "start_line": 2653
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "resolution frames do not create a generic reflexive trigger tied to an earlier action in the same resolution",
+        "when-you-do and this-way grammar remains residual"
       ],
       "case_id": "cr-603.12",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._prepare_stack_resolution",
+        "oracle_ir.OracleIRCompiler"
+      ],
+      "notes": [
+        "Ordinary delayed triggers cannot substitute because reflexive triggers inspect events earlier in the creating resolution."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "603.12",
       "rule_text_sha256": "360b9d7c1a61a07707a7c7144d8122cb3dd5532d0a83ae10ddc91b2e3079d844",
       "schema_version": 1,
@@ -33772,26 +34370,39 @@
         "end_line": 2658,
         "start_line": 2656
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "reflexive event occurrence counts are not recorded in a resolution frame",
+        "the repeated-cost exception that collapses one-or-more payments to one trigger is absent"
       ],
       "case_id": "cr-603.12a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "603.12"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._prepare_stack_resolution",
+        "oracle_ir.OracleIRCompiler"
+      ],
+      "notes": [
+        "This stays blocked with the parent reflexive-trigger rule."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "603.12a",
       "rule_text_sha256": "61a11930c1bfffe749543eaf0be07e5f30400933f890b8441025d15919007943",
       "schema_version": 1,
@@ -33800,7 +34411,7 @@
         "end_line": 2660,
         "start_line": 2659
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
       "assertion_kind": "static_traceability",

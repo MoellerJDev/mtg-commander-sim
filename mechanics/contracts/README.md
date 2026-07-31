@@ -43,6 +43,12 @@ abilities, and arbitrary nested payment windows remain explicitly untrusted.
 CR 604 traces static-ability handling with battlefield source-lifetime and
 moved-Equipment witnesses while characteristic-defining, attachment, stack,
 zone-permission, and current-information/LKI coverage remains untrusted.
+CR 603 traces trigger detection, pending batches, stack placement,
+controller-at-trigger-time, intervening conditions, APNAP groups, delayed
+triggers, and logical-incarnation guards. Complete trigger grammar, the
+two-part trigger-on-trigger ordering loop, modal and optional choices,
+state/player-loss/reflexive triggers, delayed-source provenance, and the full
+look-back exception matrix remain untrusted.
 
 Run `simctl rules sync` after changing a contract so its hash and status are
 overlaid into `mechanics/registry.json`, then run `simctl rules verify`.

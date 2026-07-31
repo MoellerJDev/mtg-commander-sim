@@ -149,6 +149,13 @@ maximum-counter foundation. It now:
 - records characteristic-defining abilities, broad attachment modifiers,
   stack-static text, nonbattlefield permissions, and universal current
   information rather than LKI as explicit blockers;
+- source-reviews all 48 CR 603 triggered-ability records and verifies that a
+  represented trigger waits for stabilization, becomes the top stack object
+  before priority, and freezes its controller at trigger time;
+- verifies represented intervening conditions at trigger and resolution and
+  exact-incarnation delayed effects, while leaving complete grammar,
+  trigger-on-trigger APNAP ordering, state/reflexive triggers, delayed-source
+  provenance, and the look-back exception matrix explicitly blocked;
 - keeps inventory-only cases separate from executable semantic passes.
 
 The prior permanent snapshot behavior remains: toughness, lethal/deathtouch,
@@ -179,10 +186,10 @@ events also remain blockers.
   `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
 - Indexed rules: 3,300
 - Conformance cases: 3,300
-- Inventory-only cases: 3,090
-- Reviewed blocked cases: 144
-- Reviewed definition-only cases: 36
-- Executable semantic passes: 30
+- Inventory-only cases: 3,042
+- Reviewed blocked cases: 184
+- Reviewed definition-only cases: 40
+- Executable semantic passes: 34
 - Indexed sections: 156
 - Glossary entries: 733
 - Discovered mechanics: 425
@@ -199,8 +206,8 @@ events also remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 3,759 passed
-- Noninventory unit/integration tests: 459 passed
+- Unit/integration tests: 3,762 passed
+- Noninventory unit/integration tests: 462 passed
 - Generated per-rule inventory/source-linkage tests: 3,300 passed
 - Focused object identity/token lifecycle tests: 15 passed
 - Focused copy-object lifecycle tests: 8 passed
@@ -214,6 +221,7 @@ events also remain blockers.
 - Focused CR 606 loyalty-ability tests: 6 passed
 - Focused CR 605 mana-ability tests: 6 passed
 - Focused CR 604 static-ability tests: 3 passed
+- Focused CR 603 triggered-ability tests: 3 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
 - Seed-20260730 hidden-information audit: pass
@@ -233,7 +241,7 @@ events also remain blockers.
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `7df89a9d54366c4a82482632cdb4107f1ba5bc5ee06f395a0c181c4f40884c73`
+  `80021a3d5c30a15a849514c1da78e208638819f59427111bf6c227818e021fa8`
 
 ## Deck-review evidence state
 
