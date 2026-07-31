@@ -10,9 +10,10 @@ coverage.
 ## Pinned baseline
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
-- Current integration branch: `agent/cr-408-command`
-- Rules integration PR #1 is merged; completed follow-on rules work is frozen
-  in PRs #10–24 pending ordered integration into `main`
+- Current integration branch: `main`
+- Rules integration PRs #1–#16, #24, and #25 are merged; the cumulative PR
+  #24 tip incorporated the exact CR 400–408 heads from PRs #17–#23 before
+  those intermediate PRs were closed as superseded
 - Rules-program base: `d099fe4`
 - Continuation start: `6517dc0`
 - Package version: `0.8.0`
@@ -27,7 +28,7 @@ coverage.
 | Workstream | Status | Current evidence |
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
-| Mechanic contracts | In progress | 47 partial/untrusted contracts; 378 mechanics unclassified; 0 trusted |
+| Mechanic contracts | In progress | 49 partial/untrusted contracts; 376 mechanics unclassified; 0 trusted |
 | Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
 | Object and zone identity | Partial | All 30 CR 400 records reviewed; owner-zone routing, logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, hidden outside-game movement, and selected linked-effect guards |
 | Library | Partial | All 8 CR 401 records reviewed; hidden order/public count, bounded look/reorder, shuffle knowledge clearing, and Nth-from-top placement; simultaneous owner ordering and continuous top-card visibility remain blocked |
@@ -44,7 +45,7 @@ coverage.
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 543 cases are reviewed, with 100 executable passes, 365 blocked cases, and 78 definition-only cases; 2,757 remain unreviewed |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 557 cases are reviewed, with 106 executable passes, 371 blocked cases, and 80 definition-only cases; 2,743 remain unreviewed |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -461,7 +462,7 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,908 unit/integration tests pass: 608 ordinary tests plus 3,300 generated
+- 3,925 unit/integration tests pass: 625 ordinary tests plus 3,300 generated
   inventory/source-linkage tests. The latter are not semantic passes.
 - Seven focused CR 403 tests cover exact source traceability, empty and shared
   four-player battlefield structure, controller-index integrity,
@@ -571,9 +572,9 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 543 cases in the current reviewed
-  families are source-reviewed: 100 pass with executable engine evidence, 365
-  remain blocked, and 78 are definition-only. The other 2,757 cases remain
+  establish inventory linkage only. All 557 cases in the current reviewed
+  families are source-reviewed: 106 pass with executable engine evidence, 371
+  remain blocked, and 80 are definition-only. The other 2,743 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -582,18 +583,15 @@ checkpoint validation.
 
 ## Next dependency-ordered work
 
-Broad sequential rules review is frozen at the completed CR 408 tip. The next
-steps are:
+Broad sequential rules review is frozen after the CR 400–408 and CR 500–512
+integration reached `main`. The next steps are:
 
-1. Integrate independent CR 504/505 work and the CR 503→408 dependency chain
-   from PRs #10–24 into `main`, regenerating all derived coverage after source
-   conflicts are resolved.
-2. Run the complete local and GitHub matrix gates on the integrated `main`.
-3. Implement and merge the first authoritative server/browser vertical slice:
+1. Create `agent/server-browser-vertical-slice` from the final green `main`.
+2. Implement and merge the first authoritative server/browser vertical slice:
    strict network commands, idempotency, expected revisions, a single-writer
    game actor, guest room/seat flow, WebSocket projections, reconnect, a
    TypeScript client, and four-context browser E2E.
-4. Resume rules work only for defects blocking that vertical slice; defer broad
+3. Resume rules work only for defects blocking that vertical slice; defer broad
    CR-number traversal until the slice is merged.
 
 No deck list has been modified, and no current game result is promoted to

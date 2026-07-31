@@ -53,6 +53,10 @@ class LocalMergeGateTests(unittest.TestCase):
             by_name["focused_regressions"],
         )
         self.assertIn(
+            "tests.test_command_zone_rules",
+            by_name["focused_regressions"],
+        )
+        self.assertIn(
             "tests.test_deterministic_full_game",
             by_name["four_player_natural_winner"],
         )

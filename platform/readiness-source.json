@@ -6,12 +6,12 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "integrate_rules_backlog_then_server_browser_vertical_slice",
-    "branch": "agent/cr-408-command",
+    "active_phase": "rules_backlog_integrated_server_browser_vertical_slice_next",
+    "branch": "main",
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
-      "focused_branch_base": "c8a52711dc9294957fc0f437a4aaeab72da213aa",
-      "focused_branch_unique_commits_over_main": 21
+      "focused_branch_base": "f968cfd7c3b964d31abc9652bcbc3bbef2374b60",
+      "focused_branch_unique_commits_over_main": 0
     },
     "pull_requests": [
       {
@@ -81,106 +81,113 @@
         "base": "main",
         "head": "agent/cr-505-main-phase",
         "number": 10,
-        "state": "draft",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/10"
       },
       {
         "base": "main",
         "head": "agent/cr-504-draw-step",
         "number": 11,
-        "state": "draft",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/11"
       },
       {
         "base": "main",
         "head": "agent/cr-503-upkeep-step",
         "number": 12,
-        "state": "draft",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/12"
       },
       {
         "base": "agent/cr-503-upkeep-step",
         "head": "agent/cr-502-untap-step",
         "number": 13,
-        "state": "draft",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/13"
       },
       {
         "base": "agent/cr-502-untap-step",
         "head": "agent/cr-501-beginning-phase",
         "number": 14,
-        "state": "draft",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/14"
       },
       {
         "base": "agent/cr-501-beginning-phase",
         "head": "agent/cr-500-turn-structure",
         "number": 15,
-        "state": "draft",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/15"
       },
       {
         "base": "agent/cr-500-turn-structure",
         "head": "agent/cr-405-stack",
         "number": 16,
-        "state": "draft",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/16"
       },
       {
         "base": "agent/cr-405-stack",
         "head": "agent/cr-400-general-zone-identity",
         "number": 17,
-        "state": "draft",
+        "state": "closed_superseded_by_pr_24",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/17"
       },
       {
         "base": "agent/cr-400-general-zone-identity",
         "head": "agent/cr-401-library",
         "number": 18,
-        "state": "draft",
+        "state": "closed_superseded_by_pr_24",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/18"
       },
       {
         "base": "agent/cr-401-library",
         "head": "agent/cr-402-hand",
         "number": 19,
-        "state": "draft",
+        "state": "closed_superseded_by_pr_24",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/19"
       },
       {
         "base": "agent/cr-402-hand",
         "head": "agent/cr-403-battlefield",
         "number": 20,
-        "state": "draft",
+        "state": "closed_superseded_by_pr_24",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/20"
       },
       {
         "base": "agent/cr-403-battlefield",
         "head": "agent/cr-404-graveyard",
         "number": 21,
-        "state": "draft",
+        "state": "closed_superseded_by_pr_24",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/21"
       },
       {
         "base": "agent/cr-404-graveyard",
         "head": "agent/cr-406-exile",
         "number": 22,
-        "state": "draft",
+        "state": "closed_superseded_by_pr_24",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/22"
       },
       {
         "base": "agent/cr-406-exile",
         "head": "agent/cr-407-ante",
         "number": 23,
-        "state": "draft",
+        "state": "closed_superseded_by_pr_24",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/23"
       },
       {
-        "base": "agent/cr-407-ante",
+        "base": "main",
         "head": "agent/cr-408-command",
         "number": 24,
-        "state": "draft",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/24"
+      },
+      {
+        "base": "main",
+        "head": "agent/integration-checkpoint",
+        "number": 25,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/25"
       }
     ],
     "tags": [
@@ -215,8 +222,8 @@
     {
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
-      "status": "integration_checkpoint",
-      "evidence": "Integration PRs #1-2 and CR 506-512 PRs #3-9 are on main. Completed CR 400-408 and CR 500-505 work remains in draft PRs #10-24 and is frozen pending ordered integration."
+      "status": "complete",
+      "evidence": "Integration PRs #1-16, #24, and #25 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; PRs #17-23 were closed as superseded only after their exact heads became reachable from main."
     },
     {
       "id": "browser_commander_mvp",
@@ -227,8 +234,8 @@
     {
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
-      "status": "active_with_integration_backlog",
-      "evidence": "The 2026-06-19 corpus and CR 506-512 reviews are on main. The current CR 408 tip reports 543 reviewed records; independent CR 504/505 and the CR 503-to-408 chain will be merged in dependency order before server/browser work."
+      "status": "active_on_main",
+      "evidence": "The versioned 2026-06-19 corpus and reviewed CR 400-408 and CR 500-512 slices are on main. Broader rules and Oracle completeness remain explicitly unclaimed."
     },
     {
       "id": "oracle_snapshot",
@@ -252,16 +259,16 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "a5143ef5629f3e7138104397a9ca15d72558eb59",
+    "baseline_commit": "f968cfd7c3b964d31abc9652bcbc3bbef2374b60",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30633146886,
-      "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30633146886"
+      "run_id": "PR-24-final-matrix",
+      "status": "required_green_before_merge",
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/24/checks"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "pass_3908",
+      "deterministic_tests": "pass_3925",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "repository_history_security_audit": "pass",
@@ -273,8 +280,7 @@
   },
   "blockers": [
     "no authoritative ASGI server, single-writer GameActor, durable persistence, or browser client exists",
-    "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete",
-    "completed rule-family work is distributed across draft PRs 10-24 and must be integrated before the platform pivot"
+    "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Freeze rule-family expansion at CR 408, run the reproducible merge gate, integrate PRs 11, 10, and 12-24 into main with ordinary green CI, then begin the single server/browser vertical-slice branch."
+  "next_task": "Create agent/server-browser-vertical-slice from final green main and begin the single authoritative server/browser vertical slice without resuming broad rules-family work."
 }

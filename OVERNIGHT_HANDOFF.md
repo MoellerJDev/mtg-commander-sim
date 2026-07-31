@@ -10,45 +10,29 @@ or provider session data.
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- `origin/main`: `c8a52711dc9294957fc0f437a4aaeab72da213aa`
-- Current branch: `agent/cr-408-command`
-- Verified CR 408 implementation commit:
-  `a5143ef5629f3e7138104397a9ca15d72558eb59`
+- Integrated commit: the `main` commit containing this document
 - Package: `0.8.0`
 - Tags: `v0.6.0`, `v0.7.0`
-- No release tag is planned for this integration checkpoint.
+- No release tag was created for this integration checkpoint.
 
-PRs #1–9 merged through ordinary merge commits. The completed, frozen backlog
-is:
+PRs #1–#16, #24, and #25 are merged through ordinary merge commits. PR #24
+was retargeted to `main` as the cumulative CR 400–408 candidate. Before
+integration, Git ancestry proved that the exact heads of PRs #17–#23 were all
+ancestors of the PR #24 head. After PR #24 reached `main`, those intermediate
+PRs were closed as superseded; no intended commit was abandoned or
+force-pushed.
 
-1. #11 — CR 504 Draw Step, based on `main`
-2. #10 — CR 505 Main Phase, based on `main`
-3. #12 — CR 503 Upkeep Step, based on `main`
-4. #13 — CR 502 Untap Step, based on #12's branch
-5. #14 — CR 501 Beginning Phase, based on #13's branch
-6. #15 — CR 500 Turn Structure, based on #14's branch
-7. #16 — CR 405 Stack, based on #15's branch
-8. #17 — CR 400 General Zone Identity, based on #16's branch
-9. #18 — CR 401 Library, based on #17's branch
-10. #19 — CR 402 Hand, based on #18's branch
-11. #20 — CR 403 Battlefield, based on #19's branch
-12. #21 — CR 404 Graveyard, based on #20's branch
-13. #22 — CR 406 Exile, based on #21's branch
-14. #23 — CR 407 Ante Exclusion, based on #22's branch
-15. #24 — CR 408 Command, based on #23's branch
+Broad sequential rules review is frozen after CR 408. Do not create CR 409 or
+another stacked rules-family branch before the server/browser vertical slice.
 
-CR 408 was already committed, pushed, locally verified, and opened as PR #24
-when the freeze instruction arrived, so it is preserved as the frozen tip.
-Do not create CR 409 or another rules-family branch.
+## Deterministic evidence
 
-## Current deterministic evidence
-
-- 3,908 tests passed locally in 275.465 seconds on Windows Python 3.11.9.
+- 3,925 unit/integration tests pass on Windows Python 3.11.9.
+- The combined focused CR 400–408 and CR 500–505 suite passes.
 - All 3,300 pinned rule records and 425 mechanic records verify against the
-  2026-06-19 rules source.
-- Current CR 408-tip conformance: 100 passing, 365 blocked, 78
-  definition-only, 2,757 unreviewed.
-- Mechanics: 47 partial, 378 unclassified, 0 trusted.
+  June 19, 2026 rules source.
+- Conformance: 106 passing, 371 blocked, 80 definition-only, 2,743 unreviewed.
+- Mechanics: 49 partial, 376 unclassified, 0 trusted.
 - Full Oracle: 2,957 exact, 15,691 partial, 19,725 unresolved; 69,664 material
   residuals.
 - Commander-legal Oracle: 338 exact, 14,354 partial, 16,930 unresolved;
@@ -56,13 +40,11 @@ Do not create CR 409 or another rules-family branch.
 - Seed-20260730 opportunity/replay, deterministic four-player natural-winner,
   hidden-information projection, repository/history/security, protocol demo,
   wheel build, and clean-install checks pass.
-- PR #24 push run `30633146886` and pull-request run `30633164682` each passed
-  Ubuntu/Windows on Python 3.11/3.12.
+- PR #24 received a fresh public GitHub Actions matrix on Python 3.11/3.12 and
+  Ubuntu/Windows before merge. All repository jobs executed and passed.
 
-GitHub Actions is executing normally now that the repository is public. Earlier
-zero-step billing/spending-limit failures on PRs #10–23 are historical external
-failures, not current merge evidence. Updated PR heads must receive ordinary
-green CI; do not use an administrator bypass while runners execute normally.
+GitHub Actions is operating normally. Historical zero-step billing failures
+are not current evidence and no administrator bypass is authorized or needed.
 
 Local tool availability:
 
@@ -72,8 +54,8 @@ Local tool availability:
 - WSL2: not installed
 - Docker: not installed
 
-The GitHub matrix supplies the supported Python 3.11/3.12 and
-Ubuntu/Windows coverage that is not locally available.
+The public GitHub matrix supplies supported Python 3.11/3.12 and
+Ubuntu/Windows coverage unavailable on this workstation.
 
 ## Product boundary
 
@@ -103,20 +85,13 @@ Not implemented:
 Optional Codex/LLM adapters remain untrusted clients. They are not rules,
 product, CI, merge, or release authorities.
 
-## Immediate execution order
+## Next branch
 
-1. Finish the documentation reconciliation and reusable local merge gate.
-2. Integrate PRs #11, #10, then #12–#24 into `main` with ordinary merge
-   commits, regenerated derived artifacts, exact-head local evidence, and green
-   GitHub CI.
-3. Verify every intended feature head is reachable from `main`.
-4. Run the complete final gate on `main` and refresh this handoff.
-5. Create `agent/server-browser-vertical-slice` from updated `main`.
-6. Implement one coherent authoritative server/browser vertical slice. Do not
-   resume broad sequential CR review until it is tested and merged.
+Create `agent/server-browser-vertical-slice` directly from the final green
+`main`, push it without product changes, and pause. When work resumes, implement
+one coherent authoritative server/browser vertical slice on that branch. Do
+not resume broad sequential CR review until that slice is tested and merged.
 
-Exact next command after the documentation commit:
-
-```powershell
-py -3.11 scripts/local_merge_gate.py --expected-branch agent/cr-408-command
-```
+The first implementation work should begin with the strict network command
+envelope, idempotency, expected revisions, and the single-writer `GameActor`;
+the browser must use that same untrusted application boundary.

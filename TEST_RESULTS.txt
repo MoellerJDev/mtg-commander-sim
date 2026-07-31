@@ -1,23 +1,23 @@
-# MTG Commander Sim 0.8.0 — current verification
+# MTG Commander Sim 0.8.0 — integrated verification
 
 Date: 2026-07-31
-Implementation commit:
-`a5143ef5629f3e7138104397a9ca15d72558eb59`
+Implementation commit: the `main` commit containing this document
 Local environment: Windows, Python 3.11.9
 
 ## Deterministic gate
 
-PASS: compilation of package, tests, scripts, and `simctl.py`.
+PASS: compilation of the package, tests, scripts, and `simctl.py`.
 
-PASS: 3,908 unit/integration tests in 275.465 seconds using a compact SQLite
-database rebuilt from the committed sanitized exact-list fixture.
+PASS: 3,925 unit/integration tests using a compact SQLite database rebuilt
+from the committed sanitized exact-list fixture.
 
-The suite includes 3,300 generated source-linkage cases plus 608 executable
+The suite includes 3,300 generated source-linkage cases plus 625 executable
 engine, conformance, protocol, replay, privacy, repository, and package tests.
 Generated source linkage is inventory evidence, not rules-correctness evidence.
 
 PASS:
 
+- combined focused CR 400–408 and CR 500–505 tests
 - seed-20260730 decision-opportunity regression
 - zero suppressed meaningful windows
 - deterministic trusted-only four-player natural-winner game
@@ -37,12 +37,12 @@ PASS: `python simctl.py rules verify --root .`
 - source SHA-256:
   `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
 - numbered rules/conformance records: 3,300
-- reviewed: 543
-- passing: 100
-- blocked: 365
-- definition-only: 78
-- unreviewed: 2,757
-- mechanics: 47 partial, 378 unclassified, 0 trusted
+- reviewed: 557
+- passing: 106
+- blocked: 371
+- definition-only: 80
+- unreviewed: 2,743
+- mechanics: 49 partial, 376 unclassified, 0 trusted
 - `current_snapshot_complete=false`
 
 Full Oracle coverage remains 2,957 exact, 15,691 partial, and 19,725
@@ -59,30 +59,25 @@ PASS:
 - tracked and reachable-history secret/capability scans
 - private-state fixture and ignored-runtime-artifact policy
 - oversized-object checks
-- repository validation: 303 tracked files, 11,944,931 bytes
+- repository validation
 - wheel build
 - fresh-environment wheel installation
 - installed package version and CLI smoke test
 
 ## GitHub CI
 
-PASS for exact implementation head
-`a5143ef5629f3e7138104397a9ca15d72558eb59`:
+PASS: the final PR #24 candidate received fresh public GitHub Actions checks
+on Python 3.11 and 3.12, Ubuntu and Windows. All eight push and pull-request
+jobs executed repository steps and passed before the ordinary merge.
 
-- push run `30633146886`
-- pull-request run `30633164682`
-- Python 3.11 and 3.12
-- Ubuntu and Windows
-- all eight jobs executed repository steps and passed
-
-The repository is public and GitHub runners are currently operating normally.
-Earlier zero-step billing/spending-limit failures on other draft PRs are not
-passes and must be superseded by fresh green CI before those heads merge.
+The repository is public and GitHub runners are operating normally. Historical
+zero-step billing/spending-limit failures are not passing evidence and were
+not used to bypass current checks.
 
 ## Claim boundary
 
-These results establish the current CR 408 integration tip, exact-list
-regression behavior, replay, privacy, source pinning, packaging, and repository
-gates. They do not establish a production server, browser client, durable
-database, complete Comprehensive Rules behavior, Oracle-corpus semantic
-closure, deck superiority, or statistical matchup evidence.
+These results establish the integrated CR 400–408 and CR 500–512 source tree,
+exact-list regression behavior, replay, privacy, source pinning, packaging, and
+repository gates. They do not establish a production server, browser client,
+durable database, complete Comprehensive Rules behavior, Oracle-corpus
+semantic closure, deck superiority, or statistical matchup evidence.

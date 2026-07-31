@@ -12,8 +12,21 @@
 - Made manual combat-damage assignment server-authoritative: noncombat sources,
   unrelated recipients, excessive totals, duplicate pairs, malformed fields,
   and client-supplied semantic flags are rejected transactionally.
+- Added a source-linked CR 505 main-phase contract with exact phase-end replay,
+  stack-resolution persistence, active priority, Saga-before-priority, ordinary
+  sorcery-speed, and stackless land-play evidence.
+- Tightened cast and land legal-action hints to the actual precombat or
+  postcombat main phase instead of trusting a standalone synthetic `main`
+  step label.
 - Added exact multi-blocker replay evidence and fail-closed first-strike
   characterization for the partial CR 510 contract.
+- Corrected CR 504 draw-step ordering so the turn-based draw or trusted
+  replacement, state-based actions, and one combined trigger-order batch all
+  finish before priority; delayed draw-step triggers can no longer preempt or
+  silently skip the draw.
+- Added source-linked CR 504 coverage for stackless draws, trusted Dredge,
+  empty-library loss timing, multiplayer and duel first-turn modifiers, and
+  exact replay without promoting the incomplete draw-replacement corpus.
 - Added a source-linked CR 506 combat-phase contract, authoritative combat
   role tests, and exact empty-combat replay without promoting unsupported
   multiplayer variants, effect-created combatants, or timing grammar.
@@ -50,11 +63,13 @@
   library and hand privacy, shared battlefield membership, graveyard/exile
   visibility, Commander legality rejection of ante cards, and typed public
   command-zone emblem objects.
-- Raised the current CR 408 integration tip to 3,908 deterministic tests, 543
-  reviewed rule records, and 47 partial mechanic contracts without promoting
-  the incomplete snapshot to trusted.
-- Froze broad sequential CR review at CR 408 while PRs #10–24 are integrated,
-  then prioritized the authoritative server/browser vertical slice.
+- Integrated the CR 400–408 and CR 500–505 backlog into `main` through the
+  cumulative PR #24 tip, with 3,925 deterministic tests, 557 reviewed rule
+  records, and 49 partial mechanic contracts without promoting the incomplete
+  snapshot to trusted.
+- Closed PRs #17–#23 as superseded only after their exact heads were
+  ancestry-proven reachable from `main`, then froze broad sequential CR review
+  for the authoritative server/browser vertical slice.
 - Recorded the repository's change to public visibility. No software license
   has been selected, and live private game artifacts remain excluded.
 

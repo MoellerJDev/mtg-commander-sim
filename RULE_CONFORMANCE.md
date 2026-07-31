@@ -101,17 +101,15 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 543 cases in CR 120, CR 210, CR 310, CR 400, CR 401, CR 402, CR 403,
+All 557 cases in CR 120, CR 210, CR 310, CR 400, CR 401, CR 402, CR 403,
 CR 404, CR 405, CR 406, CR 407, CR 408, CR 500, CR 501, CR 502, CR 503,
-CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514,
-CR 600, CR 601, CR 602, CR 603, CR 604, CR 605, CR 606, CR 607, CR 608,
-CR 609, CR 614, CR 615, and CR 616 are source-reviewed: 100 narrow
-behavioral or structural rules pass with generic executable evidence, 365
-are blocked with exact missing dependencies, and 78 are definition-only with
-contract traceability. The remaining 2,757
-cases are
-unreviewed and
-inventory-only.
+CR 504, CR 505, CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512,
+CR 513, CR 514, CR 600, CR 601, CR 602, CR 603, CR 604, CR 605, CR 606,
+CR 607, CR 608, CR 609, CR 614, CR 615, and CR 616 are source-reviewed:
+106 narrow behavioral or structural rules pass with generic executable
+evidence, 371 are blocked with exact missing dependencies, and 80 are
+definition-only with contract traceability. The remaining 2,743 cases are
+unreviewed and inventory-only.
 
 The passing CR 310 rules are battlefield defense (310.4c), Battle damage
 (310.6), the zero-defense state action (310.7), single-protector replacement

@@ -16,9 +16,11 @@ The generated current ledger is
 - [x] retarget and merge the rules branch into `main`
 - [x] retain exact replay, privacy, repository, schema, and packaging gates
 - [x] remove AI-run games and provider identity from product completion criteria
-- [ ] integrate completed CR 504, CR 505, and the CR 503→408 dependency chain
-  from PRs #10–24; broad sequential rules review is frozen at CR 408
-- [ ] verify the resulting `main` under the complete local and GitHub CI gates
+- [x] integrate CR 400–408 and CR 500–512 into `main`; the cumulative PR #24
+  tip preserved the intermediate CR 400–407 heads before PRs #17–#23 closed as
+  superseded
+- [x] verify the combined source tree under the complete local gate and public
+  Python 3.11/3.12 Ubuntu/Windows GitHub matrix
 
 The immediate product milestone combines the former phases 1–3 into one
 authoritative server/browser vertical slice. It must prove strict commands,

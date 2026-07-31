@@ -6,18 +6,18 @@ The long-term goal is deterministic enforcement of the pinned Magic
 Comprehensive Rules and Oracle corpus for any supported deck, without writing
 one engine branch per card.
 
-This branch establishes the versioned corpus, typed Oracle IR, mechanic
-contracts, and generic CR 400/613/616/704 primitives. It does not yet claim
-complete rules or Oracle coverage. The current June 19, 2026 CR / July 28,
-2026 compact Oracle snapshot deliberately reports:
+The integrated `main` branch establishes the versioned corpus, typed Oracle IR,
+mechanic contracts, and generic CR 400/613/616/704 primitives. It does not yet
+claim complete rules or Oracle coverage. The current June 19, 2026 CR / July
+28, 2026 compact Oracle snapshot deliberately reports:
 
 - 3,300 unique numbered rules indexed
 - 156 rules sections indexed
 - 733 glossary entries indexed
 - 425 CR section, keyword-action, and keyword-ability mechanics discovered
-- 47 mechanics under versioned partial contracts and 378 unclassified
-- 543 source-reviewed rule records: 100 executable passes, 365 explicit
-  fail-closed blockers, and 78 definition-only records; 2,757 remain
+- 49 mechanics under versioned partial contracts and 376 unclassified
+- 557 source-reviewed rule records: 106 executable passes, 371 explicit
+  fail-closed blockers, and 80 definition-only records; 2,743 remain
   unreviewed
 - 0 rules or mechanics promoted to trusted by the new registry
 - 38,373 Oracle IDs and 41,582 faces scanned

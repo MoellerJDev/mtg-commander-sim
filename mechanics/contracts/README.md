@@ -3,8 +3,9 @@
 Every mechanic must receive a versioned contract before the generated registry
 may mark it trusted.
 
-The current CR 408 integration tip contains 47 partial/untrusted contracts and
-378 unclassified mechanics. No mechanic is promoted to trusted, and the
+The integrated CR 400–408 and CR 500–512 source tree contains 49
+partial/untrusted contracts and 376 unclassified mechanics. No mechanic is
+promoted to trusted, and the
 snapshot-complete gate remains false.
 
 A contract records its CR/glossary references, dependencies, zones, objects,
@@ -62,6 +63,19 @@ permissions, division, and opponent-made choices remain explicitly untrusted.
 CR 600 pins the Spells, Abilities, and Effects section taxonomy to the
 dependent CR 601-609 contracts. Because CR 600 contains only a heading, it is
 definition-only and does not create a standalone behavioral claim.
+CR 505 traces ordinary precombat/postcombat main boundaries, empty-stack pass
+completion, active-player priority, sorcery-speed timing, Saga advancement,
+and stackless land plays. Legal-action hints now require a true main-phase
+phase/marker pair rather than any synthetic `main` step label. Additional or
+skipped combats and main phases, ordinal identity, Archenemy, Attractions,
+and complete simultaneous Saga qualification, replacement, and trigger
+ordering remain blocked.
+CR 504 traces the stackless turn-based draw, trusted one-at-a-time replacement,
+post-draw state-based actions, combined semantic/delayed trigger ordering, and
+active-player priority. It also records the Commander multiplayer and duel
+first-turn modifiers and empty-library loss ordering. Complete draw
+replacement/prevention semantics and the universal interaction matrix remain
+untrusted.
 CR 506 traces the combat-phase structure, attacking/defending roles, removal
 from combat, “attacks or blocks alone,” requirement snapshots, and
 combat-relative timing vocabulary. Tapping and untapping preserve represented

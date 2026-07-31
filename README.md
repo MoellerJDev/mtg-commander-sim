@@ -8,13 +8,14 @@ protocol foundation, not a complete implementation of Magic's rules or Oracle
 corpus.
 
 Current integration checkpoint: the public repository's `main` branch contains
-the deterministic foundation and reviewed CR 506–512 work. Completed CR
-400–408 and CR 500–505 work is frozen in PRs #10–24 while it is integrated in
-dependency order. The current tip has 3,908 deterministic tests, 543 reviewed
-rule records, and 47 partial mechanic contracts. GitHub Actions is running
+the deterministic foundation and reviewed CR 400–408 and CR 500–512 slices.
+PR #24 incorporated the ancestry-proven CR 400–408 stack; PRs #17–#23 were
+closed as superseded only after their exact heads became reachable from
+`main`. The integrated source tree has 3,925 deterministic tests, 557 reviewed
+rule records, and 49 partial mechanic contracts. GitHub Actions is running
 normally. No ASGI server, room service, durable game store, or browser
-application exists yet; those are the next product slice after the backlog is
-merged.
+application exists yet; the single authoritative server/browser vertical slice
+is next.
 
 This is a structural rewrite of the earlier two-player duel lab. The server-side game kernel is now separate from:
 
@@ -399,9 +400,9 @@ python simctl.py rules conformance --root .
 ```
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
-generated source-linkage tests. Of those cases, 543 are source-reviewed:
-100 have narrow executable semantic evidence, 365 are explicitly blocked, and
-78 are definition-only; 2,757 remain unreviewed. A generated inventory test
+generated source-linkage tests. Of those cases, 557 are source-reviewed:
+106 have narrow executable semantic evidence, 371 are explicitly blocked, and
+80 are definition-only; 2,743 remain unreviewed. A generated inventory test
 cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
 invalidation, and reporting policy.
 
