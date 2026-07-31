@@ -10,7 +10,7 @@ or provider session data.
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/cr-500-turn-structure`
+- Active branch: `agent/cr-405-stack`
 - Stage A merge commit on `main`:
   `bd89201be44de85aa9b85fcc9f0baacb0ee76dbe`
 - Stage A PR:
@@ -27,7 +27,8 @@ commits. Main commit
 CR 505 PR #10 and CR 504 PR #11 are independent drafts. CR 503 PR #12 is the
 dependency parent for CR 502 PR #13, which is the parent for CR 501 PR #14.
 CR 500 PR #15 is a dependency-staged draft based on
-`agent/cr-501-beginning-phase`. Their jobs did not receive runners because
+`agent/cr-501-beginning-phase`; CR 405 PR #16 is based on CR 500. Their jobs
+did not receive runners because
 GitHub reported an account billing or spending-limit failure; those pre-run
 failures are neither code passes nor code failures.
 
@@ -64,22 +65,22 @@ It generates one source-linked conformance case for each of 3,300 numbered
 rules and preserves reviewed status only while the source and rule-text hashes
 remain unchanged.
 
-Current reviewed inventory after the CR 500 synchronization:
+Current reviewed inventory after the CR 405 synchronization:
 
-- 456 reviewed cases
-- 66 executable semantic passes
-- 326 reviewed blocked cases
-- 64 definition-only cases
-- 2,844 unreviewed inventory cases
+- 471 reviewed cases
+- 71 executable semantic passes
+- 334 reviewed blocked cases
+- 66 definition-only cases
+- 2,829 unreviewed inventory cases
 - 425 discovered mechanics
-- 39 partial/untrusted mechanic contracts
-- 386 unclassified mechanics
+- 40 partial/untrusted mechanic contracts
+- 385 unclassified mechanics
 - 0 corpus-wide trusted mechanics
 
 Implemented reviewed families include narrow contracts for damage, defense,
 Battles, state-based actions, replacement/prevention ordering, effects,
 resolution, linked abilities, loyalty abilities, mana abilities, static and
-triggered abilities, casting, activating abilities, general turn structure,
+triggered abilities, casting, activating abilities, stack, general turn structure,
 beginning phase, untap,
 upkeep, end step, cleanup,
 logical zone incarnations, timestamps, World, token/copy lifecycle, and
@@ -114,7 +115,7 @@ Stage A exact evidence:
 - deterministic four-player micro-pool reached a natural winner with zero
   suppressed meaningful windows, passed seat projection, and exact-replayed
 
-The focused CR 500 local test gate passed atop the validated CR 501 dependency:
+The focused CR 405 local test gate passed atop the validated CR 500 dependency:
 
 - generated platform, rules, mechanics, and Oracle status checks
 - all noninventory and all generated per-rule tests
@@ -123,18 +124,18 @@ The focused CR 500 local test gate passed atop the validated CR 501 dependency:
 - protocol demo and packet benchmark
 - repository/history/secret/artifact scans
 - wheel build, clean installation, imported version, and CLI smoke
-- the five focused CR 500 source/phase-order/priority/mana/skip/replay tests
+- the six focused CR 405 source/LIFO/priority/mana/state/leaving/replay tests
 
-The local test gate ran 3,848 tests in 190.479 seconds, verified all 3,300 pinned
+The local test gate ran 3,854 tests in 190.764 seconds, verified all 3,300 pinned
 rules cases and 425 mechanics, checked 14 schemas and repository history,
 completed the protocol demo, and built and clean-installed the wheel. The
 seed-20260730 and four-player natural-winner regressions were independently
 rerun with exact replay and zero suppressed meaningful windows. The repository
-scan covered 274 tracked files and 11,542,504 bytes. Main commit
+scan covered 277 tracked files and 11,590,147 bytes. Main commit
 `c8a52711dc9294957fc0f437a4aaeab72da213aa` already passed run 30615647165;
-CR 500 implementation commit
-`fdb8a195ae3bc3de8f8cc8dc6e131c235ab8d37c` produced push run
-30623239181 and pull-request run 30623252811. All eight jobs had
+CR 405 implementation commit
+`c1621288eba73791f3ebcd7821173d283270705a` produced push run
+30624094540 and pull-request run 30624097333. All eight jobs had
 `runner_id=0`, zero steps, and GitHub's billing/spending-limit annotation. No
 exact-SHA CI pass is claimed for the focused branches until their jobs receive
 runners and pass.
@@ -150,10 +151,11 @@ runners and pass.
 
 ## Exact next step
 
-Keep dependency-staged CR 500 PR #15 in draft while GitHub Actions cannot
-allocate runners, and begin the dependency-unblocking CR 405 Stack review.
-CR 500 passes only the ordinary five-phase table, full empty-stack priority
-round, ordinary no-priority boundaries, mana clearing, and atomic transition
-invariants. Generic duration expiry, retained mana, simultaneous extra turns,
-additional phase/step scheduling, and skip replacement ordering remain
-blocked. Do not merge or promote those gaps.
+Keep dependency-staged CR 405 PR #16 in draft while GitHub Actions cannot
+allocate runners, and begin CR 400 General zone identity. CR 405 passes only
+top insertion, complete-pass LIFO resolution, direct effects, represented
+static abilities, and represented state-action stack bypass. Stack-first
+casting, complete simultaneous APNAP placement, stack characteristics,
+triggered mana, special/turn-based actions, concession at any time, and
+complete player-leaves-game ordering remain blocked. Do not merge or promote
+those gaps.

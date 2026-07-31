@@ -122,6 +122,13 @@
         "number": 15,
         "state": "draft",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/15"
+      },
+      {
+        "base": "agent/cr-500-turn-structure",
+        "head": "agent/cr-405-stack",
+        "number": 16,
+        "state": "draft",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/16"
       }
     ],
     "tags": [
@@ -161,7 +168,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Publish the bounded CR 405 Stack slice as a dependency-staged draft atop CR 500, keep it unmerged while exact-SHA runners are unavailable, then begin CR 400 General zone identity without promoting incomplete zone-change semantics.",
+  "next_task": "Keep dependency-staged CR 405 PR #16 in draft while GitHub cannot allocate runners, and begin CR 400 General zone identity without promoting incomplete zone-change semantics.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
