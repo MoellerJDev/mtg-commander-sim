@@ -328,11 +328,11 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 3947,
+    "deterministic_cases_discovered": 3948,
     "migration_files": 1,
     "schema_files": 14,
     "server_files": 4,
-    "web_files": 16
+    "web_files": 17
   },
   "validation": {
     "baseline_commit": "2b7c47356c653cd83869cab8550dd08e363d87c5",
