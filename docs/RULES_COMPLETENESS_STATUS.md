@@ -27,7 +27,7 @@ coverage.
 | Workstream | Status | Current evidence |
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
-| Mechanic contracts | In progress | 37 partial/untrusted contracts; 388 mechanics unclassified; 0 trusted |
+| Mechanic contracts | In progress | 38 partial/untrusted contracts; 387 mechanics unclassified; 0 trusted |
 | Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
 | Object and zone identity | Partial | CR 400 logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, and selected linked-effect guards |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
@@ -36,7 +36,7 @@ coverage.
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 452 cases in CR 120/210/310/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 67 semantic passes, 322 blocked cases, and 63 definition-only cases |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 454 cases in CR 120/210/310/501/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 68 semantic passes, 322 blocked cases, and 64 definition-only cases |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -170,6 +170,11 @@ coverage.
   production, CR 603.3b trigger-on-trigger ordering, additional upkeep
   scheduling, and after-first-upkeep casting grammar remain dependency-blocked;
   the heading is definition-only.
+- [x] Reviewed both CR 501 Beginning Phase records. The ordinary untap,
+  upkeep, then draw structure passes with exact replay into precombat main.
+  A duel turn-one draw skip suppresses only the draw action, not the draw
+  step. Generic additional or skipped phases and steps remain CR 500
+  dependencies; the heading is definition-only.
 - [x] Reviewed all 6 CR 502 Untap Step records. Ordinary stackless untaps,
   represented stun and next-untap restrictions, held-trigger handoff, and
   exact replay are characterized. Phasing and global maximum-untap choices now
@@ -225,7 +230,7 @@ coverage.
   declaration triggers, multi-attacker blocking, blocked-status effects, and
   entry-blocking remain dependency-blocked.
 
-## Current CR 120/210/310/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
+## Current CR 120/210/310/501/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
 
 The upkeep step performs no turn-based action. Represented abilities triggered
 during untap and at the beginning of upkeep wait without priority and then
@@ -423,9 +428,12 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,857 unit/integration tests are discovered: 557 ordinary tests plus 3,300
+- 3,860 unit/integration tests are discovered: 560 ordinary tests plus 3,300
   generated
   inventory/source-linkage tests. The latter are not semantic passes.
+- Three focused CR 501 tests cover source traceability, the exact ordinary
+  untap/upkeep/draw table, a turn-one skipped draw action without a skipped
+  draw step, transition into precombat main, and exact replay.
 - Six focused CR 502 tests cover source traceability, ordinary simultaneous
   stackless untap, represented stun and one-shot prohibitions, fail-closed
   phasing, fail-closed maximum-untap selection, held-trigger timing, and exact
@@ -501,10 +509,10 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 452 CR
-  120/210/310/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
-  cases are source-reviewed: 67 pass with executable engine evidence, 322
-  remain blocked, and 63 are definition-only. The other 2,848 cases remain
+  establish inventory linkage only. All 454 CR
+  120/210/310/501/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
+  cases are source-reviewed: 68 pass with executable engine evidence, 322
+  remain blocked, and 64 are definition-only. The other 2,846 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -513,8 +521,8 @@ checkpoint validation.
 
 ## Next dependency-ordered work
 
-1. Finish the exact local and GitHub gates for the combined CR 502-505
-   candidate, merge PR #13, and then integrate CR 501 PR #14 from the frozen
+1. Finish the exact local and GitHub gates for the combined CR 501-505
+   candidate, merge PR #14, and then integrate CR 500 PR #15 from the frozen
    dependency chain. Do not begin another rules-family review.
 2. Wire the reviewed CR 614/615/616 primitives into the shared CR 120/310
    replacement and prevention event pipeline, including stateful shields and

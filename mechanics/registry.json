@@ -1,5 +1,5 @@
 {
-  "contract_count": 39,
+  "contract_count": 40,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -29,6 +29,12 @@
       "mechanic_id": "cr-507-beginning-of-combat-step",
       "path": "mechanics/contracts/beginning-of-combat.json",
       "sha256": "e5e8758c7ce64f0831f790ef57a5509b2f19bafa3161941a93b8c134b043df59",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-501-beginning-phase",
+      "path": "mechanics/contracts/beginning-phase.json",
+      "sha256": "4f392afbbaf2cac9ee61aef9aa1e9a03ac692c42eed609a952d49dd8234292dd",
       "version": 1
     },
     {
@@ -6088,17 +6094,31 @@
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/beginning-phase.json",
+      "contract_sha256": "4f392afbbaf2cac9ee61aef9aa1e9a03ac692c42eed609a952d49dd8234292dd",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "TURN_STEPS and CommanderEngine turn start, step-entry, step-advance, draw, priority, and precombat-main paths",
+      "implementation_version": "beginning-phase-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "complete untap behavior remains bounded by the partial CR 502 contract",
+        "complete upkeep behavior remains bounded by the partial CR 503 contract",
+        "the CR 504 draw-step family has not been integrated into this dependency stack",
+        "generic extra-phase, extra-step, and skipped-phase or skipped-step scheduling under CR 500.8-11 is not implemented",
+        "complete replacement, trigger, state-action, APNAP, hidden-information, multiplayer, and replay interactions inside the component steps remain incomplete"
+      ],
       "mechanic_id": "cr-501-beginning-phase",
       "official_name": "Beginning Phase",
       "rule_references": [
         "501"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_501_rule",
+        "test_beginning_phase_has_exactly_untap_upkeep_then_draw",
+        "test_turn_one_skips_only_the_draw_action_and_replays_phase_order"
+      ],
       "trust_level": "untrusted"
     },
     {

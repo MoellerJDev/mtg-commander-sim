@@ -2,48 +2,44 @@ MTG Commander Sim 0.8.0 - Integration Verification Ledger
 ===========================================================
 
 Repository: MoellerJDev/mtg-commander-sim (public)
-Active branch: agent/cr-502-untap-step
-Main before candidate: cd2597d7c5f633df6bec34c8f0c6ac8024063a6a
-Active PR: #13 (CR 502 Untap Step)
+Active branch: agent/cr-501-beginning-phase
+Main before candidate: 78e81dde54e72766f7a9725c805f3c094ce37a3a
+Active PR: #14 (CR 501 Beginning Phase)
 
 LAST EXACT VERIFIED CANDIDATE
 -----------------------------
 
-CR 503 refreshed head
-  SHA: 07226dcbf1934f89e1607e99a5daddbeea27d1c7
-  Full suite: 3,851 tests passed
-  Focused merge-gate tests: 21 passed
-  Rules verification: passed
-  Deterministic natural winner: passed
-  Replay/privacy/protocol/repository/package gates: passed
+CR 502 refreshed head
+  SHA: 1efd1c760873b65e87cb3b22e7ad6e69d0e4c38a
+  Full suite: 3,857 tests passed
+  Focused merge-gate tests: 22 passed
+  Rules/replay/privacy/protocol/repository/package gates: passed
   Working-tree clean exit: passed
-  GitHub push matrix: passed (4/4)
-  GitHub pull-request matrix: passed (4/4)
+  GitHub push and pull-request matrices: passed (8/8)
 
-PR #12 merged to main
-  Main SHA: cd2597d7c5f633df6bec34c8f0c6ac8024063a6a
+PR #13 merged to main
+  Main SHA: 78e81dde54e72766f7a9725c805f3c094ce37a3a
 
 CURRENT UNVERIFIED CANDIDATE
 ----------------------------
 
-CR 502 is being combined with merged CR 503-505 on
-agent/cr-502-untap-step.
-Expected discovered tests after regeneration: 3,857.
-The exact-SHA local gate and fresh GitHub matrices must pass before PR #13 is
+CR 501 is being combined with merged CR 502-505.
+Expected discovered tests after regeneration: 3,860.
+The exact-SHA local gate and fresh GitHub matrices must pass before PR #14 is
 merged. This section is not a claim that the candidate has passed.
 
 Combined rule-review totals:
   Pinned CR release: 2026-06-19
   Numbered rules: 3,300
-  Reviewed: 452
-  Passing: 67
+  Reviewed: 454
+  Passing: 68
   Blocked: 322
-  Definition-only: 63
-  Unreviewed: 2,848
+  Definition-only: 64
+  Unreviewed: 2,846
 
 Combined mechanic totals:
-  Partial: 39
-  Unclassified: 386
+  Partial: 40
+  Unclassified: 385
 
 INTERPRETATION BOUNDARY
 -----------------------
@@ -58,10 +54,9 @@ CI POLICY
 
 The repository is public and GitHub-hosted Actions are executing normally.
 Every updated candidate must receive fresh green push and pull-request runs.
-Administrative merge bypass is prohibited while required jobs execute.
 
 NEXT
 ----
 
-Run the exact CR 502 merge gate, push the exact candidate, require green GitHub
-matrices, merge PR #13 normally, and continue with PR #14.
+Run the exact CR 501 merge gate, merge PR #14 normally after green CI, and
+continue with PR #15.
