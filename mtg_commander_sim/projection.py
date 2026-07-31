@@ -207,6 +207,10 @@ class StateProjector:
             if card.active_face:
                 obj["m"] = effective.get("m", "")
                 obj["t"] = effective.get("t", "")
+                obj["o"] = truncate(
+                    str(effective.get("o") or "").replace("\n", " / "),
+                    520,
+                )
                 if effective.get("face") is not None:
                     obj["face"] = effective["face"]
         else:
@@ -363,16 +367,27 @@ class StateProjector:
             "passes": list(self.state.priority_passes),
             "extra_q": [entry.player for entry in reversed(self.state.extra_turns)],
         }
-        stack = [
-            {
+        stack = []
+        for item in reversed(self.state.stack):
+            stack_row = {
                 "id": item.ref,
                 "kind": item.kind,
                 "ctl": item.controller,
                 "label": item.label,
                 **({"targets": item.targets} if item.targets else {}),
             }
-            for item in reversed(self.state.stack)
-        ]
+            if item.card_object_id and item.card_object_id in self.state.cards:
+                projected_card = self._obj(
+                    self.state.cards[item.card_object_id], principal
+                )
+                stack_row.update(
+                    {
+                        key: value
+                        for key, value in projected_card.items()
+                        if key != "id"
+                    }
+                )
+            stack.append(stack_row)
         combat = {
             "atk": {
                 self.state.cards[oid].ref: defender
@@ -421,7 +436,7 @@ class StateProjector:
     def _definition(self, oracle_id: str) -> dict[str, Any]:
         try:
             record = self.card_db.by_oracle_id(oracle_id)
-            return {
+            definition: dict[str, Any] = {
                 "cid": oracle_id[:8],
                 "n": record.name,
                 "m": record.mana_cost,
@@ -431,6 +446,22 @@ class StateProjector:
                 **({"p": record.power, "q": record.toughness} if record.power is not None else {}),
                 **({"k": list(record.keywords)} if record.keywords else {}),
             }
+            if record.faces:
+                definition["faces"] = [
+                    {
+                        "n": str(face.get("name") or record.name),
+                        "m": str(face.get("mana_cost") or ""),
+                        "t": str(face.get("type_line") or ""),
+                        "o": truncate(
+                            str(face.get("oracle_text") or "").replace(
+                                "\n", " / "
+                            ),
+                            520,
+                        ),
+                    }
+                    for face in record.faces
+                ]
+            return definition
         except KeyError:
             return {"cid": oracle_id[:8], "n": "Custom token"}
 

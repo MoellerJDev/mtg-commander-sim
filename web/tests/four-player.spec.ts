@@ -17,12 +17,26 @@ async function submitDeck(page: Page, seat: string, text: string) {
     .fill(zimone ? "Zimone and Dina" : "Mishra, Eminent One");
   await page.getByTestId("deck-list").fill(text);
   await page.getByTestId("submit-deck").click();
-  await expect(page.getByText("Deck validated: trusted-only semantic gate passes.")).toBeVisible();
+  // These duplicated lists exercise the browser protocol, not matchup or
+  // semantic-coverage evidence. A draft mechanic contract may correctly keep
+  // the ready list behind a visible fail-closed fidelity warning.
+  await expect(page.locator(".success-banner, .warning-banner").filter({ hasText: /Deck (validated|accepted)/ })).toBeVisible();
   await expect(page.getByTestId("deck-ready-summary")).toContainText(`Deck ${seat}`);
 }
 
 async function viewRevision(page: Page): Promise<number> {
   return Number(await page.locator(".game-shell").getAttribute("data-view-revision"));
+}
+
+async function expectCardSurface(page: Page, seat: string) {
+  const firstCard = page.getByTestId("own-hand").locator(".hand-card").first();
+  const name = await firstCard.locator(".card-copy strong").textContent();
+  expect(name).toBeTruthy();
+  await firstCard.hover();
+  await expect(page.getByTestId("card-inspector")).toBeVisible();
+  await expect(page.getByTestId("card-inspector")).toContainText(name!);
+  await expect(page.getByTestId(`zone-${seat}-graveyard`)).toBeDisabled();
+  await expect(page.getByTestId(`zone-${seat}-exile`)).toBeDisabled();
 }
 
 async function startFourPlayerGame(browser: Browser): Promise<{ contexts: BrowserContext[]; pages: Page[] }> {
@@ -51,9 +65,11 @@ async function startFourPlayerGame(browser: Browser): Promise<{ contexts: Browse
   }
   await expect(pages[0].getByTestId("start-game")).toBeEnabled();
   await pages[0].getByTestId("start-game").click();
-  for (const page of pages) {
+  for (let index = 0; index < pages.length; index += 1) {
+    const page = pages[index];
     await expect(page.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
     await expect(page.getByTestId("decision-panel")).toBeVisible();
+    await expectCardSurface(page, "ABCD"[index]);
   }
   return { contexts, pages };
 }
@@ -122,9 +138,11 @@ test("four shared-cookie browser tabs retain isolated seats through mulligans an
 
     await expect(pages[0].getByTestId("start-game")).toBeEnabled();
     await pages[0].getByTestId("start-game").click();
-    for (const page of pages) {
+    for (let index = 0; index < pages.length; index += 1) {
+      const page = pages[index];
       await expect(page.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
       await expect(page.getByTestId("decision-panel")).toBeVisible();
+      await expectCardSurface(page, "ABCD"[index]);
     }
     const handA = await pages[0].getByTestId("own-hand").textContent();
     const handB = await pages[1].getByTestId("own-hand").textContent();
@@ -203,6 +221,12 @@ test("four shared-cookie browser tabs retain isolated seats through mulligans an
     await pages[0].setViewportSize({ width: 390, height: 844 });
     await expect(pages[0].getByTestId("decision-panel")).toBeVisible();
     await expect(pages[0].getByTestId("own-hand")).toBeVisible();
+    const mobileViewer = pages[0].getByRole("button", { name: /^View / });
+    await expect(mobileViewer).toBeVisible();
+    await mobileViewer.click();
+    await expect(pages[0].getByTestId("card-inspector-expanded")).toBeVisible();
+    await pages[0].keyboard.press("Escape");
+    await expect(pages[0].getByTestId("card-inspector-expanded")).toHaveCount(0);
     expect(await pages[0].evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   } finally {
     await Promise.all(contexts.map((context) => context.close()));

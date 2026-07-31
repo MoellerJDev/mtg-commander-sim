@@ -4,6 +4,15 @@
 
 ### Managed local runtime and responsive browser
 
+- Added a card-first table inspector: pointer hover and keyboard focus drive a
+  persistent large-art/Oracle-text viewer, visible double-faced cards can switch
+  faces, and narrow layouts offer the same view in an enlarged dialog.
+- Made every projected graveyard and exile directly browsable from its player
+  board, enriched represented card spells on the stack for safe inspection, and
+  retained opposing hand/library privacy.
+- Changed playable card clicks into selection with object-scoped actions while
+  keeping drag-to-battlefield and manual mana-source activation as fast paths;
+  the action tray remains a complete fallback over the same server-issued IDs.
 - Added Arena-style card interaction: legal hand/command cards now show their
   specific play or cast action, can be clicked or dragged to the battlefield,
   and offer an explicit Auto-mana confirmation instead of an unlabeled generic

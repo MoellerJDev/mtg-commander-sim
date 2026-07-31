@@ -17,10 +17,11 @@ responsive TypeScript/React table. One Python process now builds and serves the
 browser, prepares the local Scryfall SQLite index, checks for updated Oracle and
 rulings exports every 24 hours, and serves an on-demand local card-image cache.
 The browser renders the engine's current generic choice vocabulary, locally
-cached card art, card-specific play/cast labels, drag-to-play interaction,
-optional manual mana-source activation, reconnect and exact-command retry
-states, owner-only durable stop/resume controls, and a seat-safe record
-inspection panel. These paths are
+  cached card art, a persistent hover/focus card viewer, browsable public zones,
+  card-specific play/cast/activate controls, drag-to-play interaction, optional
+  manual mana-source activation, reconnect and exact-command retry states,
+  owner-only durable stop/resume controls, and a seat-safe record inspection
+  panel. These paths are
 end-to-end tested with four shared-cookie tab-isolated seats and a two-player
 duel. Future choice schemas, full account
 identity, expiry/rate limits, and production operations remain incomplete.
@@ -100,9 +101,18 @@ warning list and is saved with the deck/game provenance. It does not override
 bans, deck-construction errors, missing card data, or unsupported rules
 semantics; material semantic gaps still fail closed during play.
 
-At the table, cards with a current action are highlighted and labeled
-**PLAY**, **CAST**, or **CHOOSE**. Click one to use it, or drag it from your
-hand or command zone onto your battlefield. Spell confirmation exposes the
+At the table, hover or keyboard-focus any visible card to show large art and its
+full projected name, mana cost, type line, and Oracle text in the desktop card
+viewer. Double-faced cards expose both visible faces. On a narrow screen, use
+the floating **View card** control for the same enlarged view. Graveyard and
+exile counts are buttons that open the complete public contents for that seat;
+hands and libraries remain seat-private.
+
+Cards with a current action are highlighted and labeled **PLAY**, **CAST**,
+**ACTIVATE**, or **CHOOSE**. Select a hand, command-zone, public-zone, or
+battlefield card to reveal only that object's current server-issued actions.
+Drag a playable land or spell to your battlefield for the fast path; an
+ambiguous card opens a short action chooser. Spell confirmation exposes the
 default **Auto-mana** path. Turn on **Manual mana** to highlight payable mana
 abilities, then click those permanents in the order you want to activate them;
 multi-color sources ask which exact mana to add. Choose the spell again after
@@ -225,8 +235,9 @@ generated documentation fixtures with bearer capabilities redacted. See
   Game Record v3 durability before command acknowledgement
 - React/TypeScript room and four-player table UI with Moxfield or pasted-list
   import, responsive desktop/mobile battlefield layout, local card art, private
-  hand rendering, card-specific legal-action prompts, drag-to-play, optional
-  click-to-activate manual mana, generic server-issued choice forms,
+  hand rendering, persistent hover/focus inspection, double-face viewing,
+  public graveyard/exile browsers, card-specific legal-action prompts,
+  drag-to-play, optional click-to-activate manual mana, generic server-issued choice forms,
   focus-contained dialogs, reconnect, exact-envelope retry, and
   four-isolated-context Playwright coverage
 - one-command local startup with browser build/static serving, a visible

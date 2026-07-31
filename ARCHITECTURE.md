@@ -547,8 +547,14 @@ service, and fully revalidated by the engine.
 
 Card-centric interaction remains a protocol adapter, not a second rules
 engine. The kernel supplies card refs, face-specific labels, current costs,
-and exact legal mana modes. Clicking a card, dragging it to the battlefield,
-or selecting the matching tray button all submit the same action ID. Manual
+exact legal mana modes, per-face visible definitions, and public-zone contents.
+Hover/focus inspection reads only those projected definitions. Selecting a card
+filters the already-issued action list by its stable card/source ref; dragging a
+playable card, clicking a mana source, or selecting the matching tray button all
+submit the same action ID. Graveyard/exile drawers reuse the projected public
+arrays and never gain a state-reading endpoint. Spell stack rows carry the
+visible projected card definition when a stack item represents a card, allowing
+the same inspector without widening principal authority. Manual
 mana mode submits ordinary mana-ability actions sequentially, preserving source
 activation order and floating the resulting server-validated bundles before a
 cast. Auto-mana remains the default. Modal double-faced land plays carry a

@@ -58,25 +58,28 @@ function CardTile({
   compact = false,
   actions = [],
   onIntent,
+  onInspect,
   manualMana = false,
+  selected = false,
 }: {
   value: JsonValue;
   view: ProjectedView;
   compact?: boolean;
   actions?: LegalAction[];
-  onIntent?: (actions: LegalAction[]) => void;
+  onIntent?: (actions: LegalAction[], card: JsonValue) => void;
+  onInspect?: (card: JsonValue) => void;
   manualMana?: boolean;
+  selected?: boolean;
 }) {
   const card = asRecord(value);
   const cid = typeof card.cid === "string" ? card.cid : "";
   const definition = cid ? view.definitions[cid] : undefined;
   const [showImage, setShowImage] = useState(Boolean(cid));
   const interactive = actions.length > 0 && Boolean(onIntent);
+  const inspectable = Boolean(onInspect);
   const ref = String(card.id ?? "");
   const face = Number(card.face ?? 0);
-  const canDrag = interactive && (
-    !compact || actions.some((action) => action.action === "cast")
-  );
+  const canDrag = interactive && actions.some((action) => ["play_land", "cast"].includes(action.action));
   const actionKinds = new Set(actions.map((action) => action.action));
   const actionHint = manualMana
     ? "TAP"
@@ -84,26 +87,31 @@ function CardTile({
       ? "CHOOSE"
       : actionKinds.has("cast")
         ? "CAST"
+        : actionKinds.has("activate")
+          ? "ACTIVATE"
         : "PLAY";
   function activate() {
-    if (interactive) onIntent?.(actions);
+    onInspect?.(value);
+    if (interactive) onIntent?.(actions, value);
   }
   function keydown(event: ReactKeyboardEvent<HTMLElement>) {
-    if (!interactive || !["Enter", " "].includes(event.key)) return;
+    if ((!interactive && !inspectable) || !["Enter", " "].includes(event.key)) return;
     event.preventDefault();
     activate();
   }
   return (
     <article
-      className={`card-tile${compact ? " compact" : " hand-card"}${showImage ? " has-image" : ""}${card.tap ? " tapped" : ""}${interactive ? " actionable" : ""}${manualMana ? " mana-source" : ""}`}
+      className={`card-tile${compact ? " compact" : " hand-card"}${showImage ? " has-image" : ""}${card.tap ? " tapped" : ""}${interactive ? " actionable" : ""}${inspectable ? " inspectable" : ""}${manualMana ? " mana-source" : ""}${selected ? " selected-card" : ""}`}
       title={String(card.o ?? definition?.o ?? cardName(value))}
-      role={interactive ? "button" : undefined}
-      tabIndex={interactive ? 0 : undefined}
-      aria-label={interactive ? `${actions.map((action) => action.label ?? action.action).join(" or ")}: ${cardName(value)}` : undefined}
+      role={interactive || inspectable ? "button" : undefined}
+      tabIndex={interactive || inspectable ? 0 : undefined}
+      aria-label={interactive ? `${actions.map((action) => action.label ?? action.action).join(" or ")}: ${cardName(value)}` : inspectable ? `Inspect ${cardName(value)}` : undefined}
       draggable={canDrag}
       data-card-ref={ref}
       onClick={activate}
       onKeyDown={keydown}
+      onMouseEnter={() => onInspect?.(value)}
+      onFocus={() => onInspect?.(value)}
       onDragStart={(event) => {
         if (!interactive) return;
         event.dataTransfer.effectAllowed = "move";
@@ -127,6 +135,89 @@ function CardTile({
       </div>
       {interactive && <span className="card-action-hint">{actionHint}</span>}
     </article>
+  );
+}
+
+function CardInspector({
+  value,
+  view,
+  onExpand,
+  expanded = false,
+}: {
+  value: JsonValue | null;
+  view: ProjectedView;
+  onExpand?: () => void;
+  expanded?: boolean;
+}) {
+  const card = asRecord(value ?? undefined);
+  const cid = typeof card.cid === "string" ? card.cid : "";
+  const definition = cid ? view.definitions[cid] : undefined;
+  const faces = asList(definition?.faces).map(asRecord);
+  const projectedFace = Number(card.face ?? 0);
+  const identity = `${String(card.id ?? cid)}:${projectedFace}`;
+  const [faceIndex, setFaceIndex] = useState(projectedFace);
+  const [showImage, setShowImage] = useState(Boolean(cid));
+
+  useEffect(() => {
+    setFaceIndex(projectedFace);
+    setShowImage(Boolean(cid));
+  }, [identity, cid, projectedFace]);
+
+  if (!value || !Object.keys(card).length) {
+    return (
+      <section className={`card-inspector-panel${expanded ? " expanded" : ""}`} data-testid={expanded ? "card-inspector-expanded" : "card-inspector"}>
+        <div className="card-inspector-empty">
+          <span className="eyebrow">CARD VIEWER</span>
+          <strong>Point at a card</strong>
+          <p>Hover, focus, or select any visible card to read it here.</p>
+        </div>
+      </section>
+    );
+  }
+
+  const face = faces[faceIndex] ?? {};
+  const name = String(face.n ?? card.n ?? definition?.n ?? card.id ?? "Unknown card");
+  const mana = String(face.m ?? card.m ?? definition?.m ?? "");
+  const typeLine = String(face.t ?? card.t ?? definition?.t ?? "");
+  const oracle = String(face.o ?? card.o ?? definition?.o ?? "No projected rules text.");
+  return (
+    <section className={`card-inspector-panel${expanded ? " expanded" : ""}`} data-testid={expanded ? "card-inspector-expanded" : "card-inspector"}>
+      <header>
+        <div><span className="eyebrow">CARD VIEWER</span><strong>{name}</strong></div>
+        {onExpand && <button type="button" className="link-button" onClick={onExpand}>Enlarge</button>}
+      </header>
+      <div className="inspector-art">
+        {showImage && cid ? (
+          <img
+            src={`/api/v1/cards/${cid}/image?size=large&face=${faceIndex}`}
+            alt={name}
+            onError={() => setShowImage(false)}
+          />
+        ) : (
+          <div className="inspector-art-fallback"><strong>{name}</strong><span>{typeLine}</span></div>
+        )}
+      </div>
+      {faces.length > 1 && (
+        <div className="face-switcher" aria-label="Card faces">
+          {faces.map((candidate, index) => (
+            <button
+              type="button"
+              key={`${String(candidate.n ?? index)}-${index}`}
+              className={faceIndex === index ? "active" : ""}
+              aria-pressed={faceIndex === index}
+              onClick={() => { setFaceIndex(index); setShowImage(Boolean(cid)); }}
+            >
+              {String(candidate.n ?? `Face ${index + 1}`)}
+            </button>
+          ))}
+        </div>
+      )}
+      <div className="inspector-text">
+        <div><strong>{name}</strong><span>{mana}</span></div>
+        {typeLine && <small>{typeLine}</small>}
+        <p>{oracle}</p>
+      </div>
+    </section>
   );
 }
 
@@ -647,9 +738,12 @@ function PlayerBoard({
   mine,
   view,
   manualMana,
-  manaActions,
   cardActions,
   onCardIntent,
+  onManaIntent,
+  onInspectCard,
+  selectedCardRef,
+  onOpenZone,
   dropEnabled,
   onCardDrop,
 }: {
@@ -660,9 +754,12 @@ function PlayerBoard({
   mine: boolean;
   view: ProjectedView;
   manualMana: boolean;
-  manaActions: LegalAction[];
   cardActions: LegalAction[];
-  onCardIntent: (actions: LegalAction[]) => void;
+  onCardIntent: (actions: LegalAction[], card: JsonValue) => void;
+  onManaIntent: (actions: LegalAction[], card: JsonValue) => void;
+  onInspectCard: (card: JsonValue) => void;
+  selectedCardRef: string;
+  onOpenZone: (seat: string, zone: "gy" | "ex") => void;
   dropEnabled: boolean;
   onCardDrop: (cardRef: string) => void;
 }) {
@@ -687,9 +784,9 @@ function PlayerBoard({
       <div className="card-strip command-zone">{command.length ? command.map((card, index) => {
         const ref = String(asRecord(card).id ?? "");
         const actions = mine
-          ? cardActions.filter((action) => String(action.card ?? "") === ref)
+          ? cardActions.filter((action) => String(action.card ?? action.source ?? "") === ref)
           : [];
-        return <CardTile key={ref || index} value={card} view={view} compact actions={actions} onIntent={onCardIntent} />;
+        return <CardTile key={ref || index} value={card} view={view} compact actions={actions} onIntent={onCardIntent} onInspect={onInspectCard} selected={selectedCardRef === ref} />;
       }) : <em>Empty</em>}</div>
       <div className="zone-label">BATTLEFIELD</div>
       <div
@@ -719,15 +816,19 @@ function PlayerBoard({
       >
         {battlefield.length ? battlefield.map((card, index) => {
           const ref = String(asRecord(card).id ?? "");
-          const actions = mine && manualMana
-            ? manaActions.filter((action) => String(action.source ?? "") === ref)
+          const actions = mine
+            ? cardActions.filter((action) =>
+                String(action.card ?? action.source ?? "") === ref
+                && (action.mana_ability !== true || manualMana),
+              )
             : [];
-          return <CardTile key={ref || index} value={card} view={view} compact actions={actions} onIntent={onCardIntent} manualMana={actions.length > 0} />;
+          const manaOnly = actions.length > 0 && actions.every((action) => action.mana_ability === true);
+          return <CardTile key={ref || index} value={card} view={view} compact actions={actions} onIntent={manaOnly ? onManaIntent : onCardIntent} onInspect={onInspectCard} manualMana={manaOnly} selected={selectedCardRef === ref} />;
         }) : <em>{mine && dropEnabled ? "Drop a playable card here" : "Empty battlefield"}</em>}
       </div>
       <footer className="zone-summary">
-        <span>GY <strong>{graveyard.length}</strong></span>
-        <span>EXILE <strong>{exile.length}</strong></span>
+        <button type="button" data-testid={`zone-${seat}-graveyard`} disabled={!graveyard.length} onClick={() => onOpenZone(seat, "gy")}>GY <strong>{graveyard.length}</strong></button>
+        <button type="button" data-testid={`zone-${seat}-exile`} disabled={!exile.length} onClick={() => onOpenZone(seat, "ex")}>EXILE <strong>{exile.length}</strong></button>
         <span>LAND <strong>{String(player.lands ?? 0)}</strong></span>
         <span>MANA <strong>{Object.entries(mana).map(([color, amount]) => `${color}${amount}`).join(" ") || "—"}</strong></span>
       </footer>
@@ -810,6 +911,10 @@ function GameView({ gameId }: { gameId: string }) {
   const [selectedAction, setSelectedAction] = useState<LegalAction | null>(null);
   const [actionChoices, setActionChoices] = useState<LegalAction[]>([]);
   const [manualMana, setManualMana] = useState(false);
+  const [inspectedCard, setInspectedCard] = useState<JsonValue | null>(null);
+  const [cardContext, setCardContext] = useState<JsonValue | null>(null);
+  const [zoneBrowser, setZoneBrowser] = useState<{ seat: string; zone: "gy" | "ex" } | null>(null);
+  const [expandedInspector, setExpandedInspector] = useState(false);
   const [choiceValues, setChoiceValues] = useState<ChoiceValues>({});
   const [choiceErrors, setChoiceErrors] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -820,6 +925,8 @@ function GameView({ gameId }: { gameId: string }) {
   const [pendingRetry, setPendingRetry] = useState<{ envelope: CommandEnvelope; label: string } | null>(null);
   const choiceDialogRef = useRef<HTMLFormElement | null>(null);
   const actionPickerRef = useRef<HTMLElement | null>(null);
+  const zoneDialogRef = useRef<HTMLElement | null>(null);
+  const previewDialogRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     let stopped = false;
@@ -877,6 +984,7 @@ function GameView({ gameId }: { gameId: string }) {
   useEffect(() => {
     setSelectedAction(null);
     setActionChoices([]);
+    setCardContext(null);
     setChoiceValues({});
     setChoiceErrors([]);
   }, [view?.decision?.id]);
@@ -888,12 +996,12 @@ function GameView({ gameId }: { gameId: string }) {
   }, [pendingRetry, view?.decision?.id]);
 
   useEffect(() => {
-    if (!selectedAction && actionChoices.length === 0) return;
+    if (!selectedAction && actionChoices.length === 0 && !zoneBrowser && !expandedInspector) return;
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const oldOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     window.requestAnimationFrame(() => {
-      const dialog = choiceDialogRef.current ?? actionPickerRef.current;
+      const dialog = choiceDialogRef.current ?? actionPickerRef.current ?? zoneDialogRef.current ?? previewDialogRef.current;
       dialog?.querySelector<HTMLElement>("input:not(:disabled), select:not(:disabled), button:not(:disabled)")?.focus();
     });
     function keydown(event: KeyboardEvent) {
@@ -901,9 +1009,11 @@ function GameView({ gameId }: { gameId: string }) {
         event.preventDefault();
         setSelectedAction(null);
         setActionChoices([]);
+        setZoneBrowser(null);
+        setExpandedInspector(false);
         return;
       }
-      const dialog = choiceDialogRef.current ?? actionPickerRef.current;
+      const dialog = choiceDialogRef.current ?? actionPickerRef.current ?? zoneDialogRef.current ?? previewDialogRef.current;
       if (event.key !== "Tab" || !dialog) return;
       const controls = [...dialog.querySelectorAll<HTMLElement>("input:not(:disabled), select:not(:disabled), textarea:not(:disabled), button:not(:disabled), [tabindex]:not([tabindex='-1'])")];
       if (!controls.length) return;
@@ -923,7 +1033,7 @@ function GameView({ gameId }: { gameId: string }) {
       document.body.style.overflow = oldOverflow;
       previous?.focus();
     };
-  }, [selectedAction, actionChoices]);
+  }, [selectedAction, actionChoices, zoneBrowser, expandedInspector]);
 
   async function submitEnvelope(envelope: CommandEnvelope, label: string) {
     setSubmitting(true);
@@ -991,6 +1101,7 @@ function GameView({ gameId }: { gameId: string }) {
 
   function chooseAction(action: LegalAction) {
     setActionChoices([]);
+    setCardContext(null);
     if (!action.form && action.action !== "cast") {
       void act(action);
       return;
@@ -1000,12 +1111,19 @@ function GameView({ gameId }: { gameId: string }) {
     setChoiceErrors([]);
   }
 
-  function chooseCardAction(actions: LegalAction[]) {
+  function chooseCardAction(actions: LegalAction[], card?: JsonValue) {
+    if (card) setInspectedCard(card);
     if (actions.length === 1) {
       chooseAction(actions[0]);
     } else if (actions.length > 1) {
       setActionChoices(actions);
     }
+  }
+
+  function selectCardActions(_actions: LegalAction[], card: JsonValue) {
+    setInspectedCard(card);
+    setCardContext(card);
+    setActionChoices([]);
   }
 
   function submitChoice(event: FormEvent) {
@@ -1032,12 +1150,14 @@ function GameView({ gameId }: { gameId: string }) {
   const ownSeat = view.principal.split(":").at(-1) ?? "?";
   const ownPlayer = asRecord(players[ownSeat]);
   const hand = asList(ownPlayer.hand);
+  const ownCommand = asList(ownPlayer.cmd);
+  const inspectionTarget = inspectedCard ?? hand[0] ?? null;
   const stack = asList(state.stack);
   const labels = projectedLabels(view);
   const labelFor = (value: string) => labels.get(value) ?? value;
   const legalActions = view.decision?.legal_actions ?? [];
-  const handActions = legalActions.filter((action) =>
-    ["play_land", "cast"].includes(action.action),
+  const cardActions = legalActions.filter((action) =>
+    typeof (action.card ?? action.source) === "string",
   );
   const manaActions = legalActions.filter((action) =>
     action.action === "activate" && action.mana_ability === true,
@@ -1045,14 +1165,20 @@ function GameView({ gameId }: { gameId: string }) {
   const displayActions = legalActions.filter((action) =>
     action.mana_ability !== true || manualMana,
   );
-  const actionsForCard = (ref: string) => handActions.filter((action) =>
-    String(action.card ?? "") === ref,
+  const actionsForCard = (ref: string) => cardActions.filter((action) =>
+    String(action.card ?? action.source ?? "") === ref
+    && (action.mana_ability !== true || manualMana),
   );
-  const dropEnabled = hand.some((card) =>
-    actionsForCard(String(asRecord(card).id ?? "")).length > 0,
+  const dropEnabled = [...hand, ...ownCommand].some((card) =>
+    actionsForCard(String(asRecord(card).id ?? "")).some((action) => ["play_land", "cast"].includes(action.action)),
   );
   const activeSeat = String(turn.active ?? "");
   const prioritySeat = String(turn.priority ?? "");
+  const selectedCardRef = String(asRecord(cardContext ?? undefined).id ?? "");
+  const contextualActions = selectedCardRef ? actionsForCard(selectedCardRef) : [];
+  const zonePlayer = zoneBrowser ? asRecord(players[zoneBrowser.seat]) : {};
+  const zoneCards = zoneBrowser ? asList(zonePlayer[zoneBrowser.zone]) : [];
+  const zoneName = zoneBrowser?.zone === "gy" ? "Graveyard" : "Exile";
   return (
     <main className="game-shell" data-view-revision={view.viewRevision}>
       <a className="skip-link" href="#decision-tray">Skip to current actions</a>
@@ -1142,19 +1268,27 @@ function GameView({ gameId }: { gameId: string }) {
               mine={ownSeat === seat}
               view={view}
               manualMana={manualMana}
-              manaActions={manaActions}
-              cardActions={handActions}
-              onCardIntent={chooseCardAction}
+              cardActions={cardActions}
+              onCardIntent={selectCardActions}
+              onManaIntent={chooseCardAction}
+              onInspectCard={setInspectedCard}
+              selectedCardRef={selectedCardRef}
+              onOpenZone={(nextSeat, zone) => {
+                const nextCards = asList(asRecord(players[nextSeat])[zone]);
+                setInspectedCard(nextCards[0] ?? null);
+                setZoneBrowser({ seat: nextSeat, zone });
+              }}
               dropEnabled={dropEnabled}
-              onCardDrop={(ref) => chooseCardAction(actionsForCard(ref))}
+              onCardDrop={(ref) => chooseCardAction(actionsForCard(ref).filter((action) => ["play_land", "cast"].includes(action.action)))}
             />
           ))}
         </section>
         <aside className="table-sidebar" aria-label="Stack and recent game activity">
+          <CardInspector value={inspectionTarget} view={view} onExpand={() => setExpandedInspector(true)} />
           <section className="stack-panel">
             <header><div className="zone-label">STACK</div><strong>{stack.length}</strong></header>
             <div className="stack-items">
-              {stack.length ? stack.map((item, index) => <CardTile key={String(asRecord(item).id ?? index)} value={item} view={view} compact />) : <em>The stack is empty</em>}
+              {stack.length ? stack.map((item, index) => <CardTile key={String(asRecord(item).id ?? index)} value={item} view={view} compact onInspect={setInspectedCard} />) : <em>The stack is empty</em>}
             </div>
           </section>
           <section className="activity-panel">
@@ -1168,10 +1302,27 @@ function GameView({ gameId }: { gameId: string }) {
       </div>
       <section className="hand-panel">
         <header><div><span className="eyebrow">YOUR PRIVATE ZONE · SEAT {ownSeat}</span><h2>Your hand</h2></div><span className="zone-count">{hand.length} cards</span></header>
+        {cardContext && (
+          <div className="selected-card-actions" data-testid="selected-card-actions">
+            <div>
+              <span className="eyebrow">SELECTED CARD</span>
+              <strong>{cardName(cardContext)}</strong>
+              <small>Choose a legal action, or drag the card to your battlefield for the fast path.</small>
+            </div>
+            <div className="selected-card-action-buttons">
+              {contextualActions.map((action) => (
+                <button type="button" key={action.id} disabled={submitting || Boolean(pendingRetry) || connection !== "LIVE" || lifecycle?.status !== "active"} onClick={() => chooseAction(action)}>
+                  {action.action === "cast" && !manualMana ? `Auto-mana · ${action.label ?? "Cast"}` : action.label ?? action.action}
+                </button>
+              ))}
+              <button type="button" className="secondary-button" onClick={() => setCardContext(null)}>Cancel</button>
+            </div>
+          </div>
+        )}
         <div className="hand-cards" data-testid="own-hand">
           {hand.map((card, index) => {
             const ref = String(asRecord(card).id ?? "");
-            return <CardTile key={ref || index} value={card} view={view} actions={actionsForCard(ref)} onIntent={chooseCardAction} />;
+            return <CardTile key={ref || index} value={card} view={view} actions={actionsForCard(ref)} onIntent={selectCardActions} onInspect={setInspectedCard} selected={selectedCardRef === ref} />;
           })}
         </div>
       </section>
@@ -1209,6 +1360,52 @@ function GameView({ gameId }: { gameId: string }) {
       {manualMana && manaActions.length > 0 && (
         <div className="mana-help" role="status">
           Click a highlighted untapped permanent to add mana in the order you choose. Floating mana appears on your board; then drag or select the spell.
+        </div>
+      )}
+      {inspectionTarget && (
+        <button type="button" className="mobile-inspector-trigger" onClick={() => setExpandedInspector(true)}>
+          View {cardName(inspectionTarget)}
+        </button>
+      )}
+      {zoneBrowser && (
+        <div className="choice-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setZoneBrowser(null); }}>
+          <section ref={zoneDialogRef} className="choice-dialog zone-browser" role="dialog" aria-modal="true" aria-labelledby="zone-browser-title" data-testid="zone-browser">
+            <header>
+              <div><span className="eyebrow">PUBLIC ZONE · SEAT {zoneBrowser.seat}</span><h2 id="zone-browser-title">{zoneName} · {zoneCards.length}</h2></div>
+              <button type="button" className="secondary-button" onClick={() => setZoneBrowser(null)}>Close</button>
+            </header>
+            <div className="zone-browser-layout">
+              <div className="zone-card-grid">
+                {zoneCards.map((card, index) => {
+                  const ref = String(asRecord(card).id ?? "");
+                  const actions = zoneBrowser.seat === ownSeat ? actionsForCard(ref) : [];
+                  return (
+                    <CardTile
+                      key={ref || index}
+                      value={card}
+                      view={view}
+                      actions={actions}
+                      onInspect={setInspectedCard}
+                      onIntent={(nextActions, selectedCard) => {
+                        setZoneBrowser(null);
+                        selectCardActions(nextActions, selectedCard);
+                      }}
+                      selected={selectedCardRef === ref}
+                    />
+                  );
+                })}
+              </div>
+              <CardInspector value={inspectedCard ?? zoneCards[0] ?? null} view={view} expanded />
+            </div>
+          </section>
+        </div>
+      )}
+      {expandedInspector && (
+        <div className="choice-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setExpandedInspector(false); }}>
+          <section ref={previewDialogRef} className="choice-dialog card-preview-dialog" role="dialog" aria-modal="true" aria-label={`Card viewer: ${inspectionTarget ? cardName(inspectionTarget) : "No card selected"}`}>
+            <header><div><span className="eyebrow">CARD VIEWER</span><h2>{inspectionTarget ? cardName(inspectionTarget) : "No card selected"}</h2></div><button type="button" className="secondary-button" onClick={() => setExpandedInspector(false)}>Close</button></header>
+            <CardInspector value={inspectionTarget} view={view} expanded />
+          </section>
         </div>
       )}
       {actionChoices.length > 0 && (

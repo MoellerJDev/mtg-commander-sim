@@ -65,7 +65,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | Milestone | Status | Evidence |
 |---|---|---|
 | Integrated deterministic foundation | `complete` | Integration PRs #1-17 and #24-30 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
-| Browser Commander MVP | `development_local_runtime_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, shared-cookie tab-isolation and two/four-player Chromium coverage, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with card-specific click/drag actions and optional manual mana activation, exact command retry, and one-command managed Scryfall/browser startup. Future schemas, full accounts, expiry/rate limits, and production deployment remain open. |
+| Browser Commander MVP | `development_local_runtime_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, shared-cookie tab-isolation and two/four-player Chromium coverage, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, card-scoped click/drag actions and optional manual mana activation, exact command retry, and one-command managed Scryfall/browser startup. Future schemas, full accounts, expiry/rate limits, and production deployment remain open. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408 and CR 500-512 slices are on main. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -76,7 +76,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 - `single_writer_game_actor`: `implemented_single_process`
 - `durable_database`: `implemented_sqlite_control_plane_plus_game_record_v3`
 - `http_websocket_server`: `implemented_single_process_managed_data_static_browser_restart_and_lifecycle_recovery`
-- `browser_client`: `implemented_card_centric_click_drag_manual_mana_current_choice_forms_local_art_reconnect_and_exact_retry`
+- `browser_client`: `implemented_card_inspector_public_zone_browser_card_scoped_click_drag_manual_mana_current_choice_forms_local_art_reconnect_and_exact_retry`
 - `guest_or_account_identity`: `implemented_expiring_per_tab_guest_sessions`
 - `rooms_and_lobbies`: `implemented_invite_only_two_or_four_seat_remove_leave_and_replace`
 - `replay`: `implemented_command_replay`
@@ -86,7 +86,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 3979
+- Tests discovered: 3980
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
 - Baseline CI: [30656571388](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30656571388) — `pass`
 - Compile: `pass`

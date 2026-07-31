@@ -1,7 +1,7 @@
 # Server and browser vertical slice
 
 Version 0.8.0 includes an executable, responsive two- or four-player browser slice with
-card-centric play/cast interaction and generic forms for the rules engine's
+card-centric play/cast/activate interaction and generic forms for the rules engine's
 current server-issued choice schemas. One
 Python process builds and serves the browser, manages the local Scryfall data
 snapshot, and serves locally cached card images. It is a single-node
@@ -69,13 +69,28 @@ ready.
 
 ## Playing from the table
 
-The action tray uses card names instead of generic verbs: for example, **Play
-Watery Grave**, **Cast Sol Ring — {1}**, and **Sensei's Divining Top — Draw a
-card, then put Sensei's Divining Top on top of its owner's library**. Cards in
-the hand and command zone are highlighted when one of those actions is legal.
-Click a highlighted card, or drag it onto your battlefield. If a card has more
-than one legal use, such as a modal double-faced spell/land, the browser asks
-which server-issued action to execute.
+The right-side card viewer follows pointer hover and keyboard focus across every
+visible card in a hand, command zone, battlefield, public zone, or the stack. It
+shows large locally cached art plus the full projected name, cost, type line,
+and Oracle text. A face switcher reads both visible faces of a double-faced
+card. Narrow layouts replace the persistent viewer with an explicit enlarged
+card dialog so it does not squeeze the battlefield.
+
+Graveyard and exile counts on every player board open a searchable-by-eye card
+grid and inspector for that complete public zone. An opponent's hand remains a
+count, and libraries remain hidden except for information the projection says
+that seat legally knows. The browser never reads the run directory or a raw
+checkpoint to populate these views.
+
+The action tray remains an accessibility and recovery fallback and uses card
+names instead of generic verbs: for example, **Play Watery Grave**, **Cast Sol
+Ring — {1}**, and **Sensei's Divining Top — Draw a card, then put Sensei's
+Divining Top on top of its owner's library**. Cards in the hand, command zone,
+owned public zones, and battlefield are highlighted when a linked action is
+legal. Click a highlighted card to select it and reveal only that card's current
+actions. Drag a playable land or spell onto your battlefield for the fast path.
+If the destination is ambiguous, such as a modal double-faced spell/land, the
+browser asks which server-issued action to execute.
 
 Casting defaults to **Auto-mana**, which asks the authoritative engine to use a
 valid routine payment. Select **Manual mana** to highlight untapped permanents
@@ -90,9 +105,10 @@ general restricted-mana or arbitrary cost-allocation editor.
 Land-face entry choices come from that face's Oracle text. **Play Agadeem, the
 Undercrypt** therefore offers **Pay 3 life to enter untapped**, charges exactly
 3 if selected, enters as the land face, and requests the back-face image.
-Dropping or clicking never bypasses timing, priority, cost, target, semantic,
-or fidelity checks: both gestures submit the same capability-scoped action as
-the action tray.
+Dropping, selecting, or activating never bypasses timing, priority, cost,
+target, semantic, or fidelity checks: every gesture resolves to the same
+capability-scoped action ID as the action tray. The client contains no parallel
+legality rules.
 
 While the server performs its startup card-data check, existing room pages
 back off polling from 750 ms to at most once every five seconds and resume
@@ -250,8 +266,10 @@ keep decisions, proves owner-only stop controls, propagates a durable paused
 status to all four contexts, disables the current decision, reloads a nonowner
 while paused, resumes, aborts one command request, retries the byte-equivalent
 command envelope with the same idempotency ID, records the exact projected hand
-count and decision, then requires a later full reconnect projection to match
-those values. It also checks the 390-pixel layout for horizontal overflow. A
+  count and decision, then requires a later full reconnect projection to match
+  those values. It verifies that hover inspection follows each seat's private
+  hand, public-zone controls start from the projected counts, and the 390-pixel
+  layout exposes an enlarged touch-friendly card viewer without horizontal overflow. A
 1v1 scenario replaces a room, removes and rejoins seat B, starts the
 `commander_duel` profile, and verifies both private projections. A separate
 scenario takes a post-free mulligan, exercises Escape/focus restoration,
