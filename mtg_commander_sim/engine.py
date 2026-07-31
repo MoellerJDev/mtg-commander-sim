@@ -2547,18 +2547,7 @@ class CommanderEngine:
         if kind == "none":
             return
         if kind == "turn_draw":
-            active = str(continuation["seat"])
-            self._dispatch_semantic_event(
-                "step.begin",
-                {
-                    "phase": self.state.phase,
-                    "step": self.state.step,
-                    "player": active,
-                },
-            )
-            if self._stabilize():
-                return
-            self._grant_priority(active)
+            self._complete_draw_step_entry(str(continuation["seat"]))
             return
         if kind == "semantic_resolution":
             self._continue_resolution(
@@ -2577,6 +2566,41 @@ class CommanderEngine:
         raise GameRuleError(
             f"Unsupported post-draw continuation {kind!r}"
         )
+
+    def _complete_draw_step_entry(self, active: str) -> None:
+        """Put draw-step triggers on the stack only after the turn draw.
+
+        CR 504.1's draw is a turn-based action.  Beginning-of-draw-step
+        triggers have already triggered, but CR 504.2 does not put them on
+        the stack or grant priority until after that action and the ensuing
+        state-based-action check.  Collect semantic and delayed triggers into
+        one APNAP/order batch so neither source kind can preempt the draw.
+        """
+
+        context = {
+            "phase": self.state.phase,
+            "step": self.state.step,
+            "player": active,
+        }
+        trigger_batch: list[StackItem] = []
+        self._dispatch_semantic_event(
+            "step.begin",
+            context,
+            trigger_batch=trigger_batch,
+        )
+        if self._semantic_pause_annotation() is not None:
+            return
+        trigger_batch.extend(
+            self._delayed_trigger_stack_item(trigger)
+            for trigger in self._matching_delayed_triggers(
+                "step.begin",
+                context,
+            )
+        )
+        self._enqueue_semantic_trigger_batch(trigger_batch)
+        if self._stabilize():
+            return
+        self._grant_priority(active)
 
     # ------------------------------------------------------------------
     # Capability-scoped command entry point
@@ -3242,11 +3266,6 @@ class CommanderEngine:
             self._grant_priority(active)
             return
 
-        delayed = self._matching_delayed_triggers("step.begin", {"phase": phase, "step": step, "player": active})
-        if delayed:
-            self._start_trigger_batch(delayed, after="grant_priority")
-            return
-
         if step == "draw":
             first_turn = self.state.turn_sequence == 1
             should_draw = not first_turn or self.state.config.effective_first_player_draws(len(self.seats))
@@ -3263,13 +3282,19 @@ class CommanderEngine:
                 return
             elif not should_draw:
                 self._log(active, "draw.skip", f"{active} skipped the first-turn draw.", importance=0)
-            self._dispatch_semantic_event(
-                "step.begin",
-                {"phase": phase, "step": step, "player": active},
-            )
-            if self._stabilize():
-                return
-            self._grant_priority(active)
+            self._complete_draw_step_entry(active)
+            return
+
+        delayed = self._matching_delayed_triggers(
+            "step.begin",
+            {
+                "phase": phase,
+                "step": step,
+                "player": active,
+            },
+        )
+        if delayed:
+            self._start_trigger_batch(delayed, after="grant_priority")
             return
 
         if step == "declare_attackers":
@@ -4349,11 +4374,13 @@ class CommanderEngine:
             self._queue_delayed_trigger(trigger_id)
         self._process_trigger_groups(list(decision.continuation.get("groups", [])), after=str(decision.continuation.get("after") or "grant_priority"))
 
-    def _queue_delayed_trigger(self, trigger_id: str) -> None:
-        trigger = next(t for t in self.state.delayed_triggers if t.trigger_id == trigger_id)
+    def _delayed_trigger_stack_item(
+        self,
+        trigger: DelayedTrigger,
+    ) -> StackItem:
         template = trigger.stack_template
         ref = self._next_ref("S")
-        item = StackItem(
+        return StackItem(
             stack_id=self._stable_runtime_id("stack", ref),
             ref=ref,
             kind="triggered_ability",
@@ -4364,8 +4391,15 @@ class CommanderEngine:
             targets=list(template.get("targets") or []),
             notes=str(template.get("note") or ""),
             visibility=list(self.seats),
-            context=copy.deepcopy(dict(template.get("context") or {})),
+            context={
+                **copy.deepcopy(dict(template.get("context") or {})),
+                "delayed_trigger_ref": trigger.ref,
+            },
         )
+
+    def _queue_delayed_trigger(self, trigger_id: str) -> None:
+        trigger = next(t for t in self.state.delayed_triggers if t.trigger_id == trigger_id)
+        item = self._delayed_trigger_stack_item(trigger)
         self.state.stack.append(item)
         self._log(trigger.controller, "stack.trigger", f"Queued {item.ref}: {item.label}.", {"stack": item.ref, "trigger": trigger.ref}, importance=2)
 

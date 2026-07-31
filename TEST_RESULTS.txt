@@ -7,19 +7,19 @@ Python: 3.11.9
 
 PASS: `python -m compileall -q mtg_commander_sim tests scripts simctl.py`
 
-PASS: 3,829 unit/integration tests in 184.906 seconds using the rebuilt compact
+PASS: 3,835 unit/integration tests in 185.817 seconds using the rebuilt compact
 Scryfall database:
 
 - 3,300 generated per-rule inventory/source-linkage tests
-- 529 ordinary rules, engine, protocol, replay, privacy, and platform tests
+- 535 ordinary rules, engine, protocol, replay, privacy, and platform tests
 
-The six new CR 506 tests verify source traceability, the exact empty-combat
-phase boundary, authoritative attacking and defending roles, removal after
-zone/control/phasing/type invalidation, historical-attacker retention, and
-tapping/untapping preservation. Alternate multiplayer options, generic
-effect-created or effect-removed combatants, requirement snapshots, extra
-combats, planeswalker destinations, “alone” provenance, and universal
-combat-relative timing remain blocked.
+The six new CR 504 tests verify source traceability, a stackless turn-based
+draw before priority, draw-step triggers waiting until after that draw,
+trusted Dredge replacement completion, empty-library state-based loss before
+priority, multiplayer and duel first-turn modifiers, and exact replay. The
+complete draw-replacement/prevention corpus and universal continuous-effect,
+trigger-target, multiplayer-elimination, and replay interaction matrix remain
+untrusted.
 
 Generated source linkage is not a claim that every rule has executable semantic
 coverage. The reviewed ledger remains fail-closed about passing, blocked,
@@ -63,7 +63,7 @@ PASS:
 - reachable-history path and oversized-blob scan
 - sanitized public replay-fixture policy check
 
-The scan covered 262 tracked files and 11,401,521 tracked bytes.
+The scan covered 265 tracked files and 11,451,578 tracked bytes.
 
 ## Package
 
@@ -74,16 +74,21 @@ package reported version 0.8.0 and its CLI smoke test completed.
 
 ## Evidence boundary
 
-These checks establish the local CR 506 focused branch atop the green CR 507
-main baseline, including source pinning, represented combat-phase roles and
-removal semantics, replay, privacy, action opportunity, packaging, and
-repository gates. They do not establish alternate multiplayer combat options,
-generic effect-created combatants, complete restriction/requirement or timing
-grammar, a production ASGI server, browser client, durable database, complete
-Comprehensive Rules behavior,
+These checks establish the local CR 504 focused branch atop the green CR 506
+main baseline, including source pinning, turn-based draw ordering, unified
+draw-step trigger batching, state-action timing, trusted Dredge, replay,
+privacy, action opportunity, packaging, and repository gates. They do not
+establish the complete draw-replacement/prevention corpus or continuous-effect,
+trigger-target, and multiplayer-elimination interaction matrix, a production
+ASGI server, browser client, durable database, complete Comprehensive Rules
+behavior,
 Oracle-corpus semantic closure, Commander deck legality for the micro-pool,
 deck superiority, or statistical matchup evidence.
 
-The baseline main commit's exact-SHA GitHub Actions matrix is recorded after
-pull request #8 in run 30614171826. Exact-SHA CI for the focused CR 506 commit is
-not claimed until that commit is pushed.
+The baseline main commit `c8a52711dc9294957fc0f437a4aaeab72da213aa`
+passed its exact-SHA GitHub Actions matrix after pull request #9 in run
+30615647165. Exact-SHA CI for the focused CR 504 commit is not claimed until
+that commit is pushed and GitHub can allocate runners. At this checkpoint,
+GitHub reports that jobs cannot start because the account billing or spending
+limit requires user correction; this infrastructure failure is not treated as
+a code pass.
