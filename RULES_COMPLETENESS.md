@@ -15,7 +15,10 @@ complete rules or Oracle coverage. The current June 19, 2026 CR / July 28,
 - 156 rules sections indexed
 - 733 glossary entries indexed
 - 425 CR section, keyword-action, and keyword-ability mechanics discovered
-- 16 mechanics under versioned partial contracts and 409 unclassified
+- 47 mechanics under versioned partial contracts and 378 unclassified
+- 543 source-reviewed rule records: 100 executable passes, 365 explicit
+  fail-closed blockers, and 78 definition-only records; 2,757 remain
+  unreviewed
 - 0 rules or mechanics promoted to trusted by the new registry
 - 38,373 Oracle IDs and 41,582 faces scanned
 - 2,957 exact (primarily textless), 15,691 partially lowerable, and 19,725

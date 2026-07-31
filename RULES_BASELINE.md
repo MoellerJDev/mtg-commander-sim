@@ -14,4 +14,14 @@ Implemented rule families include:
 - 802 — attacking multiple players and defender-order blocking
 - 903 — Commander life, command-zone, tax, and commander-damage foundations
 
-The Comprehensive Rules remain authoritative. `ARCHITECTURE.md` documents the implemented subset; uncompiled card semantics route to the arbiter rather than being guessed.
+The conformance ledger additionally source-reviews the CR 400–408 zone
+families, CR 500–514 turn/combat/ending families, and selected CR 120, 210,
+310, 600–609, 614–616, and 704 families. A reviewed family may contain passing,
+definition-only, and explicitly blocked records; review is not a completeness
+claim. Current generated totals are 543 reviewed out of 3,300 rules and 47
+partial out of 425 mechanics.
+
+The Comprehensive Rules remain authoritative. `ARCHITECTURE.md` documents the
+implemented subset. Trusted-only product play fails closed on uncompiled
+material semantics rather than guessing; the neutral arbiter path is retained
+only as a development adapter and is never an AI rules authority.

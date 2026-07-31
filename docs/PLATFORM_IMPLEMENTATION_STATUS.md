@@ -4,11 +4,11 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Repository and integration
 
-- Repository: private `MoellerJDev/mtg-commander-sim`
+- Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/cr-403-battlefield`
+- Active branch: `agent/cr-408-command`
 - Current commit: the commit containing this ledger
-- Active phase: `rules_family_cr_403_battlefield`
+- Active phase: `integrate_rules_backlog_then_server_browser_vertical_slice`
 - Package version: `0.8.0`
 
 ### Pull requests
@@ -35,6 +35,10 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#18](https://github.com/MoellerJDev/mtg-commander-sim/pull/18) | `agent/cr-401-library` | `agent/cr-400-general-zone-identity` | `draft` |
 | [#19](https://github.com/MoellerJDev/mtg-commander-sim/pull/19) | `agent/cr-402-hand` | `agent/cr-401-library` | `draft` |
 | [#20](https://github.com/MoellerJDev/mtg-commander-sim/pull/20) | `agent/cr-403-battlefield` | `agent/cr-402-hand` | `draft` |
+| [#21](https://github.com/MoellerJDev/mtg-commander-sim/pull/21) | `agent/cr-404-graveyard` | `agent/cr-403-battlefield` | `draft` |
+| [#22](https://github.com/MoellerJDev/mtg-commander-sim/pull/22) | `agent/cr-406-exile` | `agent/cr-404-graveyard` | `draft` |
+| [#23](https://github.com/MoellerJDev/mtg-commander-sim/pull/23) | `agent/cr-407-ante` | `agent/cr-406-exile` | `draft` |
+| [#24](https://github.com/MoellerJDev/mtg-commander-sim/pull/24) | `agent/cr-408-command` | `agent/cr-407-ante` | `draft` |
 
 ## Pinned snapshots and coverage
 
@@ -54,9 +58,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 | Milestone | Status | Evidence |
 |---|---|---|
-| Integrated deterministic foundation | `complete` | Both integration PRs and focused CR 512-506 slices merged through ordinary merge commits; main passed the exact-SHA CR 506 matrix. |
+| Integrated deterministic foundation | `integration_checkpoint` | Integration PRs #1-2 and CR 506-512 PRs #3-9 are on main. Completed CR 400-408 and CR 500-505 work remains in draft PRs #10-24 and is frozen pending ordered integration. |
 | Browser Commander MVP | `not_started` | No server/, web/, or migrations/ subsystem is present on this branch. |
-| Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 403 PR #20 is dependency-staged atop CR 402 PR #19, CR 401 PR #18, CR 400 PR #17, CR 405 PR #16, CR 500 PR #15, CR 501 PR #14, CR 502 PR #13, and CR 503 PR #12; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI. |
+| Active Comprehensive Rules snapshot | `active_with_integration_backlog` | The 2026-06-19 corpus and CR 506-512 reviews are on main. The current CR 408 tip reports 543 reviewed records; independent CR 504/505 and the CR 503-to-408 chain will be merged in dependency order before server/browser work. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
 ## Runtime and product boundaries
@@ -78,15 +82,15 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Tests discovered: 3908
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30615647165](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30615647165) — `pass`
+- Baseline CI: [30633146886](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30633146886) — `pass`
 - Compile: `pass`
-- Deterministic tests: `pass_3882`
+- Deterministic tests: `pass_3908`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
 - Four-player protocol demo: `pass`
 - Repository/history/security audit: `pass`
 - Wheel build and clean install: `pass`
 - Replay: `pass_for_seed_20260730_and_native_v3_regressions`
-- Privacy: `pass_for_projected_protocol_cr403_shared_battlefield_and_sanitized_fixtures`
+- Privacy: `pass_for_principal_projection_command_objects_and_sanitized_fixtures`
 - Semantic preflight: `trusted_only_for_two_pinned_exact_lists`
 
 AI/Codex pilot runs are optional client experiments. They are not product, rules, CI, merge, or release gates.
@@ -95,11 +99,11 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 - no authoritative ASGI server, single-writer GameActor, durable persistence, or browser client exists
 - full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete
-- GitHub Actions is not allocating runners for current draft PRs because of an account billing or spending-limit failure; no exact-SHA result may be inferred from those pre-run failures
+- completed rule-family work is distributed across draft PRs 10-24 and must be integrated before the platform pivot
 
 ## Exact next task
 
-Keep dependency-staged CR 403 PR #20 in draft while GitHub cannot allocate runners, and begin CR 404 Graveyard without promoting incomplete graveyard semantics.
+Freeze rule-family expansion at CR 408, run the reproducible merge gate, integrate PRs 11, 10, and 12-24 into main with ordinary green CI, then begin the single server/browser vertical-slice branch.
 
 ## Regeneration
 

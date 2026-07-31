@@ -1,9 +1,13 @@
 # Deck Review MVP implementation status
 
-Last updated: 2026-07-28
+Last updated: 2026-07-31
 
-This document tracks the checked acceptance gates for the private Deck Review
-MVP. It deliberately excludes live game state, pilot memory, capability
+This is a historical checkpoint ledger for the Deck Review MVP that merged in
+PR #2. Current integration and platform status lives in
+`docs/PLATFORM_IMPLEMENTATION_STATUS.md`; totals below are intentionally the
+evidence recorded at each historical checkpoint, not current suite totals.
+The repository is now public. This document deliberately excludes live game
+state, pilot memory, capability
 material, downloaded databases, and provider secrets.
 
 As of the platform integration program, live AI/Codex games, provider identity,
@@ -19,8 +23,8 @@ replay, privacy, action exposure, repository audits, and reproducible builds.
 - Published baseline branch: `main`
 - Published baseline tag: `v0.6.0`
 - Baseline package version: `0.6.0`
-- Current feature branch: `agent/review-mvp`
-- Remote: `origin` → private `MoellerJDev/mtg-commander-sim`
+- Historical feature branch: `agent/review-mvp` (merged by PR #2)
+- Remote: `origin` → public `MoellerJDev/mtg-commander-sim`
 - GitHub authentication: authenticated as `MoellerJDev`; no credential material
   was read or recorded
 - Baseline validation: 113 tests passed locally; Windows/Ubuntu Python

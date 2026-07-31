@@ -3,6 +3,10 @@
 Every mechanic must receive a versioned contract before the generated registry
 may mark it trusted.
 
+The current CR 408 integration tip contains 47 partial/untrusted contracts and
+378 unclassified mechanics. No mechanic is promoted to trusted, and the
+snapshot-complete gate remains false.
+
 A contract records its CR/glossary references, dependencies, zones, objects,
 events, state reads/writes, costs, timing, targets and choices, hidden
 information, APNAP behavior, layer/replacement participation, copy/control/
@@ -107,6 +111,12 @@ stack placement, tap/untap summoning sickness, object-scoped once-per-turn
 history, and sorcery/instant timing. Complete cost and instruction grammar,
 CR 601.2b-i parity, transactional rollback, opponent-made activation choices,
 cost-altering effects, and acquired-ability provenance remain untrusted.
+CR 500–505 trace the ordinary turn, beginning, untap, upkeep, draw, and main
+phase boundaries. CR 400–408 trace the general zone/object model, library,
+hand, battlefield, graveyard, stack, exile, ante exclusion, and public command
+objects. Every contract records exact blockers; these reviews do not imply
+complete extra-turn, phasing, trigger, replacement, casual-variant, or emblem
+coverage.
 
 Run `simctl rules sync` after changing a contract so its hash and status are
 overlaid into `mechanics/registry.json`, then run `simctl rules verify`.

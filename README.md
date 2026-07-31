@@ -3,8 +3,18 @@
 An experimental, deterministic, server-authoritative Commander platform under
 active development. Four-player Free-for-All Commander is the primary product
 target, with a browser client, durable game runtime, exact replay, and
-snapshot-scoped rules enforcement. The current release is a kernel and protocol
-foundation, not a complete implementation of Magic's rules or Oracle corpus.
+snapshot-scoped rules enforcement. The current development line is a kernel and
+protocol foundation, not a complete implementation of Magic's rules or Oracle
+corpus.
+
+Current integration checkpoint: the public repository's `main` branch contains
+the deterministic foundation and reviewed CR 506–512 work. Completed CR
+400–408 and CR 500–505 work is frozen in PRs #10–24 while it is integrated in
+dependency order. The current tip has 3,908 deterministic tests, 543 reviewed
+rule records, and 47 partial mechanic contracts. GitHub Actions is running
+normally. No ASGI server, room service, durable game store, or browser
+application exists yet; those are the next product slice after the backlog is
+merged.
 
 This is a structural rewrite of the earlier two-player duel lab. The server-side game kernel is now separate from:
 
@@ -754,9 +764,9 @@ container isolation when filesystem-level isolation must also be proven.
 - `mtg_commander_sim/semantics.py` — reusable effect-program registry
 - `mtg_commander_sim/mana.py` — conservative mana source parsing/planning
 - `mtg_commander_sim/abilities.py` — explicit Oracle ability/cost extraction and zone authorization
-- `mtg_commander_sim/session.py` — ChatGPT/Codex-friendly façade
+- `mtg_commander_sim/session.py` — deterministic session façade
 - `mtg_commander_sim/service.py` — transport-neutral application boundary
-- `mtg_commander_sim/pilot.py` — LLM callback orchestration and token metrics
+- `mtg_commander_sim/pilot.py` — optional automation-client orchestration and metrics
 - `mtg_commander_sim/profiles.py` — fingerprinted advisory deck profiles
 - `mtg_commander_sim/preflight.py` — trust-aware deck semantic coverage
 - `mtg_commander_sim/shortcuts.py` — validated aggregate loop fixtures
@@ -776,5 +786,5 @@ container isolation when filesystem-level isolation must also be proven.
 Read `ARCHITECTURE.md`, `LLM_PROTOCOL.md`, `PILOT_PROVIDERS.md`,
 `SEMANTIC_PACKS.md`, and `CLIENT_INTEGRATION.md` before extending the engine.
 
-No software license has been selected for this private repository. Possession
-of the source does not grant redistribution or relicensing rights.
+No software license has been selected for this public repository. Public
+visibility does not itself grant redistribution or relicensing rights.

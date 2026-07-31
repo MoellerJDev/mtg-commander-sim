@@ -1,89 +1,88 @@
-# MTG Commander Sim 0.8.0 — combined platform/rules verification
+# MTG Commander Sim 0.8.0 — current verification
 
 Date: 2026-07-31
-Python: 3.11.9
+Implementation commit:
+`a5143ef5629f3e7138104397a9ca15d72558eb59`
+Local environment: Windows, Python 3.11.9
 
-## Compile, tests, and deterministic game evidence
+## Deterministic gate
 
-PASS: `python -m compileall -q mtg_commander_sim tests scripts simctl.py`
+PASS: compilation of package, tests, scripts, and `simctl.py`.
 
-PASS: 3,829 unit/integration tests in 184.906 seconds using the rebuilt compact
-Scryfall database:
+PASS: 3,908 unit/integration tests in 275.465 seconds using a compact SQLite
+database rebuilt from the committed sanitized exact-list fixture.
 
-- 3,300 generated per-rule inventory/source-linkage tests
-- 529 ordinary rules, engine, protocol, replay, privacy, and platform tests
-
-The six new CR 506 tests verify source traceability, the exact empty-combat
-phase boundary, authoritative attacking and defending roles, removal after
-zone/control/phasing/type invalidation, historical-attacker retention, and
-tapping/untapping preservation. Alternate multiplayer options, generic
-effect-created or effect-removed combatants, requirement snapshots, extra
-combats, planeswalker destinations, “alone” provenance, and universal
-combat-relative timing remain blocked.
-
-Generated source linkage is not a claim that every rule has executable semantic
-coverage. The reviewed ledger remains fail-closed about passing, blocked,
-definition-only, and unreviewed cases.
-
-PASS: the trusted-only four-seat micro-pool reached a natural winner with zero
-incorrectly suppressed meaningful windows, passed the seat-projection audit,
-and exact command-replayed.
-
-The seed-20260730 opportunity regression and deterministic four-player
-natural-winner soak were also rerun independently. Both exact-replayed; the
-four-player run retained zero incorrectly suppressed meaningful windows and
-passed the seat-projection audit.
-
-The full-game fixture is rules-runtime and protocol evidence. Its repeated
-micro-pool is not Commander format-legality, deck-quality, or matchup evidence.
-
-## Pinned rules corpus
-
-PASS: `python simctl.py rules verify --root .`
-
-- effective date: 2026-06-19
-- source SHA-256:
-  `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
-- numbered rules verified: 3,300
-- conformance cases verified: 3,300
-- mechanics verified: 425
-- current snapshot complete: false
-
-## Protocol and repository validation
-
-PASS: the four-player protocol demo completed with protocol version 2.1,
-four players, seed 20260728, and compact delta packets smaller than bootstrap.
+The suite includes 3,300 generated source-linkage cases plus 608 executable
+engine, conformance, protocol, replay, privacy, repository, and package tests.
+Generated source linkage is inventory evidence, not rules-correctness evidence.
 
 PASS:
 
-- generated platform status stale check
-- 14 JSON schemas checked
-- complete tracked-source credential and raw-capability scan
-- forbidden runtime/database/build artifact scan
-- reachable-history path and oversized-blob scan
-- sanitized public replay-fixture policy check
+- seed-20260730 decision-opportunity regression
+- zero suppressed meaningful windows
+- deterministic trusted-only four-player natural-winner game
+- exact command replay and authoritative state hashes
+- principal/hidden-information projection
+- CR 408 typed emblem creation and exact-source Daretti trigger replay
+- sanitized four-player protocol demo
 
-The scan covered 262 tracked files and 11,401,521 tracked bytes.
+The micro-pool game is runtime/protocol evidence only. It is not
+Commander-format legality, deck-quality, or matchup evidence.
 
-## Package
+## Pinned sources and generated coverage
 
-PASS: built `mtg_commander_sim-0.8.0-py3-none-any.whl`.
+PASS: `python simctl.py rules verify --root .`
 
-PASS: installed the wheel into a fresh virtual environment; the installed
-package reported version 0.8.0 and its CLI smoke test completed.
+- Comprehensive Rules effective date: 2026-06-19
+- source SHA-256:
+  `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
+- numbered rules/conformance records: 3,300
+- reviewed: 543
+- passing: 100
+- blocked: 365
+- definition-only: 78
+- unreviewed: 2,757
+- mechanics: 47 partial, 378 unclassified, 0 trusted
+- `current_snapshot_complete=false`
 
-## Evidence boundary
+Full Oracle coverage remains 2,957 exact, 15,691 partial, and 19,725
+unresolved out of 38,373 Oracle IDs, with 69,664 material residuals.
+Commander-legal coverage remains 338 exact, 14,354 partial, and 16,930
+unresolved out of 31,622 Oracle IDs, with 61,212 material residuals.
 
-These checks establish the local CR 506 focused branch atop the green CR 507
-main baseline, including source pinning, represented combat-phase roles and
-removal semantics, replay, privacy, action opportunity, packaging, and
-repository gates. They do not establish alternate multiplayer combat options,
-generic effect-created combatants, complete restriction/requirement or timing
-grammar, a production ASGI server, browser client, durable database, complete
-Comprehensive Rules behavior,
-Oracle-corpus semantic closure, Commander deck legality for the micro-pool,
-deck superiority, or statistical matchup evidence.
+## Repository and package
 
-The baseline main commit's exact-SHA GitHub Actions matrix is recorded after
-pull request #8 in run 30614171826. Exact-SHA CI for the focused CR 506 commit is
-not claimed until that commit is pushed.
+PASS:
+
+- platform/rules/mechanics/conformance freshness
+- 14 JSON schemas
+- tracked and reachable-history secret/capability scans
+- private-state fixture and ignored-runtime-artifact policy
+- oversized-object checks
+- repository validation: 303 tracked files, 11,944,931 bytes
+- wheel build
+- fresh-environment wheel installation
+- installed package version and CLI smoke test
+
+## GitHub CI
+
+PASS for exact implementation head
+`a5143ef5629f3e7138104397a9ca15d72558eb59`:
+
+- push run `30633146886`
+- pull-request run `30633164682`
+- Python 3.11 and 3.12
+- Ubuntu and Windows
+- all eight jobs executed repository steps and passed
+
+The repository is public and GitHub runners are currently operating normally.
+Earlier zero-step billing/spending-limit failures on other draft PRs are not
+passes and must be superseded by fresh green CI before those heads merge.
+
+## Claim boundary
+
+These results establish the current CR 408 integration tip, exact-list
+regression behavior, replay, privacy, source pinning, packaging, and repository
+gates. They do not establish a production server, browser client, durable
+database, complete Comprehensive Rules behavior, Oracle-corpus semantic
+closure, deck superiority, or statistical matchup evidence.

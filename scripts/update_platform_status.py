@@ -190,7 +190,8 @@ def render_status(report: dict) -> str:
         "",
         "## Repository and integration",
         "",
-        f"- Repository: private `{report['repository']['name']}`",
+        f"- Repository: {report['repository']['visibility']} "
+        f"`{report['repository']['name']}`",
         f"- Default branch: `{report['repository']['default_branch']}`",
         f"- Active branch: `{integration['branch']}`",
         f"- Current commit: {integration['commit_reference']}",

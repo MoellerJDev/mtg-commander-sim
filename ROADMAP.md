@@ -13,9 +13,18 @@ The generated current ledger is
 
 - [x] merge `agent/review-mvp` into `main` through an ordinary merge commit
 - [x] merge updated `main` into `agent/rules-completeness` without rewriting history
-- retarget and merge the rules branch into `main`
-- retain exact replay, privacy, repository, schema, and packaging gates
-- remove AI-run games and provider identity from product completion criteria
+- [x] retarget and merge the rules branch into `main`
+- [x] retain exact replay, privacy, repository, schema, and packaging gates
+- [x] remove AI-run games and provider identity from product completion criteria
+- [ ] integrate completed CR 504, CR 505, and the CR 503→408 dependency chain
+  from PRs #10–24; broad sequential rules review is frozen at CR 408
+- [ ] verify the resulting `main` under the complete local and GitHub CI gates
+
+The immediate product milestone combines the former phases 1–3 into one
+authoritative server/browser vertical slice. It must prove strict commands,
+idempotency, expected revisions, one serialized game writer, guest room/seat
+flow, principal-scoped WebSocket projection, reconnect, and a four-context
+browser test before broad CR-number traversal resumes.
 
 ## Phase 1 — strict command and domain boundaries
 

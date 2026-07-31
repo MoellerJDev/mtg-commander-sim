@@ -43,6 +43,20 @@
   step, then cleanup, with no next-turn transition before cleanup completes.
 - Added exact command replay and cleanup-discard handoff coverage for that
   structure while retaining the partial CR 513/514 claim boundary.
+- Reviewed ordinary CR 500–505 turn, beginning, untap, upkeep, draw, and main
+  phase boundaries with fail-closed coverage for unsupported extra-turn,
+  phasing, trigger-order, draw-replacement, and main-phase variants.
+- Reviewed CR 400–408 zone boundaries, including logical object identity,
+  library and hand privacy, shared battlefield membership, graveyard/exile
+  visibility, Commander legality rejection of ante cards, and typed public
+  command-zone emblem objects.
+- Raised the current CR 408 integration tip to 3,908 deterministic tests, 543
+  reviewed rule records, and 47 partial mechanic contracts without promoting
+  the incomplete snapshot to trusted.
+- Froze broad sequential CR review at CR 408 while PRs #10–24 are integrated,
+  then prioritized the authoritative server/browser vertical slice.
+- Recorded the repository's change to public visibility. No software license
+  has been selected, and live private game artifacts remain excluded.
 
 ## 0.8.0 — 2026-07-29
 

@@ -15,6 +15,13 @@ automated clients act through a central authoritative server while:
 The key decision is to keep clients untrusted and make the server the sole
 state and rules authority.
 
+Current implementation boundary: `CommanderEngine`, `GameService`, capability
+checks, projection, replay, and protocol 2.1 run in process. The HTTP/WebSocket
+adapter shown below is target architecture, not a deployed server. There is no
+`GameActor`, `GameManager`, guest/session service, room repository, durable
+game database, or browser client in 0.8.0. The next vertical slice must add
+those boundaries without moving transport concerns into the engine.
+
 ## Layered design
 
 ```text

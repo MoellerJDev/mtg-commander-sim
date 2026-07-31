@@ -1,11 +1,13 @@
 MTG Commander Sim 0.8.0
-Package type: private exact-list semantic-closure milestone
-Built: 2026-07-28
+Package type: public experimental deterministic-kernel milestone
+Verified: 2026-07-31
 Card database: ignored local SQLite plus refreshable Scryfall bulk-data importer
 CI data: compact public exact-list JSON fixture, rebuilt during CI
 Live deck source: validated public Moxfield Commander URLs with local cache
 Optional adapters: scripted, manual, subprocess, and isolated Codex clients
 Product target: server-authoritative four-player browser Commander
+Current product boundary: in-process service/protocol; no ASGI server, room service, durable game store, or browser client yet
+Rules checkpoint: 543/3300 reviewed; 47/425 partial mechanics; current snapshot incomplete
 Semantic continuation: replayable private-search frames, exact target plans, and 100/100 pinned-list preflight
 Record lifecycle: explicit pause/finalize/refresh/verify with journal-derived telemetry
 Distribution license: not selected

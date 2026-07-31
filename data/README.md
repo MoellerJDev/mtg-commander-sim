@@ -1,19 +1,30 @@
 # Local card database
 
-The simulator reads a local SQLite database built from Scryfall's Oracle-card and
-rulings bulk files. The database is intentionally not committed to source control.
+The simulator reads a local SQLite database built from Scryfall's Oracle-card
+and rulings bulk files. Databases are ignored local artifacts and are not
+committed to the public repository.
 
-Complete bundle: `scryfall-20260728-compact.sqlite3` is already present here.
+For deterministic tests, rebuild the compact database from the committed
+sanitized fixture:
 
-Source-only checkout: place `scryfall-20260728-compact.sqlite3.gz` in this directory
-and run:
+```bash
+python scripts/build_test_database.py build \
+  --fixture tests/fixtures/scryfall-exact-lists.json \
+  --output data/test-ci.sqlite3
+```
+
+For a complete local corpus, use the bulk-data refresh command documented in
+the root README. A legacy complete bundle may instead place
+`scryfall-20260728-compact.sqlite3.gz` here and run:
 
 ```bash
 python scripts/bootstrap_data.py
 ```
 
-The default runtime path is:
+The legacy default runtime path is:
 
 ```text
 data/scryfall-20260728-compact.sqlite3
 ```
+
+Neither database path is packaged in the wheel.
