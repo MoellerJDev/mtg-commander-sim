@@ -101,11 +101,13 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 438 cases in CR 120, CR 210, CR 310, CR 502, CR 503, CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
+All 452 cases in CR 120, CR 210, CR 310, CR 502, CR 503, CR 504, CR 505, CR 506, CR 507,
+CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
 CR 602, CR 603, CR 604, CR 605, CR 606, CR 607, CR 608, CR 609, CR 614,
-CR 615, and CR 616 are source-reviewed: 61 narrow behavioral or structural rules pass with
-generic executable evidence, 316 are blocked with exact missing dependencies,
-and 61 are definition-only with contract traceability. The remaining 2,862
+CR 615, and CR 616 are source-reviewed: 67 narrow behavioral or structural
+rules pass with generic executable evidence, 322 are blocked with exact missing
+dependencies, and 63 are definition-only with contract traceability. The
+remaining 2,848
 cases are
 unreviewed and
 inventory-only.
@@ -191,6 +193,22 @@ The ordinary boundary and ordering path replay exactly. CR 503.1a remains
 blocked for the complete CR 502 event surface and CR 603.3b two-part process;
 CR 503.2 remains blocked for additional-upkeep scheduling and after-first-
 upkeep casting grammar.
+CR 505.2, 505.6, 505.6a, and 505.6b pass for the represented ordinary
+main-phase boundary: an empty-stack all-player pass advances the phase, a
+nonempty stack resolves without ending it, the active player receives
+priority, ordinary sorcery-speed spells require a true main phase and empty
+stack, and land plays are stackless authoritative actions that consume one
+allowance. The internal `main` marker is one phase-boundary sentinel, not a
+rules substep. Skipped/additional combat and main phases, main-phase ordinal
+identity, Archenemy schemes, Attractions, and complete simultaneous Saga
+counter/replacement/trigger ordering remain blocked.
+CR 504.1 and CR 504.2 pass for the represented draw-step boundary: the active
+player's normal draw or trusted replacement completes without using the stack,
+state-based actions are checked, and waiting semantic and delayed triggers are
+combined into one APNAP/order batch before priority. Empty-library loss,
+multiplayer and duel first-turn modifiers, hidden draw identity, and exact
+ replay have direct evidence. The complete draw-replacement, prevention, and
+continuous-effect interaction corpus remains outside this partial contract.
 CR 506.4b passes for the represented combat-state invariant that tapping or
 untapping an attacking or blocking creature does not remove it from combat.
 The engine also removes represented combatants after zone, control, phasing,

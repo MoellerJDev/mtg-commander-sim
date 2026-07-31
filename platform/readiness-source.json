@@ -3,15 +3,15 @@
   "repository": {
     "default_branch": "main",
     "name": "MoellerJDev/mtg-commander-sim",
-    "visibility": "private"
+    "visibility": "public"
   },
   "integration": {
-    "active_phase": "rules_family_cr_502_untap_step",
+    "active_phase": "integrate_rules_backlog_cr_502",
     "branch": "agent/cr-502-untap-step",
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
-      "focused_branch_base": "b7f4d2e3e909a9571dcc282d1589aafd386f6430",
-      "focused_branch_unique_commits_over_main": 3
+      "focused_branch_base": "cd2597d7c5f633df6bec34c8f0c6ac8024063a6a",
+      "focused_branch_unique_commits_over_main": 2
     },
     "pull_requests": [
       {
@@ -81,29 +81,36 @@
         "base": "main",
         "head": "agent/cr-505-main-phase",
         "number": 10,
-        "state": "draft",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/10"
       },
       {
         "base": "main",
         "head": "agent/cr-504-draw-step",
         "number": 11,
-        "state": "draft",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/11"
       },
       {
         "base": "main",
         "head": "agent/cr-503-upkeep-step",
         "number": 12,
-        "state": "draft",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/12"
       },
       {
-        "base": "agent/cr-503-upkeep-step",
+        "base": "main",
         "head": "agent/cr-502-untap-step",
         "number": 13,
-        "state": "draft",
+        "state": "integration_candidate",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/13"
+      },
+      {
+        "base": "main",
+        "head": "agent/integration-checkpoint",
+        "number": 25,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/25"
       }
     ],
     "tags": [
@@ -138,8 +145,8 @@
     {
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
-      "status": "complete",
-      "evidence": "Both integration PRs and focused CR 512-506 slices merged through ordinary merge commits; main passed the exact-SHA CR 506 matrix."
+      "status": "integration_checkpoint",
+      "evidence": "Integration PRs #1-2, CR 503-512, and the reusable merge gate are on main. CR 502 is the current candidate; the CR 501-to-408 chain remains frozen pending ordered integration."
     },
     {
       "id": "browser_commander_mvp",
@@ -150,8 +157,8 @@
     {
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
-      "status": "active_on_main",
-      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 502 is the current dependency-staged family atop draft CR 503; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI."
+      "status": "active_with_integration_backlog",
+      "evidence": "The 2026-06-19 corpus and reviewed CR 503-512 slices are on main. This candidate combines CR 502 and regenerates the conformance ledger before the remaining dependency chain is integrated."
     },
     {
       "id": "oracle_snapshot",
@@ -175,16 +182,16 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "c8a52711dc9294957fc0f437a4aaeab72da213aa",
+    "baseline_commit": "07226dcbf1934f89e1607e99a5daddbeea27d1c7",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30615647165,
+      "run_id": 30638736337,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30615647165"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30638736337"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "pass_3840",
+      "deterministic_tests": "pass_3851_on_merged_cr503_to_cr505_main; cr502_candidate_pending_exact_gate",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "repository_history_security_audit": "pass",
@@ -197,7 +204,7 @@
   "blockers": [
     "no authoritative ASGI server, single-writer GameActor, durable persistence, or browser client exists",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete",
-    "GitHub Actions is not allocating runners for current draft PRs because of an account billing or spending-limit failure; no exact-SHA result may be inferred from those pre-run failures"
+    "the CR 501-to-408 dependency chain remains in draft pull requests pending ordered integration"
   ],
-  "next_task": "Keep dependency-staged CR 502 PR #13 in draft while GitHub cannot allocate runners, and continue the next bounded rules family without merging or promoting blocked CR 502 behavior."
+  "next_task": "Run the exact CR 502 candidate through the local merge gate and ordinary GitHub matrix, merge PR #13, then integrate PR #14 without resuming broad rules-family work."
 }
