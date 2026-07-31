@@ -1702,7 +1702,7 @@ class CommanderEngine:
         enter_face: str | None = None,
         battle_protector: str | None = None,
         zone_timestamp: int | None = None,
-        position: str = "top",
+        position: str | int = "top",
         reveal_to: Iterable[str] | None = None,
         reason: str = "",
         log: bool = True,
@@ -1715,6 +1715,9 @@ class CommanderEngine:
         card = self.state.cards[object_id]
         requested_destination = destination
         origin = card.zone
+        library_position: str | int | None = None
+        if destination == "library":
+            library_position = self._library_position(position)
         if (
             origin == requested_destination
             and origin not in {"library", "exile", "command"}
@@ -1767,6 +1770,35 @@ class CommanderEngine:
                         "rule": "400.4a",
                     },
                     importance=2,
+                    changed_objects=[card.object_id],
+                    changed_players=[card.owner],
+                )
+            return card
+        if origin == "library" and requested_destination == "library":
+            library = self.state.players[card.owner].zones["library"]
+            if object_id not in library:
+                raise GameRuleError(
+                    "Library card is absent from its owner's library"
+                )
+            library.remove(object_id)
+            library.insert(
+                self._library_insertion_index(
+                    len(library),
+                    library_position,
+                ),
+                object_id,
+            )
+            if log:
+                self._log(
+                    card.owner,
+                    "library.reorder",
+                    f"{card.owner} changed a card's library position.",
+                    {
+                        "position": library_position,
+                        "reason": reason,
+                    },
+                    visibility=[card.owner, "analyst"],
+                    importance=1,
                     changed_objects=[card.object_id],
                     changed_players=[card.owner],
                 )
@@ -1870,10 +1902,13 @@ class CommanderEngine:
         else:
             owner_zone = self.state.players[card.owner].zones[destination]
             if destination == "library":
-                if position == "bottom":
-                    owner_zone.insert(0, object_id)
-                else:
-                    owner_zone.append(object_id)
+                owner_zone.insert(
+                    self._library_insertion_index(
+                        len(owner_zone),
+                        library_position,
+                    ),
+                    object_id,
+                )
                 card.known_to = [card.owner]
                 card.revealed_to = []
             else:
@@ -1928,6 +1963,40 @@ class CommanderEngine:
                 reason=reason,
             )
         return card
+
+    @staticmethod
+    def _library_position(position: str | int) -> str | int:
+        if isinstance(position, bool):
+            raise GameRuleError(
+                "Library position must be top, bottom, or a positive N"
+            )
+        if isinstance(position, int):
+            if position < 1:
+                raise GameRuleError(
+                    "Nth-from-top library position must be positive"
+                )
+            return position
+        normalized = str(position).strip().casefold()
+        if normalized not in {"top", "bottom"}:
+            raise GameRuleError(
+                "Library position must be top, bottom, or a positive N"
+            )
+        return normalized
+
+    @staticmethod
+    def _library_insertion_index(
+        library_size: int,
+        position: str | int | None,
+    ) -> int:
+        if position == "top":
+            return library_size
+        if position == "bottom":
+            return 0
+        if isinstance(position, int):
+            # The internal list stores the top card last. If fewer than N
+            # cards exist, CR 401.7 puts the incoming card on the bottom.
+            return max(0, library_size - position + 1)
+        raise GameRuleError("Validated library position is required")
 
     def _semantic_event_sources(
         self,
@@ -15653,7 +15722,12 @@ class CommanderEngine:
                     "mana-value constraint"
                 )
         destination_spec = str(effect.get("destination") or "hand")
-        position = str(effect.get("destination_position") or "top")
+        position: str | int = effect.get(
+            "destination_position",
+            "top",
+        )
+        if position is None or position == "":
+            position = "top"
         destination = destination_spec
         if destination_spec in {"library_top", "top_of_library"}:
             destination, position = "library", "top"
@@ -18213,7 +18287,11 @@ class CommanderEngine:
                     if "tapped" in effect
                     else None
                 ),
-                position=str(effect.get("position") or "top"),
+                position=(
+                    effect["position"]
+                    if effect.get("position") is not None
+                    else "top"
+                ),
                 reason=reason,
                 semantic_events=True,
             )
@@ -18280,7 +18358,11 @@ class CommanderEngine:
                     if "tapped" in effect
                     else None
                 ),
-                position=str(effect.get("position") or "top"),
+                position=(
+                    effect["position"]
+                    if effect.get("position") is not None
+                    else "top"
+                ),
                 reason=reason,
                 semantic_events=True,
             )
@@ -19961,8 +20043,24 @@ class CommanderEngine:
         if op == "look_top":
             seat = str(effect.get("player") or actor)
             viewer = str(effect.get("viewer") or actor)
-            count = int(effect.get("count", 1))
-            ids = list(reversed(self.state.players[seat].zones["library"][-count:]))
+            self._require_seat(seat, in_game=True)
+            self._require_seat(viewer, in_game=True)
+            try:
+                count = int(effect.get("count", 1))
+            except (TypeError, ValueError) as exc:
+                raise GameRuleError(
+                    "Library look count must be an integer"
+                ) from exc
+            if count < 0:
+                raise GameRuleError(
+                    "Library look count cannot be negative"
+                )
+            library = self.state.players[seat].zones["library"]
+            ids = (
+                list(reversed(library[-count:]))
+                if count
+                else []
+            )
             for oid in ids:
                 card = self.state.cards[oid]
                 card.known_to = sorted(set(card.known_to).union({viewer}))
@@ -19971,11 +20069,30 @@ class CommanderEngine:
         if op == "reorder_top":
             seat = str(effect.get("player") or actor)
             viewer = str(effect.get("viewer") or actor)
+            self._require_seat(seat, in_game=True)
+            self._require_seat(viewer, in_game=True)
             values = list(effect.get("cards") or [])  # top-first
             ids = [self._resolve_object(viewer, str(value), zones={"library"}).object_id for value in values]
             library = self.state.players[seat].zones["library"]
-            if any(oid not in library or viewer not in self.state.cards[oid].known_to for oid in ids):
-                raise GameRuleError("Can only reorder known cards currently in that library")
+            if len(ids) != len(set(ids)):
+                raise GameRuleError(
+                    "The same library card cannot be reordered twice"
+                )
+            current_top = (
+                list(reversed(library[-len(ids):]))
+                if ids
+                else []
+            )
+            if (
+                set(ids) != set(current_top)
+                or any(
+                    viewer not in self.state.cards[oid].known_to
+                    for oid in ids
+                )
+            ):
+                raise GameRuleError(
+                    "Can only reorder the exact known cards currently on top"
+                )
             for oid in ids:
                 library.remove(oid)
             # Internal library order stores top at the end.

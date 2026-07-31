@@ -25425,21 +25425,25 @@
       "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-401",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_library_rules.LibraryRuleTests.test_contract_traces_every_cr_401_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/library.json"
+      ],
+      "notes": [
+        "Section heading; CR 401.1-7 carry the structural and behavioral library requirements."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "401",
       "rule_text_sha256": "dc20b3d5d2cddf82fad332821ca5e9a4efdcede4a273aa193d2b495bdcc92825",
       "schema_version": 1,
@@ -25448,26 +25452,40 @@
         "end_line": 1993,
         "start_line": 1992
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-401.1",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "structural",
+      "covered_scenarios": [
+        "positive",
+        "multiplayer",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "401"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_library_rules.LibraryRuleTests.test_deck_cards_initialize_in_library_before_opening_draws"
+      ],
+      "implementation_components": [
+        "CommanderEngine.create",
+        "PlayerState.zones",
+        "CommanderEngine.draw"
+      ],
+      "notes": [
+        "Every noncommander deck card is initialized in its owner's library before opening-hand draws. Remaining library cards retain their initial logical incarnation, while drawn opening cards record the library-to-hand transition; the Commander replacement is separately represented by command-zone initialization."
+      ],
+      "required_scenarios": [
+        "positive",
+        "multiplayer",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "401.1",
       "rule_text_sha256": "f1af92b9e85cefc145811f8ae5bb4a93dd0913a7a2048827bd377982a07e7faa",
       "schema_version": 1,
@@ -25476,26 +25494,48 @@
         "end_line": 1995,
         "start_line": 1994
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-401.2",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "structural",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "401"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_library_rules.LibraryRuleTests.test_library_order_is_hidden_but_every_count_is_public",
+        "tests.test_library_rules.LibraryRuleTests.test_look_top_zero_is_empty_and_negative_fails_atomically",
+        "tests.test_library_rules.LibraryRuleTests.test_reorder_requires_the_exact_known_current_top_set",
+        "tests.test_library_rules.LibraryRuleTests.test_shuffle_forgets_known_library_positions"
+      ],
+      "implementation_components": [
+        "PlayerState.zones",
+        "StateProjector._snapshot",
+        "CommanderEngine.apply_effect",
+        "CommanderEngine.shuffle_library"
+      ],
+      "notes": [
+        "Each library is one authoritative ordered list whose identities and order are absent from ordinary seat projections. Only represented effects mutate it. A zero-card look now returns no cards rather than exposing the whole library, malformed counts fail before mutation, reorder_top requires the exact known current top group, and shuffle clears tracked positions."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "401.2",
       "rule_text_sha256": "14632fce0a96dad20b127644fead14a9bdcc221ccdced0161460a980f5f542c1",
       "schema_version": 1,
@@ -25504,26 +25544,38 @@
         "end_line": 1997,
         "start_line": 1996
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-401.3",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "multiplayer",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "401"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_library_rules.LibraryRuleTests.test_library_order_is_hidden_but_every_count_is_public"
+      ],
+      "implementation_components": [
+        "StateProjector._snapshot"
+      ],
+      "notes": [
+        "Every seat projection contains lib_n for every active or eliminated player while omitting unauthorized card identities and ordering."
+      ],
+      "required_scenarios": [
+        "positive",
+        "multiplayer",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "401.3",
       "rule_text_sha256": "24beaa36bd6c7e14e6d39ca1cb3fb1355ed8ae71d11585647421c9d036959d91",
       "schema_version": 1,
@@ -25532,26 +25584,48 @@
         "end_line": 1999,
         "start_line": 1998
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "generic_simultaneous_library_insertion_owner_order_choice_missing",
+        "multi_owner_secret_order_collection_missing",
+        "complete_ordered_library_destination_grammar_missing"
       ],
       "case_id": "cr-401.4",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "401"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_sylvan_library_draws_two_and_enforces_life_or_top_choices",
+        "tests.test_library_rules.LibraryRuleTests.test_reorder_requires_the_exact_known_current_top_set"
+      ],
+      "implementation_components": [
+        "CommanderEngine._move_cards_simultaneously",
+        "CommanderEngine._complete_semantic_choice",
+        "CommanderEngine.move_card"
+      ],
+      "notes": [
+        "Sylvan Library has an exact owner-ordered top return and reorder_top accepts an explicit top-first group. There is no generic owner-scoped choice when an arbitrary effect puts two or more cards into the same library position simultaneously, particularly for multiple owners, so the general rule remains blocked."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "401.4",
       "rule_text_sha256": "442f419f0d8c411fe8ee8b390d50a8a2c43f286d05234de135894bca0355d477",
       "schema_version": 1,
@@ -25560,26 +25634,48 @@
         "end_line": 2001,
         "start_line": 2000
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "continuous_top_card_reveal_and_look_permissions_missing",
+        "top_visibility_freeze_during_cast_activation_and_special_action_missing",
+        "complete_special_action_procedure_missing"
       ],
       "case_id": "cr-401.5",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "401"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_exact_deck_interactions.ExactDeckInteractionFamilyTests.test_senseis_divining_top_reorders_and_draws_to_library",
+        "tests.test_casting_spells_rules.CastingSpellRuleTests.test_failed_cast_submission_restores_every_partial_payment"
+      ],
+      "implementation_components": [
+        "CommanderEngine.apply_effect",
+        "CommanderEngine._cast",
+        "CommanderEngine._activate",
+        "StateProjector._snapshot"
+      ],
+      "notes": [
+        "One-shot look and reorder effects are scoped and hidden correctly, but continuous top-card reveal/look permissions are not represented. Consequently the engine cannot freeze the newly exposed top card across every casting, activation, or special-action procedure."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "401.5",
       "rule_text_sha256": "b5eb36f522aefcd6dd1993439e5c19d1ad6518d37b82d3eb1c207fd1eaf4eed8",
       "schema_version": 1,
@@ -25588,26 +25684,47 @@
         "end_line": 2003,
         "start_line": 2002
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "continuous_revealed_top_state_missing",
+        "reveal_continuity_transition_identity_missing",
+        "top_card_special_new_object_replay_missing"
       ],
       "case_id": "cr-401.6",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "401"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_library_rules.LibraryRuleTests.test_shuffle_forgets_known_library_positions",
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_incarnation_counter_is_monotonic_under_zone_mutation"
+      ],
+      "implementation_components": [
+        "CardInstance.logical_object_id",
+        "CardInstance.known_to",
+        "CardInstance.revealed_to",
+        "StateProjector._card_visible"
+      ],
+      "notes": [
+        "Shuffle correctly removes tracked knowledge, and ordinary zone changes allocate new logical incarnations. The separate CR 401.6 identity transition for a top card that stops and later resumes being continuously revealed is not represented."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "401.6",
       "rule_text_sha256": "45d7f289e5f4788ac819e08231c5c1667e9f25d7d93804659056b014ad2f0b88",
       "schema_version": 1,
@@ -25616,26 +25733,43 @@
         "end_line": 2005,
         "start_line": 2004
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-401.7",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "401"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_library_rules.LibraryRuleTests.test_nth_from_top_and_short_library_fallback_are_generic"
+      ],
+      "implementation_components": [
+        "CommanderEngine._library_position",
+        "CommanderEngine._library_insertion_index",
+        "CommanderEngine.move_card",
+        "CommanderEngine.apply_effect"
+      ],
+      "notes": [
+        "The generic library destination accepts any positive N. It inserts with exactly N-1 cards above the card, uses the bottom when the pre-insertion library contains fewer than N cards, rejects invalid positions before mutation, and preserves logical identity when an effect only repositions a card within the same library."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "401.7",
       "rule_text_sha256": "3280fa2cce8f87376a7b0eba30b4c56eb75a5e6fad4c63c5564c799ec4da248d",
       "schema_version": 1,
@@ -25644,7 +25778,7 @@
         "end_line": 2007,
         "start_line": 2006
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",

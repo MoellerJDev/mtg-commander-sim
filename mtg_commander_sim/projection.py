@@ -250,11 +250,14 @@ class StateProjector:
                 summary["hand"] = self._zone(p.zones["hand"], principal)
                 known_top = []
                 if seat is not None:
-                    known_top = [
-                        self.state.cards[oid]
-                        for oid in reversed(p.zones["library"])
-                        if seat in self.state.cards[oid].known_to
-                    ]
+                    for object_id in reversed(p.zones["library"]):
+                        card = self.state.cards[object_id]
+                        if (
+                            seat not in card.known_to
+                            and seat not in card.revealed_to
+                        ):
+                            break
+                        known_top.append(card)
                 if known_top:
                     summary["known_top"] = [self._obj(card, principal) for card in known_top[:5]]
             elif seat is not None:

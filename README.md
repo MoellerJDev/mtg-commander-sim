@@ -182,6 +182,13 @@ generated documentation fixtures with bearer capabilities redacted. See
   cannot enter the battlefield, while the complete CR 400.7 exception matrix,
   special command-zone objects, sideboards, and whole-zone instruction
   grammar remain blocked
+- source-reviewed CR 401 library boundaries: deck cards initialize in their
+  owners' libraries, counts are public while identity/order remain
+  seat-scoped, look/reorder/shuffle paths preserve hidden information, and
+  positive Nth-from-top placement falls back to the bottom of a short library;
+  zero-card looks no longer expose the entire library and stale known cards
+  cannot be pulled to the top, while simultaneous owner ordering, continuous
+  top reveal/look, and reveal-continuity identity remain blocked
 - source-reviewed CR 405 stack structure: new objects are placed on top,
   complete priority rounds resolve only the top object, direct effects,
   represented static abilities, and represented state actions bypass the
@@ -333,9 +340,9 @@ python simctl.py rules conformance --root .
 ```
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
-generated source-linkage tests. Of those cases, 501 are source-reviewed:
-82 have narrow executable semantic evidence, 350 are explicitly blocked, and
-69 are definition-only; 2,799 remain unreviewed. A generated inventory test
+generated source-linkage tests. Of those cases, 509 are source-reviewed:
+86 have narrow executable semantic evidence, 353 are explicitly blocked, and
+70 are definition-only; 2,791 remain unreviewed. A generated inventory test
 cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
 invalidation, and reporting policy.
 
@@ -363,6 +370,15 @@ visible only to their owner or another explicitly authorized viewer. Complete
 special-object command-zone rules, the remaining new-object exceptions,
 sideboards and wish effects, and generic whole-zone instructions remain
 fail-closed or explicitly blocked.
+
+The library kernel keeps the top at the end of one authoritative per-player
+list while projecting only a public count and a contiguous, explicitly known
+top group. `look_top` rejects negative or malformed counts and treats zero as
+an empty look; `reorder_top` validates the exact current known group before
+mutation. Moving a card to a positive Nth-from-top position is generic, with CR
+401.7's bottom fallback for short libraries, and repositioning within the same
+library preserves logical identity. Continuous top-card permissions and the
+simultaneous multi-card owner-order choice remain explicit blockers.
 
 Each new zone incarnation also receives a serialized timestamp moment.
 Objects entering a destination simultaneously share that moment. Battlefield

@@ -1,5 +1,5 @@
 {
-  "contract_count": 40,
+  "contract_count": 41,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -144,6 +144,12 @@
       "path": "mechanics/contracts/handling-triggered-abilities.json",
       "sha256": "c4ef9db1a0beb241d0ab314d810bb40bc1e1782e935ae00ba855a7f05c21fb02",
       "version": 2
+    },
+    {
+      "mechanic_id": "cr-401-library",
+      "path": "mechanics/contracts/library.json",
+      "sha256": "17b0c15bcad39e8fd2c49caa402bdc5d784021eec20177b25feba3318e43deb8",
+      "version": 1
     },
     {
       "mechanic_id": "cr-607-linked-abilities",
@@ -5969,17 +5975,37 @@
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/library.json",
+      "contract_sha256": "17b0c15bcad39e8fd2c49caa402bdc5d784021eec20177b25feba3318e43deb8",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine.create, move_card library insertion, shuffle_library, look_top/reorder_top effects, and StateProjector library count/knowledge projection",
+      "implementation_version": "library-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "complete owner-secret ordering when two or more cards are put into one library position simultaneously is not represented",
+        "continuous play-with-top-revealed and may-look-at-top permissions are not represented",
+        "top-card visibility is not frozen across every CR 601, CR 602, and CR 116 procedure",
+        "a top card that stops and resumes being revealed does not receive the special CR 401.6 new-object identity",
+        "complete generic Oracle grammar for every library-ordering instruction remains incomplete"
+      ],
       "mechanic_id": "cr-401-library",
       "official_name": "Library",
       "rule_references": [
         "401"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_401_rule",
+        "test_deck_cards_initialize_in_library_before_opening_draws",
+        "test_library_order_is_hidden_but_every_count_is_public",
+        "test_look_top_zero_is_empty_and_negative_fails_atomically",
+        "test_reorder_requires_the_exact_known_current_top_set",
+        "test_nth_from_top_and_short_library_fallback_are_generic",
+        "test_shuffle_forgets_known_library_positions",
+        "test_senseis_divining_top_reorders_and_draws_to_library",
+        "test_top_library_knowledge_and_reorder"
+      ],
       "trust_level": "untrusted"
     },
     {
