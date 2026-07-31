@@ -6,9 +6,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/cr-502-untap-step`
+- Active branch: `agent/cr-501-beginning-phase`
 - Current commit: the commit containing this ledger
-- Active phase: `rules_family_cr_502_untap_step`
+- Active phase: `rules_family_cr_501_beginning_phase`
 - Package version: `0.8.0`
 
 ### Pull requests
@@ -37,8 +37,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 - Rules manifest present on this branch: yes
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
-- Rules cases: blocked=316, definition_only=61, passing=61, total=3300, unreviewed=2862
-- Mechanics: status_counts={'partial': 37, 'unclassified': 388}, total=425, trusted=0
+- Rules cases: blocked=316, definition_only=62, passing=62, total=3300, unreviewed=2860
+- Mechanics: status_counts={'partial': 38, 'unclassified': 387}, total=425, trusted=0
 - Oracle coverage: material_residuals=69664, status_counts={'exact': 2957, 'partial': 15691, 'unresolved': 19725}, total=38373
 - Commander-legal Oracle coverage: material_residuals=61212, status_counts={'exact': 338, 'partial': 14354, 'unresolved': 16930}, total=31622
 - Current rules/Oracle snapshot complete: no
@@ -49,7 +49,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 |---|---|---|
 | Integrated deterministic foundation | `complete` | Both integration PRs and focused CR 512-506 slices merged through ordinary merge commits; main passed the exact-SHA CR 506 matrix. |
 | Browser Commander MVP | `not_started` | No server/, web/, or migrations/ subsystem is present on this branch. |
-| Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 502 is the current dependency-staged family atop draft CR 503; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI. |
+| Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 501 is dependency-staged atop draft CR 502 PR #13 and CR 503 PR #12; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
 ## Runtime and product boundaries
@@ -69,11 +69,11 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 3840
+- Tests discovered: 3843
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
 - Baseline CI: [30615647165](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30615647165) — `pass`
 - Compile: `pass`
-- Deterministic tests: `pass_3840`
+- Deterministic tests: `pass_3843`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
 - Four-player protocol demo: `pass`
 - Repository/history/security audit: `pass`
@@ -92,7 +92,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Keep dependency-staged CR 502 PR #13 in draft while GitHub cannot allocate runners, and continue the next bounded rules family without merging or promoting blocked CR 502 behavior.
+Commit the green dependency-staged CR 501 beginning-phase conformance slice atop CR 502, publish a draft PR, and require real exact-SHA CI before any merge or broader turn-structure claim.
 
 ## Regeneration
 

@@ -101,11 +101,11 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 438 cases in CR 120, CR 210, CR 310, CR 502, CR 503, CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
+All 440 cases in CR 120, CR 210, CR 310, CR 501, CR 502, CR 503, CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
 CR 602, CR 603, CR 604, CR 605, CR 606, CR 607, CR 608, CR 609, CR 614,
-CR 615, and CR 616 are source-reviewed: 61 narrow behavioral or structural rules pass with
+CR 615, and CR 616 are source-reviewed: 62 narrow behavioral or structural rules pass with
 generic executable evidence, 316 are blocked with exact missing dependencies,
-and 61 are definition-only with contract traceability. The remaining 2,862
+and 62 are definition-only with contract traceability. The remaining 2,860
 cases are
 unreviewed and
 inventory-only.
@@ -175,6 +175,12 @@ frozen proposals, and opponent-made choices remain blocked.
 CR 600 contains only the General section heading. It is source-reviewed as a
 definition-only taxonomy record linked to the dependent CR 601-609 contracts;
 it makes no independent engine-behavior claim.
+CR 501.1 passes for the ordinary beginning-phase structure. The authoritative
+turn table contains untap, upkeep, then draw in that order; skipping the first
+player's duel draw action does not skip the draw step, and the transition into
+precombat main exact-replays. Generic extra or skipped phases and steps remain
+separate CR 500 dependencies, and the three component-step contracts retain
+their own explicit blockers.
 CR 502 records ordinary simultaneous, stackless active-player untaps,
 represented stun and one-shot non-untap handling, and exact replay of a held
 untap trigger into upkeep. A permanent with phasing and an active global

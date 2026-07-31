@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-501-beginning-phase",
+  "official_name": "Beginning Phase",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "501",
+    "501.1"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "turn-structure",
+    "cr-502-untap-step",
+    "cr-503-upkeep-step",
+    "draw-step",
+    "priority",
+    "triggered-abilities",
+    "state-based-actions",
+    "multiplayer",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "hand",
+      "library",
+      "stack"
+    ],
+    "objects": [
+      "active turn",
+      "untap step",
+      "upkeep step",
+      "draw step"
+    ],
+    "events": [
+      "beginning phase starts with untap",
+      "untap step completes without priority",
+      "upkeep step begins",
+      "upkeep priority window completes",
+      "draw step begins even when the turn-one draw is skipped",
+      "draw-step priority completes",
+      "precombat main phase begins"
+    ],
+    "state_reads": [
+      "current phase and step",
+      "turn sequence",
+      "active player",
+      "player count and format profile",
+      "stack, pending decisions, and priority state"
+    ],
+    "state_writes": [
+      "phase and step",
+      "represented untap results",
+      "represented draw result",
+      "priority player and pass state"
+    ],
+    "costs": [],
+    "timing": [
+      "the ordinary beginning phase contains untap, upkeep, and draw in that order",
+      "skipping the first player's draw action does not skip the draw step",
+      "precombat main cannot begin before the draw step completes"
+    ],
+    "targets": [],
+    "choices": [
+      "choices inside the three component steps are delegated to their step contracts"
+    ],
+    "hidden_information": [
+      "the phase structure itself reveals no hidden information",
+      "draw visibility remains governed by the draw-step and projection rules"
+    ],
+    "apnap": [
+      "priority and trigger ordering inside the component steps are delegated to those step contracts"
+    ],
+    "layers": [
+      "continuous effects do not alter the ordinary three-step phase structure unless a separately supported effect changes turn structure"
+    ],
+    "replacement_effects": [
+      "untap and draw replacements are delegated to their component-step and replacement-effect contracts"
+    ],
+    "copy": [
+      "copy status does not alter the ordinary three-step phase structure"
+    ],
+    "control_change": [
+      "control changes do not alter the ordinary three-step phase structure"
+    ],
+    "zone_change": [
+      "zone changes within the phase are handled by the component step contracts"
+    ],
+    "source_leaves": [
+      "source departure does not alter the ordinary three-step phase structure"
+    ]
+  },
+  "variants": [
+    "ordinary untap, upkeep, and draw sequence",
+    "turn-one draw action skipped while draw step still occurs",
+    "multiplayer first player draws on turn one",
+    "unsupported added beginning phase",
+    "unsupported added or skipped beginning-phase step"
+  ],
+  "witness_cards": [
+    {
+      "name": "Sphinx of the Second Sun",
+      "oracle_id": "516101be-be39-4d84-8fee-d8a79930dd0a"
+    }
+  ],
+  "rulings": [
+    "Sphinx of the Second Sun — 2020-11-10 — The additional beginning phase has the ordinary untap, upkeep, and draw behavior.",
+    "Sphinx of the Second Sun — 2020-11-10 — After the additional beginning phase, the game normally proceeds to the ending phase."
+  ],
+  "test_ids": [
+    "test_contract_traces_every_cr_501_rule",
+    "test_beginning_phase_has_exactly_untap_upkeep_then_draw",
+    "test_turn_one_skips_only_the_draw_action_and_replays_phase_order"
+  ],
+  "implementation": {
+    "component": "TURN_STEPS and CommanderEngine turn start, step-entry, step-advance, draw, priority, and precombat-main paths",
+    "version": "beginning-phase-v1"
+  },
+  "known_blockers": [
+    "complete untap behavior remains bounded by the partial CR 502 contract",
+    "complete upkeep behavior remains bounded by the partial CR 503 contract",
+    "the CR 504 draw-step family has not been integrated into this dependency stack",
+    "generic extra-phase, extra-step, and skipped-phase or skipped-step scheduling under CR 500.8-11 is not implemented",
+    "complete replacement, trigger, state-action, APNAP, hidden-information, multiplayer, and replay interactions inside the component steps remain incomplete"
+  ],
+  "review_status": "draft"
+}

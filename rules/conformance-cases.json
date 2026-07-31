@@ -27007,21 +27007,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-501",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_beginning_phase_rules.BeginningPhaseRuleTests.test_contract_traces_every_cr_501_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/beginning-phase.json"
+      ],
+      "notes": [
+        "Section heading; CR 501.1 carries the executable three-step phase structure."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "501",
       "rule_text_sha256": "4ef686ca36cf78397d7a80914d122c32ed2a198dc9008b46578fc87d516052c0",
       "schema_version": 1,
@@ -27030,26 +27034,42 @@
         "end_line": 2143,
         "start_line": 2142
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-501.1",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "structural",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "501"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_beginning_phase_rules.BeginningPhaseRuleTests.test_beginning_phase_has_exactly_untap_upkeep_then_draw",
+        "tests.test_beginning_phase_rules.BeginningPhaseRuleTests.test_turn_one_skips_only_the_draw_action_and_replays_phase_order"
+      ],
+      "implementation_components": [
+        "TURN_STEPS",
+        "CommanderEngine._start_turn",
+        "CommanderEngine._enter_step",
+        "CommanderEngine._advance_step"
+      ],
+      "notes": [
+        "The authoritative turn table contains exactly untap, upkeep, then draw for the ordinary beginning phase. A duel turn-one draw skip suppresses only the draw action, not the draw step, and the complete phase transition into precombat main command-replays exactly. Added or skipped phases and steps remain separate CR 500 dependencies."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "501.1",
       "rule_text_sha256": "75c12eb7db6dbe70d1cd6cdb659dacf0ab7e0b0983ab4f925b5b20294ba6ee75",
       "schema_version": 1,
@@ -27058,7 +27078,7 @@
         "end_line": 2145,
         "start_line": 2144
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "static_traceability",

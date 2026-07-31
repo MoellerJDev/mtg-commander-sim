@@ -10,7 +10,7 @@ or provider session data.
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/cr-502-untap-step`
+- Active branch: `agent/cr-501-beginning-phase`
 - Stage A merge commit on `main`:
   `bd89201be44de85aa9b85fcc9f0baacb0ee76dbe`
 - Stage A PR:
@@ -28,7 +28,8 @@ CR 505 PR #10 and CR 504 PR #11 are independent drafts. CR 503 PR #12 is the
 dependency parent for CR 502 PR #13. PR #13 is a dependency-staged draft based
 on `agent/cr-503-upkeep-step`. Their jobs did not receive runners because
 GitHub reported an account billing or spending-limit failure; those pre-run
-failures are neither code passes nor code failures.
+failures are neither code passes nor code failures. The current CR 501 branch
+is dependency-staged on CR 502 while that external blocker persists.
 
 ## Deterministic product boundary
 
@@ -63,23 +64,23 @@ It generates one source-linked conformance case for each of 3,300 numbered
 rules and preserves reviewed status only while the source and rule-text hashes
 remain unchanged.
 
-Current reviewed inventory after the CR 502 synchronization:
+Current reviewed inventory after the CR 501 synchronization:
 
-- 438 reviewed cases
-- 61 executable semantic passes
+- 440 reviewed cases
+- 62 executable semantic passes
 - 316 reviewed blocked cases
-- 61 definition-only cases
-- 2,862 unreviewed inventory cases
+- 62 definition-only cases
+- 2,860 unreviewed inventory cases
 - 425 discovered mechanics
-- 37 partial/untrusted mechanic contracts
-- 388 unclassified mechanics
+- 38 partial/untrusted mechanic contracts
+- 387 unclassified mechanics
 - 0 corpus-wide trusted mechanics
 
 Implemented reviewed families include narrow contracts for damage, defense,
 Battles, state-based actions, replacement/prevention ordering, effects,
 resolution, linked abilities, loyalty abilities, mana abilities, static and
-triggered abilities, casting, activating abilities, untap, upkeep, end step,
-cleanup,
+triggered abilities, casting, activating abilities, beginning phase, untap,
+upkeep, end step, cleanup,
 logical zone incarnations, timestamps, World, token/copy lifecycle, and
 maximum counters. These are partial family implementations, not full rules
 coverage.
@@ -112,7 +113,7 @@ Stage A exact evidence:
 - deterministic four-player micro-pool reached a natural winner with zero
   suppressed meaningful windows, passed seat projection, and exact-replayed
 
-The focused CR 502 local test gate passed atop the green CR 503 dependency:
+The focused CR 501 local test gate passed atop the green CR 502 dependency:
 
 - generated platform, rules, mechanics, and Oracle status checks
 - all noninventory and all generated per-rule tests
@@ -121,23 +122,22 @@ The focused CR 502 local test gate passed atop the green CR 503 dependency:
 - protocol demo and packet benchmark
 - repository/history/secret/artifact scans
 - wheel build, clean installation, imported version, and CLI smoke
-- the six focused CR 502 source/untap/restriction/fail-closed/trigger/replay
-  tests
+- the three focused CR 501 source/phase-order/turn-one-draw/replay tests
 - exact-SHA four-job GitHub Actions for the focused commit remains pending
   until commit and push
 
-The local test gate ran 3,840 tests in 189.407 seconds, verified all 3,300 pinned
+The local test gate ran 3,843 tests in 187.154 seconds, verified all 3,300 pinned
 rules cases and 425 mechanics, checked 14 schemas and repository history,
 completed the protocol demo, and built and clean-installed the wheel. The
 seed-20260730 and four-player natural-winner regressions were independently
 rerun with exact replay and zero suppressed meaningful windows. The repository
-scan covered 271 tracked files and 11,512,955 bytes. Main commit
+scan covered 274 tracked files and 11,527,913 bytes. Main commit
 `c8a52711dc9294957fc0f437a4aaeab72da213aa` already passed run 30615647165;
-CR 502 implementation commit
-`8f21e6ee919644120e9a1ac37fcd630af4d56655` produced push run 30620985919
-and pull-request run 30621010266. All eight jobs had `runner_id=0`, zero
-steps, and GitHub's billing/spending-limit annotation. No exact-SHA CI pass is
-claimed for the focused branch until its jobs receive runners and pass.
+CR 502 PR head `6f0696b267e06555ef028830f37315651f51de46` produced push run
+30621129920 and pull-request run 30621133309. All eight jobs had
+`runner_id=0`, zero steps, and GitHub's billing/spending-limit annotation. No
+exact-SHA CI pass is claimed for the focused branches until their jobs receive
+runners and pass.
 
 ## Evidence boundaries
 
@@ -150,8 +150,9 @@ claimed for the focused branch until its jobs receive runners and pass.
 
 ## Exact next step
 
-Keep dependency-staged CR 502 PR #13 in draft while GitHub Actions cannot
-allocate runners, and continue the next bounded rules family. CR 502 remains
-partial: direct and indirect phasing, day/night, shared-team turns, arbitrary
-untap selection, complete replacement ordering, and universal untap-trigger
-production are blocked. Do not merge or promote those behaviors.
+Commit and publish the green CR 501 focused branch as a dependency-staged
+draft based on `agent/cr-502-untap-step`, then inspect its exact-SHA matrix.
+CR 501.1 passes only for the ordinary untap/upkeep/draw structure. Generic
+additional or skipped phase and step scheduling and the partial CR 502-504
+component behavior remain dependencies. Do not merge while GitHub Actions
+cannot allocate runners.

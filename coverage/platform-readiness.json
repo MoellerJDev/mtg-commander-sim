@@ -10,11 +10,11 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "rules_family_cr_502_untap_step",
-    "branch": "agent/cr-502-untap-step",
+    "active_phase": "rules_family_cr_501_beginning_phase",
+    "branch": "agent/cr-501-beginning-phase",
     "branch_ancestry": {
-      "focused_branch_base": "b7f4d2e3e909a9571dcc282d1589aafd386f6430",
-      "focused_branch_unique_commits_over_main": 3
+      "focused_branch_base": "6f0696b267e06555ef028830f37315651f51de46",
+      "focused_branch_unique_commits_over_main": 4
     },
     "commit_reference": "the commit containing this ledger",
     "pull_requests": [
@@ -135,7 +135,7 @@
       "status": "not_started"
     },
     {
-      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 502 is the current dependency-staged family atop draft CR 503; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI.",
+      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 501 is dependency-staged atop draft CR 502 PR #13 and CR 503 PR #12; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI.",
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main"
@@ -147,7 +147,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Keep dependency-staged CR 502 PR #13 in draft while GitHub cannot allocate runners, and continue the next bounded rules family without merging or promoting blocked CR 502 behavior.",
+  "next_task": "Commit the green dependency-staged CR 501 beginning-phase conformance slice atop CR 502, publish a draft PR, and require real exact-SHA CI before any merge or broader turn-structure claim.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -187,8 +187,8 @@
     "manifest_present": true,
     "mechanics": {
       "status_counts": {
-        "partial": 37,
-        "unclassified": 388
+        "partial": 38,
+        "unclassified": 387
       },
       "total": 425,
       "trusted": 0
@@ -204,10 +204,10 @@
     },
     "rules": {
       "blocked": 316,
-      "definition_only": 61,
-      "passing": 61,
+      "definition_only": 62,
+      "passing": 62,
       "total": 3300,
-      "unreviewed": 2862
+      "unreviewed": 2860
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -230,7 +230,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 3840,
+    "deterministic_cases_discovered": 3843,
     "migration_files": 0,
     "schema_files": 14,
     "server_files": 0,
@@ -247,7 +247,7 @@
     "local": {
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "pass_3840",
+      "deterministic_tests": "pass_3843",
       "four_player_protocol_demo": "pass",
       "repository_history_security_audit": "pass",
       "wheel_build_and_clean_install": "pass"

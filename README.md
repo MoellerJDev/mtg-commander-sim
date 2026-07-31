@@ -175,6 +175,11 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 501 beginning-phase structure: the ordinary turn table
+  contains untap, upkeep, then draw; a turn-one draw skip suppresses only the
+  draw action rather than the draw step, and the phase transition exact-
+  replays into precombat main; added or skipped phases and steps remain CR 500
+  dependencies
 - source-reviewed CR 502 untap boundary: ordinary untaps, stun replacement,
   represented one-shot prohibitions, stackless trigger holding, and exact
   replay are characterized; unsupported phasing and global maximum-untap
