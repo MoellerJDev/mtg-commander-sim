@@ -26,10 +26,10 @@ commits. Main commit
 `c8a52711dc9294957fc0f437a4aaeab72da213aa` then passed run 30615647165.
 CR 505 PR #10 and CR 504 PR #11 are independent drafts. CR 503 PR #12 is the
 dependency parent for CR 502 PR #13. PR #13 is a dependency-staged draft based
-on `agent/cr-503-upkeep-step`. Their jobs did not receive runners because
+on `agent/cr-503-upkeep-step`. CR 501 PR #14 is a dependency-staged draft
+based on `agent/cr-502-untap-step`. Their jobs did not receive runners because
 GitHub reported an account billing or spending-limit failure; those pre-run
-failures are neither code passes nor code failures. The current CR 501 branch
-is dependency-staged on CR 502 while that external blocker persists.
+failures are neither code passes nor code failures.
 
 ## Deterministic product boundary
 
@@ -131,13 +131,16 @@ rules cases and 425 mechanics, checked 14 schemas and repository history,
 completed the protocol demo, and built and clean-installed the wheel. The
 seed-20260730 and four-player natural-winner regressions were independently
 rerun with exact replay and zero suppressed meaningful windows. The repository
-scan covered 274 tracked files and 11,527,913 bytes. Main commit
+scan covered 274 tracked files and 11,528,724 bytes. Main commit
 `c8a52711dc9294957fc0f437a4aaeab72da213aa` already passed run 30615647165;
 CR 502 PR head `6f0696b267e06555ef028830f37315651f51de46` produced push run
 30621129920 and pull-request run 30621133309. All eight jobs had
 `runner_id=0`, zero steps, and GitHub's billing/spending-limit annotation. No
 exact-SHA CI pass is claimed for the focused branches until their jobs receive
-runners and pass.
+runners and pass. CR 501 implementation commit
+`93578eb17d0d65732101c594ac07d21be3ed8f59` likewise produced push run
+30622084658 and pull-request run 30622099431 with the same eight pre-run
+failures.
 
 ## Evidence boundaries
 
@@ -150,9 +153,8 @@ runners and pass.
 
 ## Exact next step
 
-Commit and publish the green CR 501 focused branch as a dependency-staged
-draft based on `agent/cr-502-untap-step`, then inspect its exact-SHA matrix.
+Keep dependency-staged CR 501 PR #14 in draft while GitHub Actions cannot
+allocate runners, and begin the bounded CR 500 General turn-structure review.
 CR 501.1 passes only for the ordinary untap/upkeep/draw structure. Generic
 additional or skipped phase and step scheduling and the partial CR 502-504
-component behavior remain dependencies. Do not merge while GitHub Actions
-cannot allocate runners.
+component behavior remain dependencies. Do not merge or promote those gaps.

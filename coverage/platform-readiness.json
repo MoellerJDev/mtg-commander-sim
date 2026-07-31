@@ -14,7 +14,7 @@
     "branch": "agent/cr-501-beginning-phase",
     "branch_ancestry": {
       "focused_branch_base": "6f0696b267e06555ef028830f37315651f51de46",
-      "focused_branch_unique_commits_over_main": 4
+      "focused_branch_unique_commits_over_main": 5
     },
     "commit_reference": "the commit containing this ledger",
     "pull_requests": [
@@ -108,6 +108,13 @@
         "number": 13,
         "state": "draft",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/13"
+      },
+      {
+        "base": "agent/cr-502-untap-step",
+        "head": "agent/cr-501-beginning-phase",
+        "number": 14,
+        "state": "draft",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/14"
       }
     ],
     "tags": [
@@ -147,7 +154,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Commit the green dependency-staged CR 501 beginning-phase conformance slice atop CR 502, publish a draft PR, and require real exact-SHA CI before any merge or broader turn-structure claim.",
+  "next_task": "Keep dependency-staged CR 501 PR #14 in draft while GitHub cannot allocate runners, and begin the bounded CR 500 General turn-structure review without merging or claiming unsupported extra/skip scheduling.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
