@@ -34,6 +34,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#17](https://github.com/MoellerJDev/mtg-commander-sim/pull/17) | `agent/cr-400-general-zone-identity` | `agent/cr-405-stack` | `draft` |
 | [#18](https://github.com/MoellerJDev/mtg-commander-sim/pull/18) | `agent/cr-401-library` | `agent/cr-400-general-zone-identity` | `draft` |
 | [#19](https://github.com/MoellerJDev/mtg-commander-sim/pull/19) | `agent/cr-402-hand` | `agent/cr-401-library` | `draft` |
+| [#20](https://github.com/MoellerJDev/mtg-commander-sim/pull/20) | `agent/cr-403-battlefield` | `agent/cr-402-hand` | `draft` |
 
 ## Pinned snapshots and coverage
 
@@ -55,7 +56,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 |---|---|---|
 | Integrated deterministic foundation | `complete` | Both integration PRs and focused CR 512-506 slices merged through ordinary merge commits; main passed the exact-SHA CR 506 matrix. |
 | Browser Commander MVP | `not_started` | No server/, web/, or migrations/ subsystem is present on this branch. |
-| Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 403 is dependency-staged atop CR 402 PR #19, CR 401 PR #18, CR 400 PR #17, CR 405 PR #16, CR 500 PR #15, CR 501 PR #14, CR 502 PR #13, and CR 503 PR #12; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI. |
+| Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 403 PR #20 is dependency-staged atop CR 402 PR #19, CR 401 PR #18, CR 400 PR #17, CR 405 PR #16, CR 500 PR #15, CR 501 PR #14, CR 502 PR #13, and CR 503 PR #12; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
 ## Runtime and product boundaries
@@ -98,7 +99,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Complete the dependency-staged CR 403 Battlefield full local gate, publish its focused draft PR without waiving exact-SHA CI, then begin CR 404 Graveyard.
+Keep dependency-staged CR 403 PR #20 in draft while GitHub cannot allocate runners, and begin CR 404 Graveyard without promoting incomplete graveyard semantics.
 
 ## Regeneration
 
