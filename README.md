@@ -190,6 +190,13 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 405 stack structure: new objects are placed on top,
+  complete priority rounds resolve only the top object, direct effects,
+  represented static abilities, and represented state actions bypass the
+  stack, and LIFO exact replay passes; direct non-top resolution now fails
+  before mutation, while stack-first casting, complete simultaneous APNAP
+  placement, characteristics, special actions, concession-at-any-time, and
+  player-leaves-game ordering remain blocked
 - source-reviewed CR 500 general turn structure: the ordinary five-phase
   table, full empty-stack priority round, no-priority boundaries, mana
   emptying before the next step, and atomic transition behavior pass with
@@ -343,9 +350,9 @@ python simctl.py rules conformance --root .
 ```
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
-generated source-linkage tests. Of those cases, 456 are source-reviewed:
-66 have narrow executable semantic evidence, 326 are explicitly blocked, and
-64 are definition-only; 2,844 remain unreviewed. A generated inventory test
+generated source-linkage tests. Of those cases, 471 are source-reviewed:
+71 have narrow executable semantic evidence, 334 are explicitly blocked, and
+66 are definition-only; 2,829 remain unreviewed. A generated inventory test
 cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
 invalidation, and reporting policy.
 

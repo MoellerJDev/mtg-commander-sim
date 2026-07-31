@@ -1,0 +1,500 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 405 — Stack",
+  "cases": [
+    {
+      "rule_id": "405",
+      "rule_text_sha256": "e551641242ce7246ae460270ed60105e4c8370fd38b7144debd8688931c703f6",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/stack.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_stack_rules.StackRuleTests.test_contract_traces_every_cr_405_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; CR 405.1-6h carry the behavioral and structural stack requirements."
+      ]
+    },
+    {
+      "rule_id": "405.1",
+      "rule_text_sha256": "92f097759e6168bde93a9fdb6159a684a57ee3bb86576fd3aef246584a16c389",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "StackItem",
+        "CommanderEngine._cast",
+        "CommanderEngine._activate",
+        "CommanderEngine._place_semantic_trigger_items"
+      ],
+      "executable_test_ids": [
+        "tests.test_casting_spells_rules.CastingSpellRuleTests.test_mana_abilities_run_after_cost_choice_and_before_payment",
+        "tests.test_casting_spells_rules.CastingSpellRuleTests.test_cast_trigger_is_queued_above_spell_before_priority_returns",
+        "tests.test_resolution_rules.ResolutionRuleTests.test_spell_and_ability_leave_stack_after_resolution"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "blockers": [
+        "cast_object_not_moved_at_cr_601_2a",
+        "complete_spell_ability_creation_grammar_not_implemented"
+      ],
+      "notes": [
+        "Represented spells, activated abilities, and triggers receive separate stack objects, and abilities do not use an associated card object. Casting still moves the physical card only after choices and payment instead of at CR 601.2a, so proposal-dependent stack characteristics and effects can be wrong."
+      ]
+    },
+    {
+      "rule_id": "405.2",
+      "rule_text_sha256": "e257bd110050053abcb10899ee3befd7252dceb53f04cce376c79f25c71683d0",
+      "classification": "structural",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "GameState.stack",
+        "CommanderEngine._cast",
+        "CommanderEngine._activate",
+        "CommanderEngine._place_semantic_trigger_items"
+      ],
+      "executable_test_ids": [
+        "tests.test_stack_rules.StackRuleTests.test_stack_is_last_in_first_out_and_replays_exactly",
+        "tests.test_casting_spells_rules.CastingSpellRuleTests.test_cast_trigger_is_queued_above_spell_before_priority_returns"
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "The ordered stack list stores its bottom at index zero and appends each new object at the top. A spell plus a response resolves last-in-first-out and exact-replays."
+      ]
+    },
+    {
+      "rule_id": "405.3",
+      "rule_text_sha256": "3cf9bbd0cf4c3f36c3ab0a1008795b7dc9c72fbf1b67cdf4d71bff7ac24bbf6f",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._enqueue_semantic_trigger_batch",
+        "CommanderEngine._begin_pending_semantic_trigger_batch",
+        "CommanderEngine._place_semantic_trigger_items"
+      ],
+      "executable_test_ids": [
+        "tests.test_preflight_v080.NormalizedZoneEventTests.test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
+        "tests.test_upkeep_step_rules.UpkeepStepRuleTests.test_untap_and_upkeep_triggers_share_one_apnap_order_batch_and_replay"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "blockers": [
+        "generic_effect_created_simultaneous_stack_objects_not_implemented",
+        "complete_same_controller_ordering_grammar_not_implemented"
+      ],
+      "notes": [
+        "Represented simultaneous trigger batches group controllers in APNAP order and collect same-controller order before placement. The rule also covers arbitrary effects putting multiple spells or abilities on the stack simultaneously, which is not a generic engine operation."
+      ]
+    },
+    {
+      "rule_id": "405.4",
+      "rule_text_sha256": "ef51b2f08998c1c5de420e2cc5b7b9abf2674139b290f576edcd45e18ca4e092",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "StackItem",
+        "CardInstance",
+        "CommanderEngine._effective_card_data",
+        "CommanderEngine._stack_source_ref"
+      ],
+      "executable_test_ids": [
+        "tests.test_stack_rules.StackRuleTests.test_stack_is_last_in_first_out_and_replays_exactly",
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_trigger_controller_is_frozen_at_trigger_time",
+        "tests.test_copy_objects.CopyObjectLifecycleTests.test_spell_copy_has_a_serialized_stack_object"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "blockers": [
+        "complete_stack_characteristics_model_not_implemented",
+        "complete_delayed_trigger_controller_derivation_not_implemented",
+        "spell_control_effects_not_implemented"
+      ],
+      "notes": [
+        "Represented stack items freeze the casting, activating, or trigger-time controller and associate a spell with its card object. Complete spell characteristics, ability text-only characteristics, copy/layer interactions, delayed-trigger controller rules, and spell-control effects are not represented generically."
+      ]
+    },
+    {
+      "rule_id": "405.5",
+      "rule_text_sha256": "24b264482d79be3356c49463977d80a20a0f511977f3e6d7de8c9fbb9a6ae632",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._pass_priority",
+        "CommanderEngine._prepare_stack_resolution",
+        "CommanderEngine._begin_resolve_item",
+        "CommanderEngine._advance_step"
+      ],
+      "executable_test_ids": [
+        "tests.test_stack_rules.StackRuleTests.test_stack_is_last_in_first_out_and_replays_exactly",
+        "tests.test_stack_rules.StackRuleTests.test_non_top_stack_object_cannot_begin_resolution",
+        "tests.test_turn_structure_rules.TurnStructureRuleTests.test_empty_stack_window_requires_every_player_to_pass_and_replays"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "A full active-player/nonactive-player pass round resolves exactly the top object. Starting resolution of a lower object is now rejected without mutation. When the stack is empty, the same full pass round advances the step; both paths exact-replay."
+      ]
+    },
+    {
+      "rule_id": "405.6",
+      "rule_text_sha256": "5733de5e821ea9804802e0b793eba5afe0c5213e7dc2f64b99f90a682c8f317a",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/stack.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_stack_rules.StackRuleTests.test_contract_traces_every_cr_405_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Introductory taxonomy sentence; CR 405.6a-h enumerate the immediate, non-stack categories."
+      ]
+    },
+    {
+      "rule_id": "405.6a",
+      "rule_text_sha256": "9062d4e62632b54d12558622b95f315cb4dd07725849dcf995db031f0794acdb",
+      "classification": "structural",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine.apply_effect",
+        "CommanderEngine._continue_resolution",
+        "DelayedTrigger",
+        "CommanderEngine._queue_delayed_trigger"
+      ],
+      "executable_test_ids": [
+        "tests.test_stack_rules.StackRuleTests.test_effect_and_state_action_execute_without_stack_objects",
+        "tests.test_multiplayer_rules.MultiplayerRuleTests.test_delayed_trigger_queues_at_matching_step"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "blockers": [],
+      "notes": [
+        "Represented effects mutate authoritative state directly during resolution and are never materialized as stack objects. A represented delayed trigger is stored separately and becomes a triggered-ability stack item only when its later event occurs."
+      ]
+    },
+    {
+      "rule_id": "405.6b",
+      "rule_text_sha256": "efd707663858037d2cd1b4e54304471baf033379771a06982b48c7b8584f9486",
+      "classification": "structural",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._effective_card_data",
+        "CommanderEngine._controller_has_oracle_text",
+        "continuous_effects.apply_continuous_effects"
+      ],
+      "executable_test_ids": [
+        "tests.test_static_abilities.StaticAbilityRuleTests.test_battlefield_static_effect_stops_when_source_leaves",
+        "tests.test_static_abilities.StaticAbilityRuleTests.test_moving_equipment_moves_its_static_effect"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "blockers": [],
+      "notes": [
+        "Represented static abilities are queried as continuous characteristics and never become stack objects. This structural pass does not promote the incomplete CR 604 characteristic-defining, attachment, zone-permission, layer, or LKI grammar."
+      ]
+    },
+    {
+      "rule_id": "405.6c",
+      "rule_text_sha256": "612ab33d29e1073e7925a795acdad099323508d4a6c710ec750aad9f3cf47504",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._activate_mana_plan",
+        "CommanderEngine._activate",
+        "mana.extract_mana_modes"
+      ],
+      "executable_test_ids": [
+        "tests.test_stack_rules.StackRuleTests.test_activated_mana_ability_is_immediate_and_preserves_priority",
+        "tests.test_mana_abilities.ManaAbilityRuleTests.test_activated_mana_ability_resolves_without_using_stack"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
+      "blockers": [
+        "generic_triggered_mana_abilities_not_implemented",
+        "complete_mana_ability_side_effect_grammar_not_implemented"
+      ],
+      "notes": [
+        "Represented activated mana abilities tap and produce mana immediately, create no stack item, and preserve the priority player. CR 605's generic triggered-mana classification and complete nonmana side effects remain incomplete, so the all-mana-ability statement cannot pass."
+      ]
+    },
+    {
+      "rule_id": "405.6d",
+      "rule_text_sha256": "7b22fdcaf220407403f78d47c00b5a38e20ece923b40eb040e76d88775bdb3b8",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._play_land",
+        "CommanderEngine._priority_action_hints"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_authority.RulesAuthorityRegressionTests.test_land_entry_is_server_derived_for_duel_and_multiplayer"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer"
+      ],
+      "blockers": [
+        "complete_cr_116_special_action_catalog_not_implemented",
+        "special_action_timing_and_cost_grammar_not_implemented"
+      ],
+      "notes": [
+        "The represented land-play special action executes immediately without a stack object. The engine explicitly lacks the rest of CR 116's special actions, so the general rule remains blocked."
+      ]
+    },
+    {
+      "rule_id": "405.6e",
+      "rule_text_sha256": "41f042b6c7078df77bdefd34a3d4fe0a86ebf524885b2186f36e25ccae2bfe76",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._enter_step",
+        "CommanderEngine._finish_cleanup",
+        "TURN_STEPS"
+      ],
+      "executable_test_ids": [
+        "tests.test_untap_step_rules.UntapStepRuleTests.test_ordinary_untap_is_stackless_and_advances_directly_to_upkeep",
+        "tests.test_cleanup_step_rules.CleanupStepRuleTests.test_ordinary_cleanup_grants_no_priority",
+        "tests.test_turn_structure_rules.TurnStructureRuleTests.test_unspent_mana_empties_before_the_next_step_begins"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "blockers": [
+        "complete_cr_703_turn_based_action_catalog_not_implemented",
+        "all_begin_and_end_boundary_actions_not_implemented"
+      ],
+      "notes": [
+        "Represented untap, draw, combat, cleanup, and boundary actions execute synchronously before or without priority and do not become stack objects. The complete CR 703 catalog and every added-step/phase interaction are not implemented."
+      ]
+    },
+    {
+      "rule_id": "405.6f",
+      "rule_text_sha256": "1dc2f343ed485e1c9b6cec6212b13c4422b690fcb6a9da20d67454c39956a700",
+      "classification": "structural",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._stabilize",
+        "state_based_actions.evaluate_state_based_actions",
+        "CommanderEngine._apply_state_action_batch"
+      ],
+      "executable_test_ids": [
+        "tests.test_stack_rules.StackRuleTests.test_effect_and_state_action_execute_without_stack_objects",
+        "tests.test_state_based_actions.StateBasedActionPrimitiveTests.test_world_rule_keeps_only_the_unique_newest_world"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "blockers": [],
+      "notes": [
+        "Represented state-based actions are evaluated and committed as direct stabilization batches before priority and never become stack objects. This structural pass does not promote the separately blocked, unimplemented CR 704.5 action families."
+      ]
+    },
+    {
+      "rule_id": "405.6g",
+      "rule_text_sha256": "c660a3ef11858971291217b8d59d9d6495af74c4d062c27cbe0a60aa9d20bc9b",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._issue_priority",
+        "CommanderEngine._complete_priority",
+        "CommanderEngine._eliminate_players"
+      ],
+      "executable_test_ids": [
+        "tests.test_stack_rules.StackRuleTests.test_player_leaving_removes_owned_spell_and_controlled_ability",
+        "tests.test_multiplayer_rules.MultiplayerRuleTests.test_player_elimination_keeps_multiplayer_game_running"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "multiplayer"
+      ],
+      "blockers": [
+        "concession_available_only_in_priority_task",
+        "out_of_window_server_command_not_implemented"
+      ],
+      "notes": [
+        "A concession selected from a represented priority task immediately eliminates that player without a stack object. The public command surface cannot yet concede during resolution, a no-priority turn action, or another seat's decision, so 'at any time' is not satisfied."
+      ]
+    },
+    {
+      "rule_id": "405.6h",
+      "rule_text_sha256": "b91fea45326ca744f87580448fae454c307e033deecac7152b9b9606f1707b44",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._eliminate_players",
+        "CommanderEngine.change_control",
+        "CommanderEngine.move_card"
+      ],
+      "executable_test_ids": [
+        "tests.test_stack_rules.StackRuleTests.test_player_leaving_removes_owned_spell_and_controlled_ability",
+        "tests.test_native_v3_slice.NativeV3AuditAndPilotTests.test_elimination_preserves_hidden_identity_and_public_knowledge",
+        "tests.test_multiplayer_rules.MultiplayerRuleTests.test_player_elimination_keeps_multiplayer_game_running"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "multiplayer",
+        "hidden_information"
+      ],
+      "blockers": [
+        "complete_cr_800_4a_ordering_not_implemented",
+        "control_effect_provenance_not_implemented",
+        "full_multiplayer_leaving_game_matrix_not_implemented"
+      ],
+      "notes": [
+        "Represented elimination immediately removes owned spell cards and controlled ability objects from the stack, preserves hidden identities, and lets a three-player game continue. Complete CR 800.4a ownership, control-effect ending, cease-to-exist, exile, team, and continuous-effect ordering remains incomplete."
+      ]
+    }
+  ]
+}

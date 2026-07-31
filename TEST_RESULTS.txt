@@ -2,43 +2,43 @@ MTG Commander Sim 0.8.0 - Integration Verification Ledger
 ===========================================================
 
 Repository: MoellerJDev/mtg-commander-sim (public)
-Active branch: agent/cr-500-turn-structure
-Main before candidate: f93a04deb07ab8e8897b48d6e6336e4049c26d33
-Active PR: #15 (CR 500 Turn Structure)
+Active branch: agent/cr-405-stack
+Main before candidate: 4cde25ae506a7a8b0a252096f2f7b3aad8929f9a
+Active PR: #16 (CR 405 Stack)
 
 LAST EXACT VERIFIED CANDIDATE
 -----------------------------
 
-CR 501 refreshed head
-  SHA: 5d381adc7e7c6ebf1ba4dd8744242f4ccdc6d25c
-  Full suite: 3,860 tests passed
+CR 500 refreshed head
+  SHA: 6ccba21fc02ee41d1e96e9f11e0df8452440a3c5
+  Full suite: 3,865 tests passed
   Rules/replay/privacy/protocol/repository/package gates: passed
   Working-tree clean exit: passed
   GitHub push and pull-request matrices: passed (8/8)
 
-PR #14 merged to main
-  Main SHA: f93a04deb07ab8e8897b48d6e6336e4049c26d33
+PR #15 merged to main
+  Main SHA: 4cde25ae506a7a8b0a252096f2f7b3aad8929f9a
 
 CURRENT UNVERIFIED CANDIDATE
 ----------------------------
 
-CR 500 is being combined with merged CR 501-505.
-Expected discovered tests after regeneration: 3,865.
-The exact-SHA local gate and fresh GitHub matrices must pass before PR #15 is
+CR 405 is being combined with merged CR 500-505.
+Expected discovered tests after regeneration: 3,871.
+The exact-SHA local gate and fresh GitHub matrices must pass before PR #16 is
 merged.
 
 Combined rule-review totals:
   Pinned CR release: 2026-06-19
   Numbered rules: 3,300
-  Reviewed: 470
-  Passing: 72
-  Blocked: 332
-  Definition-only: 66
-  Unreviewed: 2,830
+  Reviewed: 485
+  Passing: 77
+  Blocked: 340
+  Definition-only: 68
+  Unreviewed: 2,815
 
 Combined mechanic totals:
-  Partial: 41
-  Unclassified: 384
+  Partial: 42
+  Unclassified: 383
 
 INTERPRETATION BOUNDARY
 -----------------------
@@ -57,5 +57,5 @@ Every updated candidate must receive fresh green push and pull-request runs.
 NEXT
 ----
 
-Run the exact CR 500 merge gate, merge PR #15 normally after green CI, and
-continue with PR #16.
+Run the exact CR 405 merge gate, merge PR #16 normally after green CI, and
+continue with PR #17.

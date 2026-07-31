@@ -11803,6 +11803,10 @@ class CommanderEngine:
         *,
         note: str = "",
     ) -> None:
+        if not self.state.stack or self.state.stack[-1] is not item:
+            raise GameRuleError(
+                "Only the top object of the stack can begin resolving"
+            )
         if not self._revalidate_resolution_targets(item):
             return
         self._continue_resolution(

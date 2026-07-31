@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-405-stack",
+  "official_name": "Stack",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "405",
+    "405.1",
+    "405.2",
+    "405.3",
+    "405.4",
+    "405.5",
+    "405.6",
+    "405.6a",
+    "405.6b",
+    "405.6c",
+    "405.6d",
+    "405.6e",
+    "405.6f",
+    "405.6g",
+    "405.6h"
+  ],
+  "glossary_references": [
+    "stack",
+    "ability",
+    "effect",
+    "mana-ability",
+    "special-action",
+    "spell"
+  ],
+  "dependencies": [
+    "spells",
+    "activated-abilities",
+    "triggered-abilities",
+    "priority",
+    "apnap",
+    "effects",
+    "static-abilities",
+    "mana-abilities",
+    "special-actions",
+    "turn-based-actions",
+    "state-based-actions",
+    "multiplayer",
+    "player-leaves-game",
+    "cr-608-resolving-spells-and-abilities",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "stack",
+      "battlefield",
+      "graveyard",
+      "outside the game"
+    ],
+    "objects": [
+      "spell card on the stack",
+      "spell copy on the stack",
+      "activated ability",
+      "triggered ability",
+      "delayed triggered ability",
+      "top stack object"
+    ],
+    "events": [
+      "spell is cast",
+      "ability is activated or triggers",
+      "one or more objects are put on the stack",
+      "all active players pass in succession",
+      "top stack object resolves",
+      "effect executes",
+      "mana ability resolves immediately",
+      "turn-based or state-based action executes",
+      "player concedes or leaves the game"
+    ],
+    "state_reads": [
+      "ordered stack contents",
+      "active and nonactive player order",
+      "controller chosen at cast, activation, or trigger time",
+      "stack object kind and associated card object",
+      "priority player and ordered passes",
+      "active seats"
+    ],
+    "state_writes": [
+      "ordered stack contents",
+      "spell card zone and controller",
+      "stack-object controller and serialized choices",
+      "priority state",
+      "resolved effect state",
+      "player in-game state and leaving-player cleanup"
+    ],
+    "costs": [
+      "casting and activation costs are delegated to CR 601, CR 602, and CR 605"
+    ],
+    "timing": [
+      "new objects are placed on top",
+      "only the top object can begin resolving",
+      "one top object resolves after a complete priority pass round",
+      "effects, static abilities, mana abilities, special actions, turn-based actions, state-based actions, concession, and leaving-player cleanup bypass the stack where represented"
+    ],
+    "targets": [
+      "stack objects retain represented target choices",
+      "target legality at resolution is delegated to CR 608"
+    ],
+    "choices": [
+      "same-controller simultaneous trigger order",
+      "represented stack-object targets, modes, and values"
+    ],
+    "hidden_information": [
+      "public stack objects expose only their public serialized characteristics",
+      "stack operations do not disclose unrelated hidden zones"
+    ],
+    "apnap": [
+      "represented simultaneous trigger batches place active-player objects lowest and later APNAP groups above them",
+      "complete effect-created simultaneous stack-object grammar remains blocked"
+    ],
+    "layers": [
+      "complete spell characteristics and characteristic-defining ability evaluation on the stack remain blocked",
+      "represented battlefield static effects bypass the stack"
+    ],
+    "replacement_effects": [
+      "replacement and prevention effects alter events rather than becoming stack objects",
+      "complete player-leaves-game and control-effect ordering remains blocked"
+    ],
+    "copy": [
+      "represented spell and ability copies use independent serialized stack objects",
+      "effect-created simultaneous copy ordering remains incomplete"
+    ],
+    "control_change": [
+      "spell, activated-ability, and ordinary triggered-ability controllers are serialized",
+      "complete delayed-trigger controller derivation and spell-control effects remain blocked"
+    ],
+    "zone_change": [
+      "represented spell cards move to stack and then to their resolution or counter destination",
+      "abilities have no associated card object and cease after leaving the stack",
+      "owned stack cards leave the game with their owner where represented"
+    ],
+    "source_leaves": [
+      "an activated or triggered ability remains an independent stack object after its source leaves",
+      "complete last-known characteristics are delegated to CR 608 and remain partial"
+    ]
+  },
+  "variants": [
+    "spell card",
+    "spell copy",
+    "activated ability",
+    "triggered ability",
+    "delayed triggered ability",
+    "two or more simultaneous controlled objects",
+    "multiplayer APNAP placement",
+    "LIFO resolution",
+    "effect without stack use",
+    "static ability without stack use",
+    "activated and triggered mana ability",
+    "special action",
+    "turn-based action",
+    "state-based action",
+    "concession at any time",
+    "player leaves a multiplayer game"
+  ],
+  "witness_cards": [
+    {
+      "name": "Sensei's Divining Top",
+      "oracle_id": "13575cf9-65c1-4861-b21e-eb2155e07766"
+    },
+    {
+      "name": "Flusterstorm",
+      "oracle_id": "86bf58f2-7f25-4e10-b797-25e0e8e67769"
+    },
+    {
+      "name": "Sol Ring",
+      "oracle_id": "6ad8011d-3471-4369-9d68-b264cc027487"
+    },
+    {
+      "name": "Padeem, Consul of Innovation",
+      "oracle_id": "0c7ba712-6a99-4d2f-9242-a2163a11f69c"
+    },
+    {
+      "name": "Sundial of the Infinite",
+      "oracle_id": "79d46e09-2548-440f-9c02-3c3dc39a0cd1"
+    }
+  ],
+  "rulings": [
+    "Sensei's Divining Top — 2016-06-08 — Its second ability may be activated in response to its first; the response resolves first.",
+    "Flusterstorm — 2022-12-08 — Storm copies are put directly onto the stack and are not cast.",
+    "Sundial of the Infinite — 2011-09-22 — Ending the turn exiles all spells and abilities from the stack before later immediate turn-ending actions."
+  ],
+  "test_ids": [
+    "test_contract_traces_every_cr_405_rule",
+    "test_stack_is_last_in_first_out_and_replays_exactly",
+    "test_non_top_stack_object_cannot_begin_resolution",
+    "test_activated_mana_ability_is_immediate_and_preserves_priority",
+    "test_effect_and_state_action_execute_without_stack_objects",
+    "test_player_leaving_removes_owned_spell_and_controlled_ability",
+    "test_cast_trigger_is_queued_above_spell_before_priority_returns",
+    "test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
+    "test_battlefield_static_effect_stops_when_source_leaves",
+    "test_ordinary_untap_is_stackless_and_advances_directly_to_upkeep"
+  ],
+  "implementation": {
+    "component": "GameState.stack, StackItem, CommanderEngine cast/activate/trigger placement, priority pass, resolution, mana, stabilization, and player-elimination paths",
+    "version": "stack-foundation-v1"
+  },
+  "known_blockers": [
+    "casting currently moves the card to the stack after choices and payment rather than at CR 601.2a's first announcement step",
+    "complete simultaneous effect-created stack-object placement and same-controller ordering are not represented",
+    "spell and ability characteristics on the stack do not use a complete typed characteristics model",
+    "triggered mana abilities and complete mana-ability side-effect grammar remain incomplete",
+    "the full CR 116 special-action catalog is not represented",
+    "the full CR 703 turn-based-action catalog is not represented",
+    "concession is currently exposed only through a priority decision rather than at any time",
+    "complete CR 800.4a player-leaves-game ordering, control effects, and all multiplayer variants remain incomplete"
+  ],
+  "review_status": "draft"
+}

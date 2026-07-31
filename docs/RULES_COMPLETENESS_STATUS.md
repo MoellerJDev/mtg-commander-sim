@@ -36,7 +36,7 @@ coverage.
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 470 cases in CR 120/210/310/500/501/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 72 semantic passes, 332 blocked cases, and 66 definition-only cases |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 485 cases in CR 120/210/310/405/500/501/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 77 semantic passes, 340 blocked cases, and 68 definition-only cases |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -184,6 +184,14 @@ coverage.
   turns, added phases or steps, controller-relative suppression, and generic
   skip replacement ordering remain dependency-blocked; two taxonomy records
   are definition-only.
+- [x] Reviewed all 15 CR 405 Stack records. Top insertion, complete-pass LIFO
+  resolution, direct effects, represented static abilities, and represented
+  state actions pass, including exact replay. A non-top object now cannot
+  begin resolution. Stack-first casting, complete effect-created APNAP
+  placement, characteristics, triggered mana, the full special/turn-based
+  action catalogs, concession outside priority, and complete player-leaves-
+  game ordering remain dependency-blocked; two taxonomy records are
+  definition-only.
 - [x] Reviewed all 6 CR 502 Untap Step records. Ordinary stackless untaps,
   represented stun and next-untap restrictions, held-trigger handoff, and
   exact replay are characterized. Phasing and global maximum-untap choices now
@@ -239,7 +247,7 @@ coverage.
   declaration triggers, multi-attacker blocking, blocked-status effects, and
   entry-blocking remain dependency-blocked.
 
-## Current CR 120/210/310/500/501/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
+## Current CR 120/210/310/405/500/501/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
 
 The upkeep step performs no turn-based action. Represented abilities triggered
 during untap and at the beginning of upkeep wait without priority and then
@@ -437,9 +445,13 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,865 unit/integration tests are discovered: 565 ordinary tests plus 3,300
+- 3,871 unit/integration tests are discovered: 571 ordinary tests plus 3,300
   generated
   inventory/source-linkage tests. The latter are not semantic passes.
+- Six focused CR 405 tests cover exact source traceability, two-object LIFO
+  priority and replay, transactional non-top rejection, immediate activated
+  mana, direct effect/state-action execution, and leaving-player stack
+  cleanup.
 - Five focused CR 500 tests cover exact source traceability, the ordinary
   five-phase table, a four-player empty-stack priority round with exact
   replay, mana emptying before the next step, and transactional rejection of
@@ -522,10 +534,10 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 470 CR
-  120/210/310/500/501/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
-  cases are source-reviewed: 72 pass with executable engine evidence, 332
-  remain blocked, and 66 are definition-only. The other 2,830 cases remain
+  establish inventory linkage only. All 485 CR
+  120/210/310/405/500/501/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
+  cases are source-reviewed: 77 pass with executable engine evidence, 340
+  remain blocked, and 68 are definition-only. The other 2,815 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -534,8 +546,8 @@ checkpoint validation.
 
 ## Next dependency-ordered work
 
-1. Finish the exact local and GitHub gates for the combined CR 500-505
-   candidate, merge PR #15, and then integrate CR 405 PR #16 from the frozen
+1. Finish the exact local and GitHub gates for the combined CR 405/500-505
+   candidate, merge PR #16, and then integrate CR 400 PR #17 from the frozen
    dependency chain. Do not begin another rules-family review.
 2. Wire the reviewed CR 614/615/616 primitives into the shared CR 120/310
    replacement and prevention event pipeline, including stateful shields and

@@ -101,13 +101,13 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 470 cases in CR 120, CR 210, CR 310, CR 500, CR 501, CR 502, CR 503, CR 504, CR 505, CR 506, CR 507,
+All 485 cases in CR 120, CR 210, CR 310, CR 405, CR 500, CR 501, CR 502, CR 503, CR 504, CR 505, CR 506, CR 507,
 CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
 CR 602, CR 603, CR 604, CR 605, CR 606, CR 607, CR 608, CR 609, CR 614,
-CR 615, and CR 616 are source-reviewed: 72 narrow behavioral or structural
-rules pass with generic executable evidence, 332 are blocked with exact missing
-dependencies, and 66 are definition-only with contract traceability. The
-remaining 2,830
+CR 615, and CR 616 are source-reviewed: 77 narrow behavioral or structural
+rules pass with generic executable evidence, 340 are blocked with exact missing
+dependencies, and 68 are definition-only with contract traceability. The
+remaining 2,815
 cases are
 unreviewed and
 inventory-only.
@@ -177,6 +177,14 @@ frozen proposals, and opponent-made choices remain blocked.
 CR 600 contains only the General section heading. It is source-reviewed as a
 definition-only taxonomy record linked to the dependent CR 601-609 contracts;
 it makes no independent engine-behavior claim.
+CR 405 records top-of-stack insertion, LIFO resolution after a complete
+priority round, direct represented effects, static abilities, and state-based
+actions as passing invariants. Resolution now rejects a non-top object before
+mutation, and the two-object priority path exact-replays. Casting still moves
+the card after choices and payment rather than at CR 601.2a; generic
+simultaneous APNAP placement, complete stack characteristics, triggered mana,
+special and turn-based actions, concession at any time, and complete
+player-leaves-game ordering remain blocked.
 CR 500 records the ordinary five-phase turn table, the all-player empty-stack
 pass condition, ordinary no-priority untap and cleanup boundaries, mana
 emptying before the next step begins, and atomic step/phase transitions as
