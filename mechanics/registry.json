@@ -1,5 +1,5 @@
 {
-  "contract_count": 41,
+  "contract_count": 42,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -131,6 +131,12 @@
       "mechanic_id": "flying",
       "path": "mechanics/contracts/flying.json",
       "sha256": "e75cae496f5ecaa720ef71ae1c7d73eab1066fd69b5f2e9ca98c12128b4b35c2",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-402-hand",
+      "path": "mechanics/contracts/hand.json",
+      "sha256": "495b717cbf0b25a86ed2b3afe41e1992df6f42108ff72778709d6f6b2837dedb",
       "version": 1
     },
     {
@@ -6010,17 +6016,37 @@
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/hand.json",
+      "contract_sha256": "495b717cbf0b25a86ed2b3afe41e1992df6f42108ff72778709d6f6b2837dedb",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine.create/draw/move_card/cleanup discard, PlayerState hand and maximum size, and StateProjector multi-seat hand knowledge projection",
+      "implementation_version": "hand-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "continuous maximum-hand-size modifiers and no-maximum effects are not compiled through CR 613.11",
+        "complete Oracle grammar for arbitrary reveal, look-at-hand, and private simultaneous hand-choice effects remains incomplete",
+        "complete draw and zone-change replacement ordering remains incomplete",
+        "browser-local hand arrangement controls are not yet implemented, although authoritative hand order is rules-insignificant"
+      ],
       "mechanic_id": "cr-402-hand",
       "official_name": "Hand",
       "rule_references": [
         "402"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_402_rule",
+        "test_starting_hand_size_and_effect_moves_are_generic",
+        "test_hand_may_exceed_maximum_until_cleanup",
+        "test_hidden_card_put_into_hand_keeps_identity_private",
+        "test_public_card_returned_to_hand_remains_known_not_lookable",
+        "test_revealed_hand_identity_is_scoped_to_authorized_viewers",
+        "test_owner_hand_remains_visible_while_controlling_a_player",
+        "test_hand_order_is_private_and_owner_projection_is_always_available",
+        "test_cleanup_discard_is_exact_simultaneous_private_and_replayable",
+        "test_mindslaver_routes_controlled_turn_to_controller_pilot"
+      ],
       "trust_level": "untrusted"
     },
     {

@@ -10,7 +10,7 @@ or provider session data.
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/cr-401-library`
+- Active branch: `agent/cr-402-hand`
 - Stage A merge commit on `main`:
   `bd89201be44de85aa9b85fcc9f0baacb0ee76dbe`
 - Stage A PR:
@@ -28,8 +28,9 @@ CR 505 PR #10 and CR 504 PR #11 are independent drafts. CR 503 PR #12 is the
 dependency parent for CR 502 PR #13, which is the parent for CR 501 PR #14.
 CR 500 PR #15 is a dependency-staged draft based on
 `agent/cr-501-beginning-phase`; CR 405 PR #16 is based on CR 500, CR 400
-PR #17 is based on CR 405, and CR 401 PR #18 is based on CR 400. Their jobs
-did not receive runners because
+PR #17 is based on CR 405, CR 401 PR #18 is based on CR 400, and the CR 402
+branch is based on the final CR 401 evidence commit. Their jobs did not
+receive runners because
 GitHub reported an account billing or spending-limit failure; those pre-run
 failures are neither code passes nor code failures.
 
@@ -66,23 +67,24 @@ It generates one source-linked conformance case for each of 3,300 numbered
 rules and preserves reviewed status only while the source and rule-text hashes
 remain unchanged.
 
-Current reviewed inventory after the CR 401 synchronization:
+Current reviewed inventory after the CR 402 synchronization:
 
-- 509 reviewed cases
-- 86 executable semantic passes
+- 513 reviewed cases
+- 89 executable semantic passes
 - 353 reviewed blocked cases
-- 70 definition-only cases
-- 2,791 unreviewed inventory cases
+- 71 definition-only cases
+- 2,787 unreviewed inventory cases
 - 425 discovered mechanics
-- 41 partial/untrusted mechanic contracts
-- 384 unclassified mechanics
+- 42 partial/untrusted mechanic contracts
+- 383 unclassified mechanics
 - 0 corpus-wide trusted mechanics
 
 Implemented reviewed families include narrow contracts for damage, defense,
 Battles, state-based actions, replacement/prevention ordering, effects,
 resolution, linked abilities, loyalty abilities, mana abilities, static and
 triggered abilities, casting, activating abilities, general zones and logical
-object identity, library ordering and hidden projection, stack, general turn structure,
+object identity, library ordering and hidden projection, hand size and
+viewer-scoped hand projection, stack, general turn structure,
 beginning phase, untap,
 upkeep, end step, cleanup,
 logical zone incarnations, timestamps, World, token/copy lifecycle, and
@@ -117,7 +119,7 @@ Stage A exact evidence:
 - deterministic four-player micro-pool reached a natural winner with zero
   suppressed meaningful windows, passed seat projection, and exact-replayed
 
-The focused CR 401 local test gate passed atop the validated CR 400 dependency:
+The focused CR 402 local test gate passed atop the validated CR 401 dependency:
 
 - generated platform, rules, mechanics, and Oracle status checks
 - all noninventory and all generated per-rule tests
@@ -126,22 +128,19 @@ The focused CR 401 local test gate passed atop the validated CR 400 dependency:
 - protocol demo and packet benchmark
 - repository/history/secret/artifact scans
 - wheel build, clean installation, imported version, and CLI smoke
-- the seven focused CR 401 source/setup/count/visibility/look/reorder/Nth/
-  shuffle tests
+- the eight focused CR 402 source/setup/maximum/cleanup/count/privacy/reveal/
+  controller/order tests
 
-The local test gate ran 3,867 tests in 197.904 seconds, verified all 3,300 pinned
+The local test gate ran 3,875 tests in 192.881 seconds, verified all 3,300 pinned
 rules cases and 425 mechanics, checked 14 schemas and repository history,
 completed the protocol demo, and built and clean-installed the wheel. The
-seed-20260730 and four-player natural-winner regressions were independently
-rerun with exact replay and zero suppressed meaningful windows. The repository
-scan covered 285 tracked files and 11,736,966 bytes. Main commit
+full suite reran the seed-20260730 and four-player natural-winner regressions
+with exact replay and zero suppressed meaningful windows. The repository
+scan covered 285 tracked files and 11,748,185 bytes. Main commit
 `c8a52711dc9294957fc0f437a4aaeab72da213aa` already passed run 30615647165;
-CR 401 implementation commit
-`f445e67e009be4934fd03fe5ee1b7dc07de29b85` produced push run
-30626290382 and pull-request run 30626302543. All eight jobs had
-`runner_id=0`, zero steps, and GitHub's billing/spending-limit annotation. No
-exact-SHA CI pass is claimed for the focused branches until their jobs receive
-runners and pass.
+the CR 402 implementation commit and draft PR evidence will be recorded after
+publication. No exact-SHA CI pass is claimed for the focused branches until
+their jobs receive runners and pass.
 
 ## Evidence boundaries
 
@@ -154,10 +153,11 @@ runners and pass.
 
 ## Exact next step
 
-Keep dependency-staged CR 401 PR #18 in draft while GitHub Actions cannot
-allocate runners, and begin CR 402 Hand. CR 401 passes only deck-to-library
-initialization, public counts with hidden order, bounded look/reorder and
-shuffle knowledge, and Nth-from-top insertion. Generic simultaneous owner-
-secret insertion ordering, continuous top-card reveal/look permissions,
-procedure-time visibility freezing, and reveal-continuity new-object identity
-remain blocked. Do not merge or promote those gaps.
+Publish dependency-staged CR 402 Hand as a focused draft PR, retain it while
+GitHub Actions cannot allocate runners, and begin CR 403 Battlefield. CR 402
+passes configured starting hands, finite maximum size and cleanup discard,
+public counts, scoped identities, redacted hidden moves, directly observed
+public-to-hand knowledge, and controller dual-hand projection. Continuous
+maximum-size/no-maximum effects, complete arbitrary reveal/look grammar, and
+simultaneous private-choice coverage remain blocked. Do not merge or promote
+those gaps.

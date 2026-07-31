@@ -889,7 +889,7 @@ class ExactMishraClosureTests(unittest.TestCase):
         )
         view = packet["state"]
         self.assertIn("hand", view["players"]["B"])
-        self.assertNotIn("hand", view["players"]["A"])
+        self.assertIn("hand", view["players"]["A"])
 
     def test_roaming_throne_type_trigger_multiplier_and_ward(self):
         session = self.make_session(1116)

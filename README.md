@@ -189,6 +189,13 @@ generated documentation fixtures with bearer capabilities redacted. See
   zero-card looks no longer expose the entire library and stale known cards
   cannot be pulled to the top, while simultaneous owner ordering, continuous
   top reveal/look, and reveal-continuity identity remain blocked
+- source-reviewed CR 402 hand boundaries: configured starting hands and
+  finite maximum sizes are authoritative, excess cards remain in hand until
+  cleanup, every hand count is public, and identities remain viewer-scoped;
+  hidden-zone moves now publish only an opaque move while privately logging
+  the identity, public-to-hand moves remain known, and a player controlling
+  another player retains access to both hands; continuous no-maximum and
+  arbitrary hand-reveal semantics remain dependency-blocked
 - source-reviewed CR 405 stack structure: new objects are placed on top,
   complete priority rounds resolve only the top object, direct effects,
   represented static abilities, and represented state actions bypass the
@@ -340,9 +347,9 @@ python simctl.py rules conformance --root .
 ```
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
-generated source-linkage tests. Of those cases, 509 are source-reviewed:
-86 have narrow executable semantic evidence, 353 are explicitly blocked, and
-70 are definition-only; 2,791 remain unreviewed. A generated inventory test
+generated source-linkage tests. Of those cases, 513 are source-reviewed:
+89 have narrow executable semantic evidence, 353 are explicitly blocked, and
+71 are definition-only; 2,787 remain unreviewed. A generated inventory test
 cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
 invalidation, and reporting policy.
 

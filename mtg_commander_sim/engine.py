@@ -1723,6 +1723,9 @@ class CommanderEngine:
             and origin not in {"library", "exile", "command"}
         ):
             return card
+        origin_identity_public = (
+            origin in PUBLIC_ZONES and not card.face_down
+        )
         if (
             card.is_token
             and card.has_left_battlefield
@@ -1918,11 +1921,57 @@ class CommanderEngine:
                     card.revealed_to = list(self.seats)
                 else:
                     known = {card.owner, *(reveal_to or [])}
+                    if destination == "hand":
+                        if origin_identity_public:
+                            known.update(self.seats)
                     card.known_to = sorted(known)
                     card.revealed_to = sorted(set(reveal_to or []))
         if replacement_source is not None and card.zone == "exile":
             card.counters["void"] = 1
-        if log:
+        identity_became_hidden = (
+            card.zone in HIDDEN_ZONES
+            and not origin_identity_public
+        )
+        if log and identity_became_hidden:
+            self._log(
+                None,
+                "zone.move",
+                (
+                    f"{card.owner} moved a card: "
+                    f"{origin} → {card.zone}."
+                ),
+                {
+                    "from": origin,
+                    "to": card.zone,
+                    "reason": reason,
+                },
+                changed_objects=[object_id],
+                changed_players=[card.owner, card.controller],
+            )
+            identity_visibility = {
+                card.owner,
+                "analyst",
+                *(reveal_to or []),
+            }
+            self._log(
+                None,
+                "zone.move.private",
+                (
+                    f"{card.ref} {card.printed_name}: "
+                    f"{origin} → {card.zone}."
+                ),
+                {
+                    "object": card.ref,
+                    "from": origin,
+                    "to": card.zone,
+                    "reason": reason,
+                    "tapped": card.tapped,
+                },
+                visibility=sorted(identity_visibility),
+                changed_objects=[object_id],
+                changed_players=[card.owner, card.controller],
+            )
+        elif log:
             self._log(
                 None,
                 "zone.move",
