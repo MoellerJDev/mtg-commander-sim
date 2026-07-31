@@ -49,6 +49,21 @@ In PowerShell, set the variable with
 compact fixture covers the bundled Zimone and Dina and Mishra, Eminent One
 lists; it is not a substitute for the complete Oracle corpus.
 
+For an exact-commit merge candidate, use the reusable gate after committing all
+intended changes:
+
+```powershell
+py -3.11 scripts/local_merge_gate.py `
+  --expected-branch <branch> `
+  --expected-sha <full-sha>
+```
+
+It rebuilds its database, runs the complete deterministic and focused
+replay/privacy/game gates, creates a sanitized protocol demo, audits the
+repository, builds and clean-installs the wheel, verifies a clean exit, and
+writes ignored logs plus `summary.json` under
+`local/merge-gates/<full-sha>/`.
+
 To discover Scryfall's current timestamped Oracle and rulings exports and
 atomically rebuild the local database before a game:
 
@@ -203,6 +218,15 @@ generated documentation fixtures with bearer capabilities redacted. See
   share one APNAP/controller-order batch before active-player priority;
   complete untap events, additional upkeeps, and after-upkeep casting grammar
   remain blocked
+- source-reviewed CR 505 main-phase boundary: empty-stack pass completion,
+  active-player priority, ordinary sorcery-speed casting, and stackless
+  authoritative land plays use exact precombat/postcombat predicates; extra
+  and skipped combats, ordinal main phases, Archenemy, Attractions, and
+  complete simultaneous Saga handling remain blocked
+- source-reviewed CR 504 draw-step ordering: the stackless turn-based draw or
+  trusted replacement completes before state-based actions, one combined
+  semantic/delayed trigger-order batch, and active-player priority; complete
+  draw-replacement and draw-prevention semantics remain untrusted
 - source-reviewed CR 506 combat-phase boundary: authoritative attacking and
   defending roles, durable combat history, and represented removal from
   combat after zone, control, phasing, or type changes; alternate multiplayer
@@ -710,5 +734,5 @@ container isolation when filesystem-level isolation must also be proven.
 Read `ARCHITECTURE.md`, `LLM_PROTOCOL.md`, `PILOT_PROVIDERS.md`,
 `SEMANTIC_PACKS.md`, and `CLIENT_INTEGRATION.md` before extending the engine.
 
-No software license has been selected for this private repository. Possession
+No software license has been selected for this public repository. Possession
 of the source does not grant redistribution or relicensing rights.

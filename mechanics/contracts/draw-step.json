@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-504-draw-step",
+  "official_name": "Draw Step",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "504",
+    "504.1",
+    "504.2"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "turn-structure",
+    "drawing-cards",
+    "replacement-effects",
+    "triggered-abilities",
+    "state-based-actions",
+    "priority",
+    "multiplayer",
+    "hidden-information",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "library",
+      "hand",
+      "stack"
+    ],
+    "objects": [
+      "active player",
+      "top card of library",
+      "draw replacement",
+      "beginning-of-draw-step trigger"
+    ],
+    "events": [
+      "draw step begins",
+      "turn-based draw is attempted",
+      "card is drawn or the draw is replaced",
+      "state-based actions are checked",
+      "waiting triggers are ordered and put on the stack",
+      "active player receives priority"
+    ],
+    "state_reads": [
+      "active player",
+      "library size and top object",
+      "format first-turn draw modifier",
+      "trusted draw replacements",
+      "waiting semantic and delayed triggers"
+    ],
+    "state_writes": [
+      "library",
+      "hand",
+      "draw history",
+      "empty-library draw-attempt marker",
+      "stack",
+      "priority"
+    ],
+    "costs": [
+      "the turn-based draw has no cost"
+    ],
+    "timing": [
+      "the draw is the first turn-based action of the draw step",
+      "the draw does not use the stack",
+      "no player receives priority before the draw or its replacement completes",
+      "state-based actions and waiting trigger placement precede active-player priority"
+    ],
+    "targets": [
+      "CR 504 adds no target grammar",
+      "targets required by draw-step triggers remain a triggered-ability dependency"
+    ],
+    "choices": [
+      "a trusted optional draw replacement may require a private choice",
+      "one controller orders multiple waiting draw-step triggers"
+    ],
+    "hidden_information": [
+      "the drawn card identity is visible only to its owner and the analyst record",
+      "the public draw event exposes only the count and reason"
+    ],
+    "apnap": [
+      "simultaneous waiting triggers are grouped in active-player/nonactive-player order"
+    ],
+    "layers": [
+      "continuous effects that change or skip the draw remain external dependencies"
+    ],
+    "replacement_effects": [
+      "trusted Dredge is represented one draw at a time",
+      "the complete draw-replacement corpus and affected-player ordering remain incomplete"
+    ],
+    "copy": [
+      "no copy operation is intrinsic to the draw step"
+    ],
+    "control_change": [
+      "draw-step priority follows the current active player or next remaining player if that player leaves"
+    ],
+    "zone_change": [
+      "a normal draw creates a new hand-zone incarnation of the top library card"
+    ],
+    "source_leaves": [
+      "delayed triggers persist independently of their original source as defined by their compiled lifetime"
+    ]
+  },
+  "variants": [
+    "ordinary turn-based draw",
+    "trusted optional Dredge replacement",
+    "beginning-of-draw-step trigger ordering",
+    "empty-library state-based loss",
+    "multiplayer first-player draw",
+    "duel first-player draw omission"
+  ],
+  "witness_cards": [
+    {
+      "name": "Life from the Loam",
+      "oracle_id": "ac8fba34-512c-4f24-999a-ab72f1ce4acb"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_504_rule",
+    "test_turn_draw_is_stackless_and_precedes_active_priority",
+    "test_draw_step_triggers_wait_until_after_the_turn_draw",
+    "test_trusted_draw_replacement_finishes_before_priority",
+    "test_empty_library_loss_is_checked_before_draw_step_priority",
+    "test_first_turn_profile_modifier_and_exact_replay"
+  ],
+  "implementation": {
+    "component": "CommanderEngine draw, draw-replacement, draw-step trigger batching, state stabilization, priority, format-profile, and replay paths",
+    "version": "draw-step-v1"
+  },
+  "known_blockers": [
+    "the complete draw-replacement and draw-prevention Oracle corpus is not compiled",
+    "generic effects that skip a draw step or replace the turn-based draw with multiple or conditional events are incomplete",
+    "the complete continuous-effect, replacement, trigger-target, multiplayer-elimination, and replay interaction matrix remains incomplete"
+  ],
+  "review_status": "draft"
+}

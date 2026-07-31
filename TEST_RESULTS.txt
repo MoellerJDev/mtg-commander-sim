@@ -1,89 +1,61 @@
-# MTG Commander Sim 0.8.0 — combined platform/rules verification
+MTG Commander Sim 0.8.0 - Integration Verification Ledger
+===========================================================
 
-Date: 2026-07-31
-Python: 3.11.9
+Repository: MoellerJDev/mtg-commander-sim (public)
+Active branch: agent/cr-405-stack
+Main before candidate: 4cde25ae506a7a8b0a252096f2f7b3aad8929f9a
+Active PR: #16 (CR 405 Stack)
 
-## Compile, tests, and deterministic game evidence
+LAST EXACT VERIFIED CANDIDATE
+-----------------------------
 
-PASS: `python -m compileall -q mtg_commander_sim tests scripts simctl.py`
+CR 500 refreshed head
+  SHA: 6ccba21fc02ee41d1e96e9f11e0df8452440a3c5
+  Full suite: 3,865 tests passed
+  Rules/replay/privacy/protocol/repository/package gates: passed
+  Working-tree clean exit: passed
+  GitHub push and pull-request matrices: passed (8/8)
 
-PASS: 3,829 unit/integration tests in 184.906 seconds using the rebuilt compact
-Scryfall database:
+PR #15 merged to main
+  Main SHA: 4cde25ae506a7a8b0a252096f2f7b3aad8929f9a
 
-- 3,300 generated per-rule inventory/source-linkage tests
-- 529 ordinary rules, engine, protocol, replay, privacy, and platform tests
+CURRENT UNVERIFIED CANDIDATE
+----------------------------
 
-The six new CR 506 tests verify source traceability, the exact empty-combat
-phase boundary, authoritative attacking and defending roles, removal after
-zone/control/phasing/type invalidation, historical-attacker retention, and
-tapping/untapping preservation. Alternate multiplayer options, generic
-effect-created or effect-removed combatants, requirement snapshots, extra
-combats, planeswalker destinations, “alone” provenance, and universal
-combat-relative timing remain blocked.
+CR 405 is being combined with merged CR 500-505.
+Expected discovered tests after regeneration: 3,871.
+The exact-SHA local gate and fresh GitHub matrices must pass before PR #16 is
+merged.
 
-Generated source linkage is not a claim that every rule has executable semantic
-coverage. The reviewed ledger remains fail-closed about passing, blocked,
-definition-only, and unreviewed cases.
+Combined rule-review totals:
+  Pinned CR release: 2026-06-19
+  Numbered rules: 3,300
+  Reviewed: 485
+  Passing: 77
+  Blocked: 340
+  Definition-only: 68
+  Unreviewed: 2,815
 
-PASS: the trusted-only four-seat micro-pool reached a natural winner with zero
-incorrectly suppressed meaningful windows, passed the seat-projection audit,
-and exact command-replayed.
+Combined mechanic totals:
+  Partial: 42
+  Unclassified: 383
 
-The seed-20260730 opportunity regression and deterministic four-player
-natural-winner soak were also rerun independently. Both exact-replayed; the
-four-player run retained zero incorrectly suppressed meaningful windows and
-passed the seat-projection audit.
+INTERPRETATION BOUNDARY
+-----------------------
 
-The full-game fixture is rules-runtime and protocol evidence. Its repeated
-micro-pool is not Commander format-legality, deck-quality, or matchup evidence.
+Test counts prove only the exercised deterministic behaviors. They do not prove
+complete Comprehensive Rules or Oracle coverage. Material unsupported semantics
+must continue to fail closed. The authoritative server/browser vertical slice
+has not yet been implemented.
 
-## Pinned rules corpus
+CI POLICY
+---------
 
-PASS: `python simctl.py rules verify --root .`
+The repository is public and GitHub-hosted Actions are executing normally.
+Every updated candidate must receive fresh green push and pull-request runs.
 
-- effective date: 2026-06-19
-- source SHA-256:
-  `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
-- numbered rules verified: 3,300
-- conformance cases verified: 3,300
-- mechanics verified: 425
-- current snapshot complete: false
+NEXT
+----
 
-## Protocol and repository validation
-
-PASS: the four-player protocol demo completed with protocol version 2.1,
-four players, seed 20260728, and compact delta packets smaller than bootstrap.
-
-PASS:
-
-- generated platform status stale check
-- 14 JSON schemas checked
-- complete tracked-source credential and raw-capability scan
-- forbidden runtime/database/build artifact scan
-- reachable-history path and oversized-blob scan
-- sanitized public replay-fixture policy check
-
-The scan covered 262 tracked files and 11,401,521 tracked bytes.
-
-## Package
-
-PASS: built `mtg_commander_sim-0.8.0-py3-none-any.whl`.
-
-PASS: installed the wheel into a fresh virtual environment; the installed
-package reported version 0.8.0 and its CLI smoke test completed.
-
-## Evidence boundary
-
-These checks establish the local CR 506 focused branch atop the green CR 507
-main baseline, including source pinning, represented combat-phase roles and
-removal semantics, replay, privacy, action opportunity, packaging, and
-repository gates. They do not establish alternate multiplayer combat options,
-generic effect-created combatants, complete restriction/requirement or timing
-grammar, a production ASGI server, browser client, durable database, complete
-Comprehensive Rules behavior,
-Oracle-corpus semantic closure, Commander deck legality for the micro-pool,
-deck superiority, or statistical matchup evidence.
-
-The baseline main commit's exact-SHA GitHub Actions matrix is recorded after
-pull request #8 in run 30614171826. Exact-SHA CI for the focused CR 506 commit is
-not claimed until that commit is pushed.
+Run the exact CR 405 merge gate, merge PR #16 normally after green CI, and
+continue with PR #17.
