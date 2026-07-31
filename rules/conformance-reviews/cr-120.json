@@ -128,7 +128,7 @@
       ],
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_departed_combat_source_deals_no_damage",
-        "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_power_combat_source_assigns_zero_damage"
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_power_combat_source_assigns_no_damage"
       ],
       "required_scenarios": [
         "positive",
@@ -686,7 +686,7 @@
       ],
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event",
-        "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_power_combat_source_assigns_zero_damage",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_power_combat_source_assigns_no_damage",
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_damage_fails_closed"
       ],
       "required_scenarios": [

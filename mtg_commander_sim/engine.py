@@ -16115,20 +16115,98 @@ class CommanderEngine:
         return True
 
     def _begin_combat_damage(self) -> None:
+        unsupported_keywords: set[str] = set()
+        participant_ids = set(self.state.combat.attackers)
+        participant_ids.update(
+            blocker_id
+            for blockers in self.state.combat.blockers.values()
+            for blocker_id in blockers
+        )
+        for object_id in participant_ids:
+            card = self.state.cards.get(object_id)
+            if card is None or card.zone != "battlefield":
+                continue
+            keywords = {
+                str(keyword).casefold()
+                for keyword in self._effective_card_data(card).get(
+                    "keywords", []
+                )
+            }
+            unsupported_keywords.update(
+                keywords.intersection(
+                    {"first strike", "double strike", "trample", "lifelink"}
+                )
+            )
+        if unsupported_keywords:
+            raise GameRuleError(
+                "Combat damage requires unsupported keyword semantics: "
+                + ", ".join(sorted(unsupported_keywords))
+            )
         if self._combat_is_simple():
             assignments: list[dict[str, Any]] = []
             for attacker_id, defender in self.state.combat.attackers.items():
+                attacker = self.state.cards.get(attacker_id)
+                if (
+                    attacker is None
+                    or attacker.zone != "battlefield"
+                    or attacker.attacking is None
+                ):
+                    continue
                 power = max(
                     0,
                     self._numeric_stat(attacker_id, "power"),
                 )
-                blockers = self.state.combat.blockers.get(attacker_id, [])
-                if not blockers:
-                    assignments.append({"source": self.state.cards[attacker_id].ref, "target": defender, "amount": power})
+                was_blocked = attacker_id in self.state.combat.blockers
+                blockers = [
+                    blocker_id
+                    for blocker_id in self.state.combat.blockers.get(
+                        attacker_id,
+                        [],
+                    )
+                    if (
+                        (blocker := self.state.cards.get(blocker_id))
+                        is not None
+                        and blocker.zone == "battlefield"
+                        and blocker.blocking == attacker_id
+                    )
+                ]
+                if not was_blocked:
+                    if (
+                        power > 0
+                        and self._combat_damage_target_exists(str(defender))
+                    ):
+                        assignments.append(
+                            {
+                                "source": attacker.ref,
+                                "target": defender,
+                                "amount": power,
+                            }
+                        )
                 elif blockers:
-                    assignments.append({"source": self.state.cards[attacker_id].ref, "target": self.state.cards[blockers[0]].ref, "amount": power})
-                    blocker_power = self._numeric_stat(blockers[0], "power")
-                    assignments.append({"source": self.state.cards[blockers[0]].ref, "target": self.state.cards[attacker_id].ref, "amount": blocker_power})
+                    if power > 0:
+                        assignments.append(
+                            {
+                                "source": attacker.ref,
+                                "target": self.state.cards[
+                                    blockers[0]
+                                ].ref,
+                                "amount": power,
+                            }
+                        )
+                    blocker_power = max(
+                        0,
+                        self._numeric_stat(blockers[0], "power"),
+                    )
+                    if blocker_power > 0:
+                        assignments.append(
+                            {
+                                "source": self.state.cards[
+                                    blockers[0]
+                                ].ref,
+                                "target": attacker.ref,
+                                "amount": blocker_power,
+                            }
+                        )
             self._apply_combat_assignments(assignments)
             self._grant_priority(self.state.active_player)
             return
@@ -16145,14 +16223,179 @@ class CommanderEngine:
     def _complete_combat_damage(self, decision: Any) -> None:
         assignments: list[dict[str, Any]] = []
         for seat in decision.actors:
-            for assignment in decision.responses[seat].get("assignments") or []:
-                source = self._resolve_object(seat, str(assignment["source"]), zones={"battlefield"}, controlled_only=True)
-                amount = int(assignment.get("amount", 0))
-                if amount < 0:
-                    raise GameRuleError("Damage cannot be negative")
-                assignments.append({"source": source.ref, "target": assignment["target"], "amount": amount, "deathtouch": bool(assignment.get("deathtouch", False))})
+            assignments.extend(
+                self._validated_combat_damage_assignments(
+                    seat,
+                    decision.responses[seat].get("assignments") or [],
+                )
+            )
         self._apply_combat_assignments(assignments)
         self._grant_priority(self.state.active_player)
+
+    def _validated_combat_damage_assignments(
+        self,
+        seat: str,
+        submitted: Sequence[Mapping[str, Any]],
+    ) -> list[dict[str, Any]]:
+        if (
+            not isinstance(submitted, Sequence)
+            or isinstance(submitted, (str, bytes, Mapping))
+        ):
+            raise GameRuleError(
+                "Combat-damage assignments must be an array"
+            )
+        source_targets: dict[str, set[str]] = {}
+        source_power: dict[str, int] = {}
+
+        for attacker_id, defender in self.state.combat.attackers.items():
+            attacker = self.state.cards.get(attacker_id)
+            if (
+                attacker is None
+                or attacker.zone != "battlefield"
+                or attacker.controller != seat
+            ):
+                continue
+            types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(attacker).get("type_line")
+                    or ""
+                )
+            )
+            if "creature" not in types:
+                continue
+            if attacker_id in self.state.combat.blockers:
+                targets = {
+                    blocker.ref
+                    for blocker_id in self.state.combat.blockers.get(
+                        attacker_id, []
+                    )
+                    if (
+                        (blocker := self.state.cards.get(blocker_id))
+                        is not None
+                        and blocker.zone == "battlefield"
+                        and blocker.blocking == attacker_id
+                    )
+                }
+            else:
+                target = str(defender)
+                targets = (
+                    {target}
+                    if self._combat_damage_target_exists(target)
+                    else set()
+                )
+            source_targets[attacker.ref] = targets
+            source_power[attacker.ref] = max(
+                0,
+                self._numeric_stat(attacker.object_id, "power"),
+            )
+
+        blocker_attackers: dict[str, set[str]] = {}
+        for attacker_id, blocker_ids in self.state.combat.blockers.items():
+            attacker = self.state.cards.get(attacker_id)
+            if attacker is None or attacker.zone != "battlefield":
+                continue
+            for blocker_id in blocker_ids:
+                blocker = self.state.cards.get(blocker_id)
+                if (
+                    blocker is None
+                    or blocker.zone != "battlefield"
+                    or blocker.controller != seat
+                ):
+                    continue
+                types, _, _ = self._type_parts(
+                    str(
+                        self._effective_card_data(blocker).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )
+                if "creature" not in types:
+                    continue
+                blocker_attackers.setdefault(blocker.ref, set()).add(
+                    attacker.ref
+                )
+                source_power[blocker.ref] = max(
+                    0,
+                    self._numeric_stat(blocker.object_id, "power"),
+                )
+        source_targets.update(blocker_attackers)
+
+        totals: dict[str, int] = {}
+        canonical: list[dict[str, Any]] = []
+        seen_pairs: set[tuple[str, str]] = set()
+        for raw in submitted:
+            if not isinstance(raw, Mapping):
+                raise GameRuleError(
+                    "Each combat-damage assignment must be an object"
+                )
+            if set(raw) != {"source", "target", "amount"}:
+                raise GameRuleError(
+                    "Combat-damage assignment requires exactly source, "
+                    "target, and amount"
+                )
+            if not isinstance(raw["source"], str):
+                raise GameRuleError(
+                    "Combat-damage assignment source must be a string"
+                )
+            if not isinstance(raw["target"], str):
+                raise GameRuleError(
+                    "Combat-damage assignment target must be a string"
+                )
+            source_ref = raw["source"]
+            if source_ref not in source_targets:
+                raise GameRuleError(
+                    f"{source_ref or 'Object'} is not assigning combat damage"
+                )
+            if source_power[source_ref] <= 0:
+                raise GameRuleError(
+                    f"{source_ref} does not assign combat damage because "
+                    "its power is 0 or less"
+                )
+            target_ref = raw["target"]
+            if target_ref not in source_targets[source_ref]:
+                raise GameRuleError(
+                    f"{target_ref or 'Object'} is an illegal combat-damage "
+                    f"target for {source_ref}"
+                )
+            value = raw["amount"]
+            if not isinstance(value, int) or isinstance(value, bool):
+                raise GameRuleError("Combat damage must be an integer")
+            amount = value
+            if amount < 0:
+                raise GameRuleError("Damage cannot be negative")
+            pair = (source_ref, target_ref)
+            if pair in seen_pairs:
+                raise GameRuleError(
+                    "A combat-damage source/target pair may appear only once"
+                )
+            seen_pairs.add(pair)
+            totals[source_ref] = totals.get(source_ref, 0) + amount
+            canonical.append(
+                {
+                    "source": source_ref,
+                    "target": target_ref,
+                    "amount": amount,
+                }
+            )
+
+        for source_ref, power in source_power.items():
+            required = power if source_targets.get(source_ref) else 0
+            assigned = totals.get(source_ref, 0)
+            if assigned != required:
+                raise GameRuleError(
+                    f"{source_ref} must assign exactly {required} combat "
+                    f"damage, not {assigned}"
+                )
+        return canonical
+
+    def _combat_damage_target_exists(self, target: str) -> bool:
+        if target in self.state.players:
+            return target in self.active_seats
+        return any(
+            card.ref == target and card.zone == "battlefield"
+            for card in self.state.cards.values()
+        )
 
     def _combat_payload(self) -> dict[str, Any]:
         return {

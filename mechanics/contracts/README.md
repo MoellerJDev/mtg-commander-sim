@@ -58,6 +58,10 @@ permissions, division, and opponent-made choices remain explicitly untrusted.
 CR 600 pins the Spells, Abilities, and Effects section taxonomy to the
 dependent CR 601-609 contracts. Because CR 600 contains only a heading, it is
 definition-only and does not create a standalone behavioral claim.
+CR 510 traces combat-damage assignment authority, legal recipients, exact
+power totals, atomic rollback, and ordinary simultaneous dealing. First/double
+strike, trample, lifelink, APNAP damage triggers, and the universal simultaneous
+replacement/prevention batch remain blocked.
 CR 511 traces end-of-combat priority, represented boundary triggers, and the
 removal-from-combat handoff into postcombat main. The complete grammar for
 effects lasting until end of combat remains blocked.

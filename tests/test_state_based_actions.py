@@ -1099,7 +1099,7 @@ class StateBasedActionEngineTests(unittest.TestCase):
                 ]
             )
 
-    def test_negative_power_combat_source_assigns_zero_damage(self):
+    def test_negative_power_combat_source_assigns_no_damage(self):
         engine = self.make_engine(7088)
         creature_ref = engine.create_token(
             "A",
@@ -1118,16 +1118,7 @@ class StateBasedActionEngineTests(unittest.TestCase):
         engine._begin_combat_damage()
 
         self.assertEqual(before_life, engine.state.players["B"].life)
-        self.assertEqual(
-            [
-                {
-                    "source": creature.ref,
-                    "target": "B",
-                    "amount": 0,
-                }
-            ],
-            engine.state.combat.damage_assignments,
-        )
+        self.assertEqual([], engine.state.combat.damage_assignments)
         combat_event = next(
             event
             for event in reversed(engine.state.events)
