@@ -1,6 +1,6 @@
 {
   "blockers": [
-    "future engine choice schemas, production accessibility, and richer browser command-retry UX remain incomplete",
+    "future engine choice schemas and complete screen-reader audits remain incomplete",
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
@@ -10,7 +10,7 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "server_browser_lifecycle_operations_on_main_accessibility_next",
+    "active_phase": "managed_local_runtime_and_responsive_browser_validation",
     "branch": "main",
     "branch_ancestry": {
       "focused_branch_base": "6f05661b05de423ed081572b062c47548380c8c6",
@@ -220,6 +220,13 @@
         "number": 29,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/29"
+      },
+      {
+        "base": "main",
+        "head": "agent/browser-server-operations",
+        "number": 30,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/30"
       }
     ],
     "tags": [
@@ -235,16 +242,16 @@
   },
   "milestones": [
     {
-      "evidence": "Integration PRs #1-17 and #24-29 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
+      "evidence": "Integration PRs #1-17 and #24-30 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete"
     },
     {
-      "evidence": "The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, four-isolated-context Chromium coverage, a shared versioned adapter for current generic choice schemas, application-tested process restart recovery, and owner-only durable stop/resume with safe seated-member inspection. Future schemas, broader accessibility, expiry/rate limits, and production deployment remain open.",
+      "evidence": "The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, four-isolated-context Chromium coverage, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI, exact command retry, and one-command managed Scryfall/browser startup. Future schemas, full accounts, expiry/rate limits, and production deployment remain open.",
       "id": "browser_commander_mvp",
       "name": "Browser Commander MVP",
-      "status": "development_mvp_hardened"
+      "status": "development_local_runtime_hardened"
     },
     {
       "evidence": "The versioned 2026-06-19 corpus and reviewed CR 400-408 and CR 500-512 slices are on main. Broader rules and Oracle completeness remain explicitly unclaimed.",
@@ -259,7 +266,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Complete focused browser accessibility and command-retry hardening, then continue server expiry/rate-limit and deployment boundaries before broad rules-family work.",
+  "next_task": "Complete the current four-seat manual browser test against the live July 31 Scryfall snapshot, fix reported UI/runtime defects, then run the exact merge gate for the focused branch.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -268,11 +275,11 @@
   "platform": {
     "ai_dependency": "none_for_core_tests_or_runtime",
     "authoritative_kernel": "implemented_partial",
-    "browser_client": "implemented_current_generic_choice_forms_and_match_operations",
+    "browser_client": "implemented_responsive_current_choice_forms_local_art_reconnect_and_exact_retry",
     "durable_database": "implemented_sqlite_control_plane_plus_game_record_v3",
     "guest_or_account_identity": "implemented_expiring_guest_sessions",
     "hidden_information": "implemented_projected_protocol",
-    "http_websocket_server": "implemented_single_process_restart_and_lifecycle_recovery",
+    "http_websocket_server": "implemented_single_process_managed_data_static_browser_restart_and_lifecycle_recovery",
     "replay": "implemented_command_replay",
     "rooms_and_lobbies": "implemented_invite_only_four_seat",
     "security": "guest_hash_csrf_origin_capability_and_projection_baseline",
@@ -342,10 +349,10 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 3960,
+    "deterministic_cases_discovered": 3971,
     "migration_files": 1,
     "schema_files": 14,
-    "server_files": 4,
+    "server_files": 5,
     "web_files": 20
   },
   "validation": {
@@ -357,12 +364,13 @@
       "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30656571388"
     },
     "local": {
-      "browser_four_isolated_contexts": "pass_chromium_owner_stop_nonowner_reload_resume_reconnect_and_private_penalized_mulligan_form",
+      "browser_four_isolated_contexts": "pass_chromium_lifecycle_exact_retry_mobile_reconnect_focus_and_private_penalized_mulligan_form",
       "browser_typecheck_and_production_build": "pass",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "deterministic_tests": "pass_full_exact_commit_gate",
       "four_player_protocol_demo": "pass",
+      "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",
       "server_lifecycle_operations": "pass_owner_only_stop_resume_safe_inspection_paused_command_gate_and_rules_pause_protection",
       "server_process_restart_recovery": "pass_fresh_capability_idempotency_lifecycle_continuation_exact_replay",

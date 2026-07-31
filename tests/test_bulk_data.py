@@ -10,6 +10,7 @@ from mtg_commander_sim.bulk import (
     ScryfallBulkDataError,
     ScryfallBulkItem,
     _download_bulk_item,
+    _prune_managed_bulk_cache,
     fetch_bulk_manifest,
     parse_bulk_manifest,
 )
@@ -103,6 +104,36 @@ class ScryfallBulkDataTests(unittest.TestCase):
                 urlopen=fake_urlopen,
             )
             self.assertEqual(b"abc", path.read_bytes())
+
+    def test_successful_refresh_retains_only_current_managed_archives(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            current_oracle = root / "oracle-cards-current.jsonl.gz"
+            current_rulings = root / "rulings-current.jsonl.gz"
+            old_oracle = root / "oracle-cards-old.jsonl.gz"
+            old_rulings = root / "rulings-old.jsonl.gz"
+            stale_partial = root / "oracle-cards-failed.jsonl.gz.part"
+            user_file = root / "custom-card-data.jsonl.gz"
+            for path in (
+                current_oracle,
+                current_rulings,
+                old_oracle,
+                old_rulings,
+                stale_partial,
+                user_file,
+            ):
+                path.write_bytes(b"fixture")
+
+            removed = _prune_managed_bulk_cache(
+                root, {current_oracle, current_rulings}
+            )
+
+            self.assertEqual(
+                {old_oracle, old_rulings, stale_partial}, set(removed)
+            )
+            self.assertTrue(current_oracle.exists())
+            self.assertTrue(current_rulings.exists())
+            self.assertTrue(user_file.exists())
 
 
 if __name__ == "__main__":

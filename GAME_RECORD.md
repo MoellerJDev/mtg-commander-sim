@@ -117,6 +117,21 @@ decision. A browser resume cannot clear any other pause kind. Exact replay
 continues to verify the accepted-command prefix across stop, process restart,
 resume, and later accepted commands.
 
+The record's `manifest.scryfall.metadata_hash` also pins the local card-data
+snapshot used to interpret its cards. The server opens the current SQLite
+database when that fingerprint matches; otherwise it verifies and opens the
+retained `data/card-snapshots/<metadata-hash>.sqlite3` file. A replaced
+database is retained only while at least one local Game Record references it,
+then pruned. Raw bulk archives and downloaded image bytes are rebuildable
+caches and are not part of Game Record v3.
+
+If a player confirms future-dated preview cards, the deck provenance metadata
+records `format_legality.status = preview_override_confirmed`, the structured
+issues, and the confirmation fingerprint. This is an auditable format-policy
+exception, not semantic trust: unresolved material Oracle behavior continues
+to fail closed and prevents the record from becoming conformance or matchup
+evidence.
+
 An operator may preserve a discovered boundary explicitly:
 
 ```bash

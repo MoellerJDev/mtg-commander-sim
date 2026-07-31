@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+### Managed local runtime and responsive browser
+
+- Reduced normal local startup to `python -m server`: the launcher installs
+  missing browser dependencies, rebuilds changed React sources, serves the
+  production client and API from one origin, and opens the local UI.
+- Added visible first-run setup, 24-hour Scryfall bulk-manifest checks, atomic
+  Oracle/rulings SQLite builds, current-pair archive retention, and
+  fingerprinted database snapshots retained only for saved Game Records that
+  still require them.
+- Made startup verify and activate the newest available Scryfall snapshot
+  before deck import becomes ready, and added exact-fingerprint confirmation
+  for future-dated preview legality without weakening semantic fail-closed
+  behavior or ordinary Commander construction errors.
+- Indexed Scryfall image references in SQLite and added a host-restricted,
+  size-bounded, atomic local image cache with bounded deck prefetch and
+  per-visible-card browser requests; bulk card data never enters the browser.
+- Reworked the room and game surfaces into responsive desktop/mobile layouts
+  with deck-ready summaries, card art, stack/activity context, accessible
+  modal focus/Escape behavior, reconnect controls, reduced-motion support, and
+  exact-envelope retry after ambiguous command delivery.
+- Kept the host invite available after readiness and reload, added owner-only
+  invite replacement with immediate old-code invalidation, and added a
+  seat-scoped pregame **Change deck / Unready** flow.
+- Extended application and Chromium coverage for managed data, archive/snapshot
+  cleanup, record-pinned recovery, local static serving, 390-pixel layout,
+  focus restoration, and byte-equivalent idempotent command retry.
+
 ### Authoritative server/browser vertical slice
 
 - Added strict protocol 3.0 command envelopes with client command IDs,

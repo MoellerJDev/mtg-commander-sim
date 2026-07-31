@@ -3,15 +3,20 @@ from __future__ import annotations
 import asyncio
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+import hashlib
 import hmac
+import json
 import os
 from pathlib import Path
+import re
 import secrets
 from typing import Any, AsyncIterator
 import uuid
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -34,6 +39,7 @@ from mtg_commander_sim import (
     parse_deck_text,
 )
 from mtg_commander_sim.preflight import semantic_preflight
+from mtg_commander_sim.record import database_fingerprint
 from mtg_commander_sim.runtime import (
     GameActor,
     GameLifecycleConflict,
@@ -47,6 +53,7 @@ from .store import (
     StoreForbidden,
     StoreNotFound,
 )
+from .data import CardImageCache, IMAGE_SIZES, ManagedScryfallData
 
 
 COOKIE_NAME = "commander_guest"
@@ -58,6 +65,12 @@ class ServerSettings:
     card_db: Path
     database: Path
     game_root: Path
+    bulk_dir: Path = Path("data/bulk")
+    card_snapshot_dir: Path = Path("data/card-snapshots")
+    image_cache: Path = Path("data/images")
+    static_dir: Path = Path("web/dist")
+    auto_update_cards: bool = False
+    card_update_interval_seconds: int = 24 * 60 * 60
     allowed_origins: tuple[str, ...] = (
         "http://localhost:5173",
         "http://127.0.0.1:5173",
@@ -67,10 +80,24 @@ class ServerSettings:
     @classmethod
     def from_environment(cls) -> "ServerSettings":
         data_root = Path(os.environ.get("MTG_SERVER_DATA", "local/server"))
+        managed_data_root = Path(os.environ.get("MTG_DATA_ROOT", "data"))
+        explicit_card_db = "MTG_CARD_DB" in os.environ
         return cls(
-            card_db=Path(os.environ.get("MTG_CARD_DB", "data/test-ci.sqlite3")),
+            card_db=Path(os.environ.get("MTG_CARD_DB", managed_data_root / "scryfall-current.sqlite3")),
             database=data_root / "server.sqlite3",
             game_root=data_root / "games",
+            bulk_dir=Path(os.environ.get("MTG_BULK_DIR", managed_data_root / "bulk")),
+            card_snapshot_dir=Path(
+                os.environ.get("MTG_CARD_SNAPSHOT_DIR", managed_data_root / "card-snapshots")
+            ),
+            image_cache=Path(os.environ.get("MTG_IMAGE_CACHE", managed_data_root / "images")),
+            static_dir=Path(os.environ.get("MTG_WEB_DIST", "web/dist")),
+            auto_update_cards=os.environ.get(
+                "MTG_AUTO_UPDATE_CARDS", "0" if explicit_card_db else "1"
+            ) == "1",
+            card_update_interval_seconds=int(
+                os.environ.get("MTG_CARD_UPDATE_SECONDS", str(24 * 60 * 60))
+            ),
             allowed_origins=tuple(
                 origin.strip()
                 for origin in os.environ.get(
@@ -113,6 +140,12 @@ class DeckRequest(StrictModel):
     commander: str = Field(default="", max_length=200)
     decklist: str = Field(default="", max_length=100_000)
     source_url: str | None = Field(default=None, max_length=500)
+    legality_confirmation: str | None = Field(
+        default=None,
+        min_length=64,
+        max_length=64,
+        pattern=r"^[0-9a-f]{64}$",
+    )
 
     @model_validator(mode="after")
     def validate_source(self) -> "DeckRequest":
@@ -199,12 +232,21 @@ class ServerRuntime:
         self.settings = settings
         self.store = ServerStore(settings.database)
         self.card_db = CardDatabase(settings.card_db)
+        self._card_databases: dict[str, CardDatabase] = {
+            str(database_fingerprint(self.card_db)["metadata_hash"]): self.card_db
+        }
         self.records = DirectoryGamePersistence(settings.game_root)
         self.idempotency = SqliteIdempotencyRepository(settings.database)
         self.persistence = _StoreGamePersistence(self.records, self.store)
         self.manager = GameManager()
         self.hub = ProjectionHub()
         self._load_lock = asyncio.Lock()
+        self._background: set[asyncio.Task[Any]] = set()
+
+    def spawn(self, coroutine: Any, *, name: str) -> None:
+        task = asyncio.create_task(coroutine, name=name)
+        self._background.add(task)
+        task.add_done_callback(self._background.discard)
 
     async def actor(self, game_id: str) -> GameActor:
         try:
@@ -216,7 +258,7 @@ class ServerRuntime:
                 return self.manager.get(game_id)
             except KeyError:
                 service = self.records.load(
-                    self.card_db,
+                    self._database_for_game(game_id),
                     game_id,
                     idempotency=self.idempotency,
                 )
@@ -228,6 +270,36 @@ class ServerRuntime:
                 return await self.manager.add(
                     service, persistence=self.persistence
                 )
+
+    def _database_for_game(self, game_id: str) -> CardDatabase:
+        manifest_path = self.records.game_directory(game_id) / "manifest.json"
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            expected = str(manifest.get("scryfall", {}).get("metadata_hash") or "")
+        except (OSError, json.JSONDecodeError, AttributeError) as exc:
+            raise ValueError(f"Persisted game manifest is unreadable: {exc}") from exc
+        if not expected:
+            raise ValueError("Persisted game does not pin a card-database fingerprint")
+        existing = self._card_databases.get(expected)
+        if existing is not None:
+            return existing
+        if not re.fullmatch(r"[0-9a-f]{64}", expected):
+            raise ValueError("Persisted game card-database fingerprint is invalid")
+        path = self.settings.card_snapshot_dir / f"{expected}.sqlite3"
+        if not path.is_file():
+            raise ValueError(
+                "The card-database snapshot required by this Game Record is unavailable"
+            )
+        database = CardDatabase(path)
+        actual = str(database_fingerprint(database)["metadata_hash"])
+        if actual != expected:
+            database.close()
+            raise ValueError("Retained card-database snapshot fingerprint mismatch")
+        self._card_databases[expected] = database
+        return database
+
+    def card_databases(self) -> tuple[CardDatabase, ...]:
+        return tuple(self._card_databases.values())
 
     async def game_summary(
         self, game_id: str, guest_id: str
@@ -252,8 +324,13 @@ class ServerRuntime:
         }
 
     async def close(self) -> None:
+        for task in self._background:
+            task.cancel()
+        if self._background:
+            await asyncio.gather(*self._background, return_exceptions=True)
         await self.manager.close()
-        self.card_db.close()
+        for database in set(self._card_databases.values()):
+            database.close()
 
 
 def _bearer(request: Request) -> str | None:
@@ -264,7 +341,13 @@ def _bearer(request: Request) -> str | None:
 
 
 def _runtime(request: Request) -> ServerRuntime:
-    return request.app.state.runtime
+    runtime: ServerRuntime | None = request.app.state.runtime
+    if runtime is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Card data is still being prepared; check /api/v1/system",
+        )
+    return runtime
 
 
 def _guest(
@@ -317,17 +400,61 @@ def _compact_preflight(report: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _legality_confirmation_fingerprint(
+    deck_fingerprint: str,
+    issues: list[dict[str, Any]],
+) -> str:
+    payload = json.dumps(
+        {
+            "schema_version": 1,
+            "deck_list_fingerprint": deck_fingerprint,
+            "issues": issues,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
 def create_app(settings: ServerSettings | None = None) -> FastAPI:
     resolved = settings or ServerSettings.from_environment()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        runtime = ServerRuntime(resolved)
-        app.state.runtime = runtime
+        app.state.runtime = None
+        runtime_lock = asyncio.Lock()
+
+        async def initialize_runtime(_database: Path) -> None:
+            async with runtime_lock:
+                if app.state.runtime is None:
+                    app.state.runtime = ServerRuntime(resolved)
+
+        data = ManagedScryfallData(
+            resolved.card_db,
+            resolved.bulk_dir,
+            resolved.card_snapshot_dir,
+            resolved.game_root,
+            enabled=resolved.auto_update_cards,
+            interval_seconds=resolved.card_update_interval_seconds,
+        )
+        images = CardImageCache(
+            resolved.image_cache,
+            lambda: (
+                app.state.runtime.card_databases()
+                if app.state.runtime is not None
+                else ()
+            ),
+        )
+        app.state.data = data
+        app.state.images = images
+        await data.start(initialize_runtime)
         try:
             yield
         finally:
-            await runtime.close()
+            await data.close()
+            runtime: ServerRuntime | None = app.state.runtime
+            if runtime is not None:
+                await runtime.close()
 
     app = FastAPI(
         title="Commander Arena Server",
@@ -338,13 +465,71 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         CORSMiddleware,
         allow_origins=list(resolved.allowed_origins),
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT"],
+        allow_methods=["GET", "POST", "PUT", "DELETE"],
         allow_headers=["Content-Type", "X-CSRF-Token"],
     )
 
     @app.get("/api/v1/health")
-    async def health() -> dict[str, str]:
-        return {"status": "ok", "authority": "server", "protocol": "3.0"}
+    async def health(request: Request) -> dict[str, str]:
+        data: ManagedScryfallData = request.app.state.data
+        return {
+            "status": "ok" if data.ready else "starting",
+            "authority": "server",
+            "protocol": "3.0",
+        }
+
+    @app.get("/api/v1/system")
+    async def system_status(request: Request) -> dict[str, Any]:
+        data: ManagedScryfallData = request.app.state.data
+        images: CardImageCache = request.app.state.images
+        return {
+            "server": "ready",
+            "protocol": "3.0",
+            "card_data": data.status(),
+            "images": {
+                "mode": "local_on_demand_cache",
+                "downloaded": images.downloaded,
+                "ready": data.ready,
+            },
+            "browser": {
+                "served_by_server": (resolved.static_dir / "index.html").is_file()
+            },
+        }
+
+    @app.post("/api/v1/system/refresh", status_code=202)
+    async def refresh_system(request: Request) -> dict[str, Any]:
+        client_host = request.client.host if request.client else ""
+        if client_host not in {"127.0.0.1", "::1", "testclient"}:
+            raise HTTPException(status_code=403, detail="Refresh is limited to the local machine")
+        data: ManagedScryfallData = request.app.state.data
+        if not data.enabled:
+            raise HTTPException(status_code=409, detail="Automatic card-data updates are disabled")
+        data.request_refresh()
+        return {"accepted": True, "card_data": data.status()}
+
+    @app.get("/api/v1/cards/{oracle_prefix}/image")
+    async def card_image(
+        oracle_prefix: str,
+        request: Request,
+        face: int = 0,
+        size: str = "normal",
+    ) -> FileResponse:
+        if not re.fullmatch(r"[0-9a-fA-F-]{8,36}", oracle_prefix):
+            raise HTTPException(status_code=404, detail="Unknown card image")
+        if face < 0 or face > 9 or size not in IMAGE_SIZES:
+            raise HTTPException(status_code=422, detail="Unsupported card image variant")
+        images: CardImageCache = request.app.state.images
+        try:
+            path, media_type = await images.get(oracle_prefix, face=face, size=size)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except (OSError, ValueError) as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+        return FileResponse(
+            path,
+            media_type=media_type,
+            headers={"Cache-Control": "public, max-age=31536000, immutable"},
+        )
 
     @app.post("/api/v1/guests", status_code=201)
     async def create_guest(
@@ -415,6 +600,24 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         except (StoreForbidden, StoreNotFound) as exc:
             raise _translate_store_error(exc) from exc
 
+    @app.post(
+        "/api/v1/rooms/{room_id}/invite",
+        dependencies=[Depends(_csrf)],
+    )
+    async def rotate_room_invite(
+        room_id: str,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, str]:
+        try:
+            invite_code = runtime.store.rotate_invite(
+                room_id,
+                guest["guest_id"],
+            )
+        except (StoreForbidden, StoreNotFound, StoreConflict) as exc:
+            raise _translate_store_error(exc) from exc
+        return {"invite_code": invite_code}
+
     @app.put(
         "/api/v1/rooms/{room_id}/deck",
         dependencies=[Depends(_csrf)],
@@ -422,6 +625,7 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
     async def upload_deck(
         room_id: str,
         body: DeckRequest,
+        request: Request,
         guest: dict[str, Any] = Depends(_guest),
         runtime: ServerRuntime = Depends(_runtime),
     ) -> dict[str, Any]:
@@ -446,22 +650,93 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
                     source="browser-upload",
                 )
                 loader.resolve_names(deck)
-            issues = loader.validate_commander_deck(deck)
+            issues = loader.validate_commander_deck(deck, check_legality=False)
+            legality_issues = loader.commander_legality_issues(deck)
+            issues.extend(
+                issue["message"]
+                for issue in legality_issues
+                if not issue["confirmable"]
+            )
             if issues:
                 raise StoreConflict("; ".join(issues))
+            deck_fingerprint = deck_list_fingerprint(deck)
+            legality_confirmation = None
+            if legality_issues:
+                legality_confirmation = _legality_confirmation_fingerprint(
+                    deck_fingerprint,
+                    legality_issues,
+                )
+                if body.legality_confirmation != legality_confirmation:
+                    raise HTTPException(
+                        status_code=409,
+                        detail={
+                            "code": "legality_confirmation_required",
+                            "message": (
+                                "This list contains preview cards that are present "
+                                "in Scryfall but are not yet Commander-legal."
+                            ),
+                            "confirmation": legality_confirmation,
+                            "deck_list_fingerprint": deck_fingerprint,
+                            "issues": legality_issues,
+                        },
+                    )
+                deck.metadata["format_legality"] = {
+                    "schema_version": 1,
+                    "profile": "commander",
+                    "status": "preview_override_confirmed",
+                    "confirmation_fingerprint": legality_confirmation,
+                    "issues": legality_issues,
+                }
             preflight = semantic_preflight(runtime.card_db, deck)
+            preflight["format_legality"] = deck.metadata.get(
+                "format_legality",
+                {
+                    "schema_version": 1,
+                    "profile": "commander",
+                    "status": "legal",
+                    "issues": [],
+                },
+            )
             saved = runtime.store.save_deck(
                 guest["guest_id"],
                 room_id,
                 deck,
-                fingerprint=deck_list_fingerprint(deck),
+                fingerprint=deck_fingerprint,
                 preflight=preflight,
+            )
+            oracle_ids = [
+                runtime.card_db.lookup(name, fuzzy=False).oracle_id
+                for name in deck.expanded()
+            ]
+            images: CardImageCache = request.app.state.images
+            runtime.spawn(
+                images.prefetch(oracle_ids),
+                name=f"deck-image-prefetch-{room_id}",
             )
         except (StoreForbidden, StoreNotFound, StoreConflict) as exc:
             raise _translate_store_error(exc) from exc
         except (KeyError, ValueError, MoxfieldFetchError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
-        return {"deck": saved, "preflight": _compact_preflight(preflight)}
+        return {
+            "deck": saved,
+            "preflight": _compact_preflight(preflight),
+            "format_legality": preflight["format_legality"],
+        }
+
+    @app.delete(
+        "/api/v1/rooms/{room_id}/deck",
+        dependencies=[Depends(_csrf)],
+    )
+    async def clear_deck(
+        room_id: str,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, Any]:
+        try:
+            room = runtime.store.clear_deck(guest["guest_id"], room_id)
+        except (StoreForbidden, StoreNotFound, StoreConflict) as exc:
+            raise _translate_store_error(exc) from exc
+        return {"room": room}
 
     @app.post(
         "/api/v1/rooms/{room_id}/start",
@@ -628,7 +903,10 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
 
     @app.websocket("/api/v1/games/{game_id}/stream")
     async def game_stream(websocket: WebSocket, game_id: str) -> None:
-        runtime: ServerRuntime = websocket.app.state.runtime
+        runtime: ServerRuntime | None = websocket.app.state.runtime
+        if runtime is None:
+            await websocket.close(code=1013, reason="Card data is still being prepared")
+            return
         origin = websocket.headers.get("origin")
         if origin and origin not in resolved.allowed_origins:
             await websocket.close(code=1008, reason="Origin not allowed")
@@ -701,5 +979,21 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
                 if isinstance(task, asyncio.Task) and not task.done():
                     task.cancel()
             await actor.drop_projection_cursor(cursor_key)
+
+    index_path = resolved.static_dir / "index.html"
+    assets_path = resolved.static_dir / "assets"
+    if index_path.is_file():
+        if assets_path.is_dir():
+            app.mount("/assets", StaticFiles(directory=assets_path), name="browser-assets")
+
+        @app.get("/{browser_path:path}", include_in_schema=False)
+        async def browser_application(browser_path: str) -> FileResponse:
+            if browser_path.startswith("api/"):
+                raise HTTPException(status_code=404, detail="Unknown API route")
+            root = resolved.static_dir.resolve()
+            candidate = (root / browser_path).resolve()
+            if candidate != root and root in candidate.parents and candidate.is_file():
+                return FileResponse(candidate)
+            return FileResponse(index_path)
 
     return app

@@ -13,12 +13,14 @@ slice. It provides guest sessions, invite-only four-seat rooms, deck
 validation/preflight, a serialized single-writer game actor, SQLite control
 plane, durable Game Record v3 acknowledgement, strict idempotent protocol 3.0
 commands, seat-scoped WebSockets, reconnect and process-restart recovery, and a
-TypeScript/React table. The browser renders the engine's current generic choice
-vocabulary and provides owner-only durable stop/resume controls plus a
-seat-safe record inspection panel. Those lifecycle transitions are serialized
-through the same game actor, survive a process restart, and are end-to-end
-tested with four isolated seats. Future choice schemas, accessibility polish,
-expiry/rate limits, and production operations remain incomplete.
+responsive TypeScript/React table. One Python process now builds and serves the
+browser, prepares the local Scryfall SQLite index, checks for updated Oracle and
+rulings exports every 24 hours, and serves an on-demand local card-image cache.
+The browser renders the engine's current generic choice vocabulary, locally
+cached card art, reconnect and exact-command retry states, owner-only durable
+stop/resume controls, and a seat-safe record inspection panel. These paths are
+end-to-end tested with four isolated seats. Future choice schemas, full account
+identity, expiry/rate limits, and production operations remain incomplete.
 The generated platform ledger records the exact current test and coverage
 counts.
 
@@ -40,20 +42,67 @@ rules, server, browser, persistence, replay, privacy, and validation ledger.
 See `SERVER_BROWSER.md` for the executable API, local run commands, browser
 workflow, security boundary, and remaining UI/operations limits.
 
-## Local setup
+## Quick start
 
-Create an environment and install the source tree:
+Install Python 3.11+ and Node.js 22+, then run:
 
-```bash
+```powershell
 python -m venv .venv
-. .venv/bin/activate        # Windows PowerShell: .venv\Scripts\Activate.ps1
+.venv\Scripts\Activate.ps1
 python -m pip install -e . -r requirements-dev.txt
-cd web
-npm ci
-cd ..
+python -m server
 ```
 
-The repository deliberately does not contain a Scryfall bulk export or SQLite
+That is the entire local application startup. The server installs browser
+packages on the first run, rebuilds the browser when its sources change, opens
+`http://127.0.0.1:8000`, and shows first-run card-data progress in the UI.
+Initial setup downloads Scryfall's compressed Oracle Cards and Rulings exports
+and builds `data/scryfall-current.sqlite3`. It checks again every 24 hours.
+Every startup checks the live manifest before enabling deck import. If the
+local snapshot is stale, the setup screen remains visible until the replacement
+is built and activated; if the check is offline, the existing snapshot becomes
+available with a visible warning.
+This follows [Scryfall's recommendation to use bulk data for large local card
+and image workloads](https://scryfall.com/docs/faqs/i-m-having-trouble-accessing-the-scryfall-api-or-i-m-blocked-17)
+instead of performing one API lookup per card.
+After a successful refresh, the previous managed bulk archives are deleted;
+only the current Oracle/rulings pair is retained. A refresh discovered during
+a live process is staged and activated on the next restart so an in-progress
+Game Record never changes rules data underneath itself. The previous SQLite
+snapshot is retained by fingerprint only while a saved Game Record references
+it; unreferenced database snapshots are deleted during activation.
+
+Card images are not mirrored wholesale. Image references come from the same
+bulk snapshot; the server downloads normal images for submitted decks in the
+background and caches any other visible art on demand under `data/images/`.
+The browser requests only the local `/api/v1/cards/.../image` route. Use
+`Ctrl+C` to stop the application and rerun the same command to resume.
+Images remain unmodified local third-party cache files and are never committed
+or packaged. See [the content boundary](docs/LEGAL_CONTENT_BOUNDARY.md) for
+attribution, display constraints, and deployment review requirements.
+
+The current identity layer is an expiring guest session: choose a display name,
+host or join a private four-seat room, submit a Moxfield URL or pasted deck,
+and start when all four deck summaries show ready. The host invite remains
+visible after readying and reload; the host can replace it if necessary, and
+any player can **Change deck / Unready** before start. Full password/OAuth
+accounts are not implemented yet.
+
+Cards from a published preview that are present in Scryfall but not legal until
+their future release date produce an explicit confirmation screen instead of a
+generic rejection. The confirmation is bound to the exact deck fingerprint and
+warning list and is saved with the deck/game provenance. It does not override
+bans, deck-construction errors, missing card data, or unsupported rules
+semantics; material semantic gaps still fail closed during play.
+
+For offline development with an existing database:
+
+```powershell
+$env:MTG_CARD_DB = "data/test-ci.sqlite3"
+python -m server --offline
+```
+
+The repository deliberately does not contain a full Scryfall export or SQLite
 database. CI builds a small database from the committed public exact-list
 fixture:
 
@@ -154,8 +203,13 @@ generated documentation fixtures with bearer capabilities redacted. See
 - SQLite guest/room/seat/deck/game/idempotency control-plane persistence plus
   Game Record v3 durability before command acknowledgement
 - React/TypeScript room and four-player table UI with Moxfield or pasted-list
-  import, private hand rendering, legal-action prompts, generic server-issued
-  choice forms, reconnect, and four-isolated-context Playwright coverage
+  import, responsive desktop/mobile battlefield layout, local card art, private
+  hand rendering, legal-action prompts, generic server-issued choice forms,
+  focus-contained dialogs, reconnect, exact-envelope retry, and
+  four-isolated-context Playwright coverage
+- one-command local startup with browser build/static serving, a visible
+  first-run setup state, managed 24-hour Scryfall bulk checks, atomic SQLite
+  builds, bounded bulk-archive retention, and deck-prefetched/on-demand images
 - generic browser controls for current cost/X, mode/target, private search,
   ordering, trigger, mulligan/cleanup, AP/NAP, legend, attack/block, combat
   damage, and storm-copy choices; the engine remains the sole validator

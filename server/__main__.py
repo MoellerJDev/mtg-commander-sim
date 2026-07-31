@@ -1,8 +1,48 @@
 from __future__ import annotations
 
 import argparse
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import threading
+import webbrowser
 
 import uvicorn
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def _browser_needs_build(web_root: Path) -> bool:
+    index = web_root / "dist" / "index.html"
+    if not index.is_file():
+        return True
+    built_at = index.stat().st_mtime
+    sources = [web_root / "index.html", web_root / "package-lock.json"]
+    sources.extend((web_root / "src").rglob("*"))
+    return any(path.is_file() and path.stat().st_mtime > built_at for path in sources)
+
+
+def _prepare_browser(web_root: Path) -> None:
+    if not _browser_needs_build(web_root):
+        return
+    npm = shutil.which("npm")
+    if npm is None:
+        raise SystemExit(
+            "The browser needs to be built, but npm was not found. Install Node.js 22+ and rerun."
+        )
+    install_marker = web_root / "node_modules" / ".package-lock.json"
+    lockfile = web_root / "package-lock.json"
+    dependencies_stale = (
+        not install_marker.is_file()
+        or (lockfile.is_file() and lockfile.stat().st_mtime > install_marker.stat().st_mtime)
+    )
+    if dependencies_stale:
+        print("Installing browser dependencies…", flush=True)
+        subprocess.run([npm, "ci"], cwd=web_root, check=True)
+    print("Building the Commander Arena browser…", flush=True)
+    subprocess.run([npm, "run", "build"], cwd=web_root, check=True)
 
 
 def main() -> None:
@@ -10,7 +50,35 @@ def main() -> None:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", default=8000, type=int)
     parser.add_argument("--reload", action="store_true")
+    parser.add_argument(
+        "--no-build-browser",
+        action="store_true",
+        help="Do not build the React client when its sources changed",
+    )
+    parser.add_argument(
+        "--no-open",
+        action="store_true",
+        help="Do not open the local browser automatically",
+    )
+    parser.add_argument(
+        "--offline",
+        action="store_true",
+        help="Use the configured local card database without Scryfall update checks",
+    )
     args = parser.parse_args()
+    web_root = ROOT / "web"
+    if not args.no_build_browser:
+        _prepare_browser(web_root)
+    os.environ.setdefault("MTG_WEB_DIST", str(web_root / "dist"))
+    if args.offline:
+        os.environ["MTG_AUTO_UPDATE_CARDS"] = "0"
+    url = f"http://{args.host}:{args.port}"
+    if not args.no_open:
+        opener = threading.Timer(1.2, lambda: webbrowser.open(url))
+        opener.daemon = True
+        opener.start()
+    print(f"Commander Arena: {url}", flush=True)
+    print("The server manages card-data updates and the local image cache.", flush=True)
     uvicorn.run(
         "server.app:create_app",
         factory=True,

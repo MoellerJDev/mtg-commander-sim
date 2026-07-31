@@ -204,6 +204,25 @@ class ServerStore:
             )
         return self.room(room_id, guest_id)
 
+    def rotate_invite(self, room_id: str, guest_id: str) -> str:
+        invite_code = secrets.token_urlsafe(18)
+        with self._connection(write=True) as connection:
+            room = connection.execute(
+                "SELECT owner_guest_id, status FROM rooms WHERE room_id = ?",
+                (room_id,),
+            ).fetchone()
+            if room is None:
+                raise StoreNotFound("Room not found")
+            if room["owner_guest_id"] != guest_id:
+                raise StoreForbidden("Only the room owner can replace the invite code")
+            if room["status"] != "open":
+                raise StoreConflict("Invite codes cannot change after game start")
+            connection.execute(
+                "UPDATE rooms SET invite_code_hash = ?, updated_at = ? WHERE room_id = ?",
+                (token_hash(invite_code), utc_now(), room_id),
+            )
+        return invite_code
+
     def room(self, room_id: str, guest_id: str) -> dict[str, Any]:
         with self._connection() as connection:
             member = connection.execute(
@@ -221,7 +240,7 @@ class ServerStore:
                 """
                 SELECT s.seat, s.ready, s.guest_id, g.display_name,
                        d.deck_id, d.name AS deck_name,
-                       d.deck_list_fingerprint
+                       d.deck_list_fingerprint, d.preflight_json
                 FROM room_seats s
                 LEFT JOIN guest_sessions g ON g.guest_id = s.guest_id
                 LEFT JOIN decks d ON d.deck_id = s.deck_id
@@ -229,6 +248,40 @@ class ServerStore:
                 """,
                 (room_id,),
             ).fetchall()
+        seat_payloads: list[dict[str, Any]] = []
+        for row in seats:
+            mine = row["guest_id"] == guest_id
+            deck_payload = None
+            if row["deck_id"] is not None:
+                try:
+                    preflight = json.loads(str(row["preflight_json"] or "{}"))
+                except json.JSONDecodeError:
+                    preflight = {}
+                format_legality = preflight.get("format_legality") or {}
+                legality_issues = format_legality.get("issues") or []
+                deck_payload = {
+                    "deck_id": row["deck_id"],
+                    "name": row["deck_name"],
+                    "deck_list_fingerprint": row["deck_list_fingerprint"],
+                    "format_legality": {
+                        "status": str(format_legality.get("status") or "unknown"),
+                        "issue_count": len(legality_issues),
+                        # Card names in an unrevealed deck remain visible only
+                        # to its owner; other room members receive the public
+                        # override state and count.
+                        "issues": legality_issues if mine else [],
+                    },
+                }
+            seat_payloads.append(
+                {
+                    "seat": str(row["seat"]),
+                    "guest_id": row["guest_id"],
+                    "display_name": row["display_name"],
+                    "ready": bool(row["ready"]),
+                    "deck": deck_payload,
+                    "mine": mine,
+                }
+            )
         return {
             "room_id": room_id,
             "owner_guest_id": str(room["owner_guest_id"]),
@@ -236,27 +289,7 @@ class ServerStore:
             "format_profile": str(room["format_profile"]),
             "seat_count": int(room["seat_count"]),
             "game_id": room["game_id"],
-            "seats": [
-                {
-                    "seat": str(row["seat"]),
-                    "guest_id": row["guest_id"],
-                    "display_name": row["display_name"],
-                    "ready": bool(row["ready"]),
-                    "deck": (
-                        {
-                            "deck_id": row["deck_id"],
-                            "name": row["deck_name"],
-                            "deck_list_fingerprint": row[
-                                "deck_list_fingerprint"
-                            ],
-                        }
-                        if row["deck_id"] is not None
-                        else None
-                    ),
-                    "mine": row["guest_id"] == guest_id,
-                }
-                for row in seats
-            ],
+            "seats": seat_payloads,
         }
 
     def guest_seat(self, room_id: str, guest_id: str) -> str:
@@ -329,6 +362,34 @@ class ServerStore:
             "deck_list_fingerprint": fingerprint,
             "total_cards": deck.total_cards(),
         }
+
+    def clear_deck(self, guest_id: str, room_id: str) -> dict[str, Any]:
+        with self._connection(write=True) as connection:
+            room = connection.execute(
+                "SELECT status FROM rooms WHERE room_id = ?", (room_id,)
+            ).fetchone()
+            if room is None:
+                raise StoreNotFound("Room not found")
+            if room["status"] != "open":
+                raise StoreConflict("Deck readiness cannot change after game start")
+            seat = connection.execute(
+                "SELECT seat, deck_id FROM room_seats WHERE room_id = ? AND guest_id = ?",
+                (room_id, guest_id),
+            ).fetchone()
+            if seat is None:
+                raise StoreForbidden("Guest does not occupy a room seat")
+            deck_id = seat["deck_id"]
+            connection.execute(
+                "UPDATE room_seats SET deck_id = NULL, ready = 0 WHERE room_id = ? AND guest_id = ?",
+                (room_id, guest_id),
+            )
+            if deck_id is not None:
+                connection.execute("DELETE FROM decks WHERE deck_id = ?", (deck_id,))
+            connection.execute(
+                "UPDATE rooms SET updated_at = ? WHERE room_id = ?",
+                (utc_now(), room_id),
+            )
+        return self.room(room_id, guest_id)
 
     def start_spec(
         self, room_id: str, owner_guest_id: str

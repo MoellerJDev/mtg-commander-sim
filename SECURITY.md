@@ -39,9 +39,12 @@ The first network slice uses 256-bit random guest bearer tokens in HTTP-only,
 SameSite=Strict cookies; unsafe cookie-authenticated requests also require a
 double-submit CSRF token. Browser WebSockets accept only configured origins.
 SQLite stores SHA-256 hashes of guest tokens and room invite codes, never their
-raw values. Room membership selects the one pilot principal available to that
-guest. Decision capabilities remain separate short-lived grants and are never
-login credentials.
+raw values. The host browser retains its raw invite only in session storage so
+it survives readying and reload without becoming server-side plaintext; closing
+that browser session may require an owner-only replacement. Replacing an invite
+atomically invalidates the old hash. Room membership selects the one pilot
+principal available to that guest. Decision capabilities remain separate
+short-lived grants and are never login credentials.
 
 Set `MTG_SECURE_COOKIES=1` behind HTTPS. Restrict `MTG_ALLOWED_ORIGINS` to the
 deployed browser origin. Seated members may inspect only whitelisted lifecycle
@@ -52,6 +55,19 @@ provide production accounts, password recovery, platform-wide administration,
 rate limiting, reverse proxy hardening, secret rotation, multi-process actor
 leases, or an independent security assessment; it should not be exposed
 directly to the public Internet.
+
+The browser never receives the bulk Scryfall export or an unrestricted card
+database query. Projected cards reference a short Oracle identifier, and the
+same-origin image endpoint resolves it against local SQLite metadata. Cache
+misses may fetch only HTTPS URLs on `cards.scryfall.io`; arbitrary image hosts,
+oversized responses, and non-image content are rejected. Manual bulk refresh
+is restricted to the local machine.
+
+Preview legality confirmation is bound to the exact deck-list fingerprint and
+structured warning set. Room members may see that a preview override exists
+and how many issues it contains, but only the deck owner receives implicated
+card names. The override cannot authorize a banned card, arbitrary URL, missing
+database object, or unsupported semantic operation.
 
 ## Supported version
 

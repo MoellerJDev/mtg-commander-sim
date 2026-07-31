@@ -18,6 +18,7 @@ async function submitDeck(page: Page, seat: string, text: string) {
   await page.getByTestId("deck-list").fill(text);
   await page.getByTestId("submit-deck").click();
   await expect(page.getByText("Deck validated: trusted-only semantic gate passes.")).toBeVisible();
+  await expect(page.getByTestId("deck-ready-summary")).toContainText(`Deck ${seat}`);
 }
 
 async function viewRevision(page: Page): Promise<number> {
@@ -98,6 +99,21 @@ test("four isolated browser contexts play through authoritative mulligans and re
       await submitDeck(pages[index], seat, seat === "A" || seat === "C" ? zimone : mishra);
     }
 
+    await expect(pages[0].getByTestId("room-invite")).toHaveText(invite!);
+    await pages[0].getByTestId("replace-invite").click();
+    await expect(pages[0].getByText("A new invite code was created.")).toBeVisible();
+    const replacementInvite = await pages[0].getByTestId("room-invite").textContent();
+    expect(replacementInvite).toBeTruthy();
+    expect(replacementInvite).not.toEqual(invite);
+    await pages[0].reload();
+    await expect(pages[0].getByTestId("room-invite")).toHaveText(replacementInvite!);
+
+    await pages[0].getByTestId("unready-deck").click();
+    await expect(pages[0].getByTestId("submit-deck")).toBeVisible();
+    await expect(pages[0].getByTestId("seat-A")).toContainText("WAITING");
+    await expect(pages[0].getByTestId("start-game")).toBeDisabled();
+    await submitDeck(pages[0], "A", zimone);
+
     await expect(pages[0].getByTestId("start-game")).toBeEnabled();
     await pages[0].getByTestId("start-game").click();
     for (const page of pages) {
@@ -143,7 +159,22 @@ test("four isolated browser contexts play through authoritative mulligans and re
     for (let index = 0; index < 4; index += 1) {
       const revisions = await Promise.all(pages.map(viewRevision));
       await expect(pages[index].getByTestId("action-keep")).toBeVisible();
-      await pages[index].getByTestId("action-keep").click();
+      if (index === 0) {
+        let firstEnvelope: Record<string, unknown> | null = null;
+        await pages[index].route("**/api/v1/games/*/commands", async (route) => {
+          firstEnvelope = route.request().postDataJSON() as Record<string, unknown>;
+          await route.abort("connectionfailed");
+        }, { times: 1 });
+        await pages[index].getByTestId("action-keep").click();
+        await expect(pages[index].getByTestId("command-retry")).toBeVisible();
+        const retriedRequest = pages[index].waitForRequest("**/api/v1/games/*/commands");
+        await pages[index].getByRole("button", { name: "Retry exact command" }).click();
+        const retriedEnvelope = (await retriedRequest).postDataJSON() as Record<string, unknown>;
+        expect(retriedEnvelope.command_id).toEqual(firstEnvelope!.command_id);
+        expect(retriedEnvelope).toEqual(firstEnvelope);
+      } else {
+        await pages[index].getByTestId("action-keep").click();
+      }
       // A click only proves that the browser dispatched the command. Wait for
       // the authoritative HTTP receipt before allowing the next declaration
       // (or the reconnect below) to observe the resulting game state.
@@ -163,6 +194,10 @@ test("four isolated browser contexts play through authoritative mulligans and re
     await expect(pages[0].getByText("LIVE", { exact: true })).toBeVisible();
     await expect(pages[0].getByTestId("own-hand").locator(".hand-card")).toHaveCount(projectedHandCount);
     await expect(pages[0].getByTestId("decision-panel")).toHaveText(projectedDecision!);
+    await pages[0].setViewportSize({ width: 390, height: 844 });
+    await expect(pages[0].getByTestId("decision-panel")).toBeVisible();
+    await expect(pages[0].getByTestId("own-hand")).toBeVisible();
+    expect(await pages[0].evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   } finally {
     await Promise.all(contexts.map((context) => context.close()));
   }
@@ -175,7 +210,13 @@ test("generic private choice form executes a penalized multiplayer mulligan", as
     contexts = started.contexts;
     const pages = started.pages;
 
-    await pages[0].getByTestId("action-mulligan").click();
+    const mulliganTrigger = pages[0].getByTestId("action-mulligan");
+    await mulliganTrigger.click();
+    await expect(pages[0].getByTestId("choice-dialog")).toBeVisible();
+    await pages[0].keyboard.press("Escape");
+    await expect(pages[0].getByTestId("choice-dialog")).toHaveCount(0);
+    await expect(mulliganTrigger).toBeFocused();
+    await mulliganTrigger.click();
     await expect(pages[0].getByTestId("choice-dialog")).toBeVisible();
     await pages[0].getByTestId("choice-override_reason").fill("Browser choice-form coverage");
     await submitOpenChoice(pages[0]);

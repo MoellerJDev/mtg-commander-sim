@@ -1,53 +1,112 @@
 # Server and browser vertical slice
 
-Version 0.8.0 includes an executable four-player browser slice with generic
-forms for the rules engine's current server-issued choice schemas. It is a
-single-node development deployment, not a claim of complete Magic rules,
-future-schema coverage, production-scale operations, or finished accessibility
-and visual design.
+Version 0.8.0 includes an executable, responsive four-player browser slice with
+generic forms for the rules engine's current server-issued choice schemas. One
+Python process builds and serves the browser, manages the local Scryfall data
+snapshot, and serves locally cached card images. It is a single-node
+development deployment, not a claim of complete Magic rules, future-schema
+coverage, production-scale operations, or complete accessibility.
 
-## Run locally
+## Run locally — one command
 
-Build the compact pinned database, install both dependency sets, then start the
-API and Vite development server in separate terminals:
+After installing the Python project, start everything with:
 
 ```powershell
-python scripts/build_test_database.py build `
-  --fixture tests/fixtures/scryfall-exact-lists.json `
-  --output data/test-ci.sqlite3
 python -m pip install -e . -r requirements-dev.txt
-Set-Location web
-npm ci
-Set-Location ..
-$env:MTG_CARD_DB = "data/test-ci.sqlite3"
-python -m server --host 127.0.0.1 --port 8000
+python -m server
 ```
 
-```powershell
-Set-Location web
-npm run dev
-```
+The launcher installs `web/` dependencies if needed, performs a production
+browser build when sources are newer than `web/dist`, starts the API and
+WebSocket server, serves the browser from the same origin, and opens
+`http://127.0.0.1:8000`. There is no second Vite terminal in the normal local
+workflow. Use `--no-open`, `--no-build-browser`, or `--offline` when needed.
 
-Open `http://127.0.0.1:5173`. A host creates a room and shares its invite
-code. The other three browser contexts join distinct seats, then each seat
-submits either a public Moxfield URL or a pasted Commander list. Only the room
-owner can start after all four seats are occupied and ready.
+If `MTG_CARD_DB` is not set, the first run shows a setup screen while the
+server discovers the current Scryfall Oracle Cards and Rulings JSONL archives,
+downloads them into `data/bulk/`, and builds
+`data/scryfall-current.sqlite3`. The server checks the bulk manifest every 24
+hours. A successful build removes superseded managed archives and retains only
+the current Oracle/rulings pair. An update discovered while the server is live
+is built as one pending database and activated at the next restart; the open
+database remains pinned for existing Game Records. Activation moves the old
+SQLite file into `data/card-snapshots/` only when a saved Game Record references
+its fingerprint. Unreferenced snapshots are deleted, and lazy game recovery
+selects the exact retained database named by that record.
+
+The same manifest check runs before the game runtime becomes ready on every
+startup. A stale existing database is updated and activated before deck import
+is exposed. A network failure falls back to that existing database with a
+visible warning rather than making the application unusable.
+
+If the first-run network request fails, the setup page keeps the error visible
+and offers a local retry. If an update check fails after a database exists, the
+server remains usable with a warning and the pinned database.
+
+Choose a display name to create an expiring guest session. A host creates a
+room and shares its invite code. The other three browser contexts join distinct
+seats, then each seat submits either a public Moxfield URL or a pasted Commander
+list. Each player receives a visible private ready summary after validation.
+Before game start, a player can use **Change deck / Unready** to clear only
+their own submitted list and return to validation. The host's raw invite code
+remains available through readying and page reloads for that browser session.
+If it is unavailable, the host can generate a replacement; rotation immediately
+invalidates the previous code. Only the room owner can start after all four
+seats are occupied and ready.
+
+Future-dated preview cards whose snapshot legality is `not_legal` use a
+two-step validation response. The first response returns the owner-only card
+names, release dates, and an exact confirmation fingerprint. The second request
+must return that fingerprint before the list is saved. Banned, unknown, or
+already-released illegal cards are not confirmable. Other seats see only the
+public fact and count of a preview override, never the implicated private deck
+entries.
 
 Runtime files default to ignored `local/server/`. Override that root with
 `MTG_SERVER_DATA`, the card database with `MTG_CARD_DB`, allowed browser origins
 with comma-separated `MTG_ALLOWED_ORIGINS`, and production cookie security with
-`MTG_SECURE_COOKIES=1` behind HTTPS.
+`MTG_SECURE_COOKIES=1` behind HTTPS. `MTG_DATA_ROOT`, `MTG_BULK_DIR`,
+`MTG_IMAGE_CACHE`, `MTG_WEB_DIST`, `MTG_AUTO_UPDATE_CARDS`, and
+`MTG_CARD_UPDATE_SECONDS` control the managed local paths and update behavior;
+`MTG_CARD_SNAPSHOT_DIR` overrides retained record-pinned databases.
+
+## Card data and images
+
+Rules text, characteristics, aliases, legality, image references, and rulings
+are indexed in SQLite. No bulk file is sent to the browser, and no Scryfall API
+request occurs inside the rules engine or a running game transition.
+
+The importer stores the chosen Oracle-card image references in a `card_images`
+table. After a deck validates, the server prefetches the unique normal-size
+images in that submitted list with bounded concurrency. The browser itself asks
+only for local routes such as `/api/v1/cards/20283c4a/image?size=normal` when a
+projected card is actually rendered. The cache downloads that Scryfall CDN
+image once, writes it atomically below `data/images/`, and serves the local copy
+thereafter. Commanders, private hand cards, public permanents, stack objects,
+and visible tokens therefore load as a small working set; hidden hands and
+libraries never enter another seat's DOM or image request list. Custom tokens
+without a pinned Scryfall image use the text fallback.
+
+The client displays complete scans without crop overlays, and it remains fully
+usable through projected card text when art is unavailable. Cached image bytes
+are runtime content, not repository or package assets. See
+`docs/LEGAL_CONTENT_BOUNDARY.md` before deploying beyond local development.
 
 ## Implemented surface
 
 | Route | Purpose |
 |---|---|
+| `GET /api/v1/system` | Read public server/card-data/image-cache readiness |
+| `POST /api/v1/system/refresh` | Retry managed setup from the local machine |
+| `GET /api/v1/cards/{oracle_prefix}/image` | Fetch/cache one Scryfall card face locally |
 | `POST /api/v1/guests` | Issue an expiring guest session and CSRF token |
 | `GET /api/v1/me` | Restore the authenticated guest |
 | `POST /api/v1/rooms` | Create an invite-only four-seat room |
 | `POST /api/v1/rooms/join` | Atomically claim one unoccupied seat |
 | `GET /api/v1/rooms/{room_id}` | Read public lobby readiness |
+| `POST /api/v1/rooms/{room_id}/invite` | Owner-only replacement of the room invite |
 | `PUT /api/v1/rooms/{room_id}/deck` | Resolve, validate, fingerprint, and preflight a deck |
+| `DELETE /api/v1/rooms/{room_id}/deck` | Clear the caller's own unstarted deck/readiness |
 | `POST /api/v1/rooms/{room_id}/start` | Start one multiplayer Commander game |
 | `GET /api/v1/games/{game_id}` | Inspect safe lifecycle and journal counters for a seated member |
 | `GET /api/v1/games/{game_id}/state` | Request the caller's seat projection |
@@ -136,12 +195,15 @@ creates four guest sessions, atomically fills seats A–D, uploads the two
 duplicated exact-list fixtures, and starts a game. One scenario submits all four
 keep decisions, proves owner-only stop controls, propagates a durable paused
 status to all four contexts, disables the current decision, reloads a nonowner
-while paused, resumes, records the exact projected hand count and decision,
-then requires a later full reconnect projection to match those values. A second
-scenario takes a post-free mulligan, selects a private card to bottom through
-the generic form, proves that the other three DOMs never receive that
-seat-scoped control, and submits the resulting six-card keep. The duplicated
-pod is protocol evidence only, never matchup evidence.
+while paused, resumes, aborts one command request, retries the byte-equivalent
+command envelope with the same idempotency ID, records the exact projected hand
+count and decision, then requires a later full reconnect projection to match
+those values. It also checks the 390-pixel layout for horizontal overflow. A
+second scenario takes a post-free mulligan, exercises Escape/focus restoration,
+selects a private card to bottom through the generic form, proves that the other
+three DOMs never receive that seat-scoped control, and submits the resulting
+six-card keep. The duplicated pod is protocol evidence only, never matchup
+evidence.
 
 ## Generic decision forms
 
@@ -170,5 +232,5 @@ fail closed until both the adapter and UI support them; the client never guesses
 rules behavior.
 
 Production accounts, multi-process ownership, rate limiting, containers,
-spectators, broader accessibility hardening, and richer command-retry
-presentation remain later server/browser work.
+spectators, screen-reader audits across every future choice schema, cache size
+quotas, and production deployment remain later server/browser work.

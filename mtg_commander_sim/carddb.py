@@ -10,7 +10,7 @@ from typing import Any, Iterable, Iterator, Sequence
 
 from .util import iter_jsonl, normalize_card_name, stable_json, truncate
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 def file_sha256(path: str | Path) -> str:
@@ -215,6 +215,18 @@ def build_card_database(
             comment TEXT NOT NULL
         );
 
+        CREATE TABLE card_images (
+            oracle_id TEXT NOT NULL,
+            face_index INTEGER NOT NULL DEFAULT 0,
+            small_uri TEXT,
+            normal_uri TEXT,
+            large_uri TEXT,
+            png_uri TEXT,
+            art_crop_uri TEXT,
+            PRIMARY KEY (oracle_id, face_index),
+            FOREIGN KEY (oracle_id) REFERENCES cards(oracle_id)
+        );
+
         CREATE INDEX idx_cards_normalized_name ON cards(normalized_name);
         CREATE INDEX idx_aliases_normalized_alias ON aliases(normalized_alias);
         CREATE INDEX idx_aliases_oracle_id ON aliases(oracle_id);
@@ -236,11 +248,13 @@ def build_card_database(
 
     card_rows: list[tuple[Any, ...]] = []
     alias_rows: list[tuple[str, str, str, int]] = []
+    image_rows: list[tuple[Any, ...]] = []
     card_count = 0
     alias_count = 0
+    image_count = 0
 
     def flush_cards() -> None:
-        nonlocal card_count, alias_count
+        nonlocal card_count, alias_count, image_count
         if not card_rows:
             return
         connection.executemany(
@@ -262,10 +276,21 @@ def build_card_database(
             """,
             alias_rows,
         )
+        connection.executemany(
+            """
+            INSERT OR REPLACE INTO card_images(
+                oracle_id, face_index, small_uri, normal_uri, large_uri,
+                png_uri, art_crop_uri
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            image_rows,
+        )
         card_count += len(card_rows)
         alias_count += len(alias_rows)
+        image_count += len(image_rows)
         card_rows.clear()
         alias_rows.clear()
+        image_rows.clear()
 
     for card in iter_jsonl(oracle_cards_path):
         oracle_id = str(card.get("oracle_id") or "")
@@ -308,6 +333,26 @@ def build_card_database(
             face_name = str(face.get("name") or "")
             if face_name:
                 alias_rows.append((normalize_card_name(face_name), face_name, oracle_id, 90))
+        raw_faces = card.get("card_faces") or []
+        raw_image_sets = [
+            face.get("image_uris") or {}
+            for face in raw_faces
+            if isinstance(face, dict) and face.get("image_uris")
+        ]
+        if not raw_image_sets and card.get("image_uris"):
+            raw_image_sets = [card.get("image_uris") or {}]
+        for face_index, image_uris in enumerate(raw_image_sets):
+            image_rows.append(
+                (
+                    oracle_id,
+                    face_index,
+                    image_uris.get("small"),
+                    image_uris.get("normal"),
+                    image_uris.get("large"),
+                    image_uris.get("png"),
+                    image_uris.get("art_crop"),
+                )
+            )
         if len(card_rows) >= batch_size:
             flush_cards()
             connection.commit()
@@ -345,7 +390,11 @@ def build_card_database(
         ruling_count += len(ruling_rows)
     connection.executemany(
         "INSERT INTO metadata(key, value) VALUES (?, ?)",
-        [("card_count", str(card_count)), ("ruling_count", str(ruling_count))],
+        [
+            ("card_count", str(card_count)),
+            ("ruling_count", str(ruling_count)),
+            ("image_reference_count", str(image_count)),
+        ],
     )
     connection.commit()
 
@@ -376,6 +425,7 @@ def build_card_database(
         "database": str(output_path),
         "cards": card_count,
         "aliases": alias_count,
+        "image_references": image_count,
         "rulings": ruling_count,
         "fts_enabled": fts_enabled,
     }
@@ -435,6 +485,43 @@ class CardDatabase:
         if row is None:
             raise KeyError(f"Unknown oracle_id: {oracle_id}")
         return self._row_to_card(row)
+
+    def image_uris(self, oracle_id_or_prefix: str) -> tuple[dict[str, Any], ...]:
+        """Return Scryfall CDN image references captured by the bulk import.
+
+        Prefixes are accepted because projected clients receive an eight-character
+        Oracle identifier. Ambiguous prefixes and databases created before schema
+        version 2 fail closed instead of selecting the wrong art.
+        """
+
+        try:
+            rows = self.connection.execute(
+                """
+                SELECT oracle_id, face_index, small_uri, normal_uri, large_uri,
+                       png_uri, art_crop_uri
+                FROM card_images
+                WHERE oracle_id LIKE ?
+                ORDER BY oracle_id, face_index
+                """,
+                (f"{oracle_id_or_prefix}%",),
+            ).fetchall()
+        except sqlite3.OperationalError:
+            return ()
+        oracle_ids = {str(row["oracle_id"]) for row in rows}
+        if len(oracle_ids) > 1:
+            raise KeyError(f"Ambiguous oracle_id prefix: {oracle_id_or_prefix}")
+        return tuple(
+            {
+                "oracle_id": str(row["oracle_id"]),
+                "face_index": int(row["face_index"]),
+                "small": row["small_uri"],
+                "normal": row["normal_uri"],
+                "large": row["large_uri"],
+                "png": row["png_uri"],
+                "art_crop": row["art_crop_uri"],
+            }
+            for row in rows
+        )
 
     def iter_cards(
         self,

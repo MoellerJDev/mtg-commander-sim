@@ -8,6 +8,17 @@ function csrfToken(): string {
   return row ? decodeURIComponent(row.split("=", 2)[1]) : "";
 }
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly detail: unknown,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const method = (init.method ?? "GET").toUpperCase();
   const response = await fetch(path, {
@@ -19,8 +30,16 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
       ...(init.headers ?? {}),
     },
   });
-  const payload = (await response.json()) as { detail?: string };
-  if (!response.ok) throw new Error(payload.detail ?? `Request failed: ${response.status}`);
+  const payload = (await response.json()) as { detail?: unknown };
+  if (!response.ok) {
+    const detail = payload.detail;
+    const message = typeof detail === "string"
+      ? detail
+      : detail && typeof detail === "object" && "message" in detail
+        ? String((detail as { message: unknown }).message)
+        : `Request failed: ${response.status}`;
+    throw new ApiError(message, response.status, detail);
+  }
   return payload as T;
 }
 
@@ -36,7 +55,34 @@ export interface Seat {
   display_name: string | null;
   ready: boolean;
   mine: boolean;
-  deck: { deck_id: string; name: string; deck_list_fingerprint: string } | null;
+  deck: {
+    deck_id: string;
+    name: string;
+    deck_list_fingerprint: string;
+    format_legality: {
+      status: string;
+      issue_count: number;
+      issues: LegalityIssue[];
+    };
+  } | null;
+}
+
+export interface LegalityIssue {
+  code: string;
+  message: string;
+  card: string;
+  board: string;
+  legality: string;
+  released_at: string | null;
+  confirmable: boolean;
+}
+
+export interface LegalityConfirmationRequired {
+  code: "legality_confirmation_required";
+  message: string;
+  confirmation: string;
+  deck_list_fingerprint: string;
+  issues: LegalityIssue[];
 }
 
 export interface Room {
@@ -73,7 +119,44 @@ export interface GameLifecycle {
   events: number;
 }
 
+export interface SystemStatus {
+  server: string;
+  protocol: string;
+  card_data: {
+    ready: boolean;
+    phase: string;
+    detail: string;
+    updating: boolean;
+    automatic_updates: boolean;
+    update_interval_hours: number;
+    restart_required: boolean;
+    last_checked_at: string | null;
+    next_check_at: string | null;
+    last_error: string | null;
+    database: {
+      cards: number;
+      rulings: number;
+      image_references: number;
+      retained_game_snapshots: number;
+      oracle_updated_at: string | null;
+      rulings_updated_at: string | null;
+    };
+  };
+  images: {
+    mode: string;
+    downloaded: number;
+    ready: boolean;
+  };
+  browser: { served_by_server: boolean };
+}
+
 export const api = {
+  system: () => request<SystemStatus>("/api/v1/system"),
+  refreshSystem: () =>
+    request<{ accepted: boolean; card_data: SystemStatus["card_data"] }>(
+      "/api/v1/system/refresh",
+      { method: "POST", body: JSON.stringify({}) },
+    ),
   me: () => request<{ guest: Guest }>("/api/v1/me"),
   guest: (display_name: string) =>
     request<{ guest: Guest }>("/api/v1/guests", {
@@ -91,11 +174,40 @@ export const api = {
       body: JSON.stringify({ invite_code, seat }),
     }),
   room: (roomId: string) => request<{ room: Room }>(`/api/v1/rooms/${roomId}`),
-  deck: (roomId: string, name: string, commander: string, decklist: string, source_url?: string) =>
-    request<{ deck: unknown; preflight: { trusted_only_ready: boolean } }>(
+  rotateInvite: (roomId: string) =>
+    request<{ invite_code: string }>(`/api/v1/rooms/${roomId}/invite`, {
+      method: "POST",
+      body: JSON.stringify({}),
+    }),
+  deck: (
+    roomId: string,
+    name: string,
+    commander: string,
+    decklist: string,
+    source_url?: string,
+    legality_confirmation?: string,
+  ) =>
+    request<{
+      deck: unknown;
+      preflight: { trusted_only_ready: boolean };
+      format_legality: { status: string; issues: LegalityIssue[] };
+    }>(
       `/api/v1/rooms/${roomId}/deck`,
-      { method: "PUT", body: JSON.stringify({ name, commander, decklist, source_url: source_url || null }) },
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          name,
+          commander,
+          decklist,
+          source_url: source_url || null,
+          legality_confirmation: legality_confirmation || null,
+        }),
+      },
     ),
+  clearDeck: (roomId: string) =>
+    request<{ room: Room }>(`/api/v1/rooms/${roomId}/deck`, {
+      method: "DELETE",
+    }),
   start: (roomId: string) =>
     request<{ game_id: string }>(`/api/v1/rooms/${roomId}/start`, {
       method: "POST",
