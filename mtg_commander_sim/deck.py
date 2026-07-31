@@ -545,6 +545,23 @@ class DeckLoader:
                 # This does not attempt to parse every "any number" exception.
                 issues.append(f"Singleton warning: {count} copies of {name}")
 
+        legality_entries = {
+            (entry.name, entry.board)
+            for entry in deck.entries
+            if entry.board
+            in {"mainboard", "commander", "companion", "sideboard"}
+        }
+        for name, board in sorted(legality_entries):
+            card = self.card_db.lookup(name)
+            legality = str(
+                card.legalities.get("commander") or "unknown"
+            ).casefold()
+            if legality != "legal":
+                issues.append(
+                    f"Commander legality: {name} is {legality} "
+                    f"on the {board}"
+                )
+
         if check_color_identity and deck.commanders:
             identity: set[str] = set()
             for commander_name in deck.commanders:

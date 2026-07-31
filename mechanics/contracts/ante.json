@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-407-ante",
+  "official_name": "Ante",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "407",
+    "407.1",
+    "407.2",
+    "407.3",
+    "407.4"
+  ],
+  "glossary_references": [
+    "ante"
+  ],
+  "dependencies": [
+    "game-variants",
+    "format-validation",
+    "pregame-procedures",
+    "zones",
+    "random-selection",
+    "ownership",
+    "outside-the-game",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "ante is not a zone in either supported Commander profile",
+      "sideboard cards remain outside the game"
+    ],
+    "objects": [
+      "Commander-legal deck cards",
+      "cards whose pinned Commander legality is banned or not legal"
+    ],
+    "events": [
+      "validate a Commander deck",
+      "reject an unsupported ante profile",
+      "reject a move to an unsupported ante destination"
+    ],
+    "state_reads": [
+      "pinned per-card Commander legality",
+      "deck board",
+      "selected format profile"
+    ],
+    "state_writes": [
+      "no ante ownership or zone mutation is permitted"
+    ],
+    "costs": [
+      "ante is not accepted as a cost in a supported Commander game"
+    ],
+    "timing": [
+      "no ante procedure occurs between first-player selection and opening-hand draw"
+    ],
+    "targets": [
+      "no ante-zone target domain is exposed"
+    ],
+    "choices": [
+      "no random ante-card or ownership-transfer choice is exposed"
+    ],
+    "hidden_information": [
+      "unsupported ante setup cannot reveal a random library card"
+    ],
+    "apnap": [
+      "multiplayer Commander setup does not collect ante contributions"
+    ],
+    "layers": [
+      "ante has no continuous-effect interaction in the supported profiles"
+    ],
+    "replacement_effects": [
+      "ante setup and ownership changes cannot enter the replacement pipeline"
+    ],
+    "copy": [
+      "copying cannot create an ante operation in the supported profiles"
+    ],
+    "control_change": [
+      "control changes never imply an ante ownership change"
+    ],
+    "zone_change": [
+      "the destination allowlist rejects ante before mutating authoritative state"
+    ],
+    "source_leaves": [
+      "ante-card effects remain unavailable rather than losing provenance"
+    ]
+  },
+  "variants": [
+    "supported two-player commander_duel",
+    "supported multiplayer commander_review",
+    "explicit unsupported ante profile",
+    "banned ante card in the main deck",
+    "banned ante card in the sideboard",
+    "ordinary Commander-legal card",
+    "attempted direct move to ante"
+  ],
+  "witness_cards": [
+    {
+      "name": "Contract from Below",
+      "oracle_id": "9e0ed4b0-28b5-44be-ab83-f1e8eb07138d"
+    },
+    {
+      "name": "Darkpact",
+      "oracle_id": "74f10b9a-a286-49b2-bfa1-a427ff041bd4"
+    },
+    {
+      "name": "Jeweled Bird",
+      "oracle_id": "89f5b21c-18da-4071-bc42-9cdc433734bf"
+    }
+  ],
+  "rulings": [
+    "Pinned Oracle marks the seven traditional ante cards banned in Commander and retains their remove-before-playing instruction.",
+    "Jeweled Bird — 2004-10-04 — Its exchange covers the owner's entire ante contribution."
+  ],
+  "test_ids": [
+    "test_contract_traces_every_cr_407_rule",
+    "test_commander_profiles_reject_ante_and_have_no_ante_zone",
+    "test_ante_moves_fail_closed_without_state_change",
+    "test_commander_legality_rejects_ante_cards_in_deck_and_sideboard",
+    "test_supported_commander_lists_remain_legal",
+    "test_hidden_card_moved_outside_is_not_revealed_or_targetable"
+  ],
+  "implementation": {
+    "component": "CommanderEngine profile and destination allowlists; DeckLoader.validate_commander_deck pinned legality enforcement",
+    "version": "ante-exclusion-v1"
+  },
+  "known_blockers": [
+    "the optional ante game variant is not a supported product profile",
+    "the ante zone, random pregame contribution, public inspection, and end-game ownership transfer are not represented",
+    "ante actions and owner-only ante authorization are not represented",
+    "outside-game imports remain blocked generically",
+    "tournament-policy and local-law determinations are external to the rules engine"
+  ],
+  "review_status": "draft"
+}

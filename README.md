@@ -220,6 +220,11 @@ generated documentation fixtures with bearer capabilities redacted. See
   its stack object, and re-exiling creates a new logical incarnation; generic
   face-down creation, look authorization, pile/random selection, return-pile
   provenance, and linked exiled-card sets remain explicitly blocked
+- source-reviewed CR 407 ante exclusion: supported Commander profiles have no
+  ante zone or ante operation, reject an ante profile and destination before
+  mutation, and now validate pinned Commander legality for mainboard,
+  commander, companion, and sideboard entries; the optional ante variant
+  itself remains explicitly unsupported rather than partially simulated
 - source-reviewed CR 500 general turn structure: the ordinary five-phase
   table, full empty-stack priority round, no-priority boundaries, mana
   emptying before the next step, and atomic transition behavior pass with
@@ -364,9 +369,9 @@ python simctl.py rules conformance --root .
 ```
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
-generated source-linkage tests. Of those cases, 534 are source-reviewed:
-97 have narrow executable semantic evidence, 361 are explicitly blocked, and
-76 are definition-only; 2,766 remain unreviewed. A generated inventory test
+generated source-linkage tests. Of those cases, 539 are source-reviewed:
+98 have narrow executable semantic evidence, 364 are explicitly blocked, and
+77 are definition-only; 2,761 remain unreviewed. A generated inventory test
 cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
 invalidation, and reporting policy.
 

@@ -1,10 +1,16 @@
 {
-  "contract_count": 45,
+  "contract_count": 46,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
       "path": "mechanics/contracts/activating-activated-abilities.json",
       "sha256": "8089269fe906ed542e98649171867d8c7f8d16240fcc0861f93dcd616dd0a5b8",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-407-ante",
+      "path": "mechanics/contracts/ante.json",
+      "sha256": "faecdde543bd72d13cf2f39fee5aec8a48bf12a3075212e0793e16caee95b0b1",
       "version": 1
     },
     {
@@ -6217,17 +6223,34 @@
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/ante.json",
+      "contract_sha256": "faecdde543bd72d13cf2f39fee5aec8a48bf12a3075212e0793e16caee95b0b1",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine profile and destination allowlists; DeckLoader.validate_commander_deck pinned legality enforcement",
+      "implementation_version": "ante-exclusion-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "the optional ante game variant is not a supported product profile",
+        "the ante zone, random pregame contribution, public inspection, and end-game ownership transfer are not represented",
+        "ante actions and owner-only ante authorization are not represented",
+        "outside-game imports remain blocked generically",
+        "tournament-policy and local-law determinations are external to the rules engine"
+      ],
       "mechanic_id": "cr-407-ante",
       "official_name": "Ante",
       "rule_references": [
         "407"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_407_rule",
+        "test_commander_profiles_reject_ante_and_have_no_ante_zone",
+        "test_ante_moves_fail_closed_without_state_change",
+        "test_commander_legality_rejects_ante_cards_in_deck_and_sideboard",
+        "test_supported_commander_lists_remain_legal",
+        "test_hidden_card_moved_outside_is_not_revealed_or_targetable"
+      ],
       "trust_level": "untrusted"
     },
     {

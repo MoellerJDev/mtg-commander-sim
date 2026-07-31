@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 407 — Ante",
+  "cases": [
+    {
+      "rule_id": "407",
+      "rule_text_sha256": "6818558d76a3351a4999f1d6df083ad6201c4f419330dffe1f7c65713cd8f7cd",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/ante.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_ante_rules.AnteRuleTests.test_contract_traces_every_cr_407_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; CR 407.1-4 define the optional variant, pregame contribution, ante-card restrictions, and the ante keyword action."
+      ]
+    },
+    {
+      "rule_id": "407.1",
+      "rule_text_sha256": "2ea30c28f061111b411f8ae2f6803dee08009c6b6a4b64f7cd322c0af5d953cd",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine.create",
+        "GameConfig.profile",
+        "mechanics/contracts/ante.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_ante_rules.AnteRuleTests.test_commander_profiles_reject_ante_and_have_no_ante_zone"
+      ],
+      "required_scenarios": [
+        "negative",
+        "multiplayer"
+      ],
+      "covered_scenarios": [
+        "negative",
+        "multiplayer"
+      ],
+      "blockers": [
+        "ante_variant_profile_not_implemented",
+        "tournament_policy_is_external",
+        "local_law_policy_is_external"
+      ],
+      "notes": [
+        "Both supported Commander profiles reject an ante profile and instantiate no ante zone. This is a fail-closed product boundary, not a claim that the optional ante variation itself is implemented."
+      ]
+    },
+    {
+      "rule_id": "407.2",
+      "rule_text_sha256": "db855ee533d6dcfc18e6233cc15d2ee4ba905226130093dab93a0a064d6bcc9f",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "PlayerState.zones",
+        "CommanderEngine.create",
+        "CommanderEngine.move_card"
+      ],
+      "executable_test_ids": [
+        "tests.test_ante_rules.AnteRuleTests.test_commander_profiles_reject_ante_and_have_no_ante_zone",
+        "tests.test_ante_rules.AnteRuleTests.test_ante_moves_fail_closed_without_state_change"
+      ],
+      "required_scenarios": [
+        "negative",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "negative",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "blockers": [
+        "ante_zone_not_implemented",
+        "pregame_random_contribution_not_implemented",
+        "ante_public_inspection_not_implemented",
+        "end_game_ownership_transfer_not_implemented"
+      ],
+      "notes": [
+        "No random library card is exposed or moved during supported Commander setup. An attempted direct ante move raises before state mutation, but the optional ante procedure and ownership transfer remain absent."
+      ]
+    },
+    {
+      "rule_id": "407.3",
+      "rule_text_sha256": "786b5be277c598efaede1f4be81910cc3f5200b63f984dedcce4553f70f0ac16",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "DeckLoader.validate_commander_deck",
+        "CardRecord.legalities",
+        "CommanderEngine.create",
+        "CommanderEngine.move_card"
+      ],
+      "executable_test_ids": [
+        "tests.test_ante_rules.AnteRuleTests.test_commander_legality_rejects_ante_cards_in_deck_and_sideboard",
+        "tests.test_ante_rules.AnteRuleTests.test_supported_commander_lists_remain_legal",
+        "tests.test_ante_rules.AnteRuleTests.test_ante_moves_fail_closed_without_state_change",
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_hidden_card_moved_outside_is_not_revealed_or_targetable"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "blockers": [],
+      "notes": [
+        "Commander validation now checks the pinned Commander legality for every mainboard, commander, companion, and sideboard entry. It rejects ante witnesses generically because their snapshot legality is banned, while ordinary legal lists still pass. Supported games expose neither an ante destination nor an outside-game import action."
+      ]
+    },
+    {
+      "rule_id": "407.4",
+      "rule_text_sha256": "34510eb9918d2ce95f4e99fd0bd54e3536b9477b8eee84cd731c7100121a1bec",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine.move_card",
+        "CommanderEngine._assert_invariants",
+        "mechanics/contracts/ante.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_ante_rules.AnteRuleTests.test_ante_moves_fail_closed_without_state_change"
+      ],
+      "required_scenarios": [
+        "negative",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "negative",
+        "replay"
+      ],
+      "blockers": [
+        "ante_keyword_action_not_implemented",
+        "owner_only_ante_authorization_not_implemented",
+        "ante_zone_not_implemented"
+      ],
+      "notes": [
+        "The destination allowlist rejects ante without changing the state hash. That safely excludes the keyword action from supported Commander, but it does not implement the owner-only ante operation."
+      ]
+    }
+  ]
+}
