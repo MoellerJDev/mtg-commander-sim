@@ -87,8 +87,13 @@ coverage.
   per-event static prevention, and one application to unpreventable damage
   pass; 11 stateful/integrated behaviors remain blocked, and 2 records are
   definition-only. Negative prevention fails closed.
+- [x] Reviewed all 38 CR 614 Replacement Effects cases: one application per
+  event, zero-damage event absence, and self-replacement priority pass; 29
+  integrated families remain blocked, and 6 records are definition-only.
+  Unsupported skip, regeneration, redirection, and prohibition operations
+  fail closed.
 
-## Current CR 120/210/310/615/616/704 slice
+## Current CR 120/210/310/614/615/616/704 slice
 
 Battle behavior is derived from the effective card type, subtype, defense
 characteristic, counters, controller, and protector. It contains no
@@ -236,9 +241,9 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 78 CR 120/210/310/615/616 cases are
-  source-reviewed: 20 pass with executable engine evidence, 46 remain
-  blocked, and 12 are definition-only. The other 3,222 cases remain
+  establish inventory linkage only. All 116 CR 120/210/310/614/615/616 cases
+  are source-reviewed: 23 pass with executable engine evidence, 75 remain
+  blocked, and 18 are definition-only. The other 3,184 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -250,10 +255,10 @@ checkpoint validation.
 1. Continue reviewing and promoting conformance cases by
    dependency-ordered rules family; keep exposed but unimplemented edge cases
    failing or blocked.
-2. Wire the reviewed CR 615/616 primitives into the shared CR 120/310
-   replacement and prevention event pipeline, including stateful shields,
-   then re-evaluate the blocked damage sequence and 310.11b exile/cast
-   continuation.
+2. Wire the reviewed CR 614/615/616 primitives into the shared CR 120/310
+   replacement and prevention event pipeline, including stateful shields and
+   typed nested events, then re-evaluate the blocked damage sequence and
+   310.11b exile/cast continuation.
 3. Replace remaining physical-reference links with typed incarnation/LKI
    handles and implement the remaining CR 400.7 continuation policies.
 4. Implement the remaining ordinary CR 704.5 specialized permanent/layout

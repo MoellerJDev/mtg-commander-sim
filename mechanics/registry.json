@@ -100,8 +100,8 @@
     {
       "mechanic_id": "cr-614-replacement-effects",
       "path": "mechanics/contracts/unconditional-enters-tapped.json",
-      "sha256": "910990b5f2ed47e9ecbb794bdd03cd8bcf40f82e444d98a9adb73cab522f4633",
-      "version": 1
+      "sha256": "f39dcc95dc6251ece41b008908ef5f0d72acd3817837a13fe7e6e90ed2ffbbba",
+      "version": 2
     }
   ],
   "effective_date": "2026-06-19",
@@ -6417,17 +6417,19 @@
     {
       "category": "spells_abilities_effects",
       "contract_path": "mechanics/contracts/unconditional-enters-tapped.json",
-      "contract_sha256": "910990b5f2ed47e9ecbb794bdd03cd8bcf40f82e444d98a9adb73cab522f4633",
-      "contract_version": 1,
+      "contract_sha256": "f39dcc95dc6251ece41b008908ef5f0d72acd3817837a13fe7e6e90ed2ffbbba",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "CommanderEngine._unconditionally_enters_tapped and CommanderEngine.move_card",
-      "implementation_version": "unconditional-entry-v1",
+      "implementation_version": "replacement-effects-v2",
       "kind": "rules_section",
       "known_blockers": [
         "conditional entry replacements remain in dedicated handlers or require arbitration",
         "generic affected-player replacement ordering is not wired into every move",
-        "copy-token entry text is not yet evaluated through move_card"
+        "copy-token entry text is not yet evaluated through move_card",
+        "skip, regeneration, redirection, linked exile, and can't-event grammar are not generic",
+        "draw and graveyard replacements remain dedicated engine paths"
       ],
       "mechanic_id": "cr-614-replacement-effects",
       "official_name": "Replacement Effects",
@@ -6435,7 +6437,14 @@
         "614"
       ],
       "test_ids": [
-        "test_unconditional_entry_tapped_is_engine_derived"
+        "test_contract_traces_every_cr_614_rule",
+        "test_uncompiled_replacement_families_fail_closed",
+        "test_unconditional_entry_tapped_is_engine_derived",
+        "test_each_effect_applies_at_most_once_to_one_event",
+        "test_self_replacement_must_be_chosen_before_other_effects",
+        "test_zero_damage_creates_no_results_or_damage_event",
+        "test_life_from_the_loam_returns_lands_and_dredge_replaces_draw",
+        "test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free"
       ],
       "trust_level": "untrusted"
     },

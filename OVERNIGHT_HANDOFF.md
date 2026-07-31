@@ -107,6 +107,11 @@ maximum-counter foundation. It now:
 - verifies modified damage events and independent per-event static
   prevention, while keeping stateful shields, simultaneous source allocation,
   source selection/rechecks, and prevention triggers blocked;
+- source-reviews all 38 CR 614 Replacement Effects rules, expands the
+  contract to every family record, and verifies one application per event,
+  zero-damage event absence, and self-replacement priority;
+- rejects unsupported skip, regeneration, redirection, and prohibition
+  operations instead of approximating them;
 - keeps inventory-only cases separate from executable semantic passes.
 
 The prior permanent snapshot behavior remains: toughness, lethal/deathtouch,
@@ -137,10 +142,10 @@ events also remain blockers.
   `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
 - Indexed rules: 3,300
 - Conformance cases: 3,300
-- Inventory-only cases: 3,222
-- Reviewed blocked cases: 46
-- Reviewed definition-only cases: 12
-- Executable semantic passes: 20
+- Inventory-only cases: 3,184
+- Reviewed blocked cases: 75
+- Reviewed definition-only cases: 18
+- Executable semantic passes: 23
 - Indexed sections: 156
 - Glossary entries: 733
 - Discovered mechanics: 425
@@ -157,14 +162,15 @@ events also remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 3,733 passed
-- Noninventory unit/integration tests: 433 passed
+- Unit/integration tests: 3,735 passed
+- Noninventory unit/integration tests: 435 passed
 - Generated per-rule inventory/source-linkage tests: 3,300 passed
 - Focused object identity/token lifecycle tests: 15 passed
 - Focused copy-object lifecycle tests: 8 passed
 - Focused CR 120/210/310/704 tests: 60 passed
 - Focused CR 616 replacement-ordering tests: 13 passed
 - Focused CR 615 prevention-effect tests: 7 passed
+- Focused CR 614 trace/fail-closed tests: 2 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
 - Seed-20260730 hidden-information audit: pass
@@ -184,7 +190,7 @@ events also remain blockers.
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `c6fba35a5e2f2fa1b45b6f1eb2276ef0ad66a48ac0155fef3946eabec04af736`
+  `3bdcb6a4b46daaeeafe9b9c4460b0be9bdaf11b74868243bf0eec4804cf6ea2f`
 
 ## Deck-review evidence state
 
@@ -216,8 +222,8 @@ from scaffold to its first complete family review:
    inventory/source-linkage test;
 2. source-pinned family overlays are authoritative and fail closed when their
    source or rule-text hashes change;
-3. all CR 120/210/310/615/616 cases are reviewed: 20 narrow rules pass with
-   executable evidence, 46 expose recorded dependency gaps, and 12 are
+3. all CR 120/210/310/614/615/616 cases are reviewed: 23 narrow rules pass
+   with executable evidence, 75 expose recorded dependency gaps, and 18 are
    definition-only;
 4. CR 310.11b remains blocked after adding its native replayable Siege
    continuation because replacement ordering and broader cast grammar are

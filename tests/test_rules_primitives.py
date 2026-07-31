@@ -313,6 +313,92 @@ class ReplacementOrderingTests(unittest.TestCase):
             },
         )
 
+    def test_contract_traces_every_cr_614_rule(self):
+        root = Path(__file__).resolve().parents[1]
+        contract = json.loads(
+            (
+                root
+                / "mechanics"
+                / "contracts"
+                / "unconditional-enters-tapped.json"
+            ).read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(
+            {
+                "614",
+                "614.1",
+                "614.1a",
+                "614.1b",
+                "614.1c",
+                "614.1d",
+                "614.1e",
+                "614.2",
+                "614.3",
+                "614.4",
+                "614.5",
+                "614.6",
+                "614.7",
+                "614.7a",
+                "614.8",
+                "614.9",
+                "614.10",
+                "614.10a",
+                "614.10b",
+                "614.11",
+                "614.11a",
+                "614.11b",
+                "614.12",
+                "614.12a",
+                "614.12b",
+                "614.12c",
+                "614.13",
+                "614.13a",
+                "614.13b",
+                "614.13c",
+                "614.14",
+                "614.15",
+                "614.16",
+                "614.17",
+                "614.17a",
+                "614.17b",
+                "614.17c",
+                "614.17d",
+            },
+            {
+                rule_id
+                for rule_id in contract["rule_references"]
+                if str(rule_id).startswith("614")
+            },
+        )
+
+    def test_uncompiled_replacement_families_fail_closed(self):
+        for operation in (
+            "skip",
+            "regenerate",
+            "redirect",
+            "prohibit",
+        ):
+            with self.subTest(operation=operation):
+                effect = ReplacementEffect(
+                    effect_id=operation,
+                    source_id=f"source:{operation}",
+                    event_kind="zone_change",
+                    replacement_class=ReplacementClass.OTHER,
+                    operations=({"op": operation},),
+                )
+                choice = replacement_choice(self.event, [effect])
+
+                with self.assertRaisesRegex(
+                    ReplacementEffectError,
+                    "Unsupported replacement operation",
+                ):
+                    apply_replacement(
+                        choice,
+                        [effect],
+                        operation,
+                    )
+
     def test_affected_player_chooses_from_current_priority_class(self):
         effects = [
             self.replacement(

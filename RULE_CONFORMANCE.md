@@ -101,11 +101,11 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All cases in CR 120, CR 210, CR 310, CR 615, and CR 616 are source-reviewed:
-20 narrow behavioral rules pass with generic executable evidence, 46 are
-blocked with exact missing dependencies, and 12 are definition-only with
-contract traceability. The remaining 3,222 cases are unreviewed and
-inventory-only.
+All cases in CR 120, CR 210, CR 310, CR 614, CR 615, and CR 616 are
+source-reviewed: 23 narrow behavioral rules pass with generic executable
+evidence, 75 are blocked with exact missing dependencies, and 18 are
+definition-only with contract traceability. The remaining 3,184 cases are
+unreviewed and inventory-only.
 
 The passing CR 310 rules are battlefield defense (310.4c), Battle damage
 (310.6), the zero-defense state action (310.7), single-protector replacement
@@ -131,4 +131,9 @@ prevention, and applying a prevention effect exactly once to unpreventable
 damage. Negative prevention fails closed. Stateful shields, simultaneous
 source allocation, source selection and rechecks, and prevention-trigger
 dispatch remain explicitly blocked.
+CR 614 adds passing evidence for one application per event, zero-damage event
+absence, and self-replacement priority. Draw, entry, and Dauthi graveyard
+replacements provide partial dedicated evidence, while skip, regeneration,
+redirection, prohibition, nested entry events, and broad linked replacements
+remain blocked and fail closed where invoked generically.
 Snapshot completeness remains false.

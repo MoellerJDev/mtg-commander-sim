@@ -38711,21 +38711,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-614",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_contract_traces_every_cr_614_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/unconditional-enters-tapped.json"
+      ],
+      "notes": [
+        "Section heading; all 38 CR 614 records are pinned by the Replacement Effects contract."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "614",
       "rule_text_sha256": "5efa4e7d23dad231437f2f594f4b76007154cf2891365dbd6387b31f55516359",
       "schema_version": 1,
@@ -38734,26 +38738,40 @@
         "end_line": 3053,
         "start_line": 3052
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "replaceable engine events are not yet emitted by every event producer",
+        "continuous replacement effects are not generically registered from Oracle semantics"
       ],
       "case_id": "cr-614.1",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_applicability_is_recomputed_after_each_replacement"
+      ],
+      "implementation_components": [
+        "replacement_effects.ReplaceableEvent",
+        "replacement_effects.replacement_choice"
+      ],
+      "notes": [
+        "The primitive continuously rechecks supplied effects against a proposed event, but registry and producer integration remain incomplete."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.1",
       "rule_text_sha256": "834fbb40e8e5599884fea9586e1c4b2207ae89c6305973cfc81f599636693068",
       "schema_version": 1,
@@ -38762,26 +38780,31 @@
         "end_line": 3055,
         "start_line": 3054
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-614.1a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "614.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_contract_traces_every_cr_614_rule"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler",
+        "mechanics/contracts/unconditional-enters-tapped.json"
+      ],
+      "notes": [
+        "Definition of the common instead wording; broad Oracle compiler coverage is measured separately."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "614.1a",
       "rule_text_sha256": "f61164c5098bba1e647cd3a2fa215c89c9f395afc817fc2425bed675152dbe9a",
       "schema_version": 1,
@@ -38790,26 +38813,31 @@
         "end_line": 3057,
         "start_line": 3056
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-614.1b",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "614.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_contract_traces_every_cr_614_rule",
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_uncompiled_replacement_families_fail_closed"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/unconditional-enters-tapped.json"
+      ],
+      "notes": [
+        "Definition of skip wording; the behavioral skip family remains fail-closed under CR 614.10."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "614.1b",
       "rule_text_sha256": "582fb500d182c525fbf536d8431029f18a90f5c03efb25761487b7b39b317461",
       "schema_version": 1,
@@ -38818,26 +38846,31 @@
         "end_line": 3059,
         "start_line": 3058
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-614.1c",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "614.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_contract_traces_every_cr_614_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._initialize_intrinsic_entry_counters",
+        "mechanics/contracts/unconditional-enters-tapped.json"
+      ],
+      "notes": [
+        "Definition of self enters-with, as-enters, and enters-as wording; individual entry behaviors remain separately classified."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "614.1c",
       "rule_text_sha256": "0fba0b53e80ad4a7e5b8e3c36d2db2c79e1b4db75f51beb71b829d4cc468fdf9",
       "schema_version": 1,
@@ -38846,26 +38879,31 @@
         "end_line": 3061,
         "start_line": 3060
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-614.1d",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "614.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_oracle_ir.OracleIRTests.test_unconditional_entry_tapped_is_engine_derived"
+      ],
+      "implementation_components": [
+        "CommanderEngine._unconditionally_enters_tapped",
+        "oracle_ir.OracleIRCompiler"
+      ],
+      "notes": [
+        "Definition of enters wording; the exact unconditional self-enters-tapped template is executable."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "614.1d",
       "rule_text_sha256": "65c6bd13f04b623701680ddd9d358fbbe5d3a782362b4c2268ad6e4b743e9567",
       "schema_version": 1,
@@ -38874,26 +38912,30 @@
         "end_line": 3063,
         "start_line": 3062
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-614.1e",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "614.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_contract_traces_every_cr_614_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/unconditional-enters-tapped.json"
+      ],
+      "notes": [
+        "Definition of as-turned-face-up wording; face-up replacement behavior is not otherwise promoted."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "614.1e",
       "rule_text_sha256": "8c4367a1332af217a7e1fed2ef26be49153862f8e3ee4e2e8e97048903bd0958",
       "schema_version": 1,
@@ -38902,26 +38944,39 @@
         "end_line": 3065,
         "start_line": 3064
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "complete CR 609.7 source selection and last-known source-property evaluation are not implemented"
       ],
       "case_id": "cr-614.2",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_prevention_applies_only_to_matching_damage_events"
+      ],
+      "implementation_components": [
+        "replacement_effects._condition_matches"
+      ],
+      "notes": [
+        "Supplied source properties may constrain an effect, but authoritative source selection remains incomplete."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.2",
       "rule_text_sha256": "40dcfae124784c0730444c6f3567980f50b79757b904c193c19017e6cf415908",
       "schema_version": 1,
@@ -38930,26 +38985,37 @@
         "end_line": 3067,
         "start_line": 3066
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "generated replacement effects lack generic duration, expiration, and used-up state",
+        "casting and activation paths do not generically register generated replacements"
       ],
       "case_id": "cr-614.3",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_contract_traces_every_cr_614_rule"
+      ],
+      "implementation_components": [
+        "replacement_effects.ReplacementEffect"
+      ],
+      "notes": [
+        "The primitive represents an already-existing immutable effect only."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.3",
       "rule_text_sha256": "b4d8f28cf4534dc2237ef5ddbe2d6e9fd3807337198253a0479f306106600673",
       "schema_version": 1,
@@ -38958,26 +39024,38 @@
         "end_line": 3069,
         "start_line": 3068
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "the active-effect registry does not record effect creation moments relative to proposed events"
       ],
       "case_id": "cr-614.4",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_contract_traces_every_cr_614_rule"
+      ],
+      "implementation_components": [
+        "replacement_effects.replacement_choice"
+      ],
+      "notes": [
+        "Only effects supplied before choice computation can apply; engine-wide temporal registration remains absent."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.4",
       "rule_text_sha256": "68452ee2f975a6ee02afa573dd32f672f2c3e75c1914b02b3ee9848a23783c98",
       "schema_version": 1,
@@ -38986,26 +39064,39 @@
         "end_line": 3072,
         "start_line": 3070
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-614.5",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_each_effect_applies_at_most_once_to_one_event"
+      ],
+      "implementation_components": [
+        "replacement_effects.ReplaceableEvent.applied_effects",
+        "replacement_effects.resolve_replacements"
+      ],
+      "notes": [
+        "Each applied or declined effect is journaled and cannot be offered again for the same event."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "614.5",
       "rule_text_sha256": "8c681b69785d454e70b159cec24bb90397b536669303d525b96716bd5392938e",
       "schema_version": 1,
@@ -39014,26 +39105,42 @@
         "end_line": 3075,
         "start_line": 3073
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "modified generic events are not universally dispatched into the triggered-ability pipeline",
+        "impossible instructions and nested modified events lack typed engine integration"
       ],
       "case_id": "cr-614.6",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_prevention_produces_a_modified_damage_event"
+      ],
+      "implementation_components": [
+        "replacement_effects.apply_replacement",
+        "replacement_effects.resolve_replacements"
+      ],
+      "notes": [
+        "The primitive produces a deterministic modified event, but downstream event/trigger semantics are incomplete."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "614.6",
       "rule_text_sha256": "02230f667ab2196a50f184a602e5625fc220012f63bfa58f736870532c6fb345",
       "schema_version": 1,
@@ -39042,26 +39149,39 @@
         "end_line": 3077,
         "start_line": 3076
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "there is no universal proposed-event boundary preventing every replacement family from observing an event that never occurs"
       ],
       "case_id": "cr-614.7",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event"
+      ],
+      "implementation_components": [
+        "CommanderEngine._apply_effect",
+        "replacement_effects.replacement_choice"
+      ],
+      "notes": [
+        "The reviewed zero-damage producer suppresses its absent event; universal producer coverage remains incomplete."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.7",
       "rule_text_sha256": "b692d5c75442408e2d57027600141aa65b332880f37ad9262d95db5157ff3368",
       "schema_version": 1,
@@ -39070,26 +39190,39 @@
         "end_line": 3079,
         "start_line": 3078
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-614.7a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "614.7"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event"
+      ],
+      "implementation_components": [
+        "CommanderEngine._apply_combat_assignments",
+        "CommanderEngine._apply_effect"
+      ],
+      "notes": [
+        "Zero is suppressed before a damage event, result, attribution, or replacement opportunity can exist."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.7a",
       "rule_text_sha256": "df5197e3b9aa30bbc9c4e470f39c828532e7058a02869ceda5dcd64806e6692d",
       "schema_version": 1,
@@ -39098,26 +39231,41 @@
         "end_line": 3081,
         "start_line": 3080
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "regeneration shield state and destruction-event replacement are not implemented",
+        "tap, damage removal, and combat removal are not applied as one regeneration replacement"
       ],
       "case_id": "cr-614.8",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_uncompiled_replacement_families_fail_closed"
+      ],
+      "implementation_components": [
+        "state_based_actions.StateAction",
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "A regeneration operation is rejected rather than approximated."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "614.8",
       "rule_text_sha256": "ff8f97cc137ab7949d3bb32964824b0a8e378298917558a1c4fd02b7955d1b3e",
       "schema_version": 1,
@@ -39126,26 +39274,40 @@
         "end_line": 3083,
         "start_line": 3082
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "damage redirection has no typed source/destination legality and departed-player evaluation",
+        "redirected damage is not routed through the full damage pipeline"
       ],
       "case_id": "cr-614.9",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_uncompiled_replacement_families_fail_closed"
+      ],
+      "implementation_components": [
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "A redirection operation is rejected rather than treated as an ordinary field rewrite."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "614.9",
       "rule_text_sha256": "ea7645c243004206a0de8e0fb7939ca47966a8cde6e101cbd804e4a34305ff59",
       "schema_version": 1,
@@ -39154,26 +39316,39 @@
         "end_line": 3085,
         "start_line": 3084
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "skip-event, step, phase, and turn schedules are not represented as consumable replacements",
+        "already-started occurrence handling is not implemented"
       ],
       "case_id": "cr-614.10",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_uncompiled_replacement_families_fail_closed"
+      ],
+      "implementation_components": [
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "Skip operations fail closed."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.10",
       "rule_text_sha256": "862da5c7dacaf1b59fb56330644da7ac208c00a0cd20ae26cc1b0ee2042d1321",
       "schema_version": 1,
@@ -39182,26 +39357,38 @@
         "end_line": 3087,
         "start_line": 3086
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "scheduled next-occurrence work and multiple independent skip shields are not persisted"
       ],
       "case_id": "cr-614.10a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614.10"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_uncompiled_replacement_families_fail_closed"
+      ],
+      "implementation_components": [
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "No skipped-occurrence scheduler exists."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.10a",
       "rule_text_sha256": "8be3c770ff977c2173a46590de308931bac35643dd20034aef8e65f25ae7b345",
       "schema_version": 1,
@@ -39210,26 +39397,38 @@
         "end_line": 3089,
         "start_line": 3088
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "post-skip actions cannot be scheduled as the first event of the next actual occurrence"
       ],
       "case_id": "cr-614.10b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614.10"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_uncompiled_replacement_families_fail_closed"
+      ],
+      "implementation_components": [
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "Compound skip-then-act grammar is unsupported."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.10b",
       "rule_text_sha256": "c40c227c0b8944162aa7758527b181d3b052ce9febbe08485055bcded3be2906",
       "schema_version": 1,
@@ -39238,26 +39437,42 @@
         "end_line": 3091,
         "start_line": 3090
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "empty-library replacement applicability is not covered by the dedicated Dredge path",
+        "arbitrary draw replacements are not compiled into the generic registry"
       ],
       "case_id": "cr-614.11",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_life_from_the_loam_returns_lands_and_dredge_replaces_draw"
+      ],
+      "implementation_components": [
+        "CommanderEngine._begin_draw_sequence",
+        "CommanderEngine._complete_draw_replacement"
+      ],
+      "notes": [
+        "Dredge produces a private replacement choice, but this does not establish the full draw-replacement family."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "614.11",
       "rule_text_sha256": "1dde906cb33a41a94c6726ee0dea21c7b96b7c1cf62b07f3c6e03e7783e139c3",
       "schema_version": 1,
@@ -39266,26 +39481,39 @@
         "end_line": 3093,
         "start_line": 3092
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "a multi-draw sequence resuming after every possible replacement action is not semantically covered"
       ],
       "case_id": "cr-614.11a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "614.11"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_life_from_the_loam_returns_lands_and_dredge_replaces_draw"
+      ],
+      "implementation_components": [
+        "CommanderEngine._begin_draw_sequence",
+        "CommanderEngine._complete_draw_replacement"
+      ],
+      "notes": [
+        "The exact Dredge action completes before its one-draw sequence ends."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "614.11a",
       "rule_text_sha256": "dcbcaf9d7a4b5be4f9c1930d037b7cf2866b977da18ceb34d81fc7803aa9add6",
       "schema_version": 1,
@@ -39294,26 +39522,36 @@
         "end_line": 3095,
         "start_line": 3094
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "draw-plus-additional-action grammar does not bind the additional action to the original draw result"
       ],
       "case_id": "cr-614.11b",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "614.11"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_contract_traces_every_cr_614_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._begin_draw_sequence"
+      ],
+      "notes": [
+        "No generic test can yet prove suppression of the additional action after a replaced draw."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.11b",
       "rule_text_sha256": "5f4ab8c599b1881f6015921d5b7a0d15ed78f1916e638e16b4e180d2641ae158",
       "schema_version": 1,
@@ -39322,26 +39560,42 @@
         "end_line": 3097,
         "start_line": 3096
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "entry applicability is not generically recomputed from would-exist battlefield characteristics after every replacement",
+        "external static effects and full copy/layer interactions are incomplete"
       ],
       "case_id": "cr-614.12",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_oracle_ir.OracleIRTests.test_unconditional_entry_tapped_is_engine_derived"
+      ],
+      "implementation_components": [
+        "CommanderEngine._unconditionally_enters_tapped",
+        "CommanderEngine._effective_card_data"
+      ],
+      "notes": [
+        "An exact unconditional self-entry replacement is derived, but the full would-exist evaluator is not complete."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "614.12",
       "rule_text_sha256": "a959e15145595b2cc1dc6ab08f650445e0ef96efa39322b84e78886a74942a1d",
       "schema_version": 1,
@@ -39350,26 +39604,41 @@
         "end_line": 3102,
         "start_line": 3098
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "all entry-replacement choices are not uniformly collected before the permanent enters",
+        "choice replay is implemented only for dedicated entry families"
       ],
       "case_id": "cr-614.12a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614.12"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_oracle_ir.OracleIRTests.test_unconditional_entry_tapped_is_engine_derived"
+      ],
+      "implementation_components": [
+        "CommanderEngine.move_card",
+        "CommanderEngine._create_semantic_choice"
+      ],
+      "notes": [
+        "The unconditional template needs no choice; broader choice-bearing entry semantics remain incomplete."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "614.12a",
       "rule_text_sha256": "fda5ac94815c4a1a42744153747ff7ae39aeb4cb6fd8fb7457c1f6fda5e33e8b",
       "schema_version": 1,
@@ -39378,26 +39647,37 @@
         "end_line": 3104,
         "start_line": 3103
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "simultaneous multi-permanent entry choices do not reserve and validate combined payable costs"
       ],
       "case_id": "cr-614.12b",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "614.12"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_contract_traces_every_cr_614_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine.move_card"
+      ],
+      "notes": [
+        "No aggregate entry-choice cost planner exists."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "614.12b",
       "rule_text_sha256": "1cdd80e5e7c67f4865a0229a8d96c8d4978c545a4fd8cd8e497df8a42db6fd51",
       "schema_version": 1,
@@ -39406,26 +39686,37 @@
         "end_line": 3106,
         "start_line": 3105
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "anchor-word entry choices and linked granted abilities are not compiled generically"
       ],
       "case_id": "cr-614.12c",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "614.12"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_contract_traces_every_cr_614_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine.move_card"
+      ],
+      "notes": [
+        "Anchor-word choice identity is not represented."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "614.12c",
       "rule_text_sha256": "594780c5594d07e7b58bec45d876657daa2fb00259e243cb16695ea7bc7fa649",
       "schema_version": 1,
@@ -39434,26 +39725,40 @@
         "end_line": 3108,
         "start_line": 3107
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "entry replacements cannot contain ordered typed zone-change child events",
+        "nested event choices are not represented in replay paths"
       ],
       "case_id": "cr-614.13",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_nested_event_operation_fails_closed"
+      ],
+      "implementation_components": [
+        "replacement_effects.apply_replacement",
+        "CommanderEngine.move_card"
+      ],
+      "notes": [
+        "Nested replacement events fail closed."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.13",
       "rule_text_sha256": "51a9cf5dc58c93b095774d3042fb50dcd45a7d14a58514d17c89b57b9adaaffa",
       "schema_version": 1,
@@ -39462,26 +39767,38 @@
         "end_line": 3110,
         "start_line": 3109
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "nested entry-zone-change choices cannot exclude all simultaneously entering objects from candidate selection"
       ],
       "case_id": "cr-614.13a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614.13"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_nested_event_operation_fails_closed"
+      ],
+      "implementation_components": [
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "No candidate grammar exists for this nested event."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.13a",
       "rule_text_sha256": "742ea0b5e83a0d3c550fc8dad882bf61d81de19f707cfe6001102971e1f0ac5b",
       "schema_version": 1,
@@ -39490,26 +39807,38 @@
         "end_line": 3113,
         "start_line": 3111
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "cross-replacement uniqueness for nested zone-change choices is not tracked"
       ],
       "case_id": "cr-614.13b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614.13"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_nested_event_operation_fails_closed"
+      ],
+      "implementation_components": [
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "The same-object-twice restriction cannot yet be represented."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.13b",
       "rule_text_sha256": "85e5a15e815768d7a6aa9e45edb6b0546fb9808fd285318c1610f936ed260397",
       "schema_version": 1,
@@ -39518,26 +39847,40 @@
         "end_line": 3116,
         "start_line": 3114
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "nested mill/exile operations cannot reserve library cards already entering simultaneously",
+        "private library candidate projection is not integrated"
       ],
       "case_id": "cr-614.13c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614.13"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_nested_event_operation_fails_closed"
+      ],
+      "implementation_components": [
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "The library exclusion edge case remains unsupported."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "614.13c",
       "rule_text_sha256": "c4f485c8bf412a0b6bebf2a235f41b68d570c6d9d841b4b7e661848d8791188a",
       "schema_version": 1,
@@ -39546,26 +39889,42 @@
         "end_line": 3119,
         "start_line": 3117
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "linked replacement identity is implemented for the exact Dauthi family rather than generic linked abilities",
+        "gained paired abilities and old/new object incarnations are not fully modeled"
       ],
       "case_id": "cr-614.14",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free"
+      ],
+      "implementation_components": [
+        "CommanderEngine._compiled_graveyard_replacement",
+        "CommanderEngine._activate"
+      ],
+      "notes": [
+        "Dauthi links its exiled card permission to the represented effect, but this is not broad linked-ability coverage."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "614.14",
       "rule_text_sha256": "aa21d92956d5518751696267ec4cc9970aa85cbcf15de9fa3189fc1cc5dca9af",
       "schema_version": 1,
@@ -39574,26 +39933,39 @@
         "end_line": 3121,
         "start_line": 3120
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-614.15",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_self_replacement_must_be_chosen_before_other_effects"
+      ],
+      "implementation_components": [
+        "replacement_effects.ReplacementClass.SELF_REPLACEMENT",
+        "replacement_effects.replacement_choice"
+      ],
+      "notes": [
+        "Represented self-replacements are the mandatory first priority class before all other replacements."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "614.15",
       "rule_text_sha256": "0e0fb3adb5279c0115f8a32f6792a2a267d43ba65acf4be594c67574b0a2b6c2",
       "schema_version": 1,
@@ -39602,26 +39974,40 @@
         "end_line": 3123,
         "start_line": 3122
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "token-creation and counter-placement producers are not routed through the generic replacement registry",
+        "effects created by replacement or prevention operations do not emit typed nested token/counter events"
       ],
       "case_id": "cr-614.16",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_applicability_is_recomputed_after_each_replacement"
+      ],
+      "implementation_components": [
+        "replacement_effects.replacement_choice",
+        "CommanderEngine._apply_effect"
+      ],
+      "notes": [
+        "Applicability is recomputed after payload changes, but the specified producer families are not integrated."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.16",
       "rule_text_sha256": "3601a01df06ac3b0af20b6b560dc2e023e6e464e3ce0fb2e0b560ce83bf427ce",
       "schema_version": 1,
@@ -39630,26 +40016,38 @@
         "end_line": 3125,
         "start_line": 3124
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "a typed prohibition event and generic can't-effect registry do not exist"
       ],
       "case_id": "cr-614.17",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_uncompiled_replacement_families_fail_closed"
+      ],
+      "implementation_components": [
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "Prohibition operations fail closed instead of masquerading as replacements."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.17",
       "rule_text_sha256": "010c20ba7bfe64443533d801792cfc97f7b9dfc0075ce0a6164be3f11b0079ba",
       "schema_version": 1,
@@ -39658,26 +40056,38 @@
         "end_line": 3127,
         "start_line": 3126
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "can't-effect creation moments are not tracked relative to proposed events"
       ],
       "case_id": "cr-614.17a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614.17"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_uncompiled_replacement_families_fail_closed"
+      ],
+      "implementation_components": [
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "Retroactive prohibition cannot be represented."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.17a",
       "rule_text_sha256": "d68ae637f39d0a3cc9cd1e60c0c9e9e7f9ab2df8cff9f419d053def6f48eb915",
       "schema_version": 1,
@@ -39686,26 +40096,39 @@
         "end_line": 3129,
         "start_line": 3128
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "cost grammar does not generically consult typed can't-events before advertising or paying every event cost"
       ],
       "case_id": "cr-614.17b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614.17"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_uncompiled_replacement_families_fail_closed"
+      ],
+      "implementation_components": [
+        "CommanderEngine._ability_availability",
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "Some dedicated availability checks fail closed, but the universal cost predicate is incomplete."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.17b",
       "rule_text_sha256": "18e58bcd3234989b8968bf8e7f35afa858a9501a65ff12368d3646e7c8f223a8",
       "schema_version": 1,
@@ -39714,26 +40137,40 @@
         "end_line": 3131,
         "start_line": 3130
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "prohibited events are not represented, so the self-replacement-only exception cannot be evaluated"
       ],
       "case_id": "cr-614.17c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614.17"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_self_replacement_must_be_chosen_before_other_effects",
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_uncompiled_replacement_families_fail_closed"
+      ],
+      "implementation_components": [
+        "replacement_effects.ReplacementClass.SELF_REPLACEMENT",
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "Self-replacement priority exists, but no typed can't-event feeds it."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.17c",
       "rule_text_sha256": "8c8827d301580370d7ca8db2040162fd10902c72c90ecd65d2e90cab97636d53",
       "schema_version": 1,
@@ -39742,26 +40179,40 @@
         "end_line": 3133,
         "start_line": 3132
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "entry can't-effects are not derived through the full would-exist battlefield evaluator",
+        "external continuous effects and replacement-modified entry characteristics are incomplete"
       ],
       "case_id": "cr-614.17d",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "614.17"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_oracle_ir.OracleIRTests.test_unconditional_entry_tapped_is_engine_derived"
+      ],
+      "implementation_components": [
+        "CommanderEngine._effective_card_data",
+        "CommanderEngine.move_card"
+      ],
+      "notes": [
+        "The implemented unconditional entry replacement is not a can't-effect and does not establish this family."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "614.17d",
       "rule_text_sha256": "021535cd61482a7f53688bdb5ebb849c1b921f7018c3454de6e9c37933ca40c5",
       "schema_version": 1,
@@ -39770,7 +40221,7 @@
         "end_line": 3135,
         "start_line": 3134
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
       "assertion_kind": "static_traceability",
