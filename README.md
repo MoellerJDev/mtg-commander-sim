@@ -175,6 +175,11 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 505 main-phase boundary: empty-stack pass completion,
+  active-player priority, ordinary sorcery-speed casting, and stackless
+  authoritative land plays use exact precombat/postcombat predicates; extra
+  and skipped combats, ordinal main phases, Archenemy, Attractions, and
+  complete simultaneous Saga handling remain blocked
 - source-reviewed CR 506 combat-phase boundary: authoritative attacking and
   defending roles, durable combat history, and represented removal from
   combat after zone, control, phasing, or type changes; alternate multiplayer

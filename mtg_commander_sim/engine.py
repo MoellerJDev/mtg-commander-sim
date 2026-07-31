@@ -4869,10 +4869,18 @@ class CommanderEngine:
         if self.state.priority_player != seat:
             raise GameRuleError(f"{seat} does not have priority")
 
+    def _is_main_phase(self) -> bool:
+        """Return whether the scheduler is at either CR 505 main phase."""
+
+        return (self.state.phase, self.state.step) in {
+            ("precombat_main", "main"),
+            ("postcombat_main", "main"),
+        }
+
     def _sorcery_timing(self, seat: str) -> None:
         if seat != self.state.active_player:
             raise GameRuleError("Sorcery-speed action requires the active player")
-        if (self.state.phase, self.state.step) not in {("precombat_main", "main"), ("postcombat_main", "main")}:
+        if not self._is_main_phase():
             raise GameRuleError("Sorcery-speed action requires a main phase")
         if self.state.stack:
             raise GameRuleError("Sorcery-speed action requires an empty stack")
@@ -8090,7 +8098,11 @@ class CommanderEngine:
             record = self.card_record(oid)
             if not record or record.is_land:
                 continue
-            main_timing = seat == self.state.active_player and not self.state.stack and self.state.step == "main"
+            main_timing = (
+                seat == self.state.active_player
+                and not self.state.stack
+                and self._is_main_phase()
+            )
             program = self.semantics.get(
                 f"{record.oracle_id}:spell:front"
             )
@@ -8251,7 +8263,12 @@ class CommanderEngine:
                     ] = public_target_schema
                 castable.append(self.state.cards[oid].ref)
         lands: list[str] = []
-        if seat == self.state.active_player and not self.state.stack and self.state.step == "main" and player.land_plays_remaining:
+        if (
+            seat == self.state.active_player
+            and not self.state.stack
+            and self._is_main_phase()
+            and player.land_plays_remaining
+        ):
             lands = [
                 self.state.cards[oid].ref
                 for oid in [

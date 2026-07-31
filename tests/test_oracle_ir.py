@@ -74,6 +74,7 @@ class MechanicContractTests(unittest.TestCase):
                 "cr-310-battles",
                 "cr-400-general",
                 "cr-506-combat-phase",
+                "cr-505-main-phase",
                 "cr-507-beginning-of-combat-step",
                 "cr-508-declare-attackers-step",
                 "cr-509-declare-blockers-step",

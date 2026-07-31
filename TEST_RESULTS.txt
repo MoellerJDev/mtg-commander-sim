@@ -7,19 +7,20 @@ Python: 3.11.9
 
 PASS: `python -m compileall -q mtg_commander_sim tests scripts simctl.py`
 
-PASS: 3,829 unit/integration tests in 184.906 seconds using the rebuilt compact
+PASS: 3,837 unit/integration tests in 184.350 seconds using the rebuilt compact
 Scryfall database:
 
 - 3,300 generated per-rule inventory/source-linkage tests
-- 529 ordinary rules, engine, protocol, replay, privacy, and platform tests
+- 537 ordinary rules, engine, protocol, replay, privacy, and platform tests
 
-The six new CR 506 tests verify source traceability, the exact empty-combat
-phase boundary, authoritative attacking and defending roles, removal after
-zone/control/phasing/type invalidation, historical-attacker retention, and
-tapping/untapping preservation. Alternate multiplayer options, generic
-effect-created or effect-removed combatants, requirement snapshots, extra
-combats, planeswalker destinations, “alone” provenance, and universal
-combat-relative timing remain blocked.
+The eight new CR 505 tests verify source traceability, ordinary precombat and
+postcombat main-phase boundaries, empty-stack phase completion, nonempty-stack
+resolution without premature phase completion, represented Saga processing
+before active-player priority, ordinary sorcery timing, and authoritative
+stackless land plays with exact replay. Generic skipped or additional combat
+and main phases, ordinal main-phase identity, Archenemy schemes, Attractions,
+and complete Saga qualification and simultaneous replacement/trigger ordering
+remain blocked.
 
 Generated source linkage is not a claim that every rule has executable semantic
 coverage. The reviewed ledger remains fail-closed about passing, blocked,
@@ -63,7 +64,7 @@ PASS:
 - reachable-history path and oversized-blob scan
 - sanitized public replay-fixture policy check
 
-The scan covered 262 tracked files and 11,401,521 tracked bytes.
+The scan covered 265 tracked files and 11,452,560 tracked bytes.
 
 ## Package
 
@@ -74,16 +75,19 @@ package reported version 0.8.0 and its CLI smoke test completed.
 
 ## Evidence boundary
 
-These checks establish the local CR 506 focused branch atop the green CR 507
-main baseline, including source pinning, represented combat-phase roles and
-removal semantics, replay, privacy, action opportunity, packaging, and
-repository gates. They do not establish alternate multiplayer combat options,
-generic effect-created combatants, complete restriction/requirement or timing
-grammar, a production ASGI server, browser client, durable database, complete
-Comprehensive Rules behavior,
+These checks establish the local CR 505 focused branch atop the green CR 506
+main baseline, including source pinning, represented main-phase boundaries,
+ordinary active-player priority and timing, stackless land plays, replay,
+privacy, action opportunity, packaging, and repository gates. They do not
+establish generic skipped or additional combat and main phases, ordinal
+main-phase identity, Archenemy schemes, Attractions, complete Saga
+qualification and simultaneous replacement/trigger ordering, a production
+ASGI server, browser client, durable database, complete Comprehensive Rules
+behavior,
 Oracle-corpus semantic closure, Commander deck legality for the micro-pool,
 deck superiority, or statistical matchup evidence.
 
-The baseline main commit's exact-SHA GitHub Actions matrix is recorded after
-pull request #8 in run 30614171826. Exact-SHA CI for the focused CR 506 commit is
-not claimed until that commit is pushed.
+The baseline main commit `c8a52711dc9294957fc0f437a4aaeab72da213aa`
+passed its exact-SHA GitHub Actions matrix after pull request #9 in run
+30615647165. Exact-SHA CI for the focused CR 505 commit is not claimed until
+that commit is pushed.
