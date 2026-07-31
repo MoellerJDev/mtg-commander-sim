@@ -342,7 +342,7 @@ function GameView({ gameId }: { gameId: string }) {
   const hand = asList(ownPlayer.hand);
   const stack = asList(state.stack);
   return (
-    <main className="game-shell">
+    <main className="game-shell" data-view-revision={view.viewRevision}>
       <header className="game-topbar">
         <div><span className={`connection ${connection.toLowerCase()}`} /> {connection}</div>
         <strong>GAME {String(game.id ?? gameId).slice(0, 8)}</strong>

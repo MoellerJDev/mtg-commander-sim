@@ -20,6 +20,10 @@ async function submitDeck(page: Page, seat: string, text: string) {
   await expect(page.getByText("Deck validated: trusted-only semantic gate passes.")).toBeVisible();
 }
 
+async function viewRevision(page: Page): Promise<number> {
+  return Number(await page.locator(".game-shell").getAttribute("data-view-revision"));
+}
+
 test("four isolated browser contexts play through authoritative mulligans and reconnect", async ({ browser }) => {
   const contexts: BrowserContext[] = [];
   const pages: Page[] = [];
@@ -60,15 +64,28 @@ test("four isolated browser contexts play through authoritative mulligans and re
     expect(handA).not.toEqual(handB);
 
     for (let index = 0; index < 4; index += 1) {
+      const revisions = await Promise.all(pages.map(viewRevision));
       await expect(pages[index].getByTestId("action-keep")).toBeVisible();
       await pages[index].getByTestId("action-keep").click();
+      // A click only proves that the browser dispatched the command. Wait for
+      // the authoritative HTTP receipt before allowing the next declaration
+      // (or the reconnect below) to observe the resulting game state.
+      await expect(pages[index].locator(".toast")).toContainText("Accepted keep");
+      for (let seatIndex = 0; seatIndex < 4; seatIndex += 1) {
+        await expect.poll(() => viewRevision(pages[seatIndex])).toBeGreaterThan(revisions[seatIndex]);
+      }
     }
 
+    // Depending on the seeded hands, the rules engine may pause for any
+    // seat's meaningful upkeep response or skip pass-only windows. The
+    // revision barriers above synchronize on the final declaration without
+    // assuming a particular phase or priority holder.
+    const projectedHandCount = await pages[0].getByTestId("own-hand").locator(".hand-card").count();
+    const projectedDecision = await pages[0].getByTestId("decision-panel").textContent();
     await pages[0].reload();
-    // Multiplayer Commander keeps the first-player draw, so A has eight after
-    // all four keeps advance the engine into A's first draw step.
-    await expect(pages[0].getByTestId("own-hand").locator(".hand-card")).toHaveCount(8);
     await expect(pages[0].getByText("LIVE", { exact: true })).toBeVisible();
+    await expect(pages[0].getByTestId("own-hand").locator(".hand-card")).toHaveCount(projectedHandCount);
+    await expect(pages[0].getByTestId("decision-panel")).toHaveText(projectedDecision!);
   } finally {
     await Promise.all(contexts.map((context) => context.close()));
   }

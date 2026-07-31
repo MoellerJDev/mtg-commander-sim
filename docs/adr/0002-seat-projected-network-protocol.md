@@ -16,6 +16,9 @@ client command ID, live decision/action/capability, and expected view revision.
 Every WebSocket receives only that principal's projection and owns an ephemeral
 connection cursor. Reconnect begins with a full projection. Raw capabilities,
 session tokens, and invite codes are excluded from durable journals.
+The full projection establishes a new delivery stream even when its fresh
+connection cursor restarts `pkt` at one. It replaces the client's visible event
+tail; monotonic packet-number rejection applies to deltas within that stream.
 
 ## Consequences
 
