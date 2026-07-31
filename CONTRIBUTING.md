@@ -14,6 +14,11 @@ python -m pip install -e . -r requirements-dev.txt
 python scripts/build_test_database.py build \
   --fixture tests/fixtures/scryfall-exact-lists.json \
   --output data/test-ci.sqlite3
+cd web
+npm ci
+npm run generate:types
+npm run typecheck
+npm run build
 ```
 
 Set `MTG_CARD_DB=data/test-ci.sqlite3`, then run the commands in `AGENTS.md`.
@@ -31,6 +36,10 @@ commit its logs or database.
 ## Change boundaries
 
 - Keep `CommanderEngine` authoritative and preserve fixed-seat projection.
+- Keep FastAPI/Uvicorn/HTTP/WebSocket imports out of `mtg_commander_sim`; the
+  `server` adapter may depend inward on the transport-neutral package.
+- Run the four-context Playwright test for room, authentication, WebSocket,
+  reconnect, projection, or browser decision changes.
 - Add deterministic tests for rules, target, permission, or protocol changes.
 - Fail closed when semantics are unresolved.
 - Preserve Game Record v3 and exact command replay.

@@ -6,12 +6,12 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "rules_backlog_integrated_server_browser_vertical_slice_next",
-    "branch": "main",
+    "active_phase": "server_browser_vertical_slice_implemented_hardening_next",
+    "branch": "agent/server-browser-vertical-slice",
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
-      "focused_branch_base": "adb0f520e71161e23bd14854c78051597c545ba6",
-      "focused_branch_unique_commits_over_main": 0
+      "focused_branch_base": "b3bb0e1156b14e7054f8064f3d2e06d9592a1769",
+      "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
       {
@@ -228,8 +228,8 @@
     {
       "id": "browser_commander_mvp",
       "name": "Browser Commander MVP",
-      "status": "not_started",
-      "evidence": "No server/, web/, or migrations/ subsystem is present on this branch."
+      "status": "first_vertical_slice_complete",
+      "evidence": "The branch contains a strict protocol 3.0 application boundary, serialized game actors, SQLite control plane and migration, FastAPI HTTP/WebSocket adapter, React/TypeScript browser, generated schema bindings, and a passing four-isolated-context Chromium test. Generic forms for every rules choice and production operations remain open."
     },
     {
       "id": "rules_snapshot",
@@ -246,16 +246,16 @@
   ],
   "platform": {
     "authoritative_kernel": "implemented_partial",
-    "transport_neutral_service": "implemented_in_process",
-    "single_writer_game_actor": "not_implemented",
-    "durable_database": "not_implemented",
-    "http_websocket_server": "not_implemented",
-    "browser_client": "not_implemented",
-    "guest_or_account_identity": "not_implemented",
-    "rooms_and_lobbies": "not_implemented",
+    "transport_neutral_service": "implemented_strict_protocol_3",
+    "single_writer_game_actor": "implemented_single_process",
+    "durable_database": "implemented_sqlite_control_plane_plus_game_record_v3",
+    "http_websocket_server": "implemented_first_vertical_slice",
+    "browser_client": "implemented_first_vertical_slice",
+    "guest_or_account_identity": "implemented_expiring_guest_sessions",
+    "rooms_and_lobbies": "implemented_invite_only_four_seat",
     "replay": "implemented_command_replay",
     "hidden_information": "implemented_projected_protocol",
-    "security": "repository_and_capability_baseline_only",
+    "security": "guest_hash_csrf_origin_capability_and_projection_baseline",
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
@@ -268,9 +268,12 @@
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "pass_3925",
+      "deterministic_tests": "pass_3947_cumulative_full_run_plus_corrected_status_delta",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
+      "server_protocol_persistence_integration": "pass",
+      "browser_typecheck_and_production_build": "pass",
+      "browser_four_isolated_contexts": "pass_chromium_guest_room_decks_mulligans_reconnect",
       "repository_history_security_audit": "pass",
       "wheel_build_and_clean_install": "pass"
     },
@@ -279,8 +282,9 @@
     "semantic_preflight": "trusted_only_for_two_pinned_exact_lists"
   },
   "blockers": [
-    "no authoritative ASGI server, single-writer GameActor, durable persistence, or browser client exists",
+    "generic browser forms for all modes, targets, costs, searches, ordering, replacement, trigger, and combat choices are incomplete",
+    "production accounts, PostgreSQL, multi-process actor ownership, rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Create agent/server-browser-vertical-slice from final green main and begin the single authoritative server/browser vertical slice without resuming broad rules-family work."
+  "next_task": "Merge the verified first server/browser vertical slice, then continue on a clean focused branch with generic browser choice forms and server recovery/operations hardening before resuming broad rules-family work."
 }

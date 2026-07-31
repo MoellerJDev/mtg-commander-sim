@@ -9,15 +9,20 @@ description = "Deterministic, server-authoritative multiplayer Commander platfor
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [{name = "OpenAI"}]
-dependencies = []
+dependencies = [
+  "fastapi>=0.141,<0.142",
+  "uvicorn>=0.52,<0.53",
+  "websockets>=16,<18",
+]
 
 [project.scripts]
 mtg-commander-sim = "mtg_commander_sim.cli:main"
 simctl = "mtg_commander_sim.cli:main"
+commander-server = "server.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["mtg_commander_sim*"]
+include = ["mtg_commander_sim*", "server*"]
 
 [tool.setuptools.package-data]
 mtg_commander_sim = [

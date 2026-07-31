@@ -29,6 +29,16 @@
   "properties": {
     "sequence": {"type": "integer", "minimum": 1},
     "command_id": {"type": "string", "pattern": "^C[1-9][0-9]*$"},
+    "client_command_id": {
+      "type": ["string", "null"],
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "client_request_fingerprint": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "client_receipt": {"type": "object"},
+    "continuation": {"type": ["object", "null"]},
     "decision_id": {"type": ["string", "null"]},
     "principal": {"type": "string"},
     "actor": {"type": ["string", "null"]},

@@ -12,8 +12,9 @@ class PlatformStatusTests(unittest.TestCase):
         report = build_report()
         self.assertEqual(report["package"]["version"], "0.8.0")
         self.assertGreaterEqual(report["tests"]["deterministic_cases_discovered"], 286)
-        self.assertEqual(report["tests"]["server_files"], 0)
-        self.assertEqual(report["tests"]["web_files"], 0)
+        self.assertGreaterEqual(report["tests"]["server_files"], 4)
+        self.assertGreaterEqual(report["tests"]["web_files"], 10)
+        self.assertGreaterEqual(report["tests"]["migration_files"], 1)
         self.assertEqual(report["platform"]["ai_dependency"], "none_for_core_tests_or_runtime")
 
     def test_generated_platform_status_is_current(self):

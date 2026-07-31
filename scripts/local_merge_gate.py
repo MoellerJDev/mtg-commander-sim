@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -69,6 +70,7 @@ def build_steps(
     database: Path,
     output: Path,
     focused_tests: Sequence[str],
+    npm: str = "npm",
 ) -> list[GateStep]:
     protocol_output = output / "protocol-demo"
     wheel_output = output / "dist"
@@ -207,6 +209,26 @@ def build_steps(
                 "--dist",
                 str(wheel_output),
             ),
+        ),
+        GateStep(
+            "browser_dependencies",
+            (npm, "ci", "--prefix", "web"),
+        ),
+        GateStep(
+            "generated_protocol_types",
+            (npm, "run", "generate:types", "--prefix", "web"),
+        ),
+        GateStep(
+            "generated_protocol_freshness",
+            ("git", "diff", "--exit-code", "--", "web/src/generated"),
+        ),
+        GateStep(
+            "browser_production_build",
+            (npm, "run", "build", "--prefix", "web"),
+        ),
+        GateStep(
+            "browser_four_context_e2e",
+            (npm, "run", "e2e", "--prefix", "web"),
         ),
     ]
 
@@ -364,12 +386,16 @@ def main() -> int:
         dict.fromkeys((*DEFAULT_FOCUSED_TESTS, *args.focused_test))
     )
     python = str(Path(sys.executable).resolve())
+    npm = shutil.which("npm.cmd" if sys.platform == "win32" else "npm")
+    if npm is None:
+        raise SystemExit("npm is required for the browser merge gate")
     environment = gate_environment(database)
     steps = build_steps(
         python,
         database=database,
         output=output,
         focused_tests=focused_tests,
+        npm=npm,
     )
     summary_path = output / "summary.json"
     summary: dict = {

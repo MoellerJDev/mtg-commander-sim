@@ -47,3 +47,41 @@ jobs:
         run: python -m build --wheel
       - name: Verify clean wheel installation and CLI
         run: python scripts/verify_wheel.py
+
+  web:
+    name: Browser / Chromium
+    runs-on: ubuntu-latest
+    env:
+      MTG_CARD_DB: data/test-ci.sqlite3
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install server and browser dependencies
+        run: |
+          python -m pip install -e . -r requirements-dev.txt
+          npm ci --prefix web
+      - name: Build compact offline card database
+        run: >-
+          python scripts/build_test_database.py build
+          --fixture tests/fixtures/scryfall-exact-lists.json
+          --output data/test-ci.sqlite3
+      - name: Verify generated protocol types
+        run: |
+          npm run generate:types --prefix web
+          git diff --exit-code -- web/src/generated
+      - name: Typecheck and build browser
+        run: npm run build --prefix web
+      - name: Install Chromium
+        working-directory: web
+        run: npx playwright install --with-deps chromium
+      - name: Four-context browser test
+        run: npm run e2e --prefix web

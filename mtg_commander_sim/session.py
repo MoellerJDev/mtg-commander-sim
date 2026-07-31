@@ -217,10 +217,24 @@ class CommanderSession:
                 principals.append(principal)
         return principals
 
-    def packet(self, principal: str, *, full: bool = False) -> dict[str, Any]:
+    def packet(
+        self,
+        principal: str,
+        *,
+        full: bool = False,
+        cursor_key: str | None = None,
+    ) -> dict[str, Any]:
         # Rebind after a loaded/rolled-back engine state.
         self.projector.state = self.engine.state
-        return self.projector.packet(principal, self._cursor(principal), force_full=full)
+        return self.projector.packet(
+            principal,
+            self._cursor(cursor_key or principal),
+            force_full=full,
+        )
+
+    def drop_projection_cursor(self, cursor_key: str) -> None:
+        if cursor_key != "arbiter" and not cursor_key.startswith("pilot:"):
+            self.cursors.pop(cursor_key, None)
 
     def next_task(self, *, full: bool = False) -> dict[str, Any] | None:
         for _ in range(64):
@@ -514,7 +528,13 @@ class CommanderSession:
             )
         )
 
-    def act(self, principal: str, response: Mapping[str, Any]) -> ActionResult:
+    def act(
+        self,
+        principal: str,
+        response: Mapping[str, Any],
+        *,
+        client_command_id: str | None = None,
+    ) -> ActionResult:
         capability = self.engine.permissions.capability_for(principal)
         if capability is None:
             return ActionResult(False, f"No pending capability for {principal}", [], state_changed=False)
@@ -769,6 +789,7 @@ class CommanderSession:
                 {
                     "sequence": len(self.commands) + 1,
                     "command_id": f"C{len(self.commands) + 1}",
+                    "client_command_id": client_command_id,
                     "decision_id": decision.decision_id if decision else None,
                     "principal": principal,
                     "actor": actor,
@@ -919,6 +940,7 @@ class CommanderSession:
                 "view_hash": cursor.view_hash,
             }
             for principal, cursor in self.cursors.items()
+            if not principal.startswith("network:")
         }
         (directory / "cursors.json").write_text(
             json.dumps(cursor_payload, indent=2, sort_keys=True), encoding="utf-8"

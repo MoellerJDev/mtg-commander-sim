@@ -5,7 +5,7 @@ import hashlib
 import json
 from typing import Any, Mapping, Sequence
 
-PROTOCOL_VERSION = "2.1"
+PROTOCOL_VERSION = "3.0"
 
 
 class ProtocolError(ValueError):

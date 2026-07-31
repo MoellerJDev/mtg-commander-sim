@@ -3,8 +3,9 @@
 The product target is a deterministic, server-authoritative, browser-based
 four-player Commander platform. The current 0.8.x line is a rules-kernel,
 semantic, protocol, replay, and privacy foundation. It is not a complete
-Comprehensive Rules or Oracle implementation and does not yet include a network
-server, durable production database, or browser client.
+Comprehensive Rules or Oracle implementation. The first single-node network,
+SQLite, and browser vertical slice is implemented; production database and
+operations work plus complete generic browser choice forms remain open.
 
 The generated current ledger is
 `docs/PLATFORM_IMPLEMENTATION_STATUS.md`.
@@ -30,30 +31,30 @@ browser test before broad CR-number traversal resumes.
 
 ## Phase 1 — strict command and domain boundaries
 
-- versioned browser command envelopes and strict choice schemas
-- server-derived authenticated principals
-- idempotent commands and stale revision rejection
-- canonical public versus authoritative object identities
-- transaction rollback and architecture dependency tests
+- [x] versioned browser command envelopes and strict choice schemas
+- [x] server-derived authenticated principals
+- [x] idempotent commands and stale revision rejection
+- [x] canonical public versus authoritative object identities
+- [x] transaction rollback and architecture dependency tests
 
 ## Phase 2 — single-writer server and persistence
 
-- `GameManager` with one serialized `GameActor` per active game
-- ASGI HTTP/WebSocket gateway
-- guest identities, rooms, seats, deck selection, readiness, and lifecycle
-- persistence ports with in-memory, SQLite development, and PostgreSQL adapters
-- migrations, durable command acknowledgement, checkpoints, reconnect, and
+- [x] `GameManager` with one serialized `GameActor` per active game
+- [x] ASGI HTTP/WebSocket gateway
+- [x] guest identities, rooms, seats, deck selection, readiness, and lifecycle
+- [ ] persistence ports with SQLite development implemented; PostgreSQL remains
+- [x] migrations, durable command acknowledgement, checkpoints, reconnect, and
   process-restart recovery
 
 ## Phase 3 — browser Commander MVP
 
-- TypeScript browser client generated from versioned schemas
-- four-player table, local hand, public zones, stack, combat, decisions, and log
-- generic modes, targets, costs, searches, ordering, replacement, trigger, and
+- [x] TypeScript browser client generated from versioned schemas
+- [x] four-player table, local hand, public zones, stack, and ordinary decisions
+- [ ] generic modes, targets, costs, searches, ordering, replacement, trigger, and
   combat choices
-- safe yields, reconnect/resync, spectators, accessibility, and independent
-  text-forward visual design
-- four isolated browser-context end-to-end tests
+- [ ] safe yields, reconnect/resync, and the text-forward visual design are
+  implemented; spectators and complete accessibility remain
+- [x] four isolated browser-context end-to-end test
 
 ## Phase 4 — rules and Oracle expansion
 

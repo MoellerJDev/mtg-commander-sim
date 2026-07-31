@@ -1,9 +1,9 @@
 {
-  "v": "2.1",
+  "v": "3.0",
   "mode": "delta",
   "principal": "pilot:A",
-  "base": "6405e7cee2ec238fbb46",
-  "view": "1309ba4d4e1883ea453e",
+  "base": "22fadfe915a7a8007320",
+  "view": "c850f35a73a638eef141",
   "rev": 1,
   "event": 12,
   "patch": [
@@ -19,6 +19,7 @@
     }
   ],
   "decision": null,
+  "view_revision": 1,
   "events": [
     {
       "id": 11,

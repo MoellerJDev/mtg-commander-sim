@@ -91,7 +91,10 @@ class CapabilityManager:
 
     def _new_token(self) -> str:
         while True:
-            token = "c_" + secrets.token_urlsafe(8)
+            # 32 random bytes provide 256 bits of bearer capability entropy.
+            # The token remains short-lived and decision-scoped; this merely
+            # makes guessing safe enough for a real network boundary.
+            token = "c_" + secrets.token_urlsafe(32)
             if token not in self.state.capabilities:
                 return token
 

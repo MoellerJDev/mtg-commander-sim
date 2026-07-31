@@ -48,6 +48,12 @@ python scripts/validate_repository.py
 python simctl.py rules verify --root .
 python -m build --wheel
 python scripts/verify_wheel.py
+cd web
+npm ci
+npm run generate:types
+npm run typecheck
+npm run build
+npm run e2e
 ```
 
 Set `MTG_CARD_DB` when the database is outside `data/`.
@@ -84,6 +90,8 @@ For a new client feature:
 2. project data only to principals that need it
 3. update protocol schema and reducer tests
 4. keep transport logic out of `CommanderEngine`
+5. preserve one ephemeral projection cursor per network connection
+6. derive the principal from authenticated room membership, never request JSON
 
 For new card semantics:
 

@@ -6,9 +6,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `main`
+- Active branch: `agent/server-browser-vertical-slice`
 - Current commit: the commit containing this ledger
-- Active phase: `rules_backlog_integrated_server_browser_vertical_slice_next`
+- Active phase: `server_browser_vertical_slice_implemented_hardening_next`
 - Package version: `0.8.0`
 
 ### Pull requests
@@ -60,32 +60,32 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | Milestone | Status | Evidence |
 |---|---|---|
 | Integrated deterministic foundation | `complete` | Integration PRs #1-17, #24, and #25 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
-| Browser Commander MVP | `not_started` | No server/, web/, or migrations/ subsystem is present on this branch. |
+| Browser Commander MVP | `first_vertical_slice_complete` | The branch contains a strict protocol 3.0 application boundary, serialized game actors, SQLite control plane and migration, FastAPI HTTP/WebSocket adapter, React/TypeScript browser, generated schema bindings, and a passing four-isolated-context Chromium test. Generic forms for every rules choice and production operations remain open. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408 and CR 500-512 slices are on main. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
 ## Runtime and product boundaries
 
 - `authoritative_kernel`: `implemented_partial`
-- `transport_neutral_service`: `implemented_in_process`
-- `single_writer_game_actor`: `not_implemented`
-- `durable_database`: `not_implemented`
-- `http_websocket_server`: `not_implemented`
-- `browser_client`: `not_implemented`
-- `guest_or_account_identity`: `not_implemented`
-- `rooms_and_lobbies`: `not_implemented`
+- `transport_neutral_service`: `implemented_strict_protocol_3`
+- `single_writer_game_actor`: `implemented_single_process`
+- `durable_database`: `implemented_sqlite_control_plane_plus_game_record_v3`
+- `http_websocket_server`: `implemented_first_vertical_slice`
+- `browser_client`: `implemented_first_vertical_slice`
+- `guest_or_account_identity`: `implemented_expiring_guest_sessions`
+- `rooms_and_lobbies`: `implemented_invite_only_four_seat`
 - `replay`: `implemented_command_replay`
 - `hidden_information`: `implemented_projected_protocol`
-- `security`: `repository_and_capability_baseline_only`
+- `security`: `guest_hash_csrf_origin_capability_and_projection_baseline`
 - `ai_dependency`: `none_for_core_tests_or_runtime`
 
 ## Deterministic validation
 
-- Tests discovered: 3925
+- Tests discovered: 3947
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
 - Baseline CI: [30644492183](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30644492183) — `pass`
 - Compile: `pass`
-- Deterministic tests: `pass_3925`
+- Deterministic tests: `pass_3947_cumulative_full_run_plus_corrected_status_delta`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
 - Four-player protocol demo: `pass`
 - Repository/history/security audit: `pass`
@@ -98,12 +98,13 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Current blockers
 
-- no authoritative ASGI server, single-writer GameActor, durable persistence, or browser client exists
+- generic browser forms for all modes, targets, costs, searches, ordering, replacement, trigger, and combat choices are incomplete
+- production accounts, PostgreSQL, multi-process actor ownership, rate limits, containers, and deployment hardening are incomplete
 - full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete
 
 ## Exact next task
 
-Create agent/server-browser-vertical-slice from final green main and begin the single authoritative server/browser vertical slice without resuming broad rules-family work.
+Merge the verified first server/browser vertical slice, then continue on a clean focused branch with generic browser choice forms and server recovery/operations hardening before resuming broad rules-family work.
 
 ## Regeneration
 

@@ -1,0 +1,27 @@
+{
+  "name": "commander-arena-web",
+  "private": true,
+  "version": "0.8.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b --pretty false",
+    "generate:types": "json2ts -i ../schemas/decision-packet.schema.json -o src/generated/decision-packet.ts && json2ts -i ../schemas/command-envelope.schema.json -o src/generated/command-envelope.ts",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "6.0.5",
+    "vite": "8.2.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@types/node": "26.1.2",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "json-schema-to-typescript": "15.0.4",
+    "typescript": "7.0.2"
+  }
+}

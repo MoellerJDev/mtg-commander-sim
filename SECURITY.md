@@ -22,10 +22,30 @@ The following are treated as security defects:
 - accepting forged provider, model, thread, or seat identity
 - persisting live capabilities in tracked fixtures
 - path traversal from a seat-scoped tool into analyst or run artifacts
+- accepting a browser-supplied principal, seat, payment, or effect operation
+- acknowledging a state-changing command before durable Game Record save
+- persisting raw guest tokens, invite codes, or decision capabilities
+- sharing a delta cursor between independent network connections
 
 Custom-agent instructions are not an operating-system sandbox. The fixed-seat
 tool and projection layers enforce the application boundary; use an isolated,
 read-only workspace when filesystem isolation must also be demonstrated.
+
+## Browser/server boundary
+
+The first network slice uses 256-bit random guest bearer tokens in HTTP-only,
+SameSite=Strict cookies; unsafe cookie-authenticated requests also require a
+double-submit CSRF token. Browser WebSockets accept only configured origins.
+SQLite stores SHA-256 hashes of guest tokens and room invite codes, never their
+raw values. Room membership selects the one pilot principal available to that
+guest. Decision capabilities remain separate short-lived grants and are never
+login credentials.
+
+Set `MTG_SECURE_COOKIES=1` behind HTTPS. Restrict `MTG_ALLOWED_ORIGINS` to the
+deployed browser origin. The current development server does not yet provide
+accounts, password recovery, administrative endpoints, rate limiting, reverse
+proxy hardening, secret rotation, multi-process actor leases, or an independent
+security assessment; it should not be exposed directly to the public Internet.
 
 ## Supported version
 

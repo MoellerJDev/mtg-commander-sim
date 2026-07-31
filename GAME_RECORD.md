@@ -10,7 +10,7 @@ authoritative checkpoint, append-oriented journals, and a derived review.
 | `manifest.json` | Public identity, format profile, deck/card-data/semantic fingerprints, outcome, replay status, and fidelity result |
 | `checkpoint.json` | Current authoritative state without event history or raw capabilities |
 | `initial-checkpoint.json.gz` | Private replay origin containing the exact shuffled physical objects and pending decision |
-| `commands.jsonl` | Accepted external commands only, with principal, hashed capability ID, exact normalized payload, RNG counters, and before/after hashes |
+| `commands.jsonl` | Accepted external commands only, with principal, hashed capability ID, optional network command/fingerprint/receipt audit, exact normalized payload, RNG counters, and before/after hashes |
 | `events.jsonl` | Normalized trace at `minimal`, `standard`, or `debug` level |
 | `decisions.jsonl` | Every external attempt, including rejected attempts, scoped legal alternatives, reason/plan/confidence, model metrics, and fallback status |
 | `opportunities.jsonl` | Engine-side priority audit with meaningful-action signature, delivery/suppression disposition, and decision link |
@@ -32,6 +32,13 @@ Native command rows also record the action-template ID, selected object refs,
 targets, modes, X, selected costs, RNG consumption/results, and semantic
 program versions used by the transition. Rejected attempts stay in
 `decisions.jsonl` and never enter `commands.jsonl`.
+
+Protocol 3.0 adds optional `client_command_id`,
+`client_request_fingerprint`, and `client_receipt` fields to accepted network
+command rows. The original sequential `C1`, `C2`, … `command_id` remains Game
+Record v3 replay identity; the client ID is transport idempotency identity and
+does not redesign the format. The fingerprint excludes the raw capability, and
+the receipt contains no guest token, invite code, or capability secret.
 
 The JSON schemas live under `schemas/game-record-v3-*.schema.json` and
 `schemas/game-review-v1.schema.json`.
