@@ -31095,21 +31095,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-600",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_spells_abilities_effects_general.SpellsAbilitiesEffectsGeneralRuleTests.test_contract_traces_the_only_cr_600_record"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/spells-abilities-effects-general.json"
+      ],
+      "notes": [
+        "Section heading for CR 601-609; it contains no independent behavioral requirement."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "600",
       "rule_text_sha256": "c910d474dcd724bff83ddedeb06bf1eceaf9fb3af7c76bb282be057f36e6dffa",
       "schema_version": 1,
@@ -31118,7 +31122,7 @@
         "end_line": 2448,
         "start_line": 2447
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
       "assertion_kind": "static_traceability",

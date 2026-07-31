@@ -55,6 +55,9 @@ cast-trigger batching, and priority return. The current implementation moves
 the card to the stack only after choices and payment, so prospective stack
 characteristics, complete cost and target grammar, proposal-dependent timing
 permissions, division, and opponent-made choices remain explicitly untrusted.
+CR 600 pins the Spells, Abilities, and Effects section taxonomy to the
+dependent CR 601-609 contracts. Because CR 600 contains only a heading, it is
+definition-only and does not create a standalone behavioral claim.
 CR 602 traces activated-ability parsing, availability, authoritative costs,
 stack placement, tap/untap summoning sickness, object-scoped once-per-turn
 history, and sorcery/instant timing. Complete cost and instruction grammar,

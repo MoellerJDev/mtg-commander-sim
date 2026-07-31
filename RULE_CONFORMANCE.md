@@ -101,11 +101,11 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 306 cases in CR 120, CR 210, CR 310, CR 601, CR 602, CR 603, CR 604, CR 605,
+All 307 cases in CR 120, CR 210, CR 310, CR 600, CR 601, CR 602, CR 603, CR 604, CR 605,
 CR 606, CR 607, CR 608, CR 609, CR 614, CR 615, and CR 616 are
 source-reviewed: 40 narrow behavioral rules pass with generic executable
-evidence, 220 are blocked with exact missing dependencies, and 46 are
-definition-only with contract traceability. The remaining 2,994 cases are
+evidence, 220 are blocked with exact missing dependencies, and 47 are
+definition-only with contract traceability. The remaining 2,993 cases are
 unreviewed and
 inventory-only.
 
@@ -171,6 +171,9 @@ Those are partial witnesses only: the implementation still moves the card to
 the stack after choices and costs, and complete modes, targets, division,
 cost ordering, proposal-dependent permissions, alternative characteristics,
 frozen proposals, and opponent-made choices remain blocked.
+CR 600 contains only the General section heading. It is source-reviewed as a
+definition-only taxonomy record linked to the dependent CR 601-609 contracts;
+it makes no independent engine-behavior claim.
 CR 602 adds passing activated-only classification, creature tap/untap
 summoning-sickness and haste behavior, object-scoped once-per-turn history
 that survives control changes, and sorcery/instant activation timing. Complete

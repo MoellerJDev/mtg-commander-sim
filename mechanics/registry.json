@@ -1,5 +1,5 @@
 {
-  "contract_count": 25,
+  "contract_count": 26,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -137,6 +137,12 @@
       "mechanic_id": "cr-611-continuous-effects",
       "path": "mechanics/contracts/simple-until-end-of-turn.json",
       "sha256": "7a0747f0f5dd88a44bfa58746dad611b2db8ed4c7eb5e0aebeada351054aa2c9",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-600-general",
+      "path": "mechanics/contracts/spells-abilities-effects-general.json",
+      "sha256": "28106ee4bc9f6d04a0448f540672dac75f90b370f2d79c1b4ecc549b8059130c",
       "version": 1
     },
     {
@@ -6214,17 +6220,26 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/spells-abilities-effects-general.json",
+      "contract_sha256": "28106ee4bc9f6d04a0448f540672dac75f90b370f2d79c1b4ecc549b8059130c",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "mechanics/contracts/spells-abilities-effects-general.json and the CR 601-609 dependent contracts",
+      "implementation_version": "spells-abilities-effects-taxonomy-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "CR 601-609 dependent contracts remain partial or untrusted",
+        "the heading contains no standalone executable behavior that could promote the family to trusted"
+      ],
       "mechanic_id": "cr-600-general",
       "official_name": "General",
       "rule_references": [
         "600"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_the_only_cr_600_record"
+      ],
       "trust_level": "untrusted"
     },
     {

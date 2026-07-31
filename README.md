@@ -166,6 +166,8 @@ generated documentation fixtures with bearer capabilities redacted. See
   ordering, transactional rollback and cast-trigger witnesses; complete
   announcement ordering, choice/cost grammar, proposal-dependent permissions,
   and opponent-made casting choices remain blocked
+- source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
+  contracts without inventing standalone behavior for the heading
 - source-reviewed CR 602 activation handling with corrected untap-symbol
   summoning sickness and object-scoped once-per-turn restrictions; full cost
   grammar, activation transactions, opponent choices, and acquired-ability
