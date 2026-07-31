@@ -12,6 +12,12 @@
 - Made manual combat-damage assignment server-authoritative: noncombat sources,
   unrelated recipients, excessive totals, duplicate pairs, malformed fields,
   and client-supplied semantic flags are rejected transactionally.
+- Added a source-linked CR 505 main-phase contract with exact phase-end replay,
+  stack-resolution persistence, active priority, Saga-before-priority, ordinary
+  sorcery-speed, and stackless land-play evidence.
+- Tightened cast and land legal-action hints to the actual precombat or
+  postcombat main phase instead of trusting a standalone synthetic `main`
+  step label.
 - Added exact multi-blocker replay evidence and fail-closed first-strike
   characterization for the partial CR 510 contract.
 - Corrected CR 504 draw-step ordering so the turn-based draw or trusted

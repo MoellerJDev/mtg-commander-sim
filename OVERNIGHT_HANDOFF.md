@@ -1,153 +1,60 @@
 # Integration handoff
 
-Last updated: 2026-07-31
+This file records the current integration checkpoint. Generated coverage totals
+remain authoritative in `coverage/`; this document does not replace them.
 
-This is a sanitized operational summary. It contains no credentials,
-capabilities, private hands, library order, private choices, live Game Records,
-or provider session data.
+## Current state
 
-## Repository and integration state
+- Repository: `MoellerJDev/mtg-commander-sim` (public)
+- Package: `0.8.0`
+- Active branch: `agent/cr-505-main-phase`
+- Main before this integration: `814ff4fc45f6b10599d13348981053e8846d34d8`
+- Active pull request: #10, CR 505 Main Phase
+- Recently merged: #25 local merge gate, #11 CR 504 Draw Step
+- GitHub-hosted Actions are executing normally. No administrative CI bypass is
+  permitted while runners work.
 
-- Repository: private `MoellerJDev/mtg-commander-sim`
-- Default branch: `main`
-- Active branch: `agent/cr-504-draw-step`
-- Stage A merge commit on `main`:
-  `bd89201be44de85aa9b85fcc9f0baacb0ee76dbe`
-- Stage A PR:
-  `https://github.com/MoellerJDev/mtg-commander-sim/pull/2`
-- Rules PR:
-  `https://github.com/MoellerJDev/mtg-commander-sim/pull/1`
-- Package version: `0.8.0`
-- Existing tags: `v0.6.0`, `v0.7.0`
+CR 504 and CR 505 were sibling branches. Their runtime changes merge cleanly;
+their generated ledgers were regenerated from the combined source and review
+overlays rather than choosing either branch's stale generated files.
 
-PR #2, PR #1, and focused CR 512/511/510/509/508/507/506 PRs #3-9 passed their
-exact-SHA matrices and merged into `main` through ordinary merge commits. Main
-commit `c8a52711dc9294957fc0f437a4aaeab72da213aa` then passed run
-30615647165. CR 505 draft PR #10 remains unmerged at
-`32e663157278aaba983f78a96f6754b1b0838a8b`: its push and PR matrices created
-jobs but GitHub stopped every job before runner allocation because the account
-billing or spending limit requires user correction.
+## Combined candidate snapshot
 
-## Deterministic product boundary
+- Comprehensive Rules snapshot: 2026-06-19
+- Rules SHA-256:
+  `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
+- Numbered rules: 3,300
+- Reviewed rules: 442
+- Passing: 66
+- Blocked: 315
+- Definition-only: 61
+- Unreviewed: 2,858
+- Partial mechanics: 37
+- Unclassified mechanics: 388
+- Expected discovered tests before the exact candidate gate: 3,846
 
-The product is a deterministic server-authoritative Commander platform.
-AI/Codex adapters are optional untrusted clients and are not product, CI,
-merge, rules, or release gates. The server never delegates live legality or
-rules authority to a model.
+These figures describe review and executable coverage, not complete Magic rules
+support. Material unsupported semantics continue to fail closed.
 
-Implemented foundation:
+## Verified integration evidence
 
-- authoritative `CommanderEngine` and capability-scoped `GameService`
-- principal-specific hidden-information projection
-- versioned full/delta protocol with view hashes
-- deterministic multiplayer turn, priority, mulligan, combat, opportunity,
-  and conservative-yield machinery
-- trusted-only semantic preflight and server-issued legal actions
-- Game Record v3 commands, checkpoints, exact replay, and sanitized fixtures
-- generated platform and rules coverage ledgers with stale-output checks
+- Integration checkpoint `65f99875c79e3ec4909ac8eda282b353ffdcf91c`
+  passed the exact local merge gate with 3,832 tests.
+- CR 504 refreshed head
+  `a43ced04a87d95dbdb24862832429d70a7b1468c` passed the exact local
+  merge gate with 3,838 tests and both GitHub push and pull-request matrices.
+- PR #11 merged into main at
+  `814ff4fc45f6b10599d13348981053e8846d34d8`.
 
-Not yet implemented:
+## Next action
 
-- production ASGI/HTTP/WebSocket server
-- single-writer `GameActor`
-- durable production database and migrations
-- rooms, accounts, reconnect, spectators, or browser client
+Finish the CR 505 merge candidate, regenerate authoritative artifacts, run the
+exact local merge gate including `tests.test_main_phase_rules`, push it, require
+fresh green push and pull-request matrices, and merge PR #10 normally. Then
+continue with PR #12 in dependency order. Broad sequential rule-family work is
+frozen after the existing CR 408 tip; once the backlog is integrated and main
+passes the final gate, begin `agent/server-browser-vertical-slice`.
 
-## Rules checkpoint
-
-The branch pins the Comprehensive Rules effective 2026-06-19 at SHA-256
-`e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`.
-It generates one source-linked conformance case for each of 3,300 numbered
-rules and preserves reviewed status only while the source and rule-text hashes
-remain unchanged.
-
-Current reviewed inventory after the CR 504 synchronization on this independent
-branch:
-
-- 431 reviewed cases
-- 62 executable semantic passes
-- 309 reviewed blocked cases
-- 60 definition-only cases
-- 2,869 unreviewed inventory cases
-- 425 discovered mechanics
-- 36 partial/untrusted mechanic contracts
-- 389 unclassified mechanics
-- 0 corpus-wide trusted mechanics
-
-Implemented reviewed families include narrow contracts for damage, defense,
-Battles, state-based actions, replacement/prevention ordering, effects,
-resolution, linked abilities, loyalty abilities, mana abilities, static and
-triggered abilities, casting, activating abilities, end step, cleanup,
-logical zone incarnations, timestamps, World, token/copy lifecycle, and
-maximum counters. These are partial family implementations, not full rules
-coverage.
-
-Current full-Oracle coverage before regeneration:
-
-- 38,373 total
-- 2,957 exact
-- 15,691 partial
-- 19,725 unresolved
-- 69,664 material residuals
-
-Current Commander-legal Oracle coverage before regeneration:
-
-- 31,622 total
-- 338 exact
-- 14,354 partial
-- 16,930 unresolved
-- 61,212 material residuals
-
-## Validation state
-
-Stage A exact evidence:
-
-- 288/288 local tests passed in 99.079 seconds
-- Python 3.11/3.12 on Ubuntu and Windows passed for exact SHA
-  `ead8fa2eecfa79b989a741daa58e103347b45a66`
-- generated platform status, schemas, repository/history/security scans,
-  protocol demo, wheel build, clean install, version import, and CLI passed
-- deterministic four-player micro-pool reached a natural winner with zero
-  suppressed meaningful windows, passed seat projection, and exact-replayed
-
-The focused CR 504 local test gate passed atop the green CR 506 baseline:
-
-- generated platform, rules, mechanics, and Oracle status checks
-- all noninventory and all generated per-rule tests
-- seed-20260730 opportunity/replay/privacy regression
-- deterministic four-player natural-winner soak
-- protocol demo and packet benchmark
-- repository/history/secret/artifact scans
-- wheel build, clean installation, imported version, and CLI smoke
-- the six focused CR 504 draw/trigger/replacement/loss/profile/replay tests
-- exact-SHA four-job GitHub Actions for the focused commit remains unavailable
-  until the account billing or spending-limit issue is corrected
-
-The local test gate ran 3,835 tests in 185.817 seconds, verified all 3,300 pinned
-rules cases and 425 mechanics, checked 14 schemas and repository history,
-completed the protocol demo, and built and clean-installed the wheel. The
-seed-20260730 and four-player natural-winner regressions were independently
-rerun with exact replay and zero suppressed meaningful windows. The repository
-scan covered 265 tracked files and 11,451,578 bytes. Main commit
-`c8a52711dc9294957fc0f437a4aaeab72da213aa` already passed run 30615647165;
-no exact-SHA CI pass is claimed for the focused commit, and a pre-run GitHub
-billing/spending-limit failure is not represented as a code result.
-
-## Evidence boundaries
-
-- Source linkage for every rule is not behavioral correctness for every rule.
-- Exact-list semantic closure is not Oracle-corpus completeness.
-- The micro-pool soak is rules-runtime/protocol evidence, not Commander
-  format-legality, deck quality, or matchup evidence.
-- Duplicate-list fixtures are never matchup evidence.
-- No deck list was changed.
-
-## Exact next step
-
-Commit and publish the green CR 504 focused branch as a draft pull request.
-CR 504.1 and 504.2 may be claimed only for the represented stackless
-turn-based draw, trusted replacement completion, post-draw state-action and
-trigger batching, and active-player priority boundary. Keep the complete
-draw-replacement/prevention and interaction corpus untrusted. Do not merge CR
-504 or CR 505 until GitHub Actions can run the exact head SHA and all required
-jobs are green.
+The server/browser product slice is not yet implemented. The existing engine,
+protocol, privacy, replay, and packaging foundations must not be described as a
+finished authoritative browser platform.

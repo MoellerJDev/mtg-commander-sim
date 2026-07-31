@@ -2,7 +2,7 @@
   "blockers": [
     "no authoritative ASGI server, single-writer GameActor, durable persistence, or browser client exists",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete",
-    "GitHub Actions jobs currently stop before runner allocation because the account billing or spending limit requires user correction"
+    "the CR 503-to-408 dependency chain remains in draft pull requests pending ordered integration"
   ],
   "generated": {
     "generator": "scripts/update_platform_status.py",
@@ -10,11 +10,11 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "rules_family_cr_504_draw_step",
-    "branch": "agent/cr-504-draw-step",
+    "active_phase": "integrate_rules_backlog_cr_505",
+    "branch": "agent/cr-505-main-phase",
     "branch_ancestry": {
-      "focused_branch_base": "c8a52711dc9294957fc0f437a4aaeab72da213aa",
-      "focused_branch_unique_commits_over_main": 1
+      "focused_branch_base": "814ff4fc45f6b10599d13348981053e8846d34d8",
+      "focused_branch_unique_commits_over_main": 2
     },
     "commit_reference": "the commit containing this ledger",
     "pull_requests": [
@@ -85,8 +85,22 @@
         "base": "main",
         "head": "agent/cr-505-main-phase",
         "number": 10,
-        "state": "draft_external_ci_blocked",
+        "state": "integration_candidate",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/10"
+      },
+      {
+        "base": "main",
+        "head": "agent/cr-504-draw-step",
+        "number": 11,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/11"
+      },
+      {
+        "base": "main",
+        "head": "agent/integration-checkpoint",
+        "number": 25,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/25"
       }
     ],
     "tags": [
@@ -102,10 +116,10 @@
   },
   "milestones": [
     {
-      "evidence": "Both integration PRs and focused CR 512-506 slices merged through ordinary merge commits; main passed the exact-SHA CR 506 matrix.",
+      "evidence": "Integration PRs #1-2, CR 504 and CR 506-512, and the reusable merge gate are on main. CR 505 is the current candidate; the CR 503-to-408 chain remains frozen pending ordered integration.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
-      "status": "complete"
+      "status": "integration_checkpoint"
     },
     {
       "evidence": "No server/, web/, or migrations/ subsystem is present on this branch.",
@@ -114,10 +128,10 @@
       "status": "not_started"
     },
     {
-      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 505 is a separate draft awaiting restored external CI; CR 504 is the current independent focused family.",
+      "evidence": "The 2026-06-19 corpus and reviewed CR 504 and CR 506-512 slices are on main. This candidate combines CR 505 and regenerates the conformance ledger before the dependency chain is integrated.",
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
-      "status": "active_on_main"
+      "status": "active_with_integration_backlog"
     },
     {
       "evidence": "Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed.",
@@ -126,7 +140,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Finish the CR 504 full gate and publish the corrected draw-step ordering without promoting the incomplete draw-replacement/prevention corpus; keep CR 505 draft PR #10 unmerged until exact-SHA CI can run.",
+  "next_task": "Run the exact CR 505 candidate through the local merge gate and ordinary GitHub matrix, merge PR #10, then integrate PR #12 without resuming broad rules-family work.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -149,7 +163,7 @@
   "repository": {
     "default_branch": "main",
     "name": "MoellerJDev/mtg-commander-sim",
-    "visibility": "private"
+    "visibility": "public"
   },
   "rules_coverage": {
     "commander_oracle": {
@@ -166,8 +180,8 @@
     "manifest_present": true,
     "mechanics": {
       "status_counts": {
-        "partial": 36,
-        "unclassified": 389
+        "partial": 37,
+        "unclassified": 388
       },
       "total": 425,
       "trusted": 0
@@ -182,11 +196,11 @@
       "total": 38373
     },
     "rules": {
-      "blocked": 309,
-      "definition_only": 60,
-      "passing": 62,
+      "blocked": 315,
+      "definition_only": 61,
+      "passing": 66,
       "total": 3300,
-      "unreviewed": 2869
+      "unreviewed": 2858
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -209,24 +223,24 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 3838,
+    "deterministic_cases_discovered": 3846,
     "migration_files": 0,
     "schema_files": 14,
     "server_files": 0,
     "web_files": 0
   },
   "validation": {
-    "baseline_commit": "c8a52711dc9294957fc0f437a4aaeab72da213aa",
+    "baseline_commit": "a43ced04a87d95dbdb24862832429d70a7b1468c",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30615647165,
+      "run_id": 30636525174,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30615647165"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30636525174"
     },
     "local": {
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "pass_3835",
+      "deterministic_tests": "pass_3838_on_merged_cr504_main; cr505_candidate_pending_exact_gate",
       "four_player_protocol_demo": "pass",
       "repository_history_security_audit": "pass",
       "wheel_build_and_clean_install": "pass"

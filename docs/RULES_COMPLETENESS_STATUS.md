@@ -36,7 +36,7 @@ coverage.
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 431 cases in CR 120/210/310/504/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 62 semantic passes, 309 blocked cases, and 60 definition-only cases |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 442 cases in CR 120/210/310/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 66 semantic passes, 315 blocked cases, and 61 definition-only cases |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -170,6 +170,13 @@ coverage.
   matrix, multi-attacker blocker assignment, simultaneous replacement and
   prevention batching, post-damage APNAP triggers, first/double strike,
   trample, and lifelink remain dependency-blocked.
+- [x] Reviewed all 11 CR 505 Main Phase records. Empty-stack pass completion,
+  nonempty-stack resolution within the phase, active-player priority, ordinary
+  sorcery-speed casting, and stackless authoritative land plays pass with exact
+  phase predicates and replay. Represented Saga lore precedes priority but the
+  family remains partial because skipped/additional combats and main phases,
+  ordinal identity, Archenemy schemes, Attractions, and complete simultaneous
+  Saga qualification/replacement/trigger ordering are dependency-blocked.
 - [x] Reviewed all 29 CR 506 Combat Phase records. Tapping and untapping
   preserve represented attacking and blocking relationships. Zone, control,
   phasing, creature-type, Battle-type, and attacking-controller invalidation
@@ -204,7 +211,19 @@ coverage.
   declaration triggers, multi-attacker blocking, blocked-status effects, and
   entry-blocking remain dependency-blocked.
 
-## Current CR 120/210/310/504/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
+## Current CR 120/210/310/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
+
+Ordinary turns have one precombat and one postcombat main boundary separated
+by combat. Each is one scheduler boundary with no rules substeps: all players
+passing with an empty stack advances the phase, while passing with a stack
+resolves its top object and returns priority within the same phase. Represented
+Saga lore and chapter triggers precede active-player priority. Ordinary
+noninstant/nonflash casts and land plays require the active player, a true
+main-phase phase/marker pair, priority, and an empty stack. Land plays create no
+stack object, preserve priority, and consume exactly one authoritative
+allowance. Generic additional/skipped combat and main phases, ordinal
+main-phase identity, Archenemy, Attractions, and complete simultaneous Saga
+handling remain blocked.
 
 The draw step now performs its stackless turn-based draw or trusted replacement
 before state-based actions, one combined semantic/delayed trigger-order batch,
@@ -383,8 +402,14 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,835 unit/integration tests pass: 535 ordinary tests plus 3,300 generated
+- 3,846 unit/integration tests are discovered: 546 ordinary tests plus 3,300
+  generated
   inventory/source-linkage tests. The latter are not semantic passes.
+- Eight focused CR 505 tests cover all-rule traceability, ordinary two-main
+  structure, empty-stack completion and nonempty-stack persistence, exact
+  replay, represented Saga-before-priority ordering, active-player priority,
+  sorcery-speed legality, stackless land plays, extra allowances, and
+  synthetic-main negative exposure.
 - Six focused CR 504 tests cover all-rule traceability, the stackless
   turn-based draw, delayed-trigger ordering after the draw, trusted Dredge
   replacement completion, empty-library state-based loss before priority,
@@ -447,10 +472,10 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 431 CR
-  120/210/310/504/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
-  cases are source-reviewed: 62 pass with executable engine evidence, 309
-  remain blocked, and 60 are definition-only. The other 2,869 cases remain
+  establish inventory linkage only. All 442 CR
+  120/210/310/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
+  cases are source-reviewed: 66 pass with executable engine evidence, 315
+  remain blocked, and 61 are definition-only. The other 2,858 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -459,13 +484,9 @@ checkpoint validation.
 
 ## Next dependency-ordered work
 
-1. Continue reviewing and promoting conformance cases by
-   dependency-ordered rules family; keep exposed but unimplemented edge cases
-   failing or blocked. CR 504 Draw Step is the current bounded family; retain
-   complete draw-replacement/prevention semantics and universal interaction
-   coverage as explicit blockers. CR 505 remains a separate draft PR awaiting
-   restored GitHub Actions billing, and the deeper CR 601.2a-i stack-first
-   casting frame remains blocked.
+1. Finish the exact local and GitHub gates for the combined CR 504/505
+   candidate, merge PR #10, and then integrate CR 503 PR #12 from the frozen
+   dependency chain. Do not begin another rules-family review.
 2. Wire the reviewed CR 614/615/616 primitives into the shared CR 120/310
    replacement and prevention event pipeline, including stateful shields and
    typed nested events, then re-evaluate the blocked damage sequence and

@@ -190,6 +190,11 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 505 main-phase boundary: empty-stack pass completion,
+  active-player priority, ordinary sorcery-speed casting, and stackless
+  authoritative land plays use exact precombat/postcombat predicates; extra
+  and skipped combats, ordinal main phases, Archenemy, Attractions, and
+  complete simultaneous Saga handling remain blocked
 - source-reviewed CR 504 draw-step ordering: the stackless turn-based draw or
   trusted replacement completes before state-based actions, one combined
   semantic/delayed trigger-order batch, and active-player priority; complete
@@ -700,5 +705,5 @@ container isolation when filesystem-level isolation must also be proven.
 Read `ARCHITECTURE.md`, `LLM_PROTOCOL.md`, `PILOT_PROVIDERS.md`,
 `SEMANTIC_PACKS.md`, and `CLIENT_INTEGRATION.md` before extending the engine.
 
-No software license has been selected for this private repository. Possession
+No software license has been selected for this public repository. Possession
 of the source does not grant redistribution or relicensing rights.
