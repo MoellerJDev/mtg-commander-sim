@@ -10,17 +10,24 @@ or provider session data.
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Integrated commit: the `main` commit containing this document
+- Rules integration merge:
+  `adb0f520e71161e23bd14854c78051597c545ba6`
+- Current documentation: the `main` commit containing this document
 - Package: `0.8.0`
 - Tags: `v0.6.0`, `v0.7.0`
 - No release tag was created for this integration checkpoint.
 
-PRs #1–#16, #24, and #25 are merged through ordinary merge commits. PR #24
+PRs #1–#17, #24, and #25 are merged through ordinary merge commits. PR #24
 was retargeted to `main` as the cumulative CR 400–408 candidate. Before
 integration, Git ancestry proved that the exact heads of PRs #17–#23 were all
-ancestors of the PR #24 head. After PR #24 reached `main`, those intermediate
-PRs were closed as superseded; no intended commit was abandoned or
-force-pushed.
+ancestors of the PR #24 head. After PR #24 reached `main`, GitHub
+automatically recorded #17 as merged and #18–#23 closed as superseded. No
+intended commit was abandoned or force-pushed.
+
+Every legacy local and remote `agent/*` branch had zero commits unique over
+`main` before deletion. The redundant clean `agent/review-mvp` linked worktree
+was removed only after the same ancestry proof. Tags and PR audit records were
+preserved.
 
 Broad sequential rules review is frozen after CR 408. Do not create CR 409 or
 another stacked rules-family branch before the server/browser vertical slice.
@@ -40,8 +47,12 @@ another stacked rules-family branch before the server/browser vertical slice.
 - Seed-20260730 opportunity/replay, deterministic four-player natural-winner,
   hidden-information projection, repository/history/security, protocol demo,
   wheel build, and clean-install checks pass.
-- PR #24 received a fresh public GitHub Actions matrix on Python 3.11/3.12 and
-  Ubuntu/Windows before merge. All repository jobs executed and passed.
+- PR #24 candidate `605f14042b207e078e08d9a0ace6574b40726cb7`
+  received fresh public push run `30644109161` and pull-request runs
+  `30644116569` and `30644117240` on Python 3.11/3.12 and Ubuntu/Windows.
+  All repository jobs executed and passed.
+- Integration merge `adb0f520e71161e23bd14854c78051597c545ba6`
+  passed public `main` run `30644492183`.
 
 GitHub Actions is operating normally. Historical zero-step billing failures
 are not current evidence and no administrator bypass is authorized or needed.

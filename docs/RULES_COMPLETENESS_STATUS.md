@@ -11,9 +11,9 @@ coverage.
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Current integration branch: `main`
-- Rules integration PRs #1–#16, #24, and #25 are merged; the cumulative PR
-  #24 tip incorporated the exact CR 400–408 heads from PRs #17–#23 before
-  those intermediate PRs were closed as superseded
+- Rules integration PRs #1–#17, #24, and #25 are merged; the cumulative PR
+  #24 tip incorporated the exact CR 400–408 heads before PRs #18–#23 closed as
+  superseded
 - Rules-program base: `d099fe4`
 - Continuation start: `6517dc0`
 - Package version: `0.8.0`
