@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 507 — Beginning of Combat Step",
+  "cases": [
+    {
+      "rule_id": "507",
+      "rule_text_sha256": "92afe044784da8e208936ab64d982e964b72c7bb08b1154427be8d189221e30f",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/beginning-of-combat.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_beginning_of_combat_rules.BeginningOfCombatRuleTests.test_contract_traces_every_cr_507_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; CR 507.1-2 carry the behavioral requirements."
+      ]
+    },
+    {
+      "rule_id": "507.1",
+      "rule_text_sha256": "f18078c26d630852073a5ba12dad7bb93b70c629aaf54cb68e46decd720a888c",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine.create",
+        "CommanderEngine._enter_step"
+      ],
+      "executable_test_ids": [
+        "tests.test_beginning_of_combat_rules.BeginningOfCombatRuleTests.test_supported_commander_profiles_have_no_defender_choice",
+        "tests.test_beginning_of_combat_rules.BeginningOfCombatRuleTests.test_single_defender_multiplayer_variants_fail_closed",
+        "tests.test_multiplayer_rules.MultiplayerRuleTests.test_multiple_defenders_block_sequentially"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer"
+      ],
+      "covered_scenarios": [
+        "negative",
+        "multiplayer"
+      ],
+      "blockers": [
+        "single_defender_multiplayer_variant_choice_not_implemented"
+      ],
+      "notes": [
+        "Supported Commander multiplayer uses CR 802.2, so all active opponents remain defending players without a choice while blocker tasks are issued only to players actually being attacked. Profiles that would require the conditional CR 507.1 choice are rejected rather than simulated approximately."
+      ]
+    },
+    {
+      "rule_id": "507.2",
+      "rule_text_sha256": "dfb29e9864cd503f27d987c942be79b891458729ecc34067f6aadcfc7fcc20ab",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._enter_step",
+        "CommanderEngine._dispatch_semantic_event",
+        "CommanderEngine._matching_delayed_triggers",
+        "CommanderEngine._grant_priority"
+      ],
+      "executable_test_ids": [
+        "tests.test_beginning_of_combat_rules.BeginningOfCombatRuleTests.test_permanent_and_delayed_triggers_precede_active_priority",
+        "tests.test_beginning_of_combat_rules.BeginningOfCombatRuleTests.test_priority_round_advances_to_attackers_and_replays_exactly"
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "Represented permanent and delayed beginning-of-combat triggers coexist before the active player receives priority. An ordinary four-player priority round advances to declare attackers and command-replays exactly."
+      ]
+    }
+  ]
+}

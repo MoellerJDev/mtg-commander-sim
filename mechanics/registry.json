@@ -1,5 +1,5 @@
 {
-  "contract_count": 33,
+  "contract_count": 34,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -24,6 +24,12 @@
       "path": "mechanics/contracts/battles.json",
       "sha256": "3973811786f826f28220d96dd2e5e1a57373299875d7c5ddac22b218d4400171",
       "version": 3
+    },
+    {
+      "mechanic_id": "cr-507-beginning-of-combat-step",
+      "path": "mechanics/contracts/beginning-of-combat.json",
+      "sha256": "e5e8758c7ce64f0831f790ef57a5509b2f19bafa3161941a93b8c134b043df59",
+      "version": 1
     },
     {
       "mechanic_id": "cr-601-casting-spells",
@@ -6142,17 +6148,33 @@
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/beginning-of-combat.json",
+      "contract_sha256": "e5e8758c7ce64f0831f790ef57a5509b2f19bafa3161941a93b8c134b043df59",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine profile validation and beginning-of-combat entry, trigger, priority, and step-advance paths",
+      "implementation_version": "beginning-of-combat-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "multiplayer variants in which the active player chooses one defending player are not supported",
+        "defending-player last-known information after an attacked permanent leaves combat remains blocked by the CR 508 contract",
+        "all represented permanent and delayed triggers do not yet share one universal same-controller APNAP ordering batch",
+        "complete triggered-ability, replacement, and priority interaction coverage remains incomplete"
+      ],
       "mechanic_id": "cr-507-beginning-of-combat-step",
       "official_name": "Beginning of Combat Step",
       "rule_references": [
         "507"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_507_rule",
+        "test_supported_commander_profiles_have_no_defender_choice",
+        "test_single_defender_multiplayer_variants_fail_closed",
+        "test_permanent_and_delayed_triggers_precede_active_priority",
+        "test_priority_round_advances_to_attackers_and_replays_exactly",
+        "test_multiple_defenders_block_sequentially"
+      ],
       "trust_level": "untrusted"
     },
     {

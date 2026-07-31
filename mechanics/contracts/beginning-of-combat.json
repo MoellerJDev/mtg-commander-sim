@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-507-beginning-of-combat-step",
+  "official_name": "Beginning of Combat Step",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "507",
+    "507.1",
+    "507.2"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "turn-structure",
+    "multiplayer-options",
+    "priority",
+    "triggered-abilities",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "stack"
+    ],
+    "objects": [
+      "active player",
+      "attacking player",
+      "defending player"
+    ],
+    "events": [
+      "beginning of combat step begins",
+      "supported-profile defending players are established",
+      "beginning-of-combat triggers are collected",
+      "active player receives priority",
+      "declare attackers step begins"
+    ],
+    "state_reads": [
+      "active player",
+      "active opponents",
+      "Commander format profile",
+      "phase and step",
+      "pending permanent and delayed triggers"
+    ],
+    "state_writes": [
+      "combat defending-player set",
+      "stack and pending trigger batches",
+      "priority player",
+      "phase and step"
+    ],
+    "costs": [],
+    "timing": [
+      "supported Commander profiles require no CR 507.1 defender-choice action",
+      "permanent and delayed beginning-of-combat triggers are collected before priority",
+      "the active player receives priority before the declare attackers step"
+    ],
+    "targets": [
+      "all active opponents are defending players in the supported attack-multiple Commander profile"
+    ],
+    "choices": [
+      "unsupported multiplayer variants requiring one defending-player choice are rejected at game creation"
+    ],
+    "hidden_information": [
+      "the combat boundary reveals no private card information"
+    ],
+    "apnap": [
+      "represented trigger batches use shared APNAP machinery before active-player priority"
+    ],
+    "layers": [
+      "continuous effects that alter multiplayer combat options are not represented"
+    ],
+    "replacement_effects": [
+      "replacement behavior inside beginning-of-combat triggers remains delegated to shared replacement contracts"
+    ],
+    "copy": [
+      "copy status does not change at this step boundary"
+    ],
+    "control_change": [
+      "the active opponent set is derived when the step begins and removes players who leave the game"
+    ],
+    "zone_change": [
+      "zone changes caused by triggered abilities use shared zone-change semantics"
+    ],
+    "source_leaves": [
+      "a represented beginning-of-combat trigger remains independent of its source after triggering"
+    ]
+  },
+  "variants": [
+    "two-player Commander",
+    "Commander multiplayer with attack-multiple-players option",
+    "permanent and delayed beginning-of-combat triggers",
+    "unsupported single-defender multiplayer variant rejection",
+    "exact replay into declare attackers"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_507_rule",
+    "test_supported_commander_profiles_have_no_defender_choice",
+    "test_single_defender_multiplayer_variants_fail_closed",
+    "test_permanent_and_delayed_triggers_precede_active_priority",
+    "test_priority_round_advances_to_attackers_and_replays_exactly",
+    "test_multiple_defenders_block_sequentially"
+  ],
+  "implementation": {
+    "component": "CommanderEngine profile validation and beginning-of-combat entry, trigger, priority, and step-advance paths",
+    "version": "beginning-of-combat-v1"
+  },
+  "known_blockers": [
+    "multiplayer variants in which the active player chooses one defending player are not supported",
+    "defending-player last-known information after an attacked permanent leaves combat remains blocked by the CR 508 contract",
+    "all represented permanent and delayed triggers do not yet share one universal same-controller APNAP ordering batch",
+    "complete triggered-ability, replacement, and priority interaction coverage remains incomplete"
+  ],
+  "review_status": "draft"
+}

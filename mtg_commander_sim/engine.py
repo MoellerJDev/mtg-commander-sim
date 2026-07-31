@@ -3068,6 +3068,21 @@ class CommanderEngine:
         if active is None:
             raise StateInvariantError("A turn has no active player")
 
+        if step == "beginning_combat":
+            # The supported Commander multiplayer profile uses the attack-
+            # multiple-players option (CR 802.2), so every active opponent
+            # is a defending player as combat begins. Two-player Commander
+            # has the same result with its single nonactive player. Variants
+            # that require the CR 507.1 defending-player choice are rejected
+            # at the profile boundary rather than guessed here.
+            self.state.combat = CombatState(
+                defending_players=[
+                    seat
+                    for seat in self.active_seats
+                    if seat != active
+                ]
+            )
+
         if step == "untap":
             if self.state.config.auto_untap:
                 changed: list[str] = []
@@ -3198,11 +3213,11 @@ class CommanderEngine:
             self._finish_cleanup()
             return
 
-        if step in {"end_step", "end_combat"}:
-            # Neither boundary has a turn-based action. Collect both
-            # permanent-based and delayed beginning-of-step triggers before
-            # granting priority. A delayed trigger must not cause the
-            # semantic event dispatch to be skipped.
+        if step in {"beginning_combat", "end_step", "end_combat"}:
+            # None of these supported-profile boundaries has a turn-based
+            # choice. Collect both permanent-based and delayed beginning-of-
+            # step triggers before granting priority. A delayed trigger must
+            # not cause semantic event dispatch to be skipped.
             context = {
                 "phase": phase,
                 "step": step,
@@ -15831,7 +15846,11 @@ class CommanderEngine:
                 )
         if not candidates:
             self.state.combat.attackers_declared = True
-            self.state.combat.defending_players = []
+            self.state.combat.defending_players = [
+                seat
+                for seat in self.active_seats
+                if seat != active
+            ]
             self._grant_priority(active)
             return
         self.permissions.issue(
@@ -15992,14 +16011,10 @@ class CommanderEngine:
             self.state.combat.attackers[card.object_id] = str(defender)
             used.add(card.object_id)
         self.state.combat.attackers_declared = True
-        defending_players = {
-            self._defending_player_for_attack_target(target)
-            for target in self.state.combat.attackers.values()
-        }
         self.state.combat.defending_players = [
             seat
-            for seat in self.apnap_order()
-            if seat in defending_players
+            for seat in self.active_seats
+            if seat != active
         ]
         self._log(active, "combat.attack", f"{active} attacked with {len(used)} creature(s).", {"attackers": {self.state.cards[oid].ref: defender for oid, defender in self.state.combat.attackers.items()}}, importance=2, changed_objects=list(used), changed_players=[active])
         attack_triggers: list[StackItem] = []
@@ -16034,6 +16049,19 @@ class CommanderEngine:
         self._enqueue_semantic_trigger_batch(attack_triggers)
         self._grant_priority(active)
 
+    def _attacked_defending_players(self) -> list[str]:
+        """Return only defenders whose player or permanent is attacked."""
+
+        attacked = {
+            self._defending_player_for_attack_target(target)
+            for target in self.state.combat.attackers.values()
+        }
+        return [
+            seat
+            for seat in self.apnap_order()
+            if seat in attacked
+        ]
+
     def _current_attacker_cards(self) -> list[CardInstance]:
         attackers: list[CardInstance] = []
         for object_id in self.state.combat.attackers:
@@ -16064,7 +16092,7 @@ class CommanderEngine:
         self._issue_next_blocker()
 
     def _issue_next_blocker(self) -> None:
-        defenders = self.state.combat.defending_players
+        defenders = self._attacked_defending_players()
         if self.state.combat.blocker_cursor >= len(defenders):
             self.state.combat.blockers_declared = True
             self._grant_priority(self.state.active_player)
@@ -16276,7 +16304,12 @@ class CommanderEngine:
             self._apply_combat_assignments(assignments)
             self._grant_priority(self.state.active_player)
             return
-        actors = unique_preserving_order([self.state.active_player, *self.state.combat.defending_players])
+        actors = unique_preserving_order(
+            [
+                self.state.active_player,
+                *self._attacked_defending_players(),
+            ]
+        )
         self.permissions.issue(
             kind="combat.damage",
             role="pilot",
@@ -17615,6 +17648,11 @@ class CommanderEngine:
             self._log(seat, "player.eliminated", f"{seat} left the game: {reason}.", {"reason": reason}, importance=3, changed_players=[seat])
 
         remaining = self.active_seats
+        self.state.combat.defending_players = [
+            seat
+            for seat in self.state.combat.defending_players
+            if seat in remaining
+        ]
         if len(remaining) == 1:
             self.state.game_over = True
             self.state.winner = remaining[0]

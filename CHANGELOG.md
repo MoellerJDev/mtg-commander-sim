@@ -25,6 +25,10 @@
   targets transactionally, with exact one-command replay for legal attacks.
 - Corrected CR 508.8 so a combat with no attacking creatures skips the declare
   blockers and combat damage steps after the declare-attackers priority window.
+- Established the supported Commander defending-player set at the beginning
+  of combat, kept unsupported single-defender multiplayer profiles fail-closed,
+  and fixed permanent/delayed beginning-of-combat trigger coexistence before
+  active-player priority.
 - Corrected the CR 511.3 boundary so attacking and blocking markers and the
   combat snapshot clear after end-of-combat priority, before postcombat main.
 - Added source-linked end-of-combat priority, trigger-coexistence, multiplayer,
