@@ -10,7 +10,7 @@ or provider session data.
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/cr-506-combat-phase`
+- Active branch: `agent/cr-504-draw-step`
 - Stage A merge commit on `main`:
   `bd89201be44de85aa9b85fcc9f0baacb0ee76dbe`
 - Stage A PR:
@@ -20,9 +20,13 @@ or provider session data.
 - Package version: `0.8.0`
 - Existing tags: `v0.6.0`, `v0.7.0`
 
-PR #2, PR #1, and focused CR 512/511/510/509/508/507 PRs #3-8 passed their exact-SHA
-matrices and merged into `main` through ordinary merge commits. Main commit
-`3b9aac052b35413f3cf6ce82be686a1fa5dfe379` then passed run 30614171826.
+PR #2, PR #1, and focused CR 512/511/510/509/508/507/506 PRs #3-9 passed their
+exact-SHA matrices and merged into `main` through ordinary merge commits. Main
+commit `c8a52711dc9294957fc0f437a4aaeab72da213aa` then passed run
+30615647165. CR 505 draft PR #10 remains unmerged at
+`32e663157278aaba983f78a96f6754b1b0838a8b`: its push and PR matrices created
+jobs but GitHub stopped every job before runner allocation because the account
+billing or spending limit requires user correction.
 
 ## Deterministic product boundary
 
@@ -57,16 +61,17 @@ It generates one source-linked conformance case for each of 3,300 numbered
 rules and preserves reviewed status only while the source and rule-text hashes
 remain unchanged.
 
-Current reviewed inventory after the CR 506 synchronization:
+Current reviewed inventory after the CR 504 synchronization on this independent
+branch:
 
-- 428 reviewed cases
-- 60 executable semantic passes
+- 431 reviewed cases
+- 62 executable semantic passes
 - 309 reviewed blocked cases
-- 59 definition-only cases
-- 2,872 unreviewed inventory cases
+- 60 definition-only cases
+- 2,869 unreviewed inventory cases
 - 425 discovered mechanics
-- 35 partial/untrusted mechanic contracts
-- 390 unclassified mechanics
+- 36 partial/untrusted mechanic contracts
+- 389 unclassified mechanics
 - 0 corpus-wide trusted mechanics
 
 Implemented reviewed families include narrow contracts for damage, defense,
@@ -105,7 +110,7 @@ Stage A exact evidence:
 - deterministic four-player micro-pool reached a natural winner with zero
   suppressed meaningful windows, passed seat projection, and exact-replayed
 
-The focused CR 506 local test gate passed atop the green CR 507 baseline:
+The focused CR 504 local test gate passed atop the green CR 506 baseline:
 
 - generated platform, rules, mechanics, and Oracle status checks
 - all noninventory and all generated per-rule tests
@@ -114,18 +119,19 @@ The focused CR 506 local test gate passed atop the green CR 507 baseline:
 - protocol demo and packet benchmark
 - repository/history/secret/artifact scans
 - wheel build, clean installation, imported version, and CLI smoke
-- the six focused CR 506 role/removal/lifetime/replay tests
-- exact-SHA four-job GitHub Actions for the focused commit remains pending
-  until push
+- the six focused CR 504 draw/trigger/replacement/loss/profile/replay tests
+- exact-SHA four-job GitHub Actions for the focused commit remains unavailable
+  until the account billing or spending-limit issue is corrected
 
-The local test gate ran 3,829 tests in 184.906 seconds, verified all 3,300 pinned
+The local test gate ran 3,835 tests in 185.817 seconds, verified all 3,300 pinned
 rules cases and 425 mechanics, checked 14 schemas and repository history,
 completed the protocol demo, and built and clean-installed the wheel. The
 seed-20260730 and four-player natural-winner regressions were independently
 rerun with exact replay and zero suppressed meaningful windows. The repository
-scan covered 262 tracked files and 11,401,521 bytes. Main commit
-`3b9aac052b35413f3cf6ce82be686a1fa5dfe379` already passed run 30614171826;
-no exact-SHA CI pass is claimed for the focused commit until it is pushed.
+scan covered 265 tracked files and 11,451,578 bytes. Main commit
+`c8a52711dc9294957fc0f437a4aaeab72da213aa` already passed run 30615647165;
+no exact-SHA CI pass is claimed for the focused commit, and a pre-run GitHub
+billing/spending-limit failure is not represented as a code result.
 
 ## Evidence boundaries
 
@@ -138,9 +144,10 @@ no exact-SHA CI pass is claimed for the focused commit until it is pushed.
 
 ## Exact next step
 
-Publish the green CR 506 focused branch and wait for its exact-SHA matrix.
-CR 506.4b may be claimed for the represented tapping/untapping invariant.
-The remaining CR 506 behavior stays blocked where alternate multiplayer
-options, generic combat effects, complete restrictions/requirements,
-planeswalkers, provenance queries, extra combats, or combat-relative timing
-grammar are absent.
+Commit and publish the green CR 504 focused branch as a draft pull request.
+CR 504.1 and 504.2 may be claimed only for the represented stackless
+turn-based draw, trusted replacement completion, post-draw state-action and
+trigger batching, and active-player priority boundary. Keep the complete
+draw-replacement/prevention and interaction corpus untrusted. Do not merge CR
+504 or CR 505 until GitHub Actions can run the exact head SHA and all required
+jobs are green.

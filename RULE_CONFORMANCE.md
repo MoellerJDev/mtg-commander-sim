@@ -101,11 +101,11 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 428 cases in CR 120, CR 210, CR 310, CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
+All 431 cases in CR 120, CR 210, CR 310, CR 504, CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
 CR 602, CR 603, CR 604, CR 605, CR 606, CR 607, CR 608, CR 609, CR 614,
-CR 615, and CR 616 are source-reviewed: 60 narrow behavioral or structural rules pass with
+CR 615, and CR 616 are source-reviewed: 62 narrow behavioral or structural rules pass with
 generic executable evidence, 309 are blocked with exact missing dependencies,
-and 59 are definition-only with contract traceability. The remaining 2,872
+and 60 are definition-only with contract traceability. The remaining 2,869
 cases are
 unreviewed and
 inventory-only.
@@ -175,6 +175,13 @@ frozen proposals, and opponent-made choices remain blocked.
 CR 600 contains only the General section heading. It is source-reviewed as a
 definition-only taxonomy record linked to the dependent CR 601-609 contracts;
 it makes no independent engine-behavior claim.
+CR 504.1 and CR 504.2 pass for the represented draw-step boundary: the active
+player's normal draw or trusted replacement completes without using the stack,
+state-based actions are checked, and waiting semantic and delayed triggers are
+combined into one APNAP/order batch before priority. Empty-library loss,
+multiplayer and duel first-turn modifiers, hidden draw identity, and exact
+replay have direct evidence. The complete draw-replacement, prevention, and
+continuous-effect interaction corpus remains outside this partial contract.
 CR 506.4b passes for the represented combat-state invariant that tapping or
 untapping an attacking or blocking creature does not remove it from combat.
 The engine also removes represented combatants after zone, control, phasing,
