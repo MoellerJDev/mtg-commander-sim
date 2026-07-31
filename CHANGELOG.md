@@ -25,6 +25,12 @@
 - Kept the host invite available after readiness and reload, added owner-only
   invite replacement with immediate old-code invalidation, and added a
   seat-scoped pregame **Change deck / Unready** flow.
+- Isolated guest authentication per browser tab (including WebSockets) so
+  shared incognito cookie jars cannot collapse all players into the last seat.
+- Added explicit two-player `commander_duel` and four-player room creation,
+  owner seat removal, nonowner leave, and atomic **New room** replacement.
+- Added bounded startup retry backoff for already-open room pages and accurate
+  `starting` system status while card data is being verified.
 - Extended application and Chromium coverage for managed data, archive/snapshot
   cleanup, record-pinned recovery, local static serving, 390-pixel layout,
   focus restoration, and byte-equivalent idempotent command retry.

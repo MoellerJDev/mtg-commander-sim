@@ -1,5 +1,25 @@
 import type { CommandEnvelope, CommandReceipt } from "./generated/protocol";
 
+const TAB_STORAGE_KEY = "commander-browser-tab";
+
+function newTabId(): string {
+  return crypto.randomUUID().replaceAll("-", "");
+}
+
+function browserTabId(): string {
+  const existing = sessionStorage.getItem(TAB_STORAGE_KEY);
+  if (existing && /^[0-9a-f]{32}$/.test(existing)) return existing;
+  const created = newTabId();
+  sessionStorage.setItem(TAB_STORAGE_KEY, created);
+  return created;
+}
+
+export function beginGuestSession(): void {
+  // A duplicated/incognito tab may inherit sessionStorage. Rotating before an
+  // explicit login guarantees that this page selects its own HttpOnly cookie.
+  sessionStorage.setItem(TAB_STORAGE_KEY, newTabId());
+}
+
 function csrfToken(): string {
   const row = document.cookie
     .split(";")
@@ -27,6 +47,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     headers: {
       ...(init.body ? { "Content-Type": "application/json" } : {}),
       ...(method !== "GET" ? { "X-CSRF-Token": csrfToken() } : {}),
+      "X-Commander-Tab": browserTabId(),
       ...(init.headers ?? {}),
     },
   });
@@ -91,6 +112,7 @@ export interface Room {
   status: string;
   game_id: string | null;
   format_profile: string;
+  seat_count: 2 | 4;
   seats: Seat[];
 }
 
@@ -163,10 +185,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ display_name }),
     }),
-  createRoom: () =>
+  createRoom: (player_count: 2 | 4 = 4) =>
     request<{ room: Room; invite_code: string }>("/api/v1/rooms", {
       method: "POST",
-      body: JSON.stringify({}),
+      body: JSON.stringify({ player_count }),
     }),
   joinRoom: (invite_code: string, seat: string) =>
     request<{ room: Room }>("/api/v1/rooms/join", {
@@ -178,6 +200,19 @@ export const api = {
     request<{ invite_code: string }>(`/api/v1/rooms/${roomId}/invite`, {
       method: "POST",
       body: JSON.stringify({}),
+    }),
+  replaceRoom: (roomId: string, player_count: 2 | 4) =>
+    request<{ room: Room; invite_code: string }>(`/api/v1/rooms/${roomId}/replace`, {
+      method: "POST",
+      body: JSON.stringify({ player_count }),
+    }),
+  removeSeat: (roomId: string, seat: string) =>
+    request<{ room: Room }>(`/api/v1/rooms/${roomId}/seats/${seat}`, {
+      method: "DELETE",
+    }),
+  leaveRoom: (roomId: string) =>
+    request<{ left: boolean }>(`/api/v1/rooms/${roomId}/membership`, {
+      method: "DELETE",
     }),
   deck: (
     roomId: string,
@@ -235,4 +270,8 @@ export const api = {
 export function streamUrl(gameId: string): string {
   const protocol = location.protocol === "https:" ? "wss:" : "ws:";
   return `${protocol}//${location.host}/api/v1/games/${gameId}/stream`;
+}
+
+export function streamProtocols(): string[] {
+  return [`commander.tab.${browserTabId()}`];
 }

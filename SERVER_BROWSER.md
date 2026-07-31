@@ -1,6 +1,6 @@
 # Server and browser vertical slice
 
-Version 0.8.0 includes an executable, responsive four-player browser slice with
+Version 0.8.0 includes an executable, responsive two- or four-player browser slice with
 generic forms for the rules engine's current server-issued choice schemas. One
 Python process builds and serves the browser, manages the local Scryfall data
 snapshot, and serves locally cached card images. It is a single-node
@@ -44,15 +44,24 @@ and offers a local retry. If an update check fails after a database exists, the
 server remains usable with a warning and the pinned database.
 
 Choose a display name to create an expiring guest session. A host creates a
-room and shares its invite code. The other three browser contexts join distinct
-seats, then each seat submits either a public Moxfield URL or a pasted Commander
-list. Each player receives a visible private ready summary after validation.
+1v1 `commander_duel` or four-seat `commander_multiplayer` room and shares its
+invite code. Each browser tab receives a distinct HttpOnly guest binding even
+when incognito windows share one cookie jar. Other players join distinct seats,
+then each seat submits either a public Moxfield URL or a pasted Commander list.
+Each player receives a visible private ready summary after validation.
 Before game start, a player can use **Change deck / Unready** to clear only
 their own submitted list and return to validation. The host's raw invite code
 remains available through readying and page reloads for that browser session.
 If it is unavailable, the host can generate a replacement; rotation immediately
-invalidates the previous code. Only the room owner can start after all four
-seats are occupied and ready.
+invalidates the previous code. The owner can remove a nonowner seat or atomically
+close and replace an unstarted room; a nonowner can leave and release their
+seat. Only the room owner can start after every configured seat is occupied and
+ready.
+
+While the server performs its startup card-data check, existing room pages
+back off polling from 750 ms to at most once every five seconds and resume
+automatically. Room APIs may briefly return `503`; that is expected readiness
+gating, but a high-volume tight retry loop is not.
 
 Future-dated preview cards whose snapshot legality is `not_legal` use a
 two-step validation response. The first response returns the owner-only card
@@ -101,10 +110,13 @@ are runtime content, not repository or package assets. See
 | `GET /api/v1/cards/{oracle_prefix}/image` | Fetch/cache one Scryfall card face locally |
 | `POST /api/v1/guests` | Issue an expiring guest session and CSRF token |
 | `GET /api/v1/me` | Restore the authenticated guest |
-| `POST /api/v1/rooms` | Create an invite-only four-seat room |
+| `POST /api/v1/rooms` | Create an invite-only two- or four-seat room |
 | `POST /api/v1/rooms/join` | Atomically claim one unoccupied seat |
 | `GET /api/v1/rooms/{room_id}` | Read public lobby readiness |
 | `POST /api/v1/rooms/{room_id}/invite` | Owner-only replacement of the room invite |
+| `POST /api/v1/rooms/{room_id}/replace` | Atomically close and replace an owner's unstarted room |
+| `DELETE /api/v1/rooms/{room_id}/seats/{seat}` | Owner-only removal of a nonowner player |
+| `DELETE /api/v1/rooms/{room_id}/membership` | Leave an unstarted room and release the caller's seat |
 | `PUT /api/v1/rooms/{room_id}/deck` | Resolve, validate, fingerprint, and preflight a deck |
 | `DELETE /api/v1/rooms/{room_id}/deck` | Clear the caller's own unstarted deck/readiness |
 | `POST /api/v1/rooms/{room_id}/start` | Start one multiplayer Commander game |
@@ -190,8 +202,8 @@ npx playwright install chromium
 npm run e2e
 ```
 
-The end-to-end suite opens four isolated Chromium contexts per scenario,
-creates four guest sessions, atomically fills seats A–D, uploads the two
+The end-to-end suite includes four tabs sharing one Chromium cookie jar,
+creates four isolated tab-bound guest sessions, atomically fills seats A–D, uploads the two
 duplicated exact-list fixtures, and starts a game. One scenario submits all four
 keep decisions, proves owner-only stop controls, propagates a durable paused
 status to all four contexts, disables the current decision, reloads a nonowner
@@ -199,7 +211,9 @@ while paused, resumes, aborts one command request, retries the byte-equivalent
 command envelope with the same idempotency ID, records the exact projected hand
 count and decision, then requires a later full reconnect projection to match
 those values. It also checks the 390-pixel layout for horizontal overflow. A
-second scenario takes a post-free mulligan, exercises Escape/focus restoration,
+1v1 scenario replaces a room, removes and rejoins seat B, starts the
+`commander_duel` profile, and verifies both private projections. A separate
+scenario takes a post-free mulligan, exercises Escape/focus restoration,
 selects a private card to bottom through the generic form, proves that the other
 three DOMs never receive that seat-scoped control, and submits the resulting
 six-card keep. The duplicated pod is protocol evidence only, never matchup

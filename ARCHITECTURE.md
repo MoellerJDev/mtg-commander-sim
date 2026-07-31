@@ -416,7 +416,7 @@ engine package is architecture-tested not to import FastAPI, Starlette,
 Uvicorn, or `server`. Its request lifecycle is:
 
 ```text
-guest cookie / bearer token
+per-tab HttpOnly guest cookie / bearer token
         │
         ▼
 SQLite room seat ── derives pilot:A-D
@@ -433,6 +433,20 @@ GameService ── capability/action/choice validation and rollback
         ▼
 Game Record v3 save ── SQLite idempotency commit ── receipt
 ```
+
+Browser tabs carry a non-secret 128-bit selector in `X-Commander-Tab` and as a
+WebSocket subprotocol. The selector chooses that tab's HttpOnly guest cookie;
+the bearer never enters JavaScript or a URL. A valid selector with no matching
+cookie fails authentication instead of falling back to the shared legacy
+cookie. This preserves seat identity when several Chrome incognito windows use
+one cookie jar. Legacy nonbrowser clients may continue using the base cookie or
+an Authorization bearer.
+
+Rooms are created with exactly two seats (`commander_duel`) or four seats
+(`commander_multiplayer`). `seat_count` and the stored format profile determine
+the required ready set and the engine configuration; empty phantom seats are
+never added to a duel. Before start, an owner may remove a nonowner or atomically
+close and replace the room, while a nonowner may leave and release their seat.
 
 Persistence failure in the ambiguous post-mutation window never returns a
 success receipt. The actor fails closed and must be recreated from durable

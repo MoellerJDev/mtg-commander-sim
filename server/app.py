@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 import re
 import secrets
-from typing import Any, AsyncIterator
+from typing import Any, AsyncIterator, Literal
 import uuid
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
@@ -58,6 +58,10 @@ from .data import CardImageCache, IMAGE_SIZES, ManagedScryfallData
 
 COOKIE_NAME = "commander_guest"
 CSRF_COOKIE_NAME = "commander_csrf"
+TAB_HEADER_NAME = "X-Commander-Tab"
+TAB_COOKIE_PREFIX = f"{COOKIE_NAME}_tab_"
+TAB_PROTOCOL_PREFIX = "commander.tab."
+TAB_ID_RE = re.compile(r"^[0-9a-f]{32}$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -128,6 +132,7 @@ class GuestRequest(StrictModel):
 
 class RoomRequest(StrictModel):
     seed: int | None = Field(default=None, ge=0, le=2**63 - 1)
+    player_count: Literal[2, 4] = 4
 
 
 class JoinRoomRequest(StrictModel):
@@ -333,10 +338,24 @@ class ServerRuntime:
             database.close()
 
 
+def _tab_cookie_name(tab_id: str) -> str:
+    return f"{TAB_COOKIE_PREFIX}{tab_id}"
+
+
+def _request_tab_id(request: Request) -> str | None:
+    value = request.headers.get(TAB_HEADER_NAME, "").lower()
+    return value if TAB_ID_RE.fullmatch(value) else None
+
+
 def _bearer(request: Request) -> str | None:
     authorization = request.headers.get("authorization", "")
     if authorization.startswith("Bearer "):
         return authorization[7:]
+    tab_id = _request_tab_id(request)
+    if tab_id:
+        # A browser tab that presents a valid selector must never fall back to
+        # another tab's shared legacy cookie.
+        return request.cookies.get(_tab_cookie_name(tab_id))
     return request.cookies.get(COOKIE_NAME)
 
 
@@ -466,7 +485,7 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         allow_origins=list(resolved.allowed_origins),
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE"],
-        allow_headers=["Content-Type", "X-CSRF-Token"],
+        allow_headers=["Content-Type", "X-CSRF-Token", TAB_HEADER_NAME],
     )
 
     @app.get("/api/v1/health")
@@ -483,7 +502,7 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         data: ManagedScryfallData = request.app.state.data
         images: CardImageCache = request.app.state.images
         return {
-            "server": "ready",
+            "server": "ready" if data.ready else "starting",
             "protocol": "3.0",
             "card_data": data.status(),
             "images": {
@@ -534,6 +553,7 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
     @app.post("/api/v1/guests", status_code=201)
     async def create_guest(
         body: GuestRequest,
+        request: Request,
         response: Response,
         runtime: ServerRuntime = Depends(_runtime),
     ) -> dict[str, Any]:
@@ -548,6 +568,17 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
             max_age=7 * 24 * 60 * 60,
             path="/",
         )
+        tab_id = _request_tab_id(request)
+        if tab_id:
+            response.set_cookie(
+                _tab_cookie_name(tab_id),
+                token,
+                httponly=True,
+                secure=resolved.secure_cookies,
+                samesite="strict",
+                max_age=7 * 24 * 60 * 60,
+                path="/",
+            )
         response.set_cookie(
             CSRF_COOKIE_NAME,
             csrf,
@@ -557,7 +588,12 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
             max_age=7 * 24 * 60 * 60,
             path="/",
         )
-        return {"guest": guest, "csrf_token": csrf, "access_token": token}
+        payload: dict[str, Any] = {"guest": guest, "csrf_token": csrf}
+        # CLI/test clients without a browser-tab selector may explicitly use a
+        # bearer. Browser JavaScript receives only the HttpOnly cookie.
+        if tab_id is None:
+            payload["access_token"] = token
+        return payload
 
     @app.get("/api/v1/me")
     async def me(guest: dict[str, Any] = Depends(_guest)) -> dict[str, Any]:
@@ -570,7 +606,11 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         runtime: ServerRuntime = Depends(_runtime),
     ) -> dict[str, Any]:
         seed = body.seed if body.seed is not None else secrets.randbits(63)
-        room, invite = runtime.store.create_room(guest["guest_id"], seed=seed)
+        room, invite = runtime.store.create_room(
+            guest["guest_id"],
+            seed=seed,
+            player_count=body.player_count,
+        )
         return {"room": room, "invite_code": invite}
 
     @app.post("/api/v1/rooms/join", dependencies=[Depends(_csrf)])
@@ -617,6 +657,59 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         except (StoreForbidden, StoreNotFound, StoreConflict) as exc:
             raise _translate_store_error(exc) from exc
         return {"invite_code": invite_code}
+
+    @app.post(
+        "/api/v1/rooms/{room_id}/replace",
+        dependencies=[Depends(_csrf)],
+    )
+    async def replace_room(
+        room_id: str,
+        body: RoomRequest,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, Any]:
+        seed = body.seed if body.seed is not None else secrets.randbits(63)
+        try:
+            room, invite_code = runtime.store.replace_room(
+                room_id,
+                guest["guest_id"],
+                seed=seed,
+                player_count=body.player_count,
+            )
+        except (StoreForbidden, StoreNotFound, StoreConflict) as exc:
+            raise _translate_store_error(exc) from exc
+        return {"room": room, "invite_code": invite_code}
+
+    @app.delete(
+        "/api/v1/rooms/{room_id}/seats/{seat}",
+        dependencies=[Depends(_csrf)],
+    )
+    async def remove_room_seat(
+        room_id: str,
+        seat: str,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, Any]:
+        try:
+            room = runtime.store.remove_seat(room_id, guest["guest_id"], seat)
+        except (StoreForbidden, StoreNotFound, StoreConflict) as exc:
+            raise _translate_store_error(exc) from exc
+        return {"room": room}
+
+    @app.delete(
+        "/api/v1/rooms/{room_id}/membership",
+        dependencies=[Depends(_csrf)],
+    )
+    async def leave_room(
+        room_id: str,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, bool]:
+        try:
+            runtime.store.leave_room(room_id, guest["guest_id"])
+        except (StoreForbidden, StoreNotFound, StoreConflict) as exc:
+            raise _translate_store_error(exc) from exc
+        return {"left": True}
 
     @app.put(
         "/api/v1/rooms/{room_id}/deck",
@@ -748,7 +841,12 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         runtime: ServerRuntime = Depends(_runtime),
     ) -> dict[str, Any]:
         try:
-            seed, decks = runtime.store.start_spec(room_id, guest["guest_id"])
+            seed, decks, profile = runtime.store.start_spec(
+                room_id,
+                guest["guest_id"],
+            )
+            if profile not in {"commander_duel", "commander_multiplayer"}:
+                raise StoreConflict("Room has an unsupported format profile")
             session = CommanderSession.create(
                 runtime.card_db,
                 decks,
@@ -756,7 +854,7 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
                 seed=seed,
                 config=GameConfig(
                     seed=seed,
-                    profile="commander_multiplayer",
+                    profile=profile,
                     review_profile="commander_review",
                 ),
             )
@@ -774,7 +872,7 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         return {
             "game_id": session.state.game_id,
             "room_id": room_id,
-            "profile": "commander_multiplayer",
+            "profile": profile,
             "state_revision": session.state.revision,
         }
 
@@ -911,7 +1009,27 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         if origin and origin not in resolved.allowed_origins:
             await websocket.close(code=1008, reason="Origin not allowed")
             return
-        token = websocket.cookies.get(COOKIE_NAME) or ""
+        selected_protocol: str | None = None
+        token = ""
+        offered_tab_protocol = False
+        offered_protocols = {
+            value.strip()
+            for value in websocket.headers.get("sec-websocket-protocol", "").split(",")
+            if value.strip()
+        }
+        for protocol in offered_protocols:
+            if not protocol.startswith(TAB_PROTOCOL_PREFIX):
+                continue
+            tab_id = protocol[len(TAB_PROTOCOL_PREFIX):].lower()
+            if not TAB_ID_RE.fullmatch(tab_id):
+                continue
+            offered_tab_protocol = True
+            token = websocket.cookies.get(_tab_cookie_name(tab_id)) or ""
+            if token:
+                selected_protocol = protocol
+                break
+        if not token and not offered_tab_protocol:
+            token = websocket.cookies.get(COOKIE_NAME) or ""
         try:
             guest = runtime.store.authenticate(token)
             _, seat = runtime.store.game_access(game_id, guest["guest_id"])
@@ -921,7 +1039,7 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
             return
         principal = f"pilot:{seat}"
         cursor_key = f"network:{principal}:{uuid.uuid4().hex}"
-        await websocket.accept()
+        await websocket.accept(subprotocol=selected_protocol)
         version = runtime.hub.version(game_id)
         try:
             packet = await actor.observe(

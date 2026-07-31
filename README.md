@@ -9,7 +9,7 @@ corpus.
 
 Current development checkpoint: the deterministic foundation and reviewed CR
 400–408 and CR 500–512 slices now have an executable server/browser vertical
-slice. It provides guest sessions, invite-only four-seat rooms, deck
+slice. It provides tab-isolated guest sessions, invite-only two- or four-seat rooms, deck
 validation/preflight, a serialized single-writer game actor, SQLite control
 plane, durable Game Record v3 acknowledgement, strict idempotent protocol 3.0
 commands, seat-scoped WebSockets, reconnect and process-restart recovery, and a
@@ -19,7 +19,8 @@ rulings exports every 24 hours, and serves an on-demand local card-image cache.
 The browser renders the engine's current generic choice vocabulary, locally
 cached card art, reconnect and exact-command retry states, owner-only durable
 stop/resume controls, and a seat-safe record inspection panel. These paths are
-end-to-end tested with four isolated seats. Future choice schemas, full account
+end-to-end tested with four shared-cookie tab-isolated seats and a two-player
+duel. Future choice schemas, full account
 identity, expiry/rate limits, and production operations remain incomplete.
 The generated platform ledger records the exact current test and coverage
 counts.
@@ -81,12 +82,14 @@ Images remain unmodified local third-party cache files and are never committed
 or packaged. See [the content boundary](docs/LEGAL_CONTENT_BOUNDARY.md) for
 attribution, display constraints, and deployment review requirements.
 
-The current identity layer is an expiring guest session: choose a display name,
-host or join a private four-seat room, submit a Moxfield URL or pasted deck,
-and start when all four deck summaries show ready. The host invite remains
+The current identity layer is an expiring, per-browser-tab guest session: choose
+a display name, host or join a private 1v1 duel or four-seat room, submit a
+Moxfield URL or pasted deck, and start when every configured seat shows ready.
+Incognito windows may share cookies without collapsing into one seat. The host invite remains
 visible after readying and reload; the host can replace it if necessary, and
-any player can **Change deck / Unready** before start. Full password/OAuth
-accounts are not implemented yet.
+any player can **Change deck / Unready** before start. Owners can remove another
+player or create a fresh room; nonowners can leave and release their seat. Full
+password/OAuth accounts are not implemented yet.
 
 Cards from a published preview that are present in Scryfall but not legal until
 their future release date produce an explicit confirmation screen instead of a

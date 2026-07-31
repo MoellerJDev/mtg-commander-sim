@@ -70,13 +70,15 @@ async function submitOpenChoice(page: Page) {
   await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
 }
 
-test("four isolated browser contexts play through authoritative mulligans and reconnect", async ({ browser }) => {
+test("four shared-cookie browser tabs retain isolated seats through mulligans and reconnect", async ({ browser }) => {
   const contexts: BrowserContext[] = [];
   const pages: Page[] = [];
   try {
+    // One context deliberately shares its cookie jar across all pages. The
+    // application must still bind each tab to its own guest/seat session.
+    const context = await browser.newContext();
+    contexts.push(context);
     for (const seat of "ABCD") {
-      const context = await browser.newContext();
-      contexts.push(context);
       const page = await context.newPage();
       pages.push(page);
       await enter(page, `Browser ${seat}`);
@@ -91,6 +93,10 @@ test("four isolated browser contexts play through authoritative mulligans and re
       await pages[index].getByTestId("join-room").click();
       await expect(pages[index].getByTestId(`seat-${"ABCD"[index]}`)).toContainText(`Browser ${"ABCD"[index]}`);
     }
+    await pages[1].reload();
+    await pages[2].reload();
+    await expect(pages[1].getByTestId("seat-B")).toHaveClass(/mine/);
+    await expect(pages[2].getByTestId("seat-C")).toHaveClass(/mine/);
 
     const zimone = await readFile(path.resolve("..", "examples", "zimone-and-dina.txt"), "utf8");
     const mishra = await readFile(path.resolve("..", "examples", "mishra-eminent-one.txt"), "utf8");
@@ -200,6 +206,65 @@ test("four isolated browser contexts play through authoritative mulligans and re
     expect(await pages[0].evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   } finally {
     await Promise.all(contexts.map((context) => context.close()));
+  }
+});
+
+test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a duel", async ({ browser }) => {
+  const context = await browser.newContext();
+  const host = await context.newPage();
+  const opponent = await context.newPage();
+  try {
+    await enter(host, "Duel host");
+    await enter(opponent, "Duel opponent");
+    await host.getByTestId("room-size").selectOption("2");
+    await host.getByTestId("create-room").click();
+    await expect(host.getByTestId("seat-A")).toContainText("Duel host");
+    await expect(host.getByTestId("seat-C")).toHaveCount(0);
+    const staleInvite = await host.getByTestId("room-invite").textContent();
+    expect(staleInvite).toBeTruthy();
+
+    await opponent.getByTestId("invite-code").fill(staleInvite!);
+    await opponent.getByTestId("seat-select").selectOption("B");
+    await opponent.getByTestId("join-room").click();
+    await expect(opponent.getByTestId("seat-B")).toContainText("Duel opponent");
+
+    await host.getByTestId("new-room-size").selectOption("2");
+    await host.getByTestId("new-room").click();
+    await expect(host.getByTestId("room-invite")).not.toHaveText(staleInvite!);
+    const invite = await host.getByTestId("room-invite").textContent();
+    expect(invite).toBeTruthy();
+    expect(invite).not.toEqual(staleInvite);
+    await expect(opponent.getByRole("heading", { name: "Find your table" })).toBeVisible();
+
+    await opponent.getByTestId("invite-code").fill(staleInvite!);
+    await opponent.getByTestId("join-room").click();
+    await expect(opponent.getByRole("alert")).toContainText("Invite code not found");
+    await opponent.getByTestId("invite-code").fill(invite!);
+    await opponent.getByTestId("join-room").click();
+    await expect(opponent.getByTestId("seat-B")).toContainText("Duel opponent");
+
+    await host.getByTestId("remove-seat-B").click();
+    await expect(host.getByTestId("seat-B")).toContainText("Open seat");
+    await expect(opponent.getByRole("heading", { name: "Find your table" })).toBeVisible();
+    await opponent.getByTestId("invite-code").fill(invite!);
+    await opponent.getByTestId("seat-select").selectOption("B");
+    await opponent.getByTestId("join-room").click();
+
+    const zimone = await readFile(path.resolve("..", "examples", "zimone-and-dina.txt"), "utf8");
+    const mishra = await readFile(path.resolve("..", "examples", "mishra-eminent-one.txt"), "utf8");
+    await submitDeck(host, "A", zimone);
+    await submitDeck(opponent, "B", mishra);
+    await expect(host.getByTestId("start-game")).toHaveText("Start duel");
+    await expect(host.getByTestId("start-game")).toBeEnabled();
+    await host.getByTestId("start-game").click();
+    await expect(host.getByText("COMMANDER DUEL")).toBeVisible();
+    await expect(opponent.getByText("COMMANDER DUEL")).toBeVisible();
+    await expect(host.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
+    await expect(opponent.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
+    await expect(host.locator(".player-board")).toHaveCount(2);
+    await expect(opponent.locator(".player-board")).toHaveCount(2);
+  } finally {
+    await context.close();
   }
 });
 

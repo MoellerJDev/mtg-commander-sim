@@ -58,6 +58,141 @@ class ServerApplicationTests(unittest.TestCase):
     def auth(token: str) -> dict[str, str]:
         return {"Authorization": f"Bearer {token}"}
 
+    def test_browser_tabs_keep_distinct_guests_in_one_cookie_jar(self):
+        tab_a = "a" * 32
+        tab_b = "b" * 32
+        alice = self.client.post(
+            "/api/v1/guests",
+            headers={"X-Commander-Tab": tab_a},
+            json={"display_name": "Alice tab"},
+        )
+        unregistered_tab = self.client.get(
+            "/api/v1/me", headers={"X-Commander-Tab": tab_b}
+        )
+        bob = self.client.post(
+            "/api/v1/guests",
+            headers={"X-Commander-Tab": tab_b},
+            json={"display_name": "Bob tab"},
+        )
+        self.assertEqual(201, alice.status_code, alice.text)
+        self.assertNotIn("access_token", alice.json())
+        self.assertEqual(401, unregistered_tab.status_code, unregistered_tab.text)
+        self.assertEqual(201, bob.status_code, bob.text)
+
+        restored_a = self.client.get(
+            "/api/v1/me", headers={"X-Commander-Tab": tab_a}
+        )
+        restored_b = self.client.get(
+            "/api/v1/me", headers={"X-Commander-Tab": tab_b}
+        )
+        cookie_fallback = self.client.get("/api/v1/me")
+
+        self.assertEqual("Alice tab", restored_a.json()["guest"]["display_name"])
+        self.assertEqual("Bob tab", restored_b.json()["guest"]["display_name"])
+        self.assertEqual("Bob tab", cookie_fallback.json()["guest"]["display_name"])
+
+    def test_two_player_room_starts_as_commander_duel(self):
+        alice, _ = self.guest("Duel A")
+        bob, _ = self.guest("Duel B")
+        carol, _ = self.guest("Duel C")
+        created = self.client.post(
+            "/api/v1/rooms",
+            headers=self.auth(alice),
+            json={"seed": 20260730, "player_count": 2},
+        )
+        self.assertEqual(201, created.status_code, created.text)
+        room = created.json()["room"]
+        invite = created.json()["invite_code"]
+        self.assertEqual(2, room["seat_count"])
+        self.assertEqual("commander_duel", room["format_profile"])
+        self.assertEqual(["A", "B"], [seat["seat"] for seat in room["seats"]])
+        invalid_seat = self.client.post(
+            "/api/v1/rooms/join",
+            headers=self.auth(carol),
+            json={"invite_code": invite, "seat": "C"},
+        )
+        self.assertEqual(404, invalid_seat.status_code, invalid_seat.text)
+        joined = self.client.post(
+            "/api/v1/rooms/join",
+            headers=self.auth(bob),
+            json={"invite_code": invite, "seat": "B"},
+        )
+        self.assertEqual(200, joined.status_code, joined.text)
+        for token, name, commander, fixture in (
+            (alice, "Duel A", "Zimone and Dina", "zimone-and-dina.txt"),
+            (bob, "Duel B", "Mishra, Eminent One", "mishra-eminent-one.txt"),
+        ):
+            uploaded = self.client.put(
+                f"/api/v1/rooms/{room['room_id']}/deck",
+                headers=self.auth(token),
+                json={
+                    "name": name,
+                    "commander": commander,
+                    "decklist": (ROOT / "examples" / fixture).read_text(encoding="utf-8"),
+                },
+            )
+            self.assertEqual(200, uploaded.status_code, uploaded.text)
+        started = self.client.post(
+            f"/api/v1/rooms/{room['room_id']}/start",
+            headers=self.auth(alice),
+        )
+        self.assertEqual(200, started.status_code, started.text)
+        self.assertEqual("commander_duel", started.json()["profile"])
+        game_id = started.json()["game_id"]
+        summary = self.client.get(
+            f"/api/v1/games/{game_id}", headers=self.auth(alice)
+        ).json()["game"]
+        packet = self.client.get(
+            f"/api/v1/games/{game_id}/state?full=true",
+            headers=self.auth(alice),
+        ).json()["packet"]
+        self.assertEqual("commander_duel", summary["format_profile"])
+        self.assertEqual({"A", "B"}, set(packet["state"]["players"]))
+
+    def test_owner_removes_a_player_and_replaces_an_unstarted_room(self):
+        alice, _ = self.guest("Room owner")
+        bob, _ = self.guest("Removable player")
+        created = self.client.post(
+            "/api/v1/rooms",
+            headers=self.auth(alice),
+            json={"seed": 1, "player_count": 4},
+        )
+        room_id = created.json()["room"]["room_id"]
+        old_invite = created.json()["invite_code"]
+        joined = self.client.post(
+            "/api/v1/rooms/join",
+            headers=self.auth(bob),
+            json={"invite_code": old_invite, "seat": "B"},
+        )
+        self.assertEqual(200, joined.status_code, joined.text)
+        removed = self.client.delete(
+            f"/api/v1/rooms/{room_id}/seats/B",
+            headers=self.auth(alice),
+        )
+        self.assertEqual(200, removed.status_code, removed.text)
+        self.assertIsNone(removed.json()["room"]["seats"][1]["guest_id"])
+        expelled = self.client.get(
+            f"/api/v1/rooms/{room_id}", headers=self.auth(bob)
+        )
+        self.assertEqual(403, expelled.status_code, expelled.text)
+
+        replacement = self.client.post(
+            f"/api/v1/rooms/{room_id}/replace",
+            headers=self.auth(alice),
+            json={"seed": 2, "player_count": 2},
+        )
+        self.assertEqual(200, replacement.status_code, replacement.text)
+        next_room = replacement.json()["room"]
+        self.assertNotEqual(room_id, next_room["room_id"])
+        self.assertEqual(2, next_room["seat_count"])
+        self.assertEqual("commander_duel", next_room["format_profile"])
+        stale = self.client.post(
+            "/api/v1/rooms/join",
+            headers=self.auth(bob),
+            json={"invite_code": old_invite, "seat": "B"},
+        )
+        self.assertEqual(404, stale.status_code, stale.text)
+
     def test_system_status_exposes_local_data_readiness_without_paths(self):
         response = self.client.get("/api/v1/system")
         self.assertEqual(200, response.status_code, response.text)

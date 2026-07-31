@@ -2,12 +2,14 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   api,
   ApiError,
+  beginGuestSession,
   type GameLifecycle,
   type Guest,
   type LegalityConfirmationRequired,
   type Room,
   type SystemStatus,
   streamUrl,
+  streamProtocols,
 } from "./api";
 import { ChoiceFormView } from "./ChoiceForm";
 import {
@@ -104,6 +106,7 @@ function Welcome({ onReady }: { onReady: (guest: Guest) => void }) {
     event.preventDefault();
     try {
       setError("");
+      beginGuestSession();
       const result = await api.guest(name.trim());
       onReady(result.guest);
     } catch (caught) {
@@ -157,11 +160,12 @@ function Welcome({ onReady }: { onReady: (guest: Guest) => void }) {
 function Lobby({ guest, system, onRoom }: { guest: Guest; system: SystemStatus | null; onRoom: (room: Room, invite?: string) => void }) {
   const [invite, setInvite] = useState("");
   const [seat, setSeat] = useState("B");
+  const [playerCount, setPlayerCount] = useState<2 | 4>(4);
   const [error, setError] = useState("");
   async function create() {
     try {
       setError("");
-      const result = await api.createRoom();
+      const result = await api.createRoom(playerCount);
       onRoom(result.room, result.invite_code);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : String(caught));
@@ -186,13 +190,24 @@ function Lobby({ guest, system, onRoom }: { guest: Guest; system: SystemStatus |
         </div>
         <div className="eyebrow">COMMANDER ARENA</div>
         <h1>Find your table</h1>
-        <p className="page-lede">Host a private four-player pod or join a seat with an invite code.</p>
+        <p className="page-lede">Host a private Commander duel or four-player pod, or join a seat with an invite code.</p>
       </header>
       <div className="lobby-grid">
         <section className="panel">
           <div className="panel-number">01</div>
           <h2>Host a pod</h2>
-          <p>Create an invite-only four-player Commander room.</p>
+          <p>Create an invite-only 1v1 duel or four-player Commander room.</p>
+          <label>
+            Table size
+            <select
+              data-testid="room-size"
+              value={playerCount}
+              onChange={(event) => setPlayerCount(Number(event.target.value) as 2 | 4)}
+            >
+              <option value={4}>Four-player Commander</option>
+              <option value={2}>1v1 Commander duel</option>
+            </select>
+          </label>
           <button data-testid="create-room" onClick={create}>Create room</button>
         </section>
         <section className="panel">
@@ -223,11 +238,15 @@ function RoomView({
   initial,
   invite,
   onGame,
+  onRoom,
+  onLeave,
 }: {
   guest: Guest;
   initial: Room;
   invite: string;
   onGame: (gameId: string) => void;
+  onRoom: (room: Room, invite?: string) => void;
+  onLeave: () => void;
 }) {
   const [room, setRoom] = useState(initial);
   const [currentInvite, setCurrentInvite] = useState(invite);
@@ -239,6 +258,7 @@ function RoomView({
   const [messageKind, setMessageKind] = useState<"success" | "warning" | "error">("success");
   const [busy, setBusy] = useState(false);
   const [legalityReview, setLegalityReview] = useState<LegalityConfirmationRequired | null>(null);
+  const [nextPlayerCount, setNextPlayerCount] = useState<2 | 4>(initial.seat_count);
   const mine = room.seats.find((seat) => seat.mine);
   const owner = room.owner_guest_id === guest.guest_id;
   const readyCount = room.seats.filter((seat) => seat.ready).length;
@@ -271,18 +291,93 @@ function RoomView({
   }
 
   useEffect(() => {
-    const timer = window.setInterval(async () => {
+    let stopped = false;
+    let timer = 0;
+    let delay = 750;
+    let startupWaiting = false;
+    async function pollRoom() {
+      if (stopped) return;
+      let continuePolling = true;
       try {
         const result = await api.room(room.room_id);
-        setRoom(result.room);
-        if (result.room.game_id) onGame(result.room.game_id);
+        delay = 750;
+        if (startupWaiting) {
+          startupWaiting = false;
+          setMessage("");
+        }
+        if (result.room.status === "closed") {
+          continuePolling = false;
+          onLeave();
+        } else {
+          setRoom(result.room);
+          if (result.room.game_id) onGame(result.room.game_id);
+        }
       } catch (caught) {
-        setMessageKind("error");
-        setMessage(caught instanceof Error ? caught.message : String(caught));
+        if (caught instanceof ApiError && (caught.status === 403 || caught.status === 404)) {
+          continuePolling = false;
+          onLeave();
+        } else if (caught instanceof ApiError && caught.status === 503) {
+          startupWaiting = true;
+          delay = Math.min(delay * 2, 5000);
+          setMessageKind("warning");
+          setMessage("The server is finishing its card-data startup check. Room updates will resume automatically.");
+        } else {
+          delay = Math.min(delay * 2, 5000);
+          setMessageKind("error");
+          setMessage(caught instanceof Error ? caught.message : String(caught));
+        }
       }
-    }, 750);
-    return () => window.clearInterval(timer);
-  }, [room.room_id, onGame]);
+      if (!stopped && continuePolling) timer = window.setTimeout(pollRoom, delay);
+    }
+    timer = window.setTimeout(pollRoom, delay);
+    return () => {
+      stopped = true;
+      window.clearTimeout(timer);
+    };
+  }, [room.room_id, onGame, onLeave]);
+
+  async function makeNewRoom() {
+    setBusy(true);
+    try {
+      const oldRoomId = room.room_id;
+      const result = await api.replaceRoom(oldRoomId, nextPlayerCount);
+      sessionStorage.removeItem(inviteStorageKey(oldRoomId));
+      onRoom(result.room, result.invite_code);
+    } catch (caught) {
+      setMessageKind("error");
+      setMessage(caught instanceof Error ? caught.message : String(caught));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function leaveRoom() {
+    setBusy(true);
+    try {
+      await api.leaveRoom(room.room_id);
+      onLeave();
+    } catch (caught) {
+      setMessageKind("error");
+      setMessage(caught instanceof Error ? caught.message : String(caught));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removeSeat(seat: string) {
+    setBusy(true);
+    try {
+      const result = await api.removeSeat(room.room_id, seat);
+      setRoom(result.room);
+      setMessageKind("success");
+      setMessage(`Seat ${seat} was removed and is open again.`);
+    } catch (caught) {
+      setMessageKind("error");
+      setMessage(caught instanceof Error ? caught.message : String(caught));
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submitDeck(legalityConfirmation?: string) {
     setBusy(true);
@@ -367,23 +462,41 @@ function RoomView({
     <main className="page-shell">
       <header className="room-header">
         <div>
-          <div className="eyebrow">COMMANDER MULTIPLAYER · 40 LIFE</div>
+          <div className="eyebrow">{room.seat_count === 2 ? "COMMANDER DUEL" : "COMMANDER MULTIPLAYER"} · 40 LIFE</div>
           <h1>Room {room.room_id.slice(0, 8)}</h1>
         </div>
-        {owner && currentInvite && (
-          <div className="invite-chip">
-            <div><span>Invite code</span><strong data-testid="room-invite">{currentInvite}</strong></div>
-            <div className="invite-actions">
-              <button type="button" className="icon-button" aria-label="Copy invite code" onClick={copyInvite}>Copy</button>
-              <button type="button" className="quiet-button" data-testid="replace-invite" disabled={busy} onClick={replaceInvite}>Replace</button>
+        <div className="room-header-actions">
+          {owner && currentInvite && (
+            <div className="invite-chip">
+              <div><span>Invite code</span><strong data-testid="room-invite">{currentInvite}</strong></div>
+              <div className="invite-actions">
+                <button type="button" className="icon-button" aria-label="Copy invite code" onClick={copyInvite}>Copy</button>
+                <button type="button" className="quiet-button" data-testid="replace-invite" disabled={busy} onClick={replaceInvite}>Replace</button>
+              </div>
             </div>
-          </div>
-        )}
-        {owner && !currentInvite && (
-          <button type="button" data-testid="replace-invite" disabled={busy} onClick={replaceInvite}>Generate new invite</button>
-        )}
+          )}
+          {owner && !currentInvite && (
+            <button type="button" data-testid="replace-invite" disabled={busy} onClick={replaceInvite}>Generate new invite</button>
+          )}
+          {owner ? (
+            <div className="new-room-control">
+              <select
+                aria-label="New room size"
+                data-testid="new-room-size"
+                value={nextPlayerCount}
+                onChange={(event) => setNextPlayerCount(Number(event.target.value) as 2 | 4)}
+              >
+                <option value={4}>4 players</option>
+                <option value={2}>1v1 duel</option>
+              </select>
+              <button type="button" className="quiet-button" data-testid="new-room" disabled={busy} onClick={makeNewRoom}>New room</button>
+            </div>
+          ) : (
+            <button type="button" className="quiet-button" data-testid="leave-room" disabled={busy} onClick={leaveRoom}>Leave room</button>
+          )}
+        </div>
       </header>
-      <section className="seat-row">
+      <section className={`seat-row seats-${room.seat_count}`}>
         {room.seats.map((seat) => (
           <article key={seat.seat} className={`seat-card ${seat.mine ? "mine" : ""}`} data-testid={`seat-${seat.seat}`}>
             <div className="seat-letter">{seat.seat}</div>
@@ -392,6 +505,9 @@ function RoomView({
               <small>{seat.deck?.name ?? "No deck submitted"}</small>
             </div>
             <span className={`seat-state ${seat.ready ? "ready" : "waiting"}`}><i aria-hidden="true" />{seat.ready ? "READY" : "WAITING"}</span>
+            {owner && seat.guest_id && !seat.mine && (
+              <button type="button" className="seat-remove" data-testid={`remove-seat-${seat.seat}`} disabled={busy} onClick={() => void removeSeat(seat.seat)}>Remove</button>
+            )}
           </article>
         ))}
       </section>
@@ -458,11 +574,11 @@ function RoomView({
       {owner && (
         <div className="start-bar">
           <div className="readiness-copy">
-            <strong>{readyCount}/4 decks ready</strong>
-            <span>{readyCount === 4 ? "Your pod is ready to begin." : "Waiting for every seat to validate a deck."}</span>
+            <strong>{readyCount}/{room.seat_count} decks ready</strong>
+            <span>{readyCount === room.seat_count ? "Your table is ready to begin." : "Waiting for every seat to validate a deck."}</span>
           </div>
-          <div className="readiness-meter" aria-label={`${readyCount} of 4 decks ready`}><span style={{ width: `${readyCount * 25}%` }} /></div>
-          <button data-testid="start-game" disabled={busy || !room.seats.every((seat) => seat.ready)} onClick={start}>Start game</button>
+          <div className="readiness-meter" aria-label={`${readyCount} of ${room.seat_count} decks ready`}><span style={{ width: `${readyCount / room.seat_count * 100}%` }} /></div>
+          <button data-testid="start-game" disabled={busy || !room.seats.every((seat) => seat.ready)} onClick={start}>{room.seat_count === 2 ? "Start duel" : "Start game"}</button>
         </div>
       )}
       {message && <div className={`${messageKind}-banner`} role={messageKind === "error" ? "alert" : "status"}>{message}</div>}
@@ -606,7 +722,7 @@ function GameView({ gameId }: { gameId: string }) {
     function connect() {
       if (stopped) return;
       setConnection("CONNECTING");
-      socket = new WebSocket(streamUrl(gameId));
+      socket = new WebSocket(streamUrl(gameId), streamProtocols());
       socket.onopen = () => {
         retry = 250;
         setReconnectAttempts(0);
@@ -806,7 +922,7 @@ function GameView({ gameId }: { gameId: string }) {
           <span>{connection}</span>
           {connection !== "LIVE" && <button type="button" className="link-button" onClick={() => setReconnectNonce((value) => value + 1)}>Retry now</button>}
         </div>
-        <div className="game-identity"><small>COMMANDER POD</small><strong>{String(game.id ?? gameId).slice(0, 8)}</strong></div>
+        <div className="game-identity"><small>{lifecycle?.format_profile === "commander_duel" ? "COMMANDER DUEL" : "COMMANDER POD"}</small><strong>{String(game.id ?? gameId).slice(0, 8)}</strong></div>
         <div className="game-status-line">
           <span data-testid="game-status" className={`game-status ${lifecycle?.status ?? "loading"}`}>
             {(lifecycle?.status ?? "loading").toUpperCase()}
@@ -875,7 +991,7 @@ function GameView({ gameId }: { gameId: string }) {
         </div>
       )}
       <div className="table-workspace">
-        <section className="boards-grid" aria-label="Four-player battlefield">
+        <section className="boards-grid" aria-label="Commander battlefield">
           {Object.entries(players).map(([seat, player]) => (
             <PlayerBoard
               key={seat}
@@ -993,7 +1109,10 @@ export default function App() {
           const result = await api.me();
           if (stopped) return;
           setGuest(result.guest);
-          const roomId = localStorage.getItem("commander-room");
+          // Room restoration is tab-scoped for the same reason authentication
+          // is: localStorage is shared by incognito windows.
+          localStorage.removeItem("commander-room");
+          const roomId = sessionStorage.getItem("commander-room");
           if (!roomId) {
             setScreen("lobby");
             return;
@@ -1010,7 +1129,7 @@ export default function App() {
               setScreen("room");
             }
           } catch {
-            localStorage.removeItem("commander-room");
+            sessionStorage.removeItem("commander-room");
             sessionStorage.removeItem(inviteStorageKey(roomId));
             setScreen("lobby");
           }
@@ -1028,7 +1147,7 @@ export default function App() {
   function enterRoom(next: Room, code = "") {
     setRoom(next);
     setInvite(code);
-    localStorage.setItem("commander-room", next.room_id);
+    sessionStorage.setItem("commander-room", next.room_id);
     if (code) sessionStorage.setItem(inviteStorageKey(next.room_id), code);
     setScreen("room");
   }
@@ -1038,12 +1157,20 @@ export default function App() {
     setScreen("game");
   }
 
+  function leaveRoomScreen() {
+    if (room) sessionStorage.removeItem(inviteStorageKey(room.room_id));
+    sessionStorage.removeItem("commander-room");
+    setRoom(null);
+    setInvite("");
+    setScreen("lobby");
+  }
+
   if (screen === "loading") return <main className="loading-screen"><div className="spinner" /></main>;
   if (screen === "setup" && system) return <SetupScreen initial={system} onReady={() => { setScreen("loading"); setBootNonce((value) => value + 1); }} />;
   if (screen === "welcome") return <Welcome onReady={(value) => { setGuest(value); setScreen("lobby"); }} />;
   if (!guest) return null;
   if (screen === "lobby") return <Lobby guest={guest} system={system} onRoom={enterRoom} />;
-  if (screen === "room" && room) return <RoomView guest={guest} initial={room} invite={invite} onGame={enterGame} />;
+  if (screen === "room" && room) return <RoomView key={room.room_id} guest={guest} initial={room} invite={invite} onGame={enterGame} onRoom={enterRoom} onLeave={leaveRoomScreen} />;
   if (screen === "game" && gameId) return <GameView gameId={gameId} />;
   return null;
 }

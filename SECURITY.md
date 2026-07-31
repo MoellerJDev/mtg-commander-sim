@@ -36,8 +36,12 @@ read-only workspace when filesystem isolation must also be demonstrated.
 ## Browser/server boundary
 
 The first network slice uses 256-bit random guest bearer tokens in HTTP-only,
-SameSite=Strict cookies; unsafe cookie-authenticated requests also require a
-double-submit CSRF token. Browser WebSockets accept only configured origins.
+SameSite=Strict cookies. A non-secret, per-tab selector chooses a distinct
+HttpOnly cookie for each top-level browser tab, so Chrome incognito windows may
+share a cookie jar without sharing a seat. The same selector travels as a
+WebSocket subprotocol, while the bearer itself remains out of JavaScript and
+URLs. Unsafe cookie-authenticated requests also require a double-submit CSRF
+token. Browser WebSockets accept only configured origins.
 SQLite stores SHA-256 hashes of guest tokens and room invite codes, never their
 raw values. The host browser retains its raw invite only in session storage so
 it survives readying and reload without becoming server-side plaintext; closing
@@ -45,6 +49,13 @@ that browser session may require an owner-only replacement. Replacing an invite
 atomically invalidates the old hash. Room membership selects the one pilot
 principal available to that guest. Decision capabilities remain separate
 short-lived grants and are never login credentials.
+
+Legacy clients without a tab selector may continue using the base guest cookie.
+When a valid selector is present, authentication never falls back to that shared
+cookie; an unregistered tab must create its own guest session. This fail-closed
+rule prevents the last incognito login from silently taking over every tab.
+The current room ID and any owner invite display are likewise kept in tab-scoped
+session storage rather than shared local storage.
 
 Set `MTG_SECURE_COOKIES=1` behind HTTPS. Restrict `MTG_ALLOWED_ORIGINS` to the
 deployed browser origin. Seated members may inspect only whitelisted lifecycle
