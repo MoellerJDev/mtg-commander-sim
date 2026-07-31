@@ -9,10 +9,10 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "rules_family_cr_512_ending_phase",
-    "branch": "agent/cr-512-ending-phase",
+    "active_phase": "rules_family_cr_511_end_of_combat",
+    "branch": "agent/cr-511-end-of-combat",
     "branch_ancestry": {
-      "focused_branch_base": "390aeaa15dc19f64d8ec6ac6e37d3a0195043d86",
+      "focused_branch_base": "9762c655b0f068ce24469e6476902a05de79c9d3",
       "focused_branch_unique_commits_over_main": 1
     },
     "commit_reference": "the commit containing this ledger",
@@ -30,6 +30,13 @@
         "number": 1,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/1"
+      },
+      {
+        "base": "main",
+        "head": "agent/cr-512-ending-phase",
+        "number": 3,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/3"
       }
     ],
     "tags": [
@@ -57,7 +64,7 @@
       "status": "not_started"
     },
     {
-      "evidence": "The versioned 2026-06-19 rules corpus is on main; CR 512 is the current focused family.",
+      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 512 slice are on main; CR 511 is the current focused family.",
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main"
@@ -69,7 +76,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Publish the green CR 512 focused branch, then select the next dependency-bounded rules family without overstating full rulebook completeness.",
+  "next_task": "Publish the green CR 511 focused slice without promoting the blocked generic until-end-of-combat duration grammar.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -109,8 +116,8 @@
     "manifest_present": true,
     "mechanics": {
       "status_counts": {
-        "partial": 29,
-        "unclassified": 396
+        "partial": 30,
+        "unclassified": 395
       },
       "total": 425,
       "trusted": 0
@@ -125,11 +132,11 @@
       "total": 38373
     },
     "rules": {
-      "blocked": 222,
-      "definition_only": 51,
-      "passing": 45,
+      "blocked": 223,
+      "definition_only": 52,
+      "passing": 47,
       "total": 3300,
-      "unreviewed": 2982
+      "unreviewed": 2978
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -152,24 +159,24 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 3792,
+    "deterministic_cases_discovered": 3796,
     "migration_files": 0,
     "schema_files": 14,
     "server_files": 0,
     "web_files": 0
   },
   "validation": {
-    "baseline_commit": "390aeaa15dc19f64d8ec6ac6e37d3a0195043d86",
+    "baseline_commit": "9762c655b0f068ce24469e6476902a05de79c9d3",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30604498260,
+      "run_id": 30605533169,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30604498260"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30605533169"
     },
     "local": {
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "pass_3792",
+      "deterministic_tests": "pass_3796",
       "four_player_protocol_demo": "pass",
       "repository_history_security_audit": "pass",
       "wheel_build_and_clean_install": "pass"

@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 511 — End of Combat Step",
+  "cases": [
+    {
+      "rule_id": "511",
+      "rule_text_sha256": "9193c811a65ede788c18a8276bd82573cf6b1e5daaf76d9e79993ef7bde37cb8",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/end-of-combat.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_end_of_combat_rules.EndOfCombatRuleTests.test_contract_traces_every_cr_511_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; CR 511.1-3 carry the executable and blocked behavior."
+      ]
+    },
+    {
+      "rule_id": "511.1",
+      "rule_text_sha256": "e815eae7d0e193a525b3ddfcec1ac8e552b9cb5461b82c61b8968ca921a2023a",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._enter_step",
+        "CommanderEngine._grant_priority"
+      ],
+      "executable_test_ids": [
+        "tests.test_end_of_combat_rules.EndOfCombatRuleTests.test_end_of_combat_has_no_turn_action_then_active_gets_priority"
+      ],
+      "required_scenarios": [
+        "positive"
+      ],
+      "covered_scenarios": [
+        "positive"
+      ],
+      "blockers": [],
+      "notes": [
+        "The step emits only its boundary event before the active player receives priority; it performs no turn-based action."
+      ]
+    },
+    {
+      "rule_id": "511.2",
+      "rule_text_sha256": "db02f1352723bb03ea78c3fd9dc63c071a186d74b07b858fce58e4205c5382f2",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._enter_step",
+        "CommanderEngine._dispatch_semantic_event",
+        "CommanderEngine._matching_delayed_triggers"
+      ],
+      "executable_test_ids": [
+        "tests.test_end_of_combat_rules.EndOfCombatRuleTests.test_permanent_and_delayed_end_of_combat_triggers_precede_priority"
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "negative"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "blockers": [
+        "until_end_of_combat_duration_registry_not_implemented"
+      ],
+      "notes": [
+        "Represented permanent and delayed at-end-of-combat triggers coexist before priority. The rule remains blocked because arbitrary effects lasting until end of combat do not yet use a complete generic duration registry."
+      ]
+    },
+    {
+      "rule_id": "511.3",
+      "rule_text_sha256": "ad38066de0f1ab89914589567ab07d846a4c928017af6362f6b30f9694649db3",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._advance_step",
+        "CommanderEngine._finish_combat_phase"
+      ],
+      "executable_test_ids": [
+        "tests.test_end_of_combat_rules.EndOfCombatRuleTests.test_objects_leave_combat_only_after_step_ends_and_replay_exactly"
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "Attackers, blockers, attacked nonplayer permanents, and the combat snapshot remain live through priority, then are cleared before the postcombat main step begins. The four-player path command-replays exactly."
+      ]
+    }
+  ]
+}

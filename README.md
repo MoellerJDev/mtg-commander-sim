@@ -175,6 +175,9 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 511 end-of-combat priority, trigger coexistence, and exact
+  removal-from-combat handoff into postcombat main; generic effects lasting
+  until end of combat remain explicitly blocked
 - source-reviewed CR 512 ending-phase structure with exactly end then cleanup,
   exact replay into the next turn, and cleanup decisions preventing premature
   phase completion; behavior inside those steps remains bounded by CR 513/514

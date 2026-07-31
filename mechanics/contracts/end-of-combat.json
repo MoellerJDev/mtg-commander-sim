@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-511-end-of-combat-step",
+  "official_name": "End of Combat Step",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "511",
+    "511.1",
+    "511.2",
+    "511.3"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "turn-structure",
+    "priority",
+    "triggered-abilities",
+    "continuous-effect-duration",
+    "combat",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield"
+    ],
+    "objects": [
+      "attacking creature",
+      "blocking creature",
+      "attacked player",
+      "attacked battle",
+      "attacked planeswalker"
+    ],
+    "events": [
+      "end of combat step begins",
+      "at-end-of-combat triggers are collected",
+      "active player receives priority",
+      "end of combat step ends",
+      "objects are removed from combat",
+      "postcombat main phase begins"
+    ],
+    "state_reads": [
+      "current phase and step",
+      "active player",
+      "stack and priority state",
+      "combat attackers, blockers, defenders, and damage assignments"
+    ],
+    "state_writes": [
+      "stack and priority state",
+      "attacking and blocking markers",
+      "combat state",
+      "phase and step"
+    ],
+    "costs": [],
+    "timing": [
+      "the step has no turn-based action",
+      "beginning-of-step triggers are collected before active-player priority",
+      "objects remain in combat throughout the priority window",
+      "objects leave combat only after the step ends",
+      "the postcombat main phase follows the combat phase"
+    ],
+    "targets": [
+      "combat defenders remain addressable until the end-of-combat step ends"
+    ],
+    "choices": [
+      "trigger ordering and ordinary priority choices use the shared APNAP machinery"
+    ],
+    "hidden_information": [
+      "the combat boundary itself reveals no hidden information"
+    ],
+    "apnap": [
+      "the active player receives priority after beginning-of-step triggers are placed on the stack"
+    ],
+    "layers": [
+      "the complete grammar for effects lasting until end of combat is not yet represented"
+    ],
+    "replacement_effects": [
+      "replacement behavior inside the step remains delegated to shared replacement contracts"
+    ],
+    "copy": [
+      "copy status does not change when an object leaves combat"
+    ],
+    "control_change": [
+      "control changes during the step use the shared control and combat rules"
+    ],
+    "zone_change": [
+      "objects that change zones stop being represented by their previous combat incarnation"
+    ],
+    "source_leaves": [
+      "a represented beginning-of-step trigger remains independent of its source after triggering"
+    ]
+  },
+  "variants": [
+    "ordinary empty end-of-combat priority",
+    "permanent and delayed at-end-of-combat triggers",
+    "multiplayer combat against a nonplayer permanent",
+    "exact replay into postcombat main"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_511_rule",
+    "test_end_of_combat_has_no_turn_action_then_active_gets_priority",
+    "test_permanent_and_delayed_end_of_combat_triggers_precede_priority",
+    "test_objects_leave_combat_only_after_step_ends_and_replay_exactly"
+  ],
+  "implementation": {
+    "component": "TURN_STEPS and CommanderEngine end-of-combat entry, priority, trigger, combat-finalization, and step-advance paths",
+    "version": "end-of-combat-v1"
+  },
+  "known_blockers": [
+    "the complete continuous-effect grammar and duration registry for effects lasting until end of combat is not implemented",
+    "complete trigger ordering, replacement, control-change, extra-combat, and multiplayer interaction coverage remains incomplete"
+  ],
+  "review_status": "draft"
+}

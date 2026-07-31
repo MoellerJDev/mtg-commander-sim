@@ -7,17 +7,16 @@ Python: 3.11.9
 
 PASS: `python -m compileall -q mtg_commander_sim tests scripts simctl.py`
 
-PASS: 3,792 unit/integration tests in 177.855 seconds using the rebuilt compact
+PASS: 3,796 unit/integration tests in 179.631 seconds using the rebuilt compact
 Scryfall database:
 
 - 3,300 generated per-rule inventory/source-linkage tests
-- 492 ordinary rules, engine, protocol, replay, privacy, and platform tests
+- 496 ordinary rules, engine, protocol, replay, privacy, and platform tests
 
-The four new CR 512 tests verify its source-pinned mechanic contract, the exact
-end-step/cleanup sequence, exact replay through the next-turn handoff, and that
-a mandatory cleanup discard prevents a premature ending-phase transition.
-They establish the structural rule in CR 512.1 only; the broader end-step and
-cleanup semantics remain bounded by the partial CR 513 and CR 514 contracts.
+The four new CR 511 tests verify no-turn-action priority, coexisting permanent
+and delayed boundary triggers, multiplayer removal from combat, and exact
+replay into postcombat main. CR 511.2 remains blocked because the complete
+generic grammar for effects lasting until end of combat is not implemented.
 
 Generated source linkage is not a claim that every rule has executable semantic
 coverage. The reviewed ledger remains fail-closed about passing, blocked,
@@ -61,7 +60,7 @@ PASS:
 - reachable-history path and oversized-blob scan
 - sanitized public replay-fixture policy check
 
-The scan covered 244 tracked files and 11,165,988 tracked bytes.
+The scan covered 247 tracked files and 11,183,790 tracked bytes.
 
 ## Package
 
@@ -72,14 +71,14 @@ package reported version 0.8.0 and its CLI smoke test completed.
 
 ## Evidence boundary
 
-These checks establish the local CR 512 focused branch atop the green combined
-platform/rules baseline, including source pinning, structural ending-phase
-ordering, replay, privacy, action opportunity, packaging, and repository gates.
-They do not establish complete CR 513/514 behavior, a production ASGI server,
+These checks establish the local CR 511 focused branch atop the green CR 512
+main baseline, including source pinning, end-of-combat ordering, replay,
+privacy, action opportunity, packaging, and repository gates. They do not
+establish generic until-end-of-combat duration semantics, a production ASGI server,
 browser client, durable database, complete Comprehensive Rules behavior,
 Oracle-corpus semantic closure, Commander deck legality for the micro-pool,
 deck superiority, or statistical matchup evidence.
 
 The baseline main commit's exact-SHA GitHub Actions matrix is recorded on pull
-request #1 and run 30604498260. Exact-SHA CI for the focused CR 512 commit is
+request #3 and run 30605533169. Exact-SHA CI for the focused CR 511 commit is
 not claimed until that commit is pushed.
