@@ -1,5 +1,5 @@
 {
-  "contract_count": 36,
+  "contract_count": 37,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -96,6 +96,12 @@
       "path": "mechanics/contracts/defense.json",
       "sha256": "d91f723c5f4cc92a3201fb51ef88145a896e08f1dc967e3bb89e122294f6e6f4",
       "version": 2
+    },
+    {
+      "mechanic_id": "cr-504-draw-step",
+      "path": "mechanics/contracts/draw-step.json",
+      "sha256": "48c692a22bb7e6e6e3c79689318c4ff404466d5c1c71a52cbf0f5a4c7fbf6564",
+      "version": 1
     },
     {
       "mechanic_id": "cr-609-effects",
@@ -6115,17 +6121,32 @@
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/draw-step.json",
+      "contract_sha256": "48c692a22bb7e6e6e3c79689318c4ff404466d5c1c71a52cbf0f5a4c7fbf6564",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine draw, draw-replacement, draw-step trigger batching, state stabilization, priority, format-profile, and replay paths",
+      "implementation_version": "draw-step-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "the complete draw-replacement and draw-prevention Oracle corpus is not compiled",
+        "generic effects that skip a draw step or replace the turn-based draw with multiple or conditional events are incomplete",
+        "the complete continuous-effect, replacement, trigger-target, multiplayer-elimination, and replay interaction matrix remains incomplete"
+      ],
       "mechanic_id": "cr-504-draw-step",
       "official_name": "Draw Step",
       "rule_references": [
         "504"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_504_rule",
+        "test_turn_draw_is_stackless_and_precedes_active_priority",
+        "test_draw_step_triggers_wait_until_after_the_turn_draw",
+        "test_trusted_draw_replacement_finishes_before_priority",
+        "test_empty_library_loss_is_checked_before_draw_step_priority",
+        "test_first_turn_profile_modifier_and_exact_replay"
+      ],
       "trust_level": "untrusted"
     },
     {

@@ -27337,21 +27337,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-504",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_draw_step_rules.DrawStepRuleTests.test_contract_traces_every_cr_504_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/draw-step.json"
+      ],
+      "notes": [
+        "Section heading; CR 504.1-2 carry the behavioral requirements."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "504",
       "rule_text_sha256": "ea472394ec1ea1482c16b0dfb92306c0f2accc01eaef58b202a005f179c15a2c",
       "schema_version": 1,
@@ -27360,26 +27364,50 @@
         "end_line": 2167,
         "start_line": 2166
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-504.1",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "504"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_draw_step_rules.DrawStepRuleTests.test_turn_draw_is_stackless_and_precedes_active_priority",
+        "tests.test_draw_step_rules.DrawStepRuleTests.test_draw_step_triggers_wait_until_after_the_turn_draw",
+        "tests.test_draw_step_rules.DrawStepRuleTests.test_trusted_draw_replacement_finishes_before_priority",
+        "tests.test_draw_step_rules.DrawStepRuleTests.test_empty_library_loss_is_checked_before_draw_step_priority",
+        "tests.test_draw_step_rules.DrawStepRuleTests.test_first_turn_profile_modifier_and_exact_replay"
+      ],
+      "implementation_components": [
+        "TURN_STEPS",
+        "CommanderEngine._enter_step",
+        "CommanderEngine._begin_draw_sequence",
+        "CommanderEngine.draw",
+        "CommanderEngine._complete_draw_step_entry"
+      ],
+      "notes": [
+        "The normal draw moves the top library card directly to hand without using the stack. Trusted replacement choices complete before the step continues; an empty-library attempt is recorded for the state-based loss check. The format profile applies the separate first-turn draw modifier."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "504.1",
       "rule_text_sha256": "7b3bd7b0b9d616b693a7e54a41657482e61c8fd63803f046e545ba6d4e222201",
       "schema_version": 1,
@@ -27388,26 +27416,49 @@
         "end_line": 2169,
         "start_line": 2168
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-504.2",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "504"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_draw_step_rules.DrawStepRuleTests.test_turn_draw_is_stackless_and_precedes_active_priority",
+        "tests.test_draw_step_rules.DrawStepRuleTests.test_draw_step_triggers_wait_until_after_the_turn_draw",
+        "tests.test_draw_step_rules.DrawStepRuleTests.test_trusted_draw_replacement_finishes_before_priority",
+        "tests.test_draw_step_rules.DrawStepRuleTests.test_empty_library_loss_is_checked_before_draw_step_priority",
+        "tests.test_draw_step_rules.DrawStepRuleTests.test_first_turn_profile_modifier_and_exact_replay"
+      ],
+      "implementation_components": [
+        "CommanderEngine._complete_draw_step_entry",
+        "CommanderEngine._stabilize",
+        "CommanderEngine._enqueue_semantic_trigger_batch",
+        "CommanderEngine._grant_priority"
+      ],
+      "notes": [
+        "No priority is granted until the draw or trusted replacement completes, state-based actions are checked, and waiting semantic and delayed triggers are combined into one APNAP/order batch. The active player then receives priority, or the next remaining player does if the active player left the multiplayer game."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "504.2",
       "rule_text_sha256": "dfb29e9864cd503f27d987c942be79b891458729ecc34067f6aadcfc7fcc20ab",
       "schema_version": 1,
@@ -27416,7 +27467,7 @@
         "end_line": 2171,
         "start_line": 2170
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "static_traceability",

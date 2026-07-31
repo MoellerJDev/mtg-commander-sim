@@ -20,6 +20,13 @@
   step label.
 - Added exact multi-blocker replay evidence and fail-closed first-strike
   characterization for the partial CR 510 contract.
+- Corrected CR 504 draw-step ordering so the turn-based draw or trusted
+  replacement, state-based actions, and one combined trigger-order batch all
+  finish before priority; delayed draw-step triggers can no longer preempt or
+  silently skip the draw.
+- Added source-linked CR 504 coverage for stackless draws, trusted Dredge,
+  empty-library loss timing, multiplayer and duel first-turn modifiers, and
+  exact replay without promoting the incomplete draw-replacement corpus.
 - Added a source-linked CR 506 combat-phase contract, authoritative combat
   role tests, and exact empty-combat replay without promoting unsupported
   multiplayer variants, effect-created combatants, or timing grammar.
