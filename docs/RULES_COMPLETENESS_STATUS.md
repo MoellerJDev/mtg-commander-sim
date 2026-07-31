@@ -79,8 +79,12 @@ coverage.
 - [x] Reviewed all 26 CR 120 Damage cases, fixed zero/negative damage
   boundaries, and recorded the unresolved source-keyword, replacement,
   prevention, excess, trigger, regeneration, and advanced-combat families.
+- [x] Reviewed all 10 CR 616 replacement/prevention ordering cases:
+  7 primitive-level behaviors pass, 2 remain dependency-blocked, and the
+  section heading is definition-only. Nested events fail closed rather than
+  being flattened into an incorrect choice.
 
-## Current CR 120/210/310/704 Battle slice
+## Current CR 120/210/310/616/704 slice
 
 Battle behavior is derived from the effective card type, subtype, defense
 characteristic, counters, controller, and protector. It contains no
@@ -228,9 +232,9 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 52 CR 120/210/310 cases are
-  source-reviewed: 10 pass with executable engine evidence, 33 remain
-  blocked, and 9 are definition-only. The other 3,248 cases remain
+  establish inventory linkage only. All 62 CR 120/210/310/616 cases are
+  source-reviewed: 17 pass with executable engine evidence, 35 remain
+  blocked, and 10 are definition-only. The other 3,238 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -242,9 +246,9 @@ checkpoint validation.
 1. Continue reviewing and promoting conformance cases by
    dependency-ordered rules family; keep exposed but unimplemented edge cases
    failing or blocked.
-2. Complete the shared CR 120/310 replacement and prevention event pipeline,
-   then re-evaluate the blocked damage sequence and 310.11b exile/cast
-   continuation.
+2. Wire the reviewed CR 616 ordering primitive into the shared CR 120/310
+   replacement and prevention event pipeline, then re-evaluate the blocked
+   damage sequence and 310.11b exile/cast continuation.
 3. Replace remaining physical-reference links with typed incarnation/LKI
    handles and implement the remaining CR 400.7 continuation policies.
 4. Implement the remaining ordinary CR 704.5 specialized permanent/layout

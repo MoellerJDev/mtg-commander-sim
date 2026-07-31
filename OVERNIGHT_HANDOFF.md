@@ -95,6 +95,12 @@ maximum-counter foundation. It now:
 - preserves marked damage through loss of creature type until cleanup and
   leaves destruction or graveyard movement to the subsequent state-action
   pass;
+- source-reviews all 10 CR 616 ordering rules and verifies the five priority
+  classes, arbitrary choice within the current class, one-application
+  journaling, deterministic replay, applicability rechecks, and newly
+  applicable effects;
+- rejects unsupported nested replaceable events instead of flattening child
+  choices into the containing event;
 - keeps inventory-only cases separate from executable semantic passes.
 
 The prior permanent snapshot behavior remains: toughness, lethal/deathtouch,
@@ -102,7 +108,7 @@ loyalty, supported attachment legality, and opposing counter pairs are
 detected from one immutable snapshot. `CommanderEngine` applies the combined
 batch and repeats before priority.
 
-This is not complete CR 120/210/310/400/111/704/707 support. Complete
+This is not complete CR 120/210/310/400/111/616/704/707 support. Complete
 replacement ordering for the defeated-Siege exile, transformed cast grammar
 outside compiled target/cost schemas, nonspell Battle entry choices, Battle
 type/control changes during combat, complete damage replacement/prevention,
@@ -125,10 +131,10 @@ events also remain blockers.
   `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
 - Indexed rules: 3,300
 - Conformance cases: 3,300
-- Inventory-only cases: 3,248
-- Reviewed blocked cases: 33
-- Reviewed definition-only cases: 9
-- Executable semantic passes: 10
+- Inventory-only cases: 3,238
+- Reviewed blocked cases: 35
+- Reviewed definition-only cases: 10
+- Executable semantic passes: 17
 - Indexed sections: 156
 - Glossary entries: 733
 - Discovered mechanics: 425
@@ -145,12 +151,13 @@ events also remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 3,718 passed
-- Noninventory unit/integration tests: 418 passed
+- Unit/integration tests: 3,726 passed
+- Noninventory unit/integration tests: 426 passed
 - Generated per-rule inventory/source-linkage tests: 3,300 passed
 - Focused object identity/token lifecycle tests: 15 passed
 - Focused copy-object lifecycle tests: 8 passed
 - Focused CR 120/210/310/704 tests: 60 passed
+- Focused CR 616 replacement-ordering tests: 13 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
 - Seed-20260730 hidden-information audit: pass
@@ -170,7 +177,7 @@ events also remain blockers.
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `72165f6aa770ac798026d3609ef9bf0432874fa99b7fd9c5eb2da0cf4d2f9ec0`
+  `f354110391bf6b584332ab9758f029c8d90157457716e7385477db429f9b280e`
 
 ## Deck-review evidence state
 
@@ -202,8 +209,8 @@ from scaffold to its first complete family review:
    inventory/source-linkage test;
 2. source-pinned family overlays are authoritative and fail closed when their
    source or rule-text hashes change;
-3. all CR 120/210/310 cases are reviewed: 10 narrow rules pass with
-   executable evidence, 33 expose recorded dependency gaps, and 9 are
+3. all CR 120/210/310/616 cases are reviewed: 17 narrow rules pass with
+   executable evidence, 35 expose recorded dependency gaps, and 10 are
    definition-only;
 4. CR 310.11b remains blocked after adding its native replayable Siege
    continuation because replacement ordering and broader cast grammar are

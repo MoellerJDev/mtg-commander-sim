@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
 import random
 import unittest
 
@@ -262,12 +264,14 @@ class ReplacementOrderingTests(unittest.TestCase):
         destination,
         *,
         optional=False,
+        conditions=None,
     ):
         return ReplacementEffect(
             effect_id=effect_id,
             source_id=f"source:{effect_id}",
             event_kind="zone_change",
             replacement_class=replacement_class,
+            conditions=conditions or {},
             operations=(
                 {
                     "op": "set",
@@ -277,6 +281,60 @@ class ReplacementOrderingTests(unittest.TestCase):
             ),
             optional=optional,
         )
+
+    def test_contract_traces_every_cr_616_rule(self):
+        root = Path(__file__).resolve().parents[1]
+        contract = json.loads(
+            (
+                root
+                / "mechanics"
+                / "contracts"
+                / "replacement-ordering.json"
+            ).read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(
+            {
+                "616",
+                "616.1",
+                "616.1a",
+                "616.1b",
+                "616.1c",
+                "616.1d",
+                "616.1e",
+                "616.1f",
+                "616.1g",
+                "616.2",
+            },
+            {
+                rule_id
+                for rule_id in contract["rule_references"]
+                if str(rule_id).startswith("616")
+            },
+        )
+
+    def test_affected_player_chooses_from_current_priority_class(self):
+        effects = [
+            self.replacement(
+                "z-option", ReplacementClass.OTHER, "exile"
+            ),
+            self.replacement(
+                "a-option", ReplacementClass.OTHER, "library"
+            ),
+            self.replacement(
+                "not-applicable",
+                ReplacementClass.OTHER,
+                "hand",
+                conditions={"from": "graveyard"},
+            ),
+        ]
+
+        choice = replacement_choice(self.event, effects)
+
+        self.assertEqual("A", choice.chooser)
+        self.assertEqual(("a-option", "z-option"), choice.options)
+        changed = apply_replacement(choice, effects, "z-option")
+        self.assertEqual("exile", changed.payload["destination"])
 
     def test_self_replacement_must_be_chosen_before_other_effects(self):
         effects = [
@@ -295,6 +353,90 @@ class ReplacementOrderingTests(unittest.TestCase):
         changed = apply_replacement(choice, effects, "self")
         next_choice = replacement_choice(changed, effects)
         self.assertEqual(("other",), next_choice.options)
+
+    def test_enters_control_precedes_copy_back_face_and_other(self):
+        effects = [
+            self.replacement(
+                "other", ReplacementClass.OTHER, "other"
+            ),
+            self.replacement(
+                "back-face",
+                ReplacementClass.ENTERS_BACK_FACE,
+                "back-face",
+            ),
+            self.replacement(
+                "copy", ReplacementClass.ENTERS_COPY, "copy"
+            ),
+            self.replacement(
+                "control",
+                ReplacementClass.ENTERS_CONTROL,
+                "control",
+            ),
+        ]
+
+        choice = replacement_choice(self.event, effects)
+
+        self.assertEqual(
+            ReplacementClass.ENTERS_CONTROL,
+            choice.replacement_class,
+        )
+        self.assertEqual(("control",), choice.options)
+
+    def test_enters_copy_precedes_back_face_and_other(self):
+        effects = [
+            self.replacement(
+                "other", ReplacementClass.OTHER, "other"
+            ),
+            self.replacement(
+                "back-face",
+                ReplacementClass.ENTERS_BACK_FACE,
+                "back-face",
+            ),
+            self.replacement(
+                "copy", ReplacementClass.ENTERS_COPY, "copy"
+            ),
+        ]
+
+        choice = replacement_choice(self.event, effects)
+
+        self.assertEqual(ReplacementClass.ENTERS_COPY, choice.replacement_class)
+        self.assertEqual(("copy",), choice.options)
+
+    def test_enters_back_face_precedes_other(self):
+        effects = [
+            self.replacement(
+                "other", ReplacementClass.OTHER, "other"
+            ),
+            self.replacement(
+                "back-face",
+                ReplacementClass.ENTERS_BACK_FACE,
+                "back-face",
+            ),
+        ]
+
+        choice = replacement_choice(self.event, effects)
+
+        self.assertEqual(
+            ReplacementClass.ENTERS_BACK_FACE,
+            choice.replacement_class,
+        )
+        self.assertEqual(("back-face",), choice.options)
+
+    def test_any_effect_in_the_current_class_may_be_chosen(self):
+        effects = [
+            self.replacement(
+                "exile", ReplacementClass.OTHER, "exile"
+            ),
+            self.replacement(
+                "library", ReplacementClass.OTHER, "library"
+            ),
+        ]
+
+        choice = replacement_choice(self.event, effects)
+        changed = apply_replacement(choice, effects, "library")
+
+        self.assertEqual(("exile", "library"), choice.options)
+        self.assertEqual("library", changed.payload["destination"])
 
     def test_each_effect_applies_at_most_once_to_one_event(self):
         effects = [
@@ -315,6 +457,64 @@ class ReplacementOrderingTests(unittest.TestCase):
             ("first", "second"), changed.applied_effects
         )
         self.assertIsNone(replacement_choice(changed, effects))
+
+    def test_applicability_is_recomputed_after_each_replacement(self):
+        effects = [
+            self.replacement(
+                "to-exile", ReplacementClass.OTHER, "exile"
+            ),
+            self.replacement(
+                "exile-to-library",
+                ReplacementClass.OTHER,
+                "library",
+                conditions={"destination": "exile"},
+            ),
+            self.replacement(
+                "graveyard-only",
+                ReplacementClass.OTHER,
+                "hand",
+                conditions={"destination": "graveyard"},
+            ),
+        ]
+
+        first = replacement_choice(self.event, effects)
+        self.assertEqual(
+            ("graveyard-only", "to-exile"), first.options
+        )
+        changed = apply_replacement(first, effects, "to-exile")
+        second = replacement_choice(changed, effects)
+
+        self.assertEqual(("exile-to-library",), second.options)
+        final = apply_replacement(
+            second, effects, "exile-to-library"
+        )
+        self.assertEqual("library", final.payload["destination"])
+        self.assertIsNone(replacement_choice(final, effects))
+
+    def test_nested_event_operation_fails_closed(self):
+        nested = ReplacementEffect(
+            effect_id="nested",
+            source_id="source:nested",
+            event_kind="zone_change",
+            replacement_class=ReplacementClass.OTHER,
+            operations=(
+                {
+                    "op": "nested_event",
+                    "event": {
+                        "kind": "damage",
+                        "amount": 1,
+                    },
+                },
+            ),
+        )
+
+        choice = replacement_choice(self.event, [nested])
+
+        with self.assertRaisesRegex(
+            ReplacementEffectError,
+            "Unsupported replacement operation",
+        ):
+            apply_replacement(choice, [nested], "nested")
 
     def test_optional_decline_is_recorded_and_not_offered_again(self):
         optional = self.replacement(

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "cr-616-interaction-of-replacement-and-or-prevention-effects",
   "official_name": "Interaction of Replacement and/or Prevention Effects",
   "effective_date": "2026-06-19",
@@ -33,15 +33,23 @@
   "witness_cards": [],
   "rulings": [],
   "test_ids": [
+    "test_contract_traces_every_cr_616_rule",
+    "test_affected_player_chooses_from_current_priority_class",
     "test_self_replacement_must_be_chosen_before_other_effects",
+    "test_enters_control_precedes_copy_back_face_and_other",
+    "test_enters_copy_precedes_back_face_and_other",
+    "test_enters_back_face_precedes_other",
+    "test_any_effect_in_the_current_class_may_be_chosen",
     "test_each_effect_applies_at_most_once_to_one_event",
+    "test_applicability_is_recomputed_after_each_replacement",
+    "test_nested_event_operation_fails_closed",
     "test_optional_decline_is_recorded_and_not_offered_again",
     "test_mandatory_replacement_cannot_be_declined",
     "test_prevention_never_prevents_more_than_remaining_damage"
   ],
   "implementation": {
     "component": "replacement_effects.replacement_choice and replacement_effects.apply_replacement",
-    "version": "replacement-ordering-v1"
+    "version": "replacement-ordering-v2"
   },
   "known_blockers": [
     "generic replacement choice packets are not yet wired into all engine event producers",

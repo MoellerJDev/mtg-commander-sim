@@ -40219,21 +40219,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-616",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_contract_traces_every_cr_616_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/replacement-ordering.json"
+      ],
+      "notes": [
+        "Section heading; every numbered CR 616 record is pinned by the replacement-ordering contract."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "616",
       "rule_text_sha256": "16ec5afec0870460a5ca751a93eec9259f1c98468aa7a5cdc9b63b971992a6e3",
       "schema_version": 1,
@@ -40242,26 +40246,44 @@
         "end_line": 3172,
         "start_line": 3171
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "simultaneous replacement choices for multiple affected players or objects are not collected in APNAP order",
+        "the primitive does not independently derive an affected object's controller or owner from authoritative state",
+        "generic engine choice packets are not wired into every replaceable event producer"
       ],
       "case_id": "cr-616.1",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "616"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_affected_player_chooses_from_current_priority_class"
+      ],
+      "implementation_components": [
+        "replacement_effects.ReplaceableEvent",
+        "replacement_effects.replacement_choice"
+      ],
+      "notes": [
+        "For one represented event, the affected seat receives only currently applicable options from the current priority class.",
+        "Options are sorted only for deterministic packet and replay encoding; the affected seat may select any listed option."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "616.1",
       "rule_text_sha256": "3ef08177561d2c42c2c47fe79ed21dfa5d711fbfbfeef439f03f2c9e55422eb3",
       "schema_version": 1,
@@ -40270,26 +40292,35 @@
         "end_line": 3174,
         "start_line": 3173
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-616.1a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "616.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_self_replacement_must_be_chosen_before_other_effects"
+      ],
+      "implementation_components": [
+        "replacement_effects.ReplacementClass.SELF_REPLACEMENT",
+        "replacement_effects.replacement_choice"
+      ],
+      "notes": [
+        "A self-replacement is the only offered class while any self-replacement remains applicable."
+      ],
+      "required_scenarios": [
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "616.1a",
       "rule_text_sha256": "a2d0ac2c6ee38ed88a0008c073deb10287ea37ec951ed1da4f5889203b881938",
       "schema_version": 1,
@@ -40298,26 +40329,35 @@
         "end_line": 3176,
         "start_line": 3175
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-616.1b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "616.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_enters_control_precedes_copy_back_face_and_other"
+      ],
+      "implementation_components": [
+        "replacement_effects.ReplacementClass.ENTERS_CONTROL",
+        "replacement_effects.replacement_choice"
+      ],
+      "notes": [
+        "An enters-under-control replacement is offered before copy, back-face, and ordinary replacements."
+      ],
+      "required_scenarios": [
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "616.1b",
       "rule_text_sha256": "ddf8a058b0e725083d6f690b3cfc8884b9927eb651a8e8a0d377755a1d01c623",
       "schema_version": 1,
@@ -40326,26 +40366,35 @@
         "end_line": 3178,
         "start_line": 3177
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-616.1c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "616.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_enters_copy_precedes_back_face_and_other"
+      ],
+      "implementation_components": [
+        "replacement_effects.ReplacementClass.ENTERS_COPY",
+        "replacement_effects.replacement_choice"
+      ],
+      "notes": [
+        "An enters-as-copy replacement is offered before back-face and ordinary replacements after higher-priority classes are absent."
+      ],
+      "required_scenarios": [
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "616.1c",
       "rule_text_sha256": "651a95d8080545b505e6dd8f7d10e0f085537932f1aaf87e87aca57207890e0f",
       "schema_version": 1,
@@ -40354,26 +40403,35 @@
         "end_line": 3180,
         "start_line": 3179
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-616.1d",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "616.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_enters_back_face_precedes_other"
+      ],
+      "implementation_components": [
+        "replacement_effects.ReplacementClass.ENTERS_BACK_FACE",
+        "replacement_effects.replacement_choice"
+      ],
+      "notes": [
+        "A replacement that makes a card enter with its back face up is offered before ordinary replacements after higher-priority classes are absent."
+      ],
+      "required_scenarios": [
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "616.1d",
       "rule_text_sha256": "b58cbc2714f4176640228bbb8725bd7abe1bd595758558676bd37b798d51b374",
       "schema_version": 1,
@@ -40382,26 +40440,38 @@
         "end_line": 3182,
         "start_line": 3181
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-616.1e",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "616.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_any_effect_in_the_current_class_may_be_chosen"
+      ],
+      "implementation_components": [
+        "replacement_effects.ReplacementClass.OTHER",
+        "replacement_effects.replacement_choice",
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "All currently applicable ordinary replacements are exposed and any listed option can be selected."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "616.1e",
       "rule_text_sha256": "eafade5a4fa378995a858c0975f8834d4980d11af6d70ccf610fe52ce35fa950",
       "schema_version": 1,
@@ -40410,26 +40480,42 @@
         "end_line": 3184,
         "start_line": 3183
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-616.1f",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "616.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_each_effect_applies_at_most_once_to_one_event",
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_applicability_is_recomputed_after_each_replacement"
+      ],
+      "implementation_components": [
+        "replacement_effects.ReplaceableEvent.applied_effects",
+        "replacement_effects.replacement_choice",
+        "replacement_effects.resolve_replacements"
+      ],
+      "notes": [
+        "The resolver repeats from current applicability until no effect remains and journals each used or declined effect so it cannot apply twice to the same event.",
+        "An explicit ordered selection sequence makes the modified event exactly replayable."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "616.1f",
       "rule_text_sha256": "f309f587f0e8d0ab51915ce8d3c95006ac9eab4612e93de4953b41da9707758a",
       "schema_version": 1,
@@ -40438,26 +40524,39 @@
         "end_line": 3188,
         "start_line": 3185
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "replaceable events do not yet contain a typed nested-event tree whose child choices are deferred until the containing replacement is selected",
+        "nested event choices are not yet represented in replay selection paths"
       ],
       "case_id": "cr-616.1g",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "616.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_nested_event_operation_fails_closed"
+      ],
+      "implementation_components": [
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "An attempted nested-event operation is rejected rather than flattened into an incorrect same-level choice."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "616.1g",
       "rule_text_sha256": "8d1a45e27712e6e2cb60357b16f75c5d6f3a917c60ff041475d94194d6086afb",
       "schema_version": 1,
@@ -40466,26 +40565,36 @@
         "end_line": 3191,
         "start_line": 3189
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-616.2",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "616"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_applicability_is_recomputed_after_each_replacement"
+      ],
+      "implementation_components": [
+        "replacement_effects._condition_matches",
+        "replacement_effects.replacement_choice",
+        "replacement_effects.apply_replacement"
+      ],
+      "notes": [
+        "Changing the event payload can make a previously inapplicable replacement become the sole next choice."
+      ],
+      "required_scenarios": [
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "616.2",
       "rule_text_sha256": "cacec02583f3faf771ad6e646fb90cff1f3fcc202f9b94a39140508de02f2b12",
       "schema_version": 1,
@@ -40494,7 +40603,7 @@
         "end_line": 3195,
         "start_line": 3192
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",
