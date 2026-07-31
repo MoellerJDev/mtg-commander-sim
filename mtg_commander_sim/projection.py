@@ -37,9 +37,25 @@ class StateProjector:
     def seat_for(principal: str) -> str | None:
         return principal.split(":", 1)[1] if principal.startswith("pilot:") else None
 
-    def _view_seat_for(self, principal: str) -> str | None:
-        """Return the seat whose decisions and hidden zones are controlled."""
+    def _view_seats_for(self, principal: str) -> set[str]:
+        """Return every seat whose private information this principal may see.
 
+        A pilot always remains the player for their authenticated seat.  If a
+        current capability authorizes that pilot to make decisions for a
+        controlled player, CR 723.4 additionally exposes that controlled
+        player's information; it does not replace access to the controller's
+        own hand or other private information (CR 723.8).
+        """
+
+        seats: set[str] = set()
+        own_seat = self.seat_for(principal)
+        if own_seat in self.state.players:
+            seats.add(own_seat)
+            seats.update(
+                player_seat
+                for player_seat, player in self.state.players.items()
+                if player.stats.get("turn_controlled_by") == own_seat
+            )
         decision = self.state.pending_decision
         if decision is not None:
             capability = next(
@@ -52,37 +68,57 @@ class StateProjector:
                 ),
                 None,
             )
-            if capability is not None and capability.actor in self.state.players:
-                return capability.actor
-        return self.seat_for(principal)
+            if (
+                capability is not None
+                and capability.actor in self.state.players
+            ):
+                seats.add(capability.actor)
+        return seats
 
     def _event_visible(self, event: Event, principal: str) -> bool:
         if principal in {"analyst", "admin"}:
             return True
-        seat = self._view_seat_for(principal)
+        seats = self._view_seats_for(principal)
         if not event.visibility:
             return True
-        return principal in event.visibility or (seat is not None and seat in event.visibility)
+        return principal in event.visibility or any(
+            seat in event.visibility for seat in seats
+        )
 
     def _card_visible(self, card: CardInstance, principal: str) -> bool:
         if principal in {"analyst", "admin"}:
             return True
         if card.annotations.get("hidden_after_owner_left"):
-            seat = self._view_seat_for(principal)
-            return bool(
-                seat
-                and (
-                    seat == card.owner
-                    or seat in card.known_to
-                    or seat in card.revealed_to
-                )
+            seats = self._view_seats_for(principal)
+            return any(
+                seat == card.owner
+                or seat in card.known_to
+                or seat in card.revealed_to
+                for seat in seats
             )
-        if card.zone in {"battlefield", "graveyard", "exile", "command", "stack", "outside"}:
-            return not card.face_down
-        seat = self._view_seat_for(principal)
-        if seat is None:
-            return False
-        return seat == card.owner or seat in card.known_to or seat in card.revealed_to
+        if card.zone in {
+            "battlefield",
+            "graveyard",
+            "exile",
+            "command",
+            "stack",
+        }:
+            if not card.face_down:
+                return True
+            seats = self._view_seats_for(principal)
+            return any(
+                seat == card.owner
+                or seat in card.known_to
+                or seat in card.revealed_to
+                for seat in seats
+            )
+        seats = self._view_seats_for(principal)
+        return any(
+            seat == card.owner
+            or seat in card.known_to
+            or seat in card.revealed_to
+            for seat in seats
+        )
 
     def _effective(self, card: CardInstance) -> dict[str, Any]:
         try:
@@ -98,7 +134,11 @@ class StateProjector:
                 "k": list(record.keywords),
             }
         except KeyError:
-            token = card.annotations.get("token_characteristics") or {}
+            token = (
+                card.annotations.get("object_characteristics")
+                or card.annotations.get("token_characteristics")
+                or {}
+            )
             data = {
                 "n": card.printed_name,
                 "m": token.get("mana_cost", ""),
@@ -126,7 +166,12 @@ class StateProjector:
     def _obj(self, card: CardInstance, principal: str) -> dict[str, Any]:
         visible = self._card_visible(card, principal)
         obj: dict[str, Any] = {"id": card.ref}
-        if visible:
+        if visible and card.object_kind == "emblem":
+            obj["n"] = str(
+                card.annotations.get("display_label") or "Emblem"
+            )
+            obj["kind"] = "emblem"
+        elif visible:
             obj["cid"] = card.oracle_id[:8]
             obj["n"] = self._effective(card)["n"]
         else:
@@ -194,7 +239,7 @@ class StateProjector:
         }
 
     def _snapshot(self, principal: str) -> dict[str, Any]:
-        seat = self._view_seat_for(principal)
+        view_seats = self._view_seats_for(principal)
         players: dict[str, Any] = {}
         for player_seat in self.state.turn_order:
             p = self.state.players[player_seat]
@@ -230,21 +275,32 @@ class StateProjector:
                             publicly_known_left, key=lambda value: value.ref
                         )
                     ]
-            if seat == player_seat or principal in {"analyst", "admin"}:
+            if (
+                player_seat in view_seats
+                or principal in {"analyst", "admin"}
+            ):
                 summary["hand"] = self._zone(p.zones["hand"], principal)
                 known_top = []
-                if seat is not None:
-                    known_top = [
-                        self.state.cards[oid]
-                        for oid in reversed(p.zones["library"])
-                        if seat in self.state.cards[oid].known_to
-                    ]
+                if view_seats:
+                    for object_id in reversed(p.zones["library"]):
+                        card = self.state.cards[object_id]
+                        if not any(
+                            seat in card.known_to
+                            or seat in card.revealed_to
+                            for seat in view_seats
+                        ):
+                            break
+                        known_top.append(card)
                 if known_top:
                     summary["known_top"] = [self._obj(card, principal) for card in known_top[:5]]
-            elif seat is not None:
+            elif view_seats:
                 known = [
                     self.state.cards[oid] for oid in p.zones["hand"]
-                    if seat in self.state.cards[oid].known_to or seat in self.state.cards[oid].revealed_to
+                    if any(
+                        seat in self.state.cards[oid].known_to
+                        or seat in self.state.cards[oid].revealed_to
+                        for seat in view_seats
+                    )
                 ]
                 if known:
                     summary["known_hand"] = [self._obj(card, principal) for card in known]

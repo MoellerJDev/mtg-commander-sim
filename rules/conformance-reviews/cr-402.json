@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 402 — Hand",
+  "cases": [
+    {
+      "rule_id": "402",
+      "rule_text_sha256": "fa18c06733fbbf4138ea8591d50949c1ecd653d0fbf13278a3439ee5afa14c49",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/hand.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_hand_rules.HandRuleTests.test_contract_traces_every_cr_402_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; CR 402.1-3 carry the structural and behavioral hand requirements."
+      ]
+    },
+    {
+      "rule_id": "402.1",
+      "rule_text_sha256": "ebf696e3e206e17682e16fa82fb598613aecc8815d2471aa847e911de30b166a",
+      "classification": "structural",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "GameConfig.opening_hand_size",
+        "CommanderEngine.create",
+        "CommanderEngine.draw",
+        "CommanderEngine.move_card",
+        "PlayerState.zones"
+      ],
+      "executable_test_ids": [
+        "tests.test_hand_rules.HandRuleTests.test_starting_hand_size_and_effect_moves_are_generic"
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "hidden_information"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "hidden_information"
+      ],
+      "blockers": [],
+      "notes": [
+        "Game setup draws the configured starting hand size, whose normal default is seven. The generic zone transition can also put cards into their owner's hand without changing the configured maximum hand size."
+      ]
+    },
+    {
+      "rule_id": "402.2",
+      "rule_text_sha256": "487e9db5f0720c3d8a8f204277cb936c8c4d08c22dbaef98b64267a7055143af",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "PlayerState.max_hand_size",
+        "CommanderEngine.draw",
+        "CommanderEngine._enter_step",
+        "CommanderEngine._complete_cleanup_discard"
+      ],
+      "executable_test_ids": [
+        "tests.test_hand_rules.HandRuleTests.test_hand_may_exceed_maximum_until_cleanup",
+        "tests.test_cleanup_step_rules.CleanupStepRuleTests.test_cleanup_discard_is_exact_simultaneous_private_and_replayable",
+        "tests.test_cleanup_step_rules.CleanupStepRuleTests.test_invalid_cleanup_discard_rolls_back_capability_and_state"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "A player's hand may exceed the normal finite maximum without an early discard. At cleanup the server issues one private exact-count choice, validates distinct cards transactionally, moves the selected cards simultaneously, and replay reproduces the result. Continuous effects that modify or remove the maximum are separately classified under CR 613.11 and are not promoted by this base-zone rule."
+      ]
+    },
+    {
+      "rule_id": "402.3",
+      "rule_text_sha256": "6150708d06c7beef1b61c4f79d2d8142a143fc5a3cc99f97804563b5d979560d",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine.move_card",
+        "StateProjector._view_seats_for",
+        "StateProjector._card_visible",
+        "StateProjector._snapshot",
+        "StateProjector._events"
+      ],
+      "executable_test_ids": [
+        "tests.test_hand_rules.HandRuleTests.test_hidden_card_put_into_hand_keeps_identity_private",
+        "tests.test_hand_rules.HandRuleTests.test_public_card_returned_to_hand_remains_known_not_lookable",
+        "tests.test_hand_rules.HandRuleTests.test_revealed_hand_identity_is_scoped_to_authorized_viewers",
+        "tests.test_hand_rules.HandRuleTests.test_owner_hand_remains_visible_while_controlling_a_player",
+        "tests.test_hand_rules.HandRuleTests.test_hand_order_is_private_and_owner_projection_is_always_available",
+        "tests.test_exact_mishra_closure.ExactMishraClosureTests.test_mindslaver_routes_controlled_turn_to_controller_pilot"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information"
+      ],
+      "blockers": [],
+      "notes": [
+        "Every projection exposes hand_n while ordinary opponents receive no hidden identities or hidden-zone movement names. Owners retain complete hand access outside their priority window and while controlling another player; CR 723.4 adds the controlled hand without replacing the controller's own. A directly observed public-to-hand transition remains in known_hand but does not grant full hand inspection. Hand ordering is private and rules-insignificant."
+      ]
+    }
+  ]
+}

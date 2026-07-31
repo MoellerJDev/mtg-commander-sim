@@ -1,5 +1,11 @@
 # Redesign summary
 
+This is a historical design note for the transition away from the duel
+prototype. In the current product direction, human/browser and deterministic
+scripted clients are primary; pilot and arbiter adapters are optional and no
+AI system may supply authoritative live rules. Unsupported material behavior
+fails closed.
+
 ## The root problem
 
 The duel prototype made ChatGPT perform three expensive jobs at once:

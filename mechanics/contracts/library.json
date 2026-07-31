@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-401-library",
+  "official_name": "Library",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "401",
+    "401.1",
+    "401.2",
+    "401.3",
+    "401.4",
+    "401.5",
+    "401.6",
+    "401.7"
+  ],
+  "glossary_references": [
+    "library",
+    "deck",
+    "shuffle"
+  ],
+  "dependencies": [
+    "game-setup",
+    "zones",
+    "hidden-information",
+    "effects",
+    "casting-spells",
+    "activated-abilities",
+    "special-actions",
+    "object-zone-identity",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "library",
+      "hand",
+      "command zone"
+    ],
+    "objects": [
+      "deck card",
+      "library card",
+      "top library card",
+      "known top group"
+    ],
+    "events": [
+      "game setup creates each library",
+      "look at one or more top cards",
+      "reorder a known top group",
+      "put a card on top, bottom, or Nth from the top",
+      "shuffle a library"
+    ],
+    "state_reads": [
+      "ordered per-player library",
+      "public library count",
+      "viewer-scoped card knowledge",
+      "current top group",
+      "library size before insertion"
+    ],
+    "state_writes": [
+      "ordered per-player library",
+      "viewer-scoped card knowledge",
+      "shuffle counter",
+      "card logical incarnation on cross-zone entry"
+    ],
+    "costs": [],
+    "timing": [
+      "library order changes only through represented rules or effects",
+      "top-card visibility must freeze during casting, activation, and special-action procedures",
+      "complete top-card procedure freezing remains blocked"
+    ],
+    "targets": [
+      "library cards are not ordinary targets unless a compiled effect explicitly permits the hidden zone"
+    ],
+    "choices": [
+      "a represented top group may be reordered only while it is the exact known current top group",
+      "complete owner-secret simultaneous insertion ordering remains blocked"
+    ],
+    "hidden_information": [
+      "every player receives each library count",
+      "ordinary library identities and order are omitted from seat projections",
+      "look effects disclose only the requested top cards to the authorized viewer",
+      "shuffle clears tracked library-card knowledge"
+    ],
+    "apnap": [
+      "simultaneous multi-owner library insertions and their owner choices remain blocked"
+    ],
+    "layers": [
+      "continuous top-card reveal and look permissions remain blocked"
+    ],
+    "replacement_effects": [
+      "draw, mill, search, and zone-change replacement behavior is delegated to its producing effect",
+      "complete simultaneous insertion replacement ordering remains blocked"
+    ],
+    "copy": [
+      "copy behavior does not expose unrelated library identity"
+    ],
+    "control_change": [
+      "libraries belong to players and are not controlled objects"
+    ],
+    "zone_change": [
+      "cross-zone entry into a library creates a new logical object",
+      "repositioning a card within the same library preserves its logical object",
+      "Nth-from-top insertion falls back to the bottom when fewer than N cards exist"
+    ],
+    "source_leaves": [
+      "a one-shot look or reorder remains bounded to its current effect procedure"
+    ]
+  },
+  "variants": [
+    "initial deck becomes library",
+    "public library count",
+    "unauthorized viewer",
+    "look at zero cards",
+    "negative or malformed look count",
+    "known current top group",
+    "stale known group after top changes",
+    "duplicate reorder selection",
+    "shuffle after look",
+    "top insertion",
+    "bottom insertion",
+    "Nth-from-top insertion",
+    "library shorter than N",
+    "multiple cards inserted simultaneously",
+    "top card changes during casting",
+    "top card stops and resumes being revealed"
+  ],
+  "witness_cards": [
+    {
+      "name": "Sensei's Divining Top",
+      "oracle_id": "13575cf9-65c1-4861-b21e-eb2155e07766"
+    },
+    {
+      "name": "Sylvan Library",
+      "oracle_id": "92eed395-62ca-4293-882b-8565c40daab5"
+    },
+    {
+      "name": "Academy Ruins",
+      "oracle_id": "a3da7d5b-2c2b-45fe-b9c5-413b8c8fc0a2"
+    }
+  ],
+  "rulings": [
+    "Sensei's Divining Top — 2016-06-08 — If fewer than three cards remain, its first ability looks at all of them.",
+    "Sylvan Library — 2022-12-08 — Cards put back are placed in an order chosen by their owner.",
+    "Academy Ruins — 2020-08-07 — The targeted artifact card is put on top of its owner's library."
+  ],
+  "test_ids": [
+    "test_contract_traces_every_cr_401_rule",
+    "test_deck_cards_initialize_in_library_before_opening_draws",
+    "test_library_order_is_hidden_but_every_count_is_public",
+    "test_look_top_zero_is_empty_and_negative_fails_atomically",
+    "test_reorder_requires_the_exact_known_current_top_set",
+    "test_nth_from_top_and_short_library_fallback_are_generic",
+    "test_shuffle_forgets_known_library_positions",
+    "test_senseis_divining_top_reorders_and_draws_to_library",
+    "test_top_library_knowledge_and_reorder"
+  ],
+  "implementation": {
+    "component": "CommanderEngine.create, move_card library insertion, shuffle_library, look_top/reorder_top effects, and StateProjector library count/knowledge projection",
+    "version": "library-foundation-v1"
+  },
+  "known_blockers": [
+    "complete owner-secret ordering when two or more cards are put into one library position simultaneously is not represented",
+    "continuous play-with-top-revealed and may-look-at-top permissions are not represented",
+    "top-card visibility is not frozen across every CR 601, CR 602, and CR 116 procedure",
+    "a top card that stops and resumes being revealed does not receive the special CR 401.6 new-object identity",
+    "complete generic Oracle grammar for every library-ordering instruction remains incomplete"
+  ],
+  "review_status": "draft"
+}

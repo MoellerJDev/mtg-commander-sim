@@ -52,7 +52,7 @@ class LocalMergeGateTests(unittest.TestCase):
             "tests.test_seed_20260730_regression",
             by_name["focused_regressions"],
         )
-        self.assertNotIn(
+        self.assertIn(
             "tests.test_command_zone_rules",
             by_name["focused_regressions"],
         )

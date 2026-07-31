@@ -9,10 +9,11 @@ coverage.
 
 ## Pinned baseline
 
-- Repository: private `MoellerJDev/mtg-commander-sim`
-- Branch: `agent/rules-completeness`
-- Rules integration PR:
-  `https://github.com/MoellerJDev/mtg-commander-sim/pull/1`
+- Repository: public `MoellerJDev/mtg-commander-sim`
+- Current integration branch: `main`
+- Rules integration PRs #1–#16, #24, and #25 are merged; the cumulative PR
+  #24 tip incorporated the exact CR 400–408 heads from PRs #17–#23 before
+  those intermediate PRs were closed as superseded
 - Rules-program base: `d099fe4`
 - Continuation start: `6517dc0`
 - Package version: `0.8.0`
@@ -27,16 +28,24 @@ coverage.
 | Workstream | Status | Current evidence |
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
-| Mechanic contracts | In progress | 38 partial/untrusted contracts; 387 mechanics unclassified; 0 trusted |
+| Mechanic contracts | In progress | 49 partial/untrusted contracts; 376 mechanics unclassified; 0 trusted |
 | Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
-| Object and zone identity | Partial | CR 400 logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, and selected linked-effect guards |
+| Object and zone identity | Partial | All 30 CR 400 records reviewed; owner-zone routing, logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, hidden outside-game movement, and selected linked-effect guards |
+| Library | Partial | All 8 CR 401 records reviewed; hidden order/public count, bounded look/reorder, shuffle knowledge clearing, and Nth-from-top placement; simultaneous owner ordering and continuous top-card visibility remain blocked |
+| Hand | Partial | All 4 CR 402 records reviewed; starting/maximum size, cleanup-only excess discard, public count, scoped identity, public-to-hand knowledge, and controller dual-hand access; continuous no-maximum and arbitrary reveal/look grammar remain blocked |
+| Battlefield | Partial | All 6 CR 403 records reviewed; one shared multiplayer domain, controller-index integrity, ordinary battlefield-only scope, permanent categorization, and ordinary new-object entry; the complete CR 400.7 exception matrix remains blocked |
+| Graveyard | Partial | All 4 CR 404 records reviewed; public owner-indexed membership, ordering, and exact-incarnation moves pass for the represented subset; arbitrary ordering and broader replacement interactions remain blocked |
+| Stack | Partial | All 15 CR 405 records reviewed; one shared LIFO stack, public ordering, top-object resolution, and exact replay pass for represented objects; full copying, targets, and unsupported stack-object forms remain blocked |
+| Exile | Partial | All 11 CR 406 records reviewed; public/face-down visibility, owner routing, linked exact-incarnation return, and fail-closed unsupported identity access are represented |
+| Ante | Unsupported | All 5 CR 407 records reviewed; Commander deck validation rejects pinned-illegal ante cards and no ante variant actions or zone are exposed |
+| Command | Partial | All 4 CR 408 records reviewed; public Commander cards and typed emblem objects are represented, while non-Commander casual variants and arbitrary emblem compilation remain blocked |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
 | Replacement/prevention ordering | Partial | CR 615/616 typed primitives; stateful shields and event-producer integration incomplete |
 | Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, counter-derived battlefield defense, copied printed defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 485 cases in CR 120/210/310/405/500/501/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 77 semantic passes, 340 blocked cases, and 68 definition-only cases |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 557 cases are reviewed, with 106 executable passes, 371 blocked cases, and 80 definition-only cases; 2,743 remain unreviewed |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -192,6 +201,38 @@ coverage.
   action catalogs, concession outside priority, and complete player-leaves-
   game ordering remain dependency-blocked; two taxonomy records are
   definition-only.
+- [x] Reviewed all 30 CR 400 General records. Zone topology, owner routing,
+  logical incarnation changes, permanent-spell continuation, represented LKI,
+  authorized face-down identity, and hidden outside-game movement pass.
+  Same-graveyard moves are no-ops and instant or sorcery battlefield entry is
+  rejected transactionally. The complete new-object exception matrix,
+  special command-zone objects, sideboards and wish effects, simultaneous
+  replacement integration, and whole-zone grammar remain blocked; three
+  taxonomy records are definition-only.
+- [x] Reviewed all 8 CR 401 Library records. Deck-to-library initialization,
+  public counts, hidden order, bounded look/reorder, shuffle knowledge
+  clearing, and Nth-from-top insertion pass. Zero and malformed look counts
+  and stale reorder groups now fail safely. Generic simultaneous owner-secret
+  insertion order, continuous top visibility and procedure freezing, and
+  reveal-continuity new-object identity remain blocked; the heading is
+  definition-only.
+- [x] Reviewed all 4 CR 402 Hand records. Configured starting-hand draws,
+  finite maximum size, cleanup-only excess discard, public counts, owner and
+  viewer-scoped identity, and private hand order pass. Hidden-zone movement
+  now separates an opaque public event from the authorized identity event,
+  public-to-hand identity remains known, and a player controlling another
+  player retains both private views. CR 613.11 maximum modifiers, no-maximum
+  effects, and complete arbitrary hand reveal/look grammar remain blocked;
+  the heading is definition-only.
+- [x] Reviewed all 6 CR 403 Battlefield records. Controller-indexed
+  presentation lists form one shared multiplayer target domain and now fail
+  an invariant check if storage and controller diverge. Cross-controller
+  attachments preserve both relationships. Unqualified target schemas and
+  ordinary destroy, sacrifice, and bounce operations use battlefield scope,
+  permanent category follows battlefield membership, and ordinary entry
+  creates a new logical incarnation while CR 400.7a preserves a resolving
+  permanent spell. The complete CR 400.7 exception matrix remains blocked;
+  the heading and legacy in-play terminology are definition-only.
 - [x] Reviewed all 6 CR 502 Untap Step records. Ordinary stackless untaps,
   represented stun and next-untap restrictions, held-trigger handoff, and
   exact replay are characterized. Phasing and global maximum-untap choices now
@@ -206,13 +247,6 @@ coverage.
   matrix, multi-attacker blocker assignment, simultaneous replacement and
   prevention batching, post-damage APNAP triggers, first/double strike,
   trample, and lifelink remain dependency-blocked.
-- [x] Reviewed all 11 CR 505 Main Phase records. Empty-stack pass completion,
-  nonempty-stack resolution within the phase, active-player priority, ordinary
-  sorcery-speed casting, and stackless authoritative land plays pass with exact
-  phase predicates and replay. Represented Saga lore precedes priority but the
-  family remains partial because skipped/additional combats and main phases,
-  ordinal identity, Archenemy schemes, Attractions, and complete simultaneous
-  Saga qualification/replacement/trigger ordering are dependency-blocked.
 - [x] Reviewed all 29 CR 506 Combat Phase records. Tapping and untapping
   preserve represented attacking and blocking relationships. Zone, control,
   phasing, creature-type, Battle-type, and attacking-controller invalidation
@@ -221,12 +255,6 @@ coverage.
   effect-created or effect-removed combatants, planeswalker destinations,
   complete restrictions and requirements, “alone” provenance, extra combats,
   and combat-relative timing grammar remain dependency-blocked.
-- [x] Reviewed all 3 CR 504 Draw Step records. The turn-based draw or trusted
-  replacement completes without using the stack, empty-library loss is checked,
-  and waiting semantic and delayed triggers share one APNAP/order batch before
-  active-player priority. Multiplayer and duel first-turn modifiers and exact
-  replay pass; complete draw-replacement/prevention semantics remain outside
-  the partial contract.
 - [x] Reviewed all 3 CR 507 Beginning of Combat Step records. Supported
   Commander profiles establish all active opponents as defending players
   without a defender-choice action, permanent and delayed boundary triggers
@@ -247,33 +275,7 @@ coverage.
   declaration triggers, multi-attacker blocking, blocked-status effects, and
   entry-blocking remain dependency-blocked.
 
-## Current CR 120/210/310/405/500/501/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
-
-The upkeep step performs no turn-based action. Represented abilities triggered
-during untap and at the beginning of upkeep wait without priority and then
-share one APNAP/controller-order batch after state-based actions and before
-active-player priority. Complete CR 502 event production, CR 603.3b two-part
-ordering, additional upkeeps, and after-first-upkeep casting grammar remain
-blocked.
-
-Ordinary turns have one precombat and one postcombat main boundary separated
-by combat. Each is one scheduler boundary with no rules substeps: all players
-passing with an empty stack advances the phase, while passing with a stack
-resolves its top object and returns priority within the same phase. Represented
-Saga lore and chapter triggers precede active-player priority. Ordinary
-noninstant/nonflash casts and land plays require the active player, a true
-main-phase phase/marker pair, priority, and an empty stack. Land plays create no
-stack object, preserve priority, and consume exactly one authoritative
-allowance. Generic additional/skipped combat and main phases, ordinal
-main-phase identity, Archenemy, Attractions, and complete simultaneous Saga
-handling remain blocked.
-
-The draw step now performs its stackless turn-based draw or trusted replacement
-before state-based actions, one combined semantic/delayed trigger-order batch,
-and active-player priority. An empty-library draw attempt eliminates the player
-before that priority handoff, and the first-turn Commander profile modifier is
-replay-covered. Complete draw-replacement/prevention semantics and their
-continuous-effect interactions remain outside this partial contract.
+## Current CR 120/210/310/400/401/402/403/405/500/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
 
 At the beginning of combat, supported two-player and multiplayer Commander
 profiles establish every active opponent as a defending player without
@@ -362,7 +364,7 @@ The two Control Point previews in the July 28 Oracle corpus are
 not-yet-Commander-legal and postdate the June 19 CR snapshot, so their
 protector rules fail closed.
 
-## Prior CR 400/613/111/704/707 foundation
+## CR 400/613/111/704/707 foundation
 
 Every card retains a stable physical `object_id`, while a serialized
 `zone_change_counter` identifies its current logical incarnation. The
@@ -374,6 +376,14 @@ a permanent under CR 400.7a. Targets compare their selected incarnation at
 resolution. Daretti's delayed emblem return carries the recorded graveyard
 incarnation, so the effect does not follow a card that leaves and reenters.
 Neither physical IDs nor counters are projected to pilots.
+
+The completed CR 400 family review additionally prevents an instant or sorcery
+card from entering the battlefield before any mutation, treats an ordinary
+same-zone graveyard move as a true no-op rather than a reorder, routes
+nonbattlefield destinations to the owner's corresponding zone, and preserves
+the visibility of a hidden card moved outside the game instead of revealing it
+globally. A face-down object in a public zone is identifiable only to its owner
+or another viewer who is explicitly authorized to know it.
 
 Every new zone incarnation also receives an authoritative timestamp moment.
 Objects moved simultaneously to one destination share that moment. A separate
@@ -420,6 +430,13 @@ same object as a token permanent and does not generate a token-creation event.
 The underlying object identity remains outside seat projections, and the
 lifecycle command-replays exactly.
 
+Emblems now have a distinct serialized noncard object kind. The generic
+creation primitive puts one in the receiving player's public command-zone
+presentation with only its created abilities as characteristics. Daretti's
+reviewed emblem uses this primitive, and its artifact trigger records the exact
+emblem source. Other emblem programs and Planechase, Vanguard, Archenemy, and
+Conspiracy Draft command objects remain unimplemented and fail closed.
+
 The CR 400, CR 111, CR 704, and CR 707 contracts remain partial and untrusted.
 Outstanding blockers include:
 
@@ -445,9 +462,39 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,871 unit/integration tests are discovered: 571 ordinary tests plus 3,300
-  generated
+- 3,925 unit/integration tests pass: 625 ordinary tests plus 3,300 generated
   inventory/source-linkage tests. The latter are not semantic passes.
+- Seven focused CR 403 tests cover exact source traceability, empty and shared
+  four-player battlefield structure, controller-index integrity,
+  cross-controller attachment projection, ordinary battlefield-only scope,
+  permanent categorization, instant/sorcery entry rejection, ordinary and
+  CR 400.7a entry identity, and pinned Oracle terminology.
+- Seven focused CR 404 tests cover public owner-indexed graveyards, exact
+  ordering and incarnation moves, multiplayer visibility, transactional
+  rejection, and replay boundaries without promoting complete ordering or
+  replacement behavior.
+- Seven focused CR 406 tests cover public and face-down exile visibility,
+  owner routing, linked exact-incarnation movement, projection boundaries,
+  rejection of unavailable identities, and replay.
+- Five focused CR 407 tests pin the unsupported ante boundary, reject
+  Commander-illegal ante cards across deck sections, and prove that no ante
+  zone, contribution action, ownership transfer, or variant profile is
+  exposed.
+- Seven focused CR 408 tests cover the shared public command presentation,
+  typed noncard emblem objects, ordinary destroy exclusion, exact Daretti
+  source binding, unsupported casual-variant rejection, state round trip, and
+  replay.
+- Eight focused CR 402 tests cover exact source traceability, configured
+  starting hands, above-maximum state until cleanup, hidden-move event
+  redaction, public-to-hand knowledge, viewer-scoped reveal, retained own-hand
+  access while controlling another player, private order, and public counts.
+- Seven focused CR 401 tests cover exact source traceability, deck
+  initialization, public counts and hidden order, zero/invalid look handling,
+  exact current-top reorder validation, Nth-from-top/bottom fallback, and
+  shuffle knowledge clearing.
+- Six focused CR 400 tests cover exact source traceability, zone topology and
+  visibility, owner-zone routing, transactional instant/sorcery battlefield
+  rejection, same-graveyard no-op behavior, and hidden outside-game movement.
 - Six focused CR 405 tests cover exact source traceability, two-object LIFO
   priority and replay, transactional non-top rejection, immediate activated
   mana, direct effect/state-action execution, and leaving-player stack
@@ -467,15 +514,6 @@ Outstanding blockers include:
   action priority boundary, one APNAP/controller-order batch spanning untap
   and upkeep trigger times, state actions before trigger placement, late-
   trigger deferral, and two exact replay paths.
-- Eight focused CR 505 tests cover all-rule traceability, ordinary two-main
-  structure, empty-stack completion and nonempty-stack persistence, exact
-  replay, represented Saga-before-priority ordering, active-player priority,
-  sorcery-speed legality, stackless land plays, extra allowances, and
-  synthetic-main negative exposure.
-- Six focused CR 504 tests cover all-rule traceability, the stackless
-  turn-based draw, delayed-trigger ordering after the draw, trusted Dredge
-  replacement completion, empty-library state-based loss before priority,
-  multiplayer/duel first-turn modifiers, and exact replay.
 - Six focused CR 506 tests cover all-rule traceability, the empty-combat phase
   boundary and exact replay, authoritative attacking/defending roles, removal
   after zone/control/phasing/type invalidation, historical-attacker retention,
@@ -534,10 +572,9 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 485 CR
-  120/210/310/405/500/501/502/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
-  cases are source-reviewed: 77 pass with executable engine evidence, 340
-  remain blocked, and 68 are definition-only. The other 2,815 cases remain
+  establish inventory linkage only. All 557 cases in the current reviewed
+  families are source-reviewed: 106 pass with executable engine evidence, 371
+  remain blocked, and 80 are definition-only. The other 2,743 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -546,27 +583,16 @@ checkpoint validation.
 
 ## Next dependency-ordered work
 
-1. Finish the exact local and GitHub gates for the combined CR 405/500-505
-   candidate, merge PR #16, and then integrate CR 400 PR #17 from the frozen
-   dependency chain. Do not begin another rules-family review.
-2. Wire the reviewed CR 614/615/616 primitives into the shared CR 120/310
-   replacement and prevention event pipeline, including stateful shields and
-   typed nested events, then re-evaluate the blocked damage sequence and
-   310.11b exile/cast continuation.
-3. Replace remaining physical-reference links with typed incarnation/LKI
-   handles and implement the remaining CR 400.7 continuation policies.
-4. Implement the remaining ordinary CR 704.5 specialized permanent/layout
-   state actions.
-5. Integrate state-action destruction/loss with typed replacement and
-   regeneration events.
-6. Continue the blocked CR 603 trigger-ordering, provenance, look-back,
-   state-trigger, and reflexive-trigger dependencies.
-7. Continue migrating static characteristics to CR 613 and all replaceable
-   event producers to CR 616.
-8. Implement the remaining CR 707 copiable-value, card-copy casting, and
-   specialized copy-object exceptions.
-9. Recompute full and Commander-legal Oracle coverage after each generic
-   compiler/mechanic slice.
+Broad sequential rules review is frozen after the CR 400–408 and CR 500–512
+integration reached `main`. The next steps are:
+
+1. Create `agent/server-browser-vertical-slice` from the final green `main`.
+2. Implement and merge the first authoritative server/browser vertical slice:
+   strict network commands, idempotency, expected revisions, a single-writer
+   game actor, guest room/seat flow, WebSocket projections, reconnect, a
+   TypeScript client, and four-context browser E2E.
+3. Resume rules work only for defects blocking that vertical slice; defer broad
+   CR-number traversal until the slice is merged.
 
 No deck list has been modified, and no current game result is promoted to
 matchup evidence.

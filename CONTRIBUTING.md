@@ -1,7 +1,8 @@
 # Contributing
 
-This is a private experimental repository. Coordinate scope before beginning a
-large rules or protocol change.
+This is a public experimental repository. Coordinate scope before beginning a
+large rules or protocol change, and do not publish live game artifacts or
+security-sensitive reproductions in issues or pull requests.
 
 ## Development setup
 

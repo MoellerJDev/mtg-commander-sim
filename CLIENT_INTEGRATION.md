@@ -26,7 +26,14 @@ A transport adapter is responsible for:
 
 The server—not the request body—determines the authenticated principal.
 
-## Suggested HTTP/WebSocket surface
+In 0.8.0 this boundary is in-process only. Protocol 2.1 and
+`schemas/command-envelope.schema.json` describe the existing client/service
+contract; there is no listening HTTP/WebSocket process or browser bundle yet.
+The planned vertical slice will introduce a stricter network command envelope
+with command/decision IDs and expected-view revision while preserving this
+principal-derivation rule.
+
+## Planned HTTP/WebSocket surface
 
 ```text
 POST /games

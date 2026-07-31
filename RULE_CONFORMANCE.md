@@ -101,16 +101,15 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 485 cases in CR 120, CR 210, CR 310, CR 405, CR 500, CR 501, CR 502, CR 503, CR 504, CR 505, CR 506, CR 507,
-CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
-CR 602, CR 603, CR 604, CR 605, CR 606, CR 607, CR 608, CR 609, CR 614,
-CR 615, and CR 616 are source-reviewed: 77 narrow behavioral or structural
-rules pass with generic executable evidence, 340 are blocked with exact missing
-dependencies, and 68 are definition-only with contract traceability. The
-remaining 2,815
-cases are
-unreviewed and
-inventory-only.
+All 557 cases in CR 120, CR 210, CR 310, CR 400, CR 401, CR 402, CR 403,
+CR 404, CR 405, CR 406, CR 407, CR 408, CR 500, CR 501, CR 502, CR 503,
+CR 504, CR 505, CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512,
+CR 513, CR 514, CR 600, CR 601, CR 602, CR 603, CR 604, CR 605, CR 606,
+CR 607, CR 608, CR 609, CR 614, CR 615, and CR 616 are source-reviewed:
+106 narrow behavioral or structural rules pass with generic executable
+evidence, 371 are blocked with exact missing dependencies, and 80 are
+definition-only with contract traceability. The remaining 2,743 cases are
+unreviewed and inventory-only.
 
 The passing CR 310 rules are battlefield defense (310.4c), Battle damage
 (310.6), the zero-defense state action (310.7), single-protector replacement
@@ -177,6 +176,53 @@ frozen proposals, and opponent-made choices remain blocked.
 CR 600 contains only the General section heading. It is source-reviewed as a
 definition-only taxonomy record linked to the dependent CR 601-609 contracts;
 it makes no independent engine-behavior claim.
+CR 400 records the seven normal zones, per-player versus shared zone topology,
+owner-zone routing, cross-zone logical incarnations, the permanent-spell
+continuation, represented last-known information, authorized face-down
+visibility, and hidden outside-game movement as passing invariants. Same-zone
+graveyard movement now leaves both state and ordering unchanged, and an
+instant or sorcery card cannot enter the battlefield. The complete CR 400.7
+exception matrix, specialized command-zone objects, command-zone face-down
+changes, ordered face-down piles, sideboards and wish effects, full
+simultaneous replacement integration, and whole-zone instruction grammar
+remain explicitly blocked.
+CR 401 records library initialization, hidden ordered-pile projection, public
+counts, and positive Nth-from-top insertion (including the short-library
+bottom fallback) as passing invariants. A zero-card look now returns no cards,
+negative and malformed counts fail before mutation, only the exact known
+current top group may be reordered, and a shuffle clears tracked library
+positions. Generic simultaneous multi-card owner ordering, continuous
+top-card reveal/look permissions, procedure-time visibility freezing, and the
+special identity change after reveal continuity breaks remain blocked.
+CR 402 records configured starting-hand draws, finite maximum hand size,
+cleanup-only excess discard, public counts, and viewer-scoped identities as
+passing invariants. Hidden-to-hand movement now emits an opaque public event
+and a scoped private identity event, while a directly observed public card
+remains known after entering a hand. A player controlling another player sees
+the controlled hand in addition to, rather than instead of, their own hand.
+Continuous maximum-hand-size and no-maximum effects remain a CR 613.11
+dependency, and complete arbitrary hand reveal/look grammar remains blocked.
+CR 403 records that the battlefield starts empty and that controller-indexed
+presentation lists form one shared multiplayer zone and target domain.
+Controller/index divergence now fails the state invariant, while cross-
+controller attachments preserve both controller placement and attached-object
+identity. Unqualified target schemas and ordinary destroy, sacrifice, and
+bounce instructions are battlefield-scoped; explicitly named other zones
+remain available to reviewed schemas. Permanent category follows battlefield
+membership, instant and sorcery cards cannot enter, and ordinary entry creates
+a new logical incarnation while CR 400.7a preserves the resolving permanent
+spell. CR 403.4 remains blocked because the complete CR 400.7 exception matrix
+is not yet implemented. Historical in-play wording is definition-only because
+the engine consumes pinned current Oracle text.
+CR 404 records empty owner-indexed graveyards, public face-up pile projection,
+top-of-pile insertion, and the ordinary counter, discard, destroy, sacrifice,
+and completed instant-or-sorcery destinations as passing invariants.
+Rules-countering a permanent spell now sends it to the graveyard instead of
+its normal battlefield resolution destination, and nonbattlefield owner/index
+divergence fails the state invariant. The exact Dauthi replacement is checked
+from the pre-move state, while tokens remain eligible to reach a graveyard.
+CR 404.3 remains blocked: simultaneous movement currently inherits the
+caller's sequence and does not issue the owner the required ordering choice.
 CR 405 records top-of-stack insertion, LIFO resolution after a complete
 priority round, direct represented effects, static abilities, and state-based
 actions as passing invariants. Resolution now rejects a non-top object before
@@ -185,6 +231,36 @@ the card after choices and payment rather than at CR 601.2a; generic
 simultaneous APNAP placement, complete stack characteristics, triggered mana,
 special and turn-based actions, concession at any time, and complete
 player-leaves-game ordering remain blocked.
+CR 406 records the owner-indexed presentation of the shared exile target
+domain, face-up default visibility, ordinary movement from represented normal
+zones, temporary returns, and exile-to-exile new-object identity. Exiling a
+card spell now atomically removes its StackItem; the invariant rejects a ghost
+stack reference to any nonstack card. Manually represented face-down objects
+are redacted and cannot satisfy hidden characteristic filters for unauthorized
+viewers, but that does not promote the face-down rules: generic face-down
+creation, examine-permission lifetime, quality-constrained casting, pile
+partitioning, random hidden selection after payment, return provenance, and
+linked exiled-card sets remain blocked. Current Oracle terminology is
+definition-only; it does not create historical removed-from-game zones.
+CR 407 records ante as an optional variant outside the supported Commander
+profiles. The engine exposes no ante zone or action and rejects an ante
+profile or destination before mutation; those negative guards do not claim
+the random pregame contribution, public inspection, owner-only ante action,
+or end-game ownership transfer. CR 407.3 passes for supported non-ante games:
+Commander deck validation now checks the pinned legality of every mainboard,
+commander, companion, and sideboard entry, rejecting the ante cards
+generically without a printed-name branch, while outside-game imports remain
+unavailable.
+CR 408 records the public command area for represented Commander cards and
+typed emblem objects. Generic emblem creation now writes a persistent
+noncard, nonpermanent command object owned and controlled by the receiving
+player; its serialized characteristics contain only the created abilities,
+and every seat receives the same public display identity. Daretti's exact
+effect uses that path and binds each artifact trigger to the exact emblem
+source, while legacy count-only checkpoints retain compatibility. Command
+objects remain outside ordinary destroy scope, and emblem creation
+exact-replays. Planechase, Vanguard, Archenemy, Conspiracy Draft, arbitrary
+emblem compilation, and complete Commander replacement rules remain blocked.
 CR 500 records the ordinary five-phase turn table, the all-player empty-stack
 pass condition, ordinary no-priority untap and cleanup boundaries, mana
 emptying before the next step begins, and atomic step/phase transitions as
@@ -215,22 +291,6 @@ The ordinary boundary and ordering path replay exactly. CR 503.1a remains
 blocked for the complete CR 502 event surface and CR 603.3b two-part process;
 CR 503.2 remains blocked for additional-upkeep scheduling and after-first-
 upkeep casting grammar.
-CR 505.2, 505.6, 505.6a, and 505.6b pass for the represented ordinary
-main-phase boundary: an empty-stack all-player pass advances the phase, a
-nonempty stack resolves without ending it, the active player receives
-priority, ordinary sorcery-speed spells require a true main phase and empty
-stack, and land plays are stackless authoritative actions that consume one
-allowance. The internal `main` marker is one phase-boundary sentinel, not a
-rules substep. Skipped/additional combat and main phases, main-phase ordinal
-identity, Archenemy schemes, Attractions, and complete simultaneous Saga
-counter/replacement/trigger ordering remain blocked.
-CR 504.1 and CR 504.2 pass for the represented draw-step boundary: the active
-player's normal draw or trusted replacement completes without using the stack,
-state-based actions are checked, and waiting semantic and delayed triggers are
-combined into one APNAP/order batch before priority. Empty-library loss,
-multiplayer and duel first-turn modifiers, hidden draw identity, and exact
- replay have direct evidence. The complete draw-replacement, prevention, and
-continuous-effect interaction corpus remains outside this partial contract.
 CR 506.4b passes for the represented combat-state invariant that tapping or
 untapping an attacking or blocking creature does not remove it from combat.
 The engine also removes represented combatants after zone, control, phasing,

@@ -3,6 +3,11 @@
 Every mechanic must receive a versioned contract before the generated registry
 may mark it trusted.
 
+The integrated CR 400–408 and CR 500–512 source tree contains 49
+partial/untrusted contracts and 376 unclassified mechanics. No mechanic is
+promoted to trusted, and the
+snapshot-complete gate remains false.
+
 A contract records its CR/glossary references, dependencies, zones, objects,
 events, state reads/writes, costs, timing, targets and choices, hidden
 information, APNAP behavior, layer/replacement participation, copy/control/
@@ -58,19 +63,19 @@ permissions, division, and opponent-made choices remain explicitly untrusted.
 CR 600 pins the Spells, Abilities, and Effects section taxonomy to the
 dependent CR 601-609 contracts. Because CR 600 contains only a heading, it is
 definition-only and does not create a standalone behavioral claim.
- CR 505 traces ordinary precombat/postcombat main boundaries, empty-stack pass
+CR 505 traces ordinary precombat/postcombat main boundaries, empty-stack pass
 completion, active-player priority, sorcery-speed timing, Saga advancement,
 and stackless land plays. Legal-action hints now require a true main-phase
 phase/marker pair rather than any synthetic `main` step label. Additional or
 skipped combats and main phases, ordinal identity, Archenemy, Attractions,
 and complete simultaneous Saga qualification, replacement, and trigger
- ordering remain blocked.
- CR 504 traces the stackless turn-based draw, trusted one-at-a-time replacement,
+ordering remain blocked.
+CR 504 traces the stackless turn-based draw, trusted one-at-a-time replacement,
 post-draw state-based actions, combined semantic/delayed trigger ordering, and
 active-player priority. It also records the Commander multiplayer and duel
 first-turn modifiers and empty-library loss ordering. Complete draw
- replacement/prevention semantics and the universal interaction matrix remain
- untrusted.
+replacement/prevention semantics and the universal interaction matrix remain
+untrusted.
 CR 506 traces the combat-phase structure, attacking/defending roles, removal
 from combat, “attacks or blocks alone,” requirement snapshots, and
 combat-relative timing vocabulary. Tapping and untapping preserve represented
@@ -120,6 +125,12 @@ stack placement, tap/untap summoning sickness, object-scoped once-per-turn
 history, and sorcery/instant timing. Complete cost and instruction grammar,
 CR 601.2b-i parity, transactional rollback, opponent-made activation choices,
 cost-altering effects, and acquired-ability provenance remain untrusted.
+CR 500–505 trace the ordinary turn, beginning, untap, upkeep, draw, and main
+phase boundaries. CR 400–408 trace the general zone/object model, library,
+hand, battlefield, graveyard, stack, exile, ante exclusion, and public command
+objects. Every contract records exact blockers; these reviews do not imply
+complete extra-turn, phasing, trigger, replacement, casual-variant, or emblem
+coverage.
 
 Run `simctl rules sync` after changing a contract so its hash and status are
 overlaid into `mechanics/registry.json`, then run `simctl rules verify`.

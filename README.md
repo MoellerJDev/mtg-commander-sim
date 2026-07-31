@@ -3,8 +3,19 @@
 An experimental, deterministic, server-authoritative Commander platform under
 active development. Four-player Free-for-All Commander is the primary product
 target, with a browser client, durable game runtime, exact replay, and
-snapshot-scoped rules enforcement. The current release is a kernel and protocol
-foundation, not a complete implementation of Magic's rules or Oracle corpus.
+snapshot-scoped rules enforcement. The current development line is a kernel and
+protocol foundation, not a complete implementation of Magic's rules or Oracle
+corpus.
+
+Current integration checkpoint: the public repository's `main` branch contains
+the deterministic foundation and reviewed CR 400–408 and CR 500–512 slices.
+PR #24 incorporated the ancestry-proven CR 400–408 stack; PRs #17–#23 were
+closed as superseded only after their exact heads became reachable from
+`main`. The integrated source tree has 3,925 deterministic tests, 557 reviewed
+rule records, and 49 partial mechanic contracts. GitHub Actions is running
+normally. No ASGI server, room service, durable game store, or browser
+application exists yet; the single authoritative server/browser vertical slice
+is next.
 
 This is a structural rewrite of the earlier two-player duel lab. The server-side game kernel is now separate from:
 
@@ -190,6 +201,39 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 400 zone and object-identity invariants: the seven normal
+  zones, owner-zone routing, logical incarnation changes, permanent-spell
+  continuation, authorized face-down visibility, and outside-game secrecy
+  pass; same-graveyard movement is now a no-op and instant or sorcery cards
+  cannot enter the battlefield, while the complete CR 400.7 exception matrix,
+  special command-zone objects, sideboards, and whole-zone instruction
+  grammar remain blocked
+- source-reviewed CR 401 library boundaries: deck cards initialize in their
+  owners' libraries, counts are public while identity/order remain
+  seat-scoped, look/reorder/shuffle paths preserve hidden information, and
+  positive Nth-from-top placement falls back to the bottom of a short library;
+  zero-card looks no longer expose the entire library and stale known cards
+  cannot be pulled to the top, while simultaneous owner ordering, continuous
+  top reveal/look, and reveal-continuity identity remain blocked
+- source-reviewed CR 402 hand boundaries: configured starting hands and
+  finite maximum sizes are authoritative, excess cards remain in hand until
+  cleanup, every hand count is public, and identities remain viewer-scoped;
+  hidden-zone moves now publish only an opaque move while privately logging
+  the identity, public-to-hand moves remain known, and a player controlling
+  another player retains access to both hands; continuous no-maximum and
+  arbitrary hand-reveal semantics remain dependency-blocked
+- source-reviewed CR 403 battlefield boundaries: the controller-indexed
+  presentation lists form one shared multiplayer target domain, controller
+  membership is invariant-checked, unqualified targets and ordinary
+  destroy/sacrifice/bounce effects are battlefield-scoped, permanent status
+  follows battlefield membership, and ordinary reentry creates a new logical
+  object; the complete CR 400.7 exception matrix remains blocked
+- source-reviewed CR 404 graveyard boundaries: ordinary counter, discard,
+  destroy, sacrifice, and completed instant-or-sorcery paths append to the
+  owner's public face-up pile, including a rules-countered permanent spell;
+  owner/index divergence is invariant-checked and same-graveyard moves do not
+  reorder the pile, while simultaneous same-owner ordering choices remain
+  explicitly blocked
 - source-reviewed CR 405 stack structure: new objects are placed on top,
   complete priority rounds resolve only the top object, direct effects,
   represented static abilities, and represented state actions bypass the
@@ -197,6 +241,21 @@ generated documentation fixtures with bearer capabilities redacted. See
   before mutation, while stack-first casting, complete simultaneous APNAP
   placement, characteristics, special actions, concession-at-any-time, and
   player-leaves-game ordering remain blocked
+- source-reviewed CR 406 exile boundaries: ordinary objects enter an
+  owner-indexed public holding area, exiling a card spell atomically removes
+  its stack object, and re-exiling creates a new logical incarnation; generic
+  face-down creation, look authorization, pile/random selection, return-pile
+  provenance, and linked exiled-card sets remain explicitly blocked
+- source-reviewed CR 407 ante exclusion: supported Commander profiles have no
+  ante zone or ante operation, reject an ante profile and destination before
+  mutation, and now validate pinned Commander legality for mainboard,
+  commander, companion, and sideboard entries; the optional ante variant
+  itself remains explicitly unsupported rather than partially simulated
+- source-reviewed CR 408 command-zone objects: all Commander seats expose
+  their designated commanders through one public zone, and generic emblems
+  now persist as typed noncard, nonpermanent command objects with
+  exact-source triggers and replay; non-Commander casual-variant objects and
+  arbitrary emblem ability compilation remain explicitly blocked
 - source-reviewed CR 500 general turn structure: the ordinary five-phase
   table, full empty-stack priority round, no-priority boundaries, mana
   emptying before the next step, and atomic transition behavior pass with
@@ -218,15 +277,6 @@ generated documentation fixtures with bearer capabilities redacted. See
   share one APNAP/controller-order batch before active-player priority;
   complete untap events, additional upkeeps, and after-upkeep casting grammar
   remain blocked
-- source-reviewed CR 505 main-phase boundary: empty-stack pass completion,
-  active-player priority, ordinary sorcery-speed casting, and stackless
-  authoritative land plays use exact precombat/postcombat predicates; extra
-  and skipped combats, ordinal main phases, Archenemy, Attractions, and
-  complete simultaneous Saga handling remain blocked
-- source-reviewed CR 504 draw-step ordering: the stackless turn-based draw or
-  trusted replacement completes before state-based actions, one combined
-  semantic/delayed trigger-order batch, and active-player priority; complete
-  draw-replacement and draw-prevention semantics remain untrusted
 - source-reviewed CR 506 combat-phase boundary: authoritative attacking and
   defending roles, durable combat history, and represented removal from
   combat after zone, control, phasing, or type changes; alternate multiplayer
@@ -350,9 +400,9 @@ python simctl.py rules conformance --root .
 ```
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
-generated source-linkage tests. Of those cases, 471 are source-reviewed:
-71 have narrow executable semantic evidence, 334 are explicitly blocked, and
-66 are definition-only; 2,829 remain unreviewed. A generated inventory test
+generated source-linkage tests. Of those cases, 557 are source-reviewed:
+106 have narrow executable semantic evidence, 371 are explicitly blocked, and
+80 are definition-only; 2,743 remain unreviewed. A generated inventory test
 cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
 invalidation, and reporting policy.
 
@@ -371,6 +421,24 @@ new battlefield timestamp. Targets and implemented linked delayed effects
 retain the selected incarnation, so a card that leaves and returns is not
 silently treated as the old object. Pilot projections never expose the
 physical identifier or incarnation counter.
+
+CR 400 review also enforces three generic boundaries before mutation:
+same-zone graveyard moves cannot reorder that graveyard, instant and sorcery
+cards cannot be moved onto the battlefield, and moving a hidden card outside
+the game does not reveal it. Face-down objects in otherwise public zones remain
+visible only to their owner or another explicitly authorized viewer. Complete
+special-object command-zone rules, the remaining new-object exceptions,
+sideboards and wish effects, and generic whole-zone instructions remain
+fail-closed or explicitly blocked.
+
+The library kernel keeps the top at the end of one authoritative per-player
+list while projecting only a public count and a contiguous, explicitly known
+top group. `look_top` rejects negative or malformed counts and treats zero as
+an empty look; `reorder_top` validates the exact current known group before
+mutation. Moving a card to a positive Nth-from-top position is generic, with CR
+401.7's bottom fallback for short libraries, and repositioning within the same
+library preserves logical identity. Continuous top-card permissions and the
+simultaneous multi-card owner-order choice remain explicit blockers.
 
 Each new zone incarnation also receives a serialized timestamp moment.
 Objects entering a destination simultaneously share that moment. Battlefield
@@ -712,9 +780,9 @@ container isolation when filesystem-level isolation must also be proven.
 - `mtg_commander_sim/semantics.py` — reusable effect-program registry
 - `mtg_commander_sim/mana.py` — conservative mana source parsing/planning
 - `mtg_commander_sim/abilities.py` — explicit Oracle ability/cost extraction and zone authorization
-- `mtg_commander_sim/session.py` — ChatGPT/Codex-friendly façade
+- `mtg_commander_sim/session.py` — deterministic session façade
 - `mtg_commander_sim/service.py` — transport-neutral application boundary
-- `mtg_commander_sim/pilot.py` — LLM callback orchestration and token metrics
+- `mtg_commander_sim/pilot.py` — optional automation-client orchestration and metrics
 - `mtg_commander_sim/profiles.py` — fingerprinted advisory deck profiles
 - `mtg_commander_sim/preflight.py` — trust-aware deck semantic coverage
 - `mtg_commander_sim/shortcuts.py` — validated aggregate loop fixtures
@@ -734,5 +802,5 @@ container isolation when filesystem-level isolation must also be proven.
 Read `ARCHITECTURE.md`, `LLM_PROTOCOL.md`, `PILOT_PROVIDERS.md`,
 `SEMANTIC_PACKS.md`, and `CLIENT_INTEGRATION.md` before extending the engine.
 
-No software license has been selected for this public repository. Possession
-of the source does not grant redistribution or relicensing rights.
+No software license has been selected for this public repository. Public
+visibility does not itself grant redistribution or relicensing rights.

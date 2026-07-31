@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-402-hand",
+  "official_name": "Hand",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "402",
+    "402.1",
+    "402.2",
+    "402.3"
+  ],
+  "glossary_references": [
+    "hand",
+    "maximum hand size",
+    "starting hand size"
+  ],
+  "dependencies": [
+    "game-setup",
+    "zones",
+    "draw",
+    "cleanup-step",
+    "hidden-information",
+    "control-another-player",
+    "effects",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "hand",
+      "library",
+      "graveyard"
+    ],
+    "objects": [
+      "card in hand",
+      "known card in an opposing hand",
+      "hidden card moved into a hand"
+    ],
+    "events": [
+      "draw opening hand",
+      "draw one or more cards",
+      "put a card into a hand",
+      "discard excess cards during cleanup",
+      "move a publicly identified card into a hand"
+    ],
+    "state_reads": [
+      "starting hand size",
+      "maximum hand size",
+      "per-player hand count",
+      "owner-scoped hand identities",
+      "viewer-scoped known hand identities"
+    ],
+    "state_writes": [
+      "per-player hand membership",
+      "viewer-scoped card knowledge",
+      "maximum hand size",
+      "cleanup discard selection"
+    ],
+    "costs": [
+      "discard costs consume cards from the paying player's hand",
+      "complete discard-cost grammar is delegated to the producing ability"
+    ],
+    "timing": [
+      "a hand may exceed its maximum before cleanup",
+      "the active player discards excess cards as the cleanup step begins",
+      "a player may inspect their own projected hand regardless of priority"
+    ],
+    "targets": [
+      "cards in hand are not ordinary targets unless an effect explicitly permits that hidden zone"
+    ],
+    "choices": [
+      "the active player chooses exactly the excess cards to discard at cleanup",
+      "hand arrangement is presentation-only and has no rules-significant authoritative order"
+    ],
+    "hidden_information": [
+      "every player receives every hand count",
+      "a player receives every identity in their own hand",
+      "ordinary opponents receive no hidden hand identities",
+      "a hidden-zone move publishes the move and count change without publishing identity",
+      "a directly observed public-to-hand move remains known without granting permission to inspect the hand",
+      "a player controlling another player sees both the controlled player's hand and their own hand"
+    ],
+    "apnap": [
+      "simultaneous private hand choices remain delegated to their producing effect and the simultaneous-choice system"
+    ],
+    "layers": [
+      "continuous maximum-hand-size modifiers are a CR 613.11 dependency and remain blocked here"
+    ],
+    "replacement_effects": [
+      "draw and zone-change replacements are delegated to their producing effect"
+    ],
+    "copy": [
+      "copy behavior does not expose unrelated hand identity"
+    ],
+    "control_change": [
+      "controlling another player adds that player's visible information without replacing access to the controller's own information"
+    ],
+    "zone_change": [
+      "cross-zone entry into a hand creates a new logical object",
+      "knowledge is reset for a hidden-to-hidden move except for viewers explicitly shown the identity",
+      "public face-up identity remains known when that card moves directly into a hand"
+    ],
+    "source_leaves": [
+      "one-shot hand knowledge remains bounded to information legitimately observed by the viewer"
+    ]
+  },
+  "variants": [
+    "normal seven-card starting hand",
+    "configured starting hand size",
+    "card drawn into hand",
+    "card put into hand by another effect",
+    "hand below maximum",
+    "hand equal to maximum",
+    "hand above maximum before cleanup",
+    "cleanup discard to maximum",
+    "modified finite maximum hand size",
+    "no maximum hand size",
+    "owner inspection outside their priority",
+    "opponent hand count",
+    "opponent hidden hand identities",
+    "hidden library card moved to hand",
+    "public graveyard card moved to hand",
+    "explicitly revealed card moved to hand",
+    "controller of another player",
+    "presentation-only hand arrangement"
+  ],
+  "witness_cards": [
+    {
+      "name": "Life from the Loam",
+      "oracle_id": "ac8fba34-512c-4f24-999a-ab72f1ce4acb"
+    },
+    {
+      "name": "Daretti, Scrap Savant",
+      "oracle_id": "ea9f4de3-fc35-435a-8dff-a5657d14a9bd"
+    },
+    {
+      "name": "Sylvan Library",
+      "oracle_id": "92eed395-62ca-4293-882b-8565c40daab5"
+    }
+  ],
+  "rulings": [
+    "Daretti, Scrap Savant — 2014-11-07 — Its first ability may discard zero cards and therefore draw zero cards.",
+    "Sylvan Library — 2022-12-08 — Cards put back are chosen from cards in hand drawn during the current turn.",
+    "Life from the Loam — 2024-06-07 — Dredge replaces a draw and returns the card from the graveyard to hand."
+  ],
+  "test_ids": [
+    "test_contract_traces_every_cr_402_rule",
+    "test_starting_hand_size_and_effect_moves_are_generic",
+    "test_hand_may_exceed_maximum_until_cleanup",
+    "test_hidden_card_put_into_hand_keeps_identity_private",
+    "test_public_card_returned_to_hand_remains_known_not_lookable",
+    "test_revealed_hand_identity_is_scoped_to_authorized_viewers",
+    "test_owner_hand_remains_visible_while_controlling_a_player",
+    "test_hand_order_is_private_and_owner_projection_is_always_available",
+    "test_cleanup_discard_is_exact_simultaneous_private_and_replayable",
+    "test_mindslaver_routes_controlled_turn_to_controller_pilot"
+  ],
+  "implementation": {
+    "component": "CommanderEngine.create/draw/move_card/cleanup discard, PlayerState hand and maximum size, and StateProjector multi-seat hand knowledge projection",
+    "version": "hand-foundation-v1"
+  },
+  "known_blockers": [
+    "continuous maximum-hand-size modifiers and no-maximum effects are not compiled through CR 613.11",
+    "complete Oracle grammar for arbitrary reveal, look-at-hand, and private simultaneous hand-choice effects remains incomplete",
+    "complete draw and zone-change replacement ordering remains incomplete",
+    "browser-local hand arrangement controls are not yet implemented, although authoritative hand order is rules-insignificant"
+  ],
+  "review_status": "draft"
+}

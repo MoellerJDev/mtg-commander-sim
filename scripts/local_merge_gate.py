@@ -18,6 +18,7 @@ DEFAULT_FOCUSED_TESTS = (
     "tests.test_seed_20260730_regression",
     "tests.test_decision_opportunities",
     "tests.test_game_record_v3",
+    "tests.test_command_zone_rules",
 )
 PRIVACY_TESTS = (
     "tests.test_permissions_projection",

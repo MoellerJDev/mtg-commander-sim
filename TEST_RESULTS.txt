@@ -1,61 +1,83 @@
-MTG Commander Sim 0.8.0 - Integration Verification Ledger
-===========================================================
+# MTG Commander Sim 0.8.0 — integrated verification
 
-Repository: MoellerJDev/mtg-commander-sim (public)
-Active branch: agent/cr-405-stack
-Main before candidate: 4cde25ae506a7a8b0a252096f2f7b3aad8929f9a
-Active PR: #16 (CR 405 Stack)
+Date: 2026-07-31
+Implementation commit: the `main` commit containing this document
+Local environment: Windows, Python 3.11.9
 
-LAST EXACT VERIFIED CANDIDATE
------------------------------
+## Deterministic gate
 
-CR 500 refreshed head
-  SHA: 6ccba21fc02ee41d1e96e9f11e0df8452440a3c5
-  Full suite: 3,865 tests passed
-  Rules/replay/privacy/protocol/repository/package gates: passed
-  Working-tree clean exit: passed
-  GitHub push and pull-request matrices: passed (8/8)
+PASS: compilation of the package, tests, scripts, and `simctl.py`.
 
-PR #15 merged to main
-  Main SHA: 4cde25ae506a7a8b0a252096f2f7b3aad8929f9a
+PASS: 3,925 unit/integration tests using a compact SQLite database rebuilt
+from the committed sanitized exact-list fixture.
 
-CURRENT UNVERIFIED CANDIDATE
-----------------------------
+The suite includes 3,300 generated source-linkage cases plus 625 executable
+engine, conformance, protocol, replay, privacy, repository, and package tests.
+Generated source linkage is inventory evidence, not rules-correctness evidence.
 
-CR 405 is being combined with merged CR 500-505.
-Expected discovered tests after regeneration: 3,871.
-The exact-SHA local gate and fresh GitHub matrices must pass before PR #16 is
-merged.
+PASS:
 
-Combined rule-review totals:
-  Pinned CR release: 2026-06-19
-  Numbered rules: 3,300
-  Reviewed: 485
-  Passing: 77
-  Blocked: 340
-  Definition-only: 68
-  Unreviewed: 2,815
+- combined focused CR 400–408 and CR 500–505 tests
+- seed-20260730 decision-opportunity regression
+- zero suppressed meaningful windows
+- deterministic trusted-only four-player natural-winner game
+- exact command replay and authoritative state hashes
+- principal/hidden-information projection
+- CR 408 typed emblem creation and exact-source Daretti trigger replay
+- sanitized four-player protocol demo
 
-Combined mechanic totals:
-  Partial: 42
-  Unclassified: 383
+The micro-pool game is runtime/protocol evidence only. It is not
+Commander-format legality, deck-quality, or matchup evidence.
 
-INTERPRETATION BOUNDARY
------------------------
+## Pinned sources and generated coverage
 
-Test counts prove only the exercised deterministic behaviors. They do not prove
-complete Comprehensive Rules or Oracle coverage. Material unsupported semantics
-must continue to fail closed. The authoritative server/browser vertical slice
-has not yet been implemented.
+PASS: `python simctl.py rules verify --root .`
 
-CI POLICY
----------
+- Comprehensive Rules effective date: 2026-06-19
+- source SHA-256:
+  `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
+- numbered rules/conformance records: 3,300
+- reviewed: 557
+- passing: 106
+- blocked: 371
+- definition-only: 80
+- unreviewed: 2,743
+- mechanics: 49 partial, 376 unclassified, 0 trusted
+- `current_snapshot_complete=false`
 
-The repository is public and GitHub-hosted Actions are executing normally.
-Every updated candidate must receive fresh green push and pull-request runs.
+Full Oracle coverage remains 2,957 exact, 15,691 partial, and 19,725
+unresolved out of 38,373 Oracle IDs, with 69,664 material residuals.
+Commander-legal coverage remains 338 exact, 14,354 partial, and 16,930
+unresolved out of 31,622 Oracle IDs, with 61,212 material residuals.
 
-NEXT
-----
+## Repository and package
 
-Run the exact CR 405 merge gate, merge PR #16 normally after green CI, and
-continue with PR #17.
+PASS:
+
+- platform/rules/mechanics/conformance freshness
+- 14 JSON schemas
+- tracked and reachable-history secret/capability scans
+- private-state fixture and ignored-runtime-artifact policy
+- oversized-object checks
+- repository validation
+- wheel build
+- fresh-environment wheel installation
+- installed package version and CLI smoke test
+
+## GitHub CI
+
+PASS: the final PR #24 candidate received fresh public GitHub Actions checks
+on Python 3.11 and 3.12, Ubuntu and Windows. All eight push and pull-request
+jobs executed repository steps and passed before the ordinary merge.
+
+The repository is public and GitHub runners are operating normally. Historical
+zero-step billing/spending-limit failures are not passing evidence and were
+not used to bypass current checks.
+
+## Claim boundary
+
+These results establish the integrated CR 400–408 and CR 500–512 source tree,
+exact-list regression behavior, replay, privacy, source pinning, packaging, and
+repository gates. They do not establish a production server, browser client,
+durable database, complete Comprehensive Rules behavior, Oracle-corpus
+semantic closure, deck superiority, or statistical matchup evidence.

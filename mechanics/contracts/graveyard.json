@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-404-graveyard",
+  "official_name": "Graveyard",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "404",
+    "404.1",
+    "404.2",
+    "404.3"
+  ],
+  "glossary_references": [
+    "graveyard",
+    "discard",
+    "destroy",
+    "sacrifice",
+    "counter"
+  ],
+  "dependencies": [
+    "zones",
+    "ownership",
+    "zone-change-identity",
+    "stack",
+    "resolution",
+    "state-based-actions",
+    "replacement-effects",
+    "simultaneous-actions",
+    "player-choices",
+    "hidden-information",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "graveyard",
+      "hand",
+      "battlefield",
+      "stack",
+      "exile"
+    ],
+    "objects": [
+      "card",
+      "spell",
+      "spell copy",
+      "token"
+    ],
+    "events": [
+      "counter a spell",
+      "discard a card",
+      "destroy a permanent",
+      "sacrifice a permanent",
+      "finish resolving an instant or sorcery",
+      "move several cards simultaneously"
+    ],
+    "state_reads": [
+      "object owner",
+      "current zone",
+      "graveyard order",
+      "pre-move replacement sources"
+    ],
+    "state_writes": [
+      "owner-indexed graveyard membership",
+      "face-up public identity",
+      "top-of-graveyard append order",
+      "zone-change identity"
+    ],
+    "costs": [
+      "discard and sacrifice costs delegate payment legality to the producing action"
+    ],
+    "timing": [
+      "every graveyard starts empty",
+      "ordinary single-object movement places the object on top",
+      "a countered spell goes to its owner's graveyard rather than its normal resolution destination",
+      "replacement effects are determined from the pre-move state"
+    ],
+    "targets": [
+      "a reviewed graveyard target schema can examine cards in every player's graveyard",
+      "ordinary unqualified targets do not include graveyards"
+    ],
+    "choices": [
+      "moving an object to the same graveyard does not reorder it",
+      "owner ordering for two or more cards entering one graveyard simultaneously is not yet represented"
+    ],
+    "hidden_information": [
+      "graveyard identities and order are public to every active seat",
+      "a face-down or previously unknown card becomes face up and publicly known in a graveyard"
+    ],
+    "apnap": [
+      "simultaneous cards owned by different players route independently to their owners' graveyards",
+      "same-owner ordering choice remains blocked"
+    ],
+    "layers": [
+      "continuous characteristics are delegated to the relevant object and layer rules"
+    ],
+    "replacement_effects": [
+      "the exact represented Dauthi Voidwalker replacement is applied before graveyard insertion",
+      "complete replacement-choice ordering remains a separate blocker"
+    ],
+    "copy": [
+      "a countered spell-copy object reaches its owner's graveyard before state-based actions make it cease to exist"
+    ],
+    "control_change": [
+      "a nonbattlefield destination is indexed by owner, not the former controller"
+    ],
+    "zone_change": [
+      "ordinary graveyard entry creates a new logical object",
+      "same-graveyard movement is a no-op",
+      "graveyard entry resets face-down status"
+    ],
+    "source_leaves": [
+      "simultaneous replacement discovery uses the shared pre-move source snapshot"
+    ]
+  },
+  "variants": [
+    "empty opening graveyards",
+    "countered instant or sorcery spell",
+    "countered permanent spell",
+    "rules-countered Aura with no legal target",
+    "discarded card",
+    "destroyed permanent controlled by a nonowner",
+    "sacrificed permanent",
+    "resolved instant or sorcery",
+    "public face-up graveyard projection",
+    "same-graveyard no-op",
+    "Dauthi replacement",
+    "token unaffected by Dauthi",
+    "simultaneous same-owner cards"
+  ],
+  "witness_cards": [
+    {
+      "name": "Animate Dead",
+      "oracle_id": "c0d8fef4-65f4-4769-982d-b397d2b7e977"
+    },
+    {
+      "name": "Dauthi Voidwalker",
+      "oracle_id": "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786"
+    },
+    {
+      "name": "An Offer You Can't Refuse",
+      "oracle_id": "234a734b-ba28-4f1b-9d01-3c3e7d516590"
+    }
+  ],
+  "rulings": [
+    "Dauthi Voidwalker — 2021-06-18 — Tokens still die while Dauthi Voidwalker is on the battlefield.",
+    "Dauthi Voidwalker — 2021-06-18 — Opponents' nontoken creatures are exiled instead of dying while its replacement applies.",
+    "Animate Dead — current Oracle text — The Aura targets a creature card in a graveyard and is countered by the rules if that sole target is illegal at resolution."
+  ],
+  "test_ids": [
+    "test_contract_traces_every_cr_404_rule",
+    "test_graveyards_start_empty_and_common_causes_use_owner_top",
+    "test_rules_countered_permanent_spell_uses_graveyard_not_resolution_destination",
+    "test_graveyard_is_face_up_public_ordered_and_not_reordered_by_same_zone_move",
+    "test_graveyard_owner_index_is_an_authoritative_invariant",
+    "test_graveyard_replacement_is_decided_before_the_move",
+    "test_simultaneous_same_owner_order_is_still_caller_determined",
+    "test_countered_spell_copy_reaches_graveyard_then_ceases",
+    "test_an_offer_empty_stack_and_treasure_resolution"
+  ],
+  "implementation": {
+    "component": "CommanderEngine owner-zone movement, graveyard ordering and replacement preflight; StateProjector public graveyard projection; stack counter and resolution paths",
+    "version": "graveyard-foundation-v1"
+  },
+  "known_blockers": [
+    "a player-owned ordering decision is not issued when two or more cards enter the same graveyard simultaneously",
+    "complete replacement-effect choice and ordering is not implemented",
+    "complete state-based-action and simultaneous-effect producers are not implemented",
+    "graveyard-order-changing tournament policy is not modeled",
+    "the full Oracle corpus has not been proven to use only trusted graveyard movement and target schemas"
+  ],
+  "review_status": "draft"
+}

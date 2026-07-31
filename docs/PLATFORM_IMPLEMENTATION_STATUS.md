@@ -4,11 +4,11 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Repository and integration
 
-- Repository: private `MoellerJDev/mtg-commander-sim`
+- Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/cr-405-stack`
+- Active branch: `main`
 - Current commit: the commit containing this ledger
-- Active phase: `integrate_rules_backlog_cr_405`
+- Active phase: `rules_backlog_integrated_server_browser_vertical_slice_next`
 - Package version: `0.8.0`
 
 ### Pull requests
@@ -27,10 +27,18 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#10](https://github.com/MoellerJDev/mtg-commander-sim/pull/10) | `agent/cr-505-main-phase` | `main` | `merged` |
 | [#11](https://github.com/MoellerJDev/mtg-commander-sim/pull/11) | `agent/cr-504-draw-step` | `main` | `merged` |
 | [#12](https://github.com/MoellerJDev/mtg-commander-sim/pull/12) | `agent/cr-503-upkeep-step` | `main` | `merged` |
-| [#13](https://github.com/MoellerJDev/mtg-commander-sim/pull/13) | `agent/cr-502-untap-step` | `main` | `merged` |
-| [#14](https://github.com/MoellerJDev/mtg-commander-sim/pull/14) | `agent/cr-501-beginning-phase` | `main` | `merged` |
-| [#15](https://github.com/MoellerJDev/mtg-commander-sim/pull/15) | `agent/cr-500-turn-structure` | `main` | `merged` |
-| [#16](https://github.com/MoellerJDev/mtg-commander-sim/pull/16) | `agent/cr-405-stack` | `main` | `integration_candidate` |
+| [#13](https://github.com/MoellerJDev/mtg-commander-sim/pull/13) | `agent/cr-502-untap-step` | `agent/cr-503-upkeep-step` | `merged` |
+| [#14](https://github.com/MoellerJDev/mtg-commander-sim/pull/14) | `agent/cr-501-beginning-phase` | `agent/cr-502-untap-step` | `merged` |
+| [#15](https://github.com/MoellerJDev/mtg-commander-sim/pull/15) | `agent/cr-500-turn-structure` | `agent/cr-501-beginning-phase` | `merged` |
+| [#16](https://github.com/MoellerJDev/mtg-commander-sim/pull/16) | `agent/cr-405-stack` | `agent/cr-500-turn-structure` | `merged` |
+| [#17](https://github.com/MoellerJDev/mtg-commander-sim/pull/17) | `agent/cr-400-general-zone-identity` | `agent/cr-405-stack` | `closed_superseded_by_pr_24` |
+| [#18](https://github.com/MoellerJDev/mtg-commander-sim/pull/18) | `agent/cr-401-library` | `agent/cr-400-general-zone-identity` | `closed_superseded_by_pr_24` |
+| [#19](https://github.com/MoellerJDev/mtg-commander-sim/pull/19) | `agent/cr-402-hand` | `agent/cr-401-library` | `closed_superseded_by_pr_24` |
+| [#20](https://github.com/MoellerJDev/mtg-commander-sim/pull/20) | `agent/cr-403-battlefield` | `agent/cr-402-hand` | `closed_superseded_by_pr_24` |
+| [#21](https://github.com/MoellerJDev/mtg-commander-sim/pull/21) | `agent/cr-404-graveyard` | `agent/cr-403-battlefield` | `closed_superseded_by_pr_24` |
+| [#22](https://github.com/MoellerJDev/mtg-commander-sim/pull/22) | `agent/cr-406-exile` | `agent/cr-404-graveyard` | `closed_superseded_by_pr_24` |
+| [#23](https://github.com/MoellerJDev/mtg-commander-sim/pull/23) | `agent/cr-407-ante` | `agent/cr-406-exile` | `closed_superseded_by_pr_24` |
+| [#24](https://github.com/MoellerJDev/mtg-commander-sim/pull/24) | `agent/cr-408-command` | `main` | `merged` |
 | [#25](https://github.com/MoellerJDev/mtg-commander-sim/pull/25) | `agent/integration-checkpoint` | `main` | `merged` |
 
 ## Pinned snapshots and coverage
@@ -41,8 +49,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 - Rules manifest present on this branch: yes
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
-- Rules cases: blocked=340, definition_only=68, passing=77, total=3300, unreviewed=2815
-- Mechanics: status_counts={'partial': 42, 'unclassified': 383}, total=425, trusted=0
+- Rules cases: blocked=371, definition_only=80, passing=106, total=3300, unreviewed=2743
+- Mechanics: status_counts={'partial': 49, 'unclassified': 376}, total=425, trusted=0
 - Oracle coverage: material_residuals=69664, status_counts={'exact': 2957, 'partial': 15691, 'unresolved': 19725}, total=38373
 - Commander-legal Oracle coverage: material_residuals=61212, status_counts={'exact': 338, 'partial': 14354, 'unresolved': 16930}, total=31622
 - Current rules/Oracle snapshot complete: no
@@ -51,9 +59,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 | Milestone | Status | Evidence |
 |---|---|---|
-| Integrated deterministic foundation | `integration_checkpoint` | Integration PRs #1-2, CR 500-512, and the reusable merge gate are on main. CR 405 is the current candidate; the CR 400-to-408 zone chain remains frozen pending ordered integration. |
+| Integrated deterministic foundation | `complete` | Integration PRs #1-16, #24, and #25 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; PRs #17-23 were closed as superseded only after their exact heads became reachable from main. |
 | Browser Commander MVP | `not_started` | No server/, web/, or migrations/ subsystem is present on this branch. |
-| Active Comprehensive Rules snapshot | `active_with_integration_backlog` | The 2026-06-19 corpus and reviewed CR 500-512 slices are on main. This candidate combines CR 405 and regenerates the conformance ledger before the remaining dependency chain is integrated. |
+| Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408 and CR 500-512 slices are on main. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
 ## Runtime and product boundaries
@@ -73,17 +81,17 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 3871
+- Tests discovered: 3925
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30641570559](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30641570559) — `pass`
+- Baseline CI: [PR-24-final-matrix](https://github.com/MoellerJDev/mtg-commander-sim/pull/24/checks) — `required_green_before_merge`
 - Compile: `pass`
-- Deterministic tests: `pass_3865_on_merged_cr500_to_cr505_main; cr405_candidate_pending_exact_gate`
+- Deterministic tests: `pass_3925`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
 - Four-player protocol demo: `pass`
 - Repository/history/security audit: `pass`
 - Wheel build and clean install: `pass`
 - Replay: `pass_for_seed_20260730_and_native_v3_regressions`
-- Privacy: `pass_for_projected_protocol_and_sanitized_fixtures`
+- Privacy: `pass_for_principal_projection_command_objects_and_sanitized_fixtures`
 - Semantic preflight: `trusted_only_for_two_pinned_exact_lists`
 
 AI/Codex pilot runs are optional client experiments. They are not product, rules, CI, merge, or release gates.
@@ -92,11 +100,10 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 - no authoritative ASGI server, single-writer GameActor, durable persistence, or browser client exists
 - full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete
-- the CR 400-to-408 zone chain remains in draft pull requests pending ordered integration
 
 ## Exact next task
 
-Run the exact CR 405 candidate through the local merge gate and ordinary GitHub matrix, merge PR #16, then integrate PR #17 without resuming broad rules-family work.
+Create agent/server-browser-vertical-slice from final green main and begin the single authoritative server/browser vertical slice without resuming broad rules-family work.
 
 ## Regeneration
 

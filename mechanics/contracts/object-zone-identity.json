@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 3,
+  "contract_version": 4,
   "mechanic_id": "cr-400-general",
   "official_name": "Zones and New Object Identity",
   "effective_date": "2026-06-19",
@@ -8,6 +8,12 @@
   "rule_references": [
     "400",
     "400.1",
+    "400.2",
+    "400.3",
+    "400.4",
+    "400.4a",
+    "400.4b",
+    "400.5",
     "400.6",
     "400.7",
     "400.7a",
@@ -26,6 +32,10 @@
     "400.9",
     "400.10",
     "400.11",
+    "400.11a",
+    "400.11b",
+    "400.11c",
+    "400.12",
     "613.7d",
     "613.7m"
   ],
@@ -66,7 +76,9 @@
       "zone-change proposal",
       "replacement selection",
       "new logical incarnation",
-      "same-zone exile or command reentry"
+      "same-zone exile or command reentry",
+      "prohibited instant or sorcery battlefield move",
+      "outside-game visibility preservation"
     ],
     "state_reads": [
       "physical card identity",
@@ -99,7 +111,8 @@
       "contradictory destination effects require the appropriate controller or owner choice"
     ],
     "hidden_information": [
-      "logical incarnation metadata remains authoritative and is not projected as hidden-zone identity"
+      "logical incarnation metadata remains authoritative and is not projected as hidden-zone identity",
+      "moving a hidden card outside the game does not reveal it to opponents"
     ],
     "apnap": [
       "simultaneous zone-change replacement choices may require APNAP collection"
@@ -119,7 +132,9 @@
     "zone_change": [
       "ordinary cross-zone moves create a new logical incarnation",
       "exile-to-exile and command-to-command create new logical incarnations",
-      "a permanent spell retains its logical incarnation as it becomes a permanent"
+      "a permanent spell retains its logical incarnation as it becomes a permanent",
+      "a same-zone move outside exile, command, or an explicit library reposition is a no-op",
+      "instant and sorcery cards remain in their previous zone instead of entering the battlefield"
     ],
     "source_leaves": [
       "stack abilities use last-known information, while targets and linked delayed effects retain only the relationships allowed by CR 400.7"
@@ -128,6 +143,11 @@
   "variants": [
     "target leaves and returns before resolution",
     "same physical card leaves and returns before a linked delayed effect",
+    "owner-zone redirection",
+    "public and hidden zone projection",
+    "face-down card in a public zone",
+    "instant or sorcery card would enter the battlefield",
+    "same-graveyard move does not reorder",
     "exile-to-exile reentry",
     "spell-to-permanent continuation",
     "sequential zone entries receive increasing timestamp moments",
@@ -153,6 +173,12 @@
     "Daretti, Scrap Savant 2014-11-07: the delayed return does not follow a card that left and reentered the graveyard"
   ],
   "test_ids": [
+    "test_contract_traces_every_cr_400_rule",
+    "test_zone_topology_and_visibility_match_the_pinned_rules",
+    "test_nonbattlefield_destination_uses_the_owners_zone",
+    "test_instant_or_sorcery_cannot_enter_battlefield",
+    "test_same_graveyard_move_is_a_no_op",
+    "test_hidden_card_moved_outside_is_not_revealed_or_targetable",
     "test_zone_changes_create_serialized_logical_incarnations",
     "test_incarnation_counter_is_monotonic_under_zone_mutation",
     "test_draw_crosses_the_canonical_incarnation_boundary",
@@ -173,14 +199,18 @@
   ],
   "implementation": {
     "component": "CardInstance.zone_change_counter and zone_timestamp, GameState.timestamp_sequence, CommanderEngine.move_card, target revalidation, and identity-guarded semantic moves",
-    "version": "object-incarnation-v3"
+    "version": "object-incarnation-v4"
   },
   "known_blockers": [
     "the complete CR 400.7a-m exception matrix is not represented as typed continuation policies",
+    "conspiracy, phenomenon, plane, scheme, and vanguard command-zone immobility is not represented",
+    "complete ordered-zone mutation authorization and face-down pile ordering are not represented",
     "merged permanents, meld components, stickers, and complete face-down object identity are not implemented",
     "turning a face-up command-zone object face down does not yet create a new incarnation",
     "all legacy semantic references have not yet migrated from physical refs to typed logical handles",
     "all simultaneous replacement choices are not yet routed through the CR 616 ordering engine",
+    "sideboards, outside-the-game wish effects, and their lifecycle are not represented",
+    "complete effects that instruct actions over every card in a zone are not compiled generically",
     "complete CR 613.7m APNAP relative-timestamp choices are not represented"
   ],
   "review_status": "reviewed"

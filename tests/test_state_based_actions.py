@@ -2736,9 +2736,18 @@ class StateBasedActionEngineTests(unittest.TestCase):
 
     def test_losing_and_regaining_world_gets_a_new_since_time(self):
         engine = self.make_engine(7049)
-        card = engine.state.cards[
-            engine.state.players["A"].zones["library"][0]
-        ]
+        card = next(
+            engine.state.cards[object_id]
+            for object_id in engine.state.players["A"].zones["library"]
+            if engine._type_parts(
+                str(
+                    engine._effective_card_data(
+                        engine.state.cards[object_id]
+                    ).get("type_line")
+                    or ""
+                )
+            )[0].isdisjoint({"instant", "sorcery"})
+        )
         engine.move_card(
             card.object_id,
             "battlefield",

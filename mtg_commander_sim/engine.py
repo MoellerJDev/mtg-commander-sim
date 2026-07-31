@@ -84,7 +84,7 @@ TURN_STEPS: list[tuple[str, str]] = [
     ("ending", "cleanup"),
 ]
 
-PUBLIC_ZONES = {"battlefield", "graveyard", "exile", "command", "stack", "outside"}
+PUBLIC_ZONES = {"battlefield", "graveyard", "exile", "command", "stack"}
 HIDDEN_ZONES = {"hand", "library"}
 
 
@@ -484,7 +484,25 @@ class CommanderEngine:
                     if object_id not in self.state.cards:
                         raise StateInvariantError(f"Unknown object {object_id} in {seat}/{zone}")
                     membership.setdefault(object_id, []).append((seat, zone))
-        stack_cards = {item.card_object_id for item in self.state.stack if item.card_object_id}
+        stack_cards = {
+            item.card_object_id
+            for item in self.state.stack
+            if item.card_object_id
+        }
+        for item in self.state.stack:
+            object_id = item.card_object_id
+            if not object_id:
+                continue
+            if (
+                object_id not in self.state.cards
+                or (
+                    self.state.cards[object_id].zone != "stack"
+                    and not item.context.get("currently_resolving")
+                )
+            ):
+                raise StateInvariantError(
+                    f"Stack item references nonstack object {object_id}"
+                )
         for object_id, card in self.state.cards.items():
             locations = membership.get(object_id, [])
             if card.zone == "stack":
@@ -497,6 +515,23 @@ class CommanderEngine:
                 raise StateInvariantError(f"{card.ref} appears in {locations}, expected exactly one zone")
             elif locations[0][1] != card.zone:
                 raise StateInvariantError(f"{card.ref} zone mismatch {card.zone}/{locations[0]}")
+            elif (
+                card.zone == "battlefield"
+                and locations[0][0] != card.controller
+            ):
+                raise StateInvariantError(
+                    f"{card.ref} is indexed under {locations[0][0]} "
+                    f"but controlled by {card.controller}"
+                )
+            elif (
+                card.zone
+                in {"library", "hand", "graveyard", "exile", "command"}
+                and locations[0][0] != card.owner
+            ):
+                raise StateInvariantError(
+                    f"{card.ref} is indexed under {locations[0][0]} "
+                    f"but owned by {card.owner}"
+                )
         if self.state.priority_player is not None and self.state.priority_player not in self.active_seats:
             raise StateInvariantError("Priority belongs to a player who is not in the game")
         for player in self.state.players.values():
@@ -506,7 +541,7 @@ class CommanderEngine:
     def card_record(self, value: str | CardInstance) -> CardRecord | None:
         card = value if isinstance(value, CardInstance) else self.state.cards[value]
         if card.oracle_id.startswith(
-            ("custom-token:", "custom-copy:")
+            ("custom-token:", "custom-copy:", "custom-emblem:")
         ):
             return None
         return self.card_db.by_oracle_id(card.oracle_id)
@@ -808,33 +843,39 @@ class CommanderEngine:
         card = value if isinstance(value, CardInstance) else self.state.cards[value]
         record = self.card_record(card)
         if record is None:
-            token_characteristics = dict(
-                card.annotations.get("token_characteristics", {})
+            object_characteristics = dict(
+                card.annotations.get("object_characteristics")
+                or card.annotations.get("token_characteristics")
+                or {}
             )
             base = {
-                "name": card.printed_name,
+                "name": (
+                    ""
+                    if card.object_kind == "emblem"
+                    else card.printed_name
+                ),
                 "mana_cost": "",
-                "mana_value": token_characteristics.get(
+                "mana_value": object_characteristics.get(
                     "mana_value", 0
                 ),
                 "type_line": str(
-                    token_characteristics.get("type_line", "Token")
+                    object_characteristics.get("type_line", "Token")
                 ),
                 "oracle_text": str(
-                    token_characteristics.get("oracle_text", "")
+                    object_characteristics.get("oracle_text", "")
                 ),
-                "power": token_characteristics.get("power"),
-                "toughness": token_characteristics.get("toughness"),
-                "loyalty": token_characteristics.get("loyalty"),
-                "defense": token_characteristics.get("defense"),
+                "power": object_characteristics.get("power"),
+                "toughness": object_characteristics.get("toughness"),
+                "loyalty": object_characteristics.get("loyalty"),
+                "defense": object_characteristics.get("defense"),
                 "keywords": list(
-                    token_characteristics.get("keywords", [])
+                    object_characteristics.get("keywords", [])
                 ),
                 "colors": list(
-                    token_characteristics.get("colors", [])
+                    object_characteristics.get("colors", [])
                 ),
                 "produced_mana": list(
-                    token_characteristics.get("produced_mana", [])
+                    object_characteristics.get("produced_mana", [])
                 ),
             }
         else:
@@ -1362,7 +1403,10 @@ class CommanderEngine:
         # CR 400.7 gives the destination a new logical object.  Retain only
         # state covered by an implemented exception or by the token's initial
         # copiable characteristics.
-        retained_annotation_keys = {"token_characteristics"}
+        retained_annotation_keys = {
+            "object_characteristics",
+            "token_characteristics",
+        }
         if card.is_token or card.object_kind in {
             "spell_copy",
             "card_copy",
@@ -1702,7 +1746,7 @@ class CommanderEngine:
         enter_face: str | None = None,
         battle_protector: str | None = None,
         zone_timestamp: int | None = None,
-        position: str = "top",
+        position: str | int = "top",
         reveal_to: Iterable[str] | None = None,
         reason: str = "",
         log: bool = True,
@@ -1715,6 +1759,17 @@ class CommanderEngine:
         card = self.state.cards[object_id]
         requested_destination = destination
         origin = card.zone
+        library_position: str | int | None = None
+        if destination == "library":
+            library_position = self._library_position(position)
+        if (
+            origin == requested_destination
+            and origin not in {"library", "exile", "command"}
+        ):
+            return card
+        origin_identity_public = (
+            origin in PUBLIC_ZONES and not card.face_down
+        )
         if (
             card.is_token
             and card.has_left_battlefield
@@ -1736,6 +1791,61 @@ class CommanderEngine:
                         "rule": "111.8",
                     },
                     importance=2,
+                    changed_objects=[card.object_id],
+                    changed_players=[card.owner],
+                )
+            return card
+        if (
+            destination == "battlefield"
+            and card.is_card_object
+            and self._type_parts(
+                str(self._effective_card_data(card).get("type_line") or "")
+            )[0].intersection({"instant", "sorcery"})
+        ):
+            if log:
+                self._log(
+                    None,
+                    "zone.move.prevented",
+                    (
+                        f"{card.ref} remained in {origin}; an instant or "
+                        "sorcery card cannot enter the battlefield."
+                    ),
+                    {
+                        "object": card.ref,
+                        "from": origin,
+                        "requested_destination": requested_destination,
+                        "rule": "400.4a",
+                    },
+                    importance=2,
+                    changed_objects=[card.object_id],
+                    changed_players=[card.owner],
+                )
+            return card
+        if origin == "library" and requested_destination == "library":
+            library = self.state.players[card.owner].zones["library"]
+            if object_id not in library:
+                raise GameRuleError(
+                    "Library card is absent from its owner's library"
+                )
+            library.remove(object_id)
+            library.insert(
+                self._library_insertion_index(
+                    len(library),
+                    library_position,
+                ),
+                object_id,
+            )
+            if log:
+                self._log(
+                    card.owner,
+                    "library.reorder",
+                    f"{card.owner} changed a card's library position.",
+                    {
+                        "position": library_position,
+                        "reason": reason,
+                    },
+                    visibility=[card.owner, "analyst"],
+                    importance=1,
                     changed_objects=[card.object_id],
                     changed_players=[card.owner],
                 )
@@ -1772,7 +1882,24 @@ class CommanderEngine:
         departure_source_zones = {
             source.object_id: source.zone for source in departure_sources
         }
-        if origin != "stack":
+        if origin == "stack":
+            # A resolving or countered spell has already had its StackItem
+            # removed by that procedure.  A zone-changing effect can instead
+            # exile a card spell directly; remove its associated stack object
+            # at the same atomic boundary so no ghost spell remains.  A spell
+            # that moves its own underlying card while resolving remains a
+            # resolving stack object until every later instruction finishes.
+            if not any(
+                item.card_object_id == card.object_id
+                and item.context.get("currently_resolving")
+                for item in self.state.stack
+            ):
+                self.state.stack[:] = [
+                    item
+                    for item in self.state.stack
+                    if item.card_object_id != card.object_id
+                ]
+        else:
             self._remove_from_zone(card)
         self._reset_zone_change(
             card,
@@ -1828,15 +1955,24 @@ class CommanderEngine:
                 gained_at=card.zone_timestamp,
             )
         elif destination == "outside":
-            card.known_to = list(self.seats)
-            card.revealed_to = list(self.seats)
+            known = set(card.known_to)
+            known.add(card.owner)
+            card.known_to = sorted(known)
+            card.revealed_to = sorted(
+                viewer
+                for viewer in set(card.revealed_to)
+                if viewer in known
+            )
         else:
             owner_zone = self.state.players[card.owner].zones[destination]
             if destination == "library":
-                if position == "bottom":
-                    owner_zone.insert(0, object_id)
-                else:
-                    owner_zone.append(object_id)
+                owner_zone.insert(
+                    self._library_insertion_index(
+                        len(owner_zone),
+                        library_position,
+                    ),
+                    object_id,
+                )
                 card.known_to = [card.owner]
                 card.revealed_to = []
             else:
@@ -1846,11 +1982,57 @@ class CommanderEngine:
                     card.revealed_to = list(self.seats)
                 else:
                     known = {card.owner, *(reveal_to or [])}
+                    if destination == "hand":
+                        if origin_identity_public:
+                            known.update(self.seats)
                     card.known_to = sorted(known)
                     card.revealed_to = sorted(set(reveal_to or []))
         if replacement_source is not None and card.zone == "exile":
             card.counters["void"] = 1
-        if log:
+        identity_became_hidden = (
+            card.zone in HIDDEN_ZONES
+            and not origin_identity_public
+        )
+        if log and identity_became_hidden:
+            self._log(
+                None,
+                "zone.move",
+                (
+                    f"{card.owner} moved a card: "
+                    f"{origin} → {card.zone}."
+                ),
+                {
+                    "from": origin,
+                    "to": card.zone,
+                    "reason": reason,
+                },
+                changed_objects=[object_id],
+                changed_players=[card.owner, card.controller],
+            )
+            identity_visibility = {
+                card.owner,
+                "analyst",
+                *(reveal_to or []),
+            }
+            self._log(
+                None,
+                "zone.move.private",
+                (
+                    f"{card.ref} {card.printed_name}: "
+                    f"{origin} → {card.zone}."
+                ),
+                {
+                    "object": card.ref,
+                    "from": origin,
+                    "to": card.zone,
+                    "reason": reason,
+                    "tapped": card.tapped,
+                },
+                visibility=sorted(identity_visibility),
+                changed_objects=[object_id],
+                changed_players=[card.owner, card.controller],
+            )
+        elif log:
             self._log(
                 None,
                 "zone.move",
@@ -1891,6 +2073,40 @@ class CommanderEngine:
                 reason=reason,
             )
         return card
+
+    @staticmethod
+    def _library_position(position: str | int) -> str | int:
+        if isinstance(position, bool):
+            raise GameRuleError(
+                "Library position must be top, bottom, or a positive N"
+            )
+        if isinstance(position, int):
+            if position < 1:
+                raise GameRuleError(
+                    "Nth-from-top library position must be positive"
+                )
+            return position
+        normalized = str(position).strip().casefold()
+        if normalized not in {"top", "bottom"}:
+            raise GameRuleError(
+                "Library position must be top, bottom, or a positive N"
+            )
+        return normalized
+
+    @staticmethod
+    def _library_insertion_index(
+        library_size: int,
+        position: str | int | None,
+    ) -> int:
+        if position == "top":
+            return library_size
+        if position == "bottom":
+            return 0
+        if isinstance(position, int):
+            # The internal list stores the top card last. If fewer than N
+            # cards exist, CR 401.7 puts the incoming card on the bottom.
+            return max(0, library_size - position + 1)
+        raise GameRuleError("Validated library position is required")
 
     def _semantic_event_sources(
         self,
@@ -1996,12 +2212,29 @@ class CommanderEngine:
                 and card.is_card_object
                 and card.owner in self.active_seats
             ):
-                emblem_count = int(
-                    self.state.players[card.owner].stats.get(
-                        "daretti_emblems", 0
+                emblem_owner = self.state.players[card.owner]
+                emblem_sources: list[CardInstance | None] = [
+                    self.state.cards[object_id]
+                    for object_id in emblem_owner.zones["command"]
+                    if (
+                        self.state.cards[object_id].object_kind
+                        == "emblem"
+                        and self.state.cards[object_id].annotations.get(
+                            "emblem_semantic_key"
+                        )
+                        == "builtin:daretti-emblem"
                     )
-                )
-                for _ in range(emblem_count):
+                ]
+                if not emblem_owner.stats.get("emblem_objects_v1"):
+                    emblem_sources.extend(
+                        [None]
+                        * int(
+                            emblem_owner.stats.get(
+                                "daretti_emblems", 0
+                            )
+                        )
+                    )
+                for emblem in emblem_sources:
                     ref = self._next_ref("S")
                     event_triggers.append(
                         StackItem(
@@ -2016,6 +2249,11 @@ class CommanderEngine:
                                 "the next end step"
                             ),
                             semantic_key="builtin:daretti-emblem",
+                            source_object_id=(
+                                emblem.object_id
+                                if emblem is not None
+                                else None
+                            ),
                             visibility=list(self.seats),
                             context={
                                 "event": "artifact.graveyard",
@@ -10330,7 +10568,6 @@ class CommanderEngine:
             if public_schema is None:
                 self._counter_stack_item(
                     item.ref,
-                    destination=item.default_destination or "graveyard",
                     reason="no legal targets",
                     as_rule=True,
                     countered_by=item.controller,
@@ -11842,7 +12079,6 @@ class CommanderEngine:
         except (ValueError, GameRuleError):
             self._counter_stack_item(
                 item.ref,
-                destination=item.default_destination or "graveyard",
                 reason="target schema invalid at resolution",
                 as_rule=True,
                 countered_by=item.controller,
@@ -11916,7 +12152,6 @@ class CommanderEngine:
                 return True
             self._counter_stack_item(
                 item.ref,
-                destination=item.default_destination or "graveyard",
                 reason="all targets illegal on resolution",
                 as_rule=True,
                 countered_by=item.controller,
@@ -12042,6 +12277,7 @@ class CommanderEngine:
         item = next((candidate for candidate in self.state.stack if candidate.ref == stack_ref), None)
         if item is None:
             raise GameRuleError(f"Stack object {stack_ref} no longer exists")
+        item.context["currently_resolving"] = True
         index = 0
         while index < len(effects):
             effect = self._semantic_value(effects[index], item)
@@ -12170,6 +12406,7 @@ class CommanderEngine:
             index += 1
         # Remove the resolving object from stack only when all player choices
         # and effects have completed.
+        item.context.pop("currently_resolving", None)
         self.state.stack.remove(item)
         self._maybe_sacrifice_completed_saga(item)
         entered: CardInstance | None = None
@@ -15660,7 +15897,12 @@ class CommanderEngine:
                     "mana-value constraint"
                 )
         destination_spec = str(effect.get("destination") or "hand")
-        position = str(effect.get("destination_position") or "top")
+        position: str | int = effect.get(
+            "destination_position",
+            "top",
+        )
+        if position is None or position == "":
+            position = "top"
         destination = destination_spec
         if destination_spec in {"library_top", "top_of_library"}:
             destination, position = "library", "top"
@@ -18187,7 +18429,22 @@ class CommanderEngine:
                 once=True,
             ).ref
         if op in {"move", "sacrifice", "destroy", "exile", "bounce", "discard"}:
-            card = self._resolve_object(actor, str(effect["card"]))
+            # CR 403.2 supplies battlefield scope when a spell or ability
+            # doesn't name another zone.  The operation names below carry
+            # that ordinary scope; ``move`` and ``exile`` remain explicitly
+            # zone-polymorphic because reviewed target schemas and resolving
+            # object instructions use them for named nonbattlefield zones.
+            implicit_zones = {
+                "sacrifice": {"battlefield"},
+                "destroy": {"battlefield"},
+                "bounce": {"battlefield"},
+                "discard": {"hand"},
+            }
+            card = self._resolve_object(
+                actor,
+                str(effect["card"]),
+                zones=implicit_zones.get(op),
+            )
             if op == "destroy":
                 keywords = {
                     str(value).casefold()
@@ -18220,7 +18477,11 @@ class CommanderEngine:
                     if "tapped" in effect
                     else None
                 ),
-                position=str(effect.get("position") or "top"),
+                position=(
+                    effect["position"]
+                    if effect.get("position") is not None
+                    else "top"
+                ),
                 reason=reason,
                 semantic_events=True,
             )
@@ -18287,7 +18548,11 @@ class CommanderEngine:
                     if "tapped" in effect
                     else None
                 ),
-                position=str(effect.get("position") or "top"),
+                position=(
+                    effect["position"]
+                    if effect.get("position") is not None
+                    else "top"
+                ),
                 reason=reason,
                 semantic_events=True,
             )
@@ -19318,20 +19583,22 @@ class CommanderEngine:
             return None
         if op == "create_daretti_emblem":
             player = self.state.players[actor]
+            self.create_emblem(
+                actor,
+                abilities=[
+                    (
+                        "Whenever an artifact is put into your "
+                        "graveyard from the battlefield, return that "
+                        "card to the battlefield at the beginning of "
+                        "the next end step."
+                    )
+                ],
+                display_label="Daretti, Scrap Savant emblem",
+                semantic_key="builtin:daretti-emblem",
+                reason=reason,
+            )
             player.stats["daretti_emblems"] = (
                 int(player.stats.get("daretti_emblems", 0)) + 1
-            )
-            self._log(
-                actor,
-                "emblem.create",
-                f"{actor} created a Daretti, Scrap Savant emblem.",
-                {
-                    "name": "Daretti, Scrap Savant",
-                    "count": player.stats["daretti_emblems"],
-                    "reason": reason,
-                },
-                importance=3,
-                changed_players=[actor],
             )
             return player.stats["daretti_emblems"]
         if op == "grant_urzas_saga_chapter":
@@ -19968,8 +20235,24 @@ class CommanderEngine:
         if op == "look_top":
             seat = str(effect.get("player") or actor)
             viewer = str(effect.get("viewer") or actor)
-            count = int(effect.get("count", 1))
-            ids = list(reversed(self.state.players[seat].zones["library"][-count:]))
+            self._require_seat(seat, in_game=True)
+            self._require_seat(viewer, in_game=True)
+            try:
+                count = int(effect.get("count", 1))
+            except (TypeError, ValueError) as exc:
+                raise GameRuleError(
+                    "Library look count must be an integer"
+                ) from exc
+            if count < 0:
+                raise GameRuleError(
+                    "Library look count cannot be negative"
+                )
+            library = self.state.players[seat].zones["library"]
+            ids = (
+                list(reversed(library[-count:]))
+                if count
+                else []
+            )
             for oid in ids:
                 card = self.state.cards[oid]
                 card.known_to = sorted(set(card.known_to).union({viewer}))
@@ -19978,11 +20261,30 @@ class CommanderEngine:
         if op == "reorder_top":
             seat = str(effect.get("player") or actor)
             viewer = str(effect.get("viewer") or actor)
+            self._require_seat(seat, in_game=True)
+            self._require_seat(viewer, in_game=True)
             values = list(effect.get("cards") or [])  # top-first
             ids = [self._resolve_object(viewer, str(value), zones={"library"}).object_id for value in values]
             library = self.state.players[seat].zones["library"]
-            if any(oid not in library or viewer not in self.state.cards[oid].known_to for oid in ids):
-                raise GameRuleError("Can only reorder known cards currently in that library")
+            if len(ids) != len(set(ids)):
+                raise GameRuleError(
+                    "The same library card cannot be reordered twice"
+                )
+            current_top = (
+                list(reversed(library[-len(ids):]))
+                if ids
+                else []
+            )
+            if (
+                set(ids) != set(current_top)
+                or any(
+                    viewer not in self.state.cards[oid].known_to
+                    for oid in ids
+                )
+            ):
+                raise GameRuleError(
+                    "Can only reorder the exact known cards currently on top"
+                )
             for oid in ids:
                 library.remove(oid)
             # Internal library order stores top at the end.
@@ -20049,6 +20351,77 @@ class CommanderEngine:
             gained_at=card.zone_timestamp,
         )
         return object_id
+
+    def create_emblem(
+        self,
+        owner: str,
+        *,
+        abilities: Sequence[str],
+        display_label: str = "Emblem",
+        semantic_key: str | None = None,
+        reason: str = "emblem effect",
+    ) -> str:
+        """Create a public noncard, nonpermanent command-zone object."""
+
+        self._require_seat(owner, in_game=True)
+        normalized_abilities = [
+            str(ability).strip() for ability in abilities
+        ]
+        if (
+            not normalized_abilities
+            or any(not ability for ability in normalized_abilities)
+        ):
+            raise GameRuleError(
+                "An emblem must have at least one nonempty ability"
+            )
+        ref = self._next_ref("E")
+        object_id = self._stable_runtime_id("emblem-object", ref)
+        emblem = CardInstance(
+            object_id=object_id,
+            ref=ref,
+            oracle_id=(
+                "custom-emblem:"
+                + self._stable_runtime_id("emblem-oracle", ref)
+            ),
+            printed_name=str(display_label or "Emblem"),
+            owner=owner,
+            controller=owner,
+            zone="command",
+            object_kind="emblem",
+            zone_timestamp=self._next_zone_timestamp(),
+            annotations={
+                "display_label": str(display_label or "Emblem"),
+                "emblem_abilities": normalized_abilities,
+                "emblem_semantic_key": semantic_key,
+                "object_characteristics": {
+                    "type_line": "",
+                    "oracle_text": "\n".join(normalized_abilities),
+                    "colors": [],
+                    "keywords": [],
+                },
+            },
+            known_to=list(self.seats),
+            revealed_to=list(self.seats),
+        )
+        self.state.cards[object_id] = emblem
+        self.state.players[owner].zones["command"].append(object_id)
+        self.state.players[owner].stats["emblem_objects_v1"] = True
+        self._log(
+            owner,
+            "emblem.create",
+            f"{owner} created {emblem.printed_name}.",
+            {
+                "object": ref,
+                "label": emblem.printed_name,
+                "abilities": list(normalized_abilities),
+                "semantic_key": semantic_key,
+                "reason": reason,
+            },
+            importance=3,
+            changed_objects=[object_id],
+            changed_players=[owner],
+        )
+        return ref
 
     def create_token(
         self,

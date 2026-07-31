@@ -29,5 +29,6 @@ read-only workspace when filesystem isolation must also be demonstrated.
 
 ## Supported version
 
-Only the current private development branch receives security fixes. The
-project is experimental and has not undergone an independent security audit.
+Only the current development line receives security fixes. The repository is
+public, but the project remains experimental and has not undergone an
+independent security audit.

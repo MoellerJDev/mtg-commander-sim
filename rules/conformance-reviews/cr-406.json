@@ -1,0 +1,388 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 406 — Exile",
+  "cases": [
+    {
+      "rule_id": "406",
+      "rule_text_sha256": "2cfe1eac26d58540958a745b7e52416c7b3ddc631d4b22abe9dc9adb1269e5a5",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/exile.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_exile_rules.ExileRuleTests.test_contract_traces_every_cr_406_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; CR 406.1-8 carry exile movement, visibility, face-down pile, linkage, identity, and terminology requirements."
+      ]
+    },
+    {
+      "rule_id": "406.1",
+      "rule_text_sha256": "9ef2a2ff07ea3bafe2e9d2254a04a24037d59f636627ca318cef829c34a21cc1",
+      "classification": "structural",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "PlayerState.zones",
+        "CommanderEngine.move_card",
+        "StateProjector._snapshot",
+        "CardInstance.temporary_play_permission"
+      ],
+      "executable_test_ids": [
+        "tests.test_exile_rules.ExileRuleTests.test_exile_is_owner_indexed_public_holding_from_ordinary_zones",
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_defeated_may_be_declined_after_exile"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "blockers": [],
+      "notes": [
+        "The shared exile target domain is represented through owner-indexed presentation lists. Objects may remain there, return through an explicit movement instruction, or receive a bounded exact play permission. Every ordinary entry and return remains an auditable zone transition."
+      ]
+    },
+    {
+      "rule_id": "406.2",
+      "rule_text_sha256": "77956b9c8e281fb646603870bd6c95be41b11dc62f5068a4c0b73bedec970fa1",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine.move_card",
+        "CommanderEngine.apply_effect",
+        "CommanderEngine._assert_invariants",
+        "CommanderEngine._move_cards_simultaneously"
+      ],
+      "executable_test_ids": [
+        "tests.test_exile_rules.ExileRuleTests.test_exile_is_owner_indexed_public_holding_from_ordinary_zones",
+        "tests.test_exile_rules.ExileRuleTests.test_exiling_card_spell_removes_its_stack_object_and_ghosts_fail_invariant",
+        "tests.test_exact_deck_interactions.ExactDeckInteractionFamilyTests.test_bojuka_bog_targets_and_exiles_one_graveyard",
+        "tests.test_exact_mishra_closure.ExactMishraClosureTests.test_sundial_ends_turn_and_exiles_stack"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "The generic zone transition moves card objects into their owner's exile presentation from every represented normal per-card source. Exiling a card spell now atomically removes its StackItem, and the invariant rejects any stack item that references a nonstack card. Whole-graveyard and end-the-turn witnesses exercise batch and stack exile with exact replay elsewhere."
+      ]
+    },
+    {
+      "rule_id": "406.3",
+      "rule_text_sha256": "94555c88907d9dd6e84859148edea9dc8380b205c3e43f890b8f311fde8b783e",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CardInstance.face_down",
+        "CardInstance.known_to",
+        "CardInstance.revealed_to",
+        "CommanderEngine.move_card",
+        "StateProjector._card_visible"
+      ],
+      "executable_test_ids": [
+        "tests.test_exile_rules.ExileRuleTests.test_default_exile_is_face_up_and_authorized_face_down_identity_is_scoped",
+        "tests.test_permissions_projection.ArbiterBoundaryTests.test_arbiter_does_not_learn_face_down_public_object_identity"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer",
+        "hidden_information"
+      ],
+      "blockers": [
+        "generic_exile_face_down_instruction_missing",
+        "look_authorization_is_not_distinct_from_remembered_identity",
+        "persistent_face_down_exile_look_grant_lifecycle_missing",
+        "face_down_exile_visibility_replay_missing"
+      ],
+      "notes": [
+        "Ordinary exile entry is face up and public, while a manually represented face-down object is redacted from unauthorized pilots and the arbiter. The engine does not generically create face-down exile, distinguish permission to examine from prior knowledge, or persist and revoke that permission across all pile and zone transitions, so the complete rule remains blocked."
+      ]
+    },
+    {
+      "rule_id": "406.3a",
+      "rule_text_sha256": "18074d7ac11346c923051c43de9936860b9d55d2197799992b459804a078d347",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._target_candidate_rows",
+        "CommanderEngine._cast",
+        "CommanderEngine._reset_zone_change",
+        "StateProjector._obj"
+      ],
+      "executable_test_ids": [
+        "tests.test_exile_rules.ExileRuleTests.test_default_exile_is_face_up_and_authorized_face_down_identity_is_scoped",
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
+      "blockers": [
+        "face_down_exile_cast_announcement_boundary_missing",
+        "generic_face_down_play_permission_missing",
+        "face_down_land_play_turn_face_up_boundary_missing",
+        "complete_cr_708_characteristic_matrix_missing"
+      ],
+      "notes": [
+        "Unauthorized target generation uses no hidden front-face characteristics, and ordinary stack entry clears face-down status. Exact face-up Dauthi play permission is covered. The engine cannot yet turn a permitted face-down card face up at precisely the pre-announcement CR 601.2 boundary or support every face-down land and spell path."
+      ]
+    },
+    {
+      "rule_id": "406.3b",
+      "rule_text_sha256": "3e576d53c45cb7528a1076208fee71a84503e20de2dd1fb1c31e1999fa58bbae",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._compiled_zone_cast_permission",
+        "CommanderEngine._priority_action_hints",
+        "CommanderEngine._target_candidate_rows"
+      ],
+      "executable_test_ids": [
+        "tests.test_exile_rules.ExileRuleTests.test_default_exile_is_face_up_and_authorized_face_down_identity_is_scoped"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "negative",
+        "hidden_information"
+      ],
+      "blockers": [
+        "quality_constrained_face_down_exile_cast_permission_missing",
+        "look_permission_predicate_missing",
+        "resulting_spell_quality_validation_missing",
+        "face_down_exile_cast_replay_missing"
+      ],
+      "notes": [
+        "The characteristic filter proves an unauthorized viewer cannot use a hidden front to satisfy a creature predicate. No generic permission combines an authorized look with resulting-spell quality validation, so this casting family remains blocked."
+      ]
+    },
+    {
+      "rule_id": "406.4",
+      "rule_text_sha256": "2bc4716049486b756671f4854b0a356925d4ff20bfd5bb3431f84e78ac8bb26b",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CardInstance.face_down",
+        "StateProjector._zone",
+        "CommanderEngine._target_candidate_rows",
+        "PermissionManager"
+      ],
+      "executable_test_ids": [
+        "tests.test_exile_rules.ExileRuleTests.test_face_down_exile_piles_and_random_selection_are_not_represented"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "negative",
+        "multiplayer",
+        "hidden_information"
+      ],
+      "blockers": [
+        "face_down_exile_pile_identity_missing",
+        "pile_level_selection_schema_missing",
+        "server_random_card_selection_within_pile_missing",
+        "post_cost_payment_reveal_boundary_missing",
+        "face_down_pile_choice_replay_missing"
+      ],
+      "notes": [
+        "The characterization shows two face-down cards as separately referenced public objects with no pile metadata and no ordering or random-selection decision. The required grouping, pile choice, server randomness, and delayed reveal after full payment are therefore explicitly blocked."
+      ]
+    },
+    {
+      "rule_id": "406.5",
+      "rule_text_sha256": "e51e9e01f6471d048791192952a4e7bf04ea51c4f19bc3b5386a9c2a27c6d9eb",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CardInstance.annotations",
+        "CommanderEngine._temporary_play_permission",
+        "CommanderEngine.apply_effect",
+        "DelayedTrigger"
+      ],
+      "executable_test_ids": [
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_defeated_may_be_declined_after_exile"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "blockers": [
+        "generic_exile_pile_provenance_missing",
+        "multiple_return_instruction_partition_missing",
+        "own_ability_exile_impact_partition_missing",
+        "cross_source_exile_pile_replay_missing"
+      ],
+      "notes": [
+        "Exact effects can attach a source-scoped temporary permission or continue a represented Siege action, but exile storage has no generic pile/provenance partition for arbitrary return instructions or abilities that operate from exile."
+      ]
+    },
+    {
+      "rule_id": "406.6",
+      "rule_text_sha256": "8508fef07364068acb4a896961c1419072c047cbc4dc358205826f51a5ddc6b9",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CardInstance.annotations",
+        "CommanderEngine.apply_effect",
+        "OracleIRCompiler",
+        "CR 607 conformance contract"
+      ],
+      "executable_test_ids": [
+        "tests.test_linked_abilities.LinkedAbilityRuleTests.test_contract_traces_every_cr_607_rule",
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "blockers": [
+        "generic_linked_ability_pair_recognition_missing",
+        "exiled_with_exact_source_identity_set_missing",
+        "copied_link_and_zone_change_behavior_missing",
+        "linked_exile_set_replay_missing"
+      ],
+      "notes": [
+        "Dauthi has an exact void-counter permission, but that witness is not generic recognition of printed linked abilities or an exiled-with identity set. CR 607 remains blocked for the required pairing, copying, and zone-change semantics."
+      ]
+    },
+    {
+      "rule_id": "406.7",
+      "rule_text_sha256": "b7646abfb1b772c7746372ac32eae0ee0617a66285a9d63a3c3a450131216d07",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CardInstance.logical_object_id",
+        "CardInstance.zone_change_counter",
+        "CardInstance.zone_timestamp",
+        "CommanderEngine.move_card",
+        "CommanderEngine._reset_zone_change"
+      ],
+      "executable_test_ids": [
+        "tests.test_exile_rules.ExileRuleTests.test_reexiling_creates_a_new_object_and_moves_it_to_exile_top"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "blockers": [],
+      "notes": [
+        "Unlike an ordinary same-zone no-op, exile-to-exile movement removes and reinserts the card, increments its zone-change counter, assigns a later timestamp, and allocates a new logical incarnation. The physical card reference remains stable while all old-object links become stale."
+      ]
+    },
+    {
+      "rule_id": "406.8",
+      "rule_text_sha256": "940efd69f9057a168508f947f612fdd5d27d0983214258606278a25da4299ae4",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "CardDatabase",
+        "Scryfall Oracle snapshot",
+        "mechanics/contracts/exile.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_exile_rules.ExileRuleTests.test_pinned_oracle_data_uses_exile_not_legacy_removed_terms"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "The engine consumes pinned current Oracle text rather than printed text, and the exact offline fixture contains no removed-from-the-game or set-aside rules wording. Historical aliases therefore require source/data traceability rather than additional runtime zones."
+      ]
+    }
+  ]
+}

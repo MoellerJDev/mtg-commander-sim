@@ -1,10 +1,16 @@
 {
-  "contract_count": 42,
+  "contract_count": 49,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
       "path": "mechanics/contracts/activating-activated-abilities.json",
       "sha256": "8089269fe906ed542e98649171867d8c7f8d16240fcc0861f93dcd616dd0a5b8",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-407-ante",
+      "path": "mechanics/contracts/ante.json",
+      "sha256": "faecdde543bd72d13cf2f39fee5aec8a48bf12a3075212e0793e16caee95b0b1",
       "version": 1
     },
     {
@@ -18,6 +24,12 @@
       "path": "mechanics/contracts/basic-token-creation.json",
       "sha256": "6a3e8b566af1361f9812d74274be25153e9919e174ba191427644639be0f8d2a",
       "version": 2
+    },
+    {
+      "mechanic_id": "cr-403-battlefield",
+      "path": "mechanics/contracts/battlefield.json",
+      "sha256": "6c770d44e066d4d56d300fc624925d90aaceb804f8144f871838f4aaf500eadc",
+      "version": 1
     },
     {
       "mechanic_id": "cr-310-battles",
@@ -59,6 +71,12 @@
       "mechanic_id": "cr-506-combat-phase",
       "path": "mechanics/contracts/combat-phase.json",
       "sha256": "b00a1774a8c461d0d7377ad7e96f9fd00d769d4808c09b20cc8561a4950152f3",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-408-command",
+      "path": "mechanics/contracts/command-zone.json",
+      "sha256": "e90bd65d12a1e39a0450a82d71d4f60a1d495c7b3042d4816d1767cfaf3395cc",
       "version": 1
     },
     {
@@ -134,9 +152,27 @@
       "version": 1
     },
     {
+      "mechanic_id": "cr-406-exile",
+      "path": "mechanics/contracts/exile.json",
+      "sha256": "b14115d08b3ba68d0120dbc44d825ced9b19810582a7dd9a59e118c29af82fee",
+      "version": 1
+    },
+    {
       "mechanic_id": "flying",
       "path": "mechanics/contracts/flying.json",
       "sha256": "e75cae496f5ecaa720ef71ae1c7d73eab1066fd69b5f2e9ca98c12128b4b35c2",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-404-graveyard",
+      "path": "mechanics/contracts/graveyard.json",
+      "sha256": "af5de20be216a5752642a745758762d98b49a232bc083f57cf36c23aed02d1d1",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-402-hand",
+      "path": "mechanics/contracts/hand.json",
+      "sha256": "495b717cbf0b25a86ed2b3afe41e1992df6f42108ff72778709d6f6b2837dedb",
       "version": 1
     },
     {
@@ -150,6 +186,12 @@
       "path": "mechanics/contracts/handling-triggered-abilities.json",
       "sha256": "c4ef9db1a0beb241d0ab314d810bb40bc1e1782e935ae00ba855a7f05c21fb02",
       "version": 2
+    },
+    {
+      "mechanic_id": "cr-401-library",
+      "path": "mechanics/contracts/library.json",
+      "sha256": "17b0c15bcad39e8fd2c49caa402bdc5d784021eec20177b25feba3318e43deb8",
+      "version": 1
     },
     {
       "mechanic_id": "cr-607-linked-abilities",
@@ -178,8 +220,8 @@
     {
       "mechanic_id": "cr-400-general",
       "path": "mechanics/contracts/object-zone-identity.json",
-      "sha256": "325de592aa5bbcdda02dbe73f6160ba68ab2bdb1d09d6f7a078315411a73b382",
-      "version": 3
+      "sha256": "cec27688887e90bcdbf3d591c4cdc63316caae94833fd04a065d3ffa5be278c3",
+      "version": 4
     },
     {
       "mechanic_id": "cr-615-prevention-effects",
@@ -5928,19 +5970,23 @@
     {
       "category": "zones",
       "contract_path": "mechanics/contracts/object-zone-identity.json",
-      "contract_sha256": "325de592aa5bbcdda02dbe73f6160ba68ab2bdb1d09d6f7a078315411a73b382",
-      "contract_version": 3,
+      "contract_sha256": "cec27688887e90bcdbf3d591c4cdc63316caae94833fd04a065d3ffa5be278c3",
+      "contract_version": 4,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "CardInstance.zone_change_counter and zone_timestamp, GameState.timestamp_sequence, CommanderEngine.move_card, target revalidation, and identity-guarded semantic moves",
-      "implementation_version": "object-incarnation-v3",
+      "implementation_version": "object-incarnation-v4",
       "kind": "rules_section",
       "known_blockers": [
         "the complete CR 400.7a-m exception matrix is not represented as typed continuation policies",
+        "conspiracy, phenomenon, plane, scheme, and vanguard command-zone immobility is not represented",
+        "complete ordered-zone mutation authorization and face-down pile ordering are not represented",
         "merged permanents, meld components, stickers, and complete face-down object identity are not implemented",
         "turning a face-up command-zone object face down does not yet create a new incarnation",
         "all legacy semantic references have not yet migrated from physical refs to typed logical handles",
         "all simultaneous replacement choices are not yet routed through the CR 616 ordering engine",
+        "sideboards, outside-the-game wish effects, and their lifecycle are not represented",
+        "complete effects that instruct actions over every card in a zone are not compiled generically",
         "complete CR 613.7m APNAP relative-timestamp choices are not represented"
       ],
       "mechanic_id": "cr-400-general",
@@ -5949,6 +5995,12 @@
         "400"
       ],
       "test_ids": [
+        "test_contract_traces_every_cr_400_rule",
+        "test_zone_topology_and_visibility_match_the_pinned_rules",
+        "test_nonbattlefield_destination_uses_the_owners_zone",
+        "test_instant_or_sorcery_cannot_enter_battlefield",
+        "test_same_graveyard_move_is_a_no_op",
+        "test_hidden_card_moved_outside_is_not_revealed_or_targetable",
         "test_zone_changes_create_serialized_logical_incarnations",
         "test_incarnation_counter_is_monotonic_under_zone_mutation",
         "test_draw_crosses_the_canonical_incarnation_boundary",
@@ -5971,62 +6023,143 @@
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/library.json",
+      "contract_sha256": "17b0c15bcad39e8fd2c49caa402bdc5d784021eec20177b25feba3318e43deb8",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine.create, move_card library insertion, shuffle_library, look_top/reorder_top effects, and StateProjector library count/knowledge projection",
+      "implementation_version": "library-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "complete owner-secret ordering when two or more cards are put into one library position simultaneously is not represented",
+        "continuous play-with-top-revealed and may-look-at-top permissions are not represented",
+        "top-card visibility is not frozen across every CR 601, CR 602, and CR 116 procedure",
+        "a top card that stops and resumes being revealed does not receive the special CR 401.6 new-object identity",
+        "complete generic Oracle grammar for every library-ordering instruction remains incomplete"
+      ],
       "mechanic_id": "cr-401-library",
       "official_name": "Library",
       "rule_references": [
         "401"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_401_rule",
+        "test_deck_cards_initialize_in_library_before_opening_draws",
+        "test_library_order_is_hidden_but_every_count_is_public",
+        "test_look_top_zero_is_empty_and_negative_fails_atomically",
+        "test_reorder_requires_the_exact_known_current_top_set",
+        "test_nth_from_top_and_short_library_fallback_are_generic",
+        "test_shuffle_forgets_known_library_positions",
+        "test_senseis_divining_top_reorders_and_draws_to_library",
+        "test_top_library_knowledge_and_reorder"
+      ],
       "trust_level": "untrusted"
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/hand.json",
+      "contract_sha256": "495b717cbf0b25a86ed2b3afe41e1992df6f42108ff72778709d6f6b2837dedb",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine.create/draw/move_card/cleanup discard, PlayerState hand and maximum size, and StateProjector multi-seat hand knowledge projection",
+      "implementation_version": "hand-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "continuous maximum-hand-size modifiers and no-maximum effects are not compiled through CR 613.11",
+        "complete Oracle grammar for arbitrary reveal, look-at-hand, and private simultaneous hand-choice effects remains incomplete",
+        "complete draw and zone-change replacement ordering remains incomplete",
+        "browser-local hand arrangement controls are not yet implemented, although authoritative hand order is rules-insignificant"
+      ],
       "mechanic_id": "cr-402-hand",
       "official_name": "Hand",
       "rule_references": [
         "402"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_402_rule",
+        "test_starting_hand_size_and_effect_moves_are_generic",
+        "test_hand_may_exceed_maximum_until_cleanup",
+        "test_hidden_card_put_into_hand_keeps_identity_private",
+        "test_public_card_returned_to_hand_remains_known_not_lookable",
+        "test_revealed_hand_identity_is_scoped_to_authorized_viewers",
+        "test_owner_hand_remains_visible_while_controlling_a_player",
+        "test_hand_order_is_private_and_owner_projection_is_always_available",
+        "test_cleanup_discard_is_exact_simultaneous_private_and_replayable",
+        "test_mindslaver_routes_controlled_turn_to_controller_pilot"
+      ],
       "trust_level": "untrusted"
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/battlefield.json",
+      "contract_sha256": "6c770d44e066d4d56d300fc624925d90aaceb804f8144f871838f4aaf500eadc",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine battlefield membership, zone movement, target domains, control changes, attachments, object identity, and StateProjector controller presentation",
+      "implementation_version": "battlefield-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "complete CR 400.7 zone-change exception coverage is not implemented",
+        "complete continuous-effect layer and dependency coverage is not implemented",
+        "complete replacement-effect ordering for battlefield entry is not implemented",
+        "complete Aura, Equipment, Fortification, and player-attachment grammar is not implemented",
+        "complete face-down battlefield characteristic handling is not implemented",
+        "the full Oracle corpus has not been proven to use only trusted cross-zone target and effect schemas"
+      ],
       "mechanic_id": "cr-403-battlefield",
       "official_name": "Battlefield",
       "rule_references": [
         "403"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_403_rule",
+        "test_battlefield_starts_empty_and_is_one_shared_target_domain",
+        "test_controller_index_and_cross_controller_attachment_are_preserved",
+        "test_unqualified_effect_and_target_scope_default_to_battlefield",
+        "test_permanent_category_exists_only_on_the_battlefield",
+        "test_battlefield_entry_allocates_a_new_incarnation_except_400_7a",
+        "test_pinned_oracle_data_uses_battlefield_not_legacy_in_play_terms",
+        "test_permanent_spell_copy_becomes_the_same_token_object",
+        "test_target_that_leaves_and_returns_is_a_new_illegal_object"
+      ],
       "trust_level": "untrusted"
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/graveyard.json",
+      "contract_sha256": "af5de20be216a5752642a745758762d98b49a232bc083f57cf36c23aed02d1d1",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine owner-zone movement, graveyard ordering and replacement preflight; StateProjector public graveyard projection; stack counter and resolution paths",
+      "implementation_version": "graveyard-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "a player-owned ordering decision is not issued when two or more cards enter the same graveyard simultaneously",
+        "complete replacement-effect choice and ordering is not implemented",
+        "complete state-based-action and simultaneous-effect producers are not implemented",
+        "graveyard-order-changing tournament policy is not modeled",
+        "the full Oracle corpus has not been proven to use only trusted graveyard movement and target schemas"
+      ],
       "mechanic_id": "cr-404-graveyard",
       "official_name": "Graveyard",
       "rule_references": [
         "404"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_404_rule",
+        "test_graveyards_start_empty_and_common_causes_use_owner_top",
+        "test_rules_countered_permanent_spell_uses_graveyard_not_resolution_destination",
+        "test_graveyard_is_face_up_public_ordered_and_not_reordered_by_same_zone_move",
+        "test_graveyard_owner_index_is_an_authoritative_invariant",
+        "test_graveyard_replacement_is_decided_before_the_move",
+        "test_simultaneous_same_owner_order_is_still_caller_determined",
+        "test_countered_spell_copy_reaches_graveyard_then_ceases",
+        "test_an_offer_empty_stack_and_treasure_resolution"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -6070,47 +6203,110 @@
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/exile.json",
+      "contract_sha256": "b14115d08b3ba68d0120dbc44d825ced9b19810582a7dd9a59e118c29af82fee",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine exile movement, stack removal, logical incarnations, scoped play permissions and targets; StateProjector public/face-down exile projection",
+      "implementation_version": "exile-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "generic exile-face-down instruction and persistent look authorization are missing",
+        "face-down play does not turn the card face up at the exact CR 601.2 announcement boundary",
+        "quality-constrained casting from face-down exile is not generic",
+        "face-down pile identity and random selection after full cost payment are missing",
+        "generic temporary-return and own-ability exile piles are missing",
+        "complete linked-ability provenance and copied-link behavior are missing",
+        "the full Oracle corpus has not been proven to use only trusted exile instructions and permissions"
+      ],
       "mechanic_id": "cr-406-exile",
       "official_name": "Exile",
       "rule_references": [
         "406"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_406_rule",
+        "test_exile_is_owner_indexed_public_holding_from_ordinary_zones",
+        "test_exiling_card_spell_removes_its_stack_object_and_ghosts_fail_invariant",
+        "test_default_exile_is_face_up_and_authorized_face_down_identity_is_scoped",
+        "test_face_down_exile_piles_and_random_selection_are_not_represented",
+        "test_reexiling_creates_a_new_object_and_moves_it_to_exile_top",
+        "test_pinned_oracle_data_uses_exile_not_legacy_removed_terms",
+        "test_bojuka_bog_targets_and_exiles_one_graveyard",
+        "test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free",
+        "test_sundial_ends_turn_and_exiles_stack"
+      ],
       "trust_level": "untrusted"
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/ante.json",
+      "contract_sha256": "faecdde543bd72d13cf2f39fee5aec8a48bf12a3075212e0793e16caee95b0b1",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine profile and destination allowlists; DeckLoader.validate_commander_deck pinned legality enforcement",
+      "implementation_version": "ante-exclusion-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "the optional ante game variant is not a supported product profile",
+        "the ante zone, random pregame contribution, public inspection, and end-game ownership transfer are not represented",
+        "ante actions and owner-only ante authorization are not represented",
+        "outside-game imports remain blocked generically",
+        "tournament-policy and local-law determinations are external to the rules engine"
+      ],
       "mechanic_id": "cr-407-ante",
       "official_name": "Ante",
       "rule_references": [
         "407"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_407_rule",
+        "test_commander_profiles_reject_ante_and_have_no_ante_zone",
+        "test_ante_moves_fail_closed_without_state_change",
+        "test_commander_legality_rejects_ante_cards_in_deck_and_sideboard",
+        "test_supported_commander_lists_remain_legal",
+        "test_hidden_card_moved_outside_is_not_revealed_or_targetable"
+      ],
       "trust_level": "untrusted"
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/command-zone.json",
+      "contract_sha256": "e90bd65d12a1e39a0450a82d71d4f60a1d495c7b3042d4816d1767cfaf3395cc",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CardInstance emblem object kind, CommanderEngine.create_emblem and command-source trigger binding, StateProjector command object projection",
+      "implementation_version": "command-zone-emblems-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "Planechase plane and phenomenon cards are not represented",
+        "Vanguard cards are not represented",
+        "Archenemy scheme cards are not represented",
+        "Conspiracy Draft conspiracies are not represented",
+        "generic arbitrary emblem ability compilation is incomplete",
+        "emblem continuous, replacement, activated, and triggered ability coverage is not corpus-complete",
+        "face-down command-zone object transitions remain incomplete",
+        "complete Commander command-zone replacement and casting rules remain separate CR 903 dependencies"
+      ],
       "mechanic_id": "cr-408-command",
       "official_name": "Command",
       "rule_references": [
         "408"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_408_rule",
+        "test_command_zone_is_public_across_all_commander_seats",
+        "test_generic_emblem_is_a_persistent_noncard_command_object",
+        "test_command_zone_objects_are_not_destroyable_permanents",
+        "test_daretti_emblem_triggers_from_its_exact_command_object",
+        "test_daretti_emblem_creation_exact_replays",
+        "test_noncommander_command_variants_remain_fail_closed",
+        "test_daretti_loyalty_exchange_and_emblem_return",
+        "test_daretti_ruling_does_not_follow_a_reentered_card"
+      ],
       "trust_level": "untrusted"
     },
     {
