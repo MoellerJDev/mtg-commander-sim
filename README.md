@@ -140,6 +140,9 @@ generated documentation fixtures with bearer capabilities redacted. See
   now used for common copy/type/keyword annotations
 - CR 616 replacement/prevention priority and affected-player-choice
   primitives
+- source-reviewed CR 609 effect foundations with fail-closed condition
+  predicates and explicit blockers for universal zone scope, impossible
+  instructions, `as though`, tie handling, and damage-source derivation
 - trust-aware semantic preflight for files and live Moxfield URLs
 - compact cast, land, activation, target, and generic resolution-time search
   templates

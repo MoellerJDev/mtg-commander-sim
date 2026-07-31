@@ -95,6 +95,26 @@ def _condition_matches(
             else event.payload.get(field)
         )
         if isinstance(expected, Mapping):
+            supported_predicates = {
+                "in",
+                "not_in",
+                "eq",
+                "contains",
+            }
+            unsupported = sorted(
+                str(predicate)
+                for predicate in expected
+                if predicate not in supported_predicates
+            )
+            if unsupported:
+                raise ReplacementEffectError(
+                    "Unsupported replacement condition predicate(s): "
+                    + ", ".join(unsupported)
+                )
+            if not expected:
+                raise ReplacementEffectError(
+                    "Replacement condition predicates cannot be empty"
+                )
             if "in" in expected and actual not in expected["in"]:
                 return False
             if "not_in" in expected and actual in expected["not_in"]:

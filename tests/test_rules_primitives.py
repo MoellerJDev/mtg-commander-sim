@@ -832,5 +832,116 @@ class PreventionEffectTests(unittest.TestCase):
             apply_replacement(choice, [prevention], "prevent")
 
 
+class EffectRuleTests(unittest.TestCase):
+    @staticmethod
+    def source_shield():
+        return ReplacementEffect(
+            effect_id="red-source-shield",
+            source_id="shield",
+            event_kind="damage",
+            replacement_class=ReplacementClass.OTHER,
+            conditions={"source_color": "red"},
+            operations=({"op": "prevent", "amount": 3},),
+        )
+
+    @staticmethod
+    def damage_event(event_id, *, source_color):
+        return ReplaceableEvent(
+            event_id=event_id,
+            kind="damage",
+            affected_player="A",
+            payload={
+                "amount": 3,
+                "source_color": source_color,
+            },
+        )
+
+    def test_contract_traces_every_cr_609_rule(self):
+        root = Path(__file__).resolve().parents[1]
+        contract = json.loads(
+            (
+                root
+                / "mechanics"
+                / "contracts"
+                / "effects.json"
+            ).read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(
+            {
+                "609",
+                "609.1",
+                "609.2",
+                "609.3",
+                "609.4",
+                "609.4a",
+                "609.4b",
+                "609.5",
+                "609.6",
+                "609.7",
+                "609.7a",
+                "609.7b",
+                "609.7c",
+            },
+            {
+                rule_id
+                for rule_id in contract["rule_references"]
+                if str(rule_id).startswith("609")
+            },
+        )
+
+    def test_source_property_mismatch_does_not_consume_shield(self):
+        shield = self.source_shield()
+        mismatching = self.damage_event(
+            "damage:blue",
+            source_color="blue",
+        )
+        matching = self.damage_event(
+            "damage:red",
+            source_color="red",
+        )
+
+        self.assertIsNone(replacement_choice(mismatching, [shield]))
+        choice = replacement_choice(matching, [shield])
+        self.assertEqual(("red-source-shield",), choice.options)
+
+        changed = apply_replacement(
+            choice,
+            [shield],
+            "red-source-shield",
+        )
+        self.assertEqual(0, changed.payload["amount"])
+        self.assertEqual(
+            ("red-source-shield",),
+            changed.applied_effects,
+        )
+
+    def test_unknown_source_predicate_fails_closed(self):
+        unsupported = ReplacementEffect(
+            effect_id="unsupported-source-test",
+            source_id="shield",
+            event_kind="damage",
+            replacement_class=ReplacementClass.OTHER,
+            conditions={
+                "source_color": {
+                    "starts_with": "r",
+                }
+            },
+            operations=({"op": "prevent", "amount": 1},),
+        )
+
+        with self.assertRaisesRegex(
+            ReplacementEffectError,
+            "Unsupported replacement condition predicate",
+        ):
+            replacement_choice(
+                self.damage_event(
+                    "damage:red",
+                    source_color="red",
+                ),
+                [unsupported],
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

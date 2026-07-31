@@ -74,6 +74,7 @@ class MechanicContractTests(unittest.TestCase):
                 "cr-310-battles",
                 "cr-400-general",
                 "cr-603-handling-triggered-abilities",
+                "cr-609-effects",
                 "cr-611-continuous-effects",
                 "cr-614-replacement-effects",
                 "cr-615-prevention-effects",

@@ -1,5 +1,5 @@
 {
-  "contract_count": 17,
+  "contract_count": 18,
   "contracts": [
     {
       "mechanic_id": "cr-122-counters",
@@ -48,6 +48,12 @@
       "path": "mechanics/contracts/defense.json",
       "sha256": "d91f723c5f4cc92a3201fb51ef88145a896e08f1dc967e3bb89e122294f6e6f4",
       "version": 2
+    },
+    {
+      "mechanic_id": "cr-609-effects",
+      "path": "mechanics/contracts/effects.json",
+      "sha256": "f1360921a4ab49d10db14a3055c71ba6b8385ca606b407159fe23d0144d784c9",
+      "version": 1
     },
     {
       "mechanic_id": "flying",
@@ -6313,17 +6319,33 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/effects.json",
+      "contract_sha256": "f1360921a4ab49d10db14a3055c71ba6b8385ca606b407159fe23d0144d784c9",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine._apply_effect and replacement_effects",
+      "implementation_version": "effects-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "there is no universal typed effect executor covering every instruction and zone",
+        "as-though permissions and actual mana-spend provenance are not modeled generically",
+        "tie resolution is not a required typed semantic-program field",
+        "damage-source choices and properties are not derived from authoritative object state for every producer",
+        "stateful shields and static effects are not registered from generic Oracle semantics"
+      ],
       "mechanic_id": "cr-609-effects",
       "official_name": "Effects",
       "rule_references": [
         "609"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_609_rule",
+        "test_source_property_mismatch_does_not_consume_shield",
+        "test_unknown_source_predicate_fails_closed",
+        "test_prevention_never_prevents_more_than_remaining_damage",
+        "test_static_prevention_applies_separately_to_each_event"
+      ],
       "trust_level": "untrusted"
     },
     {

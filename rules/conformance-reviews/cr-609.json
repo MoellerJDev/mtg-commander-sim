@@ -1,0 +1,374 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 609 — Effects",
+  "cases": [
+    {
+      "rule_id": "609",
+      "rule_text_sha256": "358511c8c09805c9c10b1ba11157ed0c08ced8599d59e27e16fa226bdc32d63e",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/effects.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.EffectRuleTests.test_contract_traces_every_cr_609_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; every numbered CR 609 record is pinned by the Effects contract."
+      ]
+    },
+    {
+      "rule_id": "609.1",
+      "rule_text_sha256": "bcfa4c48fafc98d363fd6cfd9b9d429188b24ba68203871c7abd888fa3b59770",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_effect",
+        "oracle_ir.OracleIRCompiler",
+        "mechanics/contracts/effects.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.EffectRuleTests.test_contract_traces_every_cr_609_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Defines effects and their one-shot, continuous, resolving-ability, and static-ability origins; behavioral coverage belongs to the corresponding effect-family contracts."
+      ]
+    },
+    {
+      "rule_id": "609.2",
+      "rule_text_sha256": "7d90bacb285161bb6bff120bce46820c9bd7c685b623ab6ae381fc95cfad78ff",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_effect",
+        "oracle_ir.OracleIRCompiler"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.EffectRuleTests.test_contract_traces_every_cr_609_rule"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "effect instructions do not carry a universal typed zone-applicability predicate",
+        "the Oracle compiler does not prove every clear off-battlefield instruction scope",
+        "no cross-family test establishes the battlefield default without overexposing hidden-zone objects"
+      ],
+      "notes": [
+        "Individual operations select specific zones, but that is not evidence for the universal CR 609.2 default."
+      ]
+    },
+    {
+      "rule_id": "609.3",
+      "rule_text_sha256": "7e41a214bb2466576dd54fe2c4ee511400550784f2513e5885f45fdfc78f42fa",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_effect",
+        "replacement_effects.apply_replacement"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_prevention_never_prevents_more_than_remaining_damage",
+        "tests.test_rules_primitives.EffectRuleTests.test_contract_traces_every_cr_609_rule"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive"
+      ],
+      "blockers": [
+        "partial completion is implemented separately by individual operations rather than a universal typed instruction executor",
+        "compound effects do not all distinguish impossible instructions from material semantic uncertainty",
+        "the Oracle compiler cannot yet prove that every remaining instruction is attempted in order"
+      ],
+      "notes": [
+        "Prevention safely clamps to the remaining damage, but this witness cannot promote the general do-as-much-as-possible rule."
+      ]
+    },
+    {
+      "rule_id": "609.4",
+      "rule_text_sha256": "7ec931ce8d6005d527cc89e462c7dee491275ee08438c1c142a6a6869b6e7896",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/effects.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.EffectRuleTests.test_contract_traces_every_cr_609_rule"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "the permissions model has no generic scoped as-though condition",
+        "legality generation cannot apply a hypothetical condition to only the stated action while preserving normal state elsewhere"
+      ],
+      "notes": [
+        "Unsupported as-though templates remain unresolved during semantic preflight rather than being approximated."
+      ]
+    },
+    {
+      "rule_id": "609.4a",
+      "rule_text_sha256": "186f93ce336ccbca40ea86cd9d9568d96968109551ddc658ef71e61a2e33830b",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/effects.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.EffectRuleTests.test_contract_traces_every_cr_609_rule"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "generic as-though permissions are not represented",
+        "multiple hypothetical conditions cannot be composed or shown to satisfy one another"
+      ],
+      "notes": [
+        "This rule depends on the missing CR 609.4 permission model."
+      ]
+    },
+    {
+      "rule_id": "609.4b",
+      "rule_text_sha256": "38a7e8738a98e0c5509774b4196c94a063025c7ba33d86b538ecb77fb84a087b",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "mana.ManaMode",
+        "mana.ManaPlan",
+        "mana.auto_plan_payment"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.EffectRuleTests.test_contract_traces_every_cr_609_rule"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "negative"
+      ],
+      "blockers": [
+        "mana-payment plans do not represent a scoped as-though spending permission",
+        "the payment record does not retain authoritative identity and actual type or color for every mana unit spent",
+        "cost requirements and payment permissions are not separately modeled for this family"
+      ],
+      "notes": [
+        "Conditional mana modes are not silently auto-spent, but fail-closed behavior is not positive support for as-though payment."
+      ]
+    },
+    {
+      "rule_id": "609.5",
+      "rule_text_sha256": "60ebd70747fbbc5028acffc1bfff37687468f18bfb73e16f3742360b9c323fad",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler",
+        "CommanderEngine._apply_effect"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.EffectRuleTests.test_contract_traces_every_cr_609_rule"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "potentially tied comparisons do not require a typed tie-resolution branch in every semantic program",
+        "the generic executor has no invariant forbidding an implicit engine-default winner"
+      ],
+      "notes": [
+        "Card-specific operations may encode tie behavior, but universal enforcement is unproved."
+      ]
+    },
+    {
+      "rule_id": "609.6",
+      "rule_text_sha256": "808da222aae4d1b95323d13addb2a8272a08ce47a599b5cd37b8dfd51348a943",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/continuous-layers.json",
+        "mechanics/contracts/unconditional-enters-tapped.json",
+        "mechanics/contracts/prevention-effects.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.EffectRuleTests.test_contract_traces_every_cr_609_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Cross-reference identifying replacement and prevention effects as continuous-effect families; their behavior is reviewed under CR 614 through CR 616."
+      ]
+    },
+    {
+      "rule_id": "609.7",
+      "rule_text_sha256": "7a91b5827cb1cc5451bf69680a9edeafc521112c59e18f140471a2055f73abe8",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.ReplaceableEvent",
+        "mechanics/contracts/effects.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.EffectRuleTests.test_contract_traces_every_cr_609_rule",
+        "tests.test_rules_primitives.EffectRuleTests.test_source_property_mismatch_does_not_consume_shield"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Introduces the source-conditioned damage-effect family; operative source choice and property behavior is classified under CR 609.7a through CR 609.7c."
+      ]
+    },
+    {
+      "rule_id": "609.7a",
+      "rule_text_sha256": "b3349d717eb1469e887a4c0247946fba6e99a5d9035f79d1dc60913add54ca90",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/effects.json",
+        "replacement_effects.ReplacementEffect"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.EffectRuleTests.test_contract_traces_every_cr_609_rule"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "there is no authoritative candidate generator for every permitted damage-source category",
+        "source choice is not captured at effect creation with zone-change continuity",
+        "permanent-spell to resolved-permanent identity continuity is not represented for source shields",
+        "last-known objects and command-zone choices are not integrated with the effect registry"
+      ],
+      "notes": [
+        "The primitive consumes already-supplied source properties and does not pretend to implement legal source selection."
+      ]
+    },
+    {
+      "rule_id": "609.7b",
+      "rule_text_sha256": "07d7b97db58dcaefa107d8c5a2677892859426e897f76824cb9a91c6f3981317",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects._condition_matches",
+        "replacement_effects.replacement_choice",
+        "replacement_effects.apply_replacement"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.EffectRuleTests.test_source_property_mismatch_does_not_consume_shield",
+        "tests.test_rules_primitives.EffectRuleTests.test_unknown_source_predicate_fails_closed"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
+      "blockers": [
+        "damage events do not universally derive current or last-known source properties from authoritative state",
+        "generated shields have no persistent active-effect identity, duration, or used-up state across engine events",
+        "the event producer cannot prove that zero prevented or replaced damage preserves every stateful shield"
+      ],
+      "notes": [
+        "A mismatching supplied property does not apply or journal the effect, and a later matching event can use the same immutable primitive.",
+        "Unknown condition predicates now fail closed instead of accidentally matching."
+      ]
+    },
+    {
+      "rule_id": "609.7c",
+      "rule_text_sha256": "32818bc22b538aefe84f3293e44d87b6031c201ad9f1ade525244951be8be6e9",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects._condition_matches",
+        "replacement_effects.replacement_choice"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_static_prevention_applies_separately_to_each_event",
+        "tests.test_rules_primitives.EffectRuleTests.test_source_property_mismatch_does_not_consume_shield"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
+      "blockers": [
+        "static source-property effects are not continuously registered from authoritative battlefield semantics",
+        "off-battlefield source characteristics are not universally derived",
+        "source types, colors, and other properties are not evaluated through the continuous layer system for every damage event"
+      ],
+      "notes": [
+        "A supplied static primitive can independently match multiple events, but active-effect discovery and authoritative source evaluation remain incomplete."
+      ]
+    }
+  ]
+}

@@ -112,6 +112,12 @@ maximum-counter foundation. It now:
   zero-damage event absence, and self-replacement priority;
 - rejects unsupported skip, regeneration, redirection, and prohibition
   operations instead of approximating them;
+- source-reviews all 13 CR 609 Effects records and records universal effect
+  scope, do-as-much-as-possible, `as though`, tie, and damage-source
+  dependencies without promoting partial witnesses;
+- verifies that a supplied source-property mismatch does not apply or journal
+  an immutable shield, while an unknown replacement predicate fails closed
+  instead of accidentally matching;
 - keeps inventory-only cases separate from executable semantic passes.
 
 The prior permanent snapshot behavior remains: toughness, lethal/deathtouch,
@@ -142,15 +148,15 @@ events also remain blockers.
   `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
 - Indexed rules: 3,300
 - Conformance cases: 3,300
-- Inventory-only cases: 3,184
-- Reviewed blocked cases: 75
-- Reviewed definition-only cases: 18
+- Inventory-only cases: 3,171
+- Reviewed blocked cases: 84
+- Reviewed definition-only cases: 22
 - Executable semantic passes: 23
 - Indexed sections: 156
 - Glossary entries: 733
 - Discovered mechanics: 425
-- Partial/untrusted mechanic contracts: 17
-- Unclassified mechanics: 408
+- Partial/untrusted mechanic contracts: 18
+- Unclassified mechanics: 407
 - Trusted mechanics in the new corpus registry: 0
 - `current_snapshot_complete`: false
 - Full Oracle snapshot: 2,957 exact; 15,691 partial; 19,725 unresolved;
@@ -162,8 +168,8 @@ events also remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 3,735 passed
-- Noninventory unit/integration tests: 435 passed
+- Unit/integration tests: 3,738 passed
+- Noninventory unit/integration tests: 438 passed
 - Generated per-rule inventory/source-linkage tests: 3,300 passed
 - Focused object identity/token lifecycle tests: 15 passed
 - Focused copy-object lifecycle tests: 8 passed
@@ -171,6 +177,7 @@ events also remain blockers.
 - Focused CR 616 replacement-ordering tests: 13 passed
 - Focused CR 615 prevention-effect tests: 7 passed
 - Focused CR 614 trace/fail-closed tests: 2 passed
+- Focused CR 609 effect-foundation tests: 3 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
 - Seed-20260730 hidden-information audit: pass
@@ -190,7 +197,7 @@ events also remain blockers.
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `3bdcb6a4b46daaeeafe9b9c4460b0be9bdaf11b74868243bf0eec4804cf6ea2f`
+  `f95d7b0d40df178c780e1ee3554a4a49dac9fbc81f2074192b7abbff1dad5676`
 
 ## Deck-review evidence state
 
