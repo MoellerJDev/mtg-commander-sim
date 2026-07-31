@@ -6,9 +6,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/cr-503-upkeep-step`
+- Active branch: `agent/cr-502-untap-step`
 - Current commit: the commit containing this ledger
-- Active phase: `rules_family_cr_503_upkeep_step`
+- Active phase: `rules_family_cr_502_untap_step`
 - Package version: `0.8.0`
 
 ### Pull requests
@@ -26,6 +26,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#9](https://github.com/MoellerJDev/mtg-commander-sim/pull/9) | `agent/cr-506-combat-phase` | `main` | `merged` |
 | [#10](https://github.com/MoellerJDev/mtg-commander-sim/pull/10) | `agent/cr-505-main-phase` | `main` | `draft` |
 | [#11](https://github.com/MoellerJDev/mtg-commander-sim/pull/11) | `agent/cr-504-draw-step` | `main` | `draft` |
+| [#12](https://github.com/MoellerJDev/mtg-commander-sim/pull/12) | `agent/cr-503-upkeep-step` | `main` | `draft` |
 
 ## Pinned snapshots and coverage
 
@@ -35,8 +36,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 - Rules manifest present on this branch: yes
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
-- Rules cases: blocked=311, definition_only=60, passing=61, total=3300, unreviewed=2868
-- Mechanics: status_counts={'partial': 36, 'unclassified': 389}, total=425, trusted=0
+- Rules cases: blocked=316, definition_only=61, passing=61, total=3300, unreviewed=2862
+- Mechanics: status_counts={'partial': 37, 'unclassified': 388}, total=425, trusted=0
 - Oracle coverage: material_residuals=69664, status_counts={'exact': 2957, 'partial': 15691, 'unresolved': 19725}, total=38373
 - Commander-legal Oracle coverage: material_residuals=61212, status_counts={'exact': 338, 'partial': 14354, 'unresolved': 16930}, total=31622
 - Current rules/Oracle snapshot complete: no
@@ -47,7 +48,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 |---|---|---|
 | Integrated deterministic foundation | `complete` | Both integration PRs and focused CR 512-506 slices merged through ordinary merge commits; main passed the exact-SHA CR 506 matrix. |
 | Browser Commander MVP | `not_started` | No server/, web/, or migrations/ subsystem is present on this branch. |
-| Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main; CR 503 is the current independent focused family while CR 504 and CR 505 await exact-SHA CI. |
+| Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 502 is the current dependency-staged family atop draft CR 503; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
 ## Runtime and product boundaries
@@ -67,11 +68,11 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 3834
+- Tests discovered: 3840
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
 - Baseline CI: [30615647165](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30615647165) — `pass`
 - Compile: `pass`
-- Deterministic tests: `pass_3834`
+- Deterministic tests: `pass_3840`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
 - Four-player protocol demo: `pass`
 - Repository/history/security audit: `pass`
@@ -90,7 +91,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Commit and publish the green CR 503 branch, open its draft PR, and require an exact-SHA matrix before merge; do not promote incomplete CR 502 event coverage, CR 603.3b trigger-on-trigger ordering, additional upkeep scheduling, or after-upkeep casting grammar.
+Commit the green dependency-staged CR 502 slice atop CR 503, publish a draft PR based on agent/cr-503-upkeep-step, and require real exact-SHA CI before any merge or trust promotion.
 
 ## Regeneration
 

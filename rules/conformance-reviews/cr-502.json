@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 502 — Untap Step",
+  "cases": [
+    {
+      "rule_id": "502",
+      "rule_text_sha256": "2313bf36d5d823de73a6eda63f82bb4a36256c79db4235cf79dbea26be8c67fd",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/untap-step.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_untap_step_rules.UntapStepRuleTests.test_contract_traces_every_cr_502_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; CR 502.1-4 carry the behavioral requirements."
+      ]
+    },
+    {
+      "rule_id": "502.1",
+      "rule_text_sha256": "ccc3cbb69fde04e8027f6026bd54723d8e7605f40a8eb0dfa1ae05d72de58c7c",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CardInstance.phased_out",
+        "CommanderEngine._unsupported_phasing_source_at_untap",
+        "CommanderEngine._enter_step"
+      ],
+      "executable_test_ids": [
+        "tests.test_untap_step_rules.UntapStepRuleTests.test_phasing_turn_action_fails_closed_before_untap_mutation"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "negative"
+      ],
+      "blockers": [
+        "direct_and_indirect_phasing_not_implemented",
+        "controller_at_phase_out_history_not_implemented"
+      ],
+      "notes": [
+        "A phased-out permanent or an active player's permanent with phasing now stops the turn before any untap mutation. Direct/indirect simultaneous phasing, attachment groups, controller history, trigger production, and replay remain unimplemented, so no positive behavior is claimed."
+      ]
+    },
+    {
+      "rule_id": "502.2",
+      "rule_text_sha256": "1c88a7f72180ab7048b677f4deee118b095567eebdf82dd5b201ae36144c9658",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [],
+      "executable_test_ids": [],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "day_night_state_and_previous_turn_spell_count_not_implemented"
+      ],
+      "notes": [
+        "The authoritative state does not represent day/night or the previous turn's spell count for this transition. Exact-list trusted preflight excludes unresolved material day/night cards; the turn action itself remains unimplemented."
+      ]
+    },
+    {
+      "rule_id": "502.2a",
+      "rule_text_sha256": "871d04609528816f434a4dec975c875d7382da4815c1dcd4cbe81fe46b696f1a",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [],
+      "executable_test_ids": [],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "shared_team_turns_not_supported",
+        "day_night_state_and_team_spell_count_not_implemented"
+      ],
+      "notes": [
+        "Supported Commander profiles use individual turns. Shared-team turns and their team-wide day/night spell-count rule remain outside the represented profile and engine state."
+      ]
+    },
+    {
+      "rule_id": "502.3",
+      "rule_text_sha256": "21b6771ca3522bf964caea57f20271f270b71477208e4c0ced2fb87a23a1a067",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._untap_permanent",
+        "CommanderEngine._unsupported_untap_selection_source",
+        "CommanderEngine._enter_step"
+      ],
+      "executable_test_ids": [
+        "tests.test_untap_step_rules.UntapStepRuleTests.test_ordinary_untap_is_stackless_and_advances_directly_to_upkeep",
+        "tests.test_untap_step_rules.UntapStepRuleTests.test_stun_and_next_untap_restrictions_precede_the_untap_batch",
+        "tests.test_untap_step_rules.UntapStepRuleTests.test_global_untap_limit_fails_closed_instead_of_untapping_all",
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_intruder_alarm_suppresses_controller_untap_and_untaps_on_entry",
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_seedborn_muse_untaps_all_permanents_on_opponent_untap"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "blockers": [
+        "complete_untap_selection_and_restriction_grammar_not_implemented",
+        "complete_replacement_ordering_not_implemented"
+      ],
+      "notes": [
+        "Ordinary eligible permanents untap in one no-stack batch after represented stun and next-untap prohibitions; Intruder Alarm and Seedborn Muse retain exact-list witnesses. A represented global maximum now pauses instead of illegally untapping everything. Arbitrary player selection and replacement ordering remain blocked."
+      ]
+    },
+    {
+      "rule_id": "502.4",
+      "rule_text_sha256": "27059b2a5b0eaef5c71f275377fb10da6614e6dbde1aa2da52eb3275eb281fc0",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._enter_step",
+        "CommanderEngine._dispatch_semantic_event",
+        "CommanderEngine._enqueue_semantic_trigger_batch",
+        "CommanderEngine._grant_priority"
+      ],
+      "executable_test_ids": [
+        "tests.test_untap_step_rules.UntapStepRuleTests.test_ordinary_untap_is_stackless_and_advances_directly_to_upkeep",
+        "tests.test_untap_step_rules.UntapStepRuleTests.test_untap_trigger_waits_for_upkeep_priority_and_replays",
+        "tests.test_upkeep_step_rules.UpkeepStepRuleTests.test_untap_and_upkeep_triggers_share_one_apnap_order_batch_and_replay"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "blockers": [
+        "complete_untap_step_trigger_event_surface_not_implemented"
+      ],
+      "notes": [
+        "The engine grants no priority in the represented untap step, performs no stack resolution there, and carries represented triggers into the upkeep ordering/priority boundary with exact replay. The rule remains blocked because phasing, day/night, counter-removal, and arbitrary untap-trigger event production are incomplete."
+      ]
+    }
+  ]
+}

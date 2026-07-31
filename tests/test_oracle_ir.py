@@ -73,6 +73,7 @@ class MechanicContractTests(unittest.TestCase):
                 "cr-210-defense",
                 "cr-310-battles",
                 "cr-400-general",
+                "cr-502-untap-step",
                 "cr-503-upkeep-step",
                 "cr-506-combat-phase",
                 "cr-507-beginning-of-combat-step",

@@ -6,12 +6,12 @@
     "visibility": "private"
   },
   "integration": {
-    "active_phase": "rules_family_cr_503_upkeep_step",
-    "branch": "agent/cr-503-upkeep-step",
+    "active_phase": "rules_family_cr_502_untap_step",
+    "branch": "agent/cr-502-untap-step",
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
-      "focused_branch_base": "c8a52711dc9294957fc0f437a4aaeab72da213aa",
-      "focused_branch_unique_commits_over_main": 1
+      "focused_branch_base": "b7f4d2e3e909a9571dcc282d1589aafd386f6430",
+      "focused_branch_unique_commits_over_main": 2
     },
     "pull_requests": [
       {
@@ -90,6 +90,13 @@
         "number": 11,
         "state": "draft",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/11"
+      },
+      {
+        "base": "main",
+        "head": "agent/cr-503-upkeep-step",
+        "number": 12,
+        "state": "draft",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/12"
       }
     ],
     "tags": [
@@ -137,7 +144,7 @@
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main",
-      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main; CR 503 is the current independent focused family while CR 504 and CR 505 await exact-SHA CI."
+      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 502 is the current dependency-staged family atop draft CR 503; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI."
     },
     {
       "id": "oracle_snapshot",
@@ -170,7 +177,7 @@
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "pass_3834",
+      "deterministic_tests": "pass_3840",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "repository_history_security_audit": "pass",
@@ -185,5 +192,5 @@
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete",
     "GitHub Actions is not allocating runners for current draft PRs because of an account billing or spending-limit failure; no exact-SHA result may be inferred from those pre-run failures"
   ],
-  "next_task": "Commit and publish the green CR 503 branch, open its draft PR, and require an exact-SHA matrix before merge; do not promote incomplete CR 502 event coverage, CR 603.3b trigger-on-trigger ordering, additional upkeep scheduling, or after-upkeep casting grammar."
+  "next_task": "Commit the green dependency-staged CR 502 slice atop CR 503, publish a draft PR based on agent/cr-503-upkeep-step, and require real exact-SHA CI before any merge or trust promotion."
 }

@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-502-untap-step",
+  "official_name": "Untap Step",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "502",
+    "502.1",
+    "502.2",
+    "502.2a",
+    "502.3",
+    "502.4"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "turn-structure",
+    "cr-503-upkeep-step",
+    "phasing",
+    "daybound-and-nightbound",
+    "cr-731-day-and-night",
+    "replacement-effects",
+    "triggered-abilities",
+    "delayed-triggered-abilities",
+    "apnap",
+    "stack",
+    "multiplayer",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "stack"
+    ],
+    "objects": [
+      "active player",
+      "phased-in and phased-out permanents",
+      "active player's permanents",
+      "permanents with represented untap restrictions or replacements",
+      "represented abilities triggered during untap"
+    ],
+    "events": [
+      "untap step begins",
+      "unsupported phasing action is detected before mutation",
+      "unsupported global untap-selection restriction is detected before mutation",
+      "represented untap replacements and prohibitions are applied",
+      "selected permanents untap without using the stack",
+      "represented untap triggers wait for upkeep"
+    ],
+    "state_reads": [
+      "current phase and step",
+      "active player",
+      "battlefield controller",
+      "phased status",
+      "effective keywords and Oracle text",
+      "tapped status",
+      "stun counters",
+      "represented next-untap prohibition",
+      "active delayed and semantic triggers"
+    ],
+    "state_writes": [
+      "semantic unsupported pause",
+      "stun counters",
+      "represented next-untap prohibition",
+      "permanent tapped status",
+      "waiting trigger batch",
+      "phase and step"
+    ],
+    "costs": [],
+    "timing": [
+      "represented untap actions occur before upkeep",
+      "ordinary untaps do not use the stack",
+      "no priority is granted during untap",
+      "represented triggers wait until the upkeep priority boundary",
+      "phasing, day/night, shared-team turns, and universal untap-selection grammar remain blocked"
+    ],
+    "targets": [],
+    "choices": [
+      "a global maximum-untap restriction fails closed because the required active-player selection is not implemented",
+      "complete selection under restrictions, requirements, and replacement ordering remains blocked"
+    ],
+    "hidden_information": [
+      "the represented untap boundary reveals no hidden information"
+    ],
+    "apnap": [
+      "no player receives priority during the untap step",
+      "waiting represented triggers are ordered at the dependent upkeep boundary"
+    ],
+    "layers": [
+      "effective keywords and Oracle text are consulted for fail-closed phasing and untap-limit detection",
+      "complete continuous-effect interaction with untap restrictions remains blocked"
+    ],
+    "replacement_effects": [
+      "a stun counter replaces one represented untap",
+      "complete per-permanent replacement ordering and optional replacement choice remain blocked"
+    ],
+    "copy": [
+      "effective copied keywords can cause phasing to fail closed"
+    ],
+    "control_change": [
+      "the active player's currently controlled permanents are the represented ordinary untap set",
+      "controller-at-phase-out history remains blocked"
+    ],
+    "zone_change": [
+      "the ordinary untap action does not change zones"
+    ],
+    "source_leaves": [
+      "a represented static untap restriction is read only while its source remains an applicable battlefield permanent"
+    ]
+  },
+  "variants": [
+    "ordinary simultaneous active-player untap",
+    "stun counter replacement",
+    "does-not-untap-next marker",
+    "ability triggered by becoming untapped",
+    "intrinsic or effect-created phasing",
+    "day/night transition",
+    "shared-team day/night transition",
+    "global maximum-untap restriction",
+    "unsupported arbitrary untap selection"
+  ],
+  "witness_cards": [
+    {
+      "name": "Taniwha",
+      "oracle_id": "371c993a-69b8-4a51-af89-982b79940b2d"
+    },
+    {
+      "name": "The Celestus",
+      "oracle_id": "c0ad2b5f-066b-424b-bddf-d3014731e599"
+    },
+    {
+      "name": "Static Orb",
+      "oracle_id": "0004ebd0-dfd6-4276-b4a6-de0003e94237"
+    },
+    {
+      "name": "Intruder Alarm",
+      "oracle_id": "1e943e04-e213-4781-b1a7-935aad8790e1"
+    },
+    {
+      "name": "Seedborn Muse",
+      "oracle_id": "463865bc-087e-477b-9e86-84e77f1ad931"
+    },
+    {
+      "name": "Teferi's Protection",
+      "oracle_id": "0d4ecdb1-ec90-497f-a7a4-1c68092b8757"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_502_rule",
+    "test_ordinary_untap_is_stackless_and_advances_directly_to_upkeep",
+    "test_stun_and_next_untap_restrictions_precede_the_untap_batch",
+    "test_phasing_turn_action_fails_closed_before_untap_mutation",
+    "test_global_untap_limit_fails_closed_instead_of_untapping_all",
+    "test_untap_trigger_waits_for_upkeep_priority_and_replays",
+    "test_intruder_alarm_suppresses_controller_untap_and_untaps_on_entry",
+    "test_seedborn_muse_untaps_all_permanents_on_opponent_untap"
+  ],
+  "implementation": {
+    "component": "CommanderEngine untap-step entry, fail-closed phasing and untap-limit guards, represented untap restrictions/replacements, trigger holding, upkeep handoff, and exact replay",
+    "version": "untap-step-v1"
+  },
+  "known_blockers": [
+    "direct and indirect phasing, attachment phasing, and controller-at-phase-out history are not implemented",
+    "day/night state, spell-count history, transition events, and shared-team-turn calculation are not implemented",
+    "the active player cannot yet choose a legal subset under maximum-untap or arbitrary untap restrictions",
+    "the Oracle compiler does not recognize every untap prohibition, optional untap, or selection restriction",
+    "complete simultaneous untap replacement ordering and affected-player choices are not implemented",
+    "complete trigger production for phasing, day/night, counter removal, and every untap event remains incomplete",
+    "shared-team turns are outside the supported Commander profiles"
+  ],
+  "review_status": "draft"
+}
