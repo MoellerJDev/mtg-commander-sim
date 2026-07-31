@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-606-loyalty-abilities",
+  "official_name": "Loyalty Abilities",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "606",
+    "606.1",
+    "606.2",
+    "606.3",
+    "606.4",
+    "606.5",
+    "606.6"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "activated-abilities",
+    "priority",
+    "turn-structure",
+    "costs",
+    "cost-modification",
+    "counters",
+    "continuous-effects"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield"
+    ],
+    "objects": [
+      "permanent with a loyalty ability",
+      "loyalty ability on the stack"
+    ],
+    "events": [
+      "activate loyalty ability",
+      "pay loyalty-symbol cost"
+    ],
+    "state_reads": [
+      "controller",
+      "active player",
+      "phase and step",
+      "priority",
+      "stack emptiness",
+      "loyalty activations of this permanent this turn",
+      "loyalty counters",
+      "applicable cost modifiers"
+    ],
+    "state_writes": [
+      "loyalty counters",
+      "loyalty activation turn marker",
+      "activated ability stack item"
+    ],
+    "costs": [
+      "positive loyalty-symbol cost",
+      "negative loyalty-symbol cost",
+      "combined loyalty-symbol costs",
+      "modified loyalty cost"
+    ],
+    "timing": [
+      "controller has priority",
+      "controller's main phase",
+      "empty stack",
+      "no loyalty ability of that permanent previously activated this turn"
+    ],
+    "targets": [],
+    "choices": [],
+    "hidden_information": [],
+    "apnap": [],
+    "layers": [
+      "continuous effects may grant a loyalty ability to a nonplaneswalker permanent"
+    ],
+    "replacement_effects": [],
+    "copy": [
+      "copiable loyalty ability text is identified by its loyalty-symbol cost"
+    ],
+    "control_change": [
+      "only the current controller may activate the permanent's loyalty ability"
+    ],
+    "zone_change": [
+      "a new permanent incarnation has no prior loyalty activation marker"
+    ],
+    "source_leaves": [
+      "paid loyalty counters remain paid and the ability remains on the stack"
+    ]
+  },
+  "variants": [
+    "planeswalker loyalty ability",
+    "loyalty ability on another permanent type",
+    "positive loyalty cost",
+    "negative loyalty cost",
+    "multiple loyalty-symbol costs",
+    "additional loyalty cost modifier",
+    "insufficient loyalty",
+    "multiple abilities on one permanent"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_606_rule",
+    "test_loyalty_symbol_defines_ability_on_any_permanent",
+    "test_loyalty_timing_control_and_once_per_permanent",
+    "test_negative_loyalty_cost_requires_enough_counters",
+    "test_visible_loyalty_cost_modifier_fails_closed",
+    "test_multiple_loyalty_costs_fail_closed_until_combined",
+    "test_tyvar_initializes_loyalty_grants_activation_haste_and_resolves_both_abilities",
+    "test_daretti_loyalty_exchange_and_emblem_return"
+  ],
+  "implementation": {
+    "component": "ActivatedAbility loyalty costs and CommanderEngine activation availability/payment",
+    "version": "loyalty-ability-foundation-v1"
+  },
+  "known_blockers": [
+    "generic loyalty-cost modification and ordering are not represented",
+    "multiple loyalty-symbol cost components fail closed rather than combine",
+    "granted loyalty abilities are recognized from effective Oracle text only where the continuous-effect layer represents that grant",
+    "not every effect that changes the number of loyalty activations per turn is implemented"
+  ],
+  "review_status": "draft"
+}

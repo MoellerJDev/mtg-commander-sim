@@ -1,0 +1,767 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 120 — Damage",
+  "cases": [
+    {
+      "rule_id": "120",
+      "rule_text_sha256": "0c874f581a4534f15f1ed12c4a9c84723b647e51a0385aa92ea270691cb76b29",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/damage.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionPrimitiveTests.test_damage_contract_traces_every_cr_120_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; the complete CR 120 family is pinned by the Damage mechanic contract."
+      ]
+    },
+    {
+      "rule_id": "120.1",
+      "rule_text_sha256": "59707df3377673c18d792d897f05ac04207409c93c1ceeccc7cd34bcba921b81",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_damage_results_to_permanent",
+        "CommanderEngine._apply_combat_assignments",
+        "CommanderEngine._apply_effect"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_rejects_nondamageable_permanent",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
+      "blockers": [
+        "a unified damage event does not yet preserve every spell, ability, delayed object, and last-known source identity through replacement, result, and trigger processing"
+      ],
+      "notes": [
+        "Represented paths distinguish players from damageable permanents and retain the combat source for commander attribution."
+      ]
+    },
+    {
+      "rule_id": "120.1a",
+      "rule_text_sha256": "d1e77478102ebc47a69a005f72645d2e5c9c32828d0e74b2fd982a46435e80f7",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_damage_results_to_permanent",
+        "CommanderEngine._type_parts"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_rejects_nondamageable_permanent",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result"
+      ],
+      "required_scenarios": [
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "negative",
+        "interaction"
+      ],
+      "blockers": [],
+      "notes": [
+        "Permanent damage accepts only a derived Battle, creature, or planeswalker type and fails closed for an ordinary artifact."
+      ]
+    },
+    {
+      "rule_id": "120.2",
+      "rule_text_sha256": "b2e850e12b73b3cb6f720c436e01010b10afc9a459e59985feace9addb76329b",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_combat_assignments",
+        "CommanderEngine._source_colors_for_ref",
+        "SemanticProgram"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_departed_combat_source_deals_no_damage"
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "hidden_information"
+      ],
+      "covered_scenarios": [
+        "positive"
+      ],
+      "blockers": [
+        "the semantic event model cannot yet designate every legal nonpermanent, off-battlefield, delayed, or command-zone object as a damage source"
+      ],
+      "notes": [
+        "Represented combat creatures and compiled spell or ability effects can deal damage; the universal source set is incomplete."
+      ]
+    },
+    {
+      "rule_id": "120.2a",
+      "rule_text_sha256": "1acc4601c082273dd9be4e078de1d425b41ca56b77ba14c7180d1fe0ecbcfdf8",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._begin_combat_damage",
+        "CommanderEngine._complete_combat_damage",
+        "CommanderEngine._apply_combat_assignments"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_departed_combat_source_deals_no_damage",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_power_combat_source_assigns_zero_damage"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
+      "blockers": [
+        "complete combat assignment order, first strike, double strike, trample, banding, multiple blockers, and simultaneous multiplayer combat remain incomplete"
+      ],
+      "notes": [
+        "The simple path uses current power and clamps negative power to zero, but does not implement every combat-damage assignment rule."
+      ]
+    },
+    {
+      "rule_id": "120.2b",
+      "rule_text_sha256": "8e1ae17d1b80f3ba5b3e8e59fe43b4c4fe234965d3e674803fa9e3ee8ac881a0",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "SemanticProgram",
+        "CommanderEngine._apply_effect"
+      ],
+      "executable_test_ids": [
+        "tests.test_exact_deck_triggers.ExactDeckTriggerFamilyTests.test_reckless_fireweaver_damages_each_opponent"
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive"
+      ],
+      "blockers": [
+        "not every compiled damage effect carries a typed source handle through resolution and source-result processing"
+      ],
+      "notes": [
+        "Selected compiled spell and ability programs apply damage, but universal source attribution is incomplete."
+      ]
+    },
+    {
+      "rule_id": "120.3",
+      "rule_text_sha256": "e6f734fb603a3c8fb6845b49a01368a868025c80b2b5acfe3c0183c208fa561a",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/damage.json",
+        "CommanderEngine._apply_damage_results_to_permanent"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionPrimitiveTests.test_damage_contract_traces_every_cr_120_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Umbrella rule defining recipient- and characteristic-dependent damage results; each result is reviewed separately."
+      ]
+    },
+    {
+      "rule_id": "120.3a",
+      "rule_text_sha256": "929cc49ff0ba7a360a3b878b2b5fa22259e243e0aecf5839e60a3e3aa711bb93",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_combat_assignments",
+        "CommanderEngine._apply_effect"
+      ],
+      "executable_test_ids": [
+        "tests.test_exact_deck_triggers.ExactDeckTriggerFamilyTests.test_reckless_fireweaver_damages_each_opponent",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive"
+      ],
+      "blockers": [
+        "player-damage paths do not generically inspect infect before choosing life loss versus poison counters",
+        "life-loss replacement ordering is not integrated with the damage-result event"
+      ],
+      "notes": [
+        "Ordinary represented player damage reduces life, but the required noninfect predicate is not universally enforced."
+      ]
+    },
+    {
+      "rule_id": "120.3b",
+      "rule_text_sha256": "72549a6e6fc3fb0942232e01b2cec8953f21c1efd69244a66ae3af3339c1645d",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "PlayerState.poison",
+        "CommanderEngine._apply_combat_assignments"
+      ],
+      "executable_test_ids": [],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "infect damage to players is not implemented generically",
+        "poison-counter replacement and source-controller attribution are not integrated with the damage event"
+      ],
+      "notes": [
+        "The player model stores poison counters, but damage does not yet route through infect semantics."
+      ]
+    },
+    {
+      "rule_id": "120.3c",
+      "rule_text_sha256": "7383239befffdb44e5d8b62e3196469b2e1245ff7a87be0501b8b3063ce13e07",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_damage_results_to_permanent",
+        "CommanderEngine._change_permanent_counter"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_planeswalker_damage_removes_loyalty_counters",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result"
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "blockers": [],
+      "notes": [
+        "Damage dealt to a derived planeswalker removes that many loyalty counters, including when the permanent has multiple damageable card types."
+      ]
+    },
+    {
+      "rule_id": "120.3d",
+      "rule_text_sha256": "d4ce936fe76801699c9d22da1db6cf2bb10948f25e4829e9d7e2e47e54683a88",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_damage_results_to_permanent"
+      ],
+      "executable_test_ids": [],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "wither and infect damage to creatures do not generically create -1/-1 counters instead of marked damage",
+        "source-controller counter placement and replacement ordering are incomplete"
+      ],
+      "notes": [
+        "Unsupported source keywords remain an explicit damage-family blocker."
+      ]
+    },
+    {
+      "rule_id": "120.3e",
+      "rule_text_sha256": "c53efedc5c331ccf592c0f3ab730eba5554d5cfa46f902db348e8f44be27bfc3",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_damage_results_to_permanent"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_battle_creature_applies_both_results",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "blockers": [
+        "the result path cannot yet prove that a source has neither infect nor wither before marking creature damage"
+      ],
+      "notes": [
+        "Ordinary represented creature damage is marked and multi-typed permanents receive every applicable result."
+      ]
+    },
+    {
+      "rule_id": "120.3f",
+      "rule_text_sha256": "2cbb9442ead7d61978746fab6fbe92f3166cd80efd3d17f9e5635a672abb7764",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_combat_assignments"
+      ],
+      "executable_test_ids": [],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "lifelink is not processed as a simultaneous damage result across combat and noncombat damage",
+        "life-gain replacement effects are not integrated into the damage event"
+      ],
+      "notes": [
+        "The combat complexity gate recognizes Lifelink but does not yet apply its result."
+      ]
+    },
+    {
+      "rule_id": "120.3g",
+      "rule_text_sha256": "cd2f8f4d4ba6bc94e5f30f92e51c62f94de63b5a8fc2651cf8d77582d1690f71",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "PlayerState.poison",
+        "CommanderEngine._apply_combat_assignments"
+      ],
+      "executable_test_ids": [],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "toxic values are not compiled or applied after combat damage to a player",
+        "combined toxic values and poison-counter replacement ordering remain incomplete"
+      ],
+      "notes": [
+        "No toxic damage result is advertised as implemented."
+      ]
+    },
+    {
+      "rule_id": "120.3h",
+      "rule_text_sha256": "94107e232fa5fcdf8ab2c78e48761b911702f328f4266a372c5e1d32cfd1d0a4",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_damage_results_to_permanent",
+        "CommanderEngine._change_permanent_counter"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_removes_defense_instead_of_marking_damage",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_and_state_action_replay_exactly"
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "Damage dealt to a Battle removes that many defense counters, including on a multi-typed permanent, and the resulting state command-replays exactly."
+      ]
+    },
+    {
+      "rule_id": "120.4",
+      "rule_text_sha256": "bf45b07de2b5a4161d2361540adc11f02cebecb050fe2caca5db3b20f427dc0a",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.ReplaceableEvent",
+        "CommanderEngine._apply_damage_results_to_permanent"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_prevention_never_prevents_more_than_remaining_damage"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive"
+      ],
+      "blockers": [
+        "the four-part damage sequence is not one integrated engine event",
+        "replacement and prevention choices are not suspended, ordered, and replayed at every required boundary"
+      ],
+      "notes": [
+        "A typed replacement primitive exists, but live damage producers do not yet route through the complete sequence."
+      ]
+    },
+    {
+      "rule_id": "120.4a",
+      "rule_text_sha256": "3d07857231c0dd71e93185d03b8caea50e421c49959ca3cef781a4c8daf3fb8c",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_combat_assignments"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "excess-damage redirection is not implemented",
+        "simultaneous damage, deathtouch lethal thresholds, and greatest-excess calculation for multi-typed permanents are incomplete"
+      ],
+      "notes": [
+        "The multi-type result test does not constitute excess-damage implementation."
+      ]
+    },
+    {
+      "rule_id": "120.4b",
+      "rule_text_sha256": "b3ca09aa216ab0e4b47d04a6dec4a6bb9812e756e07565bdd4955b629f94a897",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.resolve_replacements",
+        "CommanderEngine._protection_colors"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_prevention_never_prevents_more_than_remaining_damage",
+        "tests.test_exact_mishra_closure.ExactMishraClosureTests.test_stasis_coffin_protection_blocks_targeting_and_damage"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive"
+      ],
+      "blockers": [
+        "live damage does not gather and order all applicable replacement and prevention effects",
+        "damage triggers are not collected from the final dealt event before state-based actions"
+      ],
+      "notes": [
+        "Selected protection prevention and the typed prevention primitive work independently; complete event integration remains blocked."
+      ]
+    },
+    {
+      "rule_id": "120.4c",
+      "rule_text_sha256": "064f3bccd7fe01f1a8ae65602cf6eb341df63a38a95be37f3eb057c221b1adaa",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_damage_results_to_permanent",
+        "replacement_effects.resolve_replacements"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive"
+      ],
+      "blockers": [
+        "life-loss, life-gain, poison, loyalty, defense, -1/-1-counter, and marked-damage result replacements are not ordered through one event"
+      ],
+      "notes": [
+        "The native permanent result fan-out is type-driven, but result replacement ordering remains incomplete."
+      ]
+    },
+    {
+      "rule_id": "120.4d",
+      "rule_text_sha256": "94b4f61b48ff3fd2eb5144e3dee6e052a933dc819b1ed7f4785b27749e6a34de",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._log",
+        "Event"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "negative"
+      ],
+      "blockers": [
+        "there is no canonical final damage-event object shared by triggers, replacement audit, results, reports, and replay"
+      ],
+      "notes": [
+        "Zero damage is suppressed before a damage event, but a fully typed final event is not yet emitted for nonzero damage."
+      ]
+    },
+    {
+      "rule_id": "120.5",
+      "rule_text_sha256": "bb9ff9e5e3658d0900e8c3ceb8d2ccd5e6725eeedf64a86fbda32abb28d0e6aa",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._apply_damage_results_to_permanent",
+        "evaluate_permanent_state_based_actions",
+        "CommanderEngine._stabilize"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_results_do_not_destroy_before_state_actions",
+        "tests.test_state_based_actions.StateBasedActionPrimitiveTests.test_snapshot_distinguishes_put_into_graveyard_from_destroy",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_and_state_action_replay_exactly"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "Damage applies only its typed results; destruction or owner-graveyard movement occurs later in the immutable state-based-action batch."
+      ]
+    },
+    {
+      "rule_id": "120.6",
+      "rule_text_sha256": "b8f698f62ee6e325767a7e23964ad4f9e9cb1645156f80264ddc139c529d52b5",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CardInstance.marked_damage",
+        "CommanderEngine._finish_cleanup",
+        "evaluate_permanent_state_based_actions"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_marked_damage_survives_type_loss_until_cleanup",
+        "tests.test_state_based_actions.StateBasedActionPrimitiveTests.test_snapshot_distinguishes_put_into_graveyard_from_destroy"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "blockers": [
+        "regeneration and its damage-removal result are not implemented",
+        "complete cleanup repetition and simultaneous trigger/state-action interactions remain incomplete"
+      ],
+      "notes": [
+        "Marked damage persists when the permanent stops being a creature and clears during cleanup; regeneration remains the explicit gap."
+      ]
+    },
+    {
+      "rule_id": "120.7",
+      "rule_text_sha256": "4a21093d27911b67b4744f836f38f71e72bfeb9170be14dbed723392b1261146",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._source_colors_for_ref",
+        "StateProjector"
+      ],
+      "executable_test_ids": [],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "the source-selection choice grammar does not enumerate all legal permanent, stack, delayed, departed, replacement, prevention, and face-up command-zone objects",
+        "seat projection for legally known departed source candidates is not defined"
+      ],
+      "notes": [
+        "This rule requires a dedicated source-choice representation rather than guessing from current battlefield objects."
+      ]
+    },
+    {
+      "rule_id": "120.8",
+      "rule_text_sha256": "0ab2ba238f127313f178b5de8256b037208db01158c1e2a372712264cf122d6b",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._begin_combat_damage",
+        "CommanderEngine._apply_combat_assignments",
+        "CommanderEngine._apply_effect",
+        "CommanderEngine._apply_damage_results_to_permanent"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_power_combat_source_assigns_zero_damage",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_damage_fails_closed"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "blockers": [],
+      "notes": [
+        "Every represented damage entry point suppresses zero before life, counters, marked damage, commander attribution, or damage events.",
+        "Automatic combat clamps negative power to zero, while externally supplied negative damage fails closed."
+      ]
+    },
+    {
+      "rule_id": "120.9",
+      "rule_text_sha256": "e1b86c6f27472b858d9acd6d9626565e946da643b84576c9710198138f4a2aff",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "StackItem.context",
+        "Event"
+      ],
+      "executable_test_ids": [],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "simultaneous damage is not correlated per source in a typed event available to triggered abilities",
+        "damage-dealt references do not retain exact source subsets through replay"
+      ],
+      "notes": [
+        "No claim is made for source-specific damage-trigger correlation."
+      ]
+    },
+    {
+      "rule_id": "120.10",
+      "rule_text_sha256": "887855ae6bd0b0b9f89e44ca4c5da547f1978424148a0d1850a85c4182f68eb0",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._numeric_stat",
+        "CommanderEngine._apply_damage_results_to_permanent"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "post-damage excess calculation and triggers are not implemented",
+        "simultaneous sources, deathtouch lethal thresholds, pre-damage loyalty or defense, and greatest-excess selection for multi-typed permanents are incomplete"
+      ],
+      "notes": [
+        "The engine applies multi-type damage results but does not infer that excess damage was dealt."
+      ]
+    }
+  ]
+}

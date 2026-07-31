@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 600 — General",
+  "cases": [
+    {
+      "rule_id": "600",
+      "rule_text_sha256": "c910d474dcd724bff83ddedeb06bf1eceaf9fb3af7c76bb282be057f36e6dffa",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/spells-abilities-effects-general.json"],
+      "executable_test_ids": ["tests.test_spells_abilities_effects_general.SpellsAbilitiesEffectsGeneralRuleTests.test_contract_traces_the_only_cr_600_record"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Section heading for CR 601-609; it contains no independent behavioral requirement."]
+    }
+  ]
+}

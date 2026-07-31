@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-608-resolving-spells-and-abilities",
+  "official_name": "Resolving Spells and Abilities",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "608",
+    "608.1",
+    "608.2",
+    "608.2a",
+    "608.2b",
+    "608.2c",
+    "608.2d",
+    "608.2e",
+    "608.2f",
+    "608.2g",
+    "608.2h",
+    "608.2i",
+    "608.2j",
+    "608.2k",
+    "608.2m",
+    "608.2n",
+    "608.2p",
+    "608.3",
+    "608.3a",
+    "608.3b",
+    "608.3c",
+    "608.3d",
+    "608.3e",
+    "608.3f",
+    "608.3g"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "priority",
+    "stack",
+    "effects",
+    "targets",
+    "choices",
+    "last-known-information",
+    "apnap",
+    "zone-changes",
+    "triggers",
+    "copying-objects",
+    "merging-with-permanents"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "stack",
+      "battlefield",
+      "graveyard",
+      "other replacement destinations"
+    ],
+    "objects": [
+      "instant spell",
+      "sorcery spell",
+      "permanent spell",
+      "activated ability",
+      "triggered ability",
+      "spell copy"
+    ],
+    "events": [
+      "all players pass",
+      "begin resolution",
+      "target revalidation",
+      "ordered instruction",
+      "resolution-time choice",
+      "finish resolution",
+      "spell or ability resolves"
+    ],
+    "state_reads": [
+      "top stack object",
+      "intervening-if condition",
+      "target legality and selected incarnation",
+      "current and last-known object information",
+      "previous game state",
+      "effect instructions",
+      "permanent-spell type and target"
+    ],
+    "state_writes": [
+      "effect results in written order",
+      "stack removal",
+      "spell destination",
+      "permanent entry",
+      "attachment or merge",
+      "resolution trigger creation"
+    ],
+    "costs": [
+      "resolution-time mana payment",
+      "spell casting instructed during resolution"
+    ],
+    "timing": [
+      "top stack object after all players pass",
+      "no priority during resolution",
+      "first and final resolution steps",
+      "resolution-trigger creation after all other steps"
+    ],
+    "targets": [
+      "all targets revalidated by current legality and logical incarnation",
+      "illegal targets skipped while legal targets remain",
+      "all-targets-illegal counter by rules",
+      "Aura, bestow, and mutate targets"
+    ],
+    "choices": [
+      "legal resolution-time options",
+      "untargeted distributions",
+      "APNAP multi-player choices",
+      "relative ordering for nonsimultaneous actions"
+    ],
+    "hidden_information": [
+      "last-known and look-back information cannot expose unrelated hidden state",
+      "resolution-time search and draw choices remain seat-scoped"
+    ],
+    "apnap": [
+      "multi-player choices collected per action in APNAP order",
+      "nonsimultaneous multi-object actions ordered by APNAP and resolving controller"
+    ],
+    "layers": [
+      "continuous effects affecting legality are applied before target revalidation",
+      "specific characteristics are queried independently"
+    ],
+    "replacement_effects": [
+      "written instructions are evaluated with applicable replacements",
+      "final spell destination can be replaced"
+    ],
+    "copy": [
+      "a permanent-spell copy becomes the same token object without a token-creation event"
+    ],
+    "control_change": [
+      "an untargeted permanent spell enters under its spell controller"
+    ],
+    "zone_change": [
+      "a target that left its selected zone or became a new incarnation is illegal",
+      "instant and sorcery spells move after instructions finish",
+      "abilities cease after instructions finish",
+      "a legally resolving object continues if it leaves the stack"
+    ],
+    "source_leaves": [
+      "target legality and effect instructions can use source last-known information"
+    ]
+  },
+  "variants": [
+    "intervening-if trigger",
+    "all targets illegal",
+    "some targets illegal",
+    "resolution-time choice",
+    "APNAP multi-player action",
+    "cast during resolution",
+    "last-known information",
+    "look-back effect",
+    "resolving object leaves stack",
+    "untargeted permanent spell",
+    "Aura",
+    "bestow",
+    "mutate",
+    "permanent-spell copy",
+    "Dash, Blitz, or Warp delayed trigger"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_608_rule",
+    "test_only_top_spell_resolves_after_all_players_pass",
+    "test_resolution_continues_after_underlying_card_moves",
+    "test_spell_and_ability_leave_stack_after_resolution",
+    "test_all_targets_illegal_counters_by_rules",
+    "test_count_distinct_and_partial_resolution",
+    "test_target_that_leaves_and_returns_is_a_new_illegal_object",
+    "test_padeem_hexproof_and_intervening_upkeep_condition",
+    "test_permanent_spell_copy_becomes_the_same_token_object",
+    "test_spell_copy_cessation_replays_exactly"
+  ],
+  "implementation": {
+    "component": "CommanderEngine._pass_priority, _prepare_stack_resolution, _begin_resolve_item, and _continue_resolution",
+    "version": "resolution-pipeline-v1"
+  },
+  "known_blockers": [
+    "intervening-if, target, choice, distribution, and instruction grammar are not complete across the Oracle corpus",
+    "resolution-time APNAP and nonsimultaneous multi-object ordering are implemented only for selected operations",
+    "mana activation and arbitrary instructed casting during resolution are not generic",
+    "current, last-known, and look-back information do not use one universal typed query model",
+    "a resolving stack item removed by an effect does not have a separate continuation object",
+    "generic Aura, mutate, cannot-enter, and static stack-to-delayed-trigger behavior is incomplete",
+    "spell-resolved trigger dispatch is not integrated for every stack object"
+  ],
+  "review_status": "draft"
+}

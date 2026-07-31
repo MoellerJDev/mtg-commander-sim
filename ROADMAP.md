@@ -11,8 +11,8 @@ The generated current ledger is
 
 ## Phase 0 — integrate the deterministic foundation
 
-- merge `agent/review-mvp` into `main` through its draft pull request
-- merge updated `main` into `agent/rules-completeness` without rewriting history
+- [x] merge `agent/review-mvp` into `main` through an ordinary merge commit
+- [x] merge updated `main` into `agent/rules-completeness` without rewriting history
 - retarget and merge the rules branch into `main`
 - retain exact replay, privacy, repository, schema, and packaging gates
 - remove AI-run games and provider identity from product completion criteria

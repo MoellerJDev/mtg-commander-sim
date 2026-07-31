@@ -30,6 +30,11 @@ MEANINGFUL_CODES = {
     "game.draw",
     "action.rejected",
     "state.creatures_died",
+    "state.attachments_unattached",
+    "state.counters_annihilated",
+    "state.objects_ceased",
+    "state.world_rule",
+    "effect.linked_object_missing",
     "effect.damage",
     "effect.life",
     "effect.energy",
@@ -447,6 +452,59 @@ def _event_description(engine: CommanderEngine, event: Event) -> str:
             _name(engine, str(ref)) for ref in details.get("objects") or []
         )
         return f"{names or 'Permanents'} died or were put into graveyards."
+    if event.code == "state.attachments_unattached":
+        names = ", ".join(
+            _name(engine, str(ref))
+            for ref in details.get("objects") or []
+        )
+        return (
+            f"{names or 'Permanents'} became unattached due to "
+            "state-based actions."
+        )
+    if event.code == "state.counters_annihilated":
+        values = ", ".join(
+            (
+                f"{_name(engine, str(item.get('object')))} "
+                f"({item.get('pairs_removed')} pair(s))"
+            )
+            for item in details.get("changes") or []
+        )
+        return (
+            "Opposing +1/+1 and -1/-1 counters were removed"
+            + (f": {values}." if values else ".")
+        )
+    if event.code == "state.objects_ceased":
+        values = ", ".join(
+            (
+                f"{_name(engine, str(item.get('object')))} "
+                f"from {item.get('zone')}"
+            )
+            for item in details.get("objects") or []
+        )
+        return (
+            "Token or copy objects ceased to exist"
+            + (f": {values}." if values else ".")
+        )
+    if event.code == "state.world_rule":
+        moved = ", ".join(
+            _name(engine, str(item.get("object")))
+            for item in details.get("moved") or []
+        )
+        survivors = ", ".join(
+            _name(engine, str(ref))
+            for ref in details.get("survivors") or []
+        )
+        return (
+            "The world rule moved "
+            + (moved or "the tied World permanents")
+            + " to their owners' graveyards"
+            + (f"; {survivors} remained." if survivors else ".")
+        )
+    if event.code == "effect.linked_object_missing":
+        return (
+            f"{_name(engine, str(details.get('object')))} was no "
+            "longer the object linked by the resolving effect."
+        )
     if event.code == "token.create":
         names = ", ".join(
             _name(engine, str(ref)) for ref in details.get("objects") or []

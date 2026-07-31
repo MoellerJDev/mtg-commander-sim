@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "contract_version": 2,
+  "mechanic_id": "cr-111-tokens",
+  "official_name": "Tokens",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "111",
+    "111.1",
+    "111.2",
+    "111.6",
+    "111.7",
+    "111.8",
+    "704.5d"
+  ],
+  "glossary_references": [],
+  "dependencies": ["cr-110-permanents", "cr-403-battlefield"],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "the first nonbattlefield destination before the next state check",
+      "outside after cessation"
+    ],
+    "objects": ["basic creature tokens with fixed printed characteristics"],
+    "events": [
+      "token creation and permanent entry",
+      "token zone change",
+      "token cessation as a state-based action"
+    ],
+    "state_reads": [
+      "controller and compiled token characteristics",
+      "logical incarnation",
+      "whether the token has left the battlefield"
+    ],
+    "state_writes": [
+      "new token object and battlefield membership",
+      "first destination-zone membership",
+      "outside tombstone after cessation"
+    ],
+    "costs": [],
+    "timing": ["during semantic effect resolution"],
+    "targets": [
+      "tokens are permanents on the battlefield but are never cards in another zone"
+    ],
+    "choices": [],
+    "hidden_information": [],
+    "apnap": [],
+    "layers": ["token base characteristics become copiable values"],
+    "replacement_effects": ["token-doubling and token-replacement effects may modify creation"],
+    "copy": ["copy tokens require a separate characteristic snapshot path"],
+    "control_change": ["created token enters under the instructed controller"],
+    "zone_change": [
+      "a token first reaches its destination and triggers see that move",
+      "after leaving the battlefield it cannot move again",
+      "it ceases to exist at the next state-based-action check"
+    ],
+    "source_leaves": []
+  },
+  "variants": ["fixed power/toughness colored creature token", "fixed artifact creature token"],
+  "witness_cards": [
+    {
+      "name": "Sprout",
+      "oracle_id": "424c6f5e-b386-47e9-b3fe-25b263097d40"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_self_pump_and_basic_token_creation_lower_generically",
+    "test_token_changes_zone_before_ceasing_at_next_state_check",
+    "test_token_that_left_battlefield_cannot_move_again",
+    "test_nonbattlefield_token_is_not_a_card_target",
+    "test_nonbattlefield_tokens_cease_from_the_shared_snapshot",
+    "test_token_cost_cessation_replays_exactly"
+  ],
+  "implementation": {
+    "component": "oracle_ir._effect_template, CommanderEngine.create_token/move_card/_stabilize, and state_based_actions.evaluate_state_based_actions",
+    "version": "token-lifecycle-v2"
+  },
+  "known_blockers": [
+    "tokens with abilities, dynamic values, predefined named characteristics, or linked choices remain residual",
+    "generic replacement ordering for token multipliers is incomplete",
+    "copy-token characteristic and entry replacement coverage is incomplete"
+  ],
+  "review_status": "reviewed"
+}

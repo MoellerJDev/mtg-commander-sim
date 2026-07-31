@@ -1,0 +1,230 @@
+{
+  "schema_version": 1,
+  "contract_version": 6,
+  "mechanic_id": "cr-704-state-based-actions",
+  "official_name": "State-Based Actions",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "704",
+    "704.1",
+    "704.2",
+    "704.3",
+    "704.4",
+    "704.5",
+    "704.5a",
+    "704.5b",
+    "704.5c",
+    "704.5d",
+    "704.5e",
+    "704.5f",
+    "704.5g",
+    "704.5h",
+    "704.5i",
+    "704.5j",
+    "704.5k",
+    "704.5m",
+    "704.5n",
+    "704.5p",
+    "704.5q",
+    "704.5r",
+    "704.5v",
+    "704.5w",
+    "704.5x",
+    "704.6c",
+    "704.8",
+    "122",
+    "122.4"
+  ],
+  "glossary_references": [
+    "state-based action",
+    "dies",
+    "lethal damage"
+  ],
+  "dependencies": [
+    "zones",
+    "continuous-effects",
+    "replacement-effects",
+    "last-known-information",
+    "attachments",
+    "counters",
+    "commander"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "graveyard",
+      "outside"
+    ],
+    "objects": [
+      "players",
+      "tokens in nonbattlefield zones",
+      "represented spell and card copies",
+      "creatures",
+      "planeswalkers",
+      "battles",
+      "legendary permanents",
+      "World permanents",
+      "Auras",
+      "Equipment",
+      "Fortifications"
+    ],
+    "events": [
+      "priority would be granted",
+      "cleanup state check",
+      "simultaneous state-based action batch",
+      "World-rule batch",
+      "fixed-point recheck"
+    ],
+    "state_reads": [
+      "life, poison, empty draw, and commander damage",
+      "derived types, subtypes, keywords, toughness, loyalty, defense, and damage",
+      "Battle protector, current attackers, and exact-incarnation pending triggers",
+      "the timestamp from which each permanent has continuously had the World supertype",
+      "attachment restriction and protected qualities",
+      "+1/+1 and -1/-1 counter counts",
+      "reviewed maximum-counter ability text and the named counter count"
+    ],
+    "state_writes": [
+      "player elimination",
+      "token cessation",
+      "spell-copy and card-copy cessation",
+      "simultaneous graveyard moves or destruction",
+      "simultaneous World-rule graveyard moves",
+      "legend choice",
+      "unattachment",
+      "opposing counter-pair removal",
+      "counters above a permanent's stated maximum removed",
+      "zero-defense Battle graveyard moves",
+      "Battle protector repair or no-protector graveyard moves"
+    ],
+    "costs": [],
+    "timing": [
+      "after resolution and before priority",
+      "all applicable actions from one snapshot happen simultaneously",
+      "repeat until no actions or waiting triggers remain"
+    ],
+    "targets": [
+      "attachment legality reuses declarative target-domain predicates without applying targeting-only shroud or hexproof"
+    ],
+    "choices": [
+      "the controller chooses one permanent for the legend rule"
+    ],
+    "hidden_information": [
+      "state checks consume authoritative state but expose only public choices"
+    ],
+    "apnap": [
+      "simultaneous choices outside the implemented legend choice remain blocked"
+    ],
+    "layers": [
+      "derived characteristics are evaluated before each snapshot"
+    ],
+    "replacement_effects": [
+      "destruction and graveyard moves use the authoritative zone-change path"
+    ],
+    "copy": [
+      "copied names, types, supertypes, and abilities affect state checks"
+    ],
+    "control_change": [
+      "current controller determines legend groups and attachment relations"
+    ],
+    "zone_change": [
+      "zone changes create new objects and detach attached permanents before the next check"
+    ],
+    "source_leaves": [
+      "last-known information is captured from the shared pre-action snapshot"
+    ]
+  },
+  "variants": [
+    "normal multiplayer",
+    "Commander loss by commander damage",
+    "legend rule",
+    "the unique newest World permanent survives",
+    "World permanents tied for newest all leave simultaneously",
+    "zero-defense Battle with and without a pending source trigger",
+    "Siege protector repair in multiplayer",
+    "Aura, Equipment, and Fortification cleanup",
+    "opposing +1/+1 and -1/-1 counters",
+    "Rasputin Dreamweaver dream-counter maximum",
+    "overlapping opposing-counter and maximum-counter removal"
+  ],
+  "witness_cards": [
+    {
+      "name": "Young Wolf",
+      "oracle_id": "8b492764-10b6-4506-be11-22daa9220a91"
+    },
+    {
+      "name": "Darksteel Myr",
+      "oracle_id": "f90fe86c-5cca-483b-93c2-6e856fa01c88"
+    },
+    {
+      "name": "Pacifism",
+      "oracle_id": "5f5e0b10-c8cf-450c-bfd3-bcb0528ec330"
+    },
+    {
+      "name": "Concordant Crossroads",
+      "oracle_id": "ff01b408-6d17-40a3-9efd-a1b341ec1307"
+    },
+    {
+      "name": "Gravity Sphere",
+      "oracle_id": "8ddf93fe-980b-4dc4-b56f-6a2ee50100a6"
+    },
+    {
+      "name": "Rasputin Dreamweaver",
+      "oracle_id": "fef452ee-9018-4175-bb79-476544e48433"
+    }
+  ],
+  "rulings": [
+    "Gravity Sphere 2008-10-01: a newer World permanent causes the older one to be put into its owner's graveyard, while World permanents entering simultaneously are all put there",
+    "Rasputin Dreamweaver 2009-10-01: if a permanent with eight or more dream counters becomes a copy of Rasputin or gains its last ability, all but seven are removed as a state-based action"
+  ],
+  "test_ids": [
+    "test_snapshot_distinguishes_put_into_graveyard_from_destroy",
+    "test_attachment_and_counter_actions_are_snapshot_based",
+    "test_input_mutation_cannot_change_batch",
+    "test_opposing_power_toughness_counters_cancel_in_pairs",
+    "test_counter_maximum_sentence_and_snapshot_action",
+    "test_counter_maximum_overlaps_opposing_pair_removal",
+    "test_rasputin_counter_maximum_replays_exactly",
+    "test_zero_defense_battle_waits_for_its_pending_trigger",
+    "test_battle_trigger_from_same_incarnation_defers_state_action",
+    "test_old_incarnation_trigger_does_not_defer_battle_state_action",
+    "test_invalid_siege_protector_is_repaired_by_its_controller",
+    "test_battle_protector_choice_replays_exactly",
+    "test_unattached_and_illegally_attached_auras_leave",
+    "test_equipment_detaches_from_illegal_or_protected_object",
+    "test_fixed_point_moves_aura_after_enchanted_creature_dies",
+    "test_simultaneous_move_captures_all_lki_before_mutation",
+    "test_nonbattlefield_tokens_cease_from_the_shared_snapshot",
+    "test_noncard_copies_cease_only_outside_their_valid_zones",
+    "test_countered_spell_copy_reaches_graveyard_then_ceases",
+    "test_card_copy_is_not_a_card_and_ceases_from_graveyard",
+    "test_card_copy_on_battlefield_is_a_nontoken_permanent",
+    "test_token_changes_zone_before_ceasing_at_next_state_check",
+    "test_legend_rule_asks_controller_to_keep_one",
+    "test_player_elimination_keeps_multiplayer_game_running",
+    "test_last_player_wins_after_simultaneous_losses",
+    "test_world_rule_keeps_only_the_unique_newest_world",
+    "test_tied_newest_world_permanents_all_leave_order_independently",
+    "test_world_rule_requires_a_since_timestamp",
+    "test_new_world_moves_the_older_world_to_graveyard",
+    "test_worlds_entering_simultaneously_are_tied_and_all_leave",
+    "test_losing_and_regaining_world_gets_a_new_since_time"
+  ],
+  "implementation": {
+    "component": "state_based_actions.evaluate_permanent_state_based_actions and CommanderEngine._stabilize",
+    "version": "state-based-actions-v7"
+  },
+  "known_blockers": [
+    "specialized copy-object exceptions such as Prepare copies in exile are not implemented",
+    "Sagas, dungeons, space sculptor, Roles, speed, and several other specialized state actions are not implemented",
+    "native Siege defeated-trigger transformed casting and future Battle subtypes remain unresolved",
+    "maximum-counter abilities outside the reviewed numeric self-restriction sentence family remain unresolved",
+    "Aura attachment to players and the complete enchant-quality grammar are not implemented",
+    "regeneration and complete loss-event replacement ordering are not integrated",
+    "all player losses and permanent actions are not yet transformed as one shared simultaneous replaceable event"
+  ],
+  "review_status": "reviewed"
+}

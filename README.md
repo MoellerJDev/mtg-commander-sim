@@ -88,7 +88,10 @@ generated documentation fixtures with bearer capabilities redacted. See
 - attacks split among multiple defenders and defender-by-defender blocking
 - extra-turn scheduling in most-recent-created-first order
 - native upkeep/end-step delayed triggers
-- automatic core state-based actions, including lethal damage, zero toughness, the legend rule, poison, commander damage, and player elimination
+- snapshot-based state-action stabilization for lethal/deathtouch damage, zero
+  toughness, planeswalker loyalty, the legend rule, poison, commander damage,
+  player elimination, opposing +1/+1 and -1/-1 counters, and common
+  Aura/Equipment/Fortification attachment cleanup
 - multiplayer continuation after a player leaves
 - conservative Oracle-informed automatic mana payment with exact source logging
 - server-extracted explicit activated abilities, including hand-zone Channel abilities and validated nonmana cost selections
@@ -130,6 +133,59 @@ generated documentation fixtures with bearer capabilities redacted. See
 - project-scoped GPT-5.6 Sol pilot-agent configuration and a
   `commander-arena` Codex skill
 - schema-validated semantic packs with trust and source provenance
+- pinned Comprehensive Rules inventory, diff, verification, dependency, and
+  mechanic-contract artifacts
+- one source-pinned conformance case and inventory-linkage test for every
+  numbered rule, with inventory kept separate from semantic passes
+- typed, source-spanned Oracle IR with deterministic semantic hashes and
+  fail-closed material residuals
+- automatic deck-time generic compilation into provisional, arbiter-gated
+  semantic programs
+- Oracle IR v2 simple self-trigger, unconditional-entry, counter, pump, and
+  basic creature-token templates with reviewed-handler precedence
+- CR 613 layer/sublayer, timestamp, dependency, and cycle-audit primitives,
+  now used for common copy/type/keyword annotations
+- CR 616 replacement/prevention priority and affected-player-choice
+  primitives
+- source-reviewed CR 609 effect foundations with fail-closed condition
+  predicates and explicit blockers for universal zone scope, impossible
+  instructions, `as though`, tie handling, and damage-source derivation
+- source-reviewed CR 608 resolution ordering with executable top-of-stack,
+  untargeted permanent, and permanent-spell-copy behavior, while incomplete
+  choice, LKI, Aura, mutate, and resolution-trigger families stay blocked
+- source-reviewed CR 607 linked-ability taxonomy with exact-incarnation and
+  undefined-choice witnesses; generic pair IDs, linked sets/facts, and
+  copied, granted, cross-face, and cross-object links remain blocked
+- source-reviewed CR 606 loyalty abilities with generic permanent support,
+  exact base timing/activation limits, and fail-closed modified or combined
+  loyalty costs
+- source-reviewed CR 605 mana abilities with corrected target/loyalty
+  exclusions, immediate activated-mana resolution, payment-path witnesses,
+  and explicit blockers for generic triggered mana abilities
+- source-reviewed CR 604 static-ability scope with source-leaves and
+  moved-attachment witnesses; generic CDA, attachment, stack, zone-permission,
+  and current-information/LKI handling remain blocked
+- source-reviewed CR 603 trigger handling with executable pending-to-stack,
+  controller-at-trigger-time, intervening-condition, and delayed-object-
+  incarnation invariants; complete trigger grammar, two-part APNAP ordering,
+  state/reflexive triggers, and the look-back exception matrix remain blocked
+- source-reviewed CR 601 casting with executable mana-ability payment-window
+  ordering, transactional rollback and cast-trigger witnesses; complete
+  announcement ordering, choice/cost grammar, proposal-dependent permissions,
+  and opponent-made casting choices remain blocked
+- source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
+  contracts without inventing standalone behavior for the heading
+- source-reviewed CR 513 end-step boundary with no turn-based action,
+  permanent and delayed trigger collection before priority, exact replay, and
+  no retroactive triggers for objects or abilities created later in the step
+- source-reviewed CR 514 cleanup sequencing with private simultaneous discard,
+  ordinary no-priority advancement, and repeat-cleanup handling after an
+  exceptional priority window; universal turn-duration expiration and complete
+  state-action/trigger/APNAP interactions remain blocked
+- source-reviewed CR 602 activation handling with corrected untap-symbol
+  summoning sickness and object-scoped once-per-turn restrictions; full cost
+  grammar, activation transactions, opponent choices, and acquired-ability
+  provenance remain blocked
 - trust-aware semantic preflight for files and live Moxfield URLs
 - compact cast, land, activation, target, and generic resolution-time search
   templates
@@ -192,6 +248,110 @@ clients cannot submit arbitrary effects.
 That boundary is safer and more auditable than silently guessing at card text, while allowing semantic coverage to grow from cards actually encountered in simulations.
 
 The same rule applies to costs. Ordinary printed costs and a conservative set of explicit activated costs are derived by the server. A pilot may choose an advertised ability and the physical cards that pay delegated costs, but it cannot submit an arbitrary cheaper `declared_cost`, invent a sacrifice, or claim that a graveyard card is castable. Alternate costs, restricted mana, and unusual zone permissions must be compiled before use rather than trusted from player input.
+
+## Rules corpus and arbitrary decks
+
+The rules-completeness program uses generic mechanics and a typed Oracle
+compiler rather than one code branch per card. `simctl rules sync` now locates
+the official Wizards TXT, preserves the raw file only in ignored local cache,
+and commits compact CR/glossary/mechanics indexes with exact source hashes.
+When supplied `--db`, it also pins the local Oracle and rulings bulk timestamps
+and archive hashes.
+
+```bash
+python simctl.py rules sync \
+  --root . \
+  --db data/scryfall-current.sqlite3
+python simctl.py rules verify --root .
+python simctl.py rules coverage --root .
+python simctl.py rules conformance --root .
+```
+
+The pinned snapshot currently has 3,300 stable conformance cases and 3,300
+generated source-linkage tests. They currently report 0 executable semantic
+passes: 3,299 cases remain unreviewed and CR 310.11b is reviewed but blocked.
+A generated inventory test cannot prove rules behavior. See
+`RULE_CONFORMANCE.md` for the promotion, invalidation, and reporting policy.
+
+Deck creation now invokes the typed Oracle compiler automatically. Exact
+whole-text templates lower into the generic effect DSL without a printed-name
+branch, but generated programs stay provisional and arbiter-gated while any
+mechanic dependency is untrusted. Unknown suffixes, costs, triggers,
+replacement effects, or static text remain material residuals.
+
+The generic zone kernel now distinguishes a stable physical card identifier
+from its logical incarnation. Every ordinary zone change, including a draw or
+a cast, advances an authoritative incarnation counter; same-zone moves through
+exile or the command zone do as well. CR 400.7a is explicit: a permanent spell
+keeps its logical incarnation when it becomes a permanent, while receiving a
+new battlefield timestamp. Targets and implemented linked delayed effects
+retain the selected incarnation, so a card that leaves and returns is not
+silently treated as the old object. Pilot projections never expose the
+physical identifier or incarnation counter.
+
+Each new zone incarnation also receives a serialized timestamp moment.
+Objects entering a destination simultaneously share that moment. Battlefield
+objects separately retain when they most recently gained the World supertype,
+allowing the CR 704.5k world rule to keep the unique newest World permanent or
+move every World permanent when the newest duration is tied. These
+authoritative timestamps are also omitted from pilot projections. Full CR
+613.7m APNAP relative-timestamp choices remain outside this reviewed slice.
+
+Tokens now reach their first nonbattlefield destination, generate the
+appropriate zone-change events, and cease to exist only at the next
+state-based-action check. A token that has left the battlefield cannot move
+again. Spell and card copies now use serialized noncard objects. A spell copy
+outside the stack, or a card copy outside the stack or battlefield, reaches
+that invalid destination before CR 704.5e makes it cease. A copied permanent
+spell becomes that same object as a token permanent and does not emit a token
+creation event. This is a reviewed partial CR 111/400/704/707 slice, not
+complete copiable-value, card-copy casting, Prepare, merged-permanent, meld,
+sticker, face-down, or linked-ability support.
+
+The same immutable CR 704 snapshot enforces the reviewed maximum-counter
+sentence family exemplified by Rasputin Dreamweaver. It derives the counter
+kind and numeric maximum from effective Oracle text rather than a card-name
+branch, and combines overlapping maximum and opposing +1/+1/-1/-1 removals
+without double-removing the same indistinguishable counters.
+
+Battle support is likewise type-driven rather than card-name-driven. A Battle
+entering the battlefield initializes defense counters from its derived
+copiable defense characteristic; damage removes defense, and the state-action
+snapshot distinguishes a zero-defense Battle whose exact-incarnation trigger
+is still pending. For the pinned rules snapshot, Sieges choose an opponent as
+protector while the spell resolves, may be attacked by every other player,
+and route blockers to that protector. Invalid protectors are repaired through
+a replayable controller choice.
+
+This is a partial CR 120/210/310/704 implementation. Removing a Siege's last
+defense counter queues the intrinsic trigger. Native resolution follows the
+exact source incarnation, exiles it, and offers its controller a replayable
+choice to cast the transformed face without paying its mana cost or decline.
+Tokens cease after exile, and ordinary casts cannot select a transforming
+card's back face. Compiled target schemas are exposed when a transformed
+instant or sorcery needs targets; unresolved target or cost grammar fails
+closed rather than advertising an illegal cast. Complete exile-replacement
+ordering remains blocked. Unknown future Battle subtypes and nonspell entries
+that require an unrepresented as-enters choice also fail closed. In
+particular, the two Control Point previews in the July 28 Oracle corpus
+postdate the June 19 pinned rules and are not silently treated as Sieges.
+
+```bash
+python simctl.py oracle parse "Lightning Bolt" \
+  --db data/scryfall-current.sqlite3
+python simctl.py oracle explain "Rest in Peace" \
+  --db data/scryfall-current.sqlite3
+python simctl.py oracle coverage \
+  --db data/scryfall-current.sqlite3
+```
+
+This is still not a completeness declaration. The measured compact snapshot
+has 38,373 Oracle IDs: 2,957 exact, 15,691 partially lowerable, and 19,725
+unresolved under current dependency gates. All 69,664 material residuals must
+be eliminated or covered by reviewed, hash-pinned overrides before complete
+Oracle support can be claimed. Genuinely unique cards may use reviewed
+overrides; common cards and mechanics compile through reusable primitives.
+See `RULES_COMPLETENESS.md` and `ORACLE_IR.md`.
 
 ## Quick Python loop
 
@@ -475,6 +635,8 @@ container isolation when filesystem-level isolation must also be proven.
 - `mtg_commander_sim/profiles.py` — fingerprinted advisory deck profiles
 - `mtg_commander_sim/preflight.py` — trust-aware deck semantic coverage
 - `mtg_commander_sim/shortcuts.py` — validated aggregate loop fixtures
+- `mtg_commander_sim/state_based_actions.py` — snapshot-based CR 704
+  permanent-action and token-cessation evaluation
 - `mtg_commander_sim/record.py` — Game Record v3 hashing, journals, migration, inspection, and replay
 - `mtg_commander_sim/report.py` — derived review and fidelity classification
 - `mtg_commander_sim/carddb.py` — local Oracle/rulings database

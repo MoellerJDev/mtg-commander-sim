@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-605-mana-abilities",
+  "official_name": "Mana Abilities",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "605",
+    "605.1",
+    "605.1a",
+    "605.1b",
+    "605.2",
+    "605.3",
+    "605.3a",
+    "605.3b",
+    "605.3c",
+    "605.4",
+    "605.4a",
+    "605.5",
+    "605.5a",
+    "605.5b"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "activated-abilities",
+    "triggered-abilities",
+    "targets",
+    "priority",
+    "stack",
+    "casting",
+    "cost-payment",
+    "loyalty-abilities",
+    "mana-pools"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "stack"
+    ],
+    "objects": [
+      "activated ability",
+      "triggered ability",
+      "spell"
+    ],
+    "events": [
+      "activate mana ability",
+      "add mana",
+      "trigger from mana activation or addition",
+      "cast mana-producing spell"
+    ],
+    "state_reads": [
+      "target requirement",
+      "possible mana output",
+      "loyalty-symbol cost",
+      "trigger event",
+      "priority or payment window",
+      "source availability"
+    ],
+    "state_writes": [
+      "mana pool",
+      "source costs",
+      "ordinary spell or nonmana ability stack item"
+    ],
+    "costs": [
+      "tap",
+      "sacrifice",
+      "life",
+      "other compiled activated-ability costs"
+    ],
+    "timing": [
+      "priority window",
+      "spell or ability mana-payment window",
+      "rule or effect mana-payment window",
+      "immediate stackless resolution"
+    ],
+    "targets": [
+      "an ability requiring a target is not a mana ability"
+    ],
+    "choices": [
+      "mana output mode"
+    ],
+    "hidden_information": [],
+    "apnap": [],
+    "layers": [
+      "effective granted ability text may define a mana ability"
+    ],
+    "replacement_effects": [
+      "mana-production replacement effects may change the resulting mana"
+    ],
+    "copy": [
+      "copied ability characteristics determine whether the ability is a mana ability"
+    ],
+    "control_change": [
+      "the current controller activates a permanent's mana ability"
+    ],
+    "zone_change": [
+      "costs can move or sacrifice the source before mana is added"
+    ],
+    "source_leaves": [
+      "a legal mana activation resolves immediately after its costs are paid"
+    ]
+  },
+  "variants": [
+    "basic land mana ability",
+    "conditional zero-output mana ability",
+    "targeted mana-producing ability",
+    "loyalty ability that adds mana",
+    "triggered mana ability",
+    "activation during casting",
+    "activation during resolution-time payment",
+    "mana-producing spell"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_605_rule",
+    "test_activated_mana_ability_excludes_targets_and_loyalty",
+    "test_mana_classification_survives_zero_output_or_unavailability",
+    "test_activated_mana_ability_resolves_without_using_stack",
+    "test_mana_ability_can_activate_during_spell_payment",
+    "test_mana_producing_spell_is_not_a_mana_ability",
+    "test_token_reminder_text_does_not_create_source_mana_ability",
+    "test_mana_drain_schedules_exact_next_main_phase_mana"
+  ],
+  "implementation": {
+    "component": "ActivatedAbility mana classification and CommanderEngine immediate mana/payment paths",
+    "version": "mana-ability-foundation-v1"
+  },
+  "known_blockers": [
+    "triggered mana abilities are not generically identified or dispatched outside the stack",
+    "possible mana-output grammar is incomplete across the Oracle corpus",
+    "explicit mana activation during arbitrary rule/effect payment windows is not exposed as a general nested decision",
+    "activation reentrancy is not represented as a state that can be independently tested",
+    "mana-production replacement and trigger integration is incomplete"
+  ],
+  "review_status": "draft"
+}

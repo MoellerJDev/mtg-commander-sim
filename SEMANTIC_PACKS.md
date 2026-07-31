@@ -23,6 +23,29 @@ The source hashes pin the Scryfall snapshot used for review. An empty rulings
 list still has the deterministic SHA-256 hash of its serialized empty array.
 Pack files are included as package data in the wheel.
 
+## Corpus compilation
+
+Hand-authored packs remain valid reviewed artifacts, but they are not the
+scaling architecture for arbitrary new decks. The rules-completeness pipeline
+pins the official CR, Oracle, and rulings snapshots, validates mechanic
+contracts, and compiles Oracle text into a typed intermediate representation.
+Recognized whole-text templates lower into the same generic DSL and kernel
+primitives used by current packs.
+
+At deck creation, generated programs are added only when their stable
+Oracle/face/ability key is not already supplied by a reviewed pack. Reviewed
+trigger event handlers also shadow equivalent generated event handlers even
+when their author-defined keys differ; this prevents duplicate triggers. A
+generated program records source line offsets, Oracle/rulings hashes, compiler
+and template IDs, and a semantic hash. It is `provisional` and
+`requires_arbiter=true` until every mechanic dependency is trusted. Under
+`trusted_only`, it is withheld or stopped rather than executed.
+
+Any material unparsed Oracle span, untrusted mechanic dependency, or source
+hash mismatch fails trusted preflight. A card-specific override must record why
+generic compilation failed and pin its Oracle/rulings/rule/test provenance.
+See `RULES_COMPLETENESS.md`.
+
 ## Trust
 
 `trusted` means the declared behavior is reviewed and characterized for this

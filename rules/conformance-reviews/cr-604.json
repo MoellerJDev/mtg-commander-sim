@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 604 — Handling Static Abilities",
+  "cases": [
+    {
+      "rule_id": "604",
+      "rule_text_sha256": "22ab17bb77bc430c77de385a2f6ce0b71c44bd67fb698a9e3f141a47abaa26a2",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/handling-static-abilities.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_static_abilities.StaticAbilityRuleTests.test_contract_traces_every_cr_604_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; every numbered CR 604 record is pinned by the Handling Static Abilities contract."
+      ]
+    },
+    {
+      "rule_id": "604.1",
+      "rule_text_sha256": "17b4877f9bfa4b2863cc8d69e56bbfc3bbbd2c1f692c011fbafcd865b22b310b",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._effective_card_data",
+        "mechanics/contracts/handling-static-abilities.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_static_abilities.StaticAbilityRuleTests.test_contract_traces_every_cr_604_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Defines static abilities as continuously true statements; the remaining records describe their behavioral scope."
+      ]
+    },
+    {
+      "rule_id": "604.2",
+      "rule_text_sha256": "207c861409b27ab888ca432535dd938018236fc88030ab05de32ff9e6704191c",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._effective_card_data",
+        "replacement_effects.apply_replacement",
+        "continuous_effects.evaluate_continuous_effects"
+      ],
+      "executable_test_ids": [
+        "tests.test_static_abilities.StaticAbilityRuleTests.test_battlefield_static_effect_stops_when_source_leaves",
+        "tests.test_exact_artifact_engines.ExactArtifactEngineTests.test_padeem_hexproof_and_intervening_upkeep_condition"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
+      "blockers": [
+        "static Oracle text is not compiled into one generic continuous, prevention, and replacement effect model",
+        "appropriate-zone evaluation is distributed across exact handlers and narrow grammars",
+        "no replay case covers a generic static prevention or replacement source entering and leaving its applicable zone"
+      ],
+      "notes": [
+        "Padeem's represented battlefield effect appears and disappears with the source, but that partial witness does not establish every static effect family."
+      ]
+    },
+    {
+      "rule_id": "604.3",
+      "rule_text_sha256": "7d0cf5872cdf6a90c6bc6ad81be7224b2aaa449a96381b878a3333648482ff15",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._effective_card_data",
+        "continuous_effects.evaluate_continuous_effects"
+      ],
+      "executable_test_ids": [
+        "tests.test_static_abilities.StaticAbilityRuleTests.test_contract_traces_every_cr_604_rule"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "the Oracle IR does not generically identify characteristic-defining abilities and their defined characteristics",
+        "dynamic characteristic handlers commonly evaluate only on the battlefield rather than in every zone, outside the game, and before the game",
+        "CDA additions and overrides do not share one all-zone layer query"
+      ],
+      "notes": [
+        "Printed and copied characteristics are represented, but that is not evidence for characteristic-defining ability scope."
+      ]
+    },
+    {
+      "rule_id": "604.3a",
+      "rule_text_sha256": "ad27b4aa524ae27774bc5b38c063b0ed8807a703349134af324fd2d32d762d07",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler",
+        "continuous_effects.ContinuousEffect"
+      ],
+      "executable_test_ids": [
+        "tests.test_static_abilities.StaticAbilityRuleTests.test_contract_traces_every_cr_604_rule"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "no classifier enforces all five CDA criteria including provenance, other-object exclusion, self-grant exclusion, and conditional-value exclusion",
+        "token creation, copy, and text-changing provenance do not feed a generic CDA classifier"
+      ],
+      "notes": [
+        "The family stays blocked rather than labeling arbitrary dynamic power/toughness text as characteristic-defining."
+      ]
+    },
+    {
+      "rule_id": "604.4",
+      "rule_text_sha256": "2fb6704455d8c45c6410f31dc0c2ec9ada98319c3f875d6b44ee1ef7ffac321b",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CardInstance.attached_to",
+        "CardInstance.attachments",
+        "CommanderEngine._effective_card_data"
+      ],
+      "executable_test_ids": [
+        "tests.test_static_abilities.StaticAbilityRuleTests.test_moving_equipment_moves_its_static_effect",
+        "tests.test_exact_artifact_engines.ExactArtifactEngineTests.test_lightning_greaves_equip_grants_haste_and_shroud"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "blockers": [
+        "attached-object modifier grammar is narrow and does not cover general Aura, Equipment, or Fortification static text",
+        "the equip action targets, but the derived static effect lacks a universal non-targeting effect representation",
+        "no command-replay case moves a generic attachment between two objects and verifies every derived layer"
+      ],
+      "notes": [
+        "Lightning Greaves moves haste and shroud from the old creature to the new one, providing a partial attachment witness."
+      ]
+    },
+    {
+      "rule_id": "604.5",
+      "rule_text_sha256": "4cd629f5f472baf22733f837827674f926fd9ca593ddf94f6c4e77da778ceed9",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._cast",
+        "CommanderEngine._cost_options_for_cast",
+        "StackItem.context"
+      ],
+      "executable_test_ids": [
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_delighted_halfling_restricted_mana_makes_legendary_spell_uncounterable"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "blockers": [
+        "stack-applicable static text is compiled through selected uncounterable, additional-cost, alternative-cost, and free-cast handlers",
+        "the complete Oracle grammar and layer/dependency interaction for static abilities on spells is absent",
+        "not every alternative or additional cost retains typed provenance on the stack"
+      ],
+      "notes": [
+        "A represented legendary spell can carry an uncounterable stack fact, but this does not establish universal stack-static behavior."
+      ]
+    },
+    {
+      "rule_id": "604.6",
+      "rule_text_sha256": "49ebad729310f5f99a4d331b111724f84d19a236264a045187833ced3da4e004",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._compiled_zone_cast_permission",
+        "CommanderEngine._compiled_land_play_permission"
+      ],
+      "executable_test_ids": [
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_gravecrawler_graveyard_cast_requires_controlled_zombie",
+        "tests.test_activated_abilities.ActivatedAbilityAndCostTests.test_pilot_cannot_cast_from_graveyard_without_compiled_permission"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
+      "blockers": [
+        "zone cast/play permissions recognize selected trusted self-referential templates rather than the complete three wording families",
+        "permissions from unusual zones, face combinations, and interacting prohibitions are incomplete",
+        "no generic exact replay covers every permission/restriction form"
+      ],
+      "notes": [
+        "Gravecrawler's graveyard permission is conditionally exposed, while an uncompiled graveyard cast fails closed."
+      ]
+    },
+    {
+      "rule_id": "604.7",
+      "rule_text_sha256": "4b04c124a3d680f61526dbc0f442a827717e4374df52414d5f8a2cc562f6e225",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._effective_card_data",
+        "CardInstance.logical_object_id"
+      ],
+      "executable_test_ids": [
+        "tests.test_static_abilities.StaticAbilityRuleTests.test_battlefield_static_effect_stops_when_source_leaves"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "negative"
+      ],
+      "blockers": [
+        "represented battlefield scans use current sources and stop Padeem's effect after it leaves, but static-effect reads do not use a universal typed current-information boundary",
+        "exact handlers can retain derived facts without one audit proving they never consult source LKI",
+        "no replay test covers control, ability loss, zone change, and source incarnation together"
+      ],
+      "notes": [
+        "The Padeem witness does not use LKI after the source leaves; broader static consumers remain unproved."
+      ]
+    }
+  ]
+}

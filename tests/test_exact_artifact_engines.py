@@ -61,7 +61,10 @@ class ExactArtifactEngineTests(unittest.TestCase):
         engine.state.priority_player = "A"
 
         engine._cast("A", {"card": sol_ring.ref, "pay": "auto"})
-        self.assertTrue(engine.state.pending_trigger_batches)
+        self.assertFalse(engine.state.pending_trigger_batches)
+        self.assertEqual(
+            "Sai artifact-cast trigger", engine.state.stack[-1].label
+        )
         self.assertFalse(engine._stabilize())
         self.assertEqual("Sai artifact-cast trigger", engine.state.stack[-1].label)
         self.resolve_top(engine)

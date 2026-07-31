@@ -10,9 +10,24 @@ from .bulk import (
     refresh_scryfall_database,
 )
 from .client import ProjectedClientView
+from .continuous_effects import (
+    CharacteristicState,
+    ContinuousEffect,
+    ContinuousEvaluation,
+    ContinuousOperation,
+    Layer,
+    evaluate_continuous_effects,
+    order_continuous_effects,
+)
 from .deck import DeckDefinition, DeckLoader, parse_deck_text
 from .engine import ActionResult, CommanderEngine, GameRuleError
 from .model import GameConfig, GameState
+from .oracle_ir import (
+    ORACLE_COMPILER_VERSION,
+    OracleCardIR,
+    compile_oracle_card,
+    oracle_corpus_coverage,
+)
 from .pilot import (
     ManualJsonPilot,
     PilotMemory,
@@ -44,6 +59,15 @@ from .record import (
     refresh_record,
     verify_record_integrity,
 )
+from .replacement_effects import (
+    ReplaceableEvent,
+    ReplacementChoice,
+    ReplacementClass,
+    ReplacementEffect,
+    apply_replacement,
+    replacement_choice,
+    resolve_replacements,
+)
 from .arena import (
     CodexThreadRegistry,
     CoordinatorTools,
@@ -55,20 +79,31 @@ __all__ = [
     "ActionResult",
     "CardDatabase",
     "CardRecord",
+    "CharacteristicState",
     "CommandEnvelope",
     "CommanderEngine",
     "CommanderSession",
+    "ContinuousEffect",
+    "ContinuousEvaluation",
+    "ContinuousOperation",
     "DeckDefinition",
     "DeckLoader",
     "GameConfig",
     "GameRuleError",
     "GameService",
     "GameState",
+    "Layer",
+    "ORACLE_COMPILER_VERSION",
+    "OracleCardIR",
     "ProjectionCursor",
     "PROTOCOL_VERSION",
     "ProjectedClientView",
     "ProtocolError",
     "Ruling",
+    "ReplaceableEvent",
+    "ReplacementChoice",
+    "ReplacementClass",
+    "ReplacementEffect",
     "ScryfallBulkDataError",
     "ScryfallBulkItem",
     "SequentialPilotRunner",
@@ -82,11 +117,18 @@ __all__ = [
     "SemanticRegistry",
     "StateProjector",
     "apply_json_patch",
+    "apply_replacement",
+    "compile_oracle_card",
+    "evaluate_continuous_effects",
     "fetch_bulk_manifest",
     "json_patch",
     "parse_bulk_manifest",
     "parse_deck_text",
+    "oracle_corpus_coverage",
+    "order_continuous_effects",
     "refresh_scryfall_database",
+    "replacement_choice",
+    "resolve_replacements",
     "view_hash",
     "semantic_preflight",
     "DeckPilotProfile",

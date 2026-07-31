@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import difflib
+import hashlib
 import json
 import sqlite3
 from dataclasses import dataclass
@@ -10,6 +11,14 @@ from typing import Any, Iterable, Iterator, Sequence
 from .util import iter_jsonl, normalize_card_name, stable_json, truncate
 
 SCHEMA_VERSION = 1
+
+
+def file_sha256(path: str | Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as source:
+        while chunk := source.read(1024 * 1024):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 @dataclass(frozen=True, slots=True)
@@ -218,7 +227,9 @@ def build_card_database(
         [
             ("schema_version", str(SCHEMA_VERSION)),
             ("oracle_source", str(oracle_cards_path)),
+            ("oracle_source_sha256", file_sha256(oracle_cards_path)),
             ("rulings_source", str(rulings_path)),
+            ("rulings_source_sha256", file_sha256(rulings_path)),
             ("include_raw", "1" if include_raw else "0"),
         ],
     )
@@ -424,6 +435,31 @@ class CardDatabase:
         if row is None:
             raise KeyError(f"Unknown oracle_id: {oracle_id}")
         return self._row_to_card(row)
+
+    def iter_cards(
+        self,
+        *,
+        commander_legal_only: bool = False,
+        limit: int | None = None,
+    ) -> Iterable[CardRecord]:
+        """Iterate the pinned Oracle corpus without loading it all in memory."""
+
+        query = "SELECT * FROM cards ORDER BY oracle_id"
+        parameters: tuple[Any, ...] = ()
+        if commander_legal_only:
+            query = (
+                "SELECT * FROM cards "
+                "WHERE json_extract(legalities_json, '$.commander') = 'legal' "
+                "ORDER BY oracle_id"
+            )
+        if limit is not None:
+            if int(limit) < 0:
+                raise ValueError("limit must be nonnegative")
+            query += " LIMIT ?"
+            parameters = (int(limit),)
+        cursor = self.connection.execute(query, parameters)
+        for row in cursor:
+            yield self._row_to_card(row)
 
     def lookup(self, name: str, *, fuzzy: bool = True) -> CardRecord:
         normalized = normalize_card_name(name)

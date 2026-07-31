@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mtg-commander-sim.local/schemas/rule-conformance-case-v1.json",
+  "title": "Pinned Comprehensive Rules conformance case v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "case_version",
+    "case_id",
+    "rule_id",
+    "effective_date",
+    "source_sha256",
+    "rule_text_sha256",
+    "source_span",
+    "classification",
+    "status",
+    "assertion_kind",
+    "reviewed",
+    "implementation_components",
+    "executable_test_ids",
+    "required_scenarios",
+    "covered_scenarios",
+    "dependency_rule_ids",
+    "blockers",
+    "notes"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "case_version": {"type": "integer", "minimum": 1},
+    "case_id": {"type": "string", "pattern": "^cr-[0-9]{3}(?:\\.[0-9]+[a-z]?)?$"},
+    "rule_id": {"type": "string", "pattern": "^[0-9]{3}(?:\\.[0-9]+[a-z]?)?$"},
+    "effective_date": {"type": "string", "format": "date"},
+    "source_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "rule_text_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "source_span": {
+      "type": "object",
+      "required": ["start_line", "end_line"],
+      "properties": {
+        "start_line": {"type": "integer", "minimum": 1},
+        "end_line": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "classification": {
+      "enum": [
+        "unclassified",
+        "behavioral",
+        "definition_only",
+        "structural",
+        "example",
+        "dependency"
+      ]
+    },
+    "status": {
+      "enum": [
+        "unreviewed",
+        "passing",
+        "failing",
+        "blocked",
+        "skipped",
+        "definition_only"
+      ]
+    },
+    "assertion_kind": {
+      "enum": [
+        "inventory_only",
+        "executable_engine",
+        "static_traceability",
+        "unsupported_fail_closed"
+      ]
+    },
+    "reviewed": {"type": "boolean"},
+    "implementation_components": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "executable_test_ids": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "required_scenarios": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "positive",
+          "negative",
+          "interaction",
+          "multiplayer",
+          "replay",
+          "hidden_information"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "covered_scenarios": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "positive",
+          "negative",
+          "interaction",
+          "multiplayer",
+          "replay",
+          "hidden_information"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "dependency_rule_ids": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[0-9]{3}(?:\\.[0-9]+[a-z]?)?$"},
+      "uniqueItems": true
+    },
+    "blockers": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "notes": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    }
+  },
+  "additionalProperties": false
+}

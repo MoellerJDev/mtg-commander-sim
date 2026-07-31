@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "flying",
+  "official_name": "Flying",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": ["702.9", "509.1b"],
+  "glossary_references": ["flying"],
+  "dependencies": ["declare-blockers", "continuous-effects", "copying-objects"],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["battlefield"],
+    "objects": ["creature"],
+    "events": ["declare blockers legality check"],
+    "state_reads": ["attacker current keywords", "blocker current keywords"],
+    "state_writes": [],
+    "costs": [],
+    "timing": ["blocking restriction applies while blockers are declared"],
+    "targets": [],
+    "choices": ["defending player chooses a legal blocker"],
+    "hidden_information": [],
+    "apnap": [],
+    "layers": ["ability-adding/removing effects must be evaluated before legality"],
+    "replacement_effects": [],
+    "copy": ["copiable keyword state may differ from printed keywords"],
+    "control_change": ["current controller declares blockers"],
+    "zone_change": ["restriction exists only while the object is a battlefield creature"],
+    "source_leaves": ["restriction ceases when the ability is absent"]
+  },
+  "variants": ["reach can block a creature with flying", "multiple instances are redundant"],
+  "witness_cards": [
+    {
+      "name": "Birds of Paradise",
+      "oracle_id": "db2f2107-0114-4e0b-aa85-5bf34b3e8cf6"
+    }
+  ],
+  "rulings": [],
+  "test_ids": ["test_flying_attacker_exposes_only_flying_or_reach_blockers"],
+  "implementation": {
+    "component": "CommanderEngine._block_pair_legality",
+    "version": "combat-keywords-v1"
+  },
+  "known_blockers": [
+    "full continuous-effect layer and dependency evaluation",
+    "complete copy and face-down characteristic evaluation"
+  ],
+  "review_status": "draft"
+}

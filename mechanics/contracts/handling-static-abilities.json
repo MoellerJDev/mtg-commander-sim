@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-604-handling-static-abilities",
+  "official_name": "Handling Static Abilities",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "604",
+    "604.1",
+    "604.2",
+    "604.3",
+    "604.3a",
+    "604.4",
+    "604.5",
+    "604.6",
+    "604.7"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "continuous-effects",
+    "continuous-layers",
+    "replacement-effects",
+    "prevention-effects",
+    "characteristic-defining-abilities",
+    "attachments",
+    "casting",
+    "zone-permissions",
+    "last-known-information"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "stack",
+      "castable or playable zones",
+      "all zones for characteristic-defining abilities",
+      "outside the game"
+    ],
+    "objects": [
+      "permanent",
+      "spell",
+      "card",
+      "Aura",
+      "Equipment",
+      "Fortification"
+    ],
+    "events": [
+      "source gains or loses static ability",
+      "source enters or leaves applicable zone",
+      "attachment moves",
+      "spell is announced",
+      "zone-cast permission is evaluated"
+    ],
+    "state_reads": [
+      "effective static ability text",
+      "source zone",
+      "attachment relationship",
+      "copiable characteristics",
+      "cast or play zone",
+      "current object information"
+    ],
+    "state_writes": [
+      "derived characteristics",
+      "continuous permissions, restrictions, prevention, and replacement results"
+    ],
+    "costs": [
+      "additional cost",
+      "alternative cost",
+      "without-paying-mana-cost permission"
+    ],
+    "timing": [
+      "continuous while source remains applicable",
+      "spell announcement and stack existence",
+      "cast/play permission from a nonbattlefield zone"
+    ],
+    "targets": [
+      "an attachment's static effect applies without targeting its attached object"
+    ],
+    "choices": [],
+    "hidden_information": [
+      "static permissions in private zones expose only the entitled player's card"
+    ],
+    "apnap": [],
+    "layers": [
+      "characteristic-defining abilities",
+      "attached-object modifications",
+      "ordinary continuous-effect layers and dependencies"
+    ],
+    "replacement_effects": [
+      "static replacement and prevention effects are active only in their applicable source zones"
+    ],
+    "copy": [
+      "copied and text-changed characteristic-defining abilities use their acquired provenance"
+    ],
+    "control_change": [
+      "controller-relative static effects re-evaluate from current control"
+    ],
+    "zone_change": [
+      "battlefield static effects stop when the source leaves",
+      "characteristic-defining abilities persist in all zones"
+    ],
+    "source_leaves": [
+      "static abilities use current information rather than source last-known information"
+    ]
+  },
+  "variants": [
+    "battlefield continuous effect",
+    "static prevention or replacement effect",
+    "characteristic-defining ability",
+    "attached-object modifier",
+    "spell-stack restriction or cost permission",
+    "self-cast permission from another zone",
+    "source leaves before effect query"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_604_rule",
+    "test_battlefield_static_effect_stops_when_source_leaves",
+    "test_moving_equipment_moves_its_static_effect",
+    "test_padeem_hexproof_and_intervening_upkeep_condition",
+    "test_lightning_greaves_equip_grants_haste_and_shroud",
+    "test_gravecrawler_graveyard_cast_requires_controlled_zombie"
+  ],
+  "implementation": {
+    "component": "CommanderEngine effective-characteristic, attachment, cost, and zone-permission paths",
+    "version": "static-ability-foundation-v1"
+  },
+  "known_blockers": [
+    "static Oracle text is not compiled into one generic continuous-effect model",
+    "characteristic-defining ability recognition and all-zone evaluation are incomplete",
+    "Aura, Equipment, and Fortification modifiers use a narrow grammar plus exact handlers",
+    "stack-applicable costs and permissions do not cover the complete Oracle grammar",
+    "nonbattlefield cast/play permissions cover selected trusted templates only",
+    "static-effect current-information versus LKI is not represented by a universal typed query boundary"
+  ],
+  "review_status": "draft"
+}

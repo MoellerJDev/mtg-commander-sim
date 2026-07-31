@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-611-continuous-effects",
+  "official_name": "Continuous Effects",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": ["611", "611.1", "611.2"],
+  "glossary_references": [],
+  "dependencies": ["cr-613-interaction-of-continuous-effects"],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["battlefield"],
+    "objects": ["source or targeted creature"],
+    "events": ["fixed power/toughness modification", "fixed keyword grant"],
+    "state_reads": ["current object identity and duration"],
+    "state_writes": ["turn-scoped characteristic annotation"],
+    "costs": [],
+    "timing": ["until cleanup removes turn-scoped effects"],
+    "targets": ["targeted variants are revalidated on resolution"],
+    "choices": [],
+    "hidden_information": [],
+    "apnap": [],
+    "layers": ["keyword grants in layer 6 and fixed modifications in layer 7c"],
+    "replacement_effects": [],
+    "copy": ["turn-scoped modifications are not copied"],
+    "control_change": ["effect remains on the object after control changes"],
+    "zone_change": ["new objects do not retain prior turn-scoped effects"],
+    "source_leaves": ["resolved effects persist for their stated duration"]
+  },
+  "variants": ["fixed self power/toughness pump", "fixed self keyword grant", "fixed target power/toughness change"],
+  "witness_cards": [
+    {
+      "name": "Whispering Shade",
+      "oracle_id": "0036d062-10dc-4267-98b4-1d2f6b190a61"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_self_pump_and_basic_token_creation_lower_generically",
+    "test_power_toughness_sublayers_set_modify_then_switch"
+  ],
+  "implementation": {
+    "component": "oracle_ir._effect_template and CommanderEngine._apply_layered_characteristic_annotations",
+    "version": "simple-until-eot-v1"
+  },
+  "known_blockers": [
+    "dynamic values, effect dependencies, and player/game-rule continuous effects remain residual",
+    "not every legacy turn-scoped annotation is represented as a ContinuousEffect",
+    "full copy, face-down, and characteristic-defining interactions are incomplete"
+  ],
+  "review_status": "draft"
+}

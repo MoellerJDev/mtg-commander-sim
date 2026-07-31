@@ -130,14 +130,14 @@ def deck_list_fingerprints(state: GameState) -> dict[str, str]:
                 "commander" if card.is_commander else "mainboard",
             )
             for card in state.cards.values()
-            if card.owner == seat and not card.is_token
+            if card.owner == seat and card.is_card_object
         )
         payload = {
             "commanders": sorted(
                 card.printed_name
                 for card in state.cards.values()
                 if card.owner == seat
-                and not card.is_token
+                and card.is_card_object
                 and card.is_commander
             ),
             "cards": sorted(

@@ -1,106 +1,145 @@
 # Integration handoff
 
-This handoff is a sanitized operational summary. It contains no credentials,
+Last updated: 2026-07-30
+
+This is a sanitized operational summary. It contains no credentials,
 capabilities, private hands, library order, private choices, live Game Records,
 or provider session data.
 
-## Repository
+## Repository and integration state
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/review-mvp`
-- Current commit: the commit containing this handoff
-- Review integration PR:
+- Active branch: `agent/rules-completeness`
+- Stage A merge commit on `main`:
+  `bd89201be44de85aa9b85fcc9f0baacb0ee76dbe`
+- Stage A PR:
   `https://github.com/MoellerJDev/mtg-commander-sim/pull/2`
-- Stacked rules PR:
+- Rules PR:
   `https://github.com/MoellerJDev/mtg-commander-sim/pull/1`
 - Package version: `0.8.0`
 - Existing tags: `v0.6.0`, `v0.7.0`
 
-`agent/review-mvp` is 30 commits ahead of `main`.
-`agent/rules-completeness` is 29 commits ahead of `agent/review-mvp`.
-`main` has no unique commit absent from `agent/review-mvp`.
+PR #2 passed both exact-SHA four-job CI matrices and merged into `main` with an
+ordinary merge commit. Stage B merges that updated `main` into
+`agent/rules-completeness`, regenerates the combined platform/rules ledgers,
+retargets PR #1 to `main`, and verifies the combined branch before merge.
 
-## Active phase
+The unfinished CR 512 ending-phase draft is preserved outside the integration
+worktree in the named stash
+`wip/cr-512-ending-phase-before-stage-b-integration`. It must be recovered only
+after the combined branch is green.
 
-Stage A integrates the deterministic review foundation into `main`. AI/Codex
-pilot games, provider identity, token use, and model routing are retired as
-product completion gates. Existing adapters remain optional untrusted clients.
+## Deterministic product boundary
 
-The generated program ledger is
-`docs/PLATFORM_IMPLEMENTATION_STATUS.md`. Its machine-readable source is
-`platform/readiness-source.json`, and CI rejects stale generated output.
+The product is a deterministic server-authoritative Commander platform.
+AI/Codex adapters are optional untrusted clients and are not product, CI,
+merge, rules, or release gates. The server never delegates live legality or
+rules authority to a model.
 
-## Implemented foundation
+Implemented foundation:
 
 - authoritative `CommanderEngine` and capability-scoped `GameService`
 - principal-specific hidden-information projection
 - versioned full/delta protocol with view hashes
-- deterministic multiplayer turns, priority, mulligans, combat baseline,
-  opportunity audit, and conservative yields
-- server-issued legal actions, costs, target plans, and choices
-- trusted-only exact-list semantic preflight for the two pinned regression
-  lists
-- Game Record v3 command journals, checkpoints, replay, and sanitized fixtures
-- scripted, manual, and subprocess deterministic client adapters
-- optional AI/Codex adapters isolated from product gates
+- deterministic multiplayer turn, priority, mulligan, combat, opportunity,
+  and conservative-yield machinery
+- trusted-only semantic preflight and server-issued legal actions
+- Game Record v3 commands, checkpoints, exact replay, and sanitized fixtures
+- generated platform and rules coverage ledgers with stale-output checks
 
-No ASGI server, single-writer `GameActor`, durable production database,
-migrations, rooms/accounts service, or browser client is implemented yet.
+Not yet implemented:
 
-## Snapshot and coverage state
+- production ASGI/HTTP/WebSocket server
+- single-writer `GameActor`
+- durable production database and migrations
+- rooms, accounts, reconnect, spectators, or browser client
 
-- Comprehensive Rules corpus: not present on this branch; implemented on the
-  stacked `agent/rules-completeness` branch
-- Oracle/rulings scope on this branch: sanitized July 28, 2026 exact-list
-  fixture with source-pinned semantic programs
-- Exact Zimone and Dina list preflight: 100 fully playable, 0 partial, 0
-  unresolved
-- Exact Mishra, Eminent One list preflight: 100 fully playable, 0 partial, 0
-  unresolved
-- Full Oracle and Comprehensive Rules completeness: not claimed
+## Rules checkpoint
 
-## Deterministic validation
+The branch pins the Comprehensive Rules effective 2026-06-19 at SHA-256
+`e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`.
+It generates one source-linked conformance case for each of 3,300 numbered
+rules and preserves reviewed status only while the source and rule-text hashes
+remain unchanged.
 
-- Discovered deterministic tests: generated in
-  `coverage/platform-readiness.json`
-- Complete Stage A local gate: 288 tests pass in 99.079 seconds
-- Added deterministic full-game soak: a trusted-only four-player micro-pool
-  reaches a natural winner, has zero incorrectly suppressed meaningful
-  windows, passes seat projection, and exact command replay
-- Four-player protocol demo: pass
-- Seed-20260730 opportunity/action-exposure regression: pass
-- Repository/history/secret/capability/large-object scans: pass
-- Wheel build, clean install, imported version, and CLI smoke: pass
-- Baseline exact-SHA CI:
-  `https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30560259007`
-  across Python 3.11/3.12 on Ubuntu and Windows
+Current reviewed inventory before the Stage B regeneration:
 
-The final integration-change local gate passed. Exact-SHA CI remains pending
-until the current coherent diff is committed and pushed. Do not infer it from
-the baseline.
+- 316 reviewed cases
+- 44 executable semantic passes
+- 222 reviewed blocked cases
+- 50 definition-only cases
+- 2,984 unreviewed inventory cases
+- 425 discovered mechanics
+- 28 partial/untrusted mechanic contracts
+- 397 unclassified mechanics
+- 0 corpus-wide trusted mechanics
+
+Implemented reviewed families include narrow contracts for damage, defense,
+Battles, state-based actions, replacement/prevention ordering, effects,
+resolution, linked abilities, loyalty abilities, mana abilities, static and
+triggered abilities, casting, activating abilities, end step, cleanup,
+logical zone incarnations, timestamps, World, token/copy lifecycle, and
+maximum counters. These are partial family implementations, not full rules
+coverage.
+
+Current full-Oracle coverage before regeneration:
+
+- 38,373 total
+- 2,957 exact
+- 15,691 partial
+- 19,725 unresolved
+- 69,664 material residuals
+
+Current Commander-legal Oracle coverage before regeneration:
+
+- 31,622 total
+- 338 exact
+- 14,354 partial
+- 16,930 unresolved
+- 61,212 material residuals
+
+## Validation state
+
+Stage A exact evidence:
+
+- 288/288 local tests passed in 99.079 seconds
+- Python 3.11/3.12 on Ubuntu and Windows passed for exact SHA
+  `ead8fa2eecfa79b989a741daa58e103347b45a66`
+- generated platform status, schemas, repository/history/security scans,
+  protocol demo, wheel build, clean install, version import, and CLI passed
+- deterministic four-player micro-pool reached a natural winner with zero
+  suppressed meaningful windows, passed seat projection, and exact-replayed
+
+The combined Stage B local gate passed:
+
+- generated platform, rules, mechanics, and Oracle status checks
+- all noninventory and all generated per-rule tests
+- seed-20260730 opportunity/replay/privacy regression
+- deterministic four-player natural-winner soak
+- protocol demo and packet benchmark
+- repository/history/secret/artifact scans
+- wheel build, clean installation, imported version, and CLI smoke
+- exact-SHA four-job GitHub Actions remains pending until push
+
+The local gate ran 3,788 tests in 184.335 seconds, verified all 3,300 pinned
+rules cases and 425 mechanics, checked 14 schemas and repository history,
+completed the protocol demo, and built and clean-installed the wheel. The
+four-player natural-winner soak exact-replayed after eliminating insertion-order
+dependence from authoritative zone timestamps. No exact-SHA CI pass is claimed
+until the integration merge is pushed.
 
 ## Evidence boundaries
 
-- The deterministic micro-pool is rules-runtime evidence, not Commander deck
-  legality, deck quality, or matchup evidence.
-- Duplicate-list fixtures are never matchup evidence.
+- Source linkage for every rule is not behavioral correctness for every rule.
 - Exact-list semantic closure is not Oracle-corpus completeness.
-- Optional AI/Codex histories are adapter characterization only.
+- The micro-pool soak is rules-runtime/protocol evidence, not Commander
+  format-legality, deck quality, or matchup evidence.
+- Duplicate-list fixtures are never matchup evidence.
 - No deck list was changed.
 
-## Current blockers
+## Exact next step
 
-- PR #2 has not yet passed final exact-SHA CI and merged into `main`.
-- PR #1 remains stacked on `agent/review-mvp`.
-- The browser/server/persistence product layers are not yet implemented.
-- Comprehensive Rules and Commander-legal Oracle trust gates remain incomplete.
-
-## Exact next command
-
-Commit and push the coherent Stage A integration update, update PR #2 with the
-tested SHA and evidence, and verify exact-SHA CI.
-
-After PR #2 merges, merge updated `main` into `agent/rules-completeness` with an
-ordinary merge commit, regenerate coverage/status artifacts, retarget PR #1 to
-`main`, and run the expanded rules gate.
+Commit and push the ordinary Stage B integration merge, retarget PR #1 to
+`main`, update its exact evidence, wait for exact-SHA CI, and merge. Recover the
+CR 512 draft only after that integration completes.

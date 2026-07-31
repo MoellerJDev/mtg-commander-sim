@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "contract_version": 2,
+  "mechanic_id": "cr-603-handling-triggered-abilities",
+  "official_name": "Handling Triggered Abilities",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "603",
+    "603.1",
+    "603.1a",
+    "603.1b",
+    "603.2",
+    "603.2a",
+    "603.2b",
+    "603.2c",
+    "603.2d",
+    "603.2e",
+    "603.2f",
+    "603.2g",
+    "603.2h",
+    "603.3",
+    "603.3a",
+    "603.3b",
+    "603.3c",
+    "603.3d",
+    "603.4",
+    "603.5",
+    "603.6",
+    "603.6a",
+    "603.6b",
+    "603.6c",
+    "603.6d",
+    "603.6e",
+    "603.7",
+    "603.7a",
+    "603.7b",
+    "603.7c",
+    "603.7d",
+    "603.7e",
+    "603.7f",
+    "603.7g",
+    "603.7h",
+    "603.8",
+    "603.9",
+    "603.10",
+    "603.10a",
+    "603.10b",
+    "603.10c",
+    "603.10d",
+    "603.10e",
+    "603.10f",
+    "603.10g",
+    "603.11",
+    "603.12",
+    "603.12a"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "abilities",
+    "timing-and-priority",
+    "stack",
+    "continuous-effects",
+    "replacement-effects",
+    "prevention-effects",
+    "state-based-actions",
+    "zone-identity",
+    "last-known-information",
+    "linked-abilities",
+    "modal-spells-and-abilities",
+    "targets",
+    "player-choices"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "stack",
+      "graveyard and other explicitly active source zones",
+      "last-known pre-event zones"
+    ],
+    "objects": [
+      "trigger source",
+      "triggered ability on the stack",
+      "object named by a delayed trigger",
+      "object found after a zone change"
+    ],
+    "events": [
+      "normalized semantic event",
+      "phase or step begins",
+      "permanent enters or leaves",
+      "creature dies",
+      "artifact enters or goes to a graveyard",
+      "land enters",
+      "second card is drawn",
+      "delayed trigger condition matches"
+    ],
+    "state_reads": [
+      "source active zone",
+      "event context",
+      "source controller at trigger time",
+      "intervening condition at trigger and resolution",
+      "source and linked-object logical incarnation"
+    ],
+    "state_writes": [
+      "pending APNAP trigger batch",
+      "triggered ability stack object",
+      "delayed trigger record"
+    ],
+    "costs": [],
+    "timing": [
+      "trigger is detected during the event",
+      "trigger batch is stabilized before priority",
+      "intervening condition is rechecked on resolution",
+      "delayed trigger waits for a later matching event"
+    ],
+    "targets": [
+      "represented target schemas select legal targets before priority"
+    ],
+    "choices": [
+      "same-controller trigger order",
+      "represented target selection",
+      "represented optional resolution choice"
+    ],
+    "hidden_information": [
+      "only legal projected target candidates are exposed",
+      "private-zone trigger information remains seat-scoped"
+    ],
+    "apnap": [
+      "simultaneous represented trigger batches group controllers in APNAP order"
+    ],
+    "layers": [
+      "last-known and entry characteristics may depend on continuous effects"
+    ],
+    "replacement_effects": [
+      "only the final authoritative event is dispatched to represented triggers"
+    ],
+    "copy": [
+      "triggered ability stack copies preserve serialized context where implemented"
+    ],
+    "control_change": [
+      "ordinary triggers freeze the source controller at trigger time",
+      "self-departure triggers use the source's last-known controller"
+    ],
+    "zone_change": [
+      "self events match stable references and pre-move active zones",
+      "identity-sensitive delayed effects reject a later incarnation"
+    ],
+    "source_leaves": [
+      "self dies and leaves triggers retain last-known controller and source context"
+    ]
+  },
+  "variants": [
+    "ordinary event trigger",
+    "phase or step trigger",
+    "intervening-if trigger",
+    "simultaneous APNAP trigger batch",
+    "zone-change trigger",
+    "delayed trigger",
+    "state trigger",
+    "look-back trigger",
+    "linked trigger",
+    "reflexive trigger"
+  ],
+  "witness_cards": [
+    {
+      "name": "Elvish Visionary",
+      "oracle_id": "c6a3a882-a127-4590-93d7-679ef4313efe"
+    },
+    {
+      "name": "Kingfisher",
+      "oracle_id": "2a70f3d7-9b5c-455e-8c4b-55870d77bd7d"
+    },
+    {
+      "name": "Padeem, Consul of Innovation",
+      "oracle_id": "0c7ba712-6a99-4d2f-9242-a2163a11f69c"
+    },
+    {
+      "name": "Daretti, Scrap Savant",
+      "oracle_id": "ea9f4de3-fc35-435a-8dff-a5657d14a9bd"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_603_rule",
+    "test_trigger_waits_for_stabilization_then_becomes_top_stack_object",
+    "test_trigger_controller_is_frozen_at_trigger_time",
+    "test_simple_self_trigger_compiles_to_normalized_engine_event",
+    "test_generated_enters_trigger_reaches_arbiter_fail_closed",
+    "test_self_dies_trigger_uses_last_known_controller",
+    "test_padeem_hexproof_and_intervening_upkeep_condition",
+    "test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
+    "test_delayed_trigger_queues_at_matching_step",
+    "test_daretti_ruling_does_not_follow_a_reentered_card",
+    "test_unconditional_entry_tapped_is_engine_derived"
+  ],
+  "implementation": {
+    "component": "oracle_ir trigger lowering plus CommanderEngine semantic-event, trigger-batch, stabilization, and delayed-trigger paths",
+    "version": "trigger-handling-foundation-v2"
+  },
+  "known_blockers": [
+    "the Oracle compiler recognizes selected whole-text trigger templates rather than the complete trigger grammar",
+    "the two-part CR 603.3b ordering for abilities that trigger from other abilities triggering is not represented",
+    "generic modal trigger legality, all target and division choices, and illegal-trigger removal remain incomplete",
+    "multi-occurrence, becomes, visibility, once-per-turn instruction, state, player-loss, linked-mid-sentence, and reflexive trigger families are incomplete",
+    "delayed-trigger creation provenance and simultaneous-event selection are not universally typed",
+    "entry and leaves look-back evaluation does not yet use the complete continuous-effect and LKI exception matrix",
+    "Aura paired-object zone-change lookup and hidden-zone finding are incomplete",
+    "generated trigger effects remain provisional until every effect dependency is trusted"
+  ],
+  "review_status": "draft"
+}

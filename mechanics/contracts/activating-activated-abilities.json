@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-602-activating-activated-abilities",
+  "official_name": "Activating Activated Abilities",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "602",
+    "602.1",
+    "602.1a",
+    "602.1b",
+    "602.1c",
+    "602.1d",
+    "602.1e",
+    "602.2",
+    "602.2a",
+    "602.2b",
+    "602.3",
+    "602.3a",
+    "602.3b",
+    "602.4",
+    "602.5",
+    "602.5a",
+    "602.5b",
+    "602.5c",
+    "602.5d",
+    "602.5e"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "abilities",
+    "timing-and-priority",
+    "casting-spells",
+    "mana",
+    "costs",
+    "targets",
+    "modes",
+    "hidden-information",
+    "illegal-actions",
+    "continuous-effects"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "hand",
+      "graveyard",
+      "exile"
+    ],
+    "objects": [
+      "ability source",
+      "activated ability stack object",
+      "objects selected or paid as costs"
+    ],
+    "events": [
+      "priority action advertises an activation",
+      "activation is announced",
+      "activation costs are paid",
+      "mana ability resolves immediately",
+      "nonmana activated ability is put on the stack",
+      "control of an ability source changes"
+    ],
+    "state_reads": [
+      "source controller or owner",
+      "source active zone",
+      "priority player",
+      "timing window and stack",
+      "effective source type and keywords",
+      "tap or untap status",
+      "mana and nonmana cost payability",
+      "per-object activation history"
+    ],
+    "state_writes": [
+      "paid mana, life, energy, loyalty, and object costs",
+      "source tap or untap status",
+      "source zone after discard, sacrifice, or exile cost",
+      "activated ability stack object",
+      "per-object once-per-turn activation fact"
+    ],
+    "costs": [
+      "mana",
+      "tap source",
+      "untap source",
+      "discard source",
+      "sacrifice or exile source",
+      "pay life or energy",
+      "loyalty",
+      "selected sacrifice, discard, return, and crew objects"
+    ],
+    "timing": [
+      "requires priority unless a mana ability is used during payment",
+      "activate only as a sorcery",
+      "activate only as an instant",
+      "summoning-sickness restriction for creature tap and untap costs",
+      "once-per-turn restriction persists on the object"
+    ],
+    "targets": [
+      "represented target schemas are selected and validated during activation"
+    ],
+    "choices": [
+      "represented modes, targets, cost objects, and mana payments"
+    ],
+    "hidden_information": [
+      "nonbattlefield source activation is owner-scoped",
+      "private cards and cost candidates remain projected only to the entitled seat"
+    ],
+    "apnap": [
+      "opponent-made activation choices are not yet represented"
+    ],
+    "layers": [
+      "effective abilities, source types, keywords, and restrictions are consulted where implemented"
+    ],
+    "replacement_effects": [],
+    "copy": [
+      "copied or acquired activation restrictions lack generic ability provenance"
+    ],
+    "control_change": [
+      "battlefield activation requires current control",
+      "per-object once-per-turn history survives control change"
+    ],
+    "zone_change": [
+      "ordinary cost zone changes use the authoritative move path"
+    ],
+    "source_leaves": [
+      "a paid nonmana activated ability remains on the stack after its source leaves"
+    ]
+  },
+  "variants": [
+    "ordinary nonmana activation",
+    "mana activation",
+    "hidden-zone activation",
+    "tap-symbol activation",
+    "untap-symbol activation",
+    "once-per-turn activation",
+    "sorcery-speed activation",
+    "instant-speed activation",
+    "opponent-made activation choice",
+    "cost-modifying activation"
+  ],
+  "witness_cards": [
+    {
+      "name": "Sensei's Divining Top",
+      "oracle_id": "13575cf9-65c1-4861-b21e-eb2155e07766"
+    },
+    {
+      "name": "Zimone and Dina",
+      "oracle_id": "5bc66b18-22ac-4138-b527-fa711116e298"
+    },
+    {
+      "name": "Boseiju, Who Endures",
+      "oracle_id": "bf1341dd-41a3-49f6-87ec-63170dde4324"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_602_rule",
+    "test_only_colon_form_activated_abilities_are_parsed",
+    "test_untap_symbol_obeys_summoning_sickness_and_haste",
+    "test_once_per_turn_restriction_survives_control_change",
+    "test_sorcery_and_instant_activation_instructions_use_right_timing",
+    "test_zimone_cost_selection_is_validated_and_paid_by_kernel",
+    "test_channel_is_exposed_from_hand_and_pays_authoritative_discounted_cost",
+    "test_divining_top_payability_and_tap_availability"
+  ],
+  "implementation": {
+    "component": "abilities.parse_activated_abilities plus CommanderEngine activation availability, cost-payment, and stack paths",
+    "version": "activated-ability-foundation-v1"
+  },
+  "known_blockers": [
+    "the Oracle parser recognizes selected cost and activation-instruction grammars rather than every activated ability",
+    "full CR 601.2b-i announcement, mode, target, division, cost-modification, mana, and rollback behavior is not shared universally",
+    "hidden-zone reveal timing and public record behavior are incomplete",
+    "opponent-made activation modes, targets, and simultaneous choices are absent",
+    "cost-altering activated abilities do not use a generic prospective-cost effect model",
+    "continuous prohibitions and activation instructions outside selected text predicates are incomplete",
+    "acquired-ability provenance does not distinguish identically worded restricted abilities",
+    "illegal activation rollback is not represented as a universal transaction"
+  ],
+  "review_status": "draft"
+}

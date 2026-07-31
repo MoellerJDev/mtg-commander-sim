@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-600-general",
+  "official_name": "Spells, Abilities, and Effects — General",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "600"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "casting-spells",
+    "activating-activated-abilities",
+    "handling-triggered-abilities",
+    "handling-static-abilities",
+    "mana-abilities",
+    "loyalty-abilities",
+    "linked-abilities",
+    "resolving-spells-and-abilities",
+    "effects"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "stack",
+      "battlefield",
+      "zones in which an ability or permission is active"
+    ],
+    "objects": [
+      "spells",
+      "activated abilities",
+      "triggered abilities",
+      "static abilities",
+      "effects"
+    ],
+    "events": [
+      "taxonomy only; behavioral events are owned by CR 601-609 contracts"
+    ],
+    "state_reads": [],
+    "state_writes": [],
+    "costs": [],
+    "timing": [
+      "taxonomy only; timing behavior is owned by the dependent contracts"
+    ],
+    "targets": [],
+    "choices": [],
+    "hidden_information": [],
+    "apnap": [],
+    "layers": [
+      "continuous-effect behavior is owned by CR 604, 609, 611, and 613"
+    ],
+    "replacement_effects": [
+      "replacement and prevention behavior is owned by CR 614-616"
+    ],
+    "copy": [],
+    "control_change": [],
+    "zone_change": [],
+    "source_leaves": []
+  },
+  "variants": [
+    "section taxonomy"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_the_only_cr_600_record"
+  ],
+  "implementation": {
+    "component": "mechanics/contracts/spells-abilities-effects-general.json and the CR 601-609 dependent contracts",
+    "version": "spells-abilities-effects-taxonomy-v1"
+  },
+  "known_blockers": [
+    "CR 601-609 dependent contracts remain partial or untrusted",
+    "the heading contains no standalone executable behavior that could promote the family to trusted"
+  ],
+  "review_status": "draft"
+}

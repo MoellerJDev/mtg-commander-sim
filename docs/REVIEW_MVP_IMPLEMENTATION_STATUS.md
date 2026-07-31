@@ -88,7 +88,7 @@ and beyond D27 with both `suppressed_meaningful_windows` and
 - [x] Historical persistent-Codex game gate retired
 - [x] Package version updated to 0.8.0
 - [x] Complete local deterministic validation
-- [ ] Milestone commit, exact-SHA CI, and branch push
+- [x] Milestone commit, exact-SHA CI, branch push, and merge to `main`
 
 Duplicated-list fixtures must always retain `matchup_evidence=false`.
 
@@ -287,13 +287,11 @@ does not count toward the qualifying streak.
   installation pass
 - [x] `agent/review-mvp` pushed
 - [x] Draft PR #2 opened against `main`
-- [x] Draft PR left unmerged while exact-SHA CI remains pending
+- [x] PR #2 passed exact-SHA CI and merged to `main` as `bd89201`
 - [x] `OVERNIGHT_HANDOFF.md` written
 
 ## Next work
 
-Commit and push the verified Stage A change, update PR #2 with the exact tested
-SHA, and merge it into `main` through an ordinary merge commit. Then merge updated
-`main` into `agent/rules-completeness`, regenerate the rules/coverage ledgers,
-retarget PR #1 to `main`, and run the expanded deterministic gate. Do not run or
-improve Codex pilots as part of this integration.
+Stage A is complete. Finish the verified Stage B rules integration, retarget PR
+#1 to `main`, and merge it only after exact-SHA CI passes. Do not run or improve
+Codex pilots as part of this integration.

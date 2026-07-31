@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "contract_version": 3,
+  "mechanic_id": "cr-400-general",
+  "official_name": "Zones and New Object Identity",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "400",
+    "400.1",
+    "400.6",
+    "400.7",
+    "400.7a",
+    "400.7b",
+    "400.7c",
+    "400.7d",
+    "400.7e",
+    "400.7f",
+    "400.7g",
+    "400.7h",
+    "400.7i",
+    "400.7j",
+    "400.7k",
+    "400.7m",
+    "400.8",
+    "400.9",
+    "400.10",
+    "400.11",
+    "613.7d",
+    "613.7m"
+  ],
+  "glossary_references": [
+    "object",
+    "zone"
+  ],
+  "dependencies": [
+    "objects",
+    "zones",
+    "last-known-information",
+    "targets",
+    "linked-abilities"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "library",
+      "hand",
+      "battlefield",
+      "graveyard",
+      "exile",
+      "command",
+      "stack",
+      "outside the game"
+    ],
+    "objects": [
+      "cards",
+      "tokens",
+      "spell copies",
+      "card copies",
+      "permanents",
+      "spells",
+      "abilities"
+    ],
+    "events": [
+      "zone-change proposal",
+      "replacement selection",
+      "new logical incarnation",
+      "same-zone exile or command reentry"
+    ],
+    "state_reads": [
+      "physical card identity",
+      "current zone",
+      "logical incarnation",
+      "pre-move characteristics",
+      "zone-change exceptions"
+    ],
+    "state_writes": [
+      "zone membership",
+      "typed card, token, spell-copy, or card-copy kind",
+      "logical incarnation counter",
+      "serialized zone-entry timestamp moment",
+      "new-object characteristics and counters",
+      "last-known-information event snapshot"
+    ],
+    "costs": [
+      "a public-zone move paid as a cost remains linkable by the resolving instruction where CR 400.7j applies"
+    ],
+    "timing": [
+      "replacement effects are selected before mutation",
+      "last-known information is captured before mutation",
+      "the destination incarnation exists after mutation",
+      "objects moved simultaneously to one destination share one timestamp moment"
+    ],
+    "targets": [
+      "a target is tied to the selected logical incarnation and does not follow the same physical card through a zone change"
+    ],
+    "choices": [
+      "contradictory destination effects require the appropriate controller or owner choice"
+    ],
+    "hidden_information": [
+      "logical incarnation metadata remains authoritative and is not projected as hidden-zone identity"
+    ],
+    "apnap": [
+      "simultaneous zone-change replacement choices may require APNAP collection"
+    ],
+    "layers": [
+      "new battlefield objects receive new timestamps and lose prior continuous effects except for explicit CR 400.7 exceptions"
+    ],
+    "replacement_effects": [
+      "destination replacements transform the same proposed zone-change event before the incarnation advances"
+    ],
+    "copy": [
+      "copy effects normally end on a zone change; permanent-spell continuation and sticker exceptions remain explicit"
+    ],
+    "control_change": [
+      "a new battlefield object uses the instructed controller; otherwise a card normally returns to its owner"
+    ],
+    "zone_change": [
+      "ordinary cross-zone moves create a new logical incarnation",
+      "exile-to-exile and command-to-command create new logical incarnations",
+      "a permanent spell retains its logical incarnation as it becomes a permanent"
+    ],
+    "source_leaves": [
+      "stack abilities use last-known information, while targets and linked delayed effects retain only the relationships allowed by CR 400.7"
+    ]
+  },
+  "variants": [
+    "target leaves and returns before resolution",
+    "same physical card leaves and returns before a linked delayed effect",
+    "exile-to-exile reentry",
+    "spell-to-permanent continuation",
+    "sequential zone entries receive increasing timestamp moments",
+    "simultaneous zone entries share a timestamp moment"
+  ],
+  "witness_cards": [
+    {
+      "name": "Ephemerate",
+      "oracle_id": "0fd57894-b917-41c8-a394-360d1d31b236"
+    },
+    {
+      "name": "Cloudshift",
+      "oracle_id": "6879f5ce-7a1b-4606-bad1-885779b0d456"
+    },
+    {
+      "name": "Daretti, Scrap Savant",
+      "oracle_id": "ea9f4de3-fc35-435a-8dff-a5657d14a9bd"
+    }
+  ],
+  "rulings": [
+    "Ephemerate 2019-06-14: the returned creature is a new object and a token will not return",
+    "Cloudshift 2018-03-16: the returned permanent is a new object and a token will not return",
+    "Daretti, Scrap Savant 2014-11-07: the delayed return does not follow a card that left and reentered the graveyard"
+  ],
+  "test_ids": [
+    "test_zone_changes_create_serialized_logical_incarnations",
+    "test_incarnation_counter_is_monotonic_under_zone_mutation",
+    "test_draw_crosses_the_canonical_incarnation_boundary",
+    "test_new_incarnation_forgets_state_except_entry_continuations",
+    "test_return_transformed_sets_the_face_before_enter_events",
+    "test_target_that_leaves_and_returns_is_a_new_illegal_object",
+    "test_linked_move_requires_the_recorded_incarnation",
+    "test_linked_move_accepts_the_current_incarnation",
+    "test_daretti_ruling_does_not_follow_a_reentered_card",
+    "test_logical_identity_metadata_is_not_projected_to_pilots",
+    "test_token_cost_cessation_replays_exactly",
+    "test_spell_copy_has_a_serialized_stack_object",
+    "test_permanent_spell_copy_becomes_the_same_token_object",
+    "test_spell_copy_cessation_replays_exactly",
+    "test_permanent_spell_keeps_its_logical_incarnation",
+    "test_simultaneous_move_captures_all_lki_before_mutation",
+    "test_worlds_entering_simultaneously_are_tied_and_all_leave"
+  ],
+  "implementation": {
+    "component": "CardInstance.zone_change_counter and zone_timestamp, GameState.timestamp_sequence, CommanderEngine.move_card, target revalidation, and identity-guarded semantic moves",
+    "version": "object-incarnation-v3"
+  },
+  "known_blockers": [
+    "the complete CR 400.7a-m exception matrix is not represented as typed continuation policies",
+    "merged permanents, meld components, stickers, and complete face-down object identity are not implemented",
+    "turning a face-up command-zone object face down does not yet create a new incarnation",
+    "all legacy semantic references have not yet migrated from physical refs to typed logical handles",
+    "all simultaneous replacement choices are not yet routed through the CR 616 ordering engine",
+    "complete CR 613.7m APNAP relative-timestamp choices are not represented"
+  ],
+  "review_status": "reviewed"
+}

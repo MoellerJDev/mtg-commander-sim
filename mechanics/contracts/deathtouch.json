@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "deathtouch",
+  "official_name": "Deathtouch",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": ["702.2", "704.5h"],
+  "glossary_references": ["deathtouch"],
+  "dependencies": ["damage", "state-based-actions", "continuous-effects"],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["battlefield"],
+    "objects": ["creature source", "creature dealt damage"],
+    "events": ["damage dealt", "state-based actions"],
+    "state_reads": ["source current deathtouch ability", "positive damage dealt"],
+    "state_writes": ["mark recipient as damaged by a deathtouch source"],
+    "costs": [],
+    "timing": ["state-based actions after damage"],
+    "targets": [],
+    "choices": ["combat damage assignment remains constrained by lethal assignment rules"],
+    "hidden_information": [],
+    "apnap": [],
+    "layers": ["ability-adding/removing effects determine source state"],
+    "replacement_effects": ["prevented or replaced damage does not count as dealt"],
+    "copy": ["copiable keyword state may differ from printed keywords"],
+    "control_change": [],
+    "zone_change": ["last known source characteristics may be required"],
+    "source_leaves": ["damage remembers whether its source had deathtouch"]
+  },
+  "variants": ["multiple instances are redundant"],
+  "witness_cards": [
+    {
+      "name": "Gifted Aetherborn",
+      "oracle_id": "c602bca9-b7c9-47ca-920d-e6df9b94a90f"
+    }
+  ],
+  "rulings": [],
+  "test_ids": ["test_deathtouch_is_derived_from_source_not_pilot_claim"],
+  "implementation": {
+    "component": "CommanderEngine.combat_damage and CommanderEngine._stabilize",
+    "version": "combat-keywords-v1"
+  },
+  "known_blockers": [
+    "full continuous-effect layers and last-known-information",
+    "complete replacement and prevention ordering",
+    "complete combat assignment edge cases"
+  ],
+  "review_status": "draft"
+}

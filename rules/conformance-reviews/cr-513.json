@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 513 — End Step",
+  "cases": [
+    {
+      "rule_id": "513",
+      "rule_text_sha256": "932d1d4f1586847832d2cc9abcdfb08bb3889a439e277c9e5ff49fab4deaa9ec",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/end-step.json"],
+      "executable_test_ids": ["tests.test_end_step_rules.EndStepRuleTests.test_contract_traces_every_cr_513_rule"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Section heading; every numbered CR 513 record is pinned by the End Step contract."]
+    },
+    {
+      "rule_id": "513.1",
+      "rule_text_sha256": "f575bd89c38a3f6982d802a38660092231852c7a5b6313a1da81fde7465774f9",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["CommanderEngine._enter_step", "CommanderEngine._grant_priority", "CommanderEngine._start_trigger_batch"],
+      "executable_test_ids": ["tests.test_end_step_rules.EndStepRuleTests.test_end_step_has_no_turn_action_then_active_gets_priority_and_replays", "tests.test_end_step_rules.EndStepRuleTests.test_permanent_and_delayed_end_step_triggers_both_precede_priority"],
+      "required_scenarios": ["positive", "interaction", "replay"],
+      "covered_scenarios": ["positive", "interaction", "replay"],
+      "blockers": [],
+      "notes": ["The end step performs no turn-based action. Represented permanent and delayed boundary triggers are collected before the active player receives priority, and ordinary passage through the step command-replays exactly."]
+    },
+    {
+      "rule_id": "513.1a",
+      "rule_text_sha256": "717cd19f193add80d036c59e70334dbc5a0a1ef875ed18ac5471baaf4f4f3e71",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["CardDatabase", "SemanticRegistry", "mechanics/contracts/end-step.json"],
+      "executable_test_ids": ["tests.test_end_step_rules.EndStepRuleTests.test_contract_traces_every_cr_513_rule"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Historical printed 'at end of turn' wording is definition-only for this engine, which consumes the current Oracle reference rather than legacy printed text."]
+    },
+    {
+      "rule_id": "513.2",
+      "rule_text_sha256": "908ee9092cbf34e51ea1b0116f13bcf38c20d3f9b29d8029c042ebf9489991fa",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["CommanderEngine._enter_step", "CommanderEngine._dispatch_semantic_event", "CommanderEngine.schedule_delayed_trigger", "CommanderEngine._matching_delayed_triggers", "CommanderEngine._finish_cleanup"],
+      "executable_test_ids": ["tests.test_end_step_rules.EndStepRuleTests.test_late_permanent_and_delayed_trigger_wait_for_next_end_step", "tests.test_end_step_rules.EndStepRuleTests.test_end_step_created_turn_duration_survives_until_cleanup"],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer"],
+      "blockers": [],
+      "notes": ["The beginning boundary is dispatched once. A represented permanent entering or delayed trigger created later in a four-player end step waits for the next end step; a turn-duration effect created during the step remains until cleanup."]
+    }
+  ]
+}

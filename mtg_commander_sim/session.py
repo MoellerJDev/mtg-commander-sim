@@ -10,6 +10,7 @@ from .carddb import CardDatabase
 from .deck import DeckDefinition, DeckLoader
 from .engine import ActionResult, CommanderEngine
 from .model import GameConfig
+from .oracle_ir import register_generated_programs
 from .projection import ProjectionCursor, StateProjector
 from .profiles import (
     DeckProfileCache,
@@ -98,6 +99,18 @@ class CommanderSession:
         semantics_path: str | Path | None = None,
     ) -> "CommanderSession":
         semantics = SemanticRegistry(semantics_path)
+        deck_records = [
+            card_db.lookup(entry.name)
+            for deck in decks.values()
+            for entry in deck.entries
+            if entry.board in {"mainboard", "commander"}
+        ]
+        register_generated_programs(
+            card_db,
+            semantics,
+            deck_records,
+            trust_level="provisional",
+        )
         game_config = config or GameConfig(seed=seed)
         if seed is not None:
             game_config.seed = seed

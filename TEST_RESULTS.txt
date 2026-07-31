@@ -1,4 +1,4 @@
-# MTG Commander Sim 0.8.0 — deterministic platform integration verification
+# MTG Commander Sim 0.8.0 — combined platform/rules verification
 
 Date: 2026-07-30
 Python: 3.11.9
@@ -7,21 +7,39 @@ Python: 3.11.9
 
 PASS: `python -m compileall -q mtg_commander_sim tests scripts simctl.py`
 
-PASS: 288 unit/integration tests in 99.079 seconds using the rebuilt compact
-Scryfall database.
+PASS: 3,788 unit/integration tests in 184.335 seconds using the rebuilt compact
+Scryfall database:
 
-The Stage A additions cover:
+- 3,300 generated per-rule inventory/source-linkage tests
+- 488 ordinary rules, engine, protocol, replay, privacy, and platform tests
 
-- generated machine-readable and human-readable platform readiness ledgers
-- CI/repository rejection of stale generated readiness output
-- explicit separation of deterministic product gates from optional untrusted
-  AI/Codex client adapters
-- a trusted-only four-seat micro-pool game that reaches a natural winner
-- zero incorrectly suppressed meaningful windows in that full game
-- seat-projection audit and exact command replay for that full game
+Generated source linkage is not a claim that every rule has executable semantic
+coverage. The reviewed ledger remains fail-closed about passing, blocked,
+definition-only, and unreviewed cases.
+
+PASS: the trusted-only four-seat micro-pool reached a natural winner with zero
+incorrectly suppressed meaningful windows, passed the seat-projection audit,
+and exact command-replayed.
+
+The integration soak exposed and fixed a replay defect: player elimination
+allocated authoritative zone timestamps from incidental mapping insertion
+order. Elimination now processes objects in stable reference/identity order, so
+continuous execution and checkpoint replay produce identical timestamps.
 
 The full-game fixture is rules-runtime and protocol evidence. Its repeated
 micro-pool is not Commander format-legality, deck-quality, or matchup evidence.
+
+## Pinned rules corpus
+
+PASS: `python simctl.py rules verify --root .`
+
+- effective date: 2026-06-19
+- source SHA-256:
+  `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
+- numbered rules verified: 3,300
+- conformance cases verified: 3,300
+- mechanics verified: 425
+- current snapshot complete: false
 
 ## Protocol and repository validation
 
@@ -31,13 +49,13 @@ four players, seed 20260728, and compact delta packets smaller than bootstrap.
 PASS:
 
 - generated platform status stale check
-- 12 JSON schemas checked
+- 14 JSON schemas checked
 - complete tracked-source credential and raw-capability scan
 - forbidden runtime/database/build artifact scan
 - reachable-history path and oversized-blob scan
 - sanitized public replay-fixture policy check
 
-The scan covered 144 tracked files and 2,521,970 tracked bytes.
+The scan covered 244 tracked files and 11,163,212 tracked bytes.
 
 ## Package
 
@@ -48,12 +66,12 @@ package reported version 0.8.0 and its CLI smoke test completed.
 
 ## Evidence boundary
 
-These checks establish the local Stage A deterministic platform foundation,
-including replay, privacy, action-opportunity, packaging, and repository gates.
-They do not establish a production ASGI server, browser client, durable
-database, full Comprehensive Rules coverage, Oracle-corpus semantic closure,
-Commander deck legality for the micro-pool, deck superiority, or statistical
-matchup evidence.
+These checks establish the local combined platform/rules branch, including
+source pinning, replay, privacy, action opportunity, packaging, and repository
+gates. They do not establish a production ASGI server, browser client, durable
+database, complete Comprehensive Rules behavior, Oracle-corpus semantic
+closure, Commander deck legality for the micro-pool, deck superiority, or
+statistical matchup evidence.
 
-Exact-SHA GitHub Actions evidence is recorded on pull request #2 after this
-coherent change is committed and pushed.
+Exact-SHA GitHub Actions evidence is recorded on pull request #1 after this
+ordinary integration merge is committed and pushed.

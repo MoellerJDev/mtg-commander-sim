@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-607-linked-abilities",
+  "official_name": "Linked Abilities",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "607",
+    "607.1",
+    "607.1a",
+    "607.1b",
+    "607.1c",
+    "607.1d",
+    "607.2",
+    "607.2a",
+    "607.2b",
+    "607.2c",
+    "607.2d",
+    "607.2e",
+    "607.2f",
+    "607.2g",
+    "607.2h",
+    "607.2i",
+    "607.2j",
+    "607.2k",
+    "607.2m",
+    "607.2n",
+    "607.2p",
+    "607.2q",
+    "607.3",
+    "607.4",
+    "607.5",
+    "607.5a"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "abilities",
+    "object-identity",
+    "zone-changes",
+    "copying-objects",
+    "replacement-effects",
+    "costs",
+    "choices",
+    "tokens",
+    "emblems",
+    "double-faced-cards"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "stack",
+      "battlefield",
+      "exile",
+      "all zones traversed by a linked object"
+    ],
+    "objects": [
+      "ability source",
+      "linked action",
+      "linked object",
+      "linked player",
+      "token",
+      "emblem",
+      "permanent spell",
+      "resulting permanent"
+    ],
+    "events": [
+      "linked choice",
+      "linked exile",
+      "linked battlefield entry",
+      "linked cost payment",
+      "linked noted information"
+    ],
+    "state_reads": [
+      "ability pair identity",
+      "source logical incarnation",
+      "linked object logical incarnation",
+      "chosen value",
+      "paid cost",
+      "noted information"
+    ],
+    "state_writes": [
+      "linked relationship identifier",
+      "linked object set",
+      "linked choice value",
+      "linked cost fact",
+      "undefined-choice marker"
+    ],
+    "costs": [
+      "additional cost paid while casting",
+      "variable additional cost",
+      "as-enters cost",
+      "cards exiled to pay a permanent spell cost"
+    ],
+    "timing": [
+      "ability-pair recognition from printed or jointly granted text",
+      "link fact captured when the first ability acts or a cost is declared",
+      "second ability resolves only against its link"
+    ],
+    "targets": [],
+    "choices": [
+      "chosen value",
+      "chosen word",
+      "anchor word",
+      "pre-game choice",
+      "one of multiple linked exiled cards"
+    ],
+    "hidden_information": [
+      "linked exile and pre-game records expose only information allowed by the effect",
+      "a private choice remains seat-scoped until rules make it public"
+    ],
+    "apnap": [],
+    "layers": [
+      "acquired ability pairs remain linked only when granted by the same effect"
+    ],
+    "replacement_effects": [
+      "cards exiled by one specific replacement event are linked to its paired ability"
+    ],
+    "copy": [
+      "copied linked abilities and multiple exiled cards preserve the exact relationship required by CR 607.3",
+      "nonmodal double-faced object faces share printed-object link recognition"
+    ],
+    "control_change": [
+      "linked relationship remains on the represented object independently of controller"
+    ],
+    "zone_change": [
+      "ordinary linked object references do not follow a new logical incarnation",
+      "pre-game characteristic choices can explicitly persist across zones",
+      "a permanent spell and the permanent it becomes can share a cast-cost link"
+    ],
+    "source_leaves": [
+      "a linked ability uses only the relationship captured by its paired ability"
+    ]
+  },
+  "variants": [
+    "exiled with this object",
+    "replacement-exiled card",
+    "created or put onto battlefield with this object",
+    "chosen value",
+    "noted information",
+    "chosen rules-meaningless word",
+    "as-enters cost",
+    "same-paragraph static and triggered abilities",
+    "additional cost paid",
+    "champion",
+    "anchor word",
+    "pre-game exile",
+    "pre-game characteristic choice",
+    "permanent-spell exile cost",
+    "multiple exiled cards",
+    "multiple linked pairs",
+    "jointly acquired linked abilities",
+    "undefined choice"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_607_rule",
+    "test_undefined_chosen_name_has_no_effect",
+    "test_pithing_needle_name_and_ability_suppression",
+    "test_linked_move_requires_the_recorded_incarnation",
+    "test_linked_move_accepts_the_current_incarnation",
+    "test_daretti_ruling_does_not_follow_a_reentered_card"
+  ],
+  "implementation": {
+    "component": "CardInstance annotations and logical incarnation guards in CommanderEngine",
+    "version": "linked-ability-foundation-v1"
+  },
+  "known_blockers": [
+    "the Oracle IR does not assign stable ability-pair and link identifiers",
+    "linked exiled-card sets, noted information, chosen words, and cost facts are not represented generically",
+    "copy, double-faced, token, emblem, and cross-object linked relationships are incomplete",
+    "multiple-card link expansion and sum semantics are not implemented generically",
+    "jointly granted ability-pair provenance is not tracked",
+    "undefined choice behavior is implemented only by selected consumers"
+  ],
+  "review_status": "draft"
+}

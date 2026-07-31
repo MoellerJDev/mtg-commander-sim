@@ -187,7 +187,15 @@ def refresh_scryfall_database(
                 [
                     ("bulk_manifest_url", manifest_url),
                     ("scryfall_oracle_updated_at", items["oracle_cards"].updated_at),
+                    (
+                        "scryfall_oracle_download_uri",
+                        items["oracle_cards"].download_uri,
+                    ),
                     ("scryfall_rulings_updated_at", items["rulings"].updated_at),
+                    (
+                        "scryfall_rulings_download_uri",
+                        items["rulings"].download_uri,
+                    ),
                 ],
             )
             connection.commit()
@@ -208,6 +216,8 @@ def refresh_scryfall_database(
             "database": str(output),
             "oracle_updated_at": metadata["scryfall_oracle_updated_at"],
             "rulings_updated_at": metadata["scryfall_rulings_updated_at"],
+            "oracle_sha256": metadata["oracle_source_sha256"],
+            "rulings_sha256": metadata["rulings_source_sha256"],
             "oracle_download": str(oracle_path),
             "rulings_download": str(rulings_path),
         }

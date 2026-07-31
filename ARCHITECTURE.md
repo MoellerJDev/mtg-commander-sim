@@ -184,6 +184,86 @@ auto-pass, ordered plan, or incorrect suppression. A nonzero
 `suppressed_meaningful_windows` fails fidelity and caps classification at
 `rules_test`.
 
+## Versioned rules and Oracle compilation
+
+Rules completeness is a separate, fail-closed pipeline above the existing
+kernel:
+
+```text
+Official CR TXT ─┐
+Oracle bulk ─────┼─> snapshot hashes -> mechanics contracts -> typed Oracle IR
+Rulings bulk ────┘                                      │
+                                                        ▼
+                                       generic engine primitives + DSL
+```
+
+`rules_corpus.py` discovers the official TXT only through allowlisted Wizards
+HTTPS endpoints, parses numbered IDs/sections/glossary locally, and writes
+compact derived indexes. The raw document remains ignored. The manifest pins
+the CR, Oracle, and rulings inputs, while coverage remains false until reviewed
+contracts and tests establish behavioral trust.
+
+`rule_conformance.py` derives one stable case from every indexed rule ID. Its
+generated unittest surface checks only source linkage. Semantic status is a
+separate reviewed field: passing requires an implementation component, real
+test IDs, declared scenarios, and complete scenario coverage. Regeneration
+preserves review only for an unchanged source and rule-text hash, so a rules
+update cannot inherit stale conformance. Missing or duplicate cases fail
+corpus verification.
+
+The Oracle compiler preserves source spans and emits typed ability, cost,
+target, trigger, replacement, and effect nodes. Oracle IR v2 lowers simple
+self enters/dies/leaves triggers, unconditional enters-tapped text, fixed
+self/target effects, and basic creature-token creation. Generated handlers
+remain provisional, and reviewed trigger handlers shadow equivalent generated
+events. A material residual prevents trusted preflight. Card-specific
+overrides are a reviewed escape hatch for irreducible exceptions, not a
+substitute for generic mechanics or a printed-name branch in
+`CommanderEngine`.
+
+CR 704 stabilization derives a public permanent snapshot before mutating
+anything. `state_based_actions.py` classifies non-destruction graveyard moves,
+destruction, unattachment, opposing-counter removal, and token cessation; the
+engine applies the batch and rechecks before granting priority. Aura legality
+reuses the declarative target domain without applying targeting-only shroud or
+hexproof, while protection remains an attachment restriction. Unsupported
+enchant quality grammar stays unresolved. The contract is partial until every
+CR 704.5/704.6 variant and simultaneous loss/replacement interaction is
+covered.
+
+`CardInstance.object_id` is stable physical identity for a card container or
+represented copy object. `object_kind` distinguishes cards, tokens, spell
+copies, and card copies. Its serialized
+`zone_change_counter` identifies the current logical incarnation under CR
+400.7. The canonical move path advances that counter for cross-zone moves and
+same-zone exile/command moves, clears state that cannot survive, and preserves
+only implemented entry continuations such as an as-enters choice. A permanent
+spell keeps its incarnation as it becomes a permanent under CR 400.7a, while
+still receiving a new battlefield timestamp. Target
+snapshots compare the selected incarnation at resolution. Implemented linked
+delayed moves carry an expected incarnation, preventing the same physical card
+from leaving and returning to satisfy the old link. These authoritative values
+are omitted from seat projections.
+
+`CardInstance.zone_timestamp` records the serialized moment at which its
+current zone incarnation began; a simultaneous destination batch shares one
+moment. `world_supertype_timestamp` separately records when a battlefield
+object most recently gained World, since losing and regaining that supertype
+changes its CR 704.5k duration without changing zones. The fixed-point state
+check synchronizes those values before taking its immutable snapshot. The
+unique newest World permanent survives; a tie for newest moves every World
+permanent simultaneously. The global sequence and both object timestamps are
+authoritative replay state but remain absent from seat projections.
+
+A token leaving the battlefield first exists in the destination long enough
+for the move and its triggers to be observed. The next shared SBA snapshot
+causes it to cease without a second zone-change event, and CR 111.8 prevents a
+later move. Spell and card copies likewise have serialized noncard
+representations. A spell copy outside the stack and a card copy outside the
+stack or battlefield cease in the shared CR 704.5e snapshot. A permanent-spell
+copy becomes the same object as a token permanent on resolution; it is not a
+newly created token.
+
 ## Rules arbitration and semantic programs
 
 The engine must not infer arbitrary card behavior from prose during a state
@@ -366,7 +446,9 @@ Untaps, pass bookkeeping, and mana clearing remain in server history but are nor
 
 ### Deterministic automation
 
-The kernel handles shuffling, drawing, turn-based actions, state-based actions, ordinary mana payment, empty priority, turn progression, and registered semantics without a model call.
+The kernel handles shuffling, drawing, turn-based actions, the implemented
+snapshot-based state actions, ordinary mana payment, empty priority, turn
+progression, and registered semantics without a model call.
 
 ### Separate client strategy and rules authority
 
@@ -401,18 +483,75 @@ live strategic decisions.
 | fetchland cost/effect unresolved | sacrifice-this-land cost plus legal private search choices and built-in search/shuffle resolution |
 | giant save mixed state, events, and credentials | Game Record v3 checkpoint and replay/audit journals; raw capabilities never persist |
 
+## Generic rules compilation
+
+Deck loading now compiles each unique pinned Oracle card into typed,
+source-spanned IR before the engine is created. Reviewed semantic packs keep
+priority on stable key collision. Newly lowerable programs record Oracle,
+rulings, compiler, template, source-span, and semantic hashes, but remain
+provisional and require the arbiter until all mechanic dependencies are
+trusted. Material residuals are never discarded.
+
+The new rules primitives sit below both generated and hand-authored semantics:
+
+- `continuous_effects.py` orders CR 613 layers, sublayers, CDAs, timestamps,
+  dependencies, and cycles. The engine already routes common copy/type/
+  subtype/temporary-keyword annotations through it.
+- `replacement_effects.py` orders CR 616 replacement/prevention priority
+  classes, affected-player choices, optional declines, and repeated
+  applicability for typed events.
+- `state_based_actions.py` evaluates the deterministic permanent subset of CR
+  704 plus token and represented spell/card-copy cessation from one immutable
+  snapshot. The engine applies the resulting batch, captures last-known
+  information before mutation, and repeats until stable. The reviewed subset
+  includes CR 704.5e, the CR 704.5k world rule, CR 704.5r numeric
+  maximum-counter abilities, CR 704.5v/w/x Battle checks, and serialized
+  World-since timestamps.
+- `CommanderEngine` derives Battle defense and protector behavior from the
+  effective type line, subtype, and copied defense characteristic. Siege
+  entry choices occur during resolution, attack/block routing uses the live
+  protector, damage removes defense counters, and pending source triggers are
+  matched to the exact logical incarnation. The intrinsic defeated trigger
+  exiles that exact incarnation and uses a seat-scoped continuation for the
+  optional transformed cast. Compiled target schemas are projected while
+  unresolved mandatory target grammar fails closed.
+- `CardInstance.object_kind` and the copy-object helpers represent stack spell
+  copies and card copies without pretending they are cards. The reviewed
+  partial CR 707 path preserves supported stack choices, treats spell copies
+  as spell targets, and converts a resolving permanent-spell copy into the
+  same token object.
+
+All of these contracts remain partial. Legacy static abilities have not all moved
+into the layer evaluator, not every zone/draw/damage/enters producer routes
+through the replacement engine, and the state-action evaluator does not yet
+cover Sagas, dungeons, Roles, speed, maximum-counter wording outside the
+reviewed self-restriction family, or complete simultaneous loss replacement.
+Battle support still lacks complete replacement ordering for the defeated
+trigger's exile, transformed cast grammar beyond compiled cost/target schemas,
+combat-removal interactions after type/control changes, and future subtype
+predicates. CR 707 remains partial for complete
+copiable values, card-copy casting/playing, Prepare, face-down and linked
+interactions, and the full copied-choice/cost matrix. CR 400 object identity
+also remains partial until its complete exception matrix and specialized
+object forms use typed continuation policies. The serialized timestamp
+moments are not yet consumed by every continuous-effect source, and complete
+CR 613.7m APNAP relative ordering remains blocked. Coverage and contracts
+describe those integration gaps explicitly.
+
 ## Remaining scope
 
 The architecture is suitable for a serious project, but complete Magic coverage is incremental. Major future modules include:
 
-- continuous-effect layers and dependencies
-- replacement/prevention ordering
+- complete migration to continuous-effect layers, dependency discovery,
+  player/game-rule effects, and APNAP timestamps
+- replacement/prevention integration for every replaceable and nested event
 - complete alternate/additional cost grammar and restricted-mana predicates
 - all special actions and zone-based casting permissions
 - copy, face-down, linked-ability, and characteristic edge cases
 - first/double-strike damage substeps and complete assignment validation
 - multiplayer shortcut and deterministic loop negotiation
-- generated semantic coverage for the full Oracle corpus
+- elimination or reviewed override of every material full-corpus Oracle
+  residual
 - single-writer game actors, durable database persistence, authentication, and
   WebSocket delivery
 - browser rooms, seats, reconnect, spectators, generic decisions, and

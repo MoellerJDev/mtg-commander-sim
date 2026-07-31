@@ -57,6 +57,36 @@ python simctl.py replay run/duel --db data/scryfall-current.sqlite3 --verify
 A mismatch fails closed at the first divergent command. Event text and
 capability tokens do not participate in the authoritative hash.
 
+Game Record v3 checkpoints now serialize both a card's stable physical
+`object_id` and its `zone_change_counter`. Together they identify the logical
+object selected by a target or implemented linked effect. The counter is
+authoritative state and therefore participates in command hashes and replay;
+it is not a capability and is not exposed in pilot projections. This is an
+additive state-field extension to v3, not a new record layout.
+
+`CardInstance.object_kind` is also serialized and hashed. It distinguishes a
+card, token, spell copy, or card copy while retaining compatibility with older
+token checkpoints. Represented copy-object IDs remain authoritative only; a
+seat sees the ordinary public stack/permanent projection, not the underlying
+copy container. Copy cessation and permanent-spell-copy resolution therefore
+command-replay exactly without exposing new hidden identity. This is another
+additive v3 state extension.
+
+The same checkpoint serializes `GameState.timestamp_sequence`,
+`CardInstance.zone_timestamp`, and `CardInstance.world_supertype_timestamp`.
+The first two establish deterministic CR 613.7d zone-entry moments, including
+shared moments for simultaneous moves. The last records the separate time from
+which a battlefield object has continuously had World for CR 704.5k. They
+participate in state hashes and exact replay but are not included in a seat
+projection. This remains an additive v3 state extension; it does not redesign
+the record format.
+
+`CardInstance.battle_protector` is another additive public game-state field.
+It is serialized and hashed so Siege entry choices, combat routing, protector
+repair, and command replay agree exactly. Seat projections expose only the
+protector seat as `protect`; they do not expose the physical card identifier,
+logical-incarnation counter, or capability data.
+
 Fresh native records use `manifest.replay.mode = "command_replay"`. The
 separate `legacy_snapshot` mode is reserved for migrated records whose accepted
 commands cannot be reconstructed honestly.

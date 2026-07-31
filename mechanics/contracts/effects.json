@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-609-effects",
+  "official_name": "Effects",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "609",
+    "609.1",
+    "609.2",
+    "609.3",
+    "609.4",
+    "609.4a",
+    "609.4b",
+    "609.5",
+    "609.6",
+    "609.7",
+    "609.7a",
+    "609.7b",
+    "609.7c"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "resolving-spells-and-abilities",
+    "one-shot-effects",
+    "continuous-effects",
+    "replacement-effects",
+    "prevention-effects",
+    "mana-payment",
+    "zones"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "stack",
+      "command",
+      "other explicitly named zones"
+    ],
+    "objects": [
+      "spell",
+      "ability",
+      "effect",
+      "permanent",
+      "damage source"
+    ],
+    "events": [
+      "one-shot effect",
+      "continuous effect",
+      "replacement effect",
+      "prevention effect",
+      "damage event"
+    ],
+    "state_reads": [
+      "instruction scope",
+      "object zone",
+      "payable cost",
+      "actual mana provenance",
+      "damage-source identity",
+      "damage-source properties"
+    ],
+    "state_writes": [
+      "effect result",
+      "modified or prevented damage",
+      "effect-use journal"
+    ],
+    "costs": [
+      "as-though mana permissions affect payment only"
+    ],
+    "timing": [
+      "source choice when an effect is created",
+      "source-property recheck when damage would occur"
+    ],
+    "targets": [
+      "objects in the zones permitted by the instruction",
+      "chosen damage source"
+    ],
+    "choices": [
+      "as-though permission",
+      "source selection",
+      "tie handling supplied by effect text"
+    ],
+    "hidden_information": [
+      "an effect cannot expose objects outside its permitted zone and choice scope"
+    ],
+    "apnap": [],
+    "layers": [
+      "continuous-effect applicability"
+    ],
+    "replacement_effects": [
+      "source-conditioned replacement",
+      "source-conditioned prevention",
+      "property recheck without consuming a mismatching shield"
+    ],
+    "copy": [],
+    "control_change": [],
+    "zone_change": [
+      "effect instructions default to permanents unless text or meaning specifies another zone"
+    ],
+    "source_leaves": [
+      "some legal source choices and property checks use an off-battlefield object or last known information"
+    ]
+  },
+  "variants": [
+    "one-shot effect",
+    "continuous effect",
+    "as-though permission",
+    "impossible instruction",
+    "source-selected damage shield",
+    "source-property damage shield",
+    "static source-property effect"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_609_rule",
+    "test_source_property_mismatch_does_not_consume_shield",
+    "test_unknown_source_predicate_fails_closed",
+    "test_prevention_never_prevents_more_than_remaining_damage",
+    "test_static_prevention_applies_separately_to_each_event"
+  ],
+  "implementation": {
+    "component": "CommanderEngine._apply_effect and replacement_effects",
+    "version": "effects-foundation-v1"
+  },
+  "known_blockers": [
+    "there is no universal typed effect executor covering every instruction and zone",
+    "as-though permissions and actual mana-spend provenance are not modeled generically",
+    "tie resolution is not a required typed semantic-program field",
+    "damage-source choices and properties are not derived from authoritative object state for every producer",
+    "stateful shields and static effects are not registered from generic Oracle semantics"
+  ],
+  "review_status": "draft"
+}

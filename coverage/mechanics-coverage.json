@@ -1,0 +1,14 @@
+{
+  "current_snapshot_complete": false,
+  "effective_date": "2026-06-19",
+  "oracle_enrichment_complete": false,
+  "schema_version": 1,
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "status_counts": {
+    "partial": 28,
+    "unclassified": 397
+  },
+  "total_mechanics": 425,
+  "trusted_fraction": 0.0,
+  "trusted_mechanics": 0
+}
