@@ -2,17 +2,17 @@ MTG Commander Sim 0.8.0 - Integration Verification Ledger
 ===========================================================
 
 Repository: MoellerJDev/mtg-commander-sim (public)
-Active branch: agent/cr-503-upkeep-step
-Main before candidate: a03a4f0cfb7819e7fbc97a387403376463d0e4fe
-Active PR: #12 (CR 503 Upkeep Step)
+Active branch: agent/cr-502-untap-step
+Main before candidate: cd2597d7c5f633df6bec34c8f0c6ac8024063a6a
+Active PR: #13 (CR 502 Untap Step)
 
 LAST EXACT VERIFIED CANDIDATE
 -----------------------------
 
-CR 505 refreshed head
-  SHA: 0ca1f82dee13f5066b2308b3a5dcbe8349a06ea6
-  Full suite: 3,846 tests passed
-  Focused merge-gate tests: 24 passed
+CR 503 refreshed head
+  SHA: 07226dcbf1934f89e1607e99a5daddbeea27d1c7
+  Full suite: 3,851 tests passed
+  Focused merge-gate tests: 21 passed
   Rules verification: passed
   Deterministic natural winner: passed
   Replay/privacy/protocol/repository/package gates: passed
@@ -20,30 +20,30 @@ CR 505 refreshed head
   GitHub push matrix: passed (4/4)
   GitHub pull-request matrix: passed (4/4)
 
-PR #10 merged to main
-  Main SHA: a03a4f0cfb7819e7fbc97a387403376463d0e4fe
+PR #12 merged to main
+  Main SHA: cd2597d7c5f633df6bec34c8f0c6ac8024063a6a
 
 CURRENT UNVERIFIED CANDIDATE
 ----------------------------
 
-CR 503 is being combined with merged CR 504 and CR 505 on
-agent/cr-503-upkeep-step.
-Expected discovered tests after regeneration: 3,851.
-The exact-SHA local gate and fresh GitHub matrices must pass before PR #12 is
+CR 502 is being combined with merged CR 503-505 on
+agent/cr-502-untap-step.
+Expected discovered tests after regeneration: 3,857.
+The exact-SHA local gate and fresh GitHub matrices must pass before PR #13 is
 merged. This section is not a claim that the candidate has passed.
 
 Combined rule-review totals:
   Pinned CR release: 2026-06-19
   Numbered rules: 3,300
-  Reviewed: 446
+  Reviewed: 452
   Passing: 67
-  Blocked: 317
-  Definition-only: 62
-  Unreviewed: 2,854
+  Blocked: 322
+  Definition-only: 63
+  Unreviewed: 2,848
 
 Combined mechanic totals:
-  Partial: 38
-  Unclassified: 387
+  Partial: 39
+  Unclassified: 386
 
 INTERPRETATION BOUNDARY
 -----------------------
@@ -63,5 +63,5 @@ Administrative merge bypass is prohibited while required jobs execute.
 NEXT
 ----
 
-Run the exact CR 503 merge gate, push the exact candidate, require green GitHub
-matrices, merge PR #12 normally, and continue with PR #13.
+Run the exact CR 502 merge gate, push the exact candidate, require green GitHub
+matrices, merge PR #13 normally, and continue with PR #14.

@@ -3086,6 +3086,61 @@ class CommanderEngine:
         card.tapped = False
         return True
 
+    def _unsupported_phasing_source_at_untap(
+        self,
+        active: str,
+    ) -> CardInstance | None:
+        """Return a permanent whose CR 502.1 action cannot be approximated.
+
+        The state model can hide an object with ``phased_out``, but it does
+        not yet preserve indirect-phasing groups or the controller-at-phase-
+        out fact required to execute phasing generically.  Silently leaving
+        such an object phased out—or merely untapping a permanent with
+        phasing—would be materially wrong, so the turn transition stops
+        before any untap-step action mutates state.
+        """
+
+        for object_id in self.state.players[active].zones["battlefield"]:
+            card = self.state.cards[object_id]
+            if card.controller != active:
+                continue
+            keywords = {
+                str(value).casefold()
+                for value in self._effective_card_data(card).get(
+                    "keywords", []
+                )
+            }
+            if card.phased_out or "phasing" in keywords:
+                return card
+        return None
+
+    def _unsupported_untap_selection_source(
+        self,
+    ) -> CardInstance | None:
+        """Find a represented global untap limit that needs a player choice."""
+
+        for seat in self.active_seats:
+            for object_id in self.state.players[seat].zones["battlefield"]:
+                card = self.state.cards[object_id]
+                if card.phased_out:
+                    continue
+                oracle_text = str(
+                    self._effective_card_data(card).get("oracle_text")
+                    or ""
+                ).casefold()
+                if (
+                    "can't untap more than" not in oracle_text
+                    or "during their untap steps" not in oracle_text
+                ):
+                    continue
+                if (
+                    "as long as this artifact is untapped" in oracle_text
+                    and card.tapped
+                ):
+                    continue
+                return card
+        return None
+
     def _enter_step(
         self,
         *,
@@ -3117,6 +3172,24 @@ class CommanderEngine:
             )
 
         if step == "untap":
+            unsupported_phasing = (
+                self._unsupported_phasing_source_at_untap(active)
+            )
+            if unsupported_phasing is not None:
+                self._pause_for_unsupported_semantic(
+                    event="untap.phasing",
+                    source=unsupported_phasing,
+                )
+                return
+            unsupported_selection = (
+                self._unsupported_untap_selection_source()
+            )
+            if unsupported_selection is not None:
+                self._pause_for_unsupported_semantic(
+                    event="untap.selection_restriction",
+                    source=unsupported_selection,
+                )
+                return
             # CR 502.4 and 503.1a hold every ability that triggers during
             # untap until the first priority opportunity in upkeep.  Untap
             # cannot be interrupted, so this batch can remain on the Python

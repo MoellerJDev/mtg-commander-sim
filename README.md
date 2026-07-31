@@ -190,6 +190,11 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 502 untap boundary: ordinary untaps, stun replacement,
+  represented one-shot prohibitions, stackless trigger holding, and exact
+  replay are characterized; unsupported phasing and global maximum-untap
+  choices now stop before mutation, while day/night and complete selection
+  grammar remain blocked
 - source-reviewed CR 503 upkeep boundary: represented triggers that occur
   during untap and at the beginning of upkeep wait without priority, then
   share one APNAP/controller-order batch before active-player priority;

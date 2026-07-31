@@ -1,5 +1,5 @@
 {
-  "contract_count": 38,
+  "contract_count": 39,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -222,6 +222,12 @@
       "path": "mechanics/contracts/unconditional-enters-tapped.json",
       "sha256": "f39dcc95dc6251ece41b008908ef5f0d72acd3817837a13fe7e6e90ed2ffbbba",
       "version": 2
+    },
+    {
+      "mechanic_id": "cr-502-untap-step",
+      "path": "mechanics/contracts/untap-step.json",
+      "sha256": "4ba8d3ea7ff3d57db8707b53f39ef91439cec1daa51fe3f4cb0408335ab44d3e",
+      "version": 1
     },
     {
       "mechanic_id": "cr-503-upkeep-step",
@@ -6097,17 +6103,38 @@
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/untap-step.json",
+      "contract_sha256": "4ba8d3ea7ff3d57db8707b53f39ef91439cec1daa51fe3f4cb0408335ab44d3e",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine untap-step entry, fail-closed phasing and untap-limit guards, represented untap restrictions/replacements, trigger holding, upkeep handoff, and exact replay",
+      "implementation_version": "untap-step-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "direct and indirect phasing, attachment phasing, and controller-at-phase-out history are not implemented",
+        "day/night state, spell-count history, transition events, and shared-team-turn calculation are not implemented",
+        "the active player cannot yet choose a legal subset under maximum-untap or arbitrary untap restrictions",
+        "the Oracle compiler does not recognize every untap prohibition, optional untap, or selection restriction",
+        "complete simultaneous untap replacement ordering and affected-player choices are not implemented",
+        "complete trigger production for phasing, day/night, counter removal, and every untap event remains incomplete",
+        "shared-team turns are outside the supported Commander profiles"
+      ],
       "mechanic_id": "cr-502-untap-step",
       "official_name": "Untap Step",
       "rule_references": [
         "502"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_502_rule",
+        "test_ordinary_untap_is_stackless_and_advances_directly_to_upkeep",
+        "test_stun_and_next_untap_restrictions_precede_the_untap_batch",
+        "test_phasing_turn_action_fails_closed_before_untap_mutation",
+        "test_global_untap_limit_fails_closed_instead_of_untapping_all",
+        "test_untap_trigger_waits_for_upkeep_priority_and_replays",
+        "test_intruder_alarm_suppresses_controller_untap_and_untaps_on_entry",
+        "test_seedborn_muse_untaps_all_permanents_on_opponent_untap"
+      ],
       "trust_level": "untrusted"
     },
     {
