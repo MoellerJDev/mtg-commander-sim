@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-500-general",
+  "official_name": "General Turn Structure",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "500",
+    "500.1",
+    "500.2",
+    "500.3",
+    "500.4",
+    "500.5",
+    "500.5a",
+    "500.5b",
+    "500.6",
+    "500.7",
+    "500.8",
+    "500.9",
+    "500.10",
+    "500.10a",
+    "500.11",
+    "500.12"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "priority",
+    "stack",
+    "state-based-actions",
+    "triggered-abilities",
+    "replacement-effects",
+    "apnap",
+    "cr-501-beginning-phase",
+    "main-phase",
+    "cr-506-combat-phase",
+    "cr-512-ending-phase",
+    "multiplayer",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "hand",
+      "library",
+      "stack"
+    ],
+    "objects": [
+      "turn",
+      "phase",
+      "step",
+      "active player",
+      "priority window",
+      "stack",
+      "mana pool",
+      "duration effect",
+      "extra or skipped turn-structure entry"
+    ],
+    "events": [
+      "turn begins",
+      "ordinary phases and steps begin in fixed order",
+      "every active player passes an empty-stack priority window",
+      "a no-priority step completes its turn-based actions",
+      "mana empties before the next step begins",
+      "represented beginning-of-boundary triggers wait for priority",
+      "extra turn is scheduled",
+      "unsupported skip schedule is rejected before turn mutation"
+    ],
+    "state_reads": [
+      "current turn, phase, and step",
+      "turn order and active seats",
+      "stack contents",
+      "priority player and ordered passes",
+      "mana pools",
+      "represented duration annotations",
+      "extra-turn queue",
+      "turn entry skip schedule"
+    ],
+    "state_writes": [
+      "current turn, phase, and step",
+      "priority player and pass state",
+      "mana pools",
+      "extra-turn queue",
+      "semantic trigger batches"
+    ],
+    "costs": [],
+    "timing": [
+      "the ordinary turn contains beginning, precombat main, combat, postcombat main, and ending in order",
+      "an empty-stack priority step ends only after every active player passes in succession",
+      "ordinary untap and cleanup boundaries complete without an ordinary priority window",
+      "mana empties synchronously before the next step begins",
+      "dynamic duration expiry, phase or step insertion, and skip scheduling remain incomplete"
+    ],
+    "targets": [],
+    "choices": [
+      "priority passes are chosen sequentially in turn order",
+      "simultaneous extra-turn APNAP ordering and arbitrary skip choices remain blocked"
+    ],
+    "hidden_information": [
+      "turn-structure transitions reveal no hidden card identity",
+      "private actions inside component steps remain governed by their contracts"
+    ],
+    "apnap": [
+      "ordinary priority follows active-player then nonactive-player turn order",
+      "simultaneous multi-player extra-turn creation remains blocked"
+    ],
+    "layers": [
+      "complete duration-effect expiry and continuous-effect interaction remain blocked"
+    ],
+    "replacement_effects": [
+      "generic phase, step, and turn skips are replacement effects and remain blocked",
+      "a pre-populated unsupported skip schedule is rejected rather than silently ignored"
+    ],
+    "copy": [
+      "copy status does not alter the ordinary fixed turn table"
+    ],
+    "control_change": [
+      "turn control does not alter the ordinary phase order",
+      "controller-relative additional-step restrictions remain blocked"
+    ],
+    "zone_change": [
+      "zone changes inside a phase or step are delegated to the relevant component rule"
+    ],
+    "source_leaves": [
+      "source-dependent mana-retention and duration effects are not yet universally represented"
+    ]
+  },
+  "variants": [
+    "ordinary five-phase turn",
+    "empty-stack full priority round",
+    "ordinary no-priority untap and cleanup",
+    "mana emptying at a step or phase end",
+    "until-step, until-phase, end-of-combat, and end-of-turn duration expiry",
+    "beginning-of-step or beginning-of-phase triggers",
+    "single and simultaneous extra turns",
+    "extra phases",
+    "extra steps before or after a step",
+    "step added after a phase",
+    "controller-relative additional step or phase",
+    "skipped step, phase, or turn",
+    "atomic transition with no interstitial game event"
+  ],
+  "witness_cards": [
+    {
+      "name": "Time Warp",
+      "oracle_id": "dbd6a94b-62ff-4a10-9d52-bdd90b26e425"
+    },
+    {
+      "name": "Sphinx of the Second Sun",
+      "oracle_id": "516101be-be39-4d84-8fee-d8a79930dd0a"
+    },
+    {
+      "name": "Obeka, Splitter of Seconds",
+      "oracle_id": "1d15a06f-5471-48f2-8c4a-9b0886bef5af"
+    },
+    {
+      "name": "Fatespinner",
+      "oracle_id": "676935c8-22e0-427f-9566-16778cea0873"
+    },
+    {
+      "name": "Omnath, Locus of Mana",
+      "oracle_id": "9da896e1-2256-425b-b801-1ae6f0470559"
+    }
+  ],
+  "rulings": [
+    "Time Warp — 2022-12-08 — Multiple extra turns are taken in reverse resolution order.",
+    "Sphinx of the Second Sun — 2020-11-10 — Multiple phases added at the same point occur most-recently-created first.",
+    "Obeka, Splitter of Seconds — 2024-04-12 — Additional upkeep steps create beginning phases whose untap and draw steps are skipped.",
+    "Fatespinner — 2004-12-01 — Every instance of the chosen step or phase is skipped, including instances added later.",
+    "Omnath, Locus of Mana — 2010-03-01 — Retained green mana keeps its restrictions across later steps, phases, and turns."
+  ],
+  "test_ids": [
+    "test_contract_traces_every_cr_500_rule",
+    "test_ordinary_turn_table_has_all_five_phases_in_order",
+    "test_empty_stack_window_requires_every_player_to_pass_and_replays",
+    "test_unspent_mana_empties_before_the_next_step_begins",
+    "test_unimplemented_skip_schedule_is_rejected_without_mutation",
+    "test_extra_turns_are_lifo_then_normal_order_resumes",
+    "test_ordinary_untap_is_stackless_and_advances_directly_to_upkeep",
+    "test_ordinary_cleanup_grants_no_priority",
+    "test_trusted_only_four_player_game_reaches_natural_winner_and_replays"
+  ],
+  "implementation": {
+    "component": "TURN_STEPS, CommanderEngine turn/step scheduler, priority passes, mana clearing, extra-turn queue, skip guard, and exact replay",
+    "version": "turn-structure-v1"
+  },
+  "known_blockers": [
+    "generic effects expiring at the beginning or end of an arbitrary step or phase are not represented",
+    "end-of-combat duration expiry is not implemented as a generic duration boundary",
+    "mana-retention effects and their source-leaves behavior are not compiled generically",
+    "complete beginning-of-phase and beginning-of-step trigger production remains incomplete",
+    "simultaneous extra turns are not collected and inserted in APNAP order",
+    "extra phase and extra step schedules are not represented",
+    "step-after-phase construction and controller-relative suppression are not represented",
+    "generic skip replacement ordering is not implemented",
+    "complete component-phase semantics remain bounded by their partial contracts"
+  ],
+  "review_status": "draft"
+}

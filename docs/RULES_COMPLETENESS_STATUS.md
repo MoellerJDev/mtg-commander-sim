@@ -175,6 +175,15 @@ coverage.
   A duel turn-one draw skip suppresses only the draw action, not the draw
   step. Generic additional or skipped phases and steps remain CR 500
   dependencies; the heading is definition-only.
+- [x] Reviewed all 16 CR 500 General turn-structure records. The ordinary
+  five-phase table, full empty-stack priority pass round, ordinary
+  no-priority boundaries, mana emptying before the next step, and atomic
+  phase/step transition behavior pass. Unsupported pre-populated skipped-step
+  schedules now fail closed before mutation. Generic duration expiry,
+  retained mana, complete boundary-trigger production, simultaneous extra
+  turns, added phases or steps, controller-relative suppression, and generic
+  skip replacement ordering remain dependency-blocked; two taxonomy records
+  are definition-only.
 - [x] Reviewed all 6 CR 502 Untap Step records. Ordinary stackless untaps,
   represented stun and next-untap restrictions, held-trigger handoff, and
   exact replay are characterized. Phasing and global maximum-untap choices now
@@ -389,8 +398,12 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,843 unit/integration tests pass: 543 ordinary tests plus 3,300 generated
+- 3,848 unit/integration tests pass: 548 ordinary tests plus 3,300 generated
   inventory/source-linkage tests. The latter are not semantic passes.
+- Five focused CR 500 tests cover exact source traceability, the ordinary
+  five-phase table, a four-player empty-stack priority round with exact
+  replay, mana emptying before the next step, and transactional rejection of
+  an unsupported skipped-step schedule.
 - Three focused CR 501 tests cover source traceability, the exact ordinary
   untap/upkeep/draw table, a turn-one skipped draw action without a skipped
   draw step, transition into precombat main, and exact replay.
@@ -460,10 +473,10 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 440 CR
-  120/210/310/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
-  cases are source-reviewed: 62 pass with executable engine evidence, 316
-  remain blocked, and 62 are definition-only. The other 2,860 cases remain
+  establish inventory linkage only. All 456 CR
+  120/210/310/500/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
+  cases are source-reviewed: 66 pass with executable engine evidence, 326
+  remain blocked, and 64 are definition-only. The other 2,844 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -474,10 +487,11 @@ checkpoint validation.
 
 1. Continue reviewing and promoting conformance cases by
    dependency-ordered rules family; keep exposed but unimplemented edge cases
-   failing or blocked. CR 501 Beginning Phase is the current bounded family;
-   retain generic additional/skipped phase and step scheduling and the partial
-   CR 502-504 component-step semantics as explicit dependencies, along with
-   the deeper CR 601.2a-i stack-first casting frame.
+   failing or blocked. CR 500 General turn structure is the current bounded
+   family; retain generic duration expiry, extra phase/step scheduling, and
+   skip replacement ordering as explicit dependencies. The next bounded
+   dependency-unblocking review should be CR 405 Stack, without promoting
+   complete stack semantics beyond executable evidence.
 2. Wire the reviewed CR 614/615/616 primitives into the shared CR 120/310
    replacement and prevention event pipeline, including stateful shields and
    typed nested events, then re-evaluate the blocked damage sequence and

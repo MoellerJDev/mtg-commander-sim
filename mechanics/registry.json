@@ -1,5 +1,5 @@
 {
-  "contract_count": 38,
+  "contract_count": 39,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -210,6 +210,12 @@
       "path": "mechanics/contracts/state-based-actions.json",
       "sha256": "2ebd4a0dd11e2bf308a4251d2534ac5d2c6179dad0ef67b3052797e700fef20c",
       "version": 6
+    },
+    {
+      "mechanic_id": "cr-500-general",
+      "path": "mechanics/contracts/turn-structure.json",
+      "sha256": "b4b8c130aed59398bf70679b58c91e0328d855fb96e462cffceefd9a5bedc122",
+      "version": 1
     },
     {
       "mechanic_id": "cr-614-replacement-effects",
@@ -6067,17 +6073,41 @@
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/turn-structure.json",
+      "contract_sha256": "b4b8c130aed59398bf70679b58c91e0328d855fb96e462cffceefd9a5bedc122",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "TURN_STEPS, CommanderEngine turn/step scheduler, priority passes, mana clearing, extra-turn queue, skip guard, and exact replay",
+      "implementation_version": "turn-structure-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "generic effects expiring at the beginning or end of an arbitrary step or phase are not represented",
+        "end-of-combat duration expiry is not implemented as a generic duration boundary",
+        "mana-retention effects and their source-leaves behavior are not compiled generically",
+        "complete beginning-of-phase and beginning-of-step trigger production remains incomplete",
+        "simultaneous extra turns are not collected and inserted in APNAP order",
+        "extra phase and extra step schedules are not represented",
+        "step-after-phase construction and controller-relative suppression are not represented",
+        "generic skip replacement ordering is not implemented",
+        "complete component-phase semantics remain bounded by their partial contracts"
+      ],
       "mechanic_id": "cr-500-general",
       "official_name": "General",
       "rule_references": [
         "500"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_500_rule",
+        "test_ordinary_turn_table_has_all_five_phases_in_order",
+        "test_empty_stack_window_requires_every_player_to_pass_and_replays",
+        "test_unspent_mana_empties_before_the_next_step_begins",
+        "test_unimplemented_skip_schedule_is_rejected_without_mutation",
+        "test_extra_turns_are_lifo_then_normal_order_resumes",
+        "test_ordinary_untap_is_stackless_and_advances_directly_to_upkeep",
+        "test_ordinary_cleanup_grants_no_priority",
+        "test_trusted_only_four_player_game_reaches_natural_winner_and_replays"
+      ],
       "trust_level": "untrusted"
     },
     {

@@ -2975,6 +2975,11 @@ class CommanderEngine:
         return TurnEntry(turn_id=self._next_ref("N"), player=seat, extra=False, created_sequence=self.state.turn_sequence)
 
     def _begin_turn(self, entry: TurnEntry) -> None:
+        if entry.skip_steps:
+            raise GameRuleError(
+                "Skipped-step turn entries are not implemented; "
+                "the turn cannot begin"
+            )
         if not self.state.players[entry.player].in_game:
             self._begin_turn(self._select_next_turn())
             return

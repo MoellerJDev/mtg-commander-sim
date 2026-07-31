@@ -175,6 +175,12 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 500 general turn structure: the ordinary five-phase
+  table, full empty-stack priority round, no-priority boundaries, mana
+  emptying before the next step, and atomic transition behavior pass with
+  exact replay; a pre-populated skipped-step schedule now fails closed before
+  turn mutation, while generic duration expiry, simultaneous extra turns,
+  additional phases or steps, and skip replacement ordering remain blocked
 - source-reviewed CR 501 beginning-phase structure: the ordinary turn table
   contains untap, upkeep, then draw; a turn-one draw skip suppresses only the
   draw action rather than the draw step, and the phase transition exact-
@@ -313,10 +319,11 @@ python simctl.py rules conformance --root .
 ```
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
-generated source-linkage tests. They currently report 0 executable semantic
-passes: 3,299 cases remain unreviewed and CR 310.11b is reviewed but blocked.
-A generated inventory test cannot prove rules behavior. See
-`RULE_CONFORMANCE.md` for the promotion, invalidation, and reporting policy.
+generated source-linkage tests. Of those cases, 456 are source-reviewed:
+66 have narrow executable semantic evidence, 326 are explicitly blocked, and
+64 are definition-only; 2,844 remain unreviewed. A generated inventory test
+cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
+invalidation, and reporting policy.
 
 Deck creation now invokes the typed Oracle compiler automatically. Exact
 whole-text templates lower into the generic effect DSL without a printed-name

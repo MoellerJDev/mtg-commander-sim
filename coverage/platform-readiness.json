@@ -10,11 +10,11 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "rules_family_cr_501_beginning_phase",
-    "branch": "agent/cr-501-beginning-phase",
+    "active_phase": "rules_family_cr_500_general_turn_structure",
+    "branch": "agent/cr-500-turn-structure",
     "branch_ancestry": {
-      "focused_branch_base": "6f0696b267e06555ef028830f37315651f51de46",
-      "focused_branch_unique_commits_over_main": 5
+      "focused_branch_base": "05e05d43216a06d2952a960427c5f8ac30b8a4d2",
+      "focused_branch_unique_commits_over_main": 7
     },
     "commit_reference": "the commit containing this ledger",
     "pull_requests": [
@@ -142,7 +142,7 @@
       "status": "not_started"
     },
     {
-      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 501 is dependency-staged atop draft CR 502 PR #13 and CR 503 PR #12; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI.",
+      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 506-512 slices are on main. CR 500 is dependency-staged atop draft CR 501 PR #14, CR 502 PR #13, and CR 503 PR #12; CR 504 and CR 505 are independent drafts awaiting exact-SHA CI.",
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main"
@@ -154,7 +154,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Keep dependency-staged CR 501 PR #14 in draft while GitHub cannot allocate runners, and begin the bounded CR 500 General turn-structure review without merging or claiming unsupported extra/skip scheduling.",
+  "next_task": "Publish the bounded CR 500 General turn-structure slice as a dependency-staged draft atop CR 501, keep it unmerged while exact-SHA runners are unavailable, then begin the dependency-unblocking CR 405 Stack review without promoting unsupported stack behavior.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -194,8 +194,8 @@
     "manifest_present": true,
     "mechanics": {
       "status_counts": {
-        "partial": 38,
-        "unclassified": 387
+        "partial": 39,
+        "unclassified": 386
       },
       "total": 425,
       "trusted": 0
@@ -210,11 +210,11 @@
       "total": 38373
     },
     "rules": {
-      "blocked": 316,
-      "definition_only": 62,
-      "passing": 62,
+      "blocked": 326,
+      "definition_only": 64,
+      "passing": 66,
       "total": 3300,
-      "unreviewed": 2860
+      "unreviewed": 2844
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -237,7 +237,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 3843,
+    "deterministic_cases_discovered": 3848,
     "migration_files": 0,
     "schema_files": 14,
     "server_files": 0,
@@ -254,7 +254,7 @@
     "local": {
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "pass_3843",
+      "deterministic_tests": "pass_3848",
       "four_player_protocol_demo": "pass",
       "repository_history_security_audit": "pass",
       "wheel_build_and_clean_install": "pass"
