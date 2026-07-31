@@ -31,6 +31,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#14](https://github.com/MoellerJDev/mtg-commander-sim/pull/14) | `agent/cr-501-beginning-phase` | `agent/cr-502-untap-step` | `draft` |
 | [#15](https://github.com/MoellerJDev/mtg-commander-sim/pull/15) | `agent/cr-500-turn-structure` | `agent/cr-501-beginning-phase` | `draft` |
 | [#16](https://github.com/MoellerJDev/mtg-commander-sim/pull/16) | `agent/cr-405-stack` | `agent/cr-500-turn-structure` | `draft` |
+| [#17](https://github.com/MoellerJDev/mtg-commander-sim/pull/17) | `agent/cr-400-general-zone-identity` | `agent/cr-405-stack` | `draft` |
 
 ## Pinned snapshots and coverage
 
@@ -95,7 +96,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Publish the bounded CR 400 General zones slice as a dependency-staged draft atop CR 405, keep it unmerged while exact-SHA runners are unavailable, then begin CR 401 Library without promoting incomplete hidden-zone semantics.
+Keep dependency-staged CR 400 PR #17 in draft while GitHub cannot allocate runners, and begin CR 401 Library without promoting incomplete hidden-zone semantics.
 
 ## Regeneration
 
