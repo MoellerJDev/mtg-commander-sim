@@ -58,6 +58,14 @@ permissions, division, and opponent-made choices remain explicitly untrusted.
 CR 600 pins the Spells, Abilities, and Effects section taxonomy to the
 dependent CR 601-609 contracts. Because CR 600 contains only a heading, it is
 definition-only and does not create a standalone behavioral claim.
+CR 506 traces the combat-phase structure, attacking/defending roles, removal
+from combat, “attacks or blocks alone,” requirement snapshots, and
+combat-relative timing vocabulary. Tapping and untapping preserve represented
+combat relationships, and zone, control, phasing, or type invalidation removes
+represented combatants without erasing the historical attacker predicate used
+by CR 508.8. Alternate multiplayer options, generic effect-created or
+effect-removed combatants, planeswalkers, requirement snapshots, provenance
+queries, extra combats, and the complete timing grammar remain blocked.
 CR 507 traces the beginning-of-combat defending-player, trigger, priority, and
 declare-attackers handoff. Supported Commander profiles establish all active
 opponents as defending players without a choice, while multiplayer variants

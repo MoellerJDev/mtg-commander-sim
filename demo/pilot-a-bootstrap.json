@@ -3,12 +3,12 @@
   "mode": "full",
   "principal": "pilot:A",
   "base": null,
-  "view": "7f6dd1c867914bd2fc23",
+  "view": "7e705bcb30d85b7a3532",
   "state": {
     "rev": 0,
     "event": 10,
     "game": {
-      "id": "bceaa59b",
+      "id": "9d991f0f",
       "over": false,
       "winner": null
     },

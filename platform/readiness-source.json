@@ -6,11 +6,11 @@
     "visibility": "private"
   },
   "integration": {
-    "active_phase": "rules_family_cr_507_beginning_of_combat",
-    "branch": "agent/cr-507-beginning-combat",
+    "active_phase": "rules_family_cr_506_combat_phase",
+    "branch": "agent/cr-506-combat-phase",
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
-      "focused_branch_base": "7f6d276218ae51c7c0c3c24058d7e31e49a776b7",
+      "focused_branch_base": "3b9aac052b35413f3cf6ce82be686a1fa5dfe379",
       "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
@@ -62,6 +62,13 @@
         "number": 7,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/7"
+      },
+      {
+        "base": "main",
+        "head": "agent/cr-507-beginning-combat",
+        "number": 8,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/8"
       }
     ],
     "tags": [
@@ -97,7 +104,7 @@
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete",
-      "evidence": "Both integration PRs and focused CR 512-508 slices merged through ordinary merge commits; main passed the exact-SHA CR 508 matrix."
+      "evidence": "Both integration PRs and focused CR 512-507 slices merged through ordinary merge commits; main passed the exact-SHA CR 507 matrix."
     },
     {
       "id": "browser_commander_mvp",
@@ -109,7 +116,7 @@
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main",
-      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 508-512 slices are on main; CR 507 is the current focused family."
+      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 507-512 slices are on main; CR 506 is the current focused family."
     },
     {
       "id": "oracle_snapshot",
@@ -133,16 +140,16 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "7f6d276218ae51c7c0c3c24058d7e31e49a776b7",
+    "baseline_commit": "3b9aac052b35413f3cf6ce82be686a1fa5dfe379",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30612078608,
+      "run_id": 30614171826,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30612078608"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30614171826"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "pass_3823",
+      "deterministic_tests": "pass_3829",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "repository_history_security_audit": "pass",
@@ -156,5 +163,5 @@
     "no authoritative ASGI server, single-writer GameActor, durable persistence, or browser client exists",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Finish the CR 507 full gate and publish the supported beginning-of-combat boundary without promoting blocked single-defender multiplayer variants or universal trigger-ordering semantics."
+  "next_task": "Finish the CR 506 full gate and publish the represented combat-phase boundary without promoting alternate multiplayer options, generic effect-created combatants, requirement snapshots, extra combats, or combat-relative timing grammar."
 }
