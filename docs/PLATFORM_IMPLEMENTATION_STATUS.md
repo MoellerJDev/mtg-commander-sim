@@ -29,6 +29,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#12](https://github.com/MoellerJDev/mtg-commander-sim/pull/12) | `agent/cr-503-upkeep-step` | `main` | `draft` |
 | [#13](https://github.com/MoellerJDev/mtg-commander-sim/pull/13) | `agent/cr-502-untap-step` | `agent/cr-503-upkeep-step` | `draft` |
 | [#14](https://github.com/MoellerJDev/mtg-commander-sim/pull/14) | `agent/cr-501-beginning-phase` | `agent/cr-502-untap-step` | `draft` |
+| [#15](https://github.com/MoellerJDev/mtg-commander-sim/pull/15) | `agent/cr-500-turn-structure` | `agent/cr-501-beginning-phase` | `draft` |
 
 ## Pinned snapshots and coverage
 
@@ -93,7 +94,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Publish the bounded CR 500 General turn-structure slice as a dependency-staged draft atop CR 501, keep it unmerged while exact-SHA runners are unavailable, then begin the dependency-unblocking CR 405 Stack review without promoting unsupported stack behavior.
+Keep dependency-staged CR 500 PR #15 in draft while GitHub cannot allocate runners, and begin the dependency-unblocking CR 405 Stack review without promoting unsupported stack behavior.
 
 ## Regeneration
 

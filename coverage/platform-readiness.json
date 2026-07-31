@@ -115,6 +115,13 @@
         "number": 14,
         "state": "draft",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/14"
+      },
+      {
+        "base": "agent/cr-501-beginning-phase",
+        "head": "agent/cr-500-turn-structure",
+        "number": 15,
+        "state": "draft",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/15"
       }
     ],
     "tags": [
@@ -154,7 +161,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Publish the bounded CR 500 General turn-structure slice as a dependency-staged draft atop CR 501, keep it unmerged while exact-SHA runners are unavailable, then begin the dependency-unblocking CR 405 Stack review without promoting unsupported stack behavior.",
+  "next_task": "Keep dependency-staged CR 500 PR #15 in draft while GitHub cannot allocate runners, and begin the dependency-unblocking CR 405 Stack review without promoting unsupported stack behavior.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",

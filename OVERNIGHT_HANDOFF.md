@@ -10,7 +10,7 @@ or provider session data.
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/cr-501-beginning-phase`
+- Active branch: `agent/cr-500-turn-structure`
 - Stage A merge commit on `main`:
   `bd89201be44de85aa9b85fcc9f0baacb0ee76dbe`
 - Stage A PR:
@@ -25,9 +25,9 @@ passed their exact-SHA matrices and merged into `main` through ordinary merge
 commits. Main commit
 `c8a52711dc9294957fc0f437a4aaeab72da213aa` then passed run 30615647165.
 CR 505 PR #10 and CR 504 PR #11 are independent drafts. CR 503 PR #12 is the
-dependency parent for CR 502 PR #13. PR #13 is a dependency-staged draft based
-on `agent/cr-503-upkeep-step`. CR 501 PR #14 is a dependency-staged draft
-based on `agent/cr-502-untap-step`. Their jobs did not receive runners because
+dependency parent for CR 502 PR #13, which is the parent for CR 501 PR #14.
+CR 500 PR #15 is a dependency-staged draft based on
+`agent/cr-501-beginning-phase`. Their jobs did not receive runners because
 GitHub reported an account billing or spending-limit failure; those pre-run
 failures are neither code passes nor code failures.
 
@@ -64,22 +64,23 @@ It generates one source-linked conformance case for each of 3,300 numbered
 rules and preserves reviewed status only while the source and rule-text hashes
 remain unchanged.
 
-Current reviewed inventory after the CR 501 synchronization:
+Current reviewed inventory after the CR 500 synchronization:
 
-- 440 reviewed cases
-- 62 executable semantic passes
-- 316 reviewed blocked cases
-- 62 definition-only cases
-- 2,860 unreviewed inventory cases
+- 456 reviewed cases
+- 66 executable semantic passes
+- 326 reviewed blocked cases
+- 64 definition-only cases
+- 2,844 unreviewed inventory cases
 - 425 discovered mechanics
-- 38 partial/untrusted mechanic contracts
-- 387 unclassified mechanics
+- 39 partial/untrusted mechanic contracts
+- 386 unclassified mechanics
 - 0 corpus-wide trusted mechanics
 
 Implemented reviewed families include narrow contracts for damage, defense,
 Battles, state-based actions, replacement/prevention ordering, effects,
 resolution, linked abilities, loyalty abilities, mana abilities, static and
-triggered abilities, casting, activating abilities, beginning phase, untap,
+triggered abilities, casting, activating abilities, general turn structure,
+beginning phase, untap,
 upkeep, end step, cleanup,
 logical zone incarnations, timestamps, World, token/copy lifecycle, and
 maximum counters. These are partial family implementations, not full rules
@@ -113,7 +114,7 @@ Stage A exact evidence:
 - deterministic four-player micro-pool reached a natural winner with zero
   suppressed meaningful windows, passed seat projection, and exact-replayed
 
-The focused CR 501 local test gate passed atop the green CR 502 dependency:
+The focused CR 500 local test gate passed atop the validated CR 501 dependency:
 
 - generated platform, rules, mechanics, and Oracle status checks
 - all noninventory and all generated per-rule tests
@@ -122,25 +123,21 @@ The focused CR 501 local test gate passed atop the green CR 502 dependency:
 - protocol demo and packet benchmark
 - repository/history/secret/artifact scans
 - wheel build, clean installation, imported version, and CLI smoke
-- the three focused CR 501 source/phase-order/turn-one-draw/replay tests
-- exact-SHA four-job GitHub Actions for the focused commit remains pending
-  until commit and push
+- the five focused CR 500 source/phase-order/priority/mana/skip/replay tests
 
-The local test gate ran 3,843 tests in 187.154 seconds, verified all 3,300 pinned
+The local test gate ran 3,848 tests in 190.479 seconds, verified all 3,300 pinned
 rules cases and 425 mechanics, checked 14 schemas and repository history,
 completed the protocol demo, and built and clean-installed the wheel. The
 seed-20260730 and four-player natural-winner regressions were independently
 rerun with exact replay and zero suppressed meaningful windows. The repository
-scan covered 274 tracked files and 11,528,724 bytes. Main commit
+scan covered 274 tracked files and 11,542,504 bytes. Main commit
 `c8a52711dc9294957fc0f437a4aaeab72da213aa` already passed run 30615647165;
-CR 502 PR head `6f0696b267e06555ef028830f37315651f51de46` produced push run
-30621129920 and pull-request run 30621133309. All eight jobs had
+CR 500 implementation commit
+`fdb8a195ae3bc3de8f8cc8dc6e131c235ab8d37c` produced push run
+30623239181 and pull-request run 30623252811. All eight jobs had
 `runner_id=0`, zero steps, and GitHub's billing/spending-limit annotation. No
 exact-SHA CI pass is claimed for the focused branches until their jobs receive
-runners and pass. CR 501 implementation commit
-`93578eb17d0d65732101c594ac07d21be3ed8f59` likewise produced push run
-30622084658 and pull-request run 30622099431 with the same eight pre-run
-failures.
+runners and pass.
 
 ## Evidence boundaries
 
@@ -153,8 +150,10 @@ failures.
 
 ## Exact next step
 
-Keep dependency-staged CR 501 PR #14 in draft while GitHub Actions cannot
-allocate runners, and begin the bounded CR 500 General turn-structure review.
-CR 501.1 passes only for the ordinary untap/upkeep/draw structure. Generic
-additional or skipped phase and step scheduling and the partial CR 502-504
-component behavior remain dependencies. Do not merge or promote those gaps.
+Keep dependency-staged CR 500 PR #15 in draft while GitHub Actions cannot
+allocate runners, and begin the dependency-unblocking CR 405 Stack review.
+CR 500 passes only the ordinary five-phase table, full empty-stack priority
+round, ordinary no-priority boundaries, mana clearing, and atomic transition
+invariants. Generic duration expiry, retained mana, simultaneous extra turns,
+additional phase/step scheduling, and skip replacement ordering remain
+blocked. Do not merge or promote those gaps.
