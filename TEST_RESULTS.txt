@@ -7,18 +7,19 @@ Python: 3.11.9
 
 PASS: `python -m compileall -q mtg_commander_sim tests scripts simctl.py`
 
-PASS: 3,823 unit/integration tests in 180.120 seconds using the rebuilt compact
+PASS: 3,829 unit/integration tests in 184.906 seconds using the rebuilt compact
 Scryfall database:
 
 - 3,300 generated per-rule inventory/source-linkage tests
-- 523 ordinary rules, engine, protocol, replay, privacy, and platform tests
+- 529 ordinary rules, engine, protocol, replay, privacy, and platform tests
 
-The five new CR 507 tests verify source traceability, supported Commander
-defending-player initialization without a choice task, fail-closed rejection
-of single-defender multiplayer profiles, coexistence of permanent and delayed
-beginning-of-combat triggers before priority, and exact replay into declare
-attackers. Universal same-controller trigger ordering and unsupported
-multiplayer combat options remain blocked.
+The six new CR 506 tests verify source traceability, the exact empty-combat
+phase boundary, authoritative attacking and defending roles, removal after
+zone/control/phasing/type invalidation, historical-attacker retention, and
+tapping/untapping preservation. Alternate multiplayer options, generic
+effect-created or effect-removed combatants, requirement snapshots, extra
+combats, planeswalker destinations, “alone” provenance, and universal
+combat-relative timing remain blocked.
 
 Generated source linkage is not a claim that every rule has executable semantic
 coverage. The reviewed ledger remains fail-closed about passing, blocked,
@@ -28,10 +29,10 @@ PASS: the trusted-only four-seat micro-pool reached a natural winner with zero
 incorrectly suppressed meaningful windows, passed the seat-projection audit,
 and exact command-replayed.
 
-The integration soak exposed and fixed a replay defect: player elimination
-allocated authoritative zone timestamps from incidental mapping insertion
-order. Elimination now processes objects in stable reference/identity order, so
-continuous execution and checkpoint replay produce identical timestamps.
+The seed-20260730 opportunity regression and deterministic four-player
+natural-winner soak were also rerun independently. Both exact-replayed; the
+four-player run retained zero incorrectly suppressed meaningful windows and
+passed the seat-projection audit.
 
 The full-game fixture is rules-runtime and protocol evidence. Its repeated
 micro-pool is not Commander format-legality, deck-quality, or matchup evidence.
@@ -62,7 +63,7 @@ PASS:
 - reachable-history path and oversized-blob scan
 - sanitized public replay-fixture policy check
 
-The scan covered 259 tracked files and 11,364,813 tracked bytes.
+The scan covered 262 tracked files and 11,401,521 tracked bytes.
 
 ## Package
 
@@ -73,15 +74,16 @@ package reported version 0.8.0 and its CLI smoke test completed.
 
 ## Evidence boundary
 
-These checks establish the local CR 507 focused branch atop the green CR 508
-main baseline, including source pinning, beginning-of-combat defender and
-priority semantics, replay, privacy, action opportunity, packaging, and
+These checks establish the local CR 506 focused branch atop the green CR 507
+main baseline, including source pinning, represented combat-phase roles and
+removal semantics, replay, privacy, action opportunity, packaging, and
 repository gates. They do not establish alternate multiplayer combat options,
-universal trigger ordering, a production ASGI server, browser client,
-durable database, complete Comprehensive Rules behavior,
+generic effect-created combatants, complete restriction/requirement or timing
+grammar, a production ASGI server, browser client, durable database, complete
+Comprehensive Rules behavior,
 Oracle-corpus semantic closure, Commander deck legality for the micro-pool,
 deck superiority, or statistical matchup evidence.
 
 The baseline main commit's exact-SHA GitHub Actions matrix is recorded after
-pull request #7 in run 30612078608. Exact-SHA CI for the focused CR 507 commit is
+pull request #8 in run 30614171826. Exact-SHA CI for the focused CR 506 commit is
 not claimed until that commit is pushed.

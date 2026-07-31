@@ -14,6 +14,12 @@
   and client-supplied semantic flags are rejected transactionally.
 - Added exact multi-blocker replay evidence and fail-closed first-strike
   characterization for the partial CR 510 contract.
+- Added a source-linked CR 506 combat-phase contract, authoritative combat
+  role tests, and exact empty-combat replay without promoting unsupported
+  multiplayer variants, effect-created combatants, or timing grammar.
+- Removed represented attackers and blockers after zone, control, phasing, or
+  type invalidation while retaining the historical attacker predicate needed
+  to advance correctly under CR 508.8; tapping and untapping preserve combat.
 - Excluded phased-out creatures from blocker alternatives and authoritative
   blocker validation, with atomic malicious-submission rollback.
 - Added exact ordinary blocker declaration/replay and blocking-lifetime

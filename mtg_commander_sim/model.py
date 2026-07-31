@@ -255,6 +255,8 @@ class DelayedTrigger:
 class CombatState:
     attackers_declared: bool = False
     blockers_declared: bool = False
+    # Historical CR 508.8 predicate. It survives removal from combat.
+    had_attacking_creature: bool = False
     attackers: dict[str, str] = field(default_factory=dict)  # attacker object -> defender seat/object
     # Every rules-defined defending player, including opponents not attacked.
     # Decision scheduling derives the actually attacked subset separately.

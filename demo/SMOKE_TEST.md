@@ -10,7 +10,7 @@
 - Bootstrap estimate: 1549 tokens
 - Repeated live-decision delta: 269 tokens
 - A's declaration delta: 108 tokens
-- Client reducer hash after the final packet: `190e3a1e8b42fbcf9bf0`
+- Client reducer hash after the final packet: `74f83f04c3b19068c8e2`
 
 The demo intentionally stops before B declares. It tests protocol routing,
 least-privilege seat projection, turn-order mulligan input, hash-checked patches,

@@ -175,6 +175,11 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 506 combat-phase boundary: authoritative attacking and
+  defending roles, durable combat history, and represented removal from
+  combat after zone, control, phasing, or type changes; alternate multiplayer
+  options, generic effect-created combatants, restriction snapshots, extra
+  combats, and combat-relative timing grammar remain blocked
 - source-reviewed CR 507 beginning-of-combat boundary: supported Commander
   profiles establish every active opponent as a defending player without a
   defender-choice task, coexisting permanent and delayed triggers are

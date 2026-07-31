@@ -1,5 +1,5 @@
 {
-  "contract_count": 34,
+  "contract_count": 35,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -47,6 +47,12 @@
       "mechanic_id": "cr-510-combat-damage-step",
       "path": "mechanics/contracts/combat-damage-step.json",
       "sha256": "e69d94b32ffd724fc770dacaa2f8b573450f0f04625a5d249262cdbe84e90d63",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-506-combat-phase",
+      "path": "mechanics/contracts/combat-phase.json",
+      "sha256": "b00a1774a8c461d0d7377ad7e96f9fd00d769d4808c09b20cc8561a4950152f3",
       "version": 1
     },
     {
@@ -6133,17 +6139,42 @@
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/combat-phase.json",
+      "contract_sha256": "b00a1774a8c461d0d7377ad7e96f9fd00d769d4808c09b20cc8561a4950152f3",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "TURN_STEPS and CommanderEngine combat entry, declaration, removal, stabilization, damage, finalization, and step-advance paths",
+      "implementation_version": "combat-phase-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "first strike and double strike do not create the required second combat-damage step",
+        "planeswalker attack destinations are not represented",
+        "single-defender, shared-team-turn, limited-range, and other multiplayer combat options are not implemented",
+        "generic effects that put objects attacking or blocking are not implemented",
+        "regeneration and explicit remove-from-combat effect grammar are not implemented",
+        "attacked planeswalker/Battle departure, hybrid type changes, and defending-player LKI are incomplete",
+        "attack-requirement provenance and had-to-attack queries are not implemented",
+        "attacks-alone, attacking-alone, blocks-alone, and blocking-alone queries are not exposed generically",
+        "combat-relative spell and ability timing grammar, skipped-point fallbacks, and multiple-combat tracking are not implemented",
+        "the complete continuous-effect, replacement, trigger, multiplayer, and replay interaction matrix remains incomplete"
+      ],
       "mechanic_id": "cr-506-combat-phase",
       "official_name": "Combat Phase",
       "rule_references": [
         "506"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_506_rule",
+        "test_empty_combat_step_sequence_and_replay_are_exact",
+        "test_supported_attacking_and_defending_roles_are_authoritative",
+        "test_zone_and_control_changes_remove_objects_from_combat",
+        "test_phasing_and_type_loss_remove_combatants_during_stabilization",
+        "test_tapping_and_untapping_do_not_remove_a_creature_from_combat",
+        "test_first_strike_fails_closed_before_damage_decision",
+        "test_no_attackers_skips_blockers_and_combat_damage_steps",
+        "test_objects_leave_combat_only_after_step_ends_and_replay_exactly"
+      ],
       "trust_level": "untrusted"
     },
     {

@@ -101,11 +101,11 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 399 cases in CR 120, CR 210, CR 310, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
+All 428 cases in CR 120, CR 210, CR 310, CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
 CR 602, CR 603, CR 604, CR 605, CR 606, CR 607, CR 608, CR 609, CR 614,
-CR 615, and CR 616 are source-reviewed: 59 narrow behavioral or structural rules pass with
-generic executable evidence, 282 are blocked with exact missing dependencies,
-and 58 are definition-only with contract traceability. The remaining 2,901
+CR 615, and CR 616 are source-reviewed: 60 narrow behavioral or structural rules pass with
+generic executable evidence, 309 are blocked with exact missing dependencies,
+and 59 are definition-only with contract traceability. The remaining 2,872
 cases are
 unreviewed and
 inventory-only.
@@ -175,6 +175,15 @@ frozen proposals, and opponent-made choices remain blocked.
 CR 600 contains only the General section heading. It is source-reviewed as a
 definition-only taxonomy record linked to the dependent CR 601-609 contracts;
 it makes no independent engine-behavior claim.
+CR 506.4b passes for the represented combat-state invariant that tapping or
+untapping an attacking or blocking creature does not remove it from combat.
+The engine also removes represented combatants after zone, control, phasing,
+creature-type, Battle-type, or attacking-controller invalidation and preserves
+the historical “had an attacker” predicate needed by CR 508.8. Those are
+partial witnesses only. Alternate multiplayer options, generic effects that
+create or remove combatants, planeswalker destinations, restriction snapshots,
+“alone” provenance, extra combats, and the complete combat-relative timing
+grammar remain blocked.
 CR 507.2 passes for the supported beginning-of-combat boundary: represented
 permanent and delayed triggers coexist before the active player receives
 priority, and a four-player priority round advances to declare attackers with

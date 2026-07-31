@@ -1314,6 +1314,11 @@ class CommanderEngine:
         if not creates_new_object:
             return
 
+        self._remove_object_from_combat(
+            card,
+            reason=f"zone change to {destination}",
+        )
+
         # CR 400.7a: a permanent spell that resolves remains the same
         # logical object as the permanent it becomes.  It still receives a
         # battlefield timestamp and has the ordinary spell-only state reset.
@@ -3293,7 +3298,8 @@ class CommanderEngine:
             self.state.phase,
             self.state.step,
         ) == ("combat", "declare_attackers") and not (
-            self.state.combat.attackers
+            self.state.combat.had_attacking_creature
+            or self.state.combat.attackers
         ):
             # CR 508.8 skips both intervening combat steps when combat has
             # no attacking creatures. The post-declaration priority window
@@ -3351,6 +3357,99 @@ class CommanderEngine:
             importance=0,
             changed_objects=changed_objects,
         )
+
+    def _remove_object_from_combat(
+        self,
+        card: CardInstance,
+        *,
+        reason: str,
+    ) -> bool:
+        """Clear one object's represented CR 506.4 combat relationships."""
+
+        was_attacker = (
+            card.attacking is not None
+            or card.object_id in self.state.combat.attackers
+        )
+        was_blocker = card.blocking is not None
+        removed_blocker_links = False
+        for blocker_ids in self.state.combat.blockers.values():
+            if card.object_id not in blocker_ids:
+                continue
+            blocker_ids[:] = [
+                object_id
+                for object_id in blocker_ids
+                if object_id != card.object_id
+            ]
+            removed_blocker_links = True
+        if not (was_attacker or was_blocker or removed_blocker_links):
+            return False
+
+        if was_attacker:
+            self.state.combat.attackers.pop(card.object_id, None)
+        card.attacking = None
+        card.blocking = None
+        self._log(
+            card.controller,
+            "combat.remove",
+            f"{card.ref} was removed from combat.",
+            {
+                "object": card.ref,
+                "was_attacking": was_attacker,
+                "was_blocking": was_blocker or removed_blocker_links,
+                "reason": reason,
+            },
+            importance=1,
+            changed_objects=[card.object_id],
+            changed_players=[card.controller],
+        )
+        return True
+
+    def _remove_invalid_combat_objects(self) -> bool:
+        """Remove represented combatants invalidated by CR 506.4 state."""
+
+        candidates: list[CardInstance] = []
+        candidate_ids: set[str] = set()
+        for object_id in self.state.combat.attackers:
+            card = self.state.cards.get(object_id)
+            if card is not None and object_id not in candidate_ids:
+                candidates.append(card)
+                candidate_ids.add(object_id)
+        for blocker_ids in self.state.combat.blockers.values():
+            for object_id in blocker_ids:
+                card = self.state.cards.get(object_id)
+                if card is not None and object_id not in candidate_ids:
+                    candidates.append(card)
+                    candidate_ids.add(object_id)
+
+        changed = False
+        for card in candidates:
+            data = self._effective_card_data(card)
+            card_types, _, _ = self._type_parts(
+                str(data.get("type_line") or "")
+            )
+            invalid_reason: str | None = None
+            if card.zone != "battlefield":
+                invalid_reason = "left the battlefield"
+            elif card.phased_out:
+                invalid_reason = "phased out"
+            elif "creature" not in card_types:
+                invalid_reason = "stopped being a creature"
+            elif "battle" in card_types:
+                invalid_reason = "became a Battle"
+            elif (
+                card.object_id in self.state.combat.attackers
+                and card.controller != self.state.active_player
+            ):
+                invalid_reason = "attacker control changed"
+            if invalid_reason is not None:
+                changed = (
+                    self._remove_object_from_combat(
+                        card,
+                        reason=invalid_reason,
+                    )
+                    or changed
+                )
+        return changed
 
     def _active_cleanup_frame(self) -> dict[str, Any] | None:
         return next(
@@ -16011,6 +16110,8 @@ class CommanderEngine:
             self.state.combat.attackers[card.object_id] = str(defender)
             used.add(card.object_id)
         self.state.combat.attackers_declared = True
+        if used:
+            self.state.combat.had_attacking_creature = True
         self.state.combat.defending_players = [
             seat
             for seat in self.active_seats
@@ -17178,6 +17279,9 @@ class CommanderEngine:
                 self._eliminate_players(losers, reason="state-based loss")
                 if self.state.game_over:
                     return True
+                continue
+
+            if self._remove_invalid_combat_objects():
                 continue
 
             self._synchronize_world_supertype_timestamps()
@@ -19938,6 +20042,10 @@ class CommanderEngine:
         if card.zone != "battlefield":
             raise GameRuleError("Only battlefield permanents have controllers")
         old = card.controller
+        self._remove_object_from_combat(
+            card,
+            reason="control changed",
+        )
         self.state.players[old].zones["battlefield"].remove(object_id)
         self.state.players[new_controller].zones["battlefield"].append(object_id)
         card.controller = new_controller

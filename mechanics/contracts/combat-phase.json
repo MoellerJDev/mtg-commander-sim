@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-506-combat-phase",
+  "official_name": "Combat Phase",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "506",
+    "506.1",
+    "506.2",
+    "506.2a",
+    "506.2b",
+    "506.3",
+    "506.3a",
+    "506.3b",
+    "506.3c",
+    "506.3d",
+    "506.3e",
+    "506.3f",
+    "506.3g",
+    "506.4",
+    "506.4a",
+    "506.4b",
+    "506.4c",
+    "506.4d",
+    "506.4e",
+    "506.5",
+    "506.6",
+    "506.7",
+    "506.7a",
+    "506.7b",
+    "506.7c",
+    "506.7d",
+    "506.7e",
+    "506.7f",
+    "506.7g"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "turn-structure",
+    "cr-507-beginning-of-combat-step",
+    "cr-508-declare-attackers-step",
+    "cr-509-declare-blockers-step",
+    "cr-510-combat-damage-step",
+    "cr-511-end-of-combat-step",
+    "multiplayer-options",
+    "continuous-effects",
+    "replacement-effects",
+    "timing-permissions",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "stack"
+    ],
+    "objects": [
+      "attacking player",
+      "defending player",
+      "attacking creature",
+      "blocking creature",
+      "attacked player",
+      "attacked planeswalker",
+      "attacked battle"
+    ],
+    "events": [
+      "combat phase begins",
+      "combat steps advance in order",
+      "empty-combat steps are skipped",
+      "combatant leaves combat",
+      "combat phase ends"
+    ],
+    "state_reads": [
+      "active player",
+      "active opponents",
+      "phase and step",
+      "effective card types",
+      "controller",
+      "zone",
+      "phased status",
+      "attacking and blocking relationships"
+    ],
+    "state_writes": [
+      "phase and step",
+      "combat attacker and blocker relationships",
+      "attacking and blocking markers",
+      "priority and stack state"
+    ],
+    "costs": [],
+    "timing": [
+      "the represented ordinary combat follows beginning, attackers, blockers, damage, and end",
+      "empty combat skips blockers and damage after declare-attackers priority",
+      "tapping or untapping a declared combatant does not remove it from combat",
+      "combat-relative Oracle timing grammar is not generically compiled"
+    ],
+    "targets": [
+      "players and represented Battles may be attacked",
+      "planeswalker destinations remain blocked",
+      "attacked-permanent departure and last-known defender binding remain blocked"
+    ],
+    "choices": [
+      "the active player declares attackers",
+      "actually attacked defending players declare blockers",
+      "manual combat damage uses only represented assigning principals"
+    ],
+    "hidden_information": [
+      "the combat phase itself reveals no hidden information"
+    ],
+    "apnap": [
+      "priority and represented simultaneous combat-damage decisions use shared APNAP machinery"
+    ],
+    "layers": [
+      "effective type loss is checked during stabilization",
+      "complete hybrid planeswalker, Battle, and creature type-layer interactions remain blocked"
+    ],
+    "replacement_effects": [
+      "regeneration and the universal simultaneous combat-damage replacement batch remain blocked"
+    ],
+    "copy": [
+      "represented effective copy characteristics can invalidate creature or Battle combat status during stabilization"
+    ],
+    "control_change": [
+      "a represented attacking or blocking permanent leaves combat before its controller changes"
+    ],
+    "zone_change": [
+      "a represented combatant leaves combat before its battlefield incarnation changes zones"
+    ],
+    "source_leaves": [
+      "leaving the battlefield clears the departing object's combat status but does not remove other creatures from combat"
+    ]
+  },
+  "variants": [
+    "ordinary two-player combat",
+    "Commander attack-multiple multiplayer",
+    "empty-combat step skipping",
+    "zone and control changes",
+    "phasing and effective type loss",
+    "tapping and untapping",
+    "unsupported first/double-strike second damage step",
+    "unsupported shared-team and alternate-attack multiplayer",
+    "unsupported combat-relative timing grammar"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_506_rule",
+    "test_empty_combat_step_sequence_and_replay_are_exact",
+    "test_supported_attacking_and_defending_roles_are_authoritative",
+    "test_zone_and_control_changes_remove_objects_from_combat",
+    "test_phasing_and_type_loss_remove_combatants_during_stabilization",
+    "test_tapping_and_untapping_do_not_remove_a_creature_from_combat",
+    "test_first_strike_fails_closed_before_damage_decision",
+    "test_no_attackers_skips_blockers_and_combat_damage_steps",
+    "test_objects_leave_combat_only_after_step_ends_and_replay_exactly"
+  ],
+  "implementation": {
+    "component": "TURN_STEPS and CommanderEngine combat entry, declaration, removal, stabilization, damage, finalization, and step-advance paths",
+    "version": "combat-phase-v1"
+  },
+  "known_blockers": [
+    "first strike and double strike do not create the required second combat-damage step",
+    "planeswalker attack destinations are not represented",
+    "single-defender, shared-team-turn, limited-range, and other multiplayer combat options are not implemented",
+    "generic effects that put objects attacking or blocking are not implemented",
+    "regeneration and explicit remove-from-combat effect grammar are not implemented",
+    "attacked planeswalker/Battle departure, hybrid type changes, and defending-player LKI are incomplete",
+    "attack-requirement provenance and had-to-attack queries are not implemented",
+    "attacks-alone, attacking-alone, blocks-alone, and blocking-alone queries are not exposed generically",
+    "combat-relative spell and ability timing grammar, skipped-point fallbacks, and multiple-combat tracking are not implemented",
+    "the complete continuous-effect, replacement, trigger, multiplayer, and replay interaction matrix remains incomplete"
+  ],
+  "review_status": "draft"
+}
