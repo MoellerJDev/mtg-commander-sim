@@ -27,6 +27,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#10](https://github.com/MoellerJDev/mtg-commander-sim/pull/10) | `agent/cr-505-main-phase` | `main` | `draft` |
 | [#11](https://github.com/MoellerJDev/mtg-commander-sim/pull/11) | `agent/cr-504-draw-step` | `main` | `draft` |
 | [#12](https://github.com/MoellerJDev/mtg-commander-sim/pull/12) | `agent/cr-503-upkeep-step` | `main` | `draft` |
+| [#13](https://github.com/MoellerJDev/mtg-commander-sim/pull/13) | `agent/cr-502-untap-step` | `agent/cr-503-upkeep-step` | `draft` |
 
 ## Pinned snapshots and coverage
 
@@ -91,7 +92,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Commit the green dependency-staged CR 502 slice atop CR 503, publish a draft PR based on agent/cr-503-upkeep-step, and require real exact-SHA CI before any merge or trust promotion.
+Keep dependency-staged CR 502 PR #13 in draft while GitHub cannot allocate runners, and continue the next bounded rules family without merging or promoting blocked CR 502 behavior.
 
 ## Regeneration
 

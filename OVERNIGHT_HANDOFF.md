@@ -25,9 +25,10 @@ passed their exact-SHA matrices and merged into `main` through ordinary merge
 commits. Main commit
 `c8a52711dc9294957fc0f437a4aaeab72da213aa` then passed run 30615647165.
 CR 505 PR #10 and CR 504 PR #11 are independent drafts. CR 503 PR #12 is the
-dependency parent for the current CR 502 branch. Their jobs did not receive
-runners because GitHub reported an account billing or spending-limit failure;
-those pre-run failures are neither code passes nor code failures.
+dependency parent for CR 502 PR #13. PR #13 is a dependency-staged draft based
+on `agent/cr-503-upkeep-step`. Their jobs did not receive runners because
+GitHub reported an account billing or spending-limit failure; those pre-run
+failures are neither code passes nor code failures.
 
 ## Deterministic product boundary
 
@@ -130,10 +131,13 @@ rules cases and 425 mechanics, checked 14 schemas and repository history,
 completed the protocol demo, and built and clean-installed the wheel. The
 seed-20260730 and four-player natural-winner regressions were independently
 rerun with exact replay and zero suppressed meaningful windows. The repository
-scan covered 268 tracked files and 11,487,307 bytes. Main commit
+scan covered 271 tracked files and 11,512,955 bytes. Main commit
 `c8a52711dc9294957fc0f437a4aaeab72da213aa` already passed run 30615647165;
-no exact-SHA CI pass is claimed for the focused commit until its jobs receive
-runners and pass.
+CR 502 implementation commit
+`8f21e6ee919644120e9a1ac37fcd630af4d56655` produced push run 30620985919
+and pull-request run 30621010266. All eight jobs had `runner_id=0`, zero
+steps, and GitHub's billing/spending-limit annotation. No exact-SHA CI pass is
+claimed for the focused branch until its jobs receive runners and pass.
 
 ## Evidence boundaries
 
@@ -146,9 +150,8 @@ runners and pass.
 
 ## Exact next step
 
-Commit and publish the green CR 502 focused branch, open a dependency-staged
-draft PR based on `agent/cr-503-upkeep-step`, and inspect its exact-SHA matrix.
-CR 502 remains partial: direct and indirect phasing, day/night, shared-team
-turns, arbitrary untap selection, complete replacement ordering, and universal
-untap-trigger production are blocked. Do not merge while GitHub Actions cannot
-allocate runners.
+Keep dependency-staged CR 502 PR #13 in draft while GitHub Actions cannot
+allocate runners, and continue the next bounded rules family. CR 502 remains
+partial: direct and indirect phasing, day/night, shared-team turns, arbitrary
+untap selection, complete replacement ordering, and universal untap-trigger
+production are blocked. Do not merge or promote those behaviors.

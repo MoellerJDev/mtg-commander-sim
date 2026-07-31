@@ -14,7 +14,7 @@
     "branch": "agent/cr-502-untap-step",
     "branch_ancestry": {
       "focused_branch_base": "b7f4d2e3e909a9571dcc282d1589aafd386f6430",
-      "focused_branch_unique_commits_over_main": 2
+      "focused_branch_unique_commits_over_main": 3
     },
     "commit_reference": "the commit containing this ledger",
     "pull_requests": [
@@ -101,6 +101,13 @@
         "number": 12,
         "state": "draft",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/12"
+      },
+      {
+        "base": "agent/cr-503-upkeep-step",
+        "head": "agent/cr-502-untap-step",
+        "number": 13,
+        "state": "draft",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/13"
       }
     ],
     "tags": [
@@ -140,7 +147,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Commit the green dependency-staged CR 502 slice atop CR 503, publish a draft PR based on agent/cr-503-upkeep-step, and require real exact-SHA CI before any merge or trust promotion.",
+  "next_task": "Keep dependency-staged CR 502 PR #13 in draft while GitHub cannot allocate runners, and continue the next bounded rules family without merging or promoting blocked CR 502 behavior.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
