@@ -4,8 +4,10 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim.carddb import CardRecord
 from mtg_commander_sim.engine import GameRuleError, TURN_STEPS
 from mtg_commander_sim.model import StackItem
 from mtg_commander_sim.record import checkpoint_envelope, replay_record
@@ -188,6 +190,14 @@ class MainPhaseRuleTests(unittest.TestCase):
         self.assertEqual("A", engine.state.priority_player)
         hints = engine._priority_action_hints("A")
         self.assertIn(ring.ref, hints["cast"])
+        cast_action = next(
+            action
+            for action in hints["actions"]
+            if action.get("card") == ring.ref
+            and action["action"] == "cast"
+        )
+        self.assertEqual("Cast Sol Ring — {1}", cast_action["label"])
+        self.assertTrue(cast_action["auto_pay"])
 
         other_ring = self.card(engine, "B", "Sol Ring")
         engine.move_card(other_ring.object_id, "hand", log=False)
@@ -254,6 +264,98 @@ class MainPhaseRuleTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(GameRuleError, "No land plays remain"):
             engine._play_land("A", {"card": lands[0].ref})
+
+    def test_modal_dfc_land_face_prompts_for_exact_life_and_enters_as_land(self):
+        session = self.make_session(50507)
+        engine = session.engine
+        card = self.card(engine, "A", "Island")
+        engine.move_card(card.object_id, "hand", log=False)
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine.state.priority_player = "A"
+        engine.state.stack.clear()
+        engine.state.players["A"].land_plays_remaining = 1
+        original_card_record = engine.card_record
+        agadeem = CardRecord(
+            oracle_id=card.oracle_id,
+            name="Agadeem's Awakening // Agadeem, the Undercrypt",
+            mana_cost="{X}{B}{B}{B} // ",
+            mana_value=3,
+            type_line="Sorcery // Land",
+            oracle_text=(
+                "Agadeem's Awakening: Return creature cards.\n//\n"
+                "Agadeem, the Undercrypt: As this land enters, you may pay "
+                "3 life. If you don't, it enters tapped.\n{T}: Add {B}."
+            ),
+            power=None,
+            toughness=None,
+            loyalty=None,
+            defense=None,
+            colors=("B",),
+            color_identity=("B",),
+            keywords=(),
+            produced_mana=("B",),
+            layout="modal_dfc",
+            released_at="2020-09-25",
+            legalities={"commander": "legal"},
+            faces=(
+                {
+                    "name": "Agadeem's Awakening",
+                    "mana_cost": "{X}{B}{B}{B}",
+                    "type_line": "Sorcery",
+                    "oracle_text": "Return creature cards.",
+                },
+                {
+                    "name": "Agadeem, the Undercrypt",
+                    "mana_cost": "",
+                    "type_line": "Land",
+                    "oracle_text": (
+                        "As this land enters, you may pay 3 life. If you don't, "
+                        "it enters tapped.\n{T}: Add {B}."
+                    ),
+                },
+            ),
+            raw={},
+        )
+
+        def record_for(value):
+            instance = value if hasattr(value, "object_id") else engine.state.cards[value]
+            return agadeem if instance.object_id == card.object_id else original_card_record(value)
+
+        with patch.object(engine, "card_record", side_effect=record_for):
+            action = next(
+                action
+                for action in engine._priority_action_hints("A")["actions"]
+                if action.get("card") == card.ref
+                and action["action"] == "play_land"
+            )
+            self.assertEqual("Play Agadeem, the Undercrypt", action["label"])
+            self.assertEqual(
+                "Pay 3 life to enter untapped",
+                action["choice_schema"]["pay_life"]["label"],
+            )
+            engine._play_land("A", {**action, "pay_life": True})
+
+            self.assertEqual("battlefield", card.zone)
+            self.assertEqual("Agadeem, the Undercrypt", card.active_face)
+            self.assertFalse(card.tapped)
+            self.assertEqual(37, engine.state.players["A"].life)
+            with patch.object(
+                session.projector.card_db,
+                "by_oracle_id",
+                return_value=agadeem,
+            ):
+                projected = session.projector._obj(card, "pilot:A")
+            self.assertEqual("Agadeem, the Undercrypt", projected["n"])
+            self.assertEqual("Land", projected["t"])
+            self.assertEqual(1, projected["face"])
+            self.assertEqual(
+                0,
+                engine.state.players["A"].stats.get(
+                    "decision_optimization", {}
+                ).get("suppressed_meaningful_windows", 0),
+            )
 
     def test_land_hints_require_the_actual_active_main_phase(self):
         session = self.make_session(50507)

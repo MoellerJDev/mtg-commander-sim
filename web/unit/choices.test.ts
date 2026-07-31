@@ -177,6 +177,26 @@ test("fully ordered server choices initialize in projected order", () => {
   assert.deepEqual(validateChoices(triggers, choices), []);
 });
 
+test("mana modes preserve an exact server-issued bundle", () => {
+  const mana = form([
+    {
+      name: "mana_output",
+      label: "Mana to add",
+      control: "mana_modes",
+      required: true,
+      options: [
+        { value: { U: 1 }, label: "Add {U}" },
+        { value: { B: 1 }, label: "Add {B}" },
+      ],
+    },
+  ]);
+  const choices = initialChoices(mana);
+  assert.deepEqual(choices, { mana_output: { U: 1 } });
+  assert.deepEqual(validateChoices(mana, choices), []);
+  choices.mana_output = { G: 1 };
+  assert.match(validateChoices(mana, choices)[0], /legal mana choice/);
+});
+
 test("copy targets preserve defaults and validate each copy", () => {
   const copies = form([
     {

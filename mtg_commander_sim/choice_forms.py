@@ -122,6 +122,25 @@ def _field(
         if "default" in value:
             field["default"] = bool(value["default"])
         return field
+    if value_type == "mana_bundle":
+        options = _rows(value.get("options"))
+        field.update(
+            {
+                "control": "mana_modes",
+                "options": [
+                    {
+                        "value": copy.deepcopy(option.get("value", {})),
+                        "label": str(option.get("label") or "Add mana"),
+                    }
+                    for option in options
+                ],
+            }
+        )
+        if options:
+            field["default"] = copy.deepcopy(
+                options[0].get("value", {})
+            )
+        return field
     if value_type == "integer":
         field["control"] = "integer"
         if value.get("minimum") is not None:

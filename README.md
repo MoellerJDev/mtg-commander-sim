@@ -17,8 +17,10 @@ responsive TypeScript/React table. One Python process now builds and serves the
 browser, prepares the local Scryfall SQLite index, checks for updated Oracle and
 rulings exports every 24 hours, and serves an on-demand local card-image cache.
 The browser renders the engine's current generic choice vocabulary, locally
-cached card art, reconnect and exact-command retry states, owner-only durable
-stop/resume controls, and a seat-safe record inspection panel. These paths are
+cached card art, card-specific play/cast labels, drag-to-play interaction,
+optional manual mana-source activation, reconnect and exact-command retry
+states, owner-only durable stop/resume controls, and a seat-safe record
+inspection panel. These paths are
 end-to-end tested with four shared-cookie tab-isolated seats and a two-player
 duel. Future choice schemas, full account
 identity, expiry/rate limits, and production operations remain incomplete.
@@ -97,6 +99,22 @@ generic rejection. The confirmation is bound to the exact deck fingerprint and
 warning list and is saved with the deck/game provenance. It does not override
 bans, deck-construction errors, missing card data, or unsupported rules
 semantics; material semantic gaps still fail closed during play.
+
+At the table, cards with a current action are highlighted and labeled
+**PLAY**, **CAST**, or **CHOOSE**. Click one to use it, or drag it from your
+hand or command zone onto your battlefield. Spell confirmation exposes the
+default **Auto-mana** path. Turn on **Manual mana** to highlight payable mana
+abilities, then click those permanents in the order you want to activate them;
+multi-color sources ask which exact mana to add. Choose the spell again after
+floating mana. Manual mode controls source activation order while the server
+still validates the pool and may complete a routine remaining payment.
+
+Modal double-faced cards receive one action for each currently playable use.
+For example, Agadeem's Awakening can be selected as a spell or as **Play
+Agadeem, the Undercrypt**. The land action asks whether to pay exactly 3 life,
+then enters and renders using the chosen land face. Client labels and drag
+gestures never create legality; they invoke the same server-issued action IDs
+as the ordinary action tray.
 
 For offline development with an existing database:
 
@@ -207,7 +225,8 @@ generated documentation fixtures with bearer capabilities redacted. See
   Game Record v3 durability before command acknowledgement
 - React/TypeScript room and four-player table UI with Moxfield or pasted-list
   import, responsive desktop/mobile battlefield layout, local card art, private
-  hand rendering, legal-action prompts, generic server-issued choice forms,
+  hand rendering, card-specific legal-action prompts, drag-to-play, optional
+  click-to-activate manual mana, generic server-issued choice forms,
   focus-contained dialogs, reconnect, exact-envelope retry, and
   four-isolated-context Playwright coverage
 - one-command local startup with browser build/static serving, a visible
@@ -215,7 +234,8 @@ generated documentation fixtures with bearer capabilities redacted. See
   builds, bounded bulk-archive retention, and deck-prefetched/on-demand images
 - generic browser controls for current cost/X, mode/target, private search,
   ordering, trigger, mulligan/cleanup, AP/NAP, legend, attack/block, combat
-  damage, and storm-copy choices; the engine remains the sole validator
+  damage, exact mana-mode, and storm-copy choices; the engine remains the sole
+  validator
 - strict protocol 3.0 command envelopes plus hash-checked projection patches
 - per-connection ephemeral projection cursors, including multiple-tab and
   reconnect isolation for one seat
@@ -227,6 +247,8 @@ generated documentation fixtures with bearer capabilities redacted. See
 - deterministic command replay with per-transition state hashes
 - explicit `commander_duel` and `commander_multiplayer` profiles
 - server-derived land entry and built-in fetchland search resolution
+- modal double-faced land-face selection with face-specific entry text and
+  exact optional life payments
 - server-generated stable legal action IDs with exact alternatives in the decision audit
 - derived turn-grouped reviews with an explicit fidelity gate
 - provider-neutral scripted, manual-JSON, and subprocess-JSON pilots

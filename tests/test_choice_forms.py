@@ -251,6 +251,39 @@ class ChoiceFormTests(unittest.TestCase):
 
         self.assertEqual(2, form["fields"][0]["minimum"])
 
+    def test_mana_modes_delegate_only_an_exact_server_issued_bundle(self):
+        action = {
+            "id": "activate:A01:ab1",
+            "action": "activate",
+            "choice_schema": {
+                "mana_output": {
+                    "type": "mana_bundle",
+                    "label": "Mana to add",
+                    "options": [
+                        {"value": {"U": 1}, "label": "Add {U}"},
+                        {"value": {"B": 1}, "label": "Add {B}"},
+                    ],
+                }
+            },
+        }
+
+        form = build_action_form(
+            action,
+            decision_kind="priority",
+            context={},
+        )
+
+        self.assertEqual("mana_modes", form["fields"][0]["control"])
+        self.assertEqual({"U": 1}, form["fields"][0]["default"])
+        self.assertEqual(
+            {"mana_output"},
+            delegated_choice_fields(
+                action,
+                decision_kind="priority",
+                context={},
+            ),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

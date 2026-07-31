@@ -536,13 +536,24 @@ delegated, so renderability cannot accidentally grant authority over an action's
 server-derived source, controller, cost, or semantic program.
 
 The React client renders only this vocabulary: references and ordered sets,
-booleans, enums, bounded integers/X, names, legal seats, cost variants,
+booleans, enums, bounded integers/X, names, legal seats, exact mana bundles,
+cost variants,
 modal/grouped targets, private searches, mulligan/cleanup and trigger choices,
 AP/NAP and legend choices, attack/block maps, combat-damage assignments, and
 storm-copy targets. Combat forms receive source power and legal targets from the
 engine; the browser does not calculate combat rules. Submission is checked for
 basic completeness in the client, limited to adapter-issued keys by the
 service, and fully revalidated by the engine.
+
+Card-centric interaction remains a protocol adapter, not a second rules
+engine. The kernel supplies card refs, face-specific labels, current costs,
+and exact legal mana modes. Clicking a card, dragging it to the battlefield,
+or selecting the matching tray button all submit the same action ID. Manual
+mana mode submits ordinary mana-ability actions sequentially, preserving source
+activation order and floating the resulting server-validated bundles before a
+cast. Auto-mana remains the default. Modal double-faced land plays carry a
+fixed selected face into land-entry derivation and projection, so the client
+cannot substitute the spell face or invent a life payment.
 
 The table layout is responsive rather than fixed to a particular viewport.
 Choice dialogs contain keyboard focus and restore it to the triggering action;

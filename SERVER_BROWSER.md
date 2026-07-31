@@ -1,7 +1,8 @@
 # Server and browser vertical slice
 
 Version 0.8.0 includes an executable, responsive two- or four-player browser slice with
-generic forms for the rules engine's current server-issued choice schemas. One
+card-centric play/cast interaction and generic forms for the rules engine's
+current server-issued choice schemas. One
 Python process builds and serves the browser, manages the local Scryfall data
 snapshot, and serves locally cached card images. It is a single-node
 development deployment, not a claim of complete Magic rules, future-schema
@@ -65,6 +66,33 @@ invalidates the previous code. The owner can remove a nonowner seat or atomicall
 close and replace an unstarted room; a nonowner can leave and release their
 seat. Only the room owner can start after every configured seat is occupied and
 ready.
+
+## Playing from the table
+
+The action tray uses card names instead of generic verbs: for example, **Play
+Watery Grave**, **Cast Sol Ring — {1}**, and **Sensei's Divining Top — Draw a
+card, then put Sensei's Divining Top on top of its owner's library**. Cards in
+the hand and command zone are highlighted when one of those actions is legal.
+Click a highlighted card, or drag it onto your battlefield. If a card has more
+than one legal use, such as a modal double-faced spell/land, the browser asks
+which server-issued action to execute.
+
+Casting defaults to **Auto-mana**, which asks the authoritative engine to use a
+valid routine payment. Select **Manual mana** to highlight untapped permanents
+with currently legal mana abilities. Click those sources in the desired
+activation order; a source with multiple modes presents exact choices such as
+**Add {U}** or **Add {B}** and adds only the selected bundle. Floating mana is
+shown on the player's board. Then choose or drag the spell again. The engine
+uses the floated pool first, validates the complete payment, and may finish a
+routine unpaid remainder. This mode controls activation order; it is not yet a
+general restricted-mana or arbitrary cost-allocation editor.
+
+Land-face entry choices come from that face's Oracle text. **Play Agadeem, the
+Undercrypt** therefore offers **Pay 3 life to enter untapped**, charges exactly
+3 if selected, enters as the land face, and requests the back-face image.
+Dropping or clicking never bypasses timing, priority, cost, target, semantic,
+or fidelity checks: both gestures submit the same capability-scoped action as
+the action tray.
 
 While the server performs its startup card-data check, existing room pages
 back off polling from 750 ms to at most once every five seconds and resume
@@ -243,6 +271,7 @@ The current form vocabulary covers:
 - required and optional single references, multi-reference selection, and
   ordering;
 - booleans, bounded integers/X, names, enums, and legal-seat choices;
+- exact server-issued mana bundles for multi-mode mana abilities;
 - alternate/additional cost variants and their variant-scoped fields;
 - modal, grouped, and multi-target selection;
 - private search/fetch choices and as-enters life payment;

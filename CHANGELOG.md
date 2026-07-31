@@ -4,6 +4,18 @@
 
 ### Managed local runtime and responsive browser
 
+- Added Arena-style card interaction: legal hand/command cards now show their
+  specific play or cast action, can be clicked or dragged to the battlefield,
+  and offer an explicit Auto-mana confirmation instead of an unlabeled generic
+  verb.
+- Added optional Manual mana mode. Legal mana sources become clickable in the
+  projected battlefield, activation order is recorded normally, exact
+  multi-color modes are selected through a server-issued form, and casting
+  consumes floated mana before routine automatic completion.
+- Fixed modal double-faced land plays. Agadeem's Awakening now advertises
+  **Play Agadeem, the Undercrypt**, prompts for the land face's exact 3-life
+  entry choice, enters on that face, and renders the matching characteristics
+  and image instead of being silently returned to hand.
 - Reduced normal local startup to `python -m server`: the launcher installs
   missing browser dependencies, rebuilds changed React sources, serves the
   production client and API from one origin, and opens the local UI.

@@ -124,16 +124,44 @@ class StateProjector:
     def _effective(self, card: CardInstance) -> dict[str, Any]:
         try:
             record = self.card_db.by_oracle_id(card.oracle_id)
+            face = next(
+                (
+                    (index, value)
+                    for index, value in enumerate(record.faces)
+                    if card.active_face
+                    and str(value.get("name") or "") == card.active_face
+                ),
+                None,
+            )
+            face_data = face[1] if face is not None else None
             data: dict[str, Any] = {
-                "n": record.name,
-                "m": record.mana_cost,
+                "n": (
+                    str(face_data.get("name"))
+                    if face_data is not None
+                    else record.name
+                ),
+                "m": (
+                    str(face_data.get("mana_cost") or "")
+                    if face_data is not None
+                    else record.mana_cost
+                ),
                 "mv": record.mana_value,
-                "t": record.type_line,
-                "o": record.oracle_text,
-                "p": record.power,
-                "q": record.toughness,
+                "t": (
+                    str(face_data.get("type_line") or "")
+                    if face_data is not None
+                    else record.type_line
+                ),
+                "o": (
+                    str(face_data.get("oracle_text") or "")
+                    if face_data is not None
+                    else record.oracle_text
+                ),
+                "p": face_data.get("power") if face_data is not None else record.power,
+                "q": face_data.get("toughness") if face_data is not None else record.toughness,
                 "k": list(record.keywords),
             }
+            if face is not None:
+                data["face"] = face[0]
         except KeyError:
             token = (
                 card.annotations.get("object_characteristics")
@@ -174,7 +202,13 @@ class StateProjector:
             obj["kind"] = "emblem"
         elif visible:
             obj["cid"] = card.oracle_id[:8]
-            obj["n"] = self._effective(card)["n"]
+            effective = self._effective(card)
+            obj["n"] = effective["n"]
+            if card.active_face:
+                obj["m"] = effective.get("m", "")
+                obj["t"] = effective.get("t", "")
+                if effective.get("face") is not None:
+                    obj["face"] = effective["face"]
         else:
             obj["n"] = "?"
         if card.tapped:

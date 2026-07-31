@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { DragEvent, FormEvent, KeyboardEvent as ReactKeyboardEvent, useEffect, useRef, useState } from "react";
 import {
   api,
   ApiError,
@@ -52,27 +52,80 @@ function actionTone(action: LegalAction): string {
   return "primary";
 }
 
-function CardTile({ value, view, compact = false }: { value: JsonValue; view: ProjectedView; compact?: boolean }) {
+function CardTile({
+  value,
+  view,
+  compact = false,
+  actions = [],
+  onIntent,
+  manualMana = false,
+}: {
+  value: JsonValue;
+  view: ProjectedView;
+  compact?: boolean;
+  actions?: LegalAction[];
+  onIntent?: (actions: LegalAction[]) => void;
+  manualMana?: boolean;
+}) {
   const card = asRecord(value);
   const cid = typeof card.cid === "string" ? card.cid : "";
   const definition = cid ? view.definitions[cid] : undefined;
   const [showImage, setShowImage] = useState(Boolean(cid));
+  const interactive = actions.length > 0 && Boolean(onIntent);
+  const ref = String(card.id ?? "");
+  const face = Number(card.face ?? 0);
+  const canDrag = interactive && (
+    !compact || actions.some((action) => action.action === "cast")
+  );
+  const actionKinds = new Set(actions.map((action) => action.action));
+  const actionHint = manualMana
+    ? "TAP"
+    : actionKinds.size > 1
+      ? "CHOOSE"
+      : actionKinds.has("cast")
+        ? "CAST"
+        : "PLAY";
+  function activate() {
+    if (interactive) onIntent?.(actions);
+  }
+  function keydown(event: ReactKeyboardEvent<HTMLElement>) {
+    if (!interactive || !["Enter", " "].includes(event.key)) return;
+    event.preventDefault();
+    activate();
+  }
   return (
-    <article className={`card-tile${compact ? " compact" : " hand-card"}${showImage ? " has-image" : ""}${card.tap ? " tapped" : ""}`} title={String(definition?.o ?? cardName(value))}>
+    <article
+      className={`card-tile${compact ? " compact" : " hand-card"}${showImage ? " has-image" : ""}${card.tap ? " tapped" : ""}${interactive ? " actionable" : ""}${manualMana ? " mana-source" : ""}`}
+      title={String(card.o ?? definition?.o ?? cardName(value))}
+      role={interactive ? "button" : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      aria-label={interactive ? `${actions.map((action) => action.label ?? action.action).join(" or ")}: ${cardName(value)}` : undefined}
+      draggable={canDrag}
+      data-card-ref={ref}
+      onClick={activate}
+      onKeyDown={keydown}
+      onDragStart={(event) => {
+        if (!interactive) return;
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("application/x-commander-card", ref);
+        event.dataTransfer.setData("text/plain", ref);
+      }}
+    >
       {showImage && (
         <img
-          src={`/api/v1/cards/${cid}/image?size=${compact ? "small" : "normal"}`}
+          src={`/api/v1/cards/${cid}/image?size=${compact ? "small" : "normal"}&face=${face}`}
           alt=""
           loading="lazy"
           onError={() => setShowImage(false)}
         />
       )}
       <div className="card-copy">
-        <small>{String(definition?.m ?? card.id ?? "")}</small>
+        <small>{String(card.m ?? definition?.m ?? card.id ?? "")}</small>
         <strong>{cardName(value)}</strong>
-        {!compact && definition?.t && <span>{String(definition.t)}</span>}
+        {!compact && (card.t ?? definition?.t) && <span>{String(card.t ?? definition?.t)}</span>}
         {card.ctr && <span>{Object.entries(asRecord(card.ctr)).map(([key, amount]) => `${key} ${amount}`).join(" · ")}</span>}
       </div>
+      {interactive && <span className="card-action-hint">{actionHint}</span>}
     </article>
   );
 }
@@ -593,6 +646,12 @@ function PlayerBoard({
   priority,
   mine,
   view,
+  manualMana,
+  manaActions,
+  cardActions,
+  onCardIntent,
+  dropEnabled,
+  onCardDrop,
 }: {
   seat: string;
   player: Record<string, JsonValue>;
@@ -600,7 +659,14 @@ function PlayerBoard({
   priority: boolean;
   mine: boolean;
   view: ProjectedView;
+  manualMana: boolean;
+  manaActions: LegalAction[];
+  cardActions: LegalAction[];
+  onCardIntent: (actions: LegalAction[]) => void;
+  dropEnabled: boolean;
+  onCardDrop: (cardRef: string) => void;
 }) {
+  const [dragActive, setDragActive] = useState(false);
   const battlefield = asList(player.bf);
   const command = asList(player.cmd);
   const graveyard = asList(player.gy);
@@ -618,9 +684,47 @@ function PlayerBoard({
       </header>
       {(active || priority) && <div className="turn-flags">{active && <span>Active player</span>}{priority && <span>Priority</span>}</div>}
       <div className="zone-label">COMMAND</div>
-      <div className="card-strip command-zone">{command.length ? command.map((card, index) => <CardTile key={String(asRecord(card).id ?? index)} value={card} view={view} compact />) : <em>Empty</em>}</div>
+      <div className="card-strip command-zone">{command.length ? command.map((card, index) => {
+        const ref = String(asRecord(card).id ?? "");
+        const actions = mine
+          ? cardActions.filter((action) => String(action.card ?? "") === ref)
+          : [];
+        return <CardTile key={ref || index} value={card} view={view} compact actions={actions} onIntent={onCardIntent} />;
+      }) : <em>Empty</em>}</div>
       <div className="zone-label">BATTLEFIELD</div>
-      <div className="card-strip battlefield">{battlefield.length ? battlefield.map((card, index) => <CardTile key={String(asRecord(card).id ?? index)} value={card} view={view} compact />) : <em>Empty battlefield</em>}</div>
+      <div
+        className={`card-strip battlefield${mine && dropEnabled ? " drop-target" : ""}${dragActive ? " drag-active" : ""}`}
+        data-testid={mine ? "own-battlefield" : undefined}
+        onDragOver={(event) => {
+          if (!mine || !dropEnabled) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "move";
+        }}
+        onDragEnter={(event) => {
+          if (!mine || !dropEnabled) return;
+          event.preventDefault();
+          setDragActive(true);
+        }}
+        onDragLeave={(event) => {
+          if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+          setDragActive(false);
+        }}
+        onDrop={(event: DragEvent<HTMLDivElement>) => {
+          if (!mine || !dropEnabled) return;
+          event.preventDefault();
+          setDragActive(false);
+          const ref = event.dataTransfer.getData("application/x-commander-card") || event.dataTransfer.getData("text/plain");
+          if (ref) onCardDrop(ref);
+        }}
+      >
+        {battlefield.length ? battlefield.map((card, index) => {
+          const ref = String(asRecord(card).id ?? "");
+          const actions = mine && manualMana
+            ? manaActions.filter((action) => String(action.source ?? "") === ref)
+            : [];
+          return <CardTile key={ref || index} value={card} view={view} compact actions={actions} onIntent={onCardIntent} manualMana={actions.length > 0} />;
+        }) : <em>{mine && dropEnabled ? "Drop a playable card here" : "Empty battlefield"}</em>}
+      </div>
       <footer className="zone-summary">
         <span>GY <strong>{graveyard.length}</strong></span>
         <span>EXILE <strong>{exile.length}</strong></span>
@@ -704,6 +808,8 @@ function GameView({ gameId }: { gameId: string }) {
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
   const [notice, setNotice] = useState("");
   const [selectedAction, setSelectedAction] = useState<LegalAction | null>(null);
+  const [actionChoices, setActionChoices] = useState<LegalAction[]>([]);
+  const [manualMana, setManualMana] = useState(false);
   const [choiceValues, setChoiceValues] = useState<ChoiceValues>({});
   const [choiceErrors, setChoiceErrors] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -713,6 +819,7 @@ function GameView({ gameId }: { gameId: string }) {
   const [controlling, setControlling] = useState(false);
   const [pendingRetry, setPendingRetry] = useState<{ envelope: CommandEnvelope; label: string } | null>(null);
   const choiceDialogRef = useRef<HTMLFormElement | null>(null);
+  const actionPickerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     let stopped = false;
@@ -769,6 +876,7 @@ function GameView({ gameId }: { gameId: string }) {
 
   useEffect(() => {
     setSelectedAction(null);
+    setActionChoices([]);
     setChoiceValues({});
     setChoiceErrors([]);
   }, [view?.decision?.id]);
@@ -780,21 +888,24 @@ function GameView({ gameId }: { gameId: string }) {
   }, [pendingRetry, view?.decision?.id]);
 
   useEffect(() => {
-    if (!selectedAction) return;
+    if (!selectedAction && actionChoices.length === 0) return;
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const oldOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     window.requestAnimationFrame(() => {
-      choiceDialogRef.current?.querySelector<HTMLElement>("input:not(:disabled), select:not(:disabled), button:not(:disabled)")?.focus();
+      const dialog = choiceDialogRef.current ?? actionPickerRef.current;
+      dialog?.querySelector<HTMLElement>("input:not(:disabled), select:not(:disabled), button:not(:disabled)")?.focus();
     });
     function keydown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         event.preventDefault();
         setSelectedAction(null);
+        setActionChoices([]);
         return;
       }
-      if (event.key !== "Tab" || !choiceDialogRef.current) return;
-      const controls = [...choiceDialogRef.current.querySelectorAll<HTMLElement>("input:not(:disabled), select:not(:disabled), textarea:not(:disabled), button:not(:disabled), [tabindex]:not([tabindex='-1'])")];
+      const dialog = choiceDialogRef.current ?? actionPickerRef.current;
+      if (event.key !== "Tab" || !dialog) return;
+      const controls = [...dialog.querySelectorAll<HTMLElement>("input:not(:disabled), select:not(:disabled), textarea:not(:disabled), button:not(:disabled), [tabindex]:not([tabindex='-1'])")];
       if (!controls.length) return;
       const first = controls[0];
       const last = controls.at(-1)!;
@@ -812,7 +923,7 @@ function GameView({ gameId }: { gameId: string }) {
       document.body.style.overflow = oldOverflow;
       previous?.focus();
     };
-  }, [selectedAction]);
+  }, [selectedAction, actionChoices]);
 
   async function submitEnvelope(envelope: CommandEnvelope, label: string) {
     setSubmitting(true);
@@ -879,24 +990,37 @@ function GameView({ gameId }: { gameId: string }) {
   }
 
   function chooseAction(action: LegalAction) {
-    if (!action.form) {
+    setActionChoices([]);
+    if (!action.form && action.action !== "cast") {
       void act(action);
       return;
     }
     setSelectedAction(action);
-    setChoiceValues(initialChoices(action.form));
+    setChoiceValues(action.form ? initialChoices(action.form) : {});
     setChoiceErrors([]);
+  }
+
+  function chooseCardAction(actions: LegalAction[]) {
+    if (actions.length === 1) {
+      chooseAction(actions[0]);
+    } else if (actions.length > 1) {
+      setActionChoices(actions);
+    }
   }
 
   function submitChoice(event: FormEvent) {
     event.preventDefault();
-    if (!selectedAction?.form) return;
-    const errors = validateChoices(selectedAction.form, choiceValues);
+    if (!selectedAction) return;
+    const errors = selectedAction.form
+      ? validateChoices(selectedAction.form, choiceValues)
+      : [];
     setChoiceErrors(errors);
     if (errors.length) return;
     void act(
       selectedAction,
-      executableChoices(selectedAction.form, choiceValues),
+      selectedAction.form
+        ? executableChoices(selectedAction.form, choiceValues)
+        : {},
     );
   }
 
@@ -911,6 +1035,22 @@ function GameView({ gameId }: { gameId: string }) {
   const stack = asList(state.stack);
   const labels = projectedLabels(view);
   const labelFor = (value: string) => labels.get(value) ?? value;
+  const legalActions = view.decision?.legal_actions ?? [];
+  const handActions = legalActions.filter((action) =>
+    ["play_land", "cast"].includes(action.action),
+  );
+  const manaActions = legalActions.filter((action) =>
+    action.action === "activate" && action.mana_ability === true,
+  );
+  const displayActions = legalActions.filter((action) =>
+    action.mana_ability !== true || manualMana,
+  );
+  const actionsForCard = (ref: string) => handActions.filter((action) =>
+    String(action.card ?? "") === ref,
+  );
+  const dropEnabled = hand.some((card) =>
+    actionsForCard(String(asRecord(card).id ?? "")).length > 0,
+  );
   const activeSeat = String(turn.active ?? "");
   const prioritySeat = String(turn.priority ?? "");
   return (
@@ -1001,6 +1141,12 @@ function GameView({ gameId }: { gameId: string }) {
               priority={prioritySeat === seat}
               mine={ownSeat === seat}
               view={view}
+              manualMana={manualMana}
+              manaActions={manaActions}
+              cardActions={handActions}
+              onCardIntent={chooseCardAction}
+              dropEnabled={dropEnabled}
+              onCardDrop={(ref) => chooseCardAction(actionsForCard(ref))}
             />
           ))}
         </section>
@@ -1023,7 +1169,10 @@ function GameView({ gameId }: { gameId: string }) {
       <section className="hand-panel">
         <header><div><span className="eyebrow">YOUR PRIVATE ZONE · SEAT {ownSeat}</span><h2>Your hand</h2></div><span className="zone-count">{hand.length} cards</span></header>
         <div className="hand-cards" data-testid="own-hand">
-          {hand.map((card, index) => <CardTile key={String(asRecord(card).id ?? index)} value={card} view={view} />)}
+          {hand.map((card, index) => {
+            const ref = String(asRecord(card).id ?? "");
+            return <CardTile key={ref || index} value={card} view={view} actions={actionsForCard(ref)} onIntent={chooseCardAction} />;
+          })}
         </div>
       </section>
       {pendingRetry && (
@@ -1035,23 +1184,58 @@ function GameView({ gameId }: { gameId: string }) {
       <section id="decision-tray" className="decision-panel" data-testid="decision-panel" aria-live="polite">
         {view.decision ? (
           <>
-            <div className="decision-copy"><span className="eyebrow">YOUR DECISION · {view.decision.id}</span><h2>{readable(view.decision.kind)}</h2><small>{view.decision.legal_actions.length} legal {view.decision.legal_actions.length === 1 ? "action" : "actions"}</small></div>
-            <div className="action-row">
-              {view.decision.legal_actions.map((action) => (
-                <button className={`action-button ${actionTone(action)}`} key={action.id} data-testid={`action-${action.id}`} disabled={submitting || Boolean(pendingRetry) || connection !== "LIVE" || lifecycle?.status !== "active"} onClick={() => chooseAction(action)}>{action.label ?? action.kind ?? action.action}</button>
-              ))}
+            <div className="decision-copy"><span className="eyebrow">YOUR DECISION · {view.decision.id}</span><h2>{readable(view.decision.kind)}</h2><small>{displayActions.length} shown · {view.decision.legal_actions.length} legal</small></div>
+            <div className="action-tools">
+              {manaActions.length > 0 && (
+                <button
+                  type="button"
+                  className={`mana-toggle${manualMana ? " active" : ""}`}
+                  aria-pressed={manualMana}
+                  data-testid="manual-mana-toggle"
+                  onClick={() => setManualMana((value) => !value)}
+                >
+                  {manualMana ? "Manual mana on" : "Manual mana"}
+                </button>
+              )}
+              <div className="action-row">
+                {displayActions.map((action) => (
+                  <button className={`action-button ${actionTone(action)}`} key={action.id} data-testid={`action-${action.id}`} disabled={submitting || Boolean(pendingRetry) || connection !== "LIVE" || lifecycle?.status !== "active"} onClick={() => chooseAction(action)}>{action.action === "cast" && !manualMana ? `Auto-mana · ${action.label ?? "Cast"}` : action.label ?? action.kind ?? action.action}</button>
+                ))}
+              </div>
             </div>
           </>
         ) : <div className="waiting-decision"><span className="status-dot muted" /><div><strong>Waiting for the table</strong><p>Waiting for another player’s decision.</p></div></div>}
       </section>
-      {selectedAction?.form && (
+      {manualMana && manaActions.length > 0 && (
+        <div className="mana-help" role="status">
+          Click a highlighted untapped permanent to add mana in the order you choose. Floating mana appears on your board; then drag or select the spell.
+        </div>
+      )}
+      {actionChoices.length > 0 && (
+        <div className="choice-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setActionChoices([]); }}>
+          <section ref={actionPickerRef} className="choice-dialog action-picker" role="dialog" aria-modal="true" aria-labelledby="action-picker-title">
+            <header>
+              <div><span className="eyebrow">CHOOSE CARD ACTION</span><h2 id="action-picker-title">How should this card be used?</h2></div>
+              <button type="button" className="secondary-button" onClick={() => setActionChoices([])}>Cancel</button>
+            </header>
+            <div className="action-picker-options">
+              {actionChoices.map((action) => (
+                <button type="button" key={action.id} onClick={() => chooseAction(action)}>
+                  {action.action === "cast" && !manualMana ? `Auto-mana · ${action.label ?? "Cast"}` : action.label ?? action.action}
+                </button>
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
+      {selectedAction && (selectedAction.form || selectedAction.action === "cast") && (
         <div className="choice-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedAction(null); }}>
           <form ref={choiceDialogRef} className="choice-dialog" role="dialog" aria-modal="true" aria-labelledby="choice-dialog-title" aria-describedby="choice-dialog-description" data-testid="choice-dialog" onSubmit={submitChoice}>
             <header>
               <div>
                 <span className="eyebrow">SERVER-ISSUED CHOICES</span>
                 <h2 id="choice-dialog-title">{selectedAction.label ?? selectedAction.action}</h2>
-                <p id="choice-dialog-description">Choose from the legal values supplied for your seat. The server validates the final action.</p>
+                <p id="choice-dialog-description">{selectedAction.action === "cast" ? manualMana ? "Spend the mana you floated in the order you chose. The server validates the pool and can complete any routine remainder." : "Use Auto-mana for a routine payment, or cancel and enable Manual mana to tap sources in your preferred order. The server validates every payment." : "Choose from the legal values supplied for your seat. The server validates the final action."}</p>
               </div>
               <button
                 type="button"
@@ -1060,23 +1244,30 @@ function GameView({ gameId }: { gameId: string }) {
                 onClick={() => setSelectedAction(null)}
               >Cancel</button>
             </header>
-            <ChoiceFormView
-              form={selectedAction.form}
-              values={choiceValues}
-              onChange={(values) => {
-                setChoiceValues(values);
-                setChoiceErrors([]);
-              }}
-              labelFor={labelFor}
-            />
+            {selectedAction.form && (
+              <ChoiceFormView
+                form={selectedAction.form}
+                values={choiceValues}
+                onChange={(values) => {
+                  setChoiceValues(values);
+                  setChoiceErrors([]);
+                }}
+                labelFor={labelFor}
+              />
+            )}
             {choiceErrors.length > 0 && (
               <ul className="choice-errors" data-testid="choice-errors">
                 {choiceErrors.map((error) => <li key={error}>{error}</li>)}
               </ul>
             )}
-            <button type="submit" data-testid="submit-choice" disabled={submitting || connection !== "LIVE"}>
-              {submitting ? "Submitting…" : selectedAction.form.submit_label}
-            </button>
+            <div className="choice-submit-row">
+              {selectedAction.action === "cast" && !manualMana && (
+                <button type="button" className="secondary-button" onClick={() => { setManualMana(true); setSelectedAction(null); setNotice("Manual mana enabled. Click highlighted mana sources, then choose the spell again."); }}>Use manual mana</button>
+              )}
+              <button type="submit" data-testid="submit-choice" disabled={submitting || connection !== "LIVE"}>
+                {submitting ? "Submitting…" : selectedAction.action === "cast" ? manualMana ? selectedAction.label ?? "Cast" : `Auto-mana & ${selectedAction.label ?? "Cast"}` : selectedAction.form?.submit_label ?? "Submit"}
+              </button>
+            </div>
           </form>
         </div>
       )}

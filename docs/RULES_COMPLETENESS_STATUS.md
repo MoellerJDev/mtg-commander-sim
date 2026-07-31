@@ -364,6 +364,14 @@ The two Control Point previews in the July 28 Oracle corpus are
 not-yet-Commander-legal and postdate the June 19 CR snapshot, so their
 protector rules fail closed.
 
+Ordinary modal double-faced cards now distinguish their front spell face from
+each playable land face during legal-action generation. A selected land face
+drives battlefield type validation, active-face projection, and face-specific
+entry text, including generic exact-N optional life payments such as Agadeem,
+the Undercrypt's 3 life. This closes the observed silent non-entry defect; it
+does not claim complete transforming-double-faced-card, copy, replacement, or
+alternate-casting coverage.
+
 ## CR 400/613/111/704/707 foundation
 
 Every card retains a stable physical `object_id`, while a serialized

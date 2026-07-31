@@ -6,7 +6,7 @@ import random
 import re
 import uuid
 from contextlib import contextmanager
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from typing import Any, Iterable, Iterator, Mapping, Sequence
 
 from .abilities import (
@@ -1795,11 +1795,28 @@ class CommanderEngine:
                     changed_players=[card.owner],
                 )
             return card
+        destination_type_line = str(
+            self._effective_card_data(card).get("type_line") or ""
+        )
+        if enter_face is not None:
+            record = self.card_record(card)
+            selected_face = next(
+                (
+                    face
+                    for face in (record.faces if record else ())
+                    if str(face.get("name") or "") == enter_face
+                ),
+                None,
+            )
+            if selected_face is not None:
+                destination_type_line = str(
+                    selected_face.get("type_line") or ""
+                )
         if (
             destination == "battlefield"
             and card.is_card_object
             and self._type_parts(
-                str(self._effective_card_data(card).get("type_line") or "")
+                destination_type_line
             )[0].intersection({"instant", "sorcery"})
         ):
             if log:
@@ -5236,15 +5253,31 @@ class CommanderEngine:
                     compiled_restriction,
                     bundle,
                 )
-            for effect in activation.get("side_effects") or mode.side_effects:
-                if effect.get("op") == "damage_self":
-                    self.state.players[seat].life -= int(effect.get("amount", 1))
-                elif effect.get("op") == "pay_life":
-                    amount = int(effect.get("amount", 1))
-                    if self.state.players[seat].life < amount:
-                        raise GameRuleError("Cannot pay more life than the player has")
-                    self.state.players[seat].life -= amount
+            self._apply_mana_mode_side_effects(
+                seat,
+                activation.get("side_effects") or mode.side_effects,
+            )
             self._log(seat, "mana.produce", f"{seat} tapped {card.ref} for { {k:v for k,v in bundle.items() if v} }.", {"source": card.ref, "bundle": {k:v for k,v in bundle.items() if v}}, importance=0, changed_objects=[card.object_id], changed_players=[seat])
+
+    def _apply_mana_mode_side_effects(
+        self,
+        seat: str,
+        effects: Iterable[Mapping[str, Any]],
+    ) -> None:
+        """Apply compiled effects coupled to one selected mana mode."""
+
+        for effect in effects:
+            if effect.get("op") == "damage_self":
+                self.state.players[seat].life -= int(
+                    effect.get("amount", 1)
+                )
+            elif effect.get("op") == "pay_life":
+                amount = int(effect.get("amount", 1))
+                if self.state.players[seat].life < amount:
+                    raise GameRuleError(
+                        "Cannot pay more life than the player has"
+                    )
+                self.state.players[seat].life -= amount
 
     def _pay_for_cost(
         self,
@@ -5400,6 +5433,8 @@ class CommanderEngine:
         seat: str | CardRecord,
         record: CardRecord | Mapping[str, Any],
         choices: Mapping[str, Any] | None = None,
+        *,
+        face: Mapping[str, Any] | None = None,
     ) -> bool:
         # Preserve the 0.2 internal probe signature used by downstream rules
         # tests while requiring a seat for contextual conditions in live play.
@@ -5408,15 +5443,25 @@ class CommanderEngine:
             record = seat
             seat = self.state.active_player or self.seats[0]
         choices = choices or {}
-        oracle = record.oracle_text.casefold()
+        oracle = str(
+            face.get("oracle_text") if face is not None else record.oracle_text
+        ).casefold()
+        display_name = str(
+            face.get("name") if face is not None else record.name
+        )
         if self._lands_enter_untapped_for(str(seat)):
             return False
         opponents = max(0, len(self.active_seats) - 1)
         if "enters tapped unless you have two or more opponents" in oracle:
             return opponents < 2
-        if "you may pay 2 life. if you don't, it enters tapped" in oracle:
+        optional_life = re.search(
+            r"you may pay (?P<life>\d+) life\. if you don't, it enters tapped",
+            oracle,
+        )
+        if optional_life:
+            amount = int(optional_life.group("life"))
             if choices.get("pay_life"):
-                if self.state.players[str(seat)].life < 2:
+                if self.state.players[str(seat)].life < amount:
                     raise GameRuleError("Cannot pay more life than the player has")
                 return False
             return True
@@ -5434,7 +5479,7 @@ class CommanderEngine:
             )
             if not required_types:
                 raise GameRuleError(
-                    f"{record.name} has an entry condition the rules engine "
+                    f"{display_name} has an entry condition the rules engine "
                     "has not compiled"
                 )
             return not any(
@@ -5450,9 +5495,40 @@ class CommanderEngine:
             return True
         if "enters tapped unless" in oracle:
             raise GameRuleError(
-                f"{record.name} has an entry condition the rules engine has not compiled"
+                f"{display_name} has an entry condition the rules engine has not compiled"
             )
         return False
+
+    @staticmethod
+    def _land_play_faces(record: CardRecord) -> list[dict[str, Any] | None]:
+        """Return the faces a player may choose for an ordinary land play."""
+
+        if record.layout == "modal_dfc" and record.faces:
+            return [
+                dict(face)
+                for face in record.faces
+                if "land" in str(face.get("type_line") or "").casefold()
+            ]
+        if record.faces:
+            front = dict(record.faces[0])
+            if "land" in str(front.get("type_line") or "").casefold():
+                return [front]
+            return []
+        return [None] if record.is_land else []
+
+    @staticmethod
+    def _land_entry_life_amount(
+        record: CardRecord,
+        face: Mapping[str, Any] | None = None,
+    ) -> int:
+        oracle = str(
+            face.get("oracle_text") if face is not None else record.oracle_text
+        ).casefold()
+        match = re.search(
+            r"you may pay (?P<life>\d+) life\. if you don't, it enters tapped",
+            oracle,
+        )
+        return int(match.group("life")) if match else 0
 
     def _play_land(self, seat: str, response: Mapping[str, Any]) -> None:
         self._check_priority(seat)
@@ -5468,7 +5544,29 @@ class CommanderEngine:
             owned_only=False,
         )
         record = self.card_record(card)
-        if not record or not record.is_land:
+        if not record:
+            raise GameRuleError(f"{card.printed_name} is not a land")
+        requested_face = str(response.get("face") or "")
+        legal_faces = self._land_play_faces(record)
+        face = next(
+            (
+                candidate
+                for candidate in legal_faces
+                if candidate is not None
+                and str(candidate.get("name") or "").casefold()
+                == requested_face.casefold()
+            ),
+            None,
+        )
+        if requested_face and face is None:
+            raise GameRuleError(
+                f"{requested_face!r} is not a playable land face of {record.name}"
+            )
+        if not requested_face:
+            if len(legal_faces) != 1:
+                raise GameRuleError("Choose which land face to play")
+            face = legal_faces[0]
+        if not legal_faces:
             raise GameRuleError(f"{card.printed_name} is not a land")
         if not self._compiled_land_play_permission(seat, card):
             raise GameRuleError(
@@ -5477,15 +5575,30 @@ class CommanderEngine:
             )
         if "enters_tapped" in response or "tapped" in response:
             raise GameRuleError("Land entry state is derived by the rules engine")
-        tapped = self._land_enters_tapped(seat, record, response)
+        tapped = self._land_enters_tapped(
+            seat,
+            record,
+            response,
+            face=face,
+        )
+        life_paid = (
+            self._land_entry_life_amount(record, face)
+            if response.get("pay_life")
+            else 0
+        )
         if response.get("pay_life"):
-            player.life -= 2
+            if life_paid <= 0:
+                raise GameRuleError(
+                    "This land play does not authorize an entry life payment"
+                )
+            player.life -= life_paid
         card.annotations.pop("temporary_play_permission", None)
         self.move_card(
             card.object_id,
             "battlefield",
             controller=seat,
             tapped=tapped,
+            enter_face=(str(face.get("name")) if face is not None else None),
             reason="land play",
             log=False,
             semantic_events=True,
@@ -5494,11 +5607,14 @@ class CommanderEngine:
         self._log(
             seat,
             "land.play",
-            f"{seat} played {card.ref} {card.printed_name}{' tapped' if tapped else ''}.",
+            f"{seat} played {card.ref} "
+            f"{str(face.get('name')) if face is not None else card.printed_name}"
+            f"{' tapped' if tapped else ''}.",
             {
                 "object": card.ref,
                 "tapped": tapped,
-                "life_paid": 2 if response.get("pay_life") else 0,
+                "life_paid": life_paid,
+                "face": str(face.get("name")) if face is not None else None,
             },
             importance=2,
             changed_objects=[card.object_id],
@@ -5516,6 +5632,10 @@ class CommanderEngine:
                     return dict(face)
             raise GameRuleError(f"{face_name!r} is not a face of {record.name}")
         return dict(record.faces[0])
+
+    @staticmethod
+    def _front_face(record: CardRecord) -> dict[str, Any] | None:
+        return dict(record.faces[0]) if record.faces else None
 
     @staticmethod
     def _trusted_generic_spell(record: CardRecord) -> bool:
@@ -6529,6 +6649,25 @@ class CommanderEngine:
                     "opponent's land could produce"
                 )
             return declared
+        legal_modes = self._mana_modes_for_ability(seat, source, ability)
+        declared = normalize_mana_bundle(response.get("mana_output"))
+        raw_choice = str(response.get("mana_choice") or "").upper()
+        if raw_choice in "WUBRGC" and len(raw_choice) == 1:
+            declared[raw_choice] += 1
+        if legal_modes:
+            if sum(declared.values()):
+                if not any(
+                    normalize_mana_bundle(mode.bundle) == declared
+                    for mode in legal_modes
+                ):
+                    raise GameRuleError(
+                        "Declared mana output is not a recognized Oracle mana mode"
+                    )
+                return declared
+            if len(legal_modes) == 1:
+                return normalize_mana_bundle(legal_modes[0].bundle)
+            raise GameRuleError("Choose which mana this ability produces")
+
         output_text = ability.effect_text.split(".", 1)[0]
         output, complex_symbols = mana_cost_to_vector(output_text)
         bundle = {color: int(output.get(color, 0)) for color in "WUBRGC"}
@@ -6555,6 +6694,67 @@ class CommanderEngine:
         if not any(normalize_mana_bundle(mode.bundle) == declared for mode in legal_modes):
             raise GameRuleError("Declared mana output is not a recognized Oracle mana mode")
         return declared
+
+    def _mana_modes_for_ability(
+        self,
+        seat: str,
+        source: CardInstance,
+        ability: ActivatedAbility,
+    ) -> tuple[ManaMode, ...]:
+        """Extract only the mana modes produced by one selected ability."""
+
+        record = self.card_record(source)
+        if record is None:
+            return ()
+        effect = ability.effect_text.casefold()
+        if (
+            "one mana of any color that a land an opponent controls "
+            "could produce"
+            in effect
+        ):
+            colors: set[str] = set()
+            for opponent in self.active_seats:
+                if opponent == seat:
+                    continue
+                for object_id in self.state.players[opponent].zones[
+                    "battlefield"
+                ]:
+                    land = self.state.cards[object_id]
+                    land_record = self.card_record(land)
+                    if (
+                        land.controller != opponent
+                        or land.phased_out
+                        or land_record is None
+                    ):
+                        continue
+                    for mode in extract_mana_modes(
+                        land_record,
+                        self._commander_identity(opponent),
+                    ):
+                        colors.update(
+                            color
+                            for color, amount in mode.bundle.items()
+                            if color in "WUBRG" and amount
+                        )
+            return tuple(
+                ManaMode(
+                    {
+                        **normalize_mana_bundle(None),
+                        color: 1,
+                    }
+                )
+                for color in sorted(colors)
+            )
+        ability_record = replace(
+            record,
+            oracle_text=f"{{T}}: {ability.effect_text}",
+            type_line="",
+            produced_mana=(),
+        )
+        return extract_mana_modes(
+            ability_record,
+            self._commander_identity(seat),
+        )
 
     @staticmethod
     def _fetch_land_types(effect_text: str) -> tuple[str, ...]:
@@ -6865,6 +7065,23 @@ class CommanderEngine:
             bundle = self._mana_output_for_ability(seat, source, ability, response)
             for color, amount in bundle.items():
                 self.state.players[seat].mana_pool[color] += amount
+            selected_mode = next(
+                (
+                    mode
+                    for mode in self._mana_modes_for_ability(
+                        seat,
+                        source,
+                        ability,
+                    )
+                    if normalize_mana_bundle(mode.bundle) == bundle
+                ),
+                None,
+            )
+            if selected_mode is not None:
+                self._apply_mana_mode_side_effects(
+                    seat,
+                    selected_mode.side_effects,
+                )
             compiled_restriction = self._compiled_mana_restriction(
                 ability.effect_text
             )
@@ -7565,13 +7782,19 @@ class CommanderEngine:
         record = self.card_record(card)
         if not record:
             return None
+        face = self._front_face(record)
+        mana_cost = (
+            str(face.get("mana_cost") or "")
+            if face is not None
+            else record.mana_cost
+        )
         commander_tax = (
             2 * self.state.players[seat].commander_casts.get(card.oracle_id, 0)
             if card.zone == "command" and card.is_commander
             else 0
         )
         try:
-            return parsed_cost(record.mana_cost, commander_tax)
+            return parsed_cost(mana_cost, commander_tax)
         except ManaPlanError:
             return None
 
@@ -7865,9 +8088,15 @@ class CommanderEngine:
         record = self.card_record(card)
         if record is None:
             return [], False
+        face = self._front_face(record)
+        mana_cost = (
+            str(face.get("mana_cost") or "")
+            if face is not None
+            else record.mana_cost
+        )
         variants = [self._mana_vector(None)]
         has_x = False
-        for symbol in parse_mana_symbols(record.mana_cost):
+        for symbol in parse_mana_symbols(mana_cost):
             if symbol.isdigit():
                 for variant in variants:
                     variant["GENERIC"] += int(symbol)
@@ -8539,7 +8768,13 @@ class CommanderEngine:
         unresolved_casts: list[dict[str, Any]] = []
         for oid in candidate_zones:
             record = self.card_record(oid)
-            if not record or record.is_land:
+            front_face = self._front_face(record) if record else None
+            front_type_line = (
+                str(front_face.get("type_line") or "")
+                if front_face is not None
+                else record.type_line if record else ""
+            )
+            if not record or "land" in front_type_line.casefold():
                 continue
             main_timing = (
                 seat == self.state.active_player
@@ -8549,7 +8784,11 @@ class CommanderEngine:
             program = self.semantics.get(
                 f"{record.oracle_id}:spell:front"
             )
-            timing_available = record.is_instant or record.has_flash or main_timing
+            timing_available = (
+                "instant" in front_type_line.casefold()
+                or record.has_flash
+                or main_timing
+            )
             if (
                 timing_available
                 and self.state.config.semantic_policy == "trusted_only"
@@ -8706,15 +8945,14 @@ class CommanderEngine:
                     ] = public_target_schema
                 castable.append(self.state.cards[oid].ref)
         lands: list[str] = []
+        land_options: list[tuple[str, dict[str, Any] | None]] = []
         if (
             seat == self.state.active_player
             and not self.state.stack
             and self._is_main_phase()
             and player.land_plays_remaining
         ):
-            lands = [
-                self.state.cards[oid].ref
-                for oid in [
+            for oid in [
                     *player.zones["hand"],
                     *[
                         object_id
@@ -8724,13 +8962,17 @@ class CommanderEngine:
                             zone_owner
                         ].zones[zone]
                     ],
-                ]
-                if (self.card_record(oid) and self.card_record(oid).is_land)
-                and self._compiled_land_play_permission(
+                ]:
+                card = self.state.cards[oid]
+                record = self.card_record(oid)
+                faces = self._land_play_faces(record) if record else []
+                if not faces or not self._compiled_land_play_permission(
                     seat,
-                    self.state.cards[oid],
-                )
-            ]
+                    card,
+                ):
+                    continue
+                lands.append(card.ref)
+                land_options.extend((card.ref, face) for face in faces)
         (
             abilities,
             mana_abilities,
@@ -8865,28 +9107,52 @@ class CommanderEngine:
             for ability in mana_abilities
             if target_available(ability)
         ]
-        actions: list[dict[str, Any]] = [{"id": "pass", "action": "pass"}]
-        for ref in lands:
+        actions: list[dict[str, Any]] = [
+            {"id": "pass", "action": "pass", "label": "Pass priority"}
+        ]
+        faces_per_land = {
+            ref: sum(1 for candidate_ref, _ in land_options if candidate_ref == ref)
+            for ref in lands
+        }
+        for ref, face in land_options:
             card = next(
                 value for value in self.state.cards.values() if value.ref == ref
             )
             record = self.card_record(card)
+            face_name = str(face.get("name") or "") if face else ""
+            display_name = face_name or (record.name if record else card.printed_name)
+            action_id = f"play-land:{ref}"
+            if faces_per_land.get(ref, 0) > 1:
+                face_index = next(
+                    index
+                    for index, candidate in enumerate(record.faces)
+                    if str(candidate.get("name") or "") == face_name
+                )
+                action_id += f":face-{face_index}"
             action = {
-                "id": f"play-land:{ref}",
+                "id": action_id,
                 "action": "play_land",
                 "kind": "play_land",
+                "label": f"Play {display_name}",
                 "card": ref,
                 "from": card.zone,
             }
-            if (
-                record
-                and "you may pay 2 life. if you don't, it enters tapped"
-                in record.oracle_text.casefold()
-            ):
+            if face_name:
+                action["face"] = face_name
+            life_amount = (
+                self._land_entry_life_amount(record, face)
+                if record
+                else 0
+            )
+            if life_amount:
                 action["choice_schema"] = {
                     "pay_life": {
                         "type": "boolean",
-                        "life": 2,
+                        "label": (
+                            f"Pay {life_amount} life to enter untapped"
+                        ),
+                        "default": False,
+                        "life": life_amount,
                         "effect": "enters untapped",
                     }
                 }
@@ -8896,6 +9162,17 @@ class CommanderEngine:
                 value for value in self.state.cards.values() if value.ref == ref
             )
             record = self.card_record(card)
+            face = self._front_face(record) if record else None
+            cast_name = (
+                str(face.get("name") or "")
+                if face is not None
+                else record.name if record else card.printed_name
+            )
+            cast_cost = (
+                str(face.get("mana_cost") or "")
+                if face is not None
+                else record.mana_cost if record else ""
+            )
             program = (
                 self.semantics.get(f"{record.oracle_id}:spell:front")
                 if record
@@ -8905,11 +9182,18 @@ class CommanderEngine:
                 "id": f"cast:{ref}",
                 "action": "cast",
                 "kind": "cast",
+                "label": (
+                    f"Cast {cast_name} — {cast_cost}"
+                    if cast_cost
+                    else f"Cast {cast_name}"
+                ),
                 "card": ref,
                 "from": card.zone,
-                "cost": record.mana_cost if record else "",
+                "cost": cast_cost,
                 "auto_pay": True,
             }
+            if face is not None:
+                action["face"] = cast_name
             if ref in cast_target_schemas:
                 action["target_schema"] = copy.deepcopy(
                     cast_target_schemas[ref]
@@ -8947,6 +9231,54 @@ class CommanderEngine:
                     }
                 },
             }
+            source = next(
+                value
+                for value in self.state.cards.values()
+                if value.ref == ability["s"]
+            )
+            selected_ability = next(
+                (
+                    candidate
+                    for candidate in self._activated_abilities(source)
+                    if candidate.ability_id == ability["a"]
+                ),
+                None,
+            )
+            if selected_ability is not None:
+                action["label"] = (
+                    f"{self.display_name(source.object_id)} — "
+                    f"{selected_ability.effect_text}"
+                )
+                if selected_ability.mana_ability:
+                    action["mana_ability"] = True
+                    mana_modes = self._mana_modes_for_ability(
+                        seat,
+                        source,
+                        selected_ability,
+                    )
+                    if len(mana_modes) > 1:
+                        action["choice_schema"] = {
+                            "mana_output": {
+                                "type": "mana_bundle",
+                                "label": "Mana to add",
+                                "options": [
+                                    {
+                                        "value": {
+                                            key: amount
+                                            for key, amount in mode.bundle.items()
+                                            if amount
+                                        },
+                                        "label": "Add "
+                                        + "".join(
+                                            f"{{{key}}}" * amount
+                                            for key, amount in mode.bundle.items()
+                                            if amount
+                                        ),
+                                    }
+                                    for mode in mana_modes
+                                ],
+                            }
+                        }
             if ability.get("search_types"):
                 action["choice_schema"] = {
                     "resolution_time": True,

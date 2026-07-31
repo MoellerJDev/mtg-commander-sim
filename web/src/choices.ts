@@ -23,6 +23,9 @@ function initialField(field: ChoiceField): JsonValue | undefined {
     return legal.length ? Boolean(legal[0]) : false;
   }
   if (control === "integer") return Number(field.minimum ?? 0);
+  if (control === "mana_modes") {
+    return structuredClone(record(list(field.options)[0]).value ?? {});
+  }
   if (control === "refs") {
     const options = list(field.options).map((option) => record(option).value ?? "");
     if (
@@ -168,6 +171,16 @@ function fieldErrors(field: ChoiceField, values: ChoiceValues): string[] {
   if (["text", "select", "ref"].includes(control)) {
     if (required && (value === undefined || value === null || value === "")) {
       errors.push(`${label} is required.`);
+    }
+  } else if (control === "mana_modes") {
+    const serialized = JSON.stringify(value ?? {});
+    const legal = new Set(
+      list(field.options).map((option) =>
+        JSON.stringify(record(option).value ?? {}),
+      ),
+    );
+    if (required && !legal.has(serialized)) {
+      errors.push(`${label} requires a legal mana choice.`);
     }
   } else if (control === "integer") {
     const number = Number(value);
