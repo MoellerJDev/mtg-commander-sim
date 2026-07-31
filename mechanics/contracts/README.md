@@ -49,6 +49,11 @@ triggers, and logical-incarnation guards. Complete trigger grammar, the
 two-part trigger-on-trigger ordering loop, modal and optional choices,
 state/player-loss/reflexive triggers, delayed-source provenance, and the full
 look-back exception matrix remain untrusted.
+CR 602 traces activated-ability parsing, availability, authoritative costs,
+stack placement, tap/untap summoning sickness, object-scoped once-per-turn
+history, and sorcery/instant timing. Complete cost and instruction grammar,
+CR 601.2b-i parity, transactional rollback, opponent-made activation choices,
+cost-altering effects, and acquired-ability provenance remain untrusted.
 
 Run `simctl rules sync` after changing a contract so its hash and status are
 overlaid into `mechanics/registry.json`, then run `simctl rules verify`.

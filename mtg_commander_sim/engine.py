@@ -5898,20 +5898,22 @@ class CommanderEngine:
             ref: self._target_snapshot(ref) for ref in validated_targets
         }
         builtin_context = self._fetch_context(seat, ability, response)
+        if (
+            (ability.tap_source or ability.untap_source)
+            and source.zone == "battlefield"
+            and self._is_summoning_sick(source)
+            and "Haste"
+            not in self._effective_card_data(source).get(
+                "keywords", []
+            )
+            and not self._may_activate_creature_as_haste(seat, source)
+        ):
+            raise GameRuleError(f"{source.ref} is summoning sick")
         if ability.tap_source:
             if source.zone != "battlefield":
                 raise GameRuleError("Tap costs require a battlefield permanent")
             if source.tapped:
                 raise GameRuleError(f"{source.ref} is tapped")
-            if (
-                self._is_summoning_sick(source)
-                and "Haste"
-                not in self._effective_card_data(source).get(
-                    "keywords", []
-                )
-                and not self._may_activate_creature_as_haste(seat, source)
-            ):
-                raise GameRuleError(f"{source.ref} is summoning sick")
             source.tapped = True
         if ability.untap_source:
             if source.zone != "battlefield" or not source.tapped:
@@ -5997,16 +5999,18 @@ class CommanderEngine:
             )
 
         if "only once each turn" in ability.effect_text.casefold():
-            activation_key = (
-                f"{source.object_id}:{ability.ability_id}:"
-                f"{self.state.turn_sequence}"
+            activations_once = dict(
+                source.annotations.get(
+                    "once_per_turn_activations",
+                    {},
+                )
             )
-            activations_once = self.state.players[seat].stats.setdefault(
-                "once_per_turn_activations",
-                [],
+            activations_once[ability.ability_id] = (
+                self.state.turn_sequence
             )
-            if activation_key not in activations_once:
-                activations_once.append(activation_key)
+            source.annotations[
+                "once_per_turn_activations"
+            ] = activations_once
 
         origin = source.zone
         if ability.discard_source:
@@ -6364,19 +6368,21 @@ class CommanderEngine:
                 return "unavailable", "tap_cost_wrong_zone"
             if card.tapped:
                 return "unavailable", "source_tapped"
-            if (
-                self._is_summoning_sick(card)
-                and "Haste"
-                not in self._effective_card_data(card).get("keywords", [])
-                and not self._may_activate_creature_as_haste(seat, card)
-            ):
-                return "unavailable", "summoning_sickness"
         if ability.untap_source and (
             zone != "battlefield"
             or not card.tapped
             or int(card.counters.get("stun", 0)) > 0
         ):
             return "unavailable", "untap_cost_unavailable"
+        if (
+            (ability.tap_source or ability.untap_source)
+            and zone == "battlefield"
+            and self._is_summoning_sick(card)
+            and "Haste"
+            not in self._effective_card_data(card).get("keywords", [])
+            and not self._may_activate_creature_as_haste(seat, card)
+        ):
+            return "unavailable", "summoning_sickness"
         if ability.discard_source and zone != "hand":
             return "unavailable", "discard_source_wrong_zone"
         if ability.sacrifice_source and zone != "battlefield":
@@ -6503,15 +6509,15 @@ class CommanderEngine:
         if "only once each turn" in effect:
             if source is None:
                 return "unresolved", "activation_source_required"
-            activation_key = (
-                f"{source.object_id}:{ability.ability_id}:"
-                f"{self.state.turn_sequence}"
-            )
-            if activation_key in set(
-                self.state.players[seat].stats.get(
+            activations_once = dict(
+                source.annotations.get(
                     "once_per_turn_activations",
-                    [],
+                    {},
                 )
+            )
+            if (
+                activations_once.get(ability.ability_id)
+                == self.state.turn_sequence
             ):
                 return "unavailable", "already_activated_this_turn"
         if "activate only if" not in effect:

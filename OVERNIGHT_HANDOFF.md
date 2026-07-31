@@ -156,6 +156,14 @@ maximum-counter foundation. It now:
   exact-incarnation delayed effects, while leaving complete grammar,
   trigger-on-trigger APNAP ordering, state/reflexive triggers, delayed-source
   provenance, and the look-back exception matrix explicitly blocked;
+- source-reviews all 20 CR 602 activation records, applies summoning sickness
+  to untap-symbol as well as tap-symbol costs, and moves once-per-turn
+  activation history from the player to the object so it survives control
+  changes;
+- verifies activated-only classification and sorcery/instant timing while
+  leaving full cost/instruction grammar, transactional rollback, opponent
+  choices, cost-altering effects, and acquired-ability provenance explicitly
+  blocked;
 - keeps inventory-only cases separate from executable semantic passes.
 
 The prior permanent snapshot behavior remains: toughness, lethal/deathtouch,
@@ -186,15 +194,15 @@ events also remain blockers.
   `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
 - Indexed rules: 3,300
 - Conformance cases: 3,300
-- Inventory-only cases: 3,042
-- Reviewed blocked cases: 184
-- Reviewed definition-only cases: 40
-- Executable semantic passes: 34
+- Inventory-only cases: 3,022
+- Reviewed blocked cases: 196
+- Reviewed definition-only cases: 43
+- Executable semantic passes: 39
 - Indexed sections: 156
 - Glossary entries: 733
 - Discovered mechanics: 425
-- Partial/untrusted mechanic contracts: 23
-- Unclassified mechanics: 402
+- Partial/untrusted mechanic contracts: 24
+- Unclassified mechanics: 401
 - Trusted mechanics in the new corpus registry: 0
 - `current_snapshot_complete`: false
 - Full Oracle snapshot: 2,957 exact; 15,691 partial; 19,725 unresolved;
@@ -206,8 +214,8 @@ events also remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 3,762 passed
-- Noninventory unit/integration tests: 462 passed
+- Unit/integration tests: 3,767 passed
+- Noninventory unit/integration tests: 467 passed
 - Generated per-rule inventory/source-linkage tests: 3,300 passed
 - Focused object identity/token lifecycle tests: 15 passed
 - Focused copy-object lifecycle tests: 8 passed
@@ -222,6 +230,7 @@ events also remain blockers.
 - Focused CR 605 mana-ability tests: 6 passed
 - Focused CR 604 static-ability tests: 3 passed
 - Focused CR 603 triggered-ability tests: 3 passed
+- Focused CR 602 activating-ability tests: 5 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
 - Seed-20260730 hidden-information audit: pass
@@ -241,7 +250,7 @@ events also remain blockers.
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `80021a3d5c30a15a849514c1da78e208638819f59427111bf6c227818e021fa8`
+  `88adb17bba620338a46f657ad6453c8300e9cfa641ee67cf835b7fcefb3d8f0b`
 
 ## Deck-review evidence state
 

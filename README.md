@@ -162,6 +162,10 @@ generated documentation fixtures with bearer capabilities redacted. See
   controller-at-trigger-time, intervening-condition, and delayed-object-
   incarnation invariants; complete trigger grammar, two-part APNAP ordering,
   state/reflexive triggers, and the look-back exception matrix remain blocked
+- source-reviewed CR 602 activation handling with corrected untap-symbol
+  summoning sickness and object-scoped once-per-turn restrictions; full cost
+  grammar, activation transactions, opponent choices, and acquired-ability
+  provenance remain blocked
 - trust-aware semantic preflight for files and live Moxfield URLs
 - compact cast, land, activation, target, and generic resolution-time search
   templates

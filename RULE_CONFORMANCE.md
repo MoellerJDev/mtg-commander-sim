@@ -101,11 +101,12 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 258 cases in CR 120, CR 210, CR 310, CR 603, CR 604, CR 605, CR 606,
-CR 607, CR 608, CR 609, CR 614, CR 615, and CR 616 are source-reviewed: 34
-narrow behavioral rules pass with generic executable evidence, 184 are
-blocked with exact missing dependencies, and 40 are definition-only with
-contract traceability. The remaining 3,042 cases are unreviewed and
+All 278 cases in CR 120, CR 210, CR 310, CR 602, CR 603, CR 604, CR 605,
+CR 606, CR 607, CR 608, CR 609, CR 614, CR 615, and CR 616 are
+source-reviewed: 39 narrow behavioral rules pass with generic executable
+evidence, 196 are blocked with exact missing dependencies, and 43 are
+definition-only with contract traceability. The remaining 3,022 cases are
+unreviewed and
 inventory-only.
 
 The passing CR 310 rules are battlefield defense (310.4c), Battle damage
@@ -162,4 +163,11 @@ effects. Complete trigger syntax and event coverage, trigger-on-trigger APNAP
 ordering, modes and choices, zone-change finding, delayed provenance, state
 and player-loss triggers, the full look-back list, linked middle-sentence
 triggers, and reflexive triggers remain blocked.
+CR 602 adds passing activated-only classification, creature tap/untap
+summoning-sickness and haste behavior, object-scoped once-per-turn history
+that survives control changes, and sorcery/instant activation timing. Complete
+cost and instruction grammar, transactional illegal-action rollback, CR
+601.2b-i parity, hidden-zone reveal behavior, opponent-made choices,
+prospective cost-altering effects, universal prohibitions, and acquired-
+ability provenance remain blocked.
 Snapshot completeness remains false.

@@ -1,6 +1,12 @@
 {
-  "contract_count": 23,
+  "contract_count": 24,
   "contracts": [
+    {
+      "mechanic_id": "cr-602-activating-activated-abilities",
+      "path": "mechanics/contracts/activating-activated-abilities.json",
+      "sha256": "8089269fe906ed542e98649171867d8c7f8d16240fcc0861f93dcd616dd0a5b8",
+      "version": 1
+    },
     {
       "mechanic_id": "cr-122-counters",
       "path": "mechanics/contracts/basic-counters.json",
@@ -6232,17 +6238,39 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/activating-activated-abilities.json",
+      "contract_sha256": "8089269fe906ed542e98649171867d8c7f8d16240fcc0861f93dcd616dd0a5b8",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "abilities.parse_activated_abilities plus CommanderEngine activation availability, cost-payment, and stack paths",
+      "implementation_version": "activated-ability-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "the Oracle parser recognizes selected cost and activation-instruction grammars rather than every activated ability",
+        "full CR 601.2b-i announcement, mode, target, division, cost-modification, mana, and rollback behavior is not shared universally",
+        "hidden-zone reveal timing and public record behavior are incomplete",
+        "opponent-made activation modes, targets, and simultaneous choices are absent",
+        "cost-altering activated abilities do not use a generic prospective-cost effect model",
+        "continuous prohibitions and activation instructions outside selected text predicates are incomplete",
+        "acquired-ability provenance does not distinguish identically worded restricted abilities",
+        "illegal activation rollback is not represented as a universal transaction"
+      ],
       "mechanic_id": "cr-602-activating-activated-abilities",
       "official_name": "Activating Activated Abilities",
       "rule_references": [
         "602"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_602_rule",
+        "test_only_colon_form_activated_abilities_are_parsed",
+        "test_untap_symbol_obeys_summoning_sickness_and_haste",
+        "test_once_per_turn_restriction_survives_control_change",
+        "test_sorcery_and_instant_activation_instructions_use_right_timing",
+        "test_zimone_cost_selection_is_validated_and_paid_by_kernel",
+        "test_channel_is_exposed_from_hand_and_pays_authoritative_discounted_cost",
+        "test_divining_top_payability_and_tap_availability"
+      ],
       "trust_level": "untrusted"
     },
     {
