@@ -616,6 +616,20 @@ class ServerApplicationTests(unittest.TestCase):
             database.close()
         self.assertTrue(replay["ok"])
 
+    def test_stale_game_websocket_stops_reconnecting_with_terminal_message(self):
+        game_id, _, _ = self.create_ready_game()
+        outsider, _ = self.guest("Stale game tab")
+        self.client.cookies.set(COOKIE_NAME, outsider)
+
+        with self.client.websocket_connect(
+            f"/api/v1/games/{game_id}/stream"
+        ) as websocket:
+            message = websocket.receive_json()
+
+        self.assertEqual("terminal", message["type"])
+        self.assertEqual("game_access_lost", message["code"])
+        self.assertIn("Return to the lobby", message["message"])
+
     def test_server_restart_recovers_decision_idempotency_and_replay(self):
         game_id, tokens, _ = self.create_ready_game()
         response = self.client.get(

@@ -92,6 +92,12 @@ actions. Drag a playable land or spell onto your battlefield for the fast path.
 If the destination is ambiguous, such as a modal double-faced spell/land, the
 browser asks which server-issued action to execute.
 
+The active player explicitly advances both main phases. With an empty stack,
+the pass control is labeled **Continue to combat** during precombat main and
+**End turn** during postcombat main. The server may still auto-skip a
+nonactive response window only after its legal-action generator verifies that
+the seat has no meaningful response.
+
 Casting defaults to **Auto-mana**, which asks the authoritative engine to use a
 valid routine payment. Select **Manual mana** to highlight untapped permanents
 with currently legal mana abilities. Click those sources in the desired
@@ -109,6 +115,18 @@ Dropping, selecting, or activating never bypasses timing, priority, cost,
 target, semantic, or fidelity checks: every gesture resolves to the same
 capability-scoped action ID as the action tray. The client contains no parallel
 legality rules.
+
+Browser games use the strict `trusted_only` semantic policy. A material card
+interaction without a trusted program pauses the durable game and surfaces the
+rules boundary to the table; it is never routed to a hidden browser-inaccessible
+arbiter prompt. Sunscorched Desert's targeted ETB damage and Orcish Bowmasters'
+resolution, targeted damage, opponent extra-draw trigger, and Amass Orcs path
+are reviewed examples of the generic semantic executor.
+
+If a tab loses game access after a room replacement or local server reset, the
+WebSocket sends one terminal `game_access_lost` message. The tab stops
+reconnecting and offers **Return to lobby**, preventing the former repeated
+403 loop.
 
 While the server performs its startup card-data check, existing room pages
 back off polling from 750 ms to at most once every five seconds and resume

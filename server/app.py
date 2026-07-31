@@ -212,24 +212,27 @@ class _StoreGamePersistence(GamePersistence):
 class ProjectionHub:
     def __init__(self) -> None:
         self._versions: dict[str, int] = {}
-        self._conditions: dict[str, asyncio.Condition] = {}
+        self._events: dict[str, asyncio.Event] = {}
 
     def version(self, game_id: str) -> int:
         return self._versions.get(game_id, 0)
 
     async def notify(self, game_id: str) -> None:
-        condition = self._conditions.setdefault(game_id, asyncio.Condition())
-        async with condition:
-            self._versions[game_id] = self.version(game_id) + 1
-            condition.notify_all()
+        self._versions[game_id] = self.version(game_id) + 1
+        event = self._events.pop(game_id, None)
+        if event is not None:
+            event.set()
 
     async def wait(self, game_id: str, after: int, timeout: float = 15) -> int:
-        condition = self._conditions.setdefault(game_id, asyncio.Condition())
-        async with condition:
-            await asyncio.wait_for(
-                condition.wait_for(lambda: self.version(game_id) > after),
-                timeout=timeout,
-            )
+        if self.version(game_id) > after:
+            return self.version(game_id)
+        event = self._events.setdefault(game_id, asyncio.Event())
+        # No await occurs between the version check and event registration, so
+        # notify() cannot race past this waiter on the event loop. Event waits
+        # also cancel cleanly when a WebSocket disconnects; Condition.wait()
+        # under wait_for() could fail while reacquiring its lock on Python 3.11.
+        if self.version(game_id) <= after:
+            await asyncio.wait_for(event.wait(), timeout=timeout)
         return self.version(game_id)
 
 
@@ -880,6 +883,8 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
                     seed=seed,
                     profile=profile,
                     review_profile="commander_review",
+                    semantic_policy="trusted_only",
+                    manual_active_main_phase=True,
                 ),
             )
             service = GameService(session, idempotency=runtime.idempotency)
@@ -1063,7 +1068,22 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
             _, seat = runtime.store.game_access(game_id, guest["guest_id"])
             actor = await runtime.actor(game_id)
         except (StoreForbidden, StoreNotFound, KeyError, ValueError):
-            await websocket.close(code=1008, reason="Unauthorized")
+            # Accept once so browser clients receive a terminal protocol
+            # message. Rejecting the HTTP upgrade as 403 gives JavaScript no
+            # useful status and previously caused an endless reconnect loop
+            # for stale game tabs after a local server reset.
+            await websocket.accept(subprotocol=selected_protocol)
+            await websocket.send_json(
+                {
+                    "type": "terminal",
+                    "code": "game_access_lost",
+                    "message": (
+                        "This browser tab no longer has access to that game. "
+                        "Return to the lobby and open the current room."
+                    ),
+                }
+            )
+            await websocket.close(code=4401, reason="Game access lost")
             return
         principal = f"pilot:{seat}"
         cursor_key = f"network:{principal}:{uuid.uuid4().hex}"
@@ -1094,6 +1114,7 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
                     )
                     if receive_task in done:
                         hub_task.cancel()
+                        await asyncio.gather(hub_task, return_exceptions=True)
                         message = receive_task.result()
                         if message["type"] == "websocket.disconnect":
                             return
@@ -1121,9 +1142,19 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         except WebSocketDisconnect:
             return
         finally:
-            for task in (locals().get("receive_task"), locals().get("hub_task")):
-                if isinstance(task, asyncio.Task) and not task.done():
+            tasks = [
+                task
+                for task in (
+                    locals().get("receive_task"),
+                    locals().get("hub_task"),
+                )
+                if isinstance(task, asyncio.Task)
+            ]
+            for task in tasks:
+                if not task.done():
                     task.cancel()
+            if tasks:
+                await asyncio.gather(*tasks, return_exceptions=True)
             await actor.drop_projection_cursor(cursor_key)
 
     index_path = resolved.static_dir / "index.html"

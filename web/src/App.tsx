@@ -59,6 +59,7 @@ function CardTile({
   actions = [],
   onIntent,
   onInspect,
+  onDragCard,
   manualMana = false,
   selected = false,
 }: {
@@ -68,6 +69,7 @@ function CardTile({
   actions?: LegalAction[];
   onIntent?: (actions: LegalAction[], card: JsonValue) => void;
   onInspect?: (card: JsonValue) => void;
+  onDragCard?: (cardRef: string | null) => void;
   manualMana?: boolean;
   selected?: boolean;
 }) {
@@ -112,12 +114,17 @@ function CardTile({
       onKeyDown={keydown}
       onMouseEnter={() => onInspect?.(value)}
       onFocus={() => onInspect?.(value)}
+      onPointerDown={(event) => {
+        if (canDrag && event.button === 0) onDragCard?.(ref);
+      }}
       onDragStart={(event) => {
-        if (!interactive) return;
+        if (!canDrag) return;
+        onDragCard?.(ref);
         event.dataTransfer.effectAllowed = "move";
         event.dataTransfer.setData("application/x-commander-card", ref);
         event.dataTransfer.setData("text/plain", ref);
       }}
+      onDragEnd={() => window.setTimeout(() => onDragCard?.(null), 0)}
     >
       {showImage && (
         <img
@@ -746,6 +753,8 @@ function PlayerBoard({
   onOpenZone,
   dropEnabled,
   onCardDrop,
+  onCardDrag,
+  getDraggedCard,
 }: {
   seat: string;
   player: Record<string, JsonValue>;
@@ -762,6 +771,8 @@ function PlayerBoard({
   onOpenZone: (seat: string, zone: "gy" | "ex") => void;
   dropEnabled: boolean;
   onCardDrop: (cardRef: string) => void;
+  onCardDrag: (cardRef: string | null) => void;
+  getDraggedCard: () => string;
 }) {
   const [dragActive, setDragActive] = useState(false);
   const battlefield = asList(player.bf);
@@ -786,7 +797,7 @@ function PlayerBoard({
         const actions = mine
           ? cardActions.filter((action) => String(action.card ?? action.source ?? "") === ref)
           : [];
-        return <CardTile key={ref || index} value={card} view={view} compact actions={actions} onIntent={onCardIntent} onInspect={onInspectCard} selected={selectedCardRef === ref} />;
+        return <CardTile key={ref || index} value={card} view={view} compact actions={actions} onIntent={onCardIntent} onInspect={onInspectCard} onDragCard={onCardDrag} selected={selectedCardRef === ref} />;
       }) : <em>Empty</em>}</div>
       <div className="zone-label">BATTLEFIELD</div>
       <div
@@ -810,7 +821,12 @@ function PlayerBoard({
           if (!mine || !dropEnabled) return;
           event.preventDefault();
           setDragActive(false);
-          const ref = event.dataTransfer.getData("application/x-commander-card") || event.dataTransfer.getData("text/plain");
+          const ref = event.dataTransfer.getData("application/x-commander-card") || event.dataTransfer.getData("text/plain") || getDraggedCard();
+          if (ref) onCardDrop(ref);
+        }}
+        onPointerUp={(event) => {
+          if (!mine || !dropEnabled || event.button !== 0) return;
+          const ref = getDraggedCard();
           if (ref) onCardDrop(ref);
         }}
       >
@@ -900,7 +916,7 @@ function SetupScreen({ initial, onReady }: { initial: SystemStatus; onReady: () 
   );
 }
 
-function GameView({ gameId }: { gameId: string }) {
+function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   const [view, setView] = useState<ProjectedView | null>(null);
   const viewRef = useRef<ProjectedView | null>(null);
   const ingestChain = useRef(Promise.resolve());
@@ -927,10 +943,21 @@ function GameView({ gameId }: { gameId: string }) {
   const actionPickerRef = useRef<HTMLElement | null>(null);
   const zoneDialogRef = useRef<HTMLElement | null>(null);
   const previewDialogRef = useRef<HTMLElement | null>(null);
+  const draggedCardRef = useRef("");
+  const lastDroppedCardRef = useRef("");
+
+  useEffect(() => {
+    const clearReleasedCard = () => {
+      window.setTimeout(() => { draggedCardRef.current = ""; }, 0);
+    };
+    window.addEventListener("pointerup", clearReleasedCard);
+    return () => window.removeEventListener("pointerup", clearReleasedCard);
+  }, []);
 
   useEffect(() => {
     let stopped = false;
     let socket: WebSocket | null = null;
+    let terminal = false;
     let retry = 250;
     let timer = 0;
     function connect() {
@@ -947,7 +974,15 @@ function GameView({ gameId }: { gameId: string }) {
           type: string;
           packet?: DecisionPacket;
           game?: GameLifecycle;
+          message?: string;
         };
+        if (message.type === "terminal") {
+          terminal = true;
+          setConnection("STOPPED");
+          setNotice(message.message ?? "This game connection is no longer available.");
+          socket?.close();
+          return;
+        }
         if (message.game) setLifecycle(message.game);
         if (message.type !== "projection" || !message.packet) return;
         ingestChain.current = ingestChain.current
@@ -962,7 +997,7 @@ function GameView({ gameId }: { gameId: string }) {
           });
       };
       socket.onclose = () => {
-        if (stopped) return;
+        if (stopped || terminal) return;
         setConnection("RECONNECTING");
         setReconnectAttempts((value) => value + 1);
         timer = window.setTimeout(connect, retry);
@@ -1126,6 +1161,23 @@ function GameView({ gameId }: { gameId: string }) {
     setActionChoices([]);
   }
 
+  function handleCardDrop(ref: string) {
+    if (lastDroppedCardRef.current === ref) return;
+    lastDroppedCardRef.current = ref;
+    window.setTimeout(() => {
+      if (lastDroppedCardRef.current === ref) lastDroppedCardRef.current = "";
+    }, 250);
+    draggedCardRef.current = "";
+    const actions = actionsForCard(ref).filter((action) =>
+      ["play_land", "cast"].includes(action.action),
+    );
+    if (!actions.length) {
+      setNotice("That card is no longer playable in the current decision window.");
+      return;
+    }
+    chooseCardAction(actions);
+  }
+
   function submitChoice(event: FormEvent) {
     event.preventDefault();
     if (!selectedAction) return;
@@ -1174,6 +1226,17 @@ function GameView({ gameId }: { gameId: string }) {
   );
   const activeSeat = String(turn.active ?? "");
   const prioritySeat = String(turn.priority ?? "");
+  const visibleActionLabel = (action: LegalAction) => {
+    if (
+      action.action === "pass"
+      && activeSeat === ownSeat
+      && stack.length === 0
+    ) {
+      if (String(turn.phase ?? "") === "precombat_main") return "Continue to combat";
+      if (String(turn.phase ?? "") === "postcombat_main") return "End turn";
+    }
+    return action.label ?? action.kind ?? action.action;
+  };
   const selectedCardRef = String(asRecord(cardContext ?? undefined).id ?? "");
   const contextualActions = selectedCardRef ? actionsForCard(selectedCardRef) : [];
   const zonePlayer = zoneBrowser ? asRecord(players[zoneBrowser.seat]) : {};
@@ -1186,7 +1249,8 @@ function GameView({ gameId }: { gameId: string }) {
         <div className="connection-group">
           <span className={`connection ${connection.toLowerCase()}`} />
           <span>{connection}</span>
-          {connection !== "LIVE" && <button type="button" className="link-button" onClick={() => setReconnectNonce((value) => value + 1)}>Retry now</button>}
+          {connection !== "LIVE" && connection !== "STOPPED" && <button type="button" className="link-button" onClick={() => setReconnectNonce((value) => value + 1)}>Retry now</button>}
+          {connection === "STOPPED" && <button type="button" className="link-button" onClick={onExit}>Return to lobby</button>}
         </div>
         <div className="game-identity"><small>{lifecycle?.format_profile === "commander_duel" ? "COMMANDER DUEL" : "COMMANDER POD"}</small><strong>{String(game.id ?? gameId).slice(0, 8)}</strong></div>
         <div className="game-status-line">
@@ -1198,7 +1262,7 @@ function GameView({ gameId }: { gameId: string }) {
       </header>
       {connection !== "LIVE" && (
         <div className="connection-banner" role="status">
-          <div><strong>Restoring your seat projection</strong><span>No actions are sent while the live table connection is unavailable.</span></div>
+          <div><strong>{connection === "STOPPED" ? "This game tab is stale" : "Restoring your seat projection"}</strong><span>{connection === "STOPPED" ? "Return to the lobby instead of repeatedly reconnecting to an inaccessible game." : "No actions are sent while the live table connection is unavailable."}</span></div>
           <span>Attempt {Math.max(1, reconnectAttempts)}</span>
         </div>
       )}
@@ -1279,7 +1343,9 @@ function GameView({ gameId }: { gameId: string }) {
                 setZoneBrowser({ seat: nextSeat, zone });
               }}
               dropEnabled={dropEnabled}
-              onCardDrop={(ref) => chooseCardAction(actionsForCard(ref).filter((action) => ["play_land", "cast"].includes(action.action)))}
+              onCardDrop={handleCardDrop}
+              onCardDrag={(ref) => { draggedCardRef.current = ref ?? ""; }}
+              getDraggedCard={() => draggedCardRef.current}
             />
           ))}
         </section>
@@ -1322,7 +1388,7 @@ function GameView({ gameId }: { gameId: string }) {
         <div className="hand-cards" data-testid="own-hand">
           {hand.map((card, index) => {
             const ref = String(asRecord(card).id ?? "");
-            return <CardTile key={ref || index} value={card} view={view} actions={actionsForCard(ref)} onIntent={selectCardActions} onInspect={setInspectedCard} selected={selectedCardRef === ref} />;
+            return <CardTile key={ref || index} value={card} view={view} actions={actionsForCard(ref)} onIntent={selectCardActions} onInspect={setInspectedCard} onDragCard={(nextRef) => { draggedCardRef.current = nextRef ?? ""; }} selected={selectedCardRef === ref} />;
           })}
         </div>
       </section>
@@ -1350,7 +1416,7 @@ function GameView({ gameId }: { gameId: string }) {
               )}
               <div className="action-row">
                 {displayActions.map((action) => (
-                  <button className={`action-button ${actionTone(action)}`} key={action.id} data-testid={`action-${action.id}`} disabled={submitting || Boolean(pendingRetry) || connection !== "LIVE" || lifecycle?.status !== "active"} onClick={() => chooseAction(action)}>{action.action === "cast" && !manualMana ? `Auto-mana · ${action.label ?? "Cast"}` : action.label ?? action.kind ?? action.action}</button>
+                  <button className={`action-button ${actionTone(action)}`} key={action.id} data-testid={`action-${action.id}`} disabled={submitting || Boolean(pendingRetry) || connection !== "LIVE" || lifecycle?.status !== "active"} onClick={() => chooseAction(action)}>{action.action === "cast" && !manualMana ? `Auto-mana · ${action.label ?? "Cast"}` : visibleActionLabel(action)}</button>
                 ))}
               </div>
             </div>
@@ -1559,6 +1625,12 @@ export default function App() {
   if (!guest) return null;
   if (screen === "lobby") return <Lobby guest={guest} system={system} onRoom={enterRoom} />;
   if (screen === "room" && room) return <RoomView key={room.room_id} guest={guest} initial={room} invite={invite} onGame={enterGame} onRoom={enterRoom} onLeave={leaveRoomScreen} />;
-  if (screen === "game" && gameId) return <GameView gameId={gameId} />;
+  if (screen === "game" && gameId) return <GameView gameId={gameId} onExit={() => {
+    sessionStorage.removeItem("commander-room");
+    setRoom(null);
+    setGameId("");
+    setScreen("loading");
+    setBootNonce((value) => value + 1);
+  }} />;
   return null;
 }

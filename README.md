@@ -20,6 +20,7 @@ The browser renders the engine's current generic choice vocabulary, locally
   cached card art, a persistent hover/focus card viewer, browsable public zones,
   card-specific play/cast/activate controls, drag-to-play interaction, optional
   manual mana-source activation, reconnect and exact-command retry states,
+  explicit active-player main-phase advancement,
   owner-only durable stop/resume controls, and a seat-safe record inspection
   panel. These paths are
 end-to-end tested with four shared-cookie tab-isolated seats and a two-player
@@ -125,6 +126,12 @@ Agadeem, the Undercrypt**. The land action asks whether to pay exactly 3 life,
 then enters and renders using the chosen land face. Client labels and drag
 gestures never create legality; they invoke the same server-issued action IDs
 as the ordinary action tray.
+
+Browser games never auto-skip the active player's own main phase. With the
+stack empty, the ordinary pass action reads **Continue to combat** in
+precombat main and **End turn** in postcombat main. Pass-only response windows
+for nonactive players can still be suppressed when the engine verifies that no
+meaningful response exists.
 
 For offline development with an existing database:
 
@@ -490,6 +497,11 @@ material spell or ability is unsupported. A development-only `arbiter` adapter
 can characterize a narrowly scoped resolution and register a reusable semantic
 program, but that path is not production legality or release evidence. Player
 clients cannot submit arbitrary effects.
+
+When a trusted-only browser game reaches an unsupported material resolution,
+the durable lifecycle changes to `paused` and the UI reports the rules
+boundary. It does not strand the players behind an arbiter-only decision or
+describe that state as repeated priority passing.
 
 That boundary is safer and more auditable than silently guessing at card text, while allowing semantic coverage to grow from cards actually encountered in simulations.
 

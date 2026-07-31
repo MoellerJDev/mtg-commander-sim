@@ -238,6 +238,20 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
   const host = await context.newPage();
   const opponent = await context.newPage();
   try {
+    await host.route(
+      /\/api\/v1\/rooms(?:\/[^/]+\/replace)?$/,
+      async (route) => {
+        const request = route.request();
+        const payload = request.postDataJSON() as Record<string, unknown>;
+        await route.continue({
+          postData: JSON.stringify({ ...payload, seed: 2 }),
+          headers: {
+            ...request.headers(),
+            "content-type": "application/json",
+          },
+        });
+      },
+    );
     await enter(host, "Duel host");
     await enter(opponent, "Duel opponent");
     await host.getByTestId("room-size").selectOption("2");
@@ -287,6 +301,20 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
     await expect(opponent.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
     await expect(host.locator(".player-board")).toHaveCount(2);
     await expect(opponent.locator(".player-board")).toHaveCount(2);
+
+    await submitImmediateAction(host, "keep");
+    await submitImmediateAction(opponent, "keep");
+    const swamp = host
+      .getByTestId("own-hand")
+      .locator(".hand-card")
+      .filter({ has: host.locator(".card-copy strong", { hasText: "Swamp" }) });
+    await expect(swamp).toHaveCount(1);
+    await expect(swamp).toHaveAttribute("draggable", "true");
+    const beforeDrop = await viewRevision(host);
+    await swamp.dragTo(host.getByTestId("own-battlefield"));
+    await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeDrop);
+    await expect(host.getByTestId("own-battlefield")).toContainText("Swamp");
+    await expect(host.getByTestId("own-hand").locator(".hand-card")).toHaveCount(6);
   } finally {
     await context.close();
   }

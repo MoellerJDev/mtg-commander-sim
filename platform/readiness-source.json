@@ -264,7 +264,7 @@
       "id": "browser_commander_mvp",
       "name": "Browser Commander MVP",
       "status": "development_local_runtime_hardened",
-      "evidence": "The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, shared-cookie tab-isolation and two/four-player Chromium coverage, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, card-scoped click/drag actions and optional manual mana activation, exact command retry, and one-command managed Scryfall/browser startup. Future schemas, full accounts, expiry/rate limits, and production deployment remain open."
+      "evidence": "The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, shared-cookie tab-isolation and two/four-player Chromium coverage, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, Chromium-verified card-scoped click/drag actions, optional manual mana activation, explicit active-player main-phase advancement, terminal stale-game recovery, exact command retry, and one-command managed Scryfall/browser startup. Future schemas, full accounts, expiry/rate limits, and production deployment remain open."
     },
     {
       "id": "rules_snapshot",
@@ -285,7 +285,7 @@
     "single_writer_game_actor": "implemented_single_process",
     "durable_database": "implemented_sqlite_control_plane_plus_game_record_v3",
     "http_websocket_server": "implemented_single_process_managed_data_static_browser_restart_and_lifecycle_recovery",
-    "browser_client": "implemented_card_inspector_public_zone_browser_card_scoped_click_drag_manual_mana_current_choice_forms_local_art_reconnect_and_exact_retry",
+    "browser_client": "implemented_card_inspector_public_zone_browser_card_scoped_click_drag_manual_mana_explicit_main_phase_current_choice_forms_local_art_terminal_stale_game_recovery_and_exact_retry",
     "guest_or_account_identity": "implemented_expiring_per_tab_guest_sessions",
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_and_replace",
     "replay": "implemented_command_replay",
@@ -324,5 +324,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Complete the current two/four-seat manual browser test against the live July 31 Scryfall snapshot, fix reported UI/runtime defects, then run the exact merge gate for the focused branch."
+  "next_task": "Continue the current two/four-seat manual browser test against the live July 31 Scryfall snapshot after the Sunscorched Desert, Orcish Bowmasters, explicit-main-phase, drag/drop, and stale-WebSocket regressions pass the exact merge gate."
 }

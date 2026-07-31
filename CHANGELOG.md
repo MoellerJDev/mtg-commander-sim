@@ -13,6 +13,9 @@
 - Changed playable card clicks into selection with object-scoped actions while
   keeping drag-to-battlefield and manual mana-source activation as fast paths;
   the action tray remains a complete fallback over the same server-issued IDs.
+- Made drag-to-battlefield work through both native drag data and a pointer
+  fallback, with a Chromium two-browser test that proves the exact card leaves
+  hand and enters the battlefield rather than merely looking draggable.
 - Added Arena-style card interaction: legal hand/command cards now show their
   specific play or cast action, can be clicked or dragged to the battlefield,
   and offer an explicit Auto-mana confirmation instead of an unlabeled generic
@@ -28,6 +31,14 @@
   **Play Agadeem, the Undercrypt**, prompts for the land face's exact 3-life
   entry choice, enters on that face, and renders the matching characteristics
   and image instead of being silently returned to hand.
+- Browser games now require the active player to explicitly leave precombat
+  and postcombat main. The same pass action is labeled **Continue to combat**
+  or **End turn**; empty nonactive response windows remain safely automatic.
+- Added reviewed Sunscorched Desert and Orcish Bowmasters semantics, including
+  targeted ETB damage, permanent-spell resolution, opponent extra-draw
+  triggers, and generic Amass Orcs execution. Unsupported trusted-only
+  resolution now pauses the visible game lifecycle instead of leaving clients
+  on an inaccessible arbiter task.
 - Reduced normal local startup to `python -m server`: the launcher installs
   missing browser dependencies, rebuilds changed React sources, serves the
   production client and API from one origin, and opens the local UI.
@@ -61,6 +72,9 @@
 - Fixed production WebSocket origin validation so the one-command UI's exact
   same origin is accepted without a Vite-only allowlist override; unrelated
   origins remain rejected.
+- Replaced opaque stale-game WebSocket 403 reconnect loops with one terminal
+  seat-safe message and a **Return to lobby** path, and made disconnect wakeups
+  cancellation-safe on Python 3.11.
 - Extended application and Chromium coverage for managed data, archive/snapshot
   cleanup, record-pinned recovery, local static serving, 390-pixel layout,
   focus restoration, and byte-equivalent idempotent command retry.

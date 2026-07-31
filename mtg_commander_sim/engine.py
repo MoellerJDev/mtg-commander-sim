@@ -584,6 +584,12 @@ class CommanderEngine:
             else []
         ) + [
             str(value).strip()
+            for value in card.annotations.get(
+                "continuous_add_subtypes", []
+            )
+            if str(value).strip()
+        ] + [
+            str(value).strip()
             for value in dict(
                 card.annotations.get("until_end_of_turn") or {}
             ).get("add_subtypes", [])
@@ -2560,6 +2566,23 @@ class CommanderEngine:
             turn_key = str(self.state.turn_sequence)
             before_count = int(draw_tracker.get(turn_key, 0))
             draw_tracker[turn_key] = before_count + len(drawn)
+            in_own_draw_step = bool(
+                self.state.active_player == seat
+                and (self.state.phase, self.state.step)
+                == ("beginning", "draw")
+            )
+            draw_step_tracker = player.stats.setdefault(
+                "cards_drawn_in_draw_step_by_turn", {}
+            )
+            before_draw_step_count = (
+                int(draw_step_tracker.get(turn_key, 0))
+                if in_own_draw_step
+                else 0
+            )
+            if in_own_draw_step:
+                draw_step_tracker[turn_key] = (
+                    before_draw_step_count + len(drawn)
+                )
             self._log(
                 seat,
                 "card.draw",
@@ -2586,6 +2609,23 @@ class CommanderEngine:
                             self.state.cards[object_id].ref
                             for object_id in drawn
                         ],
+                    },
+                )
+            for index, object_id in enumerate(drawn):
+                if in_own_draw_step and before_draw_step_count + index == 0:
+                    continue
+                self._dispatch_semantic_event(
+                    "card.draw_except_first_draw_step",
+                    {
+                        "player": seat,
+                        "object": self.state.cards[object_id].ref,
+                        "reason": reason,
+                        "in_own_draw_step": in_own_draw_step,
+                        "draw_step_ordinal": (
+                            before_draw_step_count + index + 1
+                            if in_own_draw_step
+                            else None
+                        ),
                     },
                 )
         return drawn
@@ -4529,6 +4569,7 @@ class CommanderEngine:
                 if (
                     self.state.config.auto_pass_empty_priority
                     and not meaningful
+                    and not self._manual_active_main_phase_window(seat)
                 ):
                     self._increment_optimization(
                         seat, "pass_only_windows_skipped"
@@ -4571,6 +4612,25 @@ class CommanderEngine:
             # only as a fail-safe for a loaded state between transitions.
             self._enter_step()
         raise StateInvariantError("Automatic transition limit exceeded")
+
+    def _manual_active_main_phase_window(self, seat: str) -> bool:
+        """Keep browser play under the active player's explicit control.
+
+        Simulation providers can retain empty-window auto-passing. Interactive
+        games opt in so an empty stack never carries the active player through
+        either main phase without an explicit pass.
+        """
+
+        return bool(
+            self.state.config.manual_active_main_phase
+            and seat == self.state.active_player
+            and not self.state.stack
+            and (self.state.phase, self.state.step)
+            in {
+                ("precombat_main", "main"),
+                ("postcombat_main", "main"),
+            }
+        )
 
     def _semantic_pause_annotation(self) -> dict[str, Any] | None:
         return next(
@@ -10307,6 +10367,12 @@ class CommanderEngine:
                     )
                 ):
                     return False
+            elif group.predicate == "player_or_planeswalker":
+                if (
+                    row["category"] != "player"
+                    and "planeswalker" not in types
+                ):
+                    return False
             elif group.predicate == "void_counter":
                 if (
                     not isinstance(card, CardInstance)
@@ -12711,6 +12777,7 @@ class CommanderEngine:
                 "fabricate",
                 "fomori_vault",
                 "choose_warform",
+                "amass",
                 "look_reorder_top",
                 "pay_or_lose",
                 "populate_with_haste",
@@ -13758,6 +13825,81 @@ class CommanderEngine:
                                 "legal_refs": options,
                                 "minimum": minimum,
                                 "maximum": maximum,
+                                "distinct": True,
+                            },
+                        }
+                    ],
+                }
+            )
+        elif op == "amass":
+            subtype = str(effect.get("subtype") or "Orc").strip().title()
+            amount = int(effect.get("amount", 1))
+            if not subtype or amount < 0:
+                raise GameRuleError(
+                    "Amass requires a subtype and nonnegative amount"
+                )
+            armies = self._controlled_subtype_refs(
+                seat,
+                "army",
+                required_type="creature",
+            )
+            if not armies:
+                armies = self.create_token(
+                    seat,
+                    name=f"{subtype} Army",
+                    characteristics={
+                        "type_line": f"Token Creature — {subtype} Army",
+                        "colors": ["B"],
+                        "power": "0",
+                        "toughness": "0",
+                    },
+                    reason=item.label,
+                )
+            if len(armies) == 1:
+                self._apply_amass(
+                    seat,
+                    armies[0],
+                    subtype=subtype,
+                    amount=amount,
+                    reason=item.label,
+                )
+                self._continue_resolution(
+                    stack_ref=item.ref,
+                    effects=list(remaining),
+                    destination=destination,
+                    note=note,
+                    instruction_pointer=instruction_pointer + 1,
+                )
+                return
+            effect = {
+                **dict(effect),
+                "_legal_refs": armies,
+                "_subtype": subtype,
+                "_amount": amount,
+            }
+            context.update(
+                {
+                    "prompt": (
+                        f"Choose an Army to amass {subtype}s {amount}."
+                    ),
+                    "objects": [
+                        {
+                            "id": ref,
+                            "name": self._resolve_object(
+                                seat, ref, zones={"battlefield"}
+                            ).printed_name,
+                        }
+                        for ref in armies
+                    ],
+                    "legal_actions": [
+                        {
+                            "id": "choose",
+                            "action": "choose",
+                            "choice_schema": {
+                                "field": "objects",
+                                "legal_refs": armies,
+                                "minimum": 1,
+                                "maximum": 1,
                                 "distinct": True,
                             },
                         }
@@ -15301,6 +15443,23 @@ class CommanderEngine:
                 {"stack": item.ref, "objects": selected},
                 importance=1,
             )
+        elif op == "amass":
+            selected = [
+                str(value)
+                for value in response.get(
+                    "objects", response.get("cards", [])
+                )
+            ]
+            legal = set(effect.get("_legal_refs") or [])
+            if len(selected) != 1 or selected[0] not in legal:
+                raise GameRuleError("Choose exactly one legal Army to amass")
+            self._apply_amass(
+                seat,
+                selected[0],
+                subtype=str(effect.get("_subtype") or "Orc"),
+                amount=int(effect.get("_amount", 1)),
+                reason=item.label,
+            )
         elif op == "sylvan_library_settle":
             decisions = {
                 str(key): str(value)
@@ -15800,6 +15959,87 @@ class CommanderEngine:
             destination=continuation.get("destination"),
             note=str(continuation.get("note") or ""),
             instruction_pointer=int(frame.get("instruction_pointer", 0)) + 1,
+        )
+
+    def _controlled_subtype_refs(
+        self,
+        seat: str,
+        subtype: str,
+        *,
+        required_type: str | None = None,
+    ) -> list[str]:
+        wanted = subtype.casefold()
+        wanted_type = (
+            required_type.casefold() if required_type is not None else None
+        )
+        matching: list[str] = []
+        for object_id in self.state.players[seat].zones["battlefield"]:
+            card = self.state.cards[object_id]
+            if card.controller != seat or card.phased_out:
+                continue
+            types, subtypes, _ = self._type_parts(
+                str(self._effective_card_data(card).get("type_line") or "")
+            )
+            if wanted in subtypes and (
+                wanted_type is None or wanted_type in types
+            ):
+                matching.append(card.ref)
+        return matching
+
+    def _apply_amass(
+        self,
+        seat: str,
+        army_ref: str,
+        *,
+        subtype: str,
+        amount: int,
+        reason: str,
+    ) -> None:
+        army = self._resolve_object(
+            seat,
+            army_ref,
+            zones={"battlefield"},
+            controlled_only=True,
+        )
+        _, subtypes, _ = self._type_parts(
+            str(self._effective_card_data(army).get("type_line") or "")
+        )
+        if "army" not in subtypes:
+            raise GameRuleError("Amass requires an Army creature")
+        normalized_subtype = subtype.strip().title()
+        if normalized_subtype.casefold() not in subtypes:
+            self.apply_effect(
+                {
+                    "op": "add_subtype",
+                    "card": army.ref,
+                    "subtype": normalized_subtype,
+                    "reason": reason,
+                },
+                actor=seat,
+            )
+        if amount:
+            self.apply_effect(
+                {
+                    "op": "add_counter_selected",
+                    "cards": [army.ref],
+                    "counter": "+1/+1",
+                    "amount": amount,
+                    "reason": reason,
+                },
+                actor=seat,
+            )
+        self._log(
+            seat,
+            "keyword.amass",
+            f"{seat} amassed {normalized_subtype}s {amount} onto {army.ref}.",
+            {
+                "army": army.ref,
+                "subtype": normalized_subtype,
+                "amount": amount,
+                "reason": reason,
+            },
+            importance=2,
+            changed_objects=[army.object_id],
         )
 
     def _create_mishra_warform(
@@ -20361,6 +20601,43 @@ class CommanderEngine:
                 {
                     "object": card.ref,
                     "type": card_type,
+                    "reason": reason,
+                },
+                importance=1,
+                changed_objects=[card.object_id],
+            )
+            return card.ref
+        if op == "add_subtype":
+            card = self._resolve_object(
+                actor,
+                str(effect["card"]),
+                zones={"battlefield"},
+            )
+            subtype = str(effect.get("subtype") or "").strip().title()
+            if not subtype:
+                raise GameRuleError("Continuous subtype effect requires a subtype")
+            card.annotations["continuous_add_subtypes"] = (
+                unique_preserving_order(
+                    [
+                        *list(
+                            card.annotations.get(
+                                "continuous_add_subtypes", []
+                            )
+                        ),
+                        subtype,
+                    ]
+                )
+            )
+            self._log(
+                actor,
+                "permanent.subtype",
+                (
+                    f"{card.ref} became a {subtype} in addition to its "
+                    "other types."
+                ),
+                {
+                    "object": card.ref,
+                    "subtype": subtype,
                     "reason": reason,
                 },
                 importance=1,

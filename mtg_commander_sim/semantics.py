@@ -17,8 +17,10 @@ TRUST_LEVELS = {
 SEMANTIC_SCHEMA_VERSION = 3
 BUILTIN_PACK_DIRECTORY = Path(__file__).resolve().parent / "semantic_packs"
 VALID_EFFECT_OPERATIONS = {
+    "amass",
     "add_counter_selected",
     "add_type",
+    "add_subtype",
     "add_type_until_end_of_turn",
     "add_subtype_until_end_of_turn",
     "animate_dead_prepare",

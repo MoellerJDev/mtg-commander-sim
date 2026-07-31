@@ -61,6 +61,15 @@ by Oracle/ability keys and runtime events, not printed-name branches. Runtime
 placeholders such as `$controller` and `$target.0` are resolved against the
 current stack object.
 
+The browser-reported interaction pack follows the same rule. Its reviewed
+Oracle-ID programs cover Sunscorched Desert's targeted entry damage and Orcish
+Bowmasters' permanent resolution, entry/extra-draw triggers, and Amass Orcs.
+`amass` and permanent `add_subtype` are reusable DSL operations: the executor
+creates an Army only when necessary, delegates among multiple Armies, adds the
+named creature type, and places counters. This is reusable mechanic coverage,
+not a printed-name branch or a claim that arbitrary Amass variants are already
+compiled.
+
 ## Version 0.8.0 exact-list closure
 
 The pinned July 28, 2026 Zimone and Dina and Mishra, Eminent One lists each
