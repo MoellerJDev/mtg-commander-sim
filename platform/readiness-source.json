@@ -6,11 +6,11 @@
     "visibility": "private"
   },
   "integration": {
-    "active_phase": "rules_family_cr_509_declare_blockers",
-    "branch": "agent/cr-509-declare-blockers",
+    "active_phase": "rules_family_cr_508_declare_attackers",
+    "branch": "agent/cr-508-declare-attackers",
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
-      "focused_branch_base": "5a7d87840cf0615f14b03ac76bb3eeaa9f738ed5",
+      "focused_branch_base": "47c67b94bd51a38d2babe3b6aa78ce3aa2a3c568",
       "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
@@ -48,6 +48,13 @@
         "number": 5,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/5"
+      },
+      {
+        "base": "main",
+        "head": "agent/cr-509-declare-blockers",
+        "number": 6,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/6"
       }
     ],
     "tags": [
@@ -83,7 +90,7 @@
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete",
-      "evidence": "Both integration PRs merged through ordinary merge commits; main passed its exact-SHA 3,788-test matrix."
+      "evidence": "Both integration PRs and focused CR 512-509 slices merged through ordinary merge commits; main passed the exact-SHA CR 509 matrix."
     },
     {
       "id": "browser_commander_mvp",
@@ -95,7 +102,7 @@
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main",
-      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 510-512 slices are on main; CR 509 is the current focused family."
+      "evidence": "The versioned 2026-06-19 rules corpus and reviewed CR 509-512 slices are on main; CR 508 is the current focused family."
     },
     {
       "id": "oracle_snapshot",
@@ -119,16 +126,16 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "5a7d87840cf0615f14b03ac76bb3eeaa9f738ed5",
+    "baseline_commit": "47c67b94bd51a38d2babe3b6aa78ce3aa2a3c568",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30608853469,
+      "run_id": 30609935545,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30608853469"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30609935545"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "pass_3810",
+      "deterministic_tests": "pass_3818",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "repository_history_security_audit": "pass",
@@ -142,5 +149,5 @@
     "no authoritative ASGI server, single-writer GameActor, durable persistence, or browser client exists",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Finish the CR 509 full gate and publish ordinary blocker declaration without promoting blocked requirement, cost, trigger, or entry-blocking families."
+  "next_task": "Finish the CR 508 full gate and publish ordinary attacker declaration without promoting blocked planeswalker, restriction, requirement, cost, trigger, entry-attacking, or reselection families."
 }

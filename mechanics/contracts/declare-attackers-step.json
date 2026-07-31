@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-508-declare-attackers-step",
+  "official_name": "Declare Attackers Step",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "508",
+    "508.1",
+    "508.1a",
+    "508.1b",
+    "508.1c",
+    "508.1d",
+    "508.1e",
+    "508.1f",
+    "508.1g",
+    "508.1h",
+    "508.1i",
+    "508.1j",
+    "508.1k",
+    "508.1m",
+    "508.2",
+    "508.2a",
+    "508.2b",
+    "508.3",
+    "508.3a",
+    "508.3b",
+    "508.3c",
+    "508.3d",
+    "508.3e",
+    "508.3f",
+    "508.4",
+    "508.4a",
+    "508.4b",
+    "508.4c",
+    "508.4d",
+    "508.5",
+    "508.5a",
+    "508.6",
+    "508.7",
+    "508.7a",
+    "508.7b",
+    "508.7c",
+    "508.7d",
+    "508.7e",
+    "508.8"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "combat",
+    "illegal-actions",
+    "priority",
+    "triggers",
+    "mana-abilities",
+    "cost-payment",
+    "continuous-effects",
+    "phasing"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["battlefield"],
+    "objects": [
+      "attacking creature",
+      "defending player",
+      "attacked planeswalker",
+      "attacked battle"
+    ],
+    "events": [
+      "attackers are declared",
+      "attacking relationships become fixed",
+      "declare-attackers triggers are created",
+      "active player receives priority"
+    ],
+    "state_reads": [
+      "controller",
+      "tapped and phased-out state",
+      "creature and battle types",
+      "summoning sickness and haste",
+      "vigilance",
+      "attack target and Battle protector"
+    ],
+    "state_writes": [
+      "tapped state",
+      "attacking relationship",
+      "defending players",
+      "attackers-declared marker",
+      "priority player"
+    ],
+    "costs": [
+      "generic attack costs and their mana-ability window remain blocked"
+    ],
+    "timing": [
+      "ordinary declaration is a turn-based action",
+      "active player receives priority after declaration",
+      "empty combat skips declare blockers and combat damage"
+    ],
+    "targets": [
+      "represented attackers may attack an opponent or an opponent-protected Battle"
+    ],
+    "choices": [
+      "the active player chooses zero or more eligible attackers and one represented defender for each"
+    ],
+    "hidden_information": [
+      "attacker declarations use public combat and battlefield information"
+    ],
+    "apnap": [
+      "one active player declares all attackers; multiplayer defenders are derived per attack target"
+    ],
+    "layers": [
+      "effective types and keywords are read through derived characteristics"
+    ],
+    "replacement_effects": [],
+    "copy": [
+      "copies use their effective attack characteristics"
+    ],
+    "control_change": [
+      "a submitted attacker must still be controlled by the active player and not summoning sick"
+    ],
+    "zone_change": [
+      "an attacker and attacked permanent must still be present when the declaration is validated"
+    ],
+    "source_leaves": [
+      "attacking state is cleared when an object leaves combat or combat ends"
+    ]
+  },
+  "variants": [
+    "no attackers",
+    "ordinary legal attacker",
+    "vigilance attacker",
+    "tapped, phased-out, Battle, and summoning-sick nonattackers",
+    "multiplayer split attacks",
+    "opponent-protected Battle",
+    "illegal declaration rollback",
+    "empty-combat step skipping"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_508_rule",
+    "test_only_currently_eligible_creatures_are_offered",
+    "test_attackers_tap_except_vigilance_then_active_player_gets_priority",
+    "test_malicious_phased_attacker_rolls_back_valid_partial_attack",
+    "test_phased_out_battle_is_not_an_attack_target",
+    "test_duplicate_structured_attacker_is_rejected",
+    "test_no_attackers_skips_blockers_and_combat_damage_steps",
+    "test_attacking_marker_clears_when_combat_phase_ends",
+    "test_multiple_defenders_block_sequentially",
+    "test_structured_attack_list_reaches_authoritative_combat_state",
+    "test_siege_is_attackable_and_its_protector_blocks",
+    "test_battle_creature_cannot_attack_or_block"
+  ],
+  "implementation": {
+    "component": "CommanderEngine attacker declaration and combat-step transition",
+    "version": "declare-attackers-step-v1"
+  },
+  "known_blockers": [
+    "planeswalker attack targets are not implemented",
+    "the complete attack restriction and requirement constraint solver is not implemented",
+    "banding declarations are not implemented",
+    "attack costs, cost locking, mana abilities, and ordered payment are not implemented",
+    "declare-attackers trigger generation and APNAP placement are incomplete",
+    "effects that put creatures onto the battlefield attacking are not implemented",
+    "defending-player last-known information and attack-target reselection are not implemented"
+  ],
+  "review_status": "draft"
+}

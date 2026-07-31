@@ -62,6 +62,12 @@ CR 510 traces combat-damage assignment authority, legal recipients, exact
 power totals, atomic rollback, and ordinary simultaneous dealing. First/double
 strike, trample, lifelink, APNAP damage triggers, and the universal simultaneous
 replacement/prevention batch remain blocked.
+CR 508 traces ordinary attacker eligibility, opponent and Battle routing,
+authoritative revalidation, atomic rollback, vigilance, attacking-state
+lifetime, active-player priority, and empty-combat step skipping. Planeswalker
+destinations, the complete restriction/requirement solver, banding, attack
+costs, declaration triggers, entry-attacking effects, defending-player LKI,
+and target reselection remain blocked.
 CR 509 traces ordinary blocker eligibility, defending-player routing, atomic
 declaration rollback, blocking-state lifetime, multiplayer declaration order,
 and the priority handoff. Requirements, block costs, declaration triggers,

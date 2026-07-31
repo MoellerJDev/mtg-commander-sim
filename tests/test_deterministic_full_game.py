@@ -86,7 +86,10 @@ class DeterministicFourPlayerSoakTests(unittest.TestCase):
         self.assertTrue(session.state.players["D"].in_game)
 
         opportunities = session.state.action_opportunities
-        self.assertGreater(len(opportunities), 200)
+        # CR 508.8 removes the empty blocker and combat-damage priority
+        # windows. The soak must still exercise a substantial opportunity
+        # journal without counting those skipped steps as coverage.
+        self.assertGreater(len(opportunities), 150)
         self.assertFalse(
             any(row["outcome"] == "incorrect_suppression" for row in opportunities)
         )
