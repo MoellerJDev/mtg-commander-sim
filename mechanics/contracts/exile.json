@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-406-exile",
+  "official_name": "Exile",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "406",
+    "406.1",
+    "406.2",
+    "406.3",
+    "406.3a",
+    "406.3b",
+    "406.4",
+    "406.5",
+    "406.6",
+    "406.7",
+    "406.8"
+  ],
+  "glossary_references": [
+    "exile",
+    "exiled",
+    "face down",
+    "linked abilities",
+    "removed from the game"
+  ],
+  "dependencies": [
+    "zones",
+    "ownership",
+    "stack",
+    "zone-change-identity",
+    "face-down-objects",
+    "hidden-information",
+    "casting-spells",
+    "linked-abilities",
+    "replacement-effects",
+    "random-selection",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "exile",
+      "library",
+      "hand",
+      "battlefield",
+      "graveyard",
+      "command",
+      "stack"
+    ],
+    "objects": [
+      "face-up exiled card",
+      "face-down exiled card",
+      "card spell",
+      "card with temporary play permission"
+    ],
+    "events": [
+      "exile an object",
+      "return an exiled object",
+      "exile a card spell from the stack",
+      "re-exile an exiled object",
+      "grant a scoped play permission"
+    ],
+    "state_reads": [
+      "object owner",
+      "current zone",
+      "face-down status",
+      "viewer knowledge",
+      "linked source identity",
+      "zone-change incarnation"
+    ],
+    "state_writes": [
+      "owner-indexed exile presentation",
+      "public or scoped identity",
+      "stack membership",
+      "temporary play permission",
+      "logical object incarnation"
+    ],
+    "costs": [
+      "exile costs are delegated to the producing activated or alternative-cost schema",
+      "face-down selection during casting or activation is not yet represented generically"
+    ],
+    "timing": [
+      "ordinary exile entry creates a new logical object",
+      "a card spell exiled by an effect leaves the stack atomically",
+      "re-exiling an exiled object creates another new object",
+      "turn-scoped play permissions expire by turn sequence"
+    ],
+    "targets": [
+      "face-up exile cards can be selected through an explicit exile target schema",
+      "unauthorized face-down exile cards contribute no hidden characteristics",
+      "pile-level random selection for an unexaminable card is not represented"
+    ],
+    "choices": [
+      "ordinary face-up objects are individually identifiable",
+      "face-down pile identity, authorized look grants, and random pile selection remain blocked"
+    ],
+    "hidden_information": [
+      "face-up exile identities are visible to every seat",
+      "a manually represented face-down exile object is redacted from unauthorized projections",
+      "persistent look authorization is conflated with remembered identity and is not complete"
+    ],
+    "apnap": [
+      "multi-player exile targets use the shared public target domain",
+      "simultaneous hidden pile choices are not represented"
+    ],
+    "layers": [
+      "a face-down exile card has no public characteristics",
+      "complete face-down characteristic handling remains a CR 708 dependency"
+    ],
+    "replacement_effects": [
+      "the exact Dauthi graveyard replacement can place cards into exile",
+      "complete replacement-choice ordering remains a separate blocker"
+    ],
+    "copy": [
+      "copy objects in exile are subject to the separately reviewed cease-to-exist state action"
+    ],
+    "control_change": [
+      "exile presentation follows owner rather than former controller"
+    ],
+    "zone_change": [
+      "movement to exile from an ordinary zone creates a new logical object",
+      "movement from exile can return the object to another represented zone",
+      "same-exile movement is not a no-op and creates a new logical object"
+    ],
+    "source_leaves": [
+      "exact temporary permissions store a source reference",
+      "generic exiled-with source linkage and return piles remain blocked"
+    ]
+  },
+  "variants": [
+    "empty exile zone",
+    "exile from library",
+    "exile from hand",
+    "exile from battlefield under a nonowner's control",
+    "exile from graveyard",
+    "exile from command",
+    "exile a card spell",
+    "return from exile",
+    "default face-up visibility",
+    "authorized and unauthorized face-down projection",
+    "face-down characteristic filter",
+    "multiple face-down cards without pile metadata",
+    "re-exile an exiled object",
+    "temporary play from exile",
+    "legacy removed-from-game terminology"
+  ],
+  "witness_cards": [
+    {
+      "name": "Dauthi Voidwalker",
+      "oracle_id": "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786"
+    },
+    {
+      "name": "Bojuka Bog",
+      "oracle_id": "04b7362d-0490-4cb0-b5d7-2a7732f659ce"
+    },
+    {
+      "name": "Deadly Rollick",
+      "oracle_id": "0456ec64-2c81-4763-a352-8ff64a4c3d6b"
+    }
+  ],
+  "rulings": [
+    "Dauthi Voidwalker — 2021-06-18 — A card cast with its permission remains subject to normal timing restrictions.",
+    "Dauthi Voidwalker — 2021-06-18 — Opponents' nontoken cards that would enter graveyards are exiled with void counters.",
+    "Current Oracle wording uses exile rather than the historical removed-from-the-game and set-aside terms."
+  ],
+  "test_ids": [
+    "test_contract_traces_every_cr_406_rule",
+    "test_exile_is_owner_indexed_public_holding_from_ordinary_zones",
+    "test_exiling_card_spell_removes_its_stack_object_and_ghosts_fail_invariant",
+    "test_default_exile_is_face_up_and_authorized_face_down_identity_is_scoped",
+    "test_face_down_exile_piles_and_random_selection_are_not_represented",
+    "test_reexiling_creates_a_new_object_and_moves_it_to_exile_top",
+    "test_pinned_oracle_data_uses_exile_not_legacy_removed_terms",
+    "test_bojuka_bog_targets_and_exiles_one_graveyard",
+    "test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free",
+    "test_sundial_ends_turn_and_exiles_stack"
+  ],
+  "implementation": {
+    "component": "CommanderEngine exile movement, stack removal, logical incarnations, scoped play permissions and targets; StateProjector public/face-down exile projection",
+    "version": "exile-foundation-v1"
+  },
+  "known_blockers": [
+    "generic exile-face-down instruction and persistent look authorization are missing",
+    "face-down play does not turn the card face up at the exact CR 601.2 announcement boundary",
+    "quality-constrained casting from face-down exile is not generic",
+    "face-down pile identity and random selection after full cost payment are missing",
+    "generic temporary-return and own-ability exile piles are missing",
+    "complete linked-ability provenance and copied-link behavior are missing",
+    "the full Oracle corpus has not been proven to use only trusted exile instructions and permissions"
+  ],
+  "review_status": "draft"
+}

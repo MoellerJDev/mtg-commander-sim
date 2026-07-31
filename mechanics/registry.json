@@ -1,5 +1,5 @@
 {
-  "contract_count": 44,
+  "contract_count": 45,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -131,6 +131,12 @@
       "mechanic_id": "cr-512-ending-phase",
       "path": "mechanics/contracts/ending-phase.json",
       "sha256": "50e3dfac37b7a9619c7dcdef09a05cc83fc694527be6ae06381f44485cb2526c",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-406-exile",
+      "path": "mechanics/contracts/exile.json",
+      "sha256": "b14115d08b3ba68d0120dbc44d825ced9b19810582a7dd9a59e118c29af82fee",
       "version": 1
     },
     {
@@ -6173,17 +6179,40 @@
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/exile.json",
+      "contract_sha256": "b14115d08b3ba68d0120dbc44d825ced9b19810582a7dd9a59e118c29af82fee",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine exile movement, stack removal, logical incarnations, scoped play permissions and targets; StateProjector public/face-down exile projection",
+      "implementation_version": "exile-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "generic exile-face-down instruction and persistent look authorization are missing",
+        "face-down play does not turn the card face up at the exact CR 601.2 announcement boundary",
+        "quality-constrained casting from face-down exile is not generic",
+        "face-down pile identity and random selection after full cost payment are missing",
+        "generic temporary-return and own-ability exile piles are missing",
+        "complete linked-ability provenance and copied-link behavior are missing",
+        "the full Oracle corpus has not been proven to use only trusted exile instructions and permissions"
+      ],
       "mechanic_id": "cr-406-exile",
       "official_name": "Exile",
       "rule_references": [
         "406"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_406_rule",
+        "test_exile_is_owner_indexed_public_holding_from_ordinary_zones",
+        "test_exiling_card_spell_removes_its_stack_object_and_ghosts_fail_invariant",
+        "test_default_exile_is_face_up_and_authorized_face_down_identity_is_scoped",
+        "test_face_down_exile_piles_and_random_selection_are_not_represented",
+        "test_reexiling_creates_a_new_object_and_moves_it_to_exile_top",
+        "test_pinned_oracle_data_uses_exile_not_legacy_removed_terms",
+        "test_bojuka_bog_targets_and_exiles_one_graveyard",
+        "test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free",
+        "test_sundial_ends_turn_and_exiles_stack"
+      ],
       "trust_level": "untrusted"
     },
     {

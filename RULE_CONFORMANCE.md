@@ -101,14 +101,14 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 523 cases in CR 120, CR 210, CR 310, CR 400, CR 401, CR 402, CR 403,
-CR 404, CR 405, CR 500, CR 501, CR 502, CR 503, CR 506, CR 507, CR 508,
-CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601, CR 602,
-CR 603, CR 604, CR 605, CR 606, CR 607, CR 608, CR 609, CR 614, CR 615,
-and CR 616 are source-reviewed: 94 narrow behavioral or structural rules pass
-with generic executable evidence, 355 are blocked with exact missing
-dependencies, and 74 are definition-only with contract traceability. The
-remaining 2,777
+All 534 cases in CR 120, CR 210, CR 310, CR 400, CR 401, CR 402, CR 403,
+CR 404, CR 405, CR 406, CR 500, CR 501, CR 502, CR 503, CR 506, CR 507,
+CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
+CR 602, CR 603, CR 604, CR 605, CR 606, CR 607, CR 608, CR 609, CR 614,
+CR 615, and CR 616 are source-reviewed: 97 narrow behavioral or structural
+rules pass with generic executable evidence, 361 are blocked with exact
+missing dependencies, and 76 are definition-only with contract traceability.
+The remaining 2,766
 cases are
 unreviewed and
 inventory-only.
@@ -233,6 +233,17 @@ the card after choices and payment rather than at CR 601.2a; generic
 simultaneous APNAP placement, complete stack characteristics, triggered mana,
 special and turn-based actions, concession at any time, and complete
 player-leaves-game ordering remain blocked.
+CR 406 records the owner-indexed presentation of the shared exile target
+domain, face-up default visibility, ordinary movement from represented normal
+zones, temporary returns, and exile-to-exile new-object identity. Exiling a
+card spell now atomically removes its StackItem; the invariant rejects a ghost
+stack reference to any nonstack card. Manually represented face-down objects
+are redacted and cannot satisfy hidden characteristic filters for unauthorized
+viewers, but that does not promote the face-down rules: generic face-down
+creation, examine-permission lifetime, quality-constrained casting, pile
+partitioning, random hidden selection after payment, return provenance, and
+linked exiled-card sets remain blocked. Current Oracle terminology is
+definition-only; it does not create historical removed-from-game zones.
 CR 500 records the ordinary five-phase turn table, the all-player empty-stack
 pass condition, ordinary no-priority untap and cleanup boundaries, mana
 emptying before the next step begins, and atomic step/phase transitions as

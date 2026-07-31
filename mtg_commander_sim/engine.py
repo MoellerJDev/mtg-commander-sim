@@ -484,7 +484,25 @@ class CommanderEngine:
                     if object_id not in self.state.cards:
                         raise StateInvariantError(f"Unknown object {object_id} in {seat}/{zone}")
                     membership.setdefault(object_id, []).append((seat, zone))
-        stack_cards = {item.card_object_id for item in self.state.stack if item.card_object_id}
+        stack_cards = {
+            item.card_object_id
+            for item in self.state.stack
+            if item.card_object_id
+        }
+        for item in self.state.stack:
+            object_id = item.card_object_id
+            if not object_id:
+                continue
+            if (
+                object_id not in self.state.cards
+                or (
+                    self.state.cards[object_id].zone != "stack"
+                    and not item.context.get("currently_resolving")
+                )
+            ):
+                raise StateInvariantError(
+                    f"Stack item references nonstack object {object_id}"
+                )
         for object_id, card in self.state.cards.items():
             locations = membership.get(object_id, [])
             if card.zone == "stack":
@@ -1855,7 +1873,24 @@ class CommanderEngine:
         departure_source_zones = {
             source.object_id: source.zone for source in departure_sources
         }
-        if origin != "stack":
+        if origin == "stack":
+            # A resolving or countered spell has already had its StackItem
+            # removed by that procedure.  A zone-changing effect can instead
+            # exile a card spell directly; remove its associated stack object
+            # at the same atomic boundary so no ghost spell remains.  A spell
+            # that moves its own underlying card while resolving remains a
+            # resolving stack object until every later instruction finishes.
+            if not any(
+                item.card_object_id == card.object_id
+                and item.context.get("currently_resolving")
+                for item in self.state.stack
+            ):
+                self.state.stack[:] = [
+                    item
+                    for item in self.state.stack
+                    if item.card_object_id != card.object_id
+                ]
+        else:
             self._remove_from_zone(card)
         self._reset_zone_change(
             card,
@@ -12167,6 +12202,7 @@ class CommanderEngine:
         item = next((candidate for candidate in self.state.stack if candidate.ref == stack_ref), None)
         if item is None:
             raise GameRuleError(f"Stack object {stack_ref} no longer exists")
+        item.context["currently_resolving"] = True
         index = 0
         while index < len(effects):
             effect = self._semantic_value(effects[index], item)
@@ -12295,6 +12331,7 @@ class CommanderEngine:
             index += 1
         # Remove the resolving object from stack only when all player choices
         # and effects have completed.
+        item.context.pop("currently_resolving", None)
         self.state.stack.remove(item)
         self._maybe_sacrifice_completed_saga(item)
         entered: CardInstance | None = None
