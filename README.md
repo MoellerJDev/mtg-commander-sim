@@ -190,6 +190,11 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 503 upkeep boundary: represented triggers that occur
+  during untap and at the beginning of upkeep wait without priority, then
+  share one APNAP/controller-order batch before active-player priority;
+  complete untap events, additional upkeeps, and after-upkeep casting grammar
+  remain blocked
 - source-reviewed CR 505 main-phase boundary: empty-stack pass completion,
   active-player priority, ordinary sorcery-speed casting, and stackless
   authoritative land plays use exact precombat/postcombat predicates; extra

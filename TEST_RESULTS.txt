@@ -2,56 +2,48 @@ MTG Commander Sim 0.8.0 - Integration Verification Ledger
 ===========================================================
 
 Repository: MoellerJDev/mtg-commander-sim (public)
-Active branch: agent/cr-505-main-phase
-Main before candidate: 814ff4fc45f6b10599d13348981053e8846d34d8
-Active PR: #10 (CR 505 Main Phase)
+Active branch: agent/cr-503-upkeep-step
+Main before candidate: a03a4f0cfb7819e7fbc97a387403376463d0e4fe
+Active PR: #12 (CR 503 Upkeep Step)
 
-LAST EXACT VERIFIED CANDIDATES
-------------------------------
+LAST EXACT VERIFIED CANDIDATE
+-----------------------------
 
-Integration checkpoint
-  SHA: 65f99875c79e3ec4909ac8eda282b353ffdcf91c
-  Full suite: 3,832 tests passed
-  Focused merge-gate tests: 16 passed
+CR 505 refreshed head
+  SHA: 0ca1f82dee13f5066b2308b3a5dcbe8349a06ea6
+  Full suite: 3,846 tests passed
+  Focused merge-gate tests: 24 passed
   Rules verification: passed
   Deterministic natural winner: passed
   Replay/privacy/protocol/repository/package gates: passed
   Working-tree clean exit: passed
+  GitHub push matrix: passed (4/4)
+  GitHub pull-request matrix: passed (4/4)
 
-CR 504 refreshed head
-  SHA: a43ced04a87d95dbdb24862832429d70a7b1468c
-  Full suite: 3,838 tests passed
-  Focused draw-step gate: passed
-  Rules verification: passed
-  Deterministic natural winner: passed
-  Replay/privacy/protocol/repository/package gates: passed
-  Working-tree clean exit: passed
-  GitHub push matrix: passed (8/8)
-  GitHub pull-request matrix: passed (8/8)
-
-PR #11 merged to main
-  Main SHA: 814ff4fc45f6b10599d13348981053e8846d34d8
+PR #10 merged to main
+  Main SHA: a03a4f0cfb7819e7fbc97a387403376463d0e4fe
 
 CURRENT UNVERIFIED CANDIDATE
 ----------------------------
 
-CR 504 and CR 505 are being combined on agent/cr-505-main-phase.
-Expected discovered tests after regeneration: 3,846.
-The exact-SHA local gate and fresh GitHub matrices must pass before PR #10 is
+CR 503 is being combined with merged CR 504 and CR 505 on
+agent/cr-503-upkeep-step.
+Expected discovered tests after regeneration: 3,851.
+The exact-SHA local gate and fresh GitHub matrices must pass before PR #12 is
 merged. This section is not a claim that the candidate has passed.
 
 Combined rule-review totals:
   Pinned CR release: 2026-06-19
   Numbered rules: 3,300
-  Reviewed: 442
-  Passing: 66
-  Blocked: 315
-  Definition-only: 61
-  Unreviewed: 2,858
+  Reviewed: 446
+  Passing: 67
+  Blocked: 317
+  Definition-only: 62
+  Unreviewed: 2,854
 
 Combined mechanic totals:
-  Partial: 37
-  Unclassified: 388
+  Partial: 38
+  Unclassified: 387
 
 INTERPRETATION BOUNDARY
 -----------------------
@@ -71,5 +63,5 @@ Administrative merge bypass is prohibited while required jobs execute.
 NEXT
 ----
 
-Run the exact CR 505 merge gate, push the exact candidate, require green GitHub
-matrices, merge PR #10 normally, and continue with PR #12.
+Run the exact CR 503 merge gate, push the exact candidate, require green GitHub
+matrices, merge PR #12 normally, and continue with PR #13.

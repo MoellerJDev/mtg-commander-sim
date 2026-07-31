@@ -36,7 +36,7 @@ coverage.
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 442 cases in CR 120/210/310/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 66 semantic passes, 315 blocked cases, and 61 definition-only cases |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 446 cases in CR 120/210/310/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 67 semantic passes, 317 blocked cases, and 62 definition-only cases |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -163,6 +163,13 @@ coverage.
   Twelve cost, activation-transaction, hidden reveal, CR 601 parity,
   opponent-choice, cost-altering, prohibition, and acquired-ability records
   remain dependency-blocked; 3 taxonomy records are definition-only.
+- [x] Reviewed all 4 CR 503 Upkeep Step records. The ordinary no-turn-action
+  priority boundary passes. Represented triggers from untap, permanent upkeep
+  abilities, and delayed upkeep abilities wait without priority and share one
+  APNAP/controller-order batch with exact replay. Complete CR 502 event
+  production, CR 603.3b trigger-on-trigger ordering, additional upkeep
+  scheduling, and after-first-upkeep casting grammar remain dependency-blocked;
+  the heading is definition-only.
 - [x] Reviewed all 11 CR 510 Combat Damage Step records. Exact effective-power
   totals, legal multi-blocker recipients, strict assignment fields, atomic
   rejection, and exact replay pass for the represented ordinary assignment
@@ -211,7 +218,14 @@ coverage.
   declaration triggers, multi-attacker blocking, blocked-status effects, and
   entry-blocking remain dependency-blocked.
 
-## Current CR 120/210/310/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
+## Current CR 120/210/310/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
+
+The upkeep step performs no turn-based action. Represented abilities triggered
+during untap and at the beginning of upkeep wait without priority and then
+share one APNAP/controller-order batch after state-based actions and before
+active-player priority. Complete CR 502 event production, CR 603.3b two-part
+ordering, additional upkeeps, and after-first-upkeep casting grammar remain
+blocked.
 
 Ordinary turns have one precombat and one postcombat main boundary separated
 by combat. Each is one scheduler boundary with no rules substeps: all players
@@ -402,9 +416,13 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,846 unit/integration tests are discovered: 546 ordinary tests plus 3,300
+- 3,851 unit/integration tests are discovered: 551 ordinary tests plus 3,300
   generated
   inventory/source-linkage tests. The latter are not semantic passes.
+- Five focused CR 503 tests cover source traceability, the ordinary no-turn-
+  action priority boundary, one APNAP/controller-order batch spanning untap
+  and upkeep trigger times, state actions before trigger placement, late-
+  trigger deferral, and two exact replay paths.
 - Eight focused CR 505 tests cover all-rule traceability, ordinary two-main
   structure, empty-stack completion and nonempty-stack persistence, exact
   replay, represented Saga-before-priority ordering, active-player priority,
@@ -472,10 +490,10 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 442 CR
-  120/210/310/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
-  cases are source-reviewed: 66 pass with executable engine evidence, 315
-  remain blocked, and 61 are definition-only. The other 2,858 cases remain
+  establish inventory linkage only. All 446 CR
+  120/210/310/503/504/505/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
+  cases are source-reviewed: 67 pass with executable engine evidence, 317
+  remain blocked, and 62 are definition-only. The other 2,854 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -484,8 +502,8 @@ checkpoint validation.
 
 ## Next dependency-ordered work
 
-1. Finish the exact local and GitHub gates for the combined CR 504/505
-   candidate, merge PR #10, and then integrate CR 503 PR #12 from the frozen
+1. Finish the exact local and GitHub gates for the combined CR 503/504/505
+   candidate, merge PR #12, and then integrate CR 502 PR #13 from the frozen
    dependency chain. Do not begin another rules-family review.
 2. Wire the reviewed CR 614/615/616 primitives into the shared CR 120/310
    replacement and prevention event pipeline, including stateful shields and
