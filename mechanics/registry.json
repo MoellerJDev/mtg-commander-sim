@@ -1,5 +1,5 @@
 {
-  "contract_count": 18,
+  "contract_count": 19,
   "contracts": [
     {
       "mechanic_id": "cr-122-counters",
@@ -84,6 +84,12 @@
       "path": "mechanics/contracts/replacement-ordering.json",
       "sha256": "3ae06ee98b14c0c16c722d2821816f66eb0a9d3bf1708d39d7decadbb4a2fdfe",
       "version": 2
+    },
+    {
+      "mechanic_id": "cr-608-resolving-spells-and-abilities",
+      "path": "mechanics/contracts/resolving-spells-and-abilities.json",
+      "sha256": "bf19236ce84713dbba2a84c73b9cefaafa302c57dca08a6c0dbb100df7b4bc96",
+      "version": 1
     },
     {
       "mechanic_id": "cr-603-handling-triggered-abilities",
@@ -6304,17 +6310,40 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/resolving-spells-and-abilities.json",
+      "contract_sha256": "bf19236ce84713dbba2a84c73b9cefaafa302c57dca08a6c0dbb100df7b4bc96",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine._pass_priority, _prepare_stack_resolution, _begin_resolve_item, and _continue_resolution",
+      "implementation_version": "resolution-pipeline-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "intervening-if, target, choice, distribution, and instruction grammar are not complete across the Oracle corpus",
+        "resolution-time APNAP and nonsimultaneous multi-object ordering are implemented only for selected operations",
+        "mana activation and arbitrary instructed casting during resolution are not generic",
+        "current, last-known, and look-back information do not use one universal typed query model",
+        "a resolving stack item removed by an effect does not have a separate continuation object",
+        "generic Aura, mutate, cannot-enter, and static stack-to-delayed-trigger behavior is incomplete",
+        "spell-resolved trigger dispatch is not integrated for every stack object"
+      ],
       "mechanic_id": "cr-608-resolving-spells-and-abilities",
       "official_name": "Resolving Spells and Abilities",
       "rule_references": [
         "608"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_608_rule",
+        "test_only_top_spell_resolves_after_all_players_pass",
+        "test_resolution_continues_after_underlying_card_moves",
+        "test_spell_and_ability_leave_stack_after_resolution",
+        "test_all_targets_illegal_counters_by_rules",
+        "test_count_distinct_and_partial_resolution",
+        "test_target_that_leaves_and_returns_is_a_new_illegal_object",
+        "test_padeem_hexproof_and_intervening_upkeep_condition",
+        "test_permanent_spell_copy_becomes_the_same_token_object",
+        "test_spell_copy_cessation_replays_exactly"
+      ],
       "trust_level": "untrusted"
     },
     {

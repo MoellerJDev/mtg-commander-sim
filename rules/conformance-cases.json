@@ -35363,21 +35363,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-608",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/resolving-spells-and-abilities.json"
+      ],
+      "notes": [
+        "Section heading; every numbered CR 608 record is pinned by the resolution contract."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "608",
       "rule_text_sha256": "0e2d432b8e9d5e2f16d0bc505d36408f5669be1f6c7cb1f619401c764564534c",
       "schema_version": 1,
@@ -35386,26 +35390,41 @@
         "end_line": 2782,
         "start_line": 2781
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-608.1",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "608"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_only_top_spell_resolves_after_all_players_pass",
+        "tests.test_copy_objects.CopyObjectLifecycleTests.test_spell_copy_cessation_replays_exactly"
+      ],
+      "implementation_components": [
+        "CommanderEngine._pass_priority",
+        "CommanderEngine._prepare_stack_resolution"
+      ],
+      "notes": [
+        "After every active player passes in succession, only the current top stack object resolves; a lower object remains for a new priority cycle.",
+        "The same transition command-replays with a copied spell on top."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.1",
       "rule_text_sha256": "7207a14f6247b9cbdfeccf7a1d98a056578563e901ac2e85c9f3f819e850f637",
       "schema_version": 1,
@@ -35414,26 +35433,31 @@
         "end_line": 2784,
         "start_line": 2783
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-608.2",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "608"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._begin_resolve_item",
+        "CommanderEngine._continue_resolution"
+      ],
+      "notes": [
+        "Defines the ordered resolution-step framework for instant spells, sorcery spells, and abilities; each operative step is classified separately."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "608.2",
       "rule_text_sha256": "c3ad495df46d2a40b1078e51445f55601a01ce9efe96bde3fc73cc5d21c2e974",
       "schema_version": 1,
@@ -35442,26 +35466,43 @@
         "end_line": 2786,
         "start_line": 2785
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "the Oracle compiler recognizes only selected intervening-if condition forms",
+        "not every condition is represented by a typed authoritative predicate",
+        "generic intervening-if resolution replay has not been established across trigger families"
       ],
       "case_id": "cr-608.2a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_exact_artifact_engines.ExactArtifactEngineTests.test_padeem_hexproof_and_intervening_upkeep_condition"
+      ],
+      "implementation_components": [
+        "CommanderEngine._prepare_stack_resolution",
+        "SemanticProgram.event_condition"
+      ],
+      "notes": [
+        "Padeem's reviewed condition is rechecked and the trigger does nothing when false, but that witness is not complete intervening-if grammar."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.2a",
       "rule_text_sha256": "1cd406fb17431addf79b443b8e2e9f6b48b167b65432d5371a77cdf5133fd372",
       "schema_version": 1,
@@ -35470,26 +35511,50 @@
         "end_line": 2788,
         "start_line": 2787
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "the target predicate grammar does not cover every characteristic, rule-changing continuous effect, or target instance",
+        "source last-known information is not universally derived for target legality",
+        "illegal-target information dependencies are not typed across every effect operation",
+        "mutate and the complete bestow fallback are not implemented"
       ],
       "case_id": "cr-608.2b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_targeting_v070.ExactTargetingTests.test_all_targets_illegal_counters_by_rules",
+        "tests.test_targeting_v070.ExactTargetingTests.test_count_distinct_and_partial_resolution",
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_target_that_leaves_and_returns_is_a_new_illegal_object"
+      ],
+      "implementation_components": [
+        "CommanderEngine._revalidate_resolution_targets",
+        "targets.target_plan",
+        "CardInstance.logical_object_id"
+      ],
+      "notes": [
+        "All represented targets are revalidated, changed logical incarnations become illegal, all-illegal spells are countered by rules, and target-dependent operations skip an illegal target while legal targets remain.",
+        "The general rule remains blocked by target grammar, LKI, continuous-rule effects, and specialized permanent spells."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.2b",
       "rule_text_sha256": "dab103dbf0cdfa2c7ea7d313511d8093fd3a9481fc39b00921760f8e69163c03",
       "schema_version": 1,
@@ -35498,26 +35563,42 @@
         "end_line": 2792,
         "start_line": 2789
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "semantic programs do not preserve a universally parsed instruction dependency graph for later text modifying earlier text",
+        "replacement effects are not proposed for every resolution operation",
+        "the compiler cannot prove complete whole-text English semantics"
       ],
       "case_id": "cr-608.2c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_resolution_continues_after_underlying_card_moves"
+      ],
+      "implementation_components": [
+        "CommanderEngine._continue_resolution",
+        "CommanderEngine.apply_effect"
+      ],
+      "notes": [
+        "Represented effect operations run in array order, but that is not sufficient for the whole-text and replacement requirements of CR 608.2c."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.2c",
       "rule_text_sha256": "f4e5b1703ff81954bf8c3c79aa083bcef91c55ae79d693800ce7249e4533275d",
       "schema_version": 1,
@@ -35526,26 +35607,44 @@
         "end_line": 2794,
         "start_line": 2793
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "resolution-time option legality is implemented per operation rather than one complete choice grammar",
+        "untargeted divisions and distributions with minimum-one allocation are not generic",
+        "empty-library draw remains intertwined with incomplete draw replacement and loss semantics"
       ],
       "case_id": "cr-608.2d",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._begin_semantic_choice",
+        "permissions.DecisionGroup"
+      ],
+      "notes": [
+        "Selected resolution operations issue seat-scoped choices and reject invalid selections, but complete choice and division behavior remains unimplemented."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.2d",
       "rule_text_sha256": "f91475cff41dc6affed611ee8670812b826be6a4acc39935b5c0956460a49ca7",
       "schema_version": 1,
@@ -35554,26 +35653,44 @@
         "end_line": 2797,
         "start_line": 2795
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "APNAP collection is wired only for selected semantic operations",
+        "multi-sentence actions do not share a universal choose-then-simultaneously-apply executor",
+        "later action choices cannot generically depend on the fully stabilized result of each prior action"
       ],
       "case_id": "cr-608.2e",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._issue_apnap_choice",
+        "CommanderEngine._continue_resolution"
+      ],
+      "notes": [
+        "The existing delegated APNAP choice operation is partial evidence only."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.2e",
       "rule_text_sha256": "59ea65d7a814c5e013b0842c759c10f6bc59770308be6c034c24176555718133",
       "schema_version": 1,
@@ -35582,26 +35699,41 @@
         "end_line": 2799,
         "start_line": 2798
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "multi-player and multi-object instructions do not declare whether they are simultaneous or individually processed",
+        "the resolving controller cannot generically choose relative order within one affected player's objects",
+        "APNAP fallback order is not integrated into every nonsimultaneous operation"
       ],
       "case_id": "cr-608.2f",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._continue_resolution",
+        "CommanderEngine.apnap_order"
+      ],
+      "notes": [
+        "No per-operation behavior is promoted as universal CR 608.2f support."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.2f",
       "rule_text_sha256": "30ffc8e23d426185adbc273097c3d0295d5695f2c12c0a48e95ea30a77446a76",
       "schema_version": 1,
@@ -35610,26 +35742,44 @@
         "end_line": 2803,
         "start_line": 2800
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "resolution-time mana ability activation is not a generic decision phase",
+        "only selected server-authored instructions can cast a spell during resolution",
+        "complete alternate, additional, mandatory, and target cost grammar is not available for every instructed cast",
+        "the no-priority invariant is not represented as a reusable nested-cast resolution contract"
       ],
       "case_id": "cr-608.2g",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_defeated_casts_back_face_for_free_during_resolution"
+      ],
+      "implementation_components": [
+        "CommanderEngine._cast",
+        "CommanderEngine._complete_siege_defeated_resolution"
+      ],
+      "notes": [
+        "The reviewed Siege continuation can cast one authorized transformed face during resolution, but arbitrary instructed casting remains blocked."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.2g",
       "rule_text_sha256": "65f432c1bce3488bd1926b66852325ec44a66aa6d1fa8d816cd6b8ee28d5e939",
       "schema_version": 1,
@@ -35638,26 +35788,46 @@
         "end_line": 2805,
         "start_line": 2804
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "there is no universal typed one-time game-information query",
+        "last-known information is captured for selected targets and zone events rather than every referenced object",
+        "public-to-hidden movement does not expose one audited LKI interface to all effect operations",
+        "source-as-actor attribution is not generic"
       ],
       "case_id": "cr-608.2h",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_target_that_leaves_and_returns_is_a_new_illegal_object"
+      ],
+      "implementation_components": [
+        "CommanderEngine._semantic_value",
+        "CommanderEngine._target_snapshot",
+        "CardInstance.logical_object_id"
+      ],
+      "notes": [
+        "Selected target snapshots preserve legal information, but complete current-versus-LKI selection remains blocked."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.2h",
       "rule_text_sha256": "e4eb3b30cd02d1bc1d3782c25773912b665c2caaf28041e9834c42e701f0fd7e",
       "schema_version": 1,
@@ -35666,26 +35836,41 @@
         "end_line": 2807,
         "start_line": 2806
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "look-back effects have no typed historical-state query language",
+        "event records do not preserve every characteristic predicate needed by Oracle text",
+        "hidden-information boundaries for historical object groups are not generically enforced"
       ],
       "case_id": "cr-608.2i",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+      ],
+      "implementation_components": [
+        "model.Event",
+        "CommanderEngine._semantic_value"
+      ],
+      "notes": [
+        "Unsupported look-back templates remain semantic residuals rather than consulting current state incorrectly."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.2i",
       "rule_text_sha256": "e182fedbea73d45271a58ca973fec252a1ab798a27823d3bf7fe83377239a38e",
       "schema_version": 1,
@@ -35694,26 +35879,41 @@
         "end_line": 2810,
         "start_line": 2808
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "effect information queries are not represented as typed characteristic projections",
+        "related characteristics can still be consulted by card-specific effect handlers",
+        "the full characteristic and derived-property model is incomplete"
       ],
       "case_id": "cr-608.2j",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._effective_card_data",
+        "targets.TargetGroup"
+      ],
+      "notes": [
+        "Declarative target predicates request named fields, but this does not prove every effect query ignores related characteristics."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "608.2j",
       "rule_text_sha256": "902aa4de91b6001798bc5c054d08314e58b6628d537763ff6157b479a11bc3c7",
       "schema_version": 1,
@@ -35722,26 +35922,42 @@
         "end_line": 2813,
         "start_line": 2811
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "cost and trigger references are not universally stored as typed untargeted logical-object handles",
+        "not every effect distinguishes characteristic changes from zone-change new-object identity",
+        "legacy semantic programs still use physical refs in selected links"
       ],
       "case_id": "cr-608.2k",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+      ],
+      "implementation_components": [
+        "CardInstance.logical_object_id",
+        "CommanderEngine._semantic_value"
+      ],
+      "notes": [
+        "Selected cost and delayed links retain an object reference, but the general CR 608.2k relationship is not compiled."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.2k",
       "rule_text_sha256": "032e8cdeec385eb34761e6866c3e2cd5b7483ae72b07a9ac5517781349f79667",
       "schema_version": 1,
@@ -35750,26 +35966,41 @@
         "end_line": 2816,
         "start_line": 2814
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "the engine splits a spell's card object from its stack item and retains only the latter as the continuation",
+        "an effect that removes the StackItem itself causes the current executor to stop",
+        "resolution continuations with pending choices are not stored independently from stack membership"
       ],
       "case_id": "cr-608.2m",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_resolution_continues_after_underlying_card_moves"
+      ],
+      "implementation_components": [
+        "CommanderEngine._continue_resolution"
+      ],
+      "notes": [
+        "Later instructions execute when the underlying spell card moves while the stack-item continuation remains, but complete leaves-the-stack behavior is not implemented."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.2m",
       "rule_text_sha256": "e0274070e2e32a067d5bf8c1afc29b843a39a8051cacb56d0cf1c508ca7e9953",
       "schema_version": 1,
@@ -35778,26 +36009,42 @@
         "end_line": 2818,
         "start_line": 2817
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "final spell destination replacement is not routed through the generic CR 614/616 event pipeline",
+        "not every card form and resolving copy uses a common final-destination policy",
+        "the ability object is represented only by StackItem removal rather than a typed ceased object"
       ],
       "case_id": "cr-608.2n",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_spell_and_ability_leave_stack_after_resolution"
+      ],
+      "implementation_components": [
+        "CommanderEngine._continue_resolution",
+        "CommanderEngine.move_card"
+      ],
+      "notes": [
+        "A reviewed ordinary instant reaches graveyard and an ordinary ability leaves the stack after all instructions, but replacement and specialized-object integration remain incomplete."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.2n",
       "rule_text_sha256": "e604c5db34de964a2c419171e8a8628cc20bbb73b1ffae8783e107a761cb96c3",
       "schema_version": 1,
@@ -35806,26 +36053,40 @@
         "end_line": 2820,
         "start_line": 2819
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "the generic resolver logs stack.resolve but does not dispatch a universal typed spell-or-ability-resolved event",
+        "resolution triggers are not guaranteed to be detected only after every choice, move, and final step",
+        "Oracle compilation of resolves-trigger conditions is incomplete"
       ],
       "case_id": "cr-608.2p",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._continue_resolution",
+        "CommanderEngine._dispatch_semantic_event"
+      ],
+      "notes": [
+        "This ordering point remains unsupported rather than inferred from the event log."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.2p",
       "rule_text_sha256": "91c4c434f20c1e4b30d14dcf2c5c4ae94f7ac9c6e0fc5dbcb71b8ec7496f882d",
       "schema_version": 1,
@@ -35834,26 +36095,31 @@
         "end_line": 2822,
         "start_line": 2821
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-608.3",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "608"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._begin_resolve_item",
+        "CommanderEngine._continue_resolution"
+      ],
+      "notes": [
+        "Defines the permanent-spell resolution framework; each operative permanent-spell branch is classified separately."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "608.3",
       "rule_text_sha256": "4219b859faca2f252b27dc10446d1d07324e25e675b9fc2af98940fe5dda70a0",
       "schema_version": 1,
@@ -35862,26 +36128,39 @@
         "end_line": 2824,
         "start_line": 2823
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-608.3a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "608.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_only_top_spell_resolves_after_all_players_pass"
+      ],
+      "implementation_components": [
+        "CommanderEngine._continue_resolution",
+        "CommanderEngine.move_card"
+      ],
+      "notes": [
+        "The top untargeted creature spell becomes a battlefield permanent under its spell controller while a lower spell remains on the stack."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "608.3a",
       "rule_text_sha256": "618686472930b887211c0bc215a589acac1620712dcd621ec2775cfc8a3bcd63",
       "schema_version": 1,
@@ -35890,26 +36169,41 @@
         "end_line": 2826,
         "start_line": 2825
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "mutating creature spells and merged permanents are not implemented",
+        "bestow fallback is represented only for selected semantic programs",
+        "generic targeted-permanent resolution does not cover every permanent spell type"
       ],
       "case_id": "cr-608.3b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative"
+      ],
       "dependency_rule_ids": [
         "608.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_targeting_v070.ExactTargetingTests.test_all_targets_illegal_counters_by_rules"
+      ],
+      "implementation_components": [
+        "CommanderEngine._revalidate_resolution_targets"
+      ],
+      "notes": [
+        "Ordinary represented all-illegal targets are countered by rules, but the required bestow and mutate exceptions remain incomplete."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.3b",
       "rule_text_sha256": "9df3d97703b638d67f73ecf6d1f9821d655b43fd8e5d92cc9a8d921b61544c3d",
       "schema_version": 1,
@@ -35918,26 +36212,42 @@
         "end_line": 2828,
         "start_line": 2827
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "generic Aura spells do not all record and apply their legal target attachment during resolution",
+        "player attachments and complete enchant-quality grammar are not implemented",
+        "bestow and every unusual Aura destination interaction are incomplete"
       ],
       "case_id": "cr-608.3c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "608.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_animate_dead_reanimates_attaches_modifies_power_and_sacrifices_on_leave"
+      ],
+      "implementation_components": [
+        "CommanderEngine.move_card",
+        "CommanderEngine._enchant_target_schema"
+      ],
+      "notes": [
+        "Animate Dead uses a reviewed specialized pending attachment, which is not generic Aura-spell support."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.3c",
       "rule_text_sha256": "ea60c6b85a566a75ddbfd26d2c1dd8908b411d59b2f0d7decf87b7b37f561659",
       "schema_version": 1,
@@ -35946,26 +36256,39 @@
         "end_line": 2830,
         "start_line": 2829
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "merged permanents are not represented",
+        "mutating creature target legality and component ownership are not implemented",
+        "merge resolution has no replayable authoritative operation"
       ],
       "case_id": "cr-608.3d",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "608.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/resolving-spells-and-abilities.json"
+      ],
+      "notes": [
+        "Mutate remains a material semantic residual and cannot resolve through trusted-only mode."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.3d",
       "rule_text_sha256": "d8db661d684fb28f4d3892dc9cb0cc09bdd1e92081545a8978c9213f5affdbcf",
       "schema_version": 1,
@@ -35974,26 +36297,40 @@
         "end_line": 2832,
         "start_line": 2831
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "cannot-enter-the-battlefield continuous effects are not represented generically",
+        "the resolver does not propose an authoritative enter event before selecting the fallback graveyard destination",
+        "replacement ordering around the failed entry is incomplete"
       ],
       "case_id": "cr-608.3e",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "608.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._continue_resolution",
+        "CommanderEngine.move_card"
+      ],
+      "notes": [
+        "Unsupported cannot-enter effects fail preflight rather than silently applying this fallback."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.3e",
       "rule_text_sha256": "94fad157d7f5c004a2c1ceec51622981fcc741dc11646d227b6d3b0168dc307d",
       "schema_version": 1,
@@ -36002,26 +36339,43 @@
         "end_line": 2835,
         "start_line": 2833
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-608.3f",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "608.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_copy_objects.CopyObjectLifecycleTests.test_permanent_spell_copy_becomes_the_same_token_object",
+        "tests.test_copy_objects.CopyObjectLifecycleTests.test_spell_copy_cessation_replays_exactly"
+      ],
+      "implementation_components": [
+        "CommanderEngine._continue_resolution",
+        "CardInstance.object_kind"
+      ],
+      "notes": [
+        "The same serialized spell-copy object becomes a token permanent, keeps its logical incarnation, and emits no token-creation event.",
+        "The stack transition command-replays exactly."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.3f",
       "rule_text_sha256": "af2a2df8dc92d26566aede6de1c31acc144a47fcf16756c78bdc6fed810ae1e3",
       "schema_version": 1,
@@ -36030,26 +36384,40 @@
         "end_line": 2837,
         "start_line": 2836
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "static abilities functioning on the stack are not generically registered",
+        "Dash, Blitz, Warp, and future equivalent delayed-trigger constructors are not compiled through one typed rule",
+        "the delayed trigger is not guaranteed to be created at the permanent-entry boundary"
       ],
       "case_id": "cr-608.3g",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "behavioral",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "608.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+      ],
+      "implementation_components": [
+        "CommanderEngine._dispatch_semantic_event",
+        "DelayedTrigger"
+      ],
+      "notes": [
+        "Existing delayed triggers are card-specific or semantic-operation-specific and do not establish CR 608.3g."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "608.3g",
       "rule_text_sha256": "1c4c398f0b4af7ae19943b5a526f8c6522fbfac61ddb99740c8e93afcef1ee6b",
       "schema_version": 1,
@@ -36058,7 +36426,7 @@
         "end_line": 2839,
         "start_line": 2838
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
       "assertion_kind": "static_traceability",

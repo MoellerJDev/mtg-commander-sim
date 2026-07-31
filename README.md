@@ -143,6 +143,9 @@ generated documentation fixtures with bearer capabilities redacted. See
 - source-reviewed CR 609 effect foundations with fail-closed condition
   predicates and explicit blockers for universal zone scope, impossible
   instructions, `as though`, tie handling, and damage-source derivation
+- source-reviewed CR 608 resolution ordering with executable top-of-stack,
+  untargeted permanent, and permanent-spell-copy behavior, while incomplete
+  choice, LKI, Aura, mutate, and resolution-trigger families stay blocked
 - trust-aware semantic preflight for files and live Moxfield URLs
 - compact cast, land, activation, target, and generic resolution-time search
   templates

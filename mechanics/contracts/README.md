@@ -28,7 +28,10 @@ state-based-action subset including the world rule. Separate CR 120, 210, and
 characteristic, and Siege entry/protector/combat/trigger subset. The CR 310
 contract includes exact-incarnation exile and the optional transformed cast,
 but remains partial because replacement ordering and cast grammar outside
-compiled cost/target schemas are blocked.
+compiled cost/target schemas are blocked. CR 608 and 609 contracts trace the
+resolution and effect pipelines while keeping incomplete target, choice, LKI,
+APNAP, `as though`, source-selection, Aura, mutate, and resolution-trigger
+families explicitly untrusted.
 
 Run `simctl rules sync` after changing a contract so its hash and status are
 overlaid into `mechanics/registry.json`, then run `simctl rules verify`.
