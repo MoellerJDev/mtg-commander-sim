@@ -1,5 +1,5 @@
 {
-  "contract_count": 26,
+  "contract_count": 27,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -29,6 +29,12 @@
       "mechanic_id": "cr-601-casting-spells",
       "path": "mechanics/contracts/casting-spells.json",
       "sha256": "419bf3202c36377b05e809187464f8fe8a6eafa3b0e53cbae89cd452111c57a7",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-514-cleanup-step",
+      "path": "mechanics/contracts/cleanup-step.json",
+      "sha256": "ea3533538eb616d676571180eb1f783a65ba6962753b344c49180a9bfc2331fb",
       "version": 1
     },
     {
@@ -6205,17 +6211,39 @@
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/cleanup-step.json",
+      "contract_sha256": "ea3533538eb616d676571180eb1f783a65ba6962753b344c49180a9bfc2331fb",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine cleanup entry, discard, duration clearing, cleanup-exception frame, stabilization, delayed-trigger, priority, and repeat-step paths",
+      "implementation_version": "cleanup-step-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "all until-end-of-turn and this-turn continuous effects are not represented by one duration registry",
+        "cleanup characteristic changes are applied sequentially internally rather than as one complete CR 514.2 simultaneous layer expiration",
+        "complete discard, zone-change, and effect-ending replacement interactions are absent",
+        "the state-based-action engine and trigger compiler do not cover every Comprehensive Rules and Oracle family",
+        "all cleanup-begin, discard, expiration, and state-action triggers are not merged into one universal APNAP ordering batch",
+        "cleanup trigger targets, modes, optional choices, and hidden-information interactions remain limited to compiled schemas"
+      ],
       "mechanic_id": "cr-514-cleanup-step",
       "official_name": "Cleanup Step",
       "rule_references": [
         "514"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_514_rule",
+        "test_cleanup_discard_is_exact_simultaneous_private_and_replayable",
+        "test_invalid_cleanup_discard_rolls_back_capability_and_state",
+        "test_ordinary_cleanup_grants_no_priority",
+        "test_cleanup_state_action_grants_priority_then_repeats_cleanup",
+        "test_next_cleanup_trigger_waits_until_cleanup_actions_finish",
+        "test_cleanup_clears_damage_and_represented_turn_effects_together",
+        "test_liquimetal_torque_changes_only_nonland_permanents_until_cleanup",
+        "test_toxic_deluge_pays_x_life_and_applies_until_cleanup",
+        "test_marked_damage_survives_type_loss_until_cleanup"
+      ],
       "trust_level": "untrusted"
     },
     {

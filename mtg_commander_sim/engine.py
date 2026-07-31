@@ -3159,6 +3159,45 @@ class CommanderEngine:
         if phase == "precombat_main" and step == "main":
             self._advance_active_player_sagas(active)
 
+        if step == "cleanup":
+            # Abilities can trigger at the beginning of cleanup, but CR
+            # 514.1-2 happen before those waiting triggers are put on the
+            # stack and before the exceptional priority window.  Enqueue
+            # represented semantic triggers now without stabilizing them.
+            self._dispatch_semantic_event(
+                "step.begin",
+                {"phase": phase, "step": step, "player": active},
+            )
+            hand = self.state.players[active].zones["hand"]
+            excess = (
+                len(hand)
+                - self.state.players[active].max_hand_size
+            )
+            if excess > 0:
+                self.permissions.issue(
+                    kind="cleanup.discard",
+                    role="pilot",
+                    actors=[active],
+                    allowed_actions=["discard"],
+                    payload_by_actor={
+                        active: {
+                            "count": excess,
+                            "hand": [
+                                {
+                                    "id": self.state.cards[oid].ref,
+                                    "name": self.state.cards[
+                                        oid
+                                    ].printed_name,
+                                }
+                                for oid in hand
+                            ],
+                        }
+                    },
+                )
+                return
+            self._finish_cleanup()
+            return
+
         delayed = self._matching_delayed_triggers("step.begin", {"phase": phase, "step": step, "player": active})
         if delayed:
             self._start_trigger_batch(delayed, after="grant_priority")
@@ -3198,25 +3237,6 @@ class CommanderEngine:
         if step == "combat_damage":
             self._begin_combat_damage()
             return
-        if step == "cleanup":
-            hand = self.state.players[active].zones["hand"]
-            excess = len(hand) - self.state.players[active].max_hand_size
-            if excess > 0:
-                self.permissions.issue(
-                    kind="cleanup.discard",
-                    role="pilot",
-                    actors=[active],
-                    allowed_actions=["discard"],
-                    payload_by_actor={
-                        active: {
-                            "count": excess,
-                            "hand": [{"id": self.state.cards[oid].ref, "name": self.state.cards[oid].printed_name} for oid in hand],
-                        }
-                    },
-                )
-                return
-            self._finish_cleanup()
-            return
         self._dispatch_semantic_event(
             "step.begin",
             {"phase": phase, "step": step, "player": active},
@@ -3227,12 +3247,79 @@ class CommanderEngine:
         self._clear_mana(reason="step or phase ended")
         self.state.phase_index += 1
         if self.state.phase_index >= len(TURN_STEPS):
+            if (
+                self.state.phase,
+                self.state.step,
+            ) == ("ending", "cleanup"):
+                # Priority during cleanup is exceptional.  Once its stack is
+                # empty and every player passes, CR 514.3a starts another
+                # cleanup step rather than the next turn.
+                self.state.phase_index = TURN_STEPS.index(
+                    ("ending", "cleanup")
+                )
+                self._enter_step()
+                return
             self._finish_cleanup()
             return
         self._enter_step()
 
+    def _active_cleanup_frame(self) -> dict[str, Any] | None:
+        return next(
+            (
+                annotation
+                for annotation in reversed(self.state.annotations)
+                if annotation.get("kind") == "cleanup_exception_frame"
+                and annotation.get("active", False)
+            ),
+            None,
+        )
+
+    def _remove_cleanup_frames(self) -> None:
+        self.state.annotations = [
+            annotation
+            for annotation in self.state.annotations
+            if annotation.get("kind") != "cleanup_exception_frame"
+        ]
+
     def _finish_cleanup(self) -> None:
         active = self.state.active_player
+        in_cleanup_step = (
+            self.state.phase,
+            self.state.step,
+        ) == ("ending", "cleanup")
+        self._remove_cleanup_frames()
+        cleanup_iteration = 1 + sum(
+            event.code == "turn.cleanup"
+            and event.turn_sequence == self.state.turn_sequence
+            for event in self.state.events
+        )
+        cleanup_delayed = (
+            self._matching_delayed_triggers(
+                "step.begin",
+                {
+                    "phase": "ending",
+                    "step": "cleanup",
+                    "player": active,
+                },
+            )
+            if in_cleanup_step
+            else []
+        )
+        frame = {
+            "kind": "cleanup_exception_frame",
+            "active": True,
+            "turn_sequence": self.state.turn_sequence,
+            "active_player": active,
+            "iteration": cleanup_iteration,
+            "delayed_trigger_ids": [
+                trigger.trigger_id for trigger in cleanup_delayed
+            ],
+            "delayed_triggers_queued": False,
+            "priority_granted": False,
+            "exception_reasons": [],
+        }
+        if in_cleanup_step:
+            self.state.annotations.append(frame)
         for card in self.state.cards.values():
             card.marked_damage = 0
             card.deathtouch_damage = False
@@ -3278,7 +3365,59 @@ class CommanderEngine:
                 None,
             )
         if self.state.game_over:
+            self._remove_cleanup_frames()
             return
+        if in_cleanup_step:
+            before_stabilize_event = self.state.event_sequence
+            waiting = self._stabilize()
+            stabilization_events = [
+                event
+                for event in self.state.events
+                if event.event_id > before_stabilize_event
+            ]
+            reasons: list[str] = []
+            if cleanup_delayed:
+                reasons.append("cleanup_trigger")
+            if waiting:
+                reasons.append("state_or_trigger_choice")
+            if any(
+                event.code.startswith("state.")
+                or event.code == "player.eliminated"
+                for event in stabilization_events
+            ):
+                reasons.append("state_based_action")
+            if (
+                self.state.stack
+                or self.state.pending_trigger_batches
+                or any(
+                    event.code == "stack.trigger"
+                    for event in stabilization_events
+                )
+            ):
+                reasons.append("trigger_waiting")
+            frame["exception_reasons"] = (
+                unique_preserving_order(reasons)
+            )
+            if reasons:
+                self._log(
+                    active,
+                    "cleanup.priority_required",
+                    (
+                        "Cleanup created a state action or waiting "
+                        "trigger; the active player receives priority."
+                    ),
+                    {
+                        "iteration": cleanup_iteration,
+                        "reasons": frame["exception_reasons"],
+                    },
+                    importance=2,
+                    changed_players=[active] if active else [],
+                )
+                if waiting:
+                    return
+                self._grant_priority(active)
+                return
+            self._remove_cleanup_frames()
         self._begin_turn(self._select_next_turn())
 
     def _end_turn_now(self, *, actor: str, reason: str) -> None:
@@ -3334,11 +3473,40 @@ class CommanderEngine:
             return
         if not self.active_seats:
             return
+        cleanup_frame = self._active_cleanup_frame()
+        if (
+            cleanup_frame is not None
+            and not cleanup_frame.get(
+                "delayed_triggers_queued",
+                False,
+            )
+        ):
+            cleanup_frame["delayed_triggers_queued"] = True
+            delayed_ids = {
+                str(value)
+                for value in cleanup_frame.get(
+                    "delayed_trigger_ids",
+                    [],
+                )
+            }
+            delayed = [
+                trigger
+                for trigger in self.state.delayed_triggers
+                if trigger.trigger_id in delayed_ids
+            ]
+            if delayed:
+                self._start_trigger_batch(
+                    delayed,
+                    after="grant_priority",
+                )
+                return
         if seat not in self.active_seats:
             seat = self._next_active_after(seat or self.state.active_player or self.active_seats[0])
         self.state.priority_player = seat
         self.state.priority_passes = []
         self.state.priority_epoch += 1
+        if cleanup_frame is not None:
+            cleanup_frame["priority_granted"] = True
 
     def _issue_priority(
         self, seat: str, hints: Mapping[str, Any] | None = None
@@ -3697,6 +3865,12 @@ class CommanderEngine:
                 return
             if not self.state.started:
                 return
+            if (
+                self.state.priority_player is None
+                and self._active_cleanup_frame() is not None
+            ):
+                self._grant_priority(self.state.active_player)
+                continue
             if self.state.priority_player is not None:
                 seat = self.state.priority_player
                 hints = self._priority_action_hints(seat)

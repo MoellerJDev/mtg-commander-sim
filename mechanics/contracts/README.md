@@ -58,6 +58,12 @@ permissions, division, and opponent-made choices remain explicitly untrusted.
 CR 600 pins the Spells, Abilities, and Effects section taxonomy to the
 dependent CR 601-609 contracts. Because CR 600 contains only a heading, it is
 definition-only and does not create a standalone behavioral claim.
+CR 514 traces cleanup discard, represented damage and turn-duration clearing,
+ordinary no-priority advancement, stabilization, delayed cleanup triggers,
+exceptional priority, and the required additional cleanup step. It remains
+partial because every turn-duration effect is not yet represented by one
+simultaneous duration registry and the complete state-action, replacement,
+trigger, APNAP, hidden-information, and replay interaction matrix is absent.
 CR 602 traces activated-ability parsing, availability, authoritative costs,
 stack placement, tap/untap summoning sickness, object-scoped once-per-turn
 history, and sorcery/instant timing. Complete cost and instruction grammar,

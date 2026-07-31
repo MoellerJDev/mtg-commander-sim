@@ -168,6 +168,10 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 514 cleanup sequencing with private simultaneous discard,
+  ordinary no-priority advancement, and repeat-cleanup handling after an
+  exceptional priority window; universal turn-duration expiration and complete
+  state-action/trigger/APNAP interactions remain blocked
 - source-reviewed CR 602 activation handling with corrected untap-symbol
   summoning sickness and object-scoped once-per-turn restrictions; full cost
   grammar, activation transactions, opponent choices, and acquired-ability

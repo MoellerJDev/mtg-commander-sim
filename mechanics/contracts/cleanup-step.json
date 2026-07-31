@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-514-cleanup-step",
+  "official_name": "Cleanup Step",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "514",
+    "514.1",
+    "514.2",
+    "514.3",
+    "514.3a"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "turn-structure",
+    "maximum-hand-size",
+    "discard",
+    "simultaneous-actions",
+    "continuous-effects",
+    "marked-damage",
+    "state-based-actions",
+    "triggered-abilities",
+    "priority",
+    "stack",
+    "delayed-triggered-abilities",
+    "illegal-actions",
+    "hidden-information",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "hand",
+      "graveyard",
+      "battlefield",
+      "stack"
+    ],
+    "objects": [
+      "active player's hand cards",
+      "permanents with marked damage or turn-duration effects",
+      "waiting triggered abilities",
+      "cleanup exception frame"
+    ],
+    "events": [
+      "cleanup step begins",
+      "active player discards to maximum hand size",
+      "marked damage and represented turn-duration effects end",
+      "state-based actions are performed",
+      "waiting cleanup triggers are put on the stack",
+      "exceptional priority is granted",
+      "another cleanup step begins after an empty-stack pass cycle"
+    ],
+    "state_reads": [
+      "active player",
+      "maximum hand size",
+      "private hand",
+      "marked and deathtouch damage",
+      "temporary keywords and represented turn-duration annotations",
+      "pending semantic and delayed triggers",
+      "state-based-action snapshot",
+      "stack and priority-pass state"
+    ],
+    "state_writes": [
+      "simultaneous cleanup discards",
+      "damage and represented turn-duration removal",
+      "state-based-action results",
+      "delayed trigger stack objects",
+      "serialized cleanup exception frame",
+      "priority and repeat-cleanup transition"
+    ],
+    "costs": [],
+    "timing": [
+      "discard occurs first and does not use the stack",
+      "damage and turn-duration cleanup occurs second and does not use the stack",
+      "normally no player receives priority",
+      "state actions and waiting triggers create the exceptional priority window",
+      "passing through that window starts another cleanup step"
+    ],
+    "targets": [
+      "represented cleanup triggers use their compiled target continuations"
+    ],
+    "choices": [
+      "the active player privately chooses exactly the excess hand cards",
+      "represented state and trigger-order choices remain capability-scoped"
+    ],
+    "hidden_information": [
+      "only the active seat receives the cleanup discard candidates",
+      "the public event reveals only cards actually discarded"
+    ],
+    "apnap": [
+      "represented delayed cleanup triggers use active-player/nonactive-player groups",
+      "complete merging of every simultaneous cleanup trigger family is incomplete"
+    ],
+    "layers": [
+      "ending a turn-duration effect can change derived characteristics before the state check"
+    ],
+    "replacement_effects": [
+      "discard and zone-change replacement coverage remains dependent on CR 614-616"
+    ],
+    "copy": [
+      "represented temporary copy overrides restore their prior copy state"
+    ],
+    "control_change": [
+      "represented temporary control changes restore the prior controller"
+    ],
+    "zone_change": [
+      "cleanup discards use one simultaneous authoritative move",
+      "state actions use the shared immutable snapshot and canonical move path"
+    ],
+    "source_leaves": [
+      "delayed cleanup triggers remain independent of their source where represented"
+    ]
+  },
+  "variants": [
+    "hand at or below maximum",
+    "hand above maximum",
+    "cleanup with no state action or trigger",
+    "cleanup effect expiration causes a state action",
+    "beginning-of-next-cleanup delayed trigger",
+    "additional cleanup after exceptional priority",
+    "multiple simultaneous cleanup triggers"
+  ],
+  "witness_cards": [
+    {
+      "name": "Sai, Master Thopterist",
+      "oracle_id": "52241b9c-7a69-4176-9234-8bdab09d8e64"
+    },
+    {
+      "name": "Liquimetal Torque",
+      "oracle_id": "b7d4b7dd-fbb1-4ca3-875f-ef13a95e66ad"
+    },
+    {
+      "name": "Toxic Deluge",
+      "oracle_id": "afaef788-34d1-460b-b884-9d7ae6ddeb18"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_514_rule",
+    "test_cleanup_discard_is_exact_simultaneous_private_and_replayable",
+    "test_invalid_cleanup_discard_rolls_back_capability_and_state",
+    "test_ordinary_cleanup_grants_no_priority",
+    "test_cleanup_state_action_grants_priority_then_repeats_cleanup",
+    "test_next_cleanup_trigger_waits_until_cleanup_actions_finish",
+    "test_cleanup_clears_damage_and_represented_turn_effects_together",
+    "test_liquimetal_torque_changes_only_nonland_permanents_until_cleanup",
+    "test_toxic_deluge_pays_x_life_and_applies_until_cleanup",
+    "test_marked_damage_survives_type_loss_until_cleanup"
+  ],
+  "implementation": {
+    "component": "CommanderEngine cleanup entry, discard, duration clearing, cleanup-exception frame, stabilization, delayed-trigger, priority, and repeat-step paths",
+    "version": "cleanup-step-v1"
+  },
+  "known_blockers": [
+    "all until-end-of-turn and this-turn continuous effects are not represented by one duration registry",
+    "cleanup characteristic changes are applied sequentially internally rather than as one complete CR 514.2 simultaneous layer expiration",
+    "complete discard, zone-change, and effect-ending replacement interactions are absent",
+    "the state-based-action engine and trigger compiler do not cover every Comprehensive Rules and Oracle family",
+    "all cleanup-begin, discard, expiration, and state-action triggers are not merged into one universal APNAP ordering batch",
+    "cleanup trigger targets, modes, optional choices, and hidden-information interactions remain limited to compiled schemas"
+  ],
+  "review_status": "draft"
+}

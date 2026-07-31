@@ -27,7 +27,7 @@ coverage.
 | Workstream | Status | Current evidence |
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
-| Mechanic contracts | In progress | 26 partial/untrusted contracts; 399 mechanics unclassified; 0 trusted |
+| Mechanic contracts | In progress | 27 partial/untrusted contracts; 398 mechanics unclassified; 0 trusted |
 | Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
 | Object and zone identity | Partial | CR 400 logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, and selected linked-effect guards |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
@@ -36,7 +36,7 @@ coverage.
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 307 cases in CR 120/210/310/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 40 semantic passes, 220 blocked cases, and 47 definition-only cases |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 312 cases in CR 120/210/310/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 42 semantic passes, 222 blocked cases, and 48 definition-only cases |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -144,6 +144,13 @@ coverage.
 - [x] Reviewed the sole CR 600 General record as definition-only taxonomy,
   pinned it to the CR 601-609 dependency contracts, and added an executable
   traceability test without inventing behavior for a section heading.
+- [x] Reviewed all 5 CR 514 Cleanup Step records: private exact-count
+  simultaneous discard and ordinary no-priority cleanup pass. Represented
+  state-action/trigger exceptions now grant priority and start another cleanup
+  after the empty-stack pass cycle. Universal simultaneous duration expiration
+  and complete state-action, replacement, trigger, APNAP, hidden-information,
+  multiplayer, and replay interactions remain blocked; the heading is
+  definition-only.
 - [x] Reviewed all 20 CR 602 Activating Activated Abilities cases:
   activated-only classification, tap/untap summoning sickness,
   object-scoped once-per-turn restrictions, and sorcery/instant timing pass.
@@ -151,7 +158,7 @@ coverage.
   opponent-choice, cost-altering, prohibition, and acquired-ability records
   remain dependency-blocked; 3 taxonomy records are definition-only.
 
-## Current CR 120/210/310/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
+## Current CR 120/210/310/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
 
 Battle behavior is derived from the effective card type, subtype, defense
 characteristic, counters, controller, and protector. It contains no
@@ -274,7 +281,7 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,773 unit/integration tests pass: 473 ordinary tests plus 3,300 generated
+- 3,780 unit/integration tests pass: 480 ordinary tests plus 3,300 generated
   inventory/source-linkage tests. The latter are not semantic passes.
 - Fifteen focused object/token tests cover monotonic incarnations, draws,
   timestamp moments, identity-sensitive targets and delayed links, private
@@ -292,6 +299,10 @@ Outstanding blockers include:
   exact-incarnation triggers, protector choice/repair, projection, native
   transformed casting, decline/token/changed-object behavior, compiled and
   unresolved targets, contract pinning, and three command-replay paths.
+- Seven focused CR 514 tests cover source traceability, exact private discard,
+  invalid-action rollback, ordinary no-priority cleanup, state-action
+  stabilization, delayed-trigger ordering, repeat cleanup, represented
+  turn-duration clearing, and exact command replay.
 - Exact Zimone closure: 27 tests pass.
 - Exact Mishra closure: 23 tests pass.
 - The seed-20260730 regression reaches its corrected main-phase opportunities,
@@ -299,10 +310,10 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 307 CR
-  120/210/310/600/601/602/603/604/605/606/607/608/609/614/615/616 cases are
-  source-reviewed: 40 pass with executable engine evidence, 220 remain
-  blocked, and 47 are definition-only. The other 2,993 cases remain
+  establish inventory linkage only. All 312 CR
+  120/210/310/514/600/601/602/603/604/605/606/607/608/609/614/615/616 cases
+  are source-reviewed: 42 pass with executable engine evidence, 222 remain
+  blocked, and 48 are definition-only. The other 2,988 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -313,7 +324,7 @@ checkpoint validation.
 
 1. Continue reviewing and promoting conformance cases by
    dependency-ordered rules family; keep exposed but unimplemented edge cases
-   failing or blocked. Review CR 514 Cleanup Step next, while retaining the
+   failing or blocked. Review CR 513 End Step next, while retaining the
    deeper CR 601.2a-i stack-first casting frame as an implementation blocker.
 2. Wire the reviewed CR 614/615/616 primitives into the shared CR 120/310
    replacement and prevention event pipeline, including stateful shields and
