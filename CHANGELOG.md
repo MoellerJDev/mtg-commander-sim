@@ -21,6 +21,9 @@
   projected battlefield, activation order is recorded normally, exact
   multi-color modes are selected through a server-issued form, and casting
   consumes floated mana before routine automatic completion.
+- Kept generically enforced mana-mode life payments and self-damage inside the
+  trusted preflight boundary, so manual activation does not incorrectly
+  downgrade sources such as Elves of Deep Shadow.
 - Fixed modal double-faced land plays. Agadeem's Awakening now advertises
   **Play Agadeem, the Undercrypt**, prompts for the land face's exact 3-life
   entry choice, enters on that face, and renders the matching characteristics
