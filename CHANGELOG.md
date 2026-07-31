@@ -67,9 +67,10 @@
   cumulative PR #24 tip, with 3,925 deterministic tests, 557 reviewed rule
   records, and 49 partial mechanic contracts without promoting the incomplete
   snapshot to trusted.
-- Closed PRs #17–#23 as superseded only after their exact heads were
-  ancestry-proven reachable from `main`, then froze broad sequential CR review
-  for the authoritative server/browser vertical slice.
+- Reconciled the intermediate PRs only after their exact heads were
+  ancestry-proven reachable from `main`: GitHub recorded #17 as merged and
+  #18–#23 closed as superseded. Broad sequential CR review is now frozen for
+  the authoritative server/browser vertical slice.
 - Recorded the repository's change to public visibility. No software license
   has been selected, and live private game artifacts remain excluded.
 

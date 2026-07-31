@@ -17,8 +17,8 @@ The generated current ledger is
 - [x] retain exact replay, privacy, repository, schema, and packaging gates
 - [x] remove AI-run games and provider identity from product completion criteria
 - [x] integrate CR 400–408 and CR 500–512 into `main`; the cumulative PR #24
-  tip preserved the intermediate CR 400–407 heads before PRs #17–#23 closed as
-  superseded
+  tip preserved the intermediate CR 400–407 heads before GitHub recorded #17
+  as merged and #18–#23 closed as superseded
 - [x] verify the combined source tree under the complete local gate and public
   Python 3.11/3.12 Ubuntu/Windows GitHub matrix
 

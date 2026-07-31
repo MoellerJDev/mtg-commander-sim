@@ -12,7 +12,7 @@
     "active_phase": "rules_backlog_integrated_server_browser_vertical_slice_next",
     "branch": "main",
     "branch_ancestry": {
-      "focused_branch_base": "f968cfd7c3b964d31abc9652bcbc3bbef2374b60",
+      "focused_branch_base": "adb0f520e71161e23bd14854c78051597c545ba6",
       "focused_branch_unique_commits_over_main": 0
     },
     "commit_reference": "the commit containing this ledger",
@@ -133,7 +133,7 @@
         "base": "agent/cr-405-stack",
         "head": "agent/cr-400-general-zone-identity",
         "number": 17,
-        "state": "closed_superseded_by_pr_24",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/17"
       },
       {
@@ -206,7 +206,7 @@
   },
   "milestones": [
     {
-      "evidence": "Integration PRs #1-16, #24, and #25 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; PRs #17-23 were closed as superseded only after their exact heads became reachable from main.",
+      "evidence": "Integration PRs #1-17, #24, and #25 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete"
@@ -320,12 +320,12 @@
     "web_files": 0
   },
   "validation": {
-    "baseline_commit": "f968cfd7c3b964d31abc9652bcbc3bbef2374b60",
+    "baseline_commit": "adb0f520e71161e23bd14854c78051597c545ba6",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": "PR-24-final-matrix",
-      "status": "required_green_before_merge",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/24/checks"
+      "run_id": 30644492183,
+      "status": "pass",
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30644492183"
     },
     "local": {
       "compile": "pass",

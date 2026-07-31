@@ -1,7 +1,10 @@
 # MTG Commander Sim 0.8.0 — integrated verification
 
 Date: 2026-07-31
-Implementation commit: the `main` commit containing this document
+Exact local-gate candidate:
+`605f14042b207e078e08d9a0ace6574b40726cb7`
+Rules integration merge:
+`adb0f520e71161e23bd14854c78051597c545ba6`
 Local environment: Windows, Python 3.11.9
 
 ## Deterministic gate
@@ -67,8 +70,14 @@ PASS:
 ## GitHub CI
 
 PASS: the final PR #24 candidate received fresh public GitHub Actions checks
-on Python 3.11 and 3.12, Ubuntu and Windows. All eight push and pull-request
-jobs executed repository steps and passed before the ordinary merge.
+on Python 3.11 and 3.12, Ubuntu and Windows:
+
+- push run `30644109161`
+- pull-request synchronize run `30644116569`
+- pull-request ready-for-review run `30644117240`
+
+All repository jobs executed and passed before the ordinary merge. The
+resulting `main` merge passed push run `30644492183`.
 
 The repository is public and GitHub runners are operating normally. Historical
 zero-step billing/spending-limit failures are not passing evidence and were

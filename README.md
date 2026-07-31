@@ -10,8 +10,9 @@ corpus.
 Current integration checkpoint: the public repository's `main` branch contains
 the deterministic foundation and reviewed CR 400–408 and CR 500–512 slices.
 PR #24 incorporated the ancestry-proven CR 400–408 stack; PRs #17–#23 were
-closed as superseded only after their exact heads became reachable from
-`main`. The integrated source tree has 3,925 deterministic tests, 557 reviewed
+reconciled only after their exact heads became reachable from `main`. GitHub
+recorded #17 as merged; #18–#23 closed as superseded. The integrated source
+tree has 3,925 deterministic tests, 557 reviewed
 rule records, and 49 partial mechanic contracts. GitHub Actions is running
 normally. No ASGI server, room service, durable game store, or browser
 application exists yet; the single authoritative server/browser vertical slice
