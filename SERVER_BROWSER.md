@@ -1,8 +1,10 @@
 # Server and browser vertical slice
 
-Version 0.8.0 includes the first executable four-player browser slice. It is a
+Version 0.8.0 includes an executable four-player browser slice with generic
+forms for the rules engine's current server-issued choice schemas. It is a
 single-node development deployment, not a claim of complete Magic rules,
-production-scale operations, or a finished choice UI.
+future-schema coverage, production-scale operations, or finished accessibility
+and visual design.
 
 ## Run locally
 
@@ -74,6 +76,10 @@ server derives `pilot:A`–`pilot:D` from the authenticated room seat.
   included in durable Game Record state.
 - Reconnect always starts with a full hash-verified projection, then resumes
   deltas.
+- A process restart lazily recreates a game actor from its checksummed Game
+  Record, issues fresh opaque capabilities for the surviving decision, and
+  preserves durable idempotency receipts. The application-level recovery test
+  submits before and after restart and verifies exact command replay.
 
 SQLite holds guest, room, seat, deck, game-index, and idempotency control-plane
 records. Authoritative game truth remains the existing checksummed Game Record
@@ -92,15 +98,42 @@ npx playwright install chromium
 npm run e2e
 ```
 
-The end-to-end test opens four isolated Chromium contexts, creates four guest
-sessions, atomically fills seats A–D, uploads the two duplicated exact-list
-fixtures, starts the game, verifies four private seven-card hands, submits all
-four keep decisions through server capabilities, and reloads seat A. It expects
-eight cards after reconnect because the first player draws on turn one in the
-implemented multiplayer Commander profile. The duplicated pod is protocol
-evidence only, never matchup evidence.
+The end-to-end suite opens four isolated Chromium contexts per scenario,
+creates four guest sessions, atomically fills seats A–D, uploads the two
+duplicated exact-list fixtures, and starts a game. One scenario submits all four
+keep decisions, records the exact projected hand count and decision, reloads
+seat A, and requires the full reconnect projection to match those values. A
+second scenario takes a post-free mulligan, selects a private card to bottom
+through the generic form, proves that the other three DOMs never receive that
+seat-scoped control, and submits the resulting six-card keep. The duplicated
+pod is protocol evidence only, never matchup evidence.
 
-The first browser slice renders ordinary legal-action buttons. Generic forms
-for every target, mode, cost, search, ordering, replacement, trigger, and combat
-choice remain the next UI slice; unsupported choices still fail closed at the
-server.
+## Generic decision forms
+
+Each projected legal action may contain a JSON-only `form` version. The same
+Python adapter that builds that form defines the only choice-field names the
+application service accepts. The browser renders the form, but the engine still
+revalidates cardinality, targets, modes, costs, payability, and rules effects.
+The current form vocabulary covers:
+
+- required and optional single references, multi-reference selection, and
+  ordering;
+- booleans, bounded integers/X, names, enums, and legal-seat choices;
+- alternate/additional cost variants and their variant-scoped fields;
+- modal, grouped, and multi-target selection;
+- private search/fetch choices and as-enters life payment;
+- mulligan bottoms, cleanup discards, trigger order, AP/NAP and legend choices;
+- attacker-to-defender and blocker-to-attacker assignment;
+- server-derived combat-damage source power and legal targets; and
+- per-copy storm target retention or retargeting.
+
+Private candidates enter a form only through that authenticated seat's
+projection. Simultaneous decisions still produce independent seat packets and
+capabilities. A browser cannot name another principal or submit a field absent
+from the selected server action. Unknown future schemas remain unavailable or
+fail closed until both the adapter and UI support them; the client never guesses
+rules behavior.
+
+Production accounts, multi-process ownership, rate limiting, containers,
+spectators, accessibility hardening, and richer retry/resume presentation remain
+later server/browser work.

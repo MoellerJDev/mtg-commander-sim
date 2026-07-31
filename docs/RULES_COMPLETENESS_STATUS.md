@@ -584,16 +584,17 @@ checkpoint validation.
 ## Next dependency-ordered work
 
 Broad sequential rules review is frozen after the CR 400–408 and CR 500–512
-integration reached `main`. PR #27 also merged the first authoritative
-server/browser vertical slice. The next steps are:
+integration reached `main`. The first authoritative server/browser slice now
+has a shared, versioned form adapter for the engine's current choice schemas,
+four-context private mulligan coverage, and process-restart recovery with exact
+replay. The next steps are:
 
-1. Add generic browser forms for modes, targets, costs, searches, ordering,
-   replacement choices, triggers, and combat decisions.
-2. Harden server recovery, operations, and lifecycle behavior while preserving
-   the single-writer actor and seat-projected protocol boundaries.
+1. Continue server lifecycle and operations hardening: explicit administrative
+   stop/resume inspection, expiry/rate limits, and deployment boundaries.
+2. Harden browser accessibility, retry/resume presentation, spectators, and any
+   new choice-schema family only when the engine introduces it.
 3. Resume rules work for defects that block those slices; defer broad
-   CR-number traversal until the browser can express the engine's existing
-   decision surface.
+   CR-number traversal until it has concrete executable evidence.
 
 No deck list has been modified, and no current game result is promoted to
 matchup evidence.

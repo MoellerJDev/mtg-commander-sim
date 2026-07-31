@@ -1,5 +1,12 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { api, type Guest, type Room, streamUrl } from "./api";
+import { ChoiceFormView } from "./ChoiceForm";
+import {
+  executableChoices,
+  initialChoices,
+  validateChoices,
+  type ChoiceValues,
+} from "./choices";
 import type { CommandEnvelope, DecisionPacket, JsonValue, LegalAction } from "./generated/protocol";
 import { ingestPacket, type ProjectedView } from "./protocol";
 
@@ -16,6 +23,28 @@ function asList(value: JsonValue | undefined): JsonValue[] {
 function cardName(value: JsonValue): string {
   const card = asRecord(value);
   return String(card.n ?? card.name ?? card.id ?? "Unknown card");
+}
+
+function projectedLabels(view: ProjectedView): Map<string, string> {
+  const labels = new Map<string, string>();
+  function walk(value: JsonValue | undefined) {
+    if (Array.isArray(value)) {
+      value.forEach(walk);
+      return;
+    }
+    if (!value || typeof value !== "object") return;
+    const row = value as Record<string, JsonValue>;
+    const id = row.id;
+    if (typeof id === "string") {
+      const label = row.label ?? row.n ?? row.name;
+      if (typeof label === "string") labels.set(id, label);
+    }
+    Object.values(row).forEach(walk);
+  }
+  walk(view.state);
+  walk(view.decision?.ctx);
+  for (const seat of ["A", "B", "C", "D"]) labels.set(seat, `Seat ${seat}`);
+  return labels;
 }
 
 function Welcome({ onReady }: { onReady: (guest: Guest) => void }) {
@@ -267,6 +296,10 @@ function GameView({ gameId }: { gameId: string }) {
   const ingestChain = useRef(Promise.resolve());
   const [connection, setConnection] = useState("CONNECTING");
   const [notice, setNotice] = useState("");
+  const [selectedAction, setSelectedAction] = useState<LegalAction | null>(null);
+  const [choiceValues, setChoiceValues] = useState<ChoiceValues>({});
+  const [choiceErrors, setChoiceErrors] = useState<string[]>([]);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     let stopped = false;
@@ -311,7 +344,13 @@ function GameView({ gameId }: { gameId: string }) {
     };
   }, [gameId]);
 
-  async function act(action: LegalAction) {
+  useEffect(() => {
+    setSelectedAction(null);
+    setChoiceValues({});
+    setChoiceErrors([]);
+  }, [view?.decision?.id]);
+
+  async function act(action: LegalAction, choices: ChoiceValues = {}) {
     if (!view?.decision) return;
     const envelope: CommandEnvelope = {
       protocol_version: "3.0",
@@ -321,15 +360,46 @@ function GameView({ gameId }: { gameId: string }) {
       action_id: action.id,
       capability: view.decision.cap,
       expected_view_revision: view.viewRevision,
-      choices: {},
+      choices,
     };
+    setSubmitting(true);
     try {
       const result = await api.command(gameId, envelope);
       setNotice(result.receipt.summary);
-      if (!result.receipt.ok) setNotice(`${result.receipt.code}: ${result.receipt.summary}`);
+      if (!result.receipt.ok) {
+        setNotice(`${result.receipt.code}: ${result.receipt.summary}`);
+      } else {
+        setSelectedAction(null);
+        setChoiceValues({});
+        setChoiceErrors([]);
+      }
     } catch (caught) {
       setNotice(caught instanceof Error ? caught.message : String(caught));
+    } finally {
+      setSubmitting(false);
     }
+  }
+
+  function chooseAction(action: LegalAction) {
+    if (!action.form) {
+      void act(action);
+      return;
+    }
+    setSelectedAction(action);
+    setChoiceValues(initialChoices(action.form));
+    setChoiceErrors([]);
+  }
+
+  function submitChoice(event: FormEvent) {
+    event.preventDefault();
+    if (!selectedAction?.form) return;
+    const errors = validateChoices(selectedAction.form, choiceValues);
+    setChoiceErrors(errors);
+    if (errors.length) return;
+    void act(
+      selectedAction,
+      executableChoices(selectedAction.form, choiceValues),
+    );
   }
 
   if (!view) return <main className="loading-screen"><div className="spinner" /><p>Opening your projected table…</p>{notice && <div className="error-banner">{notice}</div>}</main>;
@@ -341,6 +411,8 @@ function GameView({ gameId }: { gameId: string }) {
   const ownPlayer = asRecord(players[ownSeat]);
   const hand = asList(ownPlayer.hand);
   const stack = asList(state.stack);
+  const labels = projectedLabels(view);
+  const labelFor = (value: string) => labels.get(value) ?? value;
   return (
     <main className="game-shell" data-view-revision={view.viewRevision}>
       <header className="game-topbar">
@@ -367,12 +439,47 @@ function GameView({ gameId }: { gameId: string }) {
             <div><span className="eyebrow">DECISION {view.decision.id}</span><h2>{view.decision.kind}</h2></div>
             <div className="action-row">
               {view.decision.legal_actions.map((action) => (
-                <button key={action.id} data-testid={`action-${action.id}`} onClick={() => act(action)}>{action.label ?? action.kind ?? action.action}</button>
+                <button key={action.id} data-testid={`action-${action.id}`} disabled={submitting} onClick={() => chooseAction(action)}>{action.label ?? action.kind ?? action.action}</button>
               ))}
             </div>
           </>
         ) : <p>Waiting for another player’s decision.</p>}
       </section>
+      {selectedAction?.form && (
+        <div className="choice-overlay" role="presentation">
+          <form className="choice-dialog" data-testid="choice-dialog" onSubmit={submitChoice}>
+            <header>
+              <div>
+                <span className="eyebrow">SERVER-ISSUED CHOICES</span>
+                <h2>{selectedAction.label ?? selectedAction.action}</h2>
+              </div>
+              <button
+                type="button"
+                className="secondary-button"
+                data-testid="cancel-choice"
+                onClick={() => setSelectedAction(null)}
+              >Cancel</button>
+            </header>
+            <ChoiceFormView
+              form={selectedAction.form}
+              values={choiceValues}
+              onChange={(values) => {
+                setChoiceValues(values);
+                setChoiceErrors([]);
+              }}
+              labelFor={labelFor}
+            />
+            {choiceErrors.length > 0 && (
+              <ul className="choice-errors" data-testid="choice-errors">
+                {choiceErrors.map((error) => <li key={error}>{error}</li>)}
+              </ul>
+            )}
+            <button type="submit" data-testid="submit-choice" disabled={submitting}>
+              {submitting ? "Submitting…" : selectedAction.form.submit_label}
+            </button>
+          </form>
+        </div>
+      )}
       {notice && <div className="toast">{notice}</div>}
     </main>
   );

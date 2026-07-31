@@ -20,8 +20,9 @@ capability checks, projection, replay, and protocol 3.0 sit below a working
 FastAPI adapter. `GameManager` owns one serialized `GameActor` per active game;
 SQLite stores the guest/room/seat/deck/game/idempotency control plane while
 Game Record v3 remains authoritative game persistence. A React/TypeScript
-client consumes per-connection seat projections over WebSocket. This is a
-single-node development vertical slice, not yet the complete choice UI or a
+client consumes per-connection seat projections over WebSocket and renders the
+engine's current versioned choice-form vocabulary. This remains a single-node
+development deployment, not complete future-schema/accessibility coverage or a
 multi-process production deployment.
 
 ## Layered design
@@ -444,6 +445,36 @@ new delivery stream, so its packet number may restart at one; clients replace
 the visible event tail from that full packet and enforce monotonic packet
 numbers only for subsequent deltas.
 
+When the process no longer has an actor for an indexed game, the server lazily
+loads the checksummed Game Record into a new actor. Persisted capability metadata
+is discarded and the surviving decision receives fresh opaque tokens; SQLite
+idempotency receipts remain authoritative across the restart. Recovery is
+application-tested by accepting a command, replacing the complete ASGI runtime,
+resuming the next seat's decision, replaying the earlier command ID, accepting
+the next command, and verifying exact Game Record replay.
+
+## Browser choice adapter
+
+`choice_forms.py` translates an already legal, seat-projected action and its
+decision context into a versioned JSON-only form. Projection attaches the form
+to that action. `GameService` asks the same adapter which choice keys were
+delegated, so renderability cannot accidentally grant authority over an action's
+server-derived source, controller, cost, or semantic program.
+
+The React client renders only this vocabulary: references and ordered sets,
+booleans, enums, bounded integers/X, names, legal seats, cost variants,
+modal/grouped targets, private searches, mulligan/cleanup and trigger choices,
+AP/NAP and legend choices, attack/block maps, combat-damage assignments, and
+storm-copy targets. Combat forms receive source power and legal targets from the
+engine; the browser does not calculate combat rules. Submission is checked for
+basic completeness in the client, limited to adapter-issued keys by the
+service, and fully revalidated by the engine.
+
+The form context is the same principal projection used everywhere else. It
+cannot introduce an opposing hand, library order, analyst artifact, or raw
+checkpoint. An unknown future schema is not inferred by the browser and remains
+fail-closed until the shared adapter and client gain an explicit representation.
+
 The current SQLite ownership model is single-process. A multi-process or
 horizontal deployment requires an external ownership/lease design before a
 second process may host the same game.
@@ -618,10 +649,10 @@ The architecture is suitable for a serious project, but complete Magic coverage 
 - multiplayer shortcut and deterministic loop negotiation
 - elimination or reviewed override of every material full-corpus Oracle
   residual
-- single-writer game actors, durable database persistence, authentication, and
-  WebSocket delivery
-- browser rooms, seats, reconnect, spectators, generic decisions, and
-  accessibility
+- multi-process actor ownership/leases, PostgreSQL, production accounts,
+  rate limits, deployment containers, and operational monitoring
+- browser spectators, accessibility hardening, richer retry/resume
+  presentation, and explicit controls for future choice-schema families
 
 These modules fit behind the current `CommanderEngine`/`GameService` boundary.
 They do not require granting clients broader permissions, replacing the command

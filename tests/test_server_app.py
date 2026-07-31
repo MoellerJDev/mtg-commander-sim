@@ -30,6 +30,11 @@ class ServerApplicationTests(unittest.TestCase):
         self.client.__exit__(None, None, None)
         self.temp.cleanup()
 
+    def restart_client(self) -> None:
+        self.client.__exit__(None, None, None)
+        self.client = TestClient(create_app(self.settings))
+        self.client.__enter__()
+
     def guest(self, name: str) -> tuple[str, str]:
         response = self.client.post(
             "/api/v1/guests", json={"display_name": name}
@@ -257,6 +262,98 @@ class ServerApplicationTests(unittest.TestCase):
         database = CardDatabase(DB_PATH)
         try:
             replay = replay_record(record_dir, database, verify=True)
+        finally:
+            database.close()
+        self.assertTrue(replay["ok"])
+
+    def test_server_restart_recovers_decision_idempotency_and_replay(self):
+        game_id, tokens, _ = self.create_ready_game()
+        response = self.client.get(
+            f"/api/v1/games/{game_id}/state?full=true",
+            headers=self.auth(tokens[0]),
+        )
+        self.assertEqual(200, response.status_code, response.text)
+        packet_a = response.json()["packet"]
+        envelope_a = {
+            "protocol_version": "3.0",
+            "game_id": game_id,
+            "command_id": "restart-A-0001",
+            "decision_id": packet_a["decision"]["id"],
+            "action_id": "keep",
+            "capability": packet_a["decision"]["cap"],
+            "expected_view_revision": packet_a["view_revision"],
+            "choices": {},
+        }
+        accepted_a = self.client.post(
+            f"/api/v1/games/{game_id}/commands",
+            headers=self.auth(tokens[0]),
+            json=envelope_a,
+        )
+        self.assertEqual(200, accepted_a.status_code, accepted_a.text)
+        self.assertTrue(accepted_a.json()["receipt"]["ok"])
+        revision_after_a = accepted_a.json()["receipt"]["state_revision"]
+
+        before_restart = self.client.get(
+            f"/api/v1/games/{game_id}/state?full=true",
+            headers=self.auth(tokens[1]),
+        )
+        self.assertEqual(200, before_restart.status_code, before_restart.text)
+        packet_b_before = before_restart.json()["packet"]
+        self.assertIsNotNone(packet_b_before["decision"])
+
+        self.restart_client()
+
+        recovered = self.client.get(
+            f"/api/v1/games/{game_id}/state?full=true",
+            headers=self.auth(tokens[1]),
+        )
+        self.assertEqual(200, recovered.status_code, recovered.text)
+        packet_b = recovered.json()["packet"]
+        self.assertEqual("pilot:B", packet_b["principal"])
+        self.assertEqual(revision_after_a, packet_b["view_revision"])
+        self.assertEqual(
+            packet_b_before["decision"]["id"],
+            packet_b["decision"]["id"],
+        )
+        self.assertNotEqual(
+            packet_b_before["decision"]["cap"],
+            packet_b["decision"]["cap"],
+        )
+
+        duplicate = self.client.post(
+            f"/api/v1/games/{game_id}/commands",
+            headers=self.auth(tokens[0]),
+            json=envelope_a,
+        )
+        self.assertEqual(200, duplicate.status_code, duplicate.text)
+        self.assertTrue(duplicate.json()["receipt"]["ok"])
+        self.assertTrue(duplicate.json()["receipt"]["replayed"])
+
+        envelope_b = {
+            "protocol_version": "3.0",
+            "game_id": game_id,
+            "command_id": "restart-B-0001",
+            "decision_id": packet_b["decision"]["id"],
+            "action_id": "keep",
+            "capability": packet_b["decision"]["cap"],
+            "expected_view_revision": packet_b["view_revision"],
+            "choices": {},
+        }
+        accepted_b = self.client.post(
+            f"/api/v1/games/{game_id}/commands",
+            headers=self.auth(tokens[1]),
+            json=envelope_b,
+        )
+        self.assertEqual(200, accepted_b.status_code, accepted_b.text)
+        self.assertTrue(accepted_b.json()["receipt"]["ok"])
+
+        database = CardDatabase(DB_PATH)
+        try:
+            replay = replay_record(
+                self.settings.game_root / game_id,
+                database,
+                verify=True,
+            )
         finally:
             database.close()
         self.assertTrue(replay["ok"])

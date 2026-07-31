@@ -103,6 +103,30 @@ class ApplicationProtocolTests(unittest.TestCase):
         self.assertEqual(session.state.revision, packet["view_revision"])
         Draft202012Validator(self.packet_schema).validate(packet)
 
+    def test_projected_choice_form_and_command_fields_share_one_adapter(self):
+        session, service = self.make_service(31009)
+        packet = service.observe("pilot:A", full=True)
+        mulligan = next(
+            action
+            for action in packet["decision"]["legal_actions"]
+            if action["id"] == "mulligan"
+        )
+        self.assertEqual(1, mulligan["form"]["v"])
+        self.assertEqual(
+            "override_reason", mulligan["form"]["fields"][0]["name"]
+        )
+
+        result = service.command(
+            self.envelope(
+                session,
+                command_id="form-mulligan-1",
+                action_id="mulligan",
+                choices={"override_reason": "Protocol form coverage"},
+            ),
+            principal="pilot:A",
+        )
+        self.assertTrue(result.ok, result.summary)
+
     def test_capability_uses_256_bits_of_randomness(self):
         session, _ = self.make_service(31003)
         token = session.engine.permissions.capability_for("pilot:A").token

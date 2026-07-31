@@ -12,10 +12,12 @@ Current development checkpoint: the deterministic foundation and reviewed CR
 slice. It provides guest sessions, invite-only four-seat rooms, deck
 validation/preflight, a serialized single-writer game actor, SQLite control
 plane, durable Game Record v3 acknowledgement, strict idempotent protocol 3.0
-commands, seat-scoped WebSockets, reconnect, and a TypeScript/React table. The
-browser slice is real and end-to-end tested, but its generic choice forms and
-production operations remain incomplete. The generated platform ledger records
-the exact current test and coverage counts.
+commands, seat-scoped WebSockets, reconnect and process-restart recovery, and a
+TypeScript/React table. The browser renders the engine's current generic choice
+vocabulary and is end-to-end tested with four isolated seats; future choice
+schemas, accessibility polish, and production operations remain incomplete.
+The generated platform ledger records the exact current test and coverage
+counts.
 
 This is a structural rewrite of the earlier two-player duel lab. The server-side game kernel is now separate from:
 
@@ -149,11 +151,16 @@ generated documentation fixtures with bearer capabilities redacted. See
 - SQLite guest/room/seat/deck/game/idempotency control-plane persistence plus
   Game Record v3 durability before command acknowledgement
 - React/TypeScript room and four-player table UI with Moxfield or pasted-list
-  import, private hand rendering, legal-action prompts, reconnect, and
-  four-isolated-context Playwright coverage
+  import, private hand rendering, legal-action prompts, generic server-issued
+  choice forms, reconnect, and four-isolated-context Playwright coverage
+- generic browser controls for current cost/X, mode/target, private search,
+  ordering, trigger, mulligan/cleanup, AP/NAP, legend, attack/block, combat
+  damage, and storm-copy choices; the engine remains the sole validator
 - strict protocol 3.0 command envelopes plus hash-checked projection patches
 - per-connection ephemeral projection cursors, including multiple-tab and
   reconnect isolation for one seat
+- lazy process-restart recovery from Game Record v3 with fresh capabilities,
+  durable idempotency, continued commands, and exact replay verification
 - a reference client reducer that can be reused by a GUI, WebSocket client, or LLM runner
 - bounded same-capability retry packets for invalid model actions, without a full-state resend
 - Game Record v3 checkpoints plus command/event/decision journals

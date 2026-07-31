@@ -1,4 +1,4 @@
-import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -22,6 +22,51 @@ async function submitDeck(page: Page, seat: string, text: string) {
 
 async function viewRevision(page: Page): Promise<number> {
   return Number(await page.locator(".game-shell").getAttribute("data-view-revision"));
+}
+
+async function startFourPlayerGame(browser: Browser): Promise<{ contexts: BrowserContext[]; pages: Page[] }> {
+  const contexts: BrowserContext[] = [];
+  const pages: Page[] = [];
+  for (const seat of "ABCD") {
+    const context = await browser.newContext();
+    contexts.push(context);
+    const page = await context.newPage();
+    pages.push(page);
+    await enter(page, `Choices ${seat}`);
+  }
+  await pages[0].getByTestId("create-room").click();
+  const invite = await pages[0].getByTestId("room-invite").textContent();
+  expect(invite).toBeTruthy();
+  for (let index = 1; index < 4; index += 1) {
+    await pages[index].getByTestId("invite-code").fill(invite!);
+    await pages[index].getByTestId("seat-select").selectOption("ABCD"[index]);
+    await pages[index].getByTestId("join-room").click();
+  }
+  const zimone = await readFile(path.resolve("..", "examples", "zimone-and-dina.txt"), "utf8");
+  const mishra = await readFile(path.resolve("..", "examples", "mishra-eminent-one.txt"), "utf8");
+  for (let index = 0; index < 4; index += 1) {
+    const seat = "ABCD"[index];
+    await submitDeck(pages[index], seat, seat === "A" || seat === "C" ? zimone : mishra);
+  }
+  await expect(pages[0].getByTestId("start-game")).toBeEnabled();
+  await pages[0].getByTestId("start-game").click();
+  for (const page of pages) {
+    await expect(page.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
+    await expect(page.getByTestId("decision-panel")).toBeVisible();
+  }
+  return { contexts, pages };
+}
+
+async function submitImmediateAction(page: Page, actionId: string) {
+  const revision = await viewRevision(page);
+  await page.getByTestId(`action-${actionId}`).click();
+  await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
+}
+
+async function submitOpenChoice(page: Page) {
+  const revision = await viewRevision(page);
+  await page.getByTestId("submit-choice").click();
+  await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
 }
 
 test("four isolated browser contexts play through authoritative mulligans and reconnect", async ({ browser }) => {
@@ -86,6 +131,58 @@ test("four isolated browser contexts play through authoritative mulligans and re
     await expect(pages[0].getByText("LIVE", { exact: true })).toBeVisible();
     await expect(pages[0].getByTestId("own-hand").locator(".hand-card")).toHaveCount(projectedHandCount);
     await expect(pages[0].getByTestId("decision-panel")).toHaveText(projectedDecision!);
+  } finally {
+    await Promise.all(contexts.map((context) => context.close()));
+  }
+});
+
+test("generic private choice form executes a penalized multiplayer mulligan", async ({ browser }) => {
+  let contexts: BrowserContext[] = [];
+  try {
+    const started = await startFourPlayerGame(browser);
+    contexts = started.contexts;
+    const pages = started.pages;
+
+    await pages[0].getByTestId("action-mulligan").click();
+    await expect(pages[0].getByTestId("choice-dialog")).toBeVisible();
+    await pages[0].getByTestId("choice-override_reason").fill("Browser choice-form coverage");
+    await submitOpenChoice(pages[0]);
+
+    for (let index = 1; index < 4; index += 1) {
+      await expect(pages[index].getByTestId("action-keep")).toBeVisible();
+      await submitImmediateAction(pages[index], "keep");
+    }
+
+    await expect(pages[0].getByTestId("action-mulligan")).toBeVisible();
+    await pages[0].getByTestId("action-mulligan").click();
+    await pages[0].getByTestId("choice-override_reason").fill("Deterministic browser regression coverage");
+    await submitOpenChoice(pages[0]);
+
+    await expect(pages[0].getByTestId("action-bottom")).toBeVisible();
+    await pages[0].getByTestId("action-bottom").click();
+    await expect(pages[0].getByTestId("choice-dialog")).toBeVisible();
+    const firstCard = pages[0].locator('[data-testid^="choice-cards-"]').first();
+    const testId = await firstCard.getAttribute("data-testid");
+    expect(testId).toBeTruthy();
+    await firstCard.check();
+    for (const opponent of pages.slice(1)) {
+      expect((await opponent.content()).includes(testId!)).toBeFalsy();
+      await expect(opponent.getByTestId("choice-dialog")).toHaveCount(0);
+    }
+    await submitOpenChoice(pages[0]);
+
+    await expect(pages[0].getByTestId("action-keep")).toBeVisible();
+    await expect(pages[0].getByTestId("own-hand").locator(".hand-card")).toHaveCount(6);
+    await submitImmediateAction(pages[0], "keep");
+    // The engine may stop at a meaningful upkeep window or advance through
+    // the opening draw, depending on the random hand. Either way, the bottom
+    // operation above was observed authoritatively at six cards.
+    expect([6, 7]).toContain(
+      await pages[0].getByTestId("own-hand").locator(".hand-card").count(),
+    );
+    for (const opponent of pages.slice(1)) {
+      await expect(opponent.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
+    }
   } finally {
     await Promise.all(contexts.map((context) => context.close()));
   }

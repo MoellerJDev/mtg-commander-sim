@@ -176,6 +176,29 @@ class CombatDamageRuleTests(unittest.TestCase):
             self.assertTrue(replay["ok"], replay)
             self.assertEqual(2, replay["commands"])
 
+    def test_projected_damage_form_uses_authoritative_source_options(self):
+        session = self.make_session(51011)
+        attacker, first, second = self.set_up_multiblock(session)
+
+        packet_a = session.packet("pilot:A", full=True)
+        form_a = packet_a["decision"]["legal_actions"][0]["form"]
+        damage_a = form_a["fields"][0]["combat"]["damage_sources"]
+        self.assertEqual(4, damage_a[attacker.ref]["power"])
+        self.assertEqual(
+            sorted([first.ref, second.ref]),
+            damage_a[attacker.ref]["targets"],
+        )
+
+        packet_b = session.packet("pilot:B", full=True)
+        form_b = packet_b["decision"]["legal_actions"][0]["form"]
+        damage_b = form_b["fields"][0]["combat"]["damage_sources"]
+        self.assertEqual(
+            {attacker.ref}, set(damage_b[first.ref]["targets"])
+        )
+        self.assertEqual(
+            {attacker.ref}, set(damage_b[second.ref]["targets"])
+        )
+
     def test_assignment_above_power_is_rejected_atomically(self):
         session = self.make_session(51002)
         attacker, first, second = self.set_up_multiblock(session)
