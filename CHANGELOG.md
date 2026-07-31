@@ -14,6 +14,10 @@
   and client-supplied semantic flags are rejected transactionally.
 - Added exact multi-blocker replay evidence and fail-closed first-strike
   characterization for the partial CR 510 contract.
+- Excluded phased-out creatures from blocker alternatives and authoritative
+  blocker validation, with atomic malicious-submission rollback.
+- Added exact ordinary blocker declaration/replay and blocking-lifetime
+  evidence for the partial CR 509 contract.
 - Corrected the CR 511.3 boundary so attacking and blocking markers and the
   combat snapshot clear after end-of-combat priority, before postcombat main.
 - Added source-linked end-of-combat priority, trigger-coexistence, multiplayer,
