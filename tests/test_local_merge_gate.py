@@ -40,6 +40,11 @@ class LocalMergeGateTests(unittest.TestCase):
                 "repository_security_validation",
                 "wheel_build",
                 "wheel_clean_install",
+                "browser_dependencies",
+                "generated_protocol_types",
+                "generated_protocol_freshness",
+                "browser_production_build",
+                "browser_four_context_e2e",
             },
             set(by_name),
         )
@@ -79,6 +84,10 @@ class LocalMergeGateTests(unittest.TestCase):
                 "--check",
             ),
             by_name["generated_platform_freshness"],
+        )
+        self.assertEqual(
+            ("npm", "run", "e2e", "--prefix", "web"),
+            by_name["browser_four_context_e2e"],
         )
 
     def test_additional_focused_tests_are_preserved(self):

@@ -340,7 +340,11 @@ class StateProjector:
         return {
             "rev": self.state.revision,
             "event": self.state.event_sequence,
-            "game": {"id": self.state.game_id[:8], "over": self.state.game_over, "winner": self.state.winner},
+            "game": {
+                "id": self.state.game_id,
+                "over": self.state.game_over,
+                "winner": self.state.winner,
+            },
             "turn": turn,
             "players": players,
             "stack": stack,
@@ -433,6 +437,7 @@ class StateProjector:
         # view state. Repeat the live capability until it is consumed, and send
         # null explicitly so a client clears a stale decision after a delta.
         payload["decision"] = self._decision(principal)
+        payload["view_revision"] = snapshot["rev"]
 
         visible = self._visible_oracles(snapshot)
         new_oracles = sorted(visible - cursor.seen_oracles)

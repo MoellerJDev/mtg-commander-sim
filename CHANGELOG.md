@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+### Authoritative server/browser vertical slice
+
+- Added strict protocol 3.0 command envelopes with client command IDs,
+  expected-view revisions, server-derived principals, delegated-choice
+  filtering, stable receipts, and durable idempotent replay.
+- Added one bounded single-writer `GameActor` per active game, fail-closed
+  persistence errors, Game Record-before-ack ordering, and SQLite guest, room,
+  seat, deck, game-index, and idempotency storage.
+- Added expiring guest sessions, CSRF protection, hashed invite/session
+  secrets, atomic four-seat room claims, Moxfield or pasted-list validation,
+  multiplayer game start, seat-scoped HTTP projection, and WebSocket fan-out.
+- Added independent ephemeral connection cursors so multiple tabs and reconnects
+  cannot corrupt one another's projection delta base.
+- Added a React/TypeScript room and table client, generated schema bindings,
+  hash-verifying reducer, production build, and a real Chromium test using four
+  isolated contexts through all four opening keep decisions and reconnect.
+- Preserved Game Record v3 replay truth while adding optional network command
+  audit fields; raw guest tokens, invite codes, and decision capabilities remain
+  absent from durable records.
+
 ### Platform direction
 
 - Made the deterministic, server-authoritative browser platform the primary

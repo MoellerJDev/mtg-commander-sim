@@ -26,31 +26,37 @@ A transport adapter is responsible for:
 
 The server—not the request body—determines the authenticated principal.
 
-In 0.8.0 this boundary is in-process only. Protocol 2.1 and
-`schemas/command-envelope.schema.json` describe the existing client/service
-contract; there is no listening HTTP/WebSocket process or browser bundle yet.
-The planned vertical slice will introduce a stricter network command envelope
-with command/decision IDs and expected-view revision while preserving this
-principal-derivation rule.
+The in-process boundary and the listening FastAPI adapter both use protocol
+3.0. `schemas/command-envelope.schema.json` rejects unknown properties and
+requires client command/decision/action IDs plus the expected projected-state
+revision. The authenticated guest's room seat—not the request body—selects the
+principal.
 
-## Planned HTTP/WebSocket surface
+## HTTP/WebSocket surface
 
 ```text
-POST /games
-GET  /games/{game_id}/projection?full=1
-POST /games/{game_id}/commands
-GET  /games/{game_id}/rules?ref=A44
-WS   /games/{game_id}/stream
+POST /api/v1/guests
+POST /api/v1/rooms
+POST /api/v1/rooms/join
+PUT  /api/v1/rooms/{room_id}/deck
+POST /api/v1/rooms/{room_id}/start
+GET  /api/v1/games/{game_id}/state?full=true
+POST /api/v1/games/{game_id}/commands
+WS   /api/v1/games/{game_id}/stream
 ```
 
 Example command body:
 
 ```json
 {
+  "protocol_version":"3.0",
   "game_id":"game-uuid",
-  "capability":"c_opaque",
-  "action":"cast",
-  "payload":{"card":"A12","targets":["S4"],"auto_pay":true}
+  "command_id":"web-7b63b",
+  "decision_id":"D14",
+  "action_id":"cast:A12",
+  "capability":"opaque-single-use-token",
+  "expected_view_revision":37,
+  "choices":{"targets":["S4"]}
 }
 ```
 
@@ -60,7 +66,10 @@ The connection identity supplies `principal`; the client-controlled command body
 
 Every command is validated against:
 
+- protocol version and strict field set
 - game ID
+- client command idempotency key
+- expected projected-state revision
 - authenticated principal
 - unconsumed capability token
 - live decision ID
@@ -74,7 +83,7 @@ Capabilities are not reusable API keys. They are narrow authorization grants for
 
 ## Projection synchronization
 
-Protocol 2.1 provides:
+Protocol 3.0 provides:
 
 - initial `state`
 - `base` and `view` hashes
@@ -89,7 +98,10 @@ view = ProjectedClientView("pilot:A")
 view.ingest(packet)
 ```
 
-When a delta's `base` differs from the local hash, request `full=1`. Never apply a patch to an unknown base.
+When a delta's `base` differs from the local hash, reconnect or request
+`full=true`. Never apply a patch to an unknown base. Every WebSocket connection
+has an independent ephemeral cursor, so a second tab or reconnect cannot move
+the first tab's delta base.
 
 ## Hidden information
 
@@ -110,15 +122,18 @@ Examples:
 
 ## Persistence model
 
-Recommended server persistence separates:
+Server persistence separates:
 
 - authoritative `GameState`
 - semantic registry
-- projection cursor by `(game_id, principal, connection/client_id)`
+- ephemeral projection cursor by `(game_id, principal, connection_id)`
 - append-only events/metrics
 - authentication and seat assignment
 
-A client reconnect can request a full projection, so cursors are an optimization rather than a correctness dependency.
+A client reconnect receives a full projection, so cursors are an optimization
+rather than a correctness dependency. SQLite contains the control plane and
+hashed idempotency receipts; Game Record v3 contains authoritative game state
+and accepted-command replay truth.
 
 ## Security notes
 

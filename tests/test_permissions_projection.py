@@ -4,7 +4,14 @@ import json
 import tempfile
 import unittest
 
-from mtg_commander_sim import CommandEnvelope, CommanderSession, GameService, ProjectedClientView, ProtocolError
+from mtg_commander_sim import (
+    CommandEnvelope,
+    CommanderSession,
+    GameService,
+    PROTOCOL_VERSION,
+    ProjectedClientView,
+    ProtocolError,
+)
 from common import keep_all, load_assets, make_session
 
 
@@ -71,9 +78,34 @@ class PermissionProjectionTests(unittest.TestCase):
         session = make_session(self.db, self.mishra, self.zimone, seed=27)
         service = GameService(session)
         cap = session.engine.permissions.capability_for("pilot:A")
-        bad = service.command(CommandEnvelope("wrong", cap.token, "keep", {}), principal="pilot:A")
+        decision = session.state.pending_decision
+        bad = service.command(
+            CommandEnvelope(
+                PROTOCOL_VERSION,
+                "wrong",
+                "wrong-game-1",
+                decision.decision_id,
+                "keep",
+                cap.token,
+                session.state.revision,
+                {},
+            ),
+            principal="pilot:A",
+        )
         self.assertFalse(bad.ok)
-        good = service.command(CommandEnvelope(session.state.game_id, cap.token, "keep", {}), principal="pilot:A")
+        good = service.command(
+            CommandEnvelope(
+                PROTOCOL_VERSION,
+                session.state.game_id,
+                "valid-1",
+                decision.decision_id,
+                "keep",
+                cap.token,
+                session.state.revision,
+                {},
+            ),
+            principal="pilot:A",
+        )
         self.assertTrue(good.ok)
 
     def test_save_and_load_preserves_cursor_and_state(self):

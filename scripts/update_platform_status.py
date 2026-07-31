@@ -43,7 +43,20 @@ def _file_count(relative: str) -> int:
     directory = ROOT / relative
     if not directory.is_dir():
         return 0
-    return sum(1 for path in directory.rglob("*") if path.is_file())
+    ignored_parts = {
+        "__pycache__",
+        "node_modules",
+        "dist",
+        "playwright-report",
+        "test-results",
+    }
+    return sum(
+        1
+        for path in directory.rglob("*")
+        if path.is_file()
+        and not ignored_parts.intersection(path.relative_to(directory).parts)
+        and path.suffix not in {".pyc", ".tsbuildinfo"}
+    )
 
 
 def _optional_json(relative: str) -> dict | None:

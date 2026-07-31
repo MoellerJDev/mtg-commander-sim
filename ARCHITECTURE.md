@@ -15,12 +15,14 @@ automated clients act through a central authoritative server while:
 The key decision is to keep clients untrusted and make the server the sole
 state and rules authority.
 
-Current implementation boundary: `CommanderEngine`, `GameService`, capability
-checks, projection, replay, and protocol 2.1 run in process. The HTTP/WebSocket
-adapter shown below is target architecture, not a deployed server. There is no
-`GameActor`, `GameManager`, guest/session service, room repository, durable
-game database, or browser client in 0.8.0. The next vertical slice must add
-those boundaries without moving transport concerns into the engine.
+Current implementation boundary: `CommanderEngine`, strict `GameService`,
+capability checks, projection, replay, and protocol 3.0 sit below a working
+FastAPI adapter. `GameManager` owns one serialized `GameActor` per active game;
+SQLite stores the guest/room/seat/deck/game/idempotency control plane while
+Game Record v3 remains authoritative game persistence. A React/TypeScript
+client consumes per-connection seat projections over WebSocket. This is a
+single-node development vertical slice, not yet the complete choice UI or a
+multi-process production deployment.
 
 ## Layered design
 
@@ -59,7 +61,7 @@ those boundaries without moving transport concerns into the engine.
 └───────────────┬──────────────────────────────────────────────┘
                 ▼
 ┌──────────────────────────────────────────────────────────────┐
-│ Protocol 2.1 / ProjectedClientView                           │
+│ Protocol 3.0 / ProjectedClientView / browser reducer         │
 │ bootstrap, hash-checked JSON patches, resync boundary         │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -124,7 +126,9 @@ A player cannot forge `draw`, `damage`, `move`, `create_token`, or other effects
 
 The same least-authority rule applies to action costs. Priority packets advertise stable explicit ability IDs and objective cost requirements. A pilot may select the physical creature to sacrifice or card to discard when the Oracle cost delegates that choice, but it cannot provide arbitrary cost effects, understate a printed mana cost, or authorize a cast from another zone. Uncompiled alternate costs and zone permissions fail closed until the rules/cost layer registers them.
 
-Capabilities are **decision authorization**, not login credentials. A future server must authenticate the connection first, derive the principal, and then validate the capability.
+Capabilities are **decision authorization**, not login credentials. The server
+first authenticates an expiring guest session, derives the principal from its
+room seat, and only then validates the decision capability.
 
 ## Decision lifecycle
 
@@ -141,11 +145,10 @@ remains live. An automation adapter may retry a bounded number of times with a
 compact rejection message rather than resending a full state or silently
 repairing the move.
 
-Connections may remain alive concurrently, but game decisions commit
-sequentially because Magic grants one principal (or one ordered decision group)
-authority at a time. The future network gateway derives the principal from the
-authenticated connection and routes commands through the same `GameService`
-transaction boundary.
+Connections remain alive concurrently, but game decisions commit sequentially
+because Magic grants one principal (or one ordered decision group) authority at
+a time. The network gateway derives the principal from the authenticated room
+seat and routes commands through the same `GameService` transaction boundary.
 
 ### Multiplayer mulligans
 
@@ -382,7 +385,8 @@ line; this is not a general shortcut-negotiation implementation.
 
 ## Protocol and client-state updates
 
-Protocol 2.1 separates durable projected state from delivery metadata.
+Protocol 3.0 separates durable projected state from delivery metadata and adds
+strict client command identity plus expected-view revision checks.
 
 A full packet contains:
 
@@ -401,6 +405,45 @@ A delta packet contains:
 - new definitions/events
 
 `ProjectedClientView` is the reference reducer. If `base` does not match, the client requests a full packet. This prevents silent state drift and gives a native/web client a stable integration point without access to kernel internals.
+
+## Network runtime and persistence
+
+The `server` package is an adapter and may import the engine package; the
+engine package is architecture-tested not to import FastAPI, Starlette,
+Uvicorn, or `server`. Its request lifecycle is:
+
+```text
+guest cookie / bearer token
+        │
+        ▼
+SQLite room seat ── derives pilot:A-D
+        │
+        ▼
+strict CommandEnvelope ── expected revision + idempotency key
+        │
+        ▼
+GameManager ── exactly one bounded GameActor mailbox per game
+        │
+        ▼
+GameService ── capability/action/choice validation and rollback
+        │
+        ▼
+Game Record v3 save ── SQLite idempotency commit ── receipt
+```
+
+Persistence failure in the ambiguous post-mutation window never returns a
+success receipt. The actor fails closed and must be recreated from durable
+state. A repeated identical `(game, principal, client_command_id)` returns the
+stored receipt; the same key with different request content is rejected.
+
+Projection cursors are scoped by connection rather than only by seat. This
+allows reconnects and multiple tabs to receive independent deltas without
+changing the authoritative seat capability. Network cursors are ephemeral and
+excluded from Game Record persistence.
+
+The current SQLite ownership model is single-process. A multi-process or
+horizontal deployment requires an external ownership/lease design before a
+second process may host the same game.
 
 ## Durable Game Record v3
 

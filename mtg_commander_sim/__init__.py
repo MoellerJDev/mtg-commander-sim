@@ -51,8 +51,27 @@ from .profiles import (
 from .projection import ProjectionCursor, StateProjector
 from .protocol import PROTOCOL_VERSION, ProtocolError, apply_json_patch, json_patch, view_hash
 from .semantics import SemanticProgram, SemanticRegistry
-from .service import CommandEnvelope, GameService
+from .service import (
+    CommandEnvelope,
+    CommandReceipt,
+    GameService,
+    IdempotencyRecord,
+    IdempotencyRepository,
+    InMemoryIdempotencyRepository,
+)
 from .session import CommanderSession
+from .runtime import (
+    GameActor,
+    GameActorClosed,
+    GameActorUnavailable,
+    GameManager,
+    GamePersistence,
+)
+from .persistence import (
+    DirectoryGamePersistence,
+    SqliteIdempotencyRepository,
+    initialize_sqlite,
+)
 from .record import (
     finalize_record,
     provider_telemetry,
@@ -81,6 +100,7 @@ __all__ = [
     "CardRecord",
     "CharacteristicState",
     "CommandEnvelope",
+    "CommandReceipt",
     "CommanderEngine",
     "CommanderSession",
     "ContinuousEffect",
@@ -91,6 +111,16 @@ __all__ = [
     "GameConfig",
     "GameRuleError",
     "GameService",
+    "GameActor",
+    "GameActorClosed",
+    "GameManager",
+    "GamePersistence",
+    "DirectoryGamePersistence",
+    "SqliteIdempotencyRepository",
+    "initialize_sqlite",
+    "IdempotencyRecord",
+    "IdempotencyRepository",
+    "InMemoryIdempotencyRepository",
     "GameState",
     "Layer",
     "ORACLE_COMPILER_VERSION",

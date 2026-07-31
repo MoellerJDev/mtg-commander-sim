@@ -1,27 +1,27 @@
 {
   "bootstrap": {
-    "compact_chars": 6197,
-    "compact_bytes": 6213,
-    "pretty_chars": 6197,
-    "estimated_tokens": 1549
+    "compact_chars": 6271,
+    "compact_bytes": 6287,
+    "pretty_chars": 6271,
+    "estimated_tokens": 1567
   },
   "unchanged_live_decision": {
-    "compact_chars": 1076,
-    "compact_bytes": 1076,
-    "pretty_chars": 1076,
-    "estimated_tokens": 269
+    "compact_chars": 1126,
+    "compact_bytes": 1126,
+    "pretty_chars": 1126,
+    "estimated_tokens": 281
   },
   "after_declaration": {
-    "compact_chars": 435,
-    "compact_bytes": 435,
-    "pretty_chars": 435,
-    "estimated_tokens": 108
+    "compact_chars": 453,
+    "compact_bytes": 453,
+    "pretty_chars": 453,
+    "estimated_tokens": 113
   },
   "ratios": {
-    "unchanged_vs_bootstrap": 0.1736,
-    "declaration_vs_bootstrap": 0.0702
+    "unchanged_vs_bootstrap": 0.1796,
+    "declaration_vs_bootstrap": 0.0722
   },
-  "protocol": "2.1",
+  "protocol": "3.0",
   "players": 4,
   "seed": 20260728
 }

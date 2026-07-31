@@ -1,9 +1,9 @@
 {
-  "v": "2.1",
+  "v": "3.0",
   "mode": "delta",
   "principal": "pilot:A",
-  "base": "6405e7cee2ec238fbb46",
-  "view": "6405e7cee2ec238fbb46",
+  "base": "22fadfe915a7a8007320",
+  "view": "22fadfe915a7a8007320",
   "rev": 0,
   "event": 10,
   "patch": [],
@@ -84,5 +84,6 @@
       "decision_policy": "This is the multiplayer free-mulligan decision. Mulligan only for a materially better chance at a functional opener, not a perfect one."
     }
   },
+  "view_revision": 0,
   "pkt": 2
 }

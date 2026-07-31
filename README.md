@@ -7,16 +7,15 @@ snapshot-scoped rules enforcement. The current development line is a kernel and
 protocol foundation, not a complete implementation of Magic's rules or Oracle
 corpus.
 
-Current integration checkpoint: the public repository's `main` branch contains
-the deterministic foundation and reviewed CR 400–408 and CR 500–512 slices.
-PR #24 incorporated the ancestry-proven CR 400–408 stack; PRs #17–#23 were
-reconciled only after their exact heads became reachable from `main`. GitHub
-recorded #17 as merged; #18–#23 closed as superseded. The integrated source
-tree has 3,925 deterministic tests, 557 reviewed
-rule records, and 49 partial mechanic contracts. GitHub Actions is running
-normally. No ASGI server, room service, durable game store, or browser
-application exists yet; the single authoritative server/browser vertical slice
-is next.
+Current development checkpoint: the deterministic foundation and reviewed CR
+400–408 and CR 500–512 slices now have an executable server/browser vertical
+slice. It provides guest sessions, invite-only four-seat rooms, deck
+validation/preflight, a serialized single-writer game actor, SQLite control
+plane, durable Game Record v3 acknowledgement, strict idempotent protocol 3.0
+commands, seat-scoped WebSockets, reconnect, and a TypeScript/React table. The
+browser slice is real and end-to-end tested, but its generic choice forms and
+production operations remain incomplete. The generated platform ledger records
+the exact current test and coverage counts.
 
 This is a structural rewrite of the earlier two-player duel lab. The server-side game kernel is now separate from:
 
@@ -33,6 +32,8 @@ require an LLM, Codex runtime, provider credential, or live AI ruling.
 
 See `docs/PLATFORM_IMPLEMENTATION_STATUS.md` for the generated integration,
 rules, server, browser, persistence, replay, privacy, and validation ledger.
+See `SERVER_BROWSER.md` for the executable API, local run commands, browser
+workflow, security boundary, and remaining UI/operations limits.
 
 ## Local setup
 
@@ -42,6 +43,9 @@ Create an environment and install the source tree:
 python -m venv .venv
 . .venv/bin/activate        # Windows PowerShell: .venv\Scripts\Activate.ps1
 python -m pip install -e . -r requirements-dev.txt
+cd web
+npm ci
+cd ..
 ```
 
 The repository deliberately does not contain a Scryfall bulk export or SQLite
@@ -140,7 +144,16 @@ generated documentation fixtures with bearer capabilities redacted. See
   choices, with deterministic continuation after the choice
 - local Oracle text and Scryfall rulings; no card API calls during play
 - plain-text and defensive Moxfield deck loading
-- protocol v2.1 bootstrap plus hash-checked JSON patches
+- a FastAPI/ASGI guest, room, seat, deck, game, command, and WebSocket adapter
+- one bounded, serialized `GameActor` mailbox per active game
+- SQLite guest/room/seat/deck/game/idempotency control-plane persistence plus
+  Game Record v3 durability before command acknowledgement
+- React/TypeScript room and four-player table UI with Moxfield or pasted-list
+  import, private hand rendering, legal-action prompts, reconnect, and
+  four-isolated-context Playwright coverage
+- strict protocol 3.0 command envelopes plus hash-checked projection patches
+- per-connection ephemeral projection cursors, including multiple-tab and
+  reconnect isolation for one seat
 - a reference client reducer that can be reused by a GUI, WebSocket client, or LLM runner
 - bounded same-capability retry packets for invalid model actions, without a full-state resend
 - Game Record v3 checkpoints plus command/event/decision journals

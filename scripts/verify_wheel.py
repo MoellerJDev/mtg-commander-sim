@@ -52,7 +52,25 @@ def main() -> int:
             check=True,
             stdout=subprocess.DEVNULL,
         )
-    print(f"Verified clean installation and CLI smoke test for {wheel.name}")
+        subprocess.run(
+            [
+                str(python),
+                "-c",
+                (
+                    "from importlib.metadata import distribution; "
+                    "entries = {entry.name: entry.value for entry in "
+                    "distribution('mtg-commander-sim').entry_points "
+                    "if entry.group == 'console_scripts'}; "
+                    "assert entries['commander-server'] == "
+                    "'server.__main__:main', entries"
+                ),
+            ],
+            check=True,
+        )
+    print(
+        "Verified clean installation, simulation CLI, and server entry point "
+        f"for {wheel.name}"
+    )
     return 0
 
 
