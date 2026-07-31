@@ -196,6 +196,12 @@ generated documentation fixtures with bearer capabilities redacted. See
   the identity, public-to-hand moves remain known, and a player controlling
   another player retains access to both hands; continuous no-maximum and
   arbitrary hand-reveal semantics remain dependency-blocked
+- source-reviewed CR 403 battlefield boundaries: the controller-indexed
+  presentation lists form one shared multiplayer target domain, controller
+  membership is invariant-checked, unqualified targets and ordinary
+  destroy/sacrifice/bounce effects are battlefield-scoped, permanent status
+  follows battlefield membership, and ordinary reentry creates a new logical
+  object; the complete CR 400.7 exception matrix remains blocked
 - source-reviewed CR 405 stack structure: new objects are placed on top,
   complete priority rounds resolve only the top object, direct effects,
   represented static abilities, and represented state actions bypass the
@@ -347,9 +353,9 @@ python simctl.py rules conformance --root .
 ```
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
-generated source-linkage tests. Of those cases, 513 are source-reviewed:
-89 have narrow executable semantic evidence, 353 are explicitly blocked, and
-71 are definition-only; 2,787 remain unreviewed. A generated inventory test
+generated source-linkage tests. Of those cases, 519 are source-reviewed:
+92 have narrow executable semantic evidence, 354 are explicitly blocked, and
+73 are definition-only; 2,781 remain unreviewed. A generated inventory test
 cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
 invalidation, and reporting policy.
 

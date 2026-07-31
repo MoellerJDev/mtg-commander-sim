@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 403 — Battlefield",
+  "cases": [
+    {
+      "rule_id": "403",
+      "rule_text_sha256": "0395164a7c807d730e1e1e1384515ae89fbb048d212fe21c631773c0cc0b1c74",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/battlefield.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_battlefield_rules.BattlefieldRuleTests.test_contract_traces_every_cr_403_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; CR 403.1-5 carry the battlefield's structural, scope, permanent-status, identity, and terminology requirements."
+      ]
+    },
+    {
+      "rule_id": "403.1",
+      "rule_text_sha256": "80726f0314bd23c3c93cb224a2e78b1892775315fa963fa54adc17ee8131d6dc",
+      "classification": "structural",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "PlayerState.zones",
+        "CommanderEngine._target_candidate_rows",
+        "CommanderEngine.change_control",
+        "CommanderEngine._assert_invariants",
+        "StateProjector._snapshot",
+        "StateProjector._obj"
+      ],
+      "executable_test_ids": [
+        "tests.test_battlefield_rules.BattlefieldRuleTests.test_battlefield_starts_empty_and_is_one_shared_target_domain",
+        "tests.test_battlefield_rules.BattlefieldRuleTests.test_controller_index_and_cross_controller_attachment_are_preserved"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "blockers": [],
+      "notes": [
+        "The authoritative battlefield is the union of controller-indexed presentation lists, starts empty for every seat, and is queried as one shared target domain. The invariant checker rejects controller/index divergence. Projection keeps a cross-controller attachment in its controller's battlefield list while preserving the attached-object identity."
+      ]
+    },
+    {
+      "rule_id": "403.2",
+      "rule_text_sha256": "6b937a49ab41fff80dd7eb0370a10d7bea2c2c76d3e0083049b907109c24a36e",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "TargetGroup",
+        "CommanderEngine._target_candidate_rows",
+        "CommanderEngine.apply_effect",
+        "Oracle IR target schemas",
+        "trusted semantic programs"
+      ],
+      "executable_test_ids": [
+        "tests.test_battlefield_rules.BattlefieldRuleTests.test_unqualified_effect_and_target_scope_default_to_battlefield",
+        "tests.test_targeting_v070.ExactTargetingTests.test_hidden_zones_are_rejected_by_target_schema"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "hidden_information"
+      ],
+      "blockers": [],
+      "notes": [
+        "An omitted target zone canonically means battlefield. Destroy, sacrifice, and bounce operations enforce that ordinary scope, while discard enforces hand scope. Reviewed cross-zone programs must name the zone in their target schema or use an explicit zone-changing instruction; hidden zones cannot be introduced through the public target schema."
+      ]
+    },
+    {
+      "rule_id": "403.3",
+      "rule_text_sha256": "15c35d322844bc259a72b306318f0cfd817c06d1f20bed587c549ce3eba73f93",
+      "classification": "structural",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CardInstance.zone",
+        "CommanderEngine.move_card",
+        "CommanderEngine._target_candidate_rows",
+        "TargetGroup"
+      ],
+      "executable_test_ids": [
+        "tests.test_battlefield_rules.BattlefieldRuleTests.test_permanent_category_exists_only_on_the_battlefield",
+        "tests.test_zone_general_rules.ZoneGeneralRuleTests.test_instant_or_sorcery_cannot_enter_battlefield",
+        "tests.test_copy_objects.CopyObjectLifecycleTests.test_card_copy_on_battlefield_is_a_nontoken_permanent",
+        "tests.test_copy_objects.CopyObjectLifecycleTests.test_permanent_spell_copy_becomes_the_same_token_object"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "blockers": [],
+      "notes": [
+        "The target model derives the permanent category exclusively from current battlefield membership; the same artifact object is a card outside that zone and a permanent on it. Instant and sorcery cards are prevented from entering. Card copies and resolved permanent-spell copies follow their separately reviewed CR 707 object forms while on the battlefield."
+      ]
+    },
+    {
+      "rule_id": "403.4",
+      "rule_text_sha256": "7a6742f5d648392215a7fd5ea3242682d9b259852fd13698e8f3a734c14db1fd",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CardInstance.logical_object_id",
+        "CommanderEngine._reset_zone_change",
+        "CommanderEngine.move_card",
+        "CommanderEngine._target_identity_matches_snapshot"
+      ],
+      "executable_test_ids": [
+        "tests.test_battlefield_rules.BattlefieldRuleTests.test_battlefield_entry_allocates_a_new_incarnation_except_400_7a",
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_new_incarnation_forgets_state_except_entry_continuations",
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_permanent_spell_keeps_its_logical_incarnation",
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_target_that_leaves_and_returns_is_a_new_illegal_object"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "blockers": [
+        "complete_cr_400_7_exception_matrix_missing",
+        "linked_ability_exception_coverage_incomplete",
+        "merged_permanent_exception_coverage_incomplete",
+        "face_up_face_down_exception_coverage_incomplete"
+      ],
+      "notes": [
+        "Ordinary battlefield entry allocates a new logical incarnation, clears unretained state, and makes a leave-and-return target illegal. The implemented CR 400.7a exception preserves a resolving permanent spell's logical incarnation. Because CR 403.4 imports every CR 400.7 exception and that full matrix is not implemented, the general rule remains blocked rather than being overclaimed."
+      ]
+    },
+    {
+      "rule_id": "403.5",
+      "rule_text_sha256": "1f9c0d9197427dd2e86b9b9f574f04411e60111f37448194945fb6175f22e48d",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "CardDatabase",
+        "Scryfall Oracle snapshot",
+        "mechanics/contracts/battlefield.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_battlefield_rules.BattlefieldRuleTests.test_pinned_oracle_data_uses_battlefield_not_legacy_in_play_terms"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "The engine consumes pinned current Oracle text rather than printed text, and the exact offline Oracle fixture contains no legacy 'in play,' 'from play,' or 'into play' rules wording. The historical aliases therefore require source/data traceability rather than a second runtime zone."
+      ]
+    }
+  ]
+}

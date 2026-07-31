@@ -1,5 +1,5 @@
 {
-  "contract_count": 42,
+  "contract_count": 43,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -18,6 +18,12 @@
       "path": "mechanics/contracts/basic-token-creation.json",
       "sha256": "6a3e8b566af1361f9812d74274be25153e9919e174ba191427644639be0f8d2a",
       "version": 2
+    },
+    {
+      "mechanic_id": "cr-403-battlefield",
+      "path": "mechanics/contracts/battlefield.json",
+      "sha256": "6c770d44e066d4d56d300fc624925d90aaceb804f8144f871838f4aaf500eadc",
+      "version": 1
     },
     {
       "mechanic_id": "cr-310-battles",
@@ -6051,17 +6057,38 @@
     },
     {
       "category": "zones",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/battlefield.json",
+      "contract_sha256": "6c770d44e066d4d56d300fc624925d90aaceb804f8144f871838f4aaf500eadc",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine battlefield membership, zone movement, target domains, control changes, attachments, object identity, and StateProjector controller presentation",
+      "implementation_version": "battlefield-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "complete CR 400.7 zone-change exception coverage is not implemented",
+        "complete continuous-effect layer and dependency coverage is not implemented",
+        "complete replacement-effect ordering for battlefield entry is not implemented",
+        "complete Aura, Equipment, Fortification, and player-attachment grammar is not implemented",
+        "complete face-down battlefield characteristic handling is not implemented",
+        "the full Oracle corpus has not been proven to use only trusted cross-zone target and effect schemas"
+      ],
       "mechanic_id": "cr-403-battlefield",
       "official_name": "Battlefield",
       "rule_references": [
         "403"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_403_rule",
+        "test_battlefield_starts_empty_and_is_one_shared_target_domain",
+        "test_controller_index_and_cross_controller_attachment_are_preserved",
+        "test_unqualified_effect_and_target_scope_default_to_battlefield",
+        "test_permanent_category_exists_only_on_the_battlefield",
+        "test_battlefield_entry_allocates_a_new_incarnation_except_400_7a",
+        "test_pinned_oracle_data_uses_battlefield_not_legacy_in_play_terms",
+        "test_permanent_spell_copy_becomes_the_same_token_object",
+        "test_target_that_leaves_and_returns_is_a_new_illegal_object"
+      ],
       "trust_level": "untrusted"
     },
     {

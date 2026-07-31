@@ -27,18 +27,19 @@ coverage.
 | Workstream | Status | Current evidence |
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
-| Mechanic contracts | In progress | 42 partial/untrusted contracts; 383 mechanics unclassified; 0 trusted |
+| Mechanic contracts | In progress | 43 partial/untrusted contracts; 382 mechanics unclassified; 0 trusted |
 | Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
 | Object and zone identity | Partial | All 30 CR 400 records reviewed; owner-zone routing, logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, hidden outside-game movement, and selected linked-effect guards |
 | Library | Partial | All 8 CR 401 records reviewed; hidden order/public count, bounded look/reorder, shuffle knowledge clearing, and Nth-from-top placement; simultaneous owner ordering and continuous top-card visibility remain blocked |
 | Hand | Partial | All 4 CR 402 records reviewed; starting/maximum size, cleanup-only excess discard, public count, scoped identity, public-to-hand knowledge, and controller dual-hand access; continuous no-maximum and arbitrary reveal/look grammar remain blocked |
+| Battlefield | Partial | All 6 CR 403 records reviewed; one shared multiplayer domain, controller-index integrity, ordinary battlefield-only scope, permanent categorization, and ordinary new-object entry; the complete CR 400.7 exception matrix remains blocked |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
 | Replacement/prevention ordering | Partial | CR 615/616 typed primitives; stateful shields and event-producer integration incomplete |
 | Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, counter-derived battlefield defense, copied printed defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 513 cases in CR 120/210/310/400/401/402/405/500/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 89 semantic passes, 353 blocked cases, and 71 definition-only cases |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 519 cases in CR 120/210/310/400/401/402/403/405/500/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 92 semantic passes, 354 blocked cases, and 73 definition-only cases |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -217,6 +218,15 @@ coverage.
   player retains both private views. CR 613.11 maximum modifiers, no-maximum
   effects, and complete arbitrary hand reveal/look grammar remain blocked;
   the heading is definition-only.
+- [x] Reviewed all 6 CR 403 Battlefield records. Controller-indexed
+  presentation lists form one shared multiplayer target domain and now fail
+  an invariant check if storage and controller diverge. Cross-controller
+  attachments preserve both relationships. Unqualified target schemas and
+  ordinary destroy, sacrifice, and bounce operations use battlefield scope,
+  permanent category follows battlefield membership, and ordinary entry
+  creates a new logical incarnation while CR 400.7a preserves a resolving
+  permanent spell. The complete CR 400.7 exception matrix remains blocked;
+  the heading and legacy in-play terminology are definition-only.
 - [x] Reviewed all 6 CR 502 Untap Step records. Ordinary stackless untaps,
   represented stun and next-untap restrictions, held-trigger handoff, and
   exact replay are characterized. Phasing and global maximum-untap choices now
@@ -259,7 +269,7 @@ coverage.
   declaration triggers, multi-attacker blocking, blocked-status effects, and
   entry-blocking remain dependency-blocked.
 
-## Current CR 120/210/310/400/401/402/405/500/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
+## Current CR 120/210/310/400/401/402/403/405/500/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
 
 At the beginning of combat, supported two-player and multiplayer Commander
 profiles establish every active opponent as a defending player without
@@ -439,8 +449,13 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,875 unit/integration tests pass: 575 ordinary tests plus 3,300 generated
+- 3,882 unit/integration tests pass: 582 ordinary tests plus 3,300 generated
   inventory/source-linkage tests. The latter are not semantic passes.
+- Seven focused CR 403 tests cover exact source traceability, empty and shared
+  four-player battlefield structure, controller-index integrity,
+  cross-controller attachment projection, ordinary battlefield-only scope,
+  permanent categorization, instant/sorcery entry rejection, ordinary and
+  CR 400.7a entry identity, and pinned Oracle terminology.
 - Eight focused CR 402 tests cover exact source traceability, configured
   starting hands, above-maximum state until cleanup, hidden-move event
   redaction, public-to-hand knowledge, viewer-scoped reveal, retained own-hand
@@ -529,10 +544,10 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 513 CR
-  120/210/310/400/401/402/405/500/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
-  cases are source-reviewed: 89 pass with executable engine evidence, 353
-  remain blocked, and 71 are definition-only. The other 2,787 cases remain
+  establish inventory linkage only. All 519 CR
+  120/210/310/400/401/402/403/405/500/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
+  cases are source-reviewed: 92 pass with executable engine evidence, 354
+  remain blocked, and 73 are definition-only. The other 2,781 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -543,15 +558,13 @@ checkpoint validation.
 
 1. Continue reviewing and promoting conformance cases by
    dependency-ordered rules family; keep exposed but unimplemented edge cases
-   failing or blocked. CR 402 Hand is the current bounded family; retain
-   continuous maximum-hand-size and no-maximum effects, arbitrary hand
-   reveal/look grammar, and complete simultaneous private choices as explicit
-   blockers rather than promoting the base hand boundary beyond its evidence.
-   CR 401 Library also retains simultaneous owner-secret insertion ordering,
-   continuous top-card reveal/look permissions, procedure-time visibility
-   freezing, and reveal-continuity identity as explicit dependencies. The
-   next bounded dependency-unblocking review should be CR 403 Battlefield
-   without promoting incomplete battlefield semantics.
+   failing or blocked. CR 403 Battlefield is the current bounded family;
+   retain the complete CR 400.7 exception matrix, universal entry-replacement
+   ordering, and complete attachment/face-down grammar as explicit blockers
+   rather than promoting the base zone boundary beyond its evidence. The next
+   bounded dependency-unblocking review should be CR 404 Graveyard without
+   promoting incomplete graveyard ordering, ownership, or replacement
+   semantics.
 2. Wire the reviewed CR 614/615/616 primitives into the shared CR 120/310
    replacement and prevention event pipeline, including stateful shields and
    typed nested events, then re-evaluate the blocked damage sequence and

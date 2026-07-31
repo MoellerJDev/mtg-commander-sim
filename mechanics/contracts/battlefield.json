@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-403-battlefield",
+  "official_name": "Battlefield",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "403",
+    "403.1",
+    "403.2",
+    "403.3",
+    "403.4",
+    "403.5"
+  ],
+  "glossary_references": [
+    "battlefield",
+    "enters",
+    "permanent",
+    "in play"
+  ],
+  "dependencies": [
+    "zones",
+    "objects",
+    "permanents",
+    "targets",
+    "attachments",
+    "control-change",
+    "oracle-data",
+    "zone-change-identity",
+    "continuous-effects",
+    "replacement-effects",
+    "copy-effects"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "stack",
+      "graveyard",
+      "hand",
+      "exile",
+      "command"
+    ],
+    "objects": [
+      "card",
+      "token",
+      "permanent",
+      "card copy",
+      "permanent spell"
+    ],
+    "events": [
+      "permanent enters the battlefield",
+      "permanent leaves the battlefield",
+      "control changes",
+      "attachment changes"
+    ],
+    "state_reads": [
+      "shared battlefield membership",
+      "permanent controller",
+      "attachment relationship",
+      "current logical incarnation",
+      "effective permanent characteristics"
+    ],
+    "state_writes": [
+      "controller-indexed battlefield presentation",
+      "controller",
+      "attachment relationship",
+      "zone timestamp",
+      "zone-change counter"
+    ],
+    "costs": [
+      "sacrifice costs consume only battlefield permanents",
+      "other costs are delegated to the producing spell or ability"
+    ],
+    "timing": [
+      "the battlefield starts empty",
+      "permanents enter only through represented actions, resolution, effects, and rules",
+      "a resolving permanent spell keeps the CR 400.7a logical incarnation while receiving a battlefield timestamp"
+    ],
+    "targets": [
+      "an unqualified target domain defaults to the shared battlefield",
+      "all controller presentation lists participate in the same battlefield target domain",
+      "another public zone must be named explicitly by the target schema"
+    ],
+    "choices": [
+      "controller presentation does not change shared-zone membership",
+      "attachment placement is represented by identity rather than client screen coordinates"
+    ],
+    "hidden_information": [
+      "ordinary battlefield objects are public",
+      "face-down battlefield objects remain public objects while their hidden identity is viewer-scoped"
+    ],
+    "apnap": [
+      "simultaneous battlefield entry and triggered ability ordering are delegated to their producing rule families"
+    ],
+    "layers": [
+      "effective battlefield characteristics use the canonical layer evaluator",
+      "complete continuous-effect dependencies remain a separate trust blocker"
+    ],
+    "replacement_effects": [
+      "entry replacements are applied before or during the represented zone transition",
+      "complete replacement-choice ordering remains a separate trust blocker"
+    ],
+    "copy": [
+      "a card copy on the battlefield is categorized as a permanent",
+      "a resolving permanent spell copy becomes the same token permanent object",
+      "complete CR 400.7 exception coverage remains blocked"
+    ],
+    "control_change": [
+      "battlefield storage follows the current controller",
+      "changing control preserves the object's battlefield identity",
+      "an attachment may remain controlled by a different player than the object it is attached to"
+    ],
+    "zone_change": [
+      "ordinary entry creates a new logical object",
+      "stack-to-battlefield resolution preserves the CR 400.7a logical object",
+      "battlefield-only state is reset at the ordinary zone-change boundary"
+    ],
+    "source_leaves": [
+      "leaving the battlefield ends permanent status",
+      "last-known information and source-leaves triggers are delegated to CR 603, 608, and 609"
+    ]
+  },
+  "variants": [
+    "empty opening battlefield",
+    "two-player shared battlefield",
+    "four-player shared battlefield",
+    "permanents controlled by different players",
+    "Aura attached to another player's permanent",
+    "control change",
+    "unqualified battlefield target",
+    "explicit graveyard target",
+    "card outside the battlefield",
+    "card entering the battlefield",
+    "instant or sorcery card prevented from entering",
+    "ordinary reentry",
+    "resolving permanent spell",
+    "resolving permanent spell copy",
+    "legacy printed in-play wording normalized by Oracle"
+  ],
+  "witness_cards": [
+    {
+      "name": "Animate Dead",
+      "oracle_id": "c0d8fef4-65f4-4769-982d-b397d2b7e977"
+    },
+    {
+      "name": "Master Transmuter",
+      "oracle_id": "da46786e-28df-4638-ab3d-121011d2f150"
+    },
+    {
+      "name": "Assassin's Trophy",
+      "oracle_id": "ac10d218-f9a6-4058-9cda-a15ca1b0b7b5"
+    }
+  ],
+  "rulings": [
+    "Master Transmuter — 2020-08-07 — A returned artifact put back onto the battlefield is a new object with no relation to its previous existence.",
+    "Kindred Equipment release ruling — 2008-04-01 — An Equipment may become attached to another player's creature while its controller retains control of the Equipment.",
+    "Bloodghast — 2025-07-25 — Landfall triggers for a land entering under a player's control for any reason, including play and effects."
+  ],
+  "test_ids": [
+    "test_contract_traces_every_cr_403_rule",
+    "test_battlefield_starts_empty_and_is_one_shared_target_domain",
+    "test_controller_index_and_cross_controller_attachment_are_preserved",
+    "test_unqualified_effect_and_target_scope_default_to_battlefield",
+    "test_permanent_category_exists_only_on_the_battlefield",
+    "test_battlefield_entry_allocates_a_new_incarnation_except_400_7a",
+    "test_pinned_oracle_data_uses_battlefield_not_legacy_in_play_terms",
+    "test_permanent_spell_copy_becomes_the_same_token_object",
+    "test_target_that_leaves_and_returns_is_a_new_illegal_object"
+  ],
+  "implementation": {
+    "component": "CommanderEngine battlefield membership, zone movement, target domains, control changes, attachments, object identity, and StateProjector controller presentation",
+    "version": "battlefield-foundation-v1"
+  },
+  "known_blockers": [
+    "complete CR 400.7 zone-change exception coverage is not implemented",
+    "complete continuous-effect layer and dependency coverage is not implemented",
+    "complete replacement-effect ordering for battlefield entry is not implemented",
+    "complete Aura, Equipment, Fortification, and player-attachment grammar is not implemented",
+    "complete face-down battlefield characteristic handling is not implemented",
+    "the full Oracle corpus has not been proven to use only trusted cross-zone target and effect schemas"
+  ],
+  "review_status": "draft"
+}

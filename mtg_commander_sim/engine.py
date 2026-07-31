@@ -497,6 +497,14 @@ class CommanderEngine:
                 raise StateInvariantError(f"{card.ref} appears in {locations}, expected exactly one zone")
             elif locations[0][1] != card.zone:
                 raise StateInvariantError(f"{card.ref} zone mismatch {card.zone}/{locations[0]}")
+            elif (
+                card.zone == "battlefield"
+                and locations[0][0] != card.controller
+            ):
+                raise StateInvariantError(
+                    f"{card.ref} is indexed under {locations[0][0]} "
+                    f"but controlled by {card.controller}"
+                )
         if self.state.priority_player is not None and self.state.priority_player not in self.active_seats:
             raise StateInvariantError("Priority belongs to a player who is not in the game")
         for player in self.state.players.values():
@@ -18303,7 +18311,22 @@ class CommanderEngine:
                 once=True,
             ).ref
         if op in {"move", "sacrifice", "destroy", "exile", "bounce", "discard"}:
-            card = self._resolve_object(actor, str(effect["card"]))
+            # CR 403.2 supplies battlefield scope when a spell or ability
+            # doesn't name another zone.  The operation names below carry
+            # that ordinary scope; ``move`` and ``exile`` remain explicitly
+            # zone-polymorphic because reviewed target schemas and resolving
+            # object instructions use them for named nonbattlefield zones.
+            implicit_zones = {
+                "sacrifice": {"battlefield"},
+                "destroy": {"battlefield"},
+                "bounce": {"battlefield"},
+                "discard": {"hand"},
+            }
+            card = self._resolve_object(
+                actor,
+                str(effect["card"]),
+                zones=implicit_zones.get(op),
+            )
             if op == "destroy":
                 keywords = {
                     str(value).casefold()

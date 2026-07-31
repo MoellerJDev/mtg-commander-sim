@@ -101,11 +101,11 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 513 cases in CR 120, CR 210, CR 310, CR 400, CR 401, CR 402, CR 405, CR 500, CR 501, CR 502, CR 503, CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
+All 519 cases in CR 120, CR 210, CR 310, CR 400, CR 401, CR 402, CR 403, CR 405, CR 500, CR 501, CR 502, CR 503, CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512, CR 513, CR 514, CR 600, CR 601,
 CR 602, CR 603, CR 604, CR 605, CR 606, CR 607, CR 608, CR 609, CR 614,
-CR 615, and CR 616 are source-reviewed: 89 narrow behavioral or structural rules pass with
-generic executable evidence, 353 are blocked with exact missing dependencies,
-and 71 are definition-only with contract traceability. The remaining 2,787
+CR 615, and CR 616 are source-reviewed: 92 narrow behavioral or structural rules pass with
+generic executable evidence, 354 are blocked with exact missing dependencies,
+and 73 are definition-only with contract traceability. The remaining 2,781
 cases are
 unreviewed and
 inventory-only.
@@ -201,6 +201,18 @@ remains known after entering a hand. A player controlling another player sees
 the controlled hand in addition to, rather than instead of, their own hand.
 Continuous maximum-hand-size and no-maximum effects remain a CR 613.11
 dependency, and complete arbitrary hand reveal/look grammar remains blocked.
+CR 403 records that the battlefield starts empty and that controller-indexed
+presentation lists form one shared multiplayer zone and target domain.
+Controller/index divergence now fails the state invariant, while cross-
+controller attachments preserve both controller placement and attached-object
+identity. Unqualified target schemas and ordinary destroy, sacrifice, and
+bounce instructions are battlefield-scoped; explicitly named other zones
+remain available to reviewed schemas. Permanent category follows battlefield
+membership, instant and sorcery cards cannot enter, and ordinary entry creates
+a new logical incarnation while CR 400.7a preserves the resolving permanent
+spell. CR 403.4 remains blocked because the complete CR 400.7 exception matrix
+is not yet implemented. Historical in-play wording is definition-only because
+the engine consumes pinned current Oracle text.
 CR 405 records top-of-stack insertion, LIFO resolution after a complete
 priority round, direct represented effects, static abilities, and state-based
 actions as passing invariants. Resolution now rejects a non-top object before
