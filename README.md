@@ -162,6 +162,10 @@ generated documentation fixtures with bearer capabilities redacted. See
   controller-at-trigger-time, intervening-condition, and delayed-object-
   incarnation invariants; complete trigger grammar, two-part APNAP ordering,
   state/reflexive triggers, and the look-back exception matrix remain blocked
+- source-reviewed CR 601 casting with executable mana-ability payment-window
+  ordering, transactional rollback and cast-trigger witnesses; complete
+  announcement ordering, choice/cost grammar, proposal-dependent permissions,
+  and opponent-made casting choices remain blocked
 - source-reviewed CR 602 activation handling with corrected untap-symbol
   summoning sickness and object-scoped once-per-turn restrictions; full cost
   grammar, activation transactions, opponent choices, and acquired-ability

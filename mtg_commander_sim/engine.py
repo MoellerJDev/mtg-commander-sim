@@ -5300,7 +5300,13 @@ class CommanderEngine:
                 "from": origin,
                 "requirements": requirements,
                 "payment": {k:v for k,v in spent.items() if v},
-                "mana_sources": [{"source": a.get("source_ref"), "bundle": a.get("bundle")} for a in activations],
+                "mana_sources": [
+                    {
+                        "source": a.get("source_ref") or a.get("source"),
+                        "bundle": a.get("bundle"),
+                    }
+                    for a in activations
+                ],
                 "targets": item.targets,
                 "modes": item.modes,
                 "x": item.x_value,

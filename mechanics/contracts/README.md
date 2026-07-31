@@ -49,6 +49,12 @@ triggers, and logical-incarnation guards. Complete trigger grammar, the
 two-part trigger-on-trigger ordering loop, modal and optional choices,
 state/player-loss/reflexive triggers, delayed-source provenance, and the full
 look-back exception matrix remain untrusted.
+CR 601 traces the casting proposal, represented modes/targets/costs, mana
+abilities during payment, transactional rollback, spell-stack creation,
+cast-trigger batching, and priority return. The current implementation moves
+the card to the stack only after choices and payment, so prospective stack
+characteristics, complete cost and target grammar, proposal-dependent timing
+permissions, division, and opponent-made choices remain explicitly untrusted.
 CR 602 traces activated-ability parsing, availability, authoritative costs,
 stack placement, tap/untap summoning sickness, object-scoped once-per-turn
 history, and sorcery/instant timing. Complete cost and instruction grammar,

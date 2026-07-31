@@ -1,5 +1,5 @@
 {
-  "contract_count": 24,
+  "contract_count": 25,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -24,6 +24,12 @@
       "path": "mechanics/contracts/battles.json",
       "sha256": "3973811786f826f28220d96dd2e5e1a57373299875d7c5ddac22b218d4400171",
       "version": 3
+    },
+    {
+      "mechanic_id": "cr-601-casting-spells",
+      "path": "mechanics/contracts/casting-spells.json",
+      "sha256": "419bf3202c36377b05e809187464f8fe8a6eafa3b0e53cbae89cd452111c57a7",
+      "version": 1
     },
     {
       "mechanic_id": "cr-613-interaction-of-continuous-effects",
@@ -6223,17 +6229,44 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/casting-spells.json",
+      "contract_sha256": "419bf3202c36377b05e809187464f8fe8a6eafa3b0e53cbae89cd452111c57a7",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine priority advertisement, _cast, cost-option, target-validation, mana-payment, transaction, stack, and cast-trigger paths",
+      "implementation_version": "casting-foundation-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "the spell object is moved to the stack after choices and costs instead of before CR 601.2b-h, so prospective stack characteristics and cost effects can be wrong",
+        "complete splice, alternative/additional-cost, X, hybrid, Phyrexian, and variable-choice grammar is absent",
+        "target-count conditions, must-target effects, target triggers, division, and distribution are incomplete",
+        "the complete increase, reduction, minimum, direct-set, and payment-method cost ordering is not generic",
+        "not every cost can be paid in every legal order and not every partial-payment interaction is represented",
+        "complete prohibition, as-though-flash, conditional-flash, alternative-characteristic, and face-down-exile permission evaluation is absent",
+        "later choices cannot generically validate earlier modes, costs, targets, or divisions",
+        "opponent-made and simultaneous casting choices lack the CR 601.7 routing model",
+        "cost-changing effects do not use a universal prospective-cost model with immutable announced totals",
+        "full illegal-action restoration and replay evidence across every casting choice family remains incomplete"
+      ],
       "mechanic_id": "cr-601-casting-spells",
       "official_name": "Casting Spells",
       "rule_references": [
         "601"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_601_rule",
+        "test_mana_abilities_run_after_cost_choice_and_before_payment",
+        "test_cast_trigger_is_queued_above_spell_before_priority_returns",
+        "test_failed_cast_submission_restores_every_partial_payment",
+        "test_sorcery_timing_rejects_nonactive_cast_without_mutation",
+        "test_mana_ability_can_activate_during_spell_payment",
+        "test_hybrid_cast_cost_exposes_only_payable_variants",
+        "test_sai_cast_trigger_and_two_artifact_draw_cost",
+        "test_endurance_evoke_exiles_green_card_shuffles_target_and_sacrifices",
+        "test_tear_asunder_and_vandalblast_cost_options_change_targets",
+        "test_siege_defeated_casts_back_face_for_free_during_resolution"
+      ],
       "trust_level": "untrusted"
     },
     {

@@ -5,8 +5,8 @@
 - Indexed rules: 3300
 - Trusted rules: 0
 - Trusted fraction: 0.00%
-- Semantic conformance passes: 39
-- Unreviewed conformance cases: 3022
+- Semantic conformance passes: 40
+- Unreviewed conformance cases: 2994
 - Current snapshot complete: false
 
 A green completeness claim is blocked until every behavioral rule and mechanic contract in the pinned snapshot is trusted.

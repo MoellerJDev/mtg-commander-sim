@@ -73,6 +73,7 @@ class MechanicContractTests(unittest.TestCase):
                 "cr-210-defense",
                 "cr-310-battles",
                 "cr-400-general",
+                "cr-601-casting-spells",
                 "cr-602-activating-activated-abilities",
                 "cr-603-handling-triggered-abilities",
                 "cr-604-handling-static-abilities",
