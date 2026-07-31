@@ -27,7 +27,7 @@ coverage.
 | Workstream | Status | Current evidence |
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
-| Mechanic contracts | In progress | 35 partial/untrusted contracts; 390 mechanics unclassified; 0 trusted |
+| Mechanic contracts | In progress | 36 partial/untrusted contracts; 389 mechanics unclassified; 0 trusted |
 | Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
 | Object and zone identity | Partial | CR 400 logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, and selected linked-effect guards |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
@@ -36,7 +36,7 @@ coverage.
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 428 cases in CR 120/210/310/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 60 semantic passes, 309 blocked cases, and 59 definition-only cases |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 432 cases in CR 120/210/310/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616 are reviewed, with 61 semantic passes, 311 blocked cases, and 60 definition-only cases |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -163,6 +163,13 @@ coverage.
   Twelve cost, activation-transaction, hidden reveal, CR 601 parity,
   opponent-choice, cost-altering, prohibition, and acquired-ability records
   remain dependency-blocked; 3 taxonomy records are definition-only.
+- [x] Reviewed all 4 CR 503 Upkeep Step records. The ordinary no-turn-action
+  priority boundary passes. Represented triggers from untap, permanent upkeep
+  abilities, and delayed upkeep abilities wait without priority and share one
+  APNAP/controller-order batch with exact replay. Complete CR 502 event
+  production, CR 603.3b trigger-on-trigger ordering, additional upkeep
+  scheduling, and after-first-upkeep casting grammar remain dependency-blocked;
+  the heading is definition-only.
 - [x] Reviewed all 11 CR 510 Combat Damage Step records. Exact effective-power
   totals, legal multi-blocker recipients, strict assignment fields, atomic
   rejection, and exact replay pass for the represented ordinary assignment
@@ -198,7 +205,7 @@ coverage.
   declaration triggers, multi-attacker blocking, blocked-status effects, and
   entry-blocking remain dependency-blocked.
 
-## Current CR 120/210/310/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
+## Current CR 120/210/310/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
 
 At the beginning of combat, supported two-player and multiplayer Commander
 profiles establish every active opponent as a defending player without
@@ -370,8 +377,12 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,829 unit/integration tests pass: 529 ordinary tests plus 3,300 generated
+- 3,834 unit/integration tests pass: 534 ordinary tests plus 3,300 generated
   inventory/source-linkage tests. The latter are not semantic passes.
+- Five focused CR 503 tests cover source traceability, the ordinary no-turn-
+  action priority boundary, one APNAP/controller-order batch spanning untap
+  and upkeep trigger times, state actions before trigger placement, late-
+  trigger deferral, and two exact replay paths.
 - Six focused CR 506 tests cover all-rule traceability, the empty-combat phase
   boundary and exact replay, authoritative attacking/defending roles, removal
   after zone/control/phasing/type invalidation, historical-attacker retention,
@@ -430,10 +441,10 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 428 CR
-  120/210/310/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
-  cases are source-reviewed: 60 pass with executable engine evidence, 309
-  remain blocked, and 59 are definition-only. The other 2,872 cases remain
+  establish inventory linkage only. All 432 CR
+  120/210/310/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616
+  cases are source-reviewed: 61 pass with executable engine evidence, 311
+  remain blocked, and 60 are definition-only. The other 2,868 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -444,11 +455,11 @@ checkpoint validation.
 
 1. Continue reviewing and promoting conformance cases by
    dependency-ordered rules family; keep exposed but unimplemented edge cases
-   failing or blocked. CR 506 Combat Phase is the current bounded family;
-   retain alternate multiplayer options, generic effect-created combatants,
-   requirement snapshots, extra combats, combat-relative timing, and universal
-   same-controller/APNAP trigger batching as explicit blockers, along with the
-   deeper CR 601.2a-i stack-first casting frame.
+   failing or blocked. CR 503 Upkeep Step is the current bounded family;
+   retain incomplete CR 502 event production, CR 603.3b trigger-on-trigger
+   ordering, additional upkeep scheduling, and after-first-upkeep timing
+   grammar as explicit blockers, along with the deeper CR 601.2a-i stack-first
+   casting frame.
 2. Wire the reviewed CR 614/615/616 primitives into the shared CR 120/310
    replacement and prevention event pipeline, including stateful shields and
    typed nested events, then re-evaluate the blocked damage sequence and

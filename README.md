@@ -175,6 +175,11 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 503 upkeep boundary: represented triggers that occur
+  during untap and at the beginning of upkeep wait without priority, then
+  share one APNAP/controller-order batch before active-player priority;
+  complete untap events, additional upkeeps, and after-upkeep casting grammar
+  remain blocked
 - source-reviewed CR 506 combat-phase boundary: authoritative attacking and
   defending roles, durable combat history, and represented removal from
   combat after zone, control, phasing, or type changes; alternate multiplayer

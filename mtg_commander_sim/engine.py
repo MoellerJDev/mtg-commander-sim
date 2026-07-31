@@ -3062,7 +3062,11 @@ class CommanderEngine:
         card.tapped = False
         return True
 
-    def _enter_step(self) -> None:
+    def _enter_step(
+        self,
+        *,
+        held_triggers: Sequence[StackItem] = (),
+    ) -> None:
         phase, step = TURN_STEPS[self.state.phase_index]
         self.state.phase = phase
         self.state.step = step
@@ -3089,6 +3093,31 @@ class CommanderEngine:
             )
 
         if step == "untap":
+            # CR 502.4 and 503.1a hold every ability that triggers during
+            # untap until the first priority opportunity in upkeep.  Untap
+            # cannot be interrupted, so this batch can remain on the Python
+            # call stack while the engine synchronously crosses the boundary;
+            # no unserialized game state exists at a command/checkpoint
+            # boundary.
+            waiting_triggers: list[StackItem] = []
+            untap_context = {
+                "phase": phase,
+                "step": step,
+                "player": active,
+            }
+            self._dispatch_semantic_event(
+                "step.begin",
+                untap_context,
+                trigger_batch=waiting_triggers,
+            )
+            waiting_triggers.extend(
+                self._delayed_trigger_stack_item(trigger)
+                for trigger in self._matching_delayed_triggers(
+                    "step.begin",
+                    untap_context,
+                )
+            )
+            untapped_object_ids: list[str] = []
             if self.state.config.auto_untap:
                 changed: list[str] = []
                 intruder_alarm_active = any(
@@ -3129,6 +3158,7 @@ class CommanderEngine:
                         reason="untap step",
                     ):
                         changed.append(object_id)
+                        untapped_object_ids.append(object_id)
                 if changed:
                     self._log(active, "permanent.untap", f"{active} untapped {len(changed)} permanent(s).", {"objects": [self.state.cards[oid].ref for oid in changed]}, importance=0, changed_objects=changed, changed_players=[active])
                 for seat in self.active_seats:
@@ -3153,6 +3183,7 @@ class CommanderEngine:
                             )
                         ):
                             extra_changed.append(object_id)
+                            untapped_object_ids.append(object_id)
                     if extra_changed:
                         self._log(
                             seat,
@@ -3173,7 +3204,29 @@ class CommanderEngine:
                             changed_objects=extra_changed,
                             changed_players=[seat],
                         )
-            self._advance_step()
+            for object_id in untapped_object_ids:
+                card = self.state.cards[object_id]
+                event_context = {
+                    "card": card.ref,
+                    "player": active,
+                    "controller": card.controller,
+                    "phase": phase,
+                    "step": step,
+                    "reason": "untap step",
+                }
+                self._dispatch_semantic_event(
+                    "permanent.untap",
+                    event_context,
+                    trigger_batch=waiting_triggers,
+                )
+                waiting_triggers.extend(
+                    self._delayed_trigger_stack_item(trigger)
+                    for trigger in self._matching_delayed_triggers(
+                        "permanent.untap",
+                        event_context,
+                    )
+                )
+            self._advance_step(held_triggers=waiting_triggers)
             return
 
         if phase == "precombat_main" and step == "main":
@@ -3242,6 +3295,34 @@ class CommanderEngine:
             self._grant_priority(active)
             return
 
+        if step == "upkeep":
+            # All abilities that triggered since the last priority window,
+            # including during untap, form one APNAP/controller-order batch.
+            # A delayed trigger must not suppress permanent-based upkeep
+            # triggers, and trigger time within the no-priority interval must
+            # not determine stack order.
+            context = {
+                "phase": phase,
+                "step": step,
+                "player": active,
+            }
+            waiting_triggers = list(held_triggers)
+            self._dispatch_semantic_event(
+                "step.begin",
+                context,
+                trigger_batch=waiting_triggers,
+            )
+            waiting_triggers.extend(
+                self._delayed_trigger_stack_item(trigger)
+                for trigger in self._matching_delayed_triggers(
+                    "step.begin",
+                    context,
+                )
+            )
+            self._enqueue_semantic_trigger_batch(waiting_triggers)
+            self._grant_priority(active)
+            return
+
         delayed = self._matching_delayed_triggers("step.begin", {"phase": phase, "step": step, "player": active})
         if delayed:
             self._start_trigger_batch(delayed, after="grant_priority")
@@ -3287,7 +3368,11 @@ class CommanderEngine:
         )
         self._grant_priority(active)
 
-    def _advance_step(self) -> None:
+    def _advance_step(
+        self,
+        *,
+        held_triggers: Sequence[StackItem] = (),
+    ) -> None:
         self._clear_mana(reason="step or phase ended")
         if (
             self.state.phase,
@@ -3325,7 +3410,7 @@ class CommanderEngine:
                 return
             self._finish_cleanup()
             return
-        self._enter_step()
+        self._enter_step(held_triggers=held_triggers)
 
     def _finish_combat_phase(self) -> None:
         """Remove every represented object from combat at the CR 511.3 boundary."""
@@ -4351,9 +4436,26 @@ class CommanderEngine:
 
     def _queue_delayed_trigger(self, trigger_id: str) -> None:
         trigger = next(t for t in self.state.delayed_triggers if t.trigger_id == trigger_id)
+        item = self._delayed_trigger_stack_item(trigger)
+        self.state.stack.append(item)
+        self._log(trigger.controller, "stack.trigger", f"Queued {item.ref}: {item.label}.", {"stack": item.ref, "trigger": trigger.ref}, importance=2)
+
+    def _delayed_trigger_stack_item(
+        self,
+        trigger: DelayedTrigger,
+    ) -> StackItem:
+        """Materialize a delayed ability without choosing its stack order.
+
+        Step boundaries that combine delayed and permanent-based triggers need
+        one common ``StackItem`` representation before APNAP/controller
+        ordering.  Legacy delayed-only paths still call
+        :meth:`_queue_delayed_trigger`, which appends the returned item
+        immediately.
+        """
+
         template = trigger.stack_template
         ref = self._next_ref("S")
-        item = StackItem(
+        return StackItem(
             stack_id=self._stable_runtime_id("stack", ref),
             ref=ref,
             kind="triggered_ability",
@@ -4366,8 +4468,6 @@ class CommanderEngine:
             visibility=list(self.seats),
             context=copy.deepcopy(dict(template.get("context") or {})),
         )
-        self.state.stack.append(item)
-        self._log(trigger.controller, "stack.trigger", f"Queued {item.ref}: {item.label}.", {"stack": item.ref, "trigger": trigger.ref}, importance=2)
 
     # ------------------------------------------------------------------
     # Mana, land plays, spells, and abilities

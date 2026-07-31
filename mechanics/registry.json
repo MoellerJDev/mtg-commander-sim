@@ -1,5 +1,5 @@
 {
-  "contract_count": 35,
+  "contract_count": 36,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -210,6 +210,12 @@
       "path": "mechanics/contracts/unconditional-enters-tapped.json",
       "sha256": "f39dcc95dc6251ece41b008908ef5f0d72acd3817837a13fe7e6e90ed2ffbbba",
       "version": 2
+    },
+    {
+      "mechanic_id": "cr-503-upkeep-step",
+      "path": "mechanics/contracts/upkeep-step.json",
+      "sha256": "443acf9d3f7bc254c735c0df6637963796123604598f49eb6c62d9586ad19f2c",
+      "version": 1
     }
   ],
   "effective_date": "2026-06-19",
@@ -6094,17 +6100,36 @@
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/upkeep-step.json",
+      "contract_sha256": "443acf9d3f7bc254c735c0df6637963796123604598f49eb6c62d9586ad19f2c",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine untap/upkeep entry, represented untap-event dispatch, shared semantic/delayed trigger batching, state stabilization, priority, and exact replay",
+      "implementation_version": "upkeep-step-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "phasing, day/night transition, and every other CR 502 turn-based action are not fully implemented or exposed as normalized trigger events",
+        "the Oracle compiler does not recognize every untap or beginning-of-upkeep trigger wording, condition, target, mode, or optional choice",
+        "the complete CR 603.3b two-part trigger-on-trigger ordering process remains incomplete",
+        "additional upkeep creation and scheduling are not implemented",
+        "the after-first-upkeep spell timing restriction in CR 503.2 is not represented by the timing-permission grammar",
+        "the complete untap replacement, state-based-action, trigger, multiplayer, and replay interaction matrix remains incomplete"
+      ],
       "mechanic_id": "cr-503-upkeep-step",
       "official_name": "Upkeep Step",
       "rule_references": [
         "503"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_503_rule",
+        "test_upkeep_has_no_turn_action_then_active_gets_priority_and_replays",
+        "test_untap_and_upkeep_triggers_share_one_apnap_order_batch_and_replay",
+        "test_late_permanent_and_delayed_trigger_wait_for_later_upkeep",
+        "test_state_actions_precede_waiting_trigger_placement_and_priority",
+        "test_mystic_remora_cumulative_upkeep_and_opponent_spell_tax",
+        "test_pact_of_negation_delayed_payment_and_loss"
+      ],
       "trust_level": "untrusted"
     },
     {

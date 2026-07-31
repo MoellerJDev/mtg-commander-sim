@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 503 — Upkeep Step",
+  "cases": [
+    {
+      "rule_id": "503",
+      "rule_text_sha256": "89a93be70c66b112ac9e877255859d041feb0cf968721a142a260bac996e3302",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/upkeep-step.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_upkeep_step_rules.UpkeepStepRuleTests.test_contract_traces_every_cr_503_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; CR 503.1-2 carry the behavioral requirements."
+      ]
+    },
+    {
+      "rule_id": "503.1",
+      "rule_text_sha256": "10330e5006e416c549cca750e47f2e01d091f9f70f3e70a8ff3d36a88be37d0b",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "TURN_STEPS",
+        "CommanderEngine._enter_step",
+        "CommanderEngine._grant_priority"
+      ],
+      "executable_test_ids": [
+        "tests.test_upkeep_step_rules.UpkeepStepRuleTests.test_upkeep_has_no_turn_action_then_active_gets_priority_and_replays",
+        "tests.test_upkeep_step_rules.UpkeepStepRuleTests.test_untap_and_upkeep_triggers_share_one_apnap_order_batch_and_replay"
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "The upkeep boundary performs no turn-based action. After represented waiting triggers and state-based actions are processed, the active player receives priority; the ordinary boundary and trigger-order path command-replay exactly."
+      ]
+    },
+    {
+      "rule_id": "503.1a",
+      "rule_text_sha256": "5f3979b64fba0a5ebb488d6764f2214364b569aa88b38c52b8af7aa64865a20e",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._enter_step",
+        "CommanderEngine._dispatch_semantic_event",
+        "CommanderEngine._delayed_trigger_stack_item",
+        "CommanderEngine._enqueue_semantic_trigger_batch",
+        "CommanderEngine._stabilize"
+      ],
+      "executable_test_ids": [
+        "tests.test_upkeep_step_rules.UpkeepStepRuleTests.test_untap_and_upkeep_triggers_share_one_apnap_order_batch_and_replay",
+        "tests.test_upkeep_step_rules.UpkeepStepRuleTests.test_late_permanent_and_delayed_trigger_wait_for_later_upkeep",
+        "tests.test_upkeep_step_rules.UpkeepStepRuleTests.test_state_actions_precede_waiting_trigger_placement_and_priority"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "blockers": [
+        "complete_untap_step_event_surface_not_implemented",
+        "complete_cr_603_3b_two_part_trigger_ordering_not_implemented"
+      ],
+      "notes": [
+        "Represented beginning-of-untap, becomes-untapped, permanent upkeep, and delayed upkeep triggers wait without priority and enter one APNAP/controller-order batch. Trigger time does not constrain a controller's submitted order. The rule remains blocked because phasing, day/night, all untap replacements and trigger sources, and CR 603.3b's complete two-part process are not yet represented."
+      ]
+    },
+    {
+      "rule_id": "503.2",
+      "rule_text_sha256": "0eaf2c404c6a212ed91f5d0de38cc04448a639b3834e3bad47d5ef6d74b128c1",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [],
+      "executable_test_ids": [],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "additional_upkeep_step_scheduling_not_implemented",
+        "after_first_upkeep_cast_timing_grammar_not_implemented"
+      ],
+      "notes": [
+        "Paradox Haze is retained as a witness, but the engine does not schedule additional upkeep steps or compile spells restricted to after the first upkeep. No executable support is claimed."
+      ]
+    }
+  ]
+}

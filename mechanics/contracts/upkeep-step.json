@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-503-upkeep-step",
+  "official_name": "Upkeep Step",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "503",
+    "503.1",
+    "503.1a",
+    "503.2"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "turn-structure",
+    "cr-502-untap-step",
+    "priority",
+    "triggered-abilities",
+    "delayed-triggered-abilities",
+    "apnap",
+    "stack",
+    "state-based-actions",
+    "timing-permissions",
+    "oracle-reference",
+    "multiplayer",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "stack"
+    ],
+    "objects": [
+      "active player",
+      "permanents with represented untap or beginning-of-upkeep abilities",
+      "represented delayed beginning-of-upkeep triggers"
+    ],
+    "events": [
+      "untap step begins",
+      "represented permanents untap",
+      "upkeep step begins",
+      "waiting untap and upkeep triggers are collected",
+      "state-based actions are checked",
+      "waiting triggers are put on the stack",
+      "active player receives priority"
+    ],
+    "state_reads": [
+      "current phase and step",
+      "active player",
+      "untapped battlefield objects",
+      "battlefield semantic trigger sources",
+      "active delayed triggers and their conditions",
+      "stack and pending trigger batches"
+    ],
+    "state_writes": [
+      "permanent tapped status",
+      "semantic trigger batches",
+      "delayed trigger active state",
+      "triggered ability stack objects",
+      "priority player and pass state"
+    ],
+    "costs": [
+      "represented upkeep-trigger costs are paid only when their abilities resolve"
+    ],
+    "timing": [
+      "the upkeep step performs no turn-based action",
+      "no player receives priority between represented untap events and upkeep trigger placement",
+      "all represented triggers waiting since untap use one ordering batch",
+      "the active player receives the first priority window after stabilization",
+      "after-upkeep casting grammar and multiple upkeep scheduling remain blocked"
+    ],
+    "targets": [
+      "represented triggered abilities retain their compiled target schemas"
+    ],
+    "choices": [
+      "each controller orders all represented triggers they control that waited since the last priority window",
+      "controllers make those choices in active-player/nonactive-player order"
+    ],
+    "hidden_information": [
+      "the untap and upkeep boundaries reveal no hidden information",
+      "trigger payload visibility remains governed by the compiled semantic program"
+    ],
+    "apnap": [
+      "represented untap, permanent-based upkeep, and delayed upkeep triggers share one active-player/nonactive-player ordering batch"
+    ],
+    "layers": [
+      "effective battlefield characteristics determine represented trigger sources"
+    ],
+    "replacement_effects": [
+      "stun counters may replace represented untaps before untap-trigger collection",
+      "complete untap replacement ordering remains a CR 614/616 dependency"
+    ],
+    "copy": [
+      "represented copied characteristics may supply a compiled battlefield trigger"
+    ],
+    "control_change": [
+      "trigger controller is captured when the represented trigger is materialized"
+    ],
+    "zone_change": [
+      "state-based actions occur before waiting triggers are placed on the stack",
+      "a permanent entering after the upkeep boundary does not trigger retroactively"
+    ],
+    "source_leaves": [
+      "a represented waiting or delayed trigger remains independent of its source unless its compiled condition says otherwise"
+    ]
+  },
+  "variants": [
+    "ordinary upkeep with no waiting triggers",
+    "ability triggered by a represented untap",
+    "permanent-based beginning-of-upkeep trigger",
+    "delayed beginning-of-upkeep trigger",
+    "same-controller ordering across untap and upkeep trigger times",
+    "multiplayer APNAP ordering",
+    "late source or delayed-trigger creation",
+    "unsupported additional upkeep steps",
+    "unsupported after-upkeep casting restriction"
+  ],
+  "witness_cards": [
+    {
+      "name": "Mystic Remora",
+      "oracle_id": "8a52f3c0-2552-4425-b2e3-5496eb2232a7"
+    },
+    {
+      "name": "Pact of Negation",
+      "oracle_id": "f3e213a4-ba5a-468a-93b3-c0a34e1bd725"
+    },
+    {
+      "name": "Paradox Haze",
+      "oracle_id": "daff0e7b-08f2-435f-97b9-9b000e94ffa8"
+    }
+  ],
+  "rulings": [
+    "Pact of Negation — 2021-03-19 — Its delayed upkeep ability is created only if the Pact resolves with a legal target.",
+    "Pact of Negation — 2021-03-19 — The delayed ability is still created if the legal target could not be countered."
+  ],
+  "test_ids": [
+    "test_contract_traces_every_cr_503_rule",
+    "test_upkeep_has_no_turn_action_then_active_gets_priority_and_replays",
+    "test_untap_and_upkeep_triggers_share_one_apnap_order_batch_and_replay",
+    "test_late_permanent_and_delayed_trigger_wait_for_later_upkeep",
+    "test_state_actions_precede_waiting_trigger_placement_and_priority",
+    "test_mystic_remora_cumulative_upkeep_and_opponent_spell_tax",
+    "test_pact_of_negation_delayed_payment_and_loss"
+  ],
+  "implementation": {
+    "component": "CommanderEngine untap/upkeep entry, represented untap-event dispatch, shared semantic/delayed trigger batching, state stabilization, priority, and exact replay",
+    "version": "upkeep-step-v1"
+  },
+  "known_blockers": [
+    "phasing, day/night transition, and every other CR 502 turn-based action are not fully implemented or exposed as normalized trigger events",
+    "the Oracle compiler does not recognize every untap or beginning-of-upkeep trigger wording, condition, target, mode, or optional choice",
+    "the complete CR 603.3b two-part trigger-on-trigger ordering process remains incomplete",
+    "additional upkeep creation and scheduling are not implemented",
+    "the after-first-upkeep spell timing restriction in CR 503.2 is not represented by the timing-permission grammar",
+    "the complete untap replacement, state-based-action, trigger, multiplayer, and replay interaction matrix remains incomplete"
+  ],
+  "review_status": "draft"
+}
