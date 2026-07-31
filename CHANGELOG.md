@@ -31,6 +31,9 @@
   owner seat removal, nonowner leave, and atomic **New room** replacement.
 - Added bounded startup retry backoff for already-open room pages and accurate
   `starting` system status while card data is being verified.
+- Fixed production WebSocket origin validation so the one-command UI's exact
+  same origin is accepted without a Vite-only allowlist override; unrelated
+  origins remain rejected.
 - Extended application and Chromium coverage for managed data, archive/snapshot
   cleanup, record-pinned recovery, local static serving, 390-pixel layout,
   focus restoration, and byte-equivalent idempotent command retry.

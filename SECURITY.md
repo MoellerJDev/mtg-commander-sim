@@ -41,7 +41,9 @@ HttpOnly cookie for each top-level browser tab, so Chrome incognito windows may
 share a cookie jar without sharing a seat. The same selector travels as a
 WebSocket subprotocol, while the bearer itself remains out of JavaScript and
 URLs. Unsafe cookie-authenticated requests also require a double-submit CSRF
-token. Browser WebSockets accept only configured origins.
+token. Browser WebSockets accept the request's exact HTTP(S) origin or an
+explicitly configured development/deployment origin; unrelated origins remain
+rejected.
 SQLite stores SHA-256 hashes of guest tokens and room invite codes, never their
 raw values. The host browser retains its raw invite only in session storage so
 it survives readying and reload without becoming server-side plaintext; closing

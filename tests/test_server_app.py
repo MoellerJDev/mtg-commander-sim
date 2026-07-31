@@ -13,7 +13,7 @@ from common import DB_PATH, ROOT
 from mtg_commander_sim import CardDatabase
 from mtg_commander_sim.record import database_fingerprint, replay_record
 from server import ServerSettings, create_app
-from server.app import COOKIE_NAME, CSRF_COOKIE_NAME
+from server.app import COOKIE_NAME, CSRF_COOKIE_NAME, _websocket_origin_allowed
 
 
 class ServerApplicationTests(unittest.TestCase):
@@ -57,6 +57,30 @@ class ServerApplicationTests(unittest.TestCase):
     @staticmethod
     def auth(token: str) -> dict[str, str]:
         return {"Authorization": f"Bearer {token}"}
+
+    def test_websocket_origin_accepts_exact_same_origin_and_rejects_foreign(self):
+        configured = ("http://127.0.0.1:5173",)
+        self.assertTrue(
+            _websocket_origin_allowed(
+                "http://127.0.0.1:8000",
+                "127.0.0.1:8000",
+                configured,
+            )
+        )
+        self.assertTrue(
+            _websocket_origin_allowed(
+                "http://127.0.0.1:5173",
+                "127.0.0.1:8000",
+                configured,
+            )
+        )
+        self.assertFalse(
+            _websocket_origin_allowed(
+                "https://attacker.example",
+                "127.0.0.1:8000",
+                configured,
+            )
+        )
 
     def test_browser_tabs_keep_distinct_guests_in_one_cookie_jar(self):
         tab_a = "a" * 32
@@ -478,7 +502,8 @@ class ServerApplicationTests(unittest.TestCase):
 
         self.client.cookies.set(COOKIE_NAME, tokens[0])
         with self.client.websocket_connect(
-            f"/api/v1/games/{game_id}/stream"
+            f"/api/v1/games/{game_id}/stream",
+            headers={"origin": "http://testserver"},
         ) as websocket_a:
             initial_a = websocket_a.receive_json()
             self.assertEqual("full", initial_a["packet"]["mode"])

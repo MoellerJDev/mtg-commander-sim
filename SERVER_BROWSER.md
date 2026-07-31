@@ -79,6 +79,11 @@ with comma-separated `MTG_ALLOWED_ORIGINS`, and production cookie security with
 `MTG_CARD_UPDATE_SECONDS` control the managed local paths and update behavior;
 `MTG_CARD_SNAPSHOT_DIR` overrides retained record-pinned databases.
 
+The browser served by `python -m server` is automatically accepted as the exact
+same origin (normally `http://127.0.0.1:8000`) for WebSocket upgrades.
+`MTG_ALLOWED_ORIGINS` is for additional origins such as a separate development
+frontend; it does not need to repeat the server's own origin.
+
 ## Card data and images
 
 Rules text, characteristics, aliases, legality, image references, and rulings

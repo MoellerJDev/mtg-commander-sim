@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import secrets
 from typing import Any, AsyncIterator, Literal
+from urllib.parse import urlsplit
 import uuid
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
@@ -345,6 +346,29 @@ def _tab_cookie_name(tab_id: str) -> str:
 def _request_tab_id(request: Request) -> str | None:
     value = request.headers.get(TAB_HEADER_NAME, "").lower()
     return value if TAB_ID_RE.fullmatch(value) else None
+
+
+def _websocket_origin_allowed(
+    origin: str | None,
+    host: str,
+    configured_origins: tuple[str, ...],
+) -> bool:
+    if not origin:
+        return True
+    if origin in configured_origins:
+        return True
+    try:
+        parsed = urlsplit(origin)
+    except ValueError:
+        return False
+    return (
+        parsed.scheme in {"http", "https"}
+        and bool(host)
+        and parsed.netloc.lower() == host.lower()
+        and not parsed.path
+        and not parsed.query
+        and not parsed.fragment
+    )
 
 
 def _bearer(request: Request) -> str | None:
@@ -1006,7 +1030,11 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
             await websocket.close(code=1013, reason="Card data is still being prepared")
             return
         origin = websocket.headers.get("origin")
-        if origin and origin not in resolved.allowed_origins:
+        if not _websocket_origin_allowed(
+            origin,
+            websocket.headers.get("host", ""),
+            resolved.allowed_origins,
+        ):
             await websocket.close(code=1008, reason="Origin not allowed")
             return
         selected_protocol: str | None = None

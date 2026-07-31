@@ -36,7 +36,6 @@ export default defineConfig({
         MTG_SERVER_DATA: serverData,
         MTG_E2E_SERVER_PORT: String(serverPort),
         MTG_E2E_WEB_PORT: String(webPort),
-        MTG_ALLOWED_ORIGINS: `http://127.0.0.1:${webPort},http://localhost:${webPort}`,
       },
     },
     {
