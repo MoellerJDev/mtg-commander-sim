@@ -1,5 +1,5 @@
 {
-  "contract_count": 30,
+  "contract_count": 31,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -38,6 +38,12 @@
       "version": 1
     },
     {
+      "mechanic_id": "cr-510-combat-damage-step",
+      "path": "mechanics/contracts/combat-damage-step.json",
+      "sha256": "e69d94b32ffd724fc770dacaa2f8b573450f0f04625a5d249262cdbe84e90d63",
+      "version": 1
+    },
+    {
       "mechanic_id": "cr-613-interaction-of-continuous-effects",
       "path": "mechanics/contracts/continuous-layers.json",
       "sha256": "d134497c32d15cce341bb720aa46f8506562770cdd1e9c0cd0bfaf8c7455fbf9",
@@ -52,7 +58,7 @@
     {
       "mechanic_id": "cr-120-damage",
       "path": "mechanics/contracts/damage.json",
-      "sha256": "dc73fe9e4c881139f07a08eb6411b815f7b0a2ee31d5ff23facd09d450a8ec79",
+      "sha256": "1750d9b3334a8d3537ab7671657152c89ef6edd9637d01293bd70322120d8404",
       "version": 2
     },
     {
@@ -5259,7 +5265,7 @@
     {
       "category": "game_concepts",
       "contract_path": "mechanics/contracts/damage.json",
-      "contract_sha256": "dc73fe9e4c881139f07a08eb6411b815f7b0a2ee31d5ff23facd09d450a8ec79",
+      "contract_sha256": "1750d9b3334a8d3537ab7671657152c89ef6edd9637d01293bd70322120d8404",
       "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [],
@@ -5282,7 +5288,7 @@
         "test_damage_rejects_nondamageable_permanent",
         "test_zero_damage_creates_no_results_or_damage_event",
         "test_negative_damage_fails_closed",
-        "test_negative_power_combat_source_assigns_zero_damage",
+        "test_negative_power_combat_source_assigns_no_damage",
         "test_damage_results_do_not_destroy_before_state_actions",
         "test_damage_to_multityped_permanent_applies_every_result",
         "test_marked_damage_survives_type_loss_until_cleanup",
@@ -6169,17 +6175,39 @@
     },
     {
       "category": "turn_structure",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/combat-damage-step.json",
+      "contract_sha256": "e69d94b32ffd724fc770dacaa2f8b573450f0f04625a5d249262cdbe84e90d63",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine combat-damage assignment validation and damage application",
+      "implementation_version": "combat-damage-step-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "active-player then defending-player public assignment announcement order is not represented",
+        "trample and lifelink combat damage semantics are not complete",
+        "a blocker blocking several attackers is not produced by the declaration system",
+        "simultaneous damage replacement and prevention require the universal typed event pipeline",
+        "damage-trigger APNAP placement before priority is incomplete",
+        "first strike and double strike require multiple combat damage steps"
+      ],
       "mechanic_id": "cr-510-combat-damage-step",
       "official_name": "Combat Damage Step",
       "rule_references": [
         "510"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_510_rule",
+        "test_multiblocker_assignment_deals_all_damage_simultaneously",
+        "test_assignment_above_power_is_rejected_atomically",
+        "test_noncombat_source_is_rejected",
+        "test_attacker_cannot_assign_damage_to_unrelated_target",
+        "test_assignment_rejects_client_supplied_semantic_fields",
+        "test_nonpositive_source_cannot_submit_zero_assignment",
+        "test_blocked_attacker_assigns_nothing_after_blocker_leaves",
+        "test_first_strike_fails_closed_before_damage_decision",
+        "test_negative_power_combat_source_assigns_no_damage"
+      ],
       "trust_level": "untrusted"
     },
     {

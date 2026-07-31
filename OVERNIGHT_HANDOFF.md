@@ -1,6 +1,6 @@
 # Integration handoff
 
-Last updated: 2026-07-30
+Last updated: 2026-07-31
 
 This is a sanitized operational summary. It contains no credentials,
 capabilities, private hands, library order, private choices, live Game Records,
@@ -10,7 +10,7 @@ or provider session data.
 
 - Repository: private `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/cr-511-end-of-combat`
+- Active branch: `agent/cr-510-combat-damage`
 - Stage A merge commit on `main`:
   `bd89201be44de85aa9b85fcc9f0baacb0ee76dbe`
 - Stage A PR:
@@ -20,9 +20,10 @@ or provider session data.
 - Package version: `0.8.0`
 - Existing tags: `v0.6.0`, `v0.7.0`
 
-PR #2, PR #1, and focused CR 512 PR #3 passed their exact-SHA matrices and
-merged into `main` through ordinary merge commits. Main commit
-`9762c655b0f068ce24469e6476902a05de79c9d3` then passed run 30605533169.
+PR #2, PR #1, focused CR 512 PR #3, and focused CR 511 PR #4 passed their
+exact-SHA matrices and merged into `main` through ordinary merge commits. Main
+commit `219d21b884c8ff16df84fa818fe57e81d18c65a6` then passed run
+30606644835.
 
 ## Deterministic product boundary
 
@@ -57,16 +58,16 @@ It generates one source-linked conformance case for each of 3,300 numbered
 rules and preserves reviewed status only while the source and rule-text hashes
 remain unchanged.
 
-Current reviewed inventory after the CR 511 synchronization:
+Current reviewed inventory after the CR 510 synchronization:
 
-- 322 reviewed cases
-- 47 executable semantic passes
-- 223 reviewed blocked cases
-- 52 definition-only cases
-- 2,978 unreviewed inventory cases
+- 333 reviewed cases
+- 50 executable semantic passes
+- 230 reviewed blocked cases
+- 53 definition-only cases
+- 2,967 unreviewed inventory cases
 - 425 discovered mechanics
-- 30 partial/untrusted mechanic contracts
-- 395 unclassified mechanics
+- 31 partial/untrusted mechanic contracts
+- 394 unclassified mechanics
 - 0 corpus-wide trusted mechanics
 
 Implemented reviewed families include narrow contracts for damage, defense,
@@ -105,7 +106,7 @@ Stage A exact evidence:
 - deterministic four-player micro-pool reached a natural winner with zero
   suppressed meaningful windows, passed seat projection, and exact-replayed
 
-The focused CR 511 local test gate passed atop the green CR 512 baseline:
+The focused CR 510 local test gate passed atop the green CR 511 baseline:
 
 - generated platform, rules, mechanics, and Oracle status checks
 - all noninventory and all generated per-rule tests
@@ -114,17 +115,17 @@ The focused CR 511 local test gate passed atop the green CR 512 baseline:
 - protocol demo and packet benchmark
 - repository/history/secret/artifact scans
 - wheel build, clean installation, imported version, and CLI smoke
-- the four focused CR 511 priority/trigger/combat-finalization/replay tests
+- the nine focused CR 510 assignment-authority/rollback/replay tests
 - exact-SHA four-job GitHub Actions for the focused commit remains pending
   until push
 
-The local test gate ran 3,796 tests in 179.631 seconds, verified all 3,300 pinned
+The local test gate ran 3,805 tests in 208.373 seconds, verified all 3,300 pinned
 rules cases and 425 mechanics, checked 14 schemas and repository history,
 completed the protocol demo, and built and clean-installed the wheel. The
 four-player natural-winner soak exact-replayed after eliminating insertion-order
-dependence from authoritative zone timestamps. The repository scan covered 244
-tracked files and 11,183,790 bytes. Main commit
-`9762c655b0f068ce24469e6476902a05de79c9d3` already passed run 30605533169;
+dependence from authoritative zone timestamps. The repository scan covered 250
+tracked files and 11,219,209 bytes. Main commit
+`219d21b884c8ff16df84fa818fe57e81d18c65a6` already passed run 30606644835;
 no exact-SHA CI pass is claimed for the focused commit until it is pushed.
 
 ## Evidence boundaries
@@ -138,6 +139,6 @@ no exact-SHA CI pass is claimed for the focused commit until it is pushed.
 
 ## Exact next step
 
-Publish the green CR 511 focused branch and wait for its exact-SHA matrix.
-CR 511.1 and CR 511.3 may be claimed for the represented boundary; CR 511.2
-remains blocked on generic until-end-of-combat duration semantics.
+Publish the green CR 510 focused branch and wait for its exact-SHA matrix.
+CR 510.1a, 510.1c, and 510.1e may be claimed for the represented assignment
+boundary; the remaining CR 510 records retain their explicit dependencies.

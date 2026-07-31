@@ -9,6 +9,11 @@
 - Removed AI/Codex runs from product, rules, merge, and release completion
   criteria while retaining existing adapters as optional untrusted clients.
 - Added a generated platform readiness ledger and CI stale-artifact check.
+- Made manual combat-damage assignment server-authoritative: noncombat sources,
+  unrelated recipients, excessive totals, duplicate pairs, malformed fields,
+  and client-supplied semantic flags are rejected transactionally.
+- Added exact multi-blocker replay evidence and fail-closed first-strike
+  characterization for the partial CR 510 contract.
 - Corrected the CR 511.3 boundary so attacking and blocking markers and the
   combat snapshot clear after end-of-combat priority, before postcombat main.
 - Added source-linked end-of-combat priority, trigger-coexistence, multiplayer,

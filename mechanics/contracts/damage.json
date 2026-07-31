@@ -143,7 +143,7 @@
     "test_damage_rejects_nondamageable_permanent",
     "test_zero_damage_creates_no_results_or_damage_event",
     "test_negative_damage_fails_closed",
-    "test_negative_power_combat_source_assigns_zero_damage",
+    "test_negative_power_combat_source_assigns_no_damage",
     "test_damage_results_do_not_destroy_before_state_actions",
     "test_damage_to_multityped_permanent_applies_every_result",
     "test_marked_damage_survives_type_loss_until_cleanup",

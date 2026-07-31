@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-510-combat-damage-step",
+  "official_name": "Combat Damage Step",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "510",
+    "510.1",
+    "510.1a",
+    "510.1b",
+    "510.1c",
+    "510.1d",
+    "510.1e",
+    "510.2",
+    "510.3",
+    "510.3a",
+    "510.4"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "combat",
+    "derived-characteristics",
+    "damage",
+    "illegal-actions",
+    "priority",
+    "triggers",
+    "replacement-effects"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["battlefield"],
+    "objects": [
+      "attacking creature",
+      "blocking creature",
+      "attacked player",
+      "attacked planeswalker",
+      "attacked battle"
+    ],
+    "events": [
+      "combat damage is assigned",
+      "the complete assignment is validated",
+      "combat damage is dealt simultaneously",
+      "state-based actions and triggers stabilize",
+      "active player receives priority"
+    ],
+    "state_reads": [
+      "effective power",
+      "current attacking and blocking relationships",
+      "current attack target",
+      "first strike, double strike, trample, and lifelink"
+    ],
+    "state_writes": [
+      "marked damage",
+      "life",
+      "loyalty and defense counters",
+      "commander damage",
+      "combat damage journal"
+    ],
+    "costs": [],
+    "timing": [
+      "assignment and dealing are turn-based actions that do not use the stack",
+      "no priority window occurs between assignment and dealing",
+      "unsupported keyword-dependent damage steps fail before a client decision is issued"
+    ],
+    "targets": [
+      "unblocked attackers use their current attacked object or player",
+      "blocked attackers may assign only to their current blockers in this slice",
+      "blockers may assign only to attackers they currently block"
+    ],
+    "choices": [
+      "a controller divides a positive-power source's full damage among currently legal recipients",
+      "the complete per-player assignment is validated atomically"
+    ],
+    "hidden_information": [
+      "combat assignments contain public battlefield and player references only"
+    ],
+    "apnap": [
+      "the official active-player-then-defending-player announcement sequence remains blocked"
+    ],
+    "layers": [
+      "effective power is read through the shared derived-characteristics path"
+    ],
+    "replacement_effects": [
+      "the complete simultaneous replacement/prevention event batch remains blocked"
+    ],
+    "copy": [
+      "copies use their effective combat characteristics"
+    ],
+    "control_change": [
+      "only combat sources currently controlled by the responding seat may be assigned"
+    ],
+    "zone_change": [
+      "a source or recipient no longer on the battlefield is not a current combat participant"
+    ],
+    "source_leaves": [
+      "a departed source assigns no combat damage"
+    ]
+  },
+  "variants": [
+    "unblocked attacker",
+    "single blocker",
+    "several blockers",
+    "zero or negative power",
+    "illegal excessive assignment",
+    "illegal unrelated source or recipient",
+    "first strike and double strike fail-closed boundary"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_510_rule",
+    "test_multiblocker_assignment_deals_all_damage_simultaneously",
+    "test_assignment_above_power_is_rejected_atomically",
+    "test_noncombat_source_is_rejected",
+    "test_attacker_cannot_assign_damage_to_unrelated_target",
+    "test_assignment_rejects_client_supplied_semantic_fields",
+    "test_nonpositive_source_cannot_submit_zero_assignment",
+    "test_blocked_attacker_assigns_nothing_after_blocker_leaves",
+    "test_first_strike_fails_closed_before_damage_decision",
+    "test_negative_power_combat_source_assigns_no_damage"
+  ],
+  "implementation": {
+    "component": "CommanderEngine combat-damage assignment validation and damage application",
+    "version": "combat-damage-step-v1"
+  },
+  "known_blockers": [
+    "active-player then defending-player public assignment announcement order is not represented",
+    "trample and lifelink combat damage semantics are not complete",
+    "a blocker blocking several attackers is not produced by the declaration system",
+    "simultaneous damage replacement and prevention require the universal typed event pipeline",
+    "damage-trigger APNAP placement before priority is incomplete",
+    "first strike and double strike require multiple combat damage steps"
+  ],
+  "review_status": "draft"
+}
