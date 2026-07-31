@@ -7,19 +7,18 @@ Python: 3.11.9
 
 PASS: `python -m compileall -q mtg_commander_sim tests scripts simctl.py`
 
-PASS: 3,818 unit/integration tests in 188.131 seconds using the rebuilt compact
+PASS: 3,823 unit/integration tests in 180.120 seconds using the rebuilt compact
 Scryfall database:
 
 - 3,300 generated per-rule inventory/source-linkage tests
-- 518 ordinary rules, engine, protocol, replay, privacy, and platform tests
+- 523 ordinary rules, engine, protocol, replay, privacy, and platform tests
 
-The eight new CR 508 tests verify source traceability, legal attacker exposure,
-ordinary tapping and vigilance, attacking-state lifetime, phased attacker and
-Battle-target rejection, duplicate rejection, transactional rollback,
-empty-combat step skipping, zero meaningful suppression, and exact replay.
-Planeswalker destinations, complete restrictions and requirements, banding,
-attack costs, declaration triggers, entry-attacking effects, defending-player
-LKI, and target reselection remain blocked.
+The five new CR 507 tests verify source traceability, supported Commander
+defending-player initialization without a choice task, fail-closed rejection
+of single-defender multiplayer profiles, coexistence of permanent and delayed
+beginning-of-combat triggers before priority, and exact replay into declare
+attackers. Universal same-controller trigger ordering and unsupported
+multiplayer combat options remain blocked.
 
 Generated source linkage is not a claim that every rule has executable semantic
 coverage. The reviewed ledger remains fail-closed about passing, blocked,
@@ -63,7 +62,7 @@ PASS:
 - reachable-history path and oversized-blob scan
 - sanitized public replay-fixture policy check
 
-The scan covered 256 tracked files and 11,310,630 tracked bytes.
+The scan covered 259 tracked files and 11,364,813 tracked bytes.
 
 ## Package
 
@@ -74,15 +73,15 @@ package reported version 0.8.0 and its CLI smoke test completed.
 
 ## Evidence boundary
 
-These checks establish the local CR 508 focused branch atop the green CR 509
-main baseline, including source pinning, attacker-declaration authority, replay,
-privacy, action opportunity, packaging, and repository gates. They do not
-establish requirements, generic attack costs, complete restriction or
-declaration-trigger semantics, entry-attacking effects, a production ASGI server, browser client,
+These checks establish the local CR 507 focused branch atop the green CR 508
+main baseline, including source pinning, beginning-of-combat defender and
+priority semantics, replay, privacy, action opportunity, packaging, and
+repository gates. They do not establish alternate multiplayer combat options,
+universal trigger ordering, a production ASGI server, browser client,
 durable database, complete Comprehensive Rules behavior,
 Oracle-corpus semantic closure, Commander deck legality for the micro-pool,
 deck superiority, or statistical matchup evidence.
 
 The baseline main commit's exact-SHA GitHub Actions matrix is recorded after
-pull request #6 in run 30609935545. Exact-SHA CI for the focused CR 508 commit is
+pull request #7 in run 30612078608. Exact-SHA CI for the focused CR 507 commit is
 not claimed until that commit is pushed.

@@ -256,6 +256,8 @@ class CombatState:
     attackers_declared: bool = False
     blockers_declared: bool = False
     attackers: dict[str, str] = field(default_factory=dict)  # attacker object -> defender seat/object
+    # Every rules-defined defending player, including opponents not attacked.
+    # Decision scheduling derives the actually attacked subset separately.
     defending_players: list[str] = field(default_factory=list)
     blocker_cursor: int = 0
     blockers: dict[str, list[str]] = field(default_factory=dict)  # attacker -> blocker object ids

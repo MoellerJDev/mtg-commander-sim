@@ -175,6 +175,11 @@ generated documentation fixtures with bearer capabilities redacted. See
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
   contracts without inventing standalone behavior for the heading
+- source-reviewed CR 507 beginning-of-combat boundary: supported Commander
+  profiles establish every active opponent as a defending player without a
+  defender-choice task, coexisting permanent and delayed triggers are
+  collected before active-player priority, and unsupported single-defender
+  multiplayer variants fail closed
 - source-reviewed CR 510 combat-damage assignment validation: the server
   derives sources, recipients, and exact power totals, rejects client-supplied
   semantics, and rolls illegal assignments back atomically; complex keyword

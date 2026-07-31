@@ -58,6 +58,10 @@ permissions, division, and opponent-made choices remain explicitly untrusted.
 CR 600 pins the Spells, Abilities, and Effects section taxonomy to the
 dependent CR 601-609 contracts. Because CR 600 contains only a heading, it is
 definition-only and does not create a standalone behavioral claim.
+CR 507 traces the beginning-of-combat defending-player, trigger, priority, and
+declare-attackers handoff. Supported Commander profiles establish all active
+opponents as defending players without a choice, while multiplayer variants
+that require choosing one defender remain rejected and explicitly blocked.
 CR 510 traces combat-damage assignment authority, legal recipients, exact
 power totals, atomic rollback, and ordinary simultaneous dealing. First/double
 strike, trample, lifelink, APNAP damage triggers, and the universal simultaneous

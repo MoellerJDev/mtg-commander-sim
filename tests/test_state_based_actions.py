@@ -1932,7 +1932,10 @@ class StateBasedActionEngineTests(unittest.TestCase):
         attacker = self.card(engine, attacker_ref)
         siege = self.card(engine, siege_ref)
         self.assertEqual(siege.ref, attacker.attacking)
-        self.assertEqual(["B"], engine.state.combat.defending_players)
+        self.assertEqual(
+            ["B", "C", "D"],
+            engine.state.combat.defending_players,
+        )
         engine.permissions.invalidate_current()
         engine.state.pending_decision = None
         engine._issue_next_blocker()

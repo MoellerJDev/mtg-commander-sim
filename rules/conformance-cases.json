@@ -28535,21 +28535,25 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-507",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_beginning_of_combat_rules.BeginningOfCombatRuleTests.test_contract_traces_every_cr_507_rule"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/beginning-of-combat.json"
+      ],
+      "notes": [
+        "Section heading; CR 507.1-2 carry the behavioral requirements."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "507",
       "rule_text_sha256": "92afe044784da8e208936ab64d982e964b72c7bb08b1154427be8d189221e30f",
       "schema_version": 1,
@@ -28558,26 +28562,42 @@
         "end_line": 2253,
         "start_line": 2252
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "single_defender_multiplayer_variant_choice_not_implemented"
       ],
       "case_id": "cr-507.1",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "negative",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "507"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_beginning_of_combat_rules.BeginningOfCombatRuleTests.test_supported_commander_profiles_have_no_defender_choice",
+        "tests.test_beginning_of_combat_rules.BeginningOfCombatRuleTests.test_single_defender_multiplayer_variants_fail_closed",
+        "tests.test_multiplayer_rules.MultiplayerRuleTests.test_multiple_defenders_block_sequentially"
+      ],
+      "implementation_components": [
+        "CommanderEngine.create",
+        "CommanderEngine._enter_step"
+      ],
+      "notes": [
+        "Supported Commander multiplayer uses CR 802.2, so all active opponents remain defending players without a choice while blocker tasks are issued only to players actually being attacked. Profiles that would require the conditional CR 507.1 choice are rejected rather than simulated approximately."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "507.1",
       "rule_text_sha256": "f18078c26d630852073a5ba12dad7bb93b70c629aaf54cb68e46decd720a888c",
       "schema_version": 1,
@@ -28586,26 +28606,44 @@
         "end_line": 2255,
         "start_line": 2254
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-507.2",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "507"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_beginning_of_combat_rules.BeginningOfCombatRuleTests.test_permanent_and_delayed_triggers_precede_active_priority",
+        "tests.test_beginning_of_combat_rules.BeginningOfCombatRuleTests.test_priority_round_advances_to_attackers_and_replays_exactly"
+      ],
+      "implementation_components": [
+        "CommanderEngine._enter_step",
+        "CommanderEngine._dispatch_semantic_event",
+        "CommanderEngine._matching_delayed_triggers",
+        "CommanderEngine._grant_priority"
+      ],
+      "notes": [
+        "Represented permanent and delayed beginning-of-combat triggers coexist before the active player receives priority. An ordinary four-player priority round advances to declare attackers and command-replays exactly."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "507.2",
       "rule_text_sha256": "dfb29e9864cd503f27d987c942be79b891458729ecc34067f6aadcfc7fcc20ab",
       "schema_version": 1,
@@ -28614,7 +28652,7 @@
         "end_line": 2257,
         "start_line": 2256
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "static_traceability",

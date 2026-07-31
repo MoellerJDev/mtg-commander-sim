@@ -105,7 +105,11 @@ class MultiplayerRuleTests(unittest.TestCase):
         self.assertTrue(session.act("pilot:B", {"a": "block", "blk": {}}).ok)
         self.assertEqual("pilot:C", session.pending_principals()[0])
         self.assertTrue(session.act("pilot:C", {"a": "block", "blk": {}}).ok)
-        self.assertEqual({"B", "C"}, set(engine.state.combat.defending_players))
+        self.assertEqual("pilot:A", session.pending_principals()[0])
+        self.assertEqual(
+            {"B", "C", "D"},
+            set(engine.state.combat.defending_players),
+        )
 
     def test_structured_attack_list_reaches_authoritative_combat_state(self):
         session = make_session(self.db, self.mishra, self.zimone, seed=351)
