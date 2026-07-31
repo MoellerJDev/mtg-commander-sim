@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import Any, Iterable, Mapping
 
 from .carddb import CardDatabase
+from .choice_forms import build_action_form
 from .model import CardInstance, Event, GameState
 from .protocol import PROTOCOL_VERSION, json_patch, view_hash
 from .util import stable_json, truncate
@@ -219,7 +220,7 @@ class StateProjector:
             return None
         actor_key = capability.actor or principal
         context = copy.deepcopy(decision.payload_by_actor.get(actor_key, {}))
-        legal_actions = list(
+        raw_actions = list(
             (context.get("legal") or {}).get("actions")
             or context.get("legal_actions")
             or (
@@ -227,6 +228,19 @@ class StateProjector:
                 for action in capability.allowed_actions
             )
         )
+        legal_actions: list[dict[str, Any]] = []
+        for raw_action in raw_actions:
+            if not isinstance(raw_action, Mapping):
+                continue
+            action = copy.deepcopy(dict(raw_action))
+            form = build_action_form(
+                action,
+                decision_kind=decision.kind,
+                context=context,
+            )
+            if form is not None:
+                action["form"] = form
+            legal_actions.append(action)
         return {
             "cap": capability.token,
             "id": decision.decision_id,

@@ -8,6 +8,7 @@ import threading
 from dataclasses import dataclass, replace
 from typing import Any, Mapping, Protocol
 
+from .choice_forms import delegated_choice_fields
 from .protocol import PROTOCOL_VERSION
 from .session import CommanderSession
 
@@ -283,7 +284,10 @@ class GameService:
 
     @staticmethod
     def _choice_fields(
-        action: Mapping[str, Any], *, decision_kind: str
+        action: Mapping[str, Any],
+        *,
+        decision_kind: str,
+        context: Mapping[str, Any],
     ) -> set[str]:
         """Return the fields the current server-issued action delegates.
 
@@ -292,41 +296,11 @@ class GameService:
         writable merely because it is present in the catalog entry.
         """
 
-        fields: set[str] = set()
-        choice_schema = action.get("choice_schema")
-        if isinstance(choice_schema, Mapping):
-            field_name = choice_schema.get("field")
-            if isinstance(field_name, str) and field_name:
-                fields.add(field_name)
-            elif not any(
-                key in choice_schema
-                for key in (
-                    "type",
-                    "legal_values",
-                    "optional",
-                    "default",
-                    "target_schema",
-                )
-            ):
-                fields.update(str(key) for key in choice_schema)
-        if isinstance(action.get("target_schema"), Mapping):
-            fields.update({"targets", "modes"})
-        action_name = str(action.get("action") or "")
-        if action_name == "pass":
-            fields.add("yield")
-        elif action_name == "mulligan":
-            fields.add("override_reason")
-        elif action_name == "bottom":
-            fields.add("cards")
-        elif action_name == "attack":
-            fields.add("attackers")
-        elif action_name == "block":
-            fields.add("blocks")
-        elif action_name == "assign_damage":
-            fields.add("assignments")
-        if decision_kind == "semantic.target":
-            fields.update({"targets", "modes"})
-        return fields
+        return delegated_choice_fields(
+            action,
+            decision_kind=decision_kind,
+            context=context,
+        )
 
     def _selected_action(
         self, principal: str, action_id: str
@@ -463,7 +437,12 @@ class GameService:
                 receipt,
             ) if commit_idempotency else receipt
         allowed_choices = self._choice_fields(
-            selected, decision_kind=decision_kind
+            selected,
+            decision_kind=decision_kind,
+            context=decision.payload_by_actor.get(
+                capability.actor or principal,
+                {},
+            ),
         )
         unknown_choices = sorted(
             str(key) for key in set(envelope.choices) - allowed_choices

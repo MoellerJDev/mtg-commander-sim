@@ -6,12 +6,20 @@ import type { MTGCommanderSimProjectedDecisionPacketV30 } from "./decision-packe
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
 
+export interface ChoiceForm {
+  v: number;
+  fields: Record<string, JsonValue>[];
+  submit_label: string;
+  variants?: Record<string, JsonValue>;
+}
+
 export interface LegalAction {
   id: string;
   action: string;
   kind?: string;
   label?: string;
-  [key: string]: JsonValue | undefined;
+  form?: ChoiceForm;
+  [key: string]: JsonValue | ChoiceForm | undefined;
 }
 
 export interface Decision {

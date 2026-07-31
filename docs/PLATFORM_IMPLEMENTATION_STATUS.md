@@ -8,7 +8,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 - Default branch: `main`
 - Active branch: `main`
 - Current commit: the commit containing this ledger
-- Active phase: `server_browser_vertical_slice_on_main_hardening_next`
+- Active phase: `server_browser_choice_forms_and_restart_recovery_on_main_operations_next`
 - Package version: `0.8.0`
 
 ### Pull requests
@@ -42,6 +42,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#25](https://github.com/MoellerJDev/mtg-commander-sim/pull/25) | `agent/integration-checkpoint` | `main` | `merged` |
 | [#26](https://github.com/MoellerJDev/mtg-commander-sim/pull/26) | `agent/finalize-integration-docs` | `main` | `merged` |
 | [#27](https://github.com/MoellerJDev/mtg-commander-sim/pull/27) | `agent/server-browser-vertical-slice` | `main` | `merged` |
+| [#28](https://github.com/MoellerJDev/mtg-commander-sim/pull/28) | `agent/reconcile-platform-docs` | `main` | `merged` |
 
 ## Pinned snapshots and coverage
 
@@ -62,7 +63,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | Milestone | Status | Evidence |
 |---|---|---|
 | Integrated deterministic foundation | `complete` | Integration PRs #1-17 and #24-27 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
-| Browser Commander MVP | `first_vertical_slice_complete` | PR #27 placed a strict protocol 3.0 application boundary, serialized game actors, SQLite control plane and migration, FastAPI HTTP/WebSocket adapter, React/TypeScript browser, generated schema bindings, and a passing four-isolated-context Chromium test on main. Generic forms for every rules choice and production operations remain open. |
+| Browser Commander MVP | `development_mvp_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, four-isolated-context Chromium coverage, a shared versioned adapter for the engine's current generic choice schemas, and application-tested process restart recovery. Future schemas, accessibility, and production operations remain open. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408 and CR 500-512 slices are on main. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -72,8 +73,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 - `transport_neutral_service`: `implemented_strict_protocol_3`
 - `single_writer_game_actor`: `implemented_single_process`
 - `durable_database`: `implemented_sqlite_control_plane_plus_game_record_v3`
-- `http_websocket_server`: `implemented_first_vertical_slice`
-- `browser_client`: `implemented_first_vertical_slice`
+- `http_websocket_server`: `implemented_single_process_restart_recovery`
+- `browser_client`: `implemented_current_generic_choice_forms`
 - `guest_or_account_identity`: `implemented_expiring_guest_sessions`
 - `rooms_and_lobbies`: `implemented_invite_only_four_seat`
 - `replay`: `implemented_command_replay`
@@ -83,9 +84,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 3948
+- Tests discovered: 3957
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30650318684](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30650318684) — `pass`
+- Baseline CI: [30653748674](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30653748674) — `pass`
 - Compile: `pass`
 - Deterministic tests: `pass_3947_exact_commit_gate_dcf7a6d`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
@@ -100,13 +101,13 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Current blockers
 
-- generic browser forms for all modes, targets, costs, searches, ordering, replacement, trigger, and combat choices are incomplete
+- future engine choice schemas, production accessibility, and richer browser retry/resume UX remain incomplete
 - production accounts, PostgreSQL, multi-process actor ownership, rate limits, containers, and deployment hardening are incomplete
 - full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete
 
 ## Exact next task
 
-Create a clean focused branch from main and implement generic browser choice forms plus server recovery and operations hardening before resuming broad rules-family work.
+Complete focused server lifecycle and browser accessibility/operations hardening before resuming broad rules-family work.
 
 ## Regeneration
 

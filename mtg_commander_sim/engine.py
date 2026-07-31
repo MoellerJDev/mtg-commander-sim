@@ -11469,6 +11469,7 @@ class CommanderEngine:
                 "default_targets": copy.deepcopy(
                     template.get("targets") or []
                 ),
+                "modes": copy.deepcopy(template.get("modes") or []),
                 "target_schema": copy.deepcopy(public_schema),
             }
             for index in range(count)
@@ -16884,7 +16885,13 @@ class CommanderEngine:
             role="pilot",
             actors=actors,
             allowed_actions=["assign_damage"],
-            payload_by_actor={seat: {"combat": self._combat_payload(), "instruction": "Assign damage for sources you control."} for seat in actors},
+            payload_by_actor={
+                seat: {
+                    "combat": self._combat_payload(seat),
+                    "instruction": "Assign damage for sources you control.",
+                }
+                for seat in actors
+            },
             simultaneous=True,
         )
 
@@ -16912,9 +16919,93 @@ class CommanderEngine:
             raise GameRuleError(
                 "Combat-damage assignments must be an array"
             )
+        source_options = self._combat_damage_source_options(seat)
+        source_targets = {
+            source: set(option["targets"])
+            for source, option in source_options.items()
+        }
+        source_power = {
+            source: int(option["power"])
+            for source, option in source_options.items()
+        }
+
+        # These options are also projected to the assigning seat. Keep all
+        # target and total validation authoritative here; the browser uses
+        # them only to render controls and useful defaults.
+
+        totals: dict[str, int] = {}
+        canonical: list[dict[str, Any]] = []
+        seen_pairs: set[tuple[str, str]] = set()
+        for raw in submitted:
+            if not isinstance(raw, Mapping):
+                raise GameRuleError(
+                    "Each combat-damage assignment must be an object"
+                )
+            if set(raw) != {"source", "target", "amount"}:
+                raise GameRuleError(
+                    "Combat-damage assignment requires exactly source, "
+                    "target, and amount"
+                )
+            if not isinstance(raw["source"], str):
+                raise GameRuleError(
+                    "Combat-damage assignment source must be a string"
+                )
+            if not isinstance(raw["target"], str):
+                raise GameRuleError(
+                    "Combat-damage assignment target must be a string"
+                )
+            source_ref = raw["source"]
+            if source_ref not in source_targets:
+                raise GameRuleError(
+                    f"{source_ref or 'Object'} is not assigning combat damage"
+                )
+            if source_power[source_ref] <= 0:
+                raise GameRuleError(
+                    f"{source_ref} does not assign combat damage because "
+                    "its power is 0 or less"
+                )
+            target_ref = raw["target"]
+            if target_ref not in source_targets[source_ref]:
+                raise GameRuleError(
+                    f"{target_ref or 'Object'} is an illegal combat-damage "
+                    f"target for {source_ref}"
+                )
+            value = raw["amount"]
+            if not isinstance(value, int) or isinstance(value, bool):
+                raise GameRuleError("Combat damage must be an integer")
+            amount = value
+            if amount < 0:
+                raise GameRuleError("Damage cannot be negative")
+            pair = (source_ref, target_ref)
+            if pair in seen_pairs:
+                raise GameRuleError(
+                    "A combat-damage source/target pair may appear only once"
+                )
+            seen_pairs.add(pair)
+            totals[source_ref] = totals.get(source_ref, 0) + amount
+            canonical.append(
+                {
+                    "source": source_ref,
+                    "target": target_ref,
+                    "amount": amount,
+                }
+            )
+
+        for source_ref, power in source_power.items():
+            required = power if source_targets.get(source_ref) else 0
+            assigned = totals.get(source_ref, 0)
+            if assigned != required:
+                raise GameRuleError(
+                    f"{source_ref} must assign exactly {required} combat "
+                    f"damage, not {assigned}"
+                )
+        return canonical
+
+    def _combat_damage_source_options(
+        self, seat: str
+    ) -> dict[str, dict[str, Any]]:
         source_targets: dict[str, set[str]] = {}
         source_power: dict[str, int] = {}
-
         for attacker_id, defender in self.state.combat.attackers.items():
             attacker = self.state.cards.get(attacker_id)
             if (
@@ -16988,74 +17079,13 @@ class CommanderEngine:
                     self._numeric_stat(blocker.object_id, "power"),
                 )
         source_targets.update(blocker_attackers)
-
-        totals: dict[str, int] = {}
-        canonical: list[dict[str, Any]] = []
-        seen_pairs: set[tuple[str, str]] = set()
-        for raw in submitted:
-            if not isinstance(raw, Mapping):
-                raise GameRuleError(
-                    "Each combat-damage assignment must be an object"
-                )
-            if set(raw) != {"source", "target", "amount"}:
-                raise GameRuleError(
-                    "Combat-damage assignment requires exactly source, "
-                    "target, and amount"
-                )
-            if not isinstance(raw["source"], str):
-                raise GameRuleError(
-                    "Combat-damage assignment source must be a string"
-                )
-            if not isinstance(raw["target"], str):
-                raise GameRuleError(
-                    "Combat-damage assignment target must be a string"
-                )
-            source_ref = raw["source"]
-            if source_ref not in source_targets:
-                raise GameRuleError(
-                    f"{source_ref or 'Object'} is not assigning combat damage"
-                )
-            if source_power[source_ref] <= 0:
-                raise GameRuleError(
-                    f"{source_ref} does not assign combat damage because "
-                    "its power is 0 or less"
-                )
-            target_ref = raw["target"]
-            if target_ref not in source_targets[source_ref]:
-                raise GameRuleError(
-                    f"{target_ref or 'Object'} is an illegal combat-damage "
-                    f"target for {source_ref}"
-                )
-            value = raw["amount"]
-            if not isinstance(value, int) or isinstance(value, bool):
-                raise GameRuleError("Combat damage must be an integer")
-            amount = value
-            if amount < 0:
-                raise GameRuleError("Damage cannot be negative")
-            pair = (source_ref, target_ref)
-            if pair in seen_pairs:
-                raise GameRuleError(
-                    "A combat-damage source/target pair may appear only once"
-                )
-            seen_pairs.add(pair)
-            totals[source_ref] = totals.get(source_ref, 0) + amount
-            canonical.append(
-                {
-                    "source": source_ref,
-                    "target": target_ref,
-                    "amount": amount,
-                }
-            )
-
-        for source_ref, power in source_power.items():
-            required = power if source_targets.get(source_ref) else 0
-            assigned = totals.get(source_ref, 0)
-            if assigned != required:
-                raise GameRuleError(
-                    f"{source_ref} must assign exactly {required} combat "
-                    f"damage, not {assigned}"
-                )
-        return canonical
+        return {
+            source: {
+                "power": source_power[source],
+                "targets": sorted(targets),
+            }
+            for source, targets in source_targets.items()
+        }
 
     def _combat_damage_target_exists(self, target: str) -> bool:
         if target in self.state.players:
@@ -17065,11 +17095,16 @@ class CommanderEngine:
             for card in self.state.cards.values()
         )
 
-    def _combat_payload(self) -> dict[str, Any]:
-        return {
+    def _combat_payload(self, seat: str | None = None) -> dict[str, Any]:
+        payload = {
             "attackers": {self.state.cards[oid].ref: target for oid, target in self.state.combat.attackers.items()},
             "blockers": {self.state.cards[aid].ref: [self.state.cards[bid].ref for bid in bids] for aid, bids in self.state.combat.blockers.items()},
         }
+        if seat is not None:
+            payload["damage_sources"] = self._combat_damage_source_options(
+                seat
+            )
+        return payload
 
     def _apply_combat_assignments(self, assignments: Sequence[Mapping[str, Any]]) -> None:
         changed_objects: list[str] = []

@@ -1,0 +1,256 @@
+from __future__ import annotations
+
+import json
+import unittest
+
+from mtg_commander_sim.choice_forms import (
+    build_action_form,
+    delegated_choice_fields,
+)
+
+
+class ChoiceFormTests(unittest.TestCase):
+    def test_simple_private_ref_array_is_normalized(self):
+        action = {
+            "id": "choose",
+            "action": "choose",
+            "choice_schema": {
+                "field": "search_cards",
+                "shape": "ref_array",
+                "minimum": 0,
+                "maximum": 2,
+                "legal_refs": ["A01", "A02"],
+                "rules_may_fail_to_find": True,
+            },
+        }
+        context = {
+            "search_cards": [
+                {"id": "A01", "name": "Forest"},
+                {"id": "A02", "name": "Island"},
+            ]
+        }
+
+        form = build_action_form(
+            action,
+            decision_kind="semantic.search",
+            context=context,
+        )
+
+        self.assertEqual(1, form["v"])
+        self.assertEqual("refs", form["fields"][0]["control"])
+        self.assertEqual(
+            ["Forest", "Island"],
+            [option["label"] for option in form["fields"][0]["options"]],
+        )
+        self.assertEqual(
+            {"search_cards"},
+            delegated_choice_fields(
+                action,
+                decision_kind="semantic.search",
+                context=context,
+            ),
+        )
+        json.dumps(form)
+
+    def test_cost_variants_delegate_selector_cost_and_targets(self):
+        action = {
+            "id": "cast:A17",
+            "action": "cast",
+            "cost_options": [
+                {
+                    "id": "normal",
+                    "label": "Normal cost",
+                    "choice_schema": {
+                        "x": {"type": "integer", "minimum": 0, "maximum": 4}
+                    },
+                },
+                {
+                    "id": "pitch",
+                    "label": "Pitch cost",
+                    "choice_schema": {
+                        "exile_card": {
+                            "type": "object_ref",
+                            "legal_refs": ["A03"],
+                        }
+                    },
+                    "target_schema": {
+                        "groups": [
+                            {
+                                "id": "target",
+                                "min": 1,
+                                "max": 1,
+                                "legal_refs": ["B09"],
+                            }
+                        ]
+                    },
+                },
+            ],
+        }
+
+        form = build_action_form(
+            action,
+            decision_kind="priority",
+            context={},
+        )
+
+        self.assertEqual("cost_option", form["variants"]["field"])
+        self.assertEqual(2, len(form["variants"]["options"]))
+        self.assertEqual(
+            {"cost_option", "x", "exile_card", "targets", "modes"},
+            delegated_choice_fields(
+                action,
+                decision_kind="priority",
+                context={},
+            ),
+        )
+
+    def test_persisted_fetch_schema_maps_to_executable_fields(self):
+        action = {
+            "id": "choose",
+            "action": "choose",
+            "choice_schema": {
+                "search_candidates": ["A04", "A05"],
+                "may_fail_to_find": True,
+                "entry_pay_life": "boolean",
+            },
+        }
+
+        form = build_action_form(
+            action,
+            decision_kind="search.fetch",
+            context={
+                "search_cards": [
+                    {"id": "A04", "name": "Breeding Pool"},
+                    {"id": "A05", "name": "Island"},
+                ]
+            },
+        )
+
+        self.assertEqual(
+            ["search_card", "entry_pay_life"],
+            [field["name"] for field in form["fields"]],
+        )
+        self.assertEqual(
+            {"search_card", "entry_pay_life"},
+            delegated_choice_fields(
+                action,
+                decision_kind="search.fetch",
+                context={},
+            ),
+        )
+
+    def test_special_decisions_have_scoped_forms(self):
+        cases = [
+            (
+                {"id": "bottom", "action": "bottom"},
+                "mulligan.bottom",
+                {"count": 1, "hand": [{"id": "A01", "name": "Forest"}]},
+                "cards",
+            ),
+            (
+                {"id": "discard", "action": "discard"},
+                "cleanup.discard",
+                {"count": 1, "hand": [{"id": "A01", "name": "Forest"}]},
+                "cards",
+            ),
+            (
+                {"id": "order", "action": "order"},
+                "trigger.order",
+                {"triggers": [{"id": "S1", "label": "First"}]},
+                "triggers",
+            ),
+            (
+                {"id": "choose", "action": "choose"},
+                "state.legend",
+                {"keep_one": ["A10", "A11"]},
+                "card",
+            ),
+        ]
+        for action, kind, context, expected in cases:
+            with self.subTest(kind=kind):
+                form = build_action_form(
+                    action,
+                    decision_kind=kind,
+                    context=context,
+                )
+                self.assertEqual(expected, form["fields"][0]["name"])
+                self.assertEqual(
+                    {expected},
+                    delegated_choice_fields(
+                        action,
+                        decision_kind=kind,
+                        context=context,
+                    ),
+                )
+
+    def test_target_form_delegates_only_targets_and_modes(self):
+        action = {
+            "id": "cast:A01",
+            "action": "cast",
+            "target_schema": {
+                "legal_modes": ["damage", "destroy"],
+                "min_modes": 1,
+                "max_modes": 1,
+                "mode_schemas": {
+                    "damage": {
+                        "groups": [
+                            {
+                                "id": "creature",
+                                "min": 1,
+                                "max": 1,
+                                "legal_refs": ["B01"],
+                            }
+                        ]
+                    },
+                    "destroy": {
+                        "groups": [
+                            {
+                                "id": "artifact",
+                                "min": 1,
+                                "max": 1,
+                                "legal_refs": ["C01"],
+                            }
+                        ]
+                    },
+                },
+            },
+        }
+
+        form = build_action_form(
+            action,
+            decision_kind="priority",
+            context={},
+        )
+
+        self.assertEqual("targets", form["fields"][0]["control"])
+        self.assertEqual(
+            {"targets", "modes"},
+            delegated_choice_fields(
+                action,
+                decision_kind="priority",
+                context={},
+            ),
+        )
+
+    def test_object_map_preserves_numeric_required_count(self):
+        form = build_action_form(
+            {
+                "id": "choose",
+                "action": "choose",
+                "choice_schema": {
+                    "field": "decisions",
+                    "shape": "object_map",
+                    "legal_refs": ["A01", "A02", "A03"],
+                    "required": 2,
+                    "legal_values": ["pay_life", "top"],
+                },
+            },
+            decision_kind="semantic.sylvan_library",
+            context={},
+        )
+
+        self.assertEqual(2, form["fields"][0]["minimum"])
+
+
+if __name__ == "__main__":
+    unittest.main()

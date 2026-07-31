@@ -6,11 +6,11 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "server_browser_vertical_slice_on_main_hardening_next",
+    "active_phase": "server_browser_choice_forms_and_restart_recovery_on_main_operations_next",
     "branch": "main",
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
-      "focused_branch_base": "2b7c47356c653cd83869cab8550dd08e363d87c5",
+      "focused_branch_base": "36bcfa10fb09fba5b9bccb5bdf3d1c58d4bd5c0f",
       "focused_branch_unique_commits_over_main": 0
     },
     "pull_requests": [
@@ -202,6 +202,13 @@
         "number": 27,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/27"
+      },
+      {
+        "base": "main",
+        "head": "agent/reconcile-platform-docs",
+        "number": 28,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/28"
       }
     ],
     "tags": [
@@ -242,8 +249,8 @@
     {
       "id": "browser_commander_mvp",
       "name": "Browser Commander MVP",
-      "status": "first_vertical_slice_complete",
-      "evidence": "PR #27 placed a strict protocol 3.0 application boundary, serialized game actors, SQLite control plane and migration, FastAPI HTTP/WebSocket adapter, React/TypeScript browser, generated schema bindings, and a passing four-isolated-context Chromium test on main. Generic forms for every rules choice and production operations remain open."
+      "status": "development_mvp_hardened",
+      "evidence": "The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, four-isolated-context Chromium coverage, a shared versioned adapter for the engine's current generic choice schemas, and application-tested process restart recovery. Future schemas, accessibility, and production operations remain open."
     },
     {
       "id": "rules_snapshot",
@@ -263,8 +270,8 @@
     "transport_neutral_service": "implemented_strict_protocol_3",
     "single_writer_game_actor": "implemented_single_process",
     "durable_database": "implemented_sqlite_control_plane_plus_game_record_v3",
-    "http_websocket_server": "implemented_first_vertical_slice",
-    "browser_client": "implemented_first_vertical_slice",
+    "http_websocket_server": "implemented_single_process_restart_recovery",
+    "browser_client": "implemented_current_generic_choice_forms",
     "guest_or_account_identity": "implemented_expiring_guest_sessions",
     "rooms_and_lobbies": "implemented_invite_only_four_seat",
     "replay": "implemented_command_replay",
@@ -273,12 +280,12 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "2b7c47356c653cd83869cab8550dd08e363d87c5",
+    "baseline_commit": "36bcfa10fb09fba5b9bccb5bdf3d1c58d4bd5c0f",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30650318684,
+      "run_id": 30653748674,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30650318684"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30653748674"
     },
     "local": {
       "compile": "pass",
@@ -287,7 +294,8 @@
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
       "browser_typecheck_and_production_build": "pass",
-      "browser_four_isolated_contexts": "pass_chromium_guest_room_decks_mulligans_reconnect",
+      "browser_four_isolated_contexts": "pass_chromium_reconnect_and_private_penalized_mulligan_form",
+      "server_process_restart_recovery": "pass_fresh_capability_idempotency_continuation_exact_replay",
       "repository_history_security_audit": "pass",
       "wheel_build_and_clean_install": "pass"
     },
@@ -296,9 +304,9 @@
     "semantic_preflight": "trusted_only_for_two_pinned_exact_lists"
   },
   "blockers": [
-    "generic browser forms for all modes, targets, costs, searches, ordering, replacement, trigger, and combat choices are incomplete",
+    "future engine choice schemas, production accessibility, and richer browser retry/resume UX remain incomplete",
     "production accounts, PostgreSQL, multi-process actor ownership, rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Create a clean focused branch from main and implement generic browser choice forms plus server recovery and operations hardening before resuming broad rules-family work."
+  "next_task": "Complete focused server lifecycle and browser accessibility/operations hardening before resuming broad rules-family work."
 }
