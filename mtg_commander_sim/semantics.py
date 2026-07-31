@@ -17,37 +17,114 @@ TRUST_LEVELS = {
 SEMANTIC_SCHEMA_VERSION = 3
 BUILTIN_PACK_DIRECTORY = Path(__file__).resolve().parent / "semantic_packs"
 VALID_EFFECT_OPERATIONS = {
+    "add_counter_selected",
+    "add_type",
+    "add_type_until_end_of_turn",
+    "add_subtype_until_end_of_turn",
+    "animate_dead_prepare",
+    "animate_dead_reanimate",
+    "attach",
     "bounce",
     "change_control",
+    "change_control_until_end_of_turn",
+    "choose_card_name",
+    "choose_creature_type",
+    "choose_objects",
+    "choose_option",
     "choose_cards_apnap",
     "choose_mana",
+    "copy_all_tokens",
+    "copy_stack_item",
+    "copy_until_end_of_turn",
     "choose_warform",
     "counter",
+    "counter_all_subtype",
     "counter_or_destroy_blue",
     "counter_stack",
+    "counter_unless_pay",
+    "cumulative_upkeep",
     "create_token",
+    "create_token_if_no_controlled_subtype",
     "create_treasure",
+    "create_warform",
     "damage",
+    "damage_each_opponent",
+    "delayed_mana",
+    "delayed_pact_payment",
     "delayed_trigger",
     "destroy",
+    "destroy_all",
+    "destroy_selected",
     "discard",
     "drain_opponent",
+    "drain_each_opponent",
     "draw",
+    "draw_each_player",
     "draw_optional_land",
+    "end_turn",
+    "explore",
+    "fabricate",
     "energy",
     "exile",
+    "exile_all",
+    "exile_graveyard",
+    "exile_opponent_graveyards",
     "extra_turn",
     "field_of_dead_token",
+    "fomori_vault",
     "life",
+    "lose_life",
+    "lose_life_each_opponent",
+    "lose_life_equal_mana_value",
     "look_top",
+    "look_reorder_top",
     "move",
+    "move_if_in_zone",
+    "modify_stats_until_end_of_turn",
+    "mana",
+    "mill",
+    "next_spell_improvise",
+    "next_spell_uncounterable",
     "note",
     "reorder_top",
+    "reveal_top_permanent",
     "search",
+    "scry",
+    "sylvan_library_settle",
+    "scute_swarm_token",
+    "springheart_landfall",
+    "bestow_prepare",
+    "shuffle_into_library",
+    "shuffle_graveyard_bottom_random",
     "sacrifice",
     "sacrifice_if_present",
     "tap",
+    "toxic_deluge",
     "untap",
+    "untap_all_creatures",
+    "welder_exchange",
+    "veil_of_summer",
+    "pay_or_lose",
+    "populate_with_haste",
+    "put_land_from_hand",
+    "protection_from_everything_until_next_turn",
+    "proliferate",
+    "pump_controlled_creatures",
+    "reanimate",
+    "retarget_stack_item",
+    "remora_tax",
+    "grant_keyword_until_end_of_turn",
+    "grant_cast_permission",
+    "grant_play_without_mana_cost",
+    "put_artifact_from_hand",
+    "control_next_turn",
+    "create_daretti_emblem",
+    "daretti_exchange",
+    "demonic_junker_resolve",
+    "discard_draw_up_to",
+    "grant_urzas_saga_chapter",
+    "return_transformed",
+    "transmute_artifact",
 }
 
 
@@ -70,6 +147,8 @@ class SemanticProgram:
     tests: list[str] = field(default_factory=list)
     handlers: list[dict[str, Any]] = field(default_factory=list)
     target_schema: dict[str, Any] | None = None
+    cost_schema: dict[str, Any] | None = None
+    event_condition: dict[str, Any] | None = None
     coverage: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -77,7 +156,21 @@ class SemanticProgram:
             raise ValueError(f"Unknown semantic trust level {self.trust_level!r}")
         if self.version < 1 or self.semantic_schema_version < 1:
             raise ValueError("Semantic versions must be positive")
-        for effect in self.effects:
+        effects_to_validate = list(self.effects)
+        mode_definitions = (
+            self.target_schema.get("modes")
+            if isinstance(self.target_schema, Mapping)
+            else None
+        )
+        if isinstance(mode_definitions, Mapping):
+            for definition in mode_definitions.values():
+                if isinstance(definition, Mapping):
+                    effects_to_validate.extend(
+                        effect
+                        for effect in definition.get("effects", [])
+                        if isinstance(effect, Mapping)
+                    )
+        for effect in effects_to_validate:
             operation = str(effect.get("op") or "")
             if operation not in VALID_EFFECT_OPERATIONS:
                 raise ValueError(
@@ -124,6 +217,8 @@ class SemanticProgram:
             "tests": self.tests,
             "handlers": self.handlers,
             "target_schema": self.target_schema,
+            "cost_schema": self.cost_schema,
+            "event_condition": self.event_condition,
             "coverage": self.coverage,
         }
 
@@ -151,6 +246,16 @@ class SemanticProgram:
             target_schema=(
                 dict(data["target_schema"])
                 if isinstance(data.get("target_schema"), Mapping)
+                else None
+            ),
+            cost_schema=(
+                dict(data["cost_schema"])
+                if isinstance(data.get("cost_schema"), Mapping)
+                else None
+            ),
+            event_condition=(
+                dict(data["event_condition"])
+                if isinstance(data.get("event_condition"), Mapping)
                 else None
             ),
             coverage=[str(value) for value in data.get("coverage", [])],

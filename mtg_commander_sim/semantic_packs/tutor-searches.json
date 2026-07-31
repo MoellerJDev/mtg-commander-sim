@@ -19,10 +19,15 @@
         }
       ],
       "destination": "graveyard",
-      "trust_level": "provisional",
+      "trust_level": "trusted",
       "coverage": ["spell_resolution", "private_library_search", "semantic_continuation"],
       "tests": ["test_entomb_private_search_continuation"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+      "provenance": {
+        "source_oracle_hash": "3e082b70b4048ec72ede4524c57f28e9e04bc4edc1554601a5af32b3fe470c73",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "1b882a0e-0ede-4d1a-bd1a-9b7cffbcde8e:spell:front",
@@ -42,10 +47,15 @@
         }
       ],
       "destination": "graveyard",
-      "trust_level": "provisional",
+      "trust_level": "trusted",
       "coverage": ["spell_resolution", "typed_library_search", "natural_land_entry", "semantic_continuation"],
-      "tests": ["test_three_visits_search_template"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+      "tests": ["test_three_visits_to_bayou_and_natures_lore_template", "test_three_visits_shockland_tapped_and_untapped"],
+      "provenance": {
+        "source_oracle_hash": "0416b1413bddd6d390b428142d16aa63214e3291adfa721b0dea1e88b4d788e9",
+        "source_rulings_hash": "d483913cdb4f9c857759d8c636c300eaa41bd7a6e5caf55ea14cdf06722f5035",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "78826359-fe63-44ad-adc4-a17ffcd710e4:spell:front",
@@ -65,10 +75,15 @@
         }
       ],
       "destination": "graveyard",
-      "trust_level": "provisional",
+      "trust_level": "trusted",
       "coverage": ["spell_resolution", "typed_library_search", "natural_land_entry", "semantic_continuation"],
-      "tests": ["test_natures_lore_reuses_search_template"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+      "tests": ["test_three_visits_to_bayou_and_natures_lore_template"],
+      "provenance": {
+        "source_oracle_hash": "1969fa96656688d1b432d41afaac52db1994afdf353355b2218c4dada7c2b13f",
+        "source_rulings_hash": "e03478f72b5b59260186a64fb4aabbe3cefebd3fd47f4019b048b2d1e4c5197b",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "422e1869-134f-463d-9fa1-86b66a998b3e:spell:front",
@@ -87,10 +102,15 @@
         }
       ],
       "destination": "graveyard",
-      "trust_level": "provisional",
+      "trust_level": "trusted",
       "coverage": ["spell_resolution", "revealed_library_search", "semantic_continuation"],
-      "tests": ["test_revealed_search_target_is_public"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+      "tests": ["test_fabricate_reveals_artifact_and_moves_it_to_hand", "test_private_and_revealed_hand_search_visibility"],
+      "provenance": {
+        "source_oracle_hash": "89935eef7baef80c6f616448109b71332a1c105f50715fcc8db587a0e3ca2dda",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "47a785ed-8095-4685-8daa-02c4e2b0ffcd:spell:front",
@@ -98,10 +118,15 @@
       "oracle_id": "47a785ed-8095-4685-8daa-02c4e2b0ffcd",
       "effects": [],
       "destination": "battlefield",
-      "trust_level": "provisional",
+      "trust_level": "trusted",
       "coverage": ["permanent_characteristics"],
       "tests": ["test_spellseeker_search_trigger"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+      "provenance": {
+        "source_oracle_hash": "18a33bb2dbc3c4f250fa35193c4c58ff786303042f5d2b984930a58f4da7028f",
+        "source_rulings_hash": "866e93851da6c714c0969ba44a78651b570089a68906f31468f35f72f3052b36",
+        "authored_by": "v0.8-exact-search-family",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "47a785ed-8095-4685-8daa-02c4e2b0ffcd:trigger:enter",
@@ -109,7 +134,7 @@
       "oracle_id": "47a785ed-8095-4685-8daa-02c4e2b0ffcd",
       "ability_id": "trigger:enter",
       "active_zone": "battlefield",
-      "event": "permanent.enter",
+      "event": "permanent.enter.self",
       "effects": [
         {
           "op": "search",
@@ -127,11 +152,16 @@
           "optional": true
         }
       ],
-      "trust_level": "unresolved",
-      "coverage": ["enters_trigger", "revealed_library_search"],
-      "notes": "The generic selector does not yet combine instant-or-sorcery alternatives.",
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "revealed_library_search"],
+      "notes": "The generic selector authoritatively combines instant-or-sorcery alternatives.",
       "tests": ["test_spellseeker_search_trigger"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "provenance": {
+        "source_oracle_hash": "18a33bb2dbc3c4f250fa35193c4c58ff786303042f5d2b984930a58f4da7028f",
+        "source_rulings_hash": "866e93851da6c714c0969ba44a78651b570089a68906f31468f35f72f3052b36",
+        "authored_by": "v0.8-exact-search-family",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "c1d6cce8-085f-42cb-8b0c-b6fbbf88b16a:spell:front",
@@ -139,10 +169,15 @@
       "oracle_id": "c1d6cce8-085f-42cb-8b0c-b6fbbf88b16a",
       "effects": [],
       "destination": "battlefield",
-      "trust_level": "provisional",
+      "trust_level": "trusted",
       "coverage": ["permanent_characteristics"],
       "tests": ["test_goblin_engineer_search_trigger"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+      "provenance": {
+        "source_oracle_hash": "1f0f4e0bc03a355100e7e624b0f7bf80cbae32d63070f48688f7163ccbf95838",
+        "source_rulings_hash": "e46d604b0eb6f49a3976a411357b6f39ce8d4578e4d8f6a51abd1a3faa21a9d9",
+        "authored_by": "v0.8-exact-search-family",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "c1d6cce8-085f-42cb-8b0c-b6fbbf88b16a:trigger:enter",
@@ -150,7 +185,7 @@
       "oracle_id": "c1d6cce8-085f-42cb-8b0c-b6fbbf88b16a",
       "ability_id": "trigger:enter",
       "active_zone": "battlefield",
-      "event": "permanent.enter",
+      "event": "permanent.enter.self",
       "effects": [
         {
           "op": "search",
@@ -164,10 +199,55 @@
           "optional": true
         }
       ],
-      "trust_level": "provisional",
-      "coverage": ["enters_trigger", "private_library_search", "semantic_continuation"],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "private_library_search", "semantic_continuation"],
       "tests": ["test_goblin_engineer_search_trigger"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+      "provenance": {
+        "source_oracle_hash": "1f0f4e0bc03a355100e7e624b0f7bf80cbae32d63070f48688f7163ccbf95838",
+        "source_rulings_hash": "e46d604b0eb6f49a3976a411357b6f39ce8d4578e4d8f6a51abd1a3faa21a9d9",
+        "authored_by": "v0.8-exact-search-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c1d6cce8-085f-42cb-8b0c-b6fbbf88b16a:ability:ab2",
+      "label": "Goblin Engineer activation",
+      "oracle_id": "c1d6cce8-085f-42cb-8b0c-b6fbbf88b16a",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "move",
+          "card": "$target.0",
+          "destination": "battlefield",
+          "controller": "$controller",
+          "reason": "Goblin Engineer"
+        }
+      ],
+      "target_schema": {
+        "groups": [
+          {
+            "id": "artifact_card",
+            "zones": ["graveyard"],
+            "categories": ["card"],
+            "types_any": ["artifact"],
+            "owner_relation": "you",
+            "mana_value_max": 3,
+            "min": 1,
+            "max": 1
+          }
+        ]
+      },
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "sacrifice_cost", "target_validation", "artifact_recursion"],
+      "tests": ["test_goblin_engineer_activation_pays_cost_and_returns_small_artifact"],
+      "provenance": {
+        "source_oracle_hash": "1f0f4e0bc03a355100e7e624b0f7bf80cbae32d63070f48688f7163ccbf95838",
+        "source_rulings_hash": "e46d604b0eb6f49a3976a411357b6f39ce8d4578e4d8f6a51abd1a3faa21a9d9",
+        "authored_by": "v0.8-exact-search-family",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "119d719d-e965-45b4-9bc9-ac03211b10c2:ability:ab1",
@@ -188,11 +268,16 @@
           "shuffle_after": true
         }
       ],
-      "trust_level": "provisional",
+      "trust_level": "trusted",
       "coverage": ["activated_ability", "additional_cost", "library_search"],
       "notes": "The generic ability grammar authoritatively validates and pays the creature-card discard cost.",
       "tests": ["test_survival_search_after_authoritative_cost"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "provisional"}
+      "provenance": {
+        "source_oracle_hash": "0412346975422d69970fd0ac47ca133e3b65fcb55b10e585b4e1aa5ac8aa71b6",
+        "source_rulings_hash": "9f9d7201aa58429c270355829ed3eb094f7253710e0e8cae76075c44e9a4c802",
+        "authored_by": "v0.8-exact-search-family",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "94f01534-7bb3-4b1e-8f77-e84156408686:ability:ab2",
@@ -248,75 +333,204 @@
       "key": "0d96b60b-a060-48ee-bb83-93f1c4a10669:spell:front",
       "label": "Green Sun's Zenith",
       "oracle_id": "0d96b60b-a060-48ee-bb83-93f1c4a10669",
-      "effects": [],
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {
+            "types": ["Creature"],
+            "colors": ["G"],
+            "mana_value": {"maximum": "$x"}
+          },
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "battlefield",
+          "reveal": false,
+          "shuffle_after": true
+        },
+        {
+          "op": "shuffle_into_library",
+          "card": "$card"
+        }
+      ],
       "destination": "graveyard",
-      "trust_level": "unresolved",
-      "coverage": ["x_search", "self_shuffle"],
-      "notes": "Search is representable; self-shuffle destination and green creature/X selector need a reviewed compound program.",
-      "tests": ["test_tutor_family_fail_closed"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "trust_level": "trusted",
+      "coverage": ["x_search", "typed_library_search", "self_shuffle"],
+      "notes": "X, green creature restriction, battlefield destination, and self-shuffle are server-derived.",
+      "tests": ["test_green_sun_x_search_and_self_shuffle"],
+      "provenance": {
+        "source_oracle_hash": "db977a166f5cfd39a14527dea38b6749a9e0a0768b9af772701399642bbda574",
+        "source_rulings_hash": "043baae5e3085709fc1b12f4cd6991614735f19320d33a7431e864526f4c6158",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "69872a9a-fe54-4e58-940c-89395af71acd:spell:front",
       "label": "Finale of Devastation",
       "oracle_id": "69872a9a-fe54-4e58-940c-89395af71acd",
-      "effects": [],
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": ["library", "graveyard"],
+          "selector": {
+            "types": ["Creature"],
+            "mana_value": {"maximum": "$x"}
+          },
+          "count": {"minimum": 0, "maximum": 1},
+          "destination": "battlefield",
+          "reveal": false,
+          "shuffle_after": true,
+          "optional": true
+        },
+        {
+          "op": "pump_controlled_creatures",
+          "amount": "$x",
+          "minimum_amount": 10,
+          "keywords": ["Haste"]
+        }
+      ],
       "destination": "graveyard",
-      "trust_level": "unresolved",
+      "trust_level": "trusted",
       "coverage": ["multi_zone_search", "x_restriction", "conditional_continuous_effect"],
-      "notes": "The X>=10 continuous effect remains outside this slice.",
-      "tests": ["test_tutor_family_fail_closed"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "notes": "The selected X controls both the search restriction and the X>=10 team pump and haste effect.",
+      "tests": ["test_finale_multi_zone_search_and_x10_pump"],
+      "provenance": {
+        "source_oracle_hash": "8084fcbf71cb4765a12d38462d6967c57cdad2f47b932a8719d8b6cfed6649a3",
+        "source_rulings_hash": "0287b29472a7f14af1d55c90c765e42374e83e23c5de452cf513612a6e42f49b",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "6789a170-f2c5-4fc0-8a45-2b2361e67410:spell:front",
       "label": "Chord of Calling",
       "oracle_id": "6789a170-f2c5-4fc0-8a45-2b2361e67410",
-      "effects": [],
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {
+            "types": ["Creature"],
+            "mana_value": {"maximum": "$x"}
+          },
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "battlefield",
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
       "destination": "graveyard",
-      "trust_level": "unresolved",
+      "trust_level": "trusted",
       "coverage": ["convoke_cost", "x_search"],
-      "notes": "Convoke cost payment is not compiled in this slice.",
-      "tests": ["test_tutor_family_fail_closed"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "notes": "Convoke is paid by a server-derived tap plan after X is selected.",
+      "tests": ["test_convoke_pays_colored_x_cost_without_using_mana_sources", "test_chord_x_search"],
+      "provenance": {
+        "source_oracle_hash": "d4249d1e121206b7bba399a910d433aff8916a82bea5069df79b1bb0701152d3",
+        "source_rulings_hash": "fe20d88e4a209154b40d7b861bb7a72a7de4d865dbecc5b6ad51c9eb08aaa909",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "10180e2f-90c5-4d41-ba44-16b14948f923:trigger:dies",
       "label": "Protean Hulk dies",
       "oracle_id": "10180e2f-90c5-4d41-ba44-16b14948f923",
       "ability_id": "trigger:dies",
-      "active_zone": "graveyard",
-      "event": "creature.dies",
-      "effects": [],
-      "trust_level": "unresolved",
+      "active_zone": "battlefield",
+      "event": "creature.dies.self",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {
+            "types": ["Creature"],
+            "mana_value_total": {"maximum": 6}
+          },
+          "count": {"minimum": 0, "maximum": 100},
+          "destination": "battlefield",
+          "reveal": false,
+          "shuffle_after": true,
+          "optional": true
+        }
+      ],
+      "trust_level": "trusted",
       "coverage": ["multi_card_total_mana_value_search"],
-      "notes": "The generic search count exists; aggregate mana-value constraints remain unresolved.",
-      "tests": ["test_tutor_family_fail_closed"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "notes": "The dies event uses last-known battlefield state and validates aggregate selected mana value.",
+      "tests": ["test_protean_hulk_aggregate_search_constraint"],
+      "provenance": {
+        "source_oracle_hash": "37b08ed4ebb14e1afe26ec505646ecb581624a6aabb1b99e234b5e4fdb9f93e1",
+        "source_rulings_hash": "f0e16df6ccf64dff6103df015c6673d28f6b906eb8fb3abec5423f1ac09eb65b",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "038519b9-bca8-4b27-b5ac-2409595469d0:spell:front",
       "label": "Diabolic Intent",
       "oracle_id": "038519b9-bca8-4b27-b5ac-2409595469d0",
-      "effects": [],
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {},
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "hand",
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
       "destination": "graveyard",
-      "trust_level": "unresolved",
+      "cost_schema": {
+        "additional_costs": [
+          {"kind": "sacrifice", "count": 1, "types_any": ["Creature"]}
+        ]
+      },
+      "trust_level": "provisional",
       "coverage": ["additional_cost", "private_library_search"],
-      "notes": "Sacrifice-as-additional-cost must be validated before the search can run.",
-      "tests": ["test_tutor_family_fail_closed"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "notes": "Exactly one controlled creature is selected and sacrificed before the spell becomes available to opponents.",
+      "tests": ["test_sacrifice_additional_cost_is_required_and_paid", "test_diabolic_intent_unrestricted_search"],
+      "provenance": {"authored_by": "generic-search-v2", "review_status": "provisional"}
     },
     {
       "key": "42a3855d-25ab-45b3-9e5d-9a0f3da35a05:spell:front",
       "label": "Reshape",
       "oracle_id": "42a3855d-25ab-45b3-9e5d-9a0f3da35a05",
-      "effects": [],
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {
+            "types": ["Artifact"],
+            "mana_value": {"maximum": "$x"}
+          },
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "battlefield",
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
       "destination": "graveyard",
-      "trust_level": "unresolved",
+      "cost_schema": {
+        "additional_costs": [
+          {"kind": "sacrifice", "count": 1, "types_any": ["Artifact"]}
+        ]
+      },
+      "trust_level": "trusted",
       "coverage": ["additional_cost", "x_search"],
-      "notes": "Artifact sacrifice additional cost must be authoritative before resolution.",
-      "tests": ["test_tutor_family_fail_closed"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "notes": "Exactly one controlled artifact is sacrificed as an additional cost and X limits the search.",
+      "tests": ["test_reshape_artifact_cost_and_x_search"],
+      "provenance": {
+        "source_oracle_hash": "db430d875963b22af5dcf895e9252d3deff4a5758f900f4d4935f0e0326c60e5",
+        "source_rulings_hash": "504f1f32258f754348a9f1d8b0dcca4ece3d0b768e3b9fb5ad8dc6f23c7b272e",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "dbe792f9-22be-4972-b418-99a6190c4421:spell:front",
@@ -334,13 +548,32 @@
       "key": "152b91c9-cc07-4ca8-944f-9bc2242a2283:spell:front",
       "label": "Whir of Invention",
       "oracle_id": "152b91c9-cc07-4ca8-944f-9bc2242a2283",
-      "effects": [],
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {
+            "types": ["Artifact"],
+            "mana_value": {"maximum": "$x"}
+          },
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "battlefield",
+          "reveal": false,
+          "shuffle_after": true
+        }
+      ],
       "destination": "graveyard",
-      "trust_level": "unresolved",
+      "trust_level": "trusted",
       "coverage": ["improvise_cost", "x_search"],
-      "notes": "Improvise payment is not compiled in this slice.",
-      "tests": ["test_tutor_family_fail_closed"],
-      "provenance": {"authored_by": "generic-search-v1", "review_status": "unresolved"}
+      "notes": "Improvise pays generic mana only after X is selected.",
+      "tests": ["test_improvise_only_reduces_generic_mana", "test_whir_x_search"],
+      "provenance": {
+        "source_oracle_hash": "662ebf962260e7e8e253306924a208ec35f0679335dbce7f4c52f481c303f03a",
+        "source_rulings_hash": "e0cb9336fedb10299bda0fc1d3ba55d0c04db59418e89c6a8af0b2171728e509",
+        "authored_by": "generic-search-v2",
+        "review_status": "reviewed"
+      }
     },
     {
       "key": "0fdfe986-0216-468b-aac8-bbcf588fd894:ability:ab1",

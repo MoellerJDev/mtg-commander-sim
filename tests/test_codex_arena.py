@@ -1,21 +1,29 @@
 from __future__ import annotations
 
 import copy
+import contextlib
+import io
 import json
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 
 from common import DB_PATH, keep_all, load_assets, make_session
+from mtg_commander_sim import __version__
 from mtg_commander_sim.arena import (
     CodexThreadRegistry,
     CoordinatorTools,
     PILOT_TOOL_NAMES,
     PilotInvocationIdentity,
     SeatScopedPilotTools,
+    primary_session_prompt,
 )
+from mtg_commander_sim.bulk import SCRYFALL_USER_AGENT
+from mtg_commander_sim.cli import main as cli_main
 from mtg_commander_sim.deck import DeckDefinition
 from mtg_commander_sim.profiles import DeckProfileCache
+from mtg_commander_sim.record import ENGINE_VERSION
 from mtg_commander_sim.session import CommanderSession
 
 
@@ -27,6 +35,41 @@ class CodexArenaBoundaryTests(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.db.close()
+
+    def test_runtime_and_distribution_versions_match(self):
+        project = tomllib.loads(
+            (Path(__file__).parents[1] / "pyproject.toml").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(project["project"]["version"], __version__)
+        self.assertEqual(__version__, ENGINE_VERSION)
+        self.assertIn(f"/{__version__} ", SCRYFALL_USER_AGENT)
+
+    def test_pilot_parent_responses_forbid_private_packet_echoes(self):
+        root = Path(__file__).parents[1]
+        required = (
+            "Never echo private task data",
+            "accepted decision IDs",
+            "principal boundary",
+            "sanitized error code/message",
+        )
+        for seat in "abcd":
+            config = tomllib.loads(
+                (
+                    root / ".codex" / "agents" / f"mtg-pilot-{seat}.toml"
+                ).read_text(encoding="utf-8")
+            )
+            instructions = config["developer_instructions"]
+            for phrase in required:
+                self.assertIn(phrase, instructions)
+            self.assertEqual("low", config["model_reasoning_effort"])
+            self.assertEqual("priority", config["service_tier"])
+        skill = (
+            root / ".agents" / "skills" / "commander-arena" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("parent-message channel", skill)
+        self.assertIn("fidelity failure", skill)
 
     def test_exact_profile_fingerprint_acceptance_and_mismatch_warning(self):
         cache = DeckProfileCache()
@@ -266,6 +309,116 @@ class CodexArenaBoundaryTests(unittest.TestCase):
         self.assertFalse(result["accepted"])
         self.assertIn("reason", result["error"])
         self.assertIn("confidence", result["error"])
+
+    def test_codex_submission_requires_invocation_evidence(self):
+        session = make_session(
+            self.db, self.mishra, self.zimone, seed=412
+        )
+        tools = SeatScopedPilotTools(
+            session,
+            "A",
+            identity=PilotInvocationIdentity(
+                provider="codex_subagent",
+                model="gpt-5.6-sol",
+                reasoning_effort="max",
+                thread_id="/root/pilot-a",
+                thread_label="mtg-pilot-a",
+                provider_invoked=False,
+            ),
+        )
+        result = tools.submit_action(
+            {
+                "action_id": "keep",
+                "plan": "MULLIGAN",
+                "reason": "Keep a functional opening hand.",
+                "confidence": 0.8,
+            }
+        )
+        self.assertFalse(result["accepted"])
+        self.assertIn("--provider-invoked", result["error"])
+        self.assertFalse(session.decisions[-1]["provider_invoked"])
+
+    def test_codex_submission_rejects_dropped_thread_identity(self):
+        session = make_session(
+            self.db, self.mishra, self.zimone, seed=413
+        )
+        session.decisions.append(
+            {
+                "principal": "pilot:A",
+                "provider": "codex_subagent",
+                "model": "gpt-5.6-sol",
+                "reasoning_effort": "max",
+                "thread_id": "/root/pilot-a",
+                "thread_label": "mtg-pilot-a",
+                "provider_invoked": True,
+                "provider_identity_verified": True,
+                "model_identity_verified": True,
+            }
+        )
+        tools = SeatScopedPilotTools(
+            session,
+            "A",
+            identity=PilotInvocationIdentity(
+                provider="codex_subagent",
+                model="gpt-5.6-sol",
+                reasoning_effort="max",
+                thread_id=None,
+                thread_label="mtg-pilot-a",
+                provider_invoked=True,
+                provider_identity_verified=True,
+                model_identity_verified=True,
+            ),
+        )
+        result = tools.submit_action(
+            {
+                "action_id": "keep",
+                "plan": "MULLIGAN",
+                "reason": "Keep a functional opening hand.",
+                "confidence": 0.8,
+            }
+        )
+        self.assertFalse(result["accepted"])
+        self.assertIn("thread_id", result["error"])
+
+    def test_primary_prompt_requires_full_identity_on_every_submission(self):
+        prompt = primary_session_prompt("run/test")
+        self.assertIn("every submit-action invocation", prompt)
+        self.assertIn("never shorten that command", prompt)
+        self.assertIn("semantic_policy is trusted_only", prompt)
+
+    def test_arena_create_defaults_to_trusted_only_semantics(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "arena"
+            zimone = Path(__file__).parents[1] / "examples" / "zimone-and-dina.txt"
+            mishra = Path(__file__).parents[1] / "examples" / "mishra-eminent-one.txt"
+            with contextlib.redirect_stdout(io.StringIO()):
+                result = cli_main(
+                    [
+                        "arena-create",
+                        "--db",
+                        str(DB_PATH),
+                        "--deck",
+                        f"A={zimone}",
+                        "--deck",
+                        f"B={mishra}",
+                        "--deck",
+                        f"C={zimone}",
+                        "--deck",
+                        f"D={mishra}",
+                        "--output",
+                        str(output),
+                        "--seed",
+                        "414",
+                    ]
+                )
+            self.assertEqual(0, result)
+            checkpoint = json.loads(
+                (output / "checkpoint.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                "trusted_only",
+                checkpoint["state"]["config"]["semantic_policy"],
+            )
 
     def test_pilot_memory_is_seat_isolated(self):
         session = make_session(

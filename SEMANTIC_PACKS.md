@@ -26,15 +26,61 @@ Pack files are included as package data in the wheel.
 ## Trust
 
 `trusted` means the declared behavior is reviewed and characterized for this
-implementation. `provisional` can support a native pilot test but cannot make a
-material interaction eligible as matchup evidence. `unresolved` requires the
-arbiter or a future compiler. `intentionally_ignored` is only appropriate when
-the omitted ability is demonstrably irrelevant to the recorded operation.
+implementation. `provisional` can support development characterization but
+cannot make a material interaction eligible as conformance or release evidence.
+`unresolved` fails closed in strict mode and requires future implementation.
+Development arbitration can help author a reviewed fixture, but it is never
+production legality. `intentionally_ignored` is only appropriate when the
+omitted ability is demonstrably irrelevant to the recorded operation.
 
 The executor accepts validated DSL operations only. The kernel selects programs
 by Oracle/ability keys and runtime events, not printed-name branches. Runtime
 placeholders such as `$controller` and `$target.0` are resolved against the
 current stack object.
+
+## Version 0.8.0 exact-list closure
+
+The pinned July 28, 2026 Zimone and Dina and Mishra, Eminent One lists each
+preflight at 100 fully playable cards, with no partial or unresolved entries
+and no expected arbiter calls. The closure is backed by deterministic
+characterization scenarios and exact Oracle/rulings hashes in
+`zzz-v080-exact-deck-closure.json`.
+
+The final Mishra families include Daretti's loyalty, exchange, and emblem
+return; Demonic Junker's per-player destroy and Crew 2; both faces of Tithing
+Blade including Craft; Transmute Artifact's staged sacrifice/search/payment;
+and Urza's Saga's lore progression, granted abilities, restricted chapter-III
+search, and final sacrifice. The exact-list pack also covers the remaining
+Zimone engines, alternate/additional costs, restricted mana, copy/token
+engines, linked choices, replacement effects, and turn-control effects.
+
+This result is intentionally bounded to the two validated deck-list
+fingerprints. It does not imply that similarly worded cards outside those
+lists, arbitrary Oracle prose, continuous-effect layers, or every Commander
+rules interaction are implemented.
+
+## Version 0.7.0 interaction slice
+
+Target schemas are declarative plans rather than card-name conditionals. They
+support modal groups, public zones, players and stack objects, target counts,
+distinctness, state/type/color/mana-value filters, controller and owner
+relationships, source exclusion, and resolution-time conditions. Mandatory
+groups with insufficient candidates remove the cast or activation from the
+ordinary legal alternatives.
+
+The interaction pack pins current local Oracle and rulings hashes and has
+deterministic positive and negative scenarios for:
+
+- An Offer You Can't Refuse, Mana Drain, Swan Song, Force of Negation, Pact of
+  Negation, Flusterstorm, Red Elemental Blast, and Pyroblast
+- Assassin's Trophy, Abrade, Chaos Warp, Feed the Swarm, Tear Asunder, Force of
+  Vigor, Toxic Deluge, Vandalblast, and Deadly Rollick
+- Boseiju, Who Endures; Otawara, Soaring City; Cankerbloom; Soul-Guide
+  Lantern; and Pithing Needle
+
+These programs preserve their different target timing, modes, destinations,
+delayed payments/mana, storm copies, kicker/overload/pitch costs, life-X, and
+token results. They are not interchangeable templates.
 
 ## Version 0.6.0 vertical slice
 
@@ -56,11 +102,9 @@ The bundled packs characterize:
   Nature's Lore, Fabricate, Goblin Engineer's entry trigger, Survival of the
   Fittest, Elvish Reclaimer, and Wight of the Reliquary
 
-This is not complete coverage of either 100-card deck. In particular, the
-preflight reports retain unresolved costs, activated abilities, triggers, and
-replacement effects rather than silently treating them as vanilla. The
-generated reports under `run/semantic-preflight-*.json` are the authoritative
-inventory for this snapshot.
+This was not complete coverage of either 100-card deck at the time of the
+0.6.0 release. Version 0.8.0 closes the two pinned exact lists; generated
+preflight reports remain the authoritative inventory for any other snapshot.
 
 Version 0.6.0 improves legal-action and continuation exactness without claiming broad Oracle
 coverage:
@@ -84,12 +128,10 @@ physical object reference. The server resolves that name only after the scoped
 choice exists. Execution stops on a response, stack/cost/target change, hidden
 draw, new unsupplied choice, combat, semantic uncertainty, or fidelity failure.
 
-Other activation conditions and complex tutors remain unresolved rather than
-guessed. Green Sun's Zenith, Finale of Devastation, Chord of Calling, Protean
-Hulk, Diabolic Intent, Reshape, Transmute Artifact, Whir of Invention, Arcum
-Dagsson, Inventors' Fair, Urza's Saga, Repurposing Bay, and Spellseeker still
-require additional cost/selection/linked-effect compilation. The primary
-coordinator never chooses a private search result for the player.
+At the 0.6.0 boundary, other activation conditions and complex tutors remained
+unresolved rather than guessed. Version 0.8.0 supplies exact-list compilation
+for those cards. The primary coordinator still never chooses a private search
+result for the player.
 
 ## Preflight
 
@@ -114,11 +156,11 @@ For the July 28, 2026 decks, the current reports are:
 
 | Live deck | Fully playable | Partial | Unresolved | Expected arbiter calls | Review eligible possible |
 |---|---:|---:|---:|---:|---|
-| Zimone and Dina (`g5vt…`) | 42 | 2 | 56 | 58 | no |
-| Mishra, Eminent One (`armNI…`) | 44 | 3 | 53 | 56 | no |
+| Zimone and Dina (`g5vt…`) | 100 | 0 | 0 | 0 | yes |
+| Mishra, Eminent One (`armNI…`) | 100 | 0 | 0 | 0 | yes |
 
-Those counts are a safety result, not a defect hidden by a fixture. Neither the
-scripted turn-eight duel nor the duplicated-list Codex run is deck-quality or
+Those counts apply only to the validated July 28, 2026 fingerprints. Neither a
+scripted turn-eight duel nor a duplicated-list Codex run is deck-quality or
 matchup evidence.
 
 ## Adding coverage

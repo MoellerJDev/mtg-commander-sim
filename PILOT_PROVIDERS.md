@@ -1,5 +1,9 @@
 # Pilot providers
 
+Pilot providers are optional automation clients. The authoritative platform,
+ordinary gameplay, tests, rules enforcement, persistence, replay, and releases
+must operate without them or any AI dependency.
+
 Version 0.6.0 separates strategic inference from the authoritative game. A
 provider implements:
 
@@ -32,8 +36,10 @@ A pilot response can never submit effect-DSL operations.
 
 `codex_subagent` is the project-scoped live arena provider. It does not replace
 the scripted, manual, or subprocess adapters. Exactly four persistent
-GPT-5.6 Sol/max contexts are registered once, one per seat, and every later
-task returns to the same thread. The primary GPT-5.6 Sol/Ultra task is the
+GPT-5.6 Sol contexts are registered once, one per seat, and every later task
+returns to the same thread. The default fast pilot profile is `low` reasoning
+on the `priority` tier; the exact configured/reported identity is journaled.
+The primary GPT-5.6 Sol/Ultra task is the
 coordinator/arbiter, never a strategic pilot.
 
 Pilots do not read the run directory. `simctl pilot-mcp --game-dir <run>
@@ -42,6 +48,15 @@ Pilots do not read the run directory. `simctl pilot-mcp --game-dir <run>
 `update_memory`. Provider/model/thread metadata is injected by the coordinator;
 pilot-supplied identity, capability, principal, effect, or semantic fields are
 rejected and journaled.
+
+`simctl arena-codex-run --game <run>` is the preferred desktop transport when
+the host cannot retain four child agents in addition to the primary. It starts
+four persistent Codex CLI sessions in parallel, disables their shell, apps,
+tools, and nested agents, and then sequentially supplies only the appropriate
+fixed-seat task. The broker validates a strict structured-output schema and
+submits through `SeatScopedPilotTools`; it never writes task packets to its
+registry or benchmark. Codex `turn.completed` input, cached-input, output,
+reasoning-output, and latency values are stored as provider-owned metrics.
 
 ## Response contract
 

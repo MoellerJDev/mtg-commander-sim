@@ -17,9 +17,13 @@ from .util import mana_cost_to_vector, normalize_mana_bundle, parse_mana_symbols
 
 _ACTIVATE_ONLY_SORCERY = re.compile(r"activate only as a sorcery", re.IGNORECASE)
 _PAY_LIFE = re.compile(r"^pay\s+(\d+)\s+life$", re.IGNORECASE)
+_PAY_ENERGY = re.compile(
+    r"^pay\s+(?P<count>\d+|one|two|three|four|five|six|seven|eight|nine|ten)$",
+    re.IGNORECASE,
+)
 _SACRIFICE_CHOICE = re.compile(
     r"^sacrifice\s+(?:(?P<another>another)\s+|(?P<count>a|an|one|two|three|\d+)\s+)"
-    r"(?P<kind>creature|artifact|enchantment|land|permanent)(?:\s+you\s+control)?$",
+    r"(?P<kind>creature|artifact|enchantment|land|permanent)s?(?:\s+you\s+control)?$",
     re.IGNORECASE,
 )
 _DISCARD_CHOICE = re.compile(
@@ -27,8 +31,26 @@ _DISCARD_CHOICE = re.compile(
     r"(?:(?P<kind>creature|land|artifact|enchantment|instant|sorcery|planeswalker)\s+)?card(?:s)?$",
     re.IGNORECASE,
 )
+_RETURN_CHOICE = re.compile(
+    r"^return\s+(?:a|an|one)\s+"
+    r"(?P<kind>creature|artifact|enchantment|land|permanent|"
+    r"plains|island|swamp|mountain|forest)"
+    r"(?:\s+you\s+control)?\s+to\s+its\s+owner'?s\s+hand$",
+    re.IGNORECASE,
+)
 
 _NUMBER_WORDS = {"a": 1, "an": 1, "one": 1, "two": 2, "three": 3}
+_NUMBER_WORDS.update(
+    {
+        "four": 4,
+        "five": 5,
+        "six": 6,
+        "seven": 7,
+        "eight": 8,
+        "nine": 9,
+        "ten": 10,
+    }
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,6 +86,8 @@ class ActivatedAbility:
     sacrifice_source: bool = False
     exile_source: bool = False
     life_payment: int = 0
+    energy_payment: int = 0
+    loyalty_delta: int | None = None
     choices: tuple[CostChoice, ...] = ()
     uncompiled_costs: tuple[str, ...] = ()
     mana_ability: bool = False
@@ -94,6 +118,10 @@ class ActivatedAbility:
             result["exile_self"] = 1
         if self.life_payment:
             result["life"] = self.life_payment
+        if self.energy_payment:
+            result["energy"] = self.energy_payment
+        if self.loyalty_delta is not None:
+            result["loyalty"] = self.loyalty_delta
         if self.choices:
             result["choose_cost"] = [choice.compact() for choice in self.choices]
         if not self.compiled_cost:
@@ -141,9 +169,17 @@ def _ability_zones(
 
     if prefix == "channel" or ("channel" in keyword_set and lower_line.startswith("channel")):
         return ("hand",)
+    if prefix == "cycling":
+        return ("hand",)
     if "discard this card" in lower_cost and (prefix or "channel" in keyword_set):
         return ("hand",)
-    if "from your graveyard" in lower_line or "from a graveyard" in lower_line:
+    if "exile this card from your graveyard" in lower_cost:
+        return ("graveyard",)
+    if re.search(
+        r"activate (?:this ability )?only (?:from|if this card is in) "
+        r"(?:your|a) graveyard",
+        lower_line,
+    ):
         return ("graveyard",)
     if any(keyword in keyword_set for keyword in {"unearth", "encore", "scavenge", "embalm", "eternalize"}):
         if any(lower_line.startswith(keyword) for keyword in {"unearth", "encore", "scavenge", "embalm", "eternalize"}):
@@ -160,6 +196,36 @@ def _split_cost_clauses(cost_text: str) -> list[str]:
     return [clause.strip() for clause in cost_text.split(",") if clause.strip()]
 
 
+def _strip_inline_reminder_and_granted_text(line: str) -> str:
+    """Keep only activated abilities printed on the source itself.
+
+    Parenthetical token reminder text and quoted abilities granted to other
+    objects can contain colons, but neither is an activated ability of this
+    card. A fully parenthesized basic-land-type mana reminder remains
+    supported below because that reminder represents an intrinsic ability of
+    the land itself.
+    """
+
+    result: list[str] = []
+    parenthetical_depth = 0
+    quoted = False
+    for character in line:
+        if character in {'"', "“", "”"} and parenthetical_depth == 0:
+            quoted = not quoted
+            continue
+        if quoted:
+            continue
+        if character == "(":
+            parenthetical_depth += 1
+            continue
+        if character == ")" and parenthetical_depth:
+            parenthetical_depth -= 1
+            continue
+        if parenthetical_depth == 0:
+            result.append(character)
+    return "".join(result).strip()
+
+
 def parse_activated_abilities(
     *,
     card_name: str,
@@ -169,11 +235,39 @@ def parse_activated_abilities(
     abilities: list[ActivatedAbility] = []
     for line_index, raw_line in enumerate(oracle_text.splitlines()):
         line = raw_line.strip()
+        keyword_override: str | None = None
         # Scryfall preserves reminder text for basic-land-type mana abilities
         # as a fully parenthesized Oracle line, for example
         # "({T}: Add {G} or {U}.)".  The parentheses are not part of the cost.
-        if line.startswith("(") and line.endswith(")"):
+        intrinsic_basic_mana = (
+            line.startswith("({T}: Add ") and line.endswith(")")
+        )
+        if intrinsic_basic_mana:
             line = line[1:-1].strip()
+        else:
+            line = _strip_inline_reminder_and_granted_text(line)
+        cycling_match = re.match(
+            r"^cycling\s+(?P<cost>(?:\{[^{}]+\})+)$",
+            line,
+            re.IGNORECASE,
+        )
+        if cycling_match:
+            line = (
+                f"{cycling_match.group('cost')}, Discard this card: "
+                "Draw a card."
+            )
+            keyword_override = "Cycling"
+        equip_match = re.match(
+            r"^equip\s+(?P<cost>(?:\{[^{}]+\})+)$",
+            line,
+            re.IGNORECASE,
+        )
+        if equip_match:
+            line = (
+                f"{equip_match.group('cost')}: Attach this Equipment to "
+                "target creature you control. Activate only as a sorcery."
+            )
+            keyword_override = "Equip"
         if not line or ":" not in line:
             continue
         left, effect_text = line.split(":", 1)
@@ -181,6 +275,7 @@ def parse_activated_abilities(
         if not effect_text:
             continue
         actual_cost, keyword_prefix = _strip_keyword_prefix(left.strip())
+        keyword_prefix = keyword_override or keyword_prefix
         zones = _ability_zones(
             line=line,
             cost_text=actual_cost,
@@ -198,6 +293,8 @@ def parse_activated_abilities(
         sacrifice_source = False
         exile_source = False
         life_payment = 0
+        energy_payment = 0
+        loyalty_delta: int | None = None
         choices: list[CostChoice] = []
         uncompiled: list[str] = []
 
@@ -208,6 +305,18 @@ def parse_activated_abilities(
             if not residue:
                 continue
             lower = residue.casefold().strip(" .")
+            loyalty_match = re.fullmatch(
+                r"(?P<sign>[+\-\u2212])(?P<amount>\d+)",
+                residue,
+            )
+            if loyalty_match:
+                amount = int(loyalty_match.group("amount"))
+                loyalty_delta = (
+                    amount
+                    if loyalty_match.group("sign") == "+"
+                    else -amount
+                )
+                continue
             if lower.startswith("channel"):
                 continue
             if lower in {"discard this card", f"discard {card_name.casefold()}"}:
@@ -218,16 +327,33 @@ def parse_activated_abilities(
                 "sacrifice this artifact",
                 "sacrifice this creature",
                 "sacrifice this land",
+                "sacrifice this token",
                 "sacrifice this card",
+                f"sacrifice {card_name.casefold()}",
             }:
                 sacrifice_source = True
                 continue
-            if lower in {"exile this card from your graveyard", "exile this card"}:
+            if lower in {
+                "exile this card from your graveyard",
+                "exile this card",
+                f"exile {card_name.casefold()}",
+            }:
                 exile_source = True
                 continue
             life_match = _PAY_LIFE.match(lower)
             if life_match:
                 life_payment += int(life_match.group(1))
+                continue
+            energy_match = _PAY_ENERGY.match(lower)
+            if energy_match and "E" in symbols:
+                energy_payment += _number(
+                    energy_match.group("count")
+                )
+                complex_symbols = [
+                    symbol
+                    for symbol in complex_symbols
+                    if symbol != "E"
+                ]
                 continue
             sacrifice_match = _SACRIFICE_CHOICE.match(lower)
             if sacrifice_match:
@@ -252,6 +378,17 @@ def parse_activated_abilities(
                     )
                 )
                 continue
+            return_match = _RETURN_CHOICE.match(lower)
+            if return_match:
+                choices.append(
+                    CostChoice(
+                        kind="return",
+                        count=1,
+                        zone="battlefield",
+                        card_type=return_match.group("kind").casefold(),
+                    )
+                )
+                continue
             # Loyalty symbols, energy, counter removal, revealing, tapping
             # another permanent, and other costs are intentionally not guessed.
             if symbols and not residue:
@@ -259,7 +396,13 @@ def parse_activated_abilities(
             uncompiled.append(residue)
 
         effect_lower = effect_text.casefold()
-        mana_ability = effect_lower.startswith("add ") and "target" not in effect_lower
+        mana_ability = (
+            "target" not in effect_lower
+            and (
+                effect_lower.startswith("add ")
+                or "add one mana" in effect_lower
+            )
+        )
         generic_discount = 0
         if re.search(
             r"this ability costs \{1\} less to activate for each legendary creature you control",
@@ -284,6 +427,8 @@ def parse_activated_abilities(
                 sacrifice_source=sacrifice_source,
                 exile_source=exile_source,
                 life_payment=life_payment,
+                energy_payment=energy_payment,
+                loyalty_delta=loyalty_delta,
                 choices=tuple(choices),
                 uncompiled_costs=tuple(uncompiled),
                 mana_ability=mana_ability,

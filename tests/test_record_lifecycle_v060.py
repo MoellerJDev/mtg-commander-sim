@@ -4,6 +4,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from common import DB_PATH, load_assets, make_session
 from mtg_commander_sim.arena import (
@@ -16,9 +17,11 @@ from mtg_commander_sim.record import (
     finalize_record,
     provider_telemetry,
     refresh_record,
+    replay_record,
     verify_record_integrity,
 )
-from mtg_commander_sim.report import derive_review
+from mtg_commander_sim.model import Event
+from mtg_commander_sim.report import _semantic_coverage, derive_review
 
 
 class RecordLifecycleAndTypedToolTests(unittest.TestCase):
@@ -44,6 +47,72 @@ class RecordLifecycleAndTypedToolTests(unittest.TestCase):
             model_configured="gpt-5.6-sol",
             reasoning_effort_configured="max",
         )
+
+    def test_builtin_shockland_entry_is_trusted_in_coverage_report(self):
+        session = make_session(
+            self.db, self.mishra, self.zimone, players=2, seed=419
+        )
+        steam_vents = next(
+            card
+            for card in session.engine.state.cards.values()
+            if card.printed_name == "Steam Vents"
+        )
+        session.engine.state.events.append(
+            Event(
+                event_id=1,
+                revision=0,
+                turn_sequence=1,
+                active_player=steam_vents.owner,
+                phase="main",
+                step="precombat_main",
+                actor=steam_vents.owner,
+                code="land.play",
+                summary="played Steam Vents",
+                details={"object": steam_vents.ref, "tapped": True},
+            )
+        )
+        coverage = _semantic_coverage(session.engine)
+        row = next(
+            card
+            for card in coverage["cards"]
+            if card["name"] == "Steam Vents"
+        )
+        self.assertEqual("fully_supported", row["status"])
+        self.assertEqual("trusted", row["trust_level"])
+        self.assertEqual("complete", coverage["status"])
+
+    def test_builtin_mana_side_effect_is_trusted_in_coverage_report(self):
+        session = make_session(
+            self.db, self.mishra, self.zimone, players=2, seed=420
+        )
+        elves = next(
+            card
+            for card in session.engine.state.cards.values()
+            if card.printed_name == "Elves of Deep Shadow"
+        )
+        session.engine.state.events.append(
+            Event(
+                event_id=1,
+                revision=0,
+                turn_sequence=1,
+                active_player=elves.owner,
+                phase="main",
+                step="precombat_main",
+                actor=elves.owner,
+                code="stack.cast",
+                summary="cast Elves of Deep Shadow",
+                details={"object": elves.ref},
+            )
+        )
+        coverage = _semantic_coverage(session.engine)
+        row = next(
+            card
+            for card in coverage["cards"]
+            if card["name"] == "Elves of Deep Shadow"
+        )
+        self.assertEqual("fully_supported", row["status"])
+        self.assertEqual("trusted", row["trust_level"])
+        self.assertEqual("complete", coverage["status"])
 
     def test_typed_schema_enforces_plan_and_reason_bounds(self):
         spec = next(
@@ -227,7 +296,13 @@ class RecordLifecycleAndTypedToolTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             record = Path(temporary) / "paused"
             session.save(record)
-            finalized = finalize_record(record, self.db)
+            with patch(
+                "mtg_commander_sim.record.replay_record",
+                wraps=replay_record,
+            ) as replay:
+                finalized = finalize_record(record, self.db)
+            self.assertEqual(1, replay.call_count)
+            self.assertTrue(replay.call_args.kwargs["verify"])
             self.assertEqual("paused", finalized["status"])
             self.assertEqual(
                 "pilot_required",

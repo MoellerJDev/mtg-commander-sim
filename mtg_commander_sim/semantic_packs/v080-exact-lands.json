@@ -1,0 +1,355 @@
+{
+  "schema_version": 3,
+  "name": "v0.8-exact-deck-land-families",
+  "programs": [
+    {
+      "key": "1b301478-b14f-4ef8-94e6-9647d582eabe:trigger:enter",
+      "label": "Golgari Rot Farm enters",
+      "oracle_id": "1b301478-b14f-4ef8-94e6-9647d582eabe",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [
+        {
+          "op": "choose_objects",
+          "player": "$controller",
+          "prompt": "Choose a land you control to return to its owner's hand.",
+          "selector": {
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "types_any": ["land"],
+            "controller_relation": "you",
+            "min": 1,
+            "max": 1
+          },
+          "then": [
+            {
+              "op": "move_selected",
+              "destination": "hand",
+              "reason": "Golgari Rot Farm"
+            }
+          ]
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "mandatory_choice", "land_bounce"],
+      "tests": ["test_bounce_lands_require_controller_to_return_one_land"],
+      "provenance": {
+        "source_oracle_hash": "60d21e18b36ff964ff5dbfbef34f94cf08f166c33a4d6b300051e76f0c883b42",
+        "source_rulings_hash": "f6f3804ae1f504f6c9d6e90d0eb8eee1375abb4abe4b96db5387784858e80cad",
+        "authored_by": "v0.8-exact-land-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "046f5783-cc7b-416a-8cf6-2bcef9c2cc1a:trigger:enter",
+      "label": "Simic Growth Chamber enters",
+      "oracle_id": "046f5783-cc7b-416a-8cf6-2bcef9c2cc1a",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [
+        {
+          "op": "choose_objects",
+          "player": "$controller",
+          "prompt": "Choose a land you control to return to its owner's hand.",
+          "selector": {
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "types_any": ["land"],
+            "controller_relation": "you",
+            "min": 1,
+            "max": 1
+          },
+          "then": [
+            {
+              "op": "move_selected",
+              "destination": "hand",
+              "reason": "Simic Growth Chamber"
+            }
+          ]
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "mandatory_choice", "land_bounce"],
+      "tests": ["test_bounce_lands_require_controller_to_return_one_land"],
+      "provenance": {
+        "source_oracle_hash": "75cd40ccde9f4fc5ef049c45d9ba1ea1818a0cebc2c2c52035686dc4af1395ff",
+        "source_rulings_hash": "ea07a39affdf795090c698e9d8109b8b842632663fce91a2a640da82120760a7",
+        "authored_by": "v0.8-exact-land-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "378a1d57-e2f1-4b84-9692-1564602e9e99:trigger:enter",
+      "label": "Dimir Aqueduct enters",
+      "oracle_id": "378a1d57-e2f1-4b84-9692-1564602e9e99",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [
+        {
+          "op": "choose_objects",
+          "player": "$controller",
+          "prompt": "Choose a land you control to return to its owner's hand.",
+          "selector": {
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "types_any": ["land"],
+            "controller_relation": "you",
+            "min": 1,
+            "max": 1
+          },
+          "then": [
+            {
+              "op": "move_selected",
+              "destination": "hand",
+              "reason": "Dimir Aqueduct"
+            }
+          ]
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "mandatory_choice", "land_bounce"],
+      "tests": ["test_bounce_lands_require_controller_to_return_one_land"],
+      "provenance": {
+        "source_oracle_hash": "a21638dffb18273eccd1f5a1378fe1bdfbd44ac6c8345908509b09b5cbf384cd",
+        "source_rulings_hash": "704531e1d146ec6d1bb0684e77ae824aae21c6a4fbccfbb63ece9038b5740946",
+        "authored_by": "v0.8-exact-land-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "3644f316-f9a3-46c9-9b1e-747f86cf4ead:ability:ab2",
+      "label": "Buried Ruin recursion",
+      "oracle_id": "3644f316-f9a3-46c9-9b1e-747f86cf4ead",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "move",
+          "card": "$target.0",
+          "destination": "hand",
+          "reason": "Buried Ruin"
+        }
+      ],
+      "target_schema": {
+        "zones": ["graveyard"],
+        "categories": ["card"],
+        "types_any": ["artifact"],
+        "owner_relation": "you",
+        "count": 1
+      },
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "target_validation", "artifact_recursion"],
+      "tests": ["test_buried_and_academy_ruins_use_exact_graveyard_destinations"],
+      "provenance": {
+        "source_oracle_hash": "aa40ba99d82ad68936414a16e886755f3f17b6156e85382cdd0414faebc1b09c",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-land-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "a3da7d5b-2c2b-45fe-b9c5-413b8c8fc0a2:ability:ab2",
+      "label": "Academy Ruins recursion",
+      "oracle_id": "a3da7d5b-2c2b-45fe-b9c5-413b8c8fc0a2",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "move",
+          "card": "$target.0",
+          "destination": "library",
+          "position": "top",
+          "reason": "Academy Ruins"
+        }
+      ],
+      "target_schema": {
+        "zones": ["graveyard"],
+        "categories": ["card"],
+        "types_any": ["artifact"],
+        "owner_relation": "you",
+        "count": 1
+      },
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "target_validation", "artifact_recursion", "library_top"],
+      "tests": ["test_buried_and_academy_ruins_use_exact_graveyard_destinations"],
+      "provenance": {
+        "source_oracle_hash": "cdde5d5b09762fa78420079691a6bf4ed6f0ff63166b155e83c57022b1aec15c",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-land-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "17784f90-89a1-47a5-83ef-ae60dfc30bd1:ability:ab2",
+      "label": "Minamo untap",
+      "oracle_id": "17784f90-89a1-47a5-83ef-ae60dfc30bd1",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "untap",
+          "card": "$target.0",
+          "reason": "Minamo, School at Water's Edge"
+        }
+      ],
+      "target_schema": {
+        "zones": ["battlefield"],
+        "categories": ["permanent"],
+        "supertypes_any": ["legendary"],
+        "count": 1
+      },
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "target_validation", "untap"],
+      "tests": ["test_minamo_targets_only_legendary_permanents_and_untaps"],
+      "provenance": {
+        "source_oracle_hash": "875ff76e8b4178d31ba4b5bd200572e36c230951d6578ceb846defb7d610af69",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-land-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "f2c861d3-b302-4e84-b647-099551007269:ability:ab2",
+      "label": "Ghost Town return",
+      "oracle_id": "f2c861d3-b302-4e84-b647-099551007269",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "move",
+          "card": "$source",
+          "destination": "hand",
+          "reason": "Ghost Town"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "activation_condition", "self_return"],
+      "tests": ["test_ghost_town_only_returns_during_another_players_turn"],
+      "provenance": {
+        "source_oracle_hash": "0105e9404db32c35e84c811b71b3ea9b08e3dcf9614f50099e02613f2cad50bc",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-exact-land-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ac2dd694-d2f1-4025-8400-12332bdc882a:ability:ab2",
+      "label": "Takenuma channel",
+      "oracle_id": "ac2dd694-d2f1-4025-8400-12332bdc882a",
+      "ability_id": "ability:ab2",
+      "active_zone": "hand",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "mill",
+          "player": "$controller",
+          "count": 3,
+          "reason": "Takenuma, Abandoned Mire"
+        },
+        {
+          "op": "choose_objects",
+          "player": "$controller",
+          "prompt": "Choose a creature or planeswalker card in your graveyard to return.",
+          "selector": {
+            "zones": ["graveyard"],
+            "categories": ["card"],
+            "types_any": ["creature", "planeswalker"],
+            "owner_relation": "you",
+            "min": 1,
+            "max": 1
+          },
+          "then": [
+            {
+              "op": "move_selected",
+              "destination": "hand",
+              "reason": "Takenuma, Abandoned Mire"
+            }
+          ]
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "channel", "cost_reduction", "mill", "graveyard_recursion", "player_choice"],
+      "tests": ["test_takenuma_mills_then_returns_a_qualifying_card"],
+      "provenance": {
+        "source_oracle_hash": "bfb6a58c47c94ced432a935dc0aacf6bb4970b189ef2b4459f5871507367dad6",
+        "source_rulings_hash": "2f2b128dcf0ed222006e8e6ce91453d6a03601675578d5ae53e253119deb0c63",
+        "authored_by": "v0.8-exact-land-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "91d4a5fe-fd6d-4b14-a63f-61b4d0ecd9c4:trigger:upkeep",
+      "label": "Inventors' Fair upkeep",
+      "oracle_id": "91d4a5fe-fd6d-4b14-a63f-61b4d0ecd9c4",
+      "ability_id": "trigger:upkeep",
+      "active_zone": "battlefield",
+      "event": "step.begin",
+      "event_condition": {
+        "all": [
+          {"field": "phase", "op": "eq", "value": "beginning"},
+          {"field": "step", "op": "eq", "value": "upkeep"},
+          {"field": "player", "op": "eq", "value": "$source.controller"},
+          {
+            "field": "source_controller_type_count",
+            "type": "artifact",
+            "op": "gte",
+            "value": 3
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "life",
+          "player": "$controller",
+          "delta": 1,
+          "reason": "Inventors' Fair"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "intervening_condition", "life_gain"],
+      "tests": ["test_inventors_fair_checks_metalcraft_for_upkeep_and_search"],
+      "provenance": {
+        "source_oracle_hash": "788bf228aeb0ac5effd278a89d718415b155a703b18ad61af80e1ec30b39311f",
+        "source_rulings_hash": "74231b94bff718a84b98d90e6eb46aaaa5366087e880d0a9101fe330330f8ec3",
+        "authored_by": "v0.8-exact-land-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "91d4a5fe-fd6d-4b14-a63f-61b4d0ecd9c4:ability:ab3",
+      "label": "Inventors' Fair search",
+      "oracle_id": "91d4a5fe-fd6d-4b14-a63f-61b4d0ecd9c4",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {"types": ["artifact"]},
+          "count": {"minimum": 1, "maximum": 1},
+          "destination": "hand",
+          "reveal": true,
+          "shuffle_after": true
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "activation_condition", "private_library_search", "artifact_search"],
+      "tests": ["test_inventors_fair_checks_metalcraft_for_upkeep_and_search"],
+      "provenance": {
+        "source_oracle_hash": "788bf228aeb0ac5effd278a89d718415b155a703b18ad61af80e1ec30b39311f",
+        "source_rulings_hash": "74231b94bff718a84b98d90e6eb46aaaa5366087e880d0a9101fe330330f8ec3",
+        "authored_by": "v0.8-exact-land-family",
+        "review_status": "reviewed"
+      }
+    }
+  ]
+}

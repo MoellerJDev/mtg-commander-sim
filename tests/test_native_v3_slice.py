@@ -202,12 +202,18 @@ class NativeV3AuditAndPilotTests(unittest.TestCase):
 
     def test_preflight_is_trust_aware_and_fail_closed(self):
         report = semantic_preflight(self.db, self.zimone)
+        self.assertEqual(2, report["schema_version"])
         self.assertEqual(100, report["total_cards"])
-        self.assertFalse(report["deck_review_eligible_possible"])
+        self.assertTrue(report["deck_review_eligible_possible"])
+        self.assertEqual(0, report["unresolved_cards"])
         by_name = {row["name"]: row for row in report["cards"]}
-        self.assertEqual("fully_playable", by_name["Lotus Cobra"]["status"])
-        self.assertEqual("trusted", by_name["Lotus Cobra"]["trust_level"])
-        self.assertEqual("unresolved", by_name["Protean Hulk"]["status"])
+        self.assertTrue(by_name["Lotus Cobra"]["source_hash_match"])
+        self.assertNotIn(
+            "Lotus Cobra", report["source_hash_drift_cards"]
+        )
+        self.assertEqual(
+            "fully_playable", by_name["Protean Hulk"]["status"]
+        )
 
 
 class TrustedSemanticScenarioTests(unittest.TestCase):
@@ -316,13 +322,15 @@ class TrustedSemanticScenarioTests(unittest.TestCase):
         engine = session.engine
         self._clear_decision(engine)
         zimone = self._card(engine, "B", "Zimone and Dina")
-        fodder = self._card(engine, "B", "Bloodghast")
+        fodder = self._card(engine, "B", "Birds of Paradise")
         land = next(
             card
             for card in engine.state.cards.values()
             if card.owner == "B"
             and engine.card_record(card)
             and engine.card_record(card).is_land
+            and "when"
+            not in engine.card_record(card).oracle_text.casefold()
             and card.object_id not in {zimone.object_id, fodder.object_id}
         )
         engine.move_card(zimone.object_id, "battlefield", controller="B")
@@ -422,17 +430,20 @@ class TrustedSemanticScenarioTests(unittest.TestCase):
         )
         engine._prepare_stack_resolution()
         packet = session.packet("pilot:A", full=True)
-        self.assertEqual("semantic.choice", packet["decision"]["kind"])
+        self.assertEqual("semantic.target", packet["decision"]["kind"])
         result = session.act(
             "pilot:A",
             {
                 "action_id": "choose",
-                "card": artifact.ref,
+                "targets": [artifact.ref],
                 "plan": "DEVELOP_ENGINE",
-                "reason": "Copy Wellspring into the required hasty 4/4 Warform.",
+                "reason": "Target Wellspring for the required hasty 4/4 Warform.",
             },
         )
         self.assertTrue(result.ok, result.summary)
+        engine.permissions.invalidate_current()
+        engine.state.priority_player = None
+        engine._prepare_stack_resolution()
         warform = next(
             card
             for card in engine.state.cards.values()
@@ -449,6 +460,139 @@ class TrustedSemanticScenarioTests(unittest.TestCase):
                 for trigger in engine.state.delayed_triggers
             )
         )
+
+    def test_zulaport_drains_each_opponent_for_simultaneous_deaths(self):
+        session = make_session(
+            self.db, self.mishra, self.zimone, players=4, seed=914
+        )
+        keep_all(session)
+        engine = session.engine
+        self._clear_decision(engine)
+        cutthroat = self._card(engine, "B", "Zulaport Cutthroat")
+        engine.move_card(
+            cutthroat.object_id,
+            "battlefield",
+            controller="B",
+        )
+        fodder_ref = engine.create_token(
+            "B",
+            name="Zulaport Fodder",
+            characteristics={
+                "type_line": "Token Creature",
+                "power": "1",
+                "toughness": "1",
+            },
+        )[0]
+        fodder = next(
+            card
+            for card in engine.state.cards.values()
+            if card.ref == fodder_ref
+        )
+        life_before = {
+            seat: player.life
+            for seat, player in engine.state.players.items()
+        }
+
+        engine._move_cards_simultaneously(
+            [
+                (cutthroat.object_id, "graveyard"),
+                (fodder.object_id, "graveyard"),
+            ],
+            reason="Zulaport scenario",
+        )
+        self.assertTrue(engine._stabilize())
+        packet = session.packet("pilot:B", full=True)
+        self.assertEqual("trigger.order", packet["decision"]["kind"])
+        trigger_refs = [
+            item["id"]
+            for item in packet["decision"]["ctx"]["triggers"]
+        ]
+        self.assertTrue(
+            session.act(
+                "pilot:B",
+                {
+                    "action_id": "order",
+                    "triggers": trigger_refs,
+                    "plan": "DEVELOP_ENGINE",
+                    "reason": (
+                        "Place both simultaneous Cutthroat triggers on "
+                        "the stack in a deterministic order."
+                    ),
+                },
+            ).ok
+        )
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.priority_player = None
+
+        self.assertEqual(
+            2,
+            sum(
+                item.label == "Zulaport Cutthroat dies trigger"
+                for item in engine.state.stack
+            ),
+        )
+        while engine.state.stack:
+            engine.permissions.invalidate_current()
+            engine.state.pending_decision = None
+            engine.state.priority_player = None
+            engine._prepare_stack_resolution()
+        self.assertEqual(
+            life_before["B"] + 2,
+            engine.state.players["B"].life,
+        )
+        for seat in ("A", "C", "D"):
+            self.assertEqual(
+                life_before[seat] - 2,
+                engine.state.players[seat].life,
+            )
+
+    def test_gonti_heart_energy_cost_and_extra_turn(self):
+        session = make_session(
+            self.db, self.mishra, self.zimone, players=2, seed=916
+        )
+        keep_all(session)
+        engine = session.engine
+        self._clear_decision(engine)
+        heart = self._card(engine, "A", "Gonti's Aether Heart")
+        engine.move_card(
+            heart.object_id,
+            "battlefield",
+            controller="A",
+        )
+        ability = next(
+            ability
+            for ability in engine._activated_abilities(heart)
+            if ability.energy_payment
+        )
+        self.assertEqual(8, ability.energy_payment)
+        self.assertTrue(ability.exile_source)
+        engine.create_token(
+            "A",
+            name="Gonti Trigger Artifact",
+            characteristics={"type_line": "Token Artifact"},
+        )
+        engine.state.priority_player = None
+        engine._prepare_stack_resolution()
+        self.assertEqual(2, engine.state.players["A"].energy)
+        engine.state.players["A"].energy = 8
+        engine.state.priority_player = "A"
+
+        engine._activate(
+            "A",
+            {
+                "source": heart.ref,
+                "ability": ability.ability_id,
+            },
+        )
+
+        self.assertEqual(0, engine.state.players["A"].energy)
+        self.assertEqual("exile", heart.zone)
+        engine.permissions.invalidate_current()
+        engine.state.priority_player = None
+        engine._prepare_stack_resolution()
+        self.assertEqual(1, len(engine.state.extra_turns))
+        self.assertEqual("A", engine.state.extra_turns[0].player)
 
     def test_red_elemental_blast_template_targets_zimone(self):
         session = make_session(
@@ -475,6 +619,7 @@ class TrustedSemanticScenarioTests(unittest.TestCase):
             "pilot:A",
             {
                 "action_id": action["id"],
+                "modes": ["destroy"],
                 "targets": [zimone.ref],
                 "pay": "manual",
                 "payment": {"R": 1},

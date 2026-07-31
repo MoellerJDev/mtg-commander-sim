@@ -51,6 +51,44 @@ class MulliganAndTurnTests(unittest.TestCase):
         self.assertTrue(session.act("pilot:A", {"a": "keep"}).ok)
         self.assertEqual(6, len(session.state.players["A"].zones["hand"]))
 
+    def test_two_counted_mulligans_accept_typed_card_ids(self):
+        session = make_session(self.db, self.mishra, self.zimone, seed=131)
+        self.assertTrue(session.act("pilot:A", {"a": "keep"}).ok)
+        self.assertTrue(session.act("pilot:B", {"a": "keep"}).ok)
+        self.assertTrue(session.act("pilot:C", {"a": "mulligan"}).ok)
+        self.assertTrue(session.act("pilot:D", {"a": "mulligan"}).ok)
+
+        for seat in "CD":
+            self.assertTrue(
+                session.act(
+                    f"pilot:{seat}",
+                    {
+                        "a": "mulligan",
+                        "override_reason": "Exercise simultaneous bottoming",
+                    },
+                ).ok
+            )
+
+        self.assertEqual(
+            ["pilot:C", "pilot:D"],
+            session.pending_principals(),
+        )
+        for seat in "CD":
+            packet = session.packet(f"pilot:{seat}")
+            card = packet["decision"]["ctx"]["hand"][0]["id"]
+            result = session.act(
+                f"pilot:{seat}",
+                {
+                    "action_id": "bottom",
+                    "card_ids": [card],
+                },
+            )
+            self.assertTrue(result.ok, result.summary)
+
+        self.assertEqual(6, len(session.state.players["C"].zones["hand"]))
+        self.assertEqual(6, len(session.state.players["D"].zones["hand"]))
+        self.assertEqual(["pilot:C"], session.pending_principals())
+
 
     def test_functional_post_free_hand_requires_override_to_mulligan_again(self):
         session = make_session(self.db, self.mishra, self.zimone, seed=100)

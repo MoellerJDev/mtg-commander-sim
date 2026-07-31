@@ -1,0 +1,606 @@
+{
+  "schema_version": 3,
+  "name": "v0.8-exact-deck-trigger-families",
+  "programs": [
+    {
+      "key": "5b5ef43b-13fd-4461-8d2d-18be65e9a790:spell:front",
+      "label": "Ichor Wellspring",
+      "oracle_id": "5b5ef43b-13fd-4461-8d2d-18be65e9a790",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_ichor_wellspring_draws_on_enter_and_graveyard"],
+      "provenance": {
+        "source_oracle_hash": "e4bf9909a8a6ea954ed19c53f23563407e79bb95939937099bb2d7e68ddb6cdf",
+        "source_rulings_hash": "f77e4b392f9aacd30708de28e3750edde794f0c6367885866ce625bd463afa9e",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "5b5ef43b-13fd-4461-8d2d-18be65e9a790:trigger:enter",
+      "label": "Ichor Wellspring enters",
+      "oracle_id": "5b5ef43b-13fd-4461-8d2d-18be65e9a790",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [{"op": "draw", "player": "$controller", "count": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "draw"],
+      "tests": ["test_ichor_wellspring_draws_on_enter_and_graveyard"],
+      "provenance": {
+        "source_oracle_hash": "e4bf9909a8a6ea954ed19c53f23563407e79bb95939937099bb2d7e68ddb6cdf",
+        "source_rulings_hash": "f77e4b392f9aacd30708de28e3750edde794f0c6367885866ce625bd463afa9e",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "5b5ef43b-13fd-4461-8d2d-18be65e9a790:trigger:graveyard",
+      "label": "Ichor Wellspring graveyard trigger",
+      "oracle_id": "5b5ef43b-13fd-4461-8d2d-18be65e9a790",
+      "ability_id": "trigger:graveyard",
+      "active_zone": "battlefield",
+      "event": "artifact.graveyard.self",
+      "effects": [{"op": "draw", "player": "$controller", "count": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "graveyard_trigger", "draw", "last_known_information"],
+      "tests": ["test_ichor_wellspring_draws_on_enter_and_graveyard"],
+      "provenance": {
+        "source_oracle_hash": "e4bf9909a8a6ea954ed19c53f23563407e79bb95939937099bb2d7e68ddb6cdf",
+        "source_rulings_hash": "f77e4b392f9aacd30708de28e3750edde794f0c6367885866ce625bd463afa9e",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c7f33cea-2ec8-4081-9208-a5b1d86721b3:spell:front",
+      "label": "Bastion of Remembrance",
+      "oracle_id": "c7f33cea-2ec8-4081-9208-a5b1d86721b3",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_bastion_enter_and_multiplayer_death_triggers"],
+      "provenance": {
+        "source_oracle_hash": "01f9cb664f0cfaedc8cc919bf37984304aa32c37cc80ea906c246ff3d824238a",
+        "source_rulings_hash": "0f194c208c22666b3a3f19ea1cb736e6bf43e7cd278a94cfe77dc72760247dfb",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c7f33cea-2ec8-4081-9208-a5b1d86721b3:trigger:enter",
+      "label": "Bastion of Remembrance enters",
+      "oracle_id": "c7f33cea-2ec8-4081-9208-a5b1d86721b3",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [
+        {
+          "op": "create_token",
+          "controller": "$controller",
+          "name": "Human Soldier",
+          "quantity": 1,
+          "characteristics": {
+            "type_line": "Token Creature — Human Soldier",
+            "colors": ["W"],
+            "power": "1",
+            "toughness": "1"
+          }
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "token_creation"],
+      "tests": ["test_bastion_enter_and_multiplayer_death_triggers"],
+      "provenance": {
+        "source_oracle_hash": "01f9cb664f0cfaedc8cc919bf37984304aa32c37cc80ea906c246ff3d824238a",
+        "source_rulings_hash": "0f194c208c22666b3a3f19ea1cb736e6bf43e7cd278a94cfe77dc72760247dfb",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "c7f33cea-2ec8-4081-9208-a5b1d86721b3:trigger:dies",
+      "label": "Bastion of Remembrance dies trigger",
+      "oracle_id": "c7f33cea-2ec8-4081-9208-a5b1d86721b3",
+      "ability_id": "trigger:dies",
+      "active_zone": "battlefield",
+      "event": "creature.dies",
+      "event_condition": {
+        "field": "previous_controller",
+        "op": "eq",
+        "value": "$source.controller"
+      },
+      "effects": [{"op": "drain_each_opponent", "amount": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "dies_trigger", "multiplayer_life"],
+      "tests": ["test_bastion_enter_and_multiplayer_death_triggers"],
+      "provenance": {
+        "source_oracle_hash": "01f9cb664f0cfaedc8cc919bf37984304aa32c37cc80ea906c246ff3d824238a",
+        "source_rulings_hash": "0f194c208c22666b3a3f19ea1cb736e6bf43e7cd278a94cfe77dc72760247dfb",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "180e1a7e-890d-477c-80a5-da8a5f2857b3:spell:front",
+      "label": "Reckless Fireweaver",
+      "oracle_id": "180e1a7e-890d-477c-80a5-da8a5f2857b3",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_reckless_fireweaver_damages_each_opponent"],
+      "provenance": {
+        "source_oracle_hash": "6fdfc482de8b4563bcf66f9782f18d705e3e47d32317264519630e4de485f5e1",
+        "source_rulings_hash": "79bc360f1cd14b7456b95fa00bf9a0cc379a68f1c8d8d6d69a52c39c5c932f9c",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "180e1a7e-890d-477c-80a5-da8a5f2857b3:trigger:artifact-enter",
+      "label": "Reckless Fireweaver artifact-enter trigger",
+      "oracle_id": "180e1a7e-890d-477c-80a5-da8a5f2857b3",
+      "ability_id": "trigger:artifact-enter",
+      "active_zone": "battlefield",
+      "event": "artifact.enter",
+      "event_condition": {
+        "field": "controller",
+        "op": "eq",
+        "value": "$source.controller"
+      },
+      "effects": [{"op": "damage_each_opponent", "amount": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "artifact_enters_trigger", "multiplayer_damage"],
+      "tests": ["test_reckless_fireweaver_damages_each_opponent"],
+      "provenance": {
+        "source_oracle_hash": "6fdfc482de8b4563bcf66f9782f18d705e3e47d32317264519630e4de485f5e1",
+        "source_rulings_hash": "79bc360f1cd14b7456b95fa00bf9a0cc379a68f1c8d8d6d69a52c39c5c932f9c",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "02f062f5-8012-4440-ac12-49fc49822106:spell:front",
+      "label": "Spine of Ish Sah",
+      "oracle_id": "02f062f5-8012-4440-ac12-49fc49822106",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_spine_destroys_target_then_returns_from_graveyard"],
+      "provenance": {
+        "source_oracle_hash": "3be4607cee5f65a15e2e358daa545b8d20639a14b78a6a22881c78d8c3bbbe18",
+        "source_rulings_hash": "3aafb83063e553d6bb8556acb39e4e7a5dfe415b2416558af62a4a9ac3d43809",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "02f062f5-8012-4440-ac12-49fc49822106:trigger:enter",
+      "label": "Spine of Ish Sah enters",
+      "oracle_id": "02f062f5-8012-4440-ac12-49fc49822106",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [
+        {
+          "op": "destroy",
+          "card": "$target.0",
+          "reason": "Spine of Ish Sah"
+        }
+      ],
+      "target_schema": {
+        "groups": [
+          {
+            "id": "permanent",
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "min": 1,
+            "max": 1
+          }
+        ]
+      },
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "destroy", "target_validation"],
+      "tests": ["test_spine_destroys_target_then_returns_from_graveyard"],
+      "provenance": {
+        "source_oracle_hash": "3be4607cee5f65a15e2e358daa545b8d20639a14b78a6a22881c78d8c3bbbe18",
+        "source_rulings_hash": "3aafb83063e553d6bb8556acb39e4e7a5dfe415b2416558af62a4a9ac3d43809",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "02f062f5-8012-4440-ac12-49fc49822106:trigger:graveyard",
+      "label": "Spine of Ish Sah graveyard trigger",
+      "oracle_id": "02f062f5-8012-4440-ac12-49fc49822106",
+      "ability_id": "trigger:graveyard",
+      "active_zone": "battlefield",
+      "event": "artifact.graveyard.self",
+      "effects": [
+        {
+          "op": "move",
+          "card": "$source",
+          "destination": "hand",
+          "reason": "Spine of Ish Sah"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "graveyard_trigger", "zone_change", "last_known_information"],
+      "tests": ["test_spine_destroys_target_then_returns_from_graveyard"],
+      "provenance": {
+        "source_oracle_hash": "3be4607cee5f65a15e2e358daa545b8d20639a14b78a6a22881c78d8c3bbbe18",
+        "source_rulings_hash": "3aafb83063e553d6bb8556acb39e4e7a5dfe415b2416558af62a4a9ac3d43809",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "106e9c0d-67a2-4db7-97d9-03e1ea1b40b5:spell:front",
+      "label": "Cryogen Relic",
+      "oracle_id": "106e9c0d-67a2-4db7-97d9-03e1ea1b40b5",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_cryogen_relic_draws_on_enter_and_leave_and_stuns_tapped_creature"],
+      "provenance": {
+        "source_oracle_hash": "a6128e43caa00f5c86aea39f0edb31fbcc4e2e56910b9c5f31823b7917727962",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "106e9c0d-67a2-4db7-97d9-03e1ea1b40b5:trigger:enter",
+      "label": "Cryogen Relic enters",
+      "oracle_id": "106e9c0d-67a2-4db7-97d9-03e1ea1b40b5",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [{"op": "draw", "player": "$controller", "count": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "draw"],
+      "tests": ["test_cryogen_relic_draws_on_enter_and_leave_and_stuns_tapped_creature"],
+      "provenance": {
+        "source_oracle_hash": "a6128e43caa00f5c86aea39f0edb31fbcc4e2e56910b9c5f31823b7917727962",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "106e9c0d-67a2-4db7-97d9-03e1ea1b40b5:trigger:leave",
+      "label": "Cryogen Relic leaves",
+      "oracle_id": "106e9c0d-67a2-4db7-97d9-03e1ea1b40b5",
+      "ability_id": "trigger:leave",
+      "active_zone": "battlefield",
+      "event": "permanent.leave.self",
+      "effects": [{"op": "draw", "player": "$controller", "count": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "leaves_trigger", "draw", "last_known_information"],
+      "tests": ["test_cryogen_relic_draws_on_enter_and_leave_and_stuns_tapped_creature"],
+      "provenance": {
+        "source_oracle_hash": "a6128e43caa00f5c86aea39f0edb31fbcc4e2e56910b9c5f31823b7917727962",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "106e9c0d-67a2-4db7-97d9-03e1ea1b40b5:ability:ab2",
+      "label": "Cryogen Relic stun ability",
+      "oracle_id": "106e9c0d-67a2-4db7-97d9-03e1ea1b40b5",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "add_counter_selected",
+          "cards": "$targets",
+          "counter": "stun",
+          "amount": 1,
+          "reason": "Cryogen Relic"
+        }
+      ],
+      "target_schema": {
+        "zones": ["battlefield"],
+        "categories": ["permanent"],
+        "types_any": ["creature"],
+        "tapped": true,
+        "up_to": 1
+      },
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "sacrifice_cost", "target_validation", "stun_counter"],
+      "tests": ["test_cryogen_relic_draws_on_enter_and_leave_and_stuns_tapped_creature"],
+      "provenance": {
+        "source_oracle_hash": "a6128e43caa00f5c86aea39f0edb31fbcc4e2e56910b9c5f31823b7917727962",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "55eca80c-dcd8-4c2f-aa0f-fb0aec7b80f7:spell:front",
+      "label": "Ophiomancer",
+      "oracle_id": "55eca80c-dcd8-4c2f-aa0f-fb0aec7b80f7",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_ophiomancer_checks_each_upkeep_and_existing_snakes"],
+      "provenance": {
+        "source_oracle_hash": "616994ad2c12f6d75dcf3fe2d8eca42c9016783b33c9204aea848154115fcaf1",
+        "source_rulings_hash": "fc510b35c00e39943846d2ac3f7d477c58ded87cb326c148e5277bcef24ddc8c",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "55eca80c-dcd8-4c2f-aa0f-fb0aec7b80f7:trigger:upkeep",
+      "label": "Ophiomancer upkeep trigger",
+      "oracle_id": "55eca80c-dcd8-4c2f-aa0f-fb0aec7b80f7",
+      "ability_id": "trigger:upkeep",
+      "active_zone": "battlefield",
+      "event": "step.begin",
+      "event_condition": {
+        "all": [
+          {
+            "field": "step",
+            "op": "eq",
+            "value": "upkeep"
+          },
+          {
+            "field": "source_controller_subtype_count",
+            "subtype": "snake",
+            "op": "eq",
+            "value": 0
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "create_token_if_no_controlled_subtype",
+          "controller": "$controller",
+          "subtype": "snake",
+          "name": "Snake",
+          "quantity": 1,
+          "characteristics": {
+            "type_line": "Token Creature — Snake",
+            "colors": ["B"],
+            "power": "1",
+            "toughness": "1",
+            "keywords": ["Deathtouch"]
+          },
+          "reason": "Ophiomancer"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "upkeep_trigger", "intervening_if", "token_creation", "deathtouch"],
+      "tests": ["test_ophiomancer_checks_each_upkeep_and_existing_snakes"],
+      "provenance": {
+        "source_oracle_hash": "616994ad2c12f6d75dcf3fe2d8eca42c9016783b33c9204aea848154115fcaf1",
+        "source_rulings_hash": "fc510b35c00e39943846d2ac3f7d477c58ded87cb326c148e5277bcef24ddc8c",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ab8d5f5c-1976-4f77-8ed2-8d28ee666741:spell:front",
+      "label": "Tireless Provisioner",
+      "oracle_id": "ab8d5f5c-1976-4f77-8ed2-8d28ee666741",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_tireless_provisioner_landfall_chooses_food_or_treasure"],
+      "provenance": {
+        "source_oracle_hash": "009a80f59ebd7f1ee981c6642b7810973bf62e3159e027248a20490af978bca5",
+        "source_rulings_hash": "f9e081e75e4ae7e1d69994b7c50207d1a9f386895d0089fb9a2713d1ade15fd0",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ab8d5f5c-1976-4f77-8ed2-8d28ee666741:trigger:landfall",
+      "label": "Tireless Provisioner landfall",
+      "oracle_id": "ab8d5f5c-1976-4f77-8ed2-8d28ee666741",
+      "ability_id": "trigger:landfall",
+      "active_zone": "battlefield",
+      "event": "land.enter",
+      "event_condition": {
+        "field": "controller",
+        "op": "eq",
+        "value": "$source.controller"
+      },
+      "effects": [
+        {
+          "op": "choose_option",
+          "player": "$controller",
+          "prompt": "Choose a Food token or a Treasure token.",
+          "options": [
+            {"id": "food", "label": "Food"},
+            {"id": "treasure", "label": "Treasure"}
+          ],
+          "then_by_choice": {
+            "food": [
+              {
+                "op": "create_token",
+                "controller": "$controller",
+                "name": "Food",
+                "quantity": 1,
+                "characteristics": {
+                  "type_line": "Token Artifact — Food",
+                  "oracle_text": "{2}, {T}, Sacrifice this token: You gain 3 life."
+                },
+                "reason": "Tireless Provisioner"
+              }
+            ],
+            "treasure": [
+              {
+                "op": "create_token",
+                "controller": "$controller",
+                "name": "Treasure",
+                "quantity": 1,
+                "characteristics": {
+                  "type_line": "Token Artifact — Treasure",
+                  "oracle_text": "{T}, Sacrifice this token: Add one mana of any color."
+                },
+                "reason": "Tireless Provisioner"
+              }
+            ]
+          }
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "landfall", "player_choice", "token_creation", "food", "treasure"],
+      "tests": ["test_tireless_provisioner_landfall_chooses_food_or_treasure"],
+      "provenance": {
+        "source_oracle_hash": "009a80f59ebd7f1ee981c6642b7810973bf62e3159e027248a20490af978bca5",
+        "source_rulings_hash": "f9e081e75e4ae7e1d69994b7c50207d1a9f386895d0089fb9a2713d1ade15fd0",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "e97f9c2b-b41e-4f36-9245-77c0ac125647:spell:front",
+      "label": "Bloodghast",
+      "oracle_id": "e97f9c2b-b41e-4f36-9245-77c0ac125647",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "combat_restriction", "conditional_haste"],
+      "tests": ["test_bloodghast_landfall_return_block_restriction_and_conditional_haste"],
+      "provenance": {
+        "source_oracle_hash": "e72565744eead53b441fe56d84c43718e8c4fe0ab1c82d8daa527a213a2b512c",
+        "source_rulings_hash": "c8db5fe0dd05489bb524712033bb0f5dd065fdf94dd1ee21b9e557fbf43a890b",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "e97f9c2b-b41e-4f36-9245-77c0ac125647:trigger:landfall",
+      "label": "Bloodghast landfall",
+      "oracle_id": "e97f9c2b-b41e-4f36-9245-77c0ac125647",
+      "ability_id": "trigger:landfall",
+      "active_zone": "graveyard",
+      "event": "land.enter",
+      "event_condition": {
+        "field": "controller",
+        "op": "eq",
+        "value": "$source.controller"
+      },
+      "effects": [
+        {
+          "op": "choose_option",
+          "player": "$controller",
+          "prompt": "Return Bloodghast to the battlefield?",
+          "options": [
+            {"id": "return", "label": "Return Bloodghast"},
+            {"id": "decline", "label": "Leave it in the graveyard"}
+          ],
+          "then_by_choice": {
+            "return": [
+              {
+                "op": "move_if_in_zone",
+                "card": "$source",
+                "from": "graveyard",
+                "destination": "battlefield",
+                "controller": "$controller",
+                "reason": "Bloodghast landfall"
+              }
+            ],
+            "decline": []
+          }
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "landfall", "graveyard_recursion", "player_choice"],
+      "tests": ["test_bloodghast_landfall_return_block_restriction_and_conditional_haste"],
+      "provenance": {
+        "source_oracle_hash": "e72565744eead53b441fe56d84c43718e8c4fe0ab1c82d8daa527a213a2b512c",
+        "source_rulings_hash": "c8db5fe0dd05489bb524712033bb0f5dd065fdf94dd1ee21b9e557fbf43a890b",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "aa854d50-444c-49d9-bfb1-5476b33c1c0b:spell:front",
+      "label": "Scute Swarm",
+      "oracle_id": "aa854d50-444c-49d9-bfb1-5476b33c1c0b",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_scute_swarm_landfall_switches_to_copy_at_six_lands"],
+      "provenance": {
+        "source_oracle_hash": "193540a5fa6d52e1b6a8918450cebd51a57026e3fc161d7cb80b23570931876a",
+        "source_rulings_hash": "916f8ba7df64c205fc2d266926f278865467d918d6d621d4ef4e0409d4ebf125",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "aa854d50-444c-49d9-bfb1-5476b33c1c0b:trigger:landfall",
+      "label": "Scute Swarm landfall",
+      "oracle_id": "aa854d50-444c-49d9-bfb1-5476b33c1c0b",
+      "ability_id": "trigger:landfall",
+      "active_zone": "battlefield",
+      "event": "land.enter",
+      "event_condition": {
+        "field": "controller",
+        "op": "eq",
+        "value": "$source.controller"
+      },
+      "effects": [
+        {
+          "op": "scute_swarm_token",
+          "controller": "$controller",
+          "source": "$source",
+          "threshold": 6,
+          "reason": "Scute Swarm"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "landfall", "token_creation", "token_copy", "replacement_effect"],
+      "tests": ["test_scute_swarm_landfall_switches_to_copy_at_six_lands"],
+      "provenance": {
+        "source_oracle_hash": "193540a5fa6d52e1b6a8918450cebd51a57026e3fc161d7cb80b23570931876a",
+        "source_rulings_hash": "916f8ba7df64c205fc2d266926f278865467d918d6d621d4ef4e0409d4ebf125",
+        "authored_by": "v0.8-trigger-family",
+        "review_status": "reviewed"
+      }
+    }
+  ]
+}

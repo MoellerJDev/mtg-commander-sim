@@ -67,7 +67,12 @@ class CapabilityManager:
 
         for actor in actor_list:
             if role == "pilot":
-                principal = self.pilot_principal(actor)
+                strategic_controller = self.state.players[
+                    actor
+                ].stats.get("turn_controlled_by")
+                principal = self.pilot_principal(
+                    str(strategic_controller or actor)
+                )
                 capability_actor: str | None = actor
             else:
                 principal = role
@@ -176,7 +181,15 @@ class CapabilityManager:
             actor_key = actor if decision.role == "pilot" else actor
             if actor_key in decision.responses:
                 continue
-            principal = self.pilot_principal(actor) if decision.role == "pilot" else decision.role
+            if decision.role == "pilot":
+                strategic_controller = self.state.players[
+                    actor
+                ].stats.get("turn_controlled_by")
+                principal = self.pilot_principal(
+                    str(strategic_controller or actor)
+                )
+            else:
+                principal = decision.role
             token = self._new_token()
             self.state.capabilities[token] = Capability(
                 token=token,

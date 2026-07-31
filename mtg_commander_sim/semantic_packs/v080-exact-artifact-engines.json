@@ -1,0 +1,731 @@
+{
+  "schema_version": 3,
+  "name": "v0.8-exact-artifact-engine-families",
+  "programs": [
+    {
+      "key": "0fdfe986-0216-468b-aac8-bbcf588fd894:spell:front",
+      "label": "Arcum Dagsson",
+      "oracle_id": "0fdfe986-0216-468b-aac8-bbcf588fd894",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_arcum_sacrifices_target_controller_artifact_and_searches"],
+      "provenance": {
+        "source_oracle_hash": "4ac6301a811f6699b93a05b184294fb8583f2b7cd213cb11d976bf0a68a981a6",
+        "source_rulings_hash": "61fb3126a771d324dd0359293f905d2291424c40a03992f9ea0b65891cae810e",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "0fdfe986-0216-468b-aac8-bbcf588fd894:ability:ab1",
+      "label": "Arcum Dagsson activation",
+      "oracle_id": "0fdfe986-0216-468b-aac8-bbcf588fd894",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "groups": [
+          {
+            "id": "artifact_creature",
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "artifact": true,
+            "creature": true,
+            "min": 1,
+            "max": 1
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "sacrifice",
+          "card": "$target.0",
+          "reason": "Arcum Dagsson"
+        },
+        {
+          "op": "search",
+          "searching_player": "$target.controller.0",
+          "zone": "library",
+          "selector": {
+            "types": ["Artifact"],
+            "predicate": "noncreature"
+          },
+          "count": {"minimum": 0, "maximum": 1},
+          "destination": "battlefield",
+          "reveal": false,
+          "shuffle_after": true,
+          "optional": true
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "target_controller_search", "resolution_sacrifice", "library_search"],
+      "tests": ["test_arcum_sacrifices_target_controller_artifact_and_searches"],
+      "provenance": {
+        "source_oracle_hash": "4ac6301a811f6699b93a05b184294fb8583f2b7cd213cb11d976bf0a68a981a6",
+        "source_rulings_hash": "61fb3126a771d324dd0359293f905d2291424c40a03992f9ea0b65891cae810e",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "52241b9c-7a69-4176-9234-8bdab09d8e64:spell:front",
+      "label": "Sai, Master Thopterist",
+      "oracle_id": "52241b9c-7a69-4176-9234-8bdab09d8e64",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_sai_cast_trigger_and_two_artifact_draw_cost"],
+      "provenance": {
+        "source_oracle_hash": "32de849cc26eeb9128519635739bb739a2194132a35bca44b783744e7f76b2fe",
+        "source_rulings_hash": "5cafcfcdaa4e582da5517b0e6c89fab34c17486b8e542afd27c06faaa12acc07",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "52241b9c-7a69-4176-9234-8bdab09d8e64:trigger:artifact-cast",
+      "label": "Sai artifact-cast trigger",
+      "oracle_id": "52241b9c-7a69-4176-9234-8bdab09d8e64",
+      "ability_id": "trigger:artifact-cast",
+      "active_zone": "battlefield",
+      "event": "artifact.cast",
+      "event_condition": {
+        "field": "player",
+        "op": "eq",
+        "value": "$source.controller"
+      },
+      "effects": [
+        {
+          "op": "create_token",
+          "controller": "$controller",
+          "name": "Thopter",
+          "quantity": 1,
+          "characteristics": {
+            "type_line": "Artifact Creature — Thopter",
+            "colors": [],
+            "power": "1",
+            "toughness": "1",
+            "keywords": ["Flying"]
+          }
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "artifact_cast_trigger", "token_creation"],
+      "tests": ["test_sai_cast_trigger_and_two_artifact_draw_cost"],
+      "provenance": {
+        "source_oracle_hash": "32de849cc26eeb9128519635739bb739a2194132a35bca44b783744e7f76b2fe",
+        "source_rulings_hash": "5cafcfcdaa4e582da5517b0e6c89fab34c17486b8e542afd27c06faaa12acc07",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "52241b9c-7a69-4176-9234-8bdab09d8e64:ability:ab2",
+      "label": "Sai artifact sacrifice draw",
+      "oracle_id": "52241b9c-7a69-4176-9234-8bdab09d8e64",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [{"op": "draw", "player": "$controller", "count": 1}],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "sacrifice_cost", "draw"],
+      "tests": ["test_sai_cast_trigger_and_two_artifact_draw_cost"],
+      "provenance": {
+        "source_oracle_hash": "32de849cc26eeb9128519635739bb739a2194132a35bca44b783744e7f76b2fe",
+        "source_rulings_hash": "5cafcfcdaa4e582da5517b0e6c89fab34c17486b8e542afd27c06faaa12acc07",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "0c7ba712-6a99-4d2f-9242-a2163a11f69c:spell:front",
+      "label": "Padeem, Consul of Innovation",
+      "oracle_id": "0c7ba712-6a99-4d2f-9242-a2163a11f69c",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "continuous_effect", "hexproof"],
+      "tests": ["test_padeem_hexproof_and_intervening_upkeep_condition"],
+      "provenance": {
+        "source_oracle_hash": "fdefa904f8caa5b60debfe3d3a7ed18aed905f328440b08854120a0460510ef1",
+        "source_rulings_hash": "4f5d45f4c7f0f0a32aaf42331850177002f30e2803a8f4716feccf54e1d6af07",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "0c7ba712-6a99-4d2f-9242-a2163a11f69c:trigger:upkeep",
+      "label": "Padeem upkeep draw",
+      "oracle_id": "0c7ba712-6a99-4d2f-9242-a2163a11f69c",
+      "ability_id": "trigger:upkeep",
+      "active_zone": "battlefield",
+      "event": "step.begin",
+      "event_condition": {
+        "all": [
+          {"field": "player", "op": "eq", "value": "$source.controller"},
+          {"field": "step", "op": "eq", "value": "upkeep"},
+          {
+            "field": "source_controller_controls_highest_artifact_mana_value",
+            "op": "truthy"
+          }
+        ]
+      },
+      "effects": [{"op": "draw", "player": "$controller", "count": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "upkeep_trigger", "intervening_condition", "draw"],
+      "tests": ["test_padeem_hexproof_and_intervening_upkeep_condition"],
+      "provenance": {
+        "source_oracle_hash": "fdefa904f8caa5b60debfe3d3a7ed18aed905f328440b08854120a0460510ef1",
+        "source_rulings_hash": "4f5d45f4c7f0f0a32aaf42331850177002f30e2803a8f4716feccf54e1d6af07",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "726d9d2c-736a-4852-9938-a0f50d8fd89f:spell:front",
+      "label": "Marionette Apprentice",
+      "oracle_id": "726d9d2c-736a-4852-9938-a0f50d8fd89f",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "fabricate", "static_ability"],
+      "tests": ["test_marionette_apprentice_fabricate_and_graveyard_trigger"],
+      "provenance": {
+        "source_oracle_hash": "68313123288fd2cfedaef7134fee5e5787ba35608744b89ef1fc13ced298c5f2",
+        "source_rulings_hash": "1540d907f2788b2ce168c7a5722447ce78aa170ec323ab4155f135c2fb43dc24",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "726d9d2c-736a-4852-9938-a0f50d8fd89f:trigger:fabricate",
+      "label": "Marionette Apprentice fabricate 1",
+      "oracle_id": "726d9d2c-736a-4852-9938-a0f50d8fd89f",
+      "ability_id": "trigger:fabricate",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [{"op": "fabricate", "amount": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "fabricate", "token_creation", "counter_choice"],
+      "tests": ["test_marionette_apprentice_fabricate_and_graveyard_trigger"],
+      "provenance": {
+        "source_oracle_hash": "68313123288fd2cfedaef7134fee5e5787ba35608744b89ef1fc13ced298c5f2",
+        "source_rulings_hash": "1540d907f2788b2ce168c7a5722447ce78aa170ec323ab4155f135c2fb43dc24",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "726d9d2c-736a-4852-9938-a0f50d8fd89f:trigger:graveyard",
+      "label": "Marionette Apprentice graveyard trigger",
+      "oracle_id": "726d9d2c-736a-4852-9938-a0f50d8fd89f",
+      "ability_id": "trigger:graveyard",
+      "active_zone": "battlefield",
+      "event": "permanent.graveyard",
+      "event_condition": {
+        "all": [
+          {"field": "previous_controller", "op": "eq", "value": "$source.controller"},
+          {"field": "card", "op": "ne", "value": "$source.ref"},
+          {"field": "types", "op": "contains_any", "value": ["creature", "artifact"]}
+        ]
+      },
+      "effects": [{"op": "lose_life_each_opponent", "amount": 1}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "graveyard_trigger", "last_known_information", "multiplayer_life"],
+      "tests": ["test_marionette_apprentice_fabricate_and_graveyard_trigger"],
+      "provenance": {
+        "source_oracle_hash": "68313123288fd2cfedaef7134fee5e5787ba35608744b89ef1fc13ced298c5f2",
+        "source_rulings_hash": "1540d907f2788b2ce168c7a5722447ce78aa170ec323ab4155f135c2fb43dc24",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "301d1d8e-d3fc-4010-8b29-4724fa0b31cd:spell:front",
+      "label": "Portal to Phyrexia",
+      "oracle_id": "301d1d8e-d3fc-4010-8b29-4724fa0b31cd",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_portal_apnap_sacrifice_and_upkeep_reanimation"],
+      "provenance": {
+        "source_oracle_hash": "7f28110f3c1d502c159210171f5720adc260143685902bf5050006314f014a8d",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "301d1d8e-d3fc-4010-8b29-4724fa0b31cd:trigger:enter",
+      "label": "Portal to Phyrexia enters",
+      "oracle_id": "301d1d8e-d3fc-4010-8b29-4724fa0b31cd",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [
+        {
+          "op": "choose_cards_apnap",
+          "players": "opponents",
+          "actor": "$controller",
+          "zone": "battlefield",
+          "card_type": "creature",
+          "count": 3,
+          "then": "sacrifice",
+          "prompt": "Choose three creatures to sacrifice, or all creatures if fewer than three."
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "apnap_choice", "simultaneous_sacrifice"],
+      "tests": ["test_portal_apnap_sacrifice_and_upkeep_reanimation"],
+      "provenance": {
+        "source_oracle_hash": "7f28110f3c1d502c159210171f5720adc260143685902bf5050006314f014a8d",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "301d1d8e-d3fc-4010-8b29-4724fa0b31cd:trigger:upkeep",
+      "label": "Portal to Phyrexia upkeep",
+      "oracle_id": "301d1d8e-d3fc-4010-8b29-4724fa0b31cd",
+      "ability_id": "trigger:upkeep",
+      "active_zone": "battlefield",
+      "event": "step.begin",
+      "event_condition": {
+        "all": [
+          {"field": "player", "op": "eq", "value": "$source.controller"},
+          {"field": "step", "op": "eq", "value": "upkeep"}
+        ]
+      },
+      "target_schema": {
+        "groups": [
+          {
+            "id": "creature_card",
+            "zones": ["graveyard"],
+            "categories": ["card"],
+            "creature": true,
+            "min": 1,
+            "max": 1
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "reanimate",
+          "card": "$target.0",
+          "controller": "$controller",
+          "reason": "Portal to Phyrexia"
+        },
+        {
+          "op": "add_type",
+          "card": "$target.0",
+          "type": "Phyrexian",
+          "reason": "Portal to Phyrexia"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "upkeep_trigger", "reanimate", "continuous_effect", "type_addition"],
+      "tests": ["test_portal_apnap_sacrifice_and_upkeep_reanimation"],
+      "provenance": {
+        "source_oracle_hash": "7f28110f3c1d502c159210171f5720adc260143685902bf5050006314f014a8d",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "9fc28e1f-f4ea-4bf8-9442-a36dba3b3b29:spell:front",
+      "label": "Goblin Welder",
+      "oracle_id": "9fc28e1f-f4ea-4bf8-9442-a36dba3b3b29",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_goblin_welder_requires_same_player_and_both_legal"],
+      "provenance": {
+        "source_oracle_hash": "744d1b1f7d79949d0cec064dbf012ee6bdd99830fb9d4ec9c1f8fbfc36127408",
+        "source_rulings_hash": "6df648cc5d8dafaaae3d3a79e17843f4458c45ca25499ea3e52156f6064474db",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "9fc28e1f-f4ea-4bf8-9442-a36dba3b3b29:ability:ab1",
+      "label": "Goblin Welder exchange",
+      "oracle_id": "9fc28e1f-f4ea-4bf8-9442-a36dba3b3b29",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "groups": [
+          {
+            "id": "battlefield_artifact",
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "artifact": true,
+            "min": 1,
+            "max": 1
+          },
+          {
+            "id": "graveyard_artifact",
+            "zones": ["graveyard"],
+            "categories": ["card"],
+            "artifact": true,
+            "min": 1,
+            "max": 1
+          }
+        ],
+        "same_player_groups": [["battlefield_artifact", "graveyard_artifact"]]
+      },
+      "effects": [
+        {
+          "op": "welder_exchange",
+          "battlefield_card": "$target.0",
+          "graveyard_card": "$target.1",
+          "reason": "Goblin Welder"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "multi_target", "target_relation", "simultaneous_exchange"],
+      "tests": ["test_goblin_welder_requires_same_player_and_both_legal"],
+      "provenance": {
+        "source_oracle_hash": "744d1b1f7d79949d0cec064dbf012ee6bdd99830fb9d4ec9c1f8fbfc36127408",
+        "source_rulings_hash": "6df648cc5d8dafaaae3d3a79e17843f4458c45ca25499ea3e52156f6064474db",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "1787ac2f-762d-4f3a-b7e5-12db6d3d470d:spell:front",
+      "label": "Repurposing Bay",
+      "oracle_id": "1787ac2f-762d-4f3a-b7e5-12db6d3d470d",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics"],
+      "tests": ["test_repurposing_bay_binds_sacrificed_mana_value"],
+      "provenance": {
+        "source_oracle_hash": "edee0de8b354f8b29b5d2e639b675da856fc893e73b580d2361736b9b9d490df",
+        "source_rulings_hash": "0a40df3781dac5f869c46195be32241f58bea228c6262cb073591035f4c1e6d3",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "1787ac2f-762d-4f3a-b7e5-12db6d3d470d:ability:ab1",
+      "label": "Repurposing Bay activation",
+      "oracle_id": "1787ac2f-762d-4f3a-b7e5-12db6d3d470d",
+      "ability_id": "ability:ab1",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "effects": [
+        {
+          "op": "search",
+          "searching_player": "$controller",
+          "zone": "library",
+          "selector": {
+            "types": ["Artifact"],
+            "mana_value": {
+              "equal": "$context.cost_mana_value_plus_one"
+            }
+          },
+          "count": {"minimum": 0, "maximum": 1},
+          "destination": "battlefield",
+          "reveal": false,
+          "shuffle_after": true,
+          "optional": true
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "sacrifice_cost", "derived_exact_mana_value_search"],
+      "tests": ["test_repurposing_bay_binds_sacrificed_mana_value"],
+      "provenance": {
+        "source_oracle_hash": "edee0de8b354f8b29b5d2e639b675da856fc893e73b580d2361736b9b9d490df",
+        "source_rulings_hash": "0a40df3781dac5f869c46195be32241f58bea228c6262cb073591035f4c1e6d3",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "76678885-3674-443d-b9a2-2a460cf6aac0:spell:front",
+      "label": "Panharmonicon",
+      "oracle_id": "76678885-3674-443d-b9a2-2a460cf6aac0",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "additional_trigger"],
+      "tests": ["test_panharmonicon_adds_one_matching_enter_trigger"],
+      "provenance": {
+        "source_oracle_hash": "d6b545031266801f65f628c5dc46983b3050f0ebf8733cc7a1c2f42d7cd5f97a",
+        "source_rulings_hash": "9dbdf94816c5a4ca1be25e31977a86588fe3fa41610c4770c0fdd9efc11f156a",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "a7ac5d98-805e-4212-be94-333a0c0c44a7:spell:front",
+      "label": "Brudiclad, Telchor Engineer",
+      "oracle_id": "a7ac5d98-805e-4212-be94-333a0c0c44a7",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "continuous_effect", "haste"],
+      "tests": ["test_brudiclad_creates_myr_and_copies_other_tokens"],
+      "provenance": {
+        "source_oracle_hash": "5d062466a0455be45191ab98df47c1d179f3dd56855bd4beae3e7017f0e90583",
+        "source_rulings_hash": "9f06606f9f647a19c76630f6522b058b09be43ba4defc2459d8df78354b2f149",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "a7ac5d98-805e-4212-be94-333a0c0c44a7:trigger:beginning-combat",
+      "label": "Brudiclad beginning-of-combat trigger",
+      "oracle_id": "a7ac5d98-805e-4212-be94-333a0c0c44a7",
+      "ability_id": "trigger:beginning-combat",
+      "active_zone": "battlefield",
+      "event": "step.begin",
+      "event_condition": {
+        "all": [
+          {"field": "player", "op": "eq", "value": "$source.controller"},
+          {"field": "step", "op": "eq", "value": "beginning_combat"}
+        ]
+      },
+      "effects": [
+        {
+          "op": "create_token",
+          "controller": "$controller",
+          "name": "Phyrexian Myr",
+          "quantity": 1,
+          "characteristics": {
+            "type_line": "Artifact Creature — Phyrexian Myr",
+            "colors": ["U"],
+            "power": "2",
+            "toughness": "1"
+          }
+        },
+        {"op": "copy_all_tokens", "player": "$controller"}
+      ],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "beginning_combat", "token_creation", "token_copy", "player_choice"],
+      "tests": ["test_brudiclad_creates_myr_and_copies_other_tokens"],
+      "provenance": {
+        "source_oracle_hash": "5d062466a0455be45191ab98df47c1d179f3dd56855bd4beae3e7017f0e90583",
+        "source_rulings_hash": "9f06606f9f647a19c76630f6522b058b09be43ba4defc2459d8df78354b2f149",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "e4ed7935-0263-4cde-8118-ac18fffce3ef:spell:front",
+      "label": "Determined Iteration",
+      "oracle_id": "e4ed7935-0263-4cde-8118-ac18fffce3ef",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "populate"],
+      "tests": ["test_determined_iteration_populates_with_haste_and_delayed_sacrifice"],
+      "provenance": {
+        "source_oracle_hash": "4bed0d5c3ffd46dc2bb96af27eb2e721c3128c5463986e61a86783096aef820b",
+        "source_rulings_hash": "71c4b25927257609e126e36161d02ef6e4dee79fded692482e97949901ffa3b0",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "e4ed7935-0263-4cde-8118-ac18fffce3ef:trigger:beginning-combat",
+      "label": "Determined Iteration beginning-of-combat trigger",
+      "oracle_id": "e4ed7935-0263-4cde-8118-ac18fffce3ef",
+      "ability_id": "trigger:beginning-combat",
+      "active_zone": "battlefield",
+      "event": "step.begin",
+      "event_condition": {
+        "all": [
+          {"field": "player", "op": "eq", "value": "$source.controller"},
+          {"field": "step", "op": "eq", "value": "beginning_combat"}
+        ]
+      },
+      "effects": [{"op": "populate_with_haste", "player": "$controller"}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "beginning_combat", "populate", "token_copy", "haste", "delayed_trigger"],
+      "tests": ["test_determined_iteration_populates_with_haste_and_delayed_sacrifice"],
+      "provenance": {
+        "source_oracle_hash": "4bed0d5c3ffd46dc2bb96af27eb2e721c3128c5463986e61a86783096aef820b",
+        "source_rulings_hash": "71c4b25927257609e126e36161d02ef6e4dee79fded692482e97949901ffa3b0",
+        "authored_by": "v0.8-artifact-engine-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ca204b66-8d0c-431a-8d34-282f7c2d17da:spell:front",
+      "label": "Lightning Greaves",
+      "oracle_id": "ca204b66-8d0c-431a-8d34-282f7c2d17da",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "continuous_effect", "equip", "haste", "shroud"],
+      "tests": ["test_lightning_greaves_equip_grants_haste_and_shroud"],
+      "provenance": {
+        "source_oracle_hash": "badf1b1153288d704f59239ed8e9ed3ef48101cdac50c79a93aedbd8a14a6e8a",
+        "source_rulings_hash": "b79e5b261339baa944191bcdb018aa8bfc19c6275f361b64bbfbf2ee5764d75a",
+        "authored_by": "v0.8-equipment-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ca204b66-8d0c-431a-8d34-282f7c2d17da:ability:ab2",
+      "label": "Lightning Greaves equip",
+      "oracle_id": "ca204b66-8d0c-431a-8d34-282f7c2d17da",
+      "ability_id": "ability:ab2",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "groups": [
+          {
+            "id": "creature",
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "controller": "you",
+            "creature": true,
+            "min": 1,
+            "max": 1
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "attach",
+          "equipment": "$source",
+          "creature": "$target.0",
+          "reason": "Equip"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "equip", "attachment", "sorcery_timing"],
+      "tests": ["test_lightning_greaves_equip_grants_haste_and_shroud"],
+      "provenance": {
+        "source_oracle_hash": "badf1b1153288d704f59239ed8e9ed3ef48101cdac50c79a93aedbd8a14a6e8a",
+        "source_rulings_hash": "b79e5b261339baa944191bcdb018aa8bfc19c6275f361b64bbfbf2ee5764d75a",
+        "authored_by": "v0.8-equipment-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "65986c1b-8e51-4604-b685-d82fa7d1263a:spell:front",
+      "label": "Skullclamp",
+      "oracle_id": "65986c1b-8e51-4604-b685-d82fa7d1263a",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "static_ability", "continuous_effect", "equip", "power_toughness_modifier"],
+      "tests": ["test_skullclamp_modifier_and_attached_death_draw"],
+      "provenance": {
+        "source_oracle_hash": "855e12112aad29b851b6983235940f913f515d06ad6964ff35e55dfb99de0b2d",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-equipment-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "65986c1b-8e51-4604-b685-d82fa7d1263a:trigger:equipped-dies",
+      "label": "Skullclamp equipped-creature death trigger",
+      "oracle_id": "65986c1b-8e51-4604-b685-d82fa7d1263a",
+      "ability_id": "trigger:equipped-dies",
+      "active_zone": "battlefield",
+      "event": "creature.dies",
+      "event_condition": {
+        "field": "attachments",
+        "op": "contains_any",
+        "value": ["$source.ref"]
+      },
+      "effects": [{"op": "draw", "player": "$controller", "count": 2}],
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "dies_trigger", "attachment", "last_known_information", "draw"],
+      "tests": ["test_skullclamp_modifier_and_attached_death_draw"],
+      "provenance": {
+        "source_oracle_hash": "855e12112aad29b851b6983235940f913f515d06ad6964ff35e55dfb99de0b2d",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-equipment-family",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "65986c1b-8e51-4604-b685-d82fa7d1263a:ability:ab3",
+      "label": "Skullclamp equip",
+      "oracle_id": "65986c1b-8e51-4604-b685-d82fa7d1263a",
+      "ability_id": "ability:ab3",
+      "active_zone": "battlefield",
+      "event": "activate",
+      "target_schema": {
+        "groups": [
+          {
+            "id": "creature",
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "controller": "you",
+            "creature": true,
+            "min": 1,
+            "max": 1
+          }
+        ]
+      },
+      "effects": [
+        {
+          "op": "attach",
+          "equipment": "$source",
+          "creature": "$target.0",
+          "reason": "Equip"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["activated_ability", "equip", "attachment", "sorcery_timing"],
+      "tests": ["test_skullclamp_modifier_and_attached_death_draw"],
+      "provenance": {
+        "source_oracle_hash": "855e12112aad29b851b6983235940f913f515d06ad6964ff35e55dfb99de0b2d",
+        "source_rulings_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "authored_by": "v0.8-equipment-family",
+        "review_status": "reviewed"
+      }
+    }
+  ]
+}

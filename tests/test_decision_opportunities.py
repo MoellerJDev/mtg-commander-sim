@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import tempfile
 import unittest
+from pathlib import Path
 
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim import CommanderSession, GameConfig
@@ -185,6 +187,67 @@ class DecisionOpportunityTests(unittest.TestCase):
             engine.state.players["A"].yield_policy.mode,
         )
 
+    def test_yield_invalidation_survives_standard_trace_reload(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            seed=308,
+            auto_pass_empty=True,
+        )
+        keep_all(session)
+        engine = session.engine
+        top = self._card(engine, "A", "Sensei's Divining Top")
+        engine.move_card(
+            top.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+        )
+        engine.state.players["A"].mana_pool["U"] = 1
+        engine.permissions.invalidate_current()
+        engine.state.active_player = "B"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        self._reset_priority(engine, "A")
+        engine._set_yield("A", "until_public_change")
+        engine._log(
+            "B",
+            "permanent.untap",
+            "B untapped a permanent.",
+            {"object": "regression"},
+            importance=0,
+            changed_players=["B"],
+        )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record = Path(temporary) / "record"
+            session.save(record)
+            self.assertNotIn(
+                '"code":"permanent.untap"',
+                (record / "events.jsonl").read_text(encoding="utf-8"),
+            )
+            loaded = CommanderSession.load(
+                self.db,
+                record,
+                semantics_path=record / "semantics.json",
+            )
+            hints = loaded.engine._priority_action_hints("A")
+            allowed, reason = loaded.engine._can_auto_pass(
+                "A",
+                action_signature=(
+                    loaded.engine.meaningful_action_signature("A", hints)
+                ),
+                meaningful=loaded.engine._signature_has_actions("A", hints),
+            )
+
+        self.assertFalse(allowed)
+        self.assertEqual("public_change", reason)
+        self.assertEqual(
+            "none",
+            loaded.state.players["A"].yield_policy.mode,
+        )
+
     def test_fidelity_fails_if_meaningful_window_is_suppressed(self):
         session = make_session(
             self.db,
@@ -273,6 +336,45 @@ class DecisionOpportunityTests(unittest.TestCase):
         self.assertIn(
             "infrastructure-unverified",
             review["interaction_opportunities"]["note"],
+        )
+
+    def test_illegal_target_advertisement_fails_exposure_dimension(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            seed=306,
+            auto_pass_empty=True,
+        )
+        keep_all(session)
+        session.state.players["A"].stats.setdefault(
+            "decision_optimization", {}
+        ).update(
+            {
+                "illegal_target_actions_advertised": 1,
+                "illegal_target_actions_prevented": 4,
+            }
+        )
+
+        review = derive_review(session.engine, decisions=[])
+
+        self.assertEqual(
+            "rules_test", review["fidelity"]["classification"]
+        )
+        self.assertEqual(
+            "fail",
+            review["fidelity"]["dimensions"]["legal_action_exposure"],
+        )
+        target_audit = review["pilot_audit"]["target_action_audit"]
+        self.assertEqual(1, target_audit["illegal_target_actions_advertised"])
+        self.assertGreaterEqual(
+            target_audit["illegal_target_actions_prevented"], 4
+        )
+        self.assertTrue(
+            any(
+                "advertised without a legal mandatory target" in failure
+                for failure in review["fidelity"]["failures"]
+            )
         )
 
     def test_fetch_untapped_and_cast_accelerator_ordered_plan(self):

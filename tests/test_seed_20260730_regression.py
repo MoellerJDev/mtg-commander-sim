@@ -153,6 +153,11 @@ class Seed20260730RegressionTests(unittest.TestCase):
                 break
             invocations += 1
 
+        self.assertGreaterEqual(session.state.turn_sequence, 8)
+        self.assertGreater(
+            int(session.state.ref_counters.get("decision", 0)),
+            27,
+        )
         rows = session.state.action_opportunities
         by_turn = {
             turn: [
@@ -219,10 +224,23 @@ class Seed20260730RegressionTests(unittest.TestCase):
             ),
             0,
         )
+        self.assertEqual(
+            0,
+            sum(
+                int(row.get("illegal_target_actions_advertised", 0))
+                for row in telemetry
+            ),
+        )
 
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / "corrected"
             session.save(output)
+            hidden_audit = json.loads(
+                (output / "hidden-information-audit.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertTrue(hidden_audit["seat_projection_verified"])
             replay = replay_record(output, self.db, verify=True)
             self.assertTrue(replay["ok"])
 

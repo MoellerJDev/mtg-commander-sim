@@ -13,7 +13,7 @@ from typing import Any, Iterator, Mapping, TextIO
 
 from .carddb import CardDatabase
 from .pilot import PLAN_CATEGORIES, PilotResponse
-from .record import utc_now
+from .record import ENGINE_VERSION, utc_now
 from .report import derive_review
 from .session import CommanderSession
 from .util import stable_json
@@ -40,8 +40,11 @@ FORBIDDEN_PILOT_RESPONSE_FIELDS = {
     "thread_label",
     "parent_session_id",
     "provider_invoked",
+    "invocation_id",
     "input_tokens",
+    "cached_input_tokens",
     "output_tokens",
+    "reasoning_output_tokens",
     "latency_ms",
     "estimated_input_tokens",
     "effects",
@@ -75,11 +78,17 @@ def primary_session_prompt(game_dir: str | Path) -> str:
     return (
         "Use $commander-arena as the neutral coordinator for the Commander "
         f"record at {directory}. Run this primary session with GPT-5.6 Sol "
-        "Ultra. Validate all four exact-list profiles, spawn mtg_pilot_a "
-        "through mtg_pilot_d exactly once, and route each later seat task to "
-        "its original persistent thread through the fixed-seat MCP tools. "
+        "Ultra. Validate all four exact-list profiles, then use "
+        "arena-codex-run to start mtg_pilot_a through mtg_pilot_d exactly "
+        "once with gpt-5.6-sol/low/priority and route every later seat task "
+        "to its original persistent session through the fixed-seat broker. "
+        "Confirm semantic_policy is trusted_only before the first pilot call. "
         "Never pilot a seat, never disclose another seat's hidden information, "
         "and stop immediately if suppressed_meaningful_windows becomes nonzero. "
+        "For the one-shot pilot-tool fallback, repeat the actual provider, "
+        "model, reasoning effort, stable thread ID/label, provider-invoked, "
+        "and identity-verification flags on every submit-action invocation; "
+        "never shorten that command on later turns. "
         "Continue until turn sequence 8, a win, an unresolved material semantic, "
         "or a fidelity failure; then save, replay-verify, and report this only "
         "as pilot_test when lists are duplicated."
@@ -99,12 +108,17 @@ class PilotInvocationIdentity:
     model_identity_verified: bool = False
     model_configured: str | None = None
     reasoning_effort_configured: str | None = None
+    invocation_id: str | None = None
+    input_tokens: int | None = None
+    cached_input_tokens: int | None = None
+    output_tokens: int | None = None
+    reasoning_output_tokens: int | None = None
+    latency_ms: float | None = None
 
     def audit_fields(self) -> dict[str, Any]:
         return {
             **asdict(self),
             "thread_handle": self.thread_id,
-            "invocation_id": None,
         }
 
 
@@ -234,6 +248,11 @@ class SeatScopedPilotTools:
     def tool_names(self) -> tuple[str, ...]:
         return PILOT_TOOL_NAMES
 
+    def close(self) -> None:
+        """Release the local card database held by this façade."""
+
+        self._session.card_db.close()
+
     def _reload(self) -> None:
         if self._game_dir is None or self._db_path is None:
             return
@@ -314,6 +333,9 @@ class SeatScopedPilotTools:
                 "Pilot response contains transport/authority fields: "
                 + ", ".join(forbidden),
             )
+        identity_error = self._codex_identity_error()
+        if identity_error:
+            return self._reject_pilot_response(normalized, identity_error)
         if self._identity and self._identity.provider == "codex_subagent":
             missing: list[str] = []
             if not normalized.get("plan"):
@@ -352,6 +374,70 @@ class SeatScopedPilotTools:
             "event_ids": list(result.event_ids),
             "retry": None if result.ok else self._get_task_loaded(),
         }
+
+    def _codex_identity_error(self) -> str | None:
+        """Reject unauditable or drifting Codex transport metadata.
+
+        A one-shot pilot-tool process has no persistent server object, so its
+        invocation identity must be supplied again on every submission.  This
+        check prevents a later abbreviated command from accepting an action
+        while silently losing evidence that the same Codex thread was reused.
+        """
+
+        identity = self._identity
+        if identity is None or identity.provider != "codex_subagent":
+            return None
+        if not identity.provider_invoked:
+            return (
+                "Codex pilot submission is missing --provider-invoked; use "
+                "manual-json for a non-Codex response or repeat the complete "
+                "verified invocation identity"
+            )
+
+        prior = [
+            row
+            for row in self._session.decisions
+            if row.get("principal") == self._principal
+            and row.get("provider_invoked") is True
+        ]
+        if not prior:
+            return None
+
+        continuity_fields = (
+            ("provider", identity.provider),
+            ("model", identity.model),
+            ("reasoning_effort", identity.reasoning_effort),
+            ("thread_id", identity.thread_id),
+            ("thread_label", identity.thread_label),
+        )
+        for field_name, actual in continuity_fields:
+            expected = {
+                row.get(field_name)
+                for row in prior
+                if row.get(field_name) is not None
+            }
+            if len(expected) == 1 and actual != next(iter(expected)):
+                return (
+                    "Codex pilot invocation identity changed for "
+                    f"{field_name}; reuse the original fixed-seat thread "
+                    "and repeat its complete identity flags"
+                )
+
+        if any(
+            row.get("provider_identity_verified") is True for row in prior
+        ) and not identity.provider_identity_verified:
+            return (
+                "Codex pilot provider identity verification was dropped; "
+                "repeat --provider-identity-verified"
+            )
+        if any(
+            row.get("model_identity_verified") is True for row in prior
+        ) and not identity.model_identity_verified:
+            return (
+                "Codex pilot model identity verification was dropped; "
+                "repeat --model-identity-verified"
+            )
+        return None
 
     def _reject_pilot_response(
         self,
@@ -425,6 +511,43 @@ class SeatScopedPilotTools:
                     identity.thread_id if identity else None
                 ),
                 "invoked_at": utc_now(),
+                "invocation_id": (
+                    identity.invocation_id if identity else None
+                ),
+                "metrics": {
+                    key: value
+                    for key, value in (
+                        (
+                            "input_tokens",
+                            identity.input_tokens if identity else None,
+                        ),
+                        (
+                            "cached_input_tokens",
+                            (
+                                identity.cached_input_tokens
+                                if identity
+                                else None
+                            ),
+                        ),
+                        (
+                            "output_tokens",
+                            identity.output_tokens if identity else None,
+                        ),
+                        (
+                            "reasoning_output_tokens",
+                            (
+                                identity.reasoning_output_tokens
+                                if identity
+                                else None
+                            ),
+                        ),
+                        (
+                            "latency_ms",
+                            identity.latency_ms if identity else None,
+                        ),
+                    )
+                    if value is not None
+                },
                 "retry_count": sum(
                     1
                     for row in self._session.decisions
@@ -937,7 +1060,7 @@ def run_pilot_mcp_stdio(
                     "capabilities": {"tools": {}},
                     "serverInfo": {
                         "name": f"mtg-pilot-{tools.seat}",
-                        "version": "0.6.0",
+                        "version": ENGINE_VERSION,
                     },
                 }
             elif method == "notifications/initialized":

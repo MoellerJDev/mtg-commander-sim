@@ -1,14 +1,21 @@
 # Codex Commander Arena
 
-Version 0.6.0 supports one neutral primary Codex task coordinating exactly four
+This is an optional protocol-adapter experiment, not the product execution
+plan. Codex sessions are untrusted clients and are not required for gameplay,
+legality, CI, merges, releases, or rules decisions. Current platform work must
+not optimize prompts, models, provider routing, or live AI games.
+
+Version 0.8.0 supports one neutral primary Codex task coordinating exactly four
 persistent, seat-isolated strategic pilot tasks.
 
 ## Roles
 
 Run the primary task with model **GPT-5.6 Sol** and reasoning effort **Ultra**
 from the Codex model/reasoning selector before invoking `$commander-arena`.
-Ultra applies to the coordinator. The four project agents use GPT-5.6 Sol with
-`max` reasoning.
+Ultra applies to the coordinator. The four project agents now use the
+user-selected fast profile: GPT-5.6 Sol with `low` reasoning on the `priority`
+tier. This runtime does not expose a GPT-5.5/“Instant” pilot model, so records
+must use the actual `gpt-5.6-sol` identity rather than inventing that label.
 
 The roles are:
 
@@ -27,6 +34,14 @@ Four pilot contexts stay alive so their private strategy and bounded memory are
 stable. Invocations are nevertheless sequential: Magic gives authority to one
 principal, or one ordered decision group, at a time.
 
+The current desktop collaboration host counts the primary task against its
+four active sampling slots. It therefore cannot retain the primary plus four
+in-app child pilots at once. The preferred fast runner starts four independent
+persistent Codex CLI sessions outside that child-slot pool, bootstraps them in
+parallel, and resumes the appropriate original session sequentially as Magic
+changes principal. A run must stop rather than silently replace a missing
+session.
+
 ## Project configuration
 
 The project configuration is:
@@ -41,7 +56,7 @@ The project configuration is:
 ```
 
 `.codex/config.toml` enables four child threads and defaults them to
-`gpt-5.6-sol`/`max`. Each seat file has a unique name, read-only default,
+`gpt-5.6-sol`/`low`. Each seat file has a unique name, read-only default,
 fixed-seat server command, strict JSON instructions, and nested agents
 disabled.
 
@@ -70,6 +85,10 @@ python simctl.py arena-create `
   --output run/codex-arena
 ```
 
+`arena-create` defaults to `semantic_policy=trusted_only`. This is required for
+`deck_operation_evidence`; pass `--semantic-policy arbitrate_or_pause` only for
+an explicitly non-evidence development run.
+
 Live Moxfield metadata is authoritative. The current mapping is:
 
 - `g5vtVfRuS0W5KxZuYqZHGQ`: Zimone and Dina
@@ -79,6 +98,38 @@ Creation validates each list and exact profile fingerprint, then writes
 `PRIMARY_CODEX_PROMPT.md`. Use that file as the primary Ultra task prompt.
 `commander_duel` remains available through the ordinary duel/pilot commands for
 narrow two-player regression tests.
+
+## Fast four-session runner
+
+The preferred desktop command avoids the three-child ceiling and unnecessary
+MCP round trips:
+
+```powershell
+python simctl.py arena-codex-run `
+  --db data/scryfall-20260728-compact.sqlite3 `
+  --game run/codex-arena `
+  --model gpt-5.6-sol `
+  --reasoning-effort low `
+  --service-tier priority `
+  --through-turn 8
+```
+
+Use `--through-turn 0` for a natural terminal game. The first invocation starts
+A–D in parallel and writes a coordinator-only `codex-cli-pilots.json`
+registry. Later invocations recover those exact session IDs; they never spawn
+replacement pilots for recorded seats.
+
+The broker calls the same fixed-seat `get_task`, `get_profile`, `get_memory`,
+`submit_action`, and `update_memory` façade inside the process. It passes only
+one seat projection to that seat's Codex session. Pilot shell, apps, tools, and
+nested agents are disabled. The primary receives only the final public command
+summary, never a private packet. Codex's structured output uses the packaged
+`codex-pilot-response.schema.json`; the broker decodes choice objects, injects
+provider identity and observed usage, and submits through the seat boundary.
+
+Every accepted command checkpoints the record. At the requested stop, the
+runner performs exact replay while preserving an unfinished record as
+`in_progress`; terminal and fidelity-paused records retain their actual status.
 
 ## Fixed-seat pilot tools
 
@@ -115,7 +166,7 @@ python simctl.py pilot-tool `
   --seat A `
   --provider codex_subagent `
   --model gpt-5.6-sol `
-  --reasoning-effort max `
+  --reasoning-effort low `
   --thread-id <actual-stable-thread-id> `
   --thread-label mtg-pilot-a `
   --provider-invoked `
@@ -124,7 +175,11 @@ python simctl.py pilot-tool `
 
 Use `submit-action --json '<response>'` for the corresponding submission.
 Never invent an ID or mark `provider-invoked` when no model invocation
-occurred.
+occurred. The one-shot fallback does not retain process arguments: repeat the
+complete identity prefix, including the actual thread ID/label and verification
+flags, on **every** `submit-action`. Do not shorten later calls to only
+`--game-dir` and `--seat`; the server rejects unauditable Codex submissions and
+identity drift.
 
 The MCP submission schema exposes `action_id`/`action`, `actions`, the exact
 plan enum, a 180-character reason, confidence, yield, and a 500-character
@@ -143,13 +198,21 @@ python simctl.py coordinator-tool --game run/codex-arena get-arbiter-task
 The loop is:
 
 1. Validate four decks and exact profiles.
-2. Spawn A–D once and cache each exact profile/initial packet in its own task.
+2. Start A–D once, preferably through `arena-codex-run`, and cache each exact
+   profile/initial packet only in its own persistent session.
 3. Read the next principal from public coordinator status.
 4. Route a pilot task only to that seat's original thread.
 5. Accept strict JSON and submit through the fixed-seat surface.
+   Private task data is submitted only to that surface. A pilot's message back
+   to the primary may contain only status, accepted decision IDs, and the next
+   principal boundary; it must not echo hand/library cards, private search
+   choices, memory, or task packets. A blocked pilot may add a sanitized error
+   code/message containing no private game data so the coordinator can
+   distinguish a transport failure from a rules stop.
 6. Return compact rejection data to the same thread when needed.
-7. Resolve arbiter tasks from public/rules context without choosing player
-   strategy.
+7. In `trusted_only`, stop on an arbiter task: an evidence run may not improvise
+   live semantics. Only an explicitly non-evidence `arbitrate_or_pause`
+   development run may use the primary's scoped public/rules arbitration.
 8. Stop immediately if `suppressed_meaningful_windows` is nonzero or a
    material semantic/fidelity issue needs implementation.
 9. Save periodically, then replay-verify and generate review artifacts.
@@ -157,6 +220,11 @@ The loop is:
 Do not spawn a fresh agent per action, prompt every pilot at every priority
 window, disclose all hands to the primary, let pilots advise one another, or
 continue past meaningful suppression.
+
+An app-level pilot message that echoes private task data is itself a hidden-
+information fidelity failure even when the durable game record and fixed-seat
+tool audit are clean. Pause immediately; never treat the affected run as deck
+operation evidence.
 
 ## Responses and ordered plans
 
@@ -187,8 +255,8 @@ semantic uncertainty, or fidelity failure.
 
 Every accepted action saves the record. To pause, cease routing new tasks and
 finalize the accepted prefix; do not fabricate a game result. To resume, reopen
-the same run, restore the same seat-to-thread registry, and route only to the
-recorded original thread IDs. A
+the same run and rerun `arena-codex-run`; it restores the coordinator-only
+seat-to-thread registry and routes only to the recorded original thread IDs. A
 failed thread resume is a restart event and a persistence-fidelity failure, not
 permission to silently spawn a replacement.
 
