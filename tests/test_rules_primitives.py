@@ -564,5 +564,187 @@ class ReplacementOrderingTests(unittest.TestCase):
         self.assertEqual(2, changed.payload["prevented"])
 
 
+class PreventionEffectTests(unittest.TestCase):
+    @staticmethod
+    def event(
+        event_id="damage:1",
+        *,
+        amount=3,
+        unpreventable=False,
+        source_color="red",
+    ):
+        return ReplaceableEvent(
+            event_id=event_id,
+            kind="damage",
+            affected_player="B",
+            payload={
+                "amount": amount,
+                "unpreventable": unpreventable,
+                "source_color": source_color,
+            },
+        )
+
+    @staticmethod
+    def prevention(
+        effect_id="prevent",
+        *,
+        amount=1,
+        conditions=None,
+        operations=None,
+    ):
+        return ReplacementEffect(
+            effect_id=effect_id,
+            source_id=f"source:{effect_id}",
+            event_kind="damage",
+            replacement_class=ReplacementClass.OTHER,
+            conditions=conditions or {},
+            operations=operations
+            or ({"op": "prevent", "amount": amount},),
+        )
+
+    def test_contract_traces_every_cr_615_rule(self):
+        root = Path(__file__).resolve().parents[1]
+        contract = json.loads(
+            (
+                root
+                / "mechanics"
+                / "contracts"
+                / "prevention-effects.json"
+            ).read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(
+            {
+                "615",
+                "615.1",
+                "615.1a",
+                "615.2",
+                "615.3",
+                "615.4",
+                "615.5",
+                "615.6",
+                "615.7",
+                "615.8",
+                "615.9",
+                "615.10",
+                "615.11",
+                "615.12",
+                "615.12a",
+                "615.13",
+            },
+            {
+                rule_id
+                for rule_id in contract["rule_references"]
+                if str(rule_id).startswith("615")
+            },
+        )
+
+    def test_prevention_applies_only_to_matching_damage_events(self):
+        prevention = self.prevention(
+            conditions={"source_color": "red"}
+        )
+        nondamage = ReplaceableEvent(
+            event_id="draw:1",
+            kind="draw",
+            affected_player="B",
+            payload={"amount": 1, "source_color": "red"},
+        )
+
+        self.assertIsNone(replacement_choice(nondamage, [prevention]))
+        self.assertIsNone(
+            replacement_choice(
+                self.event(source_color="blue"),
+                [prevention],
+            )
+        )
+        self.assertEqual(
+            ("prevent",),
+            replacement_choice(
+                self.event(source_color="red"),
+                [prevention],
+            ).options,
+        )
+
+    def test_prevention_produces_a_modified_damage_event(self):
+        prevention = self.prevention(amount=2)
+
+        changed = resolve_replacements(
+            self.event(amount=3),
+            [prevention],
+            selections=["prevent"],
+        )
+
+        self.assertEqual(1, changed.payload["amount"])
+        self.assertEqual(2, changed.payload["prevented"])
+        self.assertEqual(("prevent",), changed.applied_effects)
+
+    def test_static_prevention_applies_separately_to_each_event(self):
+        prevention = self.prevention(amount=1)
+
+        first = resolve_replacements(
+            self.event("damage:1", amount=3),
+            [prevention],
+            selections=["prevent"],
+        )
+        second = resolve_replacements(
+            self.event("damage:2", amount=2),
+            [prevention],
+            selections=["prevent"],
+        )
+
+        self.assertEqual(2, first.payload["amount"])
+        self.assertEqual(1, second.payload["amount"])
+        self.assertEqual(("prevent",), first.applied_effects)
+        self.assertEqual(("prevent",), second.applied_effects)
+
+    def test_unpreventable_damage_applies_effect_once_without_preventing(self):
+        prevention = self.prevention(
+            operations=(
+                {"op": "prevent", "amount": 2},
+                {
+                    "op": "set",
+                    "field": "additional_effect",
+                    "value": "applied",
+                },
+            )
+        )
+
+        changed = resolve_replacements(
+            self.event(amount=3, unpreventable=True),
+            [prevention],
+            selections=["prevent"],
+        )
+
+        self.assertEqual(3, changed.payload["amount"])
+        self.assertEqual(0, changed.payload["prevented"])
+        self.assertEqual(
+            "applied", changed.payload["additional_effect"]
+        )
+        self.assertEqual(("prevent",), changed.applied_effects)
+        self.assertIsNone(replacement_choice(changed, [prevention]))
+
+    def test_negative_prevention_amount_fails_closed(self):
+        prevention = self.prevention(amount=-1)
+        choice = replacement_choice(self.event(), [prevention])
+
+        with self.assertRaisesRegex(
+            ReplacementEffectError,
+            "cannot be negative",
+        ):
+            apply_replacement(choice, [prevention], "prevent")
+
+    def test_negative_damage_amount_fails_closed_in_prevention(self):
+        prevention = self.prevention(amount=1)
+        choice = replacement_choice(
+            self.event(amount=-1), [prevention]
+        )
+
+        with self.assertRaisesRegex(
+            ReplacementEffectError,
+            "cannot be negative",
+        ):
+            apply_replacement(choice, [prevention], "prevent")
+
+
 if __name__ == "__main__":
     unittest.main()

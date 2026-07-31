@@ -31,7 +31,7 @@ coverage.
 | Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
 | Object and zone identity | Partial | CR 400 logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, and selected linked-effect guards |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
-| Replacement/prevention ordering | Partial | CR 616 typed ordering primitive; event-producer integration incomplete |
+| Replacement/prevention ordering | Partial | CR 615/616 typed primitives; stateful shields and event-producer integration incomplete |
 | Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, counter-derived battlefield defense, copied printed defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
@@ -83,8 +83,12 @@ coverage.
   7 primitive-level behaviors pass, 2 remain dependency-blocked, and the
   section heading is definition-only. Nested events fail closed rather than
   being flattened into an incorrect choice.
+- [x] Reviewed all 16 CR 615 Prevention Effects cases: modified events,
+  per-event static prevention, and one application to unpreventable damage
+  pass; 11 stateful/integrated behaviors remain blocked, and 2 records are
+  definition-only. Negative prevention fails closed.
 
-## Current CR 120/210/310/616/704 slice
+## Current CR 120/210/310/615/616/704 slice
 
 Battle behavior is derived from the effective card type, subtype, defense
 characteristic, counters, controller, and protector. It contains no
@@ -232,9 +236,9 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 62 CR 120/210/310/616 cases are
-  source-reviewed: 17 pass with executable engine evidence, 35 remain
-  blocked, and 10 are definition-only. The other 3,238 cases remain
+  establish inventory linkage only. All 78 CR 120/210/310/615/616 cases are
+  source-reviewed: 20 pass with executable engine evidence, 46 remain
+  blocked, and 12 are definition-only. The other 3,222 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -246,9 +250,10 @@ checkpoint validation.
 1. Continue reviewing and promoting conformance cases by
    dependency-ordered rules family; keep exposed but unimplemented edge cases
    failing or blocked.
-2. Wire the reviewed CR 616 ordering primitive into the shared CR 120/310
-   replacement and prevention event pipeline, then re-evaluate the blocked
-   damage sequence and 310.11b exile/cast continuation.
+2. Wire the reviewed CR 615/616 primitives into the shared CR 120/310
+   replacement and prevention event pipeline, including stateful shields,
+   then re-evaluate the blocked damage sequence and 310.11b exile/cast
+   continuation.
 3. Replace remaining physical-reference links with typed incarnation/LKI
    handles and implement the remaining CR 400.7 continuation policies.
 4. Implement the remaining ordinary CR 704.5 specialized permanent/layout

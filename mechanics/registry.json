@@ -1,5 +1,5 @@
 {
-  "contract_count": 16,
+  "contract_count": 17,
   "contracts": [
     {
       "mechanic_id": "cr-122-counters",
@@ -60,6 +60,12 @@
       "path": "mechanics/contracts/object-zone-identity.json",
       "sha256": "325de592aa5bbcdda02dbe73f6160ba68ab2bdb1d09d6f7a078315411a73b382",
       "version": 3
+    },
+    {
+      "mechanic_id": "cr-615-prevention-effects",
+      "path": "mechanics/contracts/prevention-effects.json",
+      "sha256": "057b9ffb22fd0564f951367653ed50ca3bcd4b496679927da735b57c9a5144f9",
+      "version": 1
     },
     {
       "mechanic_id": "protection",
@@ -6435,17 +6441,34 @@
     },
     {
       "category": "spells_abilities_effects",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/prevention-effects.json",
+      "contract_sha256": "057b9ffb22fd0564f951367653ed50ca3bcd4b496679927da735b57c9a5144f9",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "replacement_effects.replacement_choice and replacement_effects.apply_replacement",
+      "implementation_version": "prevention-event-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "generic prevention effects are not registered from active Oracle semantics",
+        "stateful cross-event shields and simultaneous source allocation are not represented",
+        "source selection, source-property rechecks, and prevention-trigger dispatch are not integrated with engine damage producers"
+      ],
       "mechanic_id": "cr-615-prevention-effects",
       "official_name": "Prevention Effects",
       "rule_references": [
         "615"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_615_rule",
+        "test_prevention_applies_only_to_matching_damage_events",
+        "test_prevention_produces_a_modified_damage_event",
+        "test_static_prevention_applies_separately_to_each_event",
+        "test_unpreventable_damage_applies_effect_once_without_preventing",
+        "test_negative_prevention_amount_fails_closed",
+        "test_negative_damage_amount_fails_closed_in_prevention",
+        "test_prevention_never_prevents_more_than_remaining_damage"
+      ],
       "trust_level": "untrusted"
     },
     {

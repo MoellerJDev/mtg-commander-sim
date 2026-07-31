@@ -101,6 +101,12 @@ maximum-counter foundation. It now:
   applicable effects;
 - rejects unsupported nested replaceable events instead of flattening child
   choices into the containing event;
+- source-reviews all 16 CR 615 Prevention Effects rules, rejects negative
+  prevention amounts, and preserves unpreventable damage while still applying
+  and journaling the prevention effect once;
+- verifies modified damage events and independent per-event static
+  prevention, while keeping stateful shields, simultaneous source allocation,
+  source selection/rechecks, and prevention triggers blocked;
 - keeps inventory-only cases separate from executable semantic passes.
 
 The prior permanent snapshot behavior remains: toughness, lethal/deathtouch,
@@ -108,7 +114,7 @@ loyalty, supported attachment legality, and opposing counter pairs are
 detected from one immutable snapshot. `CommanderEngine` applies the combined
 batch and repeats before priority.
 
-This is not complete CR 120/210/310/400/111/616/704/707 support. Complete
+This is not complete CR 120/210/310/400/111/615/616/704/707 support. Complete
 replacement ordering for the defeated-Siege exile, transformed cast grammar
 outside compiled target/cost schemas, nonspell Battle entry choices, Battle
 type/control changes during combat, complete damage replacement/prevention,
@@ -131,15 +137,15 @@ events also remain blockers.
   `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
 - Indexed rules: 3,300
 - Conformance cases: 3,300
-- Inventory-only cases: 3,238
-- Reviewed blocked cases: 35
-- Reviewed definition-only cases: 10
-- Executable semantic passes: 17
+- Inventory-only cases: 3,222
+- Reviewed blocked cases: 46
+- Reviewed definition-only cases: 12
+- Executable semantic passes: 20
 - Indexed sections: 156
 - Glossary entries: 733
 - Discovered mechanics: 425
-- Partial/untrusted mechanic contracts: 16
-- Unclassified mechanics: 409
+- Partial/untrusted mechanic contracts: 17
+- Unclassified mechanics: 408
 - Trusted mechanics in the new corpus registry: 0
 - `current_snapshot_complete`: false
 - Full Oracle snapshot: 2,957 exact; 15,691 partial; 19,725 unresolved;
@@ -151,13 +157,14 @@ events also remain blockers.
 
 - Compilation: pass
 - Rebuilt compact CI database: 181 cards, 185 aliases, 443 rulings
-- Unit/integration tests: 3,726 passed
-- Noninventory unit/integration tests: 426 passed
+- Unit/integration tests: 3,733 passed
+- Noninventory unit/integration tests: 433 passed
 - Generated per-rule inventory/source-linkage tests: 3,300 passed
 - Focused object identity/token lifecycle tests: 15 passed
 - Focused copy-object lifecycle tests: 8 passed
 - Focused CR 120/210/310/704 tests: 60 passed
 - Focused CR 616 replacement-ordering tests: 13 passed
+- Focused CR 615 prevention-effect tests: 7 passed
 - Seed-20260730 corrected decision/opportunity test: pass
 - Seed-20260730 exact replay: pass
 - Seed-20260730 hidden-information audit: pass
@@ -177,7 +184,7 @@ events also remain blockers.
 - Wheel:
   `mtg_commander_sim-0.8.0-py3-none-any.whl`
 - Wheel SHA-256:
-  `f354110391bf6b584332ab9758f029c8d90157457716e7385477db429f9b280e`
+  `c6fba35a5e2f2fa1b45b6f1eb2276ef0ad66a48ac0155fef3946eabec04af736`
 
 ## Deck-review evidence state
 
@@ -209,8 +216,8 @@ from scaffold to its first complete family review:
    inventory/source-linkage test;
 2. source-pinned family overlays are authoritative and fail closed when their
    source or rule-text hashes change;
-3. all CR 120/210/310/616 cases are reviewed: 17 narrow rules pass with
-   executable evidence, 35 expose recorded dependency gaps, and 10 are
+3. all CR 120/210/310/615/616 cases are reviewed: 20 narrow rules pass with
+   executable evidence, 46 expose recorded dependency gaps, and 12 are
    definition-only;
 4. CR 310.11b remains blocked after adding its native replayable Siege
    continuation because replacement ordering and broader cast grammar are

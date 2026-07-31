@@ -187,13 +187,17 @@ def apply_replacement(
             payload[field] = operation.get("value")
         elif op == "prevent":
             available = int(payload.get("amount", 0))
-            requested = int(
-                operation.get("amount", available)
+            requested = int(operation.get("amount", available))
+            if available < 0 or requested < 0:
+                raise ReplacementEffectError(
+                    "Damage and prevention amounts cannot be negative"
+                )
+            amount = (
+                0
+                if bool(payload.get("unpreventable"))
+                else min(available, requested)
             )
-            amount = min(available, requested)
-            payload["amount"] = max(
-                0, available - amount
-            )
+            payload["amount"] = available - amount
             payload["prevented"] = (
                 int(payload.get("prevented", 0)) + amount
             )

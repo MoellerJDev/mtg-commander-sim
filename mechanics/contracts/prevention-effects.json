@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-615-prevention-effects",
+  "official_name": "Prevention Effects",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "615",
+    "615.1",
+    "615.1a",
+    "615.2",
+    "615.3",
+    "615.4",
+    "615.5",
+    "615.6",
+    "615.7",
+    "615.8",
+    "615.9",
+    "615.10",
+    "615.11",
+    "615.12",
+    "615.12a",
+    "615.13"
+  ],
+  "glossary_references": [],
+  "dependencies": [
+    "damage",
+    "replacement-effects",
+    "interaction-of-replacement-and-or-prevention-effects"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [],
+    "objects": [
+      "damage source",
+      "damageable object",
+      "affected player"
+    ],
+    "events": [
+      "typed damage event",
+      "modified damage event",
+      "prevention application"
+    ],
+    "state_reads": [
+      "remaining damage",
+      "source properties",
+      "unpreventable marker",
+      "prevention shield state"
+    ],
+    "state_writes": [
+      "remaining damage",
+      "prevented amount",
+      "applied-effect journal",
+      "remaining shield state"
+    ],
+    "costs": [],
+    "timing": [
+      "before damage occurs",
+      "additional prevention effect immediately afterward"
+    ],
+    "targets": [
+      "shielded permanent or player",
+      "chosen damage source"
+    ],
+    "choices": [
+      "affected player chooses allocation across simultaneous sources"
+    ],
+    "hidden_information": [],
+    "apnap": [
+      "multiple affected-player replacement choices defer to CR 616"
+    ],
+    "layers": [],
+    "replacement_effects": [
+      "prevention modifies the damage event",
+      "each effect applies at most once to one event",
+      "unpreventable damage still has prevention effects applied"
+    ],
+    "copy": [],
+    "control_change": [
+      "the affected object's current controller chooses ordering"
+    ],
+    "zone_change": [],
+    "source_leaves": [
+      "chosen-source shields recheck source properties when damage would occur"
+    ]
+  },
+  "variants": [
+    "fixed shield",
+    "next-instance shield",
+    "chosen-source shield",
+    "static fixed reduction",
+    "per-creature shield",
+    "unpreventable damage",
+    "prevention trigger"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_615_rule",
+    "test_prevention_applies_only_to_matching_damage_events",
+    "test_prevention_produces_a_modified_damage_event",
+    "test_static_prevention_applies_separately_to_each_event",
+    "test_unpreventable_damage_applies_effect_once_without_preventing",
+    "test_negative_prevention_amount_fails_closed",
+    "test_negative_damage_amount_fails_closed_in_prevention",
+    "test_prevention_never_prevents_more_than_remaining_damage"
+  ],
+  "implementation": {
+    "component": "replacement_effects.replacement_choice and replacement_effects.apply_replacement",
+    "version": "prevention-event-v1"
+  },
+  "known_blockers": [
+    "generic prevention effects are not registered from active Oracle semantics",
+    "stateful cross-event shields and simultaneous source allocation are not represented",
+    "source selection, source-property rechecks, and prevention-trigger dispatch are not integrated with engine damage producers"
+  ],
+  "review_status": "draft"
+}

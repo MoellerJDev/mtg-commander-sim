@@ -1,0 +1,460 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 615 — Prevention Effects",
+  "cases": [
+    {
+      "rule_id": "615",
+      "rule_text_sha256": "93b693e985380227b45fcfad0c44bf0ff270384b0e54e78c2caea23e50729399",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/prevention-effects.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_contract_traces_every_cr_615_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Section heading; every CR 615 record is pinned by the Prevention Effects contract."
+      ]
+    },
+    {
+      "rule_id": "615.1",
+      "rule_text_sha256": "f7877396b4bd27987ea0816b0dbdaff71596b475590fdb38e62f9b98926a126f",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.ReplacementEffect",
+        "replacement_effects.replacement_choice",
+        "replacement_effects.apply_replacement"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_prevention_applies_only_to_matching_damage_events",
+        "tests.test_rules_primitives.PreventionEffectTests.test_prevention_produces_a_modified_damage_event"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
+      "blockers": [
+        "active static and generated prevention effects are not generically registered from Oracle semantics",
+        "engine damage producers are not yet routed through the typed replacement/prevention registry"
+      ],
+      "notes": [
+        "The primitive limits a represented prevention effect to matching damage events and produces a modified damage payload."
+      ]
+    },
+    {
+      "rule_id": "615.1a",
+      "rule_text_sha256": "ed679352db5b97ec2c65f40389d687790ed603319dc78e690d1c73f910c255e6",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/prevention-effects.json",
+        "oracle_ir.OracleIRCompiler"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_contract_traces_every_cr_615_rule"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Definition of prevention wording; broad Oracle compilation remains measured separately from this traceability classification."
+      ]
+    },
+    {
+      "rule_id": "615.2",
+      "rule_text_sha256": "102b82c818f1cfddf44f0887a124f3f235ea9da82f00afa7d257e3532cccd931",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects._condition_matches",
+        "replacement_effects.replacement_choice"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_prevention_applies_only_to_matching_damage_events"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
+      "blockers": [
+        "complete CR 609.7 source selection and last-known source-property evaluation are not implemented"
+      ],
+      "notes": [
+        "Represented source properties can constrain applicability, but source selection and historical source identity are incomplete."
+      ]
+    },
+    {
+      "rule_id": "615.3",
+      "rule_text_sha256": "2b5856a57d96d38f63d688bd84142225e25b6517d879f31d20d914da9657ff61",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.ReplacementEffect"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_contract_traces_every_cr_615_rule"
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "generated prevention effects do not yet have authoritative duration, expiration, and used-up shield state",
+        "casting and activation paths do not generically register generated prevention effects"
+      ],
+      "notes": [
+        "The immutable primitive represents an already-existing effect only."
+      ]
+    },
+    {
+      "rule_id": "615.4",
+      "rule_text_sha256": "500f4afe125e918f3127f0fbaadceade3e446c714778b7260ca82a72eb89d307",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.replacement_choice"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_prevention_applies_only_to_matching_damage_events"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "negative"
+      ],
+      "blockers": [
+        "the active-effect registry does not yet record creation moments relative to proposed damage events"
+      ],
+      "notes": [
+        "Callers supply the effects that already exist; the primitive cannot retroactively discover or install one."
+      ]
+    },
+    {
+      "rule_id": "615.5",
+      "rule_text_sha256": "3c6354e741cec36ec33c5aa4ad979bd5af29dfb2f34409ddc2771176368c4280",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.apply_replacement"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing"
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "replay"
+      ],
+      "blockers": [
+        "additional effects are represented only as payload operations, not queued engine events with immediately-after timing",
+        "additional-effect target, trigger, and nested replacement interactions are not integrated"
+      ],
+      "notes": [
+        "Operation ordering preserves prevention before a following payload modification, including when zero damage is prevented."
+      ]
+    },
+    {
+      "rule_id": "615.6",
+      "rule_text_sha256": "4ff391d96aeb496637f3d2f61c6b47fe5d0da52121f591a22d4cc9fa5bf0bdb8",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.apply_replacement",
+        "replacement_effects.resolve_replacements"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_prevention_produces_a_modified_damage_event",
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_prevention_never_prevents_more_than_remaining_damage"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "Prevention subtracts only from the proposed event, never more than its remaining damage, and journals the modified event for exact replay."
+      ]
+    },
+    {
+      "rule_id": "615.7",
+      "rule_text_sha256": "36b167d808a7c85048f0d5a11ba9d040d8928c378f08a6cfc3e2f9da3e81ae71",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.apply_replacement"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_prevention_never_prevents_more_than_remaining_damage",
+        "tests.test_rules_primitives.PreventionEffectTests.test_negative_prevention_amount_fails_closed"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "covered_scenarios": [
+        "negative"
+      ],
+      "blockers": [
+        "remaining shield amounts are not persisted and consumed across separate damage events",
+        "allocation across simultaneous applicable sources is not collected from the affected player"
+      ],
+      "notes": [
+        "A represented operation is bounded by current damage and rejects negative shield amounts, but it is not a stateful cross-event shield."
+      ]
+    },
+    {
+      "rule_id": "615.8",
+      "rule_text_sha256": "ccb7aa095faa005650449f3d6cd7947583dbfc859e50bfdf47b3b669c6d9c673",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.ReplacementEffect"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_contract_traces_every_cr_615_rule"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "next-instance source shields have no persistent used-up state across events",
+        "complete source identity and last-known source handling are not implemented"
+      ],
+      "notes": [
+        "A fresh immutable effect would incorrectly be applicable to a later event, so this rule remains blocked."
+      ]
+    },
+    {
+      "rule_id": "615.9",
+      "rule_text_sha256": "e8e5a4366b15feda83660d2aa930975cbe85c401a79383351848fb13c24cb9ac",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects._condition_matches"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_prevention_applies_only_to_matching_damage_events"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
+      "blockers": [
+        "chosen-source shield creation and cross-event state are not represented",
+        "source properties are not generically derived or rechecked through CR 609.7b"
+      ],
+      "notes": [
+        "Supplied current source properties are re-evaluated by conditions, but the authoritative chosen-source lifecycle is absent."
+      ]
+    },
+    {
+      "rule_id": "615.10",
+      "rule_text_sha256": "2458af8f5aad1ce4c8d59c88752122fc5ad0d88b75e0a1e375e5a7f429a6c1dd",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.ReplaceableEvent",
+        "replacement_effects.apply_replacement",
+        "replacement_effects.resolve_replacements"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_static_prevention_applies_separately_to_each_event"
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "blockers": [],
+      "notes": [
+        "A static fixed reduction applies once to each distinct applicable damage event without sharing a consumable amount between events."
+      ]
+    },
+    {
+      "rule_id": "615.11",
+      "rule_text_sha256": "ef8b7e797f7ebbb1b9a22dc0557b04030591490576368bf2a44b2fdc1baa6772",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.ReplacementEffect"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_contract_traces_every_cr_615_rule"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [],
+      "blockers": [
+        "one independent prevention shield per untargeted applicable creature is not created or persisted"
+      ],
+      "notes": [
+        "The primitive has no multi-object shield expansion operation."
+      ]
+    },
+    {
+      "rule_id": "615.12",
+      "rule_text_sha256": "e01c96d8bd947d7840faf6585a32b3acd2157d93d001c3cfbda9fbf5f43b0588",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.apply_replacement"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "replay"
+      ],
+      "blockers": [
+        "persistent prevention shields are not represented, so nonconsumption of a shield amount cannot be enforced across later damage events",
+        "engine damage producers do not yet preserve the unpreventable marker through the full CR 120.4 pipeline"
+      ],
+      "notes": [
+        "A represented unpreventable event applies the effect and its additional payload operations but leaves damage and prevented amount unchanged."
+      ]
+    },
+    {
+      "rule_id": "615.12a",
+      "rule_text_sha256": "ec9cf23b73e489057317c1dfd117bd6f3b6722e6f82cfc1dd696a7fa103567fc",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.ReplaceableEvent.applied_effects",
+        "replacement_effects.apply_replacement",
+        "replacement_effects.replacement_choice"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "The prevention is journaled as applied even when it prevents zero unpreventable damage and is not offered again for that event."
+      ]
+    },
+    {
+      "rule_id": "615.13",
+      "rule_text_sha256": "3de29fc5b99f9227f02e4ac2c11d0b59a3ac71cd348be665d417c2e34df594d2",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "replacement_effects.apply_replacement"
+      ],
+      "executable_test_ids": [
+        "tests.test_rules_primitives.PreventionEffectTests.test_prevention_produces_a_modified_damage_event",
+        "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "negative"
+      ],
+      "blockers": [
+        "prevention-application events are not dispatched into the triggered-ability pipeline",
+        "simultaneous damage-event grouping for exactly one trigger per prevention application is not represented"
+      ],
+      "notes": [
+        "The payload records the amount prevented, including zero, but no prevention trigger is emitted."
+      ]
+    }
+  ]
+}

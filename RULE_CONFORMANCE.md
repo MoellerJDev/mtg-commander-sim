@@ -101,10 +101,11 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All cases in CR 120, CR 210, CR 310, and CR 616 are source-reviewed: 17
-narrow behavioral rules pass with generic executable evidence, 35 are blocked
-with exact missing dependencies, and 10 are definition-only with contract
-traceability. The remaining 3,238 cases are unreviewed and inventory-only.
+All cases in CR 120, CR 210, CR 310, CR 615, and CR 616 are source-reviewed:
+20 narrow behavioral rules pass with generic executable evidence, 46 are
+blocked with exact missing dependencies, and 12 are definition-only with
+contract traceability. The remaining 3,222 cases are unreviewed and
+inventory-only.
 
 The passing CR 310 rules are battlefield defense (310.4c), Battle damage
 (310.6), the zero-defense state action (310.7), single-protector replacement
@@ -125,4 +126,9 @@ enters-copy, enters-back-face, ordinary-choice, repeat/recheck, and
 newly-applicable-effect ordering. Simultaneous affected-player or
 affected-object choices still lack engine-wide APNAP collection, and nested
 replaceable events fail closed until a typed event tree and replay path exist.
+CR 615 adds passing evidence for modified damage events, per-event static
+prevention, and applying a prevention effect exactly once to unpreventable
+damage. Negative prevention fails closed. Stateful shields, simultaneous
+source allocation, source selection and rechecks, and prevention-trigger
+dispatch remain explicitly blocked.
 Snapshot completeness remains false.

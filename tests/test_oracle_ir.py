@@ -76,6 +76,7 @@ class MechanicContractTests(unittest.TestCase):
                 "cr-603-handling-triggered-abilities",
                 "cr-611-continuous-effects",
                 "cr-614-replacement-effects",
+                "cr-615-prevention-effects",
                 "cr-704-state-based-actions",
                 "cr-707-copying-objects",
                 "deathtouch",
