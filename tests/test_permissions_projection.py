@@ -140,6 +140,36 @@ class PermissionProjectionTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             client.ingest(bad)
 
+    def test_client_full_resync_starts_a_new_packet_stream(self):
+        session = make_session(self.db, self.mishra, self.zimone, seed=282)
+        client = ProjectedClientView("pilot:A")
+        first_cursor = "network:pilot:A:first"
+        reconnect_cursor = "network:pilot:A:reconnect"
+
+        first = session.packet(
+            "pilot:A", full=True, cursor_key=first_cursor
+        )
+        client.ingest(first)
+        self.assertTrue(session.act("pilot:A", {"a": "keep"}).ok)
+        delta = session.packet("pilot:A", cursor_key=first_cursor)
+        client.ingest(delta)
+        self.assertEqual(2, client.packet_no)
+
+        reconnect = session.packet(
+            "pilot:A", full=True, cursor_key=reconnect_cursor
+        )
+        self.assertEqual(1, reconnect["pkt"])
+        expected_events = list(reconnect.get("events") or [])[-64:]
+        state = client.ingest(reconnect)
+
+        self.assertEqual(1, client.packet_no)
+        self.assertEqual(reconnect["view"], client.current_hash)
+        self.assertEqual(reconnect["state"], state)
+        self.assertEqual(expected_events, client.recent_events)
+
+        with self.assertRaisesRegex(ProtocolError, "stale or duplicated"):
+            client.ingest(reconnect | {"mode": "delta", "patch": []})
+
 
 if __name__ == "__main__":
     unittest.main()

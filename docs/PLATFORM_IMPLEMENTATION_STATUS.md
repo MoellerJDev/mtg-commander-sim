@@ -6,9 +6,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `agent/server-browser-vertical-slice`
+- Active branch: `main`
 - Current commit: the commit containing this ledger
-- Active phase: `server_browser_vertical_slice_implemented_hardening_next`
+- Active phase: `server_browser_vertical_slice_on_main_hardening_next`
 - Package version: `0.8.0`
 
 ### Pull requests
@@ -40,6 +40,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#23](https://github.com/MoellerJDev/mtg-commander-sim/pull/23) | `agent/cr-407-ante` | `agent/cr-406-exile` | `closed_superseded_by_pr_24` |
 | [#24](https://github.com/MoellerJDev/mtg-commander-sim/pull/24) | `agent/cr-408-command` | `main` | `merged` |
 | [#25](https://github.com/MoellerJDev/mtg-commander-sim/pull/25) | `agent/integration-checkpoint` | `main` | `merged` |
+| [#26](https://github.com/MoellerJDev/mtg-commander-sim/pull/26) | `agent/finalize-integration-docs` | `main` | `merged` |
+| [#27](https://github.com/MoellerJDev/mtg-commander-sim/pull/27) | `agent/server-browser-vertical-slice` | `main` | `merged` |
 
 ## Pinned snapshots and coverage
 
@@ -59,8 +61,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 | Milestone | Status | Evidence |
 |---|---|---|
-| Integrated deterministic foundation | `complete` | Integration PRs #1-17, #24, and #25 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
-| Browser Commander MVP | `first_vertical_slice_complete` | The branch contains a strict protocol 3.0 application boundary, serialized game actors, SQLite control plane and migration, FastAPI HTTP/WebSocket adapter, React/TypeScript browser, generated schema bindings, and a passing four-isolated-context Chromium test. Generic forms for every rules choice and production operations remain open. |
+| Integrated deterministic foundation | `complete` | Integration PRs #1-17 and #24-27 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
+| Browser Commander MVP | `first_vertical_slice_complete` | PR #27 placed a strict protocol 3.0 application boundary, serialized game actors, SQLite control plane and migration, FastAPI HTTP/WebSocket adapter, React/TypeScript browser, generated schema bindings, and a passing four-isolated-context Chromium test on main. Generic forms for every rules choice and production operations remain open. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408 and CR 500-512 slices are on main. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -81,11 +83,11 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 3947
+- Tests discovered: 3948
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30644492183](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30644492183) — `pass`
+- Baseline CI: [30650318684](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30650318684) — `pass`
 - Compile: `pass`
-- Deterministic tests: `pass_3947_cumulative_full_run_plus_corrected_status_delta`
+- Deterministic tests: `pass_3947_exact_commit_gate_dcf7a6d`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
 - Four-player protocol demo: `pass`
 - Repository/history/security audit: `pass`
@@ -104,7 +106,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Merge the verified first server/browser vertical slice, then continue on a clean focused branch with generic browser choice forms and server recovery/operations hardening before resuming broad rules-family work.
+Create a clean focused branch from main and implement generic browser choice forms plus server recovery and operations hardening before resuming broad rules-family work.
 
 ## Regeneration
 

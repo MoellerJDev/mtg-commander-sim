@@ -439,7 +439,10 @@ stored receipt; the same key with different request content is rejected.
 Projection cursors are scoped by connection rather than only by seat. This
 allows reconnects and multiple tabs to receive independent deltas without
 changing the authoritative seat capability. Network cursors are ephemeral and
-excluded from Game Record persistence.
+excluded from Game Record persistence. A reconnect's full projection starts a
+new delivery stream, so its packet number may restart at one; clients replace
+the visible event tail from that full packet and enforce monotonic packet
+numbers only for subsequent deltas.
 
 The current SQLite ownership model is single-process. A multi-process or
 horizontal deployment requires an external ownership/lease design before a

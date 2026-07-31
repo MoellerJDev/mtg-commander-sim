@@ -80,14 +80,15 @@ export async function ingestPacket(
   if (current && current.principal !== packet.principal) {
     throw new Error("Projection belongs to another principal");
   }
-  if (current && packet.pkt <= current.packetNumber) {
-    throw new Error("Projection packet is stale or duplicated");
-  }
+  if (packet.pkt <= 0) throw new Error("Projection packet number must be positive");
   let state: Record<string, JsonValue>;
   if (packet.mode === "full") {
     if (!packet.state) throw new Error("Full projection is missing state");
     state = structuredClone(packet.state);
   } else {
+    if (current && packet.pkt <= current.packetNumber) {
+      throw new Error("Projection packet is stale or duplicated");
+    }
     if (!current) throw new Error("Delta arrived before a full projection");
     if (packet.base !== current.viewHash) throw new Error("Delta base mismatch");
     state = applyPatch(current.state, packet.patch ?? []) as Record<string, JsonValue>;
@@ -107,6 +108,12 @@ export async function ingestPacket(
     packetNumber: packet.pkt,
     decision: packet.decision,
     definitions,
-    events: [...(current?.events ?? []), ...(packet.events ?? [])].slice(-64),
+    // A reconnect receives a full packet from a fresh per-connection cursor,
+    // so its packet number restarts and its event tail replaces the previous
+    // stream's baseline. Deltas continue to append in delivery order.
+    events: (packet.mode === "full"
+      ? [...(packet.events ?? [])]
+      : [...(current?.events ?? []), ...(packet.events ?? [])]
+    ).slice(-64),
   };
 }

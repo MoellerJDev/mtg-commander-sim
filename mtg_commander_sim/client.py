@@ -30,8 +30,8 @@ class ProjectedClientView:
         if str(packet.get("principal") or "") != self.principal:
             raise ProtocolError("Packet belongs to a different principal")
         number = int(packet.get("pkt") or 0)
-        if number <= self.packet_no:
-            raise ProtocolError("Packet number is stale or duplicated")
+        if number <= 0:
+            raise ProtocolError("Packet number must be positive")
 
         mode = str(packet.get("mode") or "")
         if mode == "full":
@@ -39,6 +39,8 @@ class ProjectedClientView:
                 raise ProtocolError("Full packet is missing state")
             self.state = copy.deepcopy(packet["state"])
         elif mode == "delta":
+            if number <= self.packet_no:
+                raise ProtocolError("Packet number is stale or duplicated")
             if self.state is None:
                 raise ProtocolError("A delta cannot be applied before a full packet")
             if packet.get("base") != self.current_hash:
@@ -58,7 +60,15 @@ class ProjectedClientView:
             cid = str(definition.get("cid") or "")
             if cid:
                 self.definitions[cid] = copy.deepcopy(definition)
-        if packet.get("events"):
+        if mode == "full":
+            # A full packet establishes a new delivery stream. Network
+            # reconnects use a fresh server-side cursor whose packet sequence
+            # restarts at one and whose visible event tail is a replacement
+            # baseline, not a delta to append to the previous connection.
+            self.recent_events = copy.deepcopy(
+                list(packet.get("events") or [])
+            )[-64:]
+        elif packet.get("events"):
             self.recent_events.extend(copy.deepcopy(list(packet["events"])))
             self.recent_events = self.recent_events[-64:]
         return self.state

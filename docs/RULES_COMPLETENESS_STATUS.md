@@ -584,15 +584,16 @@ checkpoint validation.
 ## Next dependency-ordered work
 
 Broad sequential rules review is frozen after the CR 400–408 and CR 500–512
-integration reached `main`. The next steps are:
+integration reached `main`. PR #27 also merged the first authoritative
+server/browser vertical slice. The next steps are:
 
-1. Create `agent/server-browser-vertical-slice` from the final green `main`.
-2. Implement and merge the first authoritative server/browser vertical slice:
-   strict network commands, idempotency, expected revisions, a single-writer
-   game actor, guest room/seat flow, WebSocket projections, reconnect, a
-   TypeScript client, and four-context browser E2E.
-3. Resume rules work only for defects blocking that vertical slice; defer broad
-   CR-number traversal until the slice is merged.
+1. Add generic browser forms for modes, targets, costs, searches, ordering,
+   replacement choices, triggers, and combat decisions.
+2. Harden server recovery, operations, and lifecycle behavior while preserving
+   the single-writer actor and seat-projected protocol boundaries.
+3. Resume rules work for defects that block those slices; defer broad
+   CR-number traversal until the browser can express the engine's existing
+   decision surface.
 
 No deck list has been modified, and no current game result is promoted to
 matchup evidence.

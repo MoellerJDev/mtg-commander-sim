@@ -10,11 +10,11 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "server_browser_vertical_slice_implemented_hardening_next",
-    "branch": "agent/server-browser-vertical-slice",
+    "active_phase": "server_browser_vertical_slice_on_main_hardening_next",
+    "branch": "main",
     "branch_ancestry": {
-      "focused_branch_base": "b3bb0e1156b14e7054f8064f3d2e06d9592a1769",
-      "focused_branch_unique_commits_over_main": 1
+      "focused_branch_base": "2b7c47356c653cd83869cab8550dd08e363d87c5",
+      "focused_branch_unique_commits_over_main": 0
     },
     "commit_reference": "the commit containing this ledger",
     "pull_requests": [
@@ -192,6 +192,20 @@
         "number": 25,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/25"
+      },
+      {
+        "base": "main",
+        "head": "agent/finalize-integration-docs",
+        "number": 26,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/26"
+      },
+      {
+        "base": "main",
+        "head": "agent/server-browser-vertical-slice",
+        "number": 27,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/27"
       }
     ],
     "tags": [
@@ -207,13 +221,13 @@
   },
   "milestones": [
     {
-      "evidence": "Integration PRs #1-17, #24, and #25 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
+      "evidence": "Integration PRs #1-17 and #24-27 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete"
     },
     {
-      "evidence": "The branch contains a strict protocol 3.0 application boundary, serialized game actors, SQLite control plane and migration, FastAPI HTTP/WebSocket adapter, React/TypeScript browser, generated schema bindings, and a passing four-isolated-context Chromium test. Generic forms for every rules choice and production operations remain open.",
+      "evidence": "PR #27 placed a strict protocol 3.0 application boundary, serialized game actors, SQLite control plane and migration, FastAPI HTTP/WebSocket adapter, React/TypeScript browser, generated schema bindings, and a passing four-isolated-context Chromium test on main. Generic forms for every rules choice and production operations remain open.",
       "id": "browser_commander_mvp",
       "name": "Browser Commander MVP",
       "status": "first_vertical_slice_complete"
@@ -231,7 +245,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Merge the verified first server/browser vertical slice, then continue on a clean focused branch with generic browser choice forms and server recovery/operations hardening before resuming broad rules-family work.",
+  "next_task": "Create a clean focused branch from main and implement generic browser choice forms plus server recovery and operations hardening before resuming broad rules-family work.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -314,26 +328,26 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 3947,
+    "deterministic_cases_discovered": 3948,
     "migration_files": 1,
     "schema_files": 14,
     "server_files": 4,
-    "web_files": 16
+    "web_files": 17
   },
   "validation": {
-    "baseline_commit": "adb0f520e71161e23bd14854c78051597c545ba6",
+    "baseline_commit": "2b7c47356c653cd83869cab8550dd08e363d87c5",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30644492183,
+      "run_id": 30650318684,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30644492183"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30650318684"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_chromium_guest_room_decks_mulligans_reconnect",
       "browser_typecheck_and_production_build": "pass",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "pass_3947_cumulative_full_run_plus_corrected_status_delta",
+      "deterministic_tests": "pass_3947_exact_commit_gate_dcf7a6d",
       "four_player_protocol_demo": "pass",
       "repository_history_security_audit": "pass",
       "server_protocol_persistence_integration": "pass",
