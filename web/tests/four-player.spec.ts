@@ -1,4 +1,4 @@
-import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -98,6 +98,23 @@ async function submitFormAction(page: Page, actionId: string) {
   await page.getByTestId(`action-${actionId}`).click();
   await expect(page.getByTestId("choice-dialog")).toBeVisible();
   await submitOpenChoice(page);
+}
+
+async function passUntilDraggable(page: Page, card: Locator) {
+  const pass = page.getByTestId("action-pass");
+  const meaningful = page.locator(
+    '[data-testid^="action-"]:not([data-testid="action-pass"]):not([data-testid="action-concede"])',
+  );
+  for (let attempts = 0; attempts < 8; attempts += 1) {
+    if (await card.getAttribute("draggable") === "true") return;
+    await expect.poll(async () =>
+      await card.getAttribute("draggable") === "true"
+      || (await pass.isVisible() && await meaningful.count() > 0),
+    ).toBe(true);
+    if (await card.getAttribute("draggable") === "true") return;
+    await submitFormAction(page, "pass");
+  }
+  await expect(card).toHaveAttribute("draggable", "true");
 }
 
 const browserTriggerDeck = `Commander:
@@ -208,6 +225,8 @@ test("four shared-cookie browser tabs retain isolated seats through mulligans an
       await expect(page.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
       await expect(page.getByTestId("decision-panel")).toBeVisible();
       await expectCardSurface(page, "ABCD"[index]);
+      await page.getByTestId("auto-pass-toggle").click();
+      await expect(page.getByTestId("auto-pass-toggle")).toContainText("Full control on");
     }
     const handA = await pages[0].getByTestId("own-hand").textContent();
     const handB = await pages[1].getByTestId("own-hand").textContent();
@@ -408,9 +427,22 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
     await expect(opponent.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
     await expect(host.locator(".player-board")).toHaveCount(2);
     await expect(opponent.locator(".player-board")).toHaveCount(2);
+    await expect(host.getByTestId("auto-pass-toggle")).toHaveAttribute("aria-pressed", "true");
+    await expect(host.getByTestId("auto-mana-toggle")).toHaveAttribute("aria-pressed", "true");
+    await host.getByTestId("auto-pass-toggle").click();
+    await expect(host.getByTestId("auto-pass-toggle")).toContainText("Full control on");
+    await host.reload();
+    await expect(host.getByTestId("auto-pass-toggle")).toHaveAttribute("aria-pressed", "false");
 
     await submitImmediateAction(host, "keep");
     await submitImmediateAction(opponent, "keep");
+    await expect(host.getByTestId("action-pass")).toBeVisible();
+    await expect(host.getByTestId("decision-panel")).toContainText("Pass priority");
+    await submitFormAction(host, "pass");
+    await host.getByTestId("auto-pass-toggle").click();
+    await expect(host.getByTestId("auto-pass-toggle")).toContainText("Auto-pass on");
+    await host.getByTestId("auto-pass-toggle").click();
+    await expect(host.getByTestId("auto-pass-toggle")).toContainText("Full control on");
     const swamp = host
       .getByTestId("own-hand")
       .locator(".hand-card")
@@ -477,6 +509,7 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
       .getByTestId("own-hand")
       .locator(".hand-card")
       .filter({ has: host.locator(".card-copy strong", { hasText: "Sunscorched Desert" }) });
+    await expect(desert).toHaveAttribute("draggable", "true");
     const beforeDesert = await viewRevision(host);
     await desert.dragTo(host.getByTestId("own-battlefield"));
     await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeDesert);
@@ -488,37 +521,42 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
     await expect(host.getByTestId("player-B").getByLabel("39 life")).toBeVisible();
     await expect(opponent.getByTestId("player-B").getByLabel("39 life")).toBeVisible();
 
-    await submitFormAction(host, "pass");
-    await submitFormAction(host, "pass");
-
     const island = opponent
       .getByTestId("own-hand")
       .locator(".hand-card")
       .filter({ has: opponent.locator(".card-copy strong", { hasText: /^Island$/ }) })
       .first();
+    await passUntilDraggable(host, island);
     const beforeIsland = await viewRevision(opponent);
-    await island.dragTo(opponent.getByTestId("own-battlefield"));
+    await island.click();
+    await opponent.getByTestId("selected-card-actions").getByRole("button", { name: /^Play Island$/ }).click();
     await expect.poll(() => viewRevision(opponent)).toBeGreaterThan(beforeIsland);
-    await submitFormAction(opponent, "pass");
-    await submitFormAction(opponent, "pass");
-
     const swamp = host
       .getByTestId("own-hand")
       .locator(".hand-card")
       .filter({ has: host.locator(".card-copy strong", { hasText: /^Swamp$/ }) })
       .first();
+    await passUntilDraggable(opponent, swamp);
     const beforeSwamp = await viewRevision(host);
-    await swamp.dragTo(host.getByTestId("own-battlefield"));
+    await swamp.click();
+    await host.getByTestId("selected-card-actions").getByRole("button", { name: /^Play Swamp$/ }).click();
     await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeSwamp);
 
     const ring = host
       .getByTestId("own-hand")
       .locator(".hand-card")
       .filter({ has: host.locator(".card-copy strong", { hasText: "Sol Ring" }) });
+    await expect(ring).toHaveAttribute("draggable", "true");
     await ring.dragTo(host.getByTestId("own-battlefield"));
     await expect(host.getByTestId("choice-dialog")).toContainText("Cast Sol Ring");
     await submitOpenChoice(host);
     await expect(opponent.locator(".stack-panel")).toContainText("Sol Ring");
+    const hostTappedLand = host.getByTestId("player-A").locator(".battlefield .table-card.tapped");
+    const opponentTappedLand = opponent.getByTestId("player-A").locator(".battlefield .table-card.tapped");
+    await expect(hostTappedLand).toHaveCount(1);
+    await expect(opponentTappedLand).toHaveCount(1);
+    await expect(hostTappedLand).toHaveAttribute("data-tapped", "true");
+    expect(await hostTappedLand.evaluate((element) => getComputedStyle(element).transform)).not.toBe("none");
 
     const offer = opponent
       .getByTestId("own-hand")
@@ -538,14 +576,10 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
     await bowmasters.dragTo(host.getByTestId("own-battlefield"));
     await expect(host.getByTestId("choice-dialog")).toContainText("Cast Orcish Bowmasters");
     await submitOpenChoice(host);
-    // The remaining Treasure is a strategically meaningful mana action, so
-    // the active player explicitly passes before the creature resolves.
-    await submitFormAction(host, "pass");
     await expect(host.getByTestId("decision-panel")).toContainText("Semantic.Target");
     await host.getByTestId("action-choose").click();
     await host.getByTestId("choice-target-B").check();
     await submitOpenChoice(host);
-    await submitFormAction(host, "pass");
 
     await expect(host.getByTestId("player-B").getByLabel("38 life")).toBeVisible();
     await expect(host.getByTestId("own-battlefield")).toContainText("Orcish Bowmasters");
@@ -597,19 +631,10 @@ test("a duel declares an attacker in the browser and applies commander combat da
       await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
     }
 
-    async function finishTurn(page: Page) {
-      await submitFormAction(page, "pass");
-      await submitFormAction(page, "pass");
-    }
-
     await playLand(host, "Forest");
-    await finishTurn(host);
     await playLand(opponent);
-    await finishTurn(opponent);
     await playLand(host, "Swamp");
-    await finishTurn(host);
     await playLand(opponent);
-    await finishTurn(opponent);
     await playLand(host, "Island");
 
     const commander = host
@@ -621,12 +646,9 @@ test("a duel declares an attacker in the browser and applies commander combat da
     await expect(host.getByTestId("choice-dialog")).toContainText("Cast Zimone and Dina");
     await submitOpenChoice(host);
     await expect(host.getByTestId("own-battlefield")).toContainText("Zimone and Dina");
-    await finishTurn(host);
 
     await playLand(opponent);
-    await finishTurn(opponent);
     await playLand(host);
-    await submitFormAction(host, "pass");
 
     await expect(host.getByTestId("decision-panel")).toContainText("Combat.Attackers");
     await host.getByTestId("action-attack").click();

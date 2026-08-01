@@ -179,6 +179,12 @@ class ServerApplicationTests(unittest.TestCase):
         self.assertEqual(
             "trusted_only", checkpoint["state"]["config"]["semantic_policy"]
         )
+        self.assertFalse(
+            checkpoint["state"]["config"]["auto_pass_empty_priority"]
+        )
+        self.assertTrue(
+            checkpoint["state"]["config"]["manual_active_main_phase"]
+        )
         self.assertEqual("debug", checkpoint["state"]["config"]["trace_level"])
         semantics = json.loads(
             (record_dir / "semantics.json").read_text(encoding="utf-8")

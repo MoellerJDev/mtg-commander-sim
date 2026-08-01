@@ -6,11 +6,11 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "rules_current_turn_history_conditions",
-    "branch": "feat/rules-combat-history-conditions",
+    "active_phase": "browser_full_control_table_interaction",
+    "branch": "feat/browser-full-control-table-ui",
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
-      "focused_branch_base": "3bde5f7c5c08fe47ff0a14ddb4c7e416c0085248",
+      "focused_branch_base": "b416c975a2cd2f4f379da081e9310dfb3a4345e9",
       "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
@@ -335,6 +335,20 @@
         "number": 46,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/46"
+      },
+      {
+        "base": "main",
+        "head": "feat/rules-combat-player-state-conditions",
+        "number": 47,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/47"
+      },
+      {
+        "base": "main",
+        "head": "feat/rules-combat-history-conditions",
+        "number": 48,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/48"
       }
     ],
     "tags": [
@@ -370,13 +384,13 @@
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete",
-      "evidence": "Integration PRs #1-17 and #24-47 are on main; the focused CR 508-509/608 current-turn history and combat-declaration slice is active. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main."
+      "evidence": "Integration PRs #1-17 and #24-48 are on main; the focused browser full-control/table-interaction slice is active. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main."
     },
     {
       "id": "browser_commander_mvp",
       "name": "Browser Commander MVP",
       "status": "development_local_runtime_hardened",
-      "evidence": "The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and seven two/four-player Chromium journeys, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, Chromium-verified card-scoped click/drag actions, optional manual mana activation, explicit active-player main-phase advancement, confirmed concession, public commander-damage tracking, terminal winner/draw rendering, exact command retry, invited read-only spectators, a durable complete public-log dialog, fail-closed handling for legacy arbiter-only records, and one-command managed Scryfall/browser startup. Compact trusted-only coverage includes modal land faces, targeted Sunscorched Desert ETB damage, a stack response, rules-created Treasure payment, Orcish Bowmasters/Amass, explicit attack and block declarations, combat damage, and a natural commander-damage winner. The 49-command natural-winner record replayed to its exact state hash with zero suppressed meaningful windows and a clean seat-projection audit; completed games also survive process restart. The inspected full-database failure remains a pinned pre-fix record, and a fresh post-restart full-database manual journey is still required as broader current-snapshot evidence. Future schemas, full accounts, expiry/rate limits, and production deployment remain open."
+      "evidence": "The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and seven two/four-player Chromium journeys, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, resilient card-scoped click/drag actions, saved Auto-mana/Manual mana and Auto-pass/Full control preferences, public tapped-card orientation, explicit active-player main-phase advancement, confirmed concession, public commander-damage tracking, terminal winner/draw rendering, exact command retry, invited read-only spectators, a durable complete public-log dialog, fail-closed handling for legacy arbiter-only records, and one-command managed Scryfall/browser startup. Compact trusted-only coverage includes modal land faces, targeted Sunscorched Desert ETB damage, a stack response, rules-created Treasure payment, Orcish Bowmasters/Amass, explicit attack and block declarations, combat damage, and a natural commander-damage winner. The 49-command natural-winner record replayed to its exact state hash with zero suppressed meaningful windows and a clean seat-projection audit; completed games also survive process restart. The inspected full-database failure remains a pinned pre-fix record, and a fresh post-restart full-database manual journey is still required as broader current-snapshot evidence. Saved board-layout customization, future schemas, full accounts, expiry/rate limits, and production deployment remain open."
     },
     {
       "id": "rules_snapshot",
@@ -397,7 +411,7 @@
     "single_writer_game_actor": "implemented_single_process",
     "durable_database": "implemented_sqlite_control_plane_plus_game_record_v3",
     "http_websocket_server": "implemented_single_process_managed_data_static_browser_restart_terminal_lifecycle_spectator_public_log_and_rules_boundary_recovery",
-    "browser_client": "implemented_card_inspector_public_zone_browser_card_scoped_click_drag_manual_mana_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause",
+    "browser_client": "implemented_card_inspector_public_zone_browser_resilient_card_scoped_click_drag_saved_manual_auto_mana_saved_auto_pass_full_control_tapped_orientation_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause",
     "guest_or_account_identity": "implemented_expiring_per_tab_guest_sessions",
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "replay": "implemented_command_replay",
@@ -406,12 +420,12 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "3bde5f7c5c08fe47ff0a14ddb4c7e416c0085248",
+    "baseline_commit": "b416c975a2cd2f4f379da081e9310dfb3a4345e9",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30700571675,
+      "run_id": 30702706411,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30700571675"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30702706411"
     },
     "local": {
       "compile": "pass",
@@ -421,7 +435,7 @@
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
       "browser_typecheck_and_production_build": "pass",
-      "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_card_drag_drop_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
+      "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "server_process_restart_recovery": "pass_fresh_capability_idempotency_lifecycle_continuation_completed_concession_and_exact_replay",
       "server_lifecycle_operations": "pass_owner_only_stop_resume_safe_inspection_paused_command_gate_rules_pause_protection_and_legacy_arbiter_fail_closed_recovery",
@@ -435,9 +449,10 @@
   },
   "blockers": [
     "a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence",
+    "saved customizable board tabs and denser public-zone dashboard preferences remain incomplete",
     "future engine choice schemas and complete screen-reader audits remain incomplete",
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "After the CR 508-509/608 current-turn history slice, extend the shared finite combat declaration solver to non-goad requirements, effect-granted restrictions, optional costs, and multi-block grammar; then route declaration triggers through the same boundary while keeping the universal CR 120.4 damage transformation pipeline as the next deeper dependency."
+  "next_task": "Finish the saved customizable board/public-zone dashboard and split the browser table into maintainable components; then begin a behavior-preserving CommanderEngine domain decomposition before resuming dependency-ordered rules slices and the universal CR 120.4 damage transformation pipeline."
 }

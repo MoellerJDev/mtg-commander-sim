@@ -12,20 +12,20 @@ or provider session data. Current generated metrics live in
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
 - Latest integrated `main` merge:
-  `3bde5f7c5c08fe47ff0a14ddb4c7e416c0085248`
+  `b416c975a2cd2f4f379da081e9310dfb3a4345e9`
 - Latest certified feature head:
-  `c60c0a9`
-- Current focused branch: `feat/rules-combat-history-conditions`, based
-  on `3bde5f7`; its
+  `de30638`
+- Current focused branch: `feat/browser-full-control-table-ui`, based
+  on `b416c97`; its
   candidate commit is the commit containing this handoff.
-- Current focused slice: CR 608.2i authoritative current-turn history plus
-  typed cast, controlled-death, positive-player-damage, and prior-player-attack
-  declaration predicates with generic Oracle lowering and exact replay
+- Current focused slice: saved browser Auto-pass/Full control and
+  Auto-mana/Manual mana policy, resilient card drag/drop, and public tapped-card
+  orientation without changing authoritative legal-action or replay semantics
 - Package: `0.8.0`
 - Tags: `v0.6.0`, `v0.7.0`
 - No `v0.8.0` release tag has been created.
 
-PRs #1–#17 and #24–#47 are merged through ordinary merge commits. PR #24
+PRs #1–#17 and #24–#48 are merged through ordinary merge commits. PR #24
 incorporated the ancestry-proven CR 400–408 stack; PRs #18–#23 were closed as
 superseded only after their exact heads were reachable from `main`. PRs #27–#35
 integrated the authoritative browser/server vertical slice, restart and
@@ -36,13 +36,14 @@ combat damage steps, APNAP damage/trigger batching, and the shared finite
 attack/block declaration solver. PRs #40–#44 add typed goad, declaration costs,
 generic restrictions, evasion/characteristic filters, and conditional public-
 state restrictions. PR #45 adds typed declaration composition and target-scope
-constraints, and PR #46 adds typed planeswalker attack targets and combat
-damage, and PR #47 adds CR 725 monarch state and inherent rules. No force push
-or tag movement was used.
+constraints, PR #46 adds typed planeswalker attack targets and combat damage,
+PR #47 adds CR 725 monarch state and inherent rules, and PR #48 adds the
+authoritative current-turn history journal and typed history predicates. No
+force push or tag movement was used.
 
 ## Deterministic evidence
 
-- The integrated `3bde5f7` baseline passed all five public CI gates across
+- The integrated `b416c97` baseline passed all five public CI gates across
   Python 3.11/3.12 on Ubuntu/Windows plus Browser/Chromium. The current branch
   runs only new and directly impacted tests locally; its full regression
   remains delegated to PR CI under the staged rules workflow.
@@ -68,7 +69,7 @@ or tag movement was used.
   replayed to the exact final hash, reported zero suppressed meaningful
   windows, and passed its hidden-information audit. A completed concession also
   restores as terminal after server restart and exact replay.
-- Merge commit `3bde5f7` is covered by `main` run `30700571675` across Python
+- Merge commit `b416c97` is covered by `main` run `30702706411` across Python
   3.11/3.12, Ubuntu/Windows, and Browser/Chromium.
 
 GitHub Actions is operating normally. Historical zero-step billing failures
@@ -101,8 +102,9 @@ Implemented:
 - one-command local server/browser startup with daily Scryfall metadata checks,
   atomic snapshot activation, stale-database fallback, and on-demand image cache
 - responsive TypeScript browser client with projected tables, card inspector,
-  public-zone browsing, click/drag play, cast/activate controls, manual or
-  automatic mana, current generic choice forms, and explicit main-phase advance
+  public-zone browsing, resilient click/drag play, cast/activate controls,
+  saved manual/automatic mana and auto-pass/full-control policy, visible tapped
+  orientation, current generic choice forms, and explicit main-phase advance
 - invite-authenticated read-only spectators with capability-free projections,
   live WebSocket updates, a complete durable public event log, and restart
   recovery without checkpoint or analyst access

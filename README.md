@@ -20,8 +20,9 @@ browser, prepares the local Scryfall SQLite index, checks for updated Oracle and
 rulings exports every 24 hours, and serves an on-demand local card-image cache.
 The browser renders the engine's current generic choice vocabulary, locally
   cached card art, a persistent hover/focus card viewer, browsable public zones,
-  card-specific play/cast/activate controls, drag-to-play interaction, optional
-  manual mana-source activation, reconnect and exact-command retry states,
+  card-specific play/cast/activate controls, resilient drag-to-play interaction,
+  saved Auto-mana/Manual mana and Auto-pass/Full control preferences, visible
+  tapped-card rotation for every seat, reconnect and exact-command retry states,
   explicit active-player main-phase advancement, attack/block interaction,
   public commander-damage tracking, confirmed concession, and terminal
   winner/draw presentation,
@@ -124,7 +125,8 @@ Cards with a current action are highlighted and labeled **PLAY**, **CAST**,
 battlefield card to reveal only that object's current server-issued actions.
 Drag a playable land or spell to your battlefield for the fast path; an
 ambiguous card opens a short action chooser. Spell confirmation exposes the
-default **Auto-mana** path. Turn on **Manual mana** to highlight payable mana
+default **Auto-mana** path. The table-level Auto-mana/Manual mana setting is
+saved in this browser. Turn on **Manual mana** to highlight payable mana
 abilities, then click those permanents in the order you want to activate them;
 multi-color sources ask which exact mana to add. Choose the spell again after
 floating mana. Manual mode controls source activation order while the server
@@ -142,11 +144,15 @@ then enters and renders using the chosen land face. Client labels and drag
 gestures never create legality; they invoke the same server-issued action IDs
 as the ordinary action tray.
 
-Browser games never auto-skip the active player's own main phase. With the
-stack empty, the ordinary pass action reads **Continue to combat** in
-precombat main and **End turn** in postcombat main. Pass-only response windows
-for nonactive players can still be suppressed when the engine verifies that no
-meaningful response exists.
+Browser games expose every priority capability to the owning tab. **Auto-pass**
+is on by default and submits an ordinary replayable pass command only when the
+current capability contains no meaningful nonmana action. It never skips a
+playable land, cast, target, combat declaration, or other player choice. Turn
+on **Full control** at any time to hold even an otherwise pass-only window until
+you press **Pass priority**; the preference is saved in this browser. With the
+stack empty, the ordinary pass action reads **Continue to combat** in precombat
+main and **End turn** in postcombat main, so a meaningful main-phase action is
+never erased by automation.
 
 Commander combat damage is displayed separately by source commander on every
 public player board. **Concede game** is a server-issued action with an explicit
@@ -270,7 +276,8 @@ generated documentation fixtures with bearer capabilities redacted. See
   import, responsive desktop/mobile battlefield layout, local card art, private
   hand rendering, persistent hover/focus inspection, double-face viewing,
   public graveyard/exile browsers, card-specific legal-action prompts,
-  drag-to-play, optional click-to-activate manual mana, generic server-issued choice forms,
+  resilient drag-to-play, saved automatic/manual mana and auto-pass/full-control
+  modes, visible tapped orientation, generic server-issued choice forms,
   focus-contained dialogs, a durable public-log dialog, read-only spectator
   mode, reconnect, exact-envelope retry, and
   four-isolated-context Playwright coverage

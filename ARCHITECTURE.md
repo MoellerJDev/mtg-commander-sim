@@ -668,7 +668,15 @@ visible projected card definition when a stack item represents a card, allowing
 the same inspector without widening principal authority. Manual
 mana mode submits ordinary mana-ability actions sequentially, preserving source
 activation order and floating the resulting server-validated bundles before a
-cast. Auto-mana remains the default. Modal double-faced land plays carry a
+cast. Auto-mana remains the default and the local preference survives reload.
+Browser games ask the kernel not to erase empty priority capabilities. The
+seat tab's default Auto-pass policy submits the ordinary replayable pass command
+only when the projected action set has no meaningful nonmana action; Full
+control leaves every such capability pending for explicit approval. Neither
+mode changes legal-action generation or authoritative yield/opportunity
+telemetry. Battlefield objects render their projected tapped flag as a
+90-degree orientation for every viewer and return upright when the next
+projection reports them untapped. Modal double-faced land plays carry a
 fixed selected face into land-entry derivation and projection, so the client
 cannot substitute the spell face or invent a life payment.
 
