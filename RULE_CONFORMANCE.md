@@ -117,6 +117,15 @@ succession when the monarch leaves, and typed continuous declaration queries
 that do nothing while no monarch exists. Whole-line Oracle support remains
 measured and fail closed outside the reviewed effect and restriction families.
 
+CR 608.2i now has a versioned authoritative current-turn journal for the
+reviewed declaration families. Generic cast, zone-change, damage, and attack
+boundaries preserve cast-time types, last-known death control/identity, final
+positive player damage, and direct-player attack targets. The journal is
+hashed, resets per turn, survives extra combats, and command-replays exactly.
+The rule remains blocked overall because previous-turn, aggregate,
+characteristic-rich, multi-object, and hidden historical queries are not yet a
+complete typed language.
+
 The passing CR 310 rules are battlefield defense (310.4c), Battle damage
 (310.6), the zero-defense state action (310.7), single-protector replacement
 (310.8f), and protector persistence through type/copy changes (310.8g).

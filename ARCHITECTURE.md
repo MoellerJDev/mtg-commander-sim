@@ -225,12 +225,19 @@ update cannot inherit stale conformance. Missing or duplicate cases fail
 corpus verification.
 
 The Oracle compiler preserves source spans and emits typed ability, cost,
-target, trigger, replacement, and effect nodes. Oracle IR v8 lowers simple
+target, trigger, replacement, and effect nodes. Oracle IR v11 lowers simple
 self enters/dies/leaves triggers, unconditional enters-tapped text, fixed
 self/target effects, basic creature-token creation, and reviewed whole-line
 fixed-mana attack/block declaration costs, combat-declaration restrictions,
 typed public battlefield and combat-composition conditions, and source-
 controller-relative declaration targets.
+Reviewed declaration look-back families query a separate versioned
+`TurnHistory`, not the presentation event log. Cast-time types, last-known
+controller and logical identity for deaths, final positive player damage, and
+direct-player attack targets are serialized in authoritative state, reset at
+the turn boundary, retained across extra combats, and included in command
+hashes. This gives CR 608.2i predicates deterministic replay without treating
+the transient event journal as rules truth.
 The engine and compiler share both declaration grammars, so a new matching
 card cannot compile differently from the rule path that enforces it. Generated handlers
 remain provisional, and reviewed trigger handlers shadow equivalent generated
@@ -360,8 +367,11 @@ Complex or mutated members of the recognized family stop fail closed.
 Shared-creature-subtype blocking thresholds use effective public subtypes and
 count each Changeling once for every type. Typed player-state conditions now
 cover exact poisoned-defender and monarch-controller/defender declaration
-families. History- and compound-with-unrelated-effects restriction/requirement
-grammar, temporary
+families. Typed current-turn conditions cover cast creature/noncreature spells,
+controlled creature deaths, opponents actually dealt damage, prior direct-
+player attacks by the same object incarnation, and opponents that cast a
+spell. Broader history and compound-with-unrelated-effects restriction/
+requirement grammar, temporary
 restrictions, non-goad defender-specific
 requirements, effect-granted and
 repeated-combat requirements,

@@ -106,14 +106,14 @@
     {
       "mechanic_id": "cr-508-declare-attackers-step",
       "path": "mechanics/contracts/declare-attackers-step.json",
-      "sha256": "70c987ce43b4a3a4016317a0400878332675d02c1c75fb0506d0e96a504cbea0",
-      "version": 9
+      "sha256": "43e355e24b8989bde07f830f0fe0def505221eedf0b15a65a4f5dac33526be28",
+      "version": 10
     },
     {
       "mechanic_id": "cr-509-declare-blockers-step",
       "path": "mechanics/contracts/declare-blockers-step.json",
-      "sha256": "b6dcf952cc71262ef9d09f7c154875095241b8a6ac4448511a400967301dc0d6",
-      "version": 9
+      "sha256": "9dc25409d7a6af8078091e116a77c1179479232a66a8569bfcc3f9aa3fa91679",
+      "version": 10
     },
     {
       "mechanic_id": "defender",
@@ -6740,16 +6740,16 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-attackers-step.json",
-      "contract_sha256": "70c987ce43b4a3a4016317a0400878332675d02c1c75fb0506d0e96a504cbea0",
-      "contract_version": 9,
+      "contract_sha256": "43e355e24b8989bde07f830f0fe0def505221eedf0b15a65a4f5dac33526be28",
+      "contract_version": 10,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine attacker declaration/payment transition",
-      "implementation_version": "declare-attackers-step-v9",
+      "implementation_version": "declare-attackers-step-v10",
       "kind": "rules_section",
       "known_blockers": [
         "exact attacks-each-combat and typed goad requirements are represented; conditional, non-goad defender-specific, and other effect-granted requirement grammar remains incomplete",
-        "history-, compound-, other named-target-, temporary-, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
+        "compound, other named-target, temporary, broader, and uncompiled current-turn attack-restriction grammar remains incomplete and recognized static families fail closed",
         "banding declarations are not implemented",
         "optional, nonmana, variable, alternative, modified, and broader conditional attack costs are not implemented",
         "declare-attackers trigger generation and APNAP placement are incomplete",
@@ -6809,7 +6809,7 @@
         "test_defender_conditions_filter_attack_options_and_replay",
         "test_controller_conditions_use_another_stats_and_exact_size",
         "test_minimum_and_relative_counts_are_defender_specific",
-        "test_relevant_unsupported_condition_pauses_fail_closed",
+        "test_cast_history_condition_recomputes_attack_domain",
         "test_triggered_text_is_not_misread_as_a_static_restriction",
         "test_oracle_ir_uses_runtime_restriction_grammar",
         "test_selected_creature_can_require_a_matching_declaration",
@@ -6823,22 +6823,31 @@
         "test_planeswalker_is_labeled_attackable_and_replays_exactly",
         "test_departed_planeswalker_keeps_defender_but_not_damage_target",
         "test_planeswalker_only_tax_is_locked_for_planeswalker_attack",
-        "test_player_and_planeswalker_tax_covers_both_target_kinds"
+        "test_player_and_planeswalker_tax_covers_both_target_kinds",
+        "test_parser_exactly_lowers_current_turn_declaration_families",
+        "test_cast_writer_preserves_types_and_mixed_creature_is_not_noncreature",
+        "test_creature_and_noncreature_cast_conditions_unlock_independently",
+        "test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack",
+        "test_controlled_creature_death_uses_lki_and_survives_token_cleanup",
+        "test_same_creature_cannot_attack_same_player_twice_and_replays",
+        "test_angelic_arbiter_uses_prior_casts_and_only_restricts_opponents",
+        "test_turn_history_is_serialized_hashed_and_legacy_absence_stays_absent",
+        "test_beginning_a_new_turn_resets_history_but_extra_combats_do_not"
       ],
       "trust_level": "untrusted"
     },
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-blockers-step.json",
-      "contract_sha256": "b6dcf952cc71262ef9d09f7c154875095241b8a6ac4448511a400967301dc0d6",
-      "contract_version": 9,
+      "contract_sha256": "9dc25409d7a6af8078091e116a77c1179479232a66a8569bfcc3f9aa3fa91679",
+      "contract_version": 10,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine blocker declaration/payment transition",
-      "implementation_version": "declare-blockers-step-v9",
+      "implementation_version": "declare-blockers-step-v10",
       "kind": "rules_section",
       "known_blockers": [
-        "history-, compound-with-unrelated-effects-, temporary-, broader-, and multi-block restriction/evasion grammar remains incomplete and recognized static families fail closed",
+        "compound-with-unrelated-effects, temporary, broader, uncompiled current-turn, and multi-block restriction/evasion grammar remains incomplete and recognized static families fail closed",
         "only exact blocks-each-combat, must-be-blocked, lure, and menace grammar is represented; conditional, effect-granted, multi-block, and optional-cost grammar remains incomplete",
         "optional, nonmana, variable, alternative, modified, and broader conditional block costs are not implemented",
         "declare-blockers trigger generation and APNAP placement are incomplete",
@@ -6904,7 +6913,9 @@
         "test_attacking_alone_and_no_other_creature_evasion_recompute",
         "test_attached_attacking_alone_evasion_uses_current_combat",
         "test_filtered_attack_and_block_target_relations",
-        "test_shared_creature_subtype_condition_includes_changeling"
+        "test_shared_creature_subtype_condition_includes_changeling",
+        "test_controlled_creature_death_uses_lki_and_survives_token_cleanup",
+        "test_parser_exactly_lowers_current_turn_declaration_families"
       ],
       "trust_level": "untrusted"
     },
@@ -8507,22 +8518,7 @@
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "sources": {
     "card_data_snapshot": {
-      "available": true,
-      "database_schema_version": "2",
-      "oracle_bulk": {
-        "download_uri": "https://data.scryfall.io/oracle-cards/oracle-cards-20260731210300.jsonl.gz",
-        "oracle_id_count": 38484,
-        "sha256": "34d43820bb1b85be99267367969396c81a0bc387061dbd00882d1e78a5e84aa9",
-        "source_filename": "oracle-cards-20260731210300.jsonl.gz",
-        "updated_at": "2026-07-31T21:03:00.228+00:00"
-      },
-      "rulings_bulk": {
-        "download_uri": "https://data.scryfall.io/rulings/rulings-20260731210039.jsonl.gz",
-        "ruling_count": 77998,
-        "sha256": "edabb33f1354d577f4a337c182f1093519b3499e71cec304f7474e7b362c0537",
-        "source_filename": "rulings-20260731210039.jsonl.gz",
-        "updated_at": "2026-07-31T21:00:39.181+00:00"
-      }
+      "available": false
     },
     "comprehensive_rules": "indexed",
     "official_set_mechanics": "planned",

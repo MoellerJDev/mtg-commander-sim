@@ -59,7 +59,7 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": ["parse_declaration_restriction_line", "DeclarationProblem", "CommanderEngine._declaration_restrictions", "CommanderEngine._block_declaration_components", "CommanderEngine._can_block", "CommanderEngine._complete_blockers"],
+      "implementation_components": ["parse_declaration_restriction_line", "DeclarationProblem", "model.TurnHistory", "CommanderEngine._record_turn_history", "CommanderEngine._declaration_restrictions", "CommanderEngine._block_declaration_components", "CommanderEngine._can_block", "CommanderEngine._complete_blockers"],
       "executable_test_ids": [
         "tests.test_exact_combat_keywords.ExactCombatKeywordTests.test_flying_attacker_exposes_only_flying_or_reach_blockers",
         "tests.test_exact_combat_keywords.ExactCombatKeywordTests.test_shadow_and_protection_restrict_blocking",
@@ -84,15 +84,15 @@
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_only_unblockable_attackers_skip_pass_only_blocker_task",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_minimum_and_maximum_blocker_counts_are_inviolable",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_block_only_keyword_filters_opposing_attackers",
-        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_relevant_unsupported_condition_pauses_fail_closed",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_monarch_controller_blocker_filter_is_enforced",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_shared_creature_subtype_condition_includes_changeling",
-        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_oracle_ir_uses_runtime_restriction_grammar"
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_oracle_ir_uses_runtime_restriction_grammar",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_controlled_creature_death_uses_lki_and_survives_token_cleanup"
       ],
       "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
       "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
-      "blockers": ["history_compound_temporary_broader_and_multi_block_grammar_not_implemented"],
-      "notes": ["The same typed declaration grammar and finite solver enforce represented blocking restrictions cumulatively with intrinsic flying, reach, shadow, and protection. Exact self, attached, global, not-alone, matching-companion, other-blocker, attacker-composition, no-other-creature, goaded-opponent, blocker-count, source-controller relation, type, supertype, subtype, token-status, keyword, color, source-stat, denied-blocker, except-by, can-block-only, controller/defender battlefield-condition, another-object, tapped-state, minimum-count, relative-count, shared-creature-subtype count, public monarch/poison player state, and conditional-evasion predicates are supported from the same projected and submitted domain; Changeling contributes once to every shared subtype. Direct pair checks use the same condition evaluator, and replay is exact. Relevant unsupported static text pauses fail closed. History, compound-with-unrelated-effects, temporary, broader, and multi-block grammar remains blocked."]
+      "blockers": ["compound_temporary_broader_uncompiled_history_and_multi_block_grammar_not_implemented"],
+      "notes": ["The same typed declaration grammar and finite solver enforce represented blocking restrictions cumulatively with intrinsic flying, reach, shadow, and protection. Exact self, attached, global, not-alone, matching-companion, other-blocker, attacker-composition, no-other-creature, goaded-opponent, blocker-count, source-controller relation, characteristic, battlefield-condition, shared-subtype, public monarch/poison player-state, conditional-evasion, and controlled-creature-died-this-turn predicates are supported from the same projected and submitted domain. Creature death uses authoritative last-known control and remains true after token cleanup. Direct pair checks use the same condition evaluator, and replay is exact. Relevant unsupported static text pauses fail closed. Compound-with-unrelated-effects, temporary, broader, uncompiled history, and multi-block grammar remains blocked."]
     },
     {
       "rule_id": "509.1c",

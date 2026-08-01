@@ -32,7 +32,7 @@ contracts, and compiles Oracle text into a typed intermediate representation.
 Recognized whole-text templates lower into the same generic DSL and kernel
 primitives used by current packs.
 
-Oracle IR v8 includes a shared combat-declaration cost grammar for exact
+Oracle IR v11 includes a shared combat-declaration cost grammar for exact
 fixed ordinary-mana intrinsic, attached-Aura, defending-player attack, and global block-tax
 sentences. The compiler records a typed static-cost node and the engine uses
 the same parser to derive live costs. Complex symbols, appended instructions,
@@ -56,8 +56,13 @@ type, supertype, subtype, color, keyword, power, and toughness filters; minimum
 counts; and relative creature/land counts. They are destination-specific in
 multiplayer and use the same evaluator for direct block-pair checks and solver
 domains. Player, planeswalker, and Battle destinations are typed rather than
-inferred from card names. History, compound-with-unrelated-effects, temporary,
-and multi-block families
+inferred from card names. Reviewed current-turn predicates compile for
+creature and noncreature spells cast, controlled creature deaths, opponents
+actually dealt damage, the direct player already attacked by one object
+incarnation, and an opponent that cast a spell. These query hashed
+`TurnHistory` facts recorded by generic cast, zone-change, damage, and attack
+transitions. Broader history, compound-with-unrelated-effects, temporary, and
+multi-block families
 retain material residuals instead of being guessed.
 
 At deck creation, generated programs are added only when their stable

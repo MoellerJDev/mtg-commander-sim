@@ -59,6 +59,7 @@ from .declaration_restrictions import (
     DeclarationPlayerStateCondition,
     DeclarationRestrictionTemplate,
     DeclarationSharedSubtypeCondition,
+    DeclarationTurnHistoryCondition,
     parse_declaration_restriction_line,
 )
 from .damage import DamageEvent, DamageRecipientKind
@@ -82,6 +83,9 @@ from .model import (
     PlayerState,
     StackItem,
     TurnEntry,
+    TurnHistory,
+    TurnHistoryEvent,
+    TurnHistoryEventKind,
     YieldPolicy,
 )
 from .permissions import AuthorizedCommand, CapabilityManager, PermissionDenied
@@ -379,6 +383,94 @@ class CommanderEngine:
     def active_seats(self) -> list[str]:
         return self.state.active_seats()
 
+    def _record_turn_history(
+        self,
+        kind: TurnHistoryEventKind,
+        *,
+        actor: str | None = None,
+        object_incarnation: str | None = None,
+        target: str | None = None,
+        target_kind: str | None = None,
+        types: Iterable[str] = (),
+        amount: int = 0,
+    ) -> None:
+        """Append one authoritative current-turn look-back fact.
+
+        Legacy Game Record v3 checkpoints omit ``turn_history``.  They keep
+        that feature disabled so loading and reserializing one cannot silently
+        add a hashed rules field partway through its command replay.
+        """
+
+        history = self.state.turn_history
+        if history is None:
+            return
+        if history.turn_sequence != self.state.turn_sequence:
+            history = TurnHistory(turn_sequence=self.state.turn_sequence)
+            self.state.turn_history = history
+        history.events.append(
+            TurnHistoryEvent(
+                kind=kind,
+                actor=actor,
+                object_incarnation=object_incarnation,
+                target=target,
+                target_kind=target_kind,
+                types=tuple(sorted({str(value).casefold() for value in types})),
+                amount=max(0, int(amount)),
+            )
+        )
+
+    def _current_turn_history(
+        self,
+        kind: TurnHistoryEventKind,
+    ) -> tuple[TurnHistoryEvent, ...]:
+        history = self.state.turn_history
+        if (
+            history is None
+            or history.schema_version != 1
+            or history.turn_sequence != self.state.turn_sequence
+        ):
+            return ()
+        return tuple(event for event in history.events if event.kind == kind)
+
+    def _player_cast_spell_this_turn(
+        self,
+        player: str,
+        *,
+        creature: bool | None = None,
+    ) -> bool:
+        for event in self._current_turn_history("spell_cast"):
+            if event.actor != player:
+                continue
+            is_creature = "creature" in event.types
+            if creature is None or is_creature == creature:
+                return True
+        return False
+
+    def _creature_died_under_control_this_turn(self, player: str) -> bool:
+        return any(
+            event.actor == player
+            for event in self._current_turn_history("creature_died")
+        )
+
+    def _opponent_was_dealt_damage_this_turn(self, player: str) -> bool:
+        opponents = set(self.active_seats) - {player}
+        return any(
+            event.target in opponents and event.amount > 0
+            for event in self._current_turn_history("player_damaged")
+        )
+
+    def _object_attacked_player_this_turn(
+        self,
+        object_incarnation: str,
+        player: str,
+    ) -> bool:
+        return any(
+            event.object_incarnation == object_incarnation
+            and event.target_kind == "player"
+            and event.target == player
+            for event in self._current_turn_history("creature_attacked")
+        )
+
     def _all_visibility(self) -> list[str]:
         return [*self.seats, "arbiter", "analyst", "spectator"]
 
@@ -651,6 +743,28 @@ class CommanderEngine:
             raise StateInvariantError(
                 "The monarch designation belongs to a player who is not in the game"
             )
+        history = self.state.turn_history
+        if history is not None:
+            if history.schema_version != 1:
+                raise StateInvariantError(
+                    f"Unsupported turn-history schema {history.schema_version}"
+                )
+            if history.turn_sequence != self.state.turn_sequence:
+                raise StateInvariantError(
+                    "Turn history does not belong to the current turn"
+                )
+            for event in history.events:
+                if event.actor is not None and event.actor not in self.state.players:
+                    raise StateInvariantError(
+                        f"Turn history names unknown actor {event.actor}"
+                    )
+                if (
+                    event.target_kind == "player"
+                    and event.target not in self.state.players
+                ):
+                    raise StateInvariantError(
+                        f"Turn history names unknown player target {event.target}"
+                    )
         for player in self.state.players.values():
             if any(value < 0 for value in player.mana_pool.values()):
                 raise StateInvariantError(f"Negative mana in {player.seat}'s pool")
@@ -2000,6 +2114,7 @@ class CommanderEngine:
             )
         )
         origin_controller = card.controller
+        origin_logical_object_id = card.logical_object_id
         origin_attachments = [
             self.state.cards[attachment_id].ref
             for attachment_id in card.attachments
@@ -2206,6 +2321,7 @@ class CommanderEngine:
                 origin=origin,
                 destination=destination,
                 origin_controller=origin_controller,
+                origin_logical_object_id=origin_logical_object_id,
                 origin_data=origin_data,
                 origin_attachments=origin_attachments,
                 origin_attached_to=origin_attached_to,
@@ -2283,6 +2399,7 @@ class CommanderEngine:
         origin: str,
         destination: str | None,
         origin_controller: str,
+        origin_logical_object_id: str,
         origin_data: Mapping[str, Any],
         origin_attachments: Sequence[str],
         origin_attached_to: str | None = None,
@@ -2307,7 +2424,7 @@ class CommanderEngine:
         event_destination = destination or card.zone
         common = {
             "card": card.ref,
-            "card_object_identity": card.logical_object_id,
+            "card_object_identity": origin_logical_object_id,
             "card_zone_change_counter": card.zone_change_counter,
             "owner": card.owner,
             "controller": card.controller,
@@ -2346,6 +2463,13 @@ class CommanderEngine:
                     sources=departure_sources,
                     source_zones=departure_source_zones,
                     trigger_batch=event_triggers,
+                )
+            if event_destination == "graveyard" and "creature" in origin_types:
+                self._record_turn_history(
+                    "creature_died",
+                    actor=origin_controller,
+                    object_incarnation=origin_logical_object_id,
+                    types=origin_types,
                 )
             if (
                 event_destination == "graveyard"
@@ -2573,6 +2697,7 @@ class CommanderEngine:
                 CardInstance,
                 str,
                 str,
+                str,
                 dict[str, Any],
                 list[str],
                 str | None,
@@ -2592,6 +2717,7 @@ class CommanderEngine:
                     card,
                     card.zone,
                     card.controller,
+                    card.logical_object_id,
                     copy.deepcopy(self._effective_card_data(card)),
                     [
                         self.state.cards[attachment_id].ref
@@ -2626,6 +2752,7 @@ class CommanderEngine:
             card,
             origin,
             origin_controller,
+            origin_logical_object_id,
             origin_data,
             origin_attachments,
             origin_attached_to,
@@ -2636,6 +2763,7 @@ class CommanderEngine:
                 origin=origin,
                 destination=destination,
                 origin_controller=origin_controller,
+                origin_logical_object_id=origin_logical_object_id,
                 origin_data=origin_data,
                 origin_attachments=origin_attachments,
                 origin_attached_to=origin_attached_to,
@@ -3425,6 +3553,10 @@ class CommanderEngine:
         if not entry.extra:
             self.state.last_normal_turn_player = entry.player
         self.state.turn_sequence += 1
+        if self.state.turn_history is not None:
+            self.state.turn_history = TurnHistory(
+                turn_sequence=self.state.turn_sequence
+            )
         player = self.state.players[entry.player]
         player.stats.pop(
             "protection_from_everything_until_next_turn",
@@ -5571,8 +5703,17 @@ class CommanderEngine:
 
         for effect in effects:
             if effect.get("op") == "damage_self":
-                self.state.players[seat].life -= int(
-                    effect.get("amount", 1)
+                amount = int(effect.get("amount", 1))
+                self.state.players[seat].life -= amount
+                self._record_turn_history(
+                    "player_damaged",
+                    actor=seat,
+                    object_incarnation=(
+                        source.logical_object_id if source is not None else None
+                    ),
+                    target=seat,
+                    target_kind="player",
+                    amount=amount,
                 )
             elif effect.get("op") == "pay_life":
                 amount = int(effect.get("amount", 1))
@@ -6293,6 +6434,7 @@ class CommanderEngine:
                 CardInstance,
                 str,
                 str,
+                str,
                 dict[str, Any],
                 list[str],
             ]
@@ -6354,6 +6496,7 @@ class CommanderEngine:
                         CardInstance,
                         str,
                         str,
+                        str,
                         dict[str, Any],
                         list[str],
                         str,
@@ -6375,6 +6518,7 @@ class CommanderEngine:
                                 paid_card,
                                 paid_card.zone,
                                 paid_card.controller,
+                                paid_card.logical_object_id,
                                 copy.deepcopy(
                                     self._effective_card_data(paid_card)
                                 ),
@@ -6392,6 +6536,7 @@ class CommanderEngine:
                     paid_card,
                     paid_origin,
                     paid_controller,
+                    paid_logical_object_id,
                     paid_data,
                     paid_attachments,
                     kind,
@@ -6408,6 +6553,7 @@ class CommanderEngine:
                             paid_card,
                             paid_origin,
                             paid_controller,
+                            paid_logical_object_id,
                             paid_data,
                             paid_attachments,
                         )
@@ -6493,10 +6639,14 @@ class CommanderEngine:
         )
         self.state.stack.append(item)
         if program and "storm" in program.coverage:
-            prior_spells = sum(
-                event.code == "stack.cast"
-                and event.turn_sequence == self.state.turn_sequence
-                for event in self.state.events
+            prior_spells = (
+                len(self._current_turn_history("spell_cast"))
+                if self.state.turn_history is not None
+                else sum(
+                    event.code == "stack.cast"
+                    and event.turn_sequence == self.state.turn_sequence
+                    for event in self.state.events
+                )
             )
             storm_ref = self._next_ref("S")
             storm_item = StackItem(
@@ -6593,6 +6743,7 @@ class CommanderEngine:
             paid_card,
             paid_origin,
             paid_controller,
+            paid_logical_object_id,
             paid_data,
             paid_attachments,
         ) in deferred_cost_events:
@@ -6601,6 +6752,7 @@ class CommanderEngine:
                 origin=paid_origin,
                 destination="graveyard",
                 origin_controller=paid_controller,
+                origin_logical_object_id=paid_logical_object_id,
                 origin_data=paid_data,
                 origin_attachments=paid_attachments,
                 departure_sources=deferred_cost_sources,
@@ -6609,6 +6761,12 @@ class CommanderEngine:
                 trigger_batch=cast_trigger_batch,
             )
         cast_types, _, _ = self._type_parts(type_line)
+        self._record_turn_history(
+            "spell_cast",
+            actor=seat,
+            object_incarnation=card.logical_object_id,
+            types=cast_types,
+        )
         cast_context = {
             "card": card.ref,
             "controller": seat,
@@ -17960,6 +18118,43 @@ class CommanderEngine:
             if condition.state == "monarch":
                 return self.state.monarch == player
             return self.state.players[player].poison > 0
+        if isinstance(condition, DeclarationTurnHistoryCondition):
+            if condition.fact == "attacked_player":
+                if kind != "attack" or option not in self.active_seats:
+                    return False
+                return self._object_attacked_player_this_turn(
+                    source.logical_object_id,
+                    option,
+                )
+            if condition.player is None:
+                return False
+            player = self._declaration_condition_player(
+                condition.player,
+                kind=kind,
+                source=source,
+                variable=variable,
+                option=option,
+                by_ref=by_ref,
+            )
+            if player is None:
+                return False
+            if condition.fact == "cast_spell":
+                return self._player_cast_spell_this_turn(player)
+            if condition.fact == "cast_creature_spell":
+                return self._player_cast_spell_this_turn(
+                    player,
+                    creature=True,
+                )
+            if condition.fact == "cast_noncreature_spell":
+                return self._player_cast_spell_this_turn(
+                    player,
+                    creature=False,
+                )
+            if condition.fact == "creature_died_under_control":
+                return self._creature_died_under_control_this_turn(player)
+            if condition.fact == "opponent_dealt_damage":
+                return self._opponent_was_dealt_damage_this_turn(player)
+            return False
         if isinstance(condition, DeclarationSharedSubtypeCondition):
             player = self._declaration_condition_player(
                 condition.player,
@@ -18938,6 +19133,13 @@ class CommanderEngine:
             self.state.combat.attackers[card.object_id] = defender
             self.state.combat.attack_target_context[card.object_id] = dict(
                 target_details
+            )
+            self._record_turn_history(
+                "creature_attacked",
+                actor=active,
+                object_incarnation=card.logical_object_id,
+                target=defender,
+                target_kind=target_details["kind"],
             )
             surviving_attackers.append((card, target_details))
         used = {card.object_id for card, _ in surviving_attackers}
@@ -20044,6 +20246,16 @@ class CommanderEngine:
         ):
             self.state.players[beneficiary].life += amount
             changed_players.append(beneficiary)
+        for event in damage_events:
+            if event.was_dealt and event.target_kind == "player":
+                self._record_turn_history(
+                    "player_damaged",
+                    actor=event.source_controller,
+                    object_incarnation=event.source_logical_object_id,
+                    target=event.target,
+                    target_kind="player",
+                    amount=event.dealt_amount,
+                )
         self.state.combat.damage_assignments.extend(dict(item) for item in assignments)
         self._log(
             None,
@@ -22263,6 +22475,13 @@ class CommanderEngine:
                     )
                 else:
                     self.state.players[target].life -= amount
+                    self._record_turn_history(
+                        "player_damaged",
+                        actor=actor,
+                        target=target,
+                        target_kind="player",
+                        amount=amount,
+                    )
                     self._log(actor, "effect.damage", f"{target} took {amount} damage.", {"target": target, "amount": amount, "reason": reason}, importance=2, changed_players=[target])
             else:
                 card = self._resolve_object(actor, target, zones={"battlefield"})
@@ -22316,6 +22535,13 @@ class CommanderEngine:
             ]
             for opponent in opponents:
                 self.state.players[opponent].life -= amount
+                self._record_turn_history(
+                    "player_damaged",
+                    actor=actor,
+                    target=opponent,
+                    target_kind="player",
+                    amount=amount,
+                )
             self._log(
                 actor,
                 "effect.damage",

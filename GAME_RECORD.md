@@ -99,6 +99,18 @@ checkpoints. Seat projections expose the designation but no private zone;
 inherent monarch abilities remain ordinary serialized stack objects and
 trigger batches.
 
+`GameState.turn_history` is an additive, versioned v3 checkpoint field for
+rules-relevant current-turn facts. Unlike `events.jsonl`, it is authoritative
+and participates in command hashes because declaration legality can depend on
+spells cast, a creature dying under a player's control, positive player damage,
+or the direct player previously attacked by one logical object incarnation.
+The journal records cast-time types and last-known death identity/control,
+resets when a turn begins, and remains intact across extra combats in that
+turn. A legacy v3 checkpoint that omitted the field keeps history support
+disabled and reserializes without the field, preserving its historical hash;
+new records always include schema version 1. Presentation events remain
+excluded from the authoritative hash.
+
 `CardInstance.battle_protector` is another additive public game-state field.
 It is serialized and hashed so Siege entry choices, combat routing, protector
 repair, and command replay agree exactly. Seat projections expose only the

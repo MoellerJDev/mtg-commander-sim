@@ -31066,7 +31066,7 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "history_compound_other_named_target_temporary_and_broader_attack_restriction_grammar_not_implemented"
+        "compound_other_named_target_temporary_broader_and_uncompiled_history_attack_restriction_grammar_not_implemented"
       ],
       "case_id": "cr-508.1c",
       "case_version": 1,
@@ -31096,21 +31096,29 @@
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_filtered_attack_and_block_target_relations",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_source_controller_attack_cap_is_per_target_and_replays",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_named_planeswalker_attack_cap_is_target_scoped_and_replays",
-        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_relevant_unsupported_condition_pauses_fail_closed",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_cast_history_condition_recomputes_attack_domain",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_triggered_text_is_not_misread_as_a_static_restriction",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_oracle_ir_uses_runtime_restriction_grammar",
         "tests.test_monarch_rules.MonarchRuleTests.test_player_state_declaration_predicates_and_exact_replay",
-        "tests.test_monarch_rules.MonarchRuleTests.test_monarch_controller_evasion_and_conditional_defense"
+        "tests.test_monarch_rules.MonarchRuleTests.test_monarch_controller_evasion_and_conditional_defense",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_cast_writer_preserves_types_and_mixed_creature_is_not_noncreature",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_creature_and_noncreature_cast_conditions_unlock_independently",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_controlled_creature_death_uses_lki_and_survives_token_cleanup",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_same_creature_cannot_attack_same_player_twice_and_replays",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_angelic_arbiter_uses_prior_casts_and_only_restricts_opponents"
       ],
       "implementation_components": [
         "parse_declaration_restriction_line",
         "DeclarationProblem",
+        "model.TurnHistory",
+        "CommanderEngine._record_turn_history",
         "CommanderEngine._declaration_restrictions",
         "CommanderEngine._attack_declaration_components",
         "CommanderEngine._complete_attackers"
       ],
       "notes": [
-        "A shared whole-line Oracle grammar lowers exact self, attached, global, keyword-filtered, not-alone, matching-companion, other-attacker, table-wide count, per-defender count, source-controller target, named-source target, typed battlefield conditions, and public monarch/poison player-state conditions into the finite declaration solver. Represented defender/controller permanent existence, player designation/status, another-object, tapped-state, characteristic/stat, minimum-count, relative-count, and declaration-composition predicates are inviolable, defender-specific in multiplayer, projected from the same legal domains used for submission, and replay exactly. Relevant unsupported static restriction text pauses fail closed; history, compound, other named-target, temporary, and broader predicate grammar remains blocked."
+        "A shared whole-line Oracle grammar lowers exact self, attached, global, keyword-filtered, not-alone, matching-companion, other-attacker, table-wide count, per-defender count, source-controller target, named-source target, typed battlefield conditions, public monarch/poison player-state conditions, and reviewed current-turn cast, death, damage, and prior-player-attack conditions into the finite declaration solver. Current-turn facts are versioned, authoritative, hashed, reset at each turn, retained across extra combats, and preserve cast-time types and last-known logical-object/control data. Represented predicates are inviolable, defender-specific in multiplayer, projected from the same legal domains used for submission, and replay exactly. Relevant unsupported static restriction text pauses fail closed; compound, other named-target, temporary, broader, and uncompiled history predicate grammar remains blocked."
       ],
       "required_scenarios": [
         "positive",
@@ -32549,7 +32557,7 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "history_compound_temporary_broader_and_multi_block_grammar_not_implemented"
+        "compound_temporary_broader_uncompiled_history_and_multi_block_grammar_not_implemented"
       ],
       "case_id": "cr-509.1b",
       "case_version": 1,
@@ -32589,21 +32597,23 @@
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_only_unblockable_attackers_skip_pass_only_blocker_task",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_minimum_and_maximum_blocker_counts_are_inviolable",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_block_only_keyword_filters_opposing_attackers",
-        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_relevant_unsupported_condition_pauses_fail_closed",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_monarch_controller_blocker_filter_is_enforced",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_shared_creature_subtype_condition_includes_changeling",
-        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_oracle_ir_uses_runtime_restriction_grammar"
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_oracle_ir_uses_runtime_restriction_grammar",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_controlled_creature_death_uses_lki_and_survives_token_cleanup"
       ],
       "implementation_components": [
         "parse_declaration_restriction_line",
         "DeclarationProblem",
+        "model.TurnHistory",
+        "CommanderEngine._record_turn_history",
         "CommanderEngine._declaration_restrictions",
         "CommanderEngine._block_declaration_components",
         "CommanderEngine._can_block",
         "CommanderEngine._complete_blockers"
       ],
       "notes": [
-        "The same typed declaration grammar and finite solver enforce represented blocking restrictions cumulatively with intrinsic flying, reach, shadow, and protection. Exact self, attached, global, not-alone, matching-companion, other-blocker, attacker-composition, no-other-creature, goaded-opponent, blocker-count, source-controller relation, type, supertype, subtype, token-status, keyword, color, source-stat, denied-blocker, except-by, can-block-only, controller/defender battlefield-condition, another-object, tapped-state, minimum-count, relative-count, shared-creature-subtype count, public monarch/poison player state, and conditional-evasion predicates are supported from the same projected and submitted domain; Changeling contributes once to every shared subtype. Direct pair checks use the same condition evaluator, and replay is exact. Relevant unsupported static text pauses fail closed. History, compound-with-unrelated-effects, temporary, broader, and multi-block grammar remains blocked."
+        "The same typed declaration grammar and finite solver enforce represented blocking restrictions cumulatively with intrinsic flying, reach, shadow, and protection. Exact self, attached, global, not-alone, matching-companion, other-blocker, attacker-composition, no-other-creature, goaded-opponent, blocker-count, source-controller relation, characteristic, battlefield-condition, shared-subtype, public monarch/poison player-state, conditional-evasion, and controlled-creature-died-this-turn predicates are supported from the same projected and submitted domain. Creature death uses authoritative last-known control and remains true after token cleanup. Direct pair checks use the same condition evaluator, and replay is exact. Relevant unsupported static text pauses fail closed. Compound-with-unrelated-effects, temporary, broader, uncompiled history, and multi-block grammar remains blocked."
       ],
       "required_scenarios": [
         "positive",
@@ -41199,27 +41209,41 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "look-back effects have no typed historical-state query language",
-        "event records do not preserve every characteristic predicate needed by Oracle text",
+        "the typed historical-state query language covers only current-turn cast, death, player-damage, and attack facts used by reviewed declaration restrictions",
+        "event records do not preserve every characteristic, aggregate, previous-turn, or multi-object predicate needed by Oracle text",
         "hidden-information boundaries for historical object groups are not generically enforced"
       ],
       "case_id": "cr-608.2i",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_turn_history_is_serialized_hashed_and_legacy_absence_stays_absent",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_beginning_a_new_turn_resets_history_but_extra_combats_do_not",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_cast_writer_preserves_types_and_mixed_creature_is_not_noncreature",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_controlled_creature_death_uses_lki_and_survives_token_cleanup",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_same_creature_cannot_attack_same_player_twice_and_replays"
       ],
       "implementation_components": [
-        "model.Event",
-        "CommanderEngine._semantic_value"
+        "model.TurnHistory",
+        "model.TurnHistoryEvent",
+        "CommanderEngine._record_turn_history",
+        "CommanderEngine._current_turn_history",
+        "CommanderEngine._declaration_condition_holds"
       ],
       "notes": [
-        "Unsupported look-back templates remain semantic residuals rather than consulting current state incorrectly."
+        "A hashed versioned current-turn journal preserves reviewed cast-time types, last-known death control, final positive player damage, and logical-object attack targets for exact declaration predicates and replay. Broader and hidden historical queries remain semantic residuals rather than consulting current state incorrectly."
       ],
       "required_scenarios": [
         "positive",

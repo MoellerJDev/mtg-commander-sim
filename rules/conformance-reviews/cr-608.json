@@ -358,11 +358,20 @@
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
       "implementation_components": [
-        "model.Event",
-        "CommanderEngine._semantic_value"
+        "model.TurnHistory",
+        "model.TurnHistoryEvent",
+        "CommanderEngine._record_turn_history",
+        "CommanderEngine._current_turn_history",
+        "CommanderEngine._declaration_condition_holds"
       ],
       "executable_test_ids": [
-        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule"
+        "tests.test_resolution_rules.ResolutionRuleTests.test_contract_traces_every_cr_608_rule",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_turn_history_is_serialized_hashed_and_legacy_absence_stays_absent",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_beginning_a_new_turn_resets_history_but_extra_combats_do_not",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_cast_writer_preserves_types_and_mixed_creature_is_not_noncreature",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_controlled_creature_death_uses_lki_and_survives_token_cleanup",
+        "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_same_creature_cannot_attack_same_player_twice_and_replays"
       ],
       "required_scenarios": [
         "positive",
@@ -371,14 +380,19 @@
         "hidden_information",
         "replay"
       ],
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
       "blockers": [
-        "look-back effects have no typed historical-state query language",
-        "event records do not preserve every characteristic predicate needed by Oracle text",
+        "the typed historical-state query language covers only current-turn cast, death, player-damage, and attack facts used by reviewed declaration restrictions",
+        "event records do not preserve every characteristic, aggregate, previous-turn, or multi-object predicate needed by Oracle text",
         "hidden-information boundaries for historical object groups are not generically enforced"
       ],
       "notes": [
-        "Unsupported look-back templates remain semantic residuals rather than consulting current state incorrectly."
+        "A hashed versioned current-turn journal preserves reviewed cast-time types, last-known death control, final positive player damage, and logical-object attack targets for exact declaration predicates and replay. Broader and hidden historical queries remain semantic residuals rather than consulting current state incorrectly."
       ]
     },
     {

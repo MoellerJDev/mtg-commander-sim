@@ -1,11 +1,11 @@
 # Oracle IR coverage
 
-- Compiler: `oracle-ir-v10`
+- Compiler: `oracle-ir-v11`
 - Oracle IDs: 38,484
 - Faces: 41,701
 - Exact: 2,959 (7.6889%)
-- Partially lowerable: 16,068
-- Unresolved: 19,457
+- Partially lowerable: 16,092
+- Unresolved: 19,433
 - Material residuals: 69,890
 - Current snapshot complete: false
 
@@ -13,8 +13,11 @@
 dependencies remain partial. See `oracle-coverage.json` for counts by residual
 kind and template.
 
-This compiler revision additionally lowers 36 exact-template `you become the
-monarch` occurrences and four public monarch/poison declaration templates. The
-declaration-restriction residual count is 160 and the declaration-cost
-residual count is 11; recognized nodes remain partial while their broader
-mechanic dependencies are untrusted.
+This compiler revision adds eight current-turn declaration occurrences across
+six generic templates: creature/noncreature spells cast, controlled creature
+deaths, opponents dealt damage, prior direct-player attacks, and opponents
+that cast a spell. Generic leading-name self-reference normalization also
+classifies additional declaration text fail closed. The declaration-
+restriction residual count is 170 and the declaration-cost residual count is
+11; recognized nodes remain partial while their broader mechanic dependencies
+are untrusted.
