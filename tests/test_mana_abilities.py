@@ -276,6 +276,115 @@ class ManaAbilityRuleTests(unittest.TestCase):
             sum(engine.state.players["A"].mana_pool.values()),
         )
 
+    def test_treasure_exposes_color_choice_and_auto_payment_sacrifices_it(self):
+        engine = self.make_engine(60506)
+        treasure_ref = engine.create_token(
+            "A",
+            name="Treasure",
+            characteristics={
+                "type_line": "Token Artifact — Treasure",
+                "oracle_text": (
+                    "{T}, Sacrifice this token: Add one mana of any color."
+                ),
+            },
+        )[0]
+        treasure = next(
+            card
+            for card in engine.state.cards.values()
+            if card.ref == treasure_ref
+        )
+        ring = self.card(engine, "A", "Sol Ring")
+        engine.move_card(ring.object_id, "hand", log=False)
+        self.prepare_main(engine)
+        engine.pump()
+
+        action = next(
+            action
+            for action in engine.state.pending_decision.payload_by_actor[
+                "A"
+            ]["legal"]["actions"]
+            if action.get("source") == treasure.ref
+        )
+
+        self.assertTrue(action["mana_ability"])
+        self.assertEqual(
+            [{color: 1} for color in "WUBRG"],
+            [
+                option["value"]
+                for option in action["choice_schema"]["mana_output"][
+                    "options"
+                ]
+            ],
+        )
+        opportunity = engine.state.action_opportunities[-1]
+        self.assertTrue(opportunity["pilot_task_issued"])
+        self.assertIn(
+            f"cast:{ring.ref}", opportunity["meaningful_action_ids"]
+        )
+        self.assertEqual(
+            0,
+            engine.state.players["A"].stats[
+                "decision_optimization"
+            ]["suppressed_meaningful_windows"],
+        )
+
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.priority_player = "A"
+
+        engine._cast("A", {"card": ring.ref, "pay": "auto"})
+
+        self.assertEqual("outside", treasure.zone)
+        self.assertEqual("stack", ring.zone)
+        self.assertEqual(
+            0,
+            sum(engine.state.players["A"].mana_pool.values()),
+        )
+
+    def test_recordless_mana_plan_ignores_submitted_side_effects(self):
+        engine = self.make_engine(60507)
+        treasure_ref = engine.create_token(
+            "A",
+            name="Treasure",
+            characteristics={
+                "type_line": "Token Artifact — Treasure",
+                "oracle_text": (
+                    "{T}, Sacrifice this token: Add one mana of any color."
+                ),
+            },
+        )[0]
+        treasure = next(
+            card
+            for card in engine.state.cards.values()
+            if card.ref == treasure_ref
+        )
+        ring = self.card(engine, "A", "Sol Ring")
+        engine.move_card(ring.object_id, "hand", log=False)
+        self.prepare_main(engine)
+        starting_life = engine.state.players["A"].life
+
+        engine._cast(
+            "A",
+            {
+                "card": ring.ref,
+                "pay": "manual",
+                "mana": [
+                    {
+                        "source": treasure.ref,
+                        "bundle": {"U": 1},
+                        "side_effects": [
+                            {"op": "pay_life", "amount": starting_life}
+                        ],
+                    }
+                ],
+                "payment": {"U": 1},
+            },
+        )
+
+        self.assertEqual(starting_life, engine.state.players["A"].life)
+        self.assertEqual("outside", treasure.zone)
+        self.assertEqual("stack", ring.zone)
+
     def test_mana_producing_spell_is_not_a_mana_ability(self):
         engine = self.make_engine(60504)
         drain = self.card(engine, "A", "Mana Drain")

@@ -119,6 +119,14 @@ uses the floated pool first, validates the complete payment, and may finish a
 routine unpaid remainder. This mode controls activation order; it is not yet a
 general restricted-mana or arbitrary cost-allocation editor.
 
+Rules-created tokens do not need a Scryfall card row when their projected
+characteristics contain a fully compiled mana ability. Treasure presents exact
+`W/U/B/R/G` output choices, is eligible for Auto-mana, and pays its tap and
+sacrifice costs before adding mana. An uncompiled token cost or output remains
+unavailable to automatic payment rather than being guessed. The server ignores
+submitted mana-plan side-effect fields and derives them from the selected
+authoritative mode.
+
 Land-face entry choices come from that face's Oracle text. **Play Agadeem, the
 Undercrypt** therefore offers **Pay 3 life to enter untapped**, charges exactly
 3 if selected, enters as the land face, and requests the back-face image.
@@ -133,6 +141,12 @@ rules boundary to the table; it is never routed to a hidden browser-inaccessible
 arbiter prompt. Sunscorched Desert's targeted ETB damage and Orcish Bowmasters'
 resolution, targeted damage, opponent extra-draw trigger, and Amass Orcs path
 are reviewed examples of the generic semantic executor.
+
+Land play is a stackless special action, but it is also a stabilization
+boundary. The server runs state-based actions and places represented enters
+triggers before it returns priority. A Sunscorched Desert play therefore
+opens its target form immediately; the choice is not postponed until a later
+pass or phase transition.
 
 Saved games retain the semantic registry and policy from their creation. An
 older game is not upgraded in place. On load, any legacy arbiter-only decision

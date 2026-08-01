@@ -24,6 +24,11 @@
   projected battlefield, activation order is recorded normally, exact
   multi-color modes are selected through a server-issued form, and casting
   consumes floated mana before routine automatic completion.
+- Made rules-created Treasure tokens first-class mana sources even though they
+  have no Scryfall card record. Their manual action offers exactly five color
+  choices, automatic payment can use them, and tap/sacrifice costs are applied
+  before the selected mana is added. Submitted mana-plan side-effect fields can
+  no longer replace the authoritative mode's costs or effects.
 - Kept generically enforced mana-mode life payments and self-damage inside the
   trusted preflight boundary, so manual activation does not incorrectly
   downgrade sources such as Elves of Deep Shadow.
@@ -39,6 +44,14 @@
   triggers, and generic Amass Orcs execution. Unsupported trusted-only
   resolution now pauses the visible game lifecycle instead of leaving clients
   on an inaccessible arbiter task.
+- Stabilized every land-play command before returning priority. State-based
+  actions and represented enters triggers now run immediately, so Sunscorched
+  Desert's target choice cannot be deferred until combat or hidden behind a
+  later priority pass.
+- Added a deterministic two-browser duel that plays and targets Sunscorched
+  Desert, casts Sol Ring, counters it with An Offer You Can't Refuse, spends a
+  resulting Treasure on Orcish Bowmasters, resolves its target, and verifies
+  the Army token without entering a rules pause.
 - Hardened the same boundary for records created by older browser builds. A
   persisted arbiter-only decision now becomes a durable, non-resumable browser
   rules pause, player actions disappear, and every seat is told that no player

@@ -153,6 +153,7 @@
     "test_saga_lore_precedes_main_phase_priority",
     "test_active_player_gets_main_priority_and_sorcery_timing_is_exact",
     "test_land_play_is_stackless_atomic_and_uses_allowance",
+    "test_land_play_command_stabilizes_enter_trigger_before_priority",
     "test_land_hints_require_the_actual_active_main_phase"
   ],
   "implementation": {

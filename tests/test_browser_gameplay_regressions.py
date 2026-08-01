@@ -156,6 +156,36 @@ class BrowserGameplayRegressionTests(unittest.TestCase):
         self.assertEqual(39, engine.state.players["A"].life)
         self.assertEqual("battlefield", desert.zone)
 
+    def test_land_play_command_stabilizes_enter_trigger_before_priority(self):
+        session = self.make_session(9106)
+        engine = session.engine
+        desert = self.add_card(engine, "A", "Sunscorched Desert", "hand")
+        engine.state.started = True
+        engine.state.turn_sequence = 3
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine.state.phase_index = 3
+        engine.state.players["A"].land_plays_remaining = 1
+        engine._grant_priority("A")
+        engine.pump()
+
+        result = session.act(
+            "pilot:A",
+            {"action_id": f"play-land:{desert.ref}"},
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("precombat_main", engine.state.phase)
+        self.assertEqual("main", engine.state.step)
+        self.assertEqual("semantic.target", engine.state.pending_decision.kind)
+        self.assertEqual(["A"], engine.state.pending_decision.actors)
+        self.assertEqual(1, len(engine.state.stack))
+        self.assertEqual(
+            "Sunscorched Desert enters", engine.state.stack[-1].label
+        )
+        self.assertIsNone(engine.state.priority_player)
+
     def test_orcish_bowmasters_resolves_then_damages_and_amasses(self):
         session = self.make_session(9103)
         engine = session.engine

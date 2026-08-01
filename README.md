@@ -26,7 +26,9 @@ The browser renders the engine's current generic choice vocabulary, locally
   owner-only durable stop/resume controls, and a seat-safe record inspection
   panel. These paths are
 end-to-end tested with four shared-cookie tab-isolated seats and a two-player
-duel, plus an isolated invited spectator. Future choice schemas, full account
+duel, plus an isolated invited spectator. A deterministic two-browser rules
+journey also covers immediate targeted land ETBs, a real stack response,
+rules-created Treasure payment, permanent-spell resolution, and Amass. Future choice schemas, full account
 identity, expiry/rate limits, and production operations remain incomplete.
 The generated platform ledger records the exact current test and coverage
 counts.
@@ -124,6 +126,11 @@ abilities, then click those permanents in the order you want to activate them;
 multi-color sources ask which exact mana to add. Choose the spell again after
 floating mana. Manual mode controls source activation order while the server
 still validates the pool and may complete a routine remaining payment.
+Rules-created mana tokens are handled by the same path without requiring a
+Scryfall printing. For example, Treasure offers only the five legal color
+outputs and its tap/sacrifice costs are paid before mana is added; Auto-mana
+may consume it only when those represented costs and outputs are fully
+compiled.
 
 Modal double-faced cards receive one action for each currently playable use.
 For example, Agadeem's Awakening can be selected as a spell or as **Play
@@ -509,6 +516,12 @@ When a trusted-only browser game reaches an unsupported material resolution,
 the durable lifecycle changes to `paused` and the UI reports the rules
 boundary. It does not strand the players behind an arbiter-only decision or
 describe that state as repeated priority passing.
+
+After a land is played, the engine stabilizes state-based actions and all
+represented waiting triggers before returning priority. A targeted enters
+trigger such as Sunscorched Desert therefore opens its target choice
+immediately in the same main phase; it cannot remain queued while another
+spell is cast or while the game advances toward combat.
 
 Game Records pin the semantic registry and policy that created them. Restarting
 the current server does not silently retrofit newer card behavior into an old

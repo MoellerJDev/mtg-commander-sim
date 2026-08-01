@@ -123,7 +123,9 @@
     "test_mana_ability_can_activate_during_spell_payment",
     "test_mana_producing_spell_is_not_a_mana_ability",
     "test_token_reminder_text_does_not_create_source_mana_ability",
-    "test_mana_drain_schedules_exact_next_main_phase_mana"
+    "test_mana_drain_schedules_exact_next_main_phase_mana",
+    "test_treasure_exposes_color_choice_and_auto_payment_sacrifices_it",
+    "test_recordless_mana_plan_ignores_submitted_side_effects"
   ],
   "implementation": {
     "component": "ActivatedAbility mana classification and CommanderEngine immediate mana/payment paths",
