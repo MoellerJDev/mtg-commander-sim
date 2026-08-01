@@ -121,6 +121,19 @@ def _matches(
     state: CharacteristicState,
     context: Mapping[str, Any],
 ) -> bool:
+    def normalized_members(values: Any) -> set[Any]:
+        if values is None:
+            return set()
+        if isinstance(values, str):
+            values = [values]
+        return {
+            value.casefold() if isinstance(value, str) else value
+            for value in values
+        }
+
+    def normalized_expected(value: Any) -> Any:
+        return value.casefold() if isinstance(value, str) else value
+
     for field_name, expected in condition.items():
         if field_name.startswith("context."):
             actual = context.get(field_name.removeprefix("context."))
@@ -128,12 +141,22 @@ def _matches(
             actual = getattr(state, field_name, None)
         if isinstance(expected, Mapping):
             if "contains" in expected:
-                if expected["contains"] not in (actual or ()):
+                if normalized_expected(
+                    expected["contains"]
+                ) not in normalized_members(actual):
                     return False
                 continue
             if "contains_any" in expected:
-                if not set(actual or ()).intersection(
-                    expected["contains_any"]
+                if not normalized_members(actual).intersection(
+                    normalized_members(expected["contains_any"])
+                ):
+                    return False
+                continue
+            if "contains_all" in expected:
+                if not normalized_members(
+                    expected["contains_all"]
+                ).issubset(
+                    normalized_members(actual)
                 ):
                     return False
                 continue
@@ -361,7 +384,7 @@ def evaluate_continuous_effects(
     context: Mapping[str, Any] | None = None,
 ) -> ContinuousEvaluation:
     context = dict(context or {})
-    applicable: list[ContinuousEffect] = []
+    present: list[ContinuousEffect] = []
     inapplicable: list[str] = []
     for effect in effects:
         if effect.duration == "while_source_present" and not (
@@ -369,13 +392,15 @@ def evaluate_continuous_effects(
         ):
             inapplicable.append(effect.effect_id)
             continue
+        present.append(effect)
+    ordered, cycles = order_continuous_effects(present)
+    applied: list[str] = []
+    for effect in ordered:
+        # Applicability is evaluated against the characteristics produced by
+        # earlier layers, not the object's unmodified starting values.
         if not _matches(effect.applies, base, context):
             inapplicable.append(effect.effect_id)
             continue
-        applicable.append(effect)
-    ordered, cycles = order_continuous_effects(applicable)
-    applied: list[str] = []
-    for effect in ordered:
         for operation in effect.operations:
             _apply_operation(base, operation)
         if effect.layer == Layer.COPY and effect.sublayer == "1a":

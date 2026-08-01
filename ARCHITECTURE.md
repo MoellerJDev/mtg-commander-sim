@@ -124,10 +124,11 @@ Game Record v3 records pin CardProgram fingerprints without changing the record
 version.
 
 Versioned CardProgram runtime component descriptors represent static
-participation in later events without printed-name dispatch in the engine. The
-first registered component lowers reviewed fixed additional-token replacements
-to typed intents. Its scope is deliberately narrower than general CR 616
-replacement ordering and rediscovery.
+participation in later events without printed-name dispatch in the engine.
+Registered families lower reviewed fixed additional-token replacements to
+typed intents and fixed subtype anthems to layer-7c continuous effects. Their
+scope remains deliberately narrower than general CR 616 replacement ordering
+or complete CR 613 dependency evaluation.
 
 ## Authoritative state versus projected state
 
@@ -861,7 +862,11 @@ The new rules primitives sit below both generated and hand-authored semantics:
 
 - `continuous_effects.py` orders CR 613 layers, sublayers, CDAs, timestamps,
   dependencies, and cycles. The engine already routes common copy/type/
-  subtype/temporary-keyword annotations through it.
+  subtype/temporary-keyword annotations through it. CardProgram runtime
+  components can contribute source-stamped effects through a read-only state
+  view; applicability is checked against the characteristics produced by
+  earlier layers. The first reviewed component is a fixed subtype anthem in
+  layer 7c, not a claim of general continuous-effect compilation.
 - `replacement_effects.py` orders CR 616 replacement/prevention priority
   classes, affected-player choices, optional declines, and repeated
   applicability for typed events.

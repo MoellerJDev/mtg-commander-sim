@@ -20,7 +20,9 @@ from .carddb import CardDatabase, CardRecord
 from .card_programs.validation import (
     canonical_program_fingerprint,
     program_source_is_current,
-    runtime_component_program_is_current_trusted,
+)
+from .card_programs.runtime import (
+    collect_card_program_continuous_effects,
 )
 from .combat import (
     DEFENDER,
@@ -197,7 +199,11 @@ class CommanderEngine:
             self.semantics, program
         )
         if card_fingerprint is None:
-            return False
+            if not self.semantics.is_runtime_handler_compatibility_program(
+                program
+            ):
+                return False
+            card_fingerprint = f"runtime-compatibility:{program.key}"
         cache_key = (program.key, program_hash, card_fingerprint)
         cached = self._semantic_trust_cache.get(cache_key)
         if cached is not None:
@@ -774,6 +780,8 @@ class CommanderEngine:
         self,
         card: CardInstance,
         base: Mapping[str, Any],
+        *,
+        runtime_effects: Sequence[ContinuousEffect] = (),
     ) -> dict[str, Any]:
         """Evaluate the engine's declarative characteristic annotations.
 
@@ -825,6 +833,7 @@ class CommanderEngine:
             or added_subtypes
             or card.temporary_keywords
             or card.annotations.get("bestowed")
+            or runtime_effects
         )
         if not layered:
             result["keywords"] = unique_preserving_order(
@@ -986,6 +995,8 @@ class CommanderEngine:
                 )
             )
 
+        effects.extend(runtime_effects)
+
         evaluated = evaluate_continuous_effects(state, effects)
         values = evaluated.characteristics
         result.update(
@@ -1129,8 +1140,19 @@ class CommanderEngine:
                 "colors": list(record.colors),
                 "produced_mana": list(record.produced_mana),
             }
+        runtime_effects = (
+            collect_card_program_continuous_effects(
+                self.state,
+                self.semantics,
+                self.semantic_program_is_current_trusted,
+            )
+            if card.zone == "battlefield"
+            else ()
+        )
         base = self._apply_layered_characteristic_annotations(
-            card, base
+            card,
+            base,
+            runtime_effects=runtime_effects,
         )
         conditional_haste = re.search(
             r"has haste as long as an opponent has "
@@ -1151,7 +1173,7 @@ class CommanderEngine:
                 [*base["keywords"], "Haste"]
             )
         if card.zone == "battlefield":
-            card_types, card_subtypes, _ = self._type_parts(
+            card_types, _, _ = self._type_parts(
                 str(base.get("type_line") or "")
             )
             for permanent_id in self.state.players[
@@ -1317,29 +1339,6 @@ class CommanderEngine:
                         )
                     except (TypeError, ValueError):
                         pass
-            if "thopter" in card_subtypes:
-                anthem_count = sum(
-                    1
-                    for object_id in self.state.players[
-                        card.controller
-                    ].zones["battlefield"]
-                    if self.state.cards[object_id].controller
-                    == card.controller
-                    and not self.state.cards[object_id].phased_out
-                    and self.state.cards[
-                        object_id
-                    ].printed_name
-                    == "Stridehangar Automaton"
-                )
-                if anthem_count:
-                    for stat in ("power", "toughness"):
-                        try:
-                            base[stat] = str(
-                                int(str(base.get(stat)))
-                                + anthem_count
-                            )
-                        except (TypeError, ValueError):
-                            pass
             graveyard_ids = self.state.players[card.owner].zones[
                 "graveyard"
             ]
@@ -23858,9 +23857,7 @@ class CommanderEngine:
                     event="token.create",
                 )
                 for program in programs:
-                    if not runtime_component_program_is_current_trusted(
-                        self.semantics, self.card_db, program
-                    ):
+                    if not self.semantic_program_is_current_trusted(program):
                         continue
                     for descriptor in program.handlers:
                         for intent in replacement_registry.lower(

@@ -65,17 +65,3 @@ def program_source_is_current(
         program.provenance.get("source_oracle_hash") == oracle_hash
         and program.provenance.get("source_rulings_hash") == rulings_hash
     )
-
-
-def runtime_component_program_is_current_trusted(
-    registry: "SemanticRegistry",
-    card_db: "CardDatabase",
-    program: "SemanticProgram",
-) -> bool:
-    if program.trust_level != "trusted":
-        return False
-    represented = (
-        canonical_program_fingerprint(registry, program) is not None
-        or registry.is_runtime_handler_compatibility_program(program)
-    )
-    return represented and program_source_is_current(card_db, program)

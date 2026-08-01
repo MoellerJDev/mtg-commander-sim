@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 3,
+  "registry_version": 4,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -43,6 +43,12 @@
       "mechanic_id": "cr-111-tokens",
       "capabilities": [
         "token.creation.additional_replacement"
+      ]
+    },
+    {
+      "mechanic_id": "cr-613-continuous-effects",
+      "capabilities": [
+        "continuous.power_toughness.fixed_anthem"
       ]
     }
   ],
@@ -117,6 +123,30 @@
       "required_evidence": ["positive", "negative", "interaction", "replay"],
       "mutation_status": "not_run",
       "blockers": ["General affected-player replacement ordering and replacement rediscovery remain outside this bounded component."],
+      "status": "tested"
+    },
+    {
+      "id": "continuous.power_toughness.fixed_anthem",
+      "version": 1,
+      "official_rules": ["604.1", "611.3a", "613.1g", "613.4c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Apply a reviewed battlefield static ability that gives same-controller permanents with declared subtypes a fixed power/toughness modifier in layer 7c.",
+        "inputs": ["active source object", "source controller", "source timestamp", "target controller", "target subtypes after earlier layers", "fixed power/toughness modifier"],
+        "outputs": ["typed layer-7c continuous effect", "dynamic subtype applicability", "stacking modifiers from multiple sources"],
+        "exclusions": ["power/toughness setting effects", "characteristic-defining abilities", "layer dependencies within 7c", "ability-removal dependency interactions", "non-subtype predicates", "state-derived modifier amounts"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.continuous_components.FixedPowerToughnessAnthemHandler", "mtg_commander_sim.card_programs.runtime.collect_card_program_continuous_effects", "mtg_commander_sim.continuous_effects.evaluate_continuous_effects"],
+      "positive_tests": ["test_registered_anthem_component_replaces_name_dispatch"],
+      "negative_tests": ["test_anthem_component_rejects_malformed_descriptors"],
+      "interaction_tests": ["test_multiple_anthem_components_stack_and_respect_control", "test_layer_four_subtype_change_enables_layer_seven_anthem"],
+      "multiplayer_tests": [],
+      "privacy_tests": [],
+      "replay_tests": ["test_anthem_component_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "replay"],
+      "mutation_status": "not_run",
+      "blockers": ["General continuous-effect dependencies and dynamically computed modifiers remain outside this bounded component."],
       "status": "tested"
     },
     {

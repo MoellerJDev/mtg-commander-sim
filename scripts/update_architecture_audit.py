@@ -638,13 +638,13 @@ def _semantic_handler_metrics(
 ) -> dict[str, Any]:
     from mtg_commander_sim.semantic_runtime import (
         default_semantic_handler_registry,
-        default_token_creation_replacement_registry,
+        runtime_component_inventory,
+        runtime_component_registry_fingerprint,
     )
 
     registry = default_semantic_handler_registry()
     inventory = registry.inventory()
-    runtime_registry = default_token_creation_replacement_registry()
-    runtime_inventory = runtime_registry.inventory()
+    runtime_inventory = runtime_component_inventory()
     engine_branches = [
         branch
         for branch in state_dispatch["semantic_operation_branches"][
@@ -672,7 +672,9 @@ def _semantic_handler_metrics(
         "registered_operation_count": len(registered_operations),
         "registered_operations": sorted(registered_operations),
         "handlers": inventory,
-        "runtime_registry_fingerprint": runtime_registry.fingerprint,
+        "runtime_registry_fingerprint": (
+            runtime_component_registry_fingerprint()
+        ),
         "registered_runtime_handler_count": len(runtime_inventory),
         "runtime_handlers": runtime_inventory,
         "engine_string_dispatch_branch_count": len(engine_branches),

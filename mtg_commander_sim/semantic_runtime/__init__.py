@@ -8,6 +8,19 @@ from .context import (
     ReadOnlyRulesQuery,
     SemanticNodeError,
 )
+from .components import (
+    describe_runtime_handler,
+    runtime_component_inventory,
+    runtime_component_registry_fingerprint,
+    validate_runtime_handler_descriptors,
+)
+from .continuous_components import (
+    ContinuousEffectComponentRegistry,
+    ContinuousEffectSourceContext,
+    FixedPowerToughnessAnthemHandler,
+    FixedPowerToughnessAnthemNode,
+    default_continuous_effect_component_registry,
+)
 from .executor import (
     DrawResolutionBatch,
     DrawResolutionRequest,
@@ -37,7 +50,6 @@ from .token_replacements import (
     TokenCreationReplacementContext,
     TokenDefinition,
     default_token_creation_replacement_registry,
-    validate_runtime_handler_descriptors,
 )
 
 
@@ -75,6 +87,10 @@ __all__ = [
     "DrawNode",
     "DrawResolutionBatch",
     "DrawResolutionRequest",
+    "ContinuousEffectComponentRegistry",
+    "ContinuousEffectSourceContext",
+    "FixedPowerToughnessAnthemHandler",
+    "FixedPowerToughnessAnthemNode",
     "IntentPlan",
     "ReadOnlyHandlerContext",
     "ReadOnlyRulesQuery",
@@ -88,10 +104,14 @@ __all__ = [
     "TokenCreationReplacementRegistry",
     "TokenDefinition",
     "default_token_creation_replacement_registry",
+    "default_continuous_effect_component_registry",
     "default_semantic_handler_registry",
     "default_semantic_interpreter",
     "draw_resolution_batch",
     "execute_intent_plan",
     "prepare_draw_resolution",
+    "describe_runtime_handler",
+    "runtime_component_inventory",
+    "runtime_component_registry_fingerprint",
     "validate_runtime_handler_descriptors",
 ]

@@ -1,0 +1,76 @@
+from __future__ import annotations
+
+import hashlib
+from typing import Any, Iterable, Mapping
+
+from ..util import stable_json
+from .context import SemanticNodeError
+from .continuous_components import (
+    default_continuous_effect_component_registry,
+)
+from .token_replacements import (
+    default_token_creation_replacement_registry,
+)
+
+
+def runtime_component_registries() -> tuple[Any, ...]:
+    return (
+        default_continuous_effect_component_registry(),
+        default_token_creation_replacement_registry(),
+    )
+
+
+def runtime_component_inventory() -> list[dict[str, Any]]:
+    inventory = [
+        descriptor
+        for registry in runtime_component_registries()
+        for descriptor in registry.inventory()
+    ]
+    identifiers = [str(value["handler_id"]) for value in inventory]
+    if len(identifiers) != len(set(identifiers)):
+        raise SemanticNodeError(
+            "Runtime handler IDs must be globally unique"
+        )
+    return sorted(inventory, key=lambda value: value["handler_id"])
+
+
+def describe_runtime_handler(handler_id: str) -> dict[str, Any] | None:
+    return next(
+        (
+            descriptor
+            for descriptor in runtime_component_inventory()
+            if descriptor["handler_id"] == handler_id
+        ),
+        None,
+    )
+
+
+def validate_runtime_handler_descriptors(
+    descriptors: Iterable[Mapping[str, Any]],
+) -> None:
+    registries = runtime_component_registries()
+    for descriptor in descriptors:
+        handler_id = str(descriptor.get("handler_id") or "")
+        registry = next(
+            (
+                value
+                for value in registries
+                if value.describe(handler_id) is not None
+            ),
+            None,
+        )
+        if registry is None:
+            raise SemanticNodeError(
+                f"Unknown runtime handler ID {handler_id!r}"
+            )
+        registry.validate(descriptor)
+
+
+def runtime_component_registry_fingerprint() -> str:
+    payload = {
+        "schema_version": 1,
+        "handlers": runtime_component_inventory(),
+    }
+    return hashlib.sha256(
+        stable_json(payload).encode("utf-8")
+    ).hexdigest()

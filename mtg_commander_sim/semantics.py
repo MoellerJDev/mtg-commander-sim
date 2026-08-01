@@ -175,6 +175,11 @@ class SemanticProgram:
         ):
             raise ValueError("Capability dependencies must be unique")
         validate_runtime_handler_descriptors(self.handlers)
+        for handler in self.handlers:
+            if handler.get("event") != self.event:
+                raise ValueError(
+                    "Runtime handler event must match its semantic program"
+                )
         if self.capability_dependencies and self.capability_closure is None:
             raise ValueError(
                 "Capability dependencies require their resolved closure"

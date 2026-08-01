@@ -28,7 +28,7 @@
   },
   "milestones": [
     {
-      "evidence": "The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, ratcheted guards, documentation enforcement, fine-grained capability closure, CardProgram V2, and the Phase 4 typed-handler boundary are integrated on verified main. Registered draw, table-wide draw, and monarch handlers use immutable rules queries, typed intents, canonical stack resolution, and a measured legacy fallback for unmigrated operations.",
+      "evidence": "The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, ratcheted guards, documentation enforcement, fine-grained capability closure, CardProgram V2, the Phase 4 typed-handler boundary, and the first bounded Phase 5 token-replacement runtime component are integrated on verified main. Registered draw, table-wide draw, and monarch handlers use immutable rules queries, typed intents, canonical stack resolution, and a measured legacy fallback for unmigrated operations.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete"
@@ -52,7 +52,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Merge the first bounded Phase 5 CardProgram runtime-component slice, then migrate the remaining Stridehangar anthem branch through a typed continuous-effect component without changing Game Record v3.",
+  "next_task": "Merge the bounded Phase 5 fixed-anthem component slice, then select the next measured card-specific core family for typed migration without widening Oracle coverage or changing Game Record v3.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -70,7 +70,7 @@
     "replay": "implemented_command_replay_with_additive_card_program_v2_fingerprints",
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "security": "guest_hash_csrf_origin_capability_and_projection_baseline",
-    "semantic_handlers": "implemented_registered_read_only_typed_intent_boundary_for_draw_table_draw_and_monarch_plus_versioned_static_runtime_component_registry_with_legacy_fallback",
+    "semantic_handlers": "implemented_registered_read_only_typed_intent_boundary_for_draw_table_draw_and_monarch_plus_versioned_token_replacement_and_continuous_effect_runtime_component_registries_with_legacy_fallback",
     "single_writer_game_actor": "implemented_single_process",
     "transport_neutral_service": "implemented_strict_protocol_3"
   },
@@ -137,19 +137,19 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4177,
+    "deterministic_cases_discovered": 4183,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
     "web_files": 24
   },
   "validation": {
-    "baseline_commit": "859cbb5dc0ad361ad55258be2eeb27c24a01173f",
+    "baseline_commit": "9547e143ad6c8f16ef1a964ce725c4ebebdb05c5",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30719623812,
+      "run_id": 30721336920,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30719623812"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30721336920"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",

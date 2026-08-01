@@ -72,8 +72,10 @@ mutation, card-specificity, documentation, and ADR guards. Phase 2 added the
 fine-grained capability registry, Phase 3 added CardProgram V2, and Phase 4
 incrementally removed generic central-dispatch branches through typed handlers
 and intents. Phase 5 is now moving card-specific core branches into registered,
-versioned CardProgram runtime components. Later phases migrate domain-owned
-state before resuming dependency-ordered rules expansion.
+versioned CardProgram runtime components. Fixed additional-token replacements
+and fixed subtype anthems are the first bounded families; neither general CR
+616 ordering nor complete CR 613 dependencies are implied. Later phases migrate
+domain-owned state before resuming dependency-ordered rules expansion.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,
