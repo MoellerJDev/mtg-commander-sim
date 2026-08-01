@@ -106,14 +106,14 @@
     {
       "mechanic_id": "cr-508-declare-attackers-step",
       "path": "mechanics/contracts/declare-attackers-step.json",
-      "sha256": "41deacea8f07c3494ebbd5c252e94c6a67e2df6e8c857156413a6e659a1362a6",
-      "version": 6
+      "sha256": "60342017bb7171ba54be068611bde4fa9ced75361125cd2a910612584ac76e6e",
+      "version": 7
     },
     {
       "mechanic_id": "cr-509-declare-blockers-step",
       "path": "mechanics/contracts/declare-blockers-step.json",
-      "sha256": "437cd7ed1e74207d89cbb7bc4aa8bfbc9bc5b68dcc35ade31cd61213ca527a7e",
-      "version": 6
+      "sha256": "aebc4626eeeecb2c12fe17e9113fd10b1cc9fd6d8502c258d5e32bb7a7f0b0c4",
+      "version": 7
     },
     {
       "mechanic_id": "defender",
@@ -6734,17 +6734,17 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-attackers-step.json",
-      "contract_sha256": "41deacea8f07c3494ebbd5c252e94c6a67e2df6e8c857156413a6e659a1362a6",
-      "contract_version": 6,
+      "contract_sha256": "60342017bb7171ba54be068611bde4fa9ced75361125cd2a910612584ac76e6e",
+      "contract_version": 7,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine attacker declaration/payment transition",
-      "implementation_version": "declare-attackers-step-v6",
+      "implementation_version": "declare-attackers-step-v7",
       "kind": "rules_section",
       "known_blockers": [
         "planeswalker attack targets are not implemented",
         "exact attacks-each-combat and typed goad requirements are represented; conditional, non-goad defender-specific, and other effect-granted requirement grammar remains incomplete",
-        "conditional, compound, target-specific, temporary, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
+        "history-, monarch-, poison-, declaration-history-, compound-, target-specific-, temporary-, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
         "banding declarations are not implemented",
         "optional, nonmana, variable, alternative, modified, and broader conditional attack costs are not implemented",
         "declare-attackers trigger generation and APNAP placement are incomplete",
@@ -6801,6 +6801,9 @@
         "test_attack_or_block_alone_allows_different_defenders_and_replays",
         "test_global_maximum_constrains_requirement_solver",
         "test_keyword_filtered_global_attack_restriction",
+        "test_defender_conditions_filter_attack_options_and_replay",
+        "test_controller_conditions_use_another_stats_and_exact_size",
+        "test_minimum_and_relative_counts_are_defender_specific",
         "test_relevant_unsupported_condition_pauses_fail_closed",
         "test_triggered_text_is_not_misread_as_a_static_restriction",
         "test_oracle_ir_uses_runtime_restriction_grammar"
@@ -6810,15 +6813,15 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-blockers-step.json",
-      "contract_sha256": "437cd7ed1e74207d89cbb7bc4aa8bfbc9bc5b68dcc35ade31cd61213ca527a7e",
-      "contract_version": 6,
+      "contract_sha256": "aebc4626eeeecb2c12fe17e9113fd10b1cc9fd6d8502c258d5e32bb7a7f0b0c4",
+      "contract_version": 7,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine blocker declaration/payment transition",
-      "implementation_version": "declare-blockers-step-v6",
+      "implementation_version": "declare-blockers-step-v7",
       "kind": "rules_section",
       "known_blockers": [
-        "conditional, compound-with-unrelated-effects, controller/history-dependent, target-specific, temporary, and broader restriction/evasion grammar remains incomplete and recognized static families fail closed",
+        "history-, monarch-, poison-, declaration-history-, shared-subtype-quantifier-, compound-with-unrelated-effects-, target-specific-, temporary-, broader-, and multi-block restriction/evasion grammar remains incomplete and recognized static families fail closed",
         "only exact blocks-each-combat, must-be-blocked, lure, and menace grammar is represented; conditional, effect-granted, multi-block, and optional-cost grammar remains incomplete",
         "optional, nonmana, variable, alternative, modified, and broader conditional block costs are not implemented",
         "declare-blockers trigger generation and APNAP placement are incomplete",
@@ -6869,6 +6872,9 @@
         "test_self_attached_and_global_block_only_filters_share_domains",
         "test_token_supertype_and_subtype_filters_use_public_characteristics",
         "test_source_relative_power_filters_use_effective_stats",
+        "test_block_conditions_recompute_from_current_battlefield",
+        "test_conditional_evasion_updates_direct_and_domain_legality",
+        "test_minimum_and_relative_counts_are_defender_specific",
         "test_minimum_and_maximum_blocker_counts_are_inviolable",
         "test_block_only_keyword_filters_opposing_attackers",
         "test_only_unblockable_attackers_skip_pass_only_blocker_task",

@@ -31051,7 +31051,7 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "conditional_compound_target_specific_temporary_and_broader_attack_restriction_grammar_not_implemented"
+        "history_monarch_poison_declaration_history_shared_subtype_compound_target_specific_temporary_and_broader_attack_restriction_grammar_not_implemented"
       ],
       "case_id": "cr-508.1c",
       "case_version": 1,
@@ -31072,6 +31072,9 @@
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_attack_or_block_alone_allows_different_defenders_and_replays",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_global_maximum_constrains_requirement_solver",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_keyword_filtered_global_attack_restriction",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_defender_conditions_filter_attack_options_and_replay",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_controller_conditions_use_another_stats_and_exact_size",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_minimum_and_relative_counts_are_defender_specific",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_relevant_unsupported_condition_pauses_fail_closed",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_triggered_text_is_not_misread_as_a_static_restriction",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_oracle_ir_uses_runtime_restriction_grammar"
@@ -31084,7 +31087,7 @@
         "CommanderEngine._complete_attackers"
       ],
       "notes": [
-        "A shared whole-line Oracle grammar lowers exact self, attached, global, keyword-filtered, not-alone, goad, and table-wide count restrictions into the finite declaration solver. Represented restrictions are inviolable and cumulative, are projected from the same legal domains used for submission, and replay exactly. Relevant unsupported static restriction text pauses fail closed; conditional, compound, target-specific, temporary, and broader predicate grammar remains blocked."
+        "A shared whole-line Oracle grammar lowers exact self, attached, global, keyword-filtered, not-alone, goad, table-wide count, and typed battlefield-condition restrictions into the finite declaration solver. Represented defender/controller permanent existence, another-object, tapped-state, characteristic/stat, minimum-count, and relative-count predicates are inviolable, defender-specific in multiplayer, projected from the same legal domains used for submission, and replay exactly. Relevant unsupported static restriction text pauses fail closed; history, monarch, poison, declaration-history, shared-subtype quantifiers, compound, target-specific, temporary, and broader predicate grammar remains blocked."
       ],
       "required_scenarios": [
         "positive",
@@ -32506,7 +32509,7 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "conditional_compound_controller_history_target_specific_temporary_and_multi_block_grammar_not_implemented"
+        "history_monarch_poison_declaration_history_shared_subtype_compound_target_specific_temporary_and_multi_block_grammar_not_implemented"
       ],
       "case_id": "cr-509.1b",
       "case_version": 1,
@@ -32535,6 +32538,9 @@
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_self_attached_and_global_block_only_filters_share_domains",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_token_supertype_and_subtype_filters_use_public_characteristics",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_source_relative_power_filters_use_effective_stats",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_block_conditions_recompute_from_current_battlefield",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_conditional_evasion_updates_direct_and_domain_legality",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_minimum_and_relative_counts_are_defender_specific",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_only_unblockable_attackers_skip_pass_only_blocker_task",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_minimum_and_maximum_blocker_counts_are_inviolable",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_block_only_keyword_filters_opposing_attackers",
@@ -32551,7 +32557,7 @@
         "CommanderEngine._complete_blockers"
       ],
       "notes": [
-        "The same typed declaration grammar and finite solver enforce represented blocking restrictions cumulatively with intrinsic flying, reach, shadow, and protection. Exact self, attached, global, not-alone, goaded-opponent, blocker-count, type, supertype, subtype, token-status, keyword, color, source-stat, denied-blocker, except-by, and can-block-only predicates are supported from the same projected and submitted domain and replay exactly; pass-only blocker tasks are skipped only after the legal domain is empty. Relevant unsupported static restriction text pauses fail closed. Conditional, compound-with-unrelated-effects, controller/history-dependent, target-specific, temporary, and multi-block grammar remains blocked."
+        "The same typed declaration grammar and finite solver enforce represented blocking restrictions cumulatively with intrinsic flying, reach, shadow, and protection. Exact self, attached, global, not-alone, goaded-opponent, blocker-count, type, supertype, subtype, token-status, keyword, color, source-stat, denied-blocker, except-by, can-block-only, controller/defender battlefield-condition, another-object, tapped-state, minimum-count, relative-count, and conditional-evasion predicates are supported from the same projected and submitted domain; direct pair checks use the same condition evaluator, and replay is exact. Relevant unsupported static text pauses fail closed. History, monarch, poison, declaration-history, shared-subtype quantifiers, compound-with-unrelated-effects, target-specific, temporary, and multi-block grammar remains blocked."
       ],
       "required_scenarios": [
         "positive",

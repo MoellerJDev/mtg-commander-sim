@@ -312,6 +312,13 @@
         "number": 42,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/42"
+      },
+      {
+        "base": "main",
+        "head": "feat/rules-combat-evasion-restrictions",
+        "number": 43,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/43"
       }
     ],
     "tags": [
@@ -327,7 +334,7 @@
   },
   "milestones": [
     {
-      "evidence": "Integration PRs #1-17 and #24-42 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
+      "evidence": "Integration PRs #1-17 and #24-43 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete"
@@ -351,7 +358,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Extend the shared finite combat declaration solver beyond source-local and typed goad witnesses to conditional, non-goad defender-specific, other effect-granted, optional-cost, and multi-block grammar, then route declaration triggers through the same boundary; keep the universal CR 120.4 damage transformation pipeline as the next deeper dependency.",
+  "next_task": "Extend the shared finite combat declaration solver beyond exact public battlefield conditions and typed goad witnesses to history-, monarch-, poison-, declaration-history-, shared-subtype-, non-goad requirement-, other effect-granted-, optional-cost-, and multi-block grammar, then route declaration triggers through the same boundary; keep the universal CR 120.4 damage transformation pipeline as the next deeper dependency.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -381,8 +388,8 @@
       "material_residuals": 61213,
       "status_counts": {
         "exact": 338,
-        "partial": 14557,
-        "unresolved": 16728
+        "partial": 14603,
+        "unresolved": 16682
       },
       "total": 31623
     },
@@ -401,8 +408,8 @@
       "material_residuals": 69890,
       "status_counts": {
         "exact": 2959,
-        "partial": 15981,
-        "unresolved": 19544
+        "partial": 16027,
+        "unresolved": 19498
       },
       "total": 38484
     },
@@ -434,7 +441,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4080,
+    "deterministic_cases_discovered": 4085,
     "migration_files": 1,
     "schema_files": 14,
     "server_files": 5,
@@ -444,9 +451,9 @@
     "baseline_commit": "939409d1e2b5a41ade9d9ae71577dd5d653d4934",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30687987451,
+      "run_id": 30694515443,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30687987451"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30694515443"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_card_drag_drop_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",

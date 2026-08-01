@@ -32,7 +32,7 @@ contracts, and compiles Oracle text into a typed intermediate representation.
 Recognized whole-text templates lower into the same generic DSL and kernel
 primitives used by current packs.
 
-Oracle IR v6 includes a shared combat-declaration cost grammar for exact
+Oracle IR v7 includes a shared combat-declaration cost grammar for exact
 fixed ordinary-mana intrinsic, attached-Aura, defending-player attack, and global block-tax
 sentences. The compiler records a typed static-cost node and the engine uses
 the same parser to derive live costs. Complex symbols, appended instructions,
@@ -44,9 +44,14 @@ absolute, not-alone, count, type, supertype, subtype, token, keyword, color,
 goad, source-stat, denied-blocker, except-by, attached-evasion, and
 can-block-only families compile into typed static nodes and feed the same
 finite solver at runtime. Multiple represented restrictions are cumulative.
-Conditional, compound-with-unrelated-effects, controller/history-dependent,
-temporary, target-specific, and multi-block families retain material residuals
-instead of being guessed.
+Typed battlefield conditions cover controller, attacking-player, and
+defending-player permanent existence; another-object exclusion; tapped state;
+type, supertype, subtype, color, keyword, power, and toughness filters; minimum
+counts; and relative creature/land counts. They are destination-specific in
+multiplayer and use the same evaluator for direct block-pair checks and solver
+domains. History, monarch, poison, declaration-history, shared-subtype
+quantifiers, compound-with-unrelated-effects, temporary, target-specific, and
+multi-block families retain material residuals instead of being guessed.
 
 At deck creation, generated programs are added only when their stable
 Oracle/face/ability key is not already supplied by a reviewed pack. Reviewed
