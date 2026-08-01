@@ -52,6 +52,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#35](https://github.com/MoellerJDev/mtg-commander-sim/pull/35) | `agent/browser-trigger-stabilization` | `main` | `merged` |
 | [#36](https://github.com/MoellerJDev/mtg-commander-sim/pull/36) | `agent/browser-lifecycle-journey` | `main` | `merged` |
 | [#37](https://github.com/MoellerJDev/mtg-commander-sim/pull/37) | `agent/rules-combat-damage` | `main` | `merged` |
+| [#38](https://github.com/MoellerJDev/mtg-commander-sim/pull/38) | `agent/rules-combat-tba-triggers` | `main` | `merged` |
 
 ## Pinned snapshots and coverage
 
@@ -93,9 +94,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 4013
+- Tests discovered: 4022
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30685770054](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30685770054) — `pass`
+- Baseline CI: [30687058403](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30687058403) — `pass`
 - Compile: `pass`
 - Deterministic tests: `pass_full_exact_commit_gate`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
@@ -117,7 +118,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Introduce one shared attack/block restrictions-and-requirements solver with deterministic satisfiability, projected explanations, transaction rollback, hidden-information safety, and exact replay; keep the universal CR 120.4 damage transformation pipeline as the next deeper dependency.
+Extend the shared finite combat declaration solver to conditional, defender-specific, goad, effect-granted, optional-cost, and multi-block grammar, then route declaration triggers through the same boundary; keep the universal CR 120.4 damage transformation pipeline as the next deeper dependency.
 
 ## Regeneration
 

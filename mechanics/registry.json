@@ -106,14 +106,14 @@
     {
       "mechanic_id": "cr-508-declare-attackers-step",
       "path": "mechanics/contracts/declare-attackers-step.json",
-      "sha256": "698e21822a398ceb8d42a49a80cae4e34bb6a3fe18c1b95f1bc3de9bc6dc3643",
-      "version": 2
+      "sha256": "1c2f07f080ea5c43f6c72db9919411fad727cea77f843ea8ba9b1ebe5eb16c77",
+      "version": 3
     },
     {
       "mechanic_id": "cr-509-declare-blockers-step",
       "path": "mechanics/contracts/declare-blockers-step.json",
-      "sha256": "f526f657548a29a6552fe8559503d980c0afe52a037433128585e2f491ab9514",
-      "version": 2
+      "sha256": "b0b2be80999453ca60ed76a2cb389c2b3773135cdfbd0e93bbc45764846afda9",
+      "version": 3
     },
     {
       "mechanic_id": "defender",
@@ -6707,16 +6707,16 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-attackers-step.json",
-      "contract_sha256": "698e21822a398ceb8d42a49a80cae4e34bb6a3fe18c1b95f1bc3de9bc6dc3643",
-      "contract_version": 2,
+      "contract_sha256": "1c2f07f080ea5c43f6c72db9919411fad727cea77f843ea8ba9b1ebe5eb16c77",
+      "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "CommanderEngine attacker declaration and combat-step transition",
-      "implementation_version": "declare-attackers-step-v2",
+      "implementation_component": "DeclarationProblem plus CommanderEngine attacker declaration and combat-step transition",
+      "implementation_version": "declare-attackers-step-v3",
       "kind": "rules_section",
       "known_blockers": [
         "planeswalker attack targets are not implemented",
-        "the complete attack restriction and requirement constraint solver is not implemented",
+        "only exact attacks-each-combat Oracle requirements and the finite declarative constraint grammar are represented; conditional, defender-specific, goad, and effect-granted grammar remains incomplete",
         "banding declarations are not implemented",
         "attack costs, cost locking, mana abilities, and ordered payment are not implemented",
         "declare-attackers trigger generation and APNAP placement are incomplete",
@@ -6741,23 +6741,27 @@
         "test_structured_attack_list_reaches_authoritative_combat_state",
         "test_siege_is_attackable_and_its_protector_blocks",
         "test_battle_creature_cannot_attack_or_block",
-        "test_defender_is_not_offered_and_cannot_be_injected_as_an_attacker"
+        "test_defender_is_not_offered_and_cannot_be_injected_as_an_attacker",
+        "test_attack_requirement_is_projected_maximized_and_replayed",
+        "test_conflicting_requirements_accept_any_maximal_declaration",
+        "test_impossible_requirement_has_zero_maximum",
+        "test_search_limit_fails_closed"
       ],
       "trust_level": "untrusted"
     },
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-blockers-step.json",
-      "contract_sha256": "f526f657548a29a6552fe8559503d980c0afe52a037433128585e2f491ab9514",
-      "contract_version": 2,
+      "contract_sha256": "b0b2be80999453ca60ed76a2cb389c2b3773135cdfbd0e93bbc45764846afda9",
+      "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "CommanderEngine blocker declaration and combat-state transition",
-      "implementation_version": "declare-blockers-step-v2",
+      "implementation_component": "DeclarationProblem plus CommanderEngine blocker declaration and combat-state transition",
+      "implementation_version": "declare-blockers-step-v3",
       "kind": "rules_section",
       "known_blockers": [
         "the complete restriction and evasion grammar is not implemented",
-        "block requirements and maximum-requirement solving are not implemented",
+        "only exact blocks-each-combat, must-be-blocked, lure, and menace grammar is represented; conditional, effect-granted, multi-block, and optional-cost grammar remains incomplete",
         "block costs, cost locking, mana abilities, and ordered payment are not implemented",
         "declare-blockers trigger generation and APNAP placement are incomplete",
         "effects that cause blocks or put creatures onto the battlefield blocking are not implemented",
@@ -6780,7 +6784,15 @@
         "test_siege_is_attackable_and_its_protector_blocks",
         "test_battle_creature_cannot_attack_or_block",
         "test_blocked_attacker_assigns_nothing_after_blocker_leaves",
-        "test_menace_requires_zero_or_two_blockers_and_projects_the_minimum"
+        "test_menace_requires_zero_or_two_blockers_and_projects_the_minimum",
+        "test_must_be_blocked_requirement_rejects_avoidable_omission",
+        "test_menace_can_make_a_block_requirement_impossible",
+        "test_two_blockers_satisfy_menace_and_the_block_requirement",
+        "test_blocker_each_combat_requirement_is_enforced",
+        "test_lure_requirement_maximizes_every_able_blocker",
+        "test_conflicting_requirements_accept_any_maximal_declaration",
+        "test_impossible_requirement_has_zero_maximum",
+        "test_search_limit_fails_closed"
       ],
       "trust_level": "untrusted"
     },

@@ -27,7 +27,6 @@ from .combat import (
     DamageAssignment,
     assigns_in_damage_step,
     first_strike_step_required,
-    menace_block_error,
     normalized_keywords,
     ordinary_second_step_combatants,
     trample_assignment_error,
@@ -38,6 +37,13 @@ from .continuous_effects import (
     ContinuousOperation,
     Layer,
     evaluate_continuous_effects,
+)
+from .combat_constraints import (
+    DeclarationConstraintError,
+    DeclarationProblem,
+    DeclarationRequirement,
+    DeclarationRestriction,
+    DeclarationSearchLimitError,
 )
 from .damage import DamageEvent, DamageRecipientKind
 from .deck import DeckDefinition
@@ -17268,6 +17274,176 @@ class CommanderEngine:
             return False, "attacker_has_protection"
         return True, None
 
+    def _combat_oracle_text(self, card: CardInstance) -> str:
+        text = " ".join(
+            str(
+                self._effective_card_data(card).get("oracle_text") or ""
+            )
+            .casefold()
+            .split()
+        )
+        name = " ".join(str(card.printed_name).casefold().split())
+        return text.replace(name, "this creature") if name else text
+
+    def _attack_declaration_problem(self, active: str) -> DeclarationProblem:
+        defenders = [
+            *[seat for seat in self.active_seats if seat != active],
+            *[battle["id"] for battle in self._attackable_battles(active)],
+        ]
+        domains: dict[str, tuple[str, ...]] = {}
+        requirements: list[DeclarationRequirement] = []
+        for object_id in self.state.players[active].zones["battlefield"]:
+            card = self.state.cards[object_id]
+            if self._attack_declaration_error(card, active) is not None:
+                continue
+            domains[card.ref] = tuple(defenders)
+            if "this creature attacks each combat if able" in (
+                self._combat_oracle_text(card)
+            ):
+                requirements.append(
+                    DeclarationRequirement(
+                        requirement_id=f"attack:{card.ref}:each-combat",
+                        kind="choose",
+                        variable=card.ref,
+                        label=(
+                            f"{self.display_name(card.object_id)} attacks "
+                            "this combat if able."
+                        ),
+                    )
+                )
+        return DeclarationProblem(
+            domains=domains,
+            requirements=tuple(requirements),
+        )
+
+    def _block_declaration_problem(
+        self,
+        defender: str,
+    ) -> DeclarationProblem:
+        attacker_cards = [
+            card
+            for card in self._current_attacker_cards()
+            if self._defending_player_for_attack_target(
+                self.state.combat.attackers[card.object_id]
+            )
+            == defender
+        ]
+        domains: dict[str, tuple[str, ...]] = {}
+        blockers_by_ref: dict[str, CardInstance] = {}
+        for object_id in self.state.players[defender].zones["battlefield"]:
+            blocker = self.state.cards[object_id]
+            blocker_types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(blocker).get("type_line")
+                    or ""
+                )
+            )
+            if (
+                blocker.controller != defender
+                or blocker.tapped
+                or blocker.phased_out
+                or "creature" not in blocker_types
+                or "battle" in blocker_types
+            ):
+                continue
+            legal = tuple(
+                attacker.ref
+                for attacker in attacker_cards
+                if self._can_block(attacker, blocker)[0]
+            )
+            if legal:
+                domains[blocker.ref] = legal
+                blockers_by_ref[blocker.ref] = blocker
+
+        requirements: list[DeclarationRequirement] = []
+        for blocker_ref, blocker in blockers_by_ref.items():
+            if "this creature blocks each combat if able" in (
+                self._combat_oracle_text(blocker)
+            ):
+                requirements.append(
+                    DeclarationRequirement(
+                        requirement_id=f"block:{blocker_ref}:each-combat",
+                        kind="choose",
+                        variable=blocker_ref,
+                        label=(
+                            f"{self.display_name(blocker.object_id)} blocks "
+                            "this combat if able."
+                        ),
+                    )
+                )
+
+        restrictions: list[DeclarationRestriction] = []
+        for attacker in attacker_cards:
+            oracle = self._combat_oracle_text(attacker)
+            if "this creature must be blocked if able" in oracle:
+                requirements.append(
+                    DeclarationRequirement(
+                        requirement_id=f"block:{attacker.ref}:if-able",
+                        kind="option_used",
+                        option=attacker.ref,
+                        label=(
+                            f"{self.display_name(attacker.object_id)} must "
+                            "be blocked if able."
+                        ),
+                    )
+                )
+            if "all creatures able to block this creature do so" in oracle:
+                for blocker_ref, legal in domains.items():
+                    if attacker.ref not in legal:
+                        continue
+                    requirements.append(
+                        DeclarationRequirement(
+                            requirement_id=(
+                                f"block:{blocker_ref}:{attacker.ref}:all"
+                            ),
+                            kind="choose_option",
+                            variable=blocker_ref,
+                            option=attacker.ref,
+                            label=(
+                                f"{self.display_name(blockers_by_ref[blocker_ref].object_id)} "
+                                f"blocks {self.display_name(attacker.object_id)} "
+                                "if able."
+                            ),
+                        )
+                    )
+            if MENACE in self._combat_keywords(attacker):
+                restrictions.append(
+                    DeclarationRestriction(
+                        restriction_id=f"block:{attacker.ref}:menace",
+                        kind="minimum_option_uses",
+                        option=attacker.ref,
+                        count=2,
+                        when_used=True,
+                        label=(
+                            f"{attacker.ref} has menace and must be blocked "
+                            "by zero or at least two creatures"
+                        ),
+                    )
+                )
+        return DeclarationProblem(
+            domains=domains,
+            requirements=tuple(requirements),
+            restrictions=tuple(restrictions),
+        )
+
+    @staticmethod
+    def _validate_declaration_requirements(
+        problem: DeclarationProblem,
+        declaration: Mapping[str, str],
+    ) -> None:
+        try:
+            evaluation = problem.evaluate(declaration)
+        except (DeclarationConstraintError, DeclarationSearchLimitError) as exc:
+            raise GameRuleError(str(exc)) from exc
+        if evaluation.restriction_errors:
+            raise GameRuleError(evaluation.restriction_errors[0])
+        if len(evaluation.satisfied) != evaluation.maximum:
+            raise GameRuleError(
+                "Combat declaration satisfies "
+                f"{len(evaluation.satisfied)} of a possible "
+                f"{evaluation.maximum} requirements"
+            )
+
     def _issue_attackers(self) -> None:
         active = self.state.active_player
         if active not in self.active_seats:
@@ -17295,6 +17471,7 @@ class CommanderEngine:
             ]
             self._grant_priority(active)
             return
+        problem = self._attack_declaration_problem(active)
         self.permissions.issue(
             kind="combat.attackers",
             role="pilot",
@@ -17319,6 +17496,7 @@ class CommanderEngine:
                     "battle_defenders": self._attackable_battles(
                         active
                     ),
+                    "declaration_constraints": problem.projection(),
                 }
             },
         )
@@ -17418,6 +17596,8 @@ class CommanderEngine:
                 }
         if not isinstance(declarations, Mapping):
             raise GameRuleError("Attack declarations must be a mapping or list")
+        chosen: list[tuple[CardInstance, str]] = []
+        canonical: dict[str, str] = {}
         used: set[str] = set()
         for value, defender in dict(declarations).items():
             card = self._resolve_object(active, str(value), zones={"battlefield"}, controlled_only=True)
@@ -17440,18 +17620,26 @@ class CommanderEngine:
                         f"Invalid Battle defender {defender}"
                     )
                 defender = battle.ref
-            data = self._effective_card_data(card)
             declaration_error = self._attack_declaration_error(
                 card,
                 active,
             )
             if declaration_error is not None:
                 raise GameRuleError(declaration_error)
+            chosen.append((card, defender))
+            canonical[card.ref] = defender
+            used.add(card.object_id)
+
+        self._validate_declaration_requirements(
+            self._attack_declaration_problem(active),
+            canonical,
+        )
+        for card, defender in chosen:
+            data = self._effective_card_data(card)
             if "Vigilance" not in data.get("keywords", []):
                 card.tapped = True
             card.attacking = str(defender)
             self.state.combat.attackers[card.object_id] = str(defender)
-            used.add(card.object_id)
         self.state.combat.attackers_declared = True
         if used:
             self.state.combat.had_attacking_creature = True
@@ -17556,6 +17744,7 @@ class CommanderEngine:
             for card in attacker_cards
             if MENACE in self._combat_keywords(card)
         }
+        problem = self._block_declaration_problem(defender)
         blockers = []
         legal_blocks: dict[str, list[str]] = {}
         for oid in self.state.players[defender].zones["battlefield"]:
@@ -17592,6 +17781,7 @@ class CommanderEngine:
                     "blockers": blockers,
                     "legal_blocks": legal_blocks,
                     "minimum_blockers": minimum_blockers,
+                    "declaration_constraints": problem.projection(),
                 }
             },
         )
@@ -17600,6 +17790,8 @@ class CommanderEngine:
         defender = decision.actors[0]
         response = decision.responses[defender]
         assignments = dict(response.get("blocks") or {})  # blocker ref -> attacker ref
+        chosen: list[tuple[CardInstance, CardInstance]] = []
+        canonical: dict[str, str] = {}
         used_blockers: set[str] = set()
         for blocker_value, attacker_value in assignments.items():
             blocker = self._resolve_object(defender, str(blocker_value), zones={"battlefield"}, controlled_only=True)
@@ -17638,31 +17830,17 @@ class CommanderEngine:
                 raise GameRuleError(
                     f"{blocker.ref} cannot block {attacker.ref}: {reason}"
                 )
+            chosen.append((blocker, attacker))
+            canonical[blocker.ref] = attacker.ref
+            used_blockers.add(blocker.object_id)
+
+        self._validate_declaration_requirements(
+            self._block_declaration_problem(defender),
+            canonical,
+        )
+        for blocker, attacker in chosen:
             self.state.combat.blockers.setdefault(attacker.object_id, []).append(blocker.object_id)
             blocker.blocking = attacker.object_id
-            used_blockers.add(blocker.object_id)
-        for attacker in self._current_attacker_cards():
-            attack_target = self.state.combat.attackers.get(
-                attacker.object_id
-            )
-            if (
-                attack_target is None
-                or self._defending_player_for_attack_target(attack_target)
-                != defender
-            ):
-                continue
-            error = menace_block_error(
-                attacker.ref,
-                self._combat_keywords(attacker),
-                len(
-                    self.state.combat.blockers.get(
-                        attacker.object_id,
-                        [],
-                    )
-                ),
-            )
-            if error is not None:
-                raise GameRuleError(error)
         self._log(defender, "combat.block", f"{defender} declared {len(used_blockers)} blocker(s).", {"blocks": {self.state.cards[b].ref: self.state.cards[a].ref for a, bs in self.state.combat.blockers.items() for b in bs if b in used_blockers}}, importance=2, changed_objects=list(used_blockers), changed_players=[defender])
         self.state.combat.blocker_cursor += 1
         self._issue_next_blocker()

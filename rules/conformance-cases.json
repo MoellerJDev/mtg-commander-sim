@@ -31086,20 +31086,33 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "attack_requirement_maximization_solver_not_implemented"
+        "complete_attack_restriction_requirement_and_cost_grammar_not_implemented"
       ],
       "case_id": "cr-508.1d",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "508.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
+      "executable_test_ids": [
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_conflicting_requirements_accept_any_maximal_declaration",
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_impossible_requirement_has_zero_maximum",
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_search_limit_fails_closed",
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_attack_requirement_is_projected_maximized_and_replayed"
+      ],
+      "implementation_components": [
+        "DeclarationProblem",
+        "CommanderEngine._attack_declaration_problem",
+        "CommanderEngine._validate_declaration_requirements"
+      ],
       "notes": [
-        "The maximum satisfiable attack-requirement algorithm, paid exceptions, and repeated-combat behavior are absent."
+        "The shared finite solver enforces the maximum satisfiable represented requirement count, projects its explanation, rolls invalid declarations back, fails closed at its deterministic search bound, and replays exactly. Only exact attacks-each-combat grammar is lowered; conditional, defender-specific, goad, effect-granted, paid-exception, and repeated-combat semantics remain blocked."
       ],
       "required_scenarios": [
         "positive",
@@ -32459,20 +32472,37 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "block_requirement_maximization_solver_not_implemented"
+        "complete_block_restriction_requirement_and_cost_grammar_not_implemented"
       ],
       "case_id": "cr-509.1c",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "509.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
+      "executable_test_ids": [
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_conflicting_requirements_accept_any_maximal_declaration",
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_impossible_requirement_has_zero_maximum",
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_search_limit_fails_closed",
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_must_be_blocked_requirement_rejects_avoidable_omission",
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_menace_can_make_a_block_requirement_impossible",
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_two_blockers_satisfy_menace_and_the_block_requirement",
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_blocker_each_combat_requirement_is_enforced",
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_lure_requirement_maximizes_every_able_blocker"
+      ],
+      "implementation_components": [
+        "DeclarationProblem",
+        "CommanderEngine._block_declaration_problem",
+        "CommanderEngine._validate_declaration_requirements"
+      ],
       "notes": [
-        "Must-block requirements, menace interactions, optional block costs, and repeated-combat requirements need a shared constraint solver."
+        "The shared finite solver maximizes exact blocks-each-combat, must-be-blocked, and lure requirements together with menace, including impossible and conflicting cases. Conditional, effect-granted, multi-block, optional-cost, and repeated-combat grammar remains blocked."
       ],
       "required_scenarios": [
         "positive",

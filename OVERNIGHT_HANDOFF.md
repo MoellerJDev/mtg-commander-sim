@@ -12,20 +12,20 @@ or provider session data. Current generated metrics live in
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
 - Latest integrated `main` merge:
-  `bd3173bf1169f8fe84681a58c2e5dad4740c90ff`
+  `3baab1cd13689657421146cdbcc92f75cf1517c9`
 - Latest certified feature head:
-  `f1cd4d9ba1148257647d8cabe0da859edb3d627e`
-- Current focused branch: `agent/rules-combat-tba-triggers`, based on
-  `bd3173b`; its
+  `66b553d82fd9fc9d7ba7fd6b7cdf8355b2e07c97`
+- Current focused branch: `agent/rules-combat-constraints`, based on
+  `3baab1c`; its
   candidate commit is the commit containing this handoff.
-- Current focused slice: APNAP combat-damage announcements, automatic forced
-  assignments, typed final combat damage events, damage/death trigger batching,
-  pinned CR 510/603/802 evidence, and exact replay
+- Current focused slice: one finite attack/block declaration constraint solver,
+  exact source-local requirement lowering, projected maximum explanations,
+  transactional rejection, bounded fail-closed search, and exact replay
 - Package: `0.8.0`
 - Tags: `v0.6.0`, `v0.7.0`
 - No `v0.8.0` release tag has been created.
 
-PRs #1–#17 and #24–#37 are merged through ordinary merge commits. PR #24
+PRs #1–#17 and #24–#38 are merged through ordinary merge commits. PR #24
 incorporated the ancestry-proven CR 400–408 stack; PRs #18–#23 were closed as
 superseded only after their exact heads were reachable from `main`. PRs #27–#35
 integrated the authoritative browser/server vertical slice, restart and
@@ -38,10 +38,10 @@ movement was used.
 
 - The latest integrated feature head `fc5e8be` passed the exact 18-stage local
   merge gate and public matrix before PR #36 merged.
-- The integrated 4,009-test suite passed PR #37's Python 3.11/3.12
-  Ubuntu/Windows and Browser/Chromium matrix. Four additional focused
-  assignment/trigger witnesses pass locally on the current branch; its full
-  regression remains delegated to PR CI.
+- The integrated 4,013-test suite passed PR #38's Python 3.11/3.12
+  Ubuntu/Windows and Browser/Chromium matrix. Nine additional focused
+  declaration-constraint witnesses pass locally on the current branch; its
+  full regression remains delegated to PR CI.
 - All 3,300 pinned rule records and 425 mechanic records verify against the
   June 19, 2026 rules source. Generated per-rule inventory tests do not imply
   semantic completeness.
@@ -59,8 +59,8 @@ movement was used.
   replayed to the exact final hash, reported zero suppressed meaningful
   windows, and passed its hidden-information audit. A completed concession also
   restores as terminal after server restart and exact replay.
-- Feature head `f1cd4d9` and merge commit `bd3173b` are covered by PR #37 run
-  `30685770054` across Python 3.11/3.12, Ubuntu/Windows, and
+- Feature head `66b553d` and merge commit `3baab1c` are covered by PR #38 run
+  `30687058403` across Python 3.11/3.12, Ubuntu/Windows, and
   Browser/Chromium.
 
 GitHub Actions is operating normally. Historical zero-step billing failures

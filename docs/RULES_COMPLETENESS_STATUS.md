@@ -628,13 +628,12 @@ dependency families. Combat damage now has exact step splitting, keyword
 assignment constraints, APNAP announcements, typed final combat events, and
 post-damage trigger batching. The next rules work is:
 
-1. Introduce one shared attack/block restrictions-and-requirements solver, with
-   deterministic satisfiability, minimum/maximum constraints, costs, rollback,
-   and projected explanations. Declare attackers and declare blockers must use
-   the same constraint vocabulary rather than accumulating keyword branches.
-2. Route represented declaration triggers and effect-created/removed
-   combatants through that solver while preserving public APNAP ordering and
-   exact replay.
+1. Extend the shared finite attack/block constraint vocabulary from the exact
+   source-local witnesses to conditional, defender-specific, goad,
+   effect-granted, optional-cost, and multi-block grammar without weakening the
+   deterministic search bound or projected explanations.
+2. Route represented declaration triggers and effect-created/removed combatants
+   through that solver while preserving public APNAP ordering and exact replay.
 3. Build the universal CR 120.4/614/615/616 typed damage transformation pipeline
    and migrate noncombat damage to the same final `DamageEvent` boundary before
    promoting broader damage, lifelink, infect, wither, toxic, or excess-damage

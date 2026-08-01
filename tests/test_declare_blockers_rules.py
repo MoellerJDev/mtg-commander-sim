@@ -51,6 +51,8 @@ class DeclareBlockersRuleTests(unittest.TestCase):
         name: str,
         *,
         tapped: bool = False,
+        keywords: tuple[str, ...] = (),
+        oracle_text: str = "",
     ):
         ref = engine.create_token(
             controller,
@@ -58,9 +60,11 @@ class DeclareBlockersRuleTests(unittest.TestCase):
             tapped=tapped,
             characteristics={
                 "type_line": "Token Creature — Test",
+                "oracle_text": oracle_text,
                 "power": "2",
                 "toughness": "2",
             },
+            temporary_keywords=keywords,
         )[0]
         return engine._resolve_object(
             controller,
@@ -153,6 +157,185 @@ class DeclareBlockersRuleTests(unittest.TestCase):
             replay = replay_record(record_dir, self.db, verify=True)
             self.assertTrue(replay["ok"], replay)
             self.assertEqual(1, replay["commands"])
+
+    def test_must_be_blocked_requirement_rejects_avoidable_omission(self):
+        session = self.make_session(50905)
+        engine = session.engine
+        attacker = self.token(
+            engine,
+            "A",
+            "Required Block Target",
+            oracle_text=(
+                "Required Block Target must be blocked if able."
+            ),
+        )
+        blocker = self.token(engine, "B", "Able Blocker")
+        attacker.attacking = "B"
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            attackers={attacker.object_id: "B"},
+            defending_players=["B"],
+        )
+        engine._begin_blocker_decisions()
+        session.initial_checkpoint = checkpoint_envelope(session.state)
+
+        constraints = engine.state.pending_decision.payload_by_actor["B"][
+            "declaration_constraints"
+        ]
+        self.assertEqual(1, constraints["maximum_requirements"])
+        before = authoritative_state_hash(session.state)
+        rejected = session.act("pilot:B", {"a": "block", "blk": {}})
+        self.assertFalse(rejected.ok)
+        self.assertEqual(before, authoritative_state_hash(session.state))
+
+        result = session.act(
+            "pilot:B",
+            {"a": "block", "blk": {blocker.ref: attacker.ref}},
+        )
+        self.assertTrue(result.ok, result.summary)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "block-requirement"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+            self.assertTrue(replay["ok"], replay)
+            self.assertEqual(1, replay["commands"])
+
+    def test_menace_can_make_a_block_requirement_impossible(self):
+        session = self.make_session(50906)
+        engine = session.engine
+        attacker = self.token(
+            engine,
+            "A",
+            "Menacing Requirement",
+            keywords=("Menace",),
+            oracle_text=(
+                "Menacing Requirement must be blocked if able."
+            ),
+        )
+        self.token(engine, "B", "Only Blocker")
+        attacker.attacking = "B"
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            attackers={attacker.object_id: "B"},
+            defending_players=["B"],
+        )
+        engine._begin_blocker_decisions()
+
+        constraints = engine.state.pending_decision.payload_by_actor["B"][
+            "declaration_constraints"
+        ]
+        self.assertEqual(0, constraints["maximum_requirements"])
+        result = session.act("pilot:B", {"a": "block", "blk": {}})
+        self.assertTrue(result.ok, result.summary)
+
+    def test_two_blockers_satisfy_menace_and_the_block_requirement(self):
+        session = self.make_session(50908)
+        engine = session.engine
+        attacker = self.token(
+            engine,
+            "A",
+            "Menacing Required Target",
+            keywords=("Menace",),
+            oracle_text=(
+                "Menacing Required Target must be blocked if able."
+            ),
+        )
+        first = self.token(engine, "B", "First Menace Blocker")
+        second = self.token(engine, "B", "Second Menace Blocker")
+        attacker.attacking = "B"
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            attackers={attacker.object_id: "B"},
+            defending_players=["B"],
+        )
+        engine._begin_blocker_decisions()
+
+        constraints = engine.state.pending_decision.payload_by_actor["B"][
+            "declaration_constraints"
+        ]
+        self.assertEqual(1, constraints["maximum_requirements"])
+        result = session.act(
+            "pilot:B",
+            {
+                "a": "block",
+                "blk": {
+                    first.ref: attacker.ref,
+                    second.ref: attacker.ref,
+                },
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+
+    def test_blocker_each_combat_requirement_is_enforced(self):
+        session = self.make_session(50909)
+        engine = session.engine
+        attacker = self.token(engine, "A", "Ordinary Attack Target")
+        blocker = self.token(
+            engine,
+            "B",
+            "Required Blocking Creature",
+            oracle_text=(
+                "Required Blocking Creature blocks each combat if able."
+            ),
+        )
+        attacker.attacking = "B"
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            attackers={attacker.object_id: "B"},
+            defending_players=["B"],
+        )
+        engine._begin_blocker_decisions()
+
+        rejected = session.act("pilot:B", {"a": "block", "blk": {}})
+        self.assertFalse(rejected.ok)
+        result = session.act(
+            "pilot:B",
+            {"a": "block", "blk": {blocker.ref: attacker.ref}},
+        )
+        self.assertTrue(result.ok, result.summary)
+
+    def test_lure_requirement_maximizes_every_able_blocker(self):
+        session = self.make_session(50907)
+        engine = session.engine
+        attacker = self.token(
+            engine,
+            "A",
+            "Lure Target",
+            oracle_text=(
+                "All creatures able to block Lure Target do so."
+            ),
+        )
+        first = self.token(engine, "B", "First Able Blocker")
+        second = self.token(engine, "B", "Second Able Blocker")
+        attacker.attacking = "B"
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            attackers={attacker.object_id: "B"},
+            defending_players=["B"],
+        )
+        engine._begin_blocker_decisions()
+
+        constraints = engine.state.pending_decision.payload_by_actor["B"][
+            "declaration_constraints"
+        ]
+        self.assertEqual(2, constraints["maximum_requirements"])
+        rejected = session.act(
+            "pilot:B",
+            {"a": "block", "blk": {first.ref: attacker.ref}},
+        )
+        self.assertFalse(rejected.ok)
+        result = session.act(
+            "pilot:B",
+            {
+                "a": "block",
+                "blk": {
+                    first.ref: attacker.ref,
+                    second.ref: attacker.ref,
+                },
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
 
     def test_phased_or_tapped_creature_is_not_offered_as_blocker(self):
         session = self.make_session(50902)

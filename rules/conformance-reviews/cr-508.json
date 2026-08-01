@@ -90,12 +90,17 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": [],
-      "executable_test_ids": [],
+      "implementation_components": ["DeclarationProblem", "CommanderEngine._attack_declaration_problem", "CommanderEngine._validate_declaration_requirements"],
+      "executable_test_ids": [
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_conflicting_requirements_accept_any_maximal_declaration",
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_impossible_requirement_has_zero_maximum",
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_search_limit_fails_closed",
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_attack_requirement_is_projected_maximized_and_replayed"
+      ],
       "required_scenarios": ["positive", "negative", "interaction", "multiplayer"],
-      "covered_scenarios": [],
-      "blockers": ["attack_requirement_maximization_solver_not_implemented"],
-      "notes": ["The maximum satisfiable attack-requirement algorithm, paid exceptions, and repeated-combat behavior are absent."]
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": ["complete_attack_restriction_requirement_and_cost_grammar_not_implemented"],
+      "notes": ["The shared finite solver enforces the maximum satisfiable represented requirement count, projects its explanation, rolls invalid declarations back, fails closed at its deterministic search bound, and replays exactly. Only exact attacks-each-combat grammar is lowered; conditional, defender-specific, goad, effect-granted, paid-exception, and repeated-combat semantics remain blocked."]
     },
     {
       "rule_id": "508.1e",

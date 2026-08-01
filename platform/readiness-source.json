@@ -10,7 +10,7 @@
     "branch": "main",
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
-      "focused_branch_base": "bd3173bf1169f8fe84681a58c2e5dad4740c90ff",
+      "focused_branch_base": "3baab1cd13689657421146cdbcc92f75cf1517c9",
       "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
@@ -272,6 +272,13 @@
         "number": 37,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/37"
+      },
+      {
+        "base": "main",
+        "head": "agent/rules-combat-tba-triggers",
+        "number": 38,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/38"
       }
     ],
     "tags": [
@@ -343,12 +350,12 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "bd3173bf1169f8fe84681a58c2e5dad4740c90ff",
+    "baseline_commit": "3baab1cd13689657421146cdbcc92f75cf1517c9",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30685770054,
+      "run_id": 30687058403,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30685770054"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30687058403"
     },
     "local": {
       "compile": "pass",
@@ -375,5 +382,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Introduce one shared attack/block restrictions-and-requirements solver with deterministic satisfiability, projected explanations, transaction rollback, hidden-information safety, and exact replay; keep the universal CR 120.4 damage transformation pipeline as the next deeper dependency."
+  "next_task": "Extend the shared finite combat declaration solver to conditional, defender-specific, goad, effect-granted, optional-cost, and multi-block grammar, then route declaration triggers through the same boundary; keep the universal CR 120.4 damage transformation pipeline as the next deeper dependency."
 }
