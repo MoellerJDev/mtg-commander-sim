@@ -112,8 +112,8 @@
     {
       "mechanic_id": "cr-509-declare-blockers-step",
       "path": "mechanics/contracts/declare-blockers-step.json",
-      "sha256": "58bf7541165edaab3201d527c7acc287381ca0b964808923f28ca6a08d65bc06",
-      "version": 5
+      "sha256": "437cd7ed1e74207d89cbb7bc4aa8bfbc9bc5b68dcc35ade31cd61213ca527a7e",
+      "version": 6
     },
     {
       "mechanic_id": "defender",
@@ -6810,15 +6810,15 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-blockers-step.json",
-      "contract_sha256": "58bf7541165edaab3201d527c7acc287381ca0b964808923f28ca6a08d65bc06",
-      "contract_version": 5,
+      "contract_sha256": "437cd7ed1e74207d89cbb7bc4aa8bfbc9bc5b68dcc35ade31cd61213ca527a7e",
+      "contract_version": 6,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine blocker declaration/payment transition",
-      "implementation_version": "declare-blockers-step-v5",
+      "implementation_version": "declare-blockers-step-v6",
       "kind": "rules_section",
       "known_blockers": [
-        "conditional, compound, attached-evasion, target-specific, temporary, and broader restriction/evasion grammar remains incomplete and recognized static families fail closed",
+        "conditional, compound-with-unrelated-effects, controller/history-dependent, target-specific, temporary, and broader restriction/evasion grammar remains incomplete and recognized static families fail closed",
         "only exact blocks-each-combat, must-be-blocked, lure, and menace grammar is represented; conditional, effect-granted, multi-block, and optional-cost grammar remains incomplete",
         "optional, nonmana, variable, alternative, modified, and broader conditional block costs are not implemented",
         "declare-blockers trigger generation and APNAP placement are incomplete",
@@ -6865,9 +6865,14 @@
         "test_power_color_and_subtype_block_restrictions_are_cumulative",
         "test_numeric_power_block_restriction_uses_effective_power",
         "test_unblockable_and_blocker_stat_evasion_filter_domains",
+        "test_type_color_keyword_and_attached_evasion_filters_are_cumulative",
+        "test_self_attached_and_global_block_only_filters_share_domains",
+        "test_token_supertype_and_subtype_filters_use_public_characteristics",
+        "test_source_relative_power_filters_use_effective_stats",
         "test_minimum_and_maximum_blocker_counts_are_inviolable",
         "test_block_only_keyword_filters_opposing_attackers",
         "test_only_unblockable_attackers_skip_pass_only_blocker_task",
+        "test_relevant_unsupported_blocker_filter_pauses_fail_closed",
         "test_oracle_ir_uses_runtime_restriction_grammar"
       ],
       "trust_level": "untrusted"

@@ -13,6 +13,7 @@ from .declaration_costs import (
 
 DeclarationRestrictionScope = Literal[
     "attached",
+    "attached_option",
     "global",
     "self",
     "source_opponents",
@@ -87,6 +88,37 @@ _SELF_BLOCKED_BY_COLOR = re.compile(
 _SELF_BLOCKED_BY_SUBTYPE = re.compile(
     r"this creature can't be blocked by (?P<subtype>[a-z][a-z'-]*)s\."
 )
+_SELF_BLOCKED_BY_FILTER = re.compile(
+    r"this creature can't be blocked by (?P<filter>[^.]+)\."
+)
+_ATTACHED_BLOCKED_BY_FILTER = re.compile(
+    r"enchanted creature can't be blocked by (?P<filter>[^.]+)\."
+)
+_SELF_BLOCKED_EXCEPT_FILTER = re.compile(
+    r"this creature can't be blocked except by (?P<filter>[^.]+)\."
+)
+_ATTACHED_BLOCKED_EXCEPT_FILTER = re.compile(
+    r"enchanted creature can't be blocked except by (?P<filter>[^.]+)\."
+)
+_ATTACHED_UNBLOCKABLE = re.compile(
+    r"enchanted creature can't be blocked\."
+)
+_SELF_BLOCK_FILTER = re.compile(
+    r"this creature can't block (?P<filter>[^.]+)\."
+)
+_ATTACHED_CAN_BLOCK_ONLY_FILTER = re.compile(
+    r"enchanted creature can block only (?P<filter>[^.]+)\."
+)
+_GLOBAL_CAN_BLOCK_ONLY_FILTER = re.compile(
+    r"(?P<subject>[^.]+) can block only (?P<opposing>[^.]+)\."
+)
+_SELF_BLOCK_SOURCE_POWER = re.compile(
+    r"this creature can't block creatures with power greater than "
+    r"this creature's power\."
+)
+_SELF_BLOCKED_BY_GREATER_POWER = re.compile(
+    r"this creature can't be blocked by creatures with greater power\."
+)
 _SELF_BLOCKED_BY_MORE_THAN = re.compile(
     r"this creature can't be blocked by more than (?P<count>one|two|three|\d+) "
     r"creatures?\."
@@ -112,6 +144,19 @@ _STATIC_RESTRICTION_PREFIX = re.compile(
     r"|no more than [a-z0-9]+ creatures? can (?:attack|block)\b)"
 )
 
+_FILTER_KEYWORDS = {
+    "defender",
+    "flying",
+    "horsemanship",
+    "reach",
+}
+_IRREGULAR_SUBTYPE_PLURALS = {
+    "elves": "Elf",
+    "dwarves": "Dwarf",
+    "mice": "Mouse",
+    "oxen": "Ox",
+}
+
 
 def _declarations(kind: str) -> tuple[DeclarationKind, ...]:
     return {
@@ -127,6 +172,22 @@ def _number(value: str) -> int:
         "two": 2,
         "three": 3,
     }.get(value, int(value) if value.isdigit() else 0)
+
+
+def _singular_subtype(value: str) -> str:
+    normalized = value.strip().casefold()
+    if normalized in _IRREGULAR_SUBTYPE_PLURALS:
+        return _IRREGULAR_SUBTYPE_PLURALS[normalized]
+    words = normalized.split()
+    if not words:
+        return ""
+    last = words[-1]
+    if last.endswith("ies") and len(last) > 3:
+        last = last[:-3] + "y"
+    elif last.endswith("s") and not last.endswith("ss"):
+        last = last[:-1]
+    words[-1] = last
+    return " ".join(words).title()
 
 
 @dataclass(frozen=True, slots=True)
@@ -157,9 +218,12 @@ class CreaturePredicate:
 
     types_any: tuple[str, ...] = ()
     types_none: tuple[str, ...] = ()
+    supertypes_any: tuple[str, ...] = ()
+    supertypes_none: tuple[str, ...] = ()
     subtypes_any: tuple[str, ...] = ()
     subtypes_none: tuple[str, ...] = ()
     colors_any: tuple[str, ...] = ()
+    colors_none: tuple[str, ...] = ()
     keywords_any: tuple[str, ...] = ()
     keywords_none: tuple[str, ...] = ()
     token: bool | None = None
@@ -170,9 +234,12 @@ class CreaturePredicate:
         return {
             "types_any": list(self.types_any),
             "types_none": list(self.types_none),
+            "supertypes_any": list(self.supertypes_any),
+            "supertypes_none": list(self.supertypes_none),
             "subtypes_any": list(self.subtypes_any),
             "subtypes_none": list(self.subtypes_none),
             "colors_any": list(self.colors_any),
+            "colors_none": list(self.colors_none),
             "keywords_any": list(self.keywords_any),
             "keywords_none": list(self.keywords_none),
             "token": self.token,
@@ -227,6 +294,133 @@ class DeclarationRestrictionParse:
     @property
     def exact(self) -> bool:
         return self.template is not None and self.reason is None
+
+
+def _matching_creature_filter(text: str) -> CreaturePredicate | None:
+    """Return the creatures named by one exact public filter phrase."""
+
+    phrase = " ".join(text.casefold().split())
+    if phrase == "artifact creatures":
+        return CreaturePredicate(types_any=("Artifact",))
+    if phrase == "legendary creatures":
+        return CreaturePredicate(supertypes_any=("Legendary",))
+    if phrase == "creature tokens":
+        return CreaturePredicate(token=True)
+    match = re.fullmatch(
+        r"(?P<colors>white|blue|black|red|green)"
+        r"(?: and/or (?P<second>white|blue|black|red|green))? creatures",
+        phrase,
+    )
+    if match:
+        colors = [match.group("colors")]
+        if match.group("second"):
+            colors.append(match.group("second"))
+        return CreaturePredicate(
+            colors_any=tuple(_COLORS[color] for color in colors)
+        )
+    match = re.fullmatch(
+        r"creatures with (?P<keywords>[a-z-]+(?: or [a-z-]+)*)",
+        phrase,
+    )
+    if match:
+        keywords = tuple(match.group("keywords").split(" or "))
+        if all(keyword in _FILTER_KEYWORDS for keyword in keywords):
+            return CreaturePredicate(
+                keywords_any=tuple(keyword.title() for keyword in keywords)
+            )
+        return None
+    match = re.fullmatch(r"non-(?P<subtype>[a-z'-]+) creatures", phrase)
+    if match:
+        return CreaturePredicate(
+            subtypes_none=(match.group("subtype").title(),)
+        )
+    # Bare subtype filters use plural subtype nouns ("Humans", "Oxen", or
+    # "Eldrazi Scions").  Do not interpret arbitrary prose ending in a word
+    # such as "controls" as a subtype phrase.
+    if {"creature", "creatures"}.intersection(phrase.split()):
+        return None
+    atoms = phrase.split(" or ")
+    if all(
+        re.fullmatch(r"[a-z][a-z'-]*(?: [a-z][a-z'-]*)?", atom)
+        and (
+            atom.split()[-1].endswith("s")
+            or atom.split()[-1] in _IRREGULAR_SUBTYPE_PLURALS
+        )
+        for atom in atoms
+    ):
+        subtypes = tuple(_singular_subtype(value) for value in atoms)
+        if all(subtypes):
+            return CreaturePredicate(subtypes_any=subtypes)
+    return None
+
+
+def _nonmatching_creature_filter(text: str) -> CreaturePredicate | None:
+    """Return creatures outside an exact allowed-blocker union."""
+
+    phrase = " ".join(text.casefold().split())
+    parts = phrase.split(" and/or ")
+    predicates: list[CreaturePredicate] = []
+    if len(parts) > 1:
+        for part in parts:
+            predicate = _matching_creature_filter(part)
+            if predicate is None:
+                return None
+            predicates.append(predicate)
+    else:
+        predicate = _matching_creature_filter(phrase)
+        if predicate is None:
+            return None
+        predicates.append(predicate)
+
+    types_any: list[str] = []
+    types_none: list[str] = []
+    supertypes_any: list[str] = []
+    supertypes_none: list[str] = []
+    subtypes_any: list[str] = []
+    subtypes_none: list[str] = []
+    colors_any: list[str] = []
+    colors_none: list[str] = []
+    keywords_any: list[str] = []
+    keywords_none: list[str] = []
+    token: bool | None = None
+    for predicate in predicates:
+        if predicate.types_any:
+            types_none.extend(predicate.types_any)
+        elif predicate.types_none:
+            types_any.extend(predicate.types_none)
+        elif predicate.supertypes_any:
+            supertypes_none.extend(predicate.supertypes_any)
+        elif predicate.supertypes_none:
+            supertypes_any.extend(predicate.supertypes_none)
+        elif predicate.subtypes_any:
+            subtypes_none.extend(predicate.subtypes_any)
+        elif predicate.subtypes_none:
+            subtypes_any.extend(predicate.subtypes_none)
+        elif predicate.colors_any:
+            colors_none.extend(predicate.colors_any)
+        elif predicate.colors_none:
+            colors_any.extend(predicate.colors_none)
+        elif predicate.keywords_any:
+            keywords_none.extend(predicate.keywords_any)
+        elif predicate.keywords_none:
+            keywords_any.extend(predicate.keywords_none)
+        elif predicate.token is True and len(predicates) == 1:
+            token = False
+        else:
+            return None
+    return CreaturePredicate(
+        types_any=tuple(types_any),
+        types_none=tuple(types_none),
+        supertypes_any=tuple(supertypes_any),
+        supertypes_none=tuple(supertypes_none),
+        subtypes_any=tuple(subtypes_any),
+        subtypes_none=tuple(subtypes_none),
+        colors_any=tuple(colors_any),
+        colors_none=tuple(colors_none),
+        keywords_any=tuple(keywords_any),
+        keywords_none=tuple(keywords_none),
+        token=token,
+    )
 
 
 def parse_declaration_restriction_line(
@@ -406,6 +600,21 @@ def parse_declaration_restriction_line(
             scope="self",
         )
 
+    if _SELF_BLOCK_SOURCE_POWER.fullmatch(line):
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="intrinsic-source-power-block-prohibition-v1",
+                declarations=("block",),
+                scope="self",
+                opposing=CreaturePredicate(
+                    stat=StatComparison("power", "gt", "source")
+                ),
+            ),
+            declarations=("block",),
+            scope="self",
+        )
+
     if _SELF_UNBLOCKABLE.fullmatch(line):
         return DeclarationRestrictionParse(
             True,
@@ -413,6 +622,33 @@ def parse_declaration_restriction_line(
                 template_id="intrinsic-unblockable-v1",
                 declarations=("block",),
                 scope="source_option",
+            ),
+            declarations=("block",),
+            scope="source_option",
+        )
+
+    if _ATTACHED_UNBLOCKABLE.fullmatch(line):
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="attached-unblockable-v1",
+                declarations=("block",),
+                scope="attached_option",
+            ),
+            declarations=("block",),
+            scope="attached_option",
+        )
+
+    if _SELF_BLOCKED_BY_GREATER_POWER.fullmatch(line):
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="intrinsic-source-stat-evasion-v1",
+                declarations=("block",),
+                scope="source_option",
+                subject=CreaturePredicate(
+                    stat=StatComparison("power", "gt", "source")
+                ),
             ),
             declarations=("block",),
             scope="source_option",
@@ -502,6 +738,70 @@ def parse_declaration_restriction_line(
             scope="source_option",
         )
 
+    match = _SELF_BLOCKED_BY_FILTER.fullmatch(line)
+    if match:
+        predicate = _matching_creature_filter(match.group("filter"))
+        if predicate is not None:
+            return DeclarationRestrictionParse(
+                True,
+                DeclarationRestrictionTemplate(
+                    template_id="intrinsic-blocker-filter-evasion-v1",
+                    declarations=("block",),
+                    scope="source_option",
+                    subject=predicate,
+                ),
+                declarations=("block",),
+                scope="source_option",
+            )
+
+    match = _ATTACHED_BLOCKED_BY_FILTER.fullmatch(line)
+    if match:
+        predicate = _matching_creature_filter(match.group("filter"))
+        if predicate is not None:
+            return DeclarationRestrictionParse(
+                True,
+                DeclarationRestrictionTemplate(
+                    template_id="attached-blocker-filter-evasion-v1",
+                    declarations=("block",),
+                    scope="attached_option",
+                    subject=predicate,
+                ),
+                declarations=("block",),
+                scope="attached_option",
+            )
+
+    match = _SELF_BLOCKED_EXCEPT_FILTER.fullmatch(line)
+    if match:
+        predicate = _nonmatching_creature_filter(match.group("filter"))
+        if predicate is not None:
+            return DeclarationRestrictionParse(
+                True,
+                DeclarationRestrictionTemplate(
+                    template_id="intrinsic-allowed-blocker-filter-v1",
+                    declarations=("block",),
+                    scope="source_option",
+                    subject=predicate,
+                ),
+                declarations=("block",),
+                scope="source_option",
+            )
+
+    match = _ATTACHED_BLOCKED_EXCEPT_FILTER.fullmatch(line)
+    if match:
+        predicate = _nonmatching_creature_filter(match.group("filter"))
+        if predicate is not None:
+            return DeclarationRestrictionParse(
+                True,
+                DeclarationRestrictionTemplate(
+                    template_id="attached-allowed-blocker-filter-v1",
+                    declarations=("block",),
+                    scope="attached_option",
+                    subject=predicate,
+                ),
+                declarations=("block",),
+                scope="attached_option",
+            )
+
     match = _SELF_CAN_BLOCK_ONLY_KEYWORD.fullmatch(line)
     if match:
         return DeclarationRestrictionParse(
@@ -518,6 +818,22 @@ def parse_declaration_restriction_line(
             scope="self",
         )
 
+    match = _ATTACHED_CAN_BLOCK_ONLY_FILTER.fullmatch(line)
+    if match:
+        predicate = _nonmatching_creature_filter(match.group("filter"))
+        if predicate is not None:
+            return DeclarationRestrictionParse(
+                True,
+                DeclarationRestrictionTemplate(
+                    template_id="attached-block-only-filter-v1",
+                    declarations=("block",),
+                    scope="attached",
+                    opposing=predicate,
+                ),
+                declarations=("block",),
+                scope="attached",
+            )
+
     match = _SELF_COLOR_BLOCK.fullmatch(line)
     if match:
         return DeclarationRestrictionParse(
@@ -533,6 +849,42 @@ def parse_declaration_restriction_line(
             declarations=("block",),
             scope="self",
         )
+
+    match = _SELF_BLOCK_FILTER.fullmatch(line)
+    if match:
+        predicate = _matching_creature_filter(match.group("filter"))
+        if predicate is not None:
+            return DeclarationRestrictionParse(
+                True,
+                DeclarationRestrictionTemplate(
+                    template_id="intrinsic-block-filter-prohibition-v1",
+                    declarations=("block",),
+                    scope="self",
+                    opposing=predicate,
+                ),
+                declarations=("block",),
+                scope="self",
+            )
+
+    match = _GLOBAL_CAN_BLOCK_ONLY_FILTER.fullmatch(line)
+    if match and not match.group("subject").startswith(
+        ("this creature", "enchanted creature")
+    ):
+        subject = _matching_creature_filter(match.group("subject"))
+        opposing = _nonmatching_creature_filter(match.group("opposing"))
+        if subject is not None and opposing is not None:
+            return DeclarationRestrictionParse(
+                True,
+                DeclarationRestrictionTemplate(
+                    template_id="global-block-only-filter-v1",
+                    declarations=("block",),
+                    scope="global",
+                    subject=subject,
+                    opposing=opposing,
+                ),
+                declarations=("block",),
+                scope="global",
+            )
 
     match = _SUBTYPE_BLOCK.fullmatch(line)
     if match and match.group("blocker") != "creature":
@@ -560,7 +912,9 @@ def parse_declaration_restriction_line(
         if "block" in line or "be blocked" in line:
             declarations.append("block")
         scope: DeclarationRestrictionScope = (
-            "source_option"
+            "attached_option"
+            if line.startswith("enchanted ") and "be blocked" in line
+            else "source_option"
             if "be blocked" in line or line.endswith("block it.")
             else "self"
             if line.startswith("this creature")

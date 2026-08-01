@@ -32,19 +32,21 @@ contracts, and compiles Oracle text into a typed intermediate representation.
 Recognized whole-text templates lower into the same generic DSL and kernel
 primitives used by current packs.
 
-Oracle IR v5 includes a shared combat-declaration cost grammar for exact
+Oracle IR v6 includes a shared combat-declaration cost grammar for exact
 fixed ordinary-mana intrinsic, attached-Aura, defending-player attack, and global block-tax
 sentences. The compiler records a typed static-cost node and the engine uses
 the same parser to derive live costs. Complex symbols, appended instructions,
 and broader conditional forms retain material residuals and stop fail closed;
 this is reusable sentence-family support, not card-name coverage.
 
-The same version adds a shared declaration-restriction grammar. Exact absolute,
-not-alone, count, keyword, color, subtype, goad, and effective-stat families
-compile into typed static nodes and feed the same finite solver at runtime.
-Multiple represented restrictions are cumulative. Conditional, compound,
-attached-evasion, temporary, target-specific, and multi-block families retain
-material residuals instead of being guessed.
+The same version includes a shared declaration-restriction grammar. Exact
+absolute, not-alone, count, type, supertype, subtype, token, keyword, color,
+goad, source-stat, denied-blocker, except-by, attached-evasion, and
+can-block-only families compile into typed static nodes and feed the same
+finite solver at runtime. Multiple represented restrictions are cumulative.
+Conditional, compound-with-unrelated-effects, controller/history-dependent,
+temporary, target-specific, and multi-block families retain material residuals
+instead of being guessed.
 
 At deck creation, generated programs are added only when their stable
 Oracle/face/ability key is not already supplied by a reviewed pack. Reviewed
