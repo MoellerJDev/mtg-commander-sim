@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 701.15 — Goad",
+  "cases": [
+    {
+      "rule_id": "701.15",
+      "rule_text_sha256": "e188b5188b60082fb69ce24bd6b0c809dc82c41163d630e7d08fff69a71757fd",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/goad.json"],
+      "executable_test_ids": ["tests.test_goad_rules.GoadRuleTests.test_contract_traces_every_goad_rule"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Section heading; CR 701.15a-d carry the behavioral rules."]
+    },
+    {
+      "rule_id": "701.15a",
+      "rule_text_sha256": "3309a176f224b49fddea6dcb66ba450d6977c1dbf15f7657f84fc4f829db8fa6",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["GoadDesignation", "CommanderEngine.apply_effect", "CommanderEngine._expire_goad_designations", "oracle_ir._effect_template"],
+      "executable_test_ids": [
+        "tests.test_goad_rules.GoadRuleTests.test_same_player_goad_is_redundant_and_expires_on_their_next_turn",
+        "tests.test_goad_rules.GoadRuleTests.test_oracle_compiler_lowers_only_anchored_target_goad_templates"
+      ],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "blockers": ["eliminated_player_would_be_next_turn_duration_and_complete_oracle_goad_grammar_not_implemented"],
+      "notes": ["Anchored target-creature goad effects create a typed designation through the generic effect DSL and expire on the goading player's next ordinary or extra turn. Other Oracle forms and CR 800.4m eliminated-player duration remain blocked."]
+    },
+    {
+      "rule_id": "701.15b",
+      "rule_text_sha256": "f82ee7c743f04d27f41e1346f30c14dff582200733c1b341b502cfdc5c44f7a3",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["GoadDesignation", "CommanderEngine._attack_declaration_problem", "DeclarationProblem", "StateProjector"],
+      "executable_test_ids": [
+        "tests.test_goad_rules.GoadRuleTests.test_single_goad_requires_another_player_when_available_and_replays",
+        "tests.test_goad_rules.GoadRuleTests.test_goad_in_duel_still_requires_attacking_the_goader",
+        "tests.test_goad_rules.GoadRuleTests.test_zone_change_removes_the_noncopiable_designation",
+        "tests.test_goad_rules.GoadRuleTests.test_exact_static_prohibition_makes_goad_have_no_effect"
+      ],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "blockers": ["continuous_effects_that_designate_creatures_as_goaded_are_not_generic"],
+      "notes": ["Represented designations are public, noncopiable, removed on zone change, and produce the two independently maximized attack requirements. Continuous 'is goaded' effects remain outside this slice."]
+    },
+    {
+      "rule_id": "701.15c",
+      "rule_text_sha256": "39471f262588acee8673dded43cc5b717bd995cfb0ff39b261628763b9d476c6",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["GoadDesignation", "CommanderEngine._attack_declaration_problem", "DeclarationProblem"],
+      "executable_test_ids": [
+        "tests.test_goad_rules.GoadRuleTests.test_multiple_goaders_create_independent_maximized_requirements",
+        "tests.test_goad_rules.GoadRuleTests.test_goaded_by_every_opponent_accepts_any_maximal_attack"
+      ],
+      "required_scenarios": ["positive", "interaction", "multiplayer"],
+      "covered_scenarios": ["positive", "interaction", "multiplayer"],
+      "blockers": [],
+      "notes": ["Each distinct goading player creates an independent pair of requirements; the exact finite solver selects declarations satisfying the maximum possible count."]
+    },
+    {
+      "rule_id": "701.15d",
+      "rule_text_sha256": "cd147628435be4f5788235a9605503ad8efb248db9ee212cb1e4a7d46ea38c5a",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["CommanderEngine.apply_effect", "GoadDesignation"],
+      "executable_test_ids": ["tests.test_goad_rules.GoadRuleTests.test_same_player_goad_is_redundant_and_expires_on_their_next_turn"],
+      "required_scenarios": ["positive", "negative", "interaction"],
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": [],
+      "notes": ["A second active designation from the same player has no effect and does not add attack requirements or extend the duration."]
+    }
+  ]
+}

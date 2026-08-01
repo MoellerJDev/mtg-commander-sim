@@ -30,6 +30,32 @@ ObjectKind = Literal[
 PrincipalRole = Literal["pilot", "arbiter", "analyst", "spectator", "admin"]
 
 
+@dataclass(frozen=True, slots=True)
+class GoadDesignation:
+    """One player's noncopiable goad designation on one permanent.
+
+    The subject owns this value by containment in ``CardInstance``. A zone
+    change therefore removes it with the rest of the old object's state.
+    ``expires_at_turns_begun`` is the goading player's next turn boundary,
+    including an extra turn.
+    """
+
+    player: str
+    expires_at_turns_begun: int
+    created_turn_sequence: int
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "GoadDesignation":
+        return cls(
+            player=str(data["player"]),
+            expires_at_turns_begun=int(data["expires_at_turns_begun"]),
+            created_turn_sequence=int(data.get("created_turn_sequence", 0)),
+        )
+
+
 @dataclass(slots=True)
 class CardInstance:
     object_id: str
@@ -53,6 +79,7 @@ class CardInstance:
     marked_damage: int = 0
     deathtouch_damage: bool = False
     temporary_keywords: list[str] = field(default_factory=list)
+    goaded_by: list[GoadDesignation] = field(default_factory=list)
     annotations: dict[str, Any] = field(default_factory=dict)
     attached_to: str | None = None
     attachments: list[str] = field(default_factory=list)
@@ -106,7 +133,12 @@ class CardInstance:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "CardInstance":
-        return cls(**data)
+        payload = dict(data)
+        payload["goaded_by"] = [
+            GoadDesignation.from_dict(value)
+            for value in payload.get("goaded_by", [])
+        ]
+        return cls(**payload)
 
 
 @dataclass(slots=True)

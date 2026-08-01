@@ -21,7 +21,7 @@ from .continuous_effects import (
 )
 from .deck import DeckDefinition, DeckLoader, parse_deck_text
 from .engine import ActionResult, CommanderEngine, GameRuleError
-from .model import GameConfig, GameState
+from .model import GameConfig, GameState, GoadDesignation
 from .oracle_ir import (
     ORACLE_COMPILER_VERSION,
     OracleCardIR,
@@ -122,6 +122,7 @@ __all__ = [
     "IdempotencyRepository",
     "InMemoryIdempotencyRepository",
     "GameState",
+    "GoadDesignation",
     "Layer",
     "ORACLE_COMPILER_VERSION",
     "OracleCardIR",

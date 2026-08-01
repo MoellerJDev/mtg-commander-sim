@@ -9,32 +9,33 @@ one engine branch per card.
 The integrated `main` branch establishes the versioned corpus, typed Oracle IR,
 mechanic contracts, and generic CR 400/613/616/704 primitives. It does not yet
 claim complete rules or Oracle coverage. The current June 19, 2026 CR / July
-28, 2026 compact Oracle snapshot deliberately reports:
+31, 2026 local Oracle snapshot deliberately reports:
 
 - 3,300 unique numbered rules indexed
 - 156 rules sections indexed
 - 733 glossary entries indexed
 - 425 CR section, keyword-action, and keyword-ability mechanics discovered
-- 56 mechanics under versioned partial contracts and 369 unclassified
-- 558 source-reviewed rule records: 113 executable passes, 365 explicit
-  fail-closed blockers, and 80 definition-only records; 2,742 remain
+- 57 mechanics under versioned partial contracts and 368 unclassified
+- 563 source-reviewed rule records: 115 executable passes, 367 explicit
+  fail-closed blockers, and 81 definition-only records; 2,737 remain
   unreviewed
 - 0 rules or mechanics promoted to trusted by the new registry
-- 38,373 Oracle IDs and 41,582 faces scanned
-- 2,957 exact (primarily textless), 15,691 partially lowerable, and 19,725
+- 38,484 Oracle IDs and 41,701 faces scanned
+- 2,959 exact (primarily textless), 15,732 partially lowerable, and 19,793
   unresolved Oracle IDs
-- 69,664 material residuals, including untrusted dependencies
+- 69,890 material residuals, including untrusted dependencies
 - `current_snapshot_complete = false`
 
 Existing reviewed engine behavior and semantic packs remain available, but the
 new corpus does not retroactively label them trusted until contracts, rule
 references, and conformance tests are linked.
 
-Oracle IR v2 additionally structures exact whole-line forms for simple self
+Oracle IR v3 additionally structures exact whole-line forms for simple self
 enters/dies/leaves triggers, unconditional enters-tapped replacements, fixed
 self pumps and keyword grants, one-counter instructions, and basic creature
-token creation. These remain provisional wherever a dependency contract is
-partial.
+token creation, plus target-creature goad instructions with optional opponent-
+controller constraints. These remain provisional wherever a dependency
+contract is partial.
 
 ## New decks: generic compilation, not one branch per card
 

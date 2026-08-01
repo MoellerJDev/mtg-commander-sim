@@ -7,6 +7,7 @@ from typing import Literal, Mapping, Sequence
 RequirementKind = Literal[
     "choose",
     "choose_option",
+    "choose_option_in",
     "option_used",
 ]
 RestrictionKind = Literal[
@@ -29,6 +30,7 @@ class DeclarationRequirement:
     kind: RequirementKind
     variable: str | None = None
     option: str | None = None
+    options: tuple[str, ...] = ()
     label: str = ""
 
     def satisfied_by(self, declaration: Mapping[str, str]) -> bool:
@@ -36,18 +38,21 @@ class DeclarationRequirement:
             return self.variable in declaration
         if self.kind == "choose_option":
             return declaration.get(str(self.variable)) == self.option
+        if self.kind == "choose_option_in":
+            return declaration.get(str(self.variable)) in self.options
         if self.kind == "option_used":
             return self.option in declaration.values()
         raise DeclarationConstraintError(
             f"Unknown declaration requirement {self.kind!r}"
         )
 
-    def to_dict(self) -> dict[str, str | None]:
+    def to_dict(self) -> dict[str, str | list[str] | None]:
         return {
             "id": self.requirement_id,
             "kind": self.kind,
             "variable": self.variable,
             "option": self.option,
+            "options": list(self.options),
             "label": self.label,
         }
 

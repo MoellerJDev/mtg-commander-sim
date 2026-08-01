@@ -1,6 +1,6 @@
 # Rules completeness implementation status
 
-Last updated: 2026-07-31
+Last updated: 2026-08-01
 
 This is the durable execution ledger for the snapshot-scoped rules
 completeness program. It records implementation evidence without claiming
@@ -11,25 +11,24 @@ coverage.
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Current integration branch: `main`
-- Rules integration PRs #1–#17, #24, and #25 are merged; the cumulative PR
-  #24 tip incorporated the exact CR 400–408 heads before PRs #18–#23 closed as
+- Rules integration PRs #1–#17 and #24–#39 are merged; the cumulative PR #24
+  tip incorporated the exact CR 400–408 heads before PRs #18–#23 closed as
   superseded
-- Rules-program base: `d099fe4`
-- Continuation start: `6517dc0`
+- Current integrated merge: `939409d`
 - Package version: `0.8.0`
 - Comprehensive Rules effective date: 2026-06-19
 - CR SHA-256:
   `e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b`
-- Oracle bulk snapshot: 2026-07-28, 38,373 Oracle IDs
-- Rulings bulk snapshot: 2026-07-28, 77,999 rulings
+- Oracle bulk snapshot: 2026-07-31, 38,484 Oracle IDs
+- Rulings bulk snapshot: 2026-07-31, 77,998 rulings
 
 ## Program gates
 
 | Workstream | Status | Current evidence |
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
-| Mechanic contracts | In progress | 55 partial/untrusted contracts; 370 mechanics unclassified; 0 trusted |
-| Typed Oracle IR | In progress | `oracle-ir-v2`, source spans, fail-closed material residuals |
+| Mechanic contracts | In progress | 57 partial/untrusted contracts; 368 mechanics unclassified; 0 trusted |
+| Typed Oracle IR | In progress | `oracle-ir-v3`, source spans, fail-closed material residuals, and anchored target-creature goad lowering |
 | Object and zone identity | Partial | All 30 CR 400 records reviewed; owner-zone routing, logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, hidden outside-game movement, and selected linked-effect guards |
 | Library | Partial | All 8 CR 401 records reviewed; hidden order/public count, bounded look/reorder, shuffle knowledge clearing, and Nth-from-top placement; simultaneous owner ordering and continuous top-card visibility remain blocked |
 | Hand | Partial | All 4 CR 402 records reviewed; starting/maximum size, cleanup-only excess discard, public count, scoped identity, public-to-hand knowledge, and controller dual-hand access; continuous no-maximum and arbitrary reveal/look grammar remain blocked |
@@ -43,9 +42,9 @@ coverage.
 | Replacement/prevention ordering | Partial | CR 615/616 typed primitives; stateful shields and event-producer integration incomplete |
 | Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, immutable final combat source-recipient events, combat damage/death trigger batching, counter-derived battlefield defense, copied printed defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
-| Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
-| Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 558 cases are reviewed, with 113 executable passes, 365 blocked cases, and 80 definition-only cases; 2,742 remain unreviewed |
+| Full Oracle compilation | In progress | exact 2,959; partial 15,732; unresolved 19,793; 69,890 material residuals |
+| Commander-legal Oracle compilation | In progress | exact 338; partial 14,343; unresolved 16,942; 61,213 material residuals |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 563 cases are reviewed, with 115 executable passes, 367 blocked cases, and 81 definition-only cases; 2,737 remain unreviewed |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -315,10 +314,15 @@ revalidated. Opponent and opponent-protected Battle destinations are
 validated, ordinary attackers tap while vigilance is preserved, illegal mixed
 declarations roll back atomically, and attacking relationships last through
 combat. If combat has no attackers after the required priority window, declare
-blockers and combat damage are skipped. Planeswalkers, complete restrictions
-and requirements, banding, attack costs, generic declaration triggers,
-entry-attacking effects, defending-player LKI, and target reselection remain
-blocked.
+blockers and combat damage are skipped. The shared finite solver maximizes
+exact source-local attacks-each-combat requirements and typed goad
+requirements. Goad supports independent designations from multiple players,
+duel and all-opponents cases, public projection, same-player redundancy,
+next-turn expiration, zone-change clearing, exact static prohibition, and
+replay. Planeswalkers, conditional and non-goad defender-specific
+requirements, banding, attack costs, generic declaration triggers,
+entry-attacking effects, eliminated-player duration boundaries, defending-
+player LKI, and target reselection remain blocked.
 
 Ordinary blocker declarations are server-derived from current public combat
 state. Only untapped, present, nonphased creature permanents that are not
@@ -564,6 +568,10 @@ Outstanding blockers include:
   and Battle-target rejection, duplicate rejection, atomic rollback,
   empty-combat step skipping, zero meaningful suppression, and exact command
   replay, and defender rejection.
+- Eleven focused CR 701.15/goad tests cover contract traceability, anchored Oracle
+  lowering, single/multiple/all-opponent goaders, duel maximization,
+  same-player redundancy, next-extra-turn expiration, noncopiable zone-change
+  clearing, exact static prohibition, public projection, and command replay.
 - Six focused CR 509 tests cover all-rule traceability, ordinary declaration
   and exact replay, phased/tapped exclusion, atomic malicious-declaration
   rollback, blocking-state lifetime, menace's conditional minimum, and the ordinary priority handoff.
@@ -612,9 +620,9 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 558 cases in the current reviewed
-  families are source-reviewed: 113 pass with executable engine evidence, 365
-  remain blocked, and 80 are definition-only. The other 2,742 cases remain
+  establish inventory linkage only. All 563 cases in the current reviewed
+  families are source-reviewed: 115 pass with executable engine evidence, 367
+  remain blocked, and 81 are definition-only. The other 2,737 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -628,10 +636,10 @@ dependency families. Combat damage now has exact step splitting, keyword
 assignment constraints, APNAP announcements, typed final combat events, and
 post-damage trigger batching. The next rules work is:
 
-1. Extend the shared finite attack/block constraint vocabulary from the exact
-   source-local witnesses to conditional, defender-specific, goad,
-   effect-granted, optional-cost, and multi-block grammar without weakening the
-   deterministic search bound or projected explanations.
+1. Extend the shared finite attack/block constraint vocabulary beyond exact
+   source-local and typed goad witnesses to conditional, non-goad defender-
+   specific, other effect-granted, optional-cost, and multi-block grammar
+   without weakening the deterministic search bound or projected explanations.
 2. Route represented declaration triggers and effect-created/removed combatants
    through that solver while preserving public APNAP ordering and exact replay.
 3. Build the universal CR 120.4/614/615/616 typed damage transformation pipeline
