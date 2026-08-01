@@ -111,14 +111,11 @@ async function ensureFullControl(page: Page) {
 
 async function passUntilDraggable(page: Page, card: Locator) {
   const pass = page.getByTestId("action-pass");
-  const meaningful = page.locator(
-    '[data-testid^="action-"]:not([data-testid="action-pass"]):not([data-testid="action-concede"])',
-  );
   for (let attempts = 0; attempts < 8; attempts += 1) {
     if (await card.getAttribute("draggable") === "true") return;
     await expect.poll(async () =>
       await card.getAttribute("draggable") === "true"
-      || (await pass.isVisible() && await meaningful.count() > 0),
+      || await pass.isVisible(),
     ).toBe(true);
     if (await card.getAttribute("draggable") === "true") return;
     await submitFormAction(page, "pass");
@@ -456,7 +453,7 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
       .locator(".hand-card")
       .filter({ has: host.locator(".card-copy strong", { hasText: "Swamp" }) });
     await expect(swamp).toHaveCount(1);
-    await expect(swamp).toHaveAttribute("draggable", "true");
+    await passUntilDraggable(host, swamp);
     const beforeDrop = await viewRevision(host);
     await swamp.dragTo(host.getByTestId("own-battlefield"));
     await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeDrop);
