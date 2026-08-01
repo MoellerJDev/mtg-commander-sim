@@ -32,9 +32,10 @@ async function expectCardSurface(page: Page, seat: string) {
   const firstCard = page.getByTestId("own-hand").locator(".hand-card").first();
   const name = await firstCard.locator(".card-copy strong").textContent();
   expect(name).toBeTruthy();
+  const visibleFaceName = name!.split(" // ", 1)[0];
   await firstCard.hover();
   await expect(page.getByTestId("card-inspector")).toBeVisible();
-  await expect(page.getByTestId("card-inspector")).toContainText(name!);
+  await expect(page.getByTestId("card-inspector")).toContainText(visibleFaceName);
   await expect(page.getByTestId(`zone-${seat}-graveyard`)).toBeDisabled();
   await expect(page.getByTestId(`zone-${seat}-exile`)).toBeDisabled();
 }
