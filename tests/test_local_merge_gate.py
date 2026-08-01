@@ -55,6 +55,7 @@ class LocalMergeGateTests(unittest.TestCase):
                 "build_test_database",
                 "full_deterministic_suite",
                 "rules_corpus_verify",
+                "architecture_policy",
                 "focused_regressions",
                 "four_player_natural_winner",
                 "projection_and_privacy",
@@ -97,6 +98,14 @@ class LocalMergeGateTests(unittest.TestCase):
                 test_module,
                 by_name["projection_and_privacy"],
             )
+        self.assertEqual(
+            (
+                "python-under-test",
+                "scripts/validate_architecture.py",
+                "--check",
+            ),
+            by_name["architecture_policy"],
+        )
         self.assertEqual(
             (
                 "python-under-test",

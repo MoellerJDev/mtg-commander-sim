@@ -136,6 +136,14 @@ def build_steps(
             ),
         ),
         GateStep(
+            "architecture_policy",
+            (
+                python,
+                "scripts/validate_architecture.py",
+                "--check",
+            ),
+        ),
+        GateStep(
             "focused_regressions",
             (
                 python,

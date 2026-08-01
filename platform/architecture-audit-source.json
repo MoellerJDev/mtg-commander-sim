@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d",
+    "baseline_main_commit": "5197a91dcdac428c09980a39467a7a5c62bc17fa",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-01",
     "phase": "phase_0_current_state_audit",
@@ -9,8 +9,8 @@
   },
   "ci": {
     "workflow": "CI",
-    "run_id": 30705718025,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30705718025",
+    "run_id": 30707443584,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30707443584",
     "status": "pass",
     "python_versions": [
       "3.11",

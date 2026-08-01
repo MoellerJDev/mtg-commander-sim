@@ -2,7 +2,7 @@
   "blockers": [
     "a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence",
     "saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit",
-    "the authoritative engine remains a 23,996-line module with interleaved turn, mutation, casting, effect, and variant responsibilities; Phase 1 must add enforceable dependency and mutation guards before extraction",
+    "the authoritative engine remains a 23,996-line module with interleaved turn, mutation, casting, effect, and variant responsibilities; the Phase 1 guard slice prevents new debt while later phases extract it",
     "future engine choice schemas and complete screen-reader audits remain incomplete",
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
@@ -13,10 +13,10 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "phase_0_current_state_audit",
-    "branch": "feat/phase0-architecture-audit",
+    "active_phase": "phase_1_architecture_enforcement_guards",
+    "branch": "feat/phase1-architecture-guards",
     "branch_ancestry": {
-      "focused_branch_base": "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d",
+      "focused_branch_base": "5197a91dcdac428c09980a39467a7a5c62bc17fa",
       "focused_branch_unique_commits_over_main": 1
     },
     "commit_reference": "the commit containing this ledger",
@@ -363,6 +363,13 @@
         "number": 49,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/49"
+      },
+      {
+        "base": "main",
+        "head": "feat/phase0-architecture-audit",
+        "number": 50,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/50"
       }
     ],
     "tags": [
@@ -378,7 +385,7 @@
   },
   "milestones": [
     {
-      "evidence": "Integration PRs #1-17 and #24-49 are on main. PR #49 completed the browser full-control/table-interaction slice. The current Phase 0 slice records measured architecture, compiler, test, semantic-pack, and documentation debt before structural migration. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
+      "evidence": "Integration PRs #1-17 and #24-50 are on main. PR #49 completed the browser full-control/table-interaction slice and PR #50 established generated architecture, compiler, test, semantic-pack, and documentation-debt baselines. The current Phase 1 guard slice makes dependency direction, mutation ownership, kernel card-specificity, and debt non-growth enforceable. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete"
@@ -402,7 +409,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Complete and merge the Phase 0 generated architecture/compiler/test/documentation baseline, then start Phase 1 on a fresh branch with enforceable dependency, direct-state-mutation, card-specificity, generated-document, and ADR guards. Broad rules expansion remains paused until those migration rails are green.",
+  "next_task": "Merge the focused Phase 1 dependency, mutation-ownership, kernel card-specificity, and debt non-growth guard slice; then create the documentation index, ADR enforcement, link/stale-claim checks, and missing current architecture/testing/operations documents on a fresh branch.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -485,19 +492,19 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4130,
+    "deterministic_cases_discovered": 4134,
     "migration_files": 1,
     "schema_files": 14,
     "server_files": 5,
     "web_files": 24
   },
   "validation": {
-    "baseline_commit": "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d",
+    "baseline_commit": "5197a91dcdac428c09980a39467a7a5c62bc17fa",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30705718025,
+      "run_id": 30707443584,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30705718025"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30707443584"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",

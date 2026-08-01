@@ -2,20 +2,20 @@
 title: "Architecture debt status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d"
+verified: "5197a91dcdac428c09980a39467a7a5c62bc17fa"
 audience: "maintainers and rules contributors"
 maintenance: "generated"
 ---
 
 # Architecture debt status
 
-This is the generated Phase 0 migration baseline. It measures the current tree and does not claim architectural completion, rules completeness, or universal card support.
+This generated migration dashboard is anchored to the Phase 0 baseline. It measures the current tree and does not claim architectural completion, rules completeness, or universal card support.
 
 ## Baseline coordinates
 
-- Main commit: `65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d`
+- Main commit: `5197a91dcdac428c09980a39467a7a5c62bc17fa`
 - Package: `0.8.0`
-- CI run: [30705718025](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30705718025) — `pass`
+- CI run: [30707443584](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30707443584) — `pass`
 - Production scope: 59 files, 56,042 physical lines, 52,575 logical lines
 
 ## Central engine debt
@@ -31,6 +31,21 @@ This is the generated Phase 0 migration baseline. It measures the current tree a
 - Modules above the 1,500-logical-line review threshold: 6
 - Functions/methods above the 150-logical-line review threshold: 50
 - Printed-name matching is deliberately over-inclusive: ordinary words that are also printed card names remain baseline candidates for Phase 1 review.
+
+## Enforced debt trend
+
+Baseline: `5197a91dcdac428c09980a39467a7a5c62bc17fa`. Guard: `python scripts/validate_architecture.py --check`.
+
+| Dimension | Baseline | Current | Delta |
+|---|---:|---:|---:|
+| `engine_logical_lines` | 23,155 | 23,155 | +0 |
+| `direct_game_state_writes` | 190 | 190 | +0 |
+| `printed_name_literals` | 416 | 416 | +0 |
+| `oracle_id_literals` | 8 | 8 | +0 |
+| `legacy_card_specific_operations` | 15 | 15 | +0 |
+| `card_named_helpers` | 1 | 1 | +0 |
+| `oversized_modules` | 6 | 6 | +0 |
+| `oversized_functions_and_methods` | 50 | 50 | +0 |
 
 ## Largest production modules
 
@@ -99,8 +114,8 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,130
-- Conventional Python cases: 830
+- Python discovered: 4,134
+- Conventional Python cases: 834
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 7
 - Browser unit cases: 14
