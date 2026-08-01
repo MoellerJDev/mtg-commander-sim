@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 6,
+  "contract_version": 7,
   "mechanic_id": "cr-508-declare-attackers-step",
   "official_name": "Declare Attackers Step",
   "effective_date": "2026-06-19",
@@ -81,7 +81,8 @@
       "vigilance",
       "attack target and Battle protector",
       "active typed goad designations and their originating players",
-      "whole-line static declaration restrictions and their relevant effective keyword, attachment, and controller predicates"
+      "whole-line static declaration restrictions and their relevant effective keyword, attachment, controller, and typed battlefield-count predicates",
+      "defending-player and source-controller permanent existence, tapped state, subtype, color, keyword, power, toughness, minimum-count, and relative-count conditions"
     ],
     "state_writes": [
       "tapped state",
@@ -153,6 +154,11 @@
     "attack-alone and attack-or-block-alone restrictions across different multiplayer defenders",
     "one- and two-attacker table-wide maxima interacting with attack requirements",
     "keyword-filtered global attack restrictions",
+    "defending-player Island, land, snow, artifact, enchantment, color, and keyword battlefield conditions",
+    "source-controller artifact, subtype-union, exact-stat, another-object, and minimum-count conditions",
+    "source-controller versus defending-player creature and land count comparisons in multiplayer",
+    "condition polarity for unless and if restrictions",
+    "conditional attack declarations replaying from identical public battlefield state",
     "recognized unsupported conditional attack restrictions stopping fail closed"
   ],
   "witness_cards": [
@@ -160,11 +166,19 @@
     {"name": "Luminous Bonds", "oracle_id": "2c006a63-0550-4a87-a5fe-f4247857271c"},
     {"name": "Silent Arbiter", "oracle_id": "1cdf30de-d88c-421a-80df-4917bbd2f09e"},
     {"name": "Stormtide Leviathan", "oracle_id": "131a7475-0b9e-46eb-9ade-fef1b9820184"},
-    {"name": "Peacekeeper", "oracle_id": "e82ce5c6-1e42-4e87-b696-67aa3822ec9c"}
+    {"name": "Peacekeeper", "oracle_id": "e82ce5c6-1e42-4e87-b696-67aa3822ec9c"},
+    {"name": "Dandân", "oracle_id": "88929373-b2c8-4a81-a809-fed87fd5b0d7"},
+    {"name": "Veteran Brawlers", "oracle_id": "77a963a3-473a-4c34-bc46-8ef016a92c0c"},
+    {"name": "Steelclad Serpent", "oracle_id": "6410e2bb-5ae6-4190-8b4a-6b2d5c9dff8d"},
+    {"name": "Mogg Toady", "oracle_id": "77c7ba06-d247-421d-9e0c-54c3000c1b78"},
+    {"name": "Topiary Stomper", "oracle_id": "e3fc10d2-2733-4265-8275-112c285fd11a"},
+    {"name": "Godhunter Octopus", "oracle_id": "930b48b8-dbd1-4109-9eaa-7d7e9a04fa5b"}
   ],
   "rulings": [
     "Mogg Flunkies — 2018-03-16 — The other attacker may attack a different player, planeswalker, or battle.",
-    "Mogg Flunkies — 2018-03-16 — If required to attack and another creature can attack, both must be declared."
+    "Mogg Flunkies — 2018-03-16 — If required to attack and another creature can attack, both must be declared.",
+    "Steelclad Serpent — 2008-10-01 — Two Steelclad Serpents enable each other because each is another artifact for the other.",
+    "Godhunter Octopus — 2014-04-26 — Its condition is checked only as attackers are declared; losing the qualifying permanent later does not remove it from combat."
   ],
   "test_ids": [
     "test_contract_traces_every_cr_508_rule",
@@ -211,18 +225,21 @@
     "test_attack_or_block_alone_allows_different_defenders_and_replays",
     "test_global_maximum_constrains_requirement_solver",
     "test_keyword_filtered_global_attack_restriction",
+    "test_defender_conditions_filter_attack_options_and_replay",
+    "test_controller_conditions_use_another_stats_and_exact_size",
+    "test_minimum_and_relative_counts_are_defender_specific",
     "test_relevant_unsupported_condition_pauses_fail_closed",
     "test_triggered_text_is_not_misread_as_a_static_restriction",
     "test_oracle_ir_uses_runtime_restriction_grammar"
   ],
   "implementation": {
     "component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine attacker declaration/payment transition",
-    "version": "declare-attackers-step-v6"
+    "version": "declare-attackers-step-v7"
   },
   "known_blockers": [
     "planeswalker attack targets are not implemented",
     "exact attacks-each-combat and typed goad requirements are represented; conditional, non-goad defender-specific, and other effect-granted requirement grammar remains incomplete",
-    "conditional, compound, target-specific, temporary, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
+    "history-, monarch-, poison-, declaration-history-, compound-, target-specific-, temporary-, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
     "banding declarations are not implemented",
     "optional, nonmana, variable, alternative, modified, and broader conditional attack costs are not implemented",
     "declare-attackers trigger generation and APNAP placement are incomplete",

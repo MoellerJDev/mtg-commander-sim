@@ -51,7 +51,9 @@ from .declaration_costs import (
     parse_declaration_cost_line,
 )
 from .declaration_restrictions import (
-    CreaturePredicate,
+    DeclarationBattlefieldCondition,
+    DeclarationConditionPlayer,
+    DeclarationObjectPredicate,
     DeclarationRestrictionTemplate,
     parse_declaration_restriction_line,
 )
@@ -17320,6 +17322,7 @@ class CommanderEngine:
         )
         if "battle" in blocker_types:
             return False, "blocker_is_battle"
+        by_ref = {card.ref: card for card in self.state.cards.values()}
         for source in sorted(
             self.state.cards.values(), key=lambda value: value.ref
         ):
@@ -17347,9 +17350,22 @@ class CommanderEngine:
                     "source_option": source.object_id == attacker.object_id,
                     "global": True,
                 }[template.scope]
+                if not applies:
+                    continue
+                if template.condition is not None and (
+                    self._declaration_condition_holds(
+                        template.condition,
+                        kind="block",
+                        source=source,
+                        variable=blocker.ref,
+                        option=attacker.ref,
+                        by_ref=by_ref,
+                    )
+                    != template.applies_when_condition
+                ):
+                    continue
                 if (
-                    applies
-                    and self._matches_declaration_predicate(
+                    self._matches_declaration_predicate(
                         blocker, template.subject, source=source
                     )
                     and self._matches_declaration_predicate(
@@ -17563,7 +17579,7 @@ class CommanderEngine:
     def _matches_declaration_predicate(
         self,
         card: CardInstance,
-        predicate: CreaturePredicate,
+        predicate: DeclarationObjectPredicate,
         *,
         source: CardInstance,
     ) -> bool:
@@ -17626,23 +17642,51 @@ class CommanderEngine:
             goaded = bool(self._active_goad_designations(card))
             if goaded != predicate.goaded:
                 return False
-        if predicate.stat is not None:
+        if predicate.tapped is not None and card.tapped != predicate.tapped:
+            return False
+        if predicate.enchanted is not None:
+            enchanted = False
+            for attachment_id in card.attachments:
+                attachment = self.state.cards.get(attachment_id)
+                if (
+                    attachment is None
+                    or attachment.zone != "battlefield"
+                    or attachment.phased_out
+                    or attachment.attached_to != card.object_id
+                ):
+                    continue
+                _, attachment_subtypes, _ = self._type_parts(
+                    str(
+                        self._effective_card_data(attachment).get("type_line")
+                        or ""
+                    )
+                )
+                if "aura" in attachment_subtypes:
+                    enchanted = True
+                    break
+            if enchanted != predicate.enchanted:
+                return False
+        for comparison_rule in (
+            *((predicate.stat,) if predicate.stat is not None else ()),
+            *predicate.additional_stats,
+        ):
             left = self._numeric_stat(
-                card.object_id, predicate.stat.stat
+                card.object_id, comparison_rule.stat
             )
             right = (
-                int(predicate.stat.value or 0)
-                if predicate.stat.operand == "fixed"
+                int(comparison_rule.value or 0)
+                if comparison_rule.operand == "fixed"
                 else self._numeric_stat(
-                    source.object_id, predicate.stat.stat
+                    source.object_id, comparison_rule.stat
                 )
             )
             comparison = {
+                "eq": left == right,
                 "lt": left < right,
                 "le": left <= right,
                 "gt": left > right,
                 "ge": left >= right,
-            }[predicate.stat.operator]
+            }[comparison_rule.operator]
             if not comparison:
                 return False
         return True
@@ -17702,6 +17746,100 @@ class CommanderEngine:
         if scope == "source_option":
             return any(source.ref in options for options in domains.values())
         return True
+
+    def _declaration_condition_player(
+        self,
+        role: DeclarationConditionPlayer,
+        *,
+        kind: str,
+        source: CardInstance,
+        variable: str,
+        option: str,
+        by_ref: Mapping[str, CardInstance],
+    ) -> str | None:
+        if role == "source_controller":
+            return source.controller
+        if kind == "attack":
+            if role == "attacking_player":
+                attacker = by_ref.get(variable)
+                return attacker.controller if attacker is not None else None
+            return self._defending_player_for_attack_target(option)
+        if role == "attacking_player":
+            attacker = by_ref.get(option)
+            return attacker.controller if attacker is not None else None
+        blocker = by_ref.get(variable)
+        return blocker.controller if blocker is not None else None
+
+    def _declaration_battlefield_count(
+        self,
+        condition: DeclarationBattlefieldCondition,
+        *,
+        player: str,
+        source: CardInstance,
+        exclude_source: bool,
+    ) -> int:
+        return sum(
+            1
+            for card in self.state.cards.values()
+            if card.zone == "battlefield"
+            and not card.phased_out
+            and card.controller == player
+            and (not exclude_source or card.object_id != source.object_id)
+            and any(
+                self._matches_declaration_predicate(
+                    card,
+                    predicate,
+                    source=source,
+                )
+                for predicate in condition.predicates_any
+            )
+        )
+
+    def _declaration_condition_holds(
+        self,
+        condition: DeclarationBattlefieldCondition,
+        *,
+        kind: str,
+        source: CardInstance,
+        variable: str,
+        option: str,
+        by_ref: Mapping[str, CardInstance],
+    ) -> bool:
+        player = self._declaration_condition_player(
+            condition.player,
+            kind=kind,
+            source=source,
+            variable=variable,
+            option=option,
+            by_ref=by_ref,
+        )
+        if player is None:
+            return False
+        count = self._declaration_battlefield_count(
+            condition,
+            player=player,
+            source=source,
+            exclude_source=condition.exclude_source,
+        )
+        if condition.compare_player is None:
+            return count >= condition.minimum
+        other = self._declaration_condition_player(
+            condition.compare_player,
+            kind=kind,
+            source=source,
+            variable=variable,
+            option=option,
+            by_ref=by_ref,
+        )
+        if other is None:
+            return False
+        other_count = self._declaration_battlefield_count(
+            condition,
+            player=other,
+            source=source,
+            exclude_source=False,
+        )
+        return count > other_count
 
     def _declaration_restrictions(
         self,
@@ -17840,6 +17978,21 @@ class CommanderEngine:
                         ):
                             legal_options.append(option)
                             continue
+                        if template.condition is not None:
+                            condition_holds = self._declaration_condition_holds(
+                                template.condition,
+                                kind=kind,
+                                source=source,
+                                variable=variable,
+                                option=option,
+                                by_ref=by_ref,
+                            )
+                            if (
+                                condition_holds
+                                != template.applies_when_condition
+                            ):
+                                legal_options.append(option)
+                                continue
                         opposing = by_ref.get(option)
                         if (
                             opposing is not None
@@ -17853,7 +18006,7 @@ class CommanderEngine:
                             continue
                         if (
                             opposing is None
-                            and template.opposing != CreaturePredicate()
+                            and template.opposing != DeclarationObjectPredicate()
                         ):
                             legal_options.append(option)
                     remaining[variable] = legal_options

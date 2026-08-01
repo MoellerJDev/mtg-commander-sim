@@ -315,9 +315,10 @@ generated documentation fixtures with bearer capabilities redacted. See
   fail-closed material residuals
 - automatic deck-time generic compilation into provisional, arbiter-gated
   semantic programs
-- Oracle IR v6 simple self-trigger, unconditional-entry, counter, pump, basic
+- Oracle IR v7 simple self-trigger, unconditional-entry, counter, pump, basic
   creature-token, fixed-mana combat-declaration cost, and exact combat-
-  declaration restriction/evasion templates with reviewed-handler precedence
+  declaration restriction/evasion/battlefield-condition templates with
+  reviewed-handler precedence
 - CR 613 layer/sublayer, timestamp, dependency, and cycle-audit primitives,
   now used for common copy/type/keyword annotations
 - CR 616 replacement/prevention priority and affected-player-choice
@@ -455,7 +456,10 @@ generated documentation fixtures with bearer capabilities redacted. See
   represented attacks-each-combat and typed single/multiple-player goad
   requirements—including duel and all-opponents-goaded cases—
   atomically, skips empty-combat blocker/damage steps, and command-replays the
-  declaration. Goad designations are public, noncopiable, same-player
+  declaration. Typed public battlefield conditions cover defender/controller
+  permanent existence, another-object exclusion, tapped state, characteristics,
+  fixed stats, minimum counts, and relative creature/land counts per multiplayer
+  defender. Goad designations are public, noncopiable, same-player
   redundant, removed by zone changes, and expire at the goading player's next
   represented turn. Whole-line fixed ordinary-mana intrinsic and defending-
   player and attached-Aura attack taxes are projected, locked after attackers tap, and paid
@@ -472,6 +476,8 @@ generated documentation fixtures with bearer capabilities redacted. See
   atomically; costed choices do not compel payment to satisfy more
   requirements. Exact blocks-each-combat, must-be-blocked, lure, and menace
   constraints use the same solver, including impossible/conflicting cases.
+  Typed controller/defender battlefield conditions and conditional evasion use
+  the same evaluator for projected domains and direct block-pair validation.
   Complete requirement grammar, optional/nonmana/variable/modified costs,
   triggers, multi-blocking, and entry-blocking remain blocked
 - source-reviewed CR 802.5 multiplayer combat-damage ordering: assigning
@@ -693,8 +699,8 @@ python simctl.py oracle coverage \
 ```
 
 This is still not a completeness declaration. The measured July 31 local
-snapshot has 38,484 Oracle IDs: 2,959 exact, 15,736 partially lowerable, and
-19,789 unresolved under current dependency gates. All 69,890 material residuals must
+snapshot has 38,484 Oracle IDs: 2,959 exact, 16,027 partially lowerable, and
+19,498 unresolved under current dependency gates. All 69,890 material residuals must
 be eliminated or covered by reviewed, hash-pinned overrides before complete
 Oracle support can be claimed. Genuinely unique cards may use reviewed
 overrides; common cards and mechanics compile through reusable primitives.

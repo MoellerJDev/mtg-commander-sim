@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 6,
+  "contract_version": 7,
   "mechanic_id": "cr-509-declare-blockers-step",
   "official_name": "Declare Blockers Step",
   "effective_date": "2026-06-19",
@@ -64,7 +64,8 @@
       "creature and battle types",
       "attack target and defending player",
       "supported evasion, protection, and menace restrictions",
-      "whole-line static restrictions over effective type, supertype, subtype, token status, keyword, color, power, toughness, goad, attachment, controller, and public combat relationships"
+      "whole-line static restrictions over effective type, supertype, subtype, token status, keyword, color, power, toughness, goad, attachment, controller, and public combat relationships",
+      "defending-player, attacking-player, and source-controller battlefield existence, tapped-state, minimum-count, and relative-count conditions"
     ],
     "state_writes": [
       "blocking relationship",
@@ -137,6 +138,10 @@
     "intrinsic and attached except-by filters, including mixed artifact/color and subtype/keyword unions",
     "self, attached, and global can-block-only filters",
     "source-relative attacker and blocker power comparisons",
+    "controller artifact, subtype-union, another-object, untapped-land, and minimum-count block conditions",
+    "controller versus attacking-player land and creature count comparisons",
+    "defending-player artifact, enchantment, land, snow, and filtered conditional evasion",
+    "condition changes reflected identically in direct pair checks and declaration domains",
     "exact filtered declarations replaying from the same projected domain",
     "pass-only blocker tasks skipped when no legal domain remains",
     "recognized unsupported conditional block restrictions stopping fail closed"
@@ -157,12 +162,19 @@
     {"name": "Dense Canopy", "oracle_id": "d182ab7d-77bd-49d1-9001-9b4016350181"},
     {"name": "Rubblebelt Runner", "oracle_id": "3bfa51dd-daed-473a-8377-7bb34a2c3371"},
     {"name": "Prehistoric Pet", "oracle_id": "2519ccc0-c206-41fb-aa15-2ef88025ff96"},
-    {"name": "Hunted Ghoul", "oracle_id": "12827076-450d-42b1-98ca-9f9279a539fc"}
+    {"name": "Hunted Ghoul", "oracle_id": "12827076-450d-42b1-98ca-9f9279a539fc"},
+    {"name": "Veteran Brawlers", "oracle_id": "77a963a3-473a-4c34-bc46-8ef016a92c0c"},
+    {"name": "Mogg Toady", "oracle_id": "77c7ba06-d247-421d-9e0c-54c3000c1b78"},
+    {"name": "Topiary Stomper", "oracle_id": "e3fc10d2-2733-4265-8275-112c285fd11a"},
+    {"name": "Mindless Null", "oracle_id": "22ff4e16-5c66-4076-94cc-32c281d42f03"},
+    {"name": "Bouncing Beebles", "oracle_id": "4fa46972-d953-4328-9c31-96e134234133"},
+    {"name": "Arctic Foxes", "oracle_id": "898f0824-cf4c-4e34-8407-9a32fdae6dcb"}
   ],
   "rulings": [
     "Mogg Flunkies — 2018-03-16 — The other blocker need not block the same attacker.",
     "Wandering Wolf — 2012-05-01 — The power comparison occurs only as blockers are declared.",
-    "Prehistoric Pet — 2026-01-27 — Once blocked, later power changes do not make it unblocked."
+    "Prehistoric Pet — 2026-01-27 — Once blocked, later power changes do not make it unblocked.",
+    "Mindless Null — 2009-10-01 — The Vampire condition matters only as blockers are declared; losing Vampires afterward does not undo the block."
   ],
   "test_ids": [
     "test_contract_traces_every_cr_509_rule",
@@ -203,6 +215,9 @@
     "test_self_attached_and_global_block_only_filters_share_domains",
     "test_token_supertype_and_subtype_filters_use_public_characteristics",
     "test_source_relative_power_filters_use_effective_stats",
+    "test_block_conditions_recompute_from_current_battlefield",
+    "test_conditional_evasion_updates_direct_and_domain_legality",
+    "test_minimum_and_relative_counts_are_defender_specific",
     "test_minimum_and_maximum_blocker_counts_are_inviolable",
     "test_block_only_keyword_filters_opposing_attackers",
     "test_only_unblockable_attackers_skip_pass_only_blocker_task",
@@ -211,10 +226,10 @@
   ],
   "implementation": {
     "component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine blocker declaration/payment transition",
-    "version": "declare-blockers-step-v6"
+    "version": "declare-blockers-step-v7"
   },
   "known_blockers": [
-    "conditional, compound-with-unrelated-effects, controller/history-dependent, target-specific, temporary, and broader restriction/evasion grammar remains incomplete and recognized static families fail closed",
+    "history-, monarch-, poison-, declaration-history-, shared-subtype-quantifier-, compound-with-unrelated-effects-, target-specific-, temporary-, broader-, and multi-block restriction/evasion grammar remains incomplete and recognized static families fail closed",
     "only exact blocks-each-combat, must-be-blocked, lure, and menace grammar is represented; conditional, effect-granted, multi-block, and optional-cost grammar remains incomplete",
     "optional, nonmana, variable, alternative, modified, and broader conditional block costs are not implemented",
     "declare-blockers trigger generation and APNAP placement are incomplete",

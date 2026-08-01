@@ -27,7 +27,7 @@ DeclarationRestrictionMode = Literal[
     "maximum_option_uses",
 ]
 PowerOperand = Literal["fixed", "source"]
-PowerOperator = Literal["lt", "le", "gt", "ge"]
+PowerOperator = Literal["eq", "lt", "le", "gt", "ge"]
 ComparedStat = Literal["power", "toughness"]
 
 _COLORS = {
@@ -119,6 +119,21 @@ _SELF_BLOCK_SOURCE_POWER = re.compile(
 _SELF_BLOCKED_BY_GREATER_POWER = re.compile(
     r"this creature can't be blocked by creatures with greater power\."
 )
+_SELF_BATTLEFIELD_CONDITION = re.compile(
+    r"this creature can't (?P<kind>attack|block|attack or block) "
+    r"(?P<link>unless|if) "
+    r"(?:(?P<source>you) control|"
+    r"(?P<defender>defending player) controls) "
+    r"(?P<filter>[^.]+)\."
+)
+_SELF_CONDITIONAL_UNBLOCKABLE = re.compile(
+    r"this creature can't be blocked as long as defending player controls "
+    r"(?P<condition>[^.]+)\."
+)
+_SELF_CONDITIONAL_BLOCKER_FILTER = re.compile(
+    r"this creature can't be blocked by (?P<blockers>[^.]+) as long as "
+    r"defending player controls (?P<condition>[^.]+)\."
+)
 _SELF_BLOCKED_BY_MORE_THAN = re.compile(
     r"this creature can't be blocked by more than (?P<count>one|two|three|\d+) "
     r"creatures?\."
@@ -171,6 +186,13 @@ def _number(value: str) -> int:
         "one": 1,
         "two": 2,
         "three": 3,
+        "four": 4,
+        "five": 5,
+        "six": 6,
+        "seven": 7,
+        "eight": 8,
+        "nine": 9,
+        "ten": 10,
     }.get(value, int(value) if value.isdigit() else 0)
 
 
@@ -213,8 +235,8 @@ class StatComparison:
 
 
 @dataclass(frozen=True, slots=True)
-class CreaturePredicate:
-    """Declarative creature filter used by declaration-domain restrictions."""
+class DeclarationObjectPredicate:
+    """Declarative battlefield-object filter used by restrictions and conditions."""
 
     types_any: tuple[str, ...] = ()
     types_none: tuple[str, ...] = ()
@@ -229,6 +251,9 @@ class CreaturePredicate:
     token: bool | None = None
     goaded: bool | None = None
     stat: StatComparison | None = None
+    additional_stats: tuple[StatComparison, ...] = ()
+    tapped: bool | None = None
+    enchanted: bool | None = None
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -245,6 +270,49 @@ class CreaturePredicate:
             "token": self.token,
             "goaded": self.goaded,
             "stat": self.stat.to_dict() if self.stat else None,
+            "additional_stats": [
+                comparison.to_dict() for comparison in self.additional_stats
+            ],
+            "tapped": self.tapped,
+            "enchanted": self.enchanted,
+        }
+
+
+DeclarationConditionPlayer = Literal[
+    "attacking_player",
+    "defending_player",
+    "source_controller",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class DeclarationBattlefieldCondition:
+    """A typed battlefield-state predicate gating a declaration restriction."""
+
+    player: DeclarationConditionPlayer
+    predicates_any: tuple[DeclarationObjectPredicate, ...]
+    minimum: int = 1
+    exclude_source: bool = False
+    compare_player: DeclarationConditionPlayer | None = None
+
+    def __post_init__(self) -> None:
+        if not self.predicates_any:
+            raise ValueError("A battlefield condition requires a predicate")
+        if self.minimum < 0:
+            raise ValueError("A battlefield condition minimum cannot be negative")
+        if self.compare_player is not None and self.minimum != 1:
+            raise ValueError("A comparative condition cannot also set a minimum")
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "kind": "battlefield_count",
+            "player": self.player,
+            "predicates_any": [
+                predicate.to_dict() for predicate in self.predicates_any
+            ],
+            "minimum": self.minimum,
+            "exclude_source": self.exclude_source,
+            "compare_player": self.compare_player,
         }
 
 
@@ -257,8 +325,10 @@ class DeclarationRestrictionTemplate:
     scope: DeclarationRestrictionScope
     mode: DeclarationRestrictionMode = "prohibit"
     count: int = 0
-    subject: CreaturePredicate = CreaturePredicate()
-    opposing: CreaturePredicate = CreaturePredicate()
+    subject: DeclarationObjectPredicate = DeclarationObjectPredicate()
+    opposing: DeclarationObjectPredicate = DeclarationObjectPredicate()
+    condition: DeclarationBattlefieldCondition | None = None
+    applies_when_condition: bool = True
 
     @property
     def mechanics(self) -> tuple[str, ...]:
@@ -278,6 +348,10 @@ class DeclarationRestrictionTemplate:
             "count": self.count,
             "subject": self.subject.to_dict(),
             "opposing": self.opposing.to_dict(),
+            "condition": (
+                self.condition.to_dict() if self.condition is not None else None
+            ),
+            "applies_when_condition": self.applies_when_condition,
         }
 
 
@@ -296,16 +370,16 @@ class DeclarationRestrictionParse:
         return self.template is not None and self.reason is None
 
 
-def _matching_creature_filter(text: str) -> CreaturePredicate | None:
+def _matching_creature_filter(text: str) -> DeclarationObjectPredicate | None:
     """Return the creatures named by one exact public filter phrase."""
 
     phrase = " ".join(text.casefold().split())
     if phrase == "artifact creatures":
-        return CreaturePredicate(types_any=("Artifact",))
+        return DeclarationObjectPredicate(types_any=("Artifact",))
     if phrase == "legendary creatures":
-        return CreaturePredicate(supertypes_any=("Legendary",))
+        return DeclarationObjectPredicate(supertypes_any=("Legendary",))
     if phrase == "creature tokens":
-        return CreaturePredicate(token=True)
+        return DeclarationObjectPredicate(token=True)
     match = re.fullmatch(
         r"(?P<colors>white|blue|black|red|green)"
         r"(?: and/or (?P<second>white|blue|black|red|green))? creatures",
@@ -315,7 +389,7 @@ def _matching_creature_filter(text: str) -> CreaturePredicate | None:
         colors = [match.group("colors")]
         if match.group("second"):
             colors.append(match.group("second"))
-        return CreaturePredicate(
+        return DeclarationObjectPredicate(
             colors_any=tuple(_COLORS[color] for color in colors)
         )
     match = re.fullmatch(
@@ -325,14 +399,31 @@ def _matching_creature_filter(text: str) -> CreaturePredicate | None:
     if match:
         keywords = tuple(match.group("keywords").split(" or "))
         if all(keyword in _FILTER_KEYWORDS for keyword in keywords):
-            return CreaturePredicate(
+            return DeclarationObjectPredicate(
                 keywords_any=tuple(keyword.title() for keyword in keywords)
             )
         return None
     match = re.fullmatch(r"non-(?P<subtype>[a-z'-]+) creatures", phrase)
     if match:
-        return CreaturePredicate(
+        return DeclarationObjectPredicate(
             subtypes_none=(match.group("subtype").title(),)
+        )
+    match = re.fullmatch(
+        r"creatures with (?P<stat>power|toughness) (?P<count>\d+) "
+        r"or (?P<direction>greater|less)",
+        phrase,
+    )
+    if match:
+        operator: PowerOperator = (
+            "ge" if match.group("direction") == "greater" else "le"
+        )
+        return DeclarationObjectPredicate(
+            stat=StatComparison(
+                match.group("stat"),
+                operator,
+                "fixed",
+                int(match.group("count")),
+            )
         )
     # Bare subtype filters use plural subtype nouns ("Humans", "Oxen", or
     # "Eldrazi Scions").  Do not interpret arbitrary prose ending in a word
@@ -350,16 +441,174 @@ def _matching_creature_filter(text: str) -> CreaturePredicate | None:
     ):
         subtypes = tuple(_singular_subtype(value) for value in atoms)
         if all(subtypes):
-            return CreaturePredicate(subtypes_any=subtypes)
+            return DeclarationObjectPredicate(subtypes_any=subtypes)
     return None
 
 
-def _nonmatching_creature_filter(text: str) -> CreaturePredicate | None:
+def _controlled_object_atom(text: str) -> DeclarationObjectPredicate | None:
+    """Parse one exact permanent-description atom after ``controls``."""
+
+    phrase = " ".join(text.casefold().split())
+    phrase = re.sub(r"^(?:a|an) ", "", phrase)
+    if phrase == "permanent":
+        return DeclarationObjectPredicate()
+    if phrase == "enchanted permanent":
+        return DeclarationObjectPredicate(enchanted=True)
+
+    match = re.fullmatch(r"(?P<power>\d+)/(?P<toughness>\d+) creature", phrase)
+    if match:
+        return DeclarationObjectPredicate(
+            types_any=("Creature",),
+            stat=StatComparison(
+                "power", "eq", "fixed", int(match.group("power"))
+            ),
+            additional_stats=(
+                StatComparison(
+                    "toughness",
+                    "eq",
+                    "fixed",
+                    int(match.group("toughness")),
+                ),
+            ),
+        )
+
+    match = re.fullmatch(
+        r"(?P<tapped>untapped )?creature with "
+        r"(?P<stat>power|toughness) (?P<count>\d+) or "
+        r"(?P<direction>greater|less)",
+        phrase,
+    )
+    if match:
+        operator: PowerOperator = (
+            "ge" if match.group("direction") == "greater" else "le"
+        )
+        return DeclarationObjectPredicate(
+            types_any=("Creature",),
+            stat=StatComparison(
+                match.group("stat"),
+                operator,
+                "fixed",
+                int(match.group("count")),
+            ),
+            tapped=False if match.group("tapped") else None,
+        )
+
+    match = re.fullmatch(
+        r"creature with (?P<keyword>[a-z][a-z-]*)", phrase
+    )
+    if match and match.group("keyword") in _FILTER_KEYWORDS:
+        return DeclarationObjectPredicate(
+            types_any=("Creature",),
+            keywords_any=(match.group("keyword").title(),),
+        )
+
+    match = re.fullmatch(
+        r"(?P<tapped>untapped )?(?P<supertype>snow )?"
+        r"(?P<type>artifact|creature|enchantment|land)",
+        phrase,
+    )
+    if match:
+        return DeclarationObjectPredicate(
+            types_any=(match.group("type").title(),),
+            supertypes_any=("Snow",) if match.group("supertype") else (),
+            tapped=False if match.group("tapped") else None,
+        )
+
+    match = re.fullmatch(
+        r"(?P<color>white|blue|black|red|green) permanent", phrase
+    )
+    if match:
+        return DeclarationObjectPredicate(
+            colors_any=(_COLORS[match.group("color")],)
+        )
+
+    # A remaining one- or two-word noun is a subtype. Longer prose and words
+    # belonging to condition grammar are rejected rather than guessed.
+    if re.fullmatch(r"[a-z][a-z'-]*(?: [a-z][a-z'-]*)?", phrase) and not {
+        "more",
+        "most",
+        "player",
+        "controls",
+    }.intersection(phrase.split()):
+        return DeclarationObjectPredicate(subtypes_any=(phrase.title(),))
+    return None
+
+
+def _battlefield_condition(
+    player: DeclarationConditionPlayer,
+    text: str,
+) -> DeclarationBattlefieldCondition | None:
+    """Compile one exact battlefield-count condition from Oracle prose."""
+
+    phrase = " ".join(text.casefold().split())
+    comparison = re.fullmatch(
+        r"more (?P<type>creatures|lands) than "
+        r"(?P<player>defending|attacking) player",
+        phrase,
+    )
+    if comparison:
+        return DeclarationBattlefieldCondition(
+            player=player,
+            predicates_any=(
+                DeclarationObjectPredicate(
+                    types_any=(comparison.group("type")[:-1].title(),)
+                ),
+            ),
+            compare_player=(
+                "defending_player"
+                if comparison.group("player") == "defending"
+                else "attacking_player"
+            ),
+        )
+
+    minimum = re.fullmatch(
+        r"(?P<count>one|two|three|four|five|six|seven|eight|nine|ten|\d+) "
+        r"or more (?P<type>creatures|lands)",
+        phrase,
+    )
+    if minimum:
+        return DeclarationBattlefieldCondition(
+            player=player,
+            predicates_any=(
+                DeclarationObjectPredicate(
+                    types_any=(minimum.group("type")[:-1].title(),)
+                ),
+            ),
+            minimum=_number(minimum.group("count")),
+        )
+
+    exclude_source = phrase.startswith("another ")
+    if exclude_source:
+        phrase = phrase.removeprefix("another ")
+
+    # Do not split the "or greater/less" portion of a stat comparison.
+    if re.search(r"\b(?:power|toughness) \d+ or (?:greater|less)$", phrase):
+        atoms = (phrase,)
+    else:
+        atoms = tuple(
+            re.sub(r"^(?:a|an) ", "", atom.strip())
+            for atom in phrase.split(" or ")
+        )
+    predicates = tuple(
+        predicate
+        for atom in atoms
+        if (predicate := _controlled_object_atom(atom)) is not None
+    )
+    if len(predicates) != len(atoms):
+        return None
+    return DeclarationBattlefieldCondition(
+        player=player,
+        predicates_any=predicates,
+        exclude_source=exclude_source,
+    )
+
+
+def _nonmatching_creature_filter(text: str) -> DeclarationObjectPredicate | None:
     """Return creatures outside an exact allowed-blocker union."""
 
     phrase = " ".join(text.casefold().split())
     parts = phrase.split(" and/or ")
-    predicates: list[CreaturePredicate] = []
+    predicates: list[DeclarationObjectPredicate] = []
     if len(parts) > 1:
         for part in parts:
             predicate = _matching_creature_filter(part)
@@ -408,7 +657,7 @@ def _nonmatching_creature_filter(text: str) -> CreaturePredicate | None:
             token = False
         else:
             return None
-    return CreaturePredicate(
+    return DeclarationObjectPredicate(
         types_any=tuple(types_any),
         types_none=tuple(types_none),
         supertypes_any=tuple(supertypes_any),
@@ -444,6 +693,81 @@ def parse_declaration_restriction_line(
 
     if parse_declaration_cost_line(line).recognized:
         return DeclarationRestrictionParse(False)
+
+    match = _SELF_BATTLEFIELD_CONDITION.fullmatch(line)
+    if match:
+        declarations = _declarations(match.group("kind"))
+        player: DeclarationConditionPlayer = (
+            "source_controller"
+            if match.group("source")
+            else "defending_player"
+        )
+        condition = _battlefield_condition(player, match.group("filter"))
+        if condition is not None:
+            role = (
+                "controller"
+                if player == "source_controller"
+                else "defending-player"
+            )
+            return DeclarationRestrictionParse(
+                True,
+                DeclarationRestrictionTemplate(
+                    template_id=(
+                        f"intrinsic-{role}-battlefield-"
+                        f"{'-'.join(declarations)}-{match.group('link')}-v1"
+                    ),
+                    declarations=declarations,
+                    scope="self",
+                    condition=condition,
+                    applies_when_condition=(match.group("link") == "if"),
+                ),
+                declarations=declarations,
+                scope="self",
+            )
+
+    match = _SELF_CONDITIONAL_BLOCKER_FILTER.fullmatch(line)
+    if match:
+        subject = _matching_creature_filter(match.group("blockers"))
+        condition = _battlefield_condition(
+            "defending_player", match.group("condition")
+        )
+        if subject is not None and condition is not None:
+            return DeclarationRestrictionParse(
+                True,
+                DeclarationRestrictionTemplate(
+                    template_id=(
+                        "intrinsic-defending-player-conditional-"
+                        "blocker-filter-v1"
+                    ),
+                    declarations=("block",),
+                    scope="source_option",
+                    subject=subject,
+                    condition=condition,
+                ),
+                declarations=("block",),
+                scope="source_option",
+            )
+
+    match = _SELF_CONDITIONAL_UNBLOCKABLE.fullmatch(line)
+    if match:
+        condition = _battlefield_condition(
+            "defending_player", match.group("condition")
+        )
+        if condition is not None:
+            return DeclarationRestrictionParse(
+                True,
+                DeclarationRestrictionTemplate(
+                    template_id=(
+                        "intrinsic-defending-player-conditional-"
+                        "unblockable-v1"
+                    ),
+                    declarations=("block",),
+                    scope="source_option",
+                    condition=condition,
+                ),
+                declarations=("block",),
+                scope="source_option",
+            )
 
     match = _SELF_PROHIBITION.fullmatch(line)
     if match:
@@ -537,7 +861,7 @@ def parse_declaration_restriction_line(
                 template_id="opponent-goaded-creature-block-prohibition-v1",
                 declarations=("block",),
                 scope="source_opponents",
-                subject=CreaturePredicate(goaded=True),
+                subject=DeclarationObjectPredicate(goaded=True),
             ),
             declarations=("block",),
             scope="source_opponents",
@@ -555,7 +879,7 @@ def parse_declaration_restriction_line(
                 template_id="global-keywordless-attack-prohibition-v1",
                 declarations=("attack",),
                 scope="global",
-                subject=CreaturePredicate(keywords_none=keywords),
+                subject=DeclarationObjectPredicate(keywords_none=keywords),
             ),
             declarations=("attack",),
             scope="global",
@@ -568,7 +892,7 @@ def parse_declaration_restriction_line(
                 template_id="source-power-evasion-v1",
                 declarations=("block",),
                 scope="source_option",
-                subject=CreaturePredicate(
+                subject=DeclarationObjectPredicate(
                     stat=StatComparison("power", "lt", "source")
                 ),
             ),
@@ -587,7 +911,7 @@ def parse_declaration_restriction_line(
                 template_id="intrinsic-fixed-power-block-prohibition-v1",
                 declarations=("block",),
                 scope="self",
-                opposing=CreaturePredicate(
+                opposing=DeclarationObjectPredicate(
                     stat=StatComparison(
                         "power",
                         operator,
@@ -607,7 +931,7 @@ def parse_declaration_restriction_line(
                 template_id="intrinsic-source-power-block-prohibition-v1",
                 declarations=("block",),
                 scope="self",
-                opposing=CreaturePredicate(
+                opposing=DeclarationObjectPredicate(
                     stat=StatComparison("power", "gt", "source")
                 ),
             ),
@@ -646,7 +970,7 @@ def parse_declaration_restriction_line(
                 template_id="intrinsic-source-stat-evasion-v1",
                 declarations=("block",),
                 scope="source_option",
-                subject=CreaturePredicate(
+                subject=DeclarationObjectPredicate(
                     stat=StatComparison("power", "gt", "source")
                 ),
             ),
@@ -663,7 +987,7 @@ def parse_declaration_restriction_line(
                 template_id="intrinsic-blocker-stat-evasion-v1",
                 declarations=("block",),
                 scope="source_option",
-                subject=CreaturePredicate(
+                subject=DeclarationObjectPredicate(
                     stat=StatComparison(
                         match.group("stat"),
                         operator,
@@ -684,7 +1008,7 @@ def parse_declaration_restriction_line(
                 template_id="intrinsic-blocker-color-evasion-v1",
                 declarations=("block",),
                 scope="source_option",
-                subject=CreaturePredicate(
+                subject=DeclarationObjectPredicate(
                     colors_any=(_COLORS[match.group("color")],)
                 ),
             ),
@@ -700,7 +1024,7 @@ def parse_declaration_restriction_line(
                 template_id="intrinsic-blocker-subtype-evasion-v1",
                 declarations=("block",),
                 scope="source_option",
-                subject=CreaturePredicate(
+                subject=DeclarationObjectPredicate(
                     subtypes_any=(match.group("subtype").title(),)
                 ),
             ),
@@ -810,7 +1134,7 @@ def parse_declaration_restriction_line(
                 template_id="intrinsic-block-only-keyword-v1",
                 declarations=("block",),
                 scope="self",
-                opposing=CreaturePredicate(
+                opposing=DeclarationObjectPredicate(
                     keywords_none=(match.group("keyword").title(),)
                 ),
             ),
@@ -842,7 +1166,7 @@ def parse_declaration_restriction_line(
                 template_id="intrinsic-color-block-prohibition-v1",
                 declarations=("block",),
                 scope="self",
-                opposing=CreaturePredicate(
+                opposing=DeclarationObjectPredicate(
                     colors_any=(_COLORS[match.group("color")],)
                 ),
             ),
@@ -894,10 +1218,10 @@ def parse_declaration_restriction_line(
                 template_id="subtype-pair-block-prohibition-v1",
                 declarations=("block",),
                 scope="global",
-                subject=CreaturePredicate(
+                subject=DeclarationObjectPredicate(
                     subtypes_any=(match.group("blocker").title(),)
                 ),
-                opposing=CreaturePredicate(
+                opposing=DeclarationObjectPredicate(
                     subtypes_any=(match.group("attacker").title(),)
                 ),
             ),

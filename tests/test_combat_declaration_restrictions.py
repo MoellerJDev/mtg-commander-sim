@@ -90,6 +90,26 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         )[0]
         return engine._resolve_object(seat, ref, zones={"battlefield"})
 
+    @staticmethod
+    def permanent(
+        engine,
+        seat: str,
+        name: str,
+        *,
+        type_line: str,
+        tapped: bool = False,
+    ):
+        ref = engine.create_token(
+            seat,
+            name=name,
+            characteristics={
+                "type_line": type_line,
+                "oracle_text": "",
+            },
+            tapped=tapped,
+        )[0]
+        return engine._resolve_object(seat, ref, zones={"battlefield"})
+
     def set_block_step(self, engine, attackers):
         engine.state.phase_index = 6
         engine.state.step = "declare_blockers"
@@ -163,6 +183,18 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
                 "global-block-only-filter-v1",
                 ("block",),
             ),
+            "This creature can't attack unless defending player controls an Island.": (
+                "intrinsic-defending-player-battlefield-attack-unless-v1",
+                ("attack",),
+            ),
+            "This creature can't block if you control an untapped land.": (
+                "intrinsic-controller-battlefield-block-if-v1",
+                ("block",),
+            ),
+            "This creature can't be blocked as long as defending player controls an artifact.": (
+                "intrinsic-defending-player-conditional-unblockable-v1",
+                ("block",),
+            ),
         }
         for text, (template_id, declarations) in cases.items():
             with self.subTest(text=text):
@@ -177,14 +209,14 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         self.assertFalse(triggered.recognized)
 
         unsupported = parse_declaration_restriction_line(
-            "This creature can't attack unless you control another artifact."
+            "This creature can't attack unless you've cast a creature spell this turn."
         )
         self.assertTrue(unsupported.recognized)
         self.assertFalse(unsupported.exact)
         self.assertEqual(("attack",), unsupported.declarations)
         for complex_filter in (
             "This creature can't be blocked by creatures that don't have a name.",
-            "This creature can't block unless you control a Vampire.",
+            "This creature can't block unless you have four or more cards in hand.",
         ):
             with self.subTest(complex_filter=complex_filter):
                 parsed = parse_declaration_restriction_line(complex_filter)
@@ -721,6 +753,312 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
             [small.ref, large.ref, relative_evasion.ref], domains[equal.ref]
         )
 
+    def test_defender_conditions_filter_attack_options_and_replay(self):
+        session = self.make_combat_session(508010907)
+        engine = session.engine
+        island_gate = self.creature(
+            engine,
+            "A",
+            "Island Gate",
+            oracle_text=(
+                "This creature can't attack unless defending player controls "
+                "an Island."
+            ),
+            keywords=("Haste",),
+        )
+        land_shy = self.creature(
+            engine,
+            "A",
+            "Land Shy",
+            oracle_text=(
+                "This creature can't attack if defending player controls an "
+                "untapped land."
+            ),
+            keywords=("Haste",),
+        )
+        godhunter = self.creature(
+            engine,
+            "A",
+            "Enchantment Gate",
+            oracle_text=(
+                "This creature can't attack unless defending player controls "
+                "an enchantment or an enchanted permanent."
+            ),
+            keywords=("Haste",),
+        )
+        self.permanent(
+            engine,
+            "B",
+            "Defender Island",
+            type_line="Token Land — Island",
+        )
+        enchanted = self.creature(engine, "B", "Enchanted Defender")
+        aura = self.permanent(
+            engine,
+            "A",
+            "Opponent Aura",
+            type_line="Token Enchantment — Aura",
+        )
+        aura.attached_to = enchanted.object_id
+        enchanted.attachments.append(aura.object_id)
+
+        problem = engine._attack_declaration_problem("A")
+        self.assertEqual(("B",), problem.domains[island_gate.ref])
+        self.assertEqual(("C",), problem.domains[land_shy.ref])
+        self.assertEqual(("B",), problem.domains[godhunter.ref])
+
+        engine._issue_attackers()
+        session.initial_checkpoint = checkpoint_envelope(session.state)
+        accepted = session.act(
+            "pilot:A",
+            {
+                "a": "attack",
+                "atk": {
+                    island_gate.ref: "B",
+                    land_shy.ref: "C",
+                    godhunter.ref: "B",
+                },
+            },
+        )
+        self.assertTrue(accepted.ok, accepted.summary)
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "conditional-attack-replay"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+            self.assertTrue(replay["ok"], replay)
+            self.assertEqual(1, replay["commands"])
+
+    def test_controller_conditions_use_another_stats_and_exact_size(self):
+        session = self.make_combat_session(508010908, players=2)
+        engine = session.engine
+        artifact_gate = self.creature(
+            engine,
+            "A",
+            "Artifact Gate",
+            oracle_text=(
+                "This creature can't attack unless you control another "
+                "artifact."
+            ),
+            keywords=("Haste",),
+            type_line="Artifact Creature — Serpent",
+        )
+        power_gate = self.creature(
+            engine,
+            "A",
+            "Power Gate",
+            oracle_text=(
+                "This creature can't attack unless you control another "
+                "creature with power 4 or greater."
+            ),
+            keywords=("Haste",),
+            power="5",
+            toughness="5",
+        )
+        exact_gate = self.creature(
+            engine,
+            "A",
+            "Exact Gate",
+            oracle_text=(
+                "This creature can't attack unless you control a 1/1 "
+                "creature."
+            ),
+            keywords=("Haste",),
+        )
+
+        initial = engine._attack_declaration_problem("A")
+        self.assertNotIn(artifact_gate.ref, initial.domains)
+        self.assertNotIn(power_gate.ref, initial.domains)
+        self.assertNotIn(exact_gate.ref, initial.domains)
+
+        self.creature(
+            engine,
+            "A",
+            "Artifact Support",
+            power="4",
+            toughness="4",
+            type_line="Artifact Creature — Construct",
+        )
+        supported = engine._attack_declaration_problem("A")
+        self.assertIn(artifact_gate.ref, supported.domains)
+        self.assertIn(power_gate.ref, supported.domains)
+        self.assertNotIn(exact_gate.ref, supported.domains)
+
+        self.creature(engine, "A", "Wrong Size", power="1", toughness="2")
+        self.assertNotIn(
+            exact_gate.ref,
+            engine._attack_declaration_problem("A").domains,
+        )
+        self.creature(engine, "A", "Exact Size", power="1", toughness="1")
+        self.assertIn(
+            exact_gate.ref,
+            engine._attack_declaration_problem("A").domains,
+        )
+
+    def test_minimum_and_relative_counts_are_defender_specific(self):
+        session = self.make_combat_session(508010909)
+        engine = session.engine
+        outnumber = self.creature(
+            engine,
+            "A",
+            "Outnumber Gate",
+            oracle_text=(
+                "This creature can't attack unless you control more creatures "
+                "than defending player."
+            ),
+            keywords=("Haste",),
+        )
+        seven_lands = self.creature(
+            engine,
+            "A",
+            "Seven Land Gate",
+            oracle_text=(
+                "This creature can't attack or block unless you control seven "
+                "or more lands."
+            ),
+            keywords=("Haste",),
+        )
+        self.creature(engine, "A", "Ally")
+        self.creature(engine, "B", "One Defender")
+        self.creature(engine, "C", "First Defender")
+        self.creature(engine, "C", "Second Defender")
+        self.creature(engine, "C", "Third Defender")
+        for number in range(6):
+            self.permanent(
+                engine,
+                "A",
+                f"Land {number}",
+                type_line="Token Land",
+            )
+
+        problem = engine._attack_declaration_problem("A")
+        self.assertEqual(("B",), problem.domains[outnumber.ref])
+        self.assertNotIn(seven_lands.ref, problem.domains)
+        self.permanent(
+            engine,
+            "A",
+            "Seventh Land",
+            type_line="Token Land",
+        )
+        self.assertEqual(
+            ("B", "C"),
+            engine._attack_declaration_problem("A").domains[seven_lands.ref],
+        )
+
+    def test_block_conditions_recompute_from_current_battlefield(self):
+        session = self.make_combat_session(509010915, players=2)
+        engine = session.engine
+        attacker = self.creature(
+            engine, "A", "Attacker", keywords=("Haste",)
+        )
+        zombie = self.creature(
+            engine,
+            "B",
+            "Zombie Gate",
+            oracle_text=(
+                "This creature can't block unless you control another Zombie."
+            ),
+            subtype="Zombie",
+        )
+        land_shy = self.creature(
+            engine,
+            "B",
+            "Untapped Land Gate",
+            oracle_text=(
+                "This creature can't block if you control an untapped land."
+            ),
+        )
+        land_count = self.creature(
+            engine,
+            "B",
+            "Land Count Gate",
+            oracle_text=(
+                "This creature can't block unless you control more lands than "
+                "attacking player."
+            ),
+        )
+        defender_land = self.permanent(
+            engine,
+            "B",
+            "Defender Land",
+            type_line="Token Land",
+        )
+        self.set_block_step(engine, [(attacker, "B")])
+
+        initial = engine._block_declaration_problem("B")
+        self.assertNotIn(zombie.ref, initial.domains)
+        self.assertNotIn(land_shy.ref, initial.domains)
+        self.assertIn(land_count.ref, initial.domains)
+        self.assertFalse(engine._can_block(attacker, zombie)[0])
+        self.assertFalse(engine._can_block(attacker, land_shy)[0])
+
+        self.creature(engine, "B", "Zombie Ally", subtype="Zombie")
+        defender_land.tapped = True
+        recomputed = engine._block_declaration_problem("B")
+        self.assertIn(zombie.ref, recomputed.domains)
+        self.assertIn(land_shy.ref, recomputed.domains)
+        self.assertTrue(engine._can_block(attacker, zombie)[0])
+        self.assertTrue(engine._can_block(attacker, land_shy)[0])
+
+        self.permanent(engine, "A", "Attack Land One", type_line="Token Land")
+        self.permanent(engine, "A", "Attack Land Two", type_line="Token Land")
+        self.assertNotIn(
+            land_count.ref,
+            engine._block_declaration_problem("B").domains,
+        )
+
+    def test_conditional_evasion_updates_direct_and_domain_legality(self):
+        session = self.make_combat_session(509010916, players=2)
+        engine = session.engine
+        artifact_evasion = self.creature(
+            engine,
+            "A",
+            "Artifact Evasion",
+            oracle_text=(
+                "This creature can't be blocked as long as defending player "
+                "controls an artifact."
+            ),
+            keywords=("Haste",),
+        )
+        snow_evasion = self.creature(
+            engine,
+            "A",
+            "Snow Evasion",
+            oracle_text=(
+                "This creature can't be blocked by creatures with power 2 or "
+                "greater as long as defending player controls a snow land."
+            ),
+            keywords=("Haste",),
+        )
+        small = self.creature(engine, "B", "Small Blocker", power="1")
+        large = self.creature(engine, "B", "Large Blocker", power="2")
+        self.set_block_step(
+            engine,
+            [(artifact_evasion, "B"), (snow_evasion, "B")],
+        )
+
+        self.assertTrue(engine._can_block(artifact_evasion, large)[0])
+        self.assertTrue(engine._can_block(snow_evasion, large)[0])
+        self.permanent(
+            engine,
+            "B",
+            "Artifact",
+            type_line="Token Artifact",
+        )
+        self.permanent(
+            engine,
+            "B",
+            "Snow Land",
+            type_line="Snow Token Land",
+        )
+
+        self.assertFalse(engine._can_block(artifact_evasion, large)[0])
+        self.assertFalse(engine._can_block(snow_evasion, large)[0])
+        self.assertTrue(engine._can_block(snow_evasion, small)[0])
+        domains = engine._block_declaration_problem("B").domains
+        self.assertEqual((snow_evasion.ref,), domains[small.ref])
+        self.assertNotIn(artifact_evasion.ref, domains.get(large.ref, ()))
+        self.assertNotIn(snow_evasion.ref, domains.get(large.ref, ()))
+
     def test_only_unblockable_attackers_skip_pass_only_blocker_task(self):
         session = self.make_combat_session(509010909, players=2)
         engine = session.engine
@@ -865,7 +1203,8 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
             "A",
             "Conditional",
             oracle_text=(
-                "This creature can't attack unless you control another artifact."
+                "This creature can't attack unless you've cast a creature "
+                "spell this turn."
             ),
             keywords=("Haste",),
         )
@@ -957,11 +1296,33 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
             evasion.faces[0].nodes[0].template_id,
         )
 
+        conditional = compile_oracle_card(
+            replace(
+                exact,
+                oracle_text=(
+                    "This creature can't attack unless defending player "
+                    "controls an Island."
+                ),
+            ),
+            trusted_mechanics={"cr-508-declare-attackers-step"},
+        )
+        self.assertEqual("exact", conditional.status)
+        conditional_node = conditional.faces[0].nodes[0]
+        self.assertEqual(
+            "intrinsic-defending-player-battlefield-attack-unless-v1",
+            conditional_node.template_id,
+        )
+        self.assertEqual(
+            "defending_player",
+            conditional_node.effects[0]["condition"]["player"],
+        )
+
         unresolved = compile_oracle_card(
             replace(
                 exact,
                 oracle_text=(
-                    "This creature can't attack unless you control another artifact."
+                    "This creature can't attack unless you've cast a creature "
+                    "spell this turn."
                 ),
             ),
             trusted_mechanics={"cr-508-declare-attackers-step"},
