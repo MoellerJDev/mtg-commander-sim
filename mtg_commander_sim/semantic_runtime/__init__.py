@@ -8,7 +8,14 @@ from .context import (
     ReadOnlyRulesQuery,
     SemanticNodeError,
 )
-from .executor import SemanticIntentSink, execute_intent_plan
+from .executor import (
+    DrawResolutionBatch,
+    DrawResolutionRequest,
+    SemanticIntentSink,
+    draw_resolution_batch,
+    execute_intent_plan,
+    prepare_draw_resolution,
+)
 from .generic import GENERIC_HANDLERS
 from .handlers import SemanticNodeHandler
 from .intents import (
@@ -53,6 +60,8 @@ __all__ = [
     "DrawCardsIntent",
     "DrawEachPlayerNode",
     "DrawNode",
+    "DrawResolutionBatch",
+    "DrawResolutionRequest",
     "IntentPlan",
     "ReadOnlyHandlerContext",
     "ReadOnlyRulesQuery",
@@ -64,5 +73,7 @@ __all__ = [
     "SemanticNodeError",
     "default_semantic_handler_registry",
     "default_semantic_interpreter",
+    "draw_resolution_batch",
     "execute_intent_plan",
+    "prepare_draw_resolution",
 ]

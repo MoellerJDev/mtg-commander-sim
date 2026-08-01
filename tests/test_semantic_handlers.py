@@ -4,6 +4,7 @@ from dataclasses import FrozenInstanceError
 import tempfile
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim.engine import GameRuleError
@@ -24,6 +25,7 @@ from mtg_commander_sim.semantic_runtime import (
 )
 from mtg_commander_sim.semantic_runtime.generic import (
     BecomeMonarchHandler,
+    DrawEachPlayerHandler,
     DrawHandler,
 )
 from mtg_commander_sim.semantics import SemanticProgram
@@ -111,6 +113,11 @@ class TypedSemanticHandlerTests(unittest.TestCase):
         self.assertFalse(hasattr(context, "state"))
         with self.assertRaises(FrozenInstanceError):
             context.actor = "C"  # type: ignore[misc]
+        private_plan = DrawHandler().lower(
+            {"op": "draw", "player": "B", "private": True},
+            context,
+        )
+        self.assertTrue(private_plan.intents[0].private)
 
     def test_draw_each_player_uses_apnap_order_and_exact_engine_path(self):
         session = self.session(1210401)
@@ -185,7 +192,14 @@ class TypedSemanticHandlerTests(unittest.TestCase):
         program = SemanticProgram(
             key="test:typed-draw",
             label="Typed draw",
-            effects=[{"op": "draw", "player": "$controller", "count": 1}],
+            effects=[
+                {
+                    "op": "draw",
+                    "player": "$controller",
+                    "count": 1,
+                    "private": True,
+                }
+            ],
             trust_level="provisional",
         )
         engine.semantics.put(program)
@@ -210,13 +224,27 @@ class TypedSemanticHandlerTests(unittest.TestCase):
         session.decisions.clear()
         hand_before = len(engine.state.players["A"].zones["hand"])
 
-        for principal in ("pilot:A", "pilot:B"):
-            result = session.act(principal, {"action_id": "pass"})
-            self.assertTrue(result.ok, result.summary)
+        original_lower = DrawHandler.lower
+        with patch.object(
+            DrawHandler,
+            "lower",
+            autospec=True,
+            side_effect=original_lower,
+        ) as lower:
+            for principal in ("pilot:A", "pilot:B"):
+                result = session.act(principal, {"action_id": "pass"})
+                self.assertTrue(result.ok, result.summary)
+        self.assertGreaterEqual(lower.call_count, 1)
         self.assertEqual(
             hand_before + 1,
             len(engine.state.players["A"].zones["hand"]),
         )
+        private_draw = next(
+            event
+            for event in reversed(engine.state.events)
+            if event.code == "card.draw.private" and event.actor == "A"
+        )
+        self.assertEqual(0, private_draw.importance)
 
         with tempfile.TemporaryDirectory() as temporary:
             record_dir = Path(temporary) / "typed-draw-record"
@@ -224,6 +252,101 @@ class TypedSemanticHandlerTests(unittest.TestCase):
             replay = replay_record(record_dir, self.db, verify=True)
         self.assertTrue(replay["ok"], replay)
         self.assertEqual(2, replay["commands"])
+
+    def test_stack_draw_node_validation_rolls_back_before_resolution(self):
+        session = self.session(1210404, players=2)
+        engine = session.engine
+        program = SemanticProgram(
+            key="test:invalid-typed-draw",
+            label="Invalid typed draw",
+            effects=[
+                {"op": "draw", "player": "$controller", "count": "1"}
+            ],
+            trust_level="provisional",
+        )
+        engine.semantics.put(program)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="invalid-typed-draw",
+                ref="S-invalid-typed-draw",
+                kind="triggered_ability",
+                controller="A",
+                label=program.label,
+                semantic_key=program.key,
+                visibility=["A", "B"],
+            )
+        )
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine._grant_priority("A")
+        engine._issue_priority("A")
+
+        first = session.act("pilot:A", {"action_id": "pass"})
+        self.assertTrue(first.ok, first.summary)
+        before = authoritative_state_hash(engine.state)
+        second = session.act("pilot:B", {"action_id": "pass"})
+
+        self.assertFalse(second.ok)
+        self.assertIn(
+            "Draw count must be a nonnegative integer", second.summary
+        )
+        self.assertEqual(before, authoritative_state_hash(engine.state))
+        self.assertEqual(
+            ["S-invalid-typed-draw"],
+            [item.ref for item in engine.state.stack],
+        )
+
+    def test_stack_draw_each_routes_through_handler_in_apnap_order(self):
+        session = self.session(1210405)
+        engine = session.engine
+        program = SemanticProgram(
+            key="test:typed-draw-each",
+            label="Typed table draw",
+            effects=[{"op": "draw_each_player", "count": 1}],
+            trust_level="provisional",
+        )
+        engine.semantics.put(program)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="typed-draw-each",
+                ref="S-typed-draw-each",
+                kind="triggered_ability",
+                controller="A",
+                label=program.label,
+                semantic_key=program.key,
+                visibility=["A", "B", "C"],
+            )
+        )
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine._grant_priority("A")
+        engine._issue_priority("A")
+        before = {
+            seat: len(engine.state.players[seat].zones["hand"])
+            for seat in engine.active_seats
+        }
+
+        original_lower = DrawEachPlayerHandler.lower
+        with patch.object(
+            DrawEachPlayerHandler,
+            "lower",
+            autospec=True,
+            side_effect=original_lower,
+        ) as lower:
+            for principal in ("pilot:A", "pilot:B", "pilot:C"):
+                result = session.act(principal, {"action_id": "pass"})
+                self.assertTrue(result.ok, result.summary)
+
+        self.assertGreaterEqual(lower.call_count, 1)
+        self.assertEqual(
+            {seat: count + 1 for seat, count in before.items()},
+            {
+                seat: len(engine.state.players[seat].zones["hand"])
+                for seat in engine.active_seats
+            },
+        )
 
 
 if __name__ == "__main__":

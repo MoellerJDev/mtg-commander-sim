@@ -21,6 +21,13 @@ def _reason(
     return str(effect.get("reason") or context.default_reason)
 
 
+def _private(effect: Mapping[str, Any]) -> bool:
+    value = effect.get("private", False)
+    if type(value) is not bool:
+        raise SemanticNodeError("Draw private flag must be a boolean")
+    return value
+
+
 @dataclass(frozen=True, slots=True)
 class DrawHandler:
     handler_id: str = "generic.draw.v1"
@@ -41,6 +48,7 @@ class DrawHandler:
             ),
             count=_count(effect),
             reason=_reason(effect, context),
+            private=_private(effect),
         )
         return IntentPlan(
             operation=self.operation,
@@ -50,6 +58,7 @@ class DrawHandler:
                     player=node.player,
                     count=node.count,
                     reason=node.reason,
+                    private=node.private,
                 ),
             ),
         )
