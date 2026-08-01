@@ -460,6 +460,8 @@ class GameState:
     step: str = "mulligan"
     stack: list[StackItem] = field(default_factory=list)
     delayed_triggers: list[DelayedTrigger] = field(default_factory=list)
+    # CR 725 designation. ``None`` means no player has become the monarch.
+    monarch: str | None = None
     pending_trigger_batches: list[dict[str, Any]] = field(
         default_factory=list
     )
@@ -509,6 +511,7 @@ class GameState:
             "step": self.step,
             "stack": [item.to_dict() for item in self.stack],
             "delayed_triggers": [trigger.to_dict() for trigger in self.delayed_triggers],
+            "monarch": self.monarch,
             "pending_trigger_batches": copy.deepcopy(
                 self.pending_trigger_batches
             ),
@@ -555,6 +558,7 @@ class GameState:
             step=str(data.get("step", "mulligan")),
             stack=[StackItem.from_dict(item) for item in data.get("stack", [])],
             delayed_triggers=[DelayedTrigger.from_dict(item) for item in data.get("delayed_triggers", [])],
+            monarch=data.get("monarch"),
             pending_trigger_batches=copy.deepcopy(
                 data.get("pending_trigger_batches", [])
             ),

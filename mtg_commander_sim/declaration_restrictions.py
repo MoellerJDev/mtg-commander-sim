@@ -127,6 +127,18 @@ _SELF_BATTLEFIELD_CONDITION = re.compile(
     r"(?P<defender>defending player) controls) "
     r"(?P<filter>[^.]+)\."
 )
+_SELF_PLAYER_STATE_CONDITION = re.compile(
+    r"this creature can't (?P<kind>attack|block|attack or block) unless "
+    r"(?P<player>defending player|you) "
+    r"(?P<verb>is|are) (?P<state>poisoned|the monarch)\."
+)
+_SELF_MONARCH_BLOCKER_CONDITION = re.compile(
+    r"this creature can't be blocked by creatures the monarch controls\."
+)
+_GLOBAL_MONARCH_SOURCE_CONTROLLER_ATTACK = re.compile(
+    r"as long as you're the monarch, creatures with power "
+    r"(?P<count>\d+) or less can't attack you\."
+)
 _SELF_CONDITIONAL_UNBLOCKABLE = re.compile(
     r"this creature can't be blocked as long as defending player controls "
     r"(?P<condition>[^.]+)\."
@@ -405,9 +417,25 @@ class DeclarationSharedSubtypeCondition:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class DeclarationPlayerStateCondition:
+    """A public player designation or counter-derived status predicate."""
+
+    player: DeclarationConditionPlayer
+    state: Literal["monarch", "poisoned"]
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "kind": "player_state",
+            "player": self.player,
+            "state": self.state,
+        }
+
+
 DeclarationCondition = (
     DeclarationBattlefieldCondition
     | DeclarationCombatCondition
+    | DeclarationPlayerStateCondition
     | DeclarationSharedSubtypeCondition
 )
 
@@ -970,6 +998,81 @@ def parse_declaration_restriction_line(
             ),
             declarations=("block",),
             scope="source_option",
+        )
+
+    match = _SELF_PLAYER_STATE_CONDITION.fullmatch(line)
+    if match:
+        expected_verb = (
+            "is" if match.group("player") == "defending player" else "are"
+        )
+        if match.group("verb") == expected_verb:
+            declarations = _declarations(match.group("kind"))
+            player: DeclarationConditionPlayer = (
+                "defending_player"
+                if match.group("player") == "defending player"
+                else "source_controller"
+            )
+            state: Literal["monarch", "poisoned"] = (
+                "monarch"
+                if match.group("state") == "the monarch"
+                else "poisoned"
+            )
+            return DeclarationRestrictionParse(
+                True,
+                DeclarationRestrictionTemplate(
+                    template_id=(
+                        f"intrinsic-{player.replace('_', '-')}-{state}-"
+                        f"{'-'.join(declarations)}-unless-v1"
+                    ),
+                    declarations=declarations,
+                    scope="self",
+                    condition=DeclarationPlayerStateCondition(
+                        player=player,
+                        state=state,
+                    ),
+                    applies_when_condition=False,
+                ),
+                declarations=declarations,
+                scope="self",
+            )
+
+    if _SELF_MONARCH_BLOCKER_CONDITION.fullmatch(line):
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="intrinsic-monarch-controller-evasion-v1",
+                declarations=("block",),
+                scope="source_option",
+                condition=DeclarationPlayerStateCondition(
+                    player="defending_player",
+                    state="monarch",
+                ),
+            ),
+            declarations=("block",),
+            scope="source_option",
+        )
+
+    match = _GLOBAL_MONARCH_SOURCE_CONTROLLER_ATTACK.fullmatch(line)
+    if match:
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="global-monarch-source-controller-attack-v1",
+                declarations=("attack",),
+                scope="global",
+                subject=DeclarationObjectPredicate(
+                    stat=StatComparison(
+                        "power", "le", "fixed", int(match.group("count"))
+                    )
+                ),
+                condition=DeclarationPlayerStateCondition(
+                    player="source_controller",
+                    state="monarch",
+                ),
+                option_relation="source_controller",
+            ),
+            declarations=("attack",),
+            scope="global",
         )
 
     match = _GLOBAL_SOURCE_CONTROLLER_ATTACK_BLOCK.fullmatch(line)

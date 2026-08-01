@@ -19,15 +19,15 @@
     }
   },
   "derived_hashes": {
-    "conformance-cases.json": "5e8bfa76a9b091c3d51ce82e7a39d8d7f976071c5f5f8c2f21c655ce158d1bb9",
+    "conformance-cases.json": "7f45a3053a218ad16e0c871631d023379e951e759810e1821f309ea5236354b7",
     "dependency-graph.json": "0c2c5095e0875c278e26d58d601246bcc597183ab96be167dec64bc0fe0ae956",
     "glossary-index.json": "576fad18aaf10a2f1c0f1f257837eae95057721b668fe38740d2182ce9aebb7d",
     "mechanic-index.json": "72998332705128357f9adc1ba7f20b73a6f5b97ccdda9fc46a95edc5f5ff7fcb",
-    "mechanics/registry.json": "0e985a5d7b90ec4db79ea466496b3e49e0f09516b61192e4459fae8bfcc76edf",
+    "mechanics/registry.json": "d11f1c47165efc7065b227b02885101691b963808a6ef7b4844c088c5c6e4e7d",
     "rule-index.json": "ae20b6961f35621fe5f9cec5e784416ca14a7723a4f0ffb5d2326aa5555f4347"
   },
   "effective_date": "2026-06-19",
-  "generated_at": "2026-08-01T11:50:42.522964+00:00",
+  "generated_at": "2026-08-01T12:35:06.648149+00:00",
   "glossary_count": 733,
   "mechanic_count": 425,
   "parser_version": "cr-index-v1",
@@ -37,5 +37,5 @@
   "source_page_url": "https://magic.wizards.com/en/rules",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "source_size_bytes": 975632,
-  "source_url": "local-source"
+  "source_url": "https://media.wizards.com/2026/downloads/MagicCompRules%2020260619.txt"
 }

@@ -11,10 +11,10 @@ coverage.
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Current integration branch: `main`
-- Rules integration PRs #1–#17 and #24–#45 are merged; the cumulative PR #24
+- Rules integration PRs #1–#17 and #24–#46 are merged; the cumulative PR #24
   tip incorporated the exact CR 400–408 heads before PRs #18–#23 closed as
   superseded
-- Current integrated merge: `81ce825`
+- Current integrated merge: `c5f0ea5`
 - Package version: `0.8.0`
 - Comprehensive Rules effective date: 2026-06-19
 - CR SHA-256:
@@ -27,8 +27,8 @@ coverage.
 | Workstream | Status | Current evidence |
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
-| Mechanic contracts | In progress | 57 partial/untrusted contracts; 368 mechanics unclassified; 0 trusted |
-| Typed Oracle IR | In progress | `oracle-ir-v9`, source spans, fail-closed material residuals, anchored target-creature goad lowering, and shared whole-line declaration cost/restriction/evasion/battlefield-condition/composition/target-scope grammars |
+| Mechanic contracts | In progress | 58 partial/untrusted contracts; 367 mechanics unclassified; 0 trusted |
+| Typed Oracle IR | In progress | `oracle-ir-v10`, source spans, fail-closed material residuals, anchored target-creature goad and become-monarch lowering, and shared whole-line declaration cost/restriction/evasion/battlefield-condition/player-state/composition/target-scope grammars |
 | Object and zone identity | Partial | All 30 CR 400 records reviewed; owner-zone routing, logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, hidden outside-game movement, and selected linked-effect guards |
 | Library | Partial | All 8 CR 401 records reviewed; hidden order/public count, bounded look/reorder, shuffle knowledge clearing, and Nth-from-top placement; simultaneous owner ordering and continuous top-card visibility remain blocked |
 | Hand | Partial | All 4 CR 402 records reviewed; starting/maximum size, cleanup-only excess discard, public count, scoped identity, public-to-hand knowledge, and controller dual-hand access; continuous no-maximum and arbitrary reveal/look grammar remain blocked |
@@ -42,9 +42,9 @@ coverage.
 | Replacement/prevention ordering | Partial | CR 615/616 typed primitives; stateful shields and event-producer integration incomplete |
 | Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, immutable final combat source-recipient events, combat damage/death trigger batching, player/planeswalker/Battle combat targets, counter-derived battlefield defense, copied printed defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
-| Full Oracle compilation | In progress | exact 2,959; partial 16,042; unresolved 19,483; 69,890 material residuals |
-| Commander-legal Oracle compilation | In progress | exact 338; partial 14,616; unresolved 16,669; 61,213 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 563 cases are reviewed, with 120 executable passes, 362 blocked cases, and 81 definition-only cases; 2,737 remain unreviewed |
+| Full Oracle compilation | In progress | exact 2,959; partial 16,068; unresolved 19,457; 69,890 material residuals |
+| Commander-legal Oracle compilation | In progress | exact 338; partial 14,642; unresolved 16,643; 61,213 material residuals |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 569 cases are reviewed, with 125 executable passes, 362 blocked cases, and 82 definition-only cases; 2,731 remain unreviewed |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -350,7 +350,8 @@ source-controller target restrictions, per-player attack caps, and source-
 specific attack maxima are also represented. Conditions cover controller/defender permanent
 existence, another-object exclusion, tapped state, characteristics and fixed
 stats, minimum counts, and relative creature/land counts per multiplayer
-destination. History, monarch, poison, compound, temporary, and broader predicate
+destination. Public monarch/poison conditions are typed. History, compound,
+temporary, and broader predicate
 families remain fail-closed residuals.
 
 Ordinary blocker declarations are server-derived from current public combat
@@ -373,10 +374,19 @@ declaration domains. Minimum-other and filtered-companion implications,
 attacking-alone and no-other-creature evasion, source-controller-relative
 block restrictions, and shared-creature-subtype thresholds use the same
 public-state boundary. Changeling contributes once to every subtype. History,
-monarch, poison, compound-with-unrelated-effects,
+compound-with-unrelated-effects,
 temporary, broader, and multi-block grammar, optional/nonmana/variable/modified block costs, declaration-trigger
 provenance, one blocker blocking several attackers, and entry-blocking effects
 remain blocked.
+
+CR 725 now has a single authoritative public monarch designation. Generic
+effects can create or replace it; the monarch's end-step draw and combat-damage
+transfer are inherent stack abilities that join the same APNAP/controller-order
+batch as represented card and delayed triggers. A departing monarch passes the
+designation to the active player or the next remaining player in turn order.
+Exact monarch/poison declaration predicates and `you become the monarch`
+effects lower without card-name branches; broader Oracle wording remains
+material and fail closed.
 
 Manual combat-damage assignment is server-authoritative. The engine derives
 the current combat sources, permitted recipients, and required effective-power
@@ -666,9 +676,9 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 563 cases in the current reviewed
-  families are source-reviewed: 120 pass with executable engine evidence, 362
-  remain blocked, and 81 are definition-only. The other 2,737 cases remain
+  establish inventory linkage only. All 569 cases in the current reviewed
+  families are source-reviewed: 125 pass with executable engine evidence, 362
+  remain blocked, and 82 are definition-only. The other 2,731 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -683,7 +693,7 @@ assignment constraints, APNAP announcements, typed final combat events, and
 post-damage trigger batching. The next rules work is:
 
 1. Extend the shared finite attack/block constraint vocabulary to history-,
-   monarch-, poison-, non-goad requirement-, other effect-granted-, optional-
+   non-goad requirement-, other effect-granted-, optional-
    cost-, and multi-block grammar without weakening the deterministic search
    bound or projected explanations.
 2. Route represented declaration triggers and effect-created/removed combatants

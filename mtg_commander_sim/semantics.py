@@ -96,6 +96,7 @@ VALID_EFFECT_OPERATIONS = {
     "scute_swarm_token",
     "springheart_landfall",
     "bestow_prepare",
+    "become_monarch",
     "shuffle_into_library",
     "shuffle_graveyard_bottom_random",
     "sacrifice",

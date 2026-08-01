@@ -1,5 +1,5 @@
 {
-  "contract_count": 57,
+  "contract_count": 58,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -106,13 +106,13 @@
     {
       "mechanic_id": "cr-508-declare-attackers-step",
       "path": "mechanics/contracts/declare-attackers-step.json",
-      "sha256": "29060dc483ed79a40c0a2084ab8e3b3abe4245d46e7ebe2470ece93c26566934",
+      "sha256": "70c987ce43b4a3a4016317a0400878332675d02c1c75fb0506d0e96a504cbea0",
       "version": 9
     },
     {
       "mechanic_id": "cr-509-declare-blockers-step",
       "path": "mechanics/contracts/declare-blockers-step.json",
-      "sha256": "52d785a54f64be8afa8651d88bfc7f71ba9709ecc47ed2b323388733a00b55ea",
+      "sha256": "b6dcf952cc71262ef9d09f7c154875095241b8a6ac4448511a400967301dc0d6",
       "version": 9
     },
     {
@@ -154,7 +154,7 @@
     {
       "mechanic_id": "cr-513-end-step",
       "path": "mechanics/contracts/end-step.json",
-      "sha256": "92350699072900a3115dec49ff7643c484ba3ee647bb7b007799f1d8b0d30e7e",
+      "sha256": "69728b62208d90d5172347d9ee0e17dcc0e93c0a9fbf578c3b411cde95801cd2",
       "version": 1
     },
     {
@@ -251,6 +251,12 @@
       "mechanic_id": "menace",
       "path": "mechanics/contracts/menace.json",
       "sha256": "34e37987949e47919ffa87a4a214ee8143de46620640970104aa12d9c048f150",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-725-the-monarch",
+      "path": "mechanics/contracts/monarch.json",
+      "sha256": "3a9a07a580385babf6e2182f20f9fad7e2139add24c971b9df6710feb52617f1",
       "version": 1
     },
     {
@@ -6734,7 +6740,7 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-attackers-step.json",
-      "contract_sha256": "29060dc483ed79a40c0a2084ab8e3b3abe4245d46e7ebe2470ece93c26566934",
+      "contract_sha256": "70c987ce43b4a3a4016317a0400878332675d02c1c75fb0506d0e96a504cbea0",
       "contract_version": 9,
       "coverage_status": "partial",
       "dependencies": [],
@@ -6743,7 +6749,7 @@
       "kind": "rules_section",
       "known_blockers": [
         "exact attacks-each-combat and typed goad requirements are represented; conditional, non-goad defender-specific, and other effect-granted requirement grammar remains incomplete",
-        "history-, monarch-, poison-, compound-, other named-target-, temporary-, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
+        "history-, compound-, other named-target-, temporary-, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
         "banding declarations are not implemented",
         "optional, nonmana, variable, alternative, modified, and broader conditional attack costs are not implemented",
         "declare-attackers trigger generation and APNAP placement are incomplete",
@@ -6824,7 +6830,7 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-blockers-step.json",
-      "contract_sha256": "52d785a54f64be8afa8651d88bfc7f71ba9709ecc47ed2b323388733a00b55ea",
+      "contract_sha256": "b6dcf952cc71262ef9d09f7c154875095241b8a6ac4448511a400967301dc0d6",
       "contract_version": 9,
       "coverage_status": "partial",
       "dependencies": [],
@@ -6832,7 +6838,7 @@
       "implementation_version": "declare-blockers-step-v9",
       "kind": "rules_section",
       "known_blockers": [
-        "history-, monarch-, poison-, compound-with-unrelated-effects-, temporary-, broader-, and multi-block restriction/evasion grammar remains incomplete and recognized static families fail closed",
+        "history-, compound-with-unrelated-effects-, temporary-, broader-, and multi-block restriction/evasion grammar remains incomplete and recognized static families fail closed",
         "only exact blocks-each-combat, must-be-blocked, lure, and menace grammar is represented; conditional, effect-granted, multi-block, and optional-cost grammar remains incomplete",
         "optional, nonmana, variable, alternative, modified, and broader conditional block costs are not implemented",
         "declare-blockers trigger generation and APNAP placement are incomplete",
@@ -7011,7 +7017,7 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/end-step.json",
-      "contract_sha256": "92350699072900a3115dec49ff7643c484ba3ee647bb7b007799f1d8b0d30e7e",
+      "contract_sha256": "69728b62208d90d5172347d9ee0e17dcc0e93c0a9fbf578c3b411cde95801cd2",
       "contract_version": 1,
       "coverage_status": "partial",
       "dependencies": [],
@@ -7019,7 +7025,6 @@
       "implementation_version": "end-step-v1",
       "kind": "rules_section",
       "known_blockers": [
-        "permanent and delayed trigger families are not merged into one universal same-controller and APNAP ordering batch",
         "the Oracle compiler does not recognize every beginning-of-end-step wording, condition, target, mode, or optional choice",
         "the triggered-ability engine does not cover every source, look-back, intervening-condition, and multiplayer interaction",
         "the complete turn-duration continuous-effect registry remains incomplete under CR 514"
@@ -8061,17 +8066,37 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/monarch.json",
+      "contract_sha256": "3a9a07a580385babf6e2182f20f9fad7e2139add24c971b9df6710feb52617f1",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "GameState monarch designation, CommanderEngine inherent trigger and succession paths, typed declaration player-state predicates, projection, and Oracle IR",
+      "implementation_version": "monarch-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "the Oracle compiler recognizes only reviewed whole-line become-the-monarch and declaration-condition families",
+        "complete damage replacement and prevention semantics remain dependencies of arbitrary combat damage",
+        "team variants and every continuous effect referring to the monarch are not yet compiled"
+      ],
       "mechanic_id": "cr-725-the-monarch",
       "official_name": "The Monarch",
       "rule_references": [
         "725"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_725_rule",
+        "test_designation_is_public_serialized_and_unique",
+        "test_null_designation_preserves_additive_v3_hash_compatibility",
+        "test_monarch_draws_from_inherent_end_step_trigger",
+        "test_other_players_end_steps_do_not_trigger_the_monarch_draw",
+        "test_creature_combat_damage_transfers_only_on_trigger_resolution",
+        "test_nonqualifying_damage_does_not_create_a_transfer_trigger",
+        "test_departing_monarch_passes_to_active_or_next_player",
+        "test_player_state_declaration_predicates_and_exact_replay",
+        "test_monarch_controller_evasion_and_conditional_defense",
+        "test_oracle_templates_lower_monarch_effects_and_restrictions"
+      ],
       "trust_level": "untrusted"
     },
     {

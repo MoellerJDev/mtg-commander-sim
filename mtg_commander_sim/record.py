@@ -72,6 +72,11 @@ def authoritative_state_hash(state: GameState | Mapping[str, Any]) -> str:
     payload = checkpoint_state(state) if isinstance(state, GameState) else copy.deepcopy(dict(state))
     payload["events"] = []
     payload["capabilities"] = {}
+    # Preserve command-hash compatibility with pre-monarch additive v3
+    # checkpoints. Absence and the rules-defined initial ``None`` state are
+    # equivalent; an actual designation remains authoritative and hashed.
+    if payload.get("monarch") is None:
+        payload.pop("monarch", None)
     return _canonical_hash(payload)
 
 

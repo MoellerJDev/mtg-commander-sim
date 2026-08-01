@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-725-the-monarch",
+  "official_name": "The Monarch",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "725",
+    "725.1",
+    "725.2",
+    "725.3",
+    "725.4",
+    "725.5"
+  ],
+  "glossary_references": [
+    "monarch"
+  ],
+  "dependencies": [
+    "triggered-abilities",
+    "end-step",
+    "combat-damage-step",
+    "player-elimination",
+    "turn-order",
+    "continuous-effects",
+    "oracle-reference",
+    "multiplayer",
+    "projection",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield",
+      "stack"
+    ],
+    "objects": [
+      "the unique monarch designation",
+      "the monarch's inherent end-step draw ability",
+      "combat-damage monarch-transfer abilities",
+      "static restrictions conditioned on the current monarch"
+    ],
+    "events": [
+      "a player becomes the monarch",
+      "the monarch's end step begins",
+      "a creature deals combat damage to the monarch",
+      "the monarch leaves the game"
+    ],
+    "state_reads": [
+      "current monarch",
+      "active players",
+      "active player",
+      "turn order",
+      "combat damage event source types, source controller, and recipient",
+      "public declaration-condition player"
+    ],
+    "state_writes": [
+      "current monarch",
+      "inherent triggered ability stack objects",
+      "private draw result",
+      "public projection and event journal"
+    ],
+    "costs": [],
+    "timing": [
+      "a become-the-monarch effect changes the designation during resolution",
+      "the end-step draw and combat transfer use the stack",
+      "combat damage does not transfer the designation before the inherent trigger resolves",
+      "all represented triggers waiting at one boundary share APNAP and controller ordering"
+    ],
+    "targets": [],
+    "choices": [
+      "one controller orders multiple simultaneous represented monarch and card triggers"
+    ],
+    "hidden_information": [
+      "the designation and transfer are public",
+      "the end-step draw identity remains private while public counts change"
+    ],
+    "apnap": [
+      "inherent monarch triggers enter the same pending trigger batch as represented card and delayed triggers"
+    ],
+    "layers": [
+      "represented continuous declaration restrictions query the current designation and do nothing while no monarch exists"
+    ],
+    "replacement_effects": [
+      "draw and damage remain subject to their represented replacement and prevention paths"
+    ],
+    "copy": [
+      "the monarch is a player designation, not a copyable object characteristic"
+    ],
+    "control_change": [
+      "the combat-transfer trigger records the damaging creature's controller at trigger time"
+    ],
+    "zone_change": [
+      "the designation is independent of the permanent whose effect created it"
+    ],
+    "source_leaves": [
+      "an inherent trigger already on the stack is independent of the damaging creature"
+    ]
+  },
+  "variants": [
+    "no initial monarch",
+    "first designation",
+    "replacement by another monarch",
+    "end-step draw",
+    "creature combat damage transfer",
+    "nonqualifying damage",
+    "monarch leaves during another player's turn",
+    "active monarch leaves",
+    "conditional restriction with and without a monarch",
+    "multiplayer declaration and replay"
+  ],
+  "witness_cards": [
+    {
+      "name": "Azure Fleet Admiral",
+      "oracle_id": "b39f228f-d146-49c6-bab4-5304e0f742d8"
+    },
+    {
+      "name": "Crown-Hunter Hireling",
+      "oracle_id": "fece36a3-deb6-4fef-a456-b6514056bfd2"
+    },
+    {
+      "name": "Queen Mother Ramonda",
+      "oracle_id": "f5619a13-b229-4202-a217-bf6509706e77"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_725_rule",
+    "test_designation_is_public_serialized_and_unique",
+    "test_null_designation_preserves_additive_v3_hash_compatibility",
+    "test_monarch_draws_from_inherent_end_step_trigger",
+    "test_other_players_end_steps_do_not_trigger_the_monarch_draw",
+    "test_creature_combat_damage_transfers_only_on_trigger_resolution",
+    "test_nonqualifying_damage_does_not_create_a_transfer_trigger",
+    "test_departing_monarch_passes_to_active_or_next_player",
+    "test_player_state_declaration_predicates_and_exact_replay",
+    "test_monarch_controller_evasion_and_conditional_defense",
+    "test_oracle_templates_lower_monarch_effects_and_restrictions"
+  ],
+  "implementation": {
+    "component": "GameState monarch designation, CommanderEngine inherent trigger and succession paths, typed declaration player-state predicates, projection, and Oracle IR",
+    "version": "monarch-v1"
+  },
+  "known_blockers": [
+    "the Oracle compiler recognizes only reviewed whole-line become-the-monarch and declaration-condition families",
+    "complete damage replacement and prevention semantics remain dependencies of arbitrary combat damage",
+    "team variants and every continuous effect referring to the monarch are not yet compiled"
+  ],
+  "review_status": "draft"
+}

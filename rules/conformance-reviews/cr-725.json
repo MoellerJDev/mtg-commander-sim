@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 725 — The Monarch",
+  "cases": [
+    {
+      "rule_id": "725",
+      "rule_text_sha256": "b3bc94d085daedcb0a34a0daa475fad81866ad881727b4cf68437172276a84f2",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/monarch.json"],
+      "executable_test_ids": ["tests.test_monarch_rules.MonarchRuleTests.test_contract_traces_every_cr_725_rule"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Section heading; every numbered CR 725 record is pinned by the Monarch contract."]
+    },
+    {
+      "rule_id": "725.1",
+      "rule_text_sha256": "4c73d5beea5ad3ddeb877bbe7990e554a6bc8f2a03bfe4c0a138abc13629af3b",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["GameState.monarch", "CommanderEngine.become_monarch", "StateProjector._snapshot"],
+      "executable_test_ids": ["tests.test_monarch_rules.MonarchRuleTests.test_designation_is_public_serialized_and_unique", "tests.test_monarch_rules.MonarchRuleTests.test_null_designation_preserves_additive_v3_hash_compatibility", "tests.test_monarch_rules.MonarchRuleTests.test_oracle_templates_lower_monarch_effects_and_restrictions"],
+      "required_scenarios": ["positive", "negative", "hidden_information"],
+      "covered_scenarios": ["positive", "negative", "hidden_information"],
+      "blockers": [],
+      "notes": ["Games begin with no monarch. A generic effect operation designates one active player, and the public projection exposes only the designation rather than hidden card information."]
+    },
+    {
+      "rule_id": "725.2",
+      "rule_text_sha256": "ccec486b77ffa5966b8a2510dfec76c8c72977c6997810bc414ba59af19cc801",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["CommanderEngine._enter_step", "CommanderEngine._apply_combat_assignments", "CommanderEngine._monarch_trigger", "CommanderEngine._enqueue_semantic_trigger_batch"],
+      "executable_test_ids": ["tests.test_monarch_rules.MonarchRuleTests.test_monarch_draws_from_inherent_end_step_trigger", "tests.test_monarch_rules.MonarchRuleTests.test_other_players_end_steps_do_not_trigger_the_monarch_draw", "tests.test_monarch_rules.MonarchRuleTests.test_creature_combat_damage_transfers_only_on_trigger_resolution", "tests.test_monarch_rules.MonarchRuleTests.test_nonqualifying_damage_does_not_create_a_transfer_trigger", "tests.test_end_step_rules.EndStepRuleTests.test_permanent_and_delayed_end_step_triggers_both_precede_priority"],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer"],
+      "blockers": [],
+      "notes": ["The inherent end-step draw and creature-combat-damage transfer are stack abilities. Transfer occurs on resolution, and inherent, permanent, and delayed triggers use one controller-order/APNAP batch."]
+    },
+    {
+      "rule_id": "725.3",
+      "rule_text_sha256": "3fce320473b7c720651d548f3d1c4c934db60f67f0e88f24b61abb313d345511",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["GameState.monarch", "CommanderEngine.become_monarch", "CommanderEngine._assert_invariants"],
+      "executable_test_ids": ["tests.test_monarch_rules.MonarchRuleTests.test_designation_is_public_serialized_and_unique"],
+      "required_scenarios": ["positive", "interaction"],
+      "covered_scenarios": ["positive", "interaction"],
+      "blockers": [],
+      "notes": ["The authoritative state stores at most one monarch. A new designation replaces the prior one atomically, and a designation cannot remain on a player outside the game."]
+    },
+    {
+      "rule_id": "725.4",
+      "rule_text_sha256": "611417aef357aabb6e664cc478df0fefe5dfc2cd7fc00367845eb8e780e881db",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["CommanderEngine._eliminate_players", "CommanderEngine.become_monarch"],
+      "executable_test_ids": ["tests.test_monarch_rules.MonarchRuleTests.test_departing_monarch_passes_to_active_or_next_player"],
+      "required_scenarios": ["interaction", "multiplayer"],
+      "covered_scenarios": ["interaction", "multiplayer"],
+      "blockers": [],
+      "notes": ["A departing nonactive monarch passes the designation to the active player. If the active monarch leaves, the next remaining player in turn order becomes monarch."]
+    },
+    {
+      "rule_id": "725.5",
+      "rule_text_sha256": "8abb63801838e0d9ef72797de1fbdf67279ad0e2942e982a7da72a61be683de4",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["DeclarationPlayerStateCondition", "CommanderEngine._declaration_condition_holds", "parse_declaration_restriction_line"],
+      "executable_test_ids": ["tests.test_monarch_rules.MonarchRuleTests.test_monarch_controller_evasion_and_conditional_defense", "tests.test_monarch_rules.MonarchRuleTests.test_oracle_templates_lower_monarch_effects_and_restrictions"],
+      "required_scenarios": ["positive", "negative", "interaction"],
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": [],
+      "notes": ["Typed continuous declaration conditions query the current designation. They do nothing while no monarch exists, begin applying when the relevant player becomes monarch, and stop when the designation changes. Unrecognized Oracle families remain fail closed rather than weakening this invariant."]
+    }
+  ]
+}

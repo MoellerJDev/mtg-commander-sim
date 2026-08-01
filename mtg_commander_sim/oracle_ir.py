@@ -17,7 +17,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v9"
+ORACLE_COMPILER_VERSION = "oracle-ir-v10"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 
 _NUMBER_WORDS = {
@@ -262,6 +262,22 @@ def _effect_template(
 
     normalized = text.strip()
     name = re.escape(card_name)
+    if re.fullmatch(
+        r"you become the monarch\.?",
+        normalized,
+        re.IGNORECASE,
+    ):
+        return (
+            "become-monarch-controller-v1",
+            (
+                {
+                    "op": "become_monarch",
+                    "player": "$controller",
+                },
+            ),
+            None,
+            ("cr-725-the-monarch",),
+        )
     match = re.fullmatch(
         r"(?:you )?draw (?P<count>a|one|two|three|four|five|six|seven|"
         r"eight|nine|ten|\d+) cards?\.?",

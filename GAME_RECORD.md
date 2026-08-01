@@ -91,6 +91,14 @@ participate in state hashes and exact replay but are not included in a seat
 projection. This remains an additive v3 state extension; it does not redesign
 the record format.
 
+`GameState.monarch` is likewise an additive v3 checkpoint field. It stores
+the one public CR 725 player designation, or `null` before anyone becomes the
+monarch. A real designation participates in authoritative hashes and replay;
+the initial `null` is hash-equivalent to its absence in older additive v3
+checkpoints. Seat projections expose the designation but no private zone;
+inherent monarch abilities remain ordinary serialized stack objects and
+trigger batches.
+
 `CardInstance.battle_protector` is another additive public game-state field.
 It is serialized and hashed so Siege entry choices, combat routing, protector
 repair, and command replay agree exactly. Seat projections expose only the

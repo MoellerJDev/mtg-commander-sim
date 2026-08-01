@@ -94,12 +94,14 @@
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_named_planeswalker_attack_cap_is_target_scoped_and_replays",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_relevant_unsupported_condition_pauses_fail_closed",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_triggered_text_is_not_misread_as_a_static_restriction",
-        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_oracle_ir_uses_runtime_restriction_grammar"
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_oracle_ir_uses_runtime_restriction_grammar",
+        "tests.test_monarch_rules.MonarchRuleTests.test_player_state_declaration_predicates_and_exact_replay",
+        "tests.test_monarch_rules.MonarchRuleTests.test_monarch_controller_evasion_and_conditional_defense"
       ],
       "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
       "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
-      "blockers": ["history_monarch_poison_compound_other_named_target_temporary_and_broader_attack_restriction_grammar_not_implemented"],
-      "notes": ["A shared whole-line Oracle grammar lowers exact self, attached, global, keyword-filtered, not-alone, matching-companion, other-attacker, table-wide count, per-defender count, source-controller target, named-source target, and typed battlefield-condition restrictions into the finite declaration solver. Represented defender/controller permanent existence, another-object, tapped-state, characteristic/stat, minimum-count, relative-count, and declaration-composition predicates are inviolable, defender-specific in multiplayer, projected from the same legal domains used for submission, and replay exactly. Relevant unsupported static restriction text pauses fail closed; history, monarch, poison, compound, other named-target, temporary, and broader predicate grammar remains blocked."]
+      "blockers": ["history_compound_other_named_target_temporary_and_broader_attack_restriction_grammar_not_implemented"],
+      "notes": ["A shared whole-line Oracle grammar lowers exact self, attached, global, keyword-filtered, not-alone, matching-companion, other-attacker, table-wide count, per-defender count, source-controller target, named-source target, typed battlefield conditions, and public monarch/poison player-state conditions into the finite declaration solver. Represented defender/controller permanent existence, player designation/status, another-object, tapped-state, characteristic/stat, minimum-count, relative-count, and declaration-composition predicates are inviolable, defender-specific in multiplayer, projected from the same legal domains used for submission, and replay exactly. Relevant unsupported static restriction text pauses fail closed; history, compound, other named-target, temporary, and broader predicate grammar remains blocked."]
     },
     {
       "rule_id": "508.1d",

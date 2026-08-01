@@ -50,13 +50,14 @@ caps, source-specific attack maxima, and defending-player shared-creature-
 subtype thresholds. Changeling contributes once to every shared subtype.
 Multiple represented restrictions are cumulative.
 Typed battlefield conditions cover controller, attacking-player, and
-defending-player permanent existence; another-object exclusion; tapped state;
+defending-player permanent existence; public monarch/poison player state;
+another-object exclusion; tapped state;
 type, supertype, subtype, color, keyword, power, and toughness filters; minimum
 counts; and relative creature/land counts. They are destination-specific in
 multiplayer and use the same evaluator for direct block-pair checks and solver
 domains. Player, planeswalker, and Battle destinations are typed rather than
-inferred from card names. History, monarch, poison, compound-with-unrelated-
-effects, temporary, and multi-block families
+inferred from card names. History, compound-with-unrelated-effects, temporary,
+and multi-block families
 retain material residuals instead of being guessed.
 
 At deck creation, generated programs are added only when their stable

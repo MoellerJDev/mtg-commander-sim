@@ -1782,7 +1782,7 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
             self.assertTrue(replay["ok"], replay)
             self.assertEqual(1, replay["commands"])
 
-    def test_relevant_unsupported_blocker_filter_pauses_fail_closed(self):
+    def test_monarch_controller_blocker_filter_is_enforced(self):
         session = self.make_combat_session(509010914, players=2)
         engine = session.engine
         attacker = self.creature(
@@ -1797,13 +1797,13 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         )
         self.creature(engine, "B", "Potential Blocker")
         self.set_block_step(engine, [(attacker, "B")])
+        engine.become_monarch("B", reason="declaration restriction test")
 
         engine._issue_next_blocker()
 
         self.assertIsNone(engine.state.pending_decision)
-        pause = engine._semantic_pause_annotation()
-        self.assertIsNotNone(pause)
-        self.assertIn("combat.block_restriction", pause["event"])
+        self.assertIsNone(engine._semantic_pause_annotation())
+        self.assertEqual("B", engine.state.monarch)
 
     def test_triggered_text_is_not_misread_as_a_static_restriction(self):
         session = self.make_combat_session(508010906, players=2)

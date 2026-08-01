@@ -72,16 +72,14 @@
       "represented triggered abilities retain their compiled target schemas"
     ],
     "choices": [
-      "represented same-controller trigger groups use trigger-order decisions",
-      "complete cross-family ordering remains a dependency"
+      "represented same-controller trigger groups use trigger-order decisions"
     ],
     "hidden_information": [
       "the step boundary itself reveals no hidden information",
       "trigger payload visibility remains governed by the compiled semantic program"
     ],
     "apnap": [
-      "represented semantic and delayed trigger families are each grouped in active-player/nonactive-player order",
-      "complete cross-family APNAP merging remains incomplete"
+      "represented semantic, delayed, and inherent monarch trigger families share one active-player/nonactive-player ordering batch"
     ],
     "layers": [
       "turn-duration continuous effects remain active through the end step and expire in cleanup"
@@ -143,7 +141,6 @@
     "version": "end-step-v1"
   },
   "known_blockers": [
-    "permanent and delayed trigger families are not merged into one universal same-controller and APNAP ordering batch",
     "the Oracle compiler does not recognize every beginning-of-end-step wording, condition, target, mode, or optional choice",
     "the triggered-ability engine does not cover every source, look-back, intervening-condition, and multiplayer interaction",
     "the complete turn-duration continuous-effect registry remains incomplete under CR 514"

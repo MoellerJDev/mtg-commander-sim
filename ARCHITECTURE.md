@@ -358,14 +358,22 @@ Chosen creatures sacrificed in that mana window pay the locked cost but are
 filtered before CR 508.1k/509.1g creates attacking or blocking relationships.
 Complex or mutated members of the recognized family stop fail closed.
 Shared-creature-subtype blocking thresholds use effective public subtypes and
-count each Changeling once for every type. History-, monarch-, poison-, and
-compound-with-unrelated-effects restriction/requirement grammar, temporary
+count each Changeling once for every type. Typed player-state conditions now
+cover exact poisoned-defender and monarch-controller/defender declaration
+families. History- and compound-with-unrelated-effects restriction/requirement
+grammar, temporary
 restrictions, non-goad defender-specific
 requirements, effect-granted and
 repeated-combat requirements,
 optional/nonmana/variable/alternative/modified costs, and multi-block remain
 explicitly unsupported; the finite solver is a semantic substrate, not
 complete Oracle coverage.
+
+The monarch is an authoritative public player designation, not an annotation
+on a card. Generic effects can create or replace it; its end-step draw and
+combat-damage transfer are inherent stack abilities merged with other waiting
+triggers, and player elimination applies the CR 725 successor rule. Projection,
+serialization, replay, and declaration predicates all consume the same field.
 
 Legal-action telemetry records candidates generated, actions removed for
 missing targets or failed modal targets, rejected submissions, targets that
