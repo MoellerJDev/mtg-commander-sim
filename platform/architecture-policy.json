@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "policy_version": "architecture-guards-v1",
+  "baseline": "platform/architecture-guard-baseline.json",
+  "card_name_hash_index": "platform/card-name-hash-index.json",
+  "printed_name_allowances": "platform/card-specificity-baseline.json",
+  "protected_rules_modules": [
+    "mtg_commander_sim/abilities.py",
+    "mtg_commander_sim/choice_forms.py",
+    "mtg_commander_sim/combat.py",
+    "mtg_commander_sim/combat_constraints.py",
+    "mtg_commander_sim/continuous_effects.py",
+    "mtg_commander_sim/damage.py",
+    "mtg_commander_sim/declaration_costs.py",
+    "mtg_commander_sim/declaration_restrictions.py",
+    "mtg_commander_sim/deck.py",
+    "mtg_commander_sim/engine.py",
+    "mtg_commander_sim/mana.py",
+    "mtg_commander_sim/mechanic_contracts.py",
+    "mtg_commander_sim/model.py",
+    "mtg_commander_sim/oracle_ir.py",
+    "mtg_commander_sim/permissions.py",
+    "mtg_commander_sim/replacement_effects.py",
+    "mtg_commander_sim/rule_conformance.py",
+    "mtg_commander_sim/rules_corpus.py",
+    "mtg_commander_sim/semantics.py",
+    "mtg_commander_sim/shortcuts.py",
+    "mtg_commander_sim/state_based_actions.py",
+    "mtg_commander_sim/targets.py"
+  ],
+  "protected_future_prefixes": [
+    "mtg_commander_sim/domain/",
+    "mtg_commander_sim/rules/",
+    "mtg_commander_sim/semantics/",
+    "mtg_commander_sim/card_overrides/"
+  ],
+  "forbidden_import_prefixes": [
+    "fastapi",
+    "starlette",
+    "uvicorn",
+    "websockets",
+    "sqlite3",
+    "server",
+    "openai",
+    "anthropic",
+    "mtg_commander_sim.application",
+    "mtg_commander_sim.arena",
+    "mtg_commander_sim.client",
+    "mtg_commander_sim.cli",
+    "mtg_commander_sim.codex_cli",
+    "mtg_commander_sim.persistence",
+    "mtg_commander_sim.pilot",
+    "mtg_commander_sim.report",
+    "mtg_commander_sim.runtime",
+    "mtg_commander_sim.service",
+    "mtg_commander_sim.session"
+  ],
+  "game_state_access": {
+    "mutable_owners": {
+      "mtg_commander_sim/engine.py": "legacy authoritative transaction and mutation boundary",
+      "mtg_commander_sim/permissions.py": "decision and capability lifecycle owned by the transaction boundary",
+      "mtg_commander_sim/record.py": "replay hydration, verification copies, and versioned migration"
+    },
+    "read_only_consumers": {
+      "mtg_commander_sim/projection.py": "principal-scoped projection",
+      "mtg_commander_sim/__init__.py": "public type re-export"
+    },
+    "model_definition": "mtg_commander_sim/model.py"
+  },
+  "specificity_scope": [
+    "mtg_commander_sim/abilities.py",
+    "mtg_commander_sim/continuous_effects.py",
+    "mtg_commander_sim/engine.py",
+    "mtg_commander_sim/oracle_ir.py",
+    "mtg_commander_sim/replacement_effects.py",
+    "mtg_commander_sim/semantics.py",
+    "mtg_commander_sim/state_based_actions.py"
+  ],
+  "review_thresholds": {
+    "module_logical_lines": 1500,
+    "function_logical_lines": 150,
+    "engine_net_logical_growth": 300
+  },
+  "baseline_update_policy": {
+    "requires_adr": true,
+    "requires_removal_or_generalization_plan_for_compatibility": true,
+    "ordinary_direction": "existing exceptions may be removed but not added"
+  }
+}

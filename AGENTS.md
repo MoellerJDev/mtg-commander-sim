@@ -71,6 +71,7 @@ python -m unittest discover -s tests -p 'test_*.py' -v
 python scripts/demo_four_player_protocol.py --db data/test-ci.sqlite3 --out demo
 python scripts/update_platform_status.py --check
 python scripts/update_architecture_audit.py --check
+python scripts/validate_architecture.py --check
 python scripts/validate_repository.py
 python simctl.py rules verify --root .
 python -m build --wheel

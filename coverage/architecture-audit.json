@@ -7,6 +7,53 @@
         "symbol": "_create_mishra_warform"
       }
     ],
+    "debt_trend": {
+      "baseline_commit": "5197a91dcdac428c09980a39467a7a5c62bc17fa",
+      "dimensions": {
+        "card_named_helpers": {
+          "baseline": 1,
+          "current": 1,
+          "delta": 0
+        },
+        "direct_game_state_writes": {
+          "baseline": 190,
+          "current": 190,
+          "delta": 0
+        },
+        "engine_logical_lines": {
+          "baseline": 23155,
+          "current": 23155,
+          "delta": 0
+        },
+        "legacy_card_specific_operations": {
+          "baseline": 15,
+          "current": 15,
+          "delta": 0
+        },
+        "oracle_id_literals": {
+          "baseline": 8,
+          "current": 8,
+          "delta": 0
+        },
+        "oversized_functions_and_methods": {
+          "baseline": 50,
+          "current": 50,
+          "delta": 0
+        },
+        "oversized_modules": {
+          "baseline": 6,
+          "current": 6,
+          "delta": 0
+        },
+        "printed_name_literals": {
+          "baseline": 416,
+          "current": 416,
+          "delta": 0
+        }
+      },
+      "guard": "python scripts/validate_architecture.py --check",
+      "policy": "platform/architecture-policy.json"
+    },
     "direct_game_state_write_heuristic": {
       "count": 190,
       "limitations": "Counts direct assignments and common mutator calls rooted at configured GameState owners or GameState parameters; alias-mediated writes require review.",
@@ -2411,6 +2458,7 @@
       ]
     },
     "printed_name_literals": {
+      "baseline_entry_count": 416,
       "conditional_entry_count": 65,
       "database_snapshot": {
         "card_count": "38484",
@@ -2419,9 +2467,10 @@
       },
       "entry_count": 416,
       "limitations": "Exact full printed-name literals only. Card-named helpers and semantic operations are separately reviewed in architecture-audit-source.json.",
-      "missing_recorded_literals": [],
-      "structural_identity": "file, nearest symbol, literal value, conditional use",
-      "verified_in_current_source": true
+      "new_unreviewed_literals": [],
+      "no_unreviewed_growth": true,
+      "removed_baseline_occurrences": 0,
+      "structural_identity": "file, nearest symbol, literal value, conditional use"
     },
     "production": {
       "file_count": 59,
@@ -6022,7 +6071,7 @@
     ]
   },
   "audit": {
-    "baseline_main_commit": "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d",
+    "baseline_main_commit": "5197a91dcdac428c09980a39467a7a5c62bc17fa",
     "baseline_worktree_clean": true,
     "phase": "phase_0_current_state_audit",
     "scope_note": "This is a measured migration baseline, not a completeness or correctness claim.",
@@ -6268,7 +6317,7 @@
     ]
   },
   "coordinates": {
-    "baseline_main_commit": "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d",
+    "baseline_main_commit": "5197a91dcdac428c09980a39467a7a5c62bc17fa",
     "baseline_worktree_clean": true,
     "ci": {
       "local_observed": {
@@ -6281,9 +6330,9 @@
         "3.11",
         "3.12"
       ],
-      "run_id": 30705718025,
+      "run_id": 30707443584,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30705718025",
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30707443584",
       "workflow": "CI"
     },
     "default_branch": "main",
@@ -6455,7 +6504,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d"
+          "verified": "5197a91dcdac428c09980a39467a7a5c62bc17fa"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -6511,7 +6560,7 @@
           "maintenance": "hand-maintained at each merged phase checkpoint",
           "status": "current",
           "title": "Integration handoff",
-          "verified": "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d"
+          "verified": "5197a91dcdac428c09980a39467a7a5c62bc17fa"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -6876,8 +6925,8 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 830,
-      "discovered_total": 4130,
+      "conventional_ast_cases": 834,
+      "discovered_total": 4134,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 18,
@@ -6887,7 +6936,7 @@
         "server_named": 13
       },
       "reconciles": true,
-      "test_files": 90
+      "test_files": 91
     }
   }
 }

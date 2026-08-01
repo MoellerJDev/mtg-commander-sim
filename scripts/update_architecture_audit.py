@@ -15,13 +15,28 @@ import tomllib
 import unittest
 from typing import Any, Iterable, Mapping
 
+try:
+    from scripts.architecture_support import (
+        build_card_name_hash_index,
+        decode_card_name_hash_index,
+        printed_name_digest,
+    )
+except ModuleNotFoundError:  # Direct `python scripts/...` execution.
+    from architecture_support import (
+        build_card_name_hash_index,
+        decode_card_name_hash_index,
+        printed_name_digest,
+    )
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "platform" / "architecture-audit-source.json"
 CARD_BASELINE = ROOT / "platform" / "card-specificity-baseline.json"
+CARD_NAME_INDEX = ROOT / "platform" / "card-name-hash-index.json"
 JSON_OUTPUT = ROOT / "coverage" / "architecture-audit.json"
 ARCHITECTURE_STATUS = ROOT / "docs" / "ARCHITECTURE_DEBT_STATUS.md"
 COMPILER_STATUS = ROOT / "docs" / "COMPILER_COVERAGE_STATUS.md"
+GUARD_BASELINE = ROOT / "platform" / "architecture-guard-baseline.json"
 
 PYTHON_SUFFIXES = {".py"}
 WEB_SUFFIXES = {".ts", ".tsx", ".css"}
@@ -413,6 +428,19 @@ def _analyze_python(path: Path, source: Mapping[str, Any]) -> SourceAnalysis:
     )
 
 
+def analyze_production() -> tuple[
+    dict[str, Any], list[Path], dict[str, SourceAnalysis]
+]:
+    source = _source()
+    paths = _production_paths(source)
+    analyses = {
+        path.relative_to(ROOT).as_posix(): _analyze_python(path, source)
+        for path in paths
+        if path.suffix == ".py"
+    }
+    return source, paths, analyses
+
+
 def _production_metrics(
     paths: Iterable[Path],
     analyses: Mapping[str, SourceAnalysis],
@@ -661,8 +689,25 @@ def _refresh_card_baseline(
     }
 
 
+def _card_name_index(
+    database: Path,
+) -> dict[str, Any]:
+    if not database.is_file():
+        raise ValueError(f"Card database does not exist: {database}")
+    names, metadata = _card_names(database)
+    snapshot = {
+        "card_count": metadata.get("card_count"),
+        "oracle_source_sha256": metadata.get("oracle_source_sha256"),
+        "scryfall_oracle_updated_at": metadata.get("scryfall_oracle_updated_at"),
+    }
+    return build_card_name_hash_index(names, snapshot)
+
+
 def _validate_card_baseline(
-    baseline: Mapping[str, Any], analyses: Mapping[str, SourceAnalysis]
+    baseline: Mapping[str, Any],
+    analyses: Mapping[str, SourceAnalysis],
+    source: Mapping[str, Any],
+    digest_index: frozenset[bytes],
 ) -> dict[str, Any]:
     def identity(literal: Mapping[str, Any]) -> tuple[str, str | None, str, bool]:
         return (
@@ -672,29 +717,97 @@ def _validate_card_baseline(
             bool(literal.get("in_condition")),
         )
 
-    actual = Counter(
-        identity(literal)
-        for analysis in analyses.values()
-        for literal in analysis.string_literals
+    observed = [
+        literal
+        for relative in source["scope"]["core_card_specificity_files"]
+        for literal in analyses[relative].string_literals
+        if printed_name_digest(str(literal["value"])) in digest_index
+    ]
+    allowances = Counter(
+        identity(item) for item in baseline.get("exact_printed_name_literals", [])
     )
-    missing: list[dict[str, Any]] = []
-    for item in baseline.get("exact_printed_name_literals", []):
+    new: list[dict[str, Any]] = []
+    for item in observed:
         key = identity(item)
-        if actual[key] > 0:
-            actual[key] -= 1
+        if allowances[key] > 0:
+            allowances[key] -= 1
         else:
-            missing.append(item)
+            new.append(item)
+    removed_count = sum(allowances.values())
     return {
-        "entry_count": len(baseline.get("exact_printed_name_literals", [])),
+        "entry_count": len(observed),
+        "baseline_entry_count": len(
+            baseline.get("exact_printed_name_literals", [])
+        ),
         "conditional_entry_count": sum(
             bool(item.get("in_condition"))
-            for item in baseline.get("exact_printed_name_literals", [])
+            for item in observed
         ),
-        "verified_in_current_source": len(missing) == 0,
-        "missing_recorded_literals": missing,
+        "no_unreviewed_growth": len(new) == 0,
+        "new_unreviewed_literals": new,
+        "removed_baseline_occurrences": removed_count,
         "structural_identity": "file, nearest symbol, literal value, conditional use",
         "database_snapshot": baseline.get("database_snapshot", {}),
         "limitations": baseline.get("limitations"),
+    }
+
+
+def _debt_trend(
+    production: Mapping[str, Any],
+    engine: Mapping[str, Any],
+    state_dispatch: Mapping[str, Any],
+    card_validation: Mapping[str, Any],
+    source: Mapping[str, Any],
+) -> dict[str, Any] | None:
+    if not GUARD_BASELINE.is_file():
+        return None
+    baseline = _load_json(GUARD_BASELINE)
+    dimensions = {
+        "engine_logical_lines": (
+            int(baseline["engine"]["logical_lines"]),
+            int(engine["logical_lines"]),
+        ),
+        "direct_game_state_writes": (
+            sum(baseline["direct_game_state_writes_by_file"].values()),
+            int(state_dispatch["direct_game_state_write_heuristic"]["count"]),
+        ),
+        "printed_name_literals": (
+            int(card_validation["baseline_entry_count"]),
+            int(card_validation["entry_count"]),
+        ),
+        "oracle_id_literals": (
+            len(baseline["oracle_id_literals"]),
+            int(state_dispatch["oracle_id_literals"]["count"]),
+        ),
+        "legacy_card_specific_operations": (
+            len(baseline["legacy_card_specific_operations"]),
+            len(source["card_specific_semantic_operations"]),
+        ),
+        "card_named_helpers": (
+            len(baseline["card_named_helpers"]),
+            len(source["card_named_helpers"]),
+        ),
+        "oversized_modules": (
+            len(baseline["oversized_modules"]),
+            int(production["oversized_module_count"]),
+        ),
+        "oversized_functions_and_methods": (
+            len(baseline["oversized_functions_and_methods"]),
+            int(production["oversized_function_and_method_count"]),
+        ),
+    }
+    return {
+        "baseline_commit": baseline["baseline_commit"],
+        "policy": "platform/architecture-policy.json",
+        "guard": "python scripts/validate_architecture.py --check",
+        "dimensions": {
+            name: {
+                "baseline": baseline_value,
+                "current": current_value,
+                "delta": current_value - baseline_value,
+            }
+            for name, (baseline_value, current_value) in dimensions.items()
+        },
     }
 
 
@@ -1011,24 +1124,27 @@ def _coordinates(source: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def build_report() -> dict[str, Any]:
-    source = _source()
-    paths = _production_paths(source)
-    analyses = {
-        path.relative_to(ROOT).as_posix(): _analyze_python(path, source)
-        for path in paths
-        if path.suffix == ".py"
-    }
+    source, paths, analyses = analyze_production()
     if not CARD_BASELINE.is_file():
         raise ValueError(
             "Missing card-specificity baseline; run with --write --card-db <full-db>"
         )
-    card_baseline = _load_json(CARD_BASELINE)
-    card_validation = _validate_card_baseline(card_baseline, analyses)
-    if not card_validation["verified_in_current_source"]:
+    if not CARD_NAME_INDEX.is_file():
         raise ValueError(
-            "Card-specificity baseline literals are stale; refresh with a full card DB"
+            "Missing card-name hash index; run with --write --card-db <full-db>"
+        )
+    card_baseline = _load_json(CARD_BASELINE)
+    digest_index = decode_card_name_hash_index(_load_json(CARD_NAME_INDEX))
+    card_validation = _validate_card_baseline(
+        card_baseline, analyses, source, digest_index
+    )
+    if not card_validation["no_unreviewed_growth"]:
+        raise ValueError(
+            "Core code contains printed-name literals outside the reviewed baseline"
         )
     state_dispatch = _state_and_dispatch_metrics(analyses, source)
+    production = _production_metrics(paths, analyses, source)
+    engine = _engine_metrics(analyses, source)
     return {
         "schema_version": 1,
         "generated": {
@@ -1043,8 +1159,8 @@ def build_report() -> dict[str, Any]:
         "rules": _rules_metrics(),
         "tests": _test_metrics(),
         "architecture": {
-            "production": _production_metrics(paths, analyses, source),
-            "engine": _engine_metrics(analyses, source),
+            "production": production,
+            "engine": engine,
             "imports": _import_metrics(analyses),
             **state_dispatch,
             "printed_name_literals": card_validation,
@@ -1055,6 +1171,9 @@ def build_report() -> dict[str, Any]:
                 for item in source["subsystem_ownership"]
                 if item["missing_dedicated_owner"]
             ],
+            "debt_trend": _debt_trend(
+                production, engine, state_dispatch, card_validation, source
+            ),
         },
         "compiler": _compiler_metrics(source, analyses),
         "semantic_packs_and_overrides": _semantic_pack_metrics(source),
@@ -1078,6 +1197,27 @@ def _metadata_lines(
     ]
 
 
+def _debt_trend_lines(architecture: Mapping[str, Any]) -> list[str]:
+    trend = architecture.get("debt_trend")
+    if not trend:
+        return []
+    lines = [
+        "",
+        "## Enforced debt trend",
+        "",
+        f"Baseline: `{trend['baseline_commit']}`. Guard: `{trend['guard']}`.",
+        "",
+        "| Dimension | Baseline | Current | Delta |",
+        "|---|---:|---:|---:|",
+    ]
+    for name, values in trend["dimensions"].items():
+        lines.append(
+            f"| `{name}` | {values['baseline']:,} | {values['current']:,} | "
+            f"{values['delta']:+,} |"
+        )
+    return lines
+
+
 def render_architecture_status(report: Mapping[str, Any]) -> str:
     architecture = report["architecture"]
     production = architecture["production"]
@@ -1094,9 +1234,9 @@ def render_architecture_status(report: Mapping[str, Any]) -> str:
         [
             "# Architecture debt status",
             "",
-            "This is the generated Phase 0 migration baseline. It measures the current "
-            "tree and does not claim architectural completion, rules completeness, or "
-            "universal card support.",
+            "This generated migration dashboard is anchored to the Phase 0 baseline. "
+            "It measures the current tree and does not claim architectural completion, "
+            "rules completeness, or universal card support.",
             "",
             "## Baseline coordinates",
             "",
@@ -1133,6 +1273,11 @@ def render_architecture_status(report: Mapping[str, Any]) -> str:
             f"{production['oversized_function_and_method_count']}",
             "- Printed-name matching is deliberately over-inclusive: ordinary words that "
             "are also printed card names remain baseline candidates for Phase 1 review.",
+        ]
+    )
+    lines.extend(_debt_trend_lines(architecture))
+    lines.extend(
+        [
             "",
             "## Largest production modules",
             "",
@@ -1349,23 +1494,42 @@ def main() -> int:
     mode.add_argument("--write", action="store_true")
     mode.add_argument("--check", action="store_true")
     parser.add_argument("--card-db", type=Path)
+    parser.add_argument("--refresh-specificity-allowances", action="store_true")
+    parser.add_argument("--adr", type=Path)
     args = parser.parse_args()
-    refreshed_card_baseline = False
+    refreshed_card_index = False
+    refreshed_allowances = False
     if args.check and args.card_db:
         parser.error("--card-db is only valid with --write")
+    if args.refresh_specificity_allowances and not args.card_db:
+        parser.error("--refresh-specificity-allowances requires --card-db")
+    if args.refresh_specificity_allowances and not args.adr:
+        parser.error("--refresh-specificity-allowances requires --adr")
+    if args.adr and not args.refresh_specificity_allowances:
+        parser.error("--adr is only valid with --refresh-specificity-allowances")
     if args.write and args.card_db:
-        source = _source()
-        paths = _production_paths(source)
-        analyses = {
-            path.relative_to(ROOT).as_posix(): _analyze_python(path, source)
-            for path in paths
-            if path.suffix == ".py"
-        }
-        baseline = _refresh_card_baseline(args.card_db.resolve(), analyses, source)
-        CARD_BASELINE.write_text(
-            _serialize_json(baseline), encoding="utf-8", newline="\n"
+        source, _paths, analyses = analyze_production()
+        CARD_NAME_INDEX.write_text(
+            _serialize_json(_card_name_index(args.card_db.resolve())),
+            encoding="utf-8",
+            newline="\n",
         )
-        refreshed_card_baseline = True
+        refreshed_card_index = True
+        if args.refresh_specificity_allowances:
+            adr = args.adr.resolve()
+            if not adr.is_file() or ROOT not in adr.parents:
+                parser.error("--adr must name an existing repository ADR")
+            adr_relative = adr.relative_to(ROOT)
+            if adr_relative.parts[:2] != ("docs", "adr"):
+                parser.error("--adr must be under docs/adr/")
+            baseline = _refresh_card_baseline(
+                args.card_db.resolve(), analyses, source
+            )
+            baseline["review_adr"] = adr_relative.as_posix()
+            CARD_BASELINE.write_text(
+                _serialize_json(baseline), encoding="utf-8", newline="\n"
+            )
+            refreshed_allowances = True
     report = build_report()
     if args.write:
         _write_outputs(report)
@@ -1375,8 +1539,13 @@ def main() -> int:
                     "ok": True,
                     "outputs": [
                         *(
+                            [CARD_NAME_INDEX.relative_to(ROOT).as_posix()]
+                            if refreshed_card_index
+                            else []
+                        ),
+                        *(
                             [CARD_BASELINE.relative_to(ROOT).as_posix()]
-                            if refreshed_card_baseline
+                            if refreshed_allowances
                             else []
                         ),
                         *(

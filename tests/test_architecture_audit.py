@@ -83,13 +83,20 @@ class ArchitectureAuditTests(unittest.TestCase):
         )
         self.assertTrue(
             self.report["architecture"]["printed_name_literals"][
-                "verified_in_current_source"
+                "no_unreviewed_growth"
             ]
         )
         self.assertEqual(
+            self.report["architecture"]["printed_name_literals"][
+                "baseline_entry_count"
+            ],
+            len(baseline["exact_printed_name_literals"]),
+        )
+        self.assertLessEqual(
             self.report["architecture"]["printed_name_literals"]["entry_count"],
             len(baseline["exact_printed_name_literals"]),
         )
+        self.assertIsNotNone(self.report["architecture"]["debt_trend"])
 
 
 if __name__ == "__main__":

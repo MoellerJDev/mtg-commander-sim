@@ -35,6 +35,16 @@ margin. The generated
 authoritative measured baseline. Extraction must preserve commands,
 projections, replay, hidden-information rules, and deterministic behavior.
 
+Phase 1 enforcement is defined by `platform/architecture-policy.json` and the
+reviewed non-growth allowances in
+`platform/architecture-guard-baseline.json`. The repository validator rejects
+forbidden rules-layer imports, undeclared mutable `GameState` access, growth in
+direct state writes, new hard-coded printed names or Oracle IDs, new
+`CommanderEngine` methods, unreviewed semantic operations, and newly oversized
+modules/functions. `platform/card-name-hash-index.json` contains only
+irreversible digests, so CI can detect new printed-name literals without a
+Scryfall database or tracked card content.
+
 ## Layered design
 
 ```text

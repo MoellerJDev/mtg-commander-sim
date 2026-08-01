@@ -1,0 +1,1951 @@
+{
+  "baseline_commit": "5197a91dcdac428c09980a39467a7a5c62bc17fa",
+  "card_named_helpers": [
+    {
+      "file": "mtg_commander_sim/engine.py",
+      "reason": "Implements a named token behavior for Mishra, Eminent One inside the universal engine.",
+      "symbol": "_create_mishra_warform"
+    }
+  ],
+  "direct_game_state_writes_by_file": {
+    "mtg_commander_sim/engine.py": 171,
+    "mtg_commander_sim/permissions.py": 8,
+    "mtg_commander_sim/record.py": 11
+  },
+  "engine": {
+    "logical_lines": 23155,
+    "methods": [
+      {
+        "kind": "method",
+        "name": "__init__",
+        "visibility": "dunder"
+      },
+      {
+        "kind": "method",
+        "name": "_ability_availability",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_ability_choice_payable",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_ability_hints",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_activate",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_activate_mana_plan",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_activated_abilities",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_activation_condition_status",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_active_cleanup_frame",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_active_goad_designations",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_add_restricted_mana",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_add_saga_lore",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_additional_cost_candidates",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_advance_active_player_sagas",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_advance_step",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_all_visibility",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_alternate_cost_condition_met",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_apply_amass",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_apply_apnap_choices",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_apply_combat_assignments",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_apply_damage_results_to_permanent",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_apply_layered_characteristic_annotations",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_apply_mana_mode_side_effects",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_apply_mana_spend",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_assert_invariants",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_assigns_combat_damage_this_step",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_attachment_is_legal",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_attack_declaration_components",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_attack_declaration_costs",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_attack_declaration_error",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_attack_declaration_problem",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_attack_target_details",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_attackable_battles",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_attackable_planeswalkers",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_attacked_defending_players",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_automatic_combat_assignments",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_battle_for_attack_target",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_battle_trigger_pending",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_begin_battle_entry_protector_choice",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_begin_blocker_decisions",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_begin_combat_damage",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_begin_draw_sequence",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_begin_pending_semantic_trigger_batch",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_begin_pending_trigger_target_selection",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_begin_resolve_item",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_begin_semantic_choice",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_begin_semantic_search",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_begin_siege_defeated_resolution",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_begin_turn",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_block_declaration_components",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_block_declaration_costs",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_block_declaration_problem",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_can_auto_pass",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_can_block",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_card_cast_requirements",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_cast",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_cast_cost_options",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_change_permanent_counter",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_check_priority",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_choice_options",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_classified_ability_hints",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_clear_mana",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_combat_damage_participants",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_combat_damage_source_options",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_combat_damage_target_exists",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_combat_keywords",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_combat_oracle_lines",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_combat_oracle_text",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_combat_payload",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_commander_identity",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_compiled_graveyard_replacement",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_compiled_land_play_permission",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_compiled_mana_restriction",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_compiled_printed_cost",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_compiled_printed_cost_options",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_compiled_zone_cast_permission",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_apnap_choice",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_arbiter_resolution",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_attackers",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_battle_entry_protector_choice",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_battle_protector_choice",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_blockers",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_cleanup_discard",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_combat_damage",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_draw_replacement",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_draw_step_entry",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_fetch_choice",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_legend_choice",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_mulligan_bottom",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_mulligan_declaration",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_priority",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_semantic_choice",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_semantic_search",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_semantic_target",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_siege_defeated_choice",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_storm_choice",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_complete_trigger_order",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_continue_combat_damage_assignments",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_continue_resolution",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_controlled_subtype_refs",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_controller_has_oracle_text",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_controls_commander",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_convoke_reduction",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_copy_stack_item",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_copyable_characteristics",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_cost_is_affordable",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_cost_payment_mechanics",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_counter_stack_item",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_create_copy_object",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_create_mishra_warform",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_create_replacement_token_instance",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_creature_died_under_control_this_turn",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_crew_candidates",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_crew_threshold",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_current_attacker_cards",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_current_turn_history",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_declaration_battlefield_count",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_declaration_condition_holds",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_declaration_condition_player",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_declaration_cost",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_declaration_costs",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_declaration_option_matches_relation",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_declaration_restrictions",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_defending_player_for_attack_target",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_defending_player_for_attacker",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_delayed_trigger_stack_item",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_detach_permanent",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_dispatch_completed_decision",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_dispatch_semantic_event",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_dispatch_zone_change_events",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_dredge_candidates",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_effect_has_missing_target",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_effective_card_data",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_eliminate_players",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_enchant_target_schema",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_end_turn_now",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_enqueue_semantic_trigger_batch",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_enter_step",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_exile_cost_candidates",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_expire_goad_designations",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_fetch_context",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_fetch_land_options",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_fetch_land_types",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_finish_cleanup",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_finish_combat_phase",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_finish_siege_defeated_resolution",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_front_face",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_goad_prohibition_source",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_grant_priority",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_group_target_submission",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_has_conservative_response",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_has_world_supertype",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_increment_optimization",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_increment_yield_change_epoch",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_initialize_combat_damage_steps",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_initialize_intrinsic_entry_counters",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_is_main_phase",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_is_summoning_sick",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_issue_apnap_choice",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_issue_attackers",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_issue_mulligan_declaration",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_issue_next_apnap_choice",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_issue_next_blocker",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_issue_priority",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_land_enters_tapped",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_land_entry_life_amount",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_land_play_faces",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_lands_enter_untapped_for",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_legend_groups",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_legendary_creatures_controlled",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_library_insertion_index",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_library_position",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_log",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_loyalty_cost_modifier_present",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_mana_ability_hints",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_mana_mode_has_compiled_activation_condition",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_mana_modes_for_ability",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_mana_output_for_ability",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_mana_restriction_allows",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_mana_vector",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_manual_active_main_phase_window",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_matches_declaration_predicate",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_matching_delayed_triggers",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_maximum_affordable_x",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_maximum_affordable_x_with_mechanics",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_may_activate_creature_as_haste",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_maybe_sacrifice_completed_saga",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_monarch_trigger",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_move_cards_simultaneously",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_mulligan_hand_payload",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_next_active_after",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_next_normal_player",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_next_ref",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_next_zone_timestamp",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_nonmana_ability_prohibited_by_name",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_normalize_target_submission",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_numeric_stat",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_object_attacked_player_this_turn",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_object_sba_snapshots",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_opening_hand_signals",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_opponent_was_dealt_damage_this_turn",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_optimization_stats",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_pass_priority",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_pause_for_unsupported_semantic",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_pay_ability_choice_costs",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_pay_crew_cost",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_pay_for_cost",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_payment_mechanic_candidates",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_perform_mulligan_redraws",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_permanent_sba_snapshots",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_place_semantic_trigger_items",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_planeswalker_for_attack_target",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_play_land",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_player_cast_spell_this_turn",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_prepare_stack_resolution",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_prepare_storm_resolution",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_priority_action_hints",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_priority_window_empty",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_process_trigger_groups",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_program_can_auto_resolve",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_protection_colors",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_public_target_schema",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_queue_delayed_trigger",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_queue_siege_defeated_trigger",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_queue_ward_triggers_for_targets",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_record_action_opportunity",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_record_combat_damage_announcement",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_record_turn_history",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_recordless_mana_modes",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_refresh_world_supertype_timestamp",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_relation_matches",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_remove_cleanup_frames",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_remove_from_zone",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_remove_invalid_combat_objects",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_remove_object_from_combat",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_repair_battle_protectors",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_require_seat",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_reset_zone_change",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_resolve_fetch_land",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_resolve_object",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_restricted_mana",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_restriction_is_relevant",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_restriction_variables",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_resume_after_draw",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_revalidate_resolution_targets",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_search_candidate_matches",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_search_is_restrictive",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_search_type_words",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_select_cast_face",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_select_next_turn",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_selected_declaration_mana",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_semantic_event_condition_matches",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_semantic_event_matches",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_semantic_event_sources",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_semantic_event_value",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_semantic_frame",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_semantic_key_for_ability",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_semantic_pause_annotation",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_semantic_search_options",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_semantic_target_options",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_semantic_trigger_groups",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_semantic_value",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_set_yield",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_signature_has_actions",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_signature_hash",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_sorcery_timing",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_source_colors_for_ref",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_spell_mana_spend_context",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_spendable_mana_pool",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_stabilize",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_stable_runtime_id",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_stack_item_can_be_countered",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_stack_signature",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_stack_source_ref",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_stack_target_schema",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_start_game",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_start_trigger_batch",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_store_restricted_mana",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_synchronize_world_supertype_timestamps",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_tap_payment_plan",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_target_candidate_map",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_target_candidate_rows",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_target_candidates",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_target_identity_matches_snapshot",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_target_plan_feasible",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_target_row_matches",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_target_snapshot",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_temporary_play_permission",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_trigger_item_matches_incarnation",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_trigger_matches",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_trusted_generic_spell",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_type_parts",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_unconditionally_enters_tapped",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_unsupported_phasing_source_at_untap",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_unsupported_untap_selection_source",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_untap_permanent",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_update_yield_change_epochs",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_validate_declaration_requirements",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_validate_semantic_frame",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_validate_semantic_targets",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_validated_combat_damage_assignments",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_yield_change_epoch",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_yield_stop_reason",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "_yield_stopped",
+        "visibility": "private"
+      },
+      {
+        "kind": "method",
+        "name": "active_seats",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "advance_until",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "apnap_order",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "apply_effect",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "apply_shortcut",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "available_mana_sources",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "become_monarch",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "card_record",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "change_control",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "create",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "create_card_copy",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "create_emblem",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "create_token",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "display_name",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "draw",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "load",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "meaningful_action_signature",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "move_card",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "pump",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "save",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "schedule_delayed_trigger",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "schedule_extra_turn",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "seats",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "semantic_program_is_current_trusted",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "shuffle_library",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "submit",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "transaction",
+        "visibility": "public"
+      },
+      {
+        "kind": "method",
+        "name": "try_submit",
+        "visibility": "public"
+      }
+    ],
+    "physical_lines": 23996
+  },
+  "legacy_card_specific_operations": [
+    "animate_dead_prepare",
+    "animate_dead_reanimate",
+    "create_daretti_emblem",
+    "create_warform",
+    "daretti_exchange",
+    "demonic_junker_resolve",
+    "field_of_dead_token",
+    "fomori_vault",
+    "remora_tax",
+    "scute_swarm_token",
+    "springheart_landfall",
+    "sylvan_library_settle",
+    "toxic_deluge",
+    "veil_of_summer",
+    "welder_exchange"
+  ],
+  "oracle_id_literals": [
+    {
+      "column": 19,
+      "file": "mtg_commander_sim/engine.py",
+      "in_condition": true,
+      "line": 1718,
+      "oracle_id": "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786",
+      "symbol": "_compiled_graveyard_replacement",
+      "value": "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786"
+    },
+    {
+      "column": 30,
+      "file": "mtg_commander_sim/engine.py",
+      "in_condition": true,
+      "line": 6842,
+      "oracle_id": "883a4180-9ede-4249-a4b8-3a29c998fb63",
+      "symbol": "_activated_abilities",
+      "value": "883a4180-9ede-4249-a4b8-3a29c998fb63"
+    },
+    {
+      "column": 16,
+      "file": "mtg_commander_sim/engine.py",
+      "in_condition": false,
+      "line": 7005,
+      "oracle_id": "dae4815e-9025-4993-ab46-52a3f1a7219e",
+      "symbol": "_semantic_key_for_ability",
+      "value": "dae4815e-9025-4993-ab46-52a3f1a7219e:granted:damage"
+    },
+    {
+      "column": 13,
+      "file": "mtg_commander_sim/shortcuts.py",
+      "in_condition": false,
+      "line": 8,
+      "oracle_id": "ace86e56-efde-4eb7-8815-71456a4c3abe",
+      "symbol": null,
+      "value": "ace86e56-efde-4eb7-8815-71456a4c3abe"
+    },
+    {
+      "column": 15,
+      "file": "mtg_commander_sim/shortcuts.py",
+      "in_condition": false,
+      "line": 9,
+      "oracle_id": "09ff28b1-b6c9-48e6-b12e-2f0e644f709f",
+      "symbol": null,
+      "value": "09ff28b1-b6c9-48e6-b12e-2f0e644f709f"
+    },
+    {
+      "column": 11,
+      "file": "mtg_commander_sim/shortcuts.py",
+      "in_condition": false,
+      "line": 10,
+      "oracle_id": "76b003e0-15af-4f22-bdf2-1ade5430964a",
+      "symbol": null,
+      "value": "76b003e0-15af-4f22-bdf2-1ade5430964a"
+    },
+    {
+      "column": 9,
+      "file": "mtg_commander_sim/shortcuts.py",
+      "in_condition": false,
+      "line": 11,
+      "oracle_id": "d3438037-3efd-4ce0-88ec-6d48ab521992",
+      "symbol": null,
+      "value": "d3438037-3efd-4ce0-88ec-6d48ab521992"
+    },
+    {
+      "column": 14,
+      "file": "mtg_commander_sim/shortcuts.py",
+      "in_condition": false,
+      "line": 12,
+      "oracle_id": "69428825-3c40-486d-b051-14e97a598ce6",
+      "symbol": null,
+      "value": "69428825-3c40-486d-b051-14e97a598ce6"
+    }
+  ],
+  "oversized_functions_and_methods": [
+    "mtg_commander_sim/abilities.py::parse_activated_abilities",
+    "mtg_commander_sim/carddb.py::build_card_database",
+    "mtg_commander_sim/choice_forms.py::_field",
+    "mtg_commander_sim/cli.py::_scripted_choice",
+    "mtg_commander_sim/cli.py::build_parser",
+    "mtg_commander_sim/cli.py::main",
+    "mtg_commander_sim/codex_cli.py::CodexCliArenaRunner.run",
+    "mtg_commander_sim/declaration_costs.py::parse_declaration_cost_line",
+    "mtg_commander_sim/declaration_restrictions.py::parse_declaration_restriction_line",
+    "mtg_commander_sim/engine.py::CommanderEngine._activate",
+    "mtg_commander_sim/engine.py::CommanderEngine._activate_mana_plan",
+    "mtg_commander_sim/engine.py::CommanderEngine._apply_combat_assignments",
+    "mtg_commander_sim/engine.py::CommanderEngine._apply_layered_characteristic_annotations",
+    "mtg_commander_sim/engine.py::CommanderEngine._begin_semantic_choice",
+    "mtg_commander_sim/engine.py::CommanderEngine._begin_siege_defeated_resolution",
+    "mtg_commander_sim/engine.py::CommanderEngine._cast",
+    "mtg_commander_sim/engine.py::CommanderEngine._cast_cost_options",
+    "mtg_commander_sim/engine.py::CommanderEngine._complete_attackers",
+    "mtg_commander_sim/engine.py::CommanderEngine._complete_semantic_choice",
+    "mtg_commander_sim/engine.py::CommanderEngine._complete_semantic_search",
+    "mtg_commander_sim/engine.py::CommanderEngine._continue_resolution",
+    "mtg_commander_sim/engine.py::CommanderEngine._declaration_restrictions",
+    "mtg_commander_sim/engine.py::CommanderEngine._dispatch_semantic_event",
+    "mtg_commander_sim/engine.py::CommanderEngine._dispatch_zone_change_events",
+    "mtg_commander_sim/engine.py::CommanderEngine._effective_card_data",
+    "mtg_commander_sim/engine.py::CommanderEngine._enter_step",
+    "mtg_commander_sim/engine.py::CommanderEngine._prepare_stack_resolution",
+    "mtg_commander_sim/engine.py::CommanderEngine._priority_action_hints",
+    "mtg_commander_sim/engine.py::CommanderEngine._semantic_event_condition_matches",
+    "mtg_commander_sim/engine.py::CommanderEngine._stabilize",
+    "mtg_commander_sim/engine.py::CommanderEngine._target_row_matches",
+    "mtg_commander_sim/engine.py::CommanderEngine._validated_combat_damage_assignments",
+    "mtg_commander_sim/engine.py::CommanderEngine.apply_effect",
+    "mtg_commander_sim/engine.py::CommanderEngine.create_token",
+    "mtg_commander_sim/engine.py::CommanderEngine.move_card",
+    "mtg_commander_sim/mana.py::extract_mana_modes",
+    "mtg_commander_sim/mechanic_contracts.py::validate_mechanic_contract",
+    "mtg_commander_sim/oracle_ir.py::_compile_face",
+    "mtg_commander_sim/oracle_ir.py::_effect_template",
+    "mtg_commander_sim/preflight.py::card_semantic_status",
+    "mtg_commander_sim/projection.py::StateProjector._snapshot",
+    "mtg_commander_sim/record.py::derive_codex_arena_metadata",
+    "mtg_commander_sim/report.py::_event_description",
+    "mtg_commander_sim/report.py::derive_review",
+    "mtg_commander_sim/rule_conformance.py::validate_rule_conformance",
+    "mtg_commander_sim/rules_corpus.py::verify_rules_corpus",
+    "mtg_commander_sim/runtime.py::GameActor._run",
+    "mtg_commander_sim/service.py::GameService.command",
+    "mtg_commander_sim/session.py::CommanderSession.act",
+    "server/app.py::create_app"
+  ],
+  "oversized_modules": [
+    "mtg_commander_sim/declaration_restrictions.py",
+    "mtg_commander_sim/engine.py",
+    "mtg_commander_sim/oracle_ir.py",
+    "mtg_commander_sim/record.py",
+    "mtg_commander_sim/report.py",
+    "web/src/App.tsx"
+  ],
+  "purpose": "Phase 1 non-growth allowances; removals remain allowed.",
+  "registered_effect_operations": [
+    "add_counter_selected",
+    "add_subtype",
+    "add_subtype_until_end_of_turn",
+    "add_type",
+    "add_type_until_end_of_turn",
+    "amass",
+    "animate_dead_prepare",
+    "animate_dead_reanimate",
+    "attach",
+    "become_monarch",
+    "bestow_prepare",
+    "bounce",
+    "change_control",
+    "change_control_until_end_of_turn",
+    "choose_card_name",
+    "choose_cards_apnap",
+    "choose_creature_type",
+    "choose_mana",
+    "choose_objects",
+    "choose_option",
+    "choose_warform",
+    "control_next_turn",
+    "copy_all_tokens",
+    "copy_stack_item",
+    "copy_until_end_of_turn",
+    "counter",
+    "counter_all_subtype",
+    "counter_or_destroy_blue",
+    "counter_stack",
+    "counter_unless_pay",
+    "create_daretti_emblem",
+    "create_token",
+    "create_token_if_no_controlled_subtype",
+    "create_treasure",
+    "create_warform",
+    "cumulative_upkeep",
+    "damage",
+    "damage_each_opponent",
+    "daretti_exchange",
+    "delayed_mana",
+    "delayed_pact_payment",
+    "delayed_trigger",
+    "demonic_junker_resolve",
+    "destroy",
+    "destroy_all",
+    "destroy_selected",
+    "discard",
+    "discard_draw_up_to",
+    "drain_each_opponent",
+    "drain_opponent",
+    "draw",
+    "draw_each_player",
+    "draw_optional_land",
+    "end_turn",
+    "energy",
+    "exile",
+    "exile_all",
+    "exile_graveyard",
+    "exile_opponent_graveyards",
+    "explore",
+    "extra_turn",
+    "fabricate",
+    "field_of_dead_token",
+    "fomori_vault",
+    "goad",
+    "grant_cast_permission",
+    "grant_keyword_until_end_of_turn",
+    "grant_play_without_mana_cost",
+    "grant_urzas_saga_chapter",
+    "life",
+    "look_reorder_top",
+    "look_top",
+    "lose_life",
+    "lose_life_each_opponent",
+    "lose_life_equal_mana_value",
+    "mana",
+    "mill",
+    "modify_stats_until_end_of_turn",
+    "move",
+    "move_if_in_zone",
+    "next_spell_improvise",
+    "next_spell_uncounterable",
+    "note",
+    "pay_or_lose",
+    "populate_with_haste",
+    "proliferate",
+    "protection_from_everything_until_next_turn",
+    "pump_controlled_creatures",
+    "put_artifact_from_hand",
+    "put_land_from_hand",
+    "reanimate",
+    "remora_tax",
+    "reorder_top",
+    "retarget_stack_item",
+    "return_transformed",
+    "reveal_top_permanent",
+    "sacrifice",
+    "sacrifice_if_present",
+    "scry",
+    "scute_swarm_token",
+    "search",
+    "shuffle_graveyard_bottom_random",
+    "shuffle_into_library",
+    "springheart_landfall",
+    "sylvan_library_settle",
+    "tap",
+    "toxic_deluge",
+    "transmute_artifact",
+    "untap",
+    "untap_all_creatures",
+    "veil_of_summer",
+    "welder_exchange"
+  ],
+  "schema_version": 1,
+  "source_fingerprints": {
+    "printed_name_allowances_sha256": "10f5b1ee75abad92e2a5d1a06b100202e85bf48a6539ab2a643d60f7d8a6b975"
+  }
+}
