@@ -12,12 +12,17 @@ from .abilities import ActivatedAbility, parse_activated_abilities
 from .carddb import CardDatabase, CardRecord
 from .declaration_costs import parse_declaration_cost_line
 from .declaration_restrictions import parse_declaration_restriction_line
+from .rules.capabilities import (
+    CapabilityClosure,
+    CapabilityRegistry,
+    capability_dependencies_for_node,
+)
 from .semantics import SemanticProgram, SemanticRegistry
 from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v11"
+ORACLE_COMPILER_VERSION = "oracle-ir-v12"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 
 _NUMBER_WORDS = {
@@ -111,9 +116,13 @@ class OracleNode:
     target_schema: Mapping[str, Any] | None = None
     mechanics: tuple[str, ...] = ()
     residual_ids: tuple[str, ...] = ()
+    capability_dependencies: tuple[str, ...] = ()
+    capability_closure: tuple[str, ...] = ()
+    capability_profile: str | None = None
+    capability_fingerprint: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        value = {
             "node_id": self.node_id,
             "kind": self.kind,
             "text": self.text,
@@ -133,6 +142,14 @@ class OracleNode:
             "mechanics": list(self.mechanics),
             "residual_ids": list(self.residual_ids),
         }
+        if self.capability_dependencies:
+            value["capability_dependencies"] = list(
+                self.capability_dependencies
+            )
+            value["capability_closure"] = list(self.capability_closure)
+            value["capability_profile"] = self.capability_profile
+            value["capability_fingerprint"] = self.capability_fingerprint
+        return value
 
 
 @dataclass(frozen=True, slots=True)
@@ -213,6 +230,48 @@ def _number(value: str) -> int:
         int(normalized)
         if normalized.isdigit()
         else _NUMBER_WORDS[normalized]
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class _DependencyGate:
+    blockers: tuple[str, ...]
+    capabilities: tuple[str, ...] = ()
+    closure: CapabilityClosure | None = None
+
+
+def _dependency_gate(
+    *,
+    mechanics: Iterable[str],
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    trusted_mechanics: frozenset[str],
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+) -> _DependencyGate:
+    mechanic_ids = tuple(str(value).casefold() for value in mechanics)
+    capabilities = capability_dependencies_for_node(
+        effects=effects,
+        target_schema=target_schema,
+        mechanic_ids=mechanic_ids,
+    )
+    if capability_registry is not None and capabilities:
+        closure = capability_registry.closure(
+            capabilities,
+            profile=capability_profile,
+        )
+        return _DependencyGate(
+            blockers=tuple(
+                f"capability:{blocker}" for blocker in closure.blockers
+            ),
+            capabilities=capabilities,
+            closure=closure,
+        )
+    return _DependencyGate(
+        blockers=tuple(
+            f"mechanic:{mechanic}"
+            for mechanic in sorted(set(mechanic_ids) - trusted_mechanics)
+        )
     )
 
 
@@ -866,6 +925,8 @@ def _compile_face(
     oracle_text: str,
     keywords: Sequence[str],
     trusted_mechanics: frozenset[str],
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
 ) -> OracleFaceIR:
     nodes: list[OracleNode] = []
     residuals: list[OracleResidual] = []
@@ -1379,7 +1440,15 @@ def _compile_face(
             card_name=face_name or record.name,
         )
         if spell and template is not None:
-            missing = sorted(set(mechanics) - trusted_mechanics)
+            dependency_gate = _dependency_gate(
+                mechanics=mechanics,
+                effects=effects,
+                target_schema=target_schema,
+                trusted_mechanics=trusted_mechanics,
+                capability_registry=capability_registry,
+                capability_profile=capability_profile,
+            )
+            missing = dependency_gate.blockers
             residual_ids = (
                 (
                     _residual(
@@ -1389,12 +1458,9 @@ def _compile_face(
                         span=span,
                         reason=(
                             "lowerable spell depends on untrusted "
-                            "mechanic contracts"
+                            "rules dependencies"
                         ),
-                        blockers=tuple(
-                            f"mechanic:{mechanic}"
-                            for mechanic in missing
-                        ),
+                        blockers=missing,
                     ),
                 )
                 if missing
@@ -1415,6 +1481,24 @@ def _compile_face(
                     target_schema=target_schema,
                     mechanics=mechanics,
                     residual_ids=residual_ids,
+                    capability_dependencies=(
+                        dependency_gate.capabilities
+                    ),
+                    capability_closure=(
+                        dependency_gate.closure.reachable
+                        if dependency_gate.closure is not None
+                        else ()
+                    ),
+                    capability_profile=(
+                        dependency_gate.closure.profile
+                        if dependency_gate.closure is not None
+                        else None
+                    ),
+                    capability_fingerprint=(
+                        dependency_gate.closure.fingerprint
+                        if dependency_gate.closure is not None
+                        else None
+                    ),
                 )
             )
             continue
@@ -1461,7 +1545,16 @@ def compile_oracle_card(
     record: CardRecord,
     *,
     trusted_mechanics: Iterable[str] = (),
+    capability_registry: CapabilityRegistry | None = None,
+    capability_profile: str = "traditional",
 ) -> OracleCardIR:
+    if (
+        capability_registry is not None
+        and capability_profile not in capability_registry.profiles
+    ):
+        raise ValueError(
+            f"Unknown capability profile: {capability_profile}"
+        )
     trusted = frozenset(
         str(mechanic).casefold() for mechanic in trusted_mechanics
     )
@@ -1496,6 +1589,8 @@ def compile_oracle_card(
             oracle_text=oracle_text,
             keywords=keywords,
             trusted_mechanics=trusted,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
         )
         for face_id, face_name, type_line, oracle_text, keywords in face_values
     )
@@ -1522,115 +1617,27 @@ def compile_oracle_card(
     )
 
 
-def _rulings_hash(db: CardDatabase, record: CardRecord) -> str:
-    rows = sorted(
-        (asdict(ruling) for ruling in db.rulings(record)),
-        key=lambda row: (
-            str(row["published_at"]),
-            str(row["source"]),
-            str(row["comment"]),
-            str(row["oracle_id"]),
-        ),
-    )
-    return hashlib.sha256(stable_json(rows).encode("utf-8")).hexdigest()
-
-
 def generated_programs(
     db: CardDatabase,
     record: CardRecord,
     *,
     trust_level: str = "provisional",
     trusted_mechanics: Iterable[str] = (),
+    capability_registry: CapabilityRegistry | None = None,
+    capability_profile: str = "traditional",
 ) -> list[SemanticProgram]:
-    """Lower exact IR nodes into the existing generic effect DSL.
+    """Compatibility API for the extracted generated-program stage."""
 
-    Generated programs remain provisional until every mechanic dependency in
-    their contract is trusted. This allows arbitrary new Oracle cards to be
-    compiled without pretending that a template match proves global CR
-    correctness.
-    """
+    from .compiler.program_generation import generated_programs as generate
 
-    ir = compile_oracle_card(
+    return generate(
+        db,
         record,
+        trust_level=trust_level,
         trusted_mechanics=trusted_mechanics,
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
     )
-    if trust_level == "trusted" and ir.status != "exact":
-        raise ValueError(
-            f"{record.name} cannot be promoted to trusted generated "
-            "semantics while material Oracle residuals remain"
-        )
-    programs: list[SemanticProgram] = []
-    rulings_hash = _rulings_hash(db, record)
-    for face in ir.faces:
-        for node in face.nodes:
-            if not node.lowerable or not node.effects:
-                continue
-            if node.kind == "spell_ability":
-                ability_id = f"spell:{face.face_id}"
-            elif node.kind == "activated_ability":
-                ability_id = f"ability:ab{node.span.line}"
-            elif node.kind == "triggered_ability":
-                ability_id = f"trigger:{face.face_id}:n{node.span.line}"
-            else:
-                continue
-            key = f"{record.oracle_id}:{ability_id}"
-            programs.append(
-                SemanticProgram(
-                    key=key,
-                    label=(
-                        record.name
-                        if node.kind == "spell_ability"
-                        else f"{record.name} — {node.text}"
-                    ),
-                    effects=[dict(effect) for effect in node.effects],
-                    destination=(
-                        "graveyard"
-                        if node.kind == "spell_ability"
-                        else None
-                    ),
-                    requires_arbiter=trust_level != "trusted",
-                    version=1,
-                    oracle_id=record.oracle_id,
-                    ability_id=ability_id,
-                    active_zone=node.active_zone,
-                    event=node.event,
-                    trust_level=trust_level,
-                    provenance={
-                        "source_oracle_hash": ir.oracle_hash,
-                        "source_rulings_hash": rulings_hash,
-                        "authored_by": ORACLE_COMPILER_VERSION,
-                        "review_status": "generated_review_required",
-                        "template_id": node.template_id,
-                        "source_span": asdict(node.span),
-                        "semantic_hash": ir.semantic_hash,
-                        "dependency_trust": (
-                            "pending_mechanic_contracts"
-                            if trust_level != "trusted"
-                            else "verified"
-                        ),
-                    },
-                    tests=[
-                        f"oracle_template:{node.template_id}",
-                    ],
-                    target_schema=(
-                        dict(node.target_schema)
-                        if node.target_schema is not None
-                        else None
-                    ),
-                    coverage=[
-                        "generated_oracle_ir",
-                        "spell_resolution"
-                        if node.kind == "spell_ability"
-                        else (
-                            "triggered_ability"
-                            if node.kind == "triggered_ability"
-                            else "activated_ability"
-                        ),
-                        *node.mechanics,
-                    ],
-                )
-            )
-    return programs
 
 
 def register_generated_programs(
@@ -1640,51 +1647,22 @@ def register_generated_programs(
     *,
     trust_level: str = "provisional",
     trusted_mechanics: Iterable[str] = (),
+    capability_registry: CapabilityRegistry | None = None,
+    capability_profile: str = "traditional",
 ) -> dict[str, Any]:
-    generated = 0
-    skipped_existing = 0
-    cards_seen: set[str] = set()
-    for record in records:
-        if record.oracle_id in cards_seen:
-            continue
-        cards_seen.add(record.oracle_id)
-        for program in generated_programs(
-            db,
-            record,
-            trust_level=trust_level,
-            trusted_mechanics=trusted_mechanics,
-        ):
-            if registry.get(program.key) is not None:
-                skipped_existing += 1
-                continue
-            if (
-                program.ability_id.startswith("trigger:")
-                and any(
-                    existing.trust_level == "trusted"
-                    and existing.active_zone == program.active_zone
-                    and existing.event == program.event
-                    for existing in registry.programs_for_oracle(
-                        record.oracle_id
-                    )
-                )
-            ):
-                # Reviewed event handlers take precedence. Trigger program
-                # keys are author-defined, so key equality alone cannot
-                # detect that a reviewed pack already owns this event family.
-                # Conservatively skipping avoids duplicate triggers; cards
-                # with multiple same-event abilities remain dependent on their
-                # reviewed pack until source-span identities are standardized.
-                skipped_existing += 1
-                continue
-            registry.put(program)
-            generated += 1
-    return {
-        "cards_considered": len(cards_seen),
-        "programs_generated": generated,
-        "programs_skipped_existing": skipped_existing,
-        "trust_level": trust_level,
-        "compiler_version": ORACLE_COMPILER_VERSION,
-    }
+    """Compatibility API for extracted generated-program registration."""
+
+    from .compiler.program_generation import register_generated_programs as register
+
+    return register(
+        db,
+        registry,
+        records,
+        trust_level=trust_level,
+        trusted_mechanics=trusted_mechanics,
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
+    )
 
 
 def oracle_corpus_coverage(

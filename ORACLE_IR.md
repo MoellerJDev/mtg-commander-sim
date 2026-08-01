@@ -1,8 +1,8 @@
 ---
 title: "Typed Oracle IR"
 status: "current"
-authoritative_source: "mtg_commander_sim/oracle_ir.py"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+authoritative_source: "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler/program_generation.py, and mtg_commander_sim/rules/capabilities.py"
+verified: "2026-08-01"
 audience: "compiler and semantic contributors"
 maintenance: "hand-maintained"
 ---
@@ -24,7 +24,8 @@ The compiler is conservative:
   targets, and residual IDs
 - every card records Oracle, compiler, and semantic hashes
 - any unparsed material text is a residual
-- a lowerable node is not exact until all mechanic dependencies are trusted
+- a lowerable node is not exact until its legacy mechanic dependencies or its
+  reviewed fine-grained capability closure are trusted
 
 ## Status meanings
 
@@ -36,8 +37,10 @@ The compiler is conservative:
 
 Textless cards can be exact without a semantic program. A recognized Flying
 line is currently partial because its contract still lists layer/copy
-blockers. A simple Lightning Bolt template is lowerable, but remains partial
-until damage and targeting dependencies are trusted.
+blockers. A simple Lightning Bolt template is lowerable. Under the legacy gate
+it remains partial; a capability-aware compile can prove its narrower public
+target and base CR 120.3 result closure without promoting the blocked broad
+damage aggregate.
 
 ## Runtime behavior
 
@@ -54,6 +57,13 @@ currently:
 - pinned to Oracle and rulings hashes
 - annotated with compiler, template, source span, semantic hash, and
   dependency status
+
+The normal session path deliberately keeps generated programs provisional. A
+compiler audit may explicitly supply the packaged capability registry and a
+supported profile. For a reviewed node mapping, the resulting program records
+direct capability IDs, the transitive closure, registry and closure
+fingerprints, and the profile. It can be promoted only when that exact closure
+is trusted. Unmapped node shapes retain the broad mechanic fallback.
 
 Reviewed event handlers shadow equivalent generated triggers. This prevents a
 reviewed card from triggering twice merely because its reviewed ability key

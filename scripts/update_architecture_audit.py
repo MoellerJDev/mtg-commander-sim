@@ -4,6 +4,7 @@ import argparse
 import ast
 from collections import Counter, defaultdict
 from dataclasses import dataclass
+import hashlib
 import io
 import json
 from pathlib import Path
@@ -37,6 +38,9 @@ JSON_OUTPUT = ROOT / "coverage" / "architecture-audit.json"
 ARCHITECTURE_STATUS = ROOT / "docs" / "ARCHITECTURE_DEBT_STATUS.md"
 COMPILER_STATUS = ROOT / "docs" / "COMPILER_COVERAGE_STATUS.md"
 GUARD_BASELINE = ROOT / "platform" / "architecture-guard-baseline.json"
+CAPABILITY_REGISTRY = (
+    ROOT / "mtg_commander_sim" / "rules" / "capability-registry.json"
+)
 
 PYTHON_SUFFIXES = {".py"}
 WEB_SUFFIXES = {".ts", ".tsx", ".css"}
@@ -886,6 +890,41 @@ def _compiler_metrics(
     oracle = _load_json(ROOT / "coverage" / "oracle-coverage.json")
     commander = _load_json(ROOT / "coverage" / "oracle-coverage-commander.json")
     mechanics = _load_json(ROOT / "coverage" / "mechanics-coverage.json")
+    capabilities = _load_json(CAPABILITY_REGISTRY)
+    capability_rows = {
+        str(row["id"]): row for row in capabilities["capabilities"]
+    }
+    capability_statuses = Counter(
+        str(row["status"]) for row in capability_rows.values()
+    )
+    aggregate_rows = []
+    for aggregate in capabilities["aggregates"]:
+        referenced = [
+            capability_rows[str(capability_id)]
+            for capability_id in aggregate["capabilities"]
+        ]
+        aggregate_rows.append(
+            {
+                "mechanic_id": aggregate["mechanic_id"],
+                "trusted": all(
+                    row["status"] == "trusted" for row in referenced
+                ),
+                "capability_count": len(referenced),
+                "blocked_capabilities": sorted(
+                    str(row["id"])
+                    for row in referenced
+                    if row["status"] != "trusted"
+                ),
+            }
+        )
+    capability_fingerprint = hashlib.sha256(
+        json.dumps(
+            capabilities,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+        ).encode("utf-8")
+    ).hexdigest()
     symbols: defaultdict[str, list[str]] = defaultdict(list)
     for analysis in analyses.values():
         for node in ast.walk(analysis.tree):
@@ -947,6 +986,17 @@ def _compiler_metrics(
             "trusted": mechanics.get("trusted_mechanics"),
             "status_counts": mechanics.get("status_counts"),
             "current_snapshot_complete": mechanics.get("current_snapshot_complete"),
+        },
+        "rule_capabilities": {
+            "schema_version": capabilities["schema_version"],
+            "registry_version": capabilities["registry_version"],
+            "effective_date": capabilities["effective_date"],
+            "source_sha256": capabilities["source_sha256"],
+            "fingerprint": capability_fingerprint,
+            "total": len(capability_rows),
+            "status_counts": dict(sorted(capability_statuses.items())),
+            "profiles": capabilities["profiles"],
+            "aggregates": aggregate_rows,
         },
     }
 
@@ -1379,6 +1429,7 @@ def render_compiler_status(report: Mapping[str, Any]) -> str:
     compiler = report["compiler"]
     full = compiler["full_oracle"]
     commander = compiler["commander_legal_oracle"]
+    capabilities = compiler["rule_capabilities"]
     semantics = report["semantic_packs_and_overrides"]
     lines = _metadata_lines(
         "Compiler coverage status",
@@ -1412,6 +1463,34 @@ def render_compiler_status(report: Mapping[str, Any]) -> str:
         lines.append(
             f"| `{stage['id']}` | `{stage['current_status']}` | "
             f"{str(stage['all_configured_evidence_present']).lower()} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Fine-grained capability registry",
+            "",
+            f"- Registry schema/version: "
+            f"`{capabilities['schema_version']}/{capabilities['registry_version']}`",
+            f"- Pinned rules effective date: `{capabilities['effective_date']}`",
+            f"- Registry fingerprint: `{capabilities['fingerprint']}`",
+            f"- Capability records: {capabilities['total']}",
+            f"- Trusted records: "
+            f"{capabilities['status_counts'].get('trusted', 0)}",
+            f"- Blocked records: "
+            f"{capabilities['status_counts'].get('blocked', 0)}",
+            "",
+            "| Broad aggregate | Capability records | Trusted | Blocked members |",
+            "|---|---:|---:|---|",
+        ]
+    )
+    for aggregate in capabilities["aggregates"]:
+        blocked = ", ".join(
+            f"`{value}`" for value in aggregate["blocked_capabilities"]
+        ) or "none"
+        lines.append(
+            f"| `{aggregate['mechanic_id']}` | "
+            f"{aggregate['capability_count']} | "
+            f"{str(aggregate['trusted']).lower()} | {blocked} |"
         )
     lines.extend(
         [
@@ -1468,8 +1547,9 @@ def render_compiler_status(report: Mapping[str, Any]) -> str:
             "## Boundary",
             "",
             "The current compiler is partial and interleaved. Full-corpus exactness is "
-            "not claimed. The next architecture phases introduce fine-grained capabilities, "
-            "CardProgram V2, typed handlers, and distinct compiler stages incrementally.",
+            "not claimed. Fine-grained closure currently covers only the reviewed base-damage "
+            "spell slice; other nodes retain the broad-contract fallback. CardProgram V2, "
+            "typed handlers, and distinct compiler stages remain incremental work.",
             "",
         ]
     )

@@ -215,9 +215,10 @@
     },
     {
       "id": "oracle_compiler",
-      "status": "single_interleaved_compiler_module",
+      "status": "generated_program_stage_extracted_from_interleaved_ir_compiler",
       "owners": [
-        "mtg_commander_sim/oracle_ir.py"
+        "mtg_commander_sim/oracle_ir.py",
+        "mtg_commander_sim/compiler/program_generation.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -284,8 +285,10 @@
     },
     {
       "id": "capability_closure",
-      "current_status": "mechanic_contract_gate_without_fine_grained_closure",
+      "current_status": "fine_grained_damage_slice_with_legacy_fallback",
       "evidence_symbols": [
+        "CapabilityRegistry",
+        "_dependency_gate",
         "generated_programs"
       ]
     },

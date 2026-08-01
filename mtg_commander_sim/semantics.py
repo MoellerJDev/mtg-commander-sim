@@ -154,12 +154,99 @@ class SemanticProgram:
     cost_schema: dict[str, Any] | None = None
     event_condition: dict[str, Any] | None = None
     coverage: list[str] = field(default_factory=list)
+    capability_dependencies: list[str] = field(default_factory=list)
+    capability_closure: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
         if self.trust_level not in TRUST_LEVELS:
             raise ValueError(f"Unknown semantic trust level {self.trust_level!r}")
         if self.version < 1 or self.semantic_schema_version < 1:
             raise ValueError("Semantic versions must be positive")
+        if any(
+            not isinstance(value, str) or not value.strip()
+            for value in self.capability_dependencies
+        ):
+            raise ValueError(
+                "Capability dependencies must be nonempty strings"
+            )
+        if len(self.capability_dependencies) != len(
+            set(self.capability_dependencies)
+        ):
+            raise ValueError("Capability dependencies must be unique")
+        if self.capability_dependencies and self.capability_closure is None:
+            raise ValueError(
+                "Capability dependencies require their resolved closure"
+            )
+        if self.capability_closure is not None:
+            if not self.capability_dependencies:
+                raise ValueError(
+                    "A capability closure requires direct dependencies"
+                )
+            if not str(
+                self.capability_closure.get("fingerprint") or ""
+            ).strip():
+                raise ValueError(
+                    "A capability closure requires a fingerprint"
+                )
+            requested = self.capability_closure.get("requested")
+            if (
+                not isinstance(requested, list)
+                or any(not isinstance(value, str) for value in requested)
+                or sorted(requested)
+                != sorted(self.capability_dependencies)
+            ):
+                raise ValueError(
+                    "Capability closure requested IDs must match direct "
+                    "dependencies"
+                )
+            for field in (
+                "reachable",
+                "profile",
+                "trusted",
+                "blockers",
+                "registry_fingerprint",
+            ):
+                if field not in self.capability_closure:
+                    raise ValueError(
+                        f"Capability closure requires {field}"
+                    )
+            if not isinstance(
+                self.capability_closure.get("reachable"), list
+            ) or not isinstance(
+                self.capability_closure.get("blockers"), list
+            ):
+                raise ValueError(
+                    "Capability closure reachability and blockers must be "
+                    "lists"
+                )
+            if not isinstance(
+                self.capability_closure.get("trusted"), bool
+            ):
+                raise ValueError(
+                    "Capability closure trusted must be boolean"
+                )
+            if not str(self.capability_closure.get("profile") or "").strip():
+                raise ValueError("Capability closure requires a profile")
+            for field in ("registry_fingerprint", "fingerprint"):
+                fingerprint = str(
+                    self.capability_closure.get(field) or ""
+                )
+                if len(fingerprint) != 64 or any(
+                    character not in "0123456789abcdef"
+                    for character in fingerprint
+                ):
+                    raise ValueError(
+                        f"Capability closure {field} must be a lowercase "
+                        "SHA-256"
+                    )
+            if self.trust_level == "trusted" and (
+                self.capability_closure.get("trusted") is not True
+                or self.capability_closure.get("blockers") != []
+            ):
+                raise ValueError(
+                    "Trusted semantics require a trusted unblocked "
+                    "capability closure"
+                )
         effects_to_validate = list(self.effects)
         mode_definitions = (
             self.target_schema.get("modes")
@@ -203,7 +290,7 @@ class SemanticProgram:
                 raise ValueError("Trusted semantics require characterization tests")
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        value = {
             "key": self.key,
             "label": self.label,
             "effects": self.effects,
@@ -225,6 +312,12 @@ class SemanticProgram:
             "event_condition": self.event_condition,
             "coverage": self.coverage,
         }
+        if self.capability_dependencies:
+            value["capability_dependencies"] = (
+                self.capability_dependencies
+            )
+            value["capability_closure"] = self.capability_closure
+        return value
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "SemanticProgram":
@@ -263,6 +356,15 @@ class SemanticProgram:
                 else None
             ),
             coverage=[str(value) for value in data.get("coverage", [])],
+            capability_dependencies=[
+                str(value)
+                for value in data.get("capability_dependencies", [])
+            ],
+            capability_closure=(
+                dict(data["capability_closure"])
+                if isinstance(data.get("capability_closure"), Mapping)
+                else None
+            ),
         )
 
 

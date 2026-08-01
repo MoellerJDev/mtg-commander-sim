@@ -13,10 +13,10 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Current representation
 
-- Compiler: `oracle-ir-v11`
+- Compiler: `oracle-ir-v12`
 - Runtime IR: OracleCardIR plus SemanticProgram
 - CardProgram V2 present: false
-- Compiler module: 1,854 physical / 1,780 logical lines
+- Compiler module: 1,832 physical / 1,765 logical lines
 
 ## Stages
 
@@ -29,9 +29,22 @@ This generated report describes only the pinned Oracle corpus and current compil
 | `binding` | `not_a_distinct_stage` | false |
 | `typing` | `partial_dataclass_ir` | true |
 | `lowering` | `interleaved_with_face_compilation` | true |
-| `capability_closure` | `mechanic_contract_gate_without_fine_grained_closure` | true |
+| `capability_closure` | `fine_grained_damage_slice_with_legacy_fallback` | true |
 | `residual_classification` | `implemented_interleaved` | true |
 | `validation` | `partial_program_registration_checks` | true |
+
+## Fine-grained capability registry
+
+- Registry schema/version: `1/1`
+- Pinned rules effective date: `2026-06-19`
+- Registry fingerprint: `dc5e739f764b077fdfce48a5f1c068f5039591b5206e6fb4498dc48a7f3828f4`
+- Capability records: 15
+- Trusted records: 8
+- Blocked records: 7
+
+| Broad aggregate | Capability records | Trusted | Blocked members |
+|---|---:|---:|---|
+| `cr-120-damage` | 13 | false | `damage.combat.excess`, `damage.prevention.order`, `damage.replacement.order`, `damage.result.infect`, `damage.result.lifelink`, `damage.result.wither`, `damage.trigger.noncombat` |
 
 ## Pinned corpus accounting
 
@@ -73,4 +86,4 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Boundary
 
-The current compiler is partial and interleaved. Full-corpus exactness is not claimed. The next architecture phases introduce fine-grained capabilities, CardProgram V2, typed handlers, and distinct compiler stages incrementally.
+The current compiler is partial and interleaved. Full-corpus exactness is not claimed. Fine-grained closure currently covers only the reviewed base-damage spell slice; other nodes retain the broad-contract fallback. CardProgram V2, typed handlers, and distinct compiler stages remain incremental work.

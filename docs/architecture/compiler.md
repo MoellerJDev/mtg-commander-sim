@@ -1,8 +1,8 @@
 ---
 title: "Oracle compiler"
 status: "current"
-authoritative_source: "mtg_commander_sim/oracle_ir.py and pinned coverage artifacts"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+authoritative_source: "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler/program_generation.py, the capability registry, and pinned coverage artifacts"
+verified: "2026-08-01"
 audience: "compiler and rules contributors"
 maintenance: "hand-maintained"
 ---
@@ -12,6 +12,9 @@ maintenance: "hand-maintained"
 The typed Oracle compiler transforms a pinned local Scryfall record into Oracle
 IR, recognized semantic nodes, dependency declarations, and material residuals.
 It is deterministic for the same card/rulings snapshot and compiler version.
+`oracle_ir.py` owns parsing and IR compatibility; the extracted
+`compiler/program_generation.py` stage owns lowering exact nodes into registry
+programs and preserves the public compatibility functions.
 
 ```mermaid
 flowchart LR
@@ -31,6 +34,9 @@ flowchart LR
 - Exact parsing is not equivalent to complete runtime behavior.
 - A program cannot be trusted beyond the closure of its mechanics, targets,
   costs, zones, events, replacements, and runtime operations.
+- Reviewed node shapes use versioned fine-grained capability closure. Unmapped
+  shapes continue through the legacy broad mechanic gate and do not inherit
+  trust from a migrated neighbor.
 - The local card database is a compiler input, not an engine dependency during
   a transition.
 

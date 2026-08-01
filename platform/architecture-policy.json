@@ -30,6 +30,7 @@
   ],
   "protected_future_prefixes": [
     "mtg_commander_sim/domain/",
+    "mtg_commander_sim/compiler/",
     "mtg_commander_sim/rules/",
     "mtg_commander_sim/semantics/",
     "mtg_commander_sim/card_overrides/"

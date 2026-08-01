@@ -42,6 +42,7 @@ indexed here but excluded from documentation front-matter validation.
 - [ADR 0001 — single writer](adr/0001-single-writer-game-actor.md)
 - [ADR 0002 — seat projections](adr/0002-seat-projected-network-protocol.md)
 - [ADR 0003 — ratcheted enforcement](adr/0003-ratcheted-architecture-enforcement.md)
+- [ADR 0004 — fine-grained capability trust](adr/0004-fine-grained-capability-trust.md)
 - [Legacy consolidated architecture reference](../ARCHITECTURE.md)
 - [Client integration boundary](../CLIENT_INTEGRATION.md)
 - [Game Record v3](../GAME_RECORD.md)

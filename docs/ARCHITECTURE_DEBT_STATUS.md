@@ -16,7 +16,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `a3ea421d021c45002048909073eeef69e6c113d9`
 - Package: `0.8.0`
 - CI run: [30708805772](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30708805772) — `pass`
-- Production scope: 59 files, 56,042 physical lines, 52,575 logical lines
+- Production scope: 63 files, 56,904 physical lines, 53,375 logical lines
 
 ## Central engine debt
 
@@ -54,7 +54,7 @@ Baseline: `5197a91dcdac428c09980a39467a7a5c62bc17fa`. Guard: `python scripts/val
 | `mtg_commander_sim/engine.py` | python | 23,996 | 23,155 |
 | `web/src/App.tsx` | web | 1,889 | 1,828 |
 | `mtg_commander_sim/report.py` | python | 1,853 | 1,813 |
-| `mtg_commander_sim/oracle_ir.py` | python | 1,854 | 1,780 |
+| `mtg_commander_sim/oracle_ir.py` | python | 1,832 | 1,765 |
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
 | `mtg_commander_sim/record.py` | python | 1,657 | 1,551 |
 | `mtg_commander_sim/rules_corpus.py` | python | 1,590 | 1,495 |
@@ -78,10 +78,10 @@ Baseline: `5197a91dcdac428c09980a39467a7a5c62bc17fa`. Guard: `python scripts/val
 | `parse_declaration_restriction_line` | `mtg_commander_sim/declaration_restrictions.py:892` | 881 | 942 |
 | `create_app` | `server/app.py:536` | 724 | 769 |
 | `CommanderEngine._cast` | `mtg_commander_sim/engine.py:6184` | 622 | 625 |
+| `_compile_face` | `mtg_commander_sim/oracle_ir.py:919` | 615 | 623 |
 | `main` | `mtg_commander_sim/cli.py:718` | 599 | 609 |
-| `_compile_face` | `mtg_commander_sim/oracle_ir.py:860` | 590 | 598 |
 | `CommanderEngine._priority_action_hints` | `mtg_commander_sim/engine.py:9304` | 579 | 581 |
-| `_effect_template` | `mtg_commander_sim/oracle_ir.py:251` | 539 | 540 |
+| `_effect_template` | `mtg_commander_sim/oracle_ir.py:310` | 539 | 540 |
 | `CommanderEngine._cast_cost_options` | `mtg_commander_sim/engine.py:8879` | 418 | 424 |
 | `CommanderEngine._activate` | `mtg_commander_sim/engine.py:7384` | 375 | 383 |
 | `CommanderSession.act` | `mtg_commander_sim/session.py:531` | 360 | 364 |
@@ -114,8 +114,8 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,141
-- Conventional Python cases: 841
+- Python discovered: 4,151
+- Conventional Python cases: 851
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 7
 - Browser unit cases: 14

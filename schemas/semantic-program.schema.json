@@ -37,7 +37,67 @@
     "target_schema": {"type": ["object", "null"]},
     "cost_schema": {"type": ["object", "null"]},
     "event_condition": {"type": ["object", "null"]},
-    "coverage": {"type": "array", "items": {"type": "string"}}
+    "coverage": {"type": "array", "items": {"type": "string"}},
+    "capability_dependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "capability_closure": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/capability_closure"}
+      ]
+    }
   },
+  "$defs": {
+    "strings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "capability_closure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requested",
+        "reachable",
+        "profile",
+        "trusted",
+        "blockers",
+        "registry_fingerprint",
+        "fingerprint"
+      ],
+      "properties": {
+        "requested": {"$ref": "#/$defs/strings"},
+        "reachable": {"$ref": "#/$defs/strings"},
+        "profile": {"type": "string", "minLength": 1},
+        "trusted": {"type": "boolean"},
+        "blockers": {"$ref": "#/$defs/strings"},
+        "registry_fingerprint": {"$ref": "#/$defs/sha256"},
+        "fingerprint": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["capability_dependencies"],
+        "properties": {
+          "capability_dependencies": {"minItems": 1}
+        }
+      },
+      "then": {
+        "required": ["capability_closure"],
+        "properties": {
+          "capability_closure": {"$ref": "#/$defs/capability_closure"}
+        }
+      }
+    }
+  ],
   "additionalProperties": false
 }
