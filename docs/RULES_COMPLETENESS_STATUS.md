@@ -131,7 +131,10 @@ coverage.
   a spell pass; 7 classifier, payment-window, reentry, and triggered-mana
   behaviors remain blocked, and 5 framework records are definition-only.
   Targeted and loyalty abilities are no longer misclassified as mana
-  abilities.
+  abilities. Rules-created Treasure tokens now expose exact five-color manual
+  modes and can satisfy automatic payment with tap/sacrifice paid before mana
+  is added; this is a narrow represented-token witness, not complete possible-
+  output grammar.
 - [x] Reviewed all 9 CR 604 Handling Static Abilities cases: 7 behavioral
   records remain dependency-blocked and 2 taxonomy records are
   definition-only. Padeem source-lifetime, moved Lightning Greaves, stack
@@ -140,7 +143,9 @@ coverage.
 - [x] Reviewed all 48 CR 603 Handling Triggered Abilities cases: represented
   trigger placement before priority, source-controller capture,
   intervening-condition rechecks, and delayed exact-incarnation behavior
-  pass. Forty grammar, event, ordering, choice, zone-change, provenance,
+  pass. The land-play command now performs the same stabilization before
+  returning priority, preventing a represented enters trigger from being
+  deferred to a later action or phase. Forty grammar, event, ordering, choice, zone-change, provenance,
   state/player-loss, look-back, linked, and reflexive behaviors remain
   dependency-blocked; 4 taxonomy records are definition-only.
 - [x] Reviewed all 28 CR 601 Casting Spells cases: the mana-ability payment

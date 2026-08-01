@@ -5112,6 +5112,16 @@ class CommanderEngine:
                 continue
             record = self.card_record(card)
             if not record:
+                compiled_modes = self._recordless_mana_modes(seat, card)
+                if compiled_modes:
+                    sources.append(
+                        ManaSource(
+                            object_id,
+                            card.ref,
+                            self.display_name(object_id),
+                            tuple(compiled_modes),
+                        )
+                    )
                 continue
             mana_abilities = [
                 ability
@@ -5223,27 +5233,33 @@ class CommanderEngine:
             else:
                 record = self.card_record(card)
                 if not record:
-                    raise GameRuleError(
-                        f"{card.ref} is not a card-backed mana source"
+                    modes = tuple(
+                        self._recordless_mana_modes(seat, card)
                     )
-                mana_abilities = [
-                    ability
-                    for ability in self._activated_abilities(card)
-                    if ability.mana_ability and card.zone in ability.zones
-                ]
-                if (
-                    not mana_abilities
-                    and not record.is_land
-                    and "creature tokens you control have"
-                    in record.oracle_text.casefold()
-                ):
-                    raise GameRuleError(
-                        f"{card.ref} does not itself have that mana ability"
+                    if not modes:
+                        raise GameRuleError(
+                            f"{card.ref} has no compiled mana mode"
+                        )
+                else:
+                    mana_abilities = [
+                        ability
+                        for ability in self._activated_abilities(card)
+                        if ability.mana_ability
+                        and card.zone in ability.zones
+                    ]
+                    if (
+                        not mana_abilities
+                        and not record.is_land
+                        and "creature tokens you control have"
+                        in record.oracle_text.casefold()
+                    ):
+                        raise GameRuleError(
+                            f"{card.ref} does not itself have that mana ability"
+                        )
+                    modes = extract_mana_modes(
+                        record,
+                        self._commander_identity(seat),
                     )
-                modes = extract_mana_modes(
-                    record,
-                    self._commander_identity(seat),
-                )
             matching = [mode for mode in modes if normalize_mana_bundle(mode.bundle) == bundle]
             if not matching:
                 raise GameRuleError(f"Declared output is not a recognized mana mode of {card.printed_name}")
@@ -5304,7 +5320,27 @@ class CommanderEngine:
                 )
             ):
                 raise GameRuleError(f"{card.printed_name}'s selected mana mode requires an explicit condition")
+            # The selected authoritative mode, not the submitted mana-plan
+            # payload, determines all costs and side effects.
+            side_effects = tuple(mode.side_effects)
+            cost_effects = tuple(
+                effect
+                for effect in side_effects
+                if effect.get("op") == "sacrifice_source"
+            )
+            result_effects = tuple(
+                effect
+                for effect in side_effects
+                if effect.get("op") != "sacrifice_source"
+            )
+            # Tap and sacrifice are paid before the mana ability resolves.
+            # They are applied together without an intervening priority window.
             card.tapped = True
+            self._apply_mana_mode_side_effects(
+                seat,
+                cost_effects,
+                source=card,
+            )
             for color, amount in bundle.items():
                 self.state.players[seat].mana_pool[color] += amount
             if compiled_restriction:
@@ -5315,7 +5351,8 @@ class CommanderEngine:
                 )
             self._apply_mana_mode_side_effects(
                 seat,
-                activation.get("side_effects") or mode.side_effects,
+                result_effects,
+                source=card,
             )
             self._log(seat, "mana.produce", f"{seat} tapped {card.ref} for { {k:v for k,v in bundle.items() if v} }.", {"source": card.ref, "bundle": {k:v for k,v in bundle.items() if v}}, importance=0, changed_objects=[card.object_id], changed_players=[seat])
 
@@ -5323,6 +5360,8 @@ class CommanderEngine:
         self,
         seat: str,
         effects: Iterable[Mapping[str, Any]],
+        *,
+        source: CardInstance | None = None,
     ) -> None:
         """Apply compiled effects coupled to one selected mana mode."""
 
@@ -5338,6 +5377,21 @@ class CommanderEngine:
                         "Cannot pay more life than the player has"
                     )
                 self.state.players[seat].life -= amount
+            elif effect.get("op") == "sacrifice_source":
+                if (
+                    source is None
+                    or source.controller != seat
+                    or source.zone != "battlefield"
+                ):
+                    raise GameRuleError(
+                        "The mana source cannot be sacrificed"
+                    )
+                self.move_card(
+                    source.object_id,
+                    "graveyard",
+                    reason="mana ability cost",
+                    semantic_events=True,
+                )
 
     def _pay_for_cost(
         self,
@@ -5680,7 +5734,15 @@ class CommanderEngine:
             changed_objects=[card.object_id],
             changed_players=[seat],
         )
+        # CR 117.5 and 704.3 require state-based actions and waiting triggers
+        # to be handled before the active player receives priority after this
+        # special action.  Without this boundary, an enters trigger created by
+        # a land play could remain queued while the player cast another spell
+        # or even advanced to the next step.
+        self.state.priority_player = None
         self.state.priority_passes = []
+        if self._stabilize():
+            return
         self.state.priority_player = seat
 
     def _select_cast_face(self, record: CardRecord, face_name: str | None) -> dict[str, Any] | None:
@@ -6765,7 +6827,22 @@ class CommanderEngine:
 
         record = self.card_record(source)
         if record is None:
-            return ()
+            effect = ability.effect_text.casefold()
+            if "one mana of any type" in effect:
+                colors = "WUBRGC"
+            elif "one mana of any color" in effect:
+                colors = "WUBRG"
+            else:
+                return ()
+            return tuple(
+                ManaMode(
+                    {
+                        **normalize_mana_bundle(None),
+                        color: 1,
+                    }
+                )
+                for color in colors
+            )
         effect = ability.effect_text.casefold()
         if (
             "one mana of any color that a land an opponent controls "
@@ -6815,6 +6892,56 @@ class CommanderEngine:
             ability_record,
             self._commander_identity(seat),
         )
+
+    def _recordless_mana_modes(
+        self,
+        seat: str,
+        source: CardInstance,
+    ) -> list[ManaMode]:
+        """Return safely executable modes for a rules-created token.
+
+        A token can have complete characteristics without a Scryfall-backed
+        CardRecord.  Only a represented tap-mana ability whose remaining costs
+        are fully compiled is eligible for automatic payment.
+        """
+
+        compiled_modes: list[ManaMode] = []
+        for ability in self._activated_abilities(source):
+            if (
+                not ability.mana_ability
+                or source.zone not in ability.zones
+                or not ability.tap_source
+                or not ability.compiled_cost
+                or sum(ability.mana.values())
+                or ability.choices
+                or ability.untap_source
+                or ability.discard_source
+                or ability.exile_source
+                or ability.life_payment
+                or ability.energy_payment
+                or ability.loyalty_delta is not None
+                or self._activation_condition_status(
+                    seat, ability, source
+                )[0]
+                != "payable"
+            ):
+                continue
+            for mode in self._mana_modes_for_ability(
+                seat, source, ability
+            ):
+                side_effects = list(mode.side_effects)
+                if ability.sacrifice_source:
+                    side_effects.append({"op": "sacrifice_source"})
+                compiled_modes.append(
+                    ManaMode(
+                        mode.bundle,
+                        conditional=mode.conditional,
+                        restriction=mode.restriction,
+                        side_effects=tuple(side_effects),
+                        requires_choice=mode.requires_choice,
+                    )
+                )
+        return compiled_modes
 
     @staticmethod
     def _fetch_land_types(effect_text: str) -> tuple[str, ...]:

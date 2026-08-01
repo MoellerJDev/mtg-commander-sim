@@ -240,6 +240,7 @@ class CodexArenaBoundaryTests(unittest.TestCase):
                 item
                 for item in task["decision"]["legal_actions"]
                 if item["action"] == "play_land"
+                and item["label"] == "Play Mana Confluence"
             )
             accepted = first_process.submit_action(
                 {

@@ -11,31 +11,29 @@ or provider session data. Current generated metrics live in
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Browser/runtime integration merge:
-  `4c576494dfe6fe60ea31e6891fd8261f9714b4a6`
-- Documentation reconciliation merge:
-  `44100e87f1b9f2f8fe8f76f5c5a473d1a8a1d853`
-- Certified feature head:
-  `52202490db25fb7be6a2c2dba36bbf4b959a41b2`
+- Latest integrated `main` merge:
+  `8e655558305534145349e93eb48c1e9e3dd84f4e`
+- Latest certified feature head:
+  `64153bb4f90e2f994ead74548c462b1782b860b4`
+- Current focused slice: land-trigger stabilization, exact rules-created
+  Treasure payment, and a deterministic target/response browser journey
 - Package: `0.8.0`
 - Tags: `v0.6.0`, `v0.7.0`
 - No `v0.8.0` release tag has been created.
 
-PRs #1–#17 and #24–#32 are merged through ordinary merge commits. PR #24
+PRs #1–#17 and #24–#34 are merged through ordinary merge commits. PR #24
 incorporated the ancestry-proven CR 400–408 stack; PRs #18–#23 were closed as
-superseded only after their exact heads were reachable from `main`. PRs #27–#31
-then integrated the authoritative browser/server vertical slice, restart and
-lifecycle hardening, the managed local data runtime, and browser gameplay
-polish; PR #32 reconciled the durable platform ledger and handoff.
-
-Local and remote branch cleanup is complete: only `main` remains, every merged
-feature commit is reachable from it, and there are no open pull requests. No
-force push or tag movement was used.
+superseded only after their exact heads were reachable from `main`. PRs #27–#34
+integrated the authoritative browser/server vertical slice, restart and
+lifecycle hardening, managed local data, UI interaction, spectators/public
+logs, and the visible fail-closed browser rules boundary. No force push or tag
+movement was used.
 
 ## Deterministic evidence
 
-- The exact local merge gate passed all 18 stages at `5220249`.
-- 3,987 unit/integration tests pass on Windows Python 3.11.9 against the
+- The latest integrated feature head `64153bb` passed the exact 18-stage local
+  merge gate and public matrix before PR #34 merged.
+- 3,991 unit/integration tests pass on Windows Python 3.11.9 against the
   compact public CI card database.
 - All 3,300 pinned rule records and 425 mechanic records verify against the
   June 19, 2026 rules source. Generated per-rule inventory tests do not imply
@@ -45,11 +43,12 @@ force push or tag movement was used.
 - The deterministic four-player natural-winner, seed-20260730 replay,
   projection/privacy, protocol demo, dependency, repository/history/security,
   wheel build, and clean-install gates pass.
-- Generated protocol types, the production browser build, and the isolated
-  four-context Chromium test pass.
-- PR #31 head `5220249` passed the public Python 3.11/3.12 Ubuntu/Windows and
-  Browser/Chromium matrix in run `30674523046`.
-- Merge commit `4c57649` is covered by public `main` run `30674808173`.
+- Generated protocol types, the production browser build, and all five
+  Playwright/Chromium scenarios pass. The browser suite includes four-seat
+  isolation, an isolated spectator/public log, 1v1 room recovery, penalized
+  mulligan choices, and a target/stack/Treasure/Bowmasters journey.
+- Merge commit `8e65555` is covered by public `main` run `30679272776` across
+  Python 3.11/3.12, Ubuntu/Windows, and Browser/Chromium.
 
 GitHub Actions is operating normally. Historical zero-step billing failures
 are not current evidence and no administrator bypass is authorized or needed.
@@ -89,6 +88,12 @@ Implemented:
 - compact-fixture regressions for modal land faces, Sunscorched Desert, Orcish
   Bowmasters under the browser's trusted-only policy, priority progression,
   exact retry, privacy, and reconnect behavior
+- immediate post-land stabilization so represented ETB triggers and their
+  choices occur before priority returns
+- exact rules-created Treasure mana choices and automatic payment with its
+  tap/sacrifice cost
+- a deterministic two-browser target/response journey from Sunscorched Desert
+  through An Offer You Can't Refuse and Orcish Bowmasters/Amass
 - durable browser fail-closed handling for legacy records that contain an
   arbiter-only decision; those records now display a rules-boundary pause and
   cannot resemble repeated player priority passes
@@ -113,11 +118,13 @@ Orcish Bowmasters program. It is historical pre-fix evidence, not evidence that
 the current generic trigger path failed. Current source hashes for both reviewed
 cards match the active full database, and compact trusted-only regressions pass.
 
-The next focused slice is a fresh full-database manual/browser journey created
-after a clean server restart. Exercise targeted ETBs, stack response, combat,
-concession, natural completion, and process restart. Treat any new failure as a
-rules or browser defect, but do not reuse the pinned pre-fix record as current
-semantic evidence.
+Compact current-server browser evidence now covers targeted ETBs and a genuine
+stack response through rules-created Treasure payment. The next focused slice
+is still a fresh full-database manual/browser journey created after a clean
+server restart. Reconfirm those target/response paths, then continue through
+combat, concession, natural completion, and process restart. Treat any new
+failure as a rules or browser defect, but do not reuse the pinned pre-fix record
+as current semantic evidence.
 
 That slice must preserve exact replay, idempotency, seat projection, hidden
 information, and the existing no-AI core runtime boundary. Production

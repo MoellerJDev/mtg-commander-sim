@@ -9,19 +9,26 @@ async function enter(page: Page, name: string) {
   await expect(page.getByRole("heading", { name: "Find your table" })).toBeVisible();
 }
 
-async function submitDeck(page: Page, seat: string, text: string) {
-  const zimone = seat === "A" || seat === "C";
-  await page.getByTestId("deck-name").fill(`Deck ${seat}`);
-  await page
-    .getByTestId("commander-name")
-    .fill(zimone ? "Zimone and Dina" : "Mishra, Eminent One");
+async function submitNamedDeck(page: Page, name: string, commander: string, text: string) {
+  await page.getByTestId("deck-name").fill(name);
+  await page.getByTestId("commander-name").fill(commander);
   await page.getByTestId("deck-list").fill(text);
   await page.getByTestId("submit-deck").click();
   // These duplicated lists exercise the browser protocol, not matchup or
   // semantic-coverage evidence. A draft mechanic contract may correctly keep
   // the ready list behind a visible fail-closed fidelity warning.
   await expect(page.locator(".success-banner, .warning-banner").filter({ hasText: /Deck (validated|accepted)/ })).toBeVisible();
-  await expect(page.getByTestId("deck-ready-summary")).toContainText(`Deck ${seat}`);
+  await expect(page.getByTestId("deck-ready-summary")).toContainText(name);
+}
+
+async function submitDeck(page: Page, seat: string, text: string) {
+  const zimone = seat === "A" || seat === "C";
+  await submitNamedDeck(
+    page,
+    `Deck ${seat}`,
+    zimone ? "Zimone and Dina" : "Mishra, Eminent One",
+    text,
+  );
 }
 
 async function viewRevision(page: Page): Promise<number> {
@@ -86,6 +93,34 @@ async function submitOpenChoice(page: Page) {
   await page.getByTestId("submit-choice").click();
   await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
 }
+
+async function submitFormAction(page: Page, actionId: string) {
+  await page.getByTestId(`action-${actionId}`).click();
+  await expect(page.getByTestId("choice-dialog")).toBeVisible();
+  await submitOpenChoice(page);
+}
+
+const browserTriggerDeck = `Commander:
+1 Mishra, Eminent One
+
+Mainboard:
+1 Sunscorched Desert
+1 Orcish Bowmasters
+1 Sol Ring
+32 Island
+32 Swamp
+32 Mountain
+`;
+
+const browserResponseDeck = `Commander:
+1 Zimone and Dina
+
+Mainboard:
+1 An Offer You Can't Refuse
+33 Island
+33 Swamp
+32 Forest
+`;
 
 test("four shared-cookie browser tabs retain isolated seats through mulligans and reconnect", async ({ browser }) => {
   const contexts: BrowserContext[] = [];
@@ -360,6 +395,120 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
     await expect(host.getByTestId("own-hand").locator(".hand-card")).toHaveCount(6);
   } finally {
     await context.close();
+  }
+});
+
+test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmasters", async ({ browser }) => {
+  const hostContext = await browser.newContext();
+  const opponentContext = await browser.newContext();
+  const host = await hostContext.newPage();
+  const opponent = await opponentContext.newPage();
+  try {
+    await host.route(/\/api\/v1\/rooms$/, async (route) => {
+      const request = route.request();
+      const payload = request.postDataJSON() as Record<string, unknown>;
+      await route.continue({
+        postData: JSON.stringify({ ...payload, seed: 42897 }),
+        headers: { ...request.headers(), "content-type": "application/json" },
+      });
+    });
+    await enter(host, "Trigger host");
+    await enter(opponent, "Response opponent");
+    await host.getByTestId("room-size").selectOption("2");
+    await host.getByTestId("create-room").click();
+    const invite = await host.getByTestId("room-invite").textContent();
+    expect(invite).toBeTruthy();
+    await opponent.getByTestId("invite-code").fill(invite!);
+    await opponent.getByTestId("seat-select").selectOption("B");
+    await opponent.getByTestId("join-room").click();
+
+    await submitNamedDeck(host, "Trigger regression", "Mishra, Eminent One", browserTriggerDeck);
+    await submitNamedDeck(opponent, "Response regression", "Zimone and Dina", browserResponseDeck);
+    await host.getByTestId("start-game").click();
+    await submitImmediateAction(host, "keep");
+    await submitImmediateAction(opponent, "keep");
+
+    const desert = host
+      .getByTestId("own-hand")
+      .locator(".hand-card")
+      .filter({ has: host.locator(".card-copy strong", { hasText: "Sunscorched Desert" }) });
+    const beforeDesert = await viewRevision(host);
+    await desert.dragTo(host.getByTestId("own-battlefield"));
+    await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeDesert);
+    await expect(host.getByTestId("decision-panel")).toContainText("Semantic.Target");
+    await host.getByTestId("action-choose").click();
+    await expect(host.getByTestId("choice-dialog")).toContainText("Seat B");
+    await host.getByTestId("choice-target-B").check();
+    await submitOpenChoice(host);
+    await expect(host.getByTestId("player-B").getByLabel("39 life")).toBeVisible();
+    await expect(opponent.getByTestId("player-B").getByLabel("39 life")).toBeVisible();
+
+    await submitFormAction(host, "pass");
+    await submitFormAction(host, "pass");
+
+    const island = opponent
+      .getByTestId("own-hand")
+      .locator(".hand-card")
+      .filter({ has: opponent.locator(".card-copy strong", { hasText: /^Island$/ }) })
+      .first();
+    const beforeIsland = await viewRevision(opponent);
+    await island.dragTo(opponent.getByTestId("own-battlefield"));
+    await expect.poll(() => viewRevision(opponent)).toBeGreaterThan(beforeIsland);
+    await submitFormAction(opponent, "pass");
+    await submitFormAction(opponent, "pass");
+
+    const swamp = host
+      .getByTestId("own-hand")
+      .locator(".hand-card")
+      .filter({ has: host.locator(".card-copy strong", { hasText: /^Swamp$/ }) })
+      .first();
+    const beforeSwamp = await viewRevision(host);
+    await swamp.dragTo(host.getByTestId("own-battlefield"));
+    await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeSwamp);
+
+    const ring = host
+      .getByTestId("own-hand")
+      .locator(".hand-card")
+      .filter({ has: host.locator(".card-copy strong", { hasText: "Sol Ring" }) });
+    await ring.dragTo(host.getByTestId("own-battlefield"));
+    await expect(host.getByTestId("choice-dialog")).toContainText("Cast Sol Ring");
+    await submitOpenChoice(host);
+    await expect(opponent.locator(".stack-panel")).toContainText("Sol Ring");
+
+    const offer = opponent
+      .getByTestId("own-hand")
+      .locator(".hand-card")
+      .filter({ has: opponent.locator(".card-copy strong", { hasText: "An Offer You Can't Refuse" }) });
+    await expect(offer).toHaveAttribute("draggable", "true");
+    await offer.dragTo(opponent.getByTestId("own-battlefield"));
+    await expect(opponent.getByTestId("choice-dialog")).toContainText("Sol Ring");
+    await opponent.locator('[data-testid^="choice-target-"]').first().check();
+    await submitOpenChoice(opponent);
+
+    const bowmasters = host
+      .getByTestId("own-hand")
+      .locator(".hand-card")
+      .filter({ has: host.locator(".card-copy strong", { hasText: "Orcish Bowmasters" }) });
+    await expect(bowmasters).toHaveAttribute("draggable", "true");
+    await bowmasters.dragTo(host.getByTestId("own-battlefield"));
+    await expect(host.getByTestId("choice-dialog")).toContainText("Cast Orcish Bowmasters");
+    await submitOpenChoice(host);
+    // The remaining Treasure is a strategically meaningful mana action, so
+    // the active player explicitly passes before the creature resolves.
+    await submitFormAction(host, "pass");
+    await expect(host.getByTestId("decision-panel")).toContainText("Semantic.Target");
+    await host.getByTestId("action-choose").click();
+    await host.getByTestId("choice-target-B").check();
+    await submitOpenChoice(host);
+    await submitFormAction(host, "pass");
+
+    await expect(host.getByTestId("player-B").getByLabel("38 life")).toBeVisible();
+    await expect(host.getByTestId("own-battlefield")).toContainText("Orcish Bowmasters");
+    await expect(host.getByTestId("own-battlefield")).toContainText("Army");
+    await expect(host.getByTestId("game-status")).toHaveText("ACTIVE");
+    await expect(host.getByTestId("paused-banner")).toHaveCount(0);
+  } finally {
+    await Promise.all([hostContext.close(), opponentContext.close()]);
   }
 });
 

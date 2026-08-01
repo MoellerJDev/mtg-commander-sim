@@ -1,40 +1,50 @@
-# MTG Commander Sim 0.8.0 — integrated verification
+# MTG Commander Sim 0.8.0 — current integrated verification
 
 Date: 2026-07-31
-Exact local-gate candidate:
-`605f14042b207e078e08d9a0ace6574b40726cb7`
-Rules integration merge:
-`adb0f520e71161e23bd14854c78051597c545ba6`
-Local environment: Windows, Python 3.11.9
+Feature candidate: the commit containing this report
+Green `main` baseline: `8e655558305534145349e93eb48c1e9e3dd84f4e`
+Local environment: Windows, Python 3.11.9, Node 24.18.0
 
 ## Deterministic gate
 
-PASS: compilation of the package, tests, scripts, and `simctl.py`.
+PASS: 3,991 unit/integration tests against `data/test-ci.sqlite3`.
 
-PASS: 3,925 unit/integration tests using a compact SQLite database rebuilt
-from the committed sanitized exact-list fixture.
-
-The suite includes 3,300 generated source-linkage cases plus 625 executable
-engine, conformance, protocol, replay, privacy, repository, and package tests.
-Generated source linkage is inventory evidence, not rules-correctness evidence.
+The suite includes all 3,300 generated rule-source linkage cases plus 691
+engine, conformance, protocol, browser/server, replay, privacy, repository, and
+package tests. Generated source linkage is inventory evidence, not proof that
+the corresponding rule has complete executable semantics.
 
 PASS:
 
-- combined focused CR 400–408 and CR 500–505 tests
-- seed-20260730 decision-opportunity regression
-- zero suppressed meaningful windows
+- seed-20260730 action-opportunity replay with zero suppressed meaningful windows
+- land-play stabilization before priority and immediate represented ETB choices
+- exact Treasure color choices and automatic tap/sacrifice mana payment
 - deterministic trusted-only four-player natural-winner game
 - exact command replay and authoritative state hashes
-- principal/hidden-information projection
-- CR 408 typed emblem creation and exact-source Daretti trigger replay
-- sanitized four-player protocol demo
+- principal/hidden-information projection and spectator isolation
+- server persistence, idempotency, lifecycle, and process-restart recovery
+- all versioned rules, mechanic-contract, and generated-artifact freshness checks
 
-The micro-pool game is runtime/protocol evidence only. It is not
-Commander-format legality, deck-quality, or matchup evidence.
+## Browser gate
+
+PASS: protocol unit tests, TypeScript compilation, and the Vite production
+build.
+
+PASS: all five Playwright/Chromium scenarios:
+
+- four shared-cookie tabs retain isolated seats through mulligans and reconnect
+- an invited spectator remains read-only and receives the durable public log
+- a 1v1 room can replace rooms, remove a player, and start normally
+- Sunscorched Desert targets immediately, An Offer You Can't Refuse responds to
+  Sol Ring, a resulting Treasure pays for Orcish Bowmasters, and Amass resolves
+- a penalized multiplayer mulligan uses the generic private choice form
+
+The targeted duel uses compact deterministic fixture data. It is browser and
+rules-regression evidence, not full-database or matchup evidence.
 
 ## Pinned sources and generated coverage
 
-PASS: `python simctl.py rules verify --root .`
+PASS: `python simctl.py rules verify --root .`.
 
 - Comprehensive Rules effective date: 2026-06-19
 - source SHA-256:
@@ -53,40 +63,20 @@ unresolved out of 38,373 Oracle IDs, with 69,664 material residuals.
 Commander-legal coverage remains 338 exact, 14,354 partial, and 16,930
 unresolved out of 31,622 Oracle IDs, with 61,212 material residuals.
 
-## Repository and package
-
-PASS:
-
-- platform/rules/mechanics/conformance freshness
-- 14 JSON schemas
-- tracked and reachable-history secret/capability scans
-- private-state fixture and ignored-runtime-artifact policy
-- oversized-object checks
-- repository validation
-- wheel build
-- fresh-environment wheel installation
-- installed package version and CLI smoke test
-
 ## GitHub CI
 
-PASS: the final PR #24 candidate received fresh public GitHub Actions checks
-on Python 3.11 and 3.12, Ubuntu and Windows:
+PASS: green baseline merge `8e655558305534145349e93eb48c1e9e3dd84f4e`
+completed the public Python 3.11/3.12 Ubuntu/Windows and Browser/Chromium matrix
+in run `30679272776`.
 
-- push run `30644109161`
-- pull-request synchronize run `30644116569`
-- pull-request ready-for-review run `30644117240`
-
-All repository jobs executed and passed before the ordinary merge. The
-resulting `main` merge passed push run `30644492183`.
-
-The repository is public and GitHub runners are operating normally. Historical
-zero-step billing/spending-limit failures are not passing evidence and were
-not used to bypass current checks.
+The current feature candidate still requires its exact committed-SHA local
+merge gate and fresh pull-request CI before merge. No administrator bypass is
+authorized or needed.
 
 ## Claim boundary
 
-These results establish the integrated CR 400–408 and CR 500–512 source tree,
-exact-list regression behavior, replay, privacy, source pinning, packaging, and
-repository gates. They do not establish a production server, browser client,
-durable database, complete Comprehensive Rules behavior, Oracle-corpus
-semantic closure, deck superiority, or statistical matchup evidence.
+These results establish the listed deterministic and compact browser paths.
+They do not establish complete Comprehensive Rules behavior, Oracle-corpus
+semantic closure, Arena parity, production deployment readiness, deck
+superiority, or statistical matchup evidence. A fresh current full-database
+browser journey through combat and terminal lifecycle paths remains required.
