@@ -49,7 +49,7 @@ margin. The generated
 authoritative measured baseline. Extraction must preserve commands,
 projections, replay, hidden-information rules, and deterministic behavior.
 
-Phase 1 enforcement is defined by `platform/architecture-policy.json` and the
+Existing enforcement is defined by `platform/architecture-policy.json` and the
 reviewed non-growth allowances in
 `platform/architecture-guard-baseline.json`. The repository validator rejects
 forbidden rules-layer imports, undeclared mutable `GameState` access, growth in

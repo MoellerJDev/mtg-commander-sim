@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "a3ea421d021c45002048909073eeef69e6c113d9",
+    "baseline_main_commit": "7cc9ea1702c67519b14d2f177d82dcc8fab5458f",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-01",
-    "phase": "phase_0_current_state_audit",
-    "scope_note": "This is a measured migration baseline, not a completeness or correctness claim."
+    "phase": "phase_0_post_pr58_reconciliation",
+    "scope_note": "This is the measured post-PR-58 reconciliation baseline. It is not a completeness or correctness claim, and absent trust, mutation, closure, or performance evidence remains absent rather than inferred."
   },
   "ci": {
     "workflow": "CI",
-    "run_id": 30716628726,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30716628726",
+    "run_id": 30723562495,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30723562495",
     "status": "pass",
     "python_versions": [
       "3.11",

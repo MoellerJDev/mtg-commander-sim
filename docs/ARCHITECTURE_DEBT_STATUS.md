@@ -2,7 +2,7 @@
 title: "Architecture debt status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
 audience: "maintainers and rules contributors"
 maintenance: "generated"
 ---
@@ -13,9 +13,9 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 
 ## Baseline coordinates
 
-- Main commit: `a3ea421d021c45002048909073eeef69e6c113d9`
+- Main commit: `7cc9ea1702c67519b14d2f177d82dcc8fab5458f`
 - Package: `0.8.0`
-- CI run: [30716628726](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30716628726) — `pass`
+- CI run: [30723562495](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30723562495) — `pass`
 - Production scope: 82 files, 60,208 physical lines, 56,347 logical lines
 
 ## Central engine debt

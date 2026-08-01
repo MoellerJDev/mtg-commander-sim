@@ -2,7 +2,7 @@
 title: "Integration handoff"
 status: "current"
 authoritative_source: "git main and generated status artifacts"
-verified: "3bb415ef898e3c013eaf78007c4169cc530111f5"
+verified: "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
 audience: "maintainers continuing the migration"
 maintenance: "hand-maintained"
 ---
@@ -16,13 +16,13 @@ or provider-session data.
 ## Integration coordinate
 
 - Public repository: `MoellerJDev/mtg-commander-sim`
-- Default branch: `main`
-- The front-matter `verified` field records the implementation commit reviewed
-  for this handoff. Use `git rev-parse HEAD` and the public Actions page for the
-  live checkout rather than copying an ephemeral branch or run ledger here.
-- Current program boundary: finish the focused Phase 3 CardProgram V2 slice,
-  then begin Phase 4 typed semantic handlers. Broad rules expansion remains
-  paused until the migration rails are integrated.
+- Default branch: `main`; do not create `master`.
+- PR #58 merged as `7cc9ea1702c67519b14d2f177d82dcc8fab5458f`.
+- The post-PR-58 reconciliation commit containing this handoff updates current
+  status and generated coordinates without adding a card family.
+- The live branch, pull request, exact-head CI, and clean-tree state must be
+  read from `git`, `gh`, and the generated platform ledger rather than inferred
+  from an older handoff.
 
 ## Current product boundary
 
@@ -41,13 +41,40 @@ copy those figures into this handoff.
 
 ## Integrated migration rails
 
-Verified `main` contains the Phase 1 ratcheted architecture/documentation
-guards and the Phase 2 versioned fine-grained capability registry. The active
-Phase 3 branch adds canonical CardProgram V2 aggregation, deterministic
-serialization, generated/reviewed compatibility adapters, source and trust
-validation, inspection commands, and additive Game Record v3 fingerprints.
-Generated Markdown remains presentation only; its JSON/source inputs are
-authoritative.
+Verified `main` contains the ratcheted architecture/documentation guards, the
+versioned fine-grained capability registry, canonical CardProgram V2,
+registered typed semantic handlers, canonical stack-resolution routing, and
+two bounded runtime-component families: fixed additional-token replacement and
+fixed same-controller subtype anthem. Generated Markdown remains presentation
+only; its JSON and source inputs are authoritative.
+
+The pinned development line is package `0.8.0`, Protocol `3.0`, CardProgram
+schema `2`, Oracle compiler `oracle-ir-v12`, and capability registry `1/4`.
+The current semantic-handler fingerprint is
+`8f805ad48c179e72abb8175dd585813430b831a08d122cc7d21850535b61f9ae`.
+The current global runtime-component fingerprint is
+`4731c5a8ed035ef1a8da0266566bc6e81b4e1d5668369fa0d61ecb03e06c4de8`.
+Snapshot dates, source hashes, capability totals, CardProgram/compiler totals,
+test classes, replay/privacy/browser status, and architecture debt are generated
+in the linked status reports and must not be hand-copied here.
+
+## Trust-hardening boundary
+
+The following remain unimplemented and must not be inferred from existing
+trusted labels or compatibility tests:
+
+- explicit capability-evidence declarations and a generated evidence index;
+- separate dependency fail-closed and implementation-mutation status;
+- CardProgram trust-basis accounting;
+- intrinsic, format, match ambient, and dynamic closure enforcement;
+- strict handler/component binding to trusted applicable closure;
+- explicit compatibility provenance through canonical CardProgram identity;
+- default-deny production-module classification, stable mutation identities,
+  complete generic specificity scope, and exact ADR exception binding;
+- a dedicated continuous-effect collection and characteristic-query benchmark.
+
+Legacy-reviewed behavior is not capability-closed behavior. Existing runtime
+components are bounded promises, not general CR 613 or CR 616 support.
 
 ## Merge discipline
 
@@ -61,7 +88,14 @@ authoritative.
 
 ## Next checkpoint
 
-After CardProgram V2 merges, Phase 4 replaces central string dispatch with
-typed semantic handlers without widening card coverage. The generated platform
-and compiler status reports are the exact source for the live next task and
-remaining blockers.
+After reconciliation merges and `main` is clean, run:
+
+```bash
+git switch -c feat/runtime-trust-hardening
+```
+
+That focused phase implements the trust and governance boundary above without
+adding a new card family, widening the Oracle grammar, or resuming numerical
+Comprehensive Rules traversal. Its first work is explicit capability evidence
+and mutation status, because later trust-basis and closure decisions depend on
+that evidence model.

@@ -751,8 +751,8 @@ compatibility input, not a second rules authority. New Game Record v3 files pin
 the complete card-program map and the subset used by every command while
 remaining replay-compatible with older v3 records.
 
-Phase 4 is migrating executable effect families into
-`mtg_commander_sim/semantic_runtime/`. Registered handlers receive only an
+The typed semantic-handler migration moved its first executable effect
+families into `mtg_commander_sim/semantic_runtime/`. Registered handlers receive only an
 immutable seat/order query, produce typed intents, and declare bounded rule
 capabilities. The executor reuses canonical engine mutation methods. Draw,
 table-wide draw, and monarch designation are the first migrated operations;
@@ -761,14 +761,22 @@ intents retain the existing replacement-aware draw sequence. All other
 operations remain explicitly on the measured legacy path. This is an
 architecture milestone, not a broader rules-completeness claim.
 
-Phase 5 is migrating card-specific core debt into versioned CardProgram
-runtime components. The first two bounded families represent mandatory fixed
-additional-token replacements and same-controller fixed subtype anthems as
-reviewed data and typed outputs. Stridehangar Automaton and Worldwalker Helm no
-longer select token or anthem behavior through printed-name engine branches.
+The first runtime-component migration moved bounded card-specific core debt
+into versioned CardProgram runtime components. The first two bounded families
+represent mandatory fixed additional-token replacements and same-controller
+fixed subtype anthems as reviewed data and typed outputs. Stridehangar
+Automaton and Worldwalker Helm no longer select token or anthem behavior
+through printed-name engine branches.
 The anthem is a layer-7c modifier whose subtype applicability is evaluated
 after earlier layers. General replacement ordering, layer dependencies, and
 state-derived modifiers remain explicitly unsupported.
+
+The current architecture priority is runtime trust and governance hardening,
+not another card family. Capability evidence and implementation mutation
+status, CardProgram trust basis and closure layers, strict handler/component
+capability binding, compatibility provenance, module classification, stable
+mutation identities, and continuous-effect performance evidence must become
+authoritative before broad rules or Oracle expansion resumes.
 
 This is still not a completeness declaration. Current exact, partial,
 unresolved, and material-residual figures are generated in
