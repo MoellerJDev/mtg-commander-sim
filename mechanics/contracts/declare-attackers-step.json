@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 4,
+  "contract_version": 5,
   "mechanic_id": "cr-508-declare-attackers-step",
   "official_name": "Declare Attackers Step",
   "effective_date": "2026-06-19",
@@ -90,7 +90,9 @@
       "priority player"
     ],
     "costs": [
-      "generic attack costs and their mana-ability window remain blocked"
+      "whole-line fixed ordinary-mana intrinsic, attached, and defending-player attack taxes are locked and paid atomically",
+      "multiple represented costs aggregate, and manual or automatic mana plans use the ordinary mana-ability payment path",
+      "optional, nonmana, variable, alternative, modified, and broader conditional attack costs remain blocked"
     ],
     "timing": [
       "ordinary declaration is a turn-based action",
@@ -136,7 +138,15 @@
     "opponent-protected Battle",
     "illegal declaration rollback",
     "empty-combat step skipping",
-    "single and multiple goaders in duel and multiplayer"
+    "single and multiple goaders in duel and multiplayer",
+    "fixed-mana intrinsic and defending-player attack taxes",
+    "stacked attack taxes and manual mana-source selection",
+    "costed attack requirements that do not compel payment",
+    "conditional untapped-source attack taxes",
+    "player taxes that do not apply to Battles or unsupported planeswalker-only destinations",
+    "fixed-mana costs from attached Auras",
+    "a chosen attacker sacrificed for mana before CR 508.1k",
+    "broader recognized attack-cost grammar stopping fail closed"
   ],
   "witness_cards": [],
   "rulings": [],
@@ -161,17 +171,34 @@
     "test_single_goad_requires_another_player_when_available_and_replays",
     "test_goad_in_duel_still_requires_attacking_the_goader",
     "test_multiple_goaders_create_independent_maximized_requirements",
-    "test_goaded_by_every_opponent_accepts_any_maximal_attack"
+    "test_goaded_by_every_opponent_accepts_any_maximal_attack",
+    "test_costed_option_is_optional_for_requirement_maximization",
+    "test_elected_cost_does_not_hide_free_requirements",
+    "test_prison_tax_is_projected_paid_atomically_and_replays",
+    "test_goad_does_not_force_payment_in_duel",
+    "test_goad_still_requires_a_free_other_player",
+    "test_stacked_prisons_lock_one_aggregate_cost",
+    "test_manual_attack_payment_uses_only_the_selected_mana_source",
+    "test_attack_player_tax_does_not_apply_to_a_battle",
+    "test_untapped_source_condition_controls_attack_tax",
+    "test_nonvigilant_attacker_cannot_fund_its_own_attack_cost",
+    "test_vigilant_attacker_may_activate_mana_while_cost_is_paid",
+    "test_sacrificed_mana_source_does_not_become_an_attacker",
+    "test_complex_attack_tax_pauses_fail_closed",
+    "test_fixed_attached_attack_cost_uses_existing_attachment_identity",
+    "test_broader_conditional_attack_tax_stops_fail_closed",
+    "test_planeswalker_only_tax_does_not_tax_a_player_attack",
+    "test_oracle_ir_uses_the_runtime_declaration_cost_grammar"
   ],
   "implementation": {
-    "component": "DeclarationProblem plus CommanderEngine attacker declaration and combat-step transition",
-    "version": "declare-attackers-step-v4"
+    "component": "DeclarationProblem, the shared declaration-cost Oracle grammar, and CommanderEngine attacker declaration/payment transition",
+    "version": "declare-attackers-step-v5"
   },
   "known_blockers": [
     "planeswalker attack targets are not implemented",
     "exact attacks-each-combat and typed goad requirements are represented; conditional, non-goad defender-specific, and other effect-granted grammar remains incomplete",
     "banding declarations are not implemented",
-    "attack costs, cost locking, mana abilities, and ordered payment are not implemented",
+    "optional, nonmana, variable, alternative, modified, and broader conditional attack costs are not implemented",
     "declare-attackers trigger generation and APNAP placement are incomplete",
     "effects that put creatures onto the battlefield attacking are not implemented",
     "defending-player last-known information and attack-target reselection are not implemented"

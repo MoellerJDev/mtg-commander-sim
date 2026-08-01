@@ -10,12 +10,13 @@ from typing import Any, Iterable, Mapping, Sequence
 
 from .abilities import ActivatedAbility, parse_activated_abilities
 from .carddb import CardDatabase, CardRecord
+from .declaration_costs import parse_declaration_cost_line
 from .semantics import SemanticProgram, SemanticRegistry
 from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v3"
+ORACLE_COMPILER_VERSION = "oracle-ir-v4"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 
 _NUMBER_WORDS = {
@@ -1145,6 +1146,96 @@ def _compile_face(
                     template_id="enters-tapped-self-v1",
                     mechanics=dependencies,
                     residual_ids=residual_ids,
+                )
+            )
+            continue
+
+        declaration_cost = parse_declaration_cost_line(
+            line,
+            card_name=face_name or record.name,
+        )
+        if declaration_cost.recognized:
+            template = declaration_cost.template
+            if declaration_cost.exact and template is not None:
+                dependencies = template.mechanics
+                missing = sorted(
+                    set(dependencies) - trusted_mechanics
+                )
+                residual_ids = (
+                    (
+                        _residual(
+                            residuals,
+                            kind="dependency_contract",
+                            text=line,
+                            span=span,
+                            reason=(
+                                "declaration cost depends on untrusted "
+                                "mechanic contracts"
+                            ),
+                            blockers=tuple(
+                                f"mechanic:{mechanic}"
+                                for mechanic in missing
+                            ),
+                        ),
+                    )
+                    if missing
+                    else ()
+                )
+                nodes.append(
+                    OracleNode(
+                        node_id=node_id,
+                        kind="static_ability",
+                        text=line,
+                        span=span,
+                        active_zone="battlefield",
+                        event="continuous",
+                        lowerable=True,
+                        exact=not missing,
+                        template_id=template.template_id,
+                        cost={
+                            "kind": "declaration_mana",
+                            "declarations": list(
+                                template.declarations
+                            ),
+                            "scope": template.scope,
+                            "mana": dict(template.mana),
+                            "printed": template.printed_cost,
+                            "source_condition": (
+                                template.source_condition
+                            ),
+                        },
+                        mechanics=dependencies,
+                        residual_ids=residual_ids,
+                    )
+                )
+                continue
+            residual_id = _residual(
+                residuals,
+                kind="declaration_cost",
+                text=line,
+                span=span,
+                reason=(
+                    declaration_cost.reason
+                    or "declaration cost grammar is unresolved"
+                ),
+                blockers=(
+                    "nonmana declaration costs",
+                    "variable and alternative mana declaration costs",
+                    "conditional declaration-cost grammar",
+                ),
+            )
+            nodes.append(
+                OracleNode(
+                    node_id=node_id,
+                    kind="static_ability",
+                    text=line,
+                    span=span,
+                    active_zone="battlefield",
+                    event="continuous",
+                    lowerable=False,
+                    exact=False,
+                    mechanics=declaration_cost.declarations,
+                    residual_ids=(residual_id,),
                 )
             )
             continue

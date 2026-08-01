@@ -60,6 +60,64 @@ class CombatDeclarationConstraintTests(unittest.TestCase):
         with self.assertRaises(DeclarationSearchLimitError):
             problem.maximum_satisfied_requirements()
 
+    def test_costed_option_is_optional_for_requirement_maximization(self):
+        problem = DeclarationProblem(
+            domains={"A1": ("B",)},
+            requirements=(
+                DeclarationRequirement("must-attack", "choose", variable="A1"),
+            ),
+            costed_options=frozenset({("A1", "B")}),
+        )
+
+        self.assertEqual(0, problem.maximum_satisfied_requirements())
+        self.assertTrue(problem.evaluate({}).legal)
+        paid = problem.evaluate({"A1": "B"})
+        self.assertEqual(1, paid.maximum)
+        self.assertTrue(paid.legal)
+        self.assertEqual(
+            [{"variable": "A1", "option": "B"}],
+            problem.projection()["costed_options"],
+        )
+
+    def test_elected_cost_does_not_hide_free_requirements(self):
+        problem = DeclarationProblem(
+            domains={"A1": ("B",), "A2": ("B",)},
+            requirements=(
+                DeclarationRequirement("costed", "choose", variable="A1"),
+                DeclarationRequirement("free", "choose", variable="A2"),
+            ),
+            costed_options=frozenset({("A1", "B")}),
+        )
+
+        self.assertFalse(problem.evaluate({"A1": "B"}).legal)
+        self.assertTrue(problem.evaluate({"A2": "B"}).legal)
+        self.assertTrue(
+            problem.evaluate({"A1": "B", "A2": "B"}).legal
+        )
+
+    def test_costed_menace_blocks_must_be_elected_together(self):
+        problem = DeclarationProblem(
+            domains={"B1": ("A1",), "B2": ("A1",)},
+            restrictions=(
+                DeclarationRestriction(
+                    "menace",
+                    "minimum_option_uses",
+                    option="A1",
+                    count=2,
+                    when_used=True,
+                ),
+            ),
+            costed_options=frozenset(
+                {("B1", "A1"), ("B2", "A1")}
+            ),
+        )
+
+        self.assertTrue(problem.evaluate({}).legal)
+        self.assertFalse(problem.evaluate({"B1": "A1"}).legal)
+        self.assertTrue(
+            problem.evaluate({"B1": "A1", "B2": "A1"}).legal
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
