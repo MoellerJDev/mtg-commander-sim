@@ -52,6 +52,8 @@ from .declaration_costs import (
 )
 from .declaration_restrictions import (
     DeclarationBattlefieldCondition,
+    DeclarationCombatCondition,
+    DeclarationCondition,
     DeclarationConditionPlayer,
     DeclarationObjectPredicate,
     DeclarationRestrictionTemplate,
@@ -17352,6 +17354,14 @@ class CommanderEngine:
                 }[template.scope]
                 if not applies:
                     continue
+                if not self._declaration_option_matches_relation(
+                    template,
+                    kind="block",
+                    source=source,
+                    option=attacker.ref,
+                    by_ref=by_ref,
+                ):
+                    continue
                 if template.condition is not None and (
                     self._declaration_condition_holds(
                         template.condition,
@@ -17797,7 +17807,7 @@ class CommanderEngine:
 
     def _declaration_condition_holds(
         self,
-        condition: DeclarationBattlefieldCondition,
+        condition: DeclarationCondition,
         *,
         kind: str,
         source: CardInstance,
@@ -17805,6 +17815,11 @@ class CommanderEngine:
         option: str,
         by_ref: Mapping[str, CardInstance],
     ) -> bool:
+        if isinstance(condition, DeclarationCombatCondition):
+            return (
+                condition.kind == "attacking_alone"
+                and len(self._current_attacker_cards()) == 1
+            )
         player = self._declaration_condition_player(
             condition.player,
             kind=kind,
@@ -17822,7 +17837,9 @@ class CommanderEngine:
             exclude_source=condition.exclude_source,
         )
         if condition.compare_player is None:
-            return count >= condition.minimum
+            return count >= condition.minimum and (
+                condition.maximum is None or count <= condition.maximum
+            )
         other = self._declaration_condition_player(
             condition.compare_player,
             kind=kind,
@@ -17840,6 +17857,39 @@ class CommanderEngine:
             exclude_source=False,
         )
         return count > other_count
+
+    def _declaration_option_matches_relation(
+        self,
+        template: DeclarationRestrictionTemplate,
+        *,
+        kind: str,
+        source: CardInstance,
+        option: str,
+        by_ref: Mapping[str, CardInstance],
+    ) -> bool:
+        """Return whether an option is in a represented source-relative scope."""
+
+        if template.option_relation is None:
+            return True
+        if template.option_relation != "source_controller":
+            return False
+        if kind == "block":
+            opposing = by_ref.get(option)
+            return (
+                opposing is not None
+                and opposing.controller == source.controller
+            )
+        if option == source.controller:
+            return True
+        if not template.includes_planeswalkers:
+            return False
+        target = by_ref.get(option)
+        if target is None or target.controller != source.controller:
+            return False
+        target_types, _, _ = self._type_parts(
+            str(self._effective_card_data(target).get("type_line") or "")
+        )
+        return "planeswalker" in target_types
 
     def _declaration_restrictions(
         self,
@@ -17907,6 +17957,28 @@ class CommanderEngine:
                     "minimum_option_uses",
                     "maximum_option_uses",
                 }:
+                    constrained_option = (
+                        source.controller
+                        if kind == "attack"
+                        and template.option_relation == "source_controller"
+                        else source.ref
+                    )
+                    if kind == "attack":
+                        constraint_label = (
+                            f"{self.display_name(source.object_id)} allows at "
+                            f"most {template.count} creature(s) to attack its "
+                            "controller."
+                        )
+                    elif template.mode == "minimum_option_uses":
+                        constraint_label = (
+                            f"{self.display_name(source.object_id)} requires "
+                            f"{template.count} blocker(s) when blocked."
+                        )
+                    else:
+                        constraint_label = (
+                            f"{self.display_name(source.object_id)} allows at "
+                            f"most {template.count} blocker(s)."
+                        )
                     constraints.append(
                         DeclarationRestriction(
                             restriction_id=(
@@ -17914,22 +17986,12 @@ class CommanderEngine:
                                 f"{line_index}:option-uses"
                             ),
                             kind=template.mode,
-                            option=source.ref,
+                            option=constrained_option,
                             count=template.count,
                             when_used=(
                                 template.mode == "minimum_option_uses"
                             ),
-                            label=(
-                                f"{self.display_name(source.object_id)} "
-                                f"requires {template.count} blocker(s) "
-                                "when blocked."
-                                if template.mode == "minimum_option_uses"
-                                else (
-                                    f"{self.display_name(source.object_id)} "
-                                    f"allows at most {template.count} "
-                                    "blocker(s)."
-                                )
-                            ),
+                            label=constraint_label,
                         )
                     )
                     continue
@@ -17956,6 +18018,36 @@ class CommanderEngine:
                             )
                         )
                         continue
+                    if template.mode == "minimum_matching_selections":
+                        matching_variables = tuple(
+                            candidate
+                            for candidate in sorted(original)
+                            if candidate != variable
+                            and (matching := by_ref.get(candidate)) is not None
+                            and self._matches_declaration_predicate(
+                                matching,
+                                template.matching,
+                                source=source,
+                            )
+                        )
+                        constraints.append(
+                            DeclarationRestriction(
+                                restriction_id=(
+                                    f"{kind}:restriction:{source.ref}:"
+                                    f"{line_index}:{variable}:matching"
+                                ),
+                                kind="minimum_variable_selections",
+                                count=template.count,
+                                trigger_variable=variable,
+                                variables=matching_variables,
+                                label=(
+                                    f"{self.display_name(subject.object_id)} "
+                                    f"requires {template.count} matching "
+                                    f"creature(s) to also {kind}."
+                                ),
+                            )
+                        )
+                        continue
                     legal_options: list[str] = []
                     for option in remaining.get(variable, []):
                         attached_option = (
@@ -17975,6 +18067,15 @@ class CommanderEngine:
                                 attached_option is None
                                 or option != attached_option.ref
                             )
+                        ):
+                            legal_options.append(option)
+                            continue
+                        if not self._declaration_option_matches_relation(
+                            template,
+                            kind=kind,
+                            source=source,
+                            option=option,
+                            by_ref=by_ref,
                         ):
                             legal_options.append(option)
                             continue

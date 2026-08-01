@@ -225,11 +225,12 @@ update cannot inherit stale conformance. Missing or duplicate cases fail
 corpus verification.
 
 The Oracle compiler preserves source spans and emits typed ability, cost,
-target, trigger, replacement, and effect nodes. Oracle IR v7 lowers simple
+target, trigger, replacement, and effect nodes. Oracle IR v8 lowers simple
 self enters/dies/leaves triggers, unconditional enters-tapped text, fixed
 self/target effects, basic creature-token creation, and reviewed whole-line
 fixed-mana attack/block declaration costs, combat-declaration restrictions,
-and typed public battlefield conditions.
+typed public battlefield and combat-composition conditions, and source-
+controller-relative declaration targets.
 The engine and compiler share both declaration grammars, so a new matching
 card cannot compile differently from the rule path that enforces it. Generated handlers
 remain provisional, and reviewed trigger handlers shadow equivalent generated
@@ -340,17 +341,22 @@ attacking-player, or defending-player permanent existence; another-object
 exclusion; tapped state; characteristics and fixed stats; minimum counts; and
 relative creature/land counts. Conditions are evaluated per attack destination
 in multiplayer and at the declaration boundary. Direct block-pair queries and
-the finite declaration solver share that evaluator.
-engine removes illegal options before requirement maximization, applies
+the finite declaration solver share that evaluator. Filtered companion and
+minimum-other declarations become conditional variable-count constraints;
+attacking-alone and no-other-creature evasion are recomputed from current
+public state. Source-controller-relative restrictions filter only attacks on
+that player or blocks of that controller's attackers, and per-player attack
+caps count only that destination.
+The engine removes illegal options before requirement maximization, applies
 represented restrictions cumulatively, and uses the same domain for task
 projection and command validation. An empty blocking domain is an automatic
 pass-only declaration rather than a player task.
 Chosen creatures sacrificed in that mana window pay the locked cost but are
 filtered before CR 508.1k/509.1g creates attacking or blocking relationships.
 Complex or mutated members of the recognized family stop fail closed.
-History-, monarch-, poison-, declaration-history-, shared-subtype-quantifier-,
-and compound-with-unrelated-effects restriction/requirement grammar,
-target-specific or temporary restrictions, non-goad defender-specific
+History-, monarch-, poison-, shared-subtype-quantifier-, and compound-with-
+unrelated-effects restriction/requirement grammar, named or nonplayer target
+restrictions, temporary restrictions, non-goad defender-specific
 requirements, effect-granted and
 repeated-combat requirements,
 optional/nonmana/variable/alternative/modified costs, and multi-block remain

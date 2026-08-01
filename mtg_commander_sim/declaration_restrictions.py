@@ -21,6 +21,7 @@ DeclarationRestrictionScope = Literal[
 ]
 DeclarationRestrictionMode = Literal[
     "prohibit",
+    "minimum_matching_selections",
     "minimum_total_selections",
     "maximum_total_selections",
     "minimum_option_uses",
@@ -133,6 +134,42 @@ _SELF_CONDITIONAL_UNBLOCKABLE = re.compile(
 _SELF_CONDITIONAL_BLOCKER_FILTER = re.compile(
     r"this creature can't be blocked by (?P<blockers>[^.]+) as long as "
     r"defending player controls (?P<condition>[^.]+)\."
+)
+_SELF_OTHER_DECLARATIONS = re.compile(
+    r"this creature can't (?P<kind>attack|block) unless at least "
+    r"(?P<count>one|two|three|\d+) other creatures "
+    r"(?P<verb>attack|block)\."
+)
+_SELF_MATCHING_COMPANION = re.compile(
+    r"this creature can't (?P<kind>attack|block) unless "
+    r"(?P<filter>a [a-z]+ or [a-z]+ creature|a creature with greater power) "
+    r"also (?P<verb>attacks|blocks)\."
+)
+_SELF_ATTACKING_ALONE_EVASION = re.compile(
+    r"this creature can't be blocked as long as it's attacking alone\."
+)
+_ATTACHED_ATTACKING_ALONE_EVASION = re.compile(
+    r"enchanted creature can't be blocked as long as it's attacking alone\."
+)
+_SELF_NO_OTHER_CREATURE_EVASION = re.compile(
+    r"this creature can't be blocked as long as you control no other creatures\."
+)
+_GLOBAL_SOURCE_CONTROLLER_ATTACK = re.compile(
+    r"creatures(?P<filter> with power \d+ or (?:greater|less)| "
+    r"with [a-z-]+| without [a-z-]+)? can't attack you"
+    r"(?P<planeswalkers> or planeswalkers you control)?\."
+)
+_GLOBAL_SOURCE_CONTROLLER_ATTACK_BLOCK = re.compile(
+    r"creatures with (?P<keyword>[a-z-]+) can't attack you or block "
+    r"creatures you control\."
+)
+_ATTACHED_SOURCE_CONTROLLER_ATTACK = re.compile(
+    r"enchanted creature can't attack you"
+    r"(?P<planeswalkers> or planeswalkers you control)?\."
+)
+_SOURCE_CONTROLLER_ATTACK_MAXIMUM = re.compile(
+    r"no more than (?P<count>one|two|three|\d+) creatures? can attack "
+    r"you each combat\."
 )
 _SELF_BLOCKED_BY_MORE_THAN = re.compile(
     r"this creature can't be blocked by more than (?P<count>one|two|three|\d+) "
@@ -292,6 +329,7 @@ class DeclarationBattlefieldCondition:
     player: DeclarationConditionPlayer
     predicates_any: tuple[DeclarationObjectPredicate, ...]
     minimum: int = 1
+    maximum: int | None = None
     exclude_source: bool = False
     compare_player: DeclarationConditionPlayer | None = None
 
@@ -300,8 +338,12 @@ class DeclarationBattlefieldCondition:
             raise ValueError("A battlefield condition requires a predicate")
         if self.minimum < 0:
             raise ValueError("A battlefield condition minimum cannot be negative")
-        if self.compare_player is not None and self.minimum != 1:
-            raise ValueError("A comparative condition cannot also set a minimum")
+        if self.maximum is not None and self.maximum < self.minimum:
+            raise ValueError("A battlefield condition maximum is below its minimum")
+        if self.compare_player is not None and (
+            self.minimum != 1 or self.maximum is not None
+        ):
+            raise ValueError("A comparative condition cannot set a count range")
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -311,9 +353,31 @@ class DeclarationBattlefieldCondition:
                 predicate.to_dict() for predicate in self.predicates_any
             ],
             "minimum": self.minimum,
+            "maximum": self.maximum,
             "exclude_source": self.exclude_source,
             "compare_player": self.compare_player,
         }
+
+
+@dataclass(frozen=True, slots=True)
+class DeclarationCombatCondition:
+    """A declaration-history condition available from the current combat."""
+
+    kind: Literal["attacking_alone"]
+
+    def __post_init__(self) -> None:
+        if self.kind != "attacking_alone":
+            raise ValueError(
+                f"Unknown declaration combat condition {self.kind!r}"
+            )
+
+    def to_dict(self) -> dict[str, object]:
+        return {"kind": self.kind}
+
+
+DeclarationCondition = (
+    DeclarationBattlefieldCondition | DeclarationCombatCondition
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -327,8 +391,11 @@ class DeclarationRestrictionTemplate:
     count: int = 0
     subject: DeclarationObjectPredicate = DeclarationObjectPredicate()
     opposing: DeclarationObjectPredicate = DeclarationObjectPredicate()
-    condition: DeclarationBattlefieldCondition | None = None
+    matching: DeclarationObjectPredicate = DeclarationObjectPredicate()
+    condition: DeclarationCondition | None = None
     applies_when_condition: bool = True
+    option_relation: Literal["source_controller"] | None = None
+    includes_planeswalkers: bool = False
 
     @property
     def mechanics(self) -> tuple[str, ...]:
@@ -348,10 +415,13 @@ class DeclarationRestrictionTemplate:
             "count": self.count,
             "subject": self.subject.to_dict(),
             "opposing": self.opposing.to_dict(),
+            "matching": self.matching.to_dict(),
             "condition": (
                 self.condition.to_dict() if self.condition is not None else None
             ),
             "applies_when_condition": self.applies_when_condition,
+            "option_relation": self.option_relation,
+            "includes_planeswalkers": self.includes_planeswalkers,
         }
 
 
@@ -672,6 +742,43 @@ def _nonmatching_creature_filter(text: str) -> DeclarationObjectPredicate | None
     )
 
 
+def _matching_companion_filter(text: str) -> DeclarationObjectPredicate | None:
+    phrase = " ".join(text.casefold().split())
+    if phrase == "a creature with greater power":
+        return DeclarationObjectPredicate(
+            stat=StatComparison("power", "gt", "source")
+        )
+    match = re.fullmatch(
+        r"a (?P<first>white|blue|black|red|green) or "
+        r"(?P<second>white|blue|black|red|green) creature",
+        phrase,
+    )
+    if match:
+        return DeclarationObjectPredicate(
+            colors_any=(
+                _COLORS[match.group("first")],
+                _COLORS[match.group("second")],
+            )
+        )
+    return None
+
+
+def _global_attacker_filter(
+    text: str | None,
+) -> DeclarationObjectPredicate | None:
+    if not text:
+        return DeclarationObjectPredicate()
+    phrase = " ".join(text.casefold().split())
+    if phrase.startswith("without "):
+        keyword = phrase.removeprefix("without ")
+        if keyword in _FILTER_KEYWORDS:
+            return DeclarationObjectPredicate(keywords_none=(keyword.title(),))
+        return None
+    if phrase.startswith("with "):
+        return _matching_creature_filter(f"creatures {phrase}")
+    return None
+
+
 def parse_declaration_restriction_line(
     text: str,
     *,
@@ -693,6 +800,159 @@ def parse_declaration_restriction_line(
 
     if parse_declaration_cost_line(line).recognized:
         return DeclarationRestrictionParse(False)
+
+    match = _SELF_OTHER_DECLARATIONS.fullmatch(line)
+    if match and match.group("kind") == match.group("verb"):
+        declarations = _declarations(match.group("kind"))
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="intrinsic-other-declarations-minimum-v1",
+                declarations=declarations,
+                scope="self",
+                mode="minimum_total_selections",
+                count=_number(match.group("count")) + 1,
+            ),
+            declarations=declarations,
+            scope="self",
+        )
+
+    match = _SELF_MATCHING_COMPANION.fullmatch(line)
+    expected_verb = (
+        "attacks"
+        if match is not None and match.group("kind") == "attack"
+        else "blocks"
+    )
+    if match and match.group("verb") == expected_verb:
+        matching = _matching_companion_filter(match.group("filter"))
+        if matching is not None:
+            declarations = _declarations(match.group("kind"))
+            return DeclarationRestrictionParse(
+                True,
+                DeclarationRestrictionTemplate(
+                    template_id="intrinsic-matching-companion-minimum-v1",
+                    declarations=declarations,
+                    scope="self",
+                    mode="minimum_matching_selections",
+                    count=1,
+                    matching=matching,
+                ),
+                declarations=declarations,
+                scope="self",
+            )
+
+    if _SELF_ATTACKING_ALONE_EVASION.fullmatch(line):
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="intrinsic-attacking-alone-evasion-v1",
+                declarations=("block",),
+                scope="source_option",
+                condition=DeclarationCombatCondition("attacking_alone"),
+            ),
+            declarations=("block",),
+            scope="source_option",
+        )
+
+    if _ATTACHED_ATTACKING_ALONE_EVASION.fullmatch(line):
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="attached-attacking-alone-evasion-v1",
+                declarations=("block",),
+                scope="attached_option",
+                condition=DeclarationCombatCondition("attacking_alone"),
+            ),
+            declarations=("block",),
+            scope="attached_option",
+        )
+
+    if _SELF_NO_OTHER_CREATURE_EVASION.fullmatch(line):
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="intrinsic-no-other-creature-evasion-v1",
+                declarations=("block",),
+                scope="source_option",
+                condition=DeclarationBattlefieldCondition(
+                    player="source_controller",
+                    predicates_any=(
+                        DeclarationObjectPredicate(types_any=("Creature",)),
+                    ),
+                    minimum=0,
+                    maximum=0,
+                    exclude_source=True,
+                ),
+            ),
+            declarations=("block",),
+            scope="source_option",
+        )
+
+    match = _SOURCE_CONTROLLER_ATTACK_MAXIMUM.fullmatch(line)
+    if match:
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="source-controller-attack-maximum-v1",
+                declarations=("attack",),
+                scope="global",
+                mode="maximum_option_uses",
+                count=_number(match.group("count")),
+                option_relation="source_controller",
+            ),
+            declarations=("attack",),
+            scope="global",
+        )
+
+    match = _GLOBAL_SOURCE_CONTROLLER_ATTACK_BLOCK.fullmatch(line)
+    if match and match.group("keyword") in _FILTER_KEYWORDS:
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="global-source-controller-attack-block-v1",
+                declarations=("attack", "block"),
+                scope="global",
+                subject=DeclarationObjectPredicate(
+                    keywords_any=(match.group("keyword").title(),)
+                ),
+                option_relation="source_controller",
+            ),
+            declarations=("attack", "block"),
+            scope="global",
+        )
+
+    match = _GLOBAL_SOURCE_CONTROLLER_ATTACK.fullmatch(line)
+    if match:
+        subject = _global_attacker_filter(match.group("filter"))
+        if subject is not None:
+            return DeclarationRestrictionParse(
+                True,
+                DeclarationRestrictionTemplate(
+                    template_id="global-source-controller-attack-v1",
+                    declarations=("attack",),
+                    scope="global",
+                    subject=subject,
+                    option_relation="source_controller",
+                    includes_planeswalkers=bool(match.group("planeswalkers")),
+                ),
+                declarations=("attack",),
+                scope="global",
+            )
+
+    match = _ATTACHED_SOURCE_CONTROLLER_ATTACK.fullmatch(line)
+    if match:
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="attached-source-controller-attack-v1",
+                declarations=("attack",),
+                scope="attached",
+                option_relation="source_controller",
+                includes_planeswalkers=bool(match.group("planeswalkers")),
+            ),
+            declarations=("attack",),
+            scope="attached",
+        )
 
     match = _SELF_BATTLEFIELD_CONDITION.fullmatch(line)
     if match:

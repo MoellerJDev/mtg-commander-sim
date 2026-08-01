@@ -7,10 +7,10 @@
   },
   "integration": {
     "active_phase": "rules_combat_dependency_families",
-    "branch": "main",
+    "branch": "feat/rules-combat-composition-targets",
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
-      "focused_branch_base": "939409d1e2b5a41ade9d9ae71577dd5d653d4934",
+      "focused_branch_base": "c544dafd6c99c777b7b43fc95f02d4115600ca2b",
       "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
@@ -314,6 +314,20 @@
         "number": 43,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/43"
+      },
+      {
+        "base": "main",
+        "head": "feat/rules-conditional-combat-restrictions",
+        "number": 44,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/44"
+      },
+      {
+        "base": "main",
+        "head": "feat/rules-combat-composition-targets",
+        "number": 45,
+        "state": "open",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/45"
       }
     ],
     "tags": [
@@ -349,7 +363,7 @@
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete",
-      "evidence": "Integration PRs #1-17 and #24-43 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main."
+      "evidence": "Integration PRs #1-17 and #24-44 are on main; focused combat-composition PR #45 is active. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main."
     },
     {
       "id": "browser_commander_mvp",
@@ -385,16 +399,17 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "939409d1e2b5a41ade9d9ae71577dd5d653d4934",
+    "baseline_commit": "c544dafd6c99c777b7b43fc95f02d4115600ca2b",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30694515443,
+      "run_id": 30695738424,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30694515443"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30695738424"
     },
     "local": {
       "compile": "pass",
       "deterministic_tests": "pass_full_exact_commit_gate",
+      "focused_rules_tests": "pass_3417_plus_32_subtests_current_branch",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
@@ -417,5 +432,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Extend the shared finite combat declaration solver beyond exact public battlefield conditions and typed goad witnesses to history-, monarch-, poison-, declaration-history-, shared-subtype-, non-goad requirement-, other effect-granted-, optional-cost-, and multi-block grammar, then route declaration triggers through the same boundary; keep the universal CR 120.4 damage transformation pipeline as the next deeper dependency."
+  "next_task": "After PR #45, extend the shared finite combat declaration solver to shared-subtype quantifiers, named/planeswalker attack targets, history-, monarch-, poison-, non-goad requirement-, other effect-granted-, optional-cost-, and multi-block grammar; then route declaration triggers through the same boundary while keeping the universal CR 120.4 damage transformation pipeline as the next deeper dependency."
 }

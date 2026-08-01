@@ -11,6 +11,7 @@ RequirementKind = Literal[
     "option_used",
 ]
 RestrictionKind = Literal[
+    "minimum_variable_selections",
     "minimum_option_uses",
     "maximum_option_uses",
     "minimum_total_selections",
@@ -67,6 +68,7 @@ class DeclarationRestriction:
     count: int = 0
     when_used: bool = False
     trigger_variable: str | None = None
+    variables: tuple[str, ...] = ()
     label: str = ""
 
     def __post_init__(self) -> None:
@@ -83,6 +85,17 @@ class DeclarationRestriction:
             raise ValueError(f"{self.kind} requires an option")
         if self.kind in total_kinds and self.option is not None:
             raise ValueError(f"{self.kind} does not accept an option")
+        if (
+            self.kind == "minimum_variable_selections"
+            and self.option is not None
+        ):
+            raise ValueError(
+                "minimum_variable_selections does not accept an option"
+            )
+        if len(set(self.variables)) != len(self.variables):
+            raise ValueError("Declaration restriction variables must be unique")
+        if self.kind != "minimum_variable_selections" and self.variables:
+            raise ValueError(f"{self.kind} does not accept variables")
 
     def error(self, declaration: Mapping[str, str]) -> str | None:
         if (
@@ -96,8 +109,13 @@ class DeclarationRestriction:
             if self.option is not None and selected == self.option
         )
         total = len(declaration)
+        variable_uses = sum(
+            1 for variable in self.variables if variable in declaration
+        )
         measured = (
-            uses
+            variable_uses
+            if self.kind == "minimum_variable_selections"
+            else uses
             if self.kind in {"minimum_option_uses", "maximum_option_uses"}
             else total
         )
@@ -106,6 +124,14 @@ class DeclarationRestriction:
         if self.kind == "minimum_option_uses" and measured < self.count:
             return self.label or (
                 f"{self.option} requires at least {self.count} selections"
+            )
+        if (
+            self.kind == "minimum_variable_selections"
+            and measured < self.count
+        ):
+            return self.label or (
+                f"The declaration requires at least {self.count} matching "
+                "selections"
             )
         if self.kind == "maximum_option_uses" and measured > self.count:
             return self.label or (
@@ -121,8 +147,8 @@ class DeclarationRestriction:
             )
         return None
 
-    def to_dict(self) -> dict[str, str | int | bool | None]:
-        return {
+    def to_dict(self) -> dict[str, str | int | bool | list[str] | None]:
+        result: dict[str, str | int | bool | list[str] | None] = {
             "id": self.restriction_id,
             "kind": self.kind,
             "option": self.option,
@@ -131,6 +157,9 @@ class DeclarationRestriction:
             "trigger_variable": self.trigger_variable,
             "label": self.label,
         }
+        if self.kind == "minimum_variable_selections":
+            result["variables"] = list(self.variables)
+        return result
 
 
 @dataclass(frozen=True, slots=True)
