@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from common import keep_all, load_assets
+from common import advance_fixture_turn, keep_all, load_assets
 from mtg_commander_sim import CommanderSession, GameConfig
 from mtg_commander_sim.model import StackItem
 
@@ -392,7 +392,7 @@ class InteractionKernelTests(unittest.TestCase):
             for trigger in engine.state.delayed_triggers
             if trigger.label == "Pact of Negation delayed payment"
         )
-        engine.state.turn_sequence += 1
+        advance_fixture_turn(engine)
         matches = engine._matching_delayed_triggers(
             "step.begin",
             {
@@ -436,7 +436,7 @@ class InteractionKernelTests(unittest.TestCase):
         engine.state.players["A"].mana_pool.update(
             {"C": 3, "U": 2}
         )
-        engine.state.turn_sequence += 1
+        advance_fixture_turn(engine)
         matches = engine._matching_delayed_triggers(
             "step.begin",
             {
@@ -612,6 +612,17 @@ class InteractionKernelTests(unittest.TestCase):
             "Synthetic prior spell two.",
             {"stack": second.ref},
         )
+        for item in (first, second):
+            engine._record_turn_history(
+                "spell_cast",
+                actor="B",
+                object_incarnation=(
+                    engine.state.cards[item.card_object_id].logical_object_id
+                    if item.card_object_id is not None
+                    else None
+                ),
+                types=("instant",),
+            )
         engine.move_card(fluster.object_id, "hand")
         engine.state.players["A"].mana_pool["U"] = 1
         self.set_window(engine, "A", active="B")

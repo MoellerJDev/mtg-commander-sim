@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 import uuid
 
-from common import keep_all, load_assets, make_session
+from common import keep_all, load_assets, make_session, set_fixture_turn
 from mtg_commander_sim.model import CardInstance, StackItem
 
 
@@ -76,7 +76,7 @@ class BrowserGameplayRegressionTests(unittest.TestCase):
         engine = session.engine
         engine.state.config.manual_active_main_phase = True
         engine.state.started = True
-        engine.state.turn_sequence = 3
+        set_fixture_turn(engine, 3)
         engine.state.active_player = "A"
         engine.state.phase = "precombat_main"
         engine.state.step = "main"
@@ -161,7 +161,7 @@ class BrowserGameplayRegressionTests(unittest.TestCase):
         engine = session.engine
         desert = self.add_card(engine, "A", "Sunscorched Desert", "hand")
         engine.state.started = True
-        engine.state.turn_sequence = 3
+        set_fixture_turn(engine, 3)
         engine.state.active_player = "A"
         engine.state.phase = "precombat_main"
         engine.state.step = "main"
@@ -240,7 +240,7 @@ class BrowserGameplayRegressionTests(unittest.TestCase):
         bowmasters = self.add_card(
             engine, "A", "Orcish Bowmasters", "battlefield"
         )
-        engine.state.turn_sequence = 20
+        set_fixture_turn(engine, 20)
         engine.state.active_player = "B"
         engine.state.phase = "beginning"
         engine.state.step = "draw"

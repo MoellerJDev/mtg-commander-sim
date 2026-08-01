@@ -5,7 +5,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from common import keep_all, load_assets, make_session, pass_current
+from common import (
+    keep_all,
+    load_assets,
+    make_session,
+    pass_current,
+    set_fixture_turn,
+)
 from mtg_commander_sim.engine import TURN_STEPS
 from mtg_commander_sim.record import replay_record
 
@@ -44,7 +50,7 @@ class DrawStepRuleTests(unittest.TestCase):
         engine.state.priority_player = None
         engine.state.priority_passes = []
         engine.state.active_player = active
-        engine.state.turn_sequence = turn_sequence
+        set_fixture_turn(engine, turn_sequence)
         engine.state.phase_index = TURN_STEPS.index(
             ("beginning", "draw")
         )

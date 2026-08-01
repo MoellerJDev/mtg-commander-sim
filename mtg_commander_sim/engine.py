@@ -749,7 +749,14 @@ class CommanderEngine:
                 raise StateInvariantError(
                     f"Unsupported turn-history schema {history.schema_version}"
                 )
-            if history.turn_sequence != self.state.turn_sequence:
+            # An empty journal carries no look-back facts, so direct fixture
+            # setup may advance ``turn_sequence`` before the first writer
+            # initializes it. A nonempty journal must never cross that
+            # boundary because prior-turn facts would affect this turn.
+            if (
+                history.events
+                and history.turn_sequence != self.state.turn_sequence
+            ):
                 raise StateInvariantError(
                     "Turn history does not belong to the current turn"
                 )

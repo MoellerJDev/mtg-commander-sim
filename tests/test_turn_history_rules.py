@@ -10,6 +10,7 @@ from mtg_commander_sim.declaration_costs import normalized_oracle_line
 from mtg_commander_sim.declaration_restrictions import (
     parse_declaration_restriction_line,
 )
+from mtg_commander_sim.engine import StateInvariantError
 from mtg_commander_sim.model import CombatState, GameState, TurnEntry
 from mtg_commander_sim.record import (
     authoritative_state_hash,
@@ -193,6 +194,27 @@ class CurrentTurnHistoryRuleTests(unittest.TestCase):
             authoritative_state_hash(legacy_payload),
             authoritative_state_hash(legacy),
         )
+
+    def test_empty_history_can_initialize_lazily_but_facts_cannot_cross_turns(self):
+        session = self.make_session(608020102, players=2)
+        engine = session.engine
+        engine.state.turn_sequence += 1
+        engine._assert_invariants()
+
+        engine._record_turn_history(
+            "player_damaged",
+            actor="A",
+            target="B",
+            target_kind="player",
+            amount=1,
+        )
+        self.assertEqual(
+            engine.state.turn_sequence,
+            engine.state.turn_history.turn_sequence,
+        )
+        engine.state.turn_sequence += 1
+        with self.assertRaises(StateInvariantError):
+            engine._assert_invariants()
 
     def test_beginning_a_new_turn_resets_history_but_extra_combats_do_not(self):
         session = self.make_session(608020102, players=2)
