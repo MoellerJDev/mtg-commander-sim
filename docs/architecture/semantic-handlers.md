@@ -62,6 +62,15 @@ claim optional or noncommutative CR 616 ordering, replacement rediscovery,
 quantity doubling, or state-derived token definitions. See
 [ADR 0007](../adr/0007-cardprogram-runtime-components.md).
 
+`continuous.anthem.power_toughness.v1` emits one source-stamped layer-7c
+effect for a fixed same-controller subtype anthem. Active sources are collected
+through a read-only state protocol; printed names never participate in runtime
+selection. Applicability is evaluated after earlier layers, so a supported
+layer-4 subtype change can enable the modifier. Multiple sources stack by
+timestamp and stable component identity. This component excludes setting
+power/toughness, characteristic-defining abilities, state-derived amounts,
+same-layer dependency discovery, and ability-removal dependency interactions.
+
 Complete historical semantic snapshots that predate these descriptors can use
 the validated built-in component as a compatibility bridge. The loaded program
 map and its recorded fingerprint remain unchanged, and source-hash validation

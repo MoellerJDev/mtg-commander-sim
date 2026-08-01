@@ -56,8 +56,11 @@ serialization, adapters, inspection, and source/identity checks. It owns no
 `GameState` and cannot mutate a game. `SemanticRegistry` owns the canonical
 groups and semantic-key index. The Phase 4 typed runtime maps migrated effect
 operations to registered handlers with immutable rules queries and typed
-intents. `CommanderEngine` remains the mutation owner; unmigrated operations
-stay on the measured legacy dispatcher.
+intents. Phase 5 runtime components expose active static/replacement abilities
+through family-specific immutable contexts; continuous sources are collected
+through a narrow read-only state protocol and emit typed layer effects.
+`CommanderEngine` remains the mutation owner; unmigrated operations stay on
+the measured legacy dispatcher.
 
 ## Inspection
 

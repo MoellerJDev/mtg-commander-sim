@@ -9,7 +9,7 @@ from ..carddb import CardDatabase, CardRecord
 from ..rules.capabilities import load_default_capability_registry
 from ..semantic_runtime import (
     default_semantic_handler_registry,
-    default_token_creation_replacement_registry,
+    describe_runtime_handler,
 )
 from ..semantics import SemanticRegistry
 from ..util import stable_json
@@ -50,11 +50,10 @@ def _runtime_handler_mapping(
         "typed_handlers": _typed_handler_mapping(operations),
     }
     if event_handlers is not None:
-        registry = default_token_creation_replacement_registry()
         result["event_handlers"] = [
             {
                 **handler,
-                "registry": registry.describe(
+                "registry": describe_runtime_handler(
                     str(handler.get("handler_id") or "")
                 ),
             }

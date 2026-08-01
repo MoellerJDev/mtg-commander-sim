@@ -367,30 +367,44 @@ class CardProgramV2Tests(unittest.TestCase):
             )
         )
 
-        runtime_program = next(
+        runtime_programs = [
             card_program
             for card_program in SemanticRegistry().card_programs()
             if any(ability.handlers for ability in card_program.abilities)
-        )
-        runtime_explained = explain_card_program(runtime_program)
-        event_handler = next(
+        ]
+        event_handlers = [
             handler
-            for ability in runtime_explained["abilities"]
+            for runtime_program in runtime_programs
+            for ability in explain_card_program(runtime_program)["abilities"]
             for handler in ability["runtime_handler_mapping"][
                 "event_handlers"
             ]
-        )
+        ]
         self.assertEqual(
-            ["token.creation.additional_replacement"],
-            event_handler["registry"]["capability_dependencies"],
+            {
+                "continuous.anthem.power_toughness.v1": [
+                    "continuous.power_toughness.fixed_anthem"
+                ],
+                "replacement.token.additional.v1": [
+                    "token.creation.additional_replacement"
+                ],
+            },
+            {
+                handler["handler_id"]: handler["registry"][
+                    "capability_dependencies"
+                ]
+                for handler in event_handlers
+            },
         )
-        runtime_audit = audit_card_program(runtime_program)
         self.assertTrue(
-            any(
-                mapping["event_handlers"]
-                for mapping in runtime_audit[
-                    "runtime_handler_mapping"
-                ].values()
+            all(
+                any(
+                    mapping["event_handlers"]
+                    for mapping in audit_card_program(runtime_program)[
+                        "runtime_handler_mapping"
+                    ].values()
+                )
+                for runtime_program in runtime_programs
             )
         )
 

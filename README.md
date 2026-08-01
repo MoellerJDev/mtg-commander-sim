@@ -761,12 +761,14 @@ intents retain the existing replacement-aware draw sequence. All other
 operations remain explicitly on the measured legacy path. This is an
 architecture milestone, not a broader rules-completeness claim.
 
-Phase 5 has begun migrating card-specific core debt into versioned CardProgram
-runtime components. The first bounded component represents mandatory fixed
-additional-token replacements as reviewed data and typed intents, removing the
-Stridehangar Automaton and Worldwalker Helm decisions from token-creation
-control flow. General replacement ordering and rediscovery remain explicitly
-unsupported; this slice is not a CR 616 completeness claim.
+Phase 5 is migrating card-specific core debt into versioned CardProgram
+runtime components. The first two bounded families represent mandatory fixed
+additional-token replacements and same-controller fixed subtype anthems as
+reviewed data and typed outputs. Stridehangar Automaton and Worldwalker Helm no
+longer select token or anthem behavior through printed-name engine branches.
+The anthem is a layer-7c modifier whose subtype applicability is evaluated
+after earlier layers. General replacement ordering, layer dependencies, and
+state-derived modifiers remain explicitly unsupported.
 
 This is still not a completeness declaration. Current exact, partial,
 unresolved, and material-residual figures are generated in

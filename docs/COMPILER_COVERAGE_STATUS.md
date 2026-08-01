@@ -45,10 +45,10 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/3`
+- Registry schema/version: `1/4`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `587bf4d83629f405e2e1dc1fbddbcf407f1bef1abd317c7786e3b1f2fa85ffce`
-- Capability records: 18
+- Registry fingerprint: `31e021cb3b2e532cdfe25e8a84512b35b2033179c9637a48cfd953aab219100e`
+- Capability records: 19
 - Trusted records: 8
 - Blocked records: 7
 
@@ -58,6 +58,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 | `cr-120-damage` | 13 | false | `damage.combat.excess`, `damage.prevention.order`, `damage.replacement.order`, `damage.result.infect`, `damage.result.lifelink`, `damage.result.wither`, `damage.trigger.noncombat` |
 | `cr-725-the-monarch` | 1 | false | `variant.monarch.designate` |
 | `cr-111-tokens` | 1 | false | `token.creation.additional_replacement` |
+| `cr-613-continuous-effects` | 1 | false | `continuous.power_toughness.fixed_anthem` |
 
 ## Pinned corpus accounting
 
@@ -83,8 +84,8 @@ This generated report describes only the pinned Oracle corpus and current compil
 ## Semantic packs and implicit overrides
 
 - Pack files: 12
-- Program entries: 257
-- Unique program keys: 245
+- Program entries: 258
+- Unique program keys: 246
 - Duplicate keys resolved by pack order: 12
 - Unique Oracle IDs represented: 137
 - Card-specific operation names: 15

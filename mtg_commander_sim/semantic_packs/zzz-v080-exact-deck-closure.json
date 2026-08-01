@@ -1809,8 +1809,41 @@
       "effects": [],
       "destination": "battlefield",
       "trust_level": "trusted",
-      "coverage": ["spell_resolution", "static_ability", "continuous_effect"],
+      "coverage": ["spell_resolution"],
       "tests": ["test_stridehangar_adds_thopter_and_applies_anthem"],
+      "provenance": {
+        "source_oracle_hash": "59ad59fe37f21e3590dbc0a425607daeb83e89e783ee0a45ea5c3aae39a11272",
+        "source_rulings_hash": "1c6f2c3ce17591f7b1816add38df1c1e7259f4fb0be4ccc861fe40dc0e0633f7",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "9070c98b-fd01-4eeb-a4ec-fc464946c7c0:static:thopter-anthem",
+      "label": "Stridehangar Automaton Thopter anthem",
+      "oracle_id": "9070c98b-fd01-4eeb-a4ec-fc464946c7c0",
+      "ability_id": "static:thopter-anthem",
+      "active_zone": "battlefield",
+      "event": "characteristics.evaluate",
+      "effects": [],
+      "handlers": [
+        {
+          "handler_id": "continuous.anthem.power_toughness.v1",
+          "schema_version": 1,
+          "event": "characteristics.evaluate",
+          "condition": {
+            "target_controller": "source_controller",
+            "target_subtypes_all": ["thopter"]
+          },
+          "modifier": {
+            "power": 1,
+            "toughness": 1
+          }
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["static_ability", "continuous_effect", "power_toughness_modifier", "subtype_anthem"],
+      "tests": ["test_registered_anthem_component_replaces_name_dispatch", "test_multiple_anthem_components_stack_and_respect_control", "test_layer_four_subtype_change_enables_layer_seven_anthem", "test_anthem_component_replays_exactly"],
       "provenance": {
         "source_oracle_hash": "59ad59fe37f21e3590dbc0a425607daeb83e89e783ee0a45ea5c3aae39a11272",
         "source_rulings_hash": "1c6f2c3ce17591f7b1816add38df1c1e7259f4fb0be4ccc861fe40dc0e0633f7",

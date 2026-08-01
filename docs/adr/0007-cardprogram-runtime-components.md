@@ -40,6 +40,19 @@ excludes optional effects, noncommutative choices, replacement rediscovery,
 quantity doubling, and outputs computed from mutable state. Those cases remain
 blocked behind CR 616 work.
 
+The second component is `continuous.anthem.power_toughness.v1`. It emits a
+source-stamped CR 613 layer-7c effect for a fixed modifier applied to
+same-controller permanents with declared subtypes. Runtime source collection
+uses a narrow read-only state protocol. Applicability is evaluated after
+earlier layers, so represented layer-4 subtype changes affect the anthem. A
+stable semantic-program/descriptor identity keeps multiple components on one
+source distinct.
+
+This component does not implement general continuous-effect compilation. It
+excludes power/toughness-setting effects, characteristic-defining abilities,
+state-derived amounts, same-layer dependency discovery, and ability-removal
+dependency interactions.
+
 Printed names and Oracle IDs may appear in reviewed CardProgram/override
 registration data, tests, and provenance, but not in generic handler logic or
 engine dispatch. Game Record remains version 3; the complete CardProgram map,
@@ -59,16 +72,16 @@ descriptor directly and do not use this bridge.
   than inferred from an engine branch.
 - Every component declares a stable ID, schema version, rules references,
   capability dependencies, applicability, typed output, and replay tests.
-- The runtime registry is frozen and included in generated architecture
-  inventory.
+- Runtime family registries share one frozen validation contract and one
+  generated architecture inventory/fingerprint.
 - Repeated card implementations can share one component while retaining
   card-specific token definitions in reviewed data.
 - Historical complete registries retain the old represented behavior through
   the explicit compatibility component while their semantic fingerprints stay
   unchanged.
-- The first migration removes two printed-name branches from token creation;
-  unrelated continuous effects, including the existing Thopter anthem debt,
-  remain separate work.
+- The first migrations remove two printed-name branches from token creation
+  and the Stridehangar Thopter anthem branch from characteristic evaluation;
+  unrelated card-specific and continuous-effect debt remains separate work.
 
 ## Alternatives
 
