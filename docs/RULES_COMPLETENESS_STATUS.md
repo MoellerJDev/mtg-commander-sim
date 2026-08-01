@@ -28,7 +28,7 @@ coverage.
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
 | Mechanic contracts | In progress | 57 partial/untrusted contracts; 368 mechanics unclassified; 0 trusted |
-| Typed Oracle IR | In progress | `oracle-ir-v4`, source spans, fail-closed material residuals, anchored target-creature goad lowering, and a shared whole-line fixed-mana declaration-cost grammar |
+| Typed Oracle IR | In progress | `oracle-ir-v5`, source spans, fail-closed material residuals, anchored target-creature goad lowering, and shared whole-line declaration cost/restriction grammars |
 | Object and zone identity | Partial | All 30 CR 400 records reviewed; owner-zone routing, logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, hidden outside-game movement, and selected linked-effect guards |
 | Library | Partial | All 8 CR 401 records reviewed; hidden order/public count, bounded look/reorder, shuffle knowledge clearing, and Nth-from-top placement; simultaneous owner ordering and continuous top-card visibility remain blocked |
 | Hand | Partial | All 4 CR 402 records reviewed; starting/maximum size, cleanup-only excess discard, public count, scoped identity, public-to-hand knowledge, and controller dual-hand access; continuous no-maximum and arbitrary reveal/look grammar remain blocked |
@@ -42,8 +42,8 @@ coverage.
 | Replacement/prevention ordering | Partial | CR 615/616 typed primitives; stateful shields and event-producer integration incomplete |
 | Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, immutable final combat source-recipient events, combat damage/death trigger batching, counter-derived battlefield defense, copied printed defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
-| Full Oracle compilation | In progress | exact 2,959; partial 15,736; unresolved 19,789; 69,890 material residuals |
-| Commander-legal Oracle compilation | In progress | exact 338; partial 14,347; unresolved 16,938; 61,213 material residuals |
+| Full Oracle compilation | In progress | exact 2,959; partial 15,949; unresolved 19,576; 69,890 material residuals |
+| Commander-legal Oracle compilation | In progress | exact 338; partial 14,525; unresolved 16,760; 61,213 material residuals |
 | Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 563 cases are reviewed, with 115 executable passes, 367 blocked cases, and 81 definition-only cases; 2,737 remain unreviewed |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
@@ -308,9 +308,9 @@ during the combat. Represented combatants are removed when they leave the
 battlefield, phase out, cease to be creatures, become Battles, or undergo an
 invalidating control change. Tapping and untapping alone preserve combat
 status. Generic effects that put creatures into combat or remove them, the
-complete restriction/requirement and “alone” query systems, alternate
-multiplayer options, extra combats, planeswalker destinations, and universal
-combat-relative timing remain blocked.
+complete conditional restriction/requirement and broader combat-relative query
+systems, alternate multiplayer options, extra combats, planeswalker
+destinations, and universal combat-relative timing remain blocked.
 
 Ordinary attacker declarations are server-derived from current public combat
 state. Only controlled, untapped, present, nonphased creature permanents that
@@ -327,7 +327,11 @@ next-turn expiration, zone-change clearing, exact static prohibition, and
 replay. Planeswalkers, conditional and non-goad defender-specific
 requirements, banding, optional/nonmana/variable/modified attack costs, generic declaration triggers,
 entry-attacking effects, eliminated-player duration boundaries, defending-
-player LKI, and target reselection remain blocked.
+player LKI, and target reselection remain blocked. Exact self, attached, global,
+not-alone, goaded-opponent, table-wide count, and keyword-filtered attack
+restrictions now remove illegal domains before requirement maximization;
+conditional, compound, target-specific, temporary, and broader predicate
+families remain fail-closed residuals.
 
 Ordinary blocker declarations are server-derived from current public combat
 state. Only untapped, present, nonphased creature permanents that are not
@@ -339,9 +343,13 @@ generic projected form metadata plus authoritative revalidation. The command
 replays exactly. Fixed ordinary-mana intrinsic and global block taxes use the
 same typed grammar as Oracle IR, exclude paid choices from the free requirement
 maximum, and lock/pay atomically. The engine does not claim the complete
-combined restriction/requirement constraint problem, optional/nonmana/
-variable/modified block costs, declaration-trigger provenance, one blocker
-blocking several attackers, or entry-blocking effects.
+combined restriction/requirement constraint problem. Exact self, attached,
+global, not-alone, goaded-opponent, blocker-count, keyword, color, subtype, and
+effective-stat block restrictions are cumulative and share one projected and
+validated legal domain. Conditional, compound, attached-evasion,
+target-specific, temporary, and multi-block grammar, optional/nonmana/variable/
+modified block costs, declaration-trigger provenance, one blocker blocking
+several attackers, and entry-blocking effects remain blocked.
 
 Manual combat-damage assignment is server-authoritative. The engine derives
 the current combat sources, permitted recipients, and required effective-power

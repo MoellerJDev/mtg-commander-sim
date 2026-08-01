@@ -50,6 +50,11 @@ from .declaration_costs import (
     normalized_oracle_line,
     parse_declaration_cost_line,
 )
+from .declaration_restrictions import (
+    CreaturePredicate,
+    DeclarationRestrictionTemplate,
+    parse_declaration_restriction_line,
+)
 from .damage import DamageEvent, DamageRecipientKind
 from .deck import DeckDefinition
 from .mana import (
@@ -17315,10 +17320,43 @@ class CommanderEngine:
         )
         if "battle" in blocker_types:
             return False, "blocker_is_battle"
-        if "this creature can't block." in self._combat_oracle_lines(
-            blocker
+        for source in sorted(
+            self.state.cards.values(), key=lambda value: value.ref
         ):
-            return False, "blocker_cannot_block"
+            if source.zone != "battlefield" or source.phased_out:
+                continue
+            for line in self._combat_oracle_lines(source):
+                parsed = parse_declaration_restriction_line(line)
+                template = parsed.template
+                if (
+                    not parsed.exact
+                    or template is None
+                    or "block" not in template.declarations
+                    or template.mode != "prohibit"
+                ):
+                    continue
+                applies = {
+                    "self": source.object_id == blocker.object_id,
+                    "attached": source.attached_to == blocker.object_id,
+                    "source_opponents": (
+                        blocker.controller != source.controller
+                    ),
+                    "source_option": source.object_id == attacker.object_id,
+                    "global": True,
+                }[template.scope]
+                if (
+                    applies
+                    and self._matches_declaration_predicate(
+                        blocker, template.subject, source=source
+                    )
+                    and self._matches_declaration_predicate(
+                        attacker, template.opposing, source=source
+                    )
+                ):
+                    return (
+                        False,
+                        f"declaration_restriction:{template.template_id}",
+                    )
         if "shadow" in attacker_keywords and "shadow" not in blocker_keywords:
             return False, "attacker_has_shadow"
         if "shadow" in blocker_keywords and "shadow" not in attacker_keywords:
@@ -17519,6 +17557,277 @@ class CommanderEngine:
     ]:
         return self._declaration_costs("attack", active, domains)
 
+    def _matches_declaration_predicate(
+        self,
+        card: CardInstance,
+        predicate: CreaturePredicate,
+        *,
+        source: CardInstance,
+    ) -> bool:
+        data = self._effective_card_data(card)
+        card_types, subtypes, _ = self._type_parts(
+            str(data.get("type_line") or "")
+        )
+        normalized_types = {value.casefold() for value in card_types}
+        if predicate.types_any and not normalized_types.intersection(
+            value.casefold() for value in predicate.types_any
+        ):
+            return False
+        if predicate.types_none and normalized_types.intersection(
+            value.casefold() for value in predicate.types_none
+        ):
+            return False
+        normalized_subtypes = {value.casefold() for value in subtypes}
+        if predicate.subtypes_any and not normalized_subtypes.intersection(
+            value.casefold() for value in predicate.subtypes_any
+        ):
+            return False
+        if predicate.subtypes_none and normalized_subtypes.intersection(
+            value.casefold() for value in predicate.subtypes_none
+        ):
+            return False
+        colors = {
+            str(value).upper() for value in data.get("colors", [])
+        }
+        if predicate.colors_any and not colors.intersection(
+            str(value).upper() for value in predicate.colors_any
+        ):
+            return False
+        keywords = normalized_keywords(data.get("keywords", []))
+        if predicate.keywords_any and not keywords.intersection(
+            str(value).casefold() for value in predicate.keywords_any
+        ):
+            return False
+        if predicate.keywords_none and keywords.intersection(
+            str(value).casefold() for value in predicate.keywords_none
+        ):
+            return False
+        if predicate.token is not None and card.is_token != predicate.token:
+            return False
+        if predicate.goaded is not None:
+            goaded = bool(self._active_goad_designations(card))
+            if goaded != predicate.goaded:
+                return False
+        if predicate.stat is not None:
+            left = self._numeric_stat(
+                card.object_id, predicate.stat.stat
+            )
+            right = (
+                int(predicate.stat.value or 0)
+                if predicate.stat.operand == "fixed"
+                else self._numeric_stat(
+                    source.object_id, predicate.stat.stat
+                )
+            )
+            comparison = {
+                "lt": left < right,
+                "le": left <= right,
+                "gt": left > right,
+                "ge": left >= right,
+            }[predicate.stat.operator]
+            if not comparison:
+                return False
+        return True
+
+    def _restriction_variables(
+        self,
+        template: DeclarationRestrictionTemplate,
+        source: CardInstance,
+        domains: Mapping[str, Sequence[str]],
+    ) -> tuple[str, ...]:
+        if template.scope == "self":
+            return (source.ref,) if source.ref in domains else ()
+        if template.scope == "attached":
+            attached = self.state.cards.get(source.attached_to or "")
+            return (
+                (attached.ref,)
+                if attached is not None and attached.ref in domains
+                else ()
+            )
+        if template.scope == "source_opponents":
+            by_ref = {
+                card.ref: card for card in self.state.cards.values()
+            }
+            return tuple(
+                variable
+                for variable in sorted(domains)
+                if variable in by_ref
+                and by_ref[variable].controller != source.controller
+            )
+        return tuple(sorted(domains))
+
+    def _restriction_is_relevant(
+        self,
+        scope: str | None,
+        source: CardInstance,
+        domains: Mapping[str, Sequence[str]],
+    ) -> bool:
+        if not domains:
+            return False
+        if scope == "self":
+            return source.ref in domains
+        if scope == "attached":
+            attached = self.state.cards.get(source.attached_to or "")
+            return attached is not None and attached.ref in domains
+        if scope == "source_opponents":
+            return any(
+                card.ref in domains and card.controller != source.controller
+                for card in self.state.cards.values()
+            )
+        if scope == "source_option":
+            return any(source.ref in options for options in domains.values())
+        return True
+
+    def _declaration_restrictions(
+        self,
+        kind: str,
+        domains: Mapping[str, Sequence[str]],
+    ) -> tuple[
+        dict[str, tuple[str, ...]],
+        tuple[DeclarationRestriction, ...],
+        tuple[tuple[CardInstance, str], ...],
+    ]:
+        """Apply represented static CR 508.1c/509.1b restrictions."""
+
+        original = {
+            str(variable): tuple(str(option) for option in options)
+            for variable, options in domains.items()
+        }
+        remaining = {
+            variable: list(options)
+            for variable, options in original.items()
+        }
+        constraints: list[DeclarationRestriction] = []
+        unresolved: list[tuple[CardInstance, str]] = []
+        by_ref = {card.ref: card for card in self.state.cards.values()}
+        for source in sorted(
+            self.state.cards.values(), key=lambda value: value.ref
+        ):
+            if source.zone != "battlefield" or source.phased_out:
+                continue
+            for line_index, line in enumerate(
+                self._combat_oracle_lines(source)
+            ):
+                parsed = parse_declaration_restriction_line(line)
+                if not parsed.recognized or kind not in parsed.declarations:
+                    continue
+                if not self._restriction_is_relevant(
+                    parsed.scope, source, original
+                ):
+                    continue
+                if not parsed.exact:
+                    unresolved.append((source, line))
+                    continue
+                template = parsed.template
+                assert template is not None
+                variables = self._restriction_variables(
+                    template, source, original
+                )
+                if template.mode == "maximum_total_selections":
+                    constraints.append(
+                        DeclarationRestriction(
+                            restriction_id=(
+                                f"{kind}:restriction:{source.ref}:"
+                                f"{line_index}:maximum"
+                            ),
+                            kind="maximum_total_selections",
+                            count=template.count,
+                            label=(
+                                f"{self.display_name(source.object_id)} "
+                                f"allows at most {template.count} creature(s) "
+                                f"to {kind}."
+                            ),
+                        )
+                    )
+                    continue
+                if template.mode in {
+                    "minimum_option_uses",
+                    "maximum_option_uses",
+                }:
+                    constraints.append(
+                        DeclarationRestriction(
+                            restriction_id=(
+                                f"{kind}:restriction:{source.ref}:"
+                                f"{line_index}:option-uses"
+                            ),
+                            kind=template.mode,
+                            option=source.ref,
+                            count=template.count,
+                            when_used=(
+                                template.mode == "minimum_option_uses"
+                            ),
+                            label=(
+                                f"{self.display_name(source.object_id)} "
+                                f"requires {template.count} blocker(s) "
+                                "when blocked."
+                                if template.mode == "minimum_option_uses"
+                                else (
+                                    f"{self.display_name(source.object_id)} "
+                                    f"allows at most {template.count} "
+                                    "blocker(s)."
+                                )
+                            ),
+                        )
+                    )
+                    continue
+                for variable in variables:
+                    subject = by_ref.get(variable)
+                    if subject is None or not self._matches_declaration_predicate(
+                        subject, template.subject, source=source
+                    ):
+                        continue
+                    if template.mode == "minimum_total_selections":
+                        constraints.append(
+                            DeclarationRestriction(
+                                restriction_id=(
+                                    f"{kind}:restriction:{source.ref}:"
+                                    f"{line_index}:{variable}:minimum"
+                                ),
+                                kind="minimum_total_selections",
+                                count=template.count,
+                                trigger_variable=variable,
+                                label=(
+                                    f"{self.display_name(subject.object_id)} "
+                                    f"can't {kind} alone."
+                                ),
+                            )
+                        )
+                        continue
+                    legal_options: list[str] = []
+                    for option in remaining.get(variable, []):
+                        if (
+                            template.scope == "source_option"
+                            and option != source.ref
+                        ):
+                            legal_options.append(option)
+                            continue
+                        opposing = by_ref.get(option)
+                        if (
+                            opposing is not None
+                            and not self._matches_declaration_predicate(
+                                opposing,
+                                template.opposing,
+                                source=source,
+                            )
+                        ):
+                            legal_options.append(option)
+                            continue
+                        if (
+                            opposing is None
+                            and template.opposing != CreaturePredicate()
+                        ):
+                            legal_options.append(option)
+                    remaining[variable] = legal_options
+        return (
+            {
+                variable: tuple(options)
+                for variable, options in remaining.items()
+                if options
+            },
+            tuple(constraints),
+            tuple(unresolved),
+        )
+
     def _selected_declaration_mana(
         self,
         costs: Sequence[DeclarationCost],
@@ -17549,7 +17858,7 @@ class CommanderEngine:
     ) -> tuple[
         DeclarationProblem,
         tuple[DeclarationCost, ...],
-        tuple[tuple[CardInstance, str], ...],
+        tuple[tuple[CardInstance, str, str], ...],
     ]:
         defenders = [
             *[seat for seat in self.active_seats if seat != active],
@@ -17609,15 +17918,26 @@ class CommanderEngine:
                         ),
                     )
                 )
-        costs, unresolved = self._attack_declaration_costs(
-            active, domains
+        domains, restrictions, restriction_gaps = (
+            self._declaration_restrictions("attack", domains)
+        )
+        costs, cost_gaps = self._attack_declaration_costs(
+            active,
+            domains,
         )
         problem = DeclarationProblem(
             domains=domains,
             requirements=tuple(requirements),
+            restrictions=restrictions,
             costed_options=frozenset(cost.selection for cost in costs),
         )
-        return problem, costs, unresolved
+        gaps = tuple(
+            (source, line, "restriction")
+            for source, line in restriction_gaps
+        ) + tuple(
+            (source, line, "cost") for source, line in cost_gaps
+        )
+        return problem, costs, gaps
 
     def _attack_declaration_problem(self, active: str) -> DeclarationProblem:
         return self._attack_declaration_components(active)[0]
@@ -17638,7 +17958,7 @@ class CommanderEngine:
     ) -> tuple[
         DeclarationProblem,
         tuple[DeclarationCost, ...],
-        tuple[tuple[CardInstance, str], ...],
+        tuple[tuple[CardInstance, str, str], ...],
     ]:
         attacker_cards = [
             card
@@ -17740,8 +18060,13 @@ class CommanderEngine:
                         ),
                     )
                 )
-        costs, unresolved = self._block_declaration_costs(
-            defender, domains
+        domains, static_restrictions, restriction_gaps = (
+            self._declaration_restrictions("block", domains)
+        )
+        restrictions.extend(static_restrictions)
+        costs, cost_gaps = self._block_declaration_costs(
+            defender,
+            domains,
         )
         problem = DeclarationProblem(
             domains=domains,
@@ -17749,7 +18074,13 @@ class CommanderEngine:
             restrictions=tuple(restrictions),
             costed_options=frozenset(cost.selection for cost in costs),
         )
-        return problem, costs, unresolved
+        gaps = tuple(
+            (source, line, "restriction")
+            for source, line in restriction_gaps
+        ) + tuple(
+            (source, line, "cost") for source, line in cost_gaps
+        )
+        return problem, costs, gaps
 
     def _block_declaration_problem(
         self,
@@ -17780,19 +18111,32 @@ class CommanderEngine:
         if active not in self.active_seats:
             self._advance_step()
             return
-        candidates = []
+        candidate_by_ref: dict[str, dict[str, Any]] = {}
         for oid in self.state.players[active].zones["battlefield"]:
             card = self.state.cards[oid]
             data = self._effective_card_data(card)
             if self._attack_declaration_error(card, active) is None:
-                candidates.append(
-                    {
-                        "id": card.ref,
-                        "name": self.display_name(oid),
-                        "sick": self._is_summoning_sick(card),
-                        "haste": "Haste" in data.get("keywords", []),
-                    }
-                )
+                candidate_by_ref[card.ref] = {
+                    "id": card.ref,
+                    "name": self.display_name(oid),
+                    "sick": self._is_summoning_sick(card),
+                    "haste": "Haste" in data.get("keywords", []),
+                }
+        problem, costs, unresolved = self._attack_declaration_components(
+            active
+        )
+        if unresolved:
+            source, line, category = unresolved[0]
+            self._pause_for_unsupported_semantic(
+                event=f"combat.attack_{category}:{line}",
+                source=source,
+            )
+            return
+        candidates = [
+            candidate_by_ref[ref]
+            for ref in problem.domains
+            if ref in candidate_by_ref
+        ]
         if not candidates:
             self.state.combat.attackers_declared = True
             self.state.combat.defending_players = [
@@ -17801,16 +18145,6 @@ class CommanderEngine:
                 if seat != active
             ]
             self._grant_priority(active)
-            return
-        problem, costs, unresolved = self._attack_declaration_components(
-            active
-        )
-        if unresolved:
-            source, line = unresolved[0]
-            self._pause_for_unsupported_semantic(
-                event=f"combat.attack_cost:{line}",
-                source=source,
-            )
             return
         self.permissions.issue(
             kind="combat.attackers",
@@ -17978,25 +18312,18 @@ class CommanderEngine:
             canonical[card.ref] = defender
             used.add(card.object_id)
 
-        problem, _, unresolved = self._attack_declaration_components(
+        problem, locked_costs, unresolved = self._attack_declaration_components(
             active
         )
         if unresolved:
             raise GameRuleError(
-                "The attack declaration has an unresolved required cost"
+                "The attack declaration has unresolved restriction or cost semantics"
             )
         self._validate_declaration_requirements(problem, canonical)
         for card, defender in chosen:
             data = self._effective_card_data(card)
             if "Vigilance" not in data.get("keywords", []):
                 card.tapped = True
-        locked_costs, unresolved = self._attack_declaration_costs(
-            active, problem.domains
-        )
-        if unresolved:
-            raise GameRuleError(
-                "The locked attack cost contains unresolved semantics"
-            )
         requirements, selected_costs = self._selected_declaration_mana(
             locked_costs,
             canonical,
@@ -18161,37 +18488,36 @@ class CommanderEngine:
             defender
         )
         if unresolved:
-            source, line = unresolved[0]
+            source, line, category = unresolved[0]
             self._pause_for_unsupported_semantic(
-                event=f"combat.block_cost:{line}",
+                event=f"combat.block_{category}:{line}",
                 source=source,
             )
             return
-        blockers = []
-        legal_blocks: dict[str, list[str]] = {}
-        for oid in self.state.players[defender].zones["battlefield"]:
-            card = self.state.cards[oid]
-            if (
-                card.controller != defender
-                or card.tapped
-                or card.phased_out
-            ):
-                continue
-            card_types, _, _ = self._type_parts(
-                str(
-                    self._effective_card_data(card).get("type_line")
-                    or ""
-                )
+        if not problem.domains:
+            self._log(
+                defender,
+                "combat.block",
+                f"{defender} had no legal blockers.",
+                {
+                    "blocks": {},
+                    "costs": [],
+                    "requirements": {},
+                    "payment": {},
+                    "mana_sources": [],
+                    "automatic": True,
+                },
+                importance=1,
+                changed_players=[defender],
             )
-            if "creature" in card_types and "battle" not in card_types:
-                legal_attackers = [
-                    attacker.ref
-                    for attacker in attacker_cards
-                    if self._can_block(attacker, card)[0]
-                ]
-                if legal_attackers:
-                    blockers.append(card.ref)
-                    legal_blocks[card.ref] = legal_attackers
+            self.state.combat.blocker_cursor += 1
+            self._issue_next_blocker()
+            return
+        blockers = list(problem.domains)
+        legal_blocks = {
+            blocker: list(options)
+            for blocker, options in problem.domains.items()
+        }
         self.permissions.issue(
             kind="combat.blockers",
             role="pilot",
@@ -18269,7 +18595,7 @@ class CommanderEngine:
         )
         if unresolved:
             raise GameRuleError(
-                "The block declaration has an unresolved required cost"
+                "The block declaration has unresolved restriction or cost semantics"
             )
         self._validate_declaration_requirements(problem, canonical)
         requirements, selected_costs = self._selected_declaration_mana(

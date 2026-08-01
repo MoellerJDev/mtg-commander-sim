@@ -55,6 +55,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#38](https://github.com/MoellerJDev/mtg-commander-sim/pull/38) | `agent/rules-combat-tba-triggers` | `main` | `merged` |
 | [#39](https://github.com/MoellerJDev/mtg-commander-sim/pull/39) | `agent/rules-combat-constraints` | `main` | `merged` |
 | [#40](https://github.com/MoellerJDev/mtg-commander-sim/pull/40) | `feat/rules-goad-requirements` | `main` | `merged` |
+| [#41](https://github.com/MoellerJDev/mtg-commander-sim/pull/41) | `feat/rules-attack-declaration-costs` | `main` | `merged` |
 
 ## Pinned snapshots and coverage
 
@@ -66,15 +67,15 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
 - Rules cases: blocked=367, definition_only=81, passing=115, total=3300, unreviewed=2737
 - Mechanics: status_counts={'partial': 57, 'unclassified': 368}, total=425, trusted=0
-- Oracle coverage: material_residuals=69890, status_counts={'exact': 2959, 'partial': 15736, 'unresolved': 19789}, total=38484
-- Commander-legal Oracle coverage: material_residuals=61213, status_counts={'exact': 338, 'partial': 14347, 'unresolved': 16938}, total=31623
+- Oracle coverage: material_residuals=69890, status_counts={'exact': 2959, 'partial': 15949, 'unresolved': 19576}, total=38484
+- Commander-legal Oracle coverage: material_residuals=61213, status_counts={'exact': 338, 'partial': 14525, 'unresolved': 16760}, total=31623
 - Current rules/Oracle snapshot complete: no
 
 ## Platform milestone status
 
 | Milestone | Status | Evidence |
 |---|---|---|
-| Integrated deterministic foundation | `complete` | Integration PRs #1-17 and #24-40 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
+| Integrated deterministic foundation | `complete` | Integration PRs #1-17 and #24-41 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
 | Browser Commander MVP | `development_local_runtime_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and seven two/four-player Chromium journeys, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, Chromium-verified card-scoped click/drag actions, optional manual mana activation, explicit active-player main-phase advancement, confirmed concession, public commander-damage tracking, terminal winner/draw rendering, exact command retry, invited read-only spectators, a durable complete public-log dialog, fail-closed handling for legacy arbiter-only records, and one-command managed Scryfall/browser startup. Compact trusted-only coverage includes modal land faces, targeted Sunscorched Desert ETB damage, a stack response, rules-created Treasure payment, Orcish Bowmasters/Amass, explicit attack and block declarations, combat damage, and a natural commander-damage winner. The 49-command natural-winner record replayed to its exact state hash with zero suppressed meaningful windows and a clean seat-projection audit; completed games also survive process restart. The inspected full-database failure remains a pinned pre-fix record, and a fresh post-restart full-database manual journey is still required as broader current-snapshot evidence. Future schemas, full accounts, expiry/rate limits, and production deployment remain open. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408 and CR 500-512 slices are on main. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
@@ -96,7 +97,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 4056
+- Tests discovered: 4075
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
 - Baseline CI: [30687987451](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30687987451) — `pass`
 - Compile: `pass`

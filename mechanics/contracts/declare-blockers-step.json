@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 4,
+  "contract_version": 5,
   "mechanic_id": "cr-509-declare-blockers-step",
   "official_name": "Declare Blockers Step",
   "effective_date": "2026-06-19",
@@ -31,7 +31,7 @@
     "509.4a",
     "509.4b"
   ],
-  "glossary_references": [],
+  "glossary_references": ["Requirement", "Restriction"],
   "dependencies": [
     "combat",
     "illegal-actions",
@@ -63,7 +63,8 @@
       "tapped and phased-out state",
       "creature and battle types",
       "attack target and defending player",
-      "supported evasion, protection, and menace restrictions"
+      "supported evasion, protection, and menace restrictions",
+      "whole-line static restrictions over effective keyword, subtype, color, power, toughness, goad, attachment, controller, and public combat relationships"
     ],
     "state_writes": [
       "blocking relationship",
@@ -87,7 +88,8 @@
     "choices": [
       "each defending player chooses zero or more legal blocks",
       "a menace attacker receives zero or at least two blockers",
-      "the declaration must maximize represented block requirements without violating restrictions"
+      "not-alone, minimum/maximum blocker-count, and table-wide count restrictions are inviolable",
+      "the declaration must maximize represented block requirements only within the restriction-obeying declaration space"
     ],
     "hidden_information": [
       "blocker declarations use public combat and battlefield information"
@@ -125,10 +127,29 @@
     "a chosen blocker sacrificed for mana before CR 509.1g",
     "broader recognized block-cost grammar stopping fail closed",
     "costed menace declarations",
-    "manual or automatic declaration-cost payment"
+    "manual or automatic declaration-cost payment",
+    "absolute self, attached, and global block prohibitions",
+    "block-alone restrictions with the other blocker assigned to a different attacker",
+    "goaded-opponent blocking prohibitions",
+    "effective power, toughness, color, subtype, keyword, flying, reach, shadow, and protection restrictions applied cumulatively",
+    "unblockable, minimum/maximum blocker-count, and can-block-only evasion families",
+    "pass-only blocker tasks skipped when no legal domain remains",
+    "recognized unsupported conditional block restrictions stopping fail closed"
   ],
-  "witness_cards": [],
-  "rulings": [],
+  "witness_cards": [
+    {"name": "Mogg Flunkies", "oracle_id": "b92fc9c1-7264-4894-90b8-a193039489c5"},
+    {"name": "Bothersome Quasit", "oracle_id": "06cf7b77-ffd7-4192-903e-19bd06887ba1"},
+    {"name": "Wandering Wolf", "oracle_id": "1750cf0a-0709-4f02-90ea-572ff88a37a5"},
+    {"name": "Ironclaw Orcs", "oracle_id": "c645a616-0d7d-416c-b5f3-057b3a1666a0"},
+    {"name": "Troll of Khazad-dûm", "oracle_id": "222fd9fc-7af4-4269-bbb9-cd7b8ac029bd"},
+    {"name": "Phantom Warrior", "oracle_id": "23745133-e5e2-4ce3-b94a-73d0d3d8a013"},
+    {"name": "Welkin Tern", "oracle_id": "010c660a-a67b-48f0-a63a-15470eb89f69"},
+    {"name": "Bedlam", "oracle_id": "c28d4caf-9b7c-40b1-9cbe-275ca9dae06a"}
+  ],
+  "rulings": [
+    "Mogg Flunkies — 2018-03-16 — The other blocker need not block the same attacker.",
+    "Wandering Wolf — 2012-05-01 — The power comparison occurs only as blockers are declared."
+  ],
   "test_ids": [
     "test_contract_traces_every_cr_509_rule",
     "test_ordinary_block_becomes_blocking_then_grants_priority",
@@ -156,14 +177,25 @@
     "test_fixed_attached_block_cost_is_paid_to_block",
     "test_broader_conditional_block_cost_stops_fail_closed",
     "test_sacrificed_mana_source_does_not_become_a_blocker",
-    "test_oracle_ir_uses_the_runtime_declaration_cost_grammar"
+    "test_oracle_ir_uses_the_runtime_declaration_cost_grammar",
+    "test_selected_creature_can_require_another_declaration",
+    "test_absolute_self_and_attached_restrictions_remove_domains",
+    "test_block_alone_allows_other_blocker_on_different_attacker",
+    "test_goaded_opponent_creature_cannot_block",
+    "test_power_color_and_subtype_block_restrictions_are_cumulative",
+    "test_numeric_power_block_restriction_uses_effective_power",
+    "test_unblockable_and_blocker_stat_evasion_filter_domains",
+    "test_minimum_and_maximum_blocker_counts_are_inviolable",
+    "test_block_only_keyword_filters_opposing_attackers",
+    "test_only_unblockable_attackers_skip_pass_only_blocker_task",
+    "test_oracle_ir_uses_runtime_restriction_grammar"
   ],
   "implementation": {
-    "component": "DeclarationProblem, the shared declaration-cost Oracle grammar, and CommanderEngine blocker declaration/payment transition",
-    "version": "declare-blockers-step-v4"
+    "component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine blocker declaration/payment transition",
+    "version": "declare-blockers-step-v5"
   },
   "known_blockers": [
-    "the complete restriction and evasion grammar is not implemented",
+    "conditional, compound, attached-evasion, target-specific, temporary, and broader restriction/evasion grammar remains incomplete and recognized static families fail closed",
     "only exact blocks-each-combat, must-be-blocked, lure, and menace grammar is represented; conditional, effect-granted, multi-block, and optional-cost grammar remains incomplete",
     "optional, nonmana, variable, alternative, modified, and broader conditional block costs are not implemented",
     "declare-blockers trigger generation and APNAP placement are incomplete",

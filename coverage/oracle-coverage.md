@@ -1,11 +1,11 @@
 # Oracle IR coverage
 
-- Compiler: `oracle-ir-v4`
+- Compiler: `oracle-ir-v5`
 - Oracle IDs: 38,484
 - Faces: 41,701
 - Exact: 2,959 (7.6889%)
-- Partially lowerable: 15,736
-- Unresolved: 19,789
+- Partially lowerable: 15,949
+- Unresolved: 19,576
 - Material residuals: 69,890
 - Current snapshot complete: false
 

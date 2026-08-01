@@ -58,15 +58,26 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": ["CommanderEngine._can_block"],
+      "implementation_components": ["parse_declaration_restriction_line", "DeclarationProblem", "CommanderEngine._declaration_restrictions", "CommanderEngine._block_declaration_components", "CommanderEngine._can_block", "CommanderEngine._complete_blockers"],
       "executable_test_ids": [
         "tests.test_exact_combat_keywords.ExactCombatKeywordTests.test_flying_attacker_exposes_only_flying_or_reach_blockers",
-        "tests.test_exact_combat_keywords.ExactCombatKeywordTests.test_shadow_and_protection_restrict_blocking"
+        "tests.test_exact_combat_keywords.ExactCombatKeywordTests.test_shadow_and_protection_restrict_blocking",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_absolute_self_and_attached_restrictions_remove_domains",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_block_alone_allows_other_blocker_on_different_attacker",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_goaded_opponent_creature_cannot_block",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_power_color_and_subtype_block_restrictions_are_cumulative",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_numeric_power_block_restriction_uses_effective_power",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_unblockable_and_blocker_stat_evasion_filter_domains",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_only_unblockable_attackers_skip_pass_only_blocker_task",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_minimum_and_maximum_blocker_counts_are_inviolable",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_block_only_keyword_filters_opposing_attackers",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_relevant_unsupported_condition_pauses_fail_closed",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_oracle_ir_uses_runtime_restriction_grammar"
       ],
-      "required_scenarios": ["positive", "negative", "interaction"],
-      "covered_scenarios": ["positive", "negative"],
-      "blockers": ["complete_cumulative_block_restriction_and_evasion_grammar_not_implemented"],
-      "notes": ["Flying, reach, shadow, protection, and an exact cannot-block subset are witnesses only; cumulative and conditional restrictions remain incomplete."]
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "blockers": ["conditional_compound_attached_evasion_target_specific_temporary_and_multi_block_grammar_not_implemented"],
+      "notes": ["The same typed declaration grammar and finite solver enforce represented blocking restrictions cumulatively with intrinsic flying, reach, shadow, and protection. Exact self, attached, global, not-alone, goaded-opponent, blocker-count, keyword, color, subtype, and effective-stat predicates are supported; pass-only blocker tasks are skipped only after the legal domain is empty. Relevant unsupported static restriction text pauses fail closed. Conditional, compound, attached-evasion, target-specific, temporary, and multi-block grammar remains blocked."]
     },
     {
       "rule_id": "509.1c",
@@ -85,12 +96,16 @@
         "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_two_blockers_satisfy_menace_and_the_block_requirement",
         "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_blocker_each_combat_requirement_is_enforced",
         "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_lure_requirement_maximizes_every_able_blocker",
-        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_costed_menace_blocks_must_be_elected_together"
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_costed_menace_blocks_must_be_elected_together",
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_selected_creature_can_require_another_declaration",
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_global_maximum_applies_before_requirement_maximization",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_block_alone_allows_other_blocker_on_different_attacker",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_minimum_and_maximum_blocker_counts_are_inviolable"
       ],
       "required_scenarios": ["positive", "negative", "interaction", "multiplayer"],
       "covered_scenarios": ["positive", "negative", "interaction"],
-      "blockers": ["complete_block_restriction_requirement_and_cost_grammar_not_implemented"],
-      "notes": ["The shared finite solver maximizes exact blocks-each-combat, must-be-blocked, and lure requirements together with menace, including impossible, conflicting, and costed choices. A block cost is never compelled merely to satisfy more requirements. Conditional, effect-granted, multi-block, optional-cost, and repeated-combat grammar remains blocked."]
+      "blockers": ["complete_conditional_block_restriction_requirement_and_cost_grammar_not_implemented"],
+      "notes": ["The shared finite solver maximizes exact blocks-each-combat, must-be-blocked, lure, and not-alone requirements only inside the legal domain left by cumulative restrictions, blocker-count constraints, menace, and elected costs, including impossible and conflicting choices. A block cost is never compelled merely to satisfy more requirements. Conditional, effect-granted, multi-block, optional-cost, and repeated-combat grammar remains blocked."]
     },
     {
       "rule_id": "509.1d",

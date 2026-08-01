@@ -13,6 +13,8 @@ RequirementKind = Literal[
 RestrictionKind = Literal[
     "minimum_option_uses",
     "maximum_option_uses",
+    "minimum_total_selections",
+    "maximum_total_selections",
 ]
 
 
@@ -61,34 +63,72 @@ class DeclarationRequirement:
 class DeclarationRestriction:
     restriction_id: str
     kind: RestrictionKind
-    option: str
-    count: int
+    option: str | None = None
+    count: int = 0
     when_used: bool = False
+    trigger_variable: str | None = None
     label: str = ""
 
+    def __post_init__(self) -> None:
+        if not self.restriction_id:
+            raise ValueError("Declaration restriction id is required")
+        if self.count < 0:
+            raise ValueError("Declaration restriction count cannot be negative")
+        option_kinds = {"minimum_option_uses", "maximum_option_uses"}
+        total_kinds = {
+            "minimum_total_selections",
+            "maximum_total_selections",
+        }
+        if self.kind in option_kinds and not self.option:
+            raise ValueError(f"{self.kind} requires an option")
+        if self.kind in total_kinds and self.option is not None:
+            raise ValueError(f"{self.kind} does not accept an option")
+
     def error(self, declaration: Mapping[str, str]) -> str | None:
-        uses = sum(
-            1 for selected in declaration.values() if selected == self.option
-        )
-        if self.when_used and uses == 0:
+        if (
+            self.trigger_variable is not None
+            and self.trigger_variable not in declaration
+        ):
             return None
-        if self.kind == "minimum_option_uses" and uses < self.count:
+        uses = sum(
+            1
+            for selected in declaration.values()
+            if self.option is not None and selected == self.option
+        )
+        total = len(declaration)
+        measured = (
+            uses
+            if self.kind in {"minimum_option_uses", "maximum_option_uses"}
+            else total
+        )
+        if self.when_used and measured == 0:
+            return None
+        if self.kind == "minimum_option_uses" and measured < self.count:
             return self.label or (
                 f"{self.option} requires at least {self.count} selections"
             )
-        if self.kind == "maximum_option_uses" and uses > self.count:
+        if self.kind == "maximum_option_uses" and measured > self.count:
             return self.label or (
                 f"{self.option} allows at most {self.count} selections"
             )
+        if self.kind == "minimum_total_selections" and measured < self.count:
+            return self.label or (
+                f"The declaration requires at least {self.count} selections"
+            )
+        if self.kind == "maximum_total_selections" and measured > self.count:
+            return self.label or (
+                f"The declaration allows at most {self.count} selections"
+            )
         return None
 
-    def to_dict(self) -> dict[str, str | int | bool]:
+    def to_dict(self) -> dict[str, str | int | bool | None]:
         return {
             "id": self.restriction_id,
             "kind": self.kind,
             "option": self.option,
             "count": self.count,
             "when_used": self.when_used,
+            "trigger_variable": self.trigger_variable,
             "label": self.label,
         }
 
@@ -271,6 +311,10 @@ class DeclarationProblem:
 
     def projection(self) -> dict[str, object]:
         return {
+            "domains": {
+                variable: list(dict.fromkeys(self.domains[variable]))
+                for variable in sorted(self.domains)
+            },
             "requirements": [item.to_dict() for item in self.requirements],
             "restrictions": [item.to_dict() for item in self.restrictions],
             "maximum_requirements": self.maximum_satisfied_requirements(),

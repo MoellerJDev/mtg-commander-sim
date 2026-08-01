@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 5,
+  "contract_version": 6,
   "mechanic_id": "cr-508-declare-attackers-step",
   "official_name": "Declare Attackers Step",
   "effective_date": "2026-06-19",
@@ -46,7 +46,7 @@
     "508.7e",
     "508.8"
   ],
-  "glossary_references": [],
+  "glossary_references": ["Requirement", "Restriction"],
   "dependencies": [
     "combat",
     "illegal-actions",
@@ -80,7 +80,8 @@
       "summoning sickness, haste, and defender",
       "vigilance",
       "attack target and Battle protector",
-      "active typed goad designations and their originating players"
+      "active typed goad designations and their originating players",
+      "whole-line static declaration restrictions and their relevant effective keyword, attachment, and controller predicates"
     ],
     "state_writes": [
       "tapped state",
@@ -104,7 +105,8 @@
     ],
     "choices": [
       "the active player chooses zero or more eligible attackers and one represented defender for each",
-      "the declaration must maximize represented attack requirements without violating restrictions"
+      "the declaration must obey every represented absolute, not-alone, and table-wide count restriction",
+      "the declaration must maximize represented attack requirements only within the restriction-obeying declaration space"
     ],
     "hidden_information": [
       "attacker declarations use public combat and battlefield information"
@@ -146,10 +148,24 @@
     "player taxes that do not apply to Battles or unsupported planeswalker-only destinations",
     "fixed-mana costs from attached Auras",
     "a chosen attacker sacrificed for mana before CR 508.1k",
-    "broader recognized attack-cost grammar stopping fail closed"
+    "broader recognized attack-cost grammar stopping fail closed",
+    "absolute self, attached, and global attack prohibitions",
+    "attack-alone and attack-or-block-alone restrictions across different multiplayer defenders",
+    "one- and two-attacker table-wide maxima interacting with attack requirements",
+    "keyword-filtered global attack restrictions",
+    "recognized unsupported conditional attack restrictions stopping fail closed"
   ],
-  "witness_cards": [],
-  "rulings": [],
+  "witness_cards": [
+    {"name": "Mogg Flunkies", "oracle_id": "b92fc9c1-7264-4894-90b8-a193039489c5"},
+    {"name": "Luminous Bonds", "oracle_id": "2c006a63-0550-4a87-a5fe-f4247857271c"},
+    {"name": "Silent Arbiter", "oracle_id": "1cdf30de-d88c-421a-80df-4917bbd2f09e"},
+    {"name": "Stormtide Leviathan", "oracle_id": "131a7475-0b9e-46eb-9ade-fef1b9820184"},
+    {"name": "Peacekeeper", "oracle_id": "e82ce5c6-1e42-4e87-b696-67aa3822ec9c"}
+  ],
+  "rulings": [
+    "Mogg Flunkies — 2018-03-16 — The other attacker may attack a different player, planeswalker, or battle.",
+    "Mogg Flunkies — 2018-03-16 — If required to attack and another creature can attack, both must be declared."
+  ],
   "test_ids": [
     "test_contract_traces_every_cr_508_rule",
     "test_only_currently_eligible_creatures_are_offered",
@@ -188,15 +204,25 @@
     "test_fixed_attached_attack_cost_uses_existing_attachment_identity",
     "test_broader_conditional_attack_tax_stops_fail_closed",
     "test_planeswalker_only_tax_does_not_tax_a_player_attack",
-    "test_oracle_ir_uses_the_runtime_declaration_cost_grammar"
+    "test_oracle_ir_uses_the_runtime_declaration_cost_grammar",
+    "test_selected_creature_can_require_another_declaration",
+    "test_global_maximum_applies_before_requirement_maximization",
+    "test_absolute_self_and_attached_restrictions_remove_domains",
+    "test_attack_or_block_alone_allows_different_defenders_and_replays",
+    "test_global_maximum_constrains_requirement_solver",
+    "test_keyword_filtered_global_attack_restriction",
+    "test_relevant_unsupported_condition_pauses_fail_closed",
+    "test_triggered_text_is_not_misread_as_a_static_restriction",
+    "test_oracle_ir_uses_runtime_restriction_grammar"
   ],
   "implementation": {
-    "component": "DeclarationProblem, the shared declaration-cost Oracle grammar, and CommanderEngine attacker declaration/payment transition",
-    "version": "declare-attackers-step-v5"
+    "component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine attacker declaration/payment transition",
+    "version": "declare-attackers-step-v6"
   },
   "known_blockers": [
     "planeswalker attack targets are not implemented",
-    "exact attacks-each-combat and typed goad requirements are represented; conditional, non-goad defender-specific, and other effect-granted grammar remains incomplete",
+    "exact attacks-each-combat and typed goad requirements are represented; conditional, non-goad defender-specific, and other effect-granted requirement grammar remains incomplete",
+    "conditional, compound, target-specific, temporary, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
     "banding declarations are not implemented",
     "optional, nonmana, variable, alternative, modified, and broader conditional attack costs are not implemented",
     "declare-attackers trigger generation and APNAP placement are incomplete",

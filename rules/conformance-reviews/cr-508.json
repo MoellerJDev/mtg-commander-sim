@@ -76,12 +76,20 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": [],
-      "executable_test_ids": [],
-      "required_scenarios": ["positive", "negative", "interaction", "multiplayer"],
-      "covered_scenarios": [],
-      "blockers": ["complete_cumulative_attack_restriction_grammar_not_implemented"],
-      "notes": ["Conditional and group attack restrictions require a generic constraint solver."]
+      "implementation_components": ["parse_declaration_restriction_line", "DeclarationProblem", "CommanderEngine._declaration_restrictions", "CommanderEngine._attack_declaration_components", "CommanderEngine._complete_attackers"],
+      "executable_test_ids": [
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_absolute_self_and_attached_restrictions_remove_domains",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_attack_or_block_alone_allows_different_defenders_and_replays",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_global_maximum_constrains_requirement_solver",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_keyword_filtered_global_attack_restriction",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_relevant_unsupported_condition_pauses_fail_closed",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_triggered_text_is_not_misread_as_a_static_restriction",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_oracle_ir_uses_runtime_restriction_grammar"
+      ],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "blockers": ["conditional_compound_target_specific_temporary_and_broader_attack_restriction_grammar_not_implemented"],
+      "notes": ["A shared whole-line Oracle grammar lowers exact self, attached, global, keyword-filtered, not-alone, goad, and table-wide count restrictions into the finite declaration solver. Represented restrictions are inviolable and cumulative, are projected from the same legal domains used for submission, and replay exactly. Relevant unsupported static restriction text pauses fail closed; conditional, compound, target-specific, temporary, and broader predicate grammar remains blocked."]
     },
     {
       "rule_id": "508.1d",
@@ -101,13 +109,17 @@
         "tests.test_goad_rules.GoadRuleTests.test_goaded_by_every_opponent_accepts_any_maximal_attack",
         "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_costed_option_is_optional_for_requirement_maximization",
         "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_elected_cost_does_not_hide_free_requirements",
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_selected_creature_can_require_another_declaration",
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_global_maximum_applies_before_requirement_maximization",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_attack_or_block_alone_allows_different_defenders_and_replays",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_global_maximum_constrains_requirement_solver",
         "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_goad_does_not_force_payment_in_duel",
         "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_goad_still_requires_a_free_other_player"
       ],
       "required_scenarios": ["positive", "negative", "interaction", "multiplayer"],
       "covered_scenarios": ["positive", "negative", "interaction", "multiplayer"],
-      "blockers": ["complete_attack_restriction_requirement_and_cost_grammar_not_implemented"],
-      "notes": ["The shared finite solver enforces the maximum satisfiable represented requirement count, projects its explanation, rolls invalid declarations back, fails closed at its deterministic search bound, and replays exactly. A costed option is excluded from the free maximum unless elected, so goad and other requirements do not compel attack-tax payment. Exact attacks-each-combat and typed single/multiple-player goad requirements are lowered; conditional, non-goad defender-specific, other effect-granted, paid-exception, and repeated-combat semantics remain blocked."]
+      "blockers": ["complete_conditional_attack_restriction_requirement_and_cost_grammar_not_implemented"],
+      "notes": ["The shared finite solver maximizes represented requirements only inside the legal space left by cumulative restrictions and elected costs. It handles exact attacks-each-combat, typed single/multiple-player goad, not-alone implications, and global declaration maxima; projects its explanation; rolls invalid declarations back; fails closed at its deterministic search bound; and replays exactly. A costed option is excluded from the free maximum unless elected, so goad and other requirements do not compel attack-tax payment. Conditional, non-goad defender-specific, other effect-granted, paid-exception, and repeated-combat semantics remain blocked."]
     },
     {
       "rule_id": "508.1e",
