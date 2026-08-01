@@ -134,6 +134,12 @@ arbiter prompt. Sunscorched Desert's targeted ETB damage and Orcish Bowmasters'
 resolution, targeted damage, opponent extra-draw trigger, and Amass Orcs path
 are reviewed examples of the generic semantic executor.
 
+Saved games retain the semantic registry and policy from their creation. An
+older game is not upgraded in place. On load, any legacy arbiter-only decision
+is durably shown as **Rules boundary reached** with all player actions removed;
+the banner explicitly says no player is passing priority. Restart the server
+and create a new room/game when retesting semantics added by a newer build.
+
 If a tab loses game access after a room replacement or local server reset, the
 WebSocket sends one terminal `game_access_lost` message. The tab stops
 reconnecting and offers **Return to lobby**, preventing the former repeated

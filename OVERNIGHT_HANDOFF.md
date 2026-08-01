@@ -87,7 +87,11 @@ Implemented:
   live WebSocket updates, a complete durable public event log, and restart
   recovery without checkpoint or analyst access
 - compact-fixture regressions for modal land faces, Sunscorched Desert, Orcish
-  Bowmasters, priority progression, exact retry, privacy, and reconnect behavior
+  Bowmasters under the browser's trusted-only policy, priority progression,
+  exact retry, privacy, and reconnect behavior
+- durable browser fail-closed handling for legacy records that contain an
+  arbiter-only decision; those records now display a rules-boundary pause and
+  cannot resemble repeated player priority passes
 
 Not implemented or not complete:
 
@@ -102,14 +106,18 @@ rules, product, CI, merge, or release authorities.
 
 ## Next dependency-ordered work
 
-The latest manual full-database duel exposed the next concrete rules blocker:
-Sunscorched Desert entered without its targeted ETB and Orcish Bowmasters
-stopped on a browser-inaccessible `arbiter.resolve` decision that looked like
-both players were passing priority. The next focused slice must make the
-trusted-only lifecycle fail closed visibly and fix the generic trigger/semantic
-path for those reproduced cards. Then extend browser end-to-end journeys
-through targeting, stack response, combat, concession, natural completion, and
-process restart.
+The inspected full-database duel was created at 17:58 local time, before the
+18:44 browser-interaction fix. Its frozen checkpoint used
+`semantic_policy=arbitrate_or_pause`, and its frozen registry contained no
+Orcish Bowmasters program. It is historical pre-fix evidence, not evidence that
+the current generic trigger path failed. Current source hashes for both reviewed
+cards match the active full database, and compact trusted-only regressions pass.
+
+The next focused slice is a fresh full-database manual/browser journey created
+after a clean server restart. Exercise targeted ETBs, stack response, combat,
+concession, natural completion, and process restart. Treat any new failure as a
+rules or browser defect, but do not reuse the pinned pre-fix record as current
+semantic evidence.
 
 That slice must preserve exact replay, idempotency, seat projection, hidden
 information, and the existing no-AI core runtime boundary. Production
