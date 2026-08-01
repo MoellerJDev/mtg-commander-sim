@@ -291,6 +291,13 @@
         "number": 39,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/39"
+      },
+      {
+        "base": "main",
+        "head": "feat/rules-goad-requirements",
+        "number": 40,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/40"
       }
     ],
     "tags": [
@@ -306,7 +313,7 @@
   },
   "milestones": [
     {
-      "evidence": "Integration PRs #1-17 and #24-36 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
+      "evidence": "Integration PRs #1-17 and #24-40 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete"
@@ -360,8 +367,8 @@
       "material_residuals": 61213,
       "status_counts": {
         "exact": 338,
-        "partial": 14343,
-        "unresolved": 16942
+        "partial": 14347,
+        "unresolved": 16938
       },
       "total": 31623
     },
@@ -380,8 +387,8 @@
       "material_residuals": 69890,
       "status_counts": {
         "exact": 2959,
-        "partial": 15732,
-        "unresolved": 19793
+        "partial": 15736,
+        "unresolved": 19789
       },
       "total": 38484
     },
@@ -413,7 +420,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4033,
+    "deterministic_cases_discovered": 4056,
     "migration_files": 1,
     "schema_files": 14,
     "server_files": 5,
