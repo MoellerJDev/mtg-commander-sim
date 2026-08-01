@@ -12,18 +12,18 @@ or provider session data. Current generated metrics live in
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
 - Latest integrated `main` merge:
-  `00bd8e1abe08fd254794ab5e1f1b2386291bcbe9`
+  `b39edeb62e984ab1785948223d4e7d5b99fbec2b`
 - Latest certified feature head:
-  `5f03ff3f06420238b068193f5193521fa34869df`
-- Current focused branch: `agent/browser-lifecycle-journey`, based on
-  `00bd8e1`; its candidate commit is the commit containing this handoff.
-- Current focused slice: browser combat, public commander damage, confirmed
-  concession, natural completion, terminal restart recovery, and exact replay
+  `fc5e8be989c81c010b2550a9187ffad8d4989dd3`
+- Current focused branch: `agent/rules-combat-damage`, based on `b39edeb`; its
+  candidate commit is the commit containing this handoff.
+- Current focused slice: first/double-strike damage steps, normal trample,
+  combat lifelink, menace, defender, pinned contracts, and exact replay
 - Package: `0.8.0`
 - Tags: `v0.6.0`, `v0.7.0`
 - No `v0.8.0` release tag has been created.
 
-PRs #1–#17 and #24–#35 are merged through ordinary merge commits. PR #24
+PRs #1–#17 and #24–#36 are merged through ordinary merge commits. PR #24
 incorporated the ancestry-proven CR 400–408 stack; PRs #18–#23 were closed as
 superseded only after their exact heads were reachable from `main`. PRs #27–#35
 integrated the authoritative browser/server vertical slice, restart and
@@ -33,14 +33,14 @@ mana stabilization. No force push or tag movement was used.
 
 ## Deterministic evidence
 
-- The latest integrated feature head `5f03ff3` passed the exact 18-stage local
-  merge gate and public matrix before PR #35 merged.
+- The latest integrated feature head `fc5e8be` passed the exact 18-stage local
+  merge gate and public matrix before PR #36 merged.
 - 3,997 unit/integration tests pass on Windows Python 3.11.9 against the
   compact public CI card database.
 - All 3,300 pinned rule records and 425 mechanic records verify against the
   June 19, 2026 rules source. Generated per-rule inventory tests do not imply
   semantic completeness.
-- Conformance remains 106 passing, 371 blocked, 80 definition-only, and 2,743
+- Conformance remains 108 passing, 369 blocked, 80 definition-only, and 2,743
   unreviewed. No complete-rules claim is authorized.
 - The deterministic four-player natural-winner, seed-20260730 replay,
   projection/privacy, protocol demo, dependency, repository/history/security,
@@ -54,7 +54,7 @@ mana stabilization. No force push or tag movement was used.
   replayed to the exact final hash, reported zero suppressed meaningful
   windows, and passed its hidden-information audit. A completed concession also
   restores as terminal after server restart and exact replay.
-- Merge commit `00bd8e1` is covered by public `main` run `30681492014` across
+- Merge commit `b39edeb` is covered by public `main` run `30684463002` across
   Python 3.11/3.12, Ubuntu/Windows, and Browser/Chromium.
 
 GitHub Actions is operating normally. Historical zero-step billing failures
@@ -124,21 +124,15 @@ rules, product, CI, merge, or release authorities.
 
 ## Next dependency-ordered work
 
-The inspected full-database duel was created at 17:58 local time, before the
-18:44 browser-interaction fix. Its frozen checkpoint used
-`semantic_policy=arbitrate_or_pause`, and its frozen registry contained no
-Orcish Bowmasters program. It is historical pre-fix evidence, not evidence that
-the current generic trigger path failed. Current source hashes for both reviewed
-cards match the active full database, and compact trusted-only regressions pass.
+The lifecycle/browser milestone is integrated. Rules work now proceeds in
+coherent dependency families. The current combat slice implements and tests
+the reusable keyword interactions without promoting their contracts beyond
+partial/untrusted. The next dependency is combat turn-based-action/trigger
+ordering and the shared restrictions-and-requirements solver; the universal
+typed damage replacement/prevention pipeline remains the deeper prerequisite
+for broader combat and Oracle trust.
 
-Compact current-server browser evidence now covers targeted ETBs, a genuine
-stack response through rules-created Treasure payment, combat, concession,
-natural completion, process-restart persistence, exact replay, and privacy. The
-next focused slice is still a fresh full-database manual/browser journey created
-after a clean server restart. Reconfirm the same paths against that active full
-snapshot. Treat any new failure as a rules or browser defect, but do not reuse
-the pinned pre-fix record as current semantic evidence.
-
-That slice must preserve exact replay, idempotency, seat projection, hidden
-information, and the existing no-AI core runtime boundary. Production
-deployment hardening follows in a separate focused slice.
+Each rules PR should run its new and directly impacted tests locally, then use
+the public PR matrix as the full regression authority. Preserve exact replay,
+transaction rollback, idempotency, seat projection, hidden information, and
+the no-AI core runtime boundary.

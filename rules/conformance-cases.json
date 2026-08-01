@@ -29695,16 +29695,15 @@
       "status": "definition_only"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "first_and_double_strike_second_damage_step_not_implemented"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-506.1",
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
         "positive",
         "negative",
+        "interaction",
         "replay"
       ],
       "dependency_rule_ids": [
@@ -29714,14 +29713,15 @@
       "executable_test_ids": [
         "tests.test_combat_phase_rules.CombatPhaseRuleTests.test_empty_combat_step_sequence_and_replay_are_exact",
         "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_no_attackers_skips_blockers_and_combat_damage_steps",
-        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_first_strike_fails_closed_before_damage_decision"
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_double_strike_creates_two_real_damage_steps_and_replays"
       ],
       "implementation_components": [
         "TURN_STEPS",
-        "CommanderEngine._advance_step"
+        "CommanderEngine._advance_step",
+        "CombatState.damage_step_index"
       ],
       "notes": [
-        "The ordinary five-step skeleton and empty-combat skip replay exactly. First/double strike fails closed because the required second damage step is not implemented."
+        "The ordinary five-step skeleton, empty-combat skip, and first/double-strike second combat-damage step replay exactly."
       ],
       "required_scenarios": [
         "positive",
@@ -29738,7 +29738,7 @@
         "end_line": 2197,
         "start_line": 2196
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
       "assertion_kind": "unsupported_fail_closed",
@@ -33532,32 +33532,41 @@
       "status": "blocked"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "first_strike_double_strike_two_damage_step_state_machine_not_implemented"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-510.4",
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
-        "negative"
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
       ],
       "dependency_rule_ids": [
         "510"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_first_strike_fails_closed_before_damage_decision"
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_first_strike_creates_the_initial_combat_damage_step",
+        "tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_second_step_uses_the_first_step_snapshot_and_current_double_strike",
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_first_strike_destroys_blocker_before_ordinary_damage",
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_double_strike_creates_two_real_damage_steps_and_replays",
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_double_strike_does_not_hit_player_after_its_blocker_dies"
       ],
       "implementation_components": [
-        "CommanderEngine._begin_combat_damage"
+        "mtg_commander_sim.combat.assigns_in_damage_step",
+        "CommanderEngine._begin_combat_damage",
+        "CommanderEngine._advance_step"
       ],
       "notes": [
-        "First strike and double strike fail closed before a damage decision; the required two-step combat damage state machine is not implemented."
+        "A frozen first-step participant snapshot and current double-strike state control two real combat-damage steps, including gain/loss mutations and exact replay."
       ],
       "required_scenarios": [
+        "positive",
         "negative",
-        "interaction"
+        "interaction",
+        "replay"
       ],
       "reviewed": true,
       "rule_id": "510.4",
@@ -33568,7 +33577,7 @@
         "end_line": 2413,
         "start_line": 2412
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
       "assertion_kind": "static_traceability",

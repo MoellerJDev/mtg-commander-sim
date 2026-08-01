@@ -558,6 +558,14 @@ engine; the browser does not calculate combat rules. Submission is checked for
 basic completeness in the client, limited to adapter-issued keys by the
 service, and fully revalidated by the engine.
 
+Core combat keyword predicates and assignment constraints live in the pure
+`mtg_commander_sim.combat` module. `CommanderEngine` supplies effective current
+characteristics and applies the validated result; `CombatState` serializes the
+first-step participant snapshot and damage-step index so priority, restart,
+and command replay cannot collapse first/double strike into one step. Generic
+assignment-map metadata carries conditional group minimums such as menace to
+the browser, but the engine repeats the complete declaration check.
+
 Card-centric interaction remains a protocol adapter, not a second rules
 engine. The kernel supplies card refs, face-specific labels, current costs,
 exact legal mana modes, per-face visible definitions, and public-zone contents.

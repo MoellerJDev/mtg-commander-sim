@@ -97,6 +97,13 @@ repair, and command replay agree exactly. Seat projections expose only the
 protector seat as `protect`; they do not expose the physical card identifier,
 logical-incarnation counter, or capability data.
 
+`CombatState.damage_step_index`, `damage_step_initialized`,
+`first_strike_step`, and `ordinary_second_damage_combatants` are additive v3
+state fields. They preserve the CR 510.4 first-step snapshot and real second
+combat-damage step across checkpoints and exact command replay. The internal
+object-ID snapshot is authoritative only; projected seats receive the public
+one-based damage-step number and whether the split step exists.
+
 Fresh native records use `manifest.replay.mode = "command_replay"`. The
 separate `legacy_snapshot` mode is reserved for migrated records whose accepted
 commands cannot be reconstructed honestly.

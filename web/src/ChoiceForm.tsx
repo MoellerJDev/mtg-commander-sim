@@ -221,9 +221,16 @@ function AssignmentMap({
   labelFor: (value: string) => string;
 }) {
   const selected = record(value);
+  const minimumGroups = record(field.minimum_group_sizes);
   return (
     <fieldset className="choice-field assignment-map">
       <legend><FieldLabel field={field} /></legend>
+      {Object.entries(minimumGroups).map(([target, rawMinimum]) => (
+        <p className="choice-help" key={target}>
+          {labelFor(target)} requires either no assignments or at least{" "}
+          {text(rawMinimum)}.
+        </p>
+      ))}
       {list(field.rows).map((rawRow) => {
         const row = record(rawRow);
         const key = text(row.value);

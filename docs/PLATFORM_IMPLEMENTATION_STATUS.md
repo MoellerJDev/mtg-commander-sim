@@ -8,7 +8,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 - Default branch: `main`
 - Active branch: `main`
 - Current commit: the commit containing this ledger
-- Active phase: `browser_commander_mvp_validation_and_operations`
+- Active phase: `rules_combat_dependency_families`
 - Package version: `0.8.0`
 
 ### Pull requests
@@ -50,6 +50,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#33](https://github.com/MoellerJDev/mtg-commander-sim/pull/33) | `agent/spectator-public-log` | `main` | `merged` |
 | [#34](https://github.com/MoellerJDev/mtg-commander-sim/pull/34) | `agent/browser-rules-boundary` | `main` | `merged` |
 | [#35](https://github.com/MoellerJDev/mtg-commander-sim/pull/35) | `agent/browser-trigger-stabilization` | `main` | `merged` |
+| [#36](https://github.com/MoellerJDev/mtg-commander-sim/pull/36) | `agent/browser-lifecycle-journey` | `main` | `merged` |
 
 ## Pinned snapshots and coverage
 
@@ -59,8 +60,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 - Rules manifest present on this branch: yes
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
-- Rules cases: blocked=371, definition_only=80, passing=106, total=3300, unreviewed=2743
-- Mechanics: status_counts={'partial': 49, 'unclassified': 376}, total=425, trusted=0
+- Rules cases: blocked=369, definition_only=80, passing=108, total=3300, unreviewed=2743
+- Mechanics: status_counts={'partial': 55, 'unclassified': 370}, total=425, trusted=0
 - Oracle coverage: material_residuals=69664, status_counts={'exact': 2957, 'partial': 15691, 'unresolved': 19725}, total=38373
 - Commander-legal Oracle coverage: material_residuals=61212, status_counts={'exact': 338, 'partial': 14354, 'unresolved': 16930}, total=31622
 - Current rules/Oracle snapshot complete: no
@@ -69,7 +70,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 | Milestone | Status | Evidence |
 |---|---|---|
-| Integrated deterministic foundation | `complete` | Integration PRs #1-17 and #24-35 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
+| Integrated deterministic foundation | `complete` | Integration PRs #1-17 and #24-36 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
 | Browser Commander MVP | `development_local_runtime_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and seven two/four-player Chromium journeys, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, Chromium-verified card-scoped click/drag actions, optional manual mana activation, explicit active-player main-phase advancement, confirmed concession, public commander-damage tracking, terminal winner/draw rendering, exact command retry, invited read-only spectators, a durable complete public-log dialog, fail-closed handling for legacy arbiter-only records, and one-command managed Scryfall/browser startup. Compact trusted-only coverage includes modal land faces, targeted Sunscorched Desert ETB damage, a stack response, rules-created Treasure payment, Orcish Bowmasters/Amass, explicit attack and block declarations, combat damage, and a natural commander-damage winner. The 49-command natural-winner record replayed to its exact state hash with zero suppressed meaningful windows and a clean seat-projection audit; completed games also survive process restart. The inspected full-database failure remains a pinned pre-fix record, and a fresh post-restart full-database manual journey is still required as broader current-snapshot evidence. Future schemas, full accounts, expiry/rate limits, and production deployment remain open. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408 and CR 500-512 slices are on main. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
@@ -91,9 +92,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 3997
+- Tests discovered: 4009
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30681492014](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30681492014) — `pass`
+- Baseline CI: [30684463002](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30684463002) — `pass`
 - Compile: `pass`
 - Deterministic tests: `pass_full_exact_commit_gate`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
@@ -115,7 +116,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Run a fresh post-restart full-database manual/browser journey that reconfirms the compact target, response, combat, concession, natural-completion, replay, and restart paths against the active full snapshot; fix only failures reproduced in that current record without weakening replay or hidden-information gates.
+Continue the dependency-ordered combat rules family: correct turn-based-action and trigger batching around declare attackers, declare blockers, and combat damage, then introduce the shared restrictions-and-requirements solver without weakening exact replay, rollback, or hidden-information gates.
 
 ## Regeneration
 

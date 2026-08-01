@@ -435,6 +435,17 @@ class StateProjector:
                 for attacker, blockers in self.state.combat.blockers.items()
                 if attacker in self.state.cards
             },
+            "damage_step": (
+                self.state.combat.damage_step_index + 1
+                if (
+                    self.state.phase,
+                    self.state.step,
+                ) == ("combat", "combat_damage")
+                else 0
+            ),
+            "first_strike_step": (
+                1 if self.state.combat.first_strike_step else 0
+            ),
         }
         return {
             "rev": self.state.revision,

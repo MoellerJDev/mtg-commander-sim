@@ -217,6 +217,29 @@ test("destructive boolean choices require the exact server-issued confirmation",
   assert.match(validateChoices(concede, choices)[0], /explicit confirmation/);
 });
 
+test("assignment maps enforce server-issued conditional group minimums", () => {
+  const blockers = form([
+    {
+      name: "blocks",
+      label: "Blockers and attackers",
+      control: "assignment_map",
+      minimum_group_sizes: { A17: 2 },
+      rows: [],
+    },
+  ]);
+  assert.deepEqual(validateChoices(blockers, { blocks: {} }), []);
+  assert.match(
+    validateChoices(blockers, { blocks: { B10: "A17" } })[0],
+    /at least 2 assignments/,
+  );
+  assert.deepEqual(
+    validateChoices(blockers, {
+      blocks: { B10: "A17", B11: "A17" },
+    }),
+    [],
+  );
+});
+
 test("copy targets preserve defaults and validate each copy", () => {
   const copies = form([
     {

@@ -271,6 +271,12 @@ class CombatState:
     blocker_cursor: int = 0
     blockers: dict[str, list[str]] = field(default_factory=dict)  # attacker -> blocker object ids
     damage_assignments: list[dict[str, Any]] = field(default_factory=list)
+    damage_step_index: int = 0
+    damage_step_initialized: bool = False
+    first_strike_step: bool = False
+    ordinary_second_damage_combatants: list[str] = field(
+        default_factory=list
+    )
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
