@@ -2,7 +2,7 @@
 title: "Rules completeness implementation status"
 status: "current"
 authoritative_source: "pinned rules and generated coverage artifacts"
-verified: "3bb415ef898e3c013eaf78007c4169cc530111f5"
+verified: "1eb40f99b7269870c7e419aa75ea3e997e7aff0e"
 audience: "rules, compiler, and engine contributors"
 maintenance: "hand-maintained"
 ---
@@ -40,8 +40,9 @@ server, provider, and pilot success never promote rules fidelity by themselves.
   incarnations, the stack, mana and costs, targets and choices, state-based
   actions, combat, Commander state, and selected continuous, replacement,
   prevention, trigger, and copy behavior.
-- Typed helpers exist for several rules families, but orchestration and mutation
-  remain heavily centralized in `CommanderEngine`.
+- Typed helpers exist for several rules families. Phase 4 has a registered,
+  read-only semantic-handler boundary for the first generic operations, but
+  most orchestration and mutation remain centralized in `CommanderEngine`.
 - Semantic packs close selected card and interaction slices. They are explicit
   overrides, not evidence of universal Oracle support.
 
@@ -59,7 +60,8 @@ The principal architectural and behavioral gaps include:
   abilities, copy effects, and merged permanents;
 - complete target, search, trigger-order, loop, shortcut, multiplayer, and
   combat edge cases;
-- broad fine-grained capability closure and a typed semantic-handler boundary;
+- broad fine-grained capability closure and migration of the remaining central
+  semantic operations into the typed-handler boundary;
 - property, differential, mutation, and performance gates at the target level.
 
 ## Current migration rule
@@ -67,8 +69,9 @@ The principal architectural and behavioral gaps include:
 Broad card-family expansion is paused during the architecture migration. Phase
 0 recorded the implementation and debt. Phase 1 added enforceable import,
 mutation, card-specificity, documentation, and ADR guards. Phase 2 added the
-fine-grained capability registry, and Phase 3 adds CardProgram V2. Later phases
-migrate typed handlers and domain-owned state before resuming
+fine-grained capability registry, Phase 3 adds CardProgram V2, and Phase 4 is
+incrementally removing generic central-dispatch branches through typed handlers
+and intents. Later phases migrate domain-owned state before resuming
 dependency-ordered rules expansion.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card

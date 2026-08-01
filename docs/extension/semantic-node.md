@@ -2,7 +2,7 @@
 title: "Semantic node extension guide"
 status: "current"
 authoritative_source: "Oracle IR and semantic executor implementation"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "1eb40f99b7269870c7e419aa75ea3e997e7aff0e"
 audience: "compiler and rules contributors"
 maintenance: "hand-maintained"
 ---
@@ -19,7 +19,10 @@ runtime contract. A node is not trusted merely because parsing succeeds.
   event inputs/outputs, replacement participation, visibility, and replay.
 - Lower exact positive grammar and retain unknown suffixes as residuals.
 - Reject malformed or ambiguous variants; do not broaden via substring guesses.
-- Execute through a generic registered operation with transactional validation.
+- Define a stable typed handler with an immutable query, typed intent, and
+  explicit capability dependencies; never import engine/state authority.
+- Execute intents through canonical mutation methods with transactional
+  validation and remove the migrated legacy-dispatch branch.
 - Add compiler positive/negative tests and runtime legal/illegal, rollback,
   replay, projection, and interaction tests.
 - Update capability dependencies and generated coverage artifacts.
@@ -27,3 +30,6 @@ runtime contract. A node is not trusted merely because parsing succeeds.
 New operations cannot be registered casually: the architecture baseline
 ratchets the operation vocabulary. A new compiler stage, schema version, or
 custom runtime extension interface requires an ADR.
+
+See the [typed semantic handler architecture](../architecture/semantic-handlers.md)
+for the migration sequence and current operation inventory.

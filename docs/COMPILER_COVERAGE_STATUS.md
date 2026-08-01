@@ -45,16 +45,18 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/1`
+- Registry schema/version: `1/2`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `dc5e739f764b077fdfce48a5f1c068f5039591b5206e6fb4498dc48a7f3828f4`
-- Capability records: 15
+- Registry fingerprint: `ec11373880386dbba8322ee25f94defee54ebeb45b9a3974d678c81f1a43382d`
+- Capability records: 17
 - Trusted records: 8
 - Blocked records: 7
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
+| `cr-121-drawing-a-card` | 1 | false | `zone.draw.library_to_hand` |
 | `cr-120-damage` | 13 | false | `damage.combat.excess`, `damage.prevention.order`, `damage.replacement.order`, `damage.result.infect`, `damage.result.lifelink`, `damage.result.wither`, `damage.trigger.noncombat` |
+| `cr-725-the-monarch` | 1 | false | `variant.monarch.designate` |
 
 ## Pinned corpus accounting
 

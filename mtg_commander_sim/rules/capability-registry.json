@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 1,
+  "registry_version": 2,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -9,6 +9,12 @@
     "commander_review"
   ],
   "aggregates": [
+    {
+      "mechanic_id": "cr-121-drawing-a-card",
+      "capabilities": [
+        "zone.draw.library_to_hand"
+      ]
+    },
     {
       "mechanic_id": "cr-120-damage",
       "capabilities": [
@@ -26,9 +32,63 @@
         "damage.result.wither",
         "damage.trigger.noncombat"
       ]
+    },
+    {
+      "mechanic_id": "cr-725-the-monarch",
+      "capabilities": [
+        "variant.monarch.designate"
+      ]
     }
   ],
   "capabilities": [
+    {
+      "id": "zone.draw.library_to_hand",
+      "version": 1,
+      "official_rules": ["121.1", "121.2"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player.",
+        "inputs": ["resolved player", "nonnegative draw count", "draw reason"],
+        "outputs": ["drawn object ids", "draw events", "empty-library draw attempt"],
+        "exclusions": ["choosing among replacement effects", "dredge selection", "draw prevention", "draw-step scheduling"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.generic.DrawHandler", "mtg_commander_sim.semantic_runtime.executor.execute_intent_plan", "CommanderEngine.draw"],
+      "positive_tests": ["test_draw_handler_lowers_typed_intent_through_read_only_context"],
+      "negative_tests": ["test_registered_node_validation_fails_before_mutation"],
+      "interaction_tests": [],
+      "multiplayer_tests": ["test_draw_each_player_uses_apnap_order_and_exact_engine_path"],
+      "privacy_tests": [],
+      "replay_tests": ["test_migrated_semantic_effect_replays_exactly"],
+      "required_evidence": ["positive", "negative", "multiplayer", "replay"],
+      "mutation_status": "not_run",
+      "blockers": ["Focused mutation evidence and draw-replacement integration remain pending."],
+      "status": "tested"
+    },
+    {
+      "id": "variant.monarch.designate",
+      "version": 1,
+      "official_rules": ["725.1", "725.2"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Designate one active player as monarch through the canonical unique public designation path.",
+        "inputs": ["resolved active player", "designation reason"],
+        "outputs": ["unique monarch designation", "public change event"],
+        "exclusions": ["combat-damage transfer trigger", "monarch end-step draw", "player-leaves transfer"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.generic.BecomeMonarchHandler", "mtg_commander_sim.semantic_runtime.executor.execute_intent_plan", "CommanderEngine.become_monarch"],
+      "positive_tests": ["test_monarch_handler_uses_canonical_engine_mutation_path"],
+      "negative_tests": ["test_nonqualifying_damage_does_not_create_a_transfer_trigger"],
+      "interaction_tests": ["test_creature_combat_damage_transfers_only_on_trigger_resolution"],
+      "multiplayer_tests": ["test_designation_is_public_serialized_and_unique"],
+      "privacy_tests": [],
+      "replay_tests": ["test_player_state_declaration_predicates_and_exact_replay"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "mutation_status": "not_run",
+      "blockers": ["Focused mutation evidence remains pending."],
+      "status": "tested"
+    },
     {
       "id": "target.revalidate_resolution",
       "version": 1,

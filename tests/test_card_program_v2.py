@@ -13,7 +13,11 @@ import jsonschema
 
 from common import DB_PATH
 from mtg_commander_sim.card_programs import CardProgram, CardProgramError
-from mtg_commander_sim.card_programs.commands import _compile_best_available
+from mtg_commander_sim.card_programs.commands import (
+    _compile_best_available,
+    audit_card_program,
+    explain_card_program,
+)
 from mtg_commander_sim.card_programs.adapters import (
     card_program_from_semantic_programs,
     card_programs_from_semantic_programs,
@@ -327,6 +331,41 @@ class CardProgramV2Tests(unittest.TestCase):
             self.assertFalse(results[3]["changed"])
             self.assertIn("overrides", results[4])
             self.assertEqual(2, results[5]["cards_considered"])
+
+    def test_explain_and_audit_identify_registered_typed_handlers(self):
+        program = next(
+            card_program
+            for card_program in SemanticRegistry().card_programs()
+            if any(
+                effect.get("op") == "draw"
+                for ability in card_program.abilities
+                for effect in ability.effects
+            )
+        )
+        explained = explain_card_program(program)
+        mappings = [
+            handler
+            for ability in explained["abilities"]
+            for handler in ability["runtime_handler_mapping"][
+                "typed_handlers"
+            ]
+        ]
+        self.assertTrue(
+            any(handler["handler_id"] == "generic.draw.v1" for handler in mappings)
+        )
+        audited = audit_card_program(program)
+        audit_mappings = [
+            handler
+            for ability in audited["runtime_handler_mapping"].values()
+            for handler in ability["typed_handlers"]
+        ]
+        self.assertTrue(
+            any(
+                handler["capability_dependencies"]
+                == ["zone.draw.library_to_hand"]
+                for handler in audit_mappings
+            )
+        )
 
     def test_cli_does_not_downgrade_unexpected_compiler_errors(self):
         with patch(

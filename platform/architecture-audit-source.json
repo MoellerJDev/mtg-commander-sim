@@ -9,8 +9,8 @@
   },
   "ci": {
     "workflow": "CI",
-    "run_id": 30708805772,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30708805772",
+    "run_id": 30716628726,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30716628726",
     "status": "pass",
     "python_versions": [
       "3.11",
@@ -124,11 +124,12 @@
     },
     {
       "id": "semantic_effect_execution",
-      "status": "embedded_string_dispatch_in_commander_engine",
+      "status": "incremental_typed_handler_registry_with_legacy_engine_fallback",
       "owners": [
+        "mtg_commander_sim/semantic_runtime",
         "mtg_commander_sim/engine.py"
       ],
-      "missing_dedicated_owner": true
+      "missing_dedicated_owner": false
     },
     {
       "id": "search_target_and_choice",

@@ -2,7 +2,7 @@
 title: "Rules kernel"
 status: "current"
 authoritative_source: "mtg_commander_sim engine and rules modules"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "1eb40f99b7269870c7e419aa75ea3e997e7aff0e"
 audience: "rules and engine contributors"
 maintenance: "hand-maintained"
 ---
@@ -24,6 +24,9 @@ decisions, events, yields, and fidelity telemetry. During migration,
 `CommanderEngine` remains the declared general mutation owner. Capability
 lifecycle and replay hydration have narrowly declared compatibility ownership.
 All other rules helpers return values or operate through the engine boundary.
+Typed semantic handlers receive an immutable rules query and emit intents;
+they cannot import the engine or state model. The intent executor calls the
+existing canonical mutation methods.
 
 ## Inputs and outputs
 
@@ -43,7 +46,8 @@ priority decision.
 
 ## Extension and event participation
 
-Reusable mechanics belong in focused rules modules and semantic operations.
+Reusable mechanics belong in focused rules modules and typed semantic
+operations.
 Triggers consume normalized events; replacements transform represented events
 before final mutation; state-based actions run to a fixed point. New rules
 work must identify event/replacement participation and use capability IDs from

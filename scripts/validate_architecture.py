@@ -89,14 +89,22 @@ def _game_state_imports(tree: ast.Module) -> bool:
 def forbidden_import_violations(
     analyses: Mapping[str, Any], policy: Mapping[str, Any]
 ) -> list[dict[str, str]]:
-    forbidden = policy["forbidden_import_prefixes"]
+    global_forbidden = policy["forbidden_import_prefixes"]
+
+    def forbidden_for(relative: str) -> list[str]:
+        result = list(global_forbidden)
+        for scope in policy.get("scoped_forbidden_imports", []):
+            if relative.startswith(str(scope["path_prefix"])):
+                result.extend(scope["import_prefixes"])
+        return result
+
     return sorted(
         (
             {"file": relative, "import": imported}
             for relative, analysis in analyses.items()
             if _protected(relative, policy)
             for imported in analysis.imports
-            if _matches_prefix(imported, forbidden)
+            if _matches_prefix(imported, forbidden_for(relative))
         ),
         key=lambda item: (item["file"], item["import"]),
     )

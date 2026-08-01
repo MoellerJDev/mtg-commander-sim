@@ -94,6 +94,13 @@ from .model import (
 )
 from .permissions import AuthorizedCommand, CapabilityManager, PermissionDenied
 from .semantics import SemanticProgram, SemanticRegistry
+from .semantic_runtime import (
+    ReadOnlyHandlerContext,
+    ReadOnlyRulesQuery,
+    SemanticNodeError,
+    default_semantic_interpreter,
+    execute_intent_plan,
+)
 from .state_based_actions import (
     ObjectSnapshot,
     PermanentSnapshot,
@@ -21407,23 +21414,23 @@ class CommanderEngine:
     def apply_effect(self, effect: Mapping[str, Any], *, actor: str, as_cost: bool = False) -> Any:
         op = str(effect.get("op") or "").casefold()
         reason = str(effect.get("reason") or ("cost" if as_cost else "effect"))
-        if op == "draw":
-            return self.draw(str(effect.get("player") or actor), int(effect.get("count", 1)), reason=reason)
-        if op == "draw_each_player":
-            count = int(effect.get("count", 1))
-            return {
-                seat: self.draw(
-                    seat,
-                    count,
-                    reason=reason,
-                    private=True,
-                )
-                for seat in self.apnap_order()
-                if seat in self.active_seats
-            }
-        if op == "become_monarch":
-            seat = str(effect.get("player") or actor)
-            return self.become_monarch(seat, reason=reason)
+        try:
+            typed_plan = default_semantic_interpreter().lower(
+                effect,
+                ReadOnlyHandlerContext(
+                    actor=actor,
+                    default_reason=reason,
+                    query=ReadOnlyRulesQuery(
+                        seats=self.seats,
+                        active_seats=tuple(self.active_seats),
+                        apnap_order=tuple(self.apnap_order()),
+                    ),
+                ),
+            )
+        except SemanticNodeError as exc:
+            raise GameRuleError(str(exc)) from exc
+        if typed_plan is not None:
+            return execute_intent_plan(self, typed_plan)
         if op == "goad":
             self._require_seat(actor, in_game=True)
             card = self._resolve_object(

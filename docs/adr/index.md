@@ -20,3 +20,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0003 — ratcheted architecture and documentation enforcement](0003-ratcheted-architecture-enforcement.md)
 - [ADR 0004 — fine-grained capability trust](0004-fine-grained-capability-trust.md)
 - [ADR 0005 — canonical CardProgram V2](0005-card-program-v2.md)
+- [ADR 0006 — typed semantic handler boundary](0006-typed-semantic-handler-boundary.md)

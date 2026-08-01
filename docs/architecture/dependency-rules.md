@@ -2,7 +2,7 @@
 title: "Dependency and mutation rules"
 status: "current"
 authoritative_source: "platform/architecture-policy.json and architecture validator"
-verified: "3bb415ef898e3c013eaf78007c4169cc530111f5"
+verified: "1eb40f99b7269870c7e419aa75ea3e997e7aff0e"
 audience: "all code contributors"
 maintenance: "hand-maintained"
 ---
@@ -32,6 +32,12 @@ generated/reviewed adapters, source/trust validation, and inspection commands.
 It may depend on compiler output, semantic value objects, the card database,
 and capability metadata. It must not depend on transport, server, pilot,
 session, or persistence orchestration, and it never mutates `GameState`.
+
+`mtg_commander_sim/semantic_runtime/` owns typed node handlers, their immutable
+query context, typed intents, deterministic registry, and canonical intent
+executor. Its scoped architecture policy additionally forbids imports of the
+engine, state model, record, or projection modules. The engine may call inward
+to this pure boundary; handlers cannot call outward to authoritative state.
 
 `CommanderEngine` remains a measured legacy mutation boundary while it is
 decomposed. New engine methods, direct `GameState` write sites, card-name/Oracle

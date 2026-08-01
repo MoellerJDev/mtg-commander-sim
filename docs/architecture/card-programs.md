@@ -54,9 +54,10 @@ fail closed.
 `mtg_commander_sim/card_programs/` owns pure schema validation, deterministic
 serialization, adapters, inspection, and source/identity checks. It owns no
 `GameState` and cannot mutate a game. `SemanticRegistry` owns the canonical
-groups and semantic-key index. `CommanderEngine` remains the current mutation
-owner and consumes only indexed compiled abilities; Phase 4 will migrate its
-central operation dispatch to typed handlers.
+groups and semantic-key index. The Phase 4 typed runtime maps migrated effect
+operations to registered handlers with immutable rules queries and typed
+intents. `CommanderEngine` remains the mutation owner; unmigrated operations
+stay on the measured legacy dispatcher.
 
 ## Inspection
 
@@ -76,7 +77,12 @@ capabilities, tests, residuals, blockers, and runtime handler mapping. `audit`
 checks deterministic round-trip and source linkage. `diff` reports exact
 artifact paths instead of comparing prose.
 
+For migrated nodes, `explain` and `audit` also report the stable handler ID,
+handler schema version, and capability dependencies. This mapping is derived
+from the frozen runtime registry and is not a second serialized authority.
+
 See [ADR 0005](../adr/0005-card-program-v2.md), the
 [semantic-node guide](../extension/semantic-node.md), the
+[typed-handler boundary](semantic-handlers.md), the
 [override guide](../extension/card-override.md), and generated
 [compiler status](../COMPILER_COVERAGE_STATUS.md).

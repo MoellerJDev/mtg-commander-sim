@@ -15,16 +15,18 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 
 - Main commit: `a3ea421d021c45002048909073eeef69e6c113d9`
 - Package: `0.8.0`
-- CI run: [30708805772](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30708805772) — `pass`
-- Production scope: 68 files, 58,612 physical lines, 54,958 logical lines
+- CI run: [30716628726](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30716628726) — `pass`
+- Production scope: 77 files, 59,153 physical lines, 55,407 logical lines
 
 ## Central engine debt
 
-- `engine.py`: 23,973 physical / 23,132 logical lines
+- `engine.py`: 23,980 physical / 23,139 logical lines
 - Methods: 28 public, 303 private, 1 dunder
 - Cross-subsystem responsibility groups: 7
 - Direct GameState-write heuristic: 190 locations
-- Semantic-operation branches: 212
+- Semantic-operation branches: 211
+- Registered typed semantic handlers: 3 across 3 operations
+- Remaining legacy `apply_effect` branches: 73
 - Exact printed-name literals in configured core files: 416 (65 conditional)
 - Oracle-ID literals in Python production code: 8
 - Card-named helpers: 1
@@ -38,7 +40,7 @@ Baseline: `5197a91dcdac428c09980a39467a7a5c62bc17fa`. Guard: `python scripts/val
 
 | Dimension | Baseline | Current | Delta |
 |---|---:|---:|---:|
-| `engine_logical_lines` | 23,155 | 23,132 | -23 |
+| `engine_logical_lines` | 23,155 | 23,139 | -16 |
 | `direct_game_state_writes` | 190 | 190 | +0 |
 | `printed_name_literals` | 416 | 416 | +0 |
 | `oracle_id_literals` | 8 | 8 | +0 |
@@ -51,7 +53,7 @@ Baseline: `5197a91dcdac428c09980a39467a7a5c62bc17fa`. Guard: `python scripts/val
 
 | File | Language | Physical | Logical |
 |---|---:|---:|---:|
-| `mtg_commander_sim/engine.py` | python | 23,973 | 23,132 |
+| `mtg_commander_sim/engine.py` | python | 23,980 | 23,139 |
 | `web/src/App.tsx` | web | 1,889 | 1,828 |
 | `mtg_commander_sim/report.py` | python | 1,853 | 1,813 |
 | `mtg_commander_sim/oracle_ir.py` | python | 1,832 | 1,765 |
@@ -71,20 +73,20 @@ Baseline: `5197a91dcdac428c09980a39467a7a5c62bc17fa`. Guard: `python scripts/val
 
 | Symbol | File:line | Logical | Physical |
 |---|---|---:|---:|
-| `CommanderEngine.apply_effect` | `mtg_commander_sim/engine.py:21407` | 2174 | 2182 |
-| `CommanderEngine._begin_semantic_choice` | `mtg_commander_sim/engine.py:13412` | 1640 | 1640 |
-| `CommanderEngine._complete_semantic_choice` | `mtg_commander_sim/engine.py:15053` | 1454 | 1456 |
+| `CommanderEngine.apply_effect` | `mtg_commander_sim/engine.py:21414` | 2174 | 2182 |
+| `CommanderEngine._begin_semantic_choice` | `mtg_commander_sim/engine.py:13419` | 1640 | 1640 |
+| `CommanderEngine._complete_semantic_choice` | `mtg_commander_sim/engine.py:15060` | 1454 | 1456 |
 | `derive_review` | `mtg_commander_sim/report.py:565` | 1085 | 1089 |
 | `parse_declaration_restriction_line` | `mtg_commander_sim/declaration_restrictions.py:892` | 881 | 942 |
 | `create_app` | `server/app.py:536` | 724 | 769 |
-| `CommanderEngine._cast` | `mtg_commander_sim/engine.py:6161` | 622 | 625 |
+| `CommanderEngine._cast` | `mtg_commander_sim/engine.py:6168` | 622 | 625 |
 | `main` | `mtg_commander_sim/cli.py:747` | 617 | 627 |
 | `_compile_face` | `mtg_commander_sim/oracle_ir.py:919` | 615 | 623 |
-| `CommanderEngine._priority_action_hints` | `mtg_commander_sim/engine.py:9281` | 579 | 581 |
+| `CommanderEngine._priority_action_hints` | `mtg_commander_sim/engine.py:9288` | 579 | 581 |
 | `_effect_template` | `mtg_commander_sim/oracle_ir.py:310` | 539 | 540 |
-| `CommanderEngine._cast_cost_options` | `mtg_commander_sim/engine.py:8856` | 418 | 424 |
+| `CommanderEngine._cast_cost_options` | `mtg_commander_sim/engine.py:8863` | 418 | 424 |
 | `CommanderSession.act` | `mtg_commander_sim/session.py:531` | 382 | 386 |
-| `CommanderEngine._activate` | `mtg_commander_sim/engine.py:7361` | 375 | 383 |
+| `CommanderEngine._activate` | `mtg_commander_sim/engine.py:7368` | 375 | 383 |
 | `build_parser` | `mtg_commander_sim/cli.py:351` | 370 | 394 |
 
 ## Engine responsibility spread
@@ -104,7 +106,6 @@ Baseline: `5197a91dcdac428c09980a39467a7a5c62bc17fa`. Guard: `python scripts/val
 - `turn_priority_and_decisions`
 - `zones_and_object_identity`
 - `casting_activation_and_costs`
-- `semantic_effect_execution`
 - `search_target_and_choice`
 - `trigger_processing`
 - `commander_variant`
@@ -113,8 +114,8 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,160
-- Conventional Python cases: 860
+- Python discovered: 4,169
+- Conventional Python cases: 869
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 7
 - Browser unit cases: 14
