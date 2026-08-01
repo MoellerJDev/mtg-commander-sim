@@ -26,6 +26,7 @@ class BrowserGameplayRegressionTests(unittest.TestCase):
             auto_pass_empty=True,
         )
         keep_all(session)
+        session.state.config.semantic_policy = "trusted_only"
         session.engine.permissions.invalidate_current()
         session.state.pending_decision = None
         session.state.priority_player = None

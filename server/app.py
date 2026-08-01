@@ -29,6 +29,7 @@ from pydantic import (
 from mtg_commander_sim import (
     CardDatabase,
     CommandEnvelope,
+    CommandReceipt,
     CommanderSession,
     DeckLoader,
     DirectoryGamePersistence,
@@ -197,6 +198,65 @@ def _server_game_status(service: GameService) -> str:
     return session.record_status
 
 
+def _pause_browser_rules_boundary(service: GameService) -> bool:
+    """Fail closed when a browser game requires the separate arbiter role.
+
+    The transport-neutral engine intentionally supports explicit arbiter
+    clients.  The browser table does not: its authenticated principals are
+    seated pilots or spectators.  Leaving an arbiter-only decision active
+    therefore makes every player appear to be waiting on priority forever.
+    """
+
+    session = service.session
+    decision = session.state.pending_decision
+    if (
+        session.record_status not in {"created", "in_progress"}
+        or decision is None
+        or decision.role != "arbiter"
+    ):
+        return False
+    arbiter_payload = decision.payload_by_actor.get("arbiter", {})
+    label = str(
+        arbiter_payload.get("label") or "the current stack item"
+    )[:200]
+    session.pause(
+        {
+            "kind": "browser_rules_boundary",
+            "label": (
+                f"Rules support is required before {label} can continue. "
+                "The match is paused; no player is passing priority."
+            ),
+            "decision_kind": decision.kind,
+            "decision_id": decision.decision_id,
+        }
+    )
+    return True
+
+
+class _BrowserGameService(GameService):
+    """Game service that enforces the browser's no-arbiter boundary."""
+
+    def command(
+        self,
+        envelope: CommandEnvelope,
+        *,
+        principal: str,
+        commit_idempotency: bool = True,
+    ) -> CommandReceipt:
+        receipt = super().command(
+            envelope,
+            principal=principal,
+            commit_idempotency=commit_idempotency,
+        )
+        if receipt.ok:
+            _pause_browser_rules_boundary(self)
+        return receipt
+
+    def poll(self) -> list[str]:
+        principals = super().poll()
+        return [] if _pause_browser_rules_boundary(self) else principals
+
+
 class _StoreGamePersistence(GamePersistence):
     def __init__(
         self, records: DirectoryGamePersistence, store: ServerStore
@@ -205,6 +265,7 @@ class _StoreGamePersistence(GamePersistence):
         self.store = store
 
     def save(self, service: GameService) -> None:
+        _pause_browser_rules_boundary(service)
         self.records.save(service)
         self.store.update_game_state(
             service.session.state.game_id,
@@ -270,11 +331,17 @@ class ServerRuntime:
             try:
                 return self.manager.get(game_id)
             except KeyError:
-                service = self.records.load(
+                loaded = self.records.load(
                     self._database_for_game(game_id),
                     game_id,
                     idempotency=self.idempotency,
                 )
+                service = _BrowserGameService(
+                    loaded.session,
+                    idempotency=self.idempotency,
+                )
+                if _pause_browser_rules_boundary(service):
+                    self.records.save(service)
                 self.store.update_game_state(
                     game_id,
                     service.session.state.revision,
@@ -911,7 +978,10 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
                     trace_level="debug",
                 ),
             )
-            service = GameService(session, idempotency=runtime.idempotency)
+            service = _BrowserGameService(
+                session,
+                idempotency=runtime.idempotency,
+            )
             runtime.records.save(service)
             runtime.store.commit_started_game(
                 room_id,

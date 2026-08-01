@@ -601,9 +601,12 @@ restart and cannot override a material rules/fidelity pause. Invited spectators
 now receive only public projections and a complete durable public log. The next
 steps are:
 
-1. Fix the full-database browser regression in which Sunscorched Desert's ETB
-   was omitted and Orcish Bowmasters produced a browser-inaccessible
-   `arbiter.resolve` boundary instead of a visible trusted-only pause.
+1. Run a fresh full-database browser journey after a clean restart. The inspected
+   record that omitted Sunscorched Desert's ETB and waited on Orcish Bowmasters
+   was created before the reviewed semantic pack and pinned
+   `arbitrate_or_pause`; legacy arbiter-only records now become visible,
+   non-resumable browser rules pauses. Current compact trusted-only regressions
+   pass, but fresh full-database gameplay evidence is still required.
 2. Continue server operations hardening: expiry/rate limits, deployment
    boundaries, and multi-process ownership design.
 3. Harden browser accessibility, command-retry presentation, and any

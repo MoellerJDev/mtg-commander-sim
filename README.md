@@ -510,6 +510,14 @@ the durable lifecycle changes to `paused` and the UI reports the rules
 boundary. It does not strand the players behind an arbiter-only decision or
 describe that state as repeated priority passing.
 
+Game Records pin the semantic registry and policy that created them. Restarting
+the current server does not silently retrofit newer card behavior into an old
+record because that would break exact replay. If a pre-boundary record already
+contains an arbiter-only decision, the browser adapter now converts it to a
+durable `browser_rules_boundary` pause and states that no player is passing
+priority. Create a new room and game after restarting to test the current
+trusted semantic pack.
+
 That boundary is safer and more auditable than silently guessing at card text, while allowing semantic coverage to grow from cards actually encountered in simulations.
 
 The same rule applies to costs. Ordinary printed costs and a conservative set of explicit activated costs are derived by the server. A pilot may choose an advertised ability and the physical cards that pay delegated costs, but it cannot submit an arbitrary cheaper `declared_cost`, invent a sacrifice, or claim that a graveyard card is castable. Alternate costs, restricted mana, and unusual zone permissions must be compiled before use rather than trusted from player input.

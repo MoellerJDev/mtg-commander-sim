@@ -172,6 +172,26 @@ class ServerApplicationTests(unittest.TestCase):
         ).json()["packet"]
         self.assertEqual("commander_duel", summary["format_profile"])
         self.assertEqual({"A", "B"}, set(packet["state"]["players"]))
+        record_dir = self.settings.game_root / game_id
+        checkpoint = json.loads(
+            (record_dir / "checkpoint.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            "trusted_only", checkpoint["state"]["config"]["semantic_policy"]
+        )
+        self.assertEqual("debug", checkpoint["state"]["config"]["trace_level"])
+        semantics = json.loads(
+            (record_dir / "semantics.json").read_text(encoding="utf-8")
+        )
+        semantic_keys = set(semantics.get("programs", {}))
+        self.assertIn(
+            "256b8c23-589e-429d-9e6e-433d55079eb4:trigger:enter",
+            semantic_keys,
+        )
+        self.assertIn(
+            "ea5103f5-27e0-4eb1-902c-7f34652d6bf3:spell:front",
+            semantic_keys,
+        )
 
     def test_owner_removes_a_player_and_replaces_an_unstarted_room(self):
         alice, _ = self.guest("Room owner")
@@ -858,6 +878,75 @@ class ServerApplicationTests(unittest.TestCase):
         self.assertEqual("terminal", message["type"])
         self.assertEqual("game_access_lost", message["code"])
         self.assertIn("Return to the lobby", message["message"])
+
+    def test_persisted_arbiter_decision_becomes_browser_rules_pause(self):
+        game_id, tokens, _ = self.create_ready_game()
+        runtime = self.client.app.state.runtime
+        service = runtime.manager.get(game_id).service
+        service.session.engine.permissions.invalidate_current()
+        service.session.state.pending_decision = None
+        service.session.engine.permissions.issue(
+            kind="arbiter.resolve",
+            role="arbiter",
+            actors=["arbiter"],
+            allowed_actions=["resolve", "register_and_resolve"],
+            payload_by_actor={
+                "arbiter": {
+                    "label": "Legacy unresolved permanent",
+                    "stack": "S1",
+                }
+            },
+        )
+        service.session.record_status = "in_progress"
+        service.session.pause_reason = None
+        # Save through the raw record adapter to model a record written by a
+        # pre-boundary browser build. The next server process must recognize
+        # that no authenticated browser principal can answer this decision.
+        original_card_db = service.session.card_db
+        test_thread_card_db = CardDatabase(self.settings.card_db)
+        try:
+            service.session.card_db = test_thread_card_db
+            service.session.engine.card_db = test_thread_card_db
+            runtime.records.save(service)
+        finally:
+            service.session.card_db = original_card_db
+            service.session.engine.card_db = original_card_db
+            test_thread_card_db.close()
+        runtime.store.update_game_state(
+            game_id,
+            service.session.state.revision,
+            "active",
+        )
+
+        self.restart_client()
+
+        response = self.client.get(
+            f"/api/v1/games/{game_id}/state?full=true",
+            headers=self.auth(tokens[0]),
+        )
+        self.assertEqual(200, response.status_code, response.text)
+        payload = response.json()
+        self.assertEqual("paused", payload["game"]["status"])
+        self.assertEqual(
+            "browser_rules_boundary",
+            payload["game"]["pause_reason"]["kind"],
+        )
+        self.assertIn(
+            "no player is passing priority",
+            payload["game"]["pause_reason"]["label"],
+        )
+        self.assertIsNone(payload["packet"]["decision"])
+        self.assertFalse(payload["game"]["can_resume"])
+        persisted = json.loads(
+            (self.settings.game_root / game_id / "manifest.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual("paused", persisted["status"])
+        self.assertEqual(
+            "browser_rules_boundary",
+            persisted["pause_reason"]["kind"],
+        )
 
     def test_server_restart_recovers_decision_idempotency_and_replay(self):
         game_id, tokens, _ = self.create_ready_game()

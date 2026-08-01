@@ -1383,7 +1383,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
       )}
       {lifecycle?.status === "paused" && (
         <div className="paused-banner" role="status" data-testid="paused-banner">
-          <strong>Match stopped</strong>
+          <strong>{lifecycle.pause_reason?.kind === "administrative_stop" ? "Match stopped" : "Rules boundary reached"}</strong>
           <span>{lifecycle.pause_reason?.label ?? "Waiting for the room owner to resume."}</span>
         </div>
       )}
@@ -1466,7 +1466,9 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
         </section>
       )}
       <section id="decision-tray" className="decision-panel" data-testid="decision-panel" aria-live="polite">
-        {isSpectator ? (
+        {lifecycle?.status === "paused" ? (
+          <div className="waiting-decision" data-testid="paused-decision"><span className="status-dot muted" /><div><strong>Match paused</strong><p>No player action or priority pass is pending while this boundary is reviewed.</p></div></div>
+        ) : isSpectator ? (
           <div className="waiting-decision"><span className="status-dot muted" /><div><strong>Watching the table</strong><p>Player decisions and private information remain seat-scoped.</p></div></div>
         ) : view.decision ? (
           <>

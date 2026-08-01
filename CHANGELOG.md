@@ -39,6 +39,12 @@
   triggers, and generic Amass Orcs execution. Unsupported trusted-only
   resolution now pauses the visible game lifecycle instead of leaving clients
   on an inaccessible arbiter task.
+- Hardened the same boundary for records created by older browser builds. A
+  persisted arbiter-only decision now becomes a durable, non-resumable browser
+  rules pause, player actions disappear, and every seat is told that no player
+  action or priority pass is pending. New browser records are regression-checked
+  for `trusted_only`, debug trace retention, and the reviewed Sunscorched Desert
+  and Orcish Bowmasters programs.
 - Reduced normal local startup to `python -m server`: the launcher installs
   missing browser dependencies, rebuilds changed React sources, serves the
   production client and API from one origin, and opens the local UI.

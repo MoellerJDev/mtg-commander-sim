@@ -164,11 +164,10 @@ test("four shared-cookie browser tabs retain isolated seats through mulligans an
       await expect(page.getByTestId("game-status")).toHaveText("PAUSED");
       await expect(page.getByTestId("paused-banner")).toContainText("Browser lifecycle regression");
     }
-    await expect(pages[0].getByTestId("action-keep")).toBeDisabled();
-    for (const waitingSeat of pages.slice(1)) {
-      await expect(waitingSeat.locator('[data-testid^="action-"]')).toHaveCount(0);
-      await expect(waitingSeat.getByTestId("decision-panel")).toContainText(
-        "Waiting for another player’s decision.",
+    for (const pausedSeat of pages) {
+      await expect(pausedSeat.locator('[data-testid^="action-"]')).toHaveCount(0);
+      await expect(pausedSeat.getByTestId("paused-decision")).toContainText(
+        "No player action or priority pass is pending",
       );
     }
     await pages[1].reload();
