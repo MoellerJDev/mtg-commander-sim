@@ -46,6 +46,7 @@ indexed here but excluded from documentation front-matter validation.
 - [ADR 0004 — fine-grained capability trust](adr/0004-fine-grained-capability-trust.md)
 - [ADR 0005 — canonical CardProgram V2](adr/0005-card-program-v2.md)
 - [ADR 0006 — typed semantic handler boundary](adr/0006-typed-semantic-handler-boundary.md)
+- [ADR 0007 — CardProgram runtime components](adr/0007-cardprogram-runtime-components.md)
 - [Legacy consolidated architecture reference](../ARCHITECTURE.md)
 - [Client integration boundary](../CLIENT_INTEGRATION.md)
 - [Game Record v3](../GAME_RECORD.md)

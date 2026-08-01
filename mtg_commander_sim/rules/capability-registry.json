@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 2,
+  "registry_version": 3,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -37,6 +37,12 @@
       "mechanic_id": "cr-725-the-monarch",
       "capabilities": [
         "variant.monarch.designate"
+      ]
+    },
+    {
+      "mechanic_id": "cr-111-tokens",
+      "capabilities": [
+        "token.creation.additional_replacement"
       ]
     }
   ],
@@ -87,6 +93,30 @@
       "required_evidence": ["positive", "negative", "interaction", "multiplayer", "replay"],
       "mutation_status": "not_run",
       "blockers": ["Focused mutation evidence remains pending."],
+      "status": "tested"
+    },
+    {
+      "id": "token.creation.additional_replacement",
+      "version": 1,
+      "official_rules": ["111.2", "614.1", "614.1a", "614.4", "614.5", "614.6", "614.16"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller.",
+        "inputs": ["source controller", "token event controller", "created token card types", "fixed additional token definition"],
+        "outputs": ["typed additional-token intent", "shared creation timestamp", "ordinary token enter events"],
+        "exclusions": ["optional replacements", "noncommutative replacement ordering", "replacement rediscovery", "effects that change or double the original token quantity", "effects whose output depends on mutable state"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.token_replacements.AdditionalTokenReplacementHandler", "CommanderEngine.create_token"],
+      "positive_tests": ["test_registered_additional_token_components_replace_without_name_dispatch"],
+      "negative_tests": ["test_additional_token_component_rejects_malformed_or_nonmatching_events"],
+      "interaction_tests": ["test_multiple_additional_token_components_share_one_creation_timestamp", "test_source_created_by_event_does_not_replace_its_own_creation"],
+      "multiplayer_tests": [],
+      "privacy_tests": [],
+      "replay_tests": ["test_additional_token_component_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "replay"],
+      "mutation_status": "not_run",
+      "blockers": ["General affected-player replacement ordering and replacement rediscovery remain outside this bounded component."],
       "status": "tested"
     },
     {

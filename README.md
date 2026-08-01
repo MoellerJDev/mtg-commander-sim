@@ -761,6 +761,13 @@ intents retain the existing replacement-aware draw sequence. All other
 operations remain explicitly on the measured legacy path. This is an
 architecture milestone, not a broader rules-completeness claim.
 
+Phase 5 has begun migrating card-specific core debt into versioned CardProgram
+runtime components. The first bounded component represents mandatory fixed
+additional-token replacements as reviewed data and typed intents, removing the
+Stridehangar Automaton and Worldwalker Helm decisions from token-creation
+control flow. General replacement ordering and rediscovery remain explicitly
+unsupported; this slice is not a CR 616 completeness claim.
+
 This is still not a completeness declaration. Current exact, partial,
 unresolved, and material-residual figures are generated in
 [`docs/COMPILER_COVERAGE_STATUS.md`](docs/COMPILER_COVERAGE_STATUS.md). Every
@@ -1045,8 +1052,8 @@ container isolation when filesystem-level isolation must also be proven.
 - `mtg_commander_sim/semantics.py` — reusable effect-program registry
 - `mtg_commander_sim/card_programs/` — canonical CardProgram V2 model,
   semantic/generated adapters, audit commands, and runtime validation
-- `mtg_commander_sim/semantic_runtime/` — frozen typed-handler registry,
-  immutable rules queries, typed intents, and canonical intent execution
+- `mtg_commander_sim/semantic_runtime/` — frozen typed effect/runtime-handler
+  registries, immutable rules queries, typed intents, and canonical execution
 - `mtg_commander_sim/mana.py` — conservative mana source parsing/planning
 - `mtg_commander_sim/abilities.py` — explicit Oracle ability/cost extraction and zone authorization
 - `mtg_commander_sim/session.py` — deterministic session façade

@@ -29,6 +29,16 @@ from .registry import (
     SemanticHandlerRegistry,
     SemanticHandlerRegistryError,
 )
+from .token_replacements import (
+    AdditionalTokenIntent,
+    AdditionalTokenReplacementHandler,
+    AdditionalTokenReplacementNode,
+    TokenCreationReplacementRegistry,
+    TokenCreationReplacementContext,
+    TokenDefinition,
+    default_token_creation_replacement_registry,
+    validate_runtime_handler_descriptors,
+)
 
 
 @lru_cache(maxsize=1)
@@ -57,6 +67,9 @@ def default_semantic_interpreter() -> SemanticInterpreter:
 __all__ = [
     "BecomeMonarchIntent",
     "BecomeMonarchNode",
+    "AdditionalTokenIntent",
+    "AdditionalTokenReplacementHandler",
+    "AdditionalTokenReplacementNode",
     "DrawCardsIntent",
     "DrawEachPlayerNode",
     "DrawNode",
@@ -71,9 +84,14 @@ __all__ = [
     "SemanticInterpreter",
     "SemanticNodeHandler",
     "SemanticNodeError",
+    "TokenCreationReplacementContext",
+    "TokenCreationReplacementRegistry",
+    "TokenDefinition",
+    "default_token_creation_replacement_registry",
     "default_semantic_handler_registry",
     "default_semantic_interpreter",
     "draw_resolution_batch",
     "execute_intent_plan",
     "prepare_draw_resolution",
+    "validate_runtime_handler_descriptors",
 ]

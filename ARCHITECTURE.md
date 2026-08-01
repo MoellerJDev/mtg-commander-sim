@@ -123,6 +123,12 @@ semantic hash, and exact fingerprint. Runtime still consumes a derived
 Game Record v3 records pin CardProgram fingerprints without changing the record
 version.
 
+Versioned CardProgram runtime component descriptors represent static
+participation in later events without printed-name dispatch in the engine. The
+first registered component lowers reviewed fixed additional-token replacements
+to typed intents. Its scope is deliberately narrower than general CR 616
+replacement ordering and rediscovery.
+
 ## Authoritative state versus projected state
 
 `GameState` is server-only. It includes every physical object, hidden zone, turn queue, delayed trigger, capability, event, and knowledge marker.

@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
+from .semantic_runtime import validate_runtime_handler_descriptors
 from .util import stable_json
 
 TRUST_LEVELS = {
@@ -173,6 +174,7 @@ class SemanticProgram:
             set(self.capability_dependencies)
         ):
             raise ValueError("Capability dependencies must be unique")
+        validate_runtime_handler_descriptors(self.handlers)
         if self.capability_dependencies and self.capability_closure is None:
             raise ValueError(
                 "Capability dependencies require their resolved closure"
@@ -389,9 +391,28 @@ class SemanticRegistry:
         self.path = Path(path) if path else None
         self._programs: dict[str, SemanticProgram] = {}
         self._card_program_cache: dict[str, Any] | None = None
+        self._runtime_handler_compatibility: dict[
+            tuple[str, str, str], tuple[SemanticProgram, ...]
+        ] = {}
+        self._runtime_handler_compatibility_enabled = False
         self.loaded_packs: list[dict[str, Any]] = []
         if include_builtin_packs and BUILTIN_PACK_DIRECTORY.exists():
             self.load_packs([BUILTIN_PACK_DIRECTORY])
+            grouped: dict[tuple[str, str, str], list[SemanticProgram]] = {}
+            for program in self._programs.values():
+                if program.oracle_id and program.handlers:
+                    grouped.setdefault(
+                        (
+                            program.oracle_id,
+                            program.active_zone,
+                            program.event,
+                        ),
+                        [],
+                    ).append(program)
+            self._runtime_handler_compatibility = {
+                key: tuple(sorted(programs, key=lambda value: value.key))
+                for key, programs in grouped.items()
+            }
         if pack_paths:
             self.load_packs(pack_paths)
         if self.path and self.path.exists():
@@ -407,6 +428,7 @@ class SemanticRegistry:
             # the semantics used to replay an older accepted-command prefix.
             self._programs.clear()
             self._card_program_cache = None
+            self._runtime_handler_compatibility_enabled = True
         serialized_card_programs = raw.get("card_programs")
         if serialized_card_programs is not None:
             if raw.get("card_program_schema_version") != 2:
@@ -542,6 +564,47 @@ class SemanticRegistry:
             and (active_zone is None or program.active_zone == active_zone)
             and (event is None or program.event == event)
         ]
+
+    def runtime_handler_programs_for_oracle(
+        self,
+        oracle_id: str,
+        *,
+        active_zone: str,
+        event: str,
+    ) -> list[SemanticProgram]:
+        current = sorted(
+            (
+                program
+                for program in self.programs_for_oracle(
+                    oracle_id,
+                    active_zone=active_zone,
+                    event=event,
+                )
+                if program.handlers
+            ),
+            key=lambda value: value.key,
+        )
+        if current or not self._runtime_handler_compatibility_enabled:
+            return current
+        return list(
+            self._runtime_handler_compatibility.get(
+                (oracle_id, active_zone, event), ()
+            )
+        )
+
+    def is_runtime_handler_compatibility_program(
+        self,
+        program: SemanticProgram,
+    ) -> bool:
+        if not self._runtime_handler_compatibility_enabled:
+            return False
+        candidates = self._runtime_handler_compatibility.get(
+            (program.oracle_id, program.active_zone, program.event), ()
+        )
+        return any(
+            candidate.to_dict() == program.to_dict()
+            for candidate in candidates
+        )
 
     def trust_for_oracle(self, oracle_id: str) -> str:
         programs = self.programs_for_oracle(oracle_id)

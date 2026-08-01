@@ -21,3 +21,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0004 — fine-grained capability trust](0004-fine-grained-capability-trust.md)
 - [ADR 0005 — canonical CardProgram V2](0005-card-program-v2.md)
 - [ADR 0006 — typed semantic handler boundary](0006-typed-semantic-handler-boundary.md)
+- [ADR 0007 — CardProgram runtime components](0007-cardprogram-runtime-components.md)

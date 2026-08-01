@@ -367,6 +367,33 @@ class CardProgramV2Tests(unittest.TestCase):
             )
         )
 
+        runtime_program = next(
+            card_program
+            for card_program in SemanticRegistry().card_programs()
+            if any(ability.handlers for ability in card_program.abilities)
+        )
+        runtime_explained = explain_card_program(runtime_program)
+        event_handler = next(
+            handler
+            for ability in runtime_explained["abilities"]
+            for handler in ability["runtime_handler_mapping"][
+                "event_handlers"
+            ]
+        )
+        self.assertEqual(
+            ["token.creation.additional_replacement"],
+            event_handler["registry"]["capability_dependencies"],
+        )
+        runtime_audit = audit_card_program(runtime_program)
+        self.assertTrue(
+            any(
+                mapping["event_handlers"]
+                for mapping in runtime_audit[
+                    "runtime_handler_mapping"
+                ].values()
+            )
+        )
+
     def test_cli_does_not_downgrade_unexpected_compiler_errors(self):
         with patch(
             "mtg_commander_sim.card_programs.commands.compile_card_program",

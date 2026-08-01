@@ -69,10 +69,11 @@ The principal architectural and behavioral gaps include:
 Broad card-family expansion is paused during the architecture migration. Phase
 0 recorded the implementation and debt. Phase 1 added enforceable import,
 mutation, card-specificity, documentation, and ADR guards. Phase 2 added the
-fine-grained capability registry, Phase 3 adds CardProgram V2, and Phase 4 is
-incrementally removing generic central-dispatch branches through typed handlers
-and intents. Later phases migrate domain-owned state before resuming
-dependency-ordered rules expansion.
+fine-grained capability registry, Phase 3 added CardProgram V2, and Phase 4
+incrementally removed generic central-dispatch branches through typed handlers
+and intents. Phase 5 is now moving card-specific core branches into registered,
+versioned CardProgram runtime components. Later phases migrate domain-owned
+state before resuming dependency-ordered rules expansion.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,
