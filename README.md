@@ -315,7 +315,7 @@ generated documentation fixtures with bearer capabilities redacted. See
   fail-closed material residuals
 - automatic deck-time generic compilation into provisional, arbiter-gated
   semantic programs
-- Oracle IR v8 simple self-trigger, unconditional-entry, counter, pump, basic
+- Oracle IR v10 simple self-trigger, unconditional-entry, counter, pump, basic
   creature-token, fixed-mana combat-declaration cost, and exact combat-
   declaration restriction/evasion/battlefield-condition/composition and
   source-controller target-scope templates with reviewed-handler precedence
@@ -613,8 +613,8 @@ python simctl.py rules conformance --root .
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
 generated source-linkage tests. Of those cases, 563 are source-reviewed:
-120 have narrow executable semantic evidence, 362 are explicitly blocked, and
-81 are definition-only; 2,737 remain unreviewed. A generated inventory test
+125 have narrow executable semantic evidence, 362 are explicitly blocked, and
+82 are definition-only; 2,731 remain unreviewed. A generated inventory test
 cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
 invalidation, and reporting policy.
 
@@ -709,8 +709,8 @@ python simctl.py oracle coverage \
 ```
 
 This is still not a completeness declaration. The measured July 31 local
-snapshot has 38,484 Oracle IDs: 2,959 exact, 16,042 partially lowerable, and
-19,483 unresolved under current dependency gates. All 69,890 material residuals must
+snapshot has 38,484 Oracle IDs: 2,959 exact, 16,068 partially lowerable, and
+19,457 unresolved under current dependency gates. All 69,890 material residuals must
 be eliminated or covered by reviewed, hash-pinned overrides before complete
 Oracle support can be claimed. Genuinely unique cards may use reviewed
 overrides; common cards and mechanics compile through reusable primitives.

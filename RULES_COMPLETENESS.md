@@ -15,13 +15,13 @@ claim complete rules or Oracle coverage. The current June 19, 2026 CR / July
 - 156 rules sections indexed
 - 733 glossary entries indexed
 - 425 CR section, keyword-action, and keyword-ability mechanics discovered
-- 57 mechanics under versioned partial contracts and 368 unclassified
-- 563 source-reviewed rule records: 115 executable passes, 367 explicit
-  fail-closed blockers, and 81 definition-only records; 2,737 remain
+- 58 mechanics under versioned partial contracts and 367 unclassified
+- 569 source-reviewed rule records: 125 executable passes, 362 explicit
+  fail-closed blockers, and 82 definition-only records; 2,731 remain
   unreviewed
 - 0 rules or mechanics promoted to trusted by the new registry
 - 38,484 Oracle IDs and 41,701 faces scanned
-- 2,959 exact (primarily textless), 15,732 partially lowerable, and 19,793
+- 2,959 exact (primarily textless), 16,068 partially lowerable, and 19,457
   unresolved Oracle IDs
 - 69,890 material residuals, including untrusted dependencies
 - `current_snapshot_complete = false`
@@ -30,7 +30,7 @@ Existing reviewed engine behavior and semantic packs remain available, but the
 new corpus does not retroactively label them trusted until contracts, rule
 references, and conformance tests are linked.
 
-Oracle IR v3 additionally structures exact whole-line forms for simple self
+Oracle IR v10 additionally structures exact whole-line forms for simple self
 enters/dies/leaves triggers, unconditional enters-tapped replacements, fixed
 self pumps and keyword grants, one-counter instructions, and basic creature
 token creation, plus target-creature goad instructions with optional opponent-

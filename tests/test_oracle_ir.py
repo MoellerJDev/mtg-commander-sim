@@ -111,6 +111,7 @@ class MechanicContractTests(unittest.TestCase):
                 "cr-615-prevention-effects",
                 "cr-704-state-based-actions",
                 "cr-707-copying-objects",
+                "cr-725-the-monarch",
                 "cr-802-attack-multiple-players-option",
                 "deathtouch",
                 "defender",

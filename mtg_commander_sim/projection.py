@@ -458,6 +458,7 @@ class StateProjector:
                 "id": self.state.game_id,
                 "over": self.state.game_over,
                 "winner": self.state.winner,
+                "monarch": self.state.monarch,
             },
             "turn": turn,
             "players": players,

@@ -167,6 +167,23 @@ class EndStepRuleTests(unittest.TestCase):
 
         self.enter_end_step(session)
 
+        self.assertEqual("trigger.order", engine.state.pending_decision.kind)
+        packet = session.packet("pilot:A", full=True)
+        by_label = {
+            item["label"]: item["id"]
+            for item in packet["decision"]["ctx"]["triggers"]
+        }
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "order",
+                "triggers": [
+                    by_label["CR 513 permanent end-step trigger"],
+                    by_label[f"Sacrifice {warform_ref}"],
+                ],
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
         self.assertEqual(
             {
                 "CR 513 permanent end-step trigger",

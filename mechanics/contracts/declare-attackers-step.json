@@ -266,7 +266,7 @@
   },
   "known_blockers": [
     "exact attacks-each-combat and typed goad requirements are represented; conditional, non-goad defender-specific, and other effect-granted requirement grammar remains incomplete",
-    "history-, monarch-, poison-, compound-, other named-target-, temporary-, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
+    "history-, compound-, other named-target-, temporary-, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
     "banding declarations are not implemented",
     "optional, nonmana, variable, alternative, modified, and broader conditional attack costs are not implemented",
     "declare-attackers trigger generation and APNAP placement are incomplete",

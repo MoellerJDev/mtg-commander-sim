@@ -11,10 +11,10 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "rules_combat_dependency_families",
-    "branch": "feat/rules-combat-quantifiers-planeswalkers",
+    "active_phase": "rules_public_player_state_conditions",
+    "branch": "feat/rules-combat-player-state-conditions",
     "branch_ancestry": {
-      "focused_branch_base": "81ce825b72ed1edaf2cd7d51881859a4bebb6dde",
+      "focused_branch_base": "c5f0ea553bf3abf89c303027e7271d51a476f76e",
       "focused_branch_unique_commits_over_main": 1
     },
     "commit_reference": "the commit containing this ledger",
@@ -333,6 +333,13 @@
         "number": 45,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/45"
+      },
+      {
+        "base": "main",
+        "head": "feat/rules-combat-quantifiers-planeswalkers",
+        "number": 46,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/46"
       }
     ],
     "tags": [
@@ -348,7 +355,7 @@
   },
   "milestones": [
     {
-      "evidence": "Integration PRs #1-17 and #24-45 are on main; the focused planeswalker-combat and declaration-quantifier slice is active. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
+      "evidence": "Integration PRs #1-17 and #24-46 are on main; the focused CR 725 monarch and public declaration-player-state slice is active. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete"
@@ -360,7 +367,7 @@
       "status": "development_local_runtime_hardened"
     },
     {
-      "evidence": "The versioned 2026-06-19 corpus and reviewed CR 400-408 and CR 500-512 slices are on main. Broader rules and Oracle completeness remain explicitly unclaimed.",
+      "evidence": "The versioned 2026-06-19 corpus and reviewed CR 400-408, CR 500-514, and focused CR 725 slices are represented. Broader rules and Oracle completeness remain explicitly unclaimed.",
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main"
@@ -372,7 +379,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "After the planeswalker-combat and declaration-quantifier slice, extend the shared finite combat declaration solver to history-, monarch-, poison-, non-goad requirement-, other effect-granted-, optional-cost-, and multi-block grammar; then route declaration triggers through the same boundary while keeping the universal CR 120.4 damage transformation pipeline as the next deeper dependency.",
+  "next_task": "After the CR 725 monarch and public player-state slice, extend the shared finite combat declaration solver to current-turn history predicates, non-goad requirements, other effect-granted restrictions, optional costs, and multi-block grammar; then route declaration triggers through the same boundary while keeping the universal CR 120.4 damage transformation pipeline as the next deeper dependency.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -402,8 +409,8 @@
       "material_residuals": 61213,
       "status_counts": {
         "exact": 338,
-        "partial": 14616,
-        "unresolved": 16669
+        "partial": 14642,
+        "unresolved": 16643
       },
       "total": 31623
     },
@@ -412,8 +419,8 @@
     "manifest_present": true,
     "mechanics": {
       "status_counts": {
-        "partial": 57,
-        "unclassified": 368
+        "partial": 58,
+        "unclassified": 367
       },
       "total": 425,
       "trusted": 0
@@ -422,17 +429,17 @@
       "material_residuals": 69890,
       "status_counts": {
         "exact": 2959,
-        "partial": 16042,
-        "unresolved": 19483
+        "partial": 16068,
+        "unresolved": 19457
       },
       "total": 38484
     },
     "rules": {
       "blocked": 362,
-      "definition_only": 81,
-      "passing": 120,
+      "definition_only": 82,
+      "passing": 125,
       "total": 3300,
-      "unreviewed": 2737
+      "unreviewed": 2731
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -455,19 +462,19 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4106,
+    "deterministic_cases_discovered": 4117,
     "migration_files": 1,
     "schema_files": 14,
     "server_files": 5,
     "web_files": 20
   },
   "validation": {
-    "baseline_commit": "81ce825b72ed1edaf2cd7d51881859a4bebb6dde",
+    "baseline_commit": "c5f0ea553bf3abf89c303027e7271d51a476f76e",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30697071401,
+      "run_id": 30698822491,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30697071401"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30698822491"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_card_drag_drop_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -476,7 +483,7 @@
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "deterministic_tests": "pass_full_exact_commit_gate",
-      "focused_rules_tests": "pass_172_new_and_directly_impacted_tests_plus_3_subtests_current_branch",
+      "focused_rules_tests": "pass_new_monarch_declaration_end_step_trigger_elimination_projection_oracle_and_exact_replay_tests_plus_directly_impacted_modules_current_branch",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",

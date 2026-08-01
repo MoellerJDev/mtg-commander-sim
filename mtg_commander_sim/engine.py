@@ -56,6 +56,7 @@ from .declaration_restrictions import (
     DeclarationCondition,
     DeclarationConditionPlayer,
     DeclarationObjectPredicate,
+    DeclarationPlayerStateCondition,
     DeclarationRestrictionTemplate,
     DeclarationSharedSubtypeCondition,
     parse_declaration_restriction_line,
@@ -506,6 +507,7 @@ class CommanderEngine:
             return
         if event.code in {
             "land.play",
+            "monarch.change",
             "token.create",
             "control.change",
             "permanent.goad",
@@ -513,6 +515,56 @@ class CommanderEngine:
             "player.eliminated",
         }:
             self._increment_yield_change_epoch("public")
+
+    def become_monarch(self, seat: str, *, reason: str) -> str:
+        """Make one active player the monarch under CR 725.1 and 725.3."""
+
+        self._require_seat(seat, in_game=True)
+        previous = self.state.monarch
+        if previous == seat:
+            return seat
+        self.state.monarch = seat
+        self._log(
+            seat,
+            "monarch.change",
+            f"{seat} became the monarch.",
+            {
+                "player": seat,
+                "previous": previous,
+                "reason": reason,
+            },
+            importance=2,
+            changed_players=unique_preserving_order(
+                [value for value in (previous, seat) if value is not None]
+            ),
+        )
+        return seat
+
+    def _monarch_trigger(
+        self,
+        *,
+        controller: str,
+        label: str,
+        effects: Sequence[Mapping[str, Any]],
+        context: Mapping[str, Any],
+    ) -> StackItem:
+        """Materialize one CR 725.2 inherent triggered ability."""
+
+        ref = self._next_ref("S")
+        return StackItem(
+            stack_id=self._stable_runtime_id("stack", ref),
+            ref=ref,
+            kind="triggered_ability",
+            controller=controller,
+            label=label,
+            visibility=list(self.seats),
+            context={
+                **copy.deepcopy(dict(context)),
+                "dynamic_effects": copy.deepcopy(
+                    [dict(effect) for effect in effects]
+                ),
+            },
+        )
 
     def _assert_invariants(self) -> None:
         membership: dict[str, list[tuple[str, str]]] = {}
@@ -592,6 +644,13 @@ class CommanderEngine:
                 )
         if self.state.priority_player is not None and self.state.priority_player not in self.active_seats:
             raise StateInvariantError("Priority belongs to a player who is not in the game")
+        if (
+            self.state.monarch is not None
+            and self.state.monarch not in self.active_seats
+        ):
+            raise StateInvariantError(
+                "The monarch designation belongs to a player who is not in the game"
+            )
         for player in self.state.players.values():
             if any(value < 0 for value in player.mana_pool.values()):
                 raise StateInvariantError(f"Negative mana in {player.seat}'s pool")
@@ -3772,17 +3831,45 @@ class CommanderEngine:
                 "step": step,
                 "player": active,
             }
-            self._dispatch_semantic_event("step.begin", context)
-            delayed = self._matching_delayed_triggers(
+            waiting_triggers: list[StackItem] = []
+            self._dispatch_semantic_event(
                 "step.begin",
                 context,
+                trigger_batch=waiting_triggers,
             )
-            if delayed:
-                self._start_trigger_batch(
-                    delayed,
-                    after="grant_priority",
+            waiting_triggers.extend(
+                self._delayed_trigger_stack_item(trigger)
+                for trigger in self._matching_delayed_triggers(
+                    "step.begin",
+                    context,
                 )
-                return
+            )
+            if step == "end_step" and self.state.monarch == active:
+                monarch = str(self.state.monarch)
+                waiting_triggers.append(
+                    self._monarch_trigger(
+                        controller=monarch,
+                        label="The monarch — draw a card",
+                        effects=(
+                            {
+                                "op": "draw",
+                                "player": monarch,
+                                "count": 1,
+                                "private": True,
+                                "reason": "the monarch's end-step trigger",
+                            },
+                        ),
+                        context={
+                            "event": "step.begin",
+                            "phase": phase,
+                            "step": step,
+                            "player": active,
+                            "monarch_at_trigger": monarch,
+                            "inherent_rule": "CR 725.2a",
+                        },
+                    )
+                )
+            self._enqueue_semantic_trigger_batch(waiting_triggers)
             self._grant_priority(active)
             return
 
@@ -17859,6 +17946,20 @@ class CommanderEngine:
                 condition.kind == "attacking_alone"
                 and len(self._current_attacker_cards()) == 1
             )
+        if isinstance(condition, DeclarationPlayerStateCondition):
+            player = self._declaration_condition_player(
+                condition.player,
+                kind=kind,
+                source=source,
+                variable=variable,
+                option=option,
+                by_ref=by_ref,
+            )
+            if player is None:
+                return False
+            if condition.state == "monarch":
+                return self.state.monarch == player
+            return self.state.players[player].poison > 0
         if isinstance(condition, DeclarationSharedSubtypeCondition):
             player = self._declaration_condition_player(
                 condition.player,
@@ -19987,6 +20088,43 @@ class CommanderEngine:
         for event in damage_events:
             if not event.was_dealt:
                 continue
+            if (
+                self.state.monarch is not None
+                and event.target_kind == "player"
+                and event.target == self.state.monarch
+                and event.combat
+                and "creature" in event.source_types
+                and event.source_controller in self.active_seats
+            ):
+                old_monarch = str(self.state.monarch)
+                new_monarch = event.source_controller
+                trigger_batch.append(
+                    self._monarch_trigger(
+                        controller=old_monarch,
+                        label=(
+                            "The monarch — "
+                            f"{new_monarch} becomes the monarch"
+                        ),
+                        effects=(
+                            {
+                                "op": "become_monarch",
+                                "player": new_monarch,
+                                "reason": (
+                                    "a creature dealt combat damage to "
+                                    "the monarch"
+                                ),
+                            },
+                        ),
+                        context={
+                            "event": "damage.dealt",
+                            "source": event.source,
+                            "damaged_player": event.target,
+                            "new_monarch": new_monarch,
+                            "monarch_at_trigger": old_monarch,
+                            "inherent_rule": "CR 725.2b",
+                        },
+                    )
+                )
             self._dispatch_semantic_event(
                 "damage.dealt",
                 event.semantic_context(),
@@ -20957,6 +21095,9 @@ class CommanderEngine:
         unique = [seat for seat in unique_preserving_order(seats) if seat in self.active_seats]
         if not unique:
             return
+        departing_monarch = self.state.monarch in unique
+        monarch_before_departure = self.state.monarch
+        active_before_departure = self.state.active_player
         for seat in unique:
             player = self.state.players[seat]
             player.in_game = False
@@ -21010,6 +21151,40 @@ class CommanderEngine:
             self._log(seat, "player.eliminated", f"{seat} left the game: {reason}.", {"reason": reason}, importance=3, changed_players=[seat])
 
         remaining = self.active_seats
+        if departing_monarch:
+            if not remaining:
+                previous = self.state.monarch
+                self.state.monarch = None
+                self._log(
+                    None,
+                    "monarch.change",
+                    "No player is the monarch.",
+                    {
+                        "player": None,
+                        "previous": previous,
+                        "reason": "the monarch left the game",
+                    },
+                    importance=2,
+                    changed_players=(
+                        [str(previous)] if previous is not None else []
+                    ),
+                )
+            else:
+                successor = (
+                    active_before_departure
+                    if active_before_departure in remaining
+                    else self._next_active_after(
+                        str(
+                            active_before_departure
+                            or monarch_before_departure
+                            or self.state.turn_order[-1]
+                        )
+                    )
+                )
+                self.become_monarch(
+                    str(successor),
+                    reason="the monarch left the game",
+                )
         self.state.combat.defending_players = [
             seat
             for seat in self.state.combat.defending_players
@@ -21050,6 +21225,9 @@ class CommanderEngine:
                 for seat in self.apnap_order()
                 if seat in self.active_seats
             }
+        if op == "become_monarch":
+            seat = str(effect.get("player") or actor)
+            return self.become_monarch(seat, reason=reason)
         if op == "goad":
             self._require_seat(actor, in_game=True)
             card = self._resolve_object(
