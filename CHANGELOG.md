@@ -1,3 +1,12 @@
+---
+title: "Changelog"
+status: "historical"
+authoritative_source: "merged repository history"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "users and maintainers"
+maintenance: "hand-maintained"
+---
+
 # Changelog
 
 ## Unreleased

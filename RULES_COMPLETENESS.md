@@ -1,3 +1,12 @@
+---
+title: "Rules completeness program"
+status: "current"
+authoritative_source: "pinned rules corpus, coverage schemas, and trust policy"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "rules, compiler, and test contributors"
+maintenance: "hand-maintained"
+---
+
 # Rules completeness program
 
 ## Goal and current status
@@ -8,23 +17,13 @@ one engine branch per card.
 
 The integrated `main` branch establishes the versioned corpus, typed Oracle IR,
 mechanic contracts, and generic CR 400/613/616/704 primitives. It does not yet
-claim complete rules or Oracle coverage. The current June 19, 2026 CR / July
-31, 2026 local Oracle snapshot deliberately reports:
-
-- 3,300 unique numbered rules indexed
-- 156 rules sections indexed
-- 733 glossary entries indexed
-- 425 CR section, keyword-action, and keyword-ability mechanics discovered
-- 58 mechanics under versioned partial contracts and 367 unclassified
-- 569 source-reviewed rule records: 125 executable passes, 362 explicit
-  fail-closed blockers, and 82 definition-only records; 2,731 remain
-  unreviewed
-- 0 rules or mechanics promoted to trusted by the new registry
-- 38,484 Oracle IDs and 41,701 faces scanned
-- 2,959 exact (primarily textless), 16,092 partially lowerable, and 19,433
-  unresolved Oracle IDs
-- 69,890 material residuals, including untrusted dependencies
-- `current_snapshot_complete = false`
+claim complete rules or Oracle coverage. Current corpus, conformance, mechanic,
+compiler, residual, and trust figures are generated from the pinned JSON in
+[`coverage/rules-coverage.md`](coverage/rules-coverage.md),
+[`coverage/rules-conformance.md`](coverage/rules-conformance.md), and
+[`docs/COMPILER_COVERAGE_STATUS.md`](docs/COMPILER_COVERAGE_STATUS.md).
+`current_snapshot_complete` is a machine-derived gate, not a hand-maintained
+claim.
 
 Existing reviewed engine behavior and semantic packs remain available, but the
 new corpus does not retroactively label them trusted until contracts, rule

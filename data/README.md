@@ -1,3 +1,12 @@
+---
+title: "Local card database"
+status: "current"
+authoritative_source: "managed Scryfall data service and card database schema"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "local operators and data-layer contributors"
+maintenance: "hand-maintained"
+---
+
 # Local card database
 
 The simulator reads a local SQLite database built from Scryfall's Oracle-card

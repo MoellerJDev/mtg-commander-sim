@@ -1,3 +1,12 @@
+---
+title: "Comprehensive Rules coverage"
+status: "generated"
+authoritative_source: "coverage/rules-coverage.json"
+verified: "2026-06-19"
+audience: "rules and engine contributors"
+maintenance: "generated"
+---
+
 # Comprehensive Rules coverage
 
 - Effective date: `2026-06-19`

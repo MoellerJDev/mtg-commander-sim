@@ -1,3 +1,12 @@
+---
+title: "Rules baseline"
+status: "current"
+authoritative_source: "pinned rules corpus and implemented engine boundary"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "rules and engine contributors"
+maintenance: "hand-maintained"
+---
+
 # Rules baseline
 
 The kernel is aligned to the Magic Comprehensive Rules effective June 19, 2026 and the local Scryfall bulk files dated July 28, 2026.
@@ -18,8 +27,9 @@ The conformance ledger additionally source-reviews the CR 400–408 zone
 families, CR 500–514 turn/combat/ending families, and selected CR 120, 210,
 310, 600–609, 614–616, and 704 families. A reviewed family may contain passing,
 definition-only, and explicitly blocked records; review is not a completeness
-claim. Current generated totals are 558 reviewed out of 3,300 rules and 56
-partial out of 425 mechanics.
+claim. Current rule and mechanic totals are generated in
+[`coverage/rules-coverage.md`](coverage/rules-coverage.md) and
+[`coverage/mechanics-coverage.md`](coverage/mechanics-coverage.md).
 
 The Comprehensive Rules remain authoritative. `ARCHITECTURE.md` documents the
 implemented subset. Trusted-only product play fails closed on uncompiled

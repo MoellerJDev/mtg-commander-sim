@@ -4,7 +4,12 @@ import subprocess
 import sys
 import unittest
 
-from scripts.update_platform_status import ROOT, build_report
+from scripts.update_platform_status import (
+    ROOT,
+    build_report,
+    render_readiness,
+    render_status,
+)
 
 
 class PlatformStatusTests(unittest.TestCase):
@@ -16,6 +21,15 @@ class PlatformStatusTests(unittest.TestCase):
         self.assertGreaterEqual(report["tests"]["web_files"], 10)
         self.assertGreaterEqual(report["tests"]["migration_files"], 1)
         self.assertEqual(report["platform"]["ai_dependency"], "none_for_core_tests_or_runtime")
+        self.assertNotIn("pull_requests", report["integration"])
+        self.assertNotIn("branch", report["integration"])
+        self.assertNotIn("branch_ancestry", report["integration"])
+        readiness = render_readiness(report)
+        status = render_status(report)
+        self.assertTrue(readiness.startswith("---\n"))
+        self.assertIn('status: "generated"', readiness)
+        self.assertNotIn("### Pull requests", status)
+        self.assertNotIn("/pull/", status)
 
     def test_generated_platform_status_is_current(self):
         result = subprocess.run(

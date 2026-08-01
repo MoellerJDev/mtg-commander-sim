@@ -104,7 +104,16 @@ def main() -> int:
             json.dumps(measures, indent=2), encoding="utf-8"
         )
 
-        summary = f"""# Four-player protocol smoke test
+        summary = f"""---
+title: "Four-player protocol smoke test"
+status: "generated"
+authoritative_source: "scripts/demo_four_player_protocol.py"
+verified: "2026-08-01"
+audience: "protocol and projection contributors"
+maintenance: "generated"
+---
+
+# Four-player protocol smoke test
 
 - Protocol: `{full['v']}`
 - Seats: A Mishra, B Zimone/Dina, C Mishra, D Zimone/Dina

@@ -1,3 +1,12 @@
+---
+title: "Review output before and after 0.4.0"
+status: "historical"
+authoritative_source: "0.4 review fixture"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "maintainers researching the decision-opportunity regression"
+maintenance: "hand-maintained"
+---
+
 # Review output before and after 0.4.0
 
 The migrated v2 fixture remains useful as a negative example. It lacks native

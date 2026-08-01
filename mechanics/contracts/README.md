@@ -1,3 +1,12 @@
+---
+title: "Mechanic contracts"
+status: "current"
+authoritative_source: "mechanic contract schema and contract files"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "rules and compiler contributors"
+maintenance: "hand-maintained"
+---
+
 # Mechanic contracts
 
 Every mechanic must receive a versioned contract before the generated registry

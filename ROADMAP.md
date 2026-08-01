@@ -1,3 +1,12 @@
+---
+title: "Roadmap"
+status: "target"
+authoritative_source: "current standalone platform objective"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "maintainers and contributors"
+maintenance: "hand-maintained"
+---
+
 # Roadmap
 
 The product target is a deterministic, server-authoritative, browser-based
@@ -17,9 +26,9 @@ The generated current ledger is
 - [x] retarget and merge the rules branch into `main`
 - [x] retain exact replay, privacy, repository, schema, and packaging gates
 - [x] remove AI-run games and provider identity from product completion criteria
-- [x] integrate CR 400–408 and CR 500–512 into `main`; the cumulative PR #24
-  tip preserved the intermediate CR 400–407 heads before GitHub recorded #17
-  as merged and #18–#23 closed as superseded
+- [x] integrate the reviewed CR 400–408 and CR 500–512 slices into `main` while
+  preserving ancestry-proven intermediate work; pull-request chronology is
+  retained in the changelog rather than this target plan
 - [x] verify the combined source tree under the complete local gate and public
   Python 3.11/3.12 Ubuntu/Windows GitHub matrix
 

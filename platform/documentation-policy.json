@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "document_globs": [
+    "*.md",
+    "coverage/*.md",
+    "data/*.md",
+    "demo/*.md",
+    "docs/**/*.md",
+    "mechanics/**/*.md",
+    "rules/*.md"
+  ],
+  "excluded_prefixes": [
+    ".agents/skills/"
+  ],
+  "required_metadata": [
+    "title",
+    "status",
+    "authoritative_source",
+    "verified",
+    "audience",
+    "maintenance"
+  ],
+  "statuses": [
+    "current",
+    "target",
+    "historical",
+    "generated",
+    "ADR"
+  ],
+  "maintenance_modes": [
+    "hand-maintained",
+    "generated"
+  ],
+  "adr_decision_statuses": [
+    "proposed",
+    "accepted",
+    "deprecated",
+    "superseded",
+    "rejected"
+  ],
+  "metric_authorities": [
+    "coverage/architecture-audit.json",
+    "coverage/mechanics-coverage.json",
+    "coverage/oracle-coverage.json",
+    "coverage/oracle-coverage-commander.json",
+    "coverage/platform-readiness.json",
+    "coverage/rules-conformance.json",
+    "coverage/rules-coverage.json",
+    "coverage/rules-delta.json"
+  ],
+  "stale_claim_patterns": [
+    {
+      "name": "test or case count",
+      "pattern": "(?i)(?:\\b[0-9][0-9,]*(?:\\.[0-9]+)?\\s+(?:generated\\s+|deterministic\\s+|conformance\\s+)?(?:tests?|cases?)\\s+(?:pass|passed|passing|discovered|remain|are|were)|(?:tests?|cases?)\\s*(?:discovered|passed|passing|total)?\\s*[:=]\\s*[0-9][0-9,]*)"
+    },
+    {
+      "name": "compiler coverage count",
+      "pattern": "(?i)(?:oracle ids?|material residuals?|exact|partially lowerable|unresolved|trusted mechanics?|trusted rules?|blocked|unreviewed)\\s*(?:count|cases?)?\\s*[:=]\\s*[0-9][0-9,]*"
+    },
+    {
+      "name": "material residual total",
+      "pattern": "(?i)\\b[0-9][0-9,]*\\s+material residuals?\\b"
+    },
+    {
+      "name": "grouped numerical metric",
+      "pattern": "(?i)\\b[0-9]{1,3}(?:,[0-9]{3})+\\b\\s+(?:tests?|cases?|rules?|mechanics?|oracle ids?|faces?|material residuals?|tokens?|characters?|commands?|journeys?)",
+      "excluded_documents": [
+        "AGENTS.md"
+      ]
+    }
+  ]
+}

@@ -1,3 +1,12 @@
+---
+title: "Codex project instructions"
+status: "current"
+authoritative_source: "repository contribution and architecture policy"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "Codex agents and contributors"
+maintenance: "hand-maintained"
+---
+
 # Codex project instructions
 
 ## Nonnegotiable boundaries
@@ -72,6 +81,7 @@ python scripts/demo_four_player_protocol.py --db data/test-ci.sqlite3 --out demo
 python scripts/update_platform_status.py --check
 python scripts/update_architecture_audit.py --check
 python scripts/validate_architecture.py --check
+python scripts/validate_documentation.py --check
 python scripts/validate_repository.py
 python simctl.py rules verify --root .
 python -m build --wheel

@@ -139,6 +139,15 @@ class RulesCorpusTests(unittest.TestCase):
                 "coverage/mechanics-coverage.md",
             ):
                 self.assertTrue((root / relative).is_file(), relative)
+            for relative in (
+                "coverage/rules-coverage.md",
+                "coverage/rules-conformance.md",
+                "coverage/mechanics-coverage.md",
+            ):
+                generated = (root / relative).read_text(encoding="utf-8")
+                self.assertTrue(generated.startswith("---\n"), relative)
+                self.assertIn('status: "generated"', generated)
+                self.assertIn('maintenance: "generated"', generated)
 
             derived = (root / "rules/rule-index.json").read_text(
                 encoding="utf-8"

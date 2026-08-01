@@ -1,3 +1,12 @@
+---
+title: "Commander-legal Oracle IR coverage snapshot"
+status: "historical"
+authoritative_source: "archived coverage/oracle-coverage-commander.json snapshot"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "compiler contributors researching prior compiler output"
+maintenance: "hand-maintained"
+---
+
 # Commander-legal Oracle IR coverage
 
 - Compiler: `oracle-ir-v11`

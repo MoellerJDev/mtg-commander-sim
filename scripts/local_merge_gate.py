@@ -144,6 +144,14 @@ def build_steps(
             ),
         ),
         GateStep(
+            "documentation_policy",
+            (
+                python,
+                "scripts/validate_documentation.py",
+                "--check",
+            ),
+        ),
+        GateStep(
             "focused_regressions",
             (
                 python,
@@ -334,6 +342,9 @@ def _verify_protocol_output(output: Path) -> dict:
             raise ValueError(
                 f"Protocol demo contains a raw capability: {_relative(path)}"
             )
+    smoke = (protocol_output / "SMOKE_TEST.md").read_text(encoding="utf-8")
+    if not smoke.startswith("---\n") or 'status: "generated"' not in smoke:
+        raise ValueError("Protocol demo documentation metadata is missing")
     benchmark = json.loads(
         (protocol_output / "token-benchmark.json").read_text(
             encoding="utf-8"

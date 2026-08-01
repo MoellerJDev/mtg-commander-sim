@@ -1,3 +1,12 @@
+---
+title: "Redesign summary"
+status: "historical"
+authoritative_source: "early architecture redesign checkpoint"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "maintainers researching project history"
+maintenance: "hand-maintained"
+---
+
 # Redesign summary
 
 This is a historical design note for the transition away from the duel

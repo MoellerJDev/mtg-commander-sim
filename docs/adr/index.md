@@ -1,0 +1,20 @@
+---
+title: "Architecture decision records"
+status: "current"
+authoritative_source: "docs/adr decision records"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "maintainers and architecture contributors"
+maintenance: "hand-maintained"
+---
+
+# Architecture decision records
+
+ADRs are immutable decision history. Supersede an accepted ADR with a new one;
+do not rewrite its outcome. Use the [template](template.md) for decisions that
+change dependencies, persistence, CardProgram/compiler schemas, runtime
+extension interfaces, mutation ownership, replay, ruleset pinning, trust,
+deployment modes, or architecture review thresholds.
+
+- [ADR 0001 — one serialized writer per game](0001-single-writer-game-actor.md)
+- [ADR 0002 — seat-projected network protocol](0002-seat-projected-network-protocol.md)
+- [ADR 0003 — ratcheted architecture and documentation enforcement](0003-ratcheted-architecture-enforcement.md)

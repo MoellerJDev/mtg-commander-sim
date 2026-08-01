@@ -2,9 +2,9 @@
 title: "Integration handoff"
 status: "current"
 authoritative_source: "git main and generated status artifacts"
-verified: "5197a91dcdac428c09980a39467a7a5c62bc17fa"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
 audience: "maintainers continuing the migration"
-maintenance: "hand-maintained at each merged phase checkpoint"
+maintenance: "hand-maintained"
 ---
 
 # Integration handoff
@@ -17,15 +17,11 @@ or provider-session data.
 
 - Public repository: `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Verified main commit: `5197a91dcdac428c09980a39467a7a5c62bc17fa`
-- Verified CI: [run 30707443584](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30707443584)
-- Current branch: `feat/phase1-architecture-guards`, based exactly on that main
-  commit
-- Current objective: Phase 1 architecture enforcement before structural migration
-
-PR #50 is merged. It records the Phase 0 architecture, compiler, test,
-semantic-pack, card-specificity, and documentation baseline on `main`. No force
-push or tag movement was used.
+- The front-matter `verified` field records the implementation commit reviewed
+  for this handoff. Use `git rev-parse HEAD` and the public Actions page for the
+  live checkout rather than copying an ephemeral branch or run ledger here.
+- Current program boundary: finish Phase 1 enforcement before structural
+  migration and broad rules expansion.
 
 ## Current product boundary
 
@@ -42,19 +38,18 @@ Compiler and rules figures are generated in
 [`docs/COMPILER_COVERAGE_STATUS.md`](docs/COMPILER_COVERAGE_STATUS.md). Do not
 copy those figures into this handoff.
 
-## Active Phase 1 guard deliverable
+## Phase 1 documentation deliverable
 
-The current branch turns the measured baseline into non-growth enforcement for:
+The architecture baseline and non-growth guards are on verified `main`. Phase
+1 documentation enforcement consists of:
 
-- forbidden rules/domain imports from transport, application, persistence, and
-  AI layers;
-- mutable `GameState` ownership and direct-write growth;
-- printed card-name and Oracle-ID literals in core code;
-- new `CommanderEngine` methods, card-specific semantic operations, and named
-  helpers;
-- new oversized modules/functions and excessive engine growth;
-- a content-free, refreshable card-name digest index whose reviewed allowances
-  cannot change without an ADR.
+- an authoritative documentation map and typed metadata on maintained files;
+- focused current architecture, extension, testing, operations, and threat
+  model documents;
+- validated ADR metadata, index, template, and decision contents;
+- internal-link and stale numerical-claim checks;
+- generated-only numerical status and removal of integration chronology from
+  current status documents.
 
 Generated Markdown is presentation only; its JSON/source inputs are
 authoritative. These guards preserve existing debt as an explicit compatibility
@@ -62,18 +57,17 @@ baseline; they do not assert that extraction has already occurred.
 
 ## Merge discipline
 
-- Keep the PR focused on architecture policy, guard baselines, validators,
-  focused negative tests, and the generated debt trend.
+- Keep the branch focused on documentation policy, validators, current/target
+  separation, focused negative tests, and generated status deduplication.
 - Run focused tests locally while iterating.
 - Before merge, run the repository’s exact-head local merge gate and require the
   public CI matrix to pass for the same commit.
 - Merge normally, remove the merged feature branch, return to updated `main`,
-  and start the Phase 1 documentation/ADR slice from a fresh branch.
+  and start the Phase 2 capability trust-model slice from a fresh branch.
 - Do not alter tags or release licenses without explicit authorization.
 
 ## Next checkpoint
 
-After this guard slice merges, create the focused Phase 1 documentation branch.
-It adds the authoritative documentation index, ADR validation, link and stale-
-claim checks, and the missing current architecture/testing/operations documents
-before any broad new rules family is implemented.
+The next phase after documentation enforcement is Phase 2: a versioned
+fine-grained capability schema and one representative compiler/runtime trust
+migration. Broad rules expansion remains paused until that rail exists.

@@ -723,7 +723,7 @@ def _write_mechanics_coverage(
         directory / "mechanics-coverage.md",
         "\n".join(
             [
-                "# Mechanics coverage",
+                f'---\ntitle: "Mechanics coverage"\nstatus: "generated"\nauthoritative_source: "coverage/mechanics-coverage.json"\nverified: "{coverage.get("effective_date")}"\naudience: "rules and compiler contributors"\nmaintenance: "generated"\n---\n\n# Mechanics coverage',
                 "",
                 f"- Effective date: `{coverage.get('effective_date')}`",
                 f"- Discovered mechanics: {coverage.get('total_mechanics', 0)}",
@@ -1079,7 +1079,7 @@ def _write_delta(root: str | Path, delta: Mapping[str, Any]) -> None:
     coverage_dir = Path(root) / "coverage"
     _atomic_json(coverage_dir / "rules-delta.json", delta)
     lines = [
-        "# Comprehensive Rules delta",
+        f'---\ntitle: "Comprehensive Rules delta"\nstatus: "generated"\nauthoritative_source: "coverage/rules-delta.json"\nverified: "{delta.get("to_effective_date")}"\naudience: "rules and engine contributors"\nmaintenance: "generated"\n---\n\n# Comprehensive Rules delta',
         "",
         f"- From: `{delta.get('from_effective_date')}`",
         f"- To: `{delta.get('to_effective_date')}`",
@@ -1137,7 +1137,7 @@ def _write_coverage(root: str | Path, coverage: Mapping[str, Any]) -> None:
     coverage_dir = Path(root) / "coverage"
     _atomic_json(coverage_dir / "rules-coverage.json", coverage)
     lines = [
-        "# Comprehensive Rules coverage",
+        f'---\ntitle: "Comprehensive Rules coverage"\nstatus: "generated"\nauthoritative_source: "coverage/rules-coverage.json"\nverified: "{coverage.get("effective_date")}"\naudience: "rules and engine contributors"\nmaintenance: "generated"\n---\n\n# Comprehensive Rules coverage',
         "",
         f"- Effective date: `{coverage.get('effective_date')}`",
         f"- Source SHA-256: `{coverage.get('source_sha256')}`",
@@ -1185,7 +1185,7 @@ def _write_conformance_coverage(
     )
     counts = coverage.get("status_counts", {})
     lines = [
-        "# Comprehensive Rules conformance cases",
+        f'---\ntitle: "Comprehensive Rules conformance cases"\nstatus: "generated"\nauthoritative_source: "coverage/rules-conformance.json"\nverified: "{coverage.get("effective_date")}"\naudience: "rules and engine contributors"\nmaintenance: "generated"\n---\n\n# Comprehensive Rules conformance cases',
         "",
         f"- Effective date: `{coverage.get('effective_date')}`",
         f"- Source SHA-256: `{coverage.get('source_sha256')}`",

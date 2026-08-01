@@ -1,3 +1,12 @@
+---
+title: "LLM pilot and arbiter protocol"
+status: "current"
+authoritative_source: "pilot protocol schemas and session implementation"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "pilot-provider and protocol contributors"
+maintenance: "hand-maintained"
+---
+
 # LLM Pilot and Arbiter Protocol
 
 This document describes an optional untrusted client adapter retained for

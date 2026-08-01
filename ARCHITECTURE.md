@@ -1,4 +1,18 @@
+---
+title: "Consolidated architecture reference"
+status: "current"
+authoritative_source: "implemented runtime and focused architecture documents"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "maintainers and integration contributors"
+maintenance: "hand-maintained"
+---
+
 # Architecture
+
+This consolidated reference remains useful for protocol and migration detail.
+The authoritative current/target document map is
+[`docs/index.md`](docs/index.md); focused ownership and dependency guidance
+lives under [`docs/architecture/`](docs/architecture/context.md).
 
 ## Objective
 
@@ -764,11 +778,9 @@ rules-incomplete smoke run from silently becoming deck-performance evidence.
 
 ### Bootstrap once, patch thereafter
 
-The refreshed bundled benchmark measures approximately:
-
-- 1,549 tokens for the initial four-player A-seat projection
-- 269 tokens for an unchanged repeated live decision
-- 108 tokens after A declares a mulligan
+The generated `demo/token-benchmark.json` records the current bundled
+bootstrap, unchanged-decision, and mulligan-delta measurements. This document
+describes the protocol shape rather than copying those volatile figures.
 
 ### Stable short references
 

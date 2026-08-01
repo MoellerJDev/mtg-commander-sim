@@ -1,3 +1,12 @@
+---
+title: "Contributing"
+status: "current"
+authoritative_source: "repository merge, test, and review policy"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "contributors"
+maintenance: "hand-maintained"
+---
+
 # Contributing
 
 This is a public experimental repository. Coordinate scope before beginning a
@@ -22,6 +31,9 @@ npm run build
 ```
 
 Set `MTG_CARD_DB=data/test-ci.sqlite3`, then run the commands in `AGENTS.md`.
+Documentation changes must keep [`docs/index.md`](docs/index.md) complete and
+pass `python scripts/validate_documentation.py --check`. Put current metrics in
+machine-readable sources and generated reports rather than prose.
 Before merging a clean committed branch, run:
 
 ```powershell
@@ -36,6 +48,8 @@ commit its logs or database.
 ## Change boundaries
 
 - Keep `CommanderEngine` authoritative and preserve fixed-seat projection.
+- Follow the executable dependency, mutation, specificity, documentation, and
+  ADR policies; reviewed exceptions require the documented decision path.
 - Keep FastAPI/Uvicorn/HTTP/WebSocket imports out of `mtg_commander_sim`; the
   `server` adapter may depend inward on the transport-neutral package.
 - Run the four-context Playwright test for room, authentication, WebSocket,

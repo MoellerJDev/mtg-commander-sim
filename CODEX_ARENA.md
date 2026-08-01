@@ -1,3 +1,12 @@
+---
+title: "Codex Commander Arena"
+status: "current"
+authoritative_source: "Codex pilot configuration and arena commands"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "Codex arena operators and pilot-provider contributors"
+maintenance: "hand-maintained"
+---
+
 # Codex Commander Arena
 
 This is an optional protocol-adapter experiment, not the product execution

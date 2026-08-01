@@ -6,11 +6,11 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "phase_1_architecture_enforcement_guards",
-    "branch": "feat/phase1-architecture-guards",
+    "active_phase": "phase_1_documentation_enforcement",
+    "branch": "feat/phase1-documentation-enforcement",
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
-      "focused_branch_base": "5197a91dcdac428c09980a39467a7a5c62bc17fa",
+      "focused_branch_base": "a3ea421d021c45002048909073eeef69e6c113d9",
       "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
@@ -398,7 +398,7 @@
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete",
-      "evidence": "Integration PRs #1-17 and #24-50 are on main. PR #49 completed the browser full-control/table-interaction slice and PR #50 established generated architecture, compiler, test, semantic-pack, and documentation-debt baselines. The current Phase 1 guard slice makes dependency direction, mutation ownership, kernel card-specificity, and debt non-growth enforceable. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main."
+      "evidence": "The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, and ratcheted dependency, mutation, specificity, and maintainability guards are integrated on verified main. The active documentation slice establishes authoritative current/target separation, ADR governance, link validation, and generated-only numerical status."
     },
     {
       "id": "browser_commander_mvp",
@@ -434,12 +434,12 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "5197a91dcdac428c09980a39467a7a5c62bc17fa",
+    "baseline_commit": "a3ea421d021c45002048909073eeef69e6c113d9",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30707443584,
+      "run_id": 30708805772,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30707443584"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30708805772"
     },
     "local": {
       "compile": "pass",
@@ -464,10 +464,10 @@
   "blockers": [
     "a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence",
     "saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit",
-    "the authoritative engine remains a 23,996-line module with interleaved turn, mutation, casting, effect, and variant responsibilities; the Phase 1 guard slice prevents new debt while later phases extract it",
+    "the authoritative engine remains a measured oversized legacy module with interleaved turn, mutation, casting, effect, and variant responsibilities; ratcheted guards prevent new debt while later phases extract it",
     "future engine choice schemas and complete screen-reader audits remain incomplete",
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Merge the focused Phase 1 dependency, mutation-ownership, kernel card-specificity, and debt non-growth guard slice; then create the documentation index, ADR enforcement, link/stale-claim checks, and missing current architecture/testing/operations documents on a fresh branch."
+  "next_task": "Merge the focused Phase 1 documentation enforcement slice; then begin Phase 2 with a versioned fine-grained capability schema and one representative compiler/runtime trust migration on a fresh branch."
 }
