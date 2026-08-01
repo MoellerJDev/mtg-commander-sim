@@ -13,18 +13,20 @@ or provider session data. Current generated metrics live in
 - Default branch: `main`
 - Browser/runtime integration merge:
   `4c576494dfe6fe60ea31e6891fd8261f9714b4a6`
+- Documentation reconciliation merge:
+  `44100e87f1b9f2f8fe8f76f5c5a473d1a8a1d853`
 - Certified feature head:
   `52202490db25fb7be6a2c2dba36bbf4b959a41b2`
 - Package: `0.8.0`
 - Tags: `v0.6.0`, `v0.7.0`
 - No `v0.8.0` release tag has been created.
 
-PRs #1–#17 and #24–#31 are merged through ordinary merge commits. PR #24
+PRs #1–#17 and #24–#32 are merged through ordinary merge commits. PR #24
 incorporated the ancestry-proven CR 400–408 stack; PRs #18–#23 were closed as
 superseded only after their exact heads were reachable from `main`. PRs #27–#31
 then integrated the authoritative browser/server vertical slice, restart and
 lifecycle hardening, the managed local data runtime, and browser gameplay
-polish.
+polish; PR #32 reconciled the durable platform ledger and handoff.
 
 Local and remote branch cleanup is complete: only `main` remains, every merged
 feature commit is reachable from it, and there are no open pull requests. No
@@ -33,7 +35,7 @@ force push or tag movement was used.
 ## Deterministic evidence
 
 - The exact local merge gate passed all 18 stages at `5220249`.
-- 3,986 unit/integration tests pass on Windows Python 3.11.9 against the
+- 3,987 unit/integration tests pass on Windows Python 3.11.9 against the
   compact public CI card database.
 - All 3,300 pinned rule records and 425 mechanic records verify against the
   June 19, 2026 rules source. Generated per-rule inventory tests do not imply
@@ -81,12 +83,14 @@ Implemented:
 - responsive TypeScript browser client with projected tables, card inspector,
   public-zone browsing, click/drag play, cast/activate controls, manual or
   automatic mana, current generic choice forms, and explicit main-phase advance
+- invite-authenticated read-only spectators with capability-free projections,
+  live WebSocket updates, a complete durable public event log, and restart
+  recovery without checkpoint or analyst access
 - compact-fixture regressions for modal land faces, Sunscorched Desert, Orcish
   Bowmasters, priority progression, exact retry, privacy, and reconnect behavior
 
 Not implemented or not complete:
 
-- spectator sessions and complete public-log presentation
 - complete screen-reader audit and every future choice-schema presentation
 - production accounts, PostgreSQL, multi-process actor ownership, expiry and
   rate-limit policy, containers, TLS/reverse-proxy deployment, backups, and
@@ -98,13 +102,14 @@ rules, product, CI, merge, or release authorities.
 
 ## Next dependency-ordered work
 
-Keep broad sequential rules review frozen unless a browser path exposes a
-concrete rules blocker. The next focused server/browser slice should add:
-
-1. spectator-safe, read-only session/projection handling;
-2. complete public game-log retrieval and browser presentation; and
-3. browser end-to-end journeys for targeting, stack response, combat,
-   concession, natural completion, and process restart.
+The latest manual full-database duel exposed the next concrete rules blocker:
+Sunscorched Desert entered without its targeted ETB and Orcish Bowmasters
+stopped on a browser-inaccessible `arbiter.resolve` decision that looked like
+both players were passing priority. The next focused slice must make the
+trusted-only lifecycle fail closed visibly and fix the generic trigger/semantic
+path for those reproduced cards. Then extend browser end-to-end journeys
+through targeting, stack response, combat, concession, natural completion, and
+process restart.
 
 That slice must preserve exact replay, idempotency, seat projection, hidden
 information, and the existing no-AI core runtime boundary. Production

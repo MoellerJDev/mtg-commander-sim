@@ -82,6 +82,14 @@ class StateProjector:
         seats = self._view_seats_for(principal)
         if not event.visibility:
             return True
+        if principal == "spectator":
+            # Historical public events sometimes enumerate every player seat
+            # instead of naming the spectator principal explicitly.  Treat
+            # only all-seat visibility as public; a proper subset remains
+            # private to those seats.
+            return "spectator" in event.visibility or set(
+                self.state.players
+            ).issubset(event.visibility)
         return principal in event.visibility or any(
             seat in event.visibility for seat in seats
         )
@@ -480,6 +488,49 @@ class StateProjector:
                 **({"d": event.details} if event.importance >= 3 else {}),
             })
         return result[-24:]
+
+    def event_page(
+        self,
+        principal: str,
+        *,
+        after: int = 0,
+        limit: int = 100,
+    ) -> dict[str, Any]:
+        """Return a compact, visibility-filtered event page.
+
+        This deliberately excludes raw event details.  The browser log is a
+        public narrative, not an alternate route to authoritative or private
+        state.
+        """
+
+        if after < 0:
+            raise ValueError("after must not be negative")
+        if not 1 <= limit <= 200:
+            raise ValueError("limit must be between 1 and 200")
+        visible = [
+            event
+            for event in self.state.events
+            if event.event_id > after
+            and self._event_visible(event, principal)
+        ]
+        page = visible[:limit]
+        next_after = (
+            page[-1].event_id if page else self.state.event_sequence
+        )
+        return {
+            "events": [
+                {
+                    "id": event.event_id,
+                    "code": event.code,
+                    "actor": event.actor,
+                    "summary": event.summary,
+                    "importance": event.importance,
+                }
+                for event in page
+            ],
+            "next_after": next_after,
+            "has_more": len(visible) > len(page),
+        }
 
     def packet(
         self,

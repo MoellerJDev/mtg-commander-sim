@@ -419,7 +419,7 @@ Uvicorn, or `server`. Its request lifecycle is:
 per-tab HttpOnly guest cookie / bearer token
         │
         ▼
-SQLite room seat ── derives pilot:A-D
+SQLite room membership ── derives pilot:A-D or spectator
         │
         ▼
 strict CommandEnvelope ── expected revision + idempotency key
@@ -447,6 +447,9 @@ Rooms are created with exactly two seats (`commander_duel`) or four seats
 the required ready set and the engine configuration; empty phantom seats are
 never added to a duel. Before start, an owner may remove a nonowner or atomically
 close and replace the room, while a nonowner may leave and release their seat.
+An invite can instead create a `spectator=1` membership without a seat. That
+role may observe an open or started room, but the command route still requires
+an authenticated seat and therefore rejects even a copied valid capability.
 
 Persistence failure in the ambiguous post-mutation window never returns a
 success receipt. The actor fails closed and must be recreated from durable
@@ -460,6 +463,15 @@ excluded from Game Record persistence. A reconnect's full projection starts a
 new delivery stream, so its packet number may restart at one; clients replace
 the visible event tail from that full packet and enforce monotonic packet
 numbers only for subsequent deltas.
+
+The recent event tail is transport optimization, not the complete public
+record. Browser-created games retain the existing debug trace in their private
+Game Record. `GameActor.public_events` serializes paginated reads with commands;
+`StateProjector.event_page("spectator")` filters each event by public
+visibility and returns only `id`, `code`, `actor`, `summary`, and `importance`.
+It never returns raw details. The endpoint is membership-authorized and gives
+players and spectators the same durable public narrative across reconnect and
+process restart.
 
 When the process no longer has an actor for an indexed game, the server lazily
 loads the checksummed Game Record into a new actor. Persisted capability metadata
@@ -480,11 +492,12 @@ game. A process restart reconciles the SQLite index from the checksummed record
 before recreating the actor.
 
 Lifecycle inspection is a separate application projection, not access to Game
-Record files. It exposes seated members to public/control-plane fields and
+Record files. It exposes game members to public/control-plane fields and
 journal counts only. It never returns `record_path`, a checkpoint, hidden zones,
 capabilities, or analyst artifacts. The WebSocket attaches this metadata to the
-existing seat projection message, preserving one authenticated seat and one
-connection-scoped projection cursor.
+existing projection message, preserving one authenticated role and one
+connection-scoped projection cursor. A spectator receives `principal =
+"spectator"`, no decision, no capability, and no seat-private zones.
 
 ## Managed local card data and images
 
@@ -750,8 +763,8 @@ The architecture is suitable for a serious project, but complete Magic coverage 
   residual
 - multi-process actor ownership/leases, PostgreSQL, production accounts,
   expiry/rate limits, deployment containers, and operational monitoring
-- browser spectators, screen-reader audits for future choice-schema families,
-  image-cache quotas/eviction, and explicit controls for future schemas
+- screen-reader audits for future choice-schema families, image-cache
+  quotas/eviction, and explicit controls for future schemas
 
 These modules fit behind the current `CommanderEngine`/`GameService` boundary.
 They do not require granting clients broader permissions, replacing the command

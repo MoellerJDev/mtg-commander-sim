@@ -28,6 +28,10 @@ The following are treated as security defects:
 - sharing a delta cursor between independent network connections
 - allowing a nonowner to stop or resume a game
 - allowing browser resume to clear a rules, fidelity, abort, or corruption pause
+- allowing a spectator to receive a decision capability, claim seat authority,
+  or submit a copied seat capability
+- exposing private event details, hidden events, checkpoint contents, or
+  analyst artifacts through the public game log
 
 Custom-agent instructions are not an operating-system sandbox. The fixed-seat
 tool and projection layers enforce the application boundary; use an isolated,
@@ -49,8 +53,10 @@ raw values. The host browser retains its raw invite only in session storage so
 it survives readying and reload without becoming server-side plaintext; closing
 that browser session may require an owner-only replacement. Replacing an invite
 atomically invalidates the old hash. Room membership selects the one pilot
-principal available to that guest. Decision capabilities remain separate
-short-lived grants and are never login credentials.
+principal available to a seated guest or the capability-free `spectator`
+principal for a watch-only guest. The command endpoint independently requires
+a seat, so request content cannot promote a spectator. Decision capabilities
+remain separate short-lived grants and are never login credentials.
 
 Legacy clients without a tab selector may continue using the base guest cookie.
 When a valid selector is present, authentication never falls back to that shared
@@ -60,8 +66,11 @@ The current room ID and any owner invite display are likewise kept in tab-scoped
 session storage rather than shared local storage.
 
 Set `MTG_SECURE_COOKIES=1` behind HTTPS. Restrict `MTG_ALLOWED_ORIGINS` to the
-deployed browser origin. Seated members may inspect only whitelisted lifecycle
-metadata; the room owner alone may durably stop/resume an
+deployed browser origin. Game members may inspect only whitelisted lifecycle
+metadata. Spectators receive the same public/control-plane subset without
+owner controls. The public-log endpoint returns a fixed compact event shape
+after spectator visibility filtering and never returns raw event details; the
+room owner alone may durably stop/resume an
 `administrative_stop`. Those endpoints never expose the backing record path or
 accept a client-selected principal. The current development server does not yet
 provide production accounts, password recovery, platform-wide administration,

@@ -117,6 +117,16 @@ decision. A browser resume cannot clear any other pause kind. Exact replay
 continues to verify the accepted-command prefix across stop, process restart,
 resume, and later accepted commands.
 
+Browser-created records use the existing `debug` trace level so the complete
+public narrative remains durable rather than disappearing when an in-memory
+projection cursor or server process is replaced. This does not expose the
+private record: the authenticated public-log application endpoint reads the
+event journal through the serialized actor, applies the `spectator`
+visibility policy, and returns only event ID, code, actor, summary, and
+importance. It never returns event details, checkpoints, capabilities,
+private events, or analyst artifacts. Trace text remains outside the
+authoritative state hash, as before.
+
 The record's `manifest.scryfall.metadata_hash` also pins the local card-data
 snapshot used to interpret its cards. The server opens the current SQLite
 database when that fingerprint matches; otherwise it verifies and opens the

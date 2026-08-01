@@ -260,8 +260,47 @@ class ServerStore:
                 (room_id, guest_id, now),
             )
             connection.execute(
+                "UPDATE room_members SET spectator = 0 WHERE room_id = ? AND guest_id = ?",
+                (room_id, guest_id),
+            )
+            connection.execute(
                 "UPDATE room_seats SET guest_id = ? WHERE room_id = ? AND seat = ?",
                 (guest_id, room_id, seat),
+            )
+            connection.execute(
+                "UPDATE rooms SET updated_at = ? WHERE room_id = ?",
+                (now, room_id),
+            )
+        return self.room(room_id, guest_id)
+
+    def join_spectator(
+        self, guest_id: str, *, invite_code: str
+    ) -> dict[str, Any]:
+        """Join an invited room without claiming a player seat."""
+
+        now = utc_now()
+        with self._connection(write=True) as connection:
+            room = connection.execute(
+                "SELECT room_id, status FROM rooms WHERE invite_code_hash = ?",
+                (token_hash(invite_code),),
+            ).fetchone()
+            if room is None:
+                raise StoreNotFound("Invite code not found")
+            if room["status"] == "closed":
+                raise StoreConflict("Room is closed")
+            room_id = str(room["room_id"])
+            seated = connection.execute(
+                "SELECT 1 FROM room_seats WHERE room_id = ? AND guest_id = ?",
+                (room_id, guest_id),
+            ).fetchone()
+            connection.execute(
+                """
+                INSERT INTO room_members(room_id, guest_id, spectator, joined_at)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(room_id, guest_id) DO UPDATE SET
+                    spectator = excluded.spectator
+                """,
+                (room_id, guest_id, 0 if seated is not None else 1, now),
             )
             connection.execute(
                 "UPDATE rooms SET updated_at = ? WHERE room_id = ?",
@@ -335,6 +374,22 @@ class ServerStore:
             ).fetchone()
             if room is None:
                 raise StoreNotFound("Room not found")
+            member = connection.execute(
+                "SELECT spectator FROM room_members WHERE room_id = ? AND guest_id = ?",
+                (room_id, guest_id),
+            ).fetchone()
+            if member is None:
+                raise StoreForbidden("Guest is not a member of this room")
+            if bool(member["spectator"]):
+                connection.execute(
+                    "DELETE FROM room_members WHERE room_id = ? AND guest_id = ?",
+                    (room_id, guest_id),
+                )
+                connection.execute(
+                    "UPDATE rooms SET updated_at = ? WHERE room_id = ?",
+                    (utc_now(), room_id),
+                )
+                return
             if room["owner_guest_id"] == guest_id:
                 raise StoreForbidden("The owner must replace the room instead")
             if room["status"] != "open":
@@ -363,7 +418,7 @@ class ServerStore:
     def room(self, room_id: str, guest_id: str) -> dict[str, Any]:
         with self._connection() as connection:
             member = connection.execute(
-                "SELECT 1 FROM room_members WHERE room_id = ? AND guest_id = ?",
+                "SELECT spectator FROM room_members WHERE room_id = ? AND guest_id = ?",
                 (room_id, guest_id),
             ).fetchone()
             if member is None:
@@ -385,9 +440,10 @@ class ServerStore:
                 """,
                 (room_id,),
             ).fetchall()
+        spectator = bool(member["spectator"])
         seat_payloads: list[dict[str, Any]] = []
         for row in seats:
-            mine = row["guest_id"] == guest_id
+            mine = not spectator and row["guest_id"] == guest_id
             deck_payload = None
             if row["deck_id"] is not None:
                 try:
@@ -426,6 +482,7 @@ class ServerStore:
             "format_profile": str(room["format_profile"]),
             "seat_count": int(room["seat_count"]),
             "game_id": room["game_id"],
+            "spectator": spectator,
             "seats": seat_payloads,
         }
 
@@ -609,23 +666,57 @@ class ServerStore:
             raise StoreForbidden("Guest cannot access this game")
         return str(row["room_id"]), str(row["seat"])
 
+    def game_membership(self, game_id: str, guest_id: str) -> dict[str, Any]:
+        """Return a game member's projection role without granting seat authority."""
+
+        with self._connection() as connection:
+            row = connection.execute(
+                """
+                SELECT g.room_id, m.spectator, s.seat
+                FROM games g
+                JOIN room_members m ON m.room_id = g.room_id
+                LEFT JOIN room_seats s
+                  ON s.room_id = g.room_id AND s.guest_id = m.guest_id
+                WHERE g.game_id = ? AND m.guest_id = ?
+                """,
+                (game_id, guest_id),
+            ).fetchone()
+        if row is None:
+            raise StoreForbidden("Guest cannot access this game")
+        spectator = bool(row["spectator"])
+        seat = None if spectator or row["seat"] is None else str(row["seat"])
+        if not spectator and seat is None:
+            raise StoreForbidden("Guest cannot access this game")
+        return {
+            "room_id": str(row["room_id"]),
+            "seat": seat,
+            "spectator": spectator,
+            "role": "spectator" if spectator else "player",
+        }
+
     def game_summary(self, game_id: str, guest_id: str) -> dict[str, Any]:
-        """Return control-plane metadata safe for a seated player."""
+        """Return control-plane metadata safe for a player or spectator."""
 
         with self._connection() as connection:
             row = connection.execute(
                 """
                 SELECT g.game_id, g.room_id, g.status, g.state_revision,
                        g.created_at, g.updated_at, r.owner_guest_id,
-                       r.format_profile, s.seat
+                       r.format_profile, m.spectator, s.seat
                 FROM games g
                 JOIN rooms r ON r.room_id = g.room_id
-                JOIN room_seats s ON s.room_id = g.room_id
-                WHERE g.game_id = ? AND s.guest_id = ?
+                JOIN room_members m ON m.room_id = g.room_id
+                LEFT JOIN room_seats s
+                  ON s.room_id = g.room_id AND s.guest_id = m.guest_id
+                WHERE g.game_id = ? AND m.guest_id = ?
                 """,
                 (game_id, guest_id),
             ).fetchone()
         if row is None:
+            raise StoreForbidden("Guest cannot access this game")
+        spectator = bool(row["spectator"])
+        seat = None if spectator or row["seat"] is None else str(row["seat"])
+        if not spectator and seat is None:
             raise StoreForbidden("Guest cannot access this game")
         return {
             "game_id": str(row["game_id"]),
@@ -635,8 +726,10 @@ class ServerStore:
             "created_at": str(row["created_at"]),
             "updated_at": str(row["updated_at"]),
             "format_profile": str(row["format_profile"]),
-            "seat": str(row["seat"]),
-            "owner": row["owner_guest_id"] == guest_id,
+            "seat": seat,
+            "spectator": spectator,
+            "role": "spectator" if spectator else "player",
+            "owner": not spectator and row["owner_guest_id"] == guest_id,
         }
 
     def require_game_owner(self, game_id: str, guest_id: str) -> None:

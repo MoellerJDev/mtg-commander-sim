@@ -597,13 +597,18 @@ has a shared, versioned form adapter for the engine's current choice schemas,
 four-context private mulligan coverage, and process-restart recovery with exact
 replay. The owner-only administrative stop/resume and seated-member safe
 inspection slice is now implemented. It preserves exact replay through process
-restart and cannot override a material rules/fidelity pause. The next steps are:
+restart and cannot override a material rules/fidelity pause. Invited spectators
+now receive only public projections and a complete durable public log. The next
+steps are:
 
-1. Continue server operations hardening: expiry/rate limits, deployment
+1. Fix the full-database browser regression in which Sunscorched Desert's ETB
+   was omitted and Orcish Bowmasters produced a browser-inaccessible
+   `arbiter.resolve` boundary instead of a visible trusted-only pause.
+2. Continue server operations hardening: expiry/rate limits, deployment
    boundaries, and multi-process ownership design.
-2. Harden browser accessibility, command-retry presentation, spectators, and any
+3. Harden browser accessibility, command-retry presentation, and any
    new choice-schema family only when the engine introduces it.
-3. Resume rules work for defects that block those slices; defer broad
+4. Resume rules work for defects that block those slices; defer broad
    CR-number traversal until it has concrete executable evidence.
 
 No deck list has been modified, and no current game result is promoted to
