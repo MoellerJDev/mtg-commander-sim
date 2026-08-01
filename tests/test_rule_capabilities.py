@@ -9,7 +9,7 @@ import unittest
 import jsonschema
 
 from common import DB_PATH
-from mtg_commander_sim.carddb import CardDatabase
+from mtg_commander_sim.carddb import CardDatabase, CardRecord
 from mtg_commander_sim.oracle_ir import (
     compile_oracle_card,
     generated_programs,
@@ -47,6 +47,32 @@ def _test_ids() -> set[str]:
             and node.name.startswith("test_")
         )
     return result
+
+
+def _lightning_bolt_record() -> CardRecord:
+    """Return a compiler fixture independent of the selected card database."""
+
+    return CardRecord(
+        oracle_id="00000000-0000-4000-8000-00000000b017",
+        name="Lightning Bolt",
+        mana_cost="{R}",
+        mana_value=1.0,
+        type_line="Instant",
+        oracle_text="Lightning Bolt deals 3 damage to any target.",
+        power=None,
+        toughness=None,
+        loyalty=None,
+        defense=None,
+        colors=("R",),
+        color_identity=("R",),
+        keywords=(),
+        produced_mana=(),
+        layout="normal",
+        released_at="1993-08-05",
+        legalities={"commander": "legal"},
+        faces=(),
+        raw={},
+    )
 
 
 class CapabilityRegistryTests(unittest.TestCase):
@@ -190,7 +216,7 @@ class GeneratedCapabilityTrustTests(unittest.TestCase):
         cls.db.close()
 
     def test_generated_bolt_uses_exact_trusted_capability_closure(self):
-        record = self.db.lookup("Lightning Bolt")
+        record = _lightning_bolt_record()
         ir = compile_oracle_card(
             record,
             capability_registry=self.registry,
@@ -267,7 +293,7 @@ class GeneratedCapabilityTrustTests(unittest.TestCase):
         result["status"] = "blocked"
         result["blockers"] = ["test mutation"]
         mutated = CapabilityRegistry(value)
-        record = self.db.lookup("Lightning Bolt")
+        record = _lightning_bolt_record()
         ir = compile_oracle_card(
             record,
             capability_registry=mutated,
@@ -293,7 +319,7 @@ class GeneratedCapabilityTrustTests(unittest.TestCase):
             )
 
     def test_unrecognized_text_remains_residual_with_capability_registry(self):
-        record = self.db.lookup("Lightning Bolt")
+        record = _lightning_bolt_record()
         changed = replace(
             record,
             oracle_text=record.oracle_text + " Then copy this spell.",
@@ -309,7 +335,7 @@ class GeneratedCapabilityTrustTests(unittest.TestCase):
     def test_capability_profile_is_validated_even_for_textless_card(self):
         with self.assertRaisesRegex(ValueError, "Unknown capability profile"):
             compile_oracle_card(
-                replace(self.db.lookup("Lightning Bolt"), oracle_text=""),
+                replace(_lightning_bolt_record(), oracle_text=""),
                 capability_registry=self.registry,
                 capability_profile="unknown-profile",
             )
