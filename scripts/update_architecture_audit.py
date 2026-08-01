@@ -638,10 +638,13 @@ def _semantic_handler_metrics(
 ) -> dict[str, Any]:
     from mtg_commander_sim.semantic_runtime import (
         default_semantic_handler_registry,
+        default_token_creation_replacement_registry,
     )
 
     registry = default_semantic_handler_registry()
     inventory = registry.inventory()
+    runtime_registry = default_token_creation_replacement_registry()
+    runtime_inventory = runtime_registry.inventory()
     engine_branches = [
         branch
         for branch in state_dispatch["semantic_operation_branches"][
@@ -669,6 +672,9 @@ def _semantic_handler_metrics(
         "registered_operation_count": len(registered_operations),
         "registered_operations": sorted(registered_operations),
         "handlers": inventory,
+        "runtime_registry_fingerprint": runtime_registry.fingerprint,
+        "registered_runtime_handler_count": len(runtime_inventory),
+        "runtime_handlers": runtime_inventory,
         "engine_string_dispatch_branch_count": len(engine_branches),
         "legacy_apply_effect_branch_count": len(
             legacy_apply_effect_branches
@@ -1400,6 +1406,8 @@ def render_architecture_status(report: Mapping[str, Any]) -> str:
             f"{architecture['semantic_handlers']['registered_handler_count']} "
             f"across {architecture['semantic_handlers']['registered_operation_count']} "
             "operations",
+            f"- Registered typed runtime components: "
+            f"{architecture['semantic_handlers']['registered_runtime_handler_count']}",
             f"- Remaining legacy `apply_effect` branches: "
             f"{architecture['semantic_handlers']['legacy_apply_effect_branch_count']}",
             f"- Registered operations still intercepted by engine string dispatch: "

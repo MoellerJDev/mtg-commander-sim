@@ -1809,8 +1809,46 @@
       "effects": [],
       "destination": "battlefield",
       "trust_level": "trusted",
-      "coverage": ["spell_resolution", "replacement_effect", "static_ability", "continuous_effect", "token_creation"],
+      "coverage": ["spell_resolution", "static_ability", "continuous_effect"],
       "tests": ["test_stridehangar_adds_thopter_and_applies_anthem"],
+      "provenance": {
+        "source_oracle_hash": "59ad59fe37f21e3590dbc0a425607daeb83e89e783ee0a45ea5c3aae39a11272",
+        "source_rulings_hash": "1c6f2c3ce17591f7b1816add38df1c1e7259f4fb0be4ccc861fe40dc0e0633f7",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "9070c98b-fd01-4eeb-a4ec-fc464946c7c0:replacement:additional-thopter",
+      "label": "Stridehangar Automaton additional-token replacement",
+      "oracle_id": "9070c98b-fd01-4eeb-a4ec-fc464946c7c0",
+      "ability_id": "replacement:additional-thopter",
+      "active_zone": "battlefield",
+      "event": "token.create",
+      "effects": [],
+      "handlers": [
+        {
+          "handler_id": "replacement.token.additional.v1",
+          "schema_version": 1,
+          "event": "token.create",
+          "condition": {
+            "event_controller": "source_controller",
+            "created_types_all": ["artifact"]
+          },
+          "quantity": 1,
+          "token": {
+            "name": "Thopter",
+            "type_line": "Token Artifact Creature — Thopter",
+            "colors": [],
+            "power": "1",
+            "toughness": "1",
+            "keywords": ["Flying"]
+          }
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["replacement_effect", "token_creation", "additional_token_replacement"],
+      "tests": ["test_registered_additional_token_components_replace_without_name_dispatch", "test_multiple_additional_token_components_share_one_creation_timestamp", "test_source_created_by_event_does_not_replace_its_own_creation", "test_additional_token_component_replays_exactly"],
       "provenance": {
         "source_oracle_hash": "59ad59fe37f21e3590dbc0a425607daeb83e89e783ee0a45ea5c3aae39a11272",
         "source_rulings_hash": "1c6f2c3ce17591f7b1816add38df1c1e7259f4fb0be4ccc861fe40dc0e0633f7",
@@ -1828,8 +1866,43 @@
       "effects": [],
       "destination": "battlefield",
       "trust_level": "trusted",
-      "coverage": ["spell_resolution", "replacement_effect", "static_ability", "keyword_ability", "explore"],
+      "coverage": ["spell_resolution"],
       "tests": ["test_worldwalker_adds_map_copies_token_and_map_explores"],
+      "provenance": {
+        "source_oracle_hash": "b83e34ade394fce60da4d1a032c8795b5c12ad8132dba550d4fc88dafe8ba82a",
+        "source_rulings_hash": "08b1c351c375cdbbf524449e4a1ccea93654ffa255c0dd4fd6dacbec7abf56a6",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "9573c85a-e574-4b4e-aae0-2165c45fd27e:replacement:additional-map",
+      "label": "Worldwalker Helm additional-token replacement",
+      "oracle_id": "9573c85a-e574-4b4e-aae0-2165c45fd27e",
+      "ability_id": "replacement:additional-map",
+      "active_zone": "battlefield",
+      "event": "token.create",
+      "effects": [],
+      "handlers": [
+        {
+          "handler_id": "replacement.token.additional.v1",
+          "schema_version": 1,
+          "event": "token.create",
+          "condition": {
+            "event_controller": "source_controller",
+            "created_types_all": ["artifact"]
+          },
+          "quantity": 1,
+          "token": {
+            "name": "Map",
+            "type_line": "Token Artifact — Map",
+            "oracle_text": "{1}, {T}, Sacrifice this token: Target creature you control explores. Activate only as a sorcery."
+          }
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["replacement_effect", "static_ability", "token_creation", "additional_token_replacement", "keyword_ability", "explore"],
+      "tests": ["test_registered_additional_token_components_replace_without_name_dispatch", "test_multiple_additional_token_components_share_one_creation_timestamp", "test_worldwalker_adds_map_copies_token_and_map_explores"],
       "provenance": {
         "source_oracle_hash": "b83e34ade394fce60da4d1a032c8795b5c12ad8132dba550d4fc88dafe8ba82a",
         "source_rulings_hash": "08b1c351c375cdbbf524449e4a1ccea93654ffa255c0dd4fd6dacbec7abf56a6",

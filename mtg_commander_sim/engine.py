@@ -20,6 +20,7 @@ from .carddb import CardDatabase, CardRecord
 from .card_programs.validation import (
     canonical_program_fingerprint,
     program_source_is_current,
+    runtime_component_program_is_current_trusted,
 )
 from .combat import (
     DEFENDER,
@@ -96,7 +97,9 @@ from .permissions import AuthorizedCommand, CapabilityManager, PermissionDenied
 from .semantics import SemanticProgram, SemanticRegistry
 from .semantic_runtime import (
     SemanticNodeError,
+    TokenCreationReplacementContext,
     default_semantic_interpreter,
+    default_token_creation_replacement_registry,
     execute_intent_plan,
     prepare_draw_resolution,
 )
@@ -23754,8 +23757,18 @@ class CommanderEngine:
                 except KeyError:
                     type_line = ""
             created_types, _, _ = self._type_parts(type_line)
-        artifact_token_event = bool(
-            quantity > 0 and "artifact" in created_types
+        token_creation_event = quantity > 0
+        replacement_sources = (
+            [
+                self.state.cards[object_id]
+                for object_id in list(
+                    self.state.players[controller].zones["battlefield"]
+                )
+                if self.state.cards[object_id].controller == controller
+                and not self.state.cards[object_id].phased_out
+            ]
+            if token_creation_event
+            else []
         )
         created: list[str] = []
         creation_timestamp = (
@@ -23827,50 +23840,50 @@ class CommanderEngine:
                         target_details
                     )
             created.append(object_id)
-        if artifact_token_event:
-            replacement_sources = [
-                self.state.cards[object_id]
-                for object_id in list(
-                    self.state.players[controller].zones[
-                        "battlefield"
-                    ]
-                )
-                if self.state.cards[object_id].controller == controller
-                and not self.state.cards[object_id].phased_out
-            ]
+        applied_replacements: list[dict[str, Any]] = []
+        if token_creation_event:
+            replacement_registry = (
+                default_token_creation_replacement_registry()
+            )
             for source in replacement_sources:
-                if source.printed_name == "Stridehangar Automaton":
-                    created.append(
-                        self._create_replacement_token_instance(
-                            controller,
-                            name="Thopter",
-                            zone_timestamp=creation_timestamp,
-                            characteristics={
-                                "type_line": (
-                                    "Token Artifact Creature — Thopter"
-                                ),
-                                "colors": [],
-                                "power": "1",
-                                "toughness": "1",
-                                "keywords": ["Flying"],
-                            },
-                        )
-                    )
-                elif source.printed_name == "Worldwalker Helm":
-                    created.append(
-                        self._create_replacement_token_instance(
-                            controller,
-                            name="Map",
-                            characteristics={
-                                "type_line": "Token Artifact — Map",
-                                "oracle_text": (
-                                    "{1}, {T}, Sacrifice this token: "
-                                    "Target creature you control explores. "
-                                    "Activate only as a sorcery."
-                                ),
-                            },
-                        )
-                    )
+                context = TokenCreationReplacementContext(
+                    source_ref=source.ref,
+                    source_controller=source.controller,
+                    event_controller=controller,
+                    created_types=tuple(sorted(created_types)),
+                )
+                programs = self.semantics.runtime_handler_programs_for_oracle(
+                    source.oracle_id,
+                    active_zone="battlefield",
+                    event="token.create",
+                )
+                for program in programs:
+                    if not runtime_component_program_is_current_trusted(
+                        self.semantics, self.card_db, program
+                    ):
+                        continue
+                    for descriptor in program.handlers:
+                        for intent in replacement_registry.lower(
+                            descriptor, context
+                        ):
+                            for _ in range(intent.quantity):
+                                created.append(
+                                    self._create_replacement_token_instance(
+                                        controller,
+                                        name=intent.token.name,
+                                        zone_timestamp=creation_timestamp,
+                                        characteristics=(
+                                            intent.token.characteristics()
+                                        ),
+                                    )
+                                )
+                            applied_replacements.append(
+                                {
+                                    "handler_id": intent.handler_id,
+                                    "source": intent.source_ref,
+                                    "quantity": intent.quantity,
+                                }
+                            )
         tracker = self.state.players[controller].stats.setdefault(
             "tokens_created_by_turn", {}
         )
@@ -23887,6 +23900,7 @@ class CommanderEngine:
                 "base_name": name,
                 "base_quantity": quantity,
                 "replacement_count": len(created) - quantity,
+                "replacement_components": applied_replacements,
                 "reason": reason,
             },
             importance=1,

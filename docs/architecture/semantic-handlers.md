@@ -47,6 +47,26 @@ The architecture audit scans every semantic-operation branch in the engine,
 not only `apply_effect`. A registered operation intercepted before the handler
 boundary is therefore reported as migration drift.
 
+## Static runtime components
+
+CardProgram's versioned `handlers` field is the fail-closed extension point for
+abilities that participate in later events rather than resolve once. Runtime
+descriptors are validated when semantic programs load, and registered handlers
+receive only the narrow immutable event context required by their family.
+
+`replacement.token.additional.v1` is the first such component. It matches a
+declared token card type and same-controller event, then emits a typed fixed
+additional-token intent. This removes printed-card-name dispatch for the
+reviewed additional Thopter and Map replacements. It deliberately does not
+claim optional or noncommutative CR 616 ordering, replacement rediscovery,
+quantity doubling, or state-derived token definitions. See
+[ADR 0007](../adr/0007-cardprogram-runtime-components.md).
+
+Complete historical semantic snapshots that predate these descriptors can use
+the validated built-in component as a compatibility bridge. The loaded program
+map and its recorded fingerprint remain unchanged, and source-hash validation
+still gates execution. Current records pin the descriptor directly.
+
 ## Migration checklist
 
 1. Characterize the current operation and exact return/event behavior.

@@ -58,6 +58,11 @@ class ArchitectureAuditTests(unittest.TestCase):
         )
         self.assertGreater(handlers["legacy_apply_effect_branch_count"], 0)
         self.assertGreater(handlers["engine_string_dispatch_branch_count"], 0)
+        self.assertEqual(1, handlers["registered_runtime_handler_count"])
+        self.assertEqual(
+            "replacement.token.additional.v1",
+            handlers["runtime_handlers"][0]["handler_id"],
+        )
         self.assertTrue(tests["python"]["reconciles"])
         self.assertEqual(
             tests["python"]["discovered_total"],

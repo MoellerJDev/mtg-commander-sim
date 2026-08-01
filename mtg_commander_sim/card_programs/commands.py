@@ -7,7 +7,10 @@ from typing import Any, Mapping
 
 from ..carddb import CardDatabase, CardRecord
 from ..rules.capabilities import load_default_capability_registry
-from ..semantic_runtime import default_semantic_handler_registry
+from ..semantic_runtime import (
+    default_semantic_handler_registry,
+    default_token_creation_replacement_registry,
+)
 from ..semantics import SemanticRegistry
 from ..util import stable_json
 from .adapters import compile_card_program
@@ -47,7 +50,16 @@ def _runtime_handler_mapping(
         "typed_handlers": _typed_handler_mapping(operations),
     }
     if event_handlers is not None:
-        result["event_handlers"] = event_handlers
+        registry = default_token_creation_replacement_registry()
+        result["event_handlers"] = [
+            {
+                **handler,
+                "registry": registry.describe(
+                    str(handler.get("handler_id") or "")
+                ),
+            }
+            for handler in event_handlers
+        ]
     return result
 
 
@@ -176,6 +188,7 @@ def audit_card_program(program: CardProgram) -> dict[str, Any]:
                 "event": ability.event,
                 **_runtime_handler_mapping(
                     ability.effects,
+                    event_handlers=ability.handlers,
                     operation_key="operations",
                 ),
             }
