@@ -2,7 +2,7 @@
 title: "Consolidated architecture reference"
 status: "current"
 authoritative_source: "implemented runtime and focused architecture documents"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "3bb415ef898e3c013eaf78007c4169cc530111f5"
 audience: "maintainers and integration contributors"
 maintenance: "hand-maintained"
 ---
@@ -86,7 +86,8 @@ Scryfall database or tracked card content.
             ▼                               ▼
 ┌─────────────────────────────┐  ┌─────────────────────────────┐
 │ SemanticRegistry            │  │ Local CardDatabase          │
-│ trusted/provisional packs   │  │ Oracle cards + rulings      │
+│ canonical CardProgram V2    │  │ Oracle cards + rulings      │
+│ + compatibility index       │  │ source hashes               │
 └─────────────────────────────┘  └─────────────────────────────┘
             │
             ▼
@@ -113,6 +114,14 @@ Fingerprint-keyed deck profiles are advisory and loaded once into the matching
 seat memory. They never enter `CommanderEngine`, determine legality, or replace
 Oracle text. Profile and memory files are resumable pilot state, not
 authoritative game state.
+
+Oracle IR and reviewed semantic-pack inputs are aggregated behind canonical
+CardProgram V2. The card-level artifact records identity, faces, source hashes,
+typed ability projections, residuals, capability closure, trust, provenance,
+semantic hash, and exact fingerprint. Runtime still consumes a derived
+`SemanticProgram` compatibility index while typed handlers are migrated; new
+Game Record v3 records pin CardProgram fingerprints without changing the record
+version.
 
 ## Authoritative state versus projected state
 
@@ -257,7 +266,7 @@ update cannot inherit stale conformance. Missing or duplicate cases fail
 corpus verification.
 
 The Oracle compiler preserves source spans and emits typed ability, cost,
-target, trigger, replacement, and effect nodes. Oracle IR v11 lowers simple
+target, trigger, replacement, and effect nodes. Oracle IR v12 lowers simple
 self enters/dies/leaves triggers, unconditional enters-tapped text, fixed
 self/target effects, basic creature-token creation, and reviewed whole-line
 fixed-mana attack/block declaration costs, combat-declaration restrictions,

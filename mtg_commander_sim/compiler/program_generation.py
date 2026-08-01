@@ -10,7 +10,7 @@ from ..semantics import SemanticProgram, SemanticRegistry
 from ..util import stable_json
 
 
-def _rulings_hash(db: CardDatabase, record: CardRecord) -> str:
+def rulings_source_hash(db: CardDatabase, record: CardRecord) -> str:
     rows = sorted(
         (asdict(ruling) for ruling in db.rulings(record)),
         key=lambda row: (
@@ -50,7 +50,7 @@ def generated_programs(
             "semantics while material Oracle residuals remain"
         )
     programs: list[SemanticProgram] = []
-    rulings_hash = _rulings_hash(db, record)
+    rulings_hash = rulings_source_hash(db, record)
     for face in ir.faces:
         for node in face.nodes:
             if not node.lowerable or not node.effects:
@@ -107,6 +107,7 @@ def generated_programs(
                             )
                         ),
                         "template_id": node.template_id,
+                        "face_id": face.face_id,
                         "source_span": asdict(node.span),
                         "semantic_hash": ir.semantic_hash,
                         "dependency_trust": (

@@ -41,6 +41,7 @@ GUARD_BASELINE = ROOT / "platform" / "architecture-guard-baseline.json"
 CAPABILITY_REGISTRY = (
     ROOT / "mtg_commander_sim" / "rules" / "capability-registry.json"
 )
+CARD_PROGRAM_SCHEMA = ROOT / "schemas" / "card-program-v2.schema.json"
 
 PYTHON_SUFFIXES = {".py"}
 WEB_SUFFIXES = {".ts", ".tsx", ".css"}
@@ -880,7 +881,10 @@ def _semantic_pack_metrics(source: Mapping[str, Any]) -> dict[str, Any]:
         "card_specific_operations": sorted(card_specific & observed),
         "configured_card_specific_operations_not_observed": sorted(card_specific - observed),
         "unclassified_operation_count": len(observed - card_specific),
-        "typed_card_override_boundary_present": False,
+        "typed_card_override_boundary_present": (
+            ROOT / "mtg_commander_sim" / "card_programs" / "model.py"
+        ).is_file(),
+        "explicit_typed_override_count": 0,
     }
 
 
@@ -891,6 +895,7 @@ def _compiler_metrics(
     commander = _load_json(ROOT / "coverage" / "oracle-coverage-commander.json")
     mechanics = _load_json(ROOT / "coverage" / "mechanics-coverage.json")
     capabilities = _load_json(CAPABILITY_REGISTRY)
+    card_program_schema = _load_json(CARD_PROGRAM_SCHEMA)
     capability_rows = {
         str(row["id"]): row for row in capabilities["capabilities"]
     }
@@ -948,8 +953,22 @@ def _compiler_metrics(
             }
         )
     return {
-        "current_ir": "OracleCardIR plus SemanticProgram",
+        "current_ir": (
+            "OracleCardIR lowered to canonical CardProgram V2 with a derived "
+            "SemanticProgram compatibility index"
+        ),
         "card_program_v2_present": "CardProgram" in symbols,
+        "card_program": {
+            "schema_version": card_program_schema["properties"]["schema_version"]["const"],
+            "required_card_fields": len(card_program_schema["required"]),
+            "required_ability_fields": len(
+                card_program_schema["$defs"]["ability"]["required"]
+            ),
+            "schema": CARD_PROGRAM_SCHEMA.relative_to(ROOT).as_posix(),
+            "model": "mtg_commander_sim/card_programs/model.py",
+            "adapter": "mtg_commander_sim/card_programs/adapters.py",
+            "validator": "mtg_commander_sim/card_programs/validation.py",
+        },
         "compiler_version": oracle.get("compiler_version"),
         "compiler_module": "mtg_commander_sim/oracle_ir.py",
         "compiler_module_physical_lines": len(
@@ -1430,6 +1449,7 @@ def render_compiler_status(report: Mapping[str, Any]) -> str:
     full = compiler["full_oracle"]
     commander = compiler["commander_legal_oracle"]
     capabilities = compiler["rule_capabilities"]
+    card_program = compiler["card_program"]
     semantics = report["semantic_packs_and_overrides"]
     lines = _metadata_lines(
         "Compiler coverage status",
@@ -1452,6 +1472,16 @@ def render_compiler_status(report: Mapping[str, Any]) -> str:
             f"{str(compiler['card_program_v2_present']).lower()}",
             f"- Compiler module: {compiler['compiler_module_physical_lines']:,} physical / "
             f"{compiler['compiler_module_logical_lines']:,} logical lines",
+            "",
+            "## Canonical CardProgram",
+            "",
+            f"- Schema version: `{card_program['schema_version']}`",
+            f"- Schema: `{card_program['schema']}`",
+            f"- Required card fields: {card_program['required_card_fields']}",
+            f"- Required per-ability fields: {card_program['required_ability_fields']}",
+            f"- Model: `{card_program['model']}`",
+            f"- Generated/reviewed adapter: `{card_program['adapter']}`",
+            f"- Runtime validator: `{card_program['validator']}`",
             "",
             "## Stages",
             "",
@@ -1536,6 +1566,7 @@ def render_compiler_status(report: Mapping[str, Any]) -> str:
             f"{len(semantics['card_specific_operations'])}",
             f"- Typed card-override boundary present: "
             f"{str(semantics['typed_card_override_boundary_present']).lower()}",
+            f"- Explicit typed overrides: {semantics['explicit_typed_override_count']}",
             "",
             "## Snapshot fingerprints",
             "",
@@ -1548,8 +1579,9 @@ def render_compiler_status(report: Mapping[str, Any]) -> str:
             "",
             "The current compiler is partial and interleaved. Full-corpus exactness is "
             "not claimed. Fine-grained closure currently covers only the reviewed base-damage "
-            "spell slice; other nodes retain the broad-contract fallback. CardProgram V2, "
-            "typed handlers, and distinct compiler stages remain incremental work.",
+            "spell slice; other nodes retain the broad-contract fallback. CardProgram V2 now "
+            "provides canonical aggregation, validation, and replay pinning. Typed handlers "
+            "and fully distinct compiler stages remain incremental work.",
             "",
         ]
     )

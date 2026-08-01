@@ -2,7 +2,7 @@
 title: "Rules completeness implementation status"
 status: "current"
 authoritative_source: "pinned rules and generated coverage artifacts"
-verified: "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d"
+verified: "3bb415ef898e3c013eaf78007c4169cc530111f5"
 audience: "rules, compiler, and engine contributors"
 maintenance: "hand-maintained"
 ---
@@ -30,8 +30,10 @@ server, provider, and pilot success never promote rules fidelity by themselves.
 
 - A pinned Comprehensive Rules corpus, Oracle snapshot, and rulings snapshot
   support deterministic inventories and reproducible source references.
-- Oracle IR v11 provides source-spanned partial compilation and material
-  residuals. It remains interleaved and is not CardProgram V2.
+- Oracle IR v12 provides source-spanned partial compilation and material
+  residuals. Generated and reviewed abilities aggregate into deterministic
+  CardProgram V2 artifacts with source, capability, trust, and replay
+  fingerprints. Compilation remains partial and interleaved.
 - Game Record v3 records accepted commands and supports exact deterministic
   replay for represented behavior.
 - The engine represents ordinary turn and priority structure, zones and object
@@ -57,16 +59,17 @@ The principal architectural and behavioral gaps include:
   abilities, copy effects, and merged permanents;
 - complete target, search, trigger-order, loop, shortcut, multiplayer, and
   combat edge cases;
-- a fine-grained capability trust model and typed semantic-handler boundary;
+- broad fine-grained capability closure and a typed semantic-handler boundary;
 - property, differential, mutation, and performance gates at the target level.
 
 ## Current migration rule
 
 Broad card-family expansion is paused during the architecture migration. Phase
-0 records the current implementation and debt. Phase 1 adds enforceable import,
-mutation, card-specificity, documentation, and ADR guards. Later phases migrate
-capability trust, CardProgram V2, typed handlers, and domain-owned state before
-resuming dependency-ordered rules expansion.
+0 recorded the implementation and debt. Phase 1 added enforceable import,
+mutation, card-specificity, documentation, and ADR guards. Phase 2 added the
+fine-grained capability registry, and Phase 3 adds CardProgram V2. Later phases
+migrate typed handlers and domain-owned state before resuming
+dependency-ordered rules expansion.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,

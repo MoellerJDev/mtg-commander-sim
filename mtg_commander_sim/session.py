@@ -677,17 +677,37 @@ class CommanderSession:
             if not semantic_key:
                 continue
             program = self.engine.semantics.get(semantic_key)
+            card_program = (
+                self.engine.semantics.card_program_for_oracle(
+                    program.oracle_id
+                )
+                if program is not None and program.oracle_id
+                else None
+            )
             programs_used.append(
                 {
                     "key": semantic_key,
+                    "oracle_id": (
+                        program.oracle_id if program is not None else None
+                    ),
                     "version": (
                         program.version
                         if program is not None
                         else 1 if semantic_key.startswith("builtin:") else None
                     ),
                     "builtin": semantic_key.startswith("builtin:"),
+                    "card_program_fingerprint": (
+                        card_program.fingerprint
+                        if card_program is not None
+                        else None
+                    ),
                 }
             )
+        card_programs_used = (
+            self.engine.semantics.card_program_fingerprints_for_keys(
+                row["key"] for row in programs_used
+            )
+        )
         retry_count = sum(
             row.get("decision_id") == (decision.decision_id if decision else None)
             and row.get("principal") == principal
@@ -843,6 +863,8 @@ class CommanderSession:
                         "registry_schema_version": 1,
                         "registry_hash": semantics_fingerprint(self.engine.semantics),
                         "programs_used": programs_used,
+                        "card_program_schema_version": 2,
+                        "card_programs_used": card_programs_used,
                     },
                     "continuation": (
                         {

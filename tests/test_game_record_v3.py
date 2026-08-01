@@ -86,9 +86,53 @@ class GameRecordV3Tests(unittest.TestCase):
             self.assertTrue(
                 all(not item["id"].startswith("c_") for item in checkpoint["active_capabilities"])
             )
+            manifest_path = record_dir / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            self.assertEqual(2, manifest["card_programs"]["schema_version"])
+            self.assertEqual(
+                session.engine.semantics.card_program_fingerprints(),
+                manifest["card_programs"]["fingerprints"],
+            )
+            command = json.loads(
+                (record_dir / "commands.jsonl").read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                2, command["semantics"]["card_program_schema_version"]
+            )
+            self.assertEqual({}, command["semantics"]["card_programs_used"])
             replay = replay_record(record_dir, self.db, verify=True)
             self.assertTrue(replay["ok"])
             self.assertEqual(replay["commands"], 1)
+            fingerprint_key = next(
+                iter(manifest["card_programs"]["fingerprints"])
+            )
+            manifest["card_programs"]["fingerprints"][fingerprint_key] = (
+                "0" * 64
+            )
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(
+                ValueError, "CardProgram fingerprint mismatch"
+            ):
+                replay_record(record_dir, self.db, verify=True)
+            manifest["card_programs"]["fingerprints"][fingerprint_key] = (
+                session.engine.semantics.card_program_fingerprints()[
+                    fingerprint_key
+                ]
+            )
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            manifest["card_programs"] = "malformed"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(
+                ValueError, "CardProgram section is malformed"
+            ):
+                replay_record(record_dir, self.db, verify=True)
+            manifest["card_programs"] = {
+                "schema_version": 2,
+                "fingerprints": (
+                    session.engine.semantics.card_program_fingerprints()
+                ),
+            }
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
             loaded = CommanderSession.load(
                 self.db,
                 record_dir,

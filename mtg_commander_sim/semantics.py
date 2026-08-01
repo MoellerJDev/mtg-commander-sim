@@ -388,6 +388,7 @@ class SemanticRegistry:
     ):
         self.path = Path(path) if path else None
         self._programs: dict[str, SemanticProgram] = {}
+        self._card_program_cache: dict[str, Any] | None = None
         self.loaded_packs: list[dict[str, Any]] = []
         if include_builtin_packs and BUILTIN_PACK_DIRECTORY.exists():
             self.load_packs([BUILTIN_PACK_DIRECTORY])
@@ -405,9 +406,43 @@ class SemanticRegistry:
             # runtime built-ins prevents a newer package from silently changing
             # the semantics used to replay an older accepted-command prefix.
             self._programs.clear()
+            self._card_program_cache = None
+        serialized_card_programs = raw.get("card_programs")
+        if serialized_card_programs is not None:
+            if raw.get("card_program_schema_version") != 2:
+                raise ValueError(
+                    "card_programs require card_program_schema_version 2"
+                )
+            if not isinstance(serialized_card_programs, Mapping):
+                raise ValueError("card_programs must be an object")
+            from .card_programs import CardProgram
+
+            parsed = {
+                str(oracle_id): CardProgram.from_dict(value)
+                for oracle_id, value in serialized_card_programs.items()
+            }
+            for oracle_id, card_program in parsed.items():
+                if oracle_id != card_program.oracle_id:
+                    raise ValueError(
+                        "CardProgram registry key does not match oracle_id"
+                    )
+                for program in card_program.abilities:
+                    self._programs[program.key] = program
+            self._card_program_cache = parsed
         programs = raw.get("programs", raw)
+        if not isinstance(programs, Mapping):
+            raise ValueError("programs must be an object")
         for key, value in programs.items():
-            self._programs[str(key)] = SemanticProgram.from_dict(value)
+            program = SemanticProgram.from_dict(value)
+            existing = self._programs.get(str(key))
+            if existing is not None and existing.to_dict() != program.to_dict():
+                raise ValueError(
+                    "CardProgram and legacy semantic program views disagree "
+                    f"for {key}"
+                )
+            self._programs[str(key)] = program
+        if serialized_card_programs is None:
+            self._card_program_cache = None
 
     @staticmethod
     def _source_hash(path: Path) -> str:
@@ -441,6 +476,7 @@ class SemanticRegistry:
             for value in items:
                 program = SemanticProgram.from_dict(value)
                 self._programs[program.key] = program
+            self._card_program_cache = None
             self.loaded_packs.append(
                 {
                     "name": str(raw.get("name") or path.stem),
@@ -457,7 +493,12 @@ class SemanticRegistry:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
             "schema_version": SEMANTIC_SCHEMA_VERSION,
+            "card_program_schema_version": 2,
             "include_builtin_packs": False,
+            "card_programs": {
+                program.oracle_id: program.to_dict()
+                for program in self.card_programs()
+            },
             "programs": {
                 key: program.to_dict() for key, program in sorted(self._programs.items())
             },
@@ -475,11 +516,13 @@ class SemanticRegistry:
         if not isinstance(program, SemanticProgram):
             program = SemanticProgram.from_dict(program)
         self._programs[program.key] = program
+        self._card_program_cache = None
         self.save()
         return program
 
     def remove(self, key: str) -> None:
         self._programs.pop(key, None)
+        self._card_program_cache = None
         self.save()
 
     def keys(self) -> list[str]:
@@ -515,3 +558,44 @@ class SemanticRegistry:
 
     def programs(self) -> list[SemanticProgram]:
         return [self._programs[key] for key in sorted(self._programs)]
+
+    def card_programs(self) -> list[Any]:
+        """Return deterministic CardProgram V2 groups used by this registry."""
+
+        if self._card_program_cache is None:
+            from .card_programs.adapters import (
+                card_programs_from_semantic_programs,
+            )
+
+            self._card_program_cache = card_programs_from_semantic_programs(
+                self._programs.values()
+            )
+        return [
+            self._card_program_cache[oracle_id]
+            for oracle_id in sorted(self._card_program_cache)
+        ]
+
+    def card_program_for_oracle(self, oracle_id: str) -> Any | None:
+        if self._card_program_cache is None:
+            self.card_programs()
+        assert self._card_program_cache is not None
+        return self._card_program_cache.get(oracle_id)
+
+    def card_program_fingerprints(self) -> dict[str, str]:
+        return {
+            program.oracle_id: program.fingerprint
+            for program in self.card_programs()
+        }
+
+    def card_program_fingerprints_for_keys(
+        self,
+        semantic_keys: Iterable[str],
+    ) -> dict[str, str]:
+        requested = set(semantic_keys)
+        return {
+            program.oracle_id: program.fingerprint
+            for program in self.card_programs()
+            if any(
+                ability.key in requested for ability in program.abilities
+            )
+        }

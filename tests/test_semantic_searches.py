@@ -180,8 +180,27 @@ class SemanticPrivateSearchTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             record = Path(temporary) / "entomb"
             session.save(record)
+            command_path = record / "commands.jsonl"
+            command = json.loads(command_path.read_text(encoding="utf-8"))
+            used = command["semantics"]["card_programs_used"]
+            self.assertTrue(used)
+            self.assertEqual(
+                next(iter(used.values())),
+                command["semantics"]["programs_used"][0][
+                    "card_program_fingerprint"
+                ],
+            )
             replay = replay_record(record, self.db, verify=True)
             self.assertTrue(replay["ok"])
+            oracle_id = next(iter(used))
+            command["semantics"]["card_programs_used"][oracle_id] = (
+                "0" * 64
+            )
+            command_path.write_text(json.dumps(command), encoding="utf-8")
+            with self.assertRaisesRegex(
+                ValueError, "CardProgram fingerprint mismatch at command"
+            ):
+                replay_record(record, self.db, verify=True)
 
     def _three_visits(
         self,
