@@ -307,7 +307,9 @@ class GoadRuleTests(unittest.TestCase):
         )
 
     def test_oracle_compiler_lowers_only_anchored_target_goad_templates(self):
-        base = self.db.lookup("Moss Diamond")
+        # Use a card in the compact CI fixture as the immutable record shell;
+        # this test replaces its Oracle text and does not depend on its rules.
+        base = self.db.lookup("Arcum Dagsson")
         ordinary = replace(base, oracle_text="{2}: Goad target creature.")
         opponent = replace(
             base,
