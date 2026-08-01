@@ -14,7 +14,7 @@ from typing import Any, AsyncIterator, Literal
 from urllib.parse import urlsplit
 import uuid
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -139,6 +139,10 @@ class RoomRequest(StrictModel):
 class JoinRoomRequest(StrictModel):
     invite_code: str = Field(min_length=20, max_length=64)
     seat: str = Field(pattern=r"^[A-Da-d]$")
+
+
+class WatchRoomRequest(StrictModel):
+    invite_code: str = Field(min_length=20, max_length=64)
 
 
 class DeckRequest(StrictModel):
@@ -314,7 +318,7 @@ class ServerRuntime:
         self, game_id: str, guest_id: str
     ) -> dict[str, Any]:
         # Authorize before a request can cause a persisted game to be loaded.
-        self.store.game_access(game_id, guest_id)
+        self.store.game_membership(game_id, guest_id)
         actor = await self.actor(game_id)
         control = self.store.game_summary(game_id, guest_id)
         lifecycle = await actor.inspect()
@@ -656,6 +660,21 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
             raise _translate_store_error(exc) from exc
         return {"room": room}
 
+    @app.post("/api/v1/rooms/watch", dependencies=[Depends(_csrf)])
+    async def watch_room(
+        body: WatchRoomRequest,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, Any]:
+        try:
+            room = runtime.store.join_spectator(
+                guest["guest_id"],
+                invite_code=body.invite_code,
+            )
+        except (StoreForbidden, StoreNotFound, StoreConflict) as exc:
+            raise _translate_store_error(exc) from exc
+        return {"room": room}
+
     @app.get("/api/v1/rooms/{room_id}")
     async def get_room(
         room_id: str,
@@ -885,6 +904,11 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
                     review_profile="commander_review",
                     semantic_policy="trusted_only",
                     manual_active_main_phase=True,
+                    # Browser tables expose a durable complete public log.
+                    # Retain every engine event in the private Game Record;
+                    # the public endpoint separately filters visibility and
+                    # strips authoritative details.
+                    trace_level="debug",
                 ),
             )
             service = GameService(session, idempotency=runtime.idempotency)
@@ -911,10 +935,13 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         runtime: ServerRuntime,
     ) -> str:
         try:
-            _, seat = runtime.store.game_access(game_id, guest["guest_id"])
+            membership = runtime.store.game_membership(
+                game_id, guest["guest_id"]
+            )
         except (StoreForbidden, StoreNotFound) as exc:
             raise _translate_store_error(exc) from exc
-        return f"pilot:{seat}"
+        seat = membership["seat"]
+        return "spectator" if membership["spectator"] else f"pilot:{seat}"
 
     @app.get("/api/v1/games/{game_id}/state")
     async def game_state(
@@ -947,6 +974,23 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
                     game_id, guest["guest_id"]
                 )
             }
+        except (StoreForbidden, StoreNotFound) as exc:
+            raise _translate_store_error(exc) from exc
+        except (KeyError, ValueError) as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/api/v1/games/{game_id}/events")
+    async def public_game_events(
+        game_id: str,
+        after: int = Query(default=0, ge=0),
+        limit: int = Query(default=100, ge=1, le=200),
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, Any]:
+        try:
+            runtime.store.game_membership(game_id, guest["guest_id"])
+            actor = await runtime.actor(game_id)
+            return await actor.public_events(after=after, limit=limit)
         except (StoreForbidden, StoreNotFound) as exc:
             raise _translate_store_error(exc) from exc
         except (KeyError, ValueError) as exc:
@@ -1014,7 +1058,11 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         guest: dict[str, Any] = Depends(_guest),
         runtime: ServerRuntime = Depends(_runtime),
     ) -> dict[str, Any]:
-        principal = await game_principal(game_id, guest, runtime)
+        try:
+            _, seat = runtime.store.game_access(game_id, guest["guest_id"])
+        except (StoreForbidden, StoreNotFound) as exc:
+            raise _translate_store_error(exc) from exc
+        principal = f"pilot:{seat}"
         try:
             raw = await request.json()
             if not isinstance(raw, dict):
@@ -1065,7 +1113,9 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
             token = websocket.cookies.get(COOKIE_NAME) or ""
         try:
             guest = runtime.store.authenticate(token)
-            _, seat = runtime.store.game_access(game_id, guest["guest_id"])
+            membership = runtime.store.game_membership(
+                game_id, guest["guest_id"]
+            )
             actor = await runtime.actor(game_id)
         except (StoreForbidden, StoreNotFound, KeyError, ValueError):
             # Accept once so browser clients receive a terminal protocol
@@ -1085,7 +1135,11 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
             )
             await websocket.close(code=4401, reason="Game access lost")
             return
-        principal = f"pilot:{seat}"
+        principal = (
+            "spectator"
+            if membership["spectator"]
+            else f"pilot:{membership['seat']}"
+        )
         cursor_key = f"network:{principal}:{uuid.uuid4().hex}"
         await websocket.accept(subprotocol=selected_protocol)
         version = runtime.hub.version(game_id)

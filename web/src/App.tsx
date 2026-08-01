@@ -6,6 +6,7 @@ import {
   type GameLifecycle,
   type Guest,
   type LegalityConfirmationRequired,
+  type PublicGameEvent,
   type Room,
   type SystemStatus,
   streamUrl,
@@ -332,6 +333,15 @@ function Lobby({ guest, system, onRoom }: { guest: Guest; system: SystemStatus |
       setError(caught instanceof Error ? caught.message : String(caught));
     }
   }
+  async function watch() {
+    try {
+      setError("");
+      const result = await api.watchRoom(invite.trim());
+      onRoom(result.room);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : String(caught));
+    }
+  }
   return (
     <main className="page-shell narrow">
       <header className="page-header">
@@ -341,7 +351,7 @@ function Lobby({ guest, system, onRoom }: { guest: Guest; system: SystemStatus |
         </div>
         <div className="eyebrow">COMMANDER ARENA</div>
         <h1>Find your table</h1>
-        <p className="page-lede">Host a private Commander duel or four-player pod, or join a seat with an invite code.</p>
+        <p className="page-lede">Host a private Commander duel or four-player pod, join a seat, or watch a table with an invite code.</p>
       </header>
       <div className="lobby-grid">
         <section className="panel">
@@ -376,6 +386,7 @@ function Lobby({ guest, system, onRoom }: { guest: Guest; system: SystemStatus |
               </select>
             </label>
             <button data-testid="join-room" type="submit">Take seat</button>
+            <button data-testid="watch-room" className="quiet-button" type="button" disabled={!invite.trim()} onClick={watch}>Watch only</button>
           </form>
         </section>
       </div>
@@ -662,7 +673,17 @@ function RoomView({
           </article>
         ))}
       </section>
-      {mine?.ready && mine.deck && (
+      {room.spectator && (
+        <section className="watch-room-card" data-testid="watch-mode">
+          <div>
+            <div className="eyebrow">READ-ONLY TABLE ACCESS</div>
+            <h2>You are watching this table</h2>
+            <p>Public zones and the public game log are available. Hands, private choices, and player capabilities stay hidden.</p>
+          </div>
+          <button type="button" className="quiet-button" data-testid="leave-watch-room" disabled={busy} onClick={leaveRoom}>Leave table</button>
+        </section>
+      )}
+      {!room.spectator && mine?.ready && mine.deck && (
         <section className="deck-ready-card" data-testid="deck-ready-summary">
           <div className="deck-ready-icon" aria-hidden="true">✓</div>
           <div>
@@ -680,7 +701,7 @@ function RoomView({
           </div>
         </section>
       )}
-      {!mine?.ready && (
+      {!room.spectator && !mine?.ready && (
         <section className="panel deck-panel">
           <div>
             <div className="eyebrow">SEAT {mine?.seat}</div>
@@ -697,7 +718,7 @@ function RoomView({
           </form>
         </section>
       )}
-      {!mine?.ready && legalityReview && (
+      {!room.spectator && !mine?.ready && legalityReview && (
         <section className="preview-review" role="alert" data-testid="legality-confirmation">
           <div>
             <div className="eyebrow">PREVIEW CARD WARNING</div>
@@ -937,14 +958,49 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   const [lifecycle, setLifecycle] = useState<GameLifecycle | null>(null);
   const [stopReason, setStopReason] = useState("Pause for a table break");
   const [showInspection, setShowInspection] = useState(false);
+  const [showPublicLog, setShowPublicLog] = useState(false);
+  const [publicEvents, setPublicEvents] = useState<PublicGameEvent[]>([]);
+  const [publicLogLoading, setPublicLogLoading] = useState(false);
   const [controlling, setControlling] = useState(false);
   const [pendingRetry, setPendingRetry] = useState<{ envelope: CommandEnvelope; label: string } | null>(null);
   const choiceDialogRef = useRef<HTMLFormElement | null>(null);
   const actionPickerRef = useRef<HTMLElement | null>(null);
   const zoneDialogRef = useRef<HTMLElement | null>(null);
   const previewDialogRef = useRef<HTMLElement | null>(null);
+  const publicLogDialogRef = useRef<HTMLElement | null>(null);
+  const publicEventCursor = useRef(0);
+  const publicLogChain = useRef(Promise.resolve());
   const draggedCardRef = useRef("");
   const lastDroppedCardRef = useRef("");
+
+  function refreshPublicLog(reset = false): Promise<void> {
+    publicLogChain.current = publicLogChain.current
+      .then(async () => {
+        setPublicLogLoading(true);
+        let after = reset ? 0 : publicEventCursor.current;
+        const collected: PublicGameEvent[] = [];
+        while (true) {
+          const page = await api.events(gameId, after, 200);
+          collected.push(...page.events);
+          if (page.next_after <= after && page.has_more) {
+            throw new Error("Public event log pagination did not advance");
+          }
+          after = page.next_after;
+          if (!page.has_more) break;
+        }
+        publicEventCursor.current = after;
+        setPublicEvents((current) => {
+          const rows = reset ? collected : [...current, ...collected];
+          return [...new Map(rows.map((event) => [event.id, event])).values()]
+            .sort((left, right) => left.id - right.id);
+        });
+      })
+      .catch((caught) => {
+        setNotice(caught instanceof Error ? caught.message : String(caught));
+      })
+      .finally(() => setPublicLogLoading(false));
+    return publicLogChain.current;
+  }
 
   useEffect(() => {
     const clearReleasedCard = () => {
@@ -960,6 +1016,8 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
     let terminal = false;
     let retry = 250;
     let timer = 0;
+    publicEventCursor.current = 0;
+    setPublicEvents([]);
     function connect() {
       if (stopped) return;
       setConnection("CONNECTING");
@@ -990,6 +1048,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
             const next = await ingestPacket(viewRef.current, message.packet!);
             viewRef.current = next;
             setView(next);
+            void refreshPublicLog(false);
           })
           .catch((error) => {
             setNotice(error instanceof Error ? error.message : String(error));
@@ -1005,7 +1064,10 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
       };
     }
     api.game(gameId)
-      .then((result) => setLifecycle(result.game))
+      .then((result) => {
+        setLifecycle(result.game);
+        void refreshPublicLog(true);
+      })
       .catch((caught) => setNotice(caught instanceof Error ? caught.message : String(caught)));
     connect();
     return () => {
@@ -1013,6 +1075,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
       window.clearTimeout(timer);
       socket?.close();
       viewRef.current = null;
+      publicEventCursor.current = 0;
     };
   }, [gameId, reconnectNonce]);
 
@@ -1031,12 +1094,12 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   }, [pendingRetry, view?.decision?.id]);
 
   useEffect(() => {
-    if (!selectedAction && actionChoices.length === 0 && !zoneBrowser && !expandedInspector) return;
+    if (!selectedAction && actionChoices.length === 0 && !zoneBrowser && !expandedInspector && !showPublicLog) return;
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const oldOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     window.requestAnimationFrame(() => {
-      const dialog = choiceDialogRef.current ?? actionPickerRef.current ?? zoneDialogRef.current ?? previewDialogRef.current;
+      const dialog = choiceDialogRef.current ?? actionPickerRef.current ?? zoneDialogRef.current ?? previewDialogRef.current ?? publicLogDialogRef.current;
       dialog?.querySelector<HTMLElement>("input:not(:disabled), select:not(:disabled), button:not(:disabled)")?.focus();
     });
     function keydown(event: KeyboardEvent) {
@@ -1046,9 +1109,10 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
         setActionChoices([]);
         setZoneBrowser(null);
         setExpandedInspector(false);
+        setShowPublicLog(false);
         return;
       }
-      const dialog = choiceDialogRef.current ?? actionPickerRef.current ?? zoneDialogRef.current ?? previewDialogRef.current;
+      const dialog = choiceDialogRef.current ?? actionPickerRef.current ?? zoneDialogRef.current ?? previewDialogRef.current ?? publicLogDialogRef.current;
       if (event.key !== "Tab" || !dialog) return;
       const controls = [...dialog.querySelectorAll<HTMLElement>("input:not(:disabled), select:not(:disabled), textarea:not(:disabled), button:not(:disabled), [tabindex]:not([tabindex='-1'])")];
       if (!controls.length) return;
@@ -1068,7 +1132,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
       document.body.style.overflow = oldOverflow;
       previous?.focus();
     };
-  }, [selectedAction, actionChoices, zoneBrowser, expandedInspector]);
+  }, [selectedAction, actionChoices, zoneBrowser, expandedInspector, showPublicLog]);
 
   async function submitEnvelope(envelope: CommandEnvelope, label: string) {
     setSubmitting(true);
@@ -1199,7 +1263,8 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   const game = asRecord(state.game);
   const turn = asRecord(state.turn);
   const players = asRecord(state.players);
-  const ownSeat = view.principal.split(":").at(-1) ?? "?";
+  const isSpectator = view.principal === "spectator" || lifecycle?.spectator === true;
+  const ownSeat = isSpectator ? "" : view.principal.split(":").at(-1) ?? "?";
   const ownPlayer = asRecord(players[ownSeat]);
   const hand = asList(ownPlayer.hand);
   const ownCommand = asList(ownPlayer.cmd);
@@ -1221,7 +1286,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
     String(action.card ?? action.source ?? "") === ref
     && (action.mana_ability !== true || manualMana),
   );
-  const dropEnabled = [...hand, ...ownCommand].some((card) =>
+  const dropEnabled = !isSpectator && [...hand, ...ownCommand].some((card) =>
     actionsForCard(String(asRecord(card).id ?? "")).some((action) => ["play_land", "cast"].includes(action.action)),
   );
   const activeSeat = String(turn.active ?? "");
@@ -1244,6 +1309,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   const zoneName = zoneBrowser?.zone === "gy" ? "Graveyard" : "Exile";
   return (
     <main className="game-shell" data-view-revision={view.viewRevision}>
+      {isSpectator && <div className="watch-mode-banner" data-testid="watch-mode"><strong>WATCH MODE</strong><span>Public table and game log · no player controls</span></div>}
       <a className="skip-link" href="#decision-tray">Skip to current actions</a>
       <header className="game-topbar">
         <div className="connection-group">
@@ -1267,7 +1333,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
         </div>
       )}
       <section className="operations-panel" aria-label="Match operations">
-        <div className="operations-heading"><span className="eyebrow">TABLE CONTROLS</span><strong>Seat {ownSeat}</strong></div>
+        <div className="operations-heading"><span className="eyebrow">{isSpectator ? "TABLE VIEW" : "TABLE CONTROLS"}</span><strong>{isSpectator ? "Spectator" : `Seat ${ownSeat}`}</strong></div>
         <button
           type="button"
           className="secondary-button"
@@ -1275,6 +1341,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
           aria-expanded={showInspection}
           onClick={() => setShowInspection((value) => !value)}
         >Inspect match</button>
+        <button type="button" className="secondary-button" data-testid="open-public-log" onClick={() => setShowPublicLog(true)}>Public log</button>
         {lifecycle?.owner && lifecycle.can_stop && (
           <label className="stop-control">
             Stop reason
@@ -1358,15 +1425,15 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
             </div>
           </section>
           <section className="activity-panel">
-            <header><div className="zone-label">RECENT ACTIVITY</div></header>
+            <header><div className="zone-label">RECENT ACTIVITY</div><button type="button" className="link-button" onClick={() => setShowPublicLog(true)}>Full log</button></header>
             <ol>
-              {view.events.slice(-5).reverse().map((event, index) => <li key={String(event.id ?? index)}><span>{event.a ? `Seat ${event.a}` : "Game"}</span>{String(event.s ?? event.c ?? "State updated")}</li>)}
-              {!view.events.length && <li className="empty-activity">Game events will appear here.</li>}
+              {publicEvents.slice(-5).reverse().map((event) => <li key={event.id}><span>{event.actor ? `Seat ${event.actor}` : "Game"}</span>{event.summary || readable(event.code)}</li>)}
+              {!publicEvents.length && <li className="empty-activity">Game events will appear here.</li>}
             </ol>
           </section>
         </aside>
       </div>
-      <section className="hand-panel">
+      {!isSpectator && <section className="hand-panel">
         <header><div><span className="eyebrow">YOUR PRIVATE ZONE · SEAT {ownSeat}</span><h2>Your hand</h2></div><span className="zone-count">{hand.length} cards</span></header>
         {cardContext && (
           <div className="selected-card-actions" data-testid="selected-card-actions">
@@ -1391,7 +1458,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
             return <CardTile key={ref || index} value={card} view={view} actions={actionsForCard(ref)} onIntent={selectCardActions} onInspect={setInspectedCard} onDragCard={(nextRef) => { draggedCardRef.current = nextRef ?? ""; }} selected={selectedCardRef === ref} />;
           })}
         </div>
-      </section>
+      </section>}
       {pendingRetry && (
         <section className="retry-panel" role="alert" data-testid="command-retry">
           <div><strong>Command delivery is uncertain</strong><span>Retrying “{pendingRetry.label}” will reuse command {pendingRetry.envelope.command_id} exactly.</span></div>
@@ -1399,7 +1466,9 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
         </section>
       )}
       <section id="decision-tray" className="decision-panel" data-testid="decision-panel" aria-live="polite">
-        {view.decision ? (
+        {isSpectator ? (
+          <div className="waiting-decision"><span className="status-dot muted" /><div><strong>Watching the table</strong><p>Player decisions and private information remain seat-scoped.</p></div></div>
+        ) : view.decision ? (
           <>
             <div className="decision-copy"><span className="eyebrow">YOUR DECISION · {view.decision.id}</span><h2>{readable(view.decision.kind)}</h2><small>{displayActions.length} shown · {view.decision.legal_actions.length} legal</small></div>
             <div className="action-tools">
@@ -1432,6 +1501,28 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
         <button type="button" className="mobile-inspector-trigger" onClick={() => setExpandedInspector(true)}>
           View {cardName(inspectionTarget)}
         </button>
+      )}
+      {showPublicLog && (
+        <div className="choice-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowPublicLog(false); }}>
+          <section ref={publicLogDialogRef} className="choice-dialog public-log-dialog" role="dialog" aria-modal="true" aria-labelledby="public-log-title" data-testid="public-game-log">
+            <header>
+              <div><span className="eyebrow">PUBLIC MATCH RECORD</span><h2 id="public-log-title">Complete game log</h2><p>Every public event retained by the authoritative Game Record, in sequence.</p></div>
+              <div className="dialog-actions">
+                <button type="button" className="quiet-button" data-testid="refresh-public-log" disabled={publicLogLoading} onClick={() => void refreshPublicLog(false)}>{publicLogLoading ? "Refreshing…" : "Refresh"}</button>
+                <button type="button" className="secondary-button" onClick={() => setShowPublicLog(false)}>Close</button>
+              </div>
+            </header>
+            <ol className="public-log-list">
+              {publicEvents.map((event) => (
+                <li key={event.id} data-testid="public-log-entry">
+                  <span>#{event.id}</span>
+                  <div><strong>{event.actor ? `Seat ${event.actor}` : "Game"}</strong><p>{event.summary || readable(event.code)}</p><small>{readable(event.code)}</small></div>
+                </li>
+              ))}
+              {!publicEvents.length && <li className="empty-activity">{publicLogLoading ? "Loading public events…" : "No public events have been recorded."}</li>}
+            </ol>
+          </section>
+        </div>
       )}
       {zoneBrowser && (
         <div className="choice-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setZoneBrowser(null); }}>
@@ -1625,7 +1716,7 @@ export default function App() {
   if (!guest) return null;
   if (screen === "lobby") return <Lobby guest={guest} system={system} onRoom={enterRoom} />;
   if (screen === "room" && room) return <RoomView key={room.room_id} guest={guest} initial={room} invite={invite} onGame={enterGame} onRoom={enterRoom} onLeave={leaveRoomScreen} />;
-  if (screen === "game" && gameId) return <GameView gameId={gameId} onExit={() => {
+  if (screen === "game" && gameId) return <GameView key={gameId} gameId={gameId} onExit={() => {
     sessionStorage.removeItem("commander-room");
     setRoom(null);
     setGameId("");

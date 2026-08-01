@@ -179,6 +179,9 @@ p { line-height: 1.65; }
 .deck-ready-card h2 { margin: .2rem 0; font-size: 1.2rem; }
 .deck-ready-card p { margin: 0; color: var(--muted); font-size: .76rem; }
 .deck-ready-card code { color: #8fa397; font: .65rem var(--mono); }
+.watch-room-card { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.15rem; border: 1px solid #536778; border-radius: var(--radius); background: linear-gradient(135deg, rgb(22 35 43 / 96%), rgb(13 22 27 / 96%)); }
+.watch-room-card h2 { margin: .25rem 0; font-size: 1.25rem; }
+.watch-room-card p { max-width: 68ch; margin: 0; color: var(--muted); font-size: .76rem; }
 .deck-ready-actions { display: grid; justify-items: end; gap: .55rem; }
 .deck-ready-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; color: var(--accent-ink); background: var(--accent); font-weight: 900; }
 .preview-chip { display: inline-block; margin-right: .25rem; padding: .15rem .38rem; border: 1px solid #a17c3d; border-radius: 99px; color: #ffe3a5; background: #352913; font: 650 .52rem var(--mono); vertical-align: .08rem; }
@@ -201,6 +204,8 @@ p { line-height: 1.65; }
 
 /* Game table */
 .game-shell { min-height: 100vh; padding: .75rem clamp(.6rem, 2vw, 1.25rem) 1.5rem; background: linear-gradient(rgb(7 12 9 / 78%), rgb(7 12 9 / 94%)), radial-gradient(circle at center, #3b5842, #09100c); }
+.watch-mode-banner { display: flex; justify-content: center; gap: .65rem; margin: -.15rem 0 .5rem; color: #b8cbd9; font: 600 .6rem var(--mono); letter-spacing: .05em; }
+.watch-mode-banner strong { color: #8fc4e4; }
 .game-topbar { position: sticky; top: .5rem; z-index: 8; min-height: 58px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; padding: .55rem .8rem; border: 1px solid var(--line); border-radius: var(--radius); background: rgb(12 18 14 / 94%); box-shadow: 0 10px 34px rgb(0 0 0 / 25%); backdrop-filter: blur(16px); }
 .connection-group, .game-status-line { display: flex; align-items: center; gap: .6rem; color: #aeb9b1; font: 600 .66rem var(--mono); }
 .game-identity { display: grid; text-align: center; }
@@ -338,6 +343,15 @@ p { line-height: 1.65; }
 .choice-dialog > header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding-bottom: .8rem; border-bottom: 1px solid var(--line); }
 .choice-dialog h2 { margin: .2rem 0; }
 .choice-dialog header p { max-width: 58ch; margin: 0; color: var(--muted); font-size: .76rem; }
+.dialog-actions { display: flex; gap: .5rem; }
+.public-log-dialog { width: min(900px, 100%); }
+.public-log-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.public-log-list li { display: grid; grid-template-columns: 3.5rem 1fr; gap: .8rem; padding: .75rem .2rem; border-bottom: 1px solid var(--line); }
+.public-log-list li > span { color: var(--faint); font: 550 .62rem var(--mono); }
+.public-log-list li div { display: grid; gap: .18rem; }
+.public-log-list li strong { color: var(--accent); font-size: .68rem; }
+.public-log-list li p { margin: 0; color: #d2ddd5; font-size: .75rem; line-height: 1.45; }
+.public-log-list li small { color: var(--faint); font: 500 .55rem var(--mono); }
 .action-picker-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .7rem; }
 .action-picker-options button { min-height: 62px; text-align: left; }
 .zone-browser { width: min(1120px, 100%); }
@@ -419,6 +433,7 @@ p { line-height: 1.65; }
   .connection-banner, .retry-panel { align-items: flex-start; flex-direction: column; }
   .selected-card-actions { align-items: stretch; flex-direction: column; }
   .selected-card-action-buttons { justify-content: flex-start; }
+  .watch-room-card { align-items: stretch; flex-direction: column; }
   .zone-browser-layout { grid-template-columns: 1fr; }
   .zone-card-grid { grid-template-columns: repeat(auto-fill, minmax(126px, 1fr)); }
   .zone-browser-layout > .card-inspector-panel { order: -1; }
@@ -444,6 +459,8 @@ p { line-height: 1.65; }
   .choice-overlay { padding: .35rem; }
   .choice-dialog { max-height: calc(100vh - .7rem); padding: .9rem; }
   .choice-dialog > header { display: grid; }
+  .dialog-actions { width: 100%; }
+  .dialog-actions button { flex: 1; }
   .zone-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .choice-submit-row { align-items: stretch; flex-direction: column-reverse; }
   .deck-ready-card { grid-template-columns: auto 1fr; }

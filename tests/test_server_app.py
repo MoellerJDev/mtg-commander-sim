@@ -362,6 +362,7 @@ class ServerApplicationTests(unittest.TestCase):
         self.assertEqual(201, response.status_code, response.text)
         room_id = response.json()["room"]["room_id"]
         invite = response.json()["invite_code"]
+        self.last_ready_invite = invite
         for index, seat in enumerate("BCD", 1):
             response = self.client.post(
                 "/api/v1/rooms/join",
@@ -409,6 +410,234 @@ class ServerApplicationTests(unittest.TestCase):
         )
         self.assertEqual(200, response.status_code, response.text)
         return response.json()["game_id"], tokens, room_id
+
+    def test_spectator_projection_public_log_and_restart_are_read_only(self):
+        game_id, tokens, room_id = self.create_ready_game()
+        spectator, _ = self.guest("Table watcher")
+        outsider, _ = self.guest("Uninvited watcher")
+
+        joined = self.client.post(
+            "/api/v1/rooms/watch",
+            headers=self.auth(spectator),
+            json={"invite_code": self.last_ready_invite},
+        )
+        self.assertEqual(200, joined.status_code, joined.text)
+        watched_room = joined.json()["room"]
+        self.assertEqual(room_id, watched_room["room_id"])
+        self.assertEqual(game_id, watched_room["game_id"])
+        self.assertTrue(watched_room["spectator"])
+        self.assertFalse(any(seat["mine"] for seat in watched_room["seats"]))
+
+        projection = self.client.get(
+            f"/api/v1/games/{game_id}/state?full=true",
+            headers=self.auth(spectator),
+        )
+        self.assertEqual(200, projection.status_code, projection.text)
+        packet = projection.json()["packet"]
+        self.assertEqual("spectator", packet["principal"])
+        self.assertIsNone(packet["decision"])
+        self.assertNotIn('"cap"', json.dumps(packet, sort_keys=True))
+        for player in packet["state"]["players"].values():
+            self.assertNotIn("hand", player)
+            self.assertNotIn("known_hand", player)
+            self.assertNotIn("known_top", player)
+
+        summary = projection.json()["game"]
+        self.assertTrue(summary["spectator"])
+        self.assertEqual("spectator", summary["role"])
+        self.assertIsNone(summary["seat"])
+        self.assertFalse(summary["owner"])
+        self.assertFalse(summary["can_stop"])
+        self.assertFalse(summary["can_resume"])
+
+        denied_outsider = self.client.get(
+            f"/api/v1/games/{game_id}/events",
+            headers=self.auth(outsider),
+        )
+        self.assertEqual(403, denied_outsider.status_code)
+
+        first_page = self.client.get(
+            f"/api/v1/games/{game_id}/events?after=0&limit=1",
+            headers=self.auth(spectator),
+        )
+        self.assertEqual(200, first_page.status_code, first_page.text)
+        first_payload = first_page.json()
+        self.assertEqual(1, len(first_payload["events"]))
+        self.assertTrue(first_payload["has_more"])
+        self.assertGreater(first_payload["next_after"], 0)
+        self.assertEqual(
+            {"id", "code", "actor", "summary", "importance"},
+            set(first_payload["events"][0]),
+        )
+
+        public_events: list[dict] = []
+        after = 0
+        while True:
+            page = self.client.get(
+                f"/api/v1/games/{game_id}/events?after={after}&limit=2",
+                headers=self.auth(spectator),
+            )
+            self.assertEqual(200, page.status_code, page.text)
+            payload = page.json()
+            public_events.extend(payload["events"])
+            self.assertGreaterEqual(payload["next_after"], after)
+            if not payload["has_more"]:
+                break
+            self.assertGreater(payload["next_after"], after)
+            after = payload["next_after"]
+        self.assertTrue(public_events)
+        self.assertEqual(
+            sorted({event["id"] for event in public_events}),
+            [event["id"] for event in public_events],
+        )
+        self.assertTrue(any(event["code"] == "game.created" for event in public_events))
+        self.assertFalse(
+            any(event["code"] in {"card.draw.private", "library.look"} for event in public_events)
+        )
+
+        seat_packet = self.client.get(
+            f"/api/v1/games/{game_id}/state?full=true",
+            headers=self.auth(tokens[0]),
+        ).json()["packet"]
+        stolen = {
+            "protocol_version": "3.0",
+            "game_id": game_id,
+            "command_id": "spectator-stolen-command",
+            "decision_id": seat_packet["decision"]["id"],
+            "action_id": "keep",
+            "capability": seat_packet["decision"]["cap"],
+            "expected_view_revision": seat_packet["view_revision"],
+            "choices": {},
+        }
+        denied_command = self.client.post(
+            f"/api/v1/games/{game_id}/commands",
+            headers=self.auth(spectator),
+            json=stolen,
+        )
+        self.assertEqual(403, denied_command.status_code, denied_command.text)
+
+        self.client.cookies.set(COOKIE_NAME, spectator)
+        with self.client.websocket_connect(
+            f"/api/v1/games/{game_id}/stream"
+        ) as websocket:
+            initial = websocket.receive_json()
+            self.assertEqual("spectator", initial["packet"]["principal"])
+            self.assertIsNone(initial["packet"]["decision"])
+
+            accepted = self.client.post(
+                f"/api/v1/games/{game_id}/commands",
+                headers=self.auth(tokens[0]),
+                json=stolen | {"command_id": "seat-a-public-update"},
+            )
+            self.assertEqual(200, accepted.status_code, accepted.text)
+            self.assertTrue(accepted.json()["receipt"]["ok"])
+            update = websocket.receive_json()
+            self.assertEqual("spectator", update["packet"]["principal"])
+            self.assertIsNone(update["packet"]["decision"])
+
+        for index in range(1, 4):
+            seat_packet = self.client.get(
+                f"/api/v1/games/{game_id}/state?full=true",
+                headers=self.auth(tokens[index]),
+            ).json()["packet"]
+            keep = self.client.post(
+                f"/api/v1/games/{game_id}/commands",
+                headers=self.auth(tokens[index]),
+                json={
+                    "protocol_version": "3.0",
+                    "game_id": game_id,
+                    "command_id": f"seat-{'ABCD'[index]}-public-log-keep",
+                    "decision_id": seat_packet["decision"]["id"],
+                    "action_id": "keep",
+                    "capability": seat_packet["decision"]["cap"],
+                    "expected_view_revision": seat_packet["view_revision"],
+                    "choices": {},
+                },
+            )
+            self.assertEqual(200, keep.status_code, keep.text)
+            self.assertTrue(keep.json()["receipt"]["ok"])
+
+        low_importance_public_event = False
+        for pass_sequence in range(20):
+            current_log = self.client.get(
+                f"/api/v1/games/{game_id}/events?after=0&limit=200",
+                headers=self.auth(spectator),
+            ).json()["events"]
+            if any(event["importance"] == 0 for event in current_log):
+                low_importance_public_event = True
+                break
+            active_index, active_packet = next(
+                (index, packet)
+                for index, token in enumerate(tokens)
+                for packet in [
+                    self.client.get(
+                        f"/api/v1/games/{game_id}/state?full=true",
+                        headers=self.auth(token),
+                    ).json()["packet"]
+                ]
+                if packet["decision"] is not None
+            )
+            pass_action = next(
+                action
+                for action in active_packet["decision"]["legal_actions"]
+                if action["id"] == "pass"
+            )
+            passed = self.client.post(
+                f"/api/v1/games/{game_id}/commands",
+                headers=self.auth(tokens[active_index]),
+                json={
+                    "protocol_version": "3.0",
+                    "game_id": game_id,
+                    "command_id": (
+                        f"seat-{'ABCD'[active_index]}-public-log-pass-"
+                        f"{pass_sequence}"
+                    ),
+                    "decision_id": active_packet["decision"]["id"],
+                    "action_id": pass_action["id"],
+                    "capability": active_packet["decision"]["cap"],
+                    "expected_view_revision": active_packet["view_revision"],
+                    "choices": {},
+                },
+            )
+            self.assertEqual(200, passed.status_code, passed.text)
+            self.assertTrue(passed.json()["receipt"]["ok"])
+        self.assertTrue(
+            low_importance_public_event,
+            "the scenario must create a low-importance public event",
+        )
+
+        self.restart_client()
+        recovered = self.client.get(
+            f"/api/v1/games/{game_id}/state?full=true",
+            headers=self.auth(spectator),
+        )
+        self.assertEqual(200, recovered.status_code, recovered.text)
+        self.assertEqual("spectator", recovered.json()["packet"]["principal"])
+        recovered_log = self.client.get(
+            f"/api/v1/games/{game_id}/events?after=0&limit=200",
+            headers=self.auth(spectator),
+        )
+        self.assertEqual(200, recovered_log.status_code, recovered_log.text)
+        self.assertGreaterEqual(
+            len(recovered_log.json()["events"]), len(public_events)
+        )
+        self.assertTrue(
+            any(
+                event["importance"] == 0
+                for event in recovered_log.json()["events"]
+            ),
+            "the complete public log must retain low-importance public events",
+        )
+
+        left = self.client.delete(
+            f"/api/v1/rooms/{room_id}/membership",
+            headers=self.auth(spectator),
+        )
+        self.assertEqual(200, left.status_code, left.text)
+        denied_after_leave = self.client.get(
+            f"/api/v1/games/{game_id}", headers=self.auth(spectator)
+        )
+        self.assertEqual(403, denied_after_leave.status_code)
 
     def test_guest_csrf_room_and_atomic_seat_claims(self):
         blank = self.client.post(

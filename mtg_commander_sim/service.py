@@ -260,6 +260,20 @@ class GameService:
     def drop_projection_cursor(self, cursor_key: str) -> None:
         self.session.drop_projection_cursor(cursor_key)
 
+    def event_page(
+        self,
+        principal: str,
+        *,
+        after: int = 0,
+        limit: int = 100,
+    ) -> dict[str, Any]:
+        self.session.projector.state = self.session.state
+        return self.session.projector.event_page(
+            principal,
+            after=after,
+            limit=limit,
+        )
+
     def _receipt(
         self,
         envelope: CommandEnvelope,

@@ -32,14 +32,15 @@ async function expectCardSurface(page: Page, seat: string) {
   const firstCard = page.getByTestId("own-hand").locator(".hand-card").first();
   const name = await firstCard.locator(".card-copy strong").textContent();
   expect(name).toBeTruthy();
+  const visibleFaceName = name!.split(" // ", 1)[0];
   await firstCard.hover();
   await expect(page.getByTestId("card-inspector")).toBeVisible();
-  await expect(page.getByTestId("card-inspector")).toContainText(name!);
+  await expect(page.getByTestId("card-inspector")).toContainText(visibleFaceName);
   await expect(page.getByTestId(`zone-${seat}-graveyard`)).toBeDisabled();
   await expect(page.getByTestId(`zone-${seat}-exile`)).toBeDisabled();
 }
 
-async function startFourPlayerGame(browser: Browser): Promise<{ contexts: BrowserContext[]; pages: Page[] }> {
+async function startFourPlayerGame(browser: Browser): Promise<{ contexts: BrowserContext[]; pages: Page[]; invite: string }> {
   const contexts: BrowserContext[] = [];
   const pages: Page[] = [];
   for (const seat of "ABCD") {
@@ -71,7 +72,7 @@ async function startFourPlayerGame(browser: Browser): Promise<{ contexts: Browse
     await expect(page.getByTestId("decision-panel")).toBeVisible();
     await expectCardSurface(page, "ABCD"[index]);
   }
-  return { contexts, pages };
+  return { contexts, pages, invite: invite! };
 }
 
 async function submitImmediateAction(page: Page, actionId: string) {
@@ -230,6 +231,49 @@ test("four shared-cookie browser tabs retain isolated seats through mulligans an
     expect(await pages[0].evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   } finally {
     await Promise.all(contexts.map((context) => context.close()));
+  }
+});
+
+test("an invited spectator receives a read-only projection and complete public log", async ({ browser }) => {
+  let playerContexts: BrowserContext[] = [];
+  const spectatorContext = await browser.newContext();
+  try {
+    const started = await startFourPlayerGame(browser);
+    playerContexts = started.contexts;
+    const spectator = await spectatorContext.newPage();
+    await enter(spectator, "Table spectator");
+    await spectator.getByTestId("invite-code").fill(started.invite);
+    await spectator.getByTestId("watch-room").click();
+
+    await expect(spectator.getByTestId("watch-mode")).toBeVisible();
+    await expect(spectator.locator(".player-board")).toHaveCount(4);
+    await expect(spectator.getByTestId("own-hand")).toHaveCount(0);
+    await expect(spectator.locator('[data-testid^="action-"]')).toHaveCount(0);
+    await expect(spectator.getByTestId("decision-panel")).toContainText(
+      "Watching the table",
+    );
+
+    await spectator.getByTestId("open-public-log").click();
+    await expect(spectator.getByTestId("public-game-log")).toBeVisible();
+    await expect(spectator.getByTestId("public-log-entry").first()).toBeVisible();
+    const beforeLogCount = await spectator.getByTestId("public-log-entry").count();
+    const beforeRevision = await viewRevision(spectator);
+
+    await submitImmediateAction(started.pages[0], "keep");
+    await expect.poll(() => viewRevision(spectator)).toBeGreaterThan(beforeRevision);
+    await spectator.getByTestId("refresh-public-log").click();
+    await expect.poll(async () => spectator.getByTestId("public-log-entry").count()).toBeGreaterThanOrEqual(beforeLogCount);
+
+    await spectator.keyboard.press("Escape");
+    await expect(spectator.getByTestId("public-game-log")).toHaveCount(0);
+    await spectator.reload();
+    await expect(spectator.getByTestId("watch-mode")).toBeVisible();
+    await expect(spectator.getByTestId("own-hand")).toHaveCount(0);
+    await spectator.getByTestId("open-public-log").click();
+    await expect(spectator.getByTestId("public-log-entry").first()).toBeVisible();
+  } finally {
+    await spectatorContext.close();
+    await Promise.all(playerContexts.map((context) => context.close()));
   }
 });
 

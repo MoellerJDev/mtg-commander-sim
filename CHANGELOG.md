@@ -67,6 +67,13 @@
   shared incognito cookie jars cannot collapse all players into the last seat.
 - Added explicit two-player `commander_duel` and four-player room creation,
   owner seat removal, nonowner leave, and atomic **New room** replacement.
+- Added invite-authenticated watch-only memberships. Spectators receive a
+  capability-free public projection over HTTP/WebSocket, cannot submit seat
+  commands, and can leave an active table without changing any player state.
+- Added a serialized, paginated complete public-log endpoint and browser
+  dialog. Browser records retain every event; responses remove raw details and
+  private visibility, and the public history survives reconnect and process
+  restart.
 - Added bounded startup retry backoff for already-open room pages and accurate
   `starting` system status while card data is being verified.
 - Fixed production WebSocket origin validation so the one-command UI's exact

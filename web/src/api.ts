@@ -113,6 +113,7 @@ export interface Room {
   game_id: string | null;
   format_profile: string;
   seat_count: 2 | 4;
+  spectator: boolean;
   seats: Seat[];
 }
 
@@ -122,7 +123,9 @@ export interface GameLifecycle {
   status: "active" | "paused" | "complete" | "aborted";
   state_revision: number;
   format_profile: string;
-  seat: string;
+  seat: string | null;
+  spectator: boolean;
+  role: "player" | "spectator";
   owner: boolean;
   can_stop: boolean;
   can_resume: boolean;
@@ -139,6 +142,20 @@ export interface GameLifecycle {
   commands: number;
   decisions: number;
   events: number;
+}
+
+export interface PublicGameEvent {
+  id: number;
+  code: string;
+  actor: string | null;
+  summary: string;
+  importance: number;
+}
+
+export interface PublicEventPage {
+  events: PublicGameEvent[];
+  next_after: number;
+  has_more: boolean;
 }
 
 export interface SystemStatus {
@@ -195,6 +212,11 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ invite_code, seat }),
     }),
+  watchRoom: (invite_code: string) =>
+    request<{ room: Room }>("/api/v1/rooms/watch", {
+      method: "POST",
+      body: JSON.stringify({ invite_code }),
+    }),
   room: (roomId: string) => request<{ room: Room }>(`/api/v1/rooms/${roomId}`),
   rotateInvite: (roomId: string) =>
     request<{ invite_code: string }>(`/api/v1/rooms/${roomId}/invite`, {
@@ -250,6 +272,10 @@ export const api = {
     }),
   game: (gameId: string) =>
     request<{ game: GameLifecycle }>(`/api/v1/games/${gameId}`),
+  events: (gameId: string, after = 0, limit = 100) =>
+    request<PublicEventPage>(
+      `/api/v1/games/${gameId}/events?after=${after}&limit=${limit}`,
+    ),
   stop: (gameId: string, reason: string) =>
     request<{ game: GameLifecycle }>(`/api/v1/games/${gameId}/stop`, {
       method: "POST",

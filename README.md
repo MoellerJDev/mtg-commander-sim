@@ -13,7 +13,9 @@ slice. It provides tab-isolated guest sessions, invite-only two- or four-seat ro
 validation/preflight, a serialized single-writer game actor, SQLite control
 plane, durable Game Record v3 acknowledgement, strict idempotent protocol 3.0
 commands, seat-scoped WebSockets, reconnect and process-restart recovery, and a
-responsive TypeScript/React table. One Python process now builds and serves the
+responsive TypeScript/React table. Invited guests can also join as read-only
+spectators: they receive only the public projection, cannot submit seat
+commands, and can browse the complete durable public event log. One Python process now builds and serves the
 browser, prepares the local Scryfall SQLite index, checks for updated Oracle and
 rulings exports every 24 hours, and serves an on-demand local card-image cache.
 The browser renders the engine's current generic choice vocabulary, locally
@@ -24,7 +26,7 @@ The browser renders the engine's current generic choice vocabulary, locally
   owner-only durable stop/resume controls, and a seat-safe record inspection
   panel. These paths are
 end-to-end tested with four shared-cookie tab-isolated seats and a two-player
-duel. Future choice schemas, full account
+duel, plus an isolated invited spectator. Future choice schemas, full account
 identity, expiry/rate limits, and production operations remain incomplete.
 The generated platform ledger records the exact current test and coverage
 counts.
@@ -87,7 +89,8 @@ or packaged. See [the content boundary](docs/LEGAL_CONTENT_BOUNDARY.md) for
 attribution, display constraints, and deployment review requirements.
 
 The current identity layer is an expiring, per-browser-tab guest session: choose
-a display name, host or join a private 1v1 duel or four-seat room, submit a
+a display name, host or join a private 1v1 duel or four-seat room, or use the
+same invite as a watch-only spectator. Seated players submit a
 Moxfield URL or pasted deck, and start when every configured seat shows ready.
 Incognito windows may share cookies without collapsing into one seat. The host invite remains
 visible after readying and reload; the host can replace it if necessary, and
@@ -107,7 +110,9 @@ full projected name, mana cost, type line, and Oracle text in the desktop card
 viewer. Double-faced cards expose both visible faces. On a narrow screen, use
 the floating **View card** control for the same enlarged view. Graveyard and
 exile counts are buttons that open the complete public contents for that seat;
-hands and libraries remain seat-private.
+hands and libraries remain seat-private. **Public log** opens the complete
+chronological public event history and remains available after reconnect or a
+server restart; raw event details and private events never enter that response.
 
 Cards with a current action are highlighted and labeled **PLAY**, **CAST**,
 **ACTIVATE**, or **CHOOSE**. Select a hand, command-zone, public-zone, or
@@ -236,7 +241,8 @@ generated documentation fixtures with bearer capabilities redacted. See
   choices, with deterministic continuation after the choice
 - local Oracle text and Scryfall rulings; no card API calls during play
 - plain-text and defensive Moxfield deck loading
-- a FastAPI/ASGI guest, room, seat, deck, game, command, and WebSocket adapter
+- a FastAPI/ASGI guest, room, seat, spectator, deck, game, command, public-log,
+  and WebSocket adapter
 - one bounded, serialized `GameActor` mailbox per active game
 - SQLite guest/room/seat/deck/game/idempotency control-plane persistence plus
   Game Record v3 durability before command acknowledgement
@@ -245,7 +251,8 @@ generated documentation fixtures with bearer capabilities redacted. See
   hand rendering, persistent hover/focus inspection, double-face viewing,
   public graveyard/exile browsers, card-specific legal-action prompts,
   drag-to-play, optional click-to-activate manual mana, generic server-issued choice forms,
-  focus-contained dialogs, reconnect, exact-envelope retry, and
+  focus-contained dialogs, a durable public-log dialog, read-only spectator
+  mode, reconnect, exact-envelope retry, and
   four-isolated-context Playwright coverage
 - one-command local startup with browser build/static serving, a visible
   first-run setup state, managed 24-hour Scryfall bulk checks, atomic SQLite

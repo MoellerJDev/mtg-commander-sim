@@ -57,6 +57,9 @@ Choose a display name to create an expiring guest session. A host creates a
 invite code. Each browser tab receives a distinct HttpOnly guest binding even
 when incognito windows share one cookie jar. Other players join distinct seats,
 then each seat submits either a public Moxfield URL or a pasted Commander list.
+An invited guest may instead choose **Watch only** without claiming a seat.
+That membership can enter an active game, receives only the `spectator`
+projection, and may leave without altering any player or deck.
 Each player receives a visible private ready summary after validation.
 Before game start, a player can use **Change deck / Unready** to clear only
 their own submitted list and return to validation. The host's raw invite code
@@ -81,6 +84,14 @@ grid and inspector for that complete public zone. An opponent's hand remains a
 count, and libraries remain hidden except for information the projection says
 that seat legally knows. The browser never reads the run directory or a raw
 checkpoint to populate these views.
+
+**Public log** opens every public event retained by the private Game Record,
+not merely the WebSocket's recent tail. Browser-created games retain the debug
+event trace so this public narrative survives process restart. The serialized
+game actor paginates it in event-ID order, removes authoritative `details`, and
+applies spectator visibility before returning it. Private draws, searches,
+choices, hidden identities, capabilities, and analyst data never enter the
+response. Players and spectators receive the same public log.
 
 The action tray remains an accessibility and recovery fallback and uses card
 names instead of generic verbs: for example, **Play Watery Grave**, **Cast Sol
@@ -212,6 +223,9 @@ server derives `pilot:A`–`pilot:D` from the authenticated room seat.
 - `GameManager` owns exactly one `GameActor` for each active in-process game.
 - Every observation, command, poll, and connection-cursor cleanup crosses that
   actor's bounded mailbox.
+- Complete public-log reads cross the same mailbox, so pagination observes a
+  serialized authoritative event sequence rather than a concurrently mutating
+  checkpoint.
 - Accepted mutations are saved as Game Record v3 before acknowledgement.
 - An ambiguous persistence error fails the actor closed; recovery creates a new
   actor from durable state.
@@ -239,15 +253,16 @@ server derives `pilot:A`–`pilot:D` from the authenticated room seat.
   it can resume only `administrative_stop`. It cannot clear a semantic,
   fidelity, corruption, abort, or completed-game boundary.
 
-SQLite holds guest, room, seat, deck, game-index, and idempotency control-plane
+SQLite holds guest, room membership/role, seat, deck, game-index, and
+idempotency control-plane
 records. Authoritative game truth remains the existing checksummed Game Record
 v3 directory. PostgreSQL, multi-process actor ownership, background expiry,
-rate limiting, spectators, accounts, and deployment containers remain later
+rate limiting, accounts, and deployment containers remain later
 operations work.
 
 ## Stop, resume, and inspect
 
-Every seated player can open **Inspect match**. The response contains only
+Every game member can open **Inspect match**. The response contains only
 control-plane and public record metadata: lifecycle status, state revision,
 turn/phase, pending principal labels, and command/decision/event counts. It
 does not contain a record path, checkpoint, hand, library order, capability,
@@ -293,8 +308,11 @@ command envelope with the same idempotency ID, records the exact projected hand
 scenario takes a post-free mulligan, exercises Escape/focus restoration,
 selects a private card to bottom through the generic form, proves that the other
 three DOMs never receive that seat-scoped control, and submits the resulting
-six-card keep. The duplicated pod is protocol evidence only, never matchup
-evidence.
+six-card keep. An additional isolated browser joins the active game as a
+spectator, verifies all four public boards with no hand or action controls,
+opens the complete public log, observes a live revision, and reloads without
+gaining seat authority. The duplicated pod is protocol evidence only, never
+matchup evidence.
 
 ## Generic decision forms
 
@@ -324,5 +342,5 @@ fail closed until both the adapter and UI support them; the client never guesses
 rules behavior.
 
 Production accounts, multi-process ownership, rate limiting, containers,
-spectators, screen-reader audits across every future choice schema, cache size
+screen-reader audits across every future choice schema, cache size
 quotas, and production deployment remain later server/browser work.

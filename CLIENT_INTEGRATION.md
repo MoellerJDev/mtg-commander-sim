@@ -115,7 +115,18 @@ the first tab's delta base.
 
 ## Hidden information
 
-Each connection receives a principal-specific projection. A spectator does not receive hands. A pilot receives its own hand and legally known opposing cards. The arbiter receives public state and resolution context, not all private hands. Analyst access should be disabled during live adversarial play unless the environment explicitly permits it.
+Each connection receives a principal-specific projection. An invited spectator
+is authenticated as a room member but receives principal `spectator`, no hand,
+no decision capability, and no command authority. A pilot receives its own hand
+and legally known opposing cards. The arbiter receives public state and
+resolution context, not all private hands. Analyst access should be disabled
+during live adversarial play unless the environment explicitly permits it.
+
+The WebSocket event tail is bounded delivery context. To render the complete
+public history, an authenticated player or spectator paginates
+`GET /api/v1/games/{game_id}/events`. The response uses one fixed public event
+shape and never includes raw details. A client must not read the Game Record
+directory, checkpoint, or analyst artifacts directly.
 
 ## UI action generation
 
@@ -152,7 +163,7 @@ and accepted-command replay truth.
 - Do not use capability tokens as long-lived session authentication.
 - Rate-limit rejected commands.
 - Log capability issuance and consumption without logging private hand contents to public telemetry.
-- Keep analyst access separate from the safe seated-member lifecycle
+- Keep analyst access separate from the safe game-member lifecycle
   projection; never turn inspection into a record-path or checkpoint endpoint.
 
 ## Why the GUI does not require a permission refactor

@@ -27,6 +27,7 @@ class GamePersistence(Protocol):
 class _ActorMessage:
     kind: Literal[
         "observe",
+        "public_events",
         "drop_cursor",
         "command",
         "poll",
@@ -41,6 +42,8 @@ class _ActorMessage:
     cursor_key: str | None = None
     envelope: CommandEnvelope | None = None
     reason: str | None = None
+    after_event: int = 0
+    limit: int = 100
 
 
 class GameActor:
@@ -112,6 +115,23 @@ class GameActor:
                 kind="drop_cursor",
                 future=loop.create_future(),
                 cursor_key=cursor_key,
+            )
+        )
+
+    async def public_events(
+        self,
+        *,
+        after: int = 0,
+        limit: int = 100,
+    ) -> dict[str, Any]:
+        loop = asyncio.get_running_loop()
+        return await self._request(
+            _ActorMessage(
+                kind="public_events",
+                future=loop.create_future(),
+                principal="spectator",
+                after_event=after,
+                limit=limit,
             )
         )
 
@@ -208,6 +228,12 @@ class GameActor:
                         str(message.principal),
                         full=message.full,
                         cursor_key=message.cursor_key,
+                    )
+                elif message.kind == "public_events":
+                    result = self.service.event_page(
+                        "spectator",
+                        after=message.after_event,
+                        limit=message.limit,
                     )
                 elif message.kind == "drop_cursor":
                     if message.cursor_key is None:
