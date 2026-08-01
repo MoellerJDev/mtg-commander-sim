@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import time
+from datetime import date
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -519,6 +520,7 @@ class DeckLoader:
         expected_size: int = 100,
         require_commander: bool = True,
         check_color_identity: bool = True,
+        check_legality: bool = True,
     ) -> list[str]:
         issues: list[str] = []
         declared_format = str(deck.metadata.get("format") or "").strip().casefold()
@@ -545,22 +547,11 @@ class DeckLoader:
                 # This does not attempt to parse every "any number" exception.
                 issues.append(f"Singleton warning: {count} copies of {name}")
 
-        legality_entries = {
-            (entry.name, entry.board)
-            for entry in deck.entries
-            if entry.board
-            in {"mainboard", "commander", "companion", "sideboard"}
-        }
-        for name, board in sorted(legality_entries):
-            card = self.card_db.lookup(name)
-            legality = str(
-                card.legalities.get("commander") or "unknown"
-            ).casefold()
-            if legality != "legal":
-                issues.append(
-                    f"Commander legality: {name} is {legality} "
-                    f"on the {board}"
-                )
+        if check_legality:
+            issues.extend(
+                issue["message"]
+                for issue in self.commander_legality_issues(deck)
+            )
 
         if check_color_identity and deck.commanders:
             identity: set[str] = set()
@@ -573,4 +564,61 @@ class DeckLoader:
                         f"Color identity warning: {name} has {sorted(card_identity)}, "
                         f"outside commander identity {sorted(identity)}"
                     )
+        return issues
+
+    def commander_legality_issues(
+        self,
+        deck: DeckDefinition,
+        *,
+        as_of: date | None = None,
+    ) -> list[dict[str, Any]]:
+        """Return structured Commander-legality issues for an exact snapshot.
+
+        A card that is present in the Oracle snapshot but has a future release
+        date may be explicitly acknowledged as preview content. Banned,
+        unknown, and already-released illegal cards remain non-overridable.
+        """
+
+        today = as_of or date.today()
+        legality_entries = {
+            (entry.name, entry.board)
+            for entry in deck.entries
+            if entry.board
+            in {"mainboard", "commander", "companion", "sideboard"}
+        }
+        issues: list[dict[str, Any]] = []
+        for name, board in sorted(legality_entries):
+            card = self.card_db.lookup(name)
+            legality = str(
+                card.legalities.get("commander") or "unknown"
+            ).casefold()
+            if legality == "legal":
+                continue
+            try:
+                release_date = date.fromisoformat(card.released_at)
+            except ValueError:
+                release_date = None
+            preview = (
+                legality == "not_legal"
+                and release_date is not None
+                and release_date > today
+            )
+            issues.append(
+                {
+                    "code": (
+                        "preview_not_yet_legal"
+                        if preview
+                        else "commander_illegal"
+                    ),
+                    "message": (
+                        f"Commander legality: {name} is {legality} "
+                        f"on the {board}"
+                    ),
+                    "card": name,
+                    "board": board,
+                    "legality": legality,
+                    "released_at": card.released_at or None,
+                    "confirmable": preview,
+                }
+            )
         return issues

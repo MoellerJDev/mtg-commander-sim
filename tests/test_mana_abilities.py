@@ -6,6 +6,7 @@ from pathlib import Path
 
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim.abilities import parse_activated_abilities
+from mtg_commander_sim.engine import GameRuleError
 from mtg_commander_sim.model import StackItem
 
 
@@ -166,6 +167,91 @@ class ManaAbilityRuleTests(unittest.TestCase):
             engine.state.players["A"].mana_pool["U"],
         )
         self.assertTrue(island.tapped)
+
+    def test_multicolor_land_requires_and_honors_one_mana_mode(self):
+        engine = self.make_engine(60505)
+        pool = self.card(engine, "B", "Breeding Pool")
+        engine.move_card(
+            pool.object_id,
+            "battlefield",
+            controller="B",
+            tapped=False,
+            log=False,
+        )
+        self.prepare_main(engine, "B")
+        ability = engine._activated_abilities(pool)[0]
+        modes = engine._mana_modes_for_ability("B", pool, ability)
+        action = next(
+            action
+            for action in engine._priority_action_hints("B")["actions"]
+            if action.get("source") == pool.ref
+            and action.get("ability") == ability.ability_id
+        )
+
+        self.assertEqual(
+            [{"U": 1}, {"G": 1}],
+            [
+                {key: amount for key, amount in mode.bundle.items() if amount}
+                for mode in modes
+            ],
+        )
+        self.assertEqual(
+            "Breeding Pool — Add {G} or {U}.",
+            action["label"],
+        )
+        self.assertTrue(action["mana_ability"])
+        self.assertEqual(
+            [{"U": 1}, {"G": 1}],
+            [
+                option["value"]
+                for option in action["choice_schema"]["mana_output"][
+                    "options"
+                ]
+            ],
+        )
+        with self.assertRaisesRegex(GameRuleError, "Choose which mana"):
+            engine._mana_output_for_ability("B", pool, ability, {})
+
+        engine._activate(
+            "B",
+            {
+                "source": pool.ref,
+                "ability": ability.ability_id,
+                "mana_output": {"G": 1},
+            },
+        )
+
+        self.assertTrue(pool.tapped)
+        self.assertEqual(1, engine.state.players["B"].mana_pool["G"])
+        self.assertEqual(0, engine.state.players["B"].mana_pool["U"])
+
+        painland = self.card(engine, "B", "Elves of Deep Shadow")
+        engine.move_card(
+            painland.object_id,
+            "battlefield",
+            controller="B",
+            tapped=False,
+            log=False,
+        )
+        engine.state.players["B"].turns_begun = (
+            painland.acquired_control_turn_count + 1
+        )
+        pain_ability = next(
+            candidate
+            for candidate in engine._activated_abilities(painland)
+            if "Add {B}" in candidate.effect_text
+        )
+        before_life = engine.state.players["B"].life
+        engine._activate(
+            "B",
+            {
+                "source": painland.ref,
+                "ability": pain_ability.ability_id,
+                "mana_output": {"B": 1},
+            },
+        )
+        self.assertEqual(before_life - 1, engine.state.players["B"].life)
+        self.assertEqual(1, engine.state.players["B"].mana_pool["B"])
 
     def test_mana_ability_can_activate_during_spell_payment(self):
         engine = self.make_engine(60503)

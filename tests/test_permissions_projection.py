@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
+import uuid
 
 from mtg_commander_sim import (
     CommandEnvelope,
@@ -51,6 +52,33 @@ class PermissionProjectionTests(unittest.TestCase):
         if unique:
             serialized = json.dumps(packet)
             self.assertTrue(all(name not in serialized for name in unique))
+
+    def test_public_spell_on_stack_includes_visible_card_definition(self):
+        from mtg_commander_sim.model import StackItem
+
+        session = make_session(self.db, self.mishra, self.zimone, seed=230)
+        object_id = session.state.players["A"].zones["hand"][0]
+        card = session.state.cards[object_id]
+        session.engine._remove_from_zone(card)
+        session.engine._reset_zone_change(card, "stack")
+        card.zone = "stack"
+        session.state.stack.append(
+            StackItem(
+                uuid.uuid4().hex,
+                "S-visible-card",
+                "spell",
+                "A",
+                card.printed_name,
+                card_object_id=object_id,
+                visibility=list("ABCD"),
+            )
+        )
+
+        packet = session.packet("pilot:B", full=True)
+        projected = packet["state"]["stack"][0]
+        self.assertEqual(card.printed_name, projected["n"])
+        self.assertEqual(card.oracle_id[:8], projected["cid"])
+        self.assertIn(projected["cid"], {row["cid"] for row in packet["defs"]})
 
     def test_live_capability_is_repeated_in_delta_packets(self):
         session = make_session(self.db, self.mishra, self.zimone, seed=24)

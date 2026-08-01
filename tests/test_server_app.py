@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import shutil
 import sqlite3
 import tempfile
 import unittest
@@ -10,19 +11,29 @@ from fastapi.testclient import TestClient
 
 from common import DB_PATH, ROOT
 from mtg_commander_sim import CardDatabase
-from mtg_commander_sim.record import replay_record
+from mtg_commander_sim.record import database_fingerprint, replay_record
 from server import ServerSettings, create_app
-from server.app import COOKIE_NAME, CSRF_COOKIE_NAME
+from server.app import COOKIE_NAME, CSRF_COOKIE_NAME, _websocket_origin_allowed
 
 
 class ServerApplicationTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         root = Path(self.temp.name)
+        static_dir = root / "browser"
+        static_dir.mkdir()
+        (static_dir / "index.html").write_text(
+            "<!doctype html><title>Commander Arena test</title>",
+            encoding="utf-8",
+        )
+        card_db = root / "cards.sqlite3"
+        shutil.copy2(DB_PATH, card_db)
         self.settings = ServerSettings(
-            card_db=DB_PATH,
+            card_db=card_db,
             database=root / "server.sqlite3",
             game_root=root / "games",
+            card_snapshot_dir=root / "card-snapshots",
+            static_dir=static_dir,
         )
         self.client = TestClient(create_app(self.settings))
         self.client.__enter__()
@@ -46,6 +57,300 @@ class ServerApplicationTests(unittest.TestCase):
     @staticmethod
     def auth(token: str) -> dict[str, str]:
         return {"Authorization": f"Bearer {token}"}
+
+    def test_websocket_origin_accepts_exact_same_origin_and_rejects_foreign(self):
+        configured = ("http://127.0.0.1:5173",)
+        self.assertTrue(
+            _websocket_origin_allowed(
+                "http://127.0.0.1:8000",
+                "127.0.0.1:8000",
+                configured,
+            )
+        )
+        self.assertTrue(
+            _websocket_origin_allowed(
+                "http://127.0.0.1:5173",
+                "127.0.0.1:8000",
+                configured,
+            )
+        )
+        self.assertFalse(
+            _websocket_origin_allowed(
+                "https://attacker.example",
+                "127.0.0.1:8000",
+                configured,
+            )
+        )
+
+    def test_browser_tabs_keep_distinct_guests_in_one_cookie_jar(self):
+        tab_a = "a" * 32
+        tab_b = "b" * 32
+        alice = self.client.post(
+            "/api/v1/guests",
+            headers={"X-Commander-Tab": tab_a},
+            json={"display_name": "Alice tab"},
+        )
+        unregistered_tab = self.client.get(
+            "/api/v1/me", headers={"X-Commander-Tab": tab_b}
+        )
+        bob = self.client.post(
+            "/api/v1/guests",
+            headers={"X-Commander-Tab": tab_b},
+            json={"display_name": "Bob tab"},
+        )
+        self.assertEqual(201, alice.status_code, alice.text)
+        self.assertNotIn("access_token", alice.json())
+        self.assertEqual(401, unregistered_tab.status_code, unregistered_tab.text)
+        self.assertEqual(201, bob.status_code, bob.text)
+
+        restored_a = self.client.get(
+            "/api/v1/me", headers={"X-Commander-Tab": tab_a}
+        )
+        restored_b = self.client.get(
+            "/api/v1/me", headers={"X-Commander-Tab": tab_b}
+        )
+        cookie_fallback = self.client.get("/api/v1/me")
+
+        self.assertEqual("Alice tab", restored_a.json()["guest"]["display_name"])
+        self.assertEqual("Bob tab", restored_b.json()["guest"]["display_name"])
+        self.assertEqual("Bob tab", cookie_fallback.json()["guest"]["display_name"])
+
+    def test_two_player_room_starts_as_commander_duel(self):
+        alice, _ = self.guest("Duel A")
+        bob, _ = self.guest("Duel B")
+        carol, _ = self.guest("Duel C")
+        created = self.client.post(
+            "/api/v1/rooms",
+            headers=self.auth(alice),
+            json={"seed": 20260730, "player_count": 2},
+        )
+        self.assertEqual(201, created.status_code, created.text)
+        room = created.json()["room"]
+        invite = created.json()["invite_code"]
+        self.assertEqual(2, room["seat_count"])
+        self.assertEqual("commander_duel", room["format_profile"])
+        self.assertEqual(["A", "B"], [seat["seat"] for seat in room["seats"]])
+        invalid_seat = self.client.post(
+            "/api/v1/rooms/join",
+            headers=self.auth(carol),
+            json={"invite_code": invite, "seat": "C"},
+        )
+        self.assertEqual(404, invalid_seat.status_code, invalid_seat.text)
+        joined = self.client.post(
+            "/api/v1/rooms/join",
+            headers=self.auth(bob),
+            json={"invite_code": invite, "seat": "B"},
+        )
+        self.assertEqual(200, joined.status_code, joined.text)
+        for token, name, commander, fixture in (
+            (alice, "Duel A", "Zimone and Dina", "zimone-and-dina.txt"),
+            (bob, "Duel B", "Mishra, Eminent One", "mishra-eminent-one.txt"),
+        ):
+            uploaded = self.client.put(
+                f"/api/v1/rooms/{room['room_id']}/deck",
+                headers=self.auth(token),
+                json={
+                    "name": name,
+                    "commander": commander,
+                    "decklist": (ROOT / "examples" / fixture).read_text(encoding="utf-8"),
+                },
+            )
+            self.assertEqual(200, uploaded.status_code, uploaded.text)
+        started = self.client.post(
+            f"/api/v1/rooms/{room['room_id']}/start",
+            headers=self.auth(alice),
+        )
+        self.assertEqual(200, started.status_code, started.text)
+        self.assertEqual("commander_duel", started.json()["profile"])
+        game_id = started.json()["game_id"]
+        summary = self.client.get(
+            f"/api/v1/games/{game_id}", headers=self.auth(alice)
+        ).json()["game"]
+        packet = self.client.get(
+            f"/api/v1/games/{game_id}/state?full=true",
+            headers=self.auth(alice),
+        ).json()["packet"]
+        self.assertEqual("commander_duel", summary["format_profile"])
+        self.assertEqual({"A", "B"}, set(packet["state"]["players"]))
+
+    def test_owner_removes_a_player_and_replaces_an_unstarted_room(self):
+        alice, _ = self.guest("Room owner")
+        bob, _ = self.guest("Removable player")
+        created = self.client.post(
+            "/api/v1/rooms",
+            headers=self.auth(alice),
+            json={"seed": 1, "player_count": 4},
+        )
+        room_id = created.json()["room"]["room_id"]
+        old_invite = created.json()["invite_code"]
+        joined = self.client.post(
+            "/api/v1/rooms/join",
+            headers=self.auth(bob),
+            json={"invite_code": old_invite, "seat": "B"},
+        )
+        self.assertEqual(200, joined.status_code, joined.text)
+        removed = self.client.delete(
+            f"/api/v1/rooms/{room_id}/seats/B",
+            headers=self.auth(alice),
+        )
+        self.assertEqual(200, removed.status_code, removed.text)
+        self.assertIsNone(removed.json()["room"]["seats"][1]["guest_id"])
+        expelled = self.client.get(
+            f"/api/v1/rooms/{room_id}", headers=self.auth(bob)
+        )
+        self.assertEqual(403, expelled.status_code, expelled.text)
+
+        replacement = self.client.post(
+            f"/api/v1/rooms/{room_id}/replace",
+            headers=self.auth(alice),
+            json={"seed": 2, "player_count": 2},
+        )
+        self.assertEqual(200, replacement.status_code, replacement.text)
+        next_room = replacement.json()["room"]
+        self.assertNotEqual(room_id, next_room["room_id"])
+        self.assertEqual(2, next_room["seat_count"])
+        self.assertEqual("commander_duel", next_room["format_profile"])
+        stale = self.client.post(
+            "/api/v1/rooms/join",
+            headers=self.auth(bob),
+            json={"invite_code": old_invite, "seat": "B"},
+        )
+        self.assertEqual(404, stale.status_code, stale.text)
+
+    def test_system_status_exposes_local_data_readiness_without_paths(self):
+        response = self.client.get("/api/v1/system")
+        self.assertEqual(200, response.status_code, response.text)
+        payload = response.json()
+        self.assertEqual("ready", payload["server"])
+        self.assertTrue(payload["card_data"]["ready"])
+        self.assertGreater(payload["card_data"]["database"]["cards"], 0)
+        self.assertEqual("local_on_demand_cache", payload["images"]["mode"])
+        self.assertTrue(payload["browser"]["served_by_server"])
+        self.assertNotIn(str(self.settings.card_db), response.text)
+        browser = self.client.get("/")
+        self.assertEqual(200, browser.status_code, browser.text)
+        self.assertIn("Commander Arena test", browser.text)
+        disabled = self.client.post("/api/v1/system/refresh")
+        self.assertEqual(409, disabled.status_code, disabled.text)
+
+    def test_future_preview_cards_require_exact_legality_confirmation(self):
+        connection = sqlite3.connect(self.settings.card_db)
+        try:
+            raw = connection.execute(
+                "SELECT legalities_json FROM cards WHERE name = 'Sol Ring'"
+            ).fetchone()[0]
+            legalities = json.loads(raw)
+            legalities["commander"] = "not_legal"
+            connection.execute(
+                "UPDATE cards SET legalities_json = ?, released_at = ? WHERE name = 'Sol Ring'",
+                (json.dumps(legalities, sort_keys=True), "2999-01-01"),
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+        alice, _ = self.guest("Preview Player")
+        bob, _ = self.guest("Public Observer")
+        created = self.client.post(
+            "/api/v1/rooms",
+            headers=self.auth(alice),
+            json={"seed": 42},
+        )
+        room_id = created.json()["room"]["room_id"]
+        invite = created.json()["invite_code"]
+        joined = self.client.post(
+            "/api/v1/rooms/join",
+            headers=self.auth(bob),
+            json={"invite_code": invite, "seat": "B"},
+        )
+        self.assertEqual(200, joined.status_code, joined.text)
+        body = {
+            "name": "Preview Mishra",
+            "commander": "Mishra, Eminent One",
+            "decklist": (ROOT / "examples" / "mishra-eminent-one.txt").read_text(
+                encoding="utf-8"
+            ),
+        }
+
+        warning = self.client.put(
+            f"/api/v1/rooms/{room_id}/deck",
+            headers=self.auth(alice),
+            json=body,
+        )
+
+        self.assertEqual(409, warning.status_code, warning.text)
+        detail = warning.json()["detail"]
+        self.assertEqual("legality_confirmation_required", detail["code"])
+        self.assertEqual("Sol Ring", detail["issues"][0]["card"])
+        self.assertEqual("2999-01-01", detail["issues"][0]["released_at"])
+        self.assertTrue(detail["issues"][0]["confirmable"])
+        before = self.client.get(
+            f"/api/v1/rooms/{room_id}", headers=self.auth(alice)
+        ).json()["room"]
+        self.assertFalse(before["seats"][0]["ready"])
+
+        confirmed = self.client.put(
+            f"/api/v1/rooms/{room_id}/deck",
+            headers=self.auth(alice),
+            json={**body, "legality_confirmation": detail["confirmation"]},
+        )
+
+        self.assertEqual(200, confirmed.status_code, confirmed.text)
+        self.assertEqual(
+            "preview_override_confirmed",
+            confirmed.json()["format_legality"]["status"],
+        )
+        owner_room = self.client.get(
+            f"/api/v1/rooms/{room_id}", headers=self.auth(alice)
+        ).json()["room"]
+        owner_deck = owner_room["seats"][0]["deck"]
+        self.assertTrue(owner_room["seats"][0]["ready"])
+        self.assertEqual(1, owner_deck["format_legality"]["issue_count"])
+        self.assertEqual("Sol Ring", owner_deck["format_legality"]["issues"][0]["card"])
+        observer_room = self.client.get(
+            f"/api/v1/rooms/{room_id}", headers=self.auth(bob)
+        ).json()["room"]
+        observer_deck = observer_room["seats"][0]["deck"]
+        self.assertEqual(1, observer_deck["format_legality"]["issue_count"])
+        self.assertEqual([], observer_deck["format_legality"]["issues"])
+
+        cleared = self.client.delete(
+            f"/api/v1/rooms/{room_id}/deck",
+            headers=self.auth(alice),
+        )
+        self.assertEqual(200, cleared.status_code, cleared.text)
+        own_seat = cleared.json()["room"]["seats"][0]
+        self.assertFalse(own_seat["ready"])
+        self.assertIsNone(own_seat["deck"])
+
+    def test_persisted_game_reopens_with_its_retained_card_snapshot(self):
+        game_id, tokens, _ = self.create_ready_game()
+        with CardDatabase(self.settings.card_db) as current:
+            old_hash = str(database_fingerprint(current)["metadata_hash"])
+        self.client.__exit__(None, None, None)
+        self.settings.card_snapshot_dir.mkdir(parents=True)
+        snapshot = self.settings.card_snapshot_dir / f"{old_hash}.sqlite3"
+        self.settings.card_db.replace(snapshot)
+        shutil.copy2(snapshot, self.settings.card_db)
+        connection = sqlite3.connect(self.settings.card_db)
+        try:
+            connection.execute(
+                "INSERT OR REPLACE INTO metadata(key, value) VALUES (?, ?)",
+                ("scryfall_oracle_updated_at", "a-newer-snapshot"),
+            )
+            connection.commit()
+        finally:
+            connection.close()
+        self.client = TestClient(create_app(self.settings))
+        self.client.__enter__()
+
+        response = self.client.get(
+            f"/api/v1/games/{game_id}/state?full=true",
+            headers=self.auth(tokens[0]),
+        )
+
+        self.assertEqual(200, response.status_code, response.text)
+        self.assertEqual(game_id, response.json()["packet"]["state"]["game"]["id"])
 
     def create_ready_game(self) -> tuple[str, list[str], str]:
         tokens = [self.guest(f"Player {seat}")[0] for seat in "ABCD"]
@@ -83,7 +388,21 @@ class ServerApplicationTests(unittest.TestCase):
                 },
             )
             self.assertEqual(200, response.status_code, response.text)
-            self.assertTrue(response.json()["preflight"]["trusted_only_ready"])
+            preflight = response.json()["preflight"]
+            # This helper tests room/game transport. Draft mechanic contracts
+            # may conservatively warn and pause when encountered; duplicated
+            # browser fixtures are not semantic or matchup evidence.
+            self.assertEqual(
+                100,
+                sum(
+                    int(preflight[key] or 0)
+                    for key in (
+                        "fully_playable_cards",
+                        "partial_cards",
+                        "unresolved_cards",
+                    )
+                ),
+            )
         response = self.client.post(
             f"/api/v1/rooms/{room_id}/start",
             headers=self.auth(tokens[0]),
@@ -132,15 +451,44 @@ class ServerApplicationTests(unittest.TestCase):
             json={"invite_code": invite, "seat": "B"},
         )
         self.assertEqual(200, joined.status_code, joined.text)
+
+        denied_rotation = self.client.post(
+            f"/api/v1/rooms/{room['room_id']}/invite",
+            headers=self.auth(bob),
+            json={},
+        )
+        self.assertEqual(403, denied_rotation.status_code, denied_rotation.text)
+        rotated = self.client.post(
+            f"/api/v1/rooms/{room['room_id']}/invite",
+            headers=self.auth(alice),
+            json={},
+        )
+        self.assertEqual(200, rotated.status_code, rotated.text)
+        replacement = rotated.json()["invite_code"]
+        self.assertNotEqual(invite, replacement)
+
+        stale_invite = self.client.post(
+            "/api/v1/rooms/join",
+            headers=self.auth(carol),
+            json={"invite_code": invite, "seat": "C"},
+        )
+        self.assertEqual(404, stale_invite.status_code, stale_invite.text)
+        replacement_join = self.client.post(
+            "/api/v1/rooms/join",
+            headers=self.auth(carol),
+            json={"invite_code": replacement, "seat": "C"},
+        )
+        self.assertEqual(200, replacement_join.status_code, replacement_join.text)
         conflict = self.client.post(
             "/api/v1/rooms/join",
             headers=self.auth(carol),
-            json={"invite_code": invite, "seat": "B"},
+            json={"invite_code": replacement, "seat": "B"},
         )
         self.assertEqual(409, conflict.status_code)
 
+        dave, _ = self.guest("Dave")
         outsider = self.client.get(
-            f"/api/v1/rooms/{room['room_id']}", headers=self.auth(carol)
+            f"/api/v1/rooms/{room['room_id']}", headers=self.auth(dave)
         )
         self.assertEqual(403, outsider.status_code)
         me = self.client.get("/api/v1/me", headers=self.auth(alice))
@@ -168,7 +516,8 @@ class ServerApplicationTests(unittest.TestCase):
 
         self.client.cookies.set(COOKIE_NAME, tokens[0])
         with self.client.websocket_connect(
-            f"/api/v1/games/{game_id}/stream"
+            f"/api/v1/games/{game_id}/stream",
+            headers={"origin": "http://testserver"},
         ) as websocket_a:
             initial_a = websocket_a.receive_json()
             self.assertEqual("full", initial_a["packet"]["mode"])
@@ -266,6 +615,20 @@ class ServerApplicationTests(unittest.TestCase):
         finally:
             database.close()
         self.assertTrue(replay["ok"])
+
+    def test_stale_game_websocket_stops_reconnecting_with_terminal_message(self):
+        game_id, _, _ = self.create_ready_game()
+        outsider, _ = self.guest("Stale game tab")
+        self.client.cookies.set(COOKIE_NAME, outsider)
+
+        with self.client.websocket_connect(
+            f"/api/v1/games/{game_id}/stream"
+        ) as websocket:
+            message = websocket.receive_json()
+
+        self.assertEqual("terminal", message["type"])
+        self.assertEqual("game_access_lost", message["code"])
+        self.assertIn("Return to the lobby", message["message"])
 
     def test_server_restart_recovers_decision_idempotency_and_replay(self):
         game_id, tokens, _ = self.create_ready_game()

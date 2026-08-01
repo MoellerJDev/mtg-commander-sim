@@ -22,6 +22,26 @@ class ScryfallBulkDataError(RuntimeError):
     pass
 
 
+def _prune_managed_bulk_cache(download_path: Path, retained: set[Path]) -> tuple[Path, ...]:
+    removed: list[Path] = []
+    retained_resolved = {path.resolve() for path in retained}
+    for candidate in download_path.iterdir():
+        resolved_candidate = candidate.resolve()
+        managed_archive = (
+            candidate.is_file()
+            and (
+                candidate.name.startswith("oracle-cards-")
+                or candidate.name.startswith("rulings-")
+            )
+            and candidate.name.endswith(".jsonl.gz")
+        )
+        stale_partial = candidate.is_file() and candidate.name.endswith(".jsonl.gz.part")
+        if resolved_candidate not in retained_resolved and (managed_archive or stale_partial):
+            candidate.unlink()
+            removed.append(candidate)
+    return tuple(removed)
+
+
 @dataclass(frozen=True, slots=True)
 class ScryfallBulkItem:
     type: str
@@ -164,10 +184,6 @@ def refresh_scryfall_database(
         timeout=timeout,
         force=force_download,
     )
-    (download_path / "bulk-manifest.json").write_text(
-        stable_json(manifest_payload), encoding="utf-8"
-    )
-
     output = Path(output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_name(output.name + ".building")
@@ -208,6 +224,14 @@ def refresh_scryfall_database(
         if temporary.exists():
             temporary.unlink()
         raise
+
+    manifest_path = download_path / "bulk-manifest.json"
+    manifest_path.write_text(stable_json(manifest_payload), encoding="utf-8")
+    retained = {oracle_path, rulings_path, manifest_path}
+    # The directory is a managed cache. Keep the active Oracle/rulings pair and
+    # discard only timestamped Scryfall archives or stale partials, never an
+    # arbitrary neighboring file supplied by the user.
+    _prune_managed_bulk_cache(download_path, retained)
 
     with CardDatabase(output) as database:
         metadata = database.metadata()

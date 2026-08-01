@@ -102,6 +102,13 @@ class ApplicationProtocolTests(unittest.TestCase):
         self.assertEqual(session.state.game_id, packet["state"]["game"]["id"])
         self.assertEqual(session.state.revision, packet["view_revision"])
         Draft202012Validator(self.packet_schema).validate(packet)
+        blade = self.db.lookup("Tithing Blade")
+        definition = session.projector._definition(blade.oracle_id)
+        self.assertEqual(
+            ["Tithing Blade", "Consuming Sepulcher"],
+            [face["n"] for face in definition["faces"]],
+        )
+        self.assertIn("beginning of your upkeep", definition["faces"][1]["o"])
 
     def test_projected_choice_form_and_command_fields_share_one_adapter(self):
         session, service = self.make_service(31009)

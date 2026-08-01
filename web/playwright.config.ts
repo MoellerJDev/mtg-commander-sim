@@ -2,6 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 import path from "node:path";
 
 const serverData = path.resolve("..", "local", `playwright-${process.pid}`);
+const serverPort = Number(process.env.MTG_E2E_SERVER_PORT ?? "8000");
+const webPort = Number(process.env.MTG_E2E_WEB_PORT ?? "5173");
 
 export default defineConfig({
   testDir: "./tests",
@@ -11,7 +13,7 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
-    baseURL: "http://127.0.0.1:5173",
+    baseURL: `http://127.0.0.1:${webPort}`,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
@@ -23,20 +25,22 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "python -m server --host 127.0.0.1 --port 8000",
+      command: `python -m server --host 127.0.0.1 --port ${serverPort}`,
       cwd: "..",
-      url: "http://127.0.0.1:8000/api/v1/health",
+      url: `http://127.0.0.1:${serverPort}/api/v1/health`,
       reuseExistingServer: false,
       timeout: 60_000,
       env: {
         ...process.env,
         MTG_CARD_DB: process.env.MTG_CARD_DB ?? "data/test-ci.sqlite3",
         MTG_SERVER_DATA: serverData,
+        MTG_E2E_SERVER_PORT: String(serverPort),
+        MTG_E2E_WEB_PORT: String(webPort),
       },
     },
     {
       command: "npm run dev",
-      url: "http://127.0.0.1:5173",
+      url: `http://127.0.0.1:${webPort}`,
       reuseExistingServer: false,
       timeout: 60_000,
     },

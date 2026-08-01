@@ -17,11 +17,26 @@ async function submitDeck(page: Page, seat: string, text: string) {
     .fill(zimone ? "Zimone and Dina" : "Mishra, Eminent One");
   await page.getByTestId("deck-list").fill(text);
   await page.getByTestId("submit-deck").click();
-  await expect(page.getByText("Deck validated: trusted-only semantic gate passes.")).toBeVisible();
+  // These duplicated lists exercise the browser protocol, not matchup or
+  // semantic-coverage evidence. A draft mechanic contract may correctly keep
+  // the ready list behind a visible fail-closed fidelity warning.
+  await expect(page.locator(".success-banner, .warning-banner").filter({ hasText: /Deck (validated|accepted)/ })).toBeVisible();
+  await expect(page.getByTestId("deck-ready-summary")).toContainText(`Deck ${seat}`);
 }
 
 async function viewRevision(page: Page): Promise<number> {
   return Number(await page.locator(".game-shell").getAttribute("data-view-revision"));
+}
+
+async function expectCardSurface(page: Page, seat: string) {
+  const firstCard = page.getByTestId("own-hand").locator(".hand-card").first();
+  const name = await firstCard.locator(".card-copy strong").textContent();
+  expect(name).toBeTruthy();
+  await firstCard.hover();
+  await expect(page.getByTestId("card-inspector")).toBeVisible();
+  await expect(page.getByTestId("card-inspector")).toContainText(name!);
+  await expect(page.getByTestId(`zone-${seat}-graveyard`)).toBeDisabled();
+  await expect(page.getByTestId(`zone-${seat}-exile`)).toBeDisabled();
 }
 
 async function startFourPlayerGame(browser: Browser): Promise<{ contexts: BrowserContext[]; pages: Page[] }> {
@@ -50,9 +65,11 @@ async function startFourPlayerGame(browser: Browser): Promise<{ contexts: Browse
   }
   await expect(pages[0].getByTestId("start-game")).toBeEnabled();
   await pages[0].getByTestId("start-game").click();
-  for (const page of pages) {
+  for (let index = 0; index < pages.length; index += 1) {
+    const page = pages[index];
     await expect(page.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
     await expect(page.getByTestId("decision-panel")).toBeVisible();
+    await expectCardSurface(page, "ABCD"[index]);
   }
   return { contexts, pages };
 }
@@ -69,13 +86,15 @@ async function submitOpenChoice(page: Page) {
   await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
 }
 
-test("four isolated browser contexts play through authoritative mulligans and reconnect", async ({ browser }) => {
+test("four shared-cookie browser tabs retain isolated seats through mulligans and reconnect", async ({ browser }) => {
   const contexts: BrowserContext[] = [];
   const pages: Page[] = [];
   try {
+    // One context deliberately shares its cookie jar across all pages. The
+    // application must still bind each tab to its own guest/seat session.
+    const context = await browser.newContext();
+    contexts.push(context);
     for (const seat of "ABCD") {
-      const context = await browser.newContext();
-      contexts.push(context);
       const page = await context.newPage();
       pages.push(page);
       await enter(page, `Browser ${seat}`);
@@ -90,6 +109,10 @@ test("four isolated browser contexts play through authoritative mulligans and re
       await pages[index].getByTestId("join-room").click();
       await expect(pages[index].getByTestId(`seat-${"ABCD"[index]}`)).toContainText(`Browser ${"ABCD"[index]}`);
     }
+    await pages[1].reload();
+    await pages[2].reload();
+    await expect(pages[1].getByTestId("seat-B")).toHaveClass(/mine/);
+    await expect(pages[2].getByTestId("seat-C")).toHaveClass(/mine/);
 
     const zimone = await readFile(path.resolve("..", "examples", "zimone-and-dina.txt"), "utf8");
     const mishra = await readFile(path.resolve("..", "examples", "mishra-eminent-one.txt"), "utf8");
@@ -98,11 +121,28 @@ test("four isolated browser contexts play through authoritative mulligans and re
       await submitDeck(pages[index], seat, seat === "A" || seat === "C" ? zimone : mishra);
     }
 
+    await expect(pages[0].getByTestId("room-invite")).toHaveText(invite!);
+    await pages[0].getByTestId("replace-invite").click();
+    await expect(pages[0].getByText("A new invite code was created.")).toBeVisible();
+    const replacementInvite = await pages[0].getByTestId("room-invite").textContent();
+    expect(replacementInvite).toBeTruthy();
+    expect(replacementInvite).not.toEqual(invite);
+    await pages[0].reload();
+    await expect(pages[0].getByTestId("room-invite")).toHaveText(replacementInvite!);
+
+    await pages[0].getByTestId("unready-deck").click();
+    await expect(pages[0].getByTestId("submit-deck")).toBeVisible();
+    await expect(pages[0].getByTestId("seat-A")).toContainText("WAITING");
+    await expect(pages[0].getByTestId("start-game")).toBeDisabled();
+    await submitDeck(pages[0], "A", zimone);
+
     await expect(pages[0].getByTestId("start-game")).toBeEnabled();
     await pages[0].getByTestId("start-game").click();
-    for (const page of pages) {
+    for (let index = 0; index < pages.length; index += 1) {
+      const page = pages[index];
       await expect(page.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
       await expect(page.getByTestId("decision-panel")).toBeVisible();
+      await expectCardSurface(page, "ABCD"[index]);
     }
     const handA = await pages[0].getByTestId("own-hand").textContent();
     const handB = await pages[1].getByTestId("own-hand").textContent();
@@ -143,7 +183,22 @@ test("four isolated browser contexts play through authoritative mulligans and re
     for (let index = 0; index < 4; index += 1) {
       const revisions = await Promise.all(pages.map(viewRevision));
       await expect(pages[index].getByTestId("action-keep")).toBeVisible();
-      await pages[index].getByTestId("action-keep").click();
+      if (index === 0) {
+        let firstEnvelope: Record<string, unknown> | null = null;
+        await pages[index].route("**/api/v1/games/*/commands", async (route) => {
+          firstEnvelope = route.request().postDataJSON() as Record<string, unknown>;
+          await route.abort("connectionfailed");
+        }, { times: 1 });
+        await pages[index].getByTestId("action-keep").click();
+        await expect(pages[index].getByTestId("command-retry")).toBeVisible();
+        const retriedRequest = pages[index].waitForRequest("**/api/v1/games/*/commands");
+        await pages[index].getByRole("button", { name: "Retry exact command" }).click();
+        const retriedEnvelope = (await retriedRequest).postDataJSON() as Record<string, unknown>;
+        expect(retriedEnvelope.command_id).toEqual(firstEnvelope!.command_id);
+        expect(retriedEnvelope).toEqual(firstEnvelope);
+      } else {
+        await pages[index].getByTestId("action-keep").click();
+      }
       // A click only proves that the browser dispatched the command. Wait for
       // the authoritative HTTP receipt before allowing the next declaration
       // (or the reconnect below) to observe the resulting game state.
@@ -163,8 +218,105 @@ test("four isolated browser contexts play through authoritative mulligans and re
     await expect(pages[0].getByText("LIVE", { exact: true })).toBeVisible();
     await expect(pages[0].getByTestId("own-hand").locator(".hand-card")).toHaveCount(projectedHandCount);
     await expect(pages[0].getByTestId("decision-panel")).toHaveText(projectedDecision!);
+    await pages[0].setViewportSize({ width: 390, height: 844 });
+    await expect(pages[0].getByTestId("decision-panel")).toBeVisible();
+    await expect(pages[0].getByTestId("own-hand")).toBeVisible();
+    const mobileViewer = pages[0].getByRole("button", { name: /^View / });
+    await expect(mobileViewer).toBeVisible();
+    await mobileViewer.click();
+    await expect(pages[0].getByTestId("card-inspector-expanded")).toBeVisible();
+    await pages[0].keyboard.press("Escape");
+    await expect(pages[0].getByTestId("card-inspector-expanded")).toHaveCount(0);
+    expect(await pages[0].evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   } finally {
     await Promise.all(contexts.map((context) => context.close()));
+  }
+});
+
+test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a duel", async ({ browser }) => {
+  const context = await browser.newContext();
+  const host = await context.newPage();
+  const opponent = await context.newPage();
+  try {
+    await host.route(
+      /\/api\/v1\/rooms(?:\/[^/]+\/replace)?$/,
+      async (route) => {
+        const request = route.request();
+        const payload = request.postDataJSON() as Record<string, unknown>;
+        await route.continue({
+          postData: JSON.stringify({ ...payload, seed: 2 }),
+          headers: {
+            ...request.headers(),
+            "content-type": "application/json",
+          },
+        });
+      },
+    );
+    await enter(host, "Duel host");
+    await enter(opponent, "Duel opponent");
+    await host.getByTestId("room-size").selectOption("2");
+    await host.getByTestId("create-room").click();
+    await expect(host.getByTestId("seat-A")).toContainText("Duel host");
+    await expect(host.getByTestId("seat-C")).toHaveCount(0);
+    const staleInvite = await host.getByTestId("room-invite").textContent();
+    expect(staleInvite).toBeTruthy();
+
+    await opponent.getByTestId("invite-code").fill(staleInvite!);
+    await opponent.getByTestId("seat-select").selectOption("B");
+    await opponent.getByTestId("join-room").click();
+    await expect(opponent.getByTestId("seat-B")).toContainText("Duel opponent");
+
+    await host.getByTestId("new-room-size").selectOption("2");
+    await host.getByTestId("new-room").click();
+    await expect(host.getByTestId("room-invite")).not.toHaveText(staleInvite!);
+    const invite = await host.getByTestId("room-invite").textContent();
+    expect(invite).toBeTruthy();
+    expect(invite).not.toEqual(staleInvite);
+    await expect(opponent.getByRole("heading", { name: "Find your table" })).toBeVisible();
+
+    await opponent.getByTestId("invite-code").fill(staleInvite!);
+    await opponent.getByTestId("join-room").click();
+    await expect(opponent.getByRole("alert")).toContainText("Invite code not found");
+    await opponent.getByTestId("invite-code").fill(invite!);
+    await opponent.getByTestId("join-room").click();
+    await expect(opponent.getByTestId("seat-B")).toContainText("Duel opponent");
+
+    await host.getByTestId("remove-seat-B").click();
+    await expect(host.getByTestId("seat-B")).toContainText("Open seat");
+    await expect(opponent.getByRole("heading", { name: "Find your table" })).toBeVisible();
+    await opponent.getByTestId("invite-code").fill(invite!);
+    await opponent.getByTestId("seat-select").selectOption("B");
+    await opponent.getByTestId("join-room").click();
+
+    const zimone = await readFile(path.resolve("..", "examples", "zimone-and-dina.txt"), "utf8");
+    const mishra = await readFile(path.resolve("..", "examples", "mishra-eminent-one.txt"), "utf8");
+    await submitDeck(host, "A", zimone);
+    await submitDeck(opponent, "B", mishra);
+    await expect(host.getByTestId("start-game")).toHaveText("Start duel");
+    await expect(host.getByTestId("start-game")).toBeEnabled();
+    await host.getByTestId("start-game").click();
+    await expect(host.getByText("COMMANDER DUEL")).toBeVisible();
+    await expect(opponent.getByText("COMMANDER DUEL")).toBeVisible();
+    await expect(host.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
+    await expect(opponent.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
+    await expect(host.locator(".player-board")).toHaveCount(2);
+    await expect(opponent.locator(".player-board")).toHaveCount(2);
+
+    await submitImmediateAction(host, "keep");
+    await submitImmediateAction(opponent, "keep");
+    const swamp = host
+      .getByTestId("own-hand")
+      .locator(".hand-card")
+      .filter({ has: host.locator(".card-copy strong", { hasText: "Swamp" }) });
+    await expect(swamp).toHaveCount(1);
+    await expect(swamp).toHaveAttribute("draggable", "true");
+    const beforeDrop = await viewRevision(host);
+    await swamp.dragTo(host.getByTestId("own-battlefield"));
+    await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeDrop);
+    await expect(host.getByTestId("own-battlefield")).toContainText("Swamp");
+    await expect(host.getByTestId("own-hand").locator(".hand-card")).toHaveCount(6);
+  } finally {
+    await context.close();
   }
 });
 
@@ -175,7 +327,13 @@ test("generic private choice form executes a penalized multiplayer mulligan", as
     contexts = started.contexts;
     const pages = started.pages;
 
-    await pages[0].getByTestId("action-mulligan").click();
+    const mulliganTrigger = pages[0].getByTestId("action-mulligan");
+    await mulliganTrigger.click();
+    await expect(pages[0].getByTestId("choice-dialog")).toBeVisible();
+    await pages[0].keyboard.press("Escape");
+    await expect(pages[0].getByTestId("choice-dialog")).toHaveCount(0);
+    await expect(mulliganTrigger).toBeFocused();
+    await mulliganTrigger.click();
     await expect(pages[0].getByTestId("choice-dialog")).toBeVisible();
     await pages[0].getByTestId("choice-override_reason").fill("Browser choice-form coverage");
     await submitOpenChoice(pages[0]);

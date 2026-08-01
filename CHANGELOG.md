@@ -2,6 +2,83 @@
 
 ## Unreleased
 
+### Managed local runtime and responsive browser
+
+- Added a card-first table inspector: pointer hover and keyboard focus drive a
+  persistent large-art/Oracle-text viewer, visible double-faced cards can switch
+  faces, and narrow layouts offer the same view in an enlarged dialog.
+- Made every projected graveyard and exile directly browsable from its player
+  board, enriched represented card spells on the stack for safe inspection, and
+  retained opposing hand/library privacy.
+- Changed playable card clicks into selection with object-scoped actions while
+  keeping drag-to-battlefield and manual mana-source activation as fast paths;
+  the action tray remains a complete fallback over the same server-issued IDs.
+- Made drag-to-battlefield work through both native drag data and a pointer
+  fallback, with a Chromium two-browser test that proves the exact card leaves
+  hand and enters the battlefield rather than merely looking draggable.
+- Added Arena-style card interaction: legal hand/command cards now show their
+  specific play or cast action, can be clicked or dragged to the battlefield,
+  and offer an explicit Auto-mana confirmation instead of an unlabeled generic
+  verb.
+- Added optional Manual mana mode. Legal mana sources become clickable in the
+  projected battlefield, activation order is recorded normally, exact
+  multi-color modes are selected through a server-issued form, and casting
+  consumes floated mana before routine automatic completion.
+- Kept generically enforced mana-mode life payments and self-damage inside the
+  trusted preflight boundary, so manual activation does not incorrectly
+  downgrade sources such as Elves of Deep Shadow.
+- Fixed modal double-faced land plays. Agadeem's Awakening now advertises
+  **Play Agadeem, the Undercrypt**, prompts for the land face's exact 3-life
+  entry choice, enters on that face, and renders the matching characteristics
+  and image instead of being silently returned to hand.
+- Browser games now require the active player to explicitly leave precombat
+  and postcombat main. The same pass action is labeled **Continue to combat**
+  or **End turn**; empty nonactive response windows remain safely automatic.
+- Added reviewed Sunscorched Desert and Orcish Bowmasters semantics, including
+  targeted ETB damage, permanent-spell resolution, opponent extra-draw
+  triggers, and generic Amass Orcs execution. Unsupported trusted-only
+  resolution now pauses the visible game lifecycle instead of leaving clients
+  on an inaccessible arbiter task.
+- Reduced normal local startup to `python -m server`: the launcher installs
+  missing browser dependencies, rebuilds changed React sources, serves the
+  production client and API from one origin, and opens the local UI.
+- Added visible first-run setup, 24-hour Scryfall bulk-manifest checks, atomic
+  Oracle/rulings SQLite builds, current-pair archive retention, and
+  fingerprinted database snapshots retained only for saved Game Records that
+  still require them.
+- Made startup verify and activate the newest available Scryfall snapshot
+  before deck import becomes ready, and added exact-fingerprint confirmation
+  for future-dated preview legality without weakening semantic fail-closed
+  behavior or ordinary Commander construction errors.
+- Kept an existing card database available when Windows prevents pending-update
+  activation because another local server still has the SQLite file open; the
+  system status now identifies the lock and requests a clean restart.
+- Indexed Scryfall image references in SQLite and added a host-restricted,
+  size-bounded, atomic local image cache with bounded deck prefetch and
+  per-visible-card browser requests; bulk card data never enters the browser.
+- Reworked the room and game surfaces into responsive desktop/mobile layouts
+  with deck-ready summaries, card art, stack/activity context, accessible
+  modal focus/Escape behavior, reconnect controls, reduced-motion support, and
+  exact-envelope retry after ambiguous command delivery.
+- Kept the host invite available after readiness and reload, added owner-only
+  invite replacement with immediate old-code invalidation, and added a
+  seat-scoped pregame **Change deck / Unready** flow.
+- Isolated guest authentication per browser tab (including WebSockets) so
+  shared incognito cookie jars cannot collapse all players into the last seat.
+- Added explicit two-player `commander_duel` and four-player room creation,
+  owner seat removal, nonowner leave, and atomic **New room** replacement.
+- Added bounded startup retry backoff for already-open room pages and accurate
+  `starting` system status while card data is being verified.
+- Fixed production WebSocket origin validation so the one-command UI's exact
+  same origin is accepted without a Vite-only allowlist override; unrelated
+  origins remain rejected.
+- Replaced opaque stale-game WebSocket 403 reconnect loops with one terminal
+  seat-safe message and a **Return to lobby** path, and made disconnect wakeups
+  cancellation-safe on Python 3.11.
+- Extended application and Chromium coverage for managed data, archive/snapshot
+  cleanup, record-pinned recovery, local static serving, 390-pixel layout,
+  focus restoration, and byte-equivalent idempotent command retry.
+
 ### Authoritative server/browser vertical slice
 
 - Added strict protocol 3.0 command envelopes with client command IDs,

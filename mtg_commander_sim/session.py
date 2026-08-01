@@ -771,10 +771,18 @@ class CommanderSession:
         if not audit.get("automatic"):
             self.decisions.append(decision_row)
         if result.ok:
-            self.record_status = (
-                "complete" if self.state.game_over else "in_progress"
-            )
-            self.pause_reason = None
+            if self.state.game_over:
+                self.record_status = "complete"
+                self.pause_reason = None
+            elif self.engine._semantic_pause_annotation() is not None:
+                # A trusted-only browser game must surface an unsupported
+                # rules boundary as a lifecycle pause. Leaving the session
+                # "active" with no pilot capability makes every client look
+                # like it is endlessly passing priority.
+                self.pause()
+            else:
+                self.record_status = "in_progress"
+                self.pause_reason = None
             selected_refs: list[str] = []
             for key in (
                 "card",

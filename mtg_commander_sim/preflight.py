@@ -274,7 +274,11 @@ def _mana_ability_requires_semantics(
     return any(
         mode.conditional
         or mode.requires_choice
-        or bool(mode.side_effects)
+        or any(
+            str(effect.get("op") or "")
+            not in {"damage_self", "pay_life"}
+            for effect in mode.side_effects
+        )
         for mode in modes
     )
 

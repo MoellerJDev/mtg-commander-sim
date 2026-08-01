@@ -31,6 +31,8 @@ data/*.tmp
 data/bulk/
 data/cache/
 data/downloads/
+data/card-snapshots/
+data/images/
 
 run/
 runs/

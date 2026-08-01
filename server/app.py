@@ -3,15 +3,21 @@ from __future__ import annotations
 import asyncio
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+import hashlib
 import hmac
+import json
 import os
 from pathlib import Path
+import re
 import secrets
-from typing import Any, AsyncIterator
+from typing import Any, AsyncIterator, Literal
+from urllib.parse import urlsplit
 import uuid
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -34,6 +40,7 @@ from mtg_commander_sim import (
     parse_deck_text,
 )
 from mtg_commander_sim.preflight import semantic_preflight
+from mtg_commander_sim.record import database_fingerprint
 from mtg_commander_sim.runtime import (
     GameActor,
     GameLifecycleConflict,
@@ -47,10 +54,15 @@ from .store import (
     StoreForbidden,
     StoreNotFound,
 )
+from .data import CardImageCache, IMAGE_SIZES, ManagedScryfallData
 
 
 COOKIE_NAME = "commander_guest"
 CSRF_COOKIE_NAME = "commander_csrf"
+TAB_HEADER_NAME = "X-Commander-Tab"
+TAB_COOKIE_PREFIX = f"{COOKIE_NAME}_tab_"
+TAB_PROTOCOL_PREFIX = "commander.tab."
+TAB_ID_RE = re.compile(r"^[0-9a-f]{32}$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -58,6 +70,12 @@ class ServerSettings:
     card_db: Path
     database: Path
     game_root: Path
+    bulk_dir: Path = Path("data/bulk")
+    card_snapshot_dir: Path = Path("data/card-snapshots")
+    image_cache: Path = Path("data/images")
+    static_dir: Path = Path("web/dist")
+    auto_update_cards: bool = False
+    card_update_interval_seconds: int = 24 * 60 * 60
     allowed_origins: tuple[str, ...] = (
         "http://localhost:5173",
         "http://127.0.0.1:5173",
@@ -67,10 +85,24 @@ class ServerSettings:
     @classmethod
     def from_environment(cls) -> "ServerSettings":
         data_root = Path(os.environ.get("MTG_SERVER_DATA", "local/server"))
+        managed_data_root = Path(os.environ.get("MTG_DATA_ROOT", "data"))
+        explicit_card_db = "MTG_CARD_DB" in os.environ
         return cls(
-            card_db=Path(os.environ.get("MTG_CARD_DB", "data/test-ci.sqlite3")),
+            card_db=Path(os.environ.get("MTG_CARD_DB", managed_data_root / "scryfall-current.sqlite3")),
             database=data_root / "server.sqlite3",
             game_root=data_root / "games",
+            bulk_dir=Path(os.environ.get("MTG_BULK_DIR", managed_data_root / "bulk")),
+            card_snapshot_dir=Path(
+                os.environ.get("MTG_CARD_SNAPSHOT_DIR", managed_data_root / "card-snapshots")
+            ),
+            image_cache=Path(os.environ.get("MTG_IMAGE_CACHE", managed_data_root / "images")),
+            static_dir=Path(os.environ.get("MTG_WEB_DIST", "web/dist")),
+            auto_update_cards=os.environ.get(
+                "MTG_AUTO_UPDATE_CARDS", "0" if explicit_card_db else "1"
+            ) == "1",
+            card_update_interval_seconds=int(
+                os.environ.get("MTG_CARD_UPDATE_SECONDS", str(24 * 60 * 60))
+            ),
             allowed_origins=tuple(
                 origin.strip()
                 for origin in os.environ.get(
@@ -101,6 +133,7 @@ class GuestRequest(StrictModel):
 
 class RoomRequest(StrictModel):
     seed: int | None = Field(default=None, ge=0, le=2**63 - 1)
+    player_count: Literal[2, 4] = 4
 
 
 class JoinRoomRequest(StrictModel):
@@ -113,6 +146,12 @@ class DeckRequest(StrictModel):
     commander: str = Field(default="", max_length=200)
     decklist: str = Field(default="", max_length=100_000)
     source_url: str | None = Field(default=None, max_length=500)
+    legality_confirmation: str | None = Field(
+        default=None,
+        min_length=64,
+        max_length=64,
+        pattern=r"^[0-9a-f]{64}$",
+    )
 
     @model_validator(mode="after")
     def validate_source(self) -> "DeckRequest":
@@ -173,24 +212,27 @@ class _StoreGamePersistence(GamePersistence):
 class ProjectionHub:
     def __init__(self) -> None:
         self._versions: dict[str, int] = {}
-        self._conditions: dict[str, asyncio.Condition] = {}
+        self._events: dict[str, asyncio.Event] = {}
 
     def version(self, game_id: str) -> int:
         return self._versions.get(game_id, 0)
 
     async def notify(self, game_id: str) -> None:
-        condition = self._conditions.setdefault(game_id, asyncio.Condition())
-        async with condition:
-            self._versions[game_id] = self.version(game_id) + 1
-            condition.notify_all()
+        self._versions[game_id] = self.version(game_id) + 1
+        event = self._events.pop(game_id, None)
+        if event is not None:
+            event.set()
 
     async def wait(self, game_id: str, after: int, timeout: float = 15) -> int:
-        condition = self._conditions.setdefault(game_id, asyncio.Condition())
-        async with condition:
-            await asyncio.wait_for(
-                condition.wait_for(lambda: self.version(game_id) > after),
-                timeout=timeout,
-            )
+        if self.version(game_id) > after:
+            return self.version(game_id)
+        event = self._events.setdefault(game_id, asyncio.Event())
+        # No await occurs between the version check and event registration, so
+        # notify() cannot race past this waiter on the event loop. Event waits
+        # also cancel cleanly when a WebSocket disconnects; Condition.wait()
+        # under wait_for() could fail while reacquiring its lock on Python 3.11.
+        if self.version(game_id) <= after:
+            await asyncio.wait_for(event.wait(), timeout=timeout)
         return self.version(game_id)
 
 
@@ -199,12 +241,21 @@ class ServerRuntime:
         self.settings = settings
         self.store = ServerStore(settings.database)
         self.card_db = CardDatabase(settings.card_db)
+        self._card_databases: dict[str, CardDatabase] = {
+            str(database_fingerprint(self.card_db)["metadata_hash"]): self.card_db
+        }
         self.records = DirectoryGamePersistence(settings.game_root)
         self.idempotency = SqliteIdempotencyRepository(settings.database)
         self.persistence = _StoreGamePersistence(self.records, self.store)
         self.manager = GameManager()
         self.hub = ProjectionHub()
         self._load_lock = asyncio.Lock()
+        self._background: set[asyncio.Task[Any]] = set()
+
+    def spawn(self, coroutine: Any, *, name: str) -> None:
+        task = asyncio.create_task(coroutine, name=name)
+        self._background.add(task)
+        task.add_done_callback(self._background.discard)
 
     async def actor(self, game_id: str) -> GameActor:
         try:
@@ -216,7 +267,7 @@ class ServerRuntime:
                 return self.manager.get(game_id)
             except KeyError:
                 service = self.records.load(
-                    self.card_db,
+                    self._database_for_game(game_id),
                     game_id,
                     idempotency=self.idempotency,
                 )
@@ -228,6 +279,36 @@ class ServerRuntime:
                 return await self.manager.add(
                     service, persistence=self.persistence
                 )
+
+    def _database_for_game(self, game_id: str) -> CardDatabase:
+        manifest_path = self.records.game_directory(game_id) / "manifest.json"
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            expected = str(manifest.get("scryfall", {}).get("metadata_hash") or "")
+        except (OSError, json.JSONDecodeError, AttributeError) as exc:
+            raise ValueError(f"Persisted game manifest is unreadable: {exc}") from exc
+        if not expected:
+            raise ValueError("Persisted game does not pin a card-database fingerprint")
+        existing = self._card_databases.get(expected)
+        if existing is not None:
+            return existing
+        if not re.fullmatch(r"[0-9a-f]{64}", expected):
+            raise ValueError("Persisted game card-database fingerprint is invalid")
+        path = self.settings.card_snapshot_dir / f"{expected}.sqlite3"
+        if not path.is_file():
+            raise ValueError(
+                "The card-database snapshot required by this Game Record is unavailable"
+            )
+        database = CardDatabase(path)
+        actual = str(database_fingerprint(database)["metadata_hash"])
+        if actual != expected:
+            database.close()
+            raise ValueError("Retained card-database snapshot fingerprint mismatch")
+        self._card_databases[expected] = database
+        return database
+
+    def card_databases(self) -> tuple[CardDatabase, ...]:
+        return tuple(self._card_databases.values())
 
     async def game_summary(
         self, game_id: str, guest_id: str
@@ -252,19 +333,67 @@ class ServerRuntime:
         }
 
     async def close(self) -> None:
+        for task in self._background:
+            task.cancel()
+        if self._background:
+            await asyncio.gather(*self._background, return_exceptions=True)
         await self.manager.close()
-        self.card_db.close()
+        for database in set(self._card_databases.values()):
+            database.close()
+
+
+def _tab_cookie_name(tab_id: str) -> str:
+    return f"{TAB_COOKIE_PREFIX}{tab_id}"
+
+
+def _request_tab_id(request: Request) -> str | None:
+    value = request.headers.get(TAB_HEADER_NAME, "").lower()
+    return value if TAB_ID_RE.fullmatch(value) else None
+
+
+def _websocket_origin_allowed(
+    origin: str | None,
+    host: str,
+    configured_origins: tuple[str, ...],
+) -> bool:
+    if not origin:
+        return True
+    if origin in configured_origins:
+        return True
+    try:
+        parsed = urlsplit(origin)
+    except ValueError:
+        return False
+    return (
+        parsed.scheme in {"http", "https"}
+        and bool(host)
+        and parsed.netloc.lower() == host.lower()
+        and not parsed.path
+        and not parsed.query
+        and not parsed.fragment
+    )
 
 
 def _bearer(request: Request) -> str | None:
     authorization = request.headers.get("authorization", "")
     if authorization.startswith("Bearer "):
         return authorization[7:]
+    tab_id = _request_tab_id(request)
+    if tab_id:
+        # A browser tab that presents a valid selector must never fall back to
+        # another tab's shared legacy cookie.
+        return request.cookies.get(_tab_cookie_name(tab_id))
     return request.cookies.get(COOKIE_NAME)
 
 
 def _runtime(request: Request) -> ServerRuntime:
-    return request.app.state.runtime
+    runtime: ServerRuntime | None = request.app.state.runtime
+    if runtime is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Card data is still being prepared; check /api/v1/system",
+        )
+    return runtime
 
 
 def _guest(
@@ -317,17 +446,61 @@ def _compact_preflight(report: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _legality_confirmation_fingerprint(
+    deck_fingerprint: str,
+    issues: list[dict[str, Any]],
+) -> str:
+    payload = json.dumps(
+        {
+            "schema_version": 1,
+            "deck_list_fingerprint": deck_fingerprint,
+            "issues": issues,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
 def create_app(settings: ServerSettings | None = None) -> FastAPI:
     resolved = settings or ServerSettings.from_environment()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        runtime = ServerRuntime(resolved)
-        app.state.runtime = runtime
+        app.state.runtime = None
+        runtime_lock = asyncio.Lock()
+
+        async def initialize_runtime(_database: Path) -> None:
+            async with runtime_lock:
+                if app.state.runtime is None:
+                    app.state.runtime = ServerRuntime(resolved)
+
+        data = ManagedScryfallData(
+            resolved.card_db,
+            resolved.bulk_dir,
+            resolved.card_snapshot_dir,
+            resolved.game_root,
+            enabled=resolved.auto_update_cards,
+            interval_seconds=resolved.card_update_interval_seconds,
+        )
+        images = CardImageCache(
+            resolved.image_cache,
+            lambda: (
+                app.state.runtime.card_databases()
+                if app.state.runtime is not None
+                else ()
+            ),
+        )
+        app.state.data = data
+        app.state.images = images
+        await data.start(initialize_runtime)
         try:
             yield
         finally:
-            await runtime.close()
+            await data.close()
+            runtime: ServerRuntime | None = app.state.runtime
+            if runtime is not None:
+                await runtime.close()
 
     app = FastAPI(
         title="Commander Arena Server",
@@ -338,17 +511,76 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         CORSMiddleware,
         allow_origins=list(resolved.allowed_origins),
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT"],
-        allow_headers=["Content-Type", "X-CSRF-Token"],
+        allow_methods=["GET", "POST", "PUT", "DELETE"],
+        allow_headers=["Content-Type", "X-CSRF-Token", TAB_HEADER_NAME],
     )
 
     @app.get("/api/v1/health")
-    async def health() -> dict[str, str]:
-        return {"status": "ok", "authority": "server", "protocol": "3.0"}
+    async def health(request: Request) -> dict[str, str]:
+        data: ManagedScryfallData = request.app.state.data
+        return {
+            "status": "ok" if data.ready else "starting",
+            "authority": "server",
+            "protocol": "3.0",
+        }
+
+    @app.get("/api/v1/system")
+    async def system_status(request: Request) -> dict[str, Any]:
+        data: ManagedScryfallData = request.app.state.data
+        images: CardImageCache = request.app.state.images
+        return {
+            "server": "ready" if data.ready else "starting",
+            "protocol": "3.0",
+            "card_data": data.status(),
+            "images": {
+                "mode": "local_on_demand_cache",
+                "downloaded": images.downloaded,
+                "ready": data.ready,
+            },
+            "browser": {
+                "served_by_server": (resolved.static_dir / "index.html").is_file()
+            },
+        }
+
+    @app.post("/api/v1/system/refresh", status_code=202)
+    async def refresh_system(request: Request) -> dict[str, Any]:
+        client_host = request.client.host if request.client else ""
+        if client_host not in {"127.0.0.1", "::1", "testclient"}:
+            raise HTTPException(status_code=403, detail="Refresh is limited to the local machine")
+        data: ManagedScryfallData = request.app.state.data
+        if not data.enabled:
+            raise HTTPException(status_code=409, detail="Automatic card-data updates are disabled")
+        data.request_refresh()
+        return {"accepted": True, "card_data": data.status()}
+
+    @app.get("/api/v1/cards/{oracle_prefix}/image")
+    async def card_image(
+        oracle_prefix: str,
+        request: Request,
+        face: int = 0,
+        size: str = "normal",
+    ) -> FileResponse:
+        if not re.fullmatch(r"[0-9a-fA-F-]{8,36}", oracle_prefix):
+            raise HTTPException(status_code=404, detail="Unknown card image")
+        if face < 0 or face > 9 or size not in IMAGE_SIZES:
+            raise HTTPException(status_code=422, detail="Unsupported card image variant")
+        images: CardImageCache = request.app.state.images
+        try:
+            path, media_type = await images.get(oracle_prefix, face=face, size=size)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except (OSError, ValueError) as exc:
+            raise HTTPException(status_code=502, detail=str(exc)) from exc
+        return FileResponse(
+            path,
+            media_type=media_type,
+            headers={"Cache-Control": "public, max-age=31536000, immutable"},
+        )
 
     @app.post("/api/v1/guests", status_code=201)
     async def create_guest(
         body: GuestRequest,
+        request: Request,
         response: Response,
         runtime: ServerRuntime = Depends(_runtime),
     ) -> dict[str, Any]:
@@ -363,6 +595,17 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
             max_age=7 * 24 * 60 * 60,
             path="/",
         )
+        tab_id = _request_tab_id(request)
+        if tab_id:
+            response.set_cookie(
+                _tab_cookie_name(tab_id),
+                token,
+                httponly=True,
+                secure=resolved.secure_cookies,
+                samesite="strict",
+                max_age=7 * 24 * 60 * 60,
+                path="/",
+            )
         response.set_cookie(
             CSRF_COOKIE_NAME,
             csrf,
@@ -372,7 +615,12 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
             max_age=7 * 24 * 60 * 60,
             path="/",
         )
-        return {"guest": guest, "csrf_token": csrf, "access_token": token}
+        payload: dict[str, Any] = {"guest": guest, "csrf_token": csrf}
+        # CLI/test clients without a browser-tab selector may explicitly use a
+        # bearer. Browser JavaScript receives only the HttpOnly cookie.
+        if tab_id is None:
+            payload["access_token"] = token
+        return payload
 
     @app.get("/api/v1/me")
     async def me(guest: dict[str, Any] = Depends(_guest)) -> dict[str, Any]:
@@ -385,7 +633,11 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         runtime: ServerRuntime = Depends(_runtime),
     ) -> dict[str, Any]:
         seed = body.seed if body.seed is not None else secrets.randbits(63)
-        room, invite = runtime.store.create_room(guest["guest_id"], seed=seed)
+        room, invite = runtime.store.create_room(
+            guest["guest_id"],
+            seed=seed,
+            player_count=body.player_count,
+        )
         return {"room": room, "invite_code": invite}
 
     @app.post("/api/v1/rooms/join", dependencies=[Depends(_csrf)])
@@ -415,6 +667,77 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         except (StoreForbidden, StoreNotFound) as exc:
             raise _translate_store_error(exc) from exc
 
+    @app.post(
+        "/api/v1/rooms/{room_id}/invite",
+        dependencies=[Depends(_csrf)],
+    )
+    async def rotate_room_invite(
+        room_id: str,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, str]:
+        try:
+            invite_code = runtime.store.rotate_invite(
+                room_id,
+                guest["guest_id"],
+            )
+        except (StoreForbidden, StoreNotFound, StoreConflict) as exc:
+            raise _translate_store_error(exc) from exc
+        return {"invite_code": invite_code}
+
+    @app.post(
+        "/api/v1/rooms/{room_id}/replace",
+        dependencies=[Depends(_csrf)],
+    )
+    async def replace_room(
+        room_id: str,
+        body: RoomRequest,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, Any]:
+        seed = body.seed if body.seed is not None else secrets.randbits(63)
+        try:
+            room, invite_code = runtime.store.replace_room(
+                room_id,
+                guest["guest_id"],
+                seed=seed,
+                player_count=body.player_count,
+            )
+        except (StoreForbidden, StoreNotFound, StoreConflict) as exc:
+            raise _translate_store_error(exc) from exc
+        return {"room": room, "invite_code": invite_code}
+
+    @app.delete(
+        "/api/v1/rooms/{room_id}/seats/{seat}",
+        dependencies=[Depends(_csrf)],
+    )
+    async def remove_room_seat(
+        room_id: str,
+        seat: str,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, Any]:
+        try:
+            room = runtime.store.remove_seat(room_id, guest["guest_id"], seat)
+        except (StoreForbidden, StoreNotFound, StoreConflict) as exc:
+            raise _translate_store_error(exc) from exc
+        return {"room": room}
+
+    @app.delete(
+        "/api/v1/rooms/{room_id}/membership",
+        dependencies=[Depends(_csrf)],
+    )
+    async def leave_room(
+        room_id: str,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, bool]:
+        try:
+            runtime.store.leave_room(room_id, guest["guest_id"])
+        except (StoreForbidden, StoreNotFound, StoreConflict) as exc:
+            raise _translate_store_error(exc) from exc
+        return {"left": True}
+
     @app.put(
         "/api/v1/rooms/{room_id}/deck",
         dependencies=[Depends(_csrf)],
@@ -422,6 +745,7 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
     async def upload_deck(
         room_id: str,
         body: DeckRequest,
+        request: Request,
         guest: dict[str, Any] = Depends(_guest),
         runtime: ServerRuntime = Depends(_runtime),
     ) -> dict[str, Any]:
@@ -446,22 +770,93 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
                     source="browser-upload",
                 )
                 loader.resolve_names(deck)
-            issues = loader.validate_commander_deck(deck)
+            issues = loader.validate_commander_deck(deck, check_legality=False)
+            legality_issues = loader.commander_legality_issues(deck)
+            issues.extend(
+                issue["message"]
+                for issue in legality_issues
+                if not issue["confirmable"]
+            )
             if issues:
                 raise StoreConflict("; ".join(issues))
+            deck_fingerprint = deck_list_fingerprint(deck)
+            legality_confirmation = None
+            if legality_issues:
+                legality_confirmation = _legality_confirmation_fingerprint(
+                    deck_fingerprint,
+                    legality_issues,
+                )
+                if body.legality_confirmation != legality_confirmation:
+                    raise HTTPException(
+                        status_code=409,
+                        detail={
+                            "code": "legality_confirmation_required",
+                            "message": (
+                                "This list contains preview cards that are present "
+                                "in Scryfall but are not yet Commander-legal."
+                            ),
+                            "confirmation": legality_confirmation,
+                            "deck_list_fingerprint": deck_fingerprint,
+                            "issues": legality_issues,
+                        },
+                    )
+                deck.metadata["format_legality"] = {
+                    "schema_version": 1,
+                    "profile": "commander",
+                    "status": "preview_override_confirmed",
+                    "confirmation_fingerprint": legality_confirmation,
+                    "issues": legality_issues,
+                }
             preflight = semantic_preflight(runtime.card_db, deck)
+            preflight["format_legality"] = deck.metadata.get(
+                "format_legality",
+                {
+                    "schema_version": 1,
+                    "profile": "commander",
+                    "status": "legal",
+                    "issues": [],
+                },
+            )
             saved = runtime.store.save_deck(
                 guest["guest_id"],
                 room_id,
                 deck,
-                fingerprint=deck_list_fingerprint(deck),
+                fingerprint=deck_fingerprint,
                 preflight=preflight,
+            )
+            oracle_ids = [
+                runtime.card_db.lookup(name, fuzzy=False).oracle_id
+                for name in deck.expanded()
+            ]
+            images: CardImageCache = request.app.state.images
+            runtime.spawn(
+                images.prefetch(oracle_ids),
+                name=f"deck-image-prefetch-{room_id}",
             )
         except (StoreForbidden, StoreNotFound, StoreConflict) as exc:
             raise _translate_store_error(exc) from exc
         except (KeyError, ValueError, MoxfieldFetchError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
-        return {"deck": saved, "preflight": _compact_preflight(preflight)}
+        return {
+            "deck": saved,
+            "preflight": _compact_preflight(preflight),
+            "format_legality": preflight["format_legality"],
+        }
+
+    @app.delete(
+        "/api/v1/rooms/{room_id}/deck",
+        dependencies=[Depends(_csrf)],
+    )
+    async def clear_deck(
+        room_id: str,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, Any]:
+        try:
+            room = runtime.store.clear_deck(guest["guest_id"], room_id)
+        except (StoreForbidden, StoreNotFound, StoreConflict) as exc:
+            raise _translate_store_error(exc) from exc
+        return {"room": room}
 
     @app.post(
         "/api/v1/rooms/{room_id}/start",
@@ -473,7 +868,12 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         runtime: ServerRuntime = Depends(_runtime),
     ) -> dict[str, Any]:
         try:
-            seed, decks = runtime.store.start_spec(room_id, guest["guest_id"])
+            seed, decks, profile = runtime.store.start_spec(
+                room_id,
+                guest["guest_id"],
+            )
+            if profile not in {"commander_duel", "commander_multiplayer"}:
+                raise StoreConflict("Room has an unsupported format profile")
             session = CommanderSession.create(
                 runtime.card_db,
                 decks,
@@ -481,8 +881,10 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
                 seed=seed,
                 config=GameConfig(
                     seed=seed,
-                    profile="commander_multiplayer",
+                    profile=profile,
                     review_profile="commander_review",
+                    semantic_policy="trusted_only",
+                    manual_active_main_phase=True,
                 ),
             )
             service = GameService(session, idempotency=runtime.idempotency)
@@ -499,7 +901,7 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         return {
             "game_id": session.state.game_id,
             "room_id": room_id,
-            "profile": "commander_multiplayer",
+            "profile": profile,
             "state_revision": session.state.revision,
         }
 
@@ -628,22 +1030,64 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
 
     @app.websocket("/api/v1/games/{game_id}/stream")
     async def game_stream(websocket: WebSocket, game_id: str) -> None:
-        runtime: ServerRuntime = websocket.app.state.runtime
+        runtime: ServerRuntime | None = websocket.app.state.runtime
+        if runtime is None:
+            await websocket.close(code=1013, reason="Card data is still being prepared")
+            return
         origin = websocket.headers.get("origin")
-        if origin and origin not in resolved.allowed_origins:
+        if not _websocket_origin_allowed(
+            origin,
+            websocket.headers.get("host", ""),
+            resolved.allowed_origins,
+        ):
             await websocket.close(code=1008, reason="Origin not allowed")
             return
-        token = websocket.cookies.get(COOKIE_NAME) or ""
+        selected_protocol: str | None = None
+        token = ""
+        offered_tab_protocol = False
+        offered_protocols = {
+            value.strip()
+            for value in websocket.headers.get("sec-websocket-protocol", "").split(",")
+            if value.strip()
+        }
+        for protocol in offered_protocols:
+            if not protocol.startswith(TAB_PROTOCOL_PREFIX):
+                continue
+            tab_id = protocol[len(TAB_PROTOCOL_PREFIX):].lower()
+            if not TAB_ID_RE.fullmatch(tab_id):
+                continue
+            offered_tab_protocol = True
+            token = websocket.cookies.get(_tab_cookie_name(tab_id)) or ""
+            if token:
+                selected_protocol = protocol
+                break
+        if not token and not offered_tab_protocol:
+            token = websocket.cookies.get(COOKIE_NAME) or ""
         try:
             guest = runtime.store.authenticate(token)
             _, seat = runtime.store.game_access(game_id, guest["guest_id"])
             actor = await runtime.actor(game_id)
         except (StoreForbidden, StoreNotFound, KeyError, ValueError):
-            await websocket.close(code=1008, reason="Unauthorized")
+            # Accept once so browser clients receive a terminal protocol
+            # message. Rejecting the HTTP upgrade as 403 gives JavaScript no
+            # useful status and previously caused an endless reconnect loop
+            # for stale game tabs after a local server reset.
+            await websocket.accept(subprotocol=selected_protocol)
+            await websocket.send_json(
+                {
+                    "type": "terminal",
+                    "code": "game_access_lost",
+                    "message": (
+                        "This browser tab no longer has access to that game. "
+                        "Return to the lobby and open the current room."
+                    ),
+                }
+            )
+            await websocket.close(code=4401, reason="Game access lost")
             return
         principal = f"pilot:{seat}"
         cursor_key = f"network:{principal}:{uuid.uuid4().hex}"
-        await websocket.accept()
+        await websocket.accept(subprotocol=selected_protocol)
         version = runtime.hub.version(game_id)
         try:
             packet = await actor.observe(
@@ -670,6 +1114,7 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
                     )
                     if receive_task in done:
                         hub_task.cancel()
+                        await asyncio.gather(hub_task, return_exceptions=True)
                         message = receive_task.result()
                         if message["type"] == "websocket.disconnect":
                             return
@@ -697,9 +1142,35 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         except WebSocketDisconnect:
             return
         finally:
-            for task in (locals().get("receive_task"), locals().get("hub_task")):
-                if isinstance(task, asyncio.Task) and not task.done():
+            tasks = [
+                task
+                for task in (
+                    locals().get("receive_task"),
+                    locals().get("hub_task"),
+                )
+                if isinstance(task, asyncio.Task)
+            ]
+            for task in tasks:
+                if not task.done():
                     task.cancel()
+            if tasks:
+                await asyncio.gather(*tasks, return_exceptions=True)
             await actor.drop_projection_cursor(cursor_key)
+
+    index_path = resolved.static_dir / "index.html"
+    assets_path = resolved.static_dir / "assets"
+    if index_path.is_file():
+        if assets_path.is_dir():
+            app.mount("/assets", StaticFiles(directory=assets_path), name="browser-assets")
+
+        @app.get("/{browser_path:path}", include_in_schema=False)
+        async def browser_application(browser_path: str) -> FileResponse:
+            if browser_path.startswith("api/"):
+                raise HTTPException(status_code=404, detail="Unknown API route")
+            root = resolved.static_dir.resolve()
+            candidate = (root / browser_path).resolve()
+            if candidate != root and root in candidate.parents and candidate.is_file():
+                return FileResponse(candidate)
+            return FileResponse(index_path)
 
     return app

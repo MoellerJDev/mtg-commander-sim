@@ -1,0 +1,115 @@
+{
+  "schema_version": 3,
+  "name": "browser-reported-interactions",
+  "programs": [
+    {
+      "key": "256b8c23-589e-429d-9e6e-433d55079eb4:trigger:enter",
+      "label": "Sunscorched Desert enters",
+      "oracle_id": "256b8c23-589e-429d-9e6e-433d55079eb4",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [
+        {
+          "op": "damage",
+          "source": "$source",
+          "target": "$target.0",
+          "amount": 1
+        }
+      ],
+      "target_schema": {
+        "zones": ["player", "battlefield"],
+        "categories": ["player", "permanent"],
+        "predicate": "player_or_planeswalker",
+        "count": 1
+      },
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "target_validation", "damage"],
+      "tests": ["test_sunscorched_desert_prompts_for_target_and_deals_damage"],
+      "provenance": {
+        "source_oracle_hash": "b640080df58b5da73ee9ff57788782936951d37ac9c6581c94d858d5600d2b7d",
+        "source_rulings_hash": "5977541ebd28b04869abdd2d07521f79dd2c3433195e7f7156152cc0dce83d20",
+        "authored_by": "browser-interaction-review",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ea5103f5-27e0-4eb1-902c-7f34652d6bf3:spell:front",
+      "label": "Orcish Bowmasters",
+      "oracle_id": "ea5103f5-27e0-4eb1-902c-7f34652d6bf3",
+      "ability_id": "spell:front",
+      "active_zone": "stack",
+      "event": "resolve",
+      "effects": [],
+      "destination": "battlefield",
+      "trust_level": "trusted",
+      "coverage": ["permanent_characteristics", "flash"],
+      "tests": ["test_orcish_bowmasters_resolves_then_damages_and_amasses"],
+      "provenance": {
+        "source_oracle_hash": "c2c7596e58d8707e6ae25cd121d0011b5457d8bda3c376e9907d5a01d81e4e10",
+        "source_rulings_hash": "f418b5a665fbfa2d677b25569afaab0ac70f243d1fa44ae9b39ab5d3f90ffa2e",
+        "authored_by": "browser-interaction-review",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ea5103f5-27e0-4eb1-902c-7f34652d6bf3:trigger:enter",
+      "label": "Orcish Bowmasters enters",
+      "oracle_id": "ea5103f5-27e0-4eb1-902c-7f34652d6bf3",
+      "ability_id": "trigger:enter",
+      "active_zone": "battlefield",
+      "event": "permanent.enter.self",
+      "effects": [
+        {"op": "damage", "source": "$source", "target": "$target.0", "amount": 1},
+        {"op": "amass", "subtype": "Orc", "amount": 1}
+      ],
+      "target_schema": {
+        "zones": ["player", "battlefield"],
+        "categories": ["player", "permanent"],
+        "predicate": "damageable",
+        "count": 1
+      },
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "enters_trigger", "target_validation", "damage", "amass"],
+      "tests": ["test_orcish_bowmasters_resolves_then_damages_and_amasses"],
+      "provenance": {
+        "source_oracle_hash": "c2c7596e58d8707e6ae25cd121d0011b5457d8bda3c376e9907d5a01d81e4e10",
+        "source_rulings_hash": "f418b5a665fbfa2d677b25569afaab0ac70f243d1fa44ae9b39ab5d3f90ffa2e",
+        "authored_by": "browser-interaction-review",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "ea5103f5-27e0-4eb1-902c-7f34652d6bf3:trigger:opponent-draw",
+      "label": "Orcish Bowmasters opponent draw",
+      "oracle_id": "ea5103f5-27e0-4eb1-902c-7f34652d6bf3",
+      "ability_id": "trigger:opponent-draw",
+      "active_zone": "battlefield",
+      "event": "card.draw_except_first_draw_step",
+      "event_condition": {
+        "field": "player",
+        "op": "ne",
+        "value": "$source.controller"
+      },
+      "effects": [
+        {"op": "damage", "source": "$source", "target": "$target.0", "amount": 1},
+        {"op": "amass", "subtype": "Orc", "amount": 1}
+      ],
+      "target_schema": {
+        "zones": ["player", "battlefield"],
+        "categories": ["player", "permanent"],
+        "predicate": "damageable",
+        "count": 1
+      },
+      "trust_level": "trusted",
+      "coverage": ["triggered_ability", "opponent_draw_tracking", "target_validation", "damage", "amass"],
+      "tests": ["test_orcish_bowmasters_triggers_for_each_qualifying_opponent_draw"],
+      "provenance": {
+        "source_oracle_hash": "c2c7596e58d8707e6ae25cd121d0011b5457d8bda3c376e9907d5a01d81e4e10",
+        "source_rulings_hash": "f418b5a665fbfa2d677b25569afaab0ac70f243d1fa44ae9b39ab5d3f90ffa2e",
+        "authored_by": "browser-interaction-review",
+        "review_status": "reviewed"
+      }
+    }
+  ]
+}

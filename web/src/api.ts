@@ -1,11 +1,42 @@
 import type { CommandEnvelope, CommandReceipt } from "./generated/protocol";
 
+const TAB_STORAGE_KEY = "commander-browser-tab";
+
+function newTabId(): string {
+  return crypto.randomUUID().replaceAll("-", "");
+}
+
+function browserTabId(): string {
+  const existing = sessionStorage.getItem(TAB_STORAGE_KEY);
+  if (existing && /^[0-9a-f]{32}$/.test(existing)) return existing;
+  const created = newTabId();
+  sessionStorage.setItem(TAB_STORAGE_KEY, created);
+  return created;
+}
+
+export function beginGuestSession(): void {
+  // A duplicated/incognito tab may inherit sessionStorage. Rotating before an
+  // explicit login guarantees that this page selects its own HttpOnly cookie.
+  sessionStorage.setItem(TAB_STORAGE_KEY, newTabId());
+}
+
 function csrfToken(): string {
   const row = document.cookie
     .split(";")
     .map((value) => value.trim())
     .find((value) => value.startsWith("commander_csrf="));
   return row ? decodeURIComponent(row.split("=", 2)[1]) : "";
+}
+
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly detail: unknown,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
 }
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -16,11 +47,20 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     headers: {
       ...(init.body ? { "Content-Type": "application/json" } : {}),
       ...(method !== "GET" ? { "X-CSRF-Token": csrfToken() } : {}),
+      "X-Commander-Tab": browserTabId(),
       ...(init.headers ?? {}),
     },
   });
-  const payload = (await response.json()) as { detail?: string };
-  if (!response.ok) throw new Error(payload.detail ?? `Request failed: ${response.status}`);
+  const payload = (await response.json()) as { detail?: unknown };
+  if (!response.ok) {
+    const detail = payload.detail;
+    const message = typeof detail === "string"
+      ? detail
+      : detail && typeof detail === "object" && "message" in detail
+        ? String((detail as { message: unknown }).message)
+        : `Request failed: ${response.status}`;
+    throw new ApiError(message, response.status, detail);
+  }
   return payload as T;
 }
 
@@ -36,7 +76,34 @@ export interface Seat {
   display_name: string | null;
   ready: boolean;
   mine: boolean;
-  deck: { deck_id: string; name: string; deck_list_fingerprint: string } | null;
+  deck: {
+    deck_id: string;
+    name: string;
+    deck_list_fingerprint: string;
+    format_legality: {
+      status: string;
+      issue_count: number;
+      issues: LegalityIssue[];
+    };
+  } | null;
+}
+
+export interface LegalityIssue {
+  code: string;
+  message: string;
+  card: string;
+  board: string;
+  legality: string;
+  released_at: string | null;
+  confirmable: boolean;
+}
+
+export interface LegalityConfirmationRequired {
+  code: "legality_confirmation_required";
+  message: string;
+  confirmation: string;
+  deck_list_fingerprint: string;
+  issues: LegalityIssue[];
 }
 
 export interface Room {
@@ -45,6 +112,7 @@ export interface Room {
   status: string;
   game_id: string | null;
   format_profile: string;
+  seat_count: 2 | 4;
   seats: Seat[];
 }
 
@@ -73,17 +141,54 @@ export interface GameLifecycle {
   events: number;
 }
 
+export interface SystemStatus {
+  server: string;
+  protocol: string;
+  card_data: {
+    ready: boolean;
+    phase: string;
+    detail: string;
+    updating: boolean;
+    automatic_updates: boolean;
+    update_interval_hours: number;
+    restart_required: boolean;
+    last_checked_at: string | null;
+    next_check_at: string | null;
+    last_error: string | null;
+    database: {
+      cards: number;
+      rulings: number;
+      image_references: number;
+      retained_game_snapshots: number;
+      oracle_updated_at: string | null;
+      rulings_updated_at: string | null;
+    };
+  };
+  images: {
+    mode: string;
+    downloaded: number;
+    ready: boolean;
+  };
+  browser: { served_by_server: boolean };
+}
+
 export const api = {
+  system: () => request<SystemStatus>("/api/v1/system"),
+  refreshSystem: () =>
+    request<{ accepted: boolean; card_data: SystemStatus["card_data"] }>(
+      "/api/v1/system/refresh",
+      { method: "POST", body: JSON.stringify({}) },
+    ),
   me: () => request<{ guest: Guest }>("/api/v1/me"),
   guest: (display_name: string) =>
     request<{ guest: Guest }>("/api/v1/guests", {
       method: "POST",
       body: JSON.stringify({ display_name }),
     }),
-  createRoom: () =>
+  createRoom: (player_count: 2 | 4 = 4) =>
     request<{ room: Room; invite_code: string }>("/api/v1/rooms", {
       method: "POST",
-      body: JSON.stringify({}),
+      body: JSON.stringify({ player_count }),
     }),
   joinRoom: (invite_code: string, seat: string) =>
     request<{ room: Room }>("/api/v1/rooms/join", {
@@ -91,11 +196,53 @@ export const api = {
       body: JSON.stringify({ invite_code, seat }),
     }),
   room: (roomId: string) => request<{ room: Room }>(`/api/v1/rooms/${roomId}`),
-  deck: (roomId: string, name: string, commander: string, decklist: string, source_url?: string) =>
-    request<{ deck: unknown; preflight: { trusted_only_ready: boolean } }>(
+  rotateInvite: (roomId: string) =>
+    request<{ invite_code: string }>(`/api/v1/rooms/${roomId}/invite`, {
+      method: "POST",
+      body: JSON.stringify({}),
+    }),
+  replaceRoom: (roomId: string, player_count: 2 | 4) =>
+    request<{ room: Room; invite_code: string }>(`/api/v1/rooms/${roomId}/replace`, {
+      method: "POST",
+      body: JSON.stringify({ player_count }),
+    }),
+  removeSeat: (roomId: string, seat: string) =>
+    request<{ room: Room }>(`/api/v1/rooms/${roomId}/seats/${seat}`, {
+      method: "DELETE",
+    }),
+  leaveRoom: (roomId: string) =>
+    request<{ left: boolean }>(`/api/v1/rooms/${roomId}/membership`, {
+      method: "DELETE",
+    }),
+  deck: (
+    roomId: string,
+    name: string,
+    commander: string,
+    decklist: string,
+    source_url?: string,
+    legality_confirmation?: string,
+  ) =>
+    request<{
+      deck: unknown;
+      preflight: { trusted_only_ready: boolean };
+      format_legality: { status: string; issues: LegalityIssue[] };
+    }>(
       `/api/v1/rooms/${roomId}/deck`,
-      { method: "PUT", body: JSON.stringify({ name, commander, decklist, source_url: source_url || null }) },
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          name,
+          commander,
+          decklist,
+          source_url: source_url || null,
+          legality_confirmation: legality_confirmation || null,
+        }),
+      },
     ),
+  clearDeck: (roomId: string) =>
+    request<{ room: Room }>(`/api/v1/rooms/${roomId}/deck`, {
+      method: "DELETE",
+    }),
   start: (roomId: string) =>
     request<{ game_id: string }>(`/api/v1/rooms/${roomId}/start`, {
       method: "POST",
@@ -123,4 +270,8 @@ export const api = {
 export function streamUrl(gameId: string): string {
   const protocol = location.protocol === "https:" ? "wss:" : "ws:";
   return `${protocol}//${location.host}/api/v1/games/${gameId}/stream`;
+}
+
+export function streamProtocols(): string[] {
+  return [`commander.tab.${browserTabId()}`];
 }

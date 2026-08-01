@@ -125,10 +125,30 @@ def extract_mana_modes(record: CardRecord, commander_identity: Iterable[str] = (
             for marker in ("sacrifice", "remove a counter", "choose a color of a permanent")
         )
         side_effects_list: list[dict[str, Any]] = []
-        if "deals 1 damage to you" in lower:
-            side_effects_list.append({"op": "damage_self", "amount": 1})
-        elif "whenever this land becomes tapped, it deals 1 damage to you" in oracle_lower:
-            side_effects_list.append({"op": "damage_self", "amount": 1})
+        self_damage = re.search(
+            r"deals? (?P<amount>\d+) damage to you",
+            ability_lower,
+        )
+        if self_damage:
+            side_effects_list.append(
+                {
+                    "op": "damage_self",
+                    "amount": int(self_damage.group("amount")),
+                }
+            )
+        else:
+            tapped_damage = re.search(
+                r"whenever this land becomes tapped, it deals? "
+                r"(?P<amount>\d+) damage to you",
+                oracle_lower,
+            )
+            if tapped_damage:
+                side_effects_list.append(
+                    {
+                        "op": "damage_self",
+                        "amount": int(tapped_damage.group("amount")),
+                    }
+                )
         pay_life = re.search(r"pay\s+(\d+)\s+life", extra_costs)
         if pay_life:
             side_effects_list.append({"op": "pay_life", "amount": int(pay_life.group(1))})

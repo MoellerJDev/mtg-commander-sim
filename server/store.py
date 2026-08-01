@@ -114,47 +114,112 @@ class ServerStore:
             "expires_at": str(row["expires_at"]),
         }
 
-    def create_room(
-        self, owner_guest_id: str, *, seed: int
-    ) -> tuple[dict[str, Any], str]:
+    @staticmethod
+    def _insert_room(
+        connection: sqlite3.Connection,
+        owner_guest_id: str,
+        *,
+        seed: int,
+        player_count: int,
+    ) -> tuple[str, str]:
+        if player_count not in {2, 4}:
+            raise StoreConflict("A browser room must have 2 or 4 players")
         room_id = uuid.uuid4().hex
         invite_code = secrets.token_urlsafe(18)
         now = utc_now()
+        profile = "commander_duel" if player_count == 2 else "commander_multiplayer"
+        connection.execute(
+            """
+            INSERT INTO rooms(
+                room_id, owner_guest_id, invite_code_hash, visibility,
+                status, seat_count, format_profile, seed, created_at,
+                updated_at
+            ) VALUES (?, ?, ?, 'invite', 'open', ?, ?, ?, ?, ?)
+            """,
+            (
+                room_id,
+                owner_guest_id,
+                token_hash(invite_code),
+                player_count,
+                profile,
+                seed,
+                now,
+                now,
+            ),
+        )
+        connection.execute(
+            """
+            INSERT INTO room_members(room_id, guest_id, joined_at)
+            VALUES (?, ?, ?)
+            """,
+            (room_id, owner_guest_id, now),
+        )
+        connection.executemany(
+            "INSERT INTO room_seats(room_id, seat) VALUES (?, ?)",
+            [(room_id, seat) for seat in SEATS[:player_count]],
+        )
+        connection.execute(
+            "UPDATE room_seats SET guest_id = ? WHERE room_id = ? AND seat = 'A'",
+            (owner_guest_id, room_id),
+        )
+        return room_id, invite_code
+
+    def create_room(
+        self, owner_guest_id: str, *, seed: int, player_count: int = 4
+    ) -> tuple[dict[str, Any], str]:
         with self._connection(write=True) as connection:
-            connection.execute(
-                """
-                INSERT INTO rooms(
-                    room_id, owner_guest_id, invite_code_hash, visibility,
-                    status, seat_count, format_profile, seed, created_at,
-                    updated_at
-                ) VALUES (?, ?, ?, 'invite', 'open', 4,
-                          'commander_multiplayer', ?, ?, ?)
-                """,
-                (
-                    room_id,
-                    owner_guest_id,
-                    token_hash(invite_code),
-                    seed,
-                    now,
-                    now,
-                ),
-            )
-            connection.execute(
-                """
-                INSERT INTO room_members(room_id, guest_id, joined_at)
-                VALUES (?, ?, ?)
-                """,
-                (room_id, owner_guest_id, now),
-            )
-            connection.executemany(
-                "INSERT INTO room_seats(room_id, seat) VALUES (?, ?)",
-                [(room_id, seat) for seat in SEATS],
-            )
-            connection.execute(
-                "UPDATE room_seats SET guest_id = ? WHERE room_id = ? AND seat = 'A'",
-                (owner_guest_id, room_id),
+            room_id, invite_code = self._insert_room(
+                connection,
+                owner_guest_id,
+                seed=seed,
+                player_count=player_count,
             )
         return self.room(room_id, owner_guest_id), invite_code
+
+    def replace_room(
+        self,
+        room_id: str,
+        owner_guest_id: str,
+        *,
+        seed: int,
+        player_count: int,
+    ) -> tuple[dict[str, Any], str]:
+        with self._connection(write=True) as connection:
+            room = connection.execute(
+                "SELECT owner_guest_id, status FROM rooms WHERE room_id = ?",
+                (room_id,),
+            ).fetchone()
+            if room is None:
+                raise StoreNotFound("Room not found")
+            if room["owner_guest_id"] != owner_guest_id:
+                raise StoreForbidden("Only the room owner can replace the room")
+            if room["status"] != "open":
+                raise StoreConflict("Only an unstarted room can be replaced")
+            deck_rows = connection.execute(
+                "SELECT deck_id FROM room_seats WHERE room_id = ? AND deck_id IS NOT NULL",
+                (room_id,),
+            ).fetchall()
+            connection.execute(
+                "UPDATE room_seats SET deck_id = NULL, ready = 0 WHERE room_id = ?",
+                (room_id,),
+            )
+            for row in deck_rows:
+                connection.execute("DELETE FROM decks WHERE deck_id = ?", (row["deck_id"],))
+            connection.execute(
+                """
+                UPDATE rooms
+                SET status = 'closed', invite_code_hash = ?, updated_at = ?
+                WHERE room_id = ?
+                """,
+                (token_hash(secrets.token_urlsafe(32)), utc_now(), room_id),
+            )
+            next_room_id, invite_code = self._insert_room(
+                connection,
+                owner_guest_id,
+                seed=seed,
+                player_count=player_count,
+            )
+        return self.room(next_room_id, owner_guest_id), invite_code
 
     def join_room(
         self, guest_id: str, *, invite_code: str, seat: str
@@ -204,6 +269,97 @@ class ServerStore:
             )
         return self.room(room_id, guest_id)
 
+    def rotate_invite(self, room_id: str, guest_id: str) -> str:
+        invite_code = secrets.token_urlsafe(18)
+        with self._connection(write=True) as connection:
+            room = connection.execute(
+                "SELECT owner_guest_id, status FROM rooms WHERE room_id = ?",
+                (room_id,),
+            ).fetchone()
+            if room is None:
+                raise StoreNotFound("Room not found")
+            if room["owner_guest_id"] != guest_id:
+                raise StoreForbidden("Only the room owner can replace the invite code")
+            if room["status"] != "open":
+                raise StoreConflict("Invite codes cannot change after game start")
+            connection.execute(
+                "UPDATE rooms SET invite_code_hash = ?, updated_at = ? WHERE room_id = ?",
+                (token_hash(invite_code), utc_now(), room_id),
+            )
+        return invite_code
+
+    def remove_seat(self, room_id: str, owner_guest_id: str, seat: str) -> dict[str, Any]:
+        seat = seat.upper()
+        with self._connection(write=True) as connection:
+            room = connection.execute(
+                "SELECT owner_guest_id, status FROM rooms WHERE room_id = ?",
+                (room_id,),
+            ).fetchone()
+            if room is None:
+                raise StoreNotFound("Room not found")
+            if room["owner_guest_id"] != owner_guest_id:
+                raise StoreForbidden("Only the room owner can remove a player")
+            if room["status"] != "open":
+                raise StoreConflict("Players cannot be removed after game start")
+            if seat == "A":
+                raise StoreForbidden("The room owner cannot remove their own seat")
+            target = connection.execute(
+                "SELECT guest_id, deck_id FROM room_seats WHERE room_id = ? AND seat = ?",
+                (room_id, seat),
+            ).fetchone()
+            if target is None:
+                raise StoreNotFound("Seat not found")
+            if target["guest_id"] is None:
+                raise StoreConflict(f"Seat {seat} is already open")
+            connection.execute(
+                "UPDATE room_seats SET guest_id = NULL, deck_id = NULL, ready = 0 WHERE room_id = ? AND seat = ?",
+                (room_id, seat),
+            )
+            if target["deck_id"] is not None:
+                connection.execute("DELETE FROM decks WHERE deck_id = ?", (target["deck_id"],))
+            connection.execute(
+                "DELETE FROM room_members WHERE room_id = ? AND guest_id = ?",
+                (room_id, target["guest_id"]),
+            )
+            connection.execute(
+                "UPDATE rooms SET updated_at = ? WHERE room_id = ?",
+                (utc_now(), room_id),
+            )
+        return self.room(room_id, owner_guest_id)
+
+    def leave_room(self, room_id: str, guest_id: str) -> None:
+        with self._connection(write=True) as connection:
+            room = connection.execute(
+                "SELECT owner_guest_id, status FROM rooms WHERE room_id = ?",
+                (room_id,),
+            ).fetchone()
+            if room is None:
+                raise StoreNotFound("Room not found")
+            if room["owner_guest_id"] == guest_id:
+                raise StoreForbidden("The owner must replace the room instead")
+            if room["status"] != "open":
+                raise StoreConflict("A player cannot leave after game start")
+            target = connection.execute(
+                "SELECT deck_id FROM room_seats WHERE room_id = ? AND guest_id = ?",
+                (room_id, guest_id),
+            ).fetchone()
+            if target is None:
+                raise StoreForbidden("Guest does not occupy a seat in this room")
+            connection.execute(
+                "UPDATE room_seats SET guest_id = NULL, deck_id = NULL, ready = 0 WHERE room_id = ? AND guest_id = ?",
+                (room_id, guest_id),
+            )
+            if target["deck_id"] is not None:
+                connection.execute("DELETE FROM decks WHERE deck_id = ?", (target["deck_id"],))
+            connection.execute(
+                "DELETE FROM room_members WHERE room_id = ? AND guest_id = ?",
+                (room_id, guest_id),
+            )
+            connection.execute(
+                "UPDATE rooms SET updated_at = ? WHERE room_id = ?",
+                (utc_now(), room_id),
+            )
+
     def room(self, room_id: str, guest_id: str) -> dict[str, Any]:
         with self._connection() as connection:
             member = connection.execute(
@@ -221,7 +377,7 @@ class ServerStore:
                 """
                 SELECT s.seat, s.ready, s.guest_id, g.display_name,
                        d.deck_id, d.name AS deck_name,
-                       d.deck_list_fingerprint
+                       d.deck_list_fingerprint, d.preflight_json
                 FROM room_seats s
                 LEFT JOIN guest_sessions g ON g.guest_id = s.guest_id
                 LEFT JOIN decks d ON d.deck_id = s.deck_id
@@ -229,6 +385,40 @@ class ServerStore:
                 """,
                 (room_id,),
             ).fetchall()
+        seat_payloads: list[dict[str, Any]] = []
+        for row in seats:
+            mine = row["guest_id"] == guest_id
+            deck_payload = None
+            if row["deck_id"] is not None:
+                try:
+                    preflight = json.loads(str(row["preflight_json"] or "{}"))
+                except json.JSONDecodeError:
+                    preflight = {}
+                format_legality = preflight.get("format_legality") or {}
+                legality_issues = format_legality.get("issues") or []
+                deck_payload = {
+                    "deck_id": row["deck_id"],
+                    "name": row["deck_name"],
+                    "deck_list_fingerprint": row["deck_list_fingerprint"],
+                    "format_legality": {
+                        "status": str(format_legality.get("status") or "unknown"),
+                        "issue_count": len(legality_issues),
+                        # Card names in an unrevealed deck remain visible only
+                        # to its owner; other room members receive the public
+                        # override state and count.
+                        "issues": legality_issues if mine else [],
+                    },
+                }
+            seat_payloads.append(
+                {
+                    "seat": str(row["seat"]),
+                    "guest_id": row["guest_id"],
+                    "display_name": row["display_name"],
+                    "ready": bool(row["ready"]),
+                    "deck": deck_payload,
+                    "mine": mine,
+                }
+            )
         return {
             "room_id": room_id,
             "owner_guest_id": str(room["owner_guest_id"]),
@@ -236,27 +426,7 @@ class ServerStore:
             "format_profile": str(room["format_profile"]),
             "seat_count": int(room["seat_count"]),
             "game_id": room["game_id"],
-            "seats": [
-                {
-                    "seat": str(row["seat"]),
-                    "guest_id": row["guest_id"],
-                    "display_name": row["display_name"],
-                    "ready": bool(row["ready"]),
-                    "deck": (
-                        {
-                            "deck_id": row["deck_id"],
-                            "name": row["deck_name"],
-                            "deck_list_fingerprint": row[
-                                "deck_list_fingerprint"
-                            ],
-                        }
-                        if row["deck_id"] is not None
-                        else None
-                    ),
-                    "mine": row["guest_id"] == guest_id,
-                }
-                for row in seats
-            ],
+            "seats": seat_payloads,
         }
 
     def guest_seat(self, room_id: str, guest_id: str) -> str:
@@ -330,9 +500,37 @@ class ServerStore:
             "total_cards": deck.total_cards(),
         }
 
+    def clear_deck(self, guest_id: str, room_id: str) -> dict[str, Any]:
+        with self._connection(write=True) as connection:
+            room = connection.execute(
+                "SELECT status FROM rooms WHERE room_id = ?", (room_id,)
+            ).fetchone()
+            if room is None:
+                raise StoreNotFound("Room not found")
+            if room["status"] != "open":
+                raise StoreConflict("Deck readiness cannot change after game start")
+            seat = connection.execute(
+                "SELECT seat, deck_id FROM room_seats WHERE room_id = ? AND guest_id = ?",
+                (room_id, guest_id),
+            ).fetchone()
+            if seat is None:
+                raise StoreForbidden("Guest does not occupy a room seat")
+            deck_id = seat["deck_id"]
+            connection.execute(
+                "UPDATE room_seats SET deck_id = NULL, ready = 0 WHERE room_id = ? AND guest_id = ?",
+                (room_id, guest_id),
+            )
+            if deck_id is not None:
+                connection.execute("DELETE FROM decks WHERE deck_id = ?", (deck_id,))
+            connection.execute(
+                "UPDATE rooms SET updated_at = ? WHERE room_id = ?",
+                (utc_now(), room_id),
+            )
+        return self.room(room_id, guest_id)
+
     def start_spec(
         self, room_id: str, owner_guest_id: str
-    ) -> tuple[int, dict[str, DeckDefinition]]:
+    ) -> tuple[int, dict[str, DeckDefinition], str]:
         with self._connection() as connection:
             room = connection.execute(
                 "SELECT * FROM rooms WHERE room_id = ?", (room_id,)
@@ -352,19 +550,20 @@ class ServerStore:
                 """,
                 (room_id,),
             ).fetchall()
-        if len(rows) != 4 or any(
+        seat_count = int(room["seat_count"])
+        if len(rows) != seat_count or any(
             row["guest_id"] is None
             or not bool(row["ready"])
             or row["definition_json"] is None
             for row in rows
         ):
-            raise StoreConflict("All four seats must be occupied and ready")
+            raise StoreConflict(f"All {seat_count} seats must be occupied and ready")
         return int(room["seed"]), {
             str(row["seat"]): DeckDefinition.from_dict(
                 json.loads(str(row["definition_json"]))
             )
             for row in rows
-        }
+        }, str(room["format_profile"])
 
     def commit_started_game(
         self, room_id: str, game_id: str, record_path: str, revision: int

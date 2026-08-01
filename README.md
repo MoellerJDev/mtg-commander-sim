@@ -9,16 +9,23 @@ corpus.
 
 Current development checkpoint: the deterministic foundation and reviewed CR
 400–408 and CR 500–512 slices now have an executable server/browser vertical
-slice. It provides guest sessions, invite-only four-seat rooms, deck
+slice. It provides tab-isolated guest sessions, invite-only two- or four-seat rooms, deck
 validation/preflight, a serialized single-writer game actor, SQLite control
 plane, durable Game Record v3 acknowledgement, strict idempotent protocol 3.0
 commands, seat-scoped WebSockets, reconnect and process-restart recovery, and a
-TypeScript/React table. The browser renders the engine's current generic choice
-vocabulary and provides owner-only durable stop/resume controls plus a
-seat-safe record inspection panel. Those lifecycle transitions are serialized
-through the same game actor, survive a process restart, and are end-to-end
-tested with four isolated seats. Future choice schemas, accessibility polish,
-expiry/rate limits, and production operations remain incomplete.
+responsive TypeScript/React table. One Python process now builds and serves the
+browser, prepares the local Scryfall SQLite index, checks for updated Oracle and
+rulings exports every 24 hours, and serves an on-demand local card-image cache.
+The browser renders the engine's current generic choice vocabulary, locally
+  cached card art, a persistent hover/focus card viewer, browsable public zones,
+  card-specific play/cast/activate controls, drag-to-play interaction, optional
+  manual mana-source activation, reconnect and exact-command retry states,
+  explicit active-player main-phase advancement,
+  owner-only durable stop/resume controls, and a seat-safe record inspection
+  panel. These paths are
+end-to-end tested with four shared-cookie tab-isolated seats and a two-player
+duel. Future choice schemas, full account
+identity, expiry/rate limits, and production operations remain incomplete.
 The generated platform ledger records the exact current test and coverage
 counts.
 
@@ -40,20 +47,100 @@ rules, server, browser, persistence, replay, privacy, and validation ledger.
 See `SERVER_BROWSER.md` for the executable API, local run commands, browser
 workflow, security boundary, and remaining UI/operations limits.
 
-## Local setup
+## Quick start
 
-Create an environment and install the source tree:
+Install Python 3.11+ and Node.js 22+, then run:
 
-```bash
+```powershell
 python -m venv .venv
-. .venv/bin/activate        # Windows PowerShell: .venv\Scripts\Activate.ps1
+.venv\Scripts\Activate.ps1
 python -m pip install -e . -r requirements-dev.txt
-cd web
-npm ci
-cd ..
+python -m server
 ```
 
-The repository deliberately does not contain a Scryfall bulk export or SQLite
+That is the entire local application startup. The server installs browser
+packages on the first run, rebuilds the browser when its sources change, opens
+`http://127.0.0.1:8000`, and shows first-run card-data progress in the UI.
+Initial setup downloads Scryfall's compressed Oracle Cards and Rulings exports
+and builds `data/scryfall-current.sqlite3`. It checks again every 24 hours.
+Every startup checks the live manifest before enabling deck import. If the
+local snapshot is stale, the setup screen remains visible until the replacement
+is built and activated; if the check is offline, the existing snapshot becomes
+available with a visible warning.
+This follows [Scryfall's recommendation to use bulk data for large local card
+and image workloads](https://scryfall.com/docs/faqs/i-m-having-trouble-accessing-the-scryfall-api-or-i-m-blocked-17)
+instead of performing one API lookup per card.
+After a successful refresh, the previous managed bulk archives are deleted;
+only the current Oracle/rulings pair is retained. A refresh discovered during
+a live process is staged and activated on the next restart so an in-progress
+Game Record never changes rules data underneath itself. The previous SQLite
+snapshot is retained by fingerprint only while a saved Game Record references
+it; unreferenced database snapshots are deleted during activation.
+
+Card images are not mirrored wholesale. Image references come from the same
+bulk snapshot; the server downloads normal images for submitted decks in the
+background and caches any other visible art on demand under `data/images/`.
+The browser requests only the local `/api/v1/cards/.../image` route. Use
+`Ctrl+C` to stop the application and rerun the same command to resume.
+Images remain unmodified local third-party cache files and are never committed
+or packaged. See [the content boundary](docs/LEGAL_CONTENT_BOUNDARY.md) for
+attribution, display constraints, and deployment review requirements.
+
+The current identity layer is an expiring, per-browser-tab guest session: choose
+a display name, host or join a private 1v1 duel or four-seat room, submit a
+Moxfield URL or pasted deck, and start when every configured seat shows ready.
+Incognito windows may share cookies without collapsing into one seat. The host invite remains
+visible after readying and reload; the host can replace it if necessary, and
+any player can **Change deck / Unready** before start. Owners can remove another
+player or create a fresh room; nonowners can leave and release their seat. Full
+password/OAuth accounts are not implemented yet.
+
+Cards from a published preview that are present in Scryfall but not legal until
+their future release date produce an explicit confirmation screen instead of a
+generic rejection. The confirmation is bound to the exact deck fingerprint and
+warning list and is saved with the deck/game provenance. It does not override
+bans, deck-construction errors, missing card data, or unsupported rules
+semantics; material semantic gaps still fail closed during play.
+
+At the table, hover or keyboard-focus any visible card to show large art and its
+full projected name, mana cost, type line, and Oracle text in the desktop card
+viewer. Double-faced cards expose both visible faces. On a narrow screen, use
+the floating **View card** control for the same enlarged view. Graveyard and
+exile counts are buttons that open the complete public contents for that seat;
+hands and libraries remain seat-private.
+
+Cards with a current action are highlighted and labeled **PLAY**, **CAST**,
+**ACTIVATE**, or **CHOOSE**. Select a hand, command-zone, public-zone, or
+battlefield card to reveal only that object's current server-issued actions.
+Drag a playable land or spell to your battlefield for the fast path; an
+ambiguous card opens a short action chooser. Spell confirmation exposes the
+default **Auto-mana** path. Turn on **Manual mana** to highlight payable mana
+abilities, then click those permanents in the order you want to activate them;
+multi-color sources ask which exact mana to add. Choose the spell again after
+floating mana. Manual mode controls source activation order while the server
+still validates the pool and may complete a routine remaining payment.
+
+Modal double-faced cards receive one action for each currently playable use.
+For example, Agadeem's Awakening can be selected as a spell or as **Play
+Agadeem, the Undercrypt**. The land action asks whether to pay exactly 3 life,
+then enters and renders using the chosen land face. Client labels and drag
+gestures never create legality; they invoke the same server-issued action IDs
+as the ordinary action tray.
+
+Browser games never auto-skip the active player's own main phase. With the
+stack empty, the ordinary pass action reads **Continue to combat** in
+precombat main and **End turn** in postcombat main. Pass-only response windows
+for nonactive players can still be suppressed when the engine verifies that no
+meaningful response exists.
+
+For offline development with an existing database:
+
+```powershell
+$env:MTG_CARD_DB = "data/test-ci.sqlite3"
+python -m server --offline
+```
+
+The repository deliberately does not contain a full Scryfall export or SQLite
 database. CI builds a small database from the committed public exact-list
 fixture:
 
@@ -154,11 +241,19 @@ generated documentation fixtures with bearer capabilities redacted. See
 - SQLite guest/room/seat/deck/game/idempotency control-plane persistence plus
   Game Record v3 durability before command acknowledgement
 - React/TypeScript room and four-player table UI with Moxfield or pasted-list
-  import, private hand rendering, legal-action prompts, generic server-issued
-  choice forms, reconnect, and four-isolated-context Playwright coverage
+  import, responsive desktop/mobile battlefield layout, local card art, private
+  hand rendering, persistent hover/focus inspection, double-face viewing,
+  public graveyard/exile browsers, card-specific legal-action prompts,
+  drag-to-play, optional click-to-activate manual mana, generic server-issued choice forms,
+  focus-contained dialogs, reconnect, exact-envelope retry, and
+  four-isolated-context Playwright coverage
+- one-command local startup with browser build/static serving, a visible
+  first-run setup state, managed 24-hour Scryfall bulk checks, atomic SQLite
+  builds, bounded bulk-archive retention, and deck-prefetched/on-demand images
 - generic browser controls for current cost/X, mode/target, private search,
   ordering, trigger, mulligan/cleanup, AP/NAP, legend, attack/block, combat
-  damage, and storm-copy choices; the engine remains the sole validator
+  damage, exact mana-mode, and storm-copy choices; the engine remains the sole
+  validator
 - strict protocol 3.0 command envelopes plus hash-checked projection patches
 - per-connection ephemeral projection cursors, including multiple-tab and
   reconnect isolation for one seat
@@ -170,6 +265,8 @@ generated documentation fixtures with bearer capabilities redacted. See
 - deterministic command replay with per-transition state hashes
 - explicit `commander_duel` and `commander_multiplayer` profiles
 - server-derived land entry and built-in fetchland search resolution
+- modal double-faced land-face selection with face-specific entry text and
+  exact optional life payments
 - server-generated stable legal action IDs with exact alternatives in the decision audit
 - derived turn-grouped reviews with an explicit fidelity gate
 - provider-neutral scripted, manual-JSON, and subprocess-JSON pilots
@@ -400,6 +497,11 @@ material spell or ability is unsupported. A development-only `arbiter` adapter
 can characterize a narrowly scoped resolution and register a reusable semantic
 program, but that path is not production legality or release evidence. Player
 clients cannot submit arbitrary effects.
+
+When a trusted-only browser game reaches an unsupported material resolution,
+the durable lifecycle changes to `paused` and the UI reports the rules
+boundary. It does not strand the players behind an arbiter-only decision or
+describe that state as repeated priority passing.
 
 That boundary is safer and more auditable than silently guessing at card text, while allowing semantic coverage to grow from cards actually encountered in simulations.
 

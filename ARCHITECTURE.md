@@ -21,9 +21,11 @@ FastAPI adapter. `GameManager` owns one serialized `GameActor` per active game;
 SQLite stores the guest/room/seat/deck/game/idempotency control plane while
 Game Record v3 remains authoritative game persistence. A React/TypeScript
 client consumes per-connection seat projections over WebSocket and renders the
-engine's current versioned choice-form vocabulary. This remains a single-node
-development deployment, not complete future-schema/accessibility coverage or a
-multi-process production deployment.
+engine's current versioned choice-form vocabulary. The same process serves the
+production browser build, manages a local bulk-derived Scryfall SQLite snapshot,
+and caches only the card images requested by submitted decks and visible
+projections. This remains a single-node development deployment, not complete
+future-schema/accessibility coverage or a multi-process production deployment.
 
 ## Layered design
 
@@ -414,7 +416,7 @@ engine package is architecture-tested not to import FastAPI, Starlette,
 Uvicorn, or `server`. Its request lifecycle is:
 
 ```text
-guest cookie / bearer token
+per-tab HttpOnly guest cookie / bearer token
         │
         ▼
 SQLite room seat ── derives pilot:A-D
@@ -431,6 +433,20 @@ GameService ── capability/action/choice validation and rollback
         ▼
 Game Record v3 save ── SQLite idempotency commit ── receipt
 ```
+
+Browser tabs carry a non-secret 128-bit selector in `X-Commander-Tab` and as a
+WebSocket subprotocol. The selector chooses that tab's HttpOnly guest cookie;
+the bearer never enters JavaScript or a URL. A valid selector with no matching
+cookie fails authentication instead of falling back to the shared legacy
+cookie. This preserves seat identity when several Chrome incognito windows use
+one cookie jar. Legacy nonbrowser clients may continue using the base cookie or
+an Authorization bearer.
+
+Rooms are created with exactly two seats (`commander_duel`) or four seats
+(`commander_multiplayer`). `seat_count` and the stored format profile determine
+the required ready set and the engine configuration; empty phantom seats are
+never added to a duel. Before start, an owner may remove a nonowner or atomically
+close and replace the room, while a nonowner may leave and release their seat.
 
 Persistence failure in the ambiguous post-mutation window never returns a
 success receipt. The actor fails closed and must be recreated from durable
@@ -470,6 +486,47 @@ capabilities, or analyst artifacts. The WebSocket attaches this metadata to the
 existing seat projection message, preserving one authenticated seat and one
 connection-scoped projection cursor.
 
+## Managed local card data and images
+
+`ManagedScryfallData` is an application/startup service, not part of
+`CommanderEngine`. It checks the Scryfall bulk manifest at startup and every 24
+hours, downloads the advertised compressed Oracle Cards and Rulings JSONL
+files, and invokes the existing atomic SQLite builder. The database contains
+card/rules fields, aliases, rulings, and approved Scryfall CDN image references.
+The bulk importer retains only the current managed Oracle/rulings archive pair
+after a successful build.
+
+The first database makes the application runtime ready. Later refreshes are
+built into one pending database and activated on process restart; an open
+`CardDatabase` is never replaced beneath a running game. On activation, the old
+database moves to a file named by its metadata fingerprint only if a Game
+Record references it; unreferenced snapshots are pruned. Lazy recovery reads
+the record's pinned fingerprint, verifies the retained database, and opens that
+snapshot instead of the current one. This keeps replay/resume exact without
+accumulating an unbounded daily database history.
+
+When a process starts, readiness is withheld until the current bulk manifest
+has been checked. A stale database is replaced before `ServerRuntime` opens its
+SQLite connection; if the check fails, the existing snapshot is opened with a
+warning. This prevents a newly previewed card from failing deck resolution
+while a completed replacement silently waits beside the active database.
+
+Format validation separates non-overridable construction failures from a
+future-dated preview legality warning. A preview acknowledgement is a SHA-256
+fingerprint over the exact deck fingerprint and structured warning set. The
+owner must resubmit it, and the result is persisted in preflight and deck
+provenance. It changes format-legality labeling only: semantic trust, action
+generation, and fail-closed execution are never waived.
+
+`CardImageCache` accepts only HTTPS references on `cards.scryfall.io`, applies a
+size limit, writes through a temporary file, and serves the local result with an
+immutable cache header. Deck upload schedules bounded-concurrency prefetch for
+the unique cards in that deck. Projection still controls presentation: the
+browser receives definitions only for newly visible Oracle IDs and requests
+individual local images only for rendered command-zone, hand, battlefield,
+stack, or token objects. It never receives SQLite, bulk JSONL, another library,
+or another hidden hand. Missing/custom token art falls back to projected text.
+
 ## Browser choice adapter
 
 `choice_forms.py` translates an already legal, seat-projected action and its
@@ -479,13 +536,38 @@ delegated, so renderability cannot accidentally grant authority over an action's
 server-derived source, controller, cost, or semantic program.
 
 The React client renders only this vocabulary: references and ordered sets,
-booleans, enums, bounded integers/X, names, legal seats, cost variants,
+booleans, enums, bounded integers/X, names, legal seats, exact mana bundles,
+cost variants,
 modal/grouped targets, private searches, mulligan/cleanup and trigger choices,
 AP/NAP and legend choices, attack/block maps, combat-damage assignments, and
 storm-copy targets. Combat forms receive source power and legal targets from the
 engine; the browser does not calculate combat rules. Submission is checked for
 basic completeness in the client, limited to adapter-issued keys by the
 service, and fully revalidated by the engine.
+
+Card-centric interaction remains a protocol adapter, not a second rules
+engine. The kernel supplies card refs, face-specific labels, current costs,
+exact legal mana modes, per-face visible definitions, and public-zone contents.
+Hover/focus inspection reads only those projected definitions. Selecting a card
+filters the already-issued action list by its stable card/source ref; dragging a
+playable card, clicking a mana source, or selecting the matching tray button all
+submit the same action ID. Graveyard/exile drawers reuse the projected public
+arrays and never gain a state-reading endpoint. Spell stack rows carry the
+visible projected card definition when a stack item represents a card, allowing
+the same inspector without widening principal authority. Manual
+mana mode submits ordinary mana-ability actions sequentially, preserving source
+activation order and floating the resulting server-validated bundles before a
+cast. Auto-mana remains the default. Modal double-faced land plays carry a
+fixed selected face into land-entry derivation and projection, so the client
+cannot substitute the spell face or invent a life payment.
+
+The table layout is responsive rather than fixed to a particular viewport.
+Choice dialogs contain keyboard focus and restore it to the triggering action;
+connection loss disables actions and exposes a manual reconnect control. If an
+HTTP command response is lost, the client retains the complete original
+`CommandEnvelope` and its client command ID. The retry control resubmits that
+exact envelope, allowing server idempotency to distinguish an accepted response
+loss from a command that never arrived.
 
 The form context is the same principal projection used everywhere else. It
 cannot introduce an opposing hand, library order, analyst artifact, or raw
@@ -668,8 +750,8 @@ The architecture is suitable for a serious project, but complete Magic coverage 
   residual
 - multi-process actor ownership/leases, PostgreSQL, production accounts,
   expiry/rate limits, deployment containers, and operational monitoring
-- browser spectators, broader accessibility hardening, richer command-retry
-  presentation, and explicit controls for future choice-schema families
+- browser spectators, screen-reader audits for future choice-schema families,
+  image-cache quotas/eviction, and explicit controls for future schemas
 
 These modules fit behind the current `CommanderEngine`/`GameService` boundary.
 They do not require granting clients broader permissions, replacing the command

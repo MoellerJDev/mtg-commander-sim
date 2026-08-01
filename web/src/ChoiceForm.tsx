@@ -93,6 +93,41 @@ function RefOptions({
   );
 }
 
+function ManaModes({
+  field,
+  value,
+  onValue,
+}: {
+  field: ChoiceField;
+  value: JsonValue | undefined;
+  onValue: (value: JsonValue) => void;
+}) {
+  const selected = JSON.stringify(value ?? {});
+  return (
+    <fieldset className="choice-field mana-modes">
+      <legend><FieldLabel field={field} /></legend>
+      <div className="choice-options">
+        {list(field.options).map((rawOption, index) => {
+          const option = record(rawOption);
+          const optionValue = option.value ?? {};
+          return (
+            <label key={JSON.stringify(optionValue)} className="choice-option">
+              <input
+                type="radio"
+                name={text(field.name)}
+                data-testid={`choice-${text(field.name)}-${index}`}
+                checked={selected === JSON.stringify(optionValue)}
+                onChange={() => onValue(structuredClone(optionValue))}
+              />
+              <span>{text(option.label)}</span>
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
 function TargetControl({
   field,
   values,
@@ -412,6 +447,7 @@ function ChoiceControl({
   const control = text(field.control);
   const value = values[name];
   const set = (next: JsonValue) => onChange({ ...values, [name]: next });
+  if (control === "mana_modes") return <ManaModes field={field} value={value} onValue={set} />;
   if (control === "refs") return <RefOptions field={field} value={value} onValue={set} labelFor={labelFor} />;
   if (control === "targets") return <TargetControl field={field} values={values} onChange={onChange} labelFor={labelFor} />;
   if (control === "assignment_map") return <AssignmentMap field={field} value={value} onValue={set} labelFor={labelFor} />;
