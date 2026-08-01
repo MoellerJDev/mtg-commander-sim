@@ -262,7 +262,7 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         self.assertFalse(triggered.recognized)
 
         unsupported = parse_declaration_restriction_line(
-            "This creature can't attack unless you've cast a creature spell this turn."
+            "This creature can't attack unless you have seven cards in hand."
         )
         self.assertTrue(unsupported.recognized)
         self.assertFalse(unsupported.exact)
@@ -1642,7 +1642,7 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         ]["domains"]
         self.assertEqual([flying.ref], domains[blocker.ref])
 
-    def test_relevant_unsupported_condition_pauses_fail_closed(self):
+    def test_cast_history_condition_recomputes_attack_domain(self):
         session = self.make_combat_session(508010905, players=2)
         engine = session.engine
         self.creature(
@@ -1656,12 +1656,24 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
             keywords=("Haste",),
         )
 
-        engine._issue_attackers()
-
-        self.assertIsNone(engine.state.pending_decision)
-        pause = engine._semantic_pause_annotation()
-        self.assertIsNotNone(pause)
-        self.assertIn("combat.attack_restriction", pause["event"])
+        conditional = next(
+            card
+            for card in engine.state.cards.values()
+            if card.printed_name == "Conditional"
+        )
+        self.assertNotIn(
+            conditional.ref,
+            engine._attack_declaration_problem("A").domains,
+        )
+        engine._record_turn_history(
+            "spell_cast",
+            actor="A",
+            types={"creature"},
+        )
+        self.assertIn(
+            conditional.ref,
+            engine._attack_declaration_problem("A").domains,
+        )
 
     def test_named_planeswalker_attack_cap_is_target_scoped_and_replays(self):
         session = self.make_combat_session(508010925, players=2)
@@ -1908,7 +1920,7 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
             target_scope.faces[0].nodes[0].effects[0]["option_relation"],
         )
 
-        unresolved = compile_oracle_card(
+        history_condition = compile_oracle_card(
             replace(
                 exact,
                 oracle_text=(
@@ -1918,10 +1930,15 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
             ),
             trusted_mechanics={"cr-508-declare-attackers-step"},
         )
-        self.assertTrue(unresolved.material_residuals)
+        self.assertEqual("exact", history_condition.status)
+        self.assertFalse(history_condition.material_residuals)
         self.assertEqual(
-            "declaration_restriction",
-            unresolved.material_residuals[0].kind,
+            {
+                "kind": "turn_history",
+                "fact": "cast_creature_spell",
+                "player": "source_controller",
+            },
+            history_condition.faces[0].nodes[0].effects[0]["condition"],
         )
 
 

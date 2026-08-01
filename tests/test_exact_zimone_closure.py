@@ -3,7 +3,13 @@ from __future__ import annotations
 import unittest
 from types import SimpleNamespace
 
-from common import keep_all, load_assets, make_session
+from common import (
+    advance_fixture_turn,
+    keep_all,
+    load_assets,
+    make_session,
+    set_fixture_turn,
+)
 from mtg_commander_sim.model import CombatState, StackItem
 from mtg_commander_sim.preflight import card_semantic_status
 from mtg_commander_sim.targets import TargetGroup
@@ -504,7 +510,7 @@ class ExactZimoneClosureTests(unittest.TestCase):
         engine.state.active_player = "B"
         engine.state.phase = "beginning"
         engine.state.step = "upkeep"
-        engine.state.turn_sequence += 1
+        advance_fixture_turn(engine)
         engine._dispatch_semantic_event(
             "step.begin",
             {
@@ -538,7 +544,7 @@ class ExactZimoneClosureTests(unittest.TestCase):
         engine.state.active_player = "B"
         engine.state.phase = "beginning"
         engine.state.step = "draw"
-        engine.state.turn_sequence = 3
+        set_fixture_turn(engine, 3)
         engine.draw("B", 1, reason="turn-based draw")
         before_life = engine.state.players["B"].life
         before_draws = len(engine.state.players["B"].draw_history)
@@ -721,7 +727,7 @@ class ExactZimoneClosureTests(unittest.TestCase):
         )
 
         engine.move_card(bird.object_id, "graveyard")
-        engine.state.turn_sequence += 1
+        advance_fixture_turn(engine)
         self.prepare_main(engine, "B")
         engine._activate(
             "B",

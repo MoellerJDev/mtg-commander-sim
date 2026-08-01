@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from common import keep_all, load_assets, make_session
+from common import advance_fixture_turn, keep_all, load_assets, make_session
 from mtg_commander_sim.model import StackItem, TurnEntry
 from mtg_commander_sim.preflight import card_semantic_status
 from mtg_commander_sim.projection import ProjectionCursor, StateProjector
@@ -1241,7 +1241,7 @@ class ExactMishraClosureTests(unittest.TestCase):
             before_hand, len(engine.state.players["A"].zones["hand"])
         )
 
-        engine.state.turn_sequence += 1
+        advance_fixture_turn(engine)
         engine.permissions.invalidate_current()
         engine.state.pending_decision = None
         engine.move_card(
@@ -1271,7 +1271,7 @@ class ExactMishraClosureTests(unittest.TestCase):
         self.assertEqual("graveyard", sacrifice.zone)
         self.assertEqual("battlefield", returned.zone)
 
-        engine.state.turn_sequence += 1
+        advance_fixture_turn(engine)
         daretti.counters["loyalty"] = 10
         engine.permissions.invalidate_current()
         engine.state.pending_decision = None

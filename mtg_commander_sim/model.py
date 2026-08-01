@@ -29,6 +29,70 @@ ObjectKind = Literal[
 
 PrincipalRole = Literal["pilot", "arbiter", "analyst", "spectator", "admin"]
 
+TurnHistoryEventKind = Literal[
+    "spell_cast",
+    "creature_attacked",
+    "creature_died",
+    "player_damaged",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class TurnHistoryEvent:
+    """One rules-relevant fact recorded during the current turn.
+
+    This compact journal is authoritative game state, unlike the presentation
+    event log.  It intentionally stores the characteristics and logical-object
+    identity that existed when the event happened so CR 608.2i look-back
+    queries never substitute the object's current characteristics or zone.
+    """
+
+    kind: TurnHistoryEventKind
+    actor: str | None = None
+    object_incarnation: str | None = None
+    target: str | None = None
+    target_kind: str | None = None
+    types: tuple[str, ...] = ()
+    amount: int = 0
+
+    def to_dict(self) -> dict[str, Any]:
+        payload = asdict(self)
+        payload["types"] = list(self.types)
+        return payload
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "TurnHistoryEvent":
+        payload = dict(data)
+        payload["types"] = tuple(str(value) for value in payload.get("types", ()))
+        return cls(**payload)
+
+
+@dataclass(slots=True)
+class TurnHistory:
+    """Versioned current-turn facts used by deterministic rules queries."""
+
+    schema_version: int = 1
+    turn_sequence: int = 0
+    events: list[TurnHistoryEvent] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "turn_sequence": self.turn_sequence,
+            "events": [event.to_dict() for event in self.events],
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "TurnHistory":
+        return cls(
+            schema_version=int(data.get("schema_version", 1)),
+            turn_sequence=int(data.get("turn_sequence", 0)),
+            events=[
+                TurnHistoryEvent.from_dict(event)
+                for event in data.get("events", [])
+            ],
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class GoadDesignation:
@@ -460,6 +524,9 @@ class GameState:
     step: str = "mulligan"
     stack: list[StackItem] = field(default_factory=list)
     delayed_triggers: list[DelayedTrigger] = field(default_factory=list)
+    # Authoritative CR 608.2i look-back facts. ``None`` is reserved for legacy
+    # Game Record v3 checkpoints created before this additive feature existed.
+    turn_history: TurnHistory | None = field(default_factory=TurnHistory)
     # CR 725 designation. ``None`` means no player has become the monarch.
     monarch: str | None = None
     pending_trigger_batches: list[dict[str, Any]] = field(
@@ -511,6 +578,11 @@ class GameState:
             "step": self.step,
             "stack": [item.to_dict() for item in self.stack],
             "delayed_triggers": [trigger.to_dict() for trigger in self.delayed_triggers],
+            **(
+                {"turn_history": self.turn_history.to_dict()}
+                if self.turn_history is not None
+                else {}
+            ),
             "monarch": self.monarch,
             "pending_trigger_batches": copy.deepcopy(
                 self.pending_trigger_batches
@@ -558,6 +630,11 @@ class GameState:
             step=str(data.get("step", "mulligan")),
             stack=[StackItem.from_dict(item) for item in data.get("stack", [])],
             delayed_triggers=[DelayedTrigger.from_dict(item) for item in data.get("delayed_triggers", [])],
+            turn_history=(
+                TurnHistory.from_dict(data["turn_history"])
+                if isinstance(data.get("turn_history"), dict)
+                else None
+            ),
             monarch=data.get("monarch"),
             pending_trigger_batches=copy.deepcopy(
                 data.get("pending_trigger_batches", [])

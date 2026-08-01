@@ -86,7 +86,28 @@ def normalized_oracle_line(text: str, *, card_name: str = "") -> str:
 
     line = " ".join(str(text).casefold().split())
     name = " ".join(str(card_name).casefold().split())
-    return line.replace(name, "this creature") if name else line
+    if not name:
+        return line
+    line = line.replace(name, "this creature")
+    # Oracle commonly shortens a legendary permanent's self-reference to its
+    # leading proper name (for example, a title is omitted). Restrict this
+    # normalization to the beginning of the ability sentence so an unrelated
+    # named object elsewhere in the text cannot be mistaken for the source.
+    leading_name = name.split(",", 1)[0].split()[0]
+    shortened_suffix = (
+        line[len(leading_name) + 1 :]
+        if line.startswith(f"{leading_name} ")
+        else ""
+    )
+    if (
+        len(leading_name) >= 3
+        and leading_name not in {"the", "a", "an"}
+        and shortened_suffix.startswith(
+            ("can't ", "can ", "attacks ", "blocks ", "has ", "gets ")
+        )
+    ):
+        line = "this creature " + shortened_suffix
+    return line
 
 
 def fixed_declaration_mana(

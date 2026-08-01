@@ -21,7 +21,7 @@ claim complete rules or Oracle coverage. The current June 19, 2026 CR / July
   unreviewed
 - 0 rules or mechanics promoted to trusted by the new registry
 - 38,484 Oracle IDs and 41,701 faces scanned
-- 2,959 exact (primarily textless), 16,068 partially lowerable, and 19,457
+- 2,959 exact (primarily textless), 16,092 partially lowerable, and 19,433
   unresolved Oracle IDs
 - 69,890 material residuals, including untrusted dependencies
 - `current_snapshot_complete = false`
@@ -30,12 +30,14 @@ Existing reviewed engine behavior and semantic packs remain available, but the
 new corpus does not retroactively label them trusted until contracts, rule
 references, and conformance tests are linked.
 
-Oracle IR v10 additionally structures exact whole-line forms for simple self
+Oracle IR v11 additionally structures exact whole-line forms for simple self
 enters/dies/leaves triggers, unconditional enters-tapped replacements, fixed
 self pumps and keyword grants, one-counter instructions, and basic creature
 token creation, plus target-creature goad instructions with optional opponent-
-controller constraints. These remain provisional wherever a dependency
-contract is partial.
+controller constraints. It also lowers reviewed current-turn declaration gates
+for spells cast, controlled creature deaths, positive player damage, and prior
+direct-player attacks through a generic hashed look-back journal. These remain
+provisional wherever a dependency contract is partial.
 
 ## New decks: generic compilation, not one branch per card
 

@@ -28,7 +28,7 @@ coverage.
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
 | Mechanic contracts | In progress | 58 partial/untrusted contracts; 367 mechanics unclassified; 0 trusted |
-| Typed Oracle IR | In progress | `oracle-ir-v10`, source spans, fail-closed material residuals, anchored target-creature goad and become-monarch lowering, and shared whole-line declaration cost/restriction/evasion/battlefield-condition/player-state/composition/target-scope grammars |
+| Typed Oracle IR | In progress | `oracle-ir-v11`, source spans, fail-closed material residuals, anchored target-creature goad and become-monarch lowering, and shared whole-line declaration cost/restriction/evasion/battlefield-condition/player-state/current-turn-history/composition/target-scope grammars |
 | Object and zone identity | Partial | All 30 CR 400 records reviewed; owner-zone routing, logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, hidden outside-game movement, and selected linked-effect guards |
 | Library | Partial | All 8 CR 401 records reviewed; hidden order/public count, bounded look/reorder, shuffle knowledge clearing, and Nth-from-top placement; simultaneous owner ordering and continuous top-card visibility remain blocked |
 | Hand | Partial | All 4 CR 402 records reviewed; starting/maximum size, cleanup-only excess discard, public count, scoped identity, public-to-hand knowledge, and controller dual-hand access; continuous no-maximum and arbitrary reveal/look grammar remain blocked |
@@ -42,8 +42,8 @@ coverage.
 | Replacement/prevention ordering | Partial | CR 615/616 typed primitives; stateful shields and event-producer integration incomplete |
 | Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, immutable final combat source-recipient events, combat damage/death trigger batching, player/planeswalker/Battle combat targets, counter-derived battlefield defense, copied printed defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
-| Full Oracle compilation | In progress | exact 2,959; partial 16,068; unresolved 19,457; 69,890 material residuals |
-| Commander-legal Oracle compilation | In progress | exact 338; partial 14,642; unresolved 16,643; 61,213 material residuals |
+| Full Oracle compilation | In progress | exact 2,959; partial 16,092; unresolved 19,433; 69,890 material residuals |
+| Commander-legal Oracle compilation | In progress | exact 338; partial 14,663; unresolved 16,622; 61,213 material residuals |
 | Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 569 cases are reviewed, with 125 executable passes, 362 blocked cases, and 82 definition-only cases; 2,731 remain unreviewed |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
@@ -350,8 +350,12 @@ source-controller target restrictions, per-player attack caps, and source-
 specific attack maxima are also represented. Conditions cover controller/defender permanent
 existence, another-object exclusion, tapped state, characteristics and fixed
 stats, minimum counts, and relative creature/land counts per multiplayer
-destination. Public monarch/poison conditions are typed. History, compound,
-temporary, and broader predicate
+destination. Public monarch/poison conditions are typed. Reviewed current-turn
+predicates cover creature/noncreature spells cast, controlled creature deaths,
+opponents actually dealt damage, a direct player already attacked by the same
+logical object incarnation, and opponents that cast a spell. These read a
+versioned, hashed journal populated at generic cast, zone-change, damage, and
+attack boundaries. Broader history, compound, temporary, and broader predicate
 families remain fail-closed residuals.
 
 Ordinary blocker declarations are server-derived from current public combat
@@ -373,7 +377,9 @@ conditional evasion share one evaluator between direct block-pair checks and
 declaration domains. Minimum-other and filtered-companion implications,
 attacking-alone and no-other-creature evasion, source-controller-relative
 block restrictions, and shared-creature-subtype thresholds use the same
-public-state boundary. Changeling contributes once to every subtype. History,
+public-state boundary. Changeling contributes once to every subtype. The
+controlled-creature-died-this-turn blocker gate uses the same authoritative
+last-known-control journal as attack restrictions. Broader history,
 compound-with-unrelated-effects,
 temporary, broader, and multi-block grammar, optional/nonmana/variable/modified block costs, declaration-trigger
 provenance, one blocker blocking several attackers, and entry-blocking effects

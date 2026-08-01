@@ -132,6 +132,24 @@ _SELF_PLAYER_STATE_CONDITION = re.compile(
     r"(?P<player>defending player|you) "
     r"(?P<verb>is|are) (?P<state>poisoned|the monarch)\."
 )
+_SELF_CAST_SPELL_THIS_TURN = re.compile(
+    r"this creature can't attack unless you've cast a "
+    r"(?P<spell_kind>creature|noncreature) spell this turn\."
+)
+_SELF_OPPONENT_DAMAGED_THIS_TURN = re.compile(
+    r"this creature can't attack unless an opponent has been dealt damage "
+    r"this turn\."
+)
+_SELF_CONTROLLED_CREATURE_DIED_THIS_TURN = re.compile(
+    r"this creature can't attack or block unless a creature died under your "
+    r"control this turn\."
+)
+_SELF_ALREADY_ATTACKED_PLAYER_THIS_TURN = re.compile(
+    r"this creature can't attack a player it has already attacked this turn\."
+)
+_OPPONENT_CAST_SPELL_THIS_TURN = re.compile(
+    r"each opponent who cast a spell this turn can't attack with creatures\."
+)
 _SELF_MONARCH_BLOCKER_CONDITION = re.compile(
     r"this creature can't be blocked by creatures the monarch controls\."
 )
@@ -432,11 +450,43 @@ class DeclarationPlayerStateCondition:
         }
 
 
+DeclarationTurnHistoryFact = Literal[
+    "cast_spell",
+    "cast_creature_spell",
+    "cast_noncreature_spell",
+    "creature_died_under_control",
+    "opponent_dealt_damage",
+    "attacked_player",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class DeclarationTurnHistoryCondition:
+    """A typed current-turn look-back predicate for a declaration."""
+
+    fact: DeclarationTurnHistoryFact
+    player: DeclarationConditionPlayer | None = None
+
+    def __post_init__(self) -> None:
+        if self.fact == "attacked_player" and self.player is not None:
+            raise ValueError("An attacked-player condition is object-scoped")
+        if self.fact != "attacked_player" and self.player is None:
+            raise ValueError("A player-scoped turn-history condition needs a player")
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "kind": "turn_history",
+            "fact": self.fact,
+            "player": self.player,
+        }
+
+
 DeclarationCondition = (
     DeclarationBattlefieldCondition
     | DeclarationCombatCondition
     | DeclarationPlayerStateCondition
     | DeclarationSharedSubtypeCondition
+    | DeclarationTurnHistoryCondition
 )
 
 
@@ -860,6 +910,100 @@ def parse_declaration_restriction_line(
 
     if parse_declaration_cost_line(line).recognized:
         return DeclarationRestrictionParse(False)
+
+    match = _SELF_CAST_SPELL_THIS_TURN.fullmatch(line)
+    if match:
+        spell_kind = match.group("spell_kind")
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id=(
+                    f"intrinsic-cast-{spell_kind}-spell-this-turn-"
+                    "attack-unless-v1"
+                ),
+                declarations=("attack",),
+                scope="self",
+                condition=DeclarationTurnHistoryCondition(
+                    fact=(
+                        "cast_creature_spell"
+                        if spell_kind == "creature"
+                        else "cast_noncreature_spell"
+                    ),
+                    player="source_controller",
+                ),
+                applies_when_condition=False,
+            ),
+            declarations=("attack",),
+            scope="self",
+        )
+
+    if _SELF_OPPONENT_DAMAGED_THIS_TURN.fullmatch(line):
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="intrinsic-opponent-damaged-this-turn-attack-unless-v1",
+                declarations=("attack",),
+                scope="self",
+                condition=DeclarationTurnHistoryCondition(
+                    fact="opponent_dealt_damage",
+                    player="source_controller",
+                ),
+                applies_when_condition=False,
+            ),
+            declarations=("attack",),
+            scope="self",
+        )
+
+    if _SELF_CONTROLLED_CREATURE_DIED_THIS_TURN.fullmatch(line):
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id=(
+                    "intrinsic-controlled-creature-died-this-turn-"
+                    "attack-block-unless-v1"
+                ),
+                declarations=("attack", "block"),
+                scope="self",
+                condition=DeclarationTurnHistoryCondition(
+                    fact="creature_died_under_control",
+                    player="source_controller",
+                ),
+                applies_when_condition=False,
+            ),
+            declarations=("attack", "block"),
+            scope="self",
+        )
+
+    if _SELF_ALREADY_ATTACKED_PLAYER_THIS_TURN.fullmatch(line):
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="intrinsic-already-attacked-player-this-turn-v1",
+                declarations=("attack",),
+                scope="self",
+                condition=DeclarationTurnHistoryCondition(
+                    fact="attacked_player",
+                ),
+            ),
+            declarations=("attack",),
+            scope="self",
+        )
+
+    if _OPPONENT_CAST_SPELL_THIS_TURN.fullmatch(line):
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="source-opponents-cast-spell-this-turn-attack-v1",
+                declarations=("attack",),
+                scope="source_opponents",
+                condition=DeclarationTurnHistoryCondition(
+                    fact="cast_spell",
+                    player="attacking_player",
+                ),
+            ),
+            declarations=("attack",),
+            scope="source_opponents",
+        )
 
     match = _SELF_OTHER_DECLARATIONS.fullmatch(line)
     if match and match.group("kind") == match.group("verb"):

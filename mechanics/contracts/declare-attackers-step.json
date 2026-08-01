@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 9,
+  "contract_version": 10,
   "mechanic_id": "cr-508-declare-attackers-step",
   "official_name": "Declare Attackers Step",
   "effective_date": "2026-06-19",
@@ -83,14 +83,16 @@
       "active typed goad designations and their originating players",
       "whole-line static declaration restrictions and their relevant effective keyword, attachment, controller, and typed battlefield-count predicates",
       "defending-player and source-controller permanent existence, tapped state, subtype, color, keyword, power, toughness, minimum-count, and relative-count conditions",
-      "current combat declaration composition, filtered companion eligibility, and source-controller-relative attack targets"
+      "current combat declaration composition, filtered companion eligibility, and source-controller-relative attack targets",
+      "versioned authoritative current-turn facts for spells cast with cast-time types, controlled creature deaths with last-known control, positive player damage after prevention, and prior direct-player attacks by logical object incarnation"
     ],
     "state_writes": [
       "tapped state",
       "attacking relationship",
       "defending players",
       "attackers-declared marker",
-      "priority player"
+      "priority player",
+      "one current-turn creature-attacked fact per surviving declared attacker"
     ],
     "costs": [
       "whole-line fixed ordinary-mana intrinsic, attached, and defending-player attack taxes are locked and paid atomically",
@@ -168,6 +170,11 @@
     "named planeswalker attack limits scoped to that planeswalker",
     "planeswalker destinations with controller-relative restrictions, blocker routing, loyalty damage, and exact replay",
     "departed planeswalker targets retaining their defending player while receiving no ordinary combat damage",
+    "creature-spell and noncreature-spell cast gates, including mixed artifact creatures",
+    "opponent-damaged gates that exclude life loss, payment, zero damage, and prevented damage",
+    "controlled-creature-death gates using last-known control and surviving token cleanup",
+    "same-player repeat-attack restrictions across extra combats while planeswalkers, Battles, and other players remain legal",
+    "opponent cast-this-turn restrictions that use prior casts, spare the source controller, and stop applying when the source leaves",
     "recognized unsupported conditional attack restrictions stopping fail closed"
   ],
   "witness_cards": [
@@ -188,13 +195,23 @@
     {"name": "Blazing Archon", "oracle_id": "82a70e4c-01ed-4280-80e4-86cb2bf6e63d"},
     {"name": "Crawlspace", "oracle_id": "2296370c-fe34-4df6-92a5-260f1634bede"},
     {"name": "The Eternal Wanderer", "oracle_id": "20a1671d-e8a4-4cf1-87a7-f2f6319f4b9e"},
-    {"name": "Onakke Oathkeeper", "oracle_id": "080df9eb-c26b-494a-96b4-d7e47e501866"}
+    {"name": "Onakke Oathkeeper", "oracle_id": "080df9eb-c26b-494a-96b4-d7e47e501866"},
+    {"name": "Goblin Cohort", "oracle_id": "88f9a7e3-0b35-43e4-b16c-19c54a1e4e2c"},
+    {"name": "Silburlind Snapper", "oracle_id": "eb2fe2f7-60f7-44d3-8d4a-4e102012435d"},
+    {"name": "Bloodcrazed Goblin", "oracle_id": "a10e5b31-c9c1-45ca-85cc-4a50ed8c4946"},
+    {"name": "Bontu the Glorified", "oracle_id": "c2679c32-a23d-4953-bb48-b46580439ce2"},
+    {"name": "Port Razer", "oracle_id": "653e4b68-3184-4352-ac91-127f7e6d7c12"},
+    {"name": "Angelic Arbiter", "oracle_id": "34dd789c-4d80-4ccc-a4f7-2e5388a9689d"}
   ],
   "rulings": [
     "Mogg Flunkies — 2018-03-16 — The other attacker may attack a different player, planeswalker, or battle.",
     "Mogg Flunkies — 2018-03-16 — If required to attack and another creature can attack, both must be declared.",
     "Steelclad Serpent — 2008-10-01 — Two Steelclad Serpents enable each other because each is another artifact for the other.",
-    "Godhunter Octopus — 2014-04-26 — Its condition is checked only as attackers are declared; losing the qualifying permanent later does not remove it from combat."
+    "Godhunter Octopus — 2014-04-26 — Its condition is checked only as attackers are declared; losing the qualifying permanent later does not remove it from combat.",
+    "Bloodcrazed Goblin — 2010-06-15 — Damage must actually be dealt before attackers are declared; damage that is entirely prevented or replaced does not count.",
+    "Bontu the Glorified — 2017-04-18 — A token creature death counts, and the dead card need not remain in the graveyard.",
+    "Port Razer — 2020-11-10 — A prior attack on a player does not prohibit attacking that player's planeswalker or a Battle they protect.",
+    "Angelic Arbiter — 2010-08-15 — A spell cast before the Arbiter entered still restricts that opponent while the Arbiter remains on the battlefield."
   ],
   "test_ids": [
     "test_contract_traces_every_cr_508_rule",
@@ -244,7 +261,7 @@
     "test_defender_conditions_filter_attack_options_and_replay",
     "test_controller_conditions_use_another_stats_and_exact_size",
     "test_minimum_and_relative_counts_are_defender_specific",
-    "test_relevant_unsupported_condition_pauses_fail_closed",
+    "test_cast_history_condition_recomputes_attack_domain",
     "test_triggered_text_is_not_misread_as_a_static_restriction",
     "test_oracle_ir_uses_runtime_restriction_grammar",
     "test_selected_creature_can_require_a_matching_declaration",
@@ -258,15 +275,24 @@
     "test_planeswalker_is_labeled_attackable_and_replays_exactly",
     "test_departed_planeswalker_keeps_defender_but_not_damage_target",
     "test_planeswalker_only_tax_is_locked_for_planeswalker_attack",
-    "test_player_and_planeswalker_tax_covers_both_target_kinds"
+    "test_player_and_planeswalker_tax_covers_both_target_kinds",
+    "test_parser_exactly_lowers_current_turn_declaration_families",
+    "test_cast_writer_preserves_types_and_mixed_creature_is_not_noncreature",
+    "test_creature_and_noncreature_cast_conditions_unlock_independently",
+    "test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack",
+    "test_controlled_creature_death_uses_lki_and_survives_token_cleanup",
+    "test_same_creature_cannot_attack_same_player_twice_and_replays",
+    "test_angelic_arbiter_uses_prior_casts_and_only_restricts_opponents",
+    "test_turn_history_is_serialized_hashed_and_legacy_absence_stays_absent",
+    "test_beginning_a_new_turn_resets_history_but_extra_combats_do_not"
   ],
   "implementation": {
     "component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine attacker declaration/payment transition",
-    "version": "declare-attackers-step-v9"
+    "version": "declare-attackers-step-v10"
   },
   "known_blockers": [
     "exact attacks-each-combat and typed goad requirements are represented; conditional, non-goad defender-specific, and other effect-granted requirement grammar remains incomplete",
-    "history-, compound-, other named-target-, temporary-, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
+    "compound, other named-target, temporary, broader, and uncompiled current-turn attack-restriction grammar remains incomplete and recognized static families fail closed",
     "banding declarations are not implemented",
     "optional, nonmana, variable, alternative, modified, and broader conditional attack costs are not implemented",
     "declare-attackers trigger generation and APNAP placement are incomplete",

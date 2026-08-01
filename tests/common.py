@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 from mtg_commander_sim import CardDatabase, CommanderSession, DeckLoader, GameConfig
+from mtg_commander_sim.model import TurnHistory
 
 ROOT = Path(__file__).resolve().parents[1]
 DB_PATH = Path(os.environ.get("MTG_CARD_DB", ROOT / "data" / "scryfall-20260728-compact.sqlite3"))
@@ -46,3 +47,17 @@ def pass_current(session, *, yield_mode=None):
     result = session.act(principal, response)
     assert result.ok, result.summary
     return principal
+
+
+def set_fixture_turn(engine, turn_sequence: int) -> None:
+    """Move a directly seeded rules fixture to a clean turn boundary."""
+
+    engine.state.turn_sequence = int(turn_sequence)
+    if engine.state.turn_history is not None:
+        engine.state.turn_history = TurnHistory(
+            turn_sequence=engine.state.turn_sequence
+        )
+
+
+def advance_fixture_turn(engine, count: int = 1) -> None:
+    set_fixture_turn(engine, engine.state.turn_sequence + int(count))
