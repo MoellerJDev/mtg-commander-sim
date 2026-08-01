@@ -4,6 +4,16 @@
 
 ### Combat rules family
 
+- Added one deterministic `DeclarationProblem` substrate for attacker and
+  blocker restrictions/requirements. It projects the represented constraints,
+  proves the maximum satisfiable requirement count, accepts any maximal legal
+  declaration, rolls rejected commands back, fails closed at a bounded search,
+  and replays exactly.
+- Lowered exact source-local attacks-each-combat, blocks-each-combat,
+  must-be-blocked, and lure Oracle wording into that solver; menace is now an
+  ordinary inviolable constraint in the same problem. Conditional, goad,
+  effect-granted, paid, and multi-block grammar remains blocked.
+
 - Combat-damage assignments now proceed in public APNAP order. Forced
   assignments are derived without a pilot task, discretionary divisions are
   routed to one fixed seat at a time, later players receive earlier
@@ -18,7 +28,7 @@
 - Added source-pinned executable evidence for CR 510.1, 510.1d, 510.3, 510.3a,
   and multiplayer CR 802.5. The universal CR 120.4 event transformation path,
   noncombat damage migration, trigger-on-trigger placement, and the shared
-  combat constraint solver remain explicit blockers.
+  complete combat-constraint grammar remain explicit blockers.
 - Added a reusable combat-rules module and a serialized two-damage-step state
   machine for first strike and double strike, including the rules for gaining
   or losing either ability between steps and priority after each real step.

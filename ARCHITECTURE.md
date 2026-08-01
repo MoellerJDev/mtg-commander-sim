@@ -308,6 +308,23 @@ are chosen as the trigger is put on the stack, before response priority.
 Hidden zones are never accepted by this public target-query path, and face-down
 objects contribute only characteristics visible to the querying seat.
 
+### Combat declaration constraints
+
+`DeclarationProblem` is the shared finite model for CR 508.1d and 509.1c. Each
+eligible attacker or blocker is a variable with only server-derived public
+options. Restrictions are inviolable; among declarations that obey them, the
+solver computes the greatest satisfiable requirement count and accepts any
+declaration that reaches that count. The same projection, submission
+validation, transaction rollback, and exact replay path is used for attacking
+and blocking. A deterministic state bound fails closed instead of accepting an
+unproven declaration.
+
+This slice lowers only exact source-local attacks-each-combat,
+blocks-each-combat, must-be-blocked, lure, and menace text. Conditional,
+defender-specific, goad, effect-granted, optional-cost, multi-block, and
+repeated-combat grammar remains explicitly unsupported; the finite solver is a
+semantic substrate, not complete Oracle coverage.
+
 Legal-action telemetry records candidates generated, actions removed for
 missing targets or failed modal targets, rejected submissions, targets that
 became illegal, rules/effect counters, and stack-interaction windows. Any

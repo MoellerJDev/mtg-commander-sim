@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "cr-509-declare-blockers-step",
   "official_name": "Declare Blockers Step",
   "effective_date": "2026-06-19",
@@ -84,7 +84,8 @@
     ],
     "choices": [
       "each defending player chooses zero or more legal blocks",
-      "a menace attacker receives zero or at least two blockers"
+      "a menace attacker receives zero or at least two blockers",
+      "the declaration must maximize represented block requirements without violating restrictions"
     ],
     "hidden_information": [
       "blocker declarations use public combat and battlefield information"
@@ -132,15 +133,23 @@
     "test_siege_is_attackable_and_its_protector_blocks",
     "test_battle_creature_cannot_attack_or_block",
     "test_blocked_attacker_assigns_nothing_after_blocker_leaves",
-    "test_menace_requires_zero_or_two_blockers_and_projects_the_minimum"
+    "test_menace_requires_zero_or_two_blockers_and_projects_the_minimum",
+    "test_must_be_blocked_requirement_rejects_avoidable_omission",
+    "test_menace_can_make_a_block_requirement_impossible",
+    "test_two_blockers_satisfy_menace_and_the_block_requirement",
+    "test_blocker_each_combat_requirement_is_enforced",
+    "test_lure_requirement_maximizes_every_able_blocker",
+    "test_conflicting_requirements_accept_any_maximal_declaration",
+    "test_impossible_requirement_has_zero_maximum",
+    "test_search_limit_fails_closed"
   ],
   "implementation": {
-    "component": "CommanderEngine blocker declaration and combat-state transition",
-    "version": "declare-blockers-step-v2"
+    "component": "DeclarationProblem plus CommanderEngine blocker declaration and combat-state transition",
+    "version": "declare-blockers-step-v3"
   },
   "known_blockers": [
     "the complete restriction and evasion grammar is not implemented",
-    "block requirements and maximum-requirement solving are not implemented",
+    "only exact blocks-each-combat, must-be-blocked, lure, and menace grammar is represented; conditional, effect-granted, multi-block, and optional-cost grammar remains incomplete",
     "block costs, cost locking, mana abilities, and ordered payment are not implemented",
     "declare-blockers trigger generation and APNAP placement are incomplete",
     "effects that cause blocks or put creatures onto the battlefield blocking are not implemented",

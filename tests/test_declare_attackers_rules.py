@@ -54,9 +54,11 @@ class DeclareAttackersRuleTests(unittest.TestCase):
         tapped: bool = False,
         keywords: tuple[str, ...] = ("Haste",),
         type_line: str = "Token Creature — Test",
+        oracle_text: str = "",
     ):
         characteristics = {
             "type_line": type_line,
+            "oracle_text": oracle_text,
             "power": "2",
             "toughness": "2",
         }
@@ -213,6 +215,59 @@ class DeclareAttackersRuleTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temporary:
             record_dir = Path(temporary) / "declare-attackers"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+            self.assertTrue(replay["ok"], replay)
+            self.assertEqual(1, replay["commands"])
+
+    def test_attack_requirement_is_projected_maximized_and_replayed(self):
+        session = self.make_session(50809)
+        engine = session.engine
+        required = self.token(
+            engine,
+            "Required Attacker",
+            oracle_text=(
+                "Required Attacker attacks each combat if able."
+            ),
+        )
+        optional = self.token(engine, "Optional Attacker")
+        engine._issue_attackers()
+        session.initial_checkpoint = checkpoint_envelope(session.state)
+
+        constraints = engine.state.pending_decision.payload_by_actor["A"][
+            "declaration_constraints"
+        ]
+        self.assertEqual(1, constraints["maximum_requirements"])
+        self.assertEqual(
+            required.ref,
+            constraints["requirements"][0]["variable"],
+        )
+        before = authoritative_state_hash(session.state)
+        rejected = session.act("pilot:A", {"a": "attack", "atk": {}})
+        self.assertFalse(rejected.ok)
+        self.assertIn("possible 1 requirements", rejected.summary)
+        self.assertEqual(before, authoritative_state_hash(session.state))
+
+        result = session.act(
+            "pilot:A",
+            {
+                "a": "attack",
+                "atk": {
+                    required.ref: "B",
+                    optional.ref: "B",
+                },
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(
+            "B",
+            session.engine._resolve_object(
+                "A", required.ref, zones={"battlefield"}
+            ).attacking,
+        )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "attack-requirement"
             session.save(record_dir)
             replay = replay_record(record_dir, self.db, verify=True)
             self.assertTrue(replay["ok"], replay)

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "cr-508-declare-attackers-step",
   "official_name": "Declare Attackers Step",
   "effective_date": "2026-06-19",
@@ -100,7 +100,8 @@
       "represented attackers may attack an opponent or an opponent-protected Battle"
     ],
     "choices": [
-      "the active player chooses zero or more eligible attackers and one represented defender for each"
+      "the active player chooses zero or more eligible attackers and one represented defender for each",
+      "the declaration must maximize represented attack requirements without violating restrictions"
     ],
     "hidden_information": [
       "attacker declarations use public combat and battlefield information"
@@ -150,15 +151,19 @@
     "test_structured_attack_list_reaches_authoritative_combat_state",
     "test_siege_is_attackable_and_its_protector_blocks",
     "test_battle_creature_cannot_attack_or_block",
-    "test_defender_is_not_offered_and_cannot_be_injected_as_an_attacker"
+    "test_defender_is_not_offered_and_cannot_be_injected_as_an_attacker",
+    "test_attack_requirement_is_projected_maximized_and_replayed",
+    "test_conflicting_requirements_accept_any_maximal_declaration",
+    "test_impossible_requirement_has_zero_maximum",
+    "test_search_limit_fails_closed"
   ],
   "implementation": {
-    "component": "CommanderEngine attacker declaration and combat-step transition",
-    "version": "declare-attackers-step-v2"
+    "component": "DeclarationProblem plus CommanderEngine attacker declaration and combat-step transition",
+    "version": "declare-attackers-step-v3"
   },
   "known_blockers": [
     "planeswalker attack targets are not implemented",
-    "the complete attack restriction and requirement constraint solver is not implemented",
+    "only exact attacks-each-combat Oracle requirements and the finite declarative constraint grammar are represented; conditional, defender-specific, goad, and effect-granted grammar remains incomplete",
     "banding declarations are not implemented",
     "attack costs, cost locking, mana abilities, and ordered payment are not implemented",
     "declare-attackers trigger generation and APNAP placement are incomplete",

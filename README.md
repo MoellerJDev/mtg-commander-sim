@@ -449,7 +449,9 @@ generated documentation fixtures with bearer capabilities redacted. See
   noncombat damage events, and source LKI remain blocked
 - source-reviewed CR 508 ordinary attacker declaration: the server offers and
   revalidates only currently eligible creatures and live opponent/Battle
-  destinations, enforces defender, preserves vigilance, rejects duplicate or phased submissions
+  destinations, enforces defender, preserves vigilance, rejects duplicate or
+  phased submissions, and uses a shared finite constraint solver to maximize
+  represented attacks-each-combat requirements
   atomically, skips empty-combat blocker/damage steps, and command-replays the
   declaration; restrictions, requirements, costs, planeswalkers, attack
   triggers, entry-attacking, and target reselection remain blocked
@@ -457,7 +459,9 @@ generated documentation fixtures with bearer capabilities redacted. See
   eligible blockers and defended attackers, rejects phased-out submissions,
   enforces menace's zero-or-two minimum, preserves blocking relationships
   through combat, and command-replays the declaration; the complete combined
-  requirement solver, costs, triggers, and entry-blocking remain blocked
+  requirement grammar, costs, triggers, multi-blocking, and entry-blocking
+  remain blocked. Exact blocks-each-combat, must-be-blocked, lure, and menace
+  constraints use the same solver, including impossible/conflicting cases
 - source-reviewed CR 802.5 multiplayer combat-damage ordering: assigning
   players proceed in APNAP order, later players receive earlier public
   assignments, forced divisions are automatic, and an illegal later division
