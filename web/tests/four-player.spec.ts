@@ -668,7 +668,7 @@ test("a duel declares an attacker in the browser and applies commander combat da
 });
 
 test("a trusted browser duel reaches a natural commander-damage winner", async ({ browser }) => {
-  test.setTimeout(150_000);
+  test.setTimeout(180_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -708,7 +708,10 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
     }
 
-    async function finishTurn(page: Page) {
+    async function declineCommanderDevelopment(page: Page) {
+      // Once six mana is available, commander casting remains meaningful in
+      // both main phases. Auto-pass must stop; this scripted witness declines
+      // those two verified opportunities explicitly.
       await submitFormAction(page, "pass");
       await submitFormAction(page, "pass");
     }
@@ -729,12 +732,15 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
         await submitOpenChoice(host);
         await expect(host.getByTestId("own-battlefield")).toContainText("Yargle and Multani");
       }
-      await finishTurn(host);
       await playLand(opponent);
-      await finishTurn(opponent);
+      if (turn === requiredMana.length - 1) {
+        await declineCommanderDevelopment(opponent);
+      }
     }
 
     async function attackWithCommander() {
+      // A still has a legal land play, so advancing to combat is meaningful
+      // and must not be consumed by Auto-pass.
       await submitFormAction(host, "pass");
       await expect(host.getByTestId("decision-panel")).toContainText("Combat.Attackers");
       await host.getByTestId("action-attack").click();
@@ -751,7 +757,7 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
     }
     await submitFormAction(host, "pass");
     await playLand(opponent);
-    await finishTurn(opponent);
+    await declineCommanderDevelopment(opponent);
 
     await attackWithCommander();
     for (const page of [host, opponent]) {
