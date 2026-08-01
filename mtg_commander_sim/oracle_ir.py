@@ -11,12 +11,13 @@ from typing import Any, Iterable, Mapping, Sequence
 from .abilities import ActivatedAbility, parse_activated_abilities
 from .carddb import CardDatabase, CardRecord
 from .declaration_costs import parse_declaration_cost_line
+from .declaration_restrictions import parse_declaration_restriction_line
 from .semantics import SemanticProgram, SemanticRegistry
 from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v4"
+ORACLE_COMPILER_VERSION = "oracle-ir-v5"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 
 _NUMBER_WORDS = {
@@ -1235,6 +1236,93 @@ def _compile_face(
                     lowerable=False,
                     exact=False,
                     mechanics=declaration_cost.declarations,
+                    residual_ids=(residual_id,),
+                )
+            )
+            continue
+
+        declaration_restriction = parse_declaration_restriction_line(
+            line,
+            card_name=face_name or record.name,
+        )
+        if declaration_restriction.recognized:
+            template = declaration_restriction.template
+            if declaration_restriction.exact and template is not None:
+                dependencies = template.mechanics
+                missing = sorted(
+                    set(dependencies) - trusted_mechanics
+                )
+                residual_ids = (
+                    (
+                        _residual(
+                            residuals,
+                            kind="dependency_contract",
+                            text=line,
+                            span=span,
+                            reason=(
+                                "declaration restriction depends on "
+                                "untrusted mechanic contracts"
+                            ),
+                            blockers=tuple(
+                                f"mechanic:{mechanic}"
+                                for mechanic in missing
+                            ),
+                        ),
+                    )
+                    if missing
+                    else ()
+                )
+                nodes.append(
+                    OracleNode(
+                        node_id=node_id,
+                        kind="static_ability",
+                        text=line,
+                        span=span,
+                        active_zone="battlefield",
+                        event="continuous",
+                        lowerable=True,
+                        exact=not missing,
+                        template_id=template.template_id,
+                        effects=(template.effect(),),
+                        mechanics=dependencies,
+                        residual_ids=residual_ids,
+                    )
+                )
+                continue
+            dependencies = tuple(
+                mechanic
+                for declaration, mechanic in (
+                    ("attack", "cr-508-declare-attackers-step"),
+                    ("block", "cr-509-declare-blockers-step"),
+                )
+                if declaration in declaration_restriction.declarations
+            )
+            residual_id = _residual(
+                residuals,
+                kind="declaration_restriction",
+                text=line,
+                span=span,
+                reason=(
+                    declaration_restriction.reason
+                    or "declaration restriction grammar is unresolved"
+                ),
+                blockers=(
+                    "conditional declaration predicates",
+                    "temporary declaration restrictions",
+                    "broader evasion and group constraints",
+                ),
+            )
+            nodes.append(
+                OracleNode(
+                    node_id=node_id,
+                    kind="static_ability",
+                    text=line,
+                    span=span,
+                    active_zone="battlefield",
+                    event="continuous",
+                    lowerable=False,
+                    exact=False,
+                    mechanics=dependencies,
                     residual_ids=(residual_id,),
                 )
             )

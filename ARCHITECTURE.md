@@ -225,12 +225,12 @@ update cannot inherit stale conformance. Missing or duplicate cases fail
 corpus verification.
 
 The Oracle compiler preserves source spans and emits typed ability, cost,
-target, trigger, replacement, and effect nodes. Oracle IR v4 lowers simple
+target, trigger, replacement, and effect nodes. Oracle IR v5 lowers simple
 self enters/dies/leaves triggers, unconditional enters-tapped text, fixed
 self/target effects, basic creature-token creation, and reviewed whole-line
-fixed-mana attack/block declaration costs. The engine and compiler share that
-declaration-cost grammar, so a new matching card cannot compile differently
-from the rule path that enforces it. Generated handlers
+fixed-mana attack/block declaration costs and combat-declaration restrictions.
+The engine and compiler share both declaration grammars, so a new matching
+card cannot compile differently from the rule path that enforces it. Generated handlers
 remain provisional, and reviewed trigger handlers shadow equivalent generated
 events. A material residual prevents trusted preflight. Card-specific
 overrides are a reviewed escape hatch for irreducible exceptions, not a
@@ -329,13 +329,21 @@ required by CR 508.1d and 509.1c. A shared whole-line grammar derives fixed
 ordinary-mana intrinsic, attached-Aura, defending-player attack, and global block taxes;
 multiple costs aggregate, lock at the rule-defined boundary, and use the same
 manual/automatic mana plan and transactional rollback path as other costs.
+Another shared whole-line grammar derives exact self, attached, global,
+not-alone, goaded-opponent, blocker-count, keyword, color, subtype, and
+effective-stat restrictions. It removes illegal options before requirement
+maximization, applies represented restrictions cumulatively, and uses the same
+domain for task projection and command validation. An empty blocking domain is
+an automatic pass-only declaration rather than a player task.
 Chosen creatures sacrificed in that mana window pay the locked cost but are
 filtered before CR 508.1k/509.1g creates attacking or blocking relationships.
 Complex or mutated members of the recognized family stop fail closed.
-Conditional requirement grammar, non-goad defender-specific requirements,
-effect-granted and repeated-combat requirements, optional/nonmana/variable/
-alternative/modified costs, and multi-block remain explicitly unsupported;
-the finite solver is a semantic substrate, not complete Oracle coverage.
+Conditional and compound restriction/requirement grammar, attached evasion,
+target-specific or temporary restrictions, non-goad defender-specific
+requirements, effect-granted and repeated-combat requirements,
+optional/nonmana/variable/alternative/modified costs, and multi-block remain
+explicitly unsupported; the finite solver is a semantic substrate, not
+complete Oracle coverage.
 
 Legal-action telemetry records candidates generated, actions removed for
 missing targets or failed modal targets, rejected submissions, targets that

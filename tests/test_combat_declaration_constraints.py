@@ -118,6 +118,69 @@ class CombatDeclarationConstraintTests(unittest.TestCase):
             problem.evaluate({"B1": "A1", "B2": "A1"}).legal
         )
 
+    def test_selected_creature_can_require_another_declaration(self):
+        problem = DeclarationProblem(
+            domains={"A1": ("B",), "A2": ("C",)},
+            restrictions=(
+                DeclarationRestriction(
+                    "not-alone",
+                    "minimum_total_selections",
+                    count=2,
+                    trigger_variable="A1",
+                ),
+            ),
+        )
+
+        self.assertTrue(problem.evaluate({}).legal)
+        self.assertFalse(problem.evaluate({"A1": "B"}).legal)
+        self.assertTrue(problem.evaluate({"A2": "C"}).legal)
+        self.assertTrue(
+            problem.evaluate({"A1": "B", "A2": "C"}).legal
+        )
+
+    def test_global_maximum_applies_before_requirement_maximization(self):
+        problem = DeclarationProblem(
+            domains={"A1": ("B",), "A2": ("B",)},
+            requirements=(
+                DeclarationRequirement("r1", "choose", variable="A1"),
+                DeclarationRequirement("r2", "choose", variable="A2"),
+            ),
+            restrictions=(
+                DeclarationRestriction(
+                    "only-one",
+                    "maximum_total_selections",
+                    count=1,
+                ),
+            ),
+        )
+
+        self.assertEqual(1, problem.maximum_satisfied_requirements())
+        self.assertTrue(problem.evaluate({"A1": "B"}).legal)
+        self.assertTrue(problem.evaluate({"A2": "B"}).legal)
+        self.assertFalse(problem.evaluate({"A1": "B", "A2": "B"}).legal)
+
+    def test_restriction_projection_identifies_trigger_variable(self):
+        restriction = DeclarationRestriction(
+            "not-alone",
+            "minimum_total_selections",
+            count=2,
+            trigger_variable="A1",
+            label="A1 can't attack alone",
+        )
+
+        self.assertEqual(
+            {
+                "id": "not-alone",
+                "kind": "minimum_total_selections",
+                "option": None,
+                "count": 2,
+                "when_used": False,
+                "trigger_variable": "A1",
+                "label": "A1 can't attack alone",
+            },
+            restriction.to_dict(),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
