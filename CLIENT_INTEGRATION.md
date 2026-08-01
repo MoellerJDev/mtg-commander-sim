@@ -1,3 +1,12 @@
+---
+title: "Client integration and permission boundary"
+status: "current"
+authoritative_source: "projection, protocol, client, and service implementation"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "client and protocol contributors"
+maintenance: "hand-maintained"
+---
+
 # Client Integration and Permission Boundary
 
 ## Goal

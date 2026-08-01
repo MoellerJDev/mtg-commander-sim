@@ -1,3 +1,12 @@
+---
+title: "Migration from MTG Duel Lab 0.1"
+status: "historical"
+authoritative_source: "0.2 migration checkpoint"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "maintainers researching legacy compatibility"
+maintenance: "hand-maintained"
+---
+
 # Migration from MTG Duel Lab 0.1
 
 ## Why a rewrite was preferable

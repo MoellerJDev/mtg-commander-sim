@@ -4,7 +4,7 @@ status: "current"
 authoritative_source: "pinned rules and generated coverage artifacts"
 verified: "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d"
 audience: "rules, compiler, and engine contributors"
-maintenance: "hand-maintained boundaries; numerical status is generated"
+maintenance: "hand-maintained"
 ---
 
 # Rules completeness implementation status

@@ -1,3 +1,12 @@
+---
+title: "Typed Oracle IR"
+status: "current"
+authoritative_source: "mtg_commander_sim/oracle_ir.py"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "compiler and semantic contributors"
+maintenance: "hand-maintained"
+---
+
 # Typed Oracle IR
 
 ## Purpose

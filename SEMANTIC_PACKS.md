@@ -1,3 +1,12 @@
+---
+title: "Semantic packs"
+status: "current"
+authoritative_source: "semantic pack schema, loader, and tracked packs"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "rules and semantic-pack contributors"
+maintenance: "hand-maintained"
+---
+
 # Semantic packs
 
 Semantic packs compile reviewed Oracle behavior into the engine's generic

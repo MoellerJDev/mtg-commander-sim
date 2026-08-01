@@ -974,6 +974,8 @@ def _documentation_metrics(source: Mapping[str, Any]) -> dict[str, Any]:
         path = ROOT / relative
         present = path.is_file() or virtual is not None
         metadata = dict(virtual or _front_matter(path))
+        if virtual:
+            metadata["verified"] = str(source["audit"]["baseline_main_commit"])
         missing_metadata = sorted(DOC_METADATA_KEYS - set(metadata)) if present else []
         rows.append(
             {
@@ -995,6 +997,14 @@ def _documentation_metrics(source: Mapping[str, Any]) -> dict[str, Any]:
             for row in rows
             if row["present"] and row["missing_metadata"]
         ],
+        "policy": {
+            "authoritative_index": "docs/index.md",
+            "validator": "python scripts/validate_documentation.py --check",
+            "metadata_enforced": True,
+            "internal_links_enforced": True,
+            "stale_claims_enforced": True,
+            "adr_system_enforced": True,
+        },
         "documents": rows,
     }
 
@@ -1349,8 +1359,9 @@ def render_architecture_status(report: Mapping[str, Any]) -> str:
             f"- Missing: {docs['missing_count']}",
             f"- Metadata complete: {docs['metadata_complete_count']}",
             "",
-            "The missing document set is recorded in `coverage/architecture-audit.json`. "
-            "Phase 1 establishes the authoritative documentation index and enforcement.",
+            "The authoritative index, metadata, internal-link, stale-claim, and "
+            "ADR policies are enforced by `scripts/validate_documentation.py`. "
+            "Detailed document records remain in `coverage/architecture-audit.json`.",
             "",
             "## Regeneration",
             "",

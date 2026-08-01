@@ -2,8 +2,8 @@
   "v": "3.0",
   "mode": "delta",
   "principal": "pilot:A",
-  "base": "22fadfe915a7a8007320",
-  "view": "22fadfe915a7a8007320",
+  "base": "9af693e21080d3e13953",
+  "view": "9af693e21080d3e13953",
   "rev": 0,
   "event": 10,
   "patch": [],
@@ -23,7 +23,20 @@
       },
       {
         "id": "mulligan",
-        "action": "mulligan"
+        "action": "mulligan",
+        "form": {
+          "v": 1,
+          "fields": [
+            {
+              "name": "override_reason",
+              "label": "Post-free mulligan reason (optional)",
+              "control": "text",
+              "required": false,
+              "max_length": 500
+            }
+          ],
+          "submit_label": "Mulligan"
+        }
       }
     ],
     "sim": 0,

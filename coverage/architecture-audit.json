@@ -6071,7 +6071,7 @@
     ]
   },
   "audit": {
-    "baseline_main_commit": "5197a91dcdac428c09980a39467a7a5c62bc17fa",
+    "baseline_main_commit": "a3ea421d021c45002048909073eeef69e6c113d9",
     "baseline_worktree_clean": true,
     "phase": "phase_0_current_state_audit",
     "scope_note": "This is a measured migration baseline, not a completeness or correctness claim.",
@@ -6317,7 +6317,7 @@
     ]
   },
   "coordinates": {
-    "baseline_main_commit": "5197a91dcdac428c09980a39467a7a5c62bc17fa",
+    "baseline_main_commit": "a3ea421d021c45002048909073eeef69e6c113d9",
     "baseline_worktree_clean": true,
     "ci": {
       "local_observed": {
@@ -6330,9 +6330,9 @@
         "3.11",
         "3.12"
       ],
-      "run_id": 30707443584,
+      "run_id": 30708805772,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30707443584",
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30708805772",
       "workflow": "CI"
     },
     "default_branch": "main",
@@ -6344,143 +6344,276 @@
     "documents": [
       {
         "file": "docs/index.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "users, operators, and contributors",
+          "authoritative_source": "repository documentation policy",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Documentation map",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/architecture/context.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "contributors and operators",
+          "authoritative_source": "implemented package, server, web client, and protocol",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "System context",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/architecture/containers.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "contributors and operators",
+          "authoritative_source": "mtg_commander_sim, server, web, platform, and coverage trees",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Runtime containers",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/architecture/rules-kernel.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "rules and engine contributors",
+          "authoritative_source": "mtg_commander_sim engine and rules modules",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Rules kernel",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/architecture/card-programs.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "compiler, rules, and semantic-pack contributors",
+          "authoritative_source": "mtg_commander_sim/semantics.py and semantic pack schemas",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Card programs",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/architecture/compiler.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "compiler and rules contributors",
+          "authoritative_source": "mtg_commander_sim/oracle_ir.py and pinned coverage artifacts",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Oracle compiler",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/architecture/server-runtime.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "server contributors and local operators",
+          "authoritative_source": "server package and GameService",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Server runtime",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/architecture/replay.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "engine, persistence, and test contributors",
+          "authoritative_source": "Game Record v3 implementation and replay verifier",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Replay architecture",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/architecture/visibility.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "client, server, pilot, and security contributors",
+          "authoritative_source": "StateProjector, protocol schemas, and privacy tests",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Visibility and projection",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/architecture/dependency-rules.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "all code contributors",
+          "authoritative_source": "platform/architecture-policy.json and architecture validator",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Dependency and mutation rules",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/extension/card-override.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "rules and compiler contributors",
+          "authoritative_source": "semantic pack validation and compiler trust policy",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Card override extension guide",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/extension/mechanic-capability.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "rules, compiler, and architecture contributors",
+          "authoritative_source": "standalone goal capability trust-model specification",
+          "maintenance": "hand-maintained",
+          "status": "target",
+          "title": "Mechanic capability extension guide",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/extension/semantic-node.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "compiler and rules contributors",
+          "authoritative_source": "Oracle IR and semantic executor implementation",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Semantic node extension guide",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/testing/strategy.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "all contributors",
+          "authoritative_source": "tests, local merge gate, and CI workflow",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Testing strategy",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/testing/interaction-coverage.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "rules and test contributors",
+          "authoritative_source": "mechanic contracts, conformance records, semantic programs, and tests",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Interaction coverage",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/testing/replay.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "engine, persistence, and protocol contributors",
+          "authoritative_source": "record replay tests and local merge gate",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Replay testing",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/testing/privacy.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "security, server, client, and pilot contributors",
+          "authoritative_source": "projection, protocol, pilot, and server privacy tests",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Privacy testing",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/operations/local-app.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "local users and contributors",
+          "authoritative_source": "server launcher, settings, managed data service, and browser build",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Local application operations",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/operations/hosted.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "future deployers and security contributors",
+          "authoritative_source": "documented gaps in server runtime and threat model",
+          "maintenance": "hand-maintained",
+          "status": "target",
+          "title": "Hosted deployment target",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/LEGAL_CONTENT_BOUNDARY.md",
         "metadata": {
           "audience": "maintainers, deployers, and contributors",
           "authoritative_source": "repository policy and runtime content adapter",
-          "maintenance": "manual review when content handling or deployment changes",
+          "maintenance": "hand-maintained",
           "status": "current",
           "title": "Legal and third-party content boundary",
           "verified": "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d"
@@ -6491,10 +6624,17 @@
       },
       {
         "file": "docs/THREAT_MODEL.md",
-        "metadata": {},
-        "metadata_complete": false,
+        "metadata": {
+          "audience": "maintainers, security reviewers, and deployers",
+          "authoritative_source": "implemented local server, protocol, projection, and repository controls",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Threat model",
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+        },
+        "metadata_complete": true,
         "missing_metadata": [],
-        "present": false
+        "present": true
       },
       {
         "file": "docs/PLATFORM_IMPLEMENTATION_STATUS.md",
@@ -6504,7 +6644,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "5197a91dcdac428c09980a39467a7a5c62bc17fa"
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -6515,7 +6655,7 @@
         "metadata": {
           "audience": "rules, compiler, and engine contributors",
           "authoritative_source": "pinned rules and generated coverage artifacts",
-          "maintenance": "hand-maintained boundaries; numerical status is generated",
+          "maintenance": "hand-maintained",
           "status": "current",
           "title": "Rules completeness implementation status",
           "verified": "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d"
@@ -6532,7 +6672,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Compiler coverage status",
-          "verified": "generated from pinned coverage artifacts"
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -6546,7 +6686,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Architecture debt status",
-          "verified": "generated from the Phase 0 baseline"
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -6557,42 +6697,29 @@
         "metadata": {
           "audience": "maintainers continuing the migration",
           "authoritative_source": "git main and generated status artifacts",
-          "maintenance": "hand-maintained at each merged phase checkpoint",
+          "maintenance": "hand-maintained",
           "status": "current",
           "title": "Integration handoff",
-          "verified": "5197a91dcdac428c09980a39467a7a5c62bc17fa"
+          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
         },
         "metadata_complete": true,
         "missing_metadata": [],
         "present": true
       }
     ],
-    "metadata_complete_count": 6,
+    "metadata_complete_count": 26,
     "metadata_drift": [],
-    "missing_count": 20,
-    "missing_documents": [
-      "docs/index.md",
-      "docs/architecture/context.md",
-      "docs/architecture/containers.md",
-      "docs/architecture/rules-kernel.md",
-      "docs/architecture/card-programs.md",
-      "docs/architecture/compiler.md",
-      "docs/architecture/server-runtime.md",
-      "docs/architecture/replay.md",
-      "docs/architecture/visibility.md",
-      "docs/architecture/dependency-rules.md",
-      "docs/extension/card-override.md",
-      "docs/extension/mechanic-capability.md",
-      "docs/extension/semantic-node.md",
-      "docs/testing/strategy.md",
-      "docs/testing/interaction-coverage.md",
-      "docs/testing/replay.md",
-      "docs/testing/privacy.md",
-      "docs/operations/local-app.md",
-      "docs/operations/hosted.md",
-      "docs/THREAT_MODEL.md"
-    ],
-    "present_count": 6,
+    "missing_count": 0,
+    "missing_documents": [],
+    "policy": {
+      "adr_system_enforced": true,
+      "authoritative_index": "docs/index.md",
+      "internal_links_enforced": true,
+      "metadata_enforced": true,
+      "stale_claims_enforced": true,
+      "validator": "python scripts/validate_documentation.py --check"
+    },
+    "present_count": 26,
     "required_count": 26
   },
   "generated": {
@@ -6925,8 +7052,8 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 834,
-      "discovered_total": 4134,
+      "conventional_ast_cases": 841,
+      "discovered_total": 4141,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 18,
@@ -6936,7 +7063,7 @@
         "server_named": 13
       },
       "reconciles": true,
-      "test_files": 91
+      "test_files": 92
     }
   }
 }

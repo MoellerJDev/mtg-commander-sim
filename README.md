@@ -1,3 +1,12 @@
+---
+title: "MTG Commander Sim"
+status: "current"
+authoritative_source: "implemented package, server/browser runtime, and generated status reports"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "users and contributors"
+maintenance: "hand-maintained"
+---
+
 # MTG Commander Sim 0.8.0
 
 An experimental, deterministic, server-authoritative Commander platform under
@@ -35,9 +44,9 @@ rules-created Treasure payment, permanent-spell resolution, Amass, combat, and
 a natural commander-damage winner. Future choice schemas, full account
 identity, expiry/rate limits, and production operations remain incomplete.
 The browser interaction slice is integrated. Development is now in a measured
-architecture migration: broad rules expansion is paused while dependency,
-mutation, card-specificity, compiler, and documentation boundaries become
-enforceable. Generated status documents record exact current counts.
+architecture migration: dependency, mutation, card-specificity, compiler, and
+documentation boundaries are enforced while the legacy kernel is decomposed.
+Generated status documents record exact current counts.
 
 This is a structural rewrite of the earlier two-player duel lab. The server-side game kernel is now separate from:
 
@@ -52,6 +61,8 @@ short-lived capabilities; they never write zones, life, mana, triggers, or
 effects directly. Ordinary gameplay, rules enforcement, CI, and releases do not
 require an LLM, Codex runtime, provider credential, or live AI ruling.
 
+Start with [`docs/index.md`](docs/index.md), the authoritative map that labels
+current, target, generated, ADR, and historical material.
 See `docs/PLATFORM_IMPLEMENTATION_STATUS.md` for the generated integration,
 rules, server, browser, persistence, replay, privacy, and validation ledger.
 See `docs/ARCHITECTURE_DEBT_STATUS.md` and
@@ -538,8 +549,8 @@ coverage for those declared programs, not a claim of complete Oracle coverage
 for either deck.
 
 Version 0.8.0 closes the conservative semantic preflight for the pinned live
-Zimone and Dina and Mishra, Eminent One lists: both exact 100-card lists report
-100 fully playable cards and no partial or unresolved cards. The closure adds
+Zimone and Dina and Mishra, Eminent One lists: both exact lists pass the
+trusted-only gate without a partial or unresolved card. The closure adds
 the remaining exact-list costs, permissions, replacement effects, delayed
 effects, linked choices, copy/token engines, Saga chapters, Craft, Crew,
 restricted mana, extra-turn control, and deterministic characterization
@@ -553,17 +564,12 @@ meaningful action. A browser, scripted test client, or optional AI adapter
 receives the same seat-projected packet with short object references and only
 the current capability.
 
-For the bundled four-seat Mishra/Zimone benchmark:
-
-| Packet | Compact characters | Approximate input tokens |
-|---|---:|---:|
-| Initial A-seat bootstrap | 6,197 | 1,549 |
-| Same live decision, unchanged state | 1,076 | 269 |
-| A mulligan declaration delta | 435 | 108 |
-
-Card definitions are emitted once per principal. Routine passes and bookkeeping remain in authoritative history but do not enter ordinary packets. Detailed rulings are requested only when an interaction is materially ambiguous.
-
-See `demo/token-benchmark.json` and `LLM_PROTOCOL.md`.
+The bundled four-seat Mishra/Zimone benchmark records bootstrap, unchanged
+decision, and declaration-delta sizes in generated
+`demo/token-benchmark.json`. Card definitions are emitted once per principal.
+Routine passes and bookkeeping remain in authoritative history but do not enter
+ordinary packets. Detailed rulings are requested only when an interaction is
+materially ambiguous. See `LLM_PROTOCOL.md`.
 
 The seed-20260730 regression is reconstructed from a sanitized state recipe in
 `tests/fixtures/`; it verifies the corrected action-opportunity boundary and
@@ -624,12 +630,12 @@ python simctl.py rules coverage --root .
 python simctl.py rules conformance --root .
 ```
 
-The pinned snapshot currently has 3,300 stable conformance cases and 3,300
-generated source-linkage tests. Of those cases, 563 are source-reviewed:
-125 have narrow executable semantic evidence, 362 are explicitly blocked, and
-82 are definition-only; 2,731 remain unreviewed. A generated inventory test
-cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
-invalidation, and reporting policy.
+The pinned snapshot has a generated conformance inventory with separately
+classified executable, blocked, definition-only, and unreviewed records. A
+generated inventory test cannot prove rules behavior. See the generated
+[`coverage/rules-conformance.md`](coverage/rules-conformance.md) for current
+figures and `RULE_CONFORMANCE.md` for promotion, invalidation, and reporting
+policy.
 
 Deck creation now invokes the typed Oracle compiler automatically. Exact
 whole-text templates lower into the generic effect DSL without a printed-name
@@ -721,13 +727,13 @@ python simctl.py oracle coverage \
   --db data/scryfall-current.sqlite3
 ```
 
-This is still not a completeness declaration. The measured July 31 local
-snapshot has 38,484 Oracle IDs: 2,959 exact, 16,092 partially lowerable, and
-19,433 unresolved under current dependency gates. All 69,890 material residuals must
-be eliminated or covered by reviewed, hash-pinned overrides before complete
-Oracle support can be claimed. Genuinely unique cards may use reviewed
-overrides; common cards and mechanics compile through reusable primitives.
-See `RULES_COMPLETENESS.md` and `ORACLE_IR.md`.
+This is still not a completeness declaration. Current exact, partial,
+unresolved, and material-residual figures are generated in
+[`docs/COMPILER_COVERAGE_STATUS.md`](docs/COMPILER_COVERAGE_STATUS.md). Every
+material residual must be eliminated or covered by a reviewed, hash-pinned
+override before complete Oracle support can be claimed. Genuinely unique cards
+may use reviewed overrides; common cards and mechanics compile through reusable
+primitives. See `RULES_COMPLETENESS.md` and `ORACLE_IR.md`.
 
 ## Quick Python loop
 

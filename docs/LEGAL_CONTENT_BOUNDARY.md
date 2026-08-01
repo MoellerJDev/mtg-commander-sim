@@ -4,7 +4,7 @@ status: "current"
 authoritative_source: "repository policy and runtime content adapter"
 verified: "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d"
 audience: "maintainers, deployers, and contributors"
-maintenance: "manual review when content handling or deployment changes"
+maintenance: "hand-maintained"
 ---
 
 # Legal and third-party content boundary

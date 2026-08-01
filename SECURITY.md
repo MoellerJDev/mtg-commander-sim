@@ -1,3 +1,12 @@
+---
+title: "Security policy"
+status: "current"
+authoritative_source: "implemented security controls and disclosure policy"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "users, contributors, and security reporters"
+maintenance: "hand-maintained"
+---
+
 # Security policy
 
 ## Reporting

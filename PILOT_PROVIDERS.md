@@ -1,3 +1,12 @@
+---
+title: "Pilot providers"
+status: "current"
+authoritative_source: "pilot implementations, protocol schemas, and provider tests"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "pilot-provider implementers and arena operators"
+maintenance: "hand-maintained"
+---
+
 # Pilot providers
 
 Pilot providers are optional automation clients. The authoritative platform,

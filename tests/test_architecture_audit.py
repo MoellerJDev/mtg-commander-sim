@@ -81,6 +81,12 @@ class ArchitectureAuditTests(unittest.TestCase):
         self.assertEqual(
             documents["metadata_complete_count"], documents["present_count"]
         )
+        self.assertEqual(documents["required_count"], documents["present_count"])
+        self.assertEqual(0, documents["missing_count"])
+        self.assertTrue(documents["policy"]["metadata_enforced"])
+        self.assertTrue(documents["policy"]["internal_links_enforced"])
+        self.assertTrue(documents["policy"]["stale_claims_enforced"])
+        self.assertTrue(documents["policy"]["adr_system_enforced"])
         self.assertTrue(
             self.report["architecture"]["printed_name_literals"][
                 "no_unreviewed_growth"

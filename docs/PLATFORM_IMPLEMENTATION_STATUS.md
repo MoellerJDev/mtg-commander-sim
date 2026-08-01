@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "5197a91dcdac428c09980a39467a7a5c62bc17fa"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,65 +15,11 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `feat/phase1-architecture-guards`
 - Current commit: the commit containing this ledger
-- Active phase: `phase_1_architecture_enforcement_guards`
+- Active phase: `phase_1_documentation_enforcement`
 - Package version: `0.8.0`
 
-### Pull requests
-
-| PR | Head | Base | State |
-|---|---|---|---|
-| [#2](https://github.com/MoellerJDev/mtg-commander-sim/pull/2) | `agent/review-mvp` | `main` | `merged` |
-| [#1](https://github.com/MoellerJDev/mtg-commander-sim/pull/1) | `agent/rules-completeness` | `main` | `merged` |
-| [#3](https://github.com/MoellerJDev/mtg-commander-sim/pull/3) | `agent/cr-512-ending-phase` | `main` | `merged` |
-| [#4](https://github.com/MoellerJDev/mtg-commander-sim/pull/4) | `agent/cr-511-end-of-combat` | `main` | `merged` |
-| [#5](https://github.com/MoellerJDev/mtg-commander-sim/pull/5) | `agent/cr-510-combat-damage` | `main` | `merged` |
-| [#6](https://github.com/MoellerJDev/mtg-commander-sim/pull/6) | `agent/cr-509-declare-blockers` | `main` | `merged` |
-| [#7](https://github.com/MoellerJDev/mtg-commander-sim/pull/7) | `agent/cr-508-declare-attackers` | `main` | `merged` |
-| [#8](https://github.com/MoellerJDev/mtg-commander-sim/pull/8) | `agent/cr-507-beginning-combat` | `main` | `merged` |
-| [#9](https://github.com/MoellerJDev/mtg-commander-sim/pull/9) | `agent/cr-506-combat-phase` | `main` | `merged` |
-| [#10](https://github.com/MoellerJDev/mtg-commander-sim/pull/10) | `agent/cr-505-main-phase` | `main` | `merged` |
-| [#11](https://github.com/MoellerJDev/mtg-commander-sim/pull/11) | `agent/cr-504-draw-step` | `main` | `merged` |
-| [#12](https://github.com/MoellerJDev/mtg-commander-sim/pull/12) | `agent/cr-503-upkeep-step` | `main` | `merged` |
-| [#13](https://github.com/MoellerJDev/mtg-commander-sim/pull/13) | `agent/cr-502-untap-step` | `agent/cr-503-upkeep-step` | `merged` |
-| [#14](https://github.com/MoellerJDev/mtg-commander-sim/pull/14) | `agent/cr-501-beginning-phase` | `agent/cr-502-untap-step` | `merged` |
-| [#15](https://github.com/MoellerJDev/mtg-commander-sim/pull/15) | `agent/cr-500-turn-structure` | `agent/cr-501-beginning-phase` | `merged` |
-| [#16](https://github.com/MoellerJDev/mtg-commander-sim/pull/16) | `agent/cr-405-stack` | `agent/cr-500-turn-structure` | `merged` |
-| [#17](https://github.com/MoellerJDev/mtg-commander-sim/pull/17) | `agent/cr-400-general-zone-identity` | `agent/cr-405-stack` | `merged` |
-| [#18](https://github.com/MoellerJDev/mtg-commander-sim/pull/18) | `agent/cr-401-library` | `agent/cr-400-general-zone-identity` | `closed_superseded_by_pr_24` |
-| [#19](https://github.com/MoellerJDev/mtg-commander-sim/pull/19) | `agent/cr-402-hand` | `agent/cr-401-library` | `closed_superseded_by_pr_24` |
-| [#20](https://github.com/MoellerJDev/mtg-commander-sim/pull/20) | `agent/cr-403-battlefield` | `agent/cr-402-hand` | `closed_superseded_by_pr_24` |
-| [#21](https://github.com/MoellerJDev/mtg-commander-sim/pull/21) | `agent/cr-404-graveyard` | `agent/cr-403-battlefield` | `closed_superseded_by_pr_24` |
-| [#22](https://github.com/MoellerJDev/mtg-commander-sim/pull/22) | `agent/cr-406-exile` | `agent/cr-404-graveyard` | `closed_superseded_by_pr_24` |
-| [#23](https://github.com/MoellerJDev/mtg-commander-sim/pull/23) | `agent/cr-407-ante` | `agent/cr-406-exile` | `closed_superseded_by_pr_24` |
-| [#24](https://github.com/MoellerJDev/mtg-commander-sim/pull/24) | `agent/cr-408-command` | `main` | `merged` |
-| [#25](https://github.com/MoellerJDev/mtg-commander-sim/pull/25) | `agent/integration-checkpoint` | `main` | `merged` |
-| [#26](https://github.com/MoellerJDev/mtg-commander-sim/pull/26) | `agent/finalize-integration-docs` | `main` | `merged` |
-| [#27](https://github.com/MoellerJDev/mtg-commander-sim/pull/27) | `agent/server-browser-vertical-slice` | `main` | `merged` |
-| [#28](https://github.com/MoellerJDev/mtg-commander-sim/pull/28) | `agent/reconcile-platform-docs` | `main` | `merged` |
-| [#29](https://github.com/MoellerJDev/mtg-commander-sim/pull/29) | `agent/browser-server-hardening` | `main` | `merged` |
-| [#30](https://github.com/MoellerJDev/mtg-commander-sim/pull/30) | `agent/browser-server-operations` | `main` | `merged` |
-| [#31](https://github.com/MoellerJDev/mtg-commander-sim/pull/31) | `agent/browser-ui-polish` | `main` | `merged` |
-| [#32](https://github.com/MoellerJDev/mtg-commander-sim/pull/32) | `agent/reconcile-browser-handoff` | `main` | `merged` |
-| [#33](https://github.com/MoellerJDev/mtg-commander-sim/pull/33) | `agent/spectator-public-log` | `main` | `merged` |
-| [#34](https://github.com/MoellerJDev/mtg-commander-sim/pull/34) | `agent/browser-rules-boundary` | `main` | `merged` |
-| [#35](https://github.com/MoellerJDev/mtg-commander-sim/pull/35) | `agent/browser-trigger-stabilization` | `main` | `merged` |
-| [#36](https://github.com/MoellerJDev/mtg-commander-sim/pull/36) | `agent/browser-lifecycle-journey` | `main` | `merged` |
-| [#37](https://github.com/MoellerJDev/mtg-commander-sim/pull/37) | `agent/rules-combat-damage` | `main` | `merged` |
-| [#38](https://github.com/MoellerJDev/mtg-commander-sim/pull/38) | `agent/rules-combat-tba-triggers` | `main` | `merged` |
-| [#39](https://github.com/MoellerJDev/mtg-commander-sim/pull/39) | `agent/rules-combat-constraints` | `main` | `merged` |
-| [#40](https://github.com/MoellerJDev/mtg-commander-sim/pull/40) | `feat/rules-goad-requirements` | `main` | `merged` |
-| [#41](https://github.com/MoellerJDev/mtg-commander-sim/pull/41) | `feat/rules-attack-declaration-costs` | `main` | `merged` |
-| [#42](https://github.com/MoellerJDev/mtg-commander-sim/pull/42) | `feat/rules-combat-restrictions` | `main` | `merged` |
-| [#43](https://github.com/MoellerJDev/mtg-commander-sim/pull/43) | `feat/rules-combat-evasion-restrictions` | `main` | `merged` |
-| [#44](https://github.com/MoellerJDev/mtg-commander-sim/pull/44) | `feat/rules-conditional-combat-restrictions` | `main` | `merged` |
-| [#45](https://github.com/MoellerJDev/mtg-commander-sim/pull/45) | `feat/rules-combat-composition-targets` | `main` | `merged` |
-| [#46](https://github.com/MoellerJDev/mtg-commander-sim/pull/46) | `feat/rules-combat-quantifiers-planeswalkers` | `main` | `merged` |
-| [#47](https://github.com/MoellerJDev/mtg-commander-sim/pull/47) | `feat/rules-combat-player-state-conditions` | `main` | `merged` |
-| [#48](https://github.com/MoellerJDev/mtg-commander-sim/pull/48) | `feat/rules-combat-history-conditions` | `main` | `merged` |
-| [#49](https://github.com/MoellerJDev/mtg-commander-sim/pull/49) | `feat/browser-full-control-table-ui` | `main` | `merged` |
-| [#50](https://github.com/MoellerJDev/mtg-commander-sim/pull/50) | `feat/phase0-architecture-audit` | `main` | `merged` |
+Historical integration chronology belongs in `CHANGELOG.md`; this current report intentionally does not reproduce a pull-request ledger.
 
 ## Pinned snapshots and coverage
 
@@ -93,7 +39,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 | Milestone | Status | Evidence |
 |---|---|---|
-| Integrated deterministic foundation | `complete` | Integration PRs #1-17 and #24-50 are on main. PR #49 completed the browser full-control/table-interaction slice and PR #50 established generated architecture, compiler, test, semantic-pack, and documentation-debt baselines. The current Phase 1 guard slice makes dependency direction, mutation ownership, kernel card-specificity, and debt non-growth enforceable. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
+| Integrated deterministic foundation | `complete` | The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, and ratcheted dependency, mutation, specificity, and maintainability guards are integrated on verified main. The active documentation slice establishes authoritative current/target separation, ADR governance, link validation, and generated-only numerical status. |
 | Browser Commander MVP | `development_local_runtime_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and seven two/four-player Chromium journeys, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, resilient card-scoped click/drag actions, saved Auto-mana/Manual mana and Auto-pass/Full control preferences, public tapped-card orientation, explicit active-player main-phase advancement, confirmed concession, public commander-damage tracking, terminal winner/draw rendering, exact command retry, invited read-only spectators, a durable complete public-log dialog, fail-closed handling for legacy arbiter-only records, and one-command managed Scryfall/browser startup. Compact trusted-only coverage includes modal land faces, targeted Sunscorched Desert ETB damage, a stack response, rules-created Treasure payment, Orcish Bowmasters/Amass, explicit attack and block declarations, combat damage, and a natural commander-damage winner. The 49-command natural-winner record replayed to its exact state hash with zero suppressed meaningful windows and a clean seat-projection audit; completed games also survive process restart. The inspected full-database failure remains a pinned pre-fix record, and a fresh post-restart full-database manual journey is still required as broader current-snapshot evidence. Saved board-layout customization, future schemas, full accounts, expiry/rate limits, and production deployment remain open. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408, CR 500-514, focused CR 725, and focused CR 508-509/608 current-turn history slices are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
@@ -115,9 +61,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 4134
+- Tests discovered: 4141
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30707443584](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30707443584) — `pass`
+- Baseline CI: [30708805772](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30708805772) — `pass`
 - Compile: `pass`
 - Deterministic tests: `pass_full_exact_commit_gate`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
@@ -134,14 +80,14 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 - a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence
 - saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit
-- the authoritative engine remains a 23,996-line module with interleaved turn, mutation, casting, effect, and variant responsibilities; the Phase 1 guard slice prevents new debt while later phases extract it
+- the authoritative engine remains a measured oversized legacy module with interleaved turn, mutation, casting, effect, and variant responsibilities; ratcheted guards prevent new debt while later phases extract it
 - future engine choice schemas and complete screen-reader audits remain incomplete
 - production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete
 - full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete
 
 ## Exact next task
 
-Merge the focused Phase 1 dependency, mutation-ownership, kernel card-specificity, and debt non-growth guard slice; then create the documentation index, ADR enforcement, link/stale-claim checks, and missing current architecture/testing/operations documents on a fresh branch.
+Merge the focused Phase 1 documentation enforcement slice; then begin Phase 2 with a versioned fine-grained capability schema and one representative compiler/runtime trust migration on a fresh branch.
 
 ## Regeneration
 

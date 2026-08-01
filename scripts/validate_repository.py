@@ -165,6 +165,18 @@ def validate_architecture_policy() -> None:
     )
 
 
+def validate_documentation_policy() -> None:
+    subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "validate_documentation.py"),
+            "--check",
+        ],
+        cwd=ROOT,
+        check=True,
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.parse_args()
@@ -173,6 +185,7 @@ def main() -> int:
     validate_generated_platform_status()
     validate_generated_architecture_audit()
     validate_architecture_policy()
+    validate_documentation_policy()
     tracked, scanned_bytes = validate_tracked_files()
     print(
         json.dumps(
@@ -187,6 +200,7 @@ def main() -> int:
                 "platform_status_stale_check": "pass",
                 "architecture_audit_stale_check": "pass",
                 "architecture_policy": "pass",
+                "documentation_policy": "pass",
             },
             indent=2,
             sort_keys=True,

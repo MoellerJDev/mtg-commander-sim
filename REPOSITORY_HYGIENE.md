@@ -1,3 +1,12 @@
+---
+title: "Repository hygiene"
+status: "current"
+authoritative_source: "gitignore and repository validation"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "contributors and release maintainers"
+maintenance: "hand-maintained"
+---
+
 # Repository hygiene
 
 The source repository contains code, documentation, schemas, sanitized

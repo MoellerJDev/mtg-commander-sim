@@ -3,14 +3,15 @@
   "mode": "full",
   "principal": "pilot:A",
   "base": null,
-  "view": "22fadfe915a7a8007320",
+  "view": "9af693e21080d3e13953",
   "state": {
     "rev": 0,
     "event": 10,
     "game": {
-      "id": "3226e9312b114c86b07fd4abe9c11821",
+      "id": "249f4480221344fe8f0259d4e28b38fe",
       "over": false,
-      "winner": null
+      "winner": null,
+      "monarch": null
     },
     "turn": {
       "seq": 0,
@@ -147,7 +148,9 @@
     "stack": [],
     "combat": {
       "atk": {},
-      "blk": {}
+      "blk": {},
+      "damage_step": 0,
+      "first_strike_step": 0
     }
   },
   "decision": {
@@ -166,7 +169,20 @@
       },
       {
         "id": "mulligan",
-        "action": "mulligan"
+        "action": "mulligan",
+        "form": {
+          "v": 1,
+          "fields": [
+            {
+              "name": "override_reason",
+              "label": "Post-free mulligan reason (optional)",
+              "control": "text",
+              "required": false,
+              "max_length": 500
+            }
+          ],
+          "submit_label": "Mulligan"
+        }
       }
     ],
     "sim": 0,

@@ -1,9 +1,19 @@
+---
+title: "Comprehensive Rules conformance cases"
+status: "current"
+authoritative_source: "rules/conformance-cases.json and conformance runner"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "rules and test contributors"
+maintenance: "hand-maintained"
+---
+
 # Comprehensive Rules conformance cases
 
 The pinned June 19, 2026 Comprehensive Rules snapshot has one stable
-conformance case record for each of its 3,300 numbered rules and subrules.
-This is a work queue and audit boundary, not a claim that all 3,300 rules are
-implemented.
+conformance case record for each indexed numbered rule and subrule. This is a
+work queue and audit boundary, not a claim that every indexed rule is
+implemented. Current inventory figures are generated in
+[`coverage/rules-conformance.md`](coverage/rules-conformance.md).
 
 ## Artifacts
 
@@ -100,16 +110,11 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 
 ## Current checkpoint
 
-All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 569 cases in CR 120, CR 210, CR 310, CR 400, CR 401, CR 402, CR 403,
-CR 404, CR 405, CR 406, CR 407, CR 408, CR 500, CR 501, CR 502, CR 503,
-CR 504, CR 505, CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512,
-CR 513, CR 514, CR 600, CR 601, CR 602, CR 603, CR 604, CR 605, CR 606,
-CR 607, CR 608, CR 609, CR 614, CR 615, CR 616, CR 725, and CR 802.5 are
-source-reviewed: 125 narrow behavioral or structural rules pass with generic
-executable evidence, 362 are blocked with exact missing dependencies, and 82
-are definition-only with contract traceability. The remaining 2,731 cases are
-unreviewed and inventory-only.
+The source-reviewed set contains narrow executable, explicitly blocked, and
+definition-only records; the remainder is unreviewed inventory. Current counts
+are generated in
+[`coverage/rules-conformance.md`](coverage/rules-conformance.md), not copied
+into this policy document.
 
 CR 725 adds one serialized and publicly projected monarch designation, generic
 become-the-monarch effects, the two inherent stack triggers, active/turn-order

@@ -1,15 +1,15 @@
 {
   "bootstrap": {
-    "compact_chars": 6271,
-    "compact_bytes": 6287,
-    "pretty_chars": 6271,
-    "estimated_tokens": 1567
+    "compact_chars": 6501,
+    "compact_bytes": 6517,
+    "pretty_chars": 6501,
+    "estimated_tokens": 1625
   },
   "unchanged_live_decision": {
-    "compact_chars": 1126,
-    "compact_bytes": 1126,
-    "pretty_chars": 1126,
-    "estimated_tokens": 281
+    "compact_chars": 1303,
+    "compact_bytes": 1303,
+    "pretty_chars": 1303,
+    "estimated_tokens": 325
   },
   "after_declaration": {
     "compact_chars": 453,
@@ -18,8 +18,8 @@
     "estimated_tokens": 113
   },
   "ratios": {
-    "unchanged_vs_bootstrap": 0.1796,
-    "declaration_vs_bootstrap": 0.0722
+    "unchanged_vs_bootstrap": 0.2004,
+    "declaration_vs_bootstrap": 0.0697
   },
   "protocol": "3.0",
   "players": 4,

@@ -1,3 +1,12 @@
+---
+title: "Deck Review MVP implementation status"
+status: "historical"
+authoritative_source: "archived early review milestone"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "maintainers researching project history"
+maintenance: "hand-maintained"
+---
+
 # Deck Review MVP implementation status
 
 Last updated: 2026-07-31

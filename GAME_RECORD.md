@@ -1,3 +1,12 @@
+---
+title: "Game Record v3"
+status: "current"
+authoritative_source: "mtg_commander_sim/record.py and record schemas"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+audience: "engine, persistence, replay, and analyst contributors"
+maintenance: "hand-maintained"
+---
+
 # Game Record v3
 
 Game Record v3 replaces the growing `game.json` monolith with a replayable

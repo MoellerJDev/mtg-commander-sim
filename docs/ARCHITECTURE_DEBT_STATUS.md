@@ -2,7 +2,7 @@
 title: "Architecture debt status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "5197a91dcdac428c09980a39467a7a5c62bc17fa"
+verified: "a3ea421d021c45002048909073eeef69e6c113d9"
 audience: "maintainers and rules contributors"
 maintenance: "generated"
 ---
@@ -13,9 +13,9 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 
 ## Baseline coordinates
 
-- Main commit: `5197a91dcdac428c09980a39467a7a5c62bc17fa`
+- Main commit: `a3ea421d021c45002048909073eeef69e6c113d9`
 - Package: `0.8.0`
-- CI run: [30707443584](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30707443584) — `pass`
+- CI run: [30708805772](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30708805772) — `pass`
 - Production scope: 59 files, 56,042 physical lines, 52,575 logical lines
 
 ## Central engine debt
@@ -114,8 +114,8 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,134
-- Conventional Python cases: 834
+- Python discovered: 4,141
+- Conventional Python cases: 841
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 7
 - Browser unit cases: 14
@@ -126,11 +126,11 @@ These are review classifications from the machine-readable source, not automatic
 ## Documentation drift
 
 - Required: 26
-- Present after generated Phase 0 outputs: 6
-- Missing: 20
-- Metadata complete: 6
+- Present after generated Phase 0 outputs: 26
+- Missing: 0
+- Metadata complete: 26
 
-The missing document set is recorded in `coverage/architecture-audit.json`. Phase 1 establishes the authoritative documentation index and enforcement.
+The authoritative index, metadata, internal-link, stale-claim, and ADR policies are enforced by `scripts/validate_documentation.py`. Detailed document records remain in `coverage/architecture-audit.json`.
 
 ## Regeneration
 
