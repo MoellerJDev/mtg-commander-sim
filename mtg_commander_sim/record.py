@@ -112,6 +112,30 @@ def semantics_fingerprint(registry: SemanticRegistry) -> str:
     return _canonical_hash({"schema_version": 1, "programs": programs})
 
 
+def _validate_card_program_fingerprints(
+    recorded: Any,
+    semantics: SemanticRegistry,
+    *,
+    context: str,
+) -> None:
+    if recorded is None:
+        return
+    if not isinstance(recorded, Mapping):
+        raise ValueError(f"{context} CardProgram fingerprints are malformed")
+    normalized = {str(key): str(value) for key, value in recorded.items()}
+    if normalized != semantics.card_program_fingerprints():
+        raise ValueError(f"CardProgram fingerprint mismatch in {context}")
+
+
+def _manifest_card_program_fingerprints(manifest: Mapping[str, Any]) -> Any:
+    section = manifest.get("card_programs")
+    if section is None:
+        return None
+    if not isinstance(section, Mapping):
+        raise ValueError("Record manifest CardProgram section is malformed")
+    return section.get("fingerprints")
+
+
 def database_fingerprint(card_db: CardDatabase) -> dict[str, Any]:
     metadata = card_db.metadata()
     stable_metadata = {
@@ -768,6 +792,10 @@ def build_manifest(
             "schema_version": 1,
             "hash": semantics_fingerprint(semantics),
         },
+        "card_programs": {
+            "schema_version": 2,
+            "fingerprints": semantics.card_program_fingerprints(),
+        },
         "scryfall": database_fingerprint(card_db),
         "created_at": created_at,
         "started_at": created_at,
@@ -796,6 +824,9 @@ def build_manifest(
             "verification": "not_run",
             "engine_version": ENGINE_VERSION,
             "semantics_fingerprint": semantics_fingerprint(semantics),
+            "card_program_fingerprints": (
+                semantics.card_program_fingerprints()
+            ),
         },
         "review": {
             "classification": "unreviewed",
@@ -982,6 +1013,11 @@ def replay_record(
         )
     if manifest.get("semantics_fingerprint") != semantics_fingerprint(semantics):
         raise ValueError("Semantic registry fingerprint does not match the record")
+    _validate_card_program_fingerprints(
+        _manifest_card_program_fingerprints(manifest),
+        semantics,
+        context="record manifest",
+    )
     initial = read_initial_checkpoint(directory / "initial-checkpoint.json.gz")
     mode = str(manifest.get("replay", {}).get("mode") or "command_replay")
     if mode == "legacy_snapshot":
@@ -1042,6 +1078,30 @@ def _apply_replay_commands(
             raise ValueError(
                 f"Semantic registry mismatch at command {command.get('sequence')}"
             )
+        recorded_programs = command_semantics.get("card_programs_used")
+        if verify and recorded_programs is not None:
+            if not isinstance(recorded_programs, Mapping):
+                raise ValueError(
+                    f"Malformed CardProgram provenance at command "
+                    f"{command.get('sequence')}"
+                )
+            semantic_keys = [
+                str(value.get("key"))
+                for value in command_semantics.get("programs_used", [])
+                if isinstance(value, Mapping) and value.get("key")
+            ]
+            current_programs = (
+                semantics.card_program_fingerprints_for_keys(semantic_keys)
+            )
+            normalized_programs = {
+                str(key): str(value)
+                for key, value in recorded_programs.items()
+            }
+            if normalized_programs != current_programs:
+                raise ValueError(
+                    f"CardProgram fingerprint mismatch at command "
+                    f"{command.get('sequence')}"
+                )
         before = authoritative_state_hash(engine.state)
         if verify and before != command.get("before_state_hash"):
             raise ValueError(
@@ -1103,6 +1163,11 @@ def verify_record_suffix(
         semantics
     ):
         raise ValueError("Semantic registry fingerprint does not match record")
+    _validate_card_program_fingerprints(
+        _manifest_card_program_fingerprints(manifest),
+        semantics,
+        context="record manifest",
+    )
 
     commands = list(_read_jsonl(directory / "commands.jsonl"))
     if baseline_commands < 0 or baseline_commands > len(commands):
@@ -1191,6 +1256,15 @@ def _rebase_command_semantics(
         row["semantics_fingerprint"] = fingerprint
         semantics = dict(row.get("semantics") or {})
         semantics["registry_hash"] = fingerprint
+        semantic_keys = [
+            str(value.get("key"))
+            for value in semantics.get("programs_used", [])
+            if isinstance(value, Mapping) and value.get("key")
+        ]
+        semantics["card_program_schema_version"] = 2
+        semantics["card_programs_used"] = (
+            registry.card_program_fingerprints_for_keys(semantic_keys)
+        )
         row["semantics"] = semantics
     _atomic_jsonl(directory / "commands.jsonl", rows)
 

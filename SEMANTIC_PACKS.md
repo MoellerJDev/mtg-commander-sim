@@ -1,8 +1,8 @@
 ---
 title: "Semantic packs"
 status: "current"
-authoritative_source: "semantic pack schema, loader, and tracked packs"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+authoritative_source: "CardProgram V2 adapter, semantic pack schema, loader, and tracked packs"
+verified: "2026-08-01"
 audience: "rules and semantic-pack contributors"
 maintenance: "hand-maintained"
 ---
@@ -12,6 +12,12 @@ maintenance: "hand-maintained"
 Semantic packs compile reviewed Oracle behavior into the engine's generic
 effect DSL. They extend `SemanticRegistry`; they do not replace the Game Record
 or grant pilots state-mutation authority.
+
+Pack schema v3 is now a compatibility input to canonical CardProgram V2. On
+load, programs are grouped by Oracle ID, source hashes and face identity are
+validated, and deterministic card/semantic/trust fingerprints are computed.
+The semantic-key map remains a derived runtime and historical-record index.
+Saved registries contain both views and reject any mismatch.
 
 ## Program identity
 
@@ -31,6 +37,8 @@ Each JSON program records:
 The source hashes pin the Scryfall snapshot used for review. An empty rulings
 list still has the deterministic SHA-256 hash of its serialized empty array.
 Pack files are included as package data in the wheel.
+Missing hashes on an ephemeral development program are represented as explicit
+trust blockers; conflicting nonempty hashes for one Oracle group fail loading.
 
 ## Corpus compilation
 
@@ -41,7 +49,7 @@ contracts, and compiles Oracle text into a typed intermediate representation.
 Recognized whole-text templates lower into the same generic DSL and kernel
 primitives used by current packs.
 
-Oracle IR v11 includes a shared combat-declaration cost grammar for exact
+Oracle IR v12 includes a shared combat-declaration cost grammar for exact
 fixed ordinary-mana intrinsic, attached-Aura, defending-player attack, and global block-tax
 sentences. The compiler records a typed static-cost node and the engine uses
 the same parser to derive live costs. Complex symbols, appended instructions,

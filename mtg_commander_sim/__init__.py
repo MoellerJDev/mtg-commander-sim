@@ -2,6 +2,13 @@
 
 from .version import __version__
 from .carddb import CardDatabase, CardRecord, Ruling
+from .card_programs import (
+    CARD_PROGRAM_SCHEMA_VERSION,
+    CardProgram,
+    CardProgramError,
+    CardProgramFace,
+    compile_card_program,
+)
 from .bulk import (
     ScryfallBulkDataError,
     ScryfallBulkItem,
@@ -98,6 +105,10 @@ __all__ = [
     "ActionResult",
     "CardDatabase",
     "CardRecord",
+    "CardProgram",
+    "CardProgramError",
+    "CardProgramFace",
+    "CARD_PROGRAM_SCHEMA_VERSION",
     "CharacteristicState",
     "CommandEnvelope",
     "CommandReceipt",
@@ -150,6 +161,7 @@ __all__ = [
     "apply_json_patch",
     "apply_replacement",
     "compile_oracle_card",
+    "compile_card_program",
     "evaluate_continuous_effects",
     "fetch_bulk_manifest",
     "json_patch",

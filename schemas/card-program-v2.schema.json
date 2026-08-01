@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mtg-commander-sim.local/schemas/card-program-v2.json",
+  "title": "CardProgram V2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "compiler_version",
+    "oracle_id",
+    "card_identity",
+    "faces",
+    "oracle_source_hash",
+    "rulings_source_hash",
+    "abilities",
+    "capability_dependencies",
+    "trust_closure",
+    "semantic_hash",
+    "residuals",
+    "provenance",
+    "fingerprint"
+  ],
+  "properties": {
+    "schema_version": {"const": 2},
+    "compiler_version": {"$ref": "#/$defs/nonempty"},
+    "oracle_id": {"$ref": "#/$defs/nonempty"},
+    "card_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {"type": ["string", "null"], "minLength": 1}
+      }
+    },
+    "faces": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/face"}
+    },
+    "oracle_source_hash": {"$ref": "#/$defs/sha256"},
+    "rulings_source_hash": {"$ref": "#/$defs/sha256"},
+    "abilities": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/ability"}
+    },
+    "capability_dependencies": {"$ref": "#/$defs/strings"},
+    "trust_closure": {"$ref": "#/$defs/program_trust_closure"},
+    "semantic_hash": {"$ref": "#/$defs/sha256"},
+    "residuals": {"$ref": "#/$defs/objects"},
+    "provenance": {"type": "object"},
+    "fingerprint": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "nonempty": {"type": "string", "minLength": 1},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "strings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/nonempty"}
+    },
+    "objects": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
+    "nullable_object": {
+      "oneOf": [{"type": "null"}, {"type": "object"}]
+    },
+    "face": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["face_id", "name", "type_line", "oracle_text_hash"],
+      "properties": {
+        "face_id": {"$ref": "#/$defs/nonempty"},
+        "name": {"type": ["string", "null"], "minLength": 1},
+        "type_line": {"type": ["string", "null"], "minLength": 1},
+        "oracle_text_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "ability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "semantic_key",
+        "ability_id",
+        "face_id",
+        "kind",
+        "label",
+        "active_zones",
+        "timing_permissions",
+        "costs",
+        "modes",
+        "targets",
+        "choices",
+        "effect_nodes",
+        "triggers",
+        "static_effects",
+        "replacement_effects",
+        "prevention_effects",
+        "continuous_effects",
+        "linked_ability_ids",
+        "durations",
+        "delayed_effects",
+        "copy_behavior",
+        "zone_permissions",
+        "capability_dependencies",
+        "trust_closure",
+        "source_span",
+        "residual_ids",
+        "runtime"
+      ],
+      "properties": {
+        "semantic_key": {"$ref": "#/$defs/nonempty"},
+        "ability_id": {"$ref": "#/$defs/nonempty"},
+        "face_id": {"$ref": "#/$defs/nonempty"},
+        "kind": {
+          "enum": [
+            "spell",
+            "activated",
+            "triggered",
+            "static",
+            "replacement",
+            "prevention",
+            "ability"
+          ]
+        },
+        "label": {"$ref": "#/$defs/nonempty"},
+        "active_zones": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/nonempty"}
+        },
+        "timing_permissions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["event"],
+          "properties": {"event": {"$ref": "#/$defs/nonempty"}}
+        },
+        "costs": {"$ref": "#/$defs/nullable_object"},
+        "modes": {"$ref": "#/$defs/objects"},
+        "targets": {"$ref": "#/$defs/nullable_object"},
+        "choices": {"$ref": "#/$defs/objects"},
+        "effect_nodes": {"$ref": "#/$defs/objects"},
+        "triggers": {"$ref": "#/$defs/objects"},
+        "static_effects": {"$ref": "#/$defs/objects"},
+        "replacement_effects": {"$ref": "#/$defs/objects"},
+        "prevention_effects": {"$ref": "#/$defs/objects"},
+        "continuous_effects": {"$ref": "#/$defs/objects"},
+        "linked_ability_ids": {"$ref": "#/$defs/strings"},
+        "durations": {"$ref": "#/$defs/objects"},
+        "delayed_effects": {"$ref": "#/$defs/objects"},
+        "copy_behavior": {"$ref": "#/$defs/objects"},
+        "zone_permissions": {"$ref": "#/$defs/objects"},
+        "capability_dependencies": {"$ref": "#/$defs/strings"},
+        "trust_closure": {"$ref": "#/$defs/nullable_object"},
+        "source_span": {"$ref": "#/$defs/nullable_object"},
+        "residual_ids": {"$ref": "#/$defs/strings"},
+        "runtime": {"$ref": "#/$defs/runtime"}
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "destination",
+        "requires_arbiter",
+        "notes",
+        "version",
+        "semantic_schema_version",
+        "trust_level",
+        "provenance",
+        "tests",
+        "handlers",
+        "event_condition",
+        "coverage"
+      ],
+      "properties": {
+        "destination": {"type": ["string", "null"]},
+        "requires_arbiter": {"type": "boolean"},
+        "notes": {"type": "string"},
+        "version": {"type": "integer", "minimum": 1},
+        "semantic_schema_version": {"type": "integer", "minimum": 1},
+        "trust_level": {
+          "enum": [
+            "trusted",
+            "provisional",
+            "unresolved",
+            "intentionally_ignored"
+          ]
+        },
+        "provenance": {"type": "object"},
+        "tests": {"$ref": "#/$defs/strings"},
+        "handlers": {"$ref": "#/$defs/objects"},
+        "event_condition": {"$ref": "#/$defs/nullable_object"},
+        "coverage": {"$ref": "#/$defs/strings"}
+      }
+    },
+    "program_trust_closure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capability_dependencies",
+        "capability_reachable",
+        "profiles",
+        "registry_fingerprints",
+        "legacy_ability_ids",
+        "blockers",
+        "trusted",
+        "fingerprint"
+      ],
+      "properties": {
+        "capability_dependencies": {"$ref": "#/$defs/strings"},
+        "capability_reachable": {"$ref": "#/$defs/strings"},
+        "profiles": {"$ref": "#/$defs/strings"},
+        "registry_fingerprints": {"$ref": "#/$defs/strings"},
+        "legacy_ability_ids": {"$ref": "#/$defs/strings"},
+        "blockers": {"$ref": "#/$defs/strings"},
+        "trusted": {"type": "boolean"},
+        "fingerprint": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

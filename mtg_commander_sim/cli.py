@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .card_programs import CARD_PROGRAM_OPERATIONS, execute_card_operation
 from .carddb import CardDatabase
 from .codex_cli import CodexCliArenaRunner, CodexExecClient
 from .arena import (
@@ -484,6 +485,34 @@ def build_parser() -> argparse.ArgumentParser:
         )
         child.add_argument("--commander-legal-only", action="store_true")
         child.add_argument("--limit", type=int)
+        child.add_argument("--output")
+
+    card_program = sub.add_parser(
+        "card",
+        help="Compile and audit canonical CardProgram V2 artifacts",
+    )
+    card_program_sub = card_program.add_subparsers(
+        dest="card_cmd",
+        required=True,
+    )
+    for operation in sorted(CARD_PROGRAM_OPERATIONS):
+        child = card_program_sub.add_parser(operation)
+        if operation in {"compile", "explain", "audit", "diff"}:
+            child.add_argument("card")
+        child.add_argument(
+            "--db",
+            default="data/scryfall-20260728-compact.sqlite3",
+        )
+        child.add_argument(
+            "--profile",
+            choices=("traditional", "commander_duel", "commander_review"),
+            default="traditional",
+        )
+        if operation == "diff":
+            child.add_argument("--against", required=True)
+        if operation == "coverage":
+            child.add_argument("--commander-legal-only", action="store_true")
+            child.add_argument("--limit", type=int)
         child.add_argument("--output")
 
     pilot_run = sub.add_parser(
@@ -1007,6 +1036,24 @@ def main(argv: list[str] | None = None) -> int:
                 card=card,
                 commander_legal_only=args.commander_legal_only,
                 limit=args.limit,
+                output=args.output,
+            )
+        except (KeyError, ValueError) as exc:
+            raise SystemExit(str(exc)) from exc
+        print(stable_json(value))
+        return 0
+    if args.cmd == "card":
+        try:
+            value = execute_card_operation(
+                args.card_cmd,
+                db_path=args.db,
+                card=getattr(args, "card", None),
+                profile=args.profile,
+                against=getattr(args, "against", None),
+                commander_legal_only=getattr(
+                    args, "commander_legal_only", False
+                ),
+                limit=getattr(args, "limit", None),
                 output=args.output,
             )
         except (KeyError, ValueError) as exc:

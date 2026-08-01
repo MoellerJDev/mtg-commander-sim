@@ -338,7 +338,7 @@ generated documentation fixtures with bearer capabilities redacted. See
   fail-closed material residuals
 - automatic deck-time generic compilation into provisional, arbiter-gated
   semantic programs
-- Oracle IR v11 simple self-trigger, unconditional-entry, counter, pump, basic
+- Oracle IR v12 simple self-trigger, unconditional-entry, counter, pump, basic
   creature-token, fixed-mana combat-declaration cost, and exact combat-
   declaration restriction/evasion/battlefield-condition/composition and
   source-controller target-scope templates with reviewed-handler precedence,
@@ -719,6 +719,21 @@ particular, the two Control Point previews in the July 28 Oracle corpus
 postdate the June 19 pinned rules and are not silently treated as Sieges.
 
 ```bash
+python simctl.py card compile "Lightning Bolt" \
+  --db data/scryfall-current.sqlite3 \
+  --output snapshots/lightning-bolt.card-program.json
+python simctl.py card explain "Lightning Bolt" \
+  --db data/scryfall-current.sqlite3
+python simctl.py card audit "Rest in Peace" \
+  --db data/scryfall-current.sqlite3
+python simctl.py card diff "Lightning Bolt" \
+  --against snapshots/lightning-bolt.card-program.json \
+  --db data/scryfall-current.sqlite3
+python simctl.py card overrides --db data/scryfall-current.sqlite3
+python simctl.py card coverage --limit 100 \
+  --db data/scryfall-current.sqlite3
+
+# Lower-level Oracle IR compatibility diagnostics remain available.
 python simctl.py oracle parse "Lightning Bolt" \
   --db data/scryfall-current.sqlite3
 python simctl.py oracle explain "Rest in Peace" \
@@ -726,6 +741,15 @@ python simctl.py oracle explain "Rest in Peace" \
 python simctl.py oracle coverage \
   --db data/scryfall-current.sqlite3
 ```
+
+CardProgram V2 is the canonical deterministic runtime artifact. It combines
+generated Oracle IR and reviewed semantic-pack abilities under stable card,
+face, and ability identities; records source spans, typed costs/targets/effect
+families, residuals, capabilities, trust closure, and exact fingerprints; and
+fails closed on stale or inconsistent sources. Semantic pack v3 remains a
+compatibility input, not a second rules authority. New Game Record v3 files pin
+the complete card-program map and the subset used by every command while
+remaining replay-compatible with older v3 records.
 
 This is still not a completeness declaration. Current exact, partial,
 unresolved, and material-residual figures are generated in
@@ -1009,6 +1033,8 @@ container isolation when filesystem-level isolation must also be proven.
 - `mtg_commander_sim/protocol.py` — protocol version, state hashing, JSON patch generation/application
 - `mtg_commander_sim/client.py` — reference projected-state reducer
 - `mtg_commander_sim/semantics.py` — reusable effect-program registry
+- `mtg_commander_sim/card_programs/` — canonical CardProgram V2 model,
+  semantic/generated adapters, audit commands, and runtime validation
 - `mtg_commander_sim/mana.py` — conservative mana source parsing/planning
 - `mtg_commander_sim/abilities.py` — explicit Oracle ability/cost extraction and zone authorization
 - `mtg_commander_sim/session.py` — deterministic session façade

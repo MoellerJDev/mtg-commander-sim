@@ -2,7 +2,7 @@
 title: "Interaction coverage"
 status: "current"
 authoritative_source: "mechanic contracts, conformance records, semantic programs, and tests"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "3bb415ef898e3c013eaf78007c4169cc530111f5"
 audience: "rules and test contributors"
 maintenance: "hand-maintained"
 ---
@@ -26,6 +26,7 @@ For each rules slice, record:
 
 Coverage must be derived into machine-readable reports. A green unit test for
 one card does not promote its untested interactions, and an exact compiler node
-does not promote an untrusted runtime dependency. The Phase 2 capability
-registry will become the authoritative interaction graph; current mechanic
-contracts and conformance cases are migration inputs.
+does not promote an untrusted runtime dependency. The versioned capability
+registry is the authoritative fine-grained trust graph for migrated slices;
+current mechanic contracts and conformance cases remain migration inputs where
+fine-grained capability mappings do not yet exist.

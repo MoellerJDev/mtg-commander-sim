@@ -1,7 +1,7 @@
 ---
 title: "Oracle compiler"
 status: "current"
-authoritative_source: "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler/program_generation.py, the capability registry, and pinned coverage artifacts"
+authoritative_source: "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler/program_generation.py, mtg_commander_sim/card_programs, the capability registry, and pinned coverage artifacts"
 verified: "2026-08-01"
 audience: "compiler and rules contributors"
 maintenance: "hand-maintained"
@@ -15,6 +15,8 @@ It is deterministic for the same card/rulings snapshot and compiler version.
 `oracle_ir.py` owns parsing and IR compatibility; the extracted
 `compiler/program_generation.py` stage owns lowering exact nodes into registry
 programs and preserves the public compatibility functions.
+`card_programs/adapters.py` combines those abilities, face identities,
+residuals, source hashes, and capability closure into canonical CardProgram V2.
 
 ```mermaid
 flowchart LR
@@ -24,7 +26,7 @@ flowchart LR
     Parse --> Residuals["classified material residuals"]
     Lower --> Gate["trust/dependency gate"]
     Residuals --> Gate
-    Gate --> Program["provisional or trusted registry entry"]
+    Gate --> Program["canonical CardProgram V2"]
 ```
 
 ## Invariants
@@ -39,6 +41,9 @@ flowchart LR
   trust from a migrated neighbor.
 - The local card database is a compiler input, not an engine dependency during
   a transition.
+- Reviewed semantic-pack abilities and generated abilities enter the same
+  CardProgram schema. A same-key reviewed ability wins; conflicting source or
+  face identity fails closed.
 
 ## Extension points
 

@@ -223,12 +223,23 @@
       "missing_dedicated_owner": false
     },
     {
-      "id": "card_overrides",
-      "status": "semantic_pack_convention_without_typed_override_boundary",
+      "id": "card_program_v2",
+      "status": "canonical_schema_adapters_registry_cli_and_replay_pinning",
       "owners": [
+        "mtg_commander_sim/card_programs",
+        "mtg_commander_sim/semantics.py",
+        "mtg_commander_sim/record.py"
+      ],
+      "missing_dedicated_owner": false
+    },
+    {
+      "id": "card_overrides",
+      "status": "card_program_v2_boundary_with_no_explicit_typed_overrides",
+      "owners": [
+        "mtg_commander_sim/card_programs",
         "mtg_commander_sim/semantic_packs"
       ],
-      "missing_dedicated_owner": true
+      "missing_dedicated_owner": false
     }
   ],
   "compiler_stages": [
@@ -277,10 +288,11 @@
     },
     {
       "id": "lowering",
-      "current_status": "interleaved_with_face_compilation",
+      "current_status": "generated_abilities_extracted_and_aggregated_to_card_program_v2",
       "evidence_symbols": [
         "_compile_face",
-        "generated_programs"
+        "generated_programs",
+        "compile_card_program"
       ]
     },
     {
@@ -302,8 +314,10 @@
     },
     {
       "id": "validation",
-      "current_status": "partial_program_registration_checks",
+      "current_status": "card_program_v2_schema_roundtrip_source_trust_and_fingerprint_validation",
       "evidence_symbols": [
+        "CardProgram",
+        "canonical_program_fingerprint",
         "register_generated_programs"
       ]
     }

@@ -2,7 +2,7 @@
 title: "Rules completeness program"
 status: "current"
 authoritative_source: "pinned rules corpus, coverage schemas, and trust policy"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "3bb415ef898e3c013eaf78007c4169cc530111f5"
 audience: "rules, compiler, and test contributors"
 maintenance: "hand-maintained"
 ---
@@ -29,7 +29,7 @@ Existing reviewed engine behavior and semantic packs remain available, but the
 new corpus does not retroactively label them trusted until contracts, rule
 references, and conformance tests are linked.
 
-Oracle IR v11 additionally structures exact whole-line forms for simple self
+Oracle IR v12 additionally structures exact whole-line forms for simple self
 enters/dies/leaves triggers, unconditional enters-tapped replacements, fixed
 self pumps and keyword grants, one-counter instructions, and basic creature
 token creation, plus target-creature goad instructions with optional opponent-

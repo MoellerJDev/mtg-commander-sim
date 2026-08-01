@@ -1,8 +1,8 @@
 ---
 title: "Card override extension guide"
 status: "current"
-authoritative_source: "semantic pack validation and compiler trust policy"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+authoritative_source: "CardProgram V2 validation, semantic pack compatibility, and compiler trust policy"
+verified: "2026-08-01"
 audience: "rules and compiler contributors"
 maintenance: "hand-maintained"
 ---
@@ -13,6 +13,12 @@ A card override is a last-resort, reviewed program for behavior that cannot yet
 be expressed by reusable compiler nodes and capabilities. It belongs in
 metadata/override scope, never as a printed-name or Oracle-ID branch in the
 kernel.
+
+An override is a CardProgram V2 producer, not a parallel runtime format. It
+must emit the same typed ability fields and exact fingerprints as generated or
+reviewed pack input. `simctl card overrides` lists only programs with explicit
+override metadata; ordinary reviewed semantic packs are not silently relabeled
+as typed overrides.
 
 ## Required evidence
 

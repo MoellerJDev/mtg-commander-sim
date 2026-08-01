@@ -1,57 +1,82 @@
 ---
-title: "Card programs"
+title: "CardProgram V2"
 status: "current"
-authoritative_source: "mtg_commander_sim/semantics.py, capability registry, and semantic pack schemas"
+authoritative_source: "mtg_commander_sim/card_programs, mtg_commander_sim/semantics.py, and schemas/card-program-v2.schema.json"
 verified: "2026-08-01"
-audience: "compiler, rules, and semantic-pack contributors"
+audience: "compiler, rules, replay, and semantic-pack contributors"
 maintenance: "hand-maintained"
 ---
 
-# Card programs
+# CardProgram V2
 
-A `SemanticProgram` is immutable, source-pinned executable metadata associated
-with an Oracle identity. Schema v3 records zones, abilities, effects, targets,
-triggers, trust metadata, source hashes, and dependency evidence. The registry
-merges reviewed packs and provisional compiler output while rejecting
-incompatible or conflicting definitions.
+`CardProgram` schema version 2 is the canonical deterministic card artifact.
+It groups every executable ability for one Oracle ID with card and face
+identity, Oracle/rulings hashes, source spans, compiler and semantic hashes,
+residuals, provenance, exact capability dependencies, trust closure, and one
+artifact fingerprint.
 
-Capability-aware generated programs may also carry additive direct capability
-IDs and the resolved profile-scoped closure with registry and closure
-fingerprints. Programs without those fields retain their prior serialized
-shape. This is the compatibility rail for CardProgram V2, not CardProgram V2
-itself.
+Each stable ability ID projects the runtime ability into explicit fields for
+active zones, timing permissions, costs, modes, targets, choices, effect
+nodes, triggers, static effects, replacements, prevention, continuous effects,
+linked identities, durations, delayed effects, copy behavior, and zone
+permissions. An empty field means that artifact does not declare the family;
+it is not evidence that the family is universally implemented.
+
+The existing `SemanticProgram` class is the executable ability object inside
+CardProgram V2. Semantic pack v3 files are compatibility inputs. The registry
+groups them by Oracle ID and retains the old semantic-key map only as a derived
+index for engine callers and historical records. Saved `semantics.json`
+snapshots contain both views and fail loading if they disagree.
+
+Generated Oracle IR produces the same CardProgram shape. Reviewed pack
+abilities supersede generated abilities only on the same semantic key.
+Unpinned provisional abilities may be represented for development, but their
+missing hashes become explicit trust blockers. Conflicting nonempty hashes,
+ambiguous faces, stale source data, material residuals, or fingerprint drift
+fail closed.
 
 ## Trust boundary
 
-- Reviewed packs may be trusted only when their source fingerprints and tests
-  match.
-- Compiler output remains provisional when any material residual or dependency
-  is unresolved.
-- A capability-aware compiler promotion requires every member of the exact
-  transitive closure to be trusted for the selected profile.
+- Reviewed abilities are executable as trusted only when their source hashes,
+  tests, canonical card membership, and any capability closure match.
+- Compiler output remains provisional when material residuals or dependencies
+  are unresolved.
 - Broad mechanic aggregate status neither grants nor revokes a smaller exact
-  closure; unmigrated nodes keep using the conservative broad-contract gate.
-- Game creation pins the semantic registry fingerprint. A saved game is not
-  silently upgraded by a later pack.
-- Runtime execution accepts registered operations only. Unknown operations and
-  semantically incomplete paths fail closed.
+  closure; unmigrated nodes keep the conservative broad-contract gate.
+- New Game Record v3 manifests pin every CardProgram fingerprint. Commands pin
+  the card programs actually used. Replay validates both when present and
+  remains compatible with older v3 records.
+- Runtime accepts registered operations only. Oracle prose is not parsed
+  during a state transition.
 
-## Current execution model
+## Execution ownership
 
-Programs subscribe to represented events or define cast/activated/resolution
-behavior. `CommanderEngine` performs the actual mutations through generic
-effect operations, target selection, choice continuations, trigger collection,
-and stabilization. A program does not receive arbitrary Python or game-state
-write authority.
+`mtg_commander_sim/card_programs/` owns pure schema validation, deterministic
+serialization, adapters, inspection, and source/identity checks. It owns no
+`GameState` and cannot mutate a game. `SemanticRegistry` owns the canonical
+groups and semantic-key index. `CommanderEngine` remains the current mutation
+owner and consumes only indexed compiled abilities; Phase 4 will migrate its
+central operation dispatch to typed handlers.
 
-## Target CardProgram v2 boundary
+## Inspection
 
-The migration target replaces broad mechanic trust with fine-grained capability
-dependency closure and makes every node's inputs, outputs, targeting, zones,
-visibility, and replay contract explicit. That target is not implemented merely
-because equivalent fields exist in current semantic packs. Schema changes,
-trust changes, or a new extension interface require an ADR.
+```bash
+python simctl.py card compile "Lightning Bolt" --db data/scryfall-current.sqlite3
+python simctl.py card explain "Mishra, Eminent One" --db data/scryfall-current.sqlite3
+python simctl.py card audit "Mishra, Eminent One" --db data/scryfall-current.sqlite3
+python simctl.py card diff "Mishra, Eminent One" \
+  --against snapshots/mishra.card-program.json \
+  --db data/scryfall-current.sqlite3
+python simctl.py card overrides --db data/scryfall-current.sqlite3
+python simctl.py card coverage --limit 100 --db data/scryfall-current.sqlite3
+```
 
-See the [semantic-node guide](../extension/semantic-node.md),
+`card explain` reports faces, abilities, typed nodes, source spans,
+capabilities, tests, residuals, blockers, and runtime handler mapping. `audit`
+checks deterministic round-trip and source linkage. `diff` reports exact
+artifact paths instead of comparing prose.
+
+See [ADR 0005](../adr/0005-card-program-v2.md), the
+[semantic-node guide](../extension/semantic-node.md), the
 [override guide](../extension/card-override.md), and generated
 [compiler status](../COMPILER_COVERAGE_STATUS.md).

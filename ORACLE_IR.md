@@ -1,7 +1,7 @@
 ---
 title: "Typed Oracle IR"
 status: "current"
-authoritative_source: "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler/program_generation.py, and mtg_commander_sim/rules/capabilities.py"
+authoritative_source: "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler/program_generation.py, mtg_commander_sim/card_programs, and mtg_commander_sim/rules/capabilities.py"
 verified: "2026-08-01"
 audience: "compiler and semantic contributors"
 maintenance: "hand-maintained"
@@ -70,6 +70,13 @@ reviewed card from triggering twice merely because its reviewed ability key
 uses a different author-defined name. Simple unconditional "enters tapped"
 text is applied by the authoritative zone-move path rather than by a pilot or
 generated effect.
+
+Every generated ability can now be aggregated into CardProgram V2 with its
+face identity, source span, typed behavior families, residuals, exact trust
+closure, semantic hash, and deterministic fingerprint. Reviewed semantic-pack
+abilities overlay only the same stable key. The older `oracle` commands remain
+IR diagnostics; `simctl card compile|explain|audit|diff|overrides|coverage`
+inspects the canonical runtime artifact.
 
 Thus an unfamiliar deck can be parsed and partially compiled automatically,
 but an unreviewed match cannot silently execute guessed rules. A

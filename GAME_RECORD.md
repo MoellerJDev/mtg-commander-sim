@@ -25,7 +25,7 @@ authoritative checkpoint, append-oriented journals, and a derived review.
 | `opportunities.jsonl` | Engine-side priority audit with meaningful-action signature, delivery/suppression disposition, and decision link |
 | `review.json` | Machine-readable derived history, diagnostics, and fidelity gate |
 | `review.md` | Human-readable review grouped by meaningful turns |
-| `semantics.json` | Optional local semantic programs used by that game |
+| `semantics.json` | Pinned CardProgram V2 objects plus the derived legacy semantic-key index used by that game |
 | `cursors.json` | Delivery cursor state; not part of authoritative replay |
 | `pilot-profiles.json` | Advisory fingerprinted profile assigned to each pilot principal |
 | `plans.json` | Remaining validated ordered-plan actions required to resume safely across fixed-seat tool processes |
@@ -39,7 +39,9 @@ opaque tokens when loaded. Consumed capabilities are not retained.
 
 Native command rows also record the action-template ID, selected object refs,
 targets, modes, X, selected costs, RNG consumption/results, and semantic
-program versions used by the transition. Rejected attempts stay in
+program versions used by the transition. New rows additionally record
+CardProgram schema version 2 and the exact card-level fingerprints used by the
+transition. Rejected attempts stay in
 `decisions.jsonl` and never enter `commands.jsonl`.
 
 Protocol 3.0 adds optional `client_command_id`,
@@ -60,6 +62,8 @@ checks:
 
 - engine version
 - semantic registry fingerprint
+- complete manifest CardProgram V2 fingerprint map, when present
+- command-scoped CardProgram V2 fingerprints for programs used, when present
 - before-state hash for every command
 - after-state hash for every command
 - final authoritative state hash
@@ -72,6 +76,14 @@ python simctl.py replay run/duel --db data/scryfall-current.sqlite3 --verify
 
 A mismatch fails closed at the first divergent command. Event text and
 capability tokens do not participate in the authoritative hash.
+
+CardProgram pinning is an additive Game Record v3 extension, not a record
+redesign. Historical v3 records without these fields continue to verify the
+semantic registry as before. A new record stores the complete card-program map
+in `manifest.card_programs`, repeats it under replay provenance, and stores
+only the used subset in each command's `semantics.card_programs_used`.
+`semantics.json` carries canonical CardPrograms and a compatibility program
+index; loading rejects disagreement between them before replay begins.
 
 Game Record v3 checkpoints now serialize both a card's stable physical
 `object_id` and its `zone_change_counter`. Together they identify the logical
@@ -271,12 +283,12 @@ legal targets. The report records `profile_fingerprint_match`,
 `provider_identity_verified`, `model_identity_verified`,
 `seat_projection_verified`, and `codex_subagent_run`.
 
-Version 0.8.0 records use the same Game Record v3 layout. Semantic closure does
-not redesign the record: replay continues to pin semantic-program identity,
-source hashes, accepted commands, transition hashes, opportunity rows, and
-honest provider metadata. A 100/100 exact-list preflight is necessary but not
-sufficient for matchup evidence; the terminal, replay, pilot, fidelity, format,
-and sample-size gates still apply.
+Version 0.8.0 records use the same Game Record v3 layout. CardProgram V2 and
+semantic closure do not redesign the record: replay pins card/ability program
+identity, source hashes, accepted commands, transition hashes, opportunity
+rows, and honest provider metadata. A 100/100 exact-list preflight is necessary
+but not sufficient for matchup evidence; the terminal, replay, pilot,
+fidelity, format, and sample-size gates still apply.
 
 The target-action audit additionally records actions prevented before
 exposure, incorrectly advertised actions, no-target/mode-target removals,

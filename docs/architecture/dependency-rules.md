@@ -2,7 +2,7 @@
 title: "Dependency and mutation rules"
 status: "current"
 authoritative_source: "platform/architecture-policy.json and architecture validator"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "3bb415ef898e3c013eaf78007c4169cc530111f5"
 audience: "all code contributors"
 maintenance: "hand-maintained"
 ---
@@ -26,6 +26,12 @@ Dependencies point toward the domain. Protected rules/domain modules may not
 import server frameworks, WebSockets, persistence adapters, AI providers, or
 application/session orchestration. Compiler and metadata code may describe
 rules programs but may not acquire runtime mutation authority.
+
+`mtg_commander_sim/card_programs/` owns the deterministic CardProgram V2 model,
+generated/reviewed adapters, source/trust validation, and inspection commands.
+It may depend on compiler output, semantic value objects, the card database,
+and capability metadata. It must not depend on transport, server, pilot,
+session, or persistence orchestration, and it never mutates `GameState`.
 
 `CommanderEngine` remains a measured legacy mutation boundary while it is
 decomposed. New engine methods, direct `GameState` write sites, card-name/Oracle

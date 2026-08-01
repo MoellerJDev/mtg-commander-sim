@@ -6,7 +6,7 @@ import random
 import re
 import uuid
 from contextlib import contextmanager
-from dataclasses import asdict, dataclass, replace
+from dataclasses import dataclass, replace
 from typing import Any, Iterable, Iterator, Mapping, Sequence
 
 from .abilities import (
@@ -17,6 +17,10 @@ from .abilities import (
     reduced_requirements,
 )
 from .carddb import CardDatabase, CardRecord
+from .card_programs.validation import (
+    canonical_program_fingerprint,
+    program_source_is_current,
+)
 from .combat import (
     DEFENDER,
     DEATHTOUCH,
@@ -168,7 +172,7 @@ class CommanderEngine:
         self.state = state
         self.semantics = semantics or SemanticRegistry()
         self.permissions = CapabilityManager(self.state)
-        self._semantic_trust_cache: dict[tuple[str, str], bool] = {}
+        self._semantic_trust_cache: dict[tuple[str, str, str], bool] = {}
         self._assert_invariants()
 
     def semantic_program_is_current_trusted(
@@ -180,43 +184,16 @@ class CommanderEngine:
         program_hash = hashlib.sha256(
             stable_json(program.to_dict()).encode("utf-8")
         ).hexdigest()
-        cache_key = (program.key, program_hash)
+        card_fingerprint = canonical_program_fingerprint(
+            self.semantics, program
+        )
+        if card_fingerprint is None:
+            return False
+        cache_key = (program.key, program_hash, card_fingerprint)
         cached = self._semantic_trust_cache.get(cache_key)
         if cached is not None:
             return cached
-        if not program.oracle_id:
-            self._semantic_trust_cache[cache_key] = False
-            return False
-        try:
-            record = self.card_db.by_oracle_id(program.oracle_id)
-        except KeyError:
-            self._semantic_trust_cache[cache_key] = False
-            return False
-        oracle_hash = hashlib.sha256(
-            record.oracle_text.encode("utf-8")
-        ).hexdigest()
-        rulings_hash = hashlib.sha256(
-            stable_json(
-                sorted(
-                    (
-                        asdict(ruling)
-                        for ruling in self.card_db.rulings(record)
-                    ),
-                    key=lambda row: (
-                        str(row["published_at"]),
-                        str(row["source"]),
-                        str(row["comment"]),
-                        str(row["oracle_id"]),
-                    ),
-                )
-            ).encode("utf-8")
-        ).hexdigest()
-        result = (
-            program.provenance.get("source_oracle_hash")
-            == oracle_hash
-            and program.provenance.get("source_rulings_hash")
-            == rulings_hash
-        )
+        result = program_source_is_current(self.card_db, program)
         self._semantic_trust_cache[cache_key] = result
         return result
 

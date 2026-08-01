@@ -2,7 +2,7 @@
 title: "Documentation map"
 status: "current"
 authoritative_source: "repository documentation policy"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "3bb415ef898e3c013eaf78007c4169cc530111f5"
 audience: "users, operators, and contributors"
 maintenance: "hand-maintained"
 ---
@@ -43,6 +43,7 @@ indexed here but excluded from documentation front-matter validation.
 - [ADR 0002 — seat projections](adr/0002-seat-projected-network-protocol.md)
 - [ADR 0003 — ratcheted enforcement](adr/0003-ratcheted-architecture-enforcement.md)
 - [ADR 0004 — fine-grained capability trust](adr/0004-fine-grained-capability-trust.md)
+- [ADR 0005 — canonical CardProgram V2](adr/0005-card-program-v2.md)
 - [Legacy consolidated architecture reference](../ARCHITECTURE.md)
 - [Client integration boundary](../CLIENT_INTEGRATION.md)
 - [Game Record v3](../GAME_RECORD.md)

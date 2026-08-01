@@ -14,9 +14,19 @@ This generated report describes only the pinned Oracle corpus and current compil
 ## Current representation
 
 - Compiler: `oracle-ir-v12`
-- Runtime IR: OracleCardIR plus SemanticProgram
-- CardProgram V2 present: false
+- Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
+- CardProgram V2 present: true
 - Compiler module: 1,832 physical / 1,765 logical lines
+
+## Canonical CardProgram
+
+- Schema version: `2`
+- Schema: `schemas/card-program-v2.schema.json`
+- Required card fields: 14
+- Required per-ability fields: 27
+- Model: `mtg_commander_sim/card_programs/model.py`
+- Generated/reviewed adapter: `mtg_commander_sim/card_programs/adapters.py`
+- Runtime validator: `mtg_commander_sim/card_programs/validation.py`
 
 ## Stages
 
@@ -28,10 +38,10 @@ This generated report describes only the pinned Oracle corpus and current compil
 | `parsing` | `regex_and_helper_parsers_interleaved` | true |
 | `binding` | `not_a_distinct_stage` | false |
 | `typing` | `partial_dataclass_ir` | true |
-| `lowering` | `interleaved_with_face_compilation` | true |
+| `lowering` | `generated_abilities_extracted_and_aggregated_to_card_program_v2` | true |
 | `capability_closure` | `fine_grained_damage_slice_with_legacy_fallback` | true |
 | `residual_classification` | `implemented_interleaved` | true |
-| `validation` | `partial_program_registration_checks` | true |
+| `validation` | `card_program_v2_schema_roundtrip_source_trust_and_fingerprint_validation` | true |
 
 ## Fine-grained capability registry
 
@@ -75,7 +85,8 @@ This generated report describes only the pinned Oracle corpus and current compil
 - Duplicate keys resolved by pack order: 12
 - Unique Oracle IDs represented: 137
 - Card-specific operation names: 15
-- Typed card-override boundary present: false
+- Typed card-override boundary present: true
+- Explicit typed overrides: 0
 
 ## Snapshot fingerprints
 
@@ -86,4 +97,4 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Boundary
 
-The current compiler is partial and interleaved. Full-corpus exactness is not claimed. Fine-grained closure currently covers only the reviewed base-damage spell slice; other nodes retain the broad-contract fallback. CardProgram V2, typed handlers, and distinct compiler stages remain incremental work.
+The current compiler is partial and interleaved. Full-corpus exactness is not claimed. Fine-grained closure currently covers only the reviewed base-damage spell slice; other nodes retain the broad-contract fallback. CardProgram V2 now provides canonical aggregation, validation, and replay pinning. Typed handlers and fully distinct compiler stages remain incremental work.

@@ -56,6 +56,21 @@
         "hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
       }
     },
+    "card_programs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "fingerprints"],
+      "properties": {
+        "schema_version": {"const": 2},
+        "fingerprints": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
     "scryfall": {"type": "object"},
     "created_at": {"type": "string"},
     "updated_at": {"type": "string"},
@@ -73,7 +88,14 @@
         "mode": {"enum": ["command_replay", "commands", "legacy_snapshot"]},
         "verification": {"enum": ["not_run", "pass", "fail", "snapshot_only"]},
         "engine_version": {"type": "string"},
-        "semantics_fingerprint": {"type": "string"}
+        "semantics_fingerprint": {"type": "string"},
+        "card_program_fingerprints": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
       }
     },
     "review": {
