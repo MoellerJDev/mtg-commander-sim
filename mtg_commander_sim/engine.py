@@ -57,6 +57,7 @@ from .declaration_restrictions import (
     DeclarationConditionPlayer,
     DeclarationObjectPredicate,
     DeclarationRestrictionTemplate,
+    DeclarationSharedSubtypeCondition,
     parse_declaration_restriction_line,
 )
 from .damage import DamageEvent, DamageRecipientKind
@@ -3976,6 +3977,9 @@ class CommanderEngine:
 
         if was_attacker:
             self.state.combat.attackers.pop(card.object_id, None)
+            self.state.combat.attack_target_context.pop(
+                card.object_id, None
+            )
         card.attacking = None
         card.blocking = None
         self._log(
@@ -17497,6 +17501,7 @@ class CommanderEngine:
 
         costs: list[DeclarationCost] = []
         unresolved: list[tuple[CardInstance, str]] = []
+        by_ref = {card.ref: card for card in self.state.cards.values()}
         for source in sorted(
             self.state.cards.values(), key=lambda value: value.ref
         ):
@@ -17508,6 +17513,24 @@ class CommanderEngine:
                 parsed = parse_declaration_cost_line(line)
                 if kind not in parsed.declarations:
                     continue
+
+                def source_planeswalker(option: str) -> bool:
+                    target = by_ref.get(option)
+                    if (
+                        target is None
+                        or target.controller != source.controller
+                    ):
+                        return False
+                    target_types, _, _ = self._type_parts(
+                        str(
+                            self._effective_card_data(target).get(
+                                "type_line"
+                            )
+                            or ""
+                        )
+                    )
+                    return "planeswalker" in target_types
+
                 selections: list[tuple[str, str]] = []
                 if parsed.scope == "self" and source.ref in domains:
                     selections.extend(
@@ -17527,10 +17550,26 @@ class CommanderEngine:
                     parsed.scope == "source_controller"
                     and kind == "attack"
                 ):
+                    for variable, options in sorted(domains.items()):
+                        selections.extend(
+                            (variable, str(option))
+                            for option in options
+                            if option == source.controller
+                            or (
+                                parsed.template is not None
+                                and parsed.template.includes_planeswalkers
+                                and source_planeswalker(str(option))
+                            )
+                        )
+                elif (
+                    parsed.scope == "source_planeswalkers"
+                    and kind == "attack"
+                ):
                     selections.extend(
-                        (variable, source.controller)
+                        (variable, str(option))
                         for variable, options in sorted(domains.items())
-                        if source.controller in options
+                        for option in options
+                        if source_planeswalker(str(option))
                     )
                 elif parsed.scope == "global" and kind == "block":
                     selections.extend(
@@ -17820,6 +17859,46 @@ class CommanderEngine:
                 condition.kind == "attacking_alone"
                 and len(self._current_attacker_cards()) == 1
             )
+        if isinstance(condition, DeclarationSharedSubtypeCondition):
+            player = self._declaration_condition_player(
+                condition.player,
+                kind=kind,
+                source=source,
+                variable=variable,
+                option=option,
+                by_ref=by_ref,
+            )
+            if player is None:
+                return False
+            subtype_counts: dict[str, int] = {}
+            changelings = 0
+            for card in self.state.cards.values():
+                if (
+                    card.zone != "battlefield"
+                    or card.phased_out
+                    or card.controller != player
+                ):
+                    continue
+                data = self._effective_card_data(card)
+                card_types, subtypes, _ = self._type_parts(
+                    str(data.get("type_line") or "")
+                )
+                if "creature" not in card_types:
+                    continue
+                has_changeling = "changeling" in normalized_keywords(
+                    data.get("keywords", [])
+                )
+                if has_changeling:
+                    changelings += 1
+                else:
+                    for subtype in subtypes:
+                        subtype_counts[subtype] = (
+                            subtype_counts.get(subtype, 0) + 1
+                        )
+            return changelings >= condition.minimum or any(
+                count + changelings >= condition.minimum
+                for count in subtype_counts.values()
+            )
         player = self._declaration_condition_player(
             condition.player,
             kind=kind,
@@ -17966,8 +18045,12 @@ class CommanderEngine:
                     if kind == "attack":
                         constraint_label = (
                             f"{self.display_name(source.object_id)} allows at "
-                            f"most {template.count} creature(s) to attack its "
-                            "controller."
+                            f"most {template.count} creature(s) to attack "
+                            + (
+                                "it."
+                                if template.scope == "source_option"
+                                else "its controller."
+                            )
                         )
                     elif template.mode == "minimum_option_uses":
                         constraint_label = (
@@ -18153,9 +18236,17 @@ class CommanderEngine:
         tuple[DeclarationCost, ...],
         tuple[tuple[CardInstance, str, str], ...],
     ]:
+        planeswalkers = self._attackable_planeswalkers(active)
+        battles = self._attackable_battles(active)
+        planeswalker_ids = {walker["id"] for walker in planeswalkers}
         defenders = [
             *[seat for seat in self.active_seats if seat != active],
-            *[battle["id"] for battle in self._attackable_battles(active)],
+            *[walker["id"] for walker in planeswalkers],
+            *[
+                battle["id"]
+                for battle in battles
+                if battle["id"] not in planeswalker_ids
+            ],
         ]
         domains: dict[str, tuple[str, ...]] = {}
         requirements: list[DeclarationRequirement] = []
@@ -18256,8 +18347,9 @@ class CommanderEngine:
         attacker_cards = [
             card
             for card in self._current_attacker_cards()
-            if self._defending_player_for_attack_target(
-                self.state.combat.attackers[card.object_id]
+            if self._defending_player_for_attacker(
+                card.object_id,
+                self.state.combat.attackers[card.object_id],
             )
             == defender
         ]
@@ -18439,6 +18531,11 @@ class CommanderEngine:
             ]
             self._grant_priority(active)
             return
+        planeswalker_defenders = self._attackable_planeswalkers(active)
+        battle_defenders = self._attackable_battles(active)
+        permanent_defender_ids = {
+            walker["id"] for walker in planeswalker_defenders
+        }
         self.permissions.issue(
             kind="combat.attackers",
             role="pilot",
@@ -18454,15 +18551,17 @@ class CommanderEngine:
                             if seat != active
                         ],
                         *[
+                            walker["id"]
+                            for walker in planeswalker_defenders
+                        ],
+                        *[
                             battle["id"]
-                            for battle in self._attackable_battles(
-                                active
-                            )
+                            for battle in battle_defenders
+                            if battle["id"] not in permanent_defender_ids
                         ],
                     ],
-                    "battle_defenders": self._attackable_battles(
-                        active
-                    ),
+                    "planeswalker_defenders": planeswalker_defenders,
+                    "battle_defenders": battle_defenders,
                     "declaration_constraints": problem.projection(),
                     "declaration_costs": [
                         cost.to_dict() for cost in costs
@@ -18475,6 +18574,37 @@ class CommanderEngine:
                 }
             },
         )
+
+    def _attackable_planeswalkers(
+        self,
+        attacker: str,
+    ) -> list[dict[str, Any]]:
+        planeswalkers: list[dict[str, Any]] = []
+        for card in self.state.cards.values():
+            if (
+                card.zone != "battlefield"
+                or card.phased_out
+                or card.controller not in self.active_seats
+                or card.controller == attacker
+            ):
+                continue
+            card_types, _, _ = self._type_parts(
+                str(
+                    self._effective_card_data(card).get("type_line")
+                    or ""
+                )
+            )
+            if "planeswalker" not in card_types:
+                continue
+            planeswalkers.append(
+                {
+                    "id": card.ref,
+                    "name": self.display_name(card.object_id),
+                    "controller": card.controller,
+                    "loyalty": int(card.counters.get("loyalty", 0)),
+                }
+            )
+        return sorted(planeswalkers, key=lambda value: value["id"])
 
     def _attackable_battles(self, attacker: str) -> list[dict[str, Any]]:
         battles: list[dict[str, Any]] = []
@@ -18531,14 +18661,87 @@ class CommanderEngine:
         )
         return battle if "battle" in card_types else None
 
+    def _planeswalker_for_attack_target(
+        self,
+        value: str,
+    ) -> CardInstance | None:
+        planeswalker = next(
+            (
+                card
+                for card in self.state.cards.values()
+                if card.ref == value
+                and card.zone == "battlefield"
+                and not card.phased_out
+            ),
+            None,
+        )
+        if planeswalker is None:
+            return None
+        card_types, _, _ = self._type_parts(
+            str(
+                self._effective_card_data(planeswalker).get("type_line")
+                or ""
+            )
+        )
+        return planeswalker if "planeswalker" in card_types else None
+
+    def _attack_target_details(
+        self,
+        attacker: str,
+        value: str,
+    ) -> dict[str, str] | None:
+        if value in self.active_seats and value != attacker:
+            return {
+                "target": value,
+                "kind": "player",
+                "defending_player": value,
+            }
+        planeswalker = self._planeswalker_for_attack_target(value)
+        if (
+            planeswalker is not None
+            and planeswalker.controller in self.active_seats
+            and planeswalker.controller != attacker
+        ):
+            return {
+                "target": planeswalker.ref,
+                "kind": "planeswalker",
+                "defending_player": planeswalker.controller,
+            }
+        battle = self._battle_for_attack_target(value)
+        if (
+            battle is not None
+            and battle.battle_protector in self.active_seats
+            and battle.battle_protector != attacker
+        ):
+            return {
+                "target": battle.ref,
+                "kind": "battle",
+                "defending_player": str(battle.battle_protector),
+            }
+        return None
+
     def _defending_player_for_attack_target(
         self,
         value: str,
     ) -> str | None:
         if value in self.active_seats:
             return value
+        planeswalker = self._planeswalker_for_attack_target(value)
+        if planeswalker is not None:
+            return planeswalker.controller
         battle = self._battle_for_attack_target(value)
         return battle.battle_protector if battle is not None else None
+
+    def _defending_player_for_attacker(
+        self,
+        attacker_id: str,
+        target: str,
+    ) -> str | None:
+        context = self.state.combat.attack_target_context.get(attacker_id)
+        if context is not None:
+            defender = context.get("defending_player")
+            return defender if defender in self.state.players else None
+        return self._defending_player_for_attack_target(target)
 
     def _complete_attackers(self, decision: Any) -> None:
         active = decision.actors[0]
@@ -18571,7 +18774,7 @@ class CommanderEngine:
                 }
         if not isinstance(declarations, Mapping):
             raise GameRuleError("Attack declarations must be a mapping or list")
-        chosen: list[tuple[CardInstance, str]] = []
+        chosen: list[tuple[CardInstance, dict[str, str]]] = []
         canonical: dict[str, str] = {}
         used: set[str] = set()
         for value, defender in dict(declarations).items():
@@ -18579,29 +18782,17 @@ class CommanderEngine:
             if card.object_id in used:
                 raise GameRuleError("A creature cannot be declared twice")
             defender = str(defender)
-            if defender in self.active_seats:
-                if defender == active:
-                    raise GameRuleError(
-                        f"Invalid defending player {defender}"
-                    )
-            else:
-                battle = self._battle_for_attack_target(defender)
-                if (
-                    battle is None
-                    or battle.battle_protector not in self.active_seats
-                    or battle.battle_protector == active
-                ):
-                    raise GameRuleError(
-                        f"Invalid Battle defender {defender}"
-                    )
-                defender = battle.ref
+            target_details = self._attack_target_details(active, defender)
+            if target_details is None:
+                raise GameRuleError(f"Invalid attack defender {defender}")
+            defender = target_details["target"]
             declaration_error = self._attack_declaration_error(
                 card,
                 active,
             )
             if declaration_error is not None:
                 raise GameRuleError(declaration_error)
-            chosen.append((card, defender))
+            chosen.append((card, target_details))
             canonical[card.ref] = defender
             used.add(card.object_id)
 
@@ -18613,7 +18804,7 @@ class CommanderEngine:
                 "The attack declaration has unresolved restriction or cost semantics"
             )
         self._validate_declaration_requirements(problem, canonical)
-        for card, defender in chosen:
+        for card, _target_details in chosen:
             data = self._effective_card_data(card)
             if "Vigilance" not in data.get("keywords", []):
                 card.tapped = True
@@ -18631,17 +18822,23 @@ class CommanderEngine:
                 response,
                 spend_context="combat_declaration",
             )
-        surviving_attackers: list[tuple[CardInstance, str]] = []
-        for card, defender in chosen:
+        surviving_attackers: list[
+            tuple[CardInstance, dict[str, str]]
+        ] = []
+        for card, target_details in chosen:
             if (
                 card.zone != "battlefield"
                 or card.controller != active
                 or card.phased_out
             ):
                 continue
-            card.attacking = str(defender)
-            self.state.combat.attackers[card.object_id] = str(defender)
-            surviving_attackers.append((card, defender))
+            defender = target_details["target"]
+            card.attacking = defender
+            self.state.combat.attackers[card.object_id] = defender
+            self.state.combat.attack_target_context[card.object_id] = dict(
+                target_details
+            )
+            surviving_attackers.append((card, target_details))
         used = {card.object_id for card, _ in surviving_attackers}
         self.state.combat.attackers_declared = True
         if used:
@@ -18718,8 +18915,8 @@ class CommanderEngine:
         """Return only defenders whose player or permanent is attacked."""
 
         attacked = {
-            self._defending_player_for_attack_target(target)
-            for target in self.state.combat.attackers.values()
+            self._defending_player_for_attacker(attacker_id, target)
+            for attacker_id, target in self.state.combat.attackers.items()
         }
         return [
             seat
@@ -18766,8 +18963,9 @@ class CommanderEngine:
         attacker_cards = [
             card
             for card in self._current_attacker_cards()
-            if self._defending_player_for_attack_target(
-                self.state.combat.attackers[card.object_id]
+            if self._defending_player_for_attacker(
+                card.object_id,
+                self.state.combat.attackers[card.object_id],
             )
             == defender
         ]
@@ -18852,8 +19050,9 @@ class CommanderEngine:
             )
             if (
                 attack_target is None
-                or self._defending_player_for_attack_target(
-                    attack_target
+                or self._defending_player_for_attacker(
+                    attacker.object_id,
+                    attack_target,
                 )
                 != defender
             ):
@@ -19344,14 +19543,18 @@ class CommanderEngine:
                         targets.add(blocker.ref)
                 if (
                     TRAMPLE in self._combat_keywords(attacker)
-                    and self._combat_damage_target_exists(str(defender))
+                    and self._combat_damage_target_exists(
+                        str(defender), attacker_id=attacker.object_id
+                    )
                 ):
                     targets.add(str(defender))
             else:
                 target = str(defender)
                 targets = (
                     {target}
-                    if self._combat_damage_target_exists(target)
+                    if self._combat_damage_target_exists(
+                        target, attacker_id=attacker.object_id
+                    )
                     else set()
                 )
             source_targets[attacker.ref] = targets
@@ -19401,13 +19604,66 @@ class CommanderEngine:
             for source, targets in source_targets.items()
         }
 
-    def _combat_damage_target_exists(self, target: str) -> bool:
-        if target in self.state.players:
-            return target in self.active_seats
-        return any(
-            card.ref == target and card.zone == "battlefield"
-            for card in self.state.cards.values()
+    def _combat_damage_target_exists(
+        self,
+        target: str,
+        *,
+        attacker_id: str | None = None,
+    ) -> bool:
+        """Return whether an attack target is still a legal damage recipient.
+
+        An attacked permanent leaving combat does not remove its attackers
+        from combat (CR 506.4c), but an ordinary unblocked attacker then has
+        no combat-damage recipient (CR 510.1b).  The declaration-time target
+        kind and defending player keep that distinction authoritative.
+        """
+
+        if attacker_id is None:
+            if target in self.state.players:
+                return target in self.active_seats
+            return any(
+                card.ref == target
+                and card.zone == "battlefield"
+                and not card.phased_out
+                for card in self.state.cards.values()
+            )
+        context = self.state.combat.attack_target_context.get(attacker_id)
+        if context is None:
+            context = self._attack_target_details(
+                self.state.active_player, target
+            )
+        if context is None or context.get("target") != target:
+            return False
+        kind = context.get("kind")
+        defender = context.get("defending_player")
+        if kind == "player":
+            return target == defender and target in self.active_seats
+        card = next(
+            (
+                candidate
+                for candidate in self.state.cards.values()
+                if candidate.ref == target
+                and candidate.zone == "battlefield"
+                and not candidate.phased_out
+            ),
+            None,
         )
+        if card is None or defender not in self.active_seats:
+            return False
+        card_types, _, _ = self._type_parts(
+            str(self._effective_card_data(card).get("type_line") or "")
+        )
+        if kind == "planeswalker":
+            return (
+                "planeswalker" in card_types
+                and card.controller == defender
+            )
+        if kind == "battle":
+            return (
+                "battle" in card_types
+                and card.battle_protector == defender
+            )
+        return False
 
     def _combat_payload(
         self,
@@ -23170,6 +23426,13 @@ class CommanderEngine:
             )
             if attacking:
                 self.state.combat.attackers[object_id] = attacking
+                target_details = self._attack_target_details(
+                    controller, attacking
+                )
+                if target_details is not None:
+                    self.state.combat.attack_target_context[object_id] = (
+                        target_details
+                    )
             created.append(object_id)
         if artifact_token_event:
             replacement_sources = [

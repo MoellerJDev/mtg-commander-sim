@@ -64,14 +64,14 @@
     {
       "mechanic_id": "cr-510-combat-damage-step",
       "path": "mechanics/contracts/combat-damage-step.json",
-      "sha256": "b287c3cf90278a47122c376ea4cd1259120cabfa89dbfa9918a1b4b0b4ed18a4",
-      "version": 3
+      "sha256": "efa5ce2c61463962804108189beb02cb2ae2e662805244c7ed2fe600b35e5d28",
+      "version": 4
     },
     {
       "mechanic_id": "cr-506-combat-phase",
       "path": "mechanics/contracts/combat-phase.json",
-      "sha256": "a6e929326cd8e1cb82904f5eaee4220b76cfd54513936fd5be9cd3ced23ef3f0",
-      "version": 2
+      "sha256": "0bf2bab678f07716ac5711e5e203cb939acd106f9ba7101dfbcc16ae58dcd7a7",
+      "version": 3
     },
     {
       "mechanic_id": "cr-408-command",
@@ -106,14 +106,14 @@
     {
       "mechanic_id": "cr-508-declare-attackers-step",
       "path": "mechanics/contracts/declare-attackers-step.json",
-      "sha256": "4ec589ea4e9eed73ef6ed1c13d0cac6ae968b955d2a891bec63bc615c4c604f2",
-      "version": 8
+      "sha256": "29060dc483ed79a40c0a2084ab8e3b3abe4245d46e7ebe2470ece93c26566934",
+      "version": 9
     },
     {
       "mechanic_id": "cr-509-declare-blockers-step",
       "path": "mechanics/contracts/declare-blockers-step.json",
-      "sha256": "569be870e7e5043d36bd631ff3e2d9ec4a8156338b9e8ed17b9514e837a14dcb",
-      "version": 8
+      "sha256": "52d785a54f64be8afa8651d88bfc7f71ba9709ecc47ed2b323388733a00b55ea",
+      "version": 9
     },
     {
       "mechanic_id": "defender",
@@ -6664,19 +6664,18 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/combat-phase.json",
-      "contract_sha256": "a6e929326cd8e1cb82904f5eaee4220b76cfd54513936fd5be9cd3ced23ef3f0",
-      "contract_version": 2,
+      "contract_sha256": "0bf2bab678f07716ac5711e5e203cb939acd106f9ba7101dfbcc16ae58dcd7a7",
+      "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "TURN_STEPS and CommanderEngine combat entry, declaration, removal, stabilization, damage, finalization, and step-advance paths",
-      "implementation_version": "combat-phase-v2",
+      "implementation_version": "combat-phase-v3",
       "kind": "rules_section",
       "known_blockers": [
-        "planeswalker attack destinations are not represented",
         "single-defender, shared-team-turn, limited-range, and other multiplayer combat options are not implemented",
         "generic effects that put objects attacking or blocking are not implemented",
         "regeneration and explicit remove-from-combat effect grammar are not implemented",
-        "attacked planeswalker/Battle departure, hybrid type changes, and defending-player LKI are incomplete",
+        "explicit remove-an-attacked-permanent-from-combat effects and complete hybrid planeswalker/Battle type transitions remain incomplete",
         "attack-requirement provenance and had-to-attack queries are not implemented",
         "attacks-alone, attacking-alone, blocks-alone, and blocking-alone queries are not exposed generically",
         "combat-relative spell and ability timing grammar, skipped-point fallbacks, and multiple-combat tracking are not implemented",
@@ -6691,6 +6690,7 @@
         "test_contract_traces_every_cr_506_rule",
         "test_empty_combat_step_sequence_and_replay_are_exact",
         "test_supported_attacking_and_defending_roles_are_authoritative",
+        "test_departed_planeswalker_keeps_defender_but_not_damage_target",
         "test_zone_and_control_changes_remove_objects_from_combat",
         "test_phasing_and_type_loss_remove_combatants_during_stabilization",
         "test_tapping_and_untapping_do_not_remove_a_creature_from_combat",
@@ -6734,22 +6734,21 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-attackers-step.json",
-      "contract_sha256": "4ec589ea4e9eed73ef6ed1c13d0cac6ae968b955d2a891bec63bc615c4c604f2",
-      "contract_version": 8,
+      "contract_sha256": "29060dc483ed79a40c0a2084ab8e3b3abe4245d46e7ebe2470ece93c26566934",
+      "contract_version": 9,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine attacker declaration/payment transition",
-      "implementation_version": "declare-attackers-step-v8",
+      "implementation_version": "declare-attackers-step-v9",
       "kind": "rules_section",
       "known_blockers": [
-        "planeswalker attack targets are not implemented",
         "exact attacks-each-combat and typed goad requirements are represented; conditional, non-goad defender-specific, and other effect-granted requirement grammar remains incomplete",
-        "history-, monarch-, poison-, shared-subtype-quantifier-, compound-, named/nonplayer-target-, temporary-, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
+        "history-, monarch-, poison-, compound-, other named-target-, temporary-, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
         "banding declarations are not implemented",
         "optional, nonmana, variable, alternative, modified, and broader conditional attack costs are not implemented",
         "declare-attackers trigger generation and APNAP placement are incomplete",
         "effects that put creatures onto the battlefield attacking are not implemented",
-        "defending-player last-known information and attack-target reselection are not implemented"
+        "attack-target reselection and complete hybrid planeswalker/Battle target transitions are not implemented"
       ],
       "mechanic_id": "cr-508-declare-attackers-step",
       "official_name": "Declare Attackers Step",
@@ -6814,22 +6813,26 @@
         "test_attack_target_restrictions_are_source_controller_scoped",
         "test_filtered_attack_and_block_target_relations",
         "test_source_controller_attack_cap_is_per_target_and_replays",
-        "test_unsupported_named_attack_target_cap_pauses_fail_closed"
+        "test_named_planeswalker_attack_cap_is_target_scoped_and_replays",
+        "test_planeswalker_is_labeled_attackable_and_replays_exactly",
+        "test_departed_planeswalker_keeps_defender_but_not_damage_target",
+        "test_planeswalker_only_tax_is_locked_for_planeswalker_attack",
+        "test_player_and_planeswalker_tax_covers_both_target_kinds"
       ],
       "trust_level": "untrusted"
     },
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-blockers-step.json",
-      "contract_sha256": "569be870e7e5043d36bd631ff3e2d9ec4a8156338b9e8ed17b9514e837a14dcb",
-      "contract_version": 8,
+      "contract_sha256": "52d785a54f64be8afa8651d88bfc7f71ba9709ecc47ed2b323388733a00b55ea",
+      "contract_version": 9,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine blocker declaration/payment transition",
-      "implementation_version": "declare-blockers-step-v8",
+      "implementation_version": "declare-blockers-step-v9",
       "kind": "rules_section",
       "known_blockers": [
-        "history-, monarch-, poison-, shared-subtype-quantifier-, compound-with-unrelated-effects-, temporary-, broader-, and multi-block restriction/evasion grammar remains incomplete and recognized static families fail closed",
+        "history-, monarch-, poison-, compound-with-unrelated-effects-, temporary-, broader-, and multi-block restriction/evasion grammar remains incomplete and recognized static families fail closed",
         "only exact blocks-each-combat, must-be-blocked, lure, and menace grammar is represented; conditional, effect-granted, multi-block, and optional-cost grammar remains incomplete",
         "optional, nonmana, variable, alternative, modified, and broader conditional block costs are not implemented",
         "declare-blockers trigger generation and APNAP placement are incomplete",
@@ -6894,19 +6897,20 @@
         "test_source_can_require_two_other_blockers",
         "test_attacking_alone_and_no_other_creature_evasion_recompute",
         "test_attached_attacking_alone_evasion_uses_current_combat",
-        "test_filtered_attack_and_block_target_relations"
+        "test_filtered_attack_and_block_target_relations",
+        "test_shared_creature_subtype_condition_includes_changeling"
       ],
       "trust_level": "untrusted"
     },
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/combat-damage-step.json",
-      "contract_sha256": "b287c3cf90278a47122c376ea4cd1259120cabfa89dbfa9918a1b4b0b4ed18a4",
-      "contract_version": 3,
+      "contract_sha256": "efa5ce2c61463962804108189beb02cb2ae2e662805244c7ed2fe600b35e5d28",
+      "contract_version": 4,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "CommanderEngine APNAP combat assignment, typed damage-event, trigger-batch, and damage application paths",
-      "implementation_version": "combat-damage-step-v3",
+      "implementation_version": "combat-damage-step-v4",
       "kind": "rules_section",
       "known_blockers": [
         "trample over planeswalkers, banding assignment control, and complete combat assignment exceptions are not implemented",
@@ -6941,7 +6945,11 @@
         "test_trample_deals_to_defender_after_all_blockers_leave",
         "test_discretionary_assignments_are_collected_in_apnap_order_and_replay",
         "test_multiplayer_assignment_announcements_follow_apnap",
-        "test_damage_and_resulting_death_triggers_share_one_order_batch"
+        "test_damage_and_resulting_death_triggers_share_one_order_batch",
+        "test_unblocked_attacker_damages_planeswalker_loyalty",
+        "test_lethal_planeswalker_combat_damage_applies_state_action",
+        "test_unblocked_attacker_damages_battle_defense",
+        "test_departed_planeswalker_keeps_defender_but_not_damage_target"
       ],
       "trust_level": "untrusted"
     },

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "cr-506-combat-phase",
   "official_name": "Combat Phase",
   "effective_date": "2026-06-19",
@@ -81,11 +81,12 @@
       "controller",
       "zone",
       "phased status",
-      "attacking and blocking relationships"
+      "attacking and blocking relationships",
+      "declaration-time attack target kind and defending-player binding"
     ],
     "state_writes": [
       "phase and step",
-      "combat attacker and blocker relationships",
+      "combat attacker, target-context, and blocker relationships",
       "attacking and blocking markers",
       "priority and stack state"
     ],
@@ -97,9 +98,9 @@
       "combat-relative Oracle timing grammar is not generically compiled"
     ],
     "targets": [
-      "players and represented Battles may be attacked",
-      "planeswalker destinations remain blocked",
-      "attacked-permanent departure and last-known defender binding remain blocked"
+      "players, represented planeswalkers, and represented Battles may be attacked",
+      "an attacked permanent's declaration-time defending player remains bound after the target leaves or becomes invalid",
+      "an invalid departed attack target receives no ordinary combat damage"
     ],
     "choices": [
       "the active player declares attackers",
@@ -140,6 +141,7 @@
     "phasing and effective type loss",
     "tapping and untapping",
     "first/double-strike second damage step",
+    "planeswalker attack target departure before blockers or damage",
     "unsupported shared-team and alternate-attack multiplayer",
     "unsupported combat-relative timing grammar"
   ],
@@ -149,6 +151,7 @@
     "test_contract_traces_every_cr_506_rule",
     "test_empty_combat_step_sequence_and_replay_are_exact",
     "test_supported_attacking_and_defending_roles_are_authoritative",
+    "test_departed_planeswalker_keeps_defender_but_not_damage_target",
     "test_zone_and_control_changes_remove_objects_from_combat",
     "test_phasing_and_type_loss_remove_combatants_during_stabilization",
     "test_tapping_and_untapping_do_not_remove_a_creature_from_combat",
@@ -158,14 +161,13 @@
   ],
   "implementation": {
     "component": "TURN_STEPS and CommanderEngine combat entry, declaration, removal, stabilization, damage, finalization, and step-advance paths",
-    "version": "combat-phase-v2"
+    "version": "combat-phase-v3"
   },
   "known_blockers": [
-    "planeswalker attack destinations are not represented",
     "single-defender, shared-team-turn, limited-range, and other multiplayer combat options are not implemented",
     "generic effects that put objects attacking or blocking are not implemented",
     "regeneration and explicit remove-from-combat effect grammar are not implemented",
-    "attacked planeswalker/Battle departure, hybrid type changes, and defending-player LKI are incomplete",
+    "explicit remove-an-attacked-permanent-from-combat effects and complete hybrid planeswalker/Battle type transitions remain incomplete",
     "attack-requirement provenance and had-to-attack queries are not implemented",
     "attacks-alone, attacking-alone, blocks-alone, and blocking-alone queries are not exposed generically",
     "combat-relative spell and ability timing grammar, skipped-point fallbacks, and multiple-combat tracking are not implemented",

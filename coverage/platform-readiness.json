@@ -12,9 +12,9 @@
   },
   "integration": {
     "active_phase": "rules_combat_dependency_families",
-    "branch": "feat/rules-combat-composition-targets",
+    "branch": "feat/rules-combat-quantifiers-planeswalkers",
     "branch_ancestry": {
-      "focused_branch_base": "c544dafd6c99c777b7b43fc95f02d4115600ca2b",
+      "focused_branch_base": "81ce825b72ed1edaf2cd7d51881859a4bebb6dde",
       "focused_branch_unique_commits_over_main": 1
     },
     "commit_reference": "the commit containing this ledger",
@@ -331,7 +331,7 @@
         "base": "main",
         "head": "feat/rules-combat-composition-targets",
         "number": 45,
-        "state": "open",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/45"
       }
     ],
@@ -348,7 +348,7 @@
   },
   "milestones": [
     {
-      "evidence": "Integration PRs #1-17 and #24-44 are on main; focused combat-composition PR #45 is active. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
+      "evidence": "Integration PRs #1-17 and #24-45 are on main; the focused planeswalker-combat and declaration-quantifier slice is active. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete"
@@ -372,7 +372,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "After PR #45, extend the shared finite combat declaration solver to shared-subtype quantifiers, named/planeswalker attack targets, history-, monarch-, poison-, non-goad requirement-, other effect-granted-, optional-cost-, and multi-block grammar; then route declaration triggers through the same boundary while keeping the universal CR 120.4 damage transformation pipeline as the next deeper dependency.",
+  "next_task": "After the planeswalker-combat and declaration-quantifier slice, extend the shared finite combat declaration solver to history-, monarch-, poison-, non-goad requirement-, other effect-granted-, optional-cost-, and multi-block grammar; then route declaration triggers through the same boundary while keeping the universal CR 120.4 damage transformation pipeline as the next deeper dependency.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -402,8 +402,8 @@
       "material_residuals": 61213,
       "status_counts": {
         "exact": 338,
-        "partial": 14613,
-        "unresolved": 16672
+        "partial": 14616,
+        "unresolved": 16669
       },
       "total": 31623
     },
@@ -422,15 +422,15 @@
       "material_residuals": 69890,
       "status_counts": {
         "exact": 2959,
-        "partial": 16039,
-        "unresolved": 19486
+        "partial": 16042,
+        "unresolved": 19483
       },
       "total": 38484
     },
     "rules": {
-      "blocked": 367,
+      "blocked": 362,
       "definition_only": 81,
-      "passing": 115,
+      "passing": 120,
       "total": 3300,
       "unreviewed": 2737
     },
@@ -455,19 +455,19 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4097,
+    "deterministic_cases_discovered": 4106,
     "migration_files": 1,
     "schema_files": 14,
     "server_files": 5,
     "web_files": 20
   },
   "validation": {
-    "baseline_commit": "c544dafd6c99c777b7b43fc95f02d4115600ca2b",
+    "baseline_commit": "81ce825b72ed1edaf2cd7d51881859a4bebb6dde",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30695738424,
+      "run_id": 30697071401,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30695738424"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30697071401"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_card_drag_drop_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -476,7 +476,7 @@
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "deterministic_tests": "pass_full_exact_commit_gate",
-      "focused_rules_tests": "pass_3417_plus_32_subtests_current_branch",
+      "focused_rules_tests": "pass_172_new_and_directly_impacted_tests_plus_3_subtests_current_branch",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",

@@ -171,6 +171,15 @@ _SOURCE_CONTROLLER_ATTACK_MAXIMUM = re.compile(
     r"no more than (?P<count>one|two|three|\d+) creatures? can attack "
     r"you each combat\."
 )
+_SOURCE_ATTACK_MAXIMUM = re.compile(
+    r"no more than (?P<count>one|two|three|\d+) creatures? can attack "
+    r"this creature each combat\."
+)
+_SELF_SHARED_SUBTYPE_BLOCK_CONDITION = re.compile(
+    r"this creature can't be blocked unless defending player controls "
+    r"(?P<count>one|two|three|\d+) or more creatures that share a "
+    r"creature type\."
+)
 _SELF_BLOCKED_BY_MORE_THAN = re.compile(
     r"this creature can't be blocked by more than (?P<count>one|two|three|\d+) "
     r"creatures?\."
@@ -375,8 +384,31 @@ class DeclarationCombatCondition:
         return {"kind": self.kind}
 
 
+@dataclass(frozen=True, slots=True)
+class DeclarationSharedSubtypeCondition:
+    """Require one public creature subtype to occur on enough permanents."""
+
+    player: DeclarationConditionPlayer
+    minimum: int
+
+    def __post_init__(self) -> None:
+        if self.minimum < 1:
+            raise ValueError(
+                "A shared-subtype condition requires a positive minimum"
+            )
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "kind": "shared_creature_subtype_count",
+            "player": self.player,
+            "minimum": self.minimum,
+        }
+
+
 DeclarationCondition = (
-    DeclarationBattlefieldCondition | DeclarationCombatCondition
+    DeclarationBattlefieldCondition
+    | DeclarationCombatCondition
+    | DeclarationSharedSubtypeCondition
 )
 
 
@@ -902,6 +934,42 @@ def parse_declaration_restriction_line(
             ),
             declarations=("attack",),
             scope="global",
+        )
+
+    match = _SOURCE_ATTACK_MAXIMUM.fullmatch(line)
+    if match:
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id="source-attack-maximum-v1",
+                declarations=("attack",),
+                scope="source_option",
+                mode="maximum_option_uses",
+                count=_number(match.group("count")),
+            ),
+            declarations=("attack",),
+            scope="source_option",
+        )
+
+    match = _SELF_SHARED_SUBTYPE_BLOCK_CONDITION.fullmatch(line)
+    if match:
+        return DeclarationRestrictionParse(
+            True,
+            DeclarationRestrictionTemplate(
+                template_id=(
+                    "intrinsic-defending-player-shared-subtype-"
+                    "block-unless-v1"
+                ),
+                declarations=("block",),
+                scope="source_option",
+                condition=DeclarationSharedSubtypeCondition(
+                    player="defending_player",
+                    minimum=_number(match.group("count")),
+                ),
+                applies_when_condition=False,
+            ),
+            declarations=("block",),
+            scope="source_option",
         )
 
     match = _GLOBAL_SOURCE_CONTROLLER_ATTACK_BLOCK.fullmatch(line)

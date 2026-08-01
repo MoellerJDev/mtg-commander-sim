@@ -125,6 +125,115 @@ class CombatDamageRuleTests(unittest.TestCase):
         }
         self.assertEqual(expected, set(contract["rule_references"]))
 
+    def test_unblocked_attacker_damages_planeswalker_loyalty(self):
+        session = self.make_session(51018)
+        engine = session.engine
+        attacker = self.token(engine, "A", "Walker Attacker", 3)
+        walker_ref = engine.create_token(
+            "B",
+            name="Damage Walker",
+            characteristics={
+                "type_line": "Token Planeswalker — Test",
+                "loyalty": "5",
+            },
+        )[0]
+        walker = engine._resolve_object(
+            "A", walker_ref, zones={"battlefield"}
+        )
+        attacker.attacking = walker.ref
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            blockers_declared=True,
+            attackers={attacker.object_id: walker.ref},
+            attack_target_context={
+                attacker.object_id: {
+                    "target": walker.ref,
+                    "kind": "planeswalker",
+                    "defending_player": "B",
+                }
+            },
+            defending_players=["B"],
+        )
+
+        engine._begin_combat_damage()
+
+        self.assertEqual(2, walker.counters["loyalty"])
+        damage = next(
+            event
+            for event in reversed(engine.state.events)
+            if event.code == "combat.damage"
+        )
+        self.assertEqual(walker.ref, damage.details["assignments"][0]["target"])
+
+    def test_lethal_planeswalker_combat_damage_applies_state_action(self):
+        session = self.make_session(51019)
+        engine = session.engine
+        attacker = self.token(engine, "A", "Lethal Walker Attacker", 4)
+        walker_ref = engine.create_token(
+            "B",
+            name="Lethal Walker",
+            characteristics={
+                "type_line": "Token Planeswalker — Test",
+                "loyalty": "3",
+            },
+        )[0]
+        walker = engine._resolve_object(
+            "A", walker_ref, zones={"battlefield"}
+        )
+        attacker.attacking = walker.ref
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            blockers_declared=True,
+            attackers={attacker.object_id: walker.ref},
+            attack_target_context={
+                attacker.object_id: {
+                    "target": walker.ref,
+                    "kind": "planeswalker",
+                    "defending_player": "B",
+                }
+            },
+            defending_players=["B"],
+        )
+
+        engine._begin_combat_damage()
+
+        self.assertEqual("outside", walker.zone)
+
+    def test_unblocked_attacker_damages_battle_defense(self):
+        session = self.make_session(51020, players=3)
+        engine = session.engine
+        attacker = self.token(engine, "A", "Battle Attacker", 2)
+        battle_ref = engine.create_token(
+            "C",
+            name="Damage Battle",
+            battle_protector="B",
+            characteristics={
+                "type_line": "Token Battle — Siege",
+                "defense": "5",
+            },
+        )[0]
+        battle = engine._resolve_object(
+            "A", battle_ref, zones={"battlefield"}
+        )
+        attacker.attacking = battle.ref
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            blockers_declared=True,
+            attackers={attacker.object_id: battle.ref},
+            attack_target_context={
+                attacker.object_id: {
+                    "target": battle.ref,
+                    "kind": "battle",
+                    "defending_player": "B",
+                }
+            },
+            defending_players=["B"],
+        )
+
+        engine._begin_combat_damage()
+
+        self.assertEqual(3, battle.counters["defense"])
+
     def test_multiplayer_assignment_contract_traces_cr_802_5(self):
         root = Path(__file__).resolve().parents[1]
         contract = json.loads(

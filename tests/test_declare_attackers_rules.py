@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session, pass_current
+from mtg_commander_sim.engine import TURN_STEPS
 from mtg_commander_sim.model import CombatState
 from mtg_commander_sim.record import (
     authoritative_state_hash,
@@ -337,7 +338,119 @@ class DeclareAttackersRuleTests(unittest.TestCase):
         )
 
         self.assertFalse(result.ok)
-        self.assertIn("Invalid Battle defender", result.summary)
+        self.assertIn("Invalid attack defender", result.summary)
+
+    def test_planeswalker_is_labeled_attackable_and_replays_exactly(self):
+        session = self.make_session(50809)
+        engine = session.engine
+        attacker = self.token(engine, "Planeswalker Attacker")
+        walker_ref = engine.create_token(
+            "B",
+            name="Defending Walker",
+            characteristics={
+                "type_line": "Token Planeswalker — Test",
+                "loyalty": "4",
+            },
+        )[0]
+        walker = engine._resolve_object(
+            "A", walker_ref, zones={"battlefield"}
+        )
+        engine._issue_attackers()
+        session.initial_checkpoint = checkpoint_envelope(session.state)
+
+        payload = engine.state.pending_decision.payload_by_actor["A"]
+        self.assertIn(walker.ref, payload["defenders"])
+        self.assertEqual(
+            [
+                {
+                    "id": walker.ref,
+                    "name": "Defending Walker",
+                    "controller": "B",
+                    "loyalty": 4,
+                }
+            ],
+            payload["planeswalker_defenders"],
+        )
+        result = session.act(
+            "pilot:A",
+            {"a": "attack", "atk": {attacker.ref: walker.ref}},
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(walker.ref, attacker.attacking)
+        self.assertEqual(
+            {
+                "target": walker.ref,
+                "kind": "planeswalker",
+                "defending_player": "B",
+            },
+            engine.state.combat.attack_target_context[attacker.object_id],
+        )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "planeswalker-attack"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+            self.assertTrue(replay["ok"], replay)
+            self.assertEqual(1, replay["commands"])
+
+    def test_departed_planeswalker_keeps_defender_but_not_damage_target(self):
+        session = self.make_session(50810)
+        engine = session.engine
+        attacker = self.token(engine, "Persistent Attacker")
+        blocker_ref = engine.create_token(
+            "B",
+            name="Late Blocker",
+            characteristics={
+                "type_line": "Token Creature — Soldier",
+                "power": "2",
+                "toughness": "2",
+            },
+        )[0]
+        blocker = engine._resolve_object(
+            "A", blocker_ref, zones={"battlefield"}
+        )
+        walker_ref = engine.create_token(
+            "B",
+            name="Departing Walker",
+            characteristics={
+                "type_line": "Token Planeswalker — Test",
+                "loyalty": "4",
+            },
+        )[0]
+        walker = engine._resolve_object(
+            "A", walker_ref, zones={"battlefield"}
+        )
+        engine._issue_attackers()
+        result = session.act(
+            "pilot:A",
+            {"a": "attack", "atk": {attacker.ref: walker.ref}},
+        )
+        self.assertTrue(result.ok, result.summary)
+
+        engine.move_card(
+            walker.object_id,
+            "graveyard",
+            reason="attacked planeswalker left combat",
+        )
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.priority_player = None
+        engine.state.phase_index = TURN_STEPS.index(
+            ("combat", "declare_blockers")
+        )
+        engine.state.phase = "combat"
+        engine.state.step = "declare_blockers"
+        engine._issue_next_blocker()
+
+        self.assertEqual(["B"], engine.state.pending_decision.actors)
+        problem = engine._block_declaration_problem("B")
+        self.assertEqual((attacker.ref,), problem.domains[blocker.ref])
+        self.assertEqual(
+            [],
+            engine._combat_damage_source_options("A")[attacker.ref][
+                "targets"
+            ],
+        )
 
     def test_duplicate_structured_attacker_is_rejected(self):
         session = self.make_session(50805)

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 3,
+  "contract_version": 4,
   "mechanic_id": "cr-510-combat-damage-step",
   "official_name": "Combat Damage Step",
   "effective_date": "2026-06-19",
@@ -113,6 +113,8 @@
   },
   "variants": [
     "unblocked attacker",
+    "unblocked attacker dealing damage to a planeswalker or Battle",
+    "departed planeswalker receiving no combat damage while its attacker remains blockable",
     "single blocker",
     "several blockers",
     "zero or negative power",
@@ -147,11 +149,15 @@
     "test_trample_deals_to_defender_after_all_blockers_leave",
     "test_discretionary_assignments_are_collected_in_apnap_order_and_replay",
     "test_multiplayer_assignment_announcements_follow_apnap",
-    "test_damage_and_resulting_death_triggers_share_one_order_batch"
+    "test_damage_and_resulting_death_triggers_share_one_order_batch",
+    "test_unblocked_attacker_damages_planeswalker_loyalty",
+    "test_lethal_planeswalker_combat_damage_applies_state_action",
+    "test_unblocked_attacker_damages_battle_defense",
+    "test_departed_planeswalker_keeps_defender_but_not_damage_target"
   ],
   "implementation": {
     "component": "CommanderEngine APNAP combat assignment, typed damage-event, trigger-batch, and damage application paths",
-    "version": "combat-damage-step-v3"
+    "version": "combat-damage-step-v4"
   },
   "known_blockers": [
     "trample over planeswalkers, banding assignment control, and complete combat assignment exceptions are not implemented",

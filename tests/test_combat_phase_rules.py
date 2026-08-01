@@ -277,6 +277,45 @@ class CombatPhaseRuleTests(unittest.TestCase):
             engine.state.combat.blockers[attacker_two.object_id],
         )
 
+    def test_postdeclaration_restriction_does_not_remove_attacker(self):
+        session = self.make_session(50607)
+        engine = session.engine
+        attacker = self.token(engine, "A", "Already Attacking", haste=True)
+        attacker.attacking = "B"
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            had_attacking_creature=True,
+            attackers={attacker.object_id: "B"},
+            attack_target_context={
+                attacker.object_id: {
+                    "target": "B",
+                    "kind": "player",
+                    "defending_player": "B",
+                }
+            },
+            defending_players=["B"],
+        )
+        aura_ref = engine.create_token(
+            "B",
+            name="Late Restraint",
+            characteristics={
+                "type_line": "Token Enchantment — Aura",
+                "oracle_text": "Enchanted creature can't attack.",
+            },
+        )[0]
+        aura = engine._resolve_object(
+            "A", aura_ref, zones={"battlefield"}
+        )
+        aura.attached_to = attacker.object_id
+        attacker.attachments.append(aura.object_id)
+
+        self.assertFalse(engine._stabilize())
+
+        self.assertEqual("B", attacker.attacking)
+        self.assertEqual(
+            "B", engine.state.combat.attackers[attacker.object_id]
+        )
+
     def test_phasing_and_type_loss_remove_combatants_during_stabilization(
         self,
     ):

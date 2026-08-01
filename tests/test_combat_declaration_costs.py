@@ -449,6 +449,88 @@ class CombatDeclarationCostTests(unittest.TestCase):
         payload = engine.state.pending_decision.payload_by_actor["A"]
         self.assertEqual([], payload["declaration_costs"])
 
+    def test_planeswalker_only_tax_is_locked_for_planeswalker_attack(self):
+        session = self.make_combat_session(508010412, players=2)
+        engine = session.engine
+        attacker = self.creature(
+            engine, "A", "Walker Tax Attacker", keywords=("Haste",)
+        )
+        self.creature(
+            engine,
+            "B",
+            "Planeswalker Oathkeeper",
+            oracle_text=(
+                "Creatures can't attack planeswalkers you control unless "
+                "their controller pays {1} for each creature they control "
+                "that's attacking a planeswalker you control."
+            ),
+        )
+        walker_ref = engine.create_token(
+            "B",
+            name="Taxed Walker",
+            characteristics={
+                "type_line": "Token Planeswalker — Test",
+                "loyalty": "4",
+            },
+        )[0]
+        walker = engine._resolve_object(
+            "A", walker_ref, zones={"battlefield"}
+        )
+        land = self.colorless_land(engine, "A", "Tax Payment")
+
+        engine._issue_attackers()
+
+        payload = engine.state.pending_decision.payload_by_actor["A"]
+        self.assertEqual(1, len(payload["declaration_costs"]))
+        self.assertEqual(walker.ref, payload["declaration_costs"][0]["option"])
+        result = session.act(
+            "pilot:A",
+            {
+                "a": "attack",
+                "atk": {attacker.ref: walker.ref},
+                "pay": "auto",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertTrue(land.tapped)
+
+    def test_player_and_planeswalker_tax_covers_both_target_kinds(self):
+        session = self.make_combat_session(508010413, players=2)
+        engine = session.engine
+        attacker = self.creature(
+            engine, "A", "Combined Tax Attacker", keywords=("Haste",)
+        )
+        self.creature(
+            engine,
+            "B",
+            "Combined Tithe",
+            oracle_text=(
+                "Creatures can't attack you or planeswalkers you control "
+                "unless their controller pays {1} for each of those creatures."
+            ),
+        )
+        walker_ref = engine.create_token(
+            "B",
+            name="Combined Tax Walker",
+            characteristics={
+                "type_line": "Token Planeswalker — Test",
+                "loyalty": "4",
+            },
+        )[0]
+        walker = engine._resolve_object(
+            "A", walker_ref, zones={"battlefield"}
+        )
+
+        engine._issue_attackers()
+
+        costs = engine.state.pending_decision.payload_by_actor["A"][
+            "declaration_costs"
+        ]
+        self.assertEqual(
+            {(attacker.ref, "B"), (attacker.ref, walker.ref)},
+            {(cost["variable"], cost["option"]) for cost in costs},
+        )
+
     def test_nonvigilant_attacker_cannot_fund_its_own_attack_cost(self):
         session = self.make_combat_session(508010805, players=2)
         engine = session.engine
