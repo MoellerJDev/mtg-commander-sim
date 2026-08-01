@@ -27,6 +27,14 @@ and caches only the card images requested by submitted decks and visible
 projections. This remains a single-node development deployment, not complete
 future-schema/accessibility coverage or a multi-process production deployment.
 
+This describes the implemented boundary, not the target internal structure.
+`CommanderEngine` currently combines too many rules and mutation
+responsibilities and exceeds the repository's review thresholds by a wide
+margin. The generated
+[`docs/ARCHITECTURE_DEBT_STATUS.md`](docs/ARCHITECTURE_DEBT_STATUS.md) is the
+authoritative measured baseline. Extraction must preserve commands,
+projections, replay, hidden-information rules, and deterministic behavior.
+
 ## Layered design
 
 ```text
@@ -864,7 +872,9 @@ describe those integration gaps explicitly.
 
 ## Remaining scope
 
-The architecture is suitable for a serious project, but complete Magic coverage is incremental. Major future modules include:
+The external authority and protocol boundary is a sound migration constraint;
+the internal rules kernel and compiler are not yet at the target architecture.
+Major future modules and migrations include:
 
 - complete migration to continuous-effect layers, dependency discovery,
   player/game-rule effects, and APNAP timestamps
@@ -881,6 +891,7 @@ The architecture is suitable for a serious project, but complete Magic coverage 
 - screen-reader audits for future choice-schema families, image-cache
   quotas/eviction, and explicit controls for future schemas
 
-These modules fit behind the current `CommanderEngine`/`GameService` boundary.
-They do not require granting clients broader permissions, replacing the command
-protocol, or introducing an AI rules authority.
+These changes preserve the current `GameService` authority boundary while
+decomposing `CommanderEngine` into domain-owned modules. They do not require
+granting clients broader permissions, replacing the command protocol, or
+introducing an AI rules authority.

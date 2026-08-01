@@ -141,12 +141,25 @@ def validate_generated_platform_status() -> None:
     )
 
 
+def validate_generated_architecture_audit() -> None:
+    subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "update_architecture_audit.py"),
+            "--check",
+        ],
+        cwd=ROOT,
+        check=True,
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.parse_args()
     schemas = validate_schemas()
     validate_public_fixture()
     validate_generated_platform_status()
+    validate_generated_architecture_audit()
     tracked, scanned_bytes = validate_tracked_files()
     print(
         json.dumps(
@@ -159,6 +172,7 @@ def main() -> int:
                 "secret_and_capability_scan": "pass",
                 "history_artifact_scan": "pass",
                 "platform_status_stale_check": "pass",
+                "architecture_audit_stale_check": "pass",
             },
             indent=2,
             sort_keys=True,

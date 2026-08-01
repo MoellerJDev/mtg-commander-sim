@@ -1,0 +1,360 @@
+{
+  "schema_version": 1,
+  "audit": {
+    "baseline_main_commit": "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d",
+    "baseline_worktree_clean": true,
+    "verified_at": "2026-08-01",
+    "phase": "phase_0_current_state_audit",
+    "scope_note": "This is a measured migration baseline, not a completeness or correctness claim."
+  },
+  "ci": {
+    "workflow": "CI",
+    "run_id": 30705718025,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30705718025",
+    "status": "pass",
+    "python_versions": [
+      "3.11",
+      "3.12"
+    ],
+    "node_version": "24",
+    "local_observed": {
+      "python": "3.11.9",
+      "node": "24.18.0",
+      "npm": "11.16.0"
+    }
+  },
+  "scope": {
+    "production_roots": [
+      "mtg_commander_sim",
+      "server",
+      "web/src"
+    ],
+    "production_files": [
+      "simctl.py"
+    ],
+    "state_owner_modules": [
+      "mtg_commander_sim/engine.py",
+      "mtg_commander_sim/permissions.py"
+    ],
+    "state_parameter_modules": [
+      "mtg_commander_sim/record.py",
+      "mtg_commander_sim/state_based_actions.py"
+    ],
+    "core_card_specificity_files": [
+      "mtg_commander_sim/engine.py",
+      "mtg_commander_sim/oracle_ir.py",
+      "mtg_commander_sim/semantics.py",
+      "mtg_commander_sim/abilities.py",
+      "mtg_commander_sim/replacement_effects.py",
+      "mtg_commander_sim/continuous_effects.py",
+      "mtg_commander_sim/state_based_actions.py"
+    ]
+  },
+  "thresholds": {
+    "module_logical_lines_review": 1500,
+    "function_logical_lines_review": 150
+  },
+  "engine_method_responsibilities": [
+    {
+      "id": "turn_priority_decisions",
+      "pattern": "turn|phase|step|priority|yield|decision|mulligan|pump"
+    },
+    {
+      "id": "casting_activation_and_costs",
+      "pattern": "cast|activate|ability|mana|cost|payment|land_play"
+    },
+    {
+      "id": "semantics_resolution_and_choices",
+      "pattern": "semantic|resolve|effect|trigger|target|choice|search|copy|replacement"
+    },
+    {
+      "id": "combat_and_damage",
+      "pattern": "combat|attack|block|damage"
+    },
+    {
+      "id": "zones_objects_and_state",
+      "pattern": "zone|move|draw|library|graveyard|exile|battlefield|object|state|card"
+    },
+    {
+      "id": "commander_and_multiplayer",
+      "pattern": "commander|monarch|eliminate|concede|multiplayer|apnap|seat"
+    },
+    {
+      "id": "persistence_logging_and_invariants",
+      "pattern": "save|load|record|log|invariant|transaction|history"
+    }
+  ],
+  "subsystem_ownership": [
+    {
+      "id": "application_session",
+      "status": "dedicated_modules",
+      "owners": [
+        "mtg_commander_sim/service.py",
+        "mtg_commander_sim/session.py"
+      ],
+      "missing_dedicated_owner": false
+    },
+    {
+      "id": "turn_priority_and_decisions",
+      "status": "embedded_in_commander_engine",
+      "owners": [
+        "mtg_commander_sim/engine.py",
+        "mtg_commander_sim/permissions.py"
+      ],
+      "missing_dedicated_owner": true
+    },
+    {
+      "id": "zones_and_object_identity",
+      "status": "split_with_engine_as_mutation_owner",
+      "owners": [
+        "mtg_commander_sim/engine.py",
+        "mtg_commander_sim/model.py"
+      ],
+      "missing_dedicated_owner": true
+    },
+    {
+      "id": "casting_activation_and_costs",
+      "status": "split_with_engine_as_orchestrator_and_executor",
+      "owners": [
+        "mtg_commander_sim/engine.py",
+        "mtg_commander_sim/abilities.py",
+        "mtg_commander_sim/mana.py"
+      ],
+      "missing_dedicated_owner": true
+    },
+    {
+      "id": "semantic_effect_execution",
+      "status": "embedded_string_dispatch_in_commander_engine",
+      "owners": [
+        "mtg_commander_sim/engine.py"
+      ],
+      "missing_dedicated_owner": true
+    },
+    {
+      "id": "search_target_and_choice",
+      "status": "split_with_engine_as_executor",
+      "owners": [
+        "mtg_commander_sim/engine.py",
+        "mtg_commander_sim/targets.py",
+        "mtg_commander_sim/choice_forms.py"
+      ],
+      "missing_dedicated_owner": true
+    },
+    {
+      "id": "trigger_processing",
+      "status": "embedded_in_commander_engine",
+      "owners": [
+        "mtg_commander_sim/engine.py"
+      ],
+      "missing_dedicated_owner": true
+    },
+    {
+      "id": "replacement_and_prevention",
+      "status": "partial_dedicated_module_with_engine_integration",
+      "owners": [
+        "mtg_commander_sim/replacement_effects.py",
+        "mtg_commander_sim/engine.py"
+      ],
+      "missing_dedicated_owner": false
+    },
+    {
+      "id": "continuous_effects",
+      "status": "partial_dedicated_module_with_engine_integration",
+      "owners": [
+        "mtg_commander_sim/continuous_effects.py",
+        "mtg_commander_sim/engine.py"
+      ],
+      "missing_dedicated_owner": false
+    },
+    {
+      "id": "state_based_actions",
+      "status": "dedicated_evaluator_with_engine_mutation",
+      "owners": [
+        "mtg_commander_sim/state_based_actions.py",
+        "mtg_commander_sim/engine.py"
+      ],
+      "missing_dedicated_owner": false
+    },
+    {
+      "id": "combat",
+      "status": "split_domain_helpers_with_engine_orchestration",
+      "owners": [
+        "mtg_commander_sim/combat.py",
+        "mtg_commander_sim/combat_constraints.py",
+        "mtg_commander_sim/declaration_costs.py",
+        "mtg_commander_sim/declaration_restrictions.py",
+        "mtg_commander_sim/damage.py",
+        "mtg_commander_sim/engine.py"
+      ],
+      "missing_dedicated_owner": false
+    },
+    {
+      "id": "commander_variant",
+      "status": "embedded_in_commander_engine",
+      "owners": [
+        "mtg_commander_sim/engine.py"
+      ],
+      "missing_dedicated_owner": true
+    },
+    {
+      "id": "projection_and_protocol",
+      "status": "dedicated_modules",
+      "owners": [
+        "mtg_commander_sim/projection.py",
+        "mtg_commander_sim/protocol.py"
+      ],
+      "missing_dedicated_owner": false
+    },
+    {
+      "id": "record_and_replay",
+      "status": "dedicated_module",
+      "owners": [
+        "mtg_commander_sim/record.py"
+      ],
+      "missing_dedicated_owner": false
+    },
+    {
+      "id": "oracle_compiler",
+      "status": "single_interleaved_compiler_module",
+      "owners": [
+        "mtg_commander_sim/oracle_ir.py"
+      ],
+      "missing_dedicated_owner": false
+    },
+    {
+      "id": "card_overrides",
+      "status": "semantic_pack_convention_without_typed_override_boundary",
+      "owners": [
+        "mtg_commander_sim/semantic_packs"
+      ],
+      "missing_dedicated_owner": true
+    }
+  ],
+  "compiler_stages": [
+    {
+      "id": "normalization",
+      "current_status": "interleaved",
+      "evidence_symbols": [
+        "_without_parenthetical_reminder",
+        "_source_lines"
+      ]
+    },
+    {
+      "id": "segmentation",
+      "current_status": "interleaved",
+      "evidence_symbols": [
+        "_source_lines",
+        "_compile_face"
+      ]
+    },
+    {
+      "id": "lexing",
+      "current_status": "not_a_distinct_stage",
+      "evidence_symbols": []
+    },
+    {
+      "id": "parsing",
+      "current_status": "regex_and_helper_parsers_interleaved",
+      "evidence_symbols": [
+        "_effect_template",
+        "parse_activated_abilities"
+      ]
+    },
+    {
+      "id": "binding",
+      "current_status": "not_a_distinct_stage",
+      "evidence_symbols": []
+    },
+    {
+      "id": "typing",
+      "current_status": "partial_dataclass_ir",
+      "evidence_symbols": [
+        "OracleNode",
+        "OracleFaceIR",
+        "OracleCardIR"
+      ]
+    },
+    {
+      "id": "lowering",
+      "current_status": "interleaved_with_face_compilation",
+      "evidence_symbols": [
+        "_compile_face",
+        "generated_programs"
+      ]
+    },
+    {
+      "id": "capability_closure",
+      "current_status": "mechanic_contract_gate_without_fine_grained_closure",
+      "evidence_symbols": [
+        "generated_programs"
+      ]
+    },
+    {
+      "id": "residual_classification",
+      "current_status": "implemented_interleaved",
+      "evidence_symbols": [
+        "_residual",
+        "oracle_corpus_coverage"
+      ]
+    },
+    {
+      "id": "validation",
+      "current_status": "partial_program_registration_checks",
+      "evidence_symbols": [
+        "register_generated_programs"
+      ]
+    }
+  ],
+  "card_specific_semantic_operations": [
+    "animate_dead_prepare",
+    "animate_dead_reanimate",
+    "create_daretti_emblem",
+    "create_warform",
+    "daretti_exchange",
+    "demonic_junker_resolve",
+    "field_of_dead_token",
+    "fomori_vault",
+    "remora_tax",
+    "scute_swarm_token",
+    "springheart_landfall",
+    "sylvan_library_settle",
+    "toxic_deluge",
+    "veil_of_summer",
+    "welder_exchange"
+  ],
+  "card_named_helpers": [
+    {
+      "file": "mtg_commander_sim/engine.py",
+      "symbol": "_create_mishra_warform",
+      "reason": "Implements a named token behavior for Mishra, Eminent One inside the universal engine."
+    }
+  ],
+  "required_documents": [
+    "docs/index.md",
+    "docs/architecture/context.md",
+    "docs/architecture/containers.md",
+    "docs/architecture/rules-kernel.md",
+    "docs/architecture/card-programs.md",
+    "docs/architecture/compiler.md",
+    "docs/architecture/server-runtime.md",
+    "docs/architecture/replay.md",
+    "docs/architecture/visibility.md",
+    "docs/architecture/dependency-rules.md",
+    "docs/extension/card-override.md",
+    "docs/extension/mechanic-capability.md",
+    "docs/extension/semantic-node.md",
+    "docs/testing/strategy.md",
+    "docs/testing/interaction-coverage.md",
+    "docs/testing/replay.md",
+    "docs/testing/privacy.md",
+    "docs/operations/local-app.md",
+    "docs/operations/hosted.md",
+    "docs/LEGAL_CONTENT_BOUNDARY.md",
+    "docs/THREAT_MODEL.md",
+    "docs/PLATFORM_IMPLEMENTATION_STATUS.md",
+    "docs/RULES_COMPLETENESS_STATUS.md",
+    "docs/COMPILER_COVERAGE_STATUS.md",
+    "docs/ARCHITECTURE_DEBT_STATUS.md",
+    "OVERNIGHT_HANDOFF.md"
+  ]
+}
