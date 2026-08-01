@@ -1,5 +1,5 @@
 {
-  "contract_count": 55,
+  "contract_count": 56,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -64,8 +64,8 @@
     {
       "mechanic_id": "cr-510-combat-damage-step",
       "path": "mechanics/contracts/combat-damage-step.json",
-      "sha256": "870cf77a9ec297c95bee1e49f6c2e18d0aba49c32d587af8eb0c18cdb83ca75a",
-      "version": 2
+      "sha256": "b287c3cf90278a47122c376ea4cd1259120cabfa89dbfa9918a1b4b0b4ed18a4",
+      "version": 3
     },
     {
       "mechanic_id": "cr-506-combat-phase",
@@ -94,8 +94,8 @@
     {
       "mechanic_id": "cr-120-damage",
       "path": "mechanics/contracts/damage.json",
-      "sha256": "1750d9b3334a8d3537ab7671657152c89ef6edd9637d01293bd70322120d8404",
-      "version": 2
+      "sha256": "4ece9cadcd7d92abc73988483f2d10367c6ddee9a94d825f182dfa33fc77109d",
+      "version": 3
     },
     {
       "mechanic_id": "deathtouch",
@@ -202,8 +202,8 @@
     {
       "mechanic_id": "cr-603-handling-triggered-abilities",
       "path": "mechanics/contracts/handling-triggered-abilities.json",
-      "sha256": "c4ef9db1a0beb241d0ab314d810bb40bc1e1782e935ae00ba855a7f05c21fb02",
-      "version": 2
+      "sha256": "e90481862c991ff6697f28a7ddd370d2076b08b3e4c24766011a4f7bead8b2c6",
+      "version": 3
     },
     {
       "mechanic_id": "cr-401-library",
@@ -245,6 +245,12 @@
       "mechanic_id": "menace",
       "path": "mechanics/contracts/menace.json",
       "sha256": "34e37987949e47919ffa87a4a214ee8143de46620640970104aa12d9c048f150",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-802-attack-multiple-players-option",
+      "path": "mechanics/contracts/multiplayer-combat-damage-order.json",
+      "sha256": "5abe8fc5cc4f515193ab5660c2f377a995d3cc885c4e197a20b26bc7e27bfcc8",
       "version": 1
     },
     {
@@ -5484,18 +5490,18 @@
     {
       "category": "game_concepts",
       "contract_path": "mechanics/contracts/damage.json",
-      "contract_sha256": "1750d9b3334a8d3537ab7671657152c89ef6edd9637d01293bd70322120d8404",
-      "contract_version": 2,
+      "contract_sha256": "4ece9cadcd7d92abc73988483f2d10367c6ddee9a94d825f182dfa33fc77109d",
+      "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "CommanderEngine._apply_damage_results_to_permanent and CommanderEngine._apply_combat_assignments",
-      "implementation_version": "damage-results-v3",
+      "implementation_component": "DamageEvent plus CommanderEngine._apply_damage_results_to_permanent and CommanderEngine._apply_combat_assignments",
+      "implementation_version": "damage-results-v4",
       "kind": "rules_section",
       "known_blockers": [
         "the complete CR 120.4 damage-event pipeline, excess damage, replacement, and prevention ordering are not implemented",
         "infect, wither, lifelink, toxic, and all source-result combinations are not implemented generically",
-        "damage-trigger generation and source-specific event correlation are not complete",
-        "combat assignment order, first strike, double strike, trample, regeneration, and damage-source selection remain incomplete"
+        "noncombat damage-trigger generation and the universal CR 120.4 event order are not complete",
+        "infect, wither, toxic, regeneration, and damage-source selection remain incomplete"
       ],
       "mechanic_id": "cr-120-damage",
       "official_name": "Damage",
@@ -5515,7 +5521,10 @@
         "test_damage_to_battle_creature_applies_both_results",
         "test_planeswalker_damage_removes_loyalty_counters",
         "test_departed_combat_source_deals_no_damage",
-        "test_battle_damage_and_state_action_replay_exactly"
+        "test_battle_damage_and_state_action_replay_exactly",
+        "test_discretionary_assignments_are_collected_in_apnap_order_and_replay",
+        "test_damage_and_resulting_death_triggers_share_one_order_batch",
+        "test_lifelink_counts_only_damage_not_prevented_by_protection"
       ],
       "trust_level": "untrusted"
     },
@@ -6778,20 +6787,19 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/combat-damage-step.json",
-      "contract_sha256": "870cf77a9ec297c95bee1e49f6c2e18d0aba49c32d587af8eb0c18cdb83ca75a",
-      "contract_version": 2,
+      "contract_sha256": "b287c3cf90278a47122c376ea4cd1259120cabfa89dbfa9918a1b4b0b4ed18a4",
+      "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "CommanderEngine combat-damage assignment validation and damage application",
-      "implementation_version": "combat-damage-step-v2",
+      "implementation_component": "CommanderEngine APNAP combat assignment, typed damage-event, trigger-batch, and damage application paths",
+      "implementation_version": "combat-damage-step-v3",
       "kind": "rules_section",
       "known_blockers": [
-        "active-player then defending-player public assignment announcement order is not represented",
         "trample over planeswalkers, banding assignment control, and complete combat assignment exceptions are not implemented",
         "lifelink outside the combat damage path and source last-known information are incomplete",
         "a blocker blocking several attackers is not produced by the declaration system",
         "simultaneous damage replacement and prevention require the universal typed event pipeline",
-        "damage-trigger APNAP placement before priority is incomplete"
+        "trigger-on-trigger two-part placement and complete triggered-ability choice grammar remain CR 603 dependencies"
       ],
       "mechanic_id": "cr-510-combat-damage-step",
       "official_name": "Combat Damage Step",
@@ -6816,7 +6824,10 @@
         "test_trample_rejects_spill_before_lethal_atomically",
         "test_trample_accepts_lethal_then_spill",
         "test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
-        "test_trample_deals_to_defender_after_all_blockers_leave"
+        "test_trample_deals_to_defender_after_all_blockers_leave",
+        "test_discretionary_assignments_are_collected_in_apnap_order_and_replay",
+        "test_multiplayer_assignment_announcements_follow_apnap",
+        "test_damage_and_resulting_death_triggers_share_one_order_batch"
       ],
       "trust_level": "untrusted"
     },
@@ -7050,16 +7061,16 @@
     {
       "category": "spells_abilities_effects",
       "contract_path": "mechanics/contracts/handling-triggered-abilities.json",
-      "contract_sha256": "c4ef9db1a0beb241d0ab314d810bb40bc1e1782e935ae00ba855a7f05c21fb02",
-      "contract_version": 2,
+      "contract_sha256": "e90481862c991ff6697f28a7ddd370d2076b08b3e4c24766011a4f7bead8b2c6",
+      "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "oracle_ir trigger lowering plus CommanderEngine semantic-event, trigger-batch, stabilization, and delayed-trigger paths",
-      "implementation_version": "trigger-handling-foundation-v2",
+      "implementation_component": "oracle_ir trigger lowering plus CommanderEngine semantic-event, mergeable trigger-batch, stabilization, and delayed-trigger paths",
+      "implementation_version": "trigger-handling-foundation-v3",
       "kind": "rules_section",
       "known_blockers": [
         "the Oracle compiler recognizes selected whole-text trigger templates rather than the complete trigger grammar",
-        "the two-part CR 603.3b ordering for abilities that trigger from other abilities triggering is not represented",
+        "the second CR 603.3b placement part for abilities that trigger from other abilities triggering is not represented",
         "generic modal trigger legality, all target and division choices, and illegal-trigger removal remain incomplete",
         "multi-occurrence, becomes, visibility, once-per-turn instruction, state, player-loss, linked-mid-sentence, and reflexive trigger families are incomplete",
         "delayed-trigger creation provenance and simultaneous-event selection are not universally typed",
@@ -7083,7 +7094,8 @@
         "test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
         "test_delayed_trigger_queues_at_matching_step",
         "test_daretti_ruling_does_not_follow_a_reentered_card",
-        "test_unconditional_entry_tapped_is_engine_derived"
+        "test_unconditional_entry_tapped_is_engine_derived",
+        "test_damage_and_resulting_death_triggers_share_one_order_batch"
       ],
       "trust_level": "untrusted"
     },
@@ -8092,17 +8104,28 @@
     },
     {
       "category": "multiplayer",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/multiplayer-combat-damage-order.json",
+      "contract_sha256": "5abe8fc5cc4f515193ab5660c2f377a995d3cc885c4e197a20b26bc7e27bfcc8",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine._continue_combat_damage_assignments",
+      "implementation_version": "multiplayer-combat-damage-order-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "complete banding and controller-of-assignment exceptions are not implemented",
+        "the declaration UI does not yet produce every legal several-attacker blocking relationship"
+      ],
       "mechanic_id": "cr-802-attack-multiple-players-option",
       "official_name": "Attack Multiple Players Option",
       "rule_references": [
         "802"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_multiplayer_assignment_contract_traces_cr_802_5",
+        "test_discretionary_assignments_are_collected_in_apnap_order_and_replay",
+        "test_multiplayer_assignment_announcements_follow_apnap"
+      ],
       "trust_level": "untrusted"
     },
     {

@@ -39,6 +39,7 @@ from .continuous_effects import (
     Layer,
     evaluate_continuous_effects,
 )
+from .damage import DamageEvent, DamageRecipientKind
 from .deck import DeckDefinition
 from .mana import (
     ManaMode,
@@ -10055,20 +10056,42 @@ class CommanderEngine:
     ) -> None:
         if not items:
             return
-        groups: list[dict[str, Any]] = []
-        for controller in self.apnap_order():
-            controlled = [
-                item.to_dict()
-                for item in items
-                if item.controller == controller
-            ]
-            if controlled:
-                groups.append(
-                    {
-                        "controller": controller,
-                        "items": controlled,
-                    }
+
+        serialized = [
+            item.to_dict()
+            for item in items
+            if item.controller in self.active_seats
+        ]
+        if not serialized:
+            return
+
+        # CR 603.3b groups every represented ability that triggered since the
+        # previous priority window.  Event producers may discover those
+        # abilities at different times (damage first, then deaths caused by
+        # state-based actions), so merge them until stack placement starts.
+        # A started batch is sealed: abilities triggered during its placement
+        # belong to the rule's later repeat pass.
+        if self.state.pending_trigger_batches:
+            pending = self.state.pending_trigger_batches[-1]
+            same_priority_window = int(
+                pending.get("priority_epoch", self.state.priority_epoch)
+            ) == int(self.state.priority_epoch)
+            if (
+                not pending.get("placement_started", False)
+                and same_priority_window
+            ):
+                existing = [
+                    dict(value)
+                    for group in pending.get("groups", [])
+                    for value in group.get("items", [])
+                ]
+                pending["apnap_order"] = self.apnap_order()
+                pending["groups"] = self._semantic_trigger_groups(
+                    [*existing, *serialized]
                 )
+                return
+
+        groups = self._semantic_trigger_groups(serialized)
         if not groups:
             return
         batch_ref = self._next_ref("TB")
@@ -10082,8 +10105,30 @@ class CommanderEngine:
                 "apnap_order": self.apnap_order(),
                 "groups": groups,
                 "turn_sequence": self.state.turn_sequence,
+                "priority_epoch": self.state.priority_epoch,
+                "placement_started": False,
             }
         )
+
+    def _semantic_trigger_groups(
+        self,
+        values: Sequence[Mapping[str, Any]],
+    ) -> list[dict[str, Any]]:
+        groups: list[dict[str, Any]] = []
+        for controller in self.apnap_order():
+            controlled = [
+                copy.deepcopy(dict(value))
+                for value in values
+                if str(value.get("controller") or "") == controller
+            ]
+            if controlled:
+                groups.append(
+                    {
+                        "controller": controller,
+                        "items": controlled,
+                    }
+                )
+        return groups
 
     def _place_semantic_trigger_items(
         self,
@@ -10116,6 +10161,15 @@ class CommanderEngine:
     def _begin_pending_semantic_trigger_batch(self) -> bool:
         while self.state.pending_trigger_batches:
             batch = self.state.pending_trigger_batches[0]
+            if not batch.get("placement_started", False):
+                waiting = [
+                    dict(value)
+                    for group in batch.get("groups", [])
+                    for value in group.get("items", [])
+                ]
+                batch["apnap_order"] = self.apnap_order()
+                batch["groups"] = self._semantic_trigger_groups(waiting)
+                batch["placement_started"] = True
             groups = list(batch.get("groups") or [])
             if not groups:
                 self.state.pending_trigger_batches.pop(0)
@@ -17646,43 +17700,154 @@ class CommanderEngine:
 
     def _begin_combat_damage(self) -> None:
         self._initialize_combat_damage_steps()
-        actors = unique_preserving_order(
-            [
-                self.state.active_player,
-                *self._attacked_defending_players(),
-            ]
-        )
-        assignments = self._automatic_combat_assignments(actors)
-        if assignments is not None:
-            self._apply_combat_assignments(assignments)
-            self._grant_priority(self.state.active_player)
-            return
-        self.permissions.issue(
-            kind="combat.damage",
-            role="pilot",
+        actors = [
+            seat
+            for seat in self.apnap_order()
+            if self._combat_damage_source_options(seat)
+        ]
+        self._continue_combat_damage_assignments(
             actors=actors,
-            allowed_actions=["assign_damage"],
-            payload_by_actor={
-                seat: {
-                    "combat": self._combat_payload(seat),
-                    "instruction": "Assign damage for sources you control.",
-                }
-                for seat in actors
+            cursor=0,
+            announced=[],
+        )
+
+    def _continue_combat_damage_assignments(
+        self,
+        *,
+        actors: Sequence[str],
+        cursor: int,
+        announced: Sequence[Mapping[str, Any]],
+    ) -> None:
+        """Collect CR 510.1/802.5 assignments in public APNAP order."""
+
+        collected = [dict(value) for value in announced]
+        ordered_actors = [
+            seat for seat in actors if seat in self.active_seats
+        ]
+        while cursor < len(ordered_actors):
+            seat = ordered_actors[cursor]
+            automatic = self._automatic_combat_assignments([seat])
+            if automatic is not None:
+                self._record_combat_damage_announcement(
+                    seat,
+                    automatic,
+                    announcement_index=cursor,
+                    automatic=True,
+                )
+                collected.extend(automatic)
+                cursor += 1
+                continue
+
+            self.permissions.issue(
+                kind="combat.damage",
+                role="pilot",
+                actors=[seat],
+                allowed_actions=["assign_damage"],
+                payload_by_actor={
+                    seat: {
+                        "combat": self._combat_payload(
+                            seat,
+                            announced_assignments=collected,
+                        ),
+                        "instruction": (
+                            "Assign damage for sources you control. Earlier "
+                            "APNAP assignments are final and public."
+                        ),
+                    }
+                },
+                continuation={
+                    "combat_damage_assignment_order": ordered_actors,
+                    "combat_damage_assignment_cursor": cursor,
+                    "announced_assignments": collected,
+                },
+            )
+            return
+
+        waiting = self._apply_combat_assignments(collected)
+        if not waiting:
+            self._grant_priority(self.state.active_player)
+
+    def _record_combat_damage_announcement(
+        self,
+        seat: str,
+        assignments: Sequence[Mapping[str, Any]],
+        *,
+        announcement_index: int,
+        automatic: bool,
+    ) -> None:
+        canonical = [dict(value) for value in assignments]
+        self._log(
+            seat,
+            "combat.damage.assigned",
+            f"{seat} announced combat-damage assignments.",
+            {
+                "player": seat,
+                "assignments": canonical,
+                "announcement_index": announcement_index,
+                "automatic": automatic,
+                "damage_step": self.state.combat.damage_step_index + 1,
             },
-            simultaneous=True,
+            importance=1,
+            changed_players=[seat],
         )
 
     def _complete_combat_damage(self, decision: Any) -> None:
-        assignments: list[dict[str, Any]] = []
-        for seat in decision.actors:
-            assignments.extend(
-                self._validated_combat_damage_assignments(
-                    seat,
-                    decision.responses[seat].get("assignments") or [],
+        order = decision.continuation.get(
+            "combat_damage_assignment_order"
+        )
+        if order is None:
+            # Backward-compatible completion for a pending pre-v2 checkpoint.
+            assignments: list[dict[str, Any]] = []
+            for seat in decision.actors:
+                assignments.extend(
+                    self._validated_combat_damage_assignments(
+                        seat,
+                        decision.responses[seat].get("assignments") or [],
+                    )
                 )
+            waiting = self._apply_combat_assignments(assignments)
+            if not waiting:
+                self._grant_priority(self.state.active_player)
+            return
+
+        actors = [str(value) for value in order]
+        cursor = int(
+            decision.continuation.get(
+                "combat_damage_assignment_cursor", 0
             )
-        self._apply_combat_assignments(assignments)
-        self._grant_priority(self.state.active_player)
+        )
+        if cursor < 0 or cursor >= len(actors):
+            raise GameRuleError(
+                "Combat-damage assignment cursor is invalid"
+            )
+        seat = actors[cursor]
+        if decision.actors != [seat]:
+            raise GameRuleError(
+                "Only the current APNAP player may assign combat damage"
+            )
+        assignments = self._validated_combat_damage_assignments(
+            seat,
+            decision.responses[seat].get("assignments") or [],
+        )
+        self._record_combat_damage_announcement(
+            seat,
+            assignments,
+            announcement_index=cursor,
+            automatic=False,
+        )
+        self._continue_combat_damage_assignments(
+            actors=actors,
+            cursor=cursor + 1,
+            announced=[
+                *(
+                    dict(value)
+                    for value in decision.continuation.get(
+                        "announced_assignments", []
+                    )
+                ),
+                *assignments,
+            ],
+        )
 
     def _validated_combat_damage_assignments(
         self,
@@ -17956,12 +18121,20 @@ class CommanderEngine:
             for card in self.state.cards.values()
         )
 
-    def _combat_payload(self, seat: str | None = None) -> dict[str, Any]:
+    def _combat_payload(
+        self,
+        seat: str | None = None,
+        *,
+        announced_assignments: Sequence[Mapping[str, Any]] = (),
+    ) -> dict[str, Any]:
         payload = {
             "attackers": {self.state.cards[oid].ref: target for oid, target in self.state.combat.attackers.items()},
             "blockers": {self.state.cards[aid].ref: [self.state.cards[bid].ref for bid in bids] for aid, bids in self.state.combat.blockers.items()},
             "damage_step": self.state.combat.damage_step_index + 1,
             "first_strike_step": self.state.combat.first_strike_step,
+            "announced_assignments": [
+                dict(value) for value in announced_assignments
+            ],
         }
         if seat is not None:
             payload["damage_sources"] = self._combat_damage_source_options(
@@ -17969,11 +18142,89 @@ class CommanderEngine:
             )
         return payload
 
-    def _apply_combat_assignments(self, assignments: Sequence[Mapping[str, Any]]) -> None:
+    def _apply_combat_assignments(
+        self,
+        assignments: Sequence[Mapping[str, Any]],
+    ) -> bool:
+        """Deal one simultaneous combat-damage batch and stabilize it.
+
+        Returns ``True`` when trigger ordering, another rules choice, a
+        semantic stop, or game end prevents the ordinary priority grant.
+        """
+
         changed_objects: list[str] = []
         changed_players: list[str] = []
         dealt_assignments: list[dict[str, Any]] = []
         lifelink_damage: dict[tuple[str, str], int] = {}
+        damage_events: list[DamageEvent] = []
+        trigger_sources = self._semantic_event_sources()
+        trigger_source_zones = {
+            source.object_id: source.zone for source in trigger_sources
+        }
+
+        def damage_event(
+            source: CardInstance,
+            *,
+            target: str,
+            target_kind: DamageRecipientKind,
+            target_card: CardInstance | None,
+            assigned: int,
+            dealt: int,
+        ) -> DamageEvent:
+            source_data = self._effective_card_data(source)
+            source_types, source_subtypes, _ = self._type_parts(
+                str(source_data.get("type_line") or "")
+            )
+            target_types: set[str] = set()
+            target_subtypes: set[str] = set()
+            if target_card is not None:
+                target_types, target_subtypes, _ = self._type_parts(
+                    str(
+                        self._effective_card_data(target_card).get(
+                            "type_line"
+                        )
+                        or ""
+                    )
+                )
+            return DamageEvent(
+                source=source.ref,
+                source_object_id=source.object_id,
+                source_logical_object_id=source.logical_object_id,
+                source_controller=source.controller,
+                source_owner=source.owner,
+                source_types=tuple(sorted(source_types)),
+                source_subtypes=tuple(sorted(source_subtypes)),
+                source_colors=tuple(
+                    sorted(
+                        str(value).upper()
+                        for value in source_data.get("colors", [])
+                    )
+                ),
+                source_keywords=tuple(
+                    sorted(normalized_keywords(source_data.get("keywords", [])))
+                ),
+                source_is_commander=source.is_commander,
+                target=target,
+                target_kind=target_kind,
+                target_object_id=(
+                    target_card.object_id
+                    if target_card is not None
+                    else None
+                ),
+                target_controller=(
+                    target_card.controller
+                    if target_card is not None
+                    else target
+                ),
+                target_types=tuple(sorted(target_types)),
+                target_subtypes=tuple(sorted(target_subtypes)),
+                assigned_amount=assigned,
+                dealt_amount=dealt,
+                prevented_amount=assigned - dealt,
+                combat=True,
+                damage_step=self.state.combat.damage_step_index + 1,
+                first_strike_step=self.state.combat.first_strike_step,
+            )
 
         def record_lifelink(source: CardInstance, amount: int) -> None:
             if LIFELINK not in self._combat_keywords(source):
@@ -18020,6 +18271,16 @@ class CommanderEngine:
                 if target.stats.get(
                     "protection_from_everything_until_next_turn"
                 ):
+                    damage_events.append(
+                        damage_event(
+                            source,
+                            target=target_value,
+                            target_kind="player",
+                            target_card=None,
+                            assigned=amount,
+                            dealt=0,
+                        )
+                    )
                     self._log(
                         target_value,
                         "combat.damage.prevented",
@@ -18041,6 +18302,16 @@ class CommanderEngine:
                         key = source.oracle_id
                         target.commander_damage_received[key] = target.commander_damage_received.get(key, 0) + amount
                     dealt_assignments.append(dict(assignment))
+                    damage_events.append(
+                        damage_event(
+                            source,
+                            target=target_value,
+                            target_kind="player",
+                            target_card=None,
+                            assigned=amount,
+                            dealt=amount,
+                        )
+                    )
                     record_lifelink(source, amount)
             else:
                 target_card = next((card for card in self.state.cards.values() if card.ref == target_value), None)
@@ -18070,6 +18341,16 @@ class CommanderEngine:
                 if self._protection_colors(target_card).intersection(
                     source_colors
                 ):
+                    damage_events.append(
+                        damage_event(
+                            source,
+                            target=target_card.ref,
+                            target_kind="permanent",
+                            target_card=target_card,
+                            assigned=amount,
+                            dealt=0,
+                        )
+                    )
                     self._log(
                         source.controller,
                         "combat.damage.prevented",
@@ -18102,6 +18383,16 @@ class CommanderEngine:
                 )
                 changed_objects.append(target_card.object_id)
                 dealt_assignments.append(dict(assignment))
+                damage_events.append(
+                    damage_event(
+                        source,
+                        target=target_card.ref,
+                        target_kind="permanent",
+                        target_card=target_card,
+                        assigned=amount,
+                        dealt=amount,
+                    )
+                )
                 record_lifelink(source, amount)
         for (beneficiary, _source_ref), amount in sorted(
             lifelink_damage.items()
@@ -18124,6 +18415,9 @@ class CommanderEngine:
                 ],
                 "damage_step": self.state.combat.damage_step_index + 1,
                 "first_strike_step": self.state.combat.first_strike_step,
+                "damage_events": [
+                    event.semantic_context() for event in damage_events
+                ],
             },
             importance=2,
             changed_objects=changed_objects,
@@ -18145,7 +18439,23 @@ class CommanderEngine:
                 importance=1,
                 changed_players=[beneficiary],
             )
-        self._stabilize()
+        trigger_batch: list[StackItem] = []
+        for event in damage_events:
+            if not event.was_dealt:
+                continue
+            self._dispatch_semantic_event(
+                "damage.dealt",
+                event.semantic_context(),
+                sources=trigger_sources,
+                source_zones=trigger_source_zones,
+                trigger_batch=trigger_batch,
+            )
+            if self._semantic_pause_annotation() is not None:
+                break
+        self._enqueue_semantic_trigger_batch(trigger_batch)
+        if self._semantic_pause_annotation() is not None:
+            return True
+        return self._stabilize()
 
     # ------------------------------------------------------------------
     # Cleanup, state-based actions, and player elimination

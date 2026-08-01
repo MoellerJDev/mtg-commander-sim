@@ -12881,7 +12881,7 @@
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
         "live damage does not gather and order all applicable replacement and prevention effects",
-        "damage triggers are not collected from the final dealt event before state-based actions"
+        "noncombat damage producers do not yet share the typed final-event trigger path"
       ],
       "case_id": "cr-120.4b",
       "case_version": 1,
@@ -12902,7 +12902,7 @@
         "CommanderEngine._protection_colors"
       ],
       "notes": [
-        "Selected protection prevention and the typed prevention primitive work independently; complete event integration remains blocked."
+        "Selected combat prevention records a final dealt/prevented result and dispatches only positive dealt results to represented triggers before post-damage priority. Complete replacement, prevention, and noncombat event integration remains blocked."
       ],
       "required_scenarios": [
         "positive",
@@ -12968,27 +12968,33 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "there is no canonical final damage-event object shared by triggers, replacement audit, results, reports, and replay"
+        "noncombat producers and the complete CR 120.4 replacement/result sequence do not yet share the canonical DamageEvent path"
       ],
       "case_id": "cr-120.4d",
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
-        "negative"
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
       ],
       "dependency_rule_ids": [
         "120.4"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event"
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event",
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_lifelink_counts_only_damage_not_prevented_by_protection",
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch"
       ],
       "implementation_components": [
-        "CommanderEngine._log",
+        "DamageEvent",
+        "CommanderEngine._apply_combat_assignments",
         "Event"
       ],
       "notes": [
-        "Zero damage is suppressed before a damage event, but a fully typed final event is not yet emitted for nonzero damage."
+        "Combat damage journals a typed final source-recipient result, including assigned, dealt, and prevented amounts, and the same serialized context drives represented damage triggers and exact replay. The rule remains blocked for the universal damage pipeline."
       ],
       "required_scenarios": [
         "positive",
@@ -13187,24 +13193,31 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "simultaneous damage is not correlated per source in a typed event available to triggered abilities",
-        "damage-dealt references do not retain exact source subsets through replay"
+        "noncombat simultaneous damage does not yet emit per-source typed event subsets",
+        "the complete Oracle grammar for effects that refer back to damage dealt is not compiled"
       ],
       "case_id": "cr-120.9",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "120"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
+      "executable_test_ids": [
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch"
+      ],
       "implementation_components": [
+        "DamageEvent",
         "StackItem.context",
         "Event"
       ],
       "notes": [
-        "No claim is made for source-specific damage-trigger correlation."
+        "Represented combat damage emits one immutable source-recipient context per final dealt result and preserves that context on the triggered ability through exact replay. Universal source-subset semantics remain blocked."
       ],
       "required_scenarios": [
         "positive",
@@ -33177,30 +33190,31 @@
       "status": "definition_only"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "sequential_active_then_defending_player_assignment_announcement_not_implemented"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-510.1",
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
         "positive",
-        "interaction"
+        "interaction",
+        "multiplayer"
       ],
       "dependency_rule_ids": [
         "510"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_multiblocker_assignment_deals_all_damage_simultaneously"
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_multiblocker_assignment_deals_all_damage_simultaneously",
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_discretionary_assignments_are_collected_in_apnap_order_and_replay",
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_multiplayer_assignment_announcements_follow_apnap"
       ],
       "implementation_components": [
         "CommanderEngine._begin_combat_damage",
         "CommanderEngine._complete_combat_damage"
       ],
       "notes": [
-        "Assignments are collected without an intervening priority window, but the official active-player then defending-player announcement order is not yet represented."
+        "Players with assigning creatures announce in APNAP order. Forced assignments are derived without a strategic task, discretionary divisions are capability-scoped, and earlier assignments are public to later assigning players before simultaneous dealing."
       ],
       "required_scenarios": [
         "positive",
@@ -33216,7 +33230,7 @@
         "end_line": 2394,
         "start_line": 2393
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
       "assertion_kind": "executable_engine",
@@ -33338,24 +33352,27 @@
       "status": "passing"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "blocking_several_attackers_declaration_not_implemented"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-510.1d",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "510.1"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
+      "executable_test_ids": [
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_discretionary_assignments_are_collected_in_apnap_order_and_replay"
+      ],
       "implementation_components": [
         "CommanderEngine._validated_combat_damage_assignments"
       ],
       "notes": [
-        "The validator can derive several attacked recipients from combat state, but the declaration system currently forbids one blocker from blocking several attackers."
+        "Given an authoritative combat state in which a blocker blocks several attackers, its controller receives the full recipient set and must divide exactly its power among those attackers. Ordinary declaration support for producing that state remains a separate CR 509 concern."
       ],
       "required_scenarios": [
         "positive",
@@ -33370,7 +33387,7 @@
         "end_line": 2403,
         "start_line": 2402
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
       "assertion_kind": "executable_engine",
@@ -33458,26 +33475,30 @@
       "status": "blocked"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "complete_post_damage_trigger_stabilization_before_priority_not_verified"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-510.3",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "510"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
+      "executable_test_ids": [
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch"
+      ],
       "implementation_components": [
         "CommanderEngine._begin_combat_damage",
+        "CommanderEngine._apply_combat_assignments",
         "CommanderEngine._stabilize",
         "CommanderEngine._grant_priority"
       ],
       "notes": [
-        "The ordinary path grants active-player priority, but complete trigger and state-action ordering must be verified with CR 510.3a."
+        "After the stackless assignment and dealing actions, state-based actions stabilize, represented waiting triggers are placed, and only then does the active player receive priority."
       ],
       "required_scenarios": [
         "positive",
@@ -33492,28 +33513,34 @@
         "end_line": 2409,
         "start_line": 2408
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "complete_damage_and_state_action_trigger_apnap_batch_not_implemented"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-510.3a",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "510.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
+      "executable_test_ids": [
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch"
+      ],
       "implementation_components": [
-        "CommanderEngine._stabilize",
-        "CommanderEngine._enqueue_semantic_trigger_batch"
+        "DamageEvent",
+        "CommanderEngine._apply_combat_assignments",
+        "CommanderEngine._enqueue_semantic_trigger_batch",
+        "CommanderEngine._stabilize"
       ],
       "notes": [
-        "Complete APNAP placement of damage and post-damage state-action triggers before priority remains a trigger-pipeline dependency."
+        "Normalized source-recipient damage triggers and triggers discovered during the resulting state-based-action fixed point merge into one unstarted APNAP/controller-order batch. Their chronological trigger order does not constrain the controller's submitted order, and exact command replay is verified."
       ],
       "required_scenarios": [
         "positive",
@@ -33529,7 +33556,7 @@
         "end_line": 2411,
         "start_line": 2410
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
       "assertion_kind": "executable_engine",
@@ -36825,14 +36852,17 @@
       "classification": "behavioral",
       "covered_scenarios": [
         "positive",
-        "multiplayer"
+        "interaction",
+        "multiplayer",
+        "replay"
       ],
       "dependency_rule_ids": [
         "603.3"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_preflight_v080.NormalizedZoneEventTests.test_simultaneous_semantic_triggers_use_apnap_and_owner_order"
+        "tests.test_preflight_v080.NormalizedZoneEventTests.test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch"
       ],
       "implementation_components": [
         "CommanderEngine._enqueue_semantic_trigger_batch",
@@ -36840,7 +36870,7 @@
         "CommanderEngine._stabilize"
       ],
       "notes": [
-        "Represented simultaneous triggers use APNAP controller groups and controller-selected order, but only the first part of the rule is modeled."
+        "Represented triggers discovered across one pre-priority stabilization window merge until placement starts, including damage and resulting state-action triggers, then use APNAP controller groups and controller-selected order. The distinct second part for abilities triggered by another ability triggering remains unimplemented."
       ],
       "required_scenarios": [
         "positive",
@@ -91958,23 +91988,43 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-802.5",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "802"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_multiplayer_assignment_contract_traces_cr_802_5",
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_discretionary_assignments_are_collected_in_apnap_order_and_replay",
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_multiplayer_assignment_announcements_follow_apnap"
+      ],
+      "implementation_components": [
+        "CommanderEngine._continue_combat_damage_assignments",
+        "CommanderEngine._record_combat_damage_announcement",
+        "CommanderEngine._apply_combat_assignments"
+      ],
+      "notes": [
+        "Players with current assigning creatures announce in APNAP order. Earlier assignments remain public while a later player's illegal division rolls back transactionally, and all accepted assignments replay exactly before simultaneous dealing."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "802.5",
       "rule_text_sha256": "91349d251bd083a26d5e2eae41dbf7f2bdeaa4a4b6a54d1122044b6554e22bac",
       "schema_version": 1,
@@ -91983,7 +92033,7 @@
         "end_line": 6542,
         "start_line": 6541
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",

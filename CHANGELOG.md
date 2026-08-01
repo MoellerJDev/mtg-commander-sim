@@ -4,6 +4,21 @@
 
 ### Combat rules family
 
+- Combat-damage assignments now proceed in public APNAP order. Forced
+  assignments are derived without a pilot task, discretionary divisions are
+  routed to one fixed seat at a time, later players receive earlier
+  announcements, and an illegal later division preserves the accepted prefix.
+- Added immutable final combat `DamageEvent` records with source, recipient,
+  assigned, dealt, and prevented correlation. Positive final results emit the
+  normalized `damage.dealt` event used by represented trigger programs.
+- Trigger batches now merge independently discovered abilities until stack
+  placement begins. Combat damage triggers and deaths caused by the ensuing
+  state-based-action fixed point therefore receive one APNAP/controller-order
+  choice before active-player priority and replay exactly.
+- Added source-pinned executable evidence for CR 510.1, 510.1d, 510.3, 510.3a,
+  and multiplayer CR 802.5. The universal CR 120.4 event transformation path,
+  noncombat damage migration, trigger-on-trigger placement, and the shared
+  combat constraint solver remain explicit blockers.
 - Added a reusable combat-rules module and a serialized two-damage-step state
   machine for first strike and double strike, including the rules for gaining
   or losing either ability between steps and priority after each real step.

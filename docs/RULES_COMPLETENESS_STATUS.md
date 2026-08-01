@@ -41,11 +41,11 @@ coverage.
 | Command | Partial | All 4 CR 408 records reviewed; public Commander cards and typed emblem objects are represented, while non-Commander casual variants and arbitrary emblem compilation remain blocked |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
 | Replacement/prevention ordering | Partial | CR 615/616 typed primitives; stateful shields and event-producer integration incomplete |
-| Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, counter-derived battlefield defense, copied printed defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
+| Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, immutable final combat source-recipient events, combat damage/death trigger batching, counter-derived battlefield defense, copied printed defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
 | Full Oracle compilation | In progress | exact 2,957; partial 15,691; unresolved 19,725; 69,664 material residuals |
 | Commander-legal Oracle compilation | In progress | exact 338; partial 14,354; unresolved 16,930; 61,212 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 557 cases are reviewed, with 108 executable passes, 369 blocked cases, and 80 definition-only cases; 2,743 remain unreviewed |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 558 cases are reviewed, with 113 executable passes, 365 blocked cases, and 80 definition-only cases; 2,742 remain unreviewed |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -247,12 +247,19 @@ coverage.
   definition-only.
 - [x] Reviewed all 11 CR 510 Combat Damage Step records. Exact effective-power
   totals, legal multi-blocker recipients, strict assignment fields, atomic
-  rejection, first/double-strike two-step sequencing, and exact replay pass for
-  the represented boundary. Normal trample validates lethal before spill using
-  marked damage, simultaneous assignments, and deathtouch; combat lifelink
-  uses damage actually dealt. The complete recipient matrix, trample over
+  per-player rejection, APNAP announcement sequencing, first/double-strike
+  two-step sequencing, and exact replay pass for the represented boundary.
+  Forced assignments require no pilot task. Normal trample validates lethal
+  before spill using marked damage, simultaneous assignments, and deathtouch;
+  combat lifelink uses damage actually dealt. Immutable final combat results
+  drive represented damage triggers, which combine with resulting death
+  triggers before priority. The complete recipient matrix, trample over
   planeswalkers, banding assignment control, universal replacement/prevention,
-  source LKI, and post-damage APNAP triggers remain dependency-blocked.
+  noncombat damage events, and source LKI remain dependency-blocked.
+- [x] Reviewed CR 802.5 for multiplayer combat-damage assignment order.
+  Assigning players proceed in APNAP order, later players receive earlier
+  public announcements, forced assignments are automatic, illegal later
+  divisions preserve the accepted prefix, and the sequence replays exactly.
 - [x] Reviewed all 29 CR 506 Combat Phase records. Tapping and untapping
   preserve represented attacking and blocking relationships. Zone, control,
   phasing, creature-type, Battle-type, and attacking-controller invalidation
@@ -281,7 +288,7 @@ coverage.
   declaration triggers, multi-attacker blocking, blocked-status effects, and
   entry-blocking remain dependency-blocked.
 
-## Current CR 120/210/310/400/401/402/403/405/500/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704 slice
+## Current CR 120/210/310/400/401/402/403/405/500/501/502/503/506/507/508/509/510/511/512/513/514/600/601/602/603/604/605/606/607/608/609/614/615/616/704/802 slice
 
 At the beginning of combat, supported two-player and multiplayer Commander
 profiles establish every active opponent as a defending player without
@@ -330,14 +337,21 @@ total from authoritative state; the client may submit only source, target, and
 integer amount. A source with power 0 or less submits no assignment. Noncombat
 sources, unrelated recipients, missing or excessive totals, duplicate pairs,
 malformed fields, and client-supplied semantic flags are rejected before
-damage is applied. First strike and double strike create two real combat
-damage steps with a frozen ordinary-participant snapshot and current
-double-strike recheck. Normal trample exposes the attacked object only when
-lethal is assigned to every current blocker, counting marked damage,
-simultaneous assignments, and deathtouch but not prevention. Combat lifelink
-gains life only for damage actually dealt. Trample over planeswalkers,
-noncombat lifelink/LKI, banding assignment control, universal simultaneous
-damage replacement, and post-damage trigger batching remain blocked.
+damage is applied. Players with assigning creatures proceed in APNAP order;
+forced assignments are derived without a task, while later discretionary
+forms contain the earlier public announcements. An illegal later assignment
+rolls back to that player's pre-announcement state without erasing the accepted
+prefix. First strike and double strike create two real combat-damage steps with
+a frozen ordinary-participant snapshot and current double-strike recheck.
+Normal trample exposes the attacked object only when lethal is assigned to
+every current blocker, counting marked damage, simultaneous assignments, and
+deathtouch but not prevention. Combat lifelink gains life only for damage
+actually dealt. Each positive final combat result emits a source-correlated
+`damage.dealt` context; represented damage triggers and triggers caused by
+post-damage state-based actions merge into one APNAP/controller-order batch
+before active-player priority. Trample over planeswalkers, noncombat
+lifelink/LKI and damage events, banding assignment control, and universal
+simultaneous damage replacement/result ordering remain blocked.
 
 Battle behavior is derived from the effective card type, subtype, defense
 characteristic, counters, controller, and protector. It contains no
@@ -483,8 +497,10 @@ Outstanding blockers include:
 
 ## Verification at this checkpoint
 
-- 3,925 unit/integration tests pass: 625 ordinary tests plus 3,300 generated
-  inventory/source-linkage tests. The latter are not semantic passes.
+- 4,013 unit/integration tests are in the current suite: 713 ordinary tests
+  plus 3,300 generated inventory/source-linkage tests. The four new combat
+  assignment/trigger witnesses pass in the focused local run; the full matrix
+  remains the PR CI merge authority. Generated tests are not semantic passes.
 - Seven focused CR 403 tests cover exact source traceability, empty and shared
   four-player battlefield structure, controller-index integrity,
   cross-controller attachment projection, ordinary battlefield-only scope,
@@ -551,13 +567,15 @@ Outstanding blockers include:
 - Six focused CR 509 tests cover all-rule traceability, ordinary declaration
   and exact replay, phased/tapped exclusion, atomic malicious-declaration
   rollback, blocking-state lifetime, menace's conditional minimum, and the ordinary priority handoff.
-- Twenty-two focused CR 510/combat-keyword tests cover contract traceability,
+- Twenty-six focused CR 510/combat-keyword tests cover contract traceability,
   server-derived multi-blocker assignment, excessive-total rejection,
   noncombat-source rejection, nonpositive-power nonassignment,
   departed-blocker nonassignment, unrelated-recipient rejection, strict nested
-  assignment fields, first/double-strike step mutations, normal trample lethal
-  assignment, deathtouch, marked/prevented damage, lifelink, atomic rollback,
-  and exact command replay.
+  assignment fields, sequential APNAP announcements, automatic forced
+  assignment, later-player rollback, normalized final damage events,
+  damage/death trigger batching, first/double-strike step mutations, normal
+  trample lethal assignment, deathtouch, marked/prevented damage, lifelink,
+  atomic rollback, multiplayer ordering, and exact command replay.
 - Four focused CR 511 tests cover no-turn-action priority, coexisting
   permanent/delayed boundary triggers, multiplayer removal from combat, and
   exact replay into postcombat main.
@@ -594,9 +612,9 @@ Outstanding blockers include:
   command replay.
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
-  establish inventory linkage only. All 557 cases in the current reviewed
-  families are source-reviewed: 108 pass with executable engine evidence, 369
-  remain blocked, and 80 are definition-only. The other 2,743 cases remain
+  establish inventory linkage only. All 558 cases in the current reviewed
+  families are source-reviewed: 113 pass with executable engine evidence, 365
+  remain blocked, and 80 are definition-only. The other 2,742 cases remain
   unreviewed.
 
 Repository demo, repository audit, wheel build, clean wheel installation, and
@@ -605,28 +623,22 @@ checkpoint validation.
 
 ## Next dependency-ordered work
 
-Broad sequential rules review is frozen after the CR 400–408 and CR 500–512
-integration reached `main`. The first authoritative server/browser slice now
-has a shared, versioned form adapter for the engine's current choice schemas,
-four-context private mulligan coverage, and process-restart recovery with exact
-replay. The owner-only administrative stop/resume and seated-member safe
-inspection slice is now implemented. It preserves exact replay through process
-restart and cannot override a material rules/fidelity pause. Invited spectators
-now receive only public projections and a complete durable public log. The next
-steps are:
+Broad sequential CR-number traversal remains frozen in favor of coherent
+dependency families. Combat damage now has exact step splitting, keyword
+assignment constraints, APNAP announcements, typed final combat events, and
+post-damage trigger batching. The next rules work is:
 
-1. Run a fresh full-database browser journey after a clean restart. The inspected
-   record that omitted Sunscorched Desert's ETB and waited on Orcish Bowmasters
-   was created before the reviewed semantic pack and pinned
-   `arbitrate_or_pause`; legacy arbiter-only records now become visible,
-   non-resumable browser rules pauses. Current compact trusted-only regressions
-   pass, but fresh full-database gameplay evidence is still required.
-2. Continue server operations hardening: expiry/rate limits, deployment
-   boundaries, and multi-process ownership design.
-3. Harden browser accessibility, command-retry presentation, and any
-   new choice-schema family only when the engine introduces it.
-4. Resume rules work for defects that block those slices; defer broad
-   CR-number traversal until it has concrete executable evidence.
+1. Introduce one shared attack/block restrictions-and-requirements solver, with
+   deterministic satisfiability, minimum/maximum constraints, costs, rollback,
+   and projected explanations. Declare attackers and declare blockers must use
+   the same constraint vocabulary rather than accumulating keyword branches.
+2. Route represented declaration triggers and effect-created/removed
+   combatants through that solver while preserving public APNAP ordering and
+   exact replay.
+3. Build the universal CR 120.4/614/615/616 typed damage transformation pipeline
+   and migrate noncombat damage to the same final `DamageEvent` boundary before
+   promoting broader damage, lifelink, infect, wither, toxic, or excess-damage
+   coverage.
 
 No deck list has been modified, and no current game result is promoted to
 matchup evidence.

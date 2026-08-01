@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 802 — Attack Multiple Players Option",
+  "cases": [
+    {
+      "rule_id": "802.5",
+      "rule_text_sha256": "91349d251bd083a26d5e2eae41dbf7f2bdeaa4a4b6a54d1122044b6554e22bac",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._continue_combat_damage_assignments",
+        "CommanderEngine._record_combat_damage_announcement",
+        "CommanderEngine._apply_combat_assignments"
+      ],
+      "executable_test_ids": [
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_multiplayer_assignment_contract_traces_cr_802_5",
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_discretionary_assignments_are_collected_in_apnap_order_and_replay",
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_multiplayer_assignment_announcements_follow_apnap"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "Players with current assigning creatures announce in APNAP order. Earlier assignments remain public while a later player's illegal division rolls back transactionally, and all accepted assignments replay exactly before simultaneous dealing."
+      ]
+    }
+  ]
+}

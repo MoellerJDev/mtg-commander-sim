@@ -222,11 +222,14 @@
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
       "implementation_components": ["CommanderEngine._enqueue_semantic_trigger_batch", "CommanderEngine._begin_pending_semantic_trigger_batch", "CommanderEngine._stabilize"],
-      "executable_test_ids": ["tests.test_preflight_v080.NormalizedZoneEventTests.test_simultaneous_semantic_triggers_use_apnap_and_owner_order"],
+      "executable_test_ids": [
+        "tests.test_preflight_v080.NormalizedZoneEventTests.test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch"
+      ],
       "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
-      "covered_scenarios": ["positive", "multiplayer"],
+      "covered_scenarios": ["positive", "interaction", "multiplayer", "replay"],
       "blockers": ["trigger batches do not separate ordinary triggers from abilities triggered by another ability triggering", "the complete repeat-SBA-then-new-trigger two-part loop lacks exact replay coverage"],
-      "notes": ["Represented simultaneous triggers use APNAP controller groups and controller-selected order, but only the first part of the rule is modeled."]
+      "notes": ["Represented triggers discovered across one pre-priority stabilization window merge until placement starts, including damage and resulting state-action triggers, then use APNAP controller groups and controller-selected order. The distinct second part for abilities triggered by another ability triggering remains unimplemented."]
     },
     {
       "rule_id": "603.3c",

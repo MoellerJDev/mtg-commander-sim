@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-802-attack-multiple-players-option",
+  "official_name": "Attack Multiple Players Option",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": ["802.5"],
+  "glossary_references": [],
+  "dependencies": [
+    "combat",
+    "combat-damage-step",
+    "multiplayer",
+    "apnap",
+    "illegal-actions"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["battlefield"],
+    "objects": [
+      "attacking creature",
+      "blocking creature",
+      "assigning player"
+    ],
+    "events": [
+      "player announces combat-damage assignments",
+      "all assignments complete",
+      "combat damage is dealt simultaneously"
+    ],
+    "state_reads": [
+      "active player",
+      "turn order",
+      "current controllers of assigning combatants"
+    ],
+    "state_writes": [
+      "public assignment journal",
+      "pending next-player assignment continuation"
+    ],
+    "costs": [],
+    "timing": [
+      "assignment announcements occur in APNAP order",
+      "no priority occurs between announcements or before dealing"
+    ],
+    "targets": [
+      "only recipients legal for each assigning creature"
+    ],
+    "choices": [
+      "a player divides damage only when multiple recipients exist",
+      "forced assignments are derived without a player task"
+    ],
+    "hidden_information": [
+      "combat assignments are public",
+      "a later assigning player receives earlier announcements"
+    ],
+    "apnap": [
+      "players with assigning creatures are processed in current APNAP order"
+    ],
+    "layers": [
+      "effective power and creature status use derived characteristics"
+    ],
+    "replacement_effects": [
+      "damage replacement and prevention are separate dependencies"
+    ],
+    "copy": [
+      "copies use effective combat characteristics"
+    ],
+    "control_change": [
+      "the current controller announces for an assigning creature"
+    ],
+    "zone_change": [
+      "departed combatants do not assign"
+    ],
+    "source_leaves": [
+      "a departed source contributes no assignment"
+    ]
+  },
+  "variants": [
+    "two-player assignment order",
+    "four-player order with a player that has no assigning creature",
+    "discretionary assignments for more than one player",
+    "illegal later-player assignment rollback"
+  ],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": [
+    "test_multiplayer_assignment_contract_traces_cr_802_5",
+    "test_discretionary_assignments_are_collected_in_apnap_order_and_replay",
+    "test_multiplayer_assignment_announcements_follow_apnap"
+  ],
+  "implementation": {
+    "component": "CommanderEngine._continue_combat_damage_assignments",
+    "version": "multiplayer-combat-damage-order-v1"
+  },
+  "known_blockers": [
+    "complete banding and controller-of-assignment exceptions are not implemented",
+    "the declaration UI does not yet produce every legal several-attacker blocking relationship"
+  ],
+  "review_status": "draft"
+}

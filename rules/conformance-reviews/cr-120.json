@@ -509,10 +509,10 @@
       ],
       "blockers": [
         "live damage does not gather and order all applicable replacement and prevention effects",
-        "damage triggers are not collected from the final dealt event before state-based actions"
+        "noncombat damage producers do not yet share the typed final-event trigger path"
       ],
       "notes": [
-        "Selected protection prevention and the typed prevention primitive work independently; complete event integration remains blocked."
+        "Selected combat prevention records a final dealt/prevented result and dispatches only positive dealt results to represented triggers before post-damage priority. Complete replacement, prevention, and noncombat event integration remains blocked."
       ]
     },
     {
@@ -554,11 +554,14 @@
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
       "implementation_components": [
-        "CommanderEngine._log",
+        "DamageEvent",
+        "CommanderEngine._apply_combat_assignments",
         "Event"
       ],
       "executable_test_ids": [
-        "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event"
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event",
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_lifelink_counts_only_damage_not_prevented_by_protection",
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch"
       ],
       "required_scenarios": [
         "positive",
@@ -567,13 +570,16 @@
         "replay"
       ],
       "covered_scenarios": [
-        "negative"
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
       ],
       "blockers": [
-        "there is no canonical final damage-event object shared by triggers, replacement audit, results, reports, and replay"
+        "noncombat producers and the complete CR 120.4 replacement/result sequence do not yet share the canonical DamageEvent path"
       ],
       "notes": [
-        "Zero damage is suppressed before a damage event, but a fully typed final event is not yet emitted for nonzero damage."
+        "Combat damage journals a typed final source-recipient result, including assigned, dealt, and prevented amounts, and the same serialized context drives represented damage triggers and exact replay. The rule remains blocked for the universal damage pipeline."
       ]
     },
     {
@@ -713,10 +719,13 @@
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
       "implementation_components": [
+        "DamageEvent",
         "StackItem.context",
         "Event"
       ],
-      "executable_test_ids": [],
+      "executable_test_ids": [
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch"
+      ],
       "required_scenarios": [
         "positive",
         "negative",
@@ -724,13 +733,13 @@
         "multiplayer",
         "replay"
       ],
-      "covered_scenarios": [],
+      "covered_scenarios": ["positive", "interaction", "replay"],
       "blockers": [
-        "simultaneous damage is not correlated per source in a typed event available to triggered abilities",
-        "damage-dealt references do not retain exact source subsets through replay"
+        "noncombat simultaneous damage does not yet emit per-source typed event subsets",
+        "the complete Oracle grammar for effects that refer back to damage dealt is not compiled"
       ],
       "notes": [
-        "No claim is made for source-specific damage-trigger correlation."
+        "Represented combat damage emits one immutable source-recipient context per final dealt result and preserves that context on the triggered ability through exact replay. Universal source-subset semantics remain blocked."
       ]
     },
     {

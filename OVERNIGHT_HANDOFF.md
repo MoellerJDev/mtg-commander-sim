@@ -12,35 +12,40 @@ or provider session data. Current generated metrics live in
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
 - Latest integrated `main` merge:
-  `b39edeb62e984ab1785948223d4e7d5b99fbec2b`
+  `bd3173bf1169f8fe84681a58c2e5dad4740c90ff`
 - Latest certified feature head:
-  `fc5e8be989c81c010b2550a9187ffad8d4989dd3`
-- Current focused branch: `agent/rules-combat-damage`, based on `b39edeb`; its
+  `f1cd4d9ba1148257647d8cabe0da859edb3d627e`
+- Current focused branch: `agent/rules-combat-tba-triggers`, based on
+  `bd3173b`; its
   candidate commit is the commit containing this handoff.
-- Current focused slice: first/double-strike damage steps, normal trample,
-  combat lifelink, menace, defender, pinned contracts, and exact replay
+- Current focused slice: APNAP combat-damage announcements, automatic forced
+  assignments, typed final combat damage events, damage/death trigger batching,
+  pinned CR 510/603/802 evidence, and exact replay
 - Package: `0.8.0`
 - Tags: `v0.6.0`, `v0.7.0`
 - No `v0.8.0` release tag has been created.
 
-PRs #1–#17 and #24–#36 are merged through ordinary merge commits. PR #24
+PRs #1–#17 and #24–#37 are merged through ordinary merge commits. PR #24
 incorporated the ancestry-proven CR 400–408 stack; PRs #18–#23 were closed as
 superseded only after their exact heads were reachable from `main`. PRs #27–#35
 integrated the authoritative browser/server vertical slice, restart and
 lifecycle hardening, managed local data, UI interaction, spectators/public
-logs, the visible fail-closed browser rules boundary, and current trigger/token
-mana stabilization. No force push or tag movement was used.
+logs, the visible fail-closed browser rules boundary, current trigger/token
+mana stabilization, and the core combat-keyword slice. No force push or tag
+movement was used.
 
 ## Deterministic evidence
 
 - The latest integrated feature head `fc5e8be` passed the exact 18-stage local
   merge gate and public matrix before PR #36 merged.
-- 3,997 unit/integration tests pass on Windows Python 3.11.9 against the
-  compact public CI card database.
+- The integrated 4,009-test suite passed PR #37's Python 3.11/3.12
+  Ubuntu/Windows and Browser/Chromium matrix. Four additional focused
+  assignment/trigger witnesses pass locally on the current branch; its full
+  regression remains delegated to PR CI.
 - All 3,300 pinned rule records and 425 mechanic records verify against the
   June 19, 2026 rules source. Generated per-rule inventory tests do not imply
   semantic completeness.
-- Conformance remains 108 passing, 369 blocked, 80 definition-only, and 2,743
+- Conformance is 113 passing, 365 blocked, 80 definition-only, and 2,742
   unreviewed. No complete-rules claim is authorized.
 - The deterministic four-player natural-winner, seed-20260730 replay,
   projection/privacy, protocol demo, dependency, repository/history/security,
@@ -54,8 +59,9 @@ mana stabilization. No force push or tag movement was used.
   replayed to the exact final hash, reported zero suppressed meaningful
   windows, and passed its hidden-information audit. A completed concession also
   restores as terminal after server restart and exact replay.
-- Merge commit `b39edeb` is covered by public `main` run `30684463002` across
-  Python 3.11/3.12, Ubuntu/Windows, and Browser/Chromium.
+- Feature head `f1cd4d9` and merge commit `bd3173b` are covered by PR #37 run
+  `30685770054` across Python 3.11/3.12, Ubuntu/Windows, and
+  Browser/Chromium.
 
 GitHub Actions is operating normally. Historical zero-step billing failures
 are not current evidence and no administrator bypass is authorized or needed.
@@ -125,12 +131,13 @@ rules, product, CI, merge, or release authorities.
 ## Next dependency-ordered work
 
 The lifecycle/browser milestone is integrated. Rules work now proceeds in
-coherent dependency families. The current combat slice implements and tests
-the reusable keyword interactions without promoting their contracts beyond
-partial/untrusted. The next dependency is combat turn-based-action/trigger
-ordering and the shared restrictions-and-requirements solver; the universal
-typed damage replacement/prevention pipeline remains the deeper prerequisite
-for broader combat and Oracle trust.
+coherent dependency families. Reusable combat keyword interactions, real split
+damage steps, APNAP assignment announcements, typed final combat results, and
+post-damage trigger batching are implemented without promoting their broader
+contracts beyond partial/untrusted. The next dependency is one shared
+attack/block restrictions-and-requirements solver. The universal typed CR
+120.4/614/615/616 damage replacement/prevention/result pipeline remains the
+deeper prerequisite for noncombat damage and broader Oracle trust.
 
 Each rules PR should run its new and directly impacted tests locally, then use
 the public PR matrix as the full regression authority. Preserve exact replay,

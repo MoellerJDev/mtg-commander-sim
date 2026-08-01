@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "cr-603-handling-triggered-abilities",
   "official_name": "Handling Triggered Abilities",
   "effective_date": "2026-06-19",
@@ -94,6 +94,7 @@
       "artifact enters or goes to a graveyard",
       "land enters",
       "second card is drawn",
+      "combat damage is dealt",
       "delayed trigger condition matches"
     ],
     "state_reads": [
@@ -112,6 +113,7 @@
     "timing": [
       "trigger is detected during the event",
       "trigger batch is stabilized before priority",
+      "represented triggers discovered by later state-based actions merge until stack placement begins",
       "intervening condition is rechecked on resolution",
       "delayed trigger waits for a later matching event"
     ],
@@ -128,7 +130,8 @@
       "private-zone trigger information remains seat-scoped"
     ],
     "apnap": [
-      "simultaneous represented trigger batches group controllers in APNAP order"
+      "represented triggers waiting since the previous priority window group controllers in APNAP order",
+      "same-controller damage and resulting state-action triggers receive one ordering choice"
     ],
     "layers": [
       "last-known and entry characteristics may depend on continuous effects"
@@ -193,15 +196,16 @@
     "test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
     "test_delayed_trigger_queues_at_matching_step",
     "test_daretti_ruling_does_not_follow_a_reentered_card",
-    "test_unconditional_entry_tapped_is_engine_derived"
+    "test_unconditional_entry_tapped_is_engine_derived",
+    "test_damage_and_resulting_death_triggers_share_one_order_batch"
   ],
   "implementation": {
-    "component": "oracle_ir trigger lowering plus CommanderEngine semantic-event, trigger-batch, stabilization, and delayed-trigger paths",
-    "version": "trigger-handling-foundation-v2"
+    "component": "oracle_ir trigger lowering plus CommanderEngine semantic-event, mergeable trigger-batch, stabilization, and delayed-trigger paths",
+    "version": "trigger-handling-foundation-v3"
   },
   "known_blockers": [
     "the Oracle compiler recognizes selected whole-text trigger templates rather than the complete trigger grammar",
-    "the two-part CR 603.3b ordering for abilities that trigger from other abilities triggering is not represented",
+    "the second CR 603.3b placement part for abilities that trigger from other abilities triggering is not represented",
     "generic modal trigger legality, all target and division choices, and illegal-trigger removal remain incomplete",
     "multi-occurrence, becomes, visibility, once-per-turn instruction, state, player-loss, linked-mid-sentence, and reflexive trigger families are incomplete",
     "delayed-trigger creation provenance and simultaneous-event selection are not universally typed",

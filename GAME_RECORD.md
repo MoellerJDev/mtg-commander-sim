@@ -104,6 +104,18 @@ combat-damage step across checkpoints and exact command replay. The internal
 object-ID snapshot is authoritative only; projected seats receive the public
 one-based damage-step number and whether the split step exists.
 
+Sequential combat-damage choices remain ordinary v3 decision continuations.
+The continuation records the fixed APNAP assignment order, current cursor, and
+already announced public assignments; it contains no hidden card identity.
+Forced assignments create public `combat.damage.assigned` events without a
+client command. The final `combat.damage` event journals normalized assigned,
+dealt, and prevented source-recipient results. Pending semantic trigger batches
+use the additive `placement_started` marker so damage triggers may merge with
+triggers discovered by subsequent state-based actions until placement begins,
+while `priority_epoch` prevents merging across priority windows and triggers
+created during placement remain a later CR 603.3b pass. These
+are additive checkpoint details, not a Game Record v3 redesign.
+
 Fresh native records use `manifest.replay.mode = "command_replay"`. The
 separate `legacy_snapshot` mode is reserved for migrated records whose accepted
 commands cannot be reconstructed honestly.

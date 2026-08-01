@@ -10,7 +10,7 @@
     "branch": "main",
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
-      "focused_branch_base": "b39edeb62e984ab1785948223d4e7d5b99fbec2b",
+      "focused_branch_base": "bd3173bf1169f8fe84681a58c2e5dad4740c90ff",
       "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
@@ -265,6 +265,13 @@
         "number": 36,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/36"
+      },
+      {
+        "base": "main",
+        "head": "agent/rules-combat-damage",
+        "number": 37,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/37"
       }
     ],
     "tags": [
@@ -336,12 +343,12 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "b39edeb62e984ab1785948223d4e7d5b99fbec2b",
+    "baseline_commit": "bd3173bf1169f8fe84681a58c2e5dad4740c90ff",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30684463002,
+      "run_id": 30685770054,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30684463002"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30685770054"
     },
     "local": {
       "compile": "pass",
@@ -368,5 +375,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Continue the dependency-ordered combat rules family: correct turn-based-action and trigger batching around declare attackers, declare blockers, and combat damage, then introduce the shared restrictions-and-requirements solver without weakening exact replay, rollback, or hidden-information gates."
+  "next_task": "Introduce one shared attack/block restrictions-and-requirements solver with deterministic satisfiability, projected explanations, transaction rollback, hidden-information safety, and exact replay; keep the universal CR 120.4 damage transformation pipeline as the next deeper dependency."
 }

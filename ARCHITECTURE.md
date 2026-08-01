@@ -566,6 +566,19 @@ and command replay cannot collapse first/double strike into one step. Generic
 assignment-map metadata carries conditional group minimums such as menace to
 the browser, but the engine repeats the complete declaration check.
 
+Final combat source-recipient results use the immutable
+`mtg_commander_sim.damage.DamageEvent` boundary. Combat assignment is a
+stackless APNAP continuation: forced assignments are derived, discretionary
+divisions receive one fixed-seat capability at a time, earlier announcements
+are public to later players, and damage is dealt only after the sequence is
+complete. `damage.dealt` semantic triggers are collected from positive final
+results. The trigger queue merges additional represented triggers discovered
+during the resulting state-based-action fixed point until stack placement
+starts, so one controller orders damage and death triggers together before the
+active player receives priority. This is the combat portion of the damage
+pipeline; noncombat damage and universal CR 120.4 replacement/prevention/result
+ordering remain explicit dependencies.
+
 Card-centric interaction remains a protocol adapter, not a second rules
 engine. The kernel supplies card refs, face-specific labels, current costs,
 exact legal mana modes, per-face visible definitions, and public-zone contents.
