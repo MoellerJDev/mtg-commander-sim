@@ -190,6 +190,15 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         )
         self.assertEqual([free.ref], [item["id"] for item in payload["candidates"]])
 
+        attacker = self.creature(engine, "B", "Opponent")
+        self.assertEqual(
+            (
+                False,
+                "declaration_restriction:attached-attack-block-prohibition-v1",
+            ),
+            engine._can_block(attacker, attached),
+        )
+
     def test_attack_or_block_alone_allows_different_defenders_and_replays(self):
         session = self.make_combat_session(508010902)
         engine = session.engine

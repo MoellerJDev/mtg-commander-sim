@@ -95,6 +95,8 @@ class MultiplayerRuleTests(unittest.TestCase):
         engine.permissions.invalidate_current()
         engine.state.priority_player = None
         a1, a2 = engine.create_token("A", name="Attacker", quantity=2, characteristics={"type_line": "Creature", "power": "2", "toughness": "2"}, temporary_keywords=["Haste"])
+        engine.create_token("B", name="Blocker B", characteristics={"type_line": "Creature", "power": "2", "toughness": "2"})
+        engine.create_token("C", name="Blocker C", characteristics={"type_line": "Creature", "power": "2", "toughness": "2"})
         engine.state.phase_index = 5
         engine._enter_step()
         self.assertEqual("combat.attackers", engine.state.pending_decision.kind)

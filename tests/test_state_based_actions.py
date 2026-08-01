@@ -2062,13 +2062,7 @@ class StateBasedActionEngineTests(unittest.TestCase):
         engine.permissions.invalidate_current()
         engine.state.pending_decision = None
         engine._issue_next_blocker()
-        blocker_payload = (
-            engine.state.pending_decision.payload_by_actor["B"]
-        )
-        self.assertNotIn(
-            battle_blocker_ref,
-            blocker_payload["blockers"],
-        )
+        self.assertIsNone(engine.state.pending_decision)
         self.assertEqual(
             (False, "blocker_is_battle"),
             engine._can_block(

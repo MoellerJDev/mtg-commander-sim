@@ -634,8 +634,6 @@ test("a duel declares an attacker in the browser and applies commander combat da
     await expect(attackerChoice).toBeVisible();
     await attackerChoice.selectOption("B");
     await submitOpenChoice(host);
-    await expect(opponent.getByTestId("decision-panel")).toContainText("Combat.Blockers");
-    await submitFormAction(opponent, "block");
 
     await expect(host.getByTestId("player-B").getByLabel("37 life")).toBeVisible();
     await expect(opponent.getByTestId("player-B").getByLabel("37 life")).toBeVisible();
@@ -722,8 +720,6 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       await expect(attackerChoice).toBeVisible();
       await attackerChoice.selectOption("B");
       await submitOpenChoice(host);
-      await expect(opponent.getByTestId("decision-panel")).toContainText("Combat.Blockers");
-      await submitFormAction(opponent, "block");
     }
 
     await attackWithCommander();

@@ -17320,6 +17320,43 @@ class CommanderEngine:
         )
         if "battle" in blocker_types:
             return False, "blocker_is_battle"
+        for source in sorted(
+            self.state.cards.values(), key=lambda value: value.ref
+        ):
+            if source.zone != "battlefield" or source.phased_out:
+                continue
+            for line in self._combat_oracle_lines(source):
+                parsed = parse_declaration_restriction_line(line)
+                template = parsed.template
+                if (
+                    not parsed.exact
+                    or template is None
+                    or "block" not in template.declarations
+                    or template.mode != "prohibit"
+                ):
+                    continue
+                applies = {
+                    "self": source.object_id == blocker.object_id,
+                    "attached": source.attached_to == blocker.object_id,
+                    "source_opponents": (
+                        blocker.controller != source.controller
+                    ),
+                    "source_option": source.object_id == attacker.object_id,
+                    "global": True,
+                }[template.scope]
+                if (
+                    applies
+                    and self._matches_declaration_predicate(
+                        blocker, template.subject, source=source
+                    )
+                    and self._matches_declaration_predicate(
+                        attacker, template.opposing, source=source
+                    )
+                ):
+                    return (
+                        False,
+                        f"declaration_restriction:{template.template_id}",
+                    )
         if "shadow" in attacker_keywords and "shadow" not in blocker_keywords:
             return False, "attacker_has_shadow"
         if "shadow" in blocker_keywords and "shadow" not in attacker_keywords:
