@@ -103,11 +103,19 @@ actions. Drag a playable land or spell onto your battlefield for the fast path.
 If the destination is ambiguous, such as a modal double-faced spell/land, the
 browser asks which server-issued action to execute.
 
-The active player explicitly advances both main phases. With an empty stack,
-the pass control is labeled **Continue to combat** during precombat main and
-**End turn** during postcombat main. The server may still auto-skip a
-nonactive response window only after its legal-action generator verifies that
-the seat has no meaningful response.
+**Auto-pass** and **Auto-mana** are on by default and persist in local browser
+storage. Auto-pass submits only an ordinary pass-only capability; the presence
+of a playable land, cast, target, declaration, or other meaningful nonmana
+action stops it. Select **Full control** at any time to require **Pass priority**
+even when the legal action set is otherwise empty. Browser-created games do not
+enable kernel-side empty-window suppression, so changing this toggle takes
+effect without creating a replacement game and every automatic pass remains an
+auditable command. With an empty stack, the pass control is labeled **Continue
+to combat** during precombat main and **End turn** during postcombat main.
+
+Every battlefield card uses its projected tapped flag. Tapping rotates the card
+90 degrees in every player's view; a later untap projection returns it upright.
+The browser never predicts or locally mutates tapped state.
 
 Attack and block forms use only the server's current legal assignment maps.
 Combat damage updates life and separately projects commander damage by source
@@ -119,13 +127,14 @@ same terminal result after a server restart. Concession outside a current
 projected player decision is not yet exposed as an out-of-band command.
 
 Casting defaults to **Auto-mana**, which asks the authoritative engine to use a
-valid routine payment. Select **Manual mana** to highlight untapped permanents
+valid routine payment. Select **Manual mana**—from either persistent table
+control or a cast form—to highlight untapped permanents
 with currently legal mana abilities. Click those sources in the desired
 activation order; a source with multiple modes presents exact choices such as
 **Add {U}** or **Add {B}** and adds only the selected bundle. Floating mana is
 shown on the player's board. Then choose or drag the spell again. The engine
 uses the floated pool first, validates the complete payment, and may finish a
-routine unpaid remainder. This mode controls activation order; it is not yet a
+routine unpaid remainder. The saved mode controls activation order; it is not yet a
 general restricted-mana or arbitrary cost-allocation editor.
 
 Rules-created tokens do not need a Scryfall card row when their projected

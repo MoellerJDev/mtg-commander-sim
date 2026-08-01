@@ -21,6 +21,12 @@ import {
 } from "./choices";
 import type { CommandEnvelope, DecisionPacket, JsonValue, LegalAction } from "./generated/protocol";
 import { ingestPacket, type ProjectedView } from "./protocol";
+import { findSafeAutoPass } from "./tableAutomation";
+import {
+  loadTablePreferences,
+  saveTablePreferences,
+  type TablePreferences,
+} from "./tablePreferences";
 
 type Screen = "loading" | "setup" | "welcome" | "lobby" | "room" | "game";
 
@@ -57,20 +63,24 @@ function CardTile({
   value,
   view,
   compact = false,
+  table = false,
   actions = [],
   onIntent,
   onInspect,
   onDragCard,
+  onDropCard,
   manualMana = false,
   selected = false,
 }: {
   value: JsonValue;
   view: ProjectedView;
   compact?: boolean;
+  table?: boolean;
   actions?: LegalAction[];
   onIntent?: (actions: LegalAction[], card: JsonValue) => void;
   onInspect?: (card: JsonValue) => void;
   onDragCard?: (cardRef: string | null) => void;
+  onDropCard?: (cardRef: string) => void;
   manualMana?: boolean;
   selected?: boolean;
 }) {
@@ -104,13 +114,14 @@ function CardTile({
   }
   return (
     <article
-      className={`card-tile${compact ? " compact" : " hand-card"}${showImage ? " has-image" : ""}${card.tap ? " tapped" : ""}${interactive ? " actionable" : ""}${inspectable ? " inspectable" : ""}${manualMana ? " mana-source" : ""}${selected ? " selected-card" : ""}`}
+      className={`card-tile${compact ? " compact" : table ? " table-card" : " hand-card"}${showImage ? " has-image" : ""}${card.tap ? " tapped" : ""}${interactive ? " actionable" : ""}${inspectable ? " inspectable" : ""}${manualMana ? " mana-source" : ""}${selected ? " selected-card" : ""}`}
       title={String(card.o ?? definition?.o ?? cardName(value))}
       role={interactive || inspectable ? "button" : undefined}
       tabIndex={interactive || inspectable ? 0 : undefined}
       aria-label={interactive ? `${actions.map((action) => action.label ?? action.action).join(" or ")}: ${cardName(value)}` : inspectable ? `Inspect ${cardName(value)}` : undefined}
       draggable={canDrag}
       data-card-ref={ref}
+      data-tapped={card.tap ? "true" : "false"}
       onClick={activate}
       onKeyDown={keydown}
       onMouseEnter={() => onInspect?.(value)}
@@ -125,11 +136,26 @@ function CardTile({
         event.dataTransfer.setData("application/x-commander-card", ref);
         event.dataTransfer.setData("text/plain", ref);
       }}
-      onDragEnd={() => window.setTimeout(() => onDragCard?.(null), 0)}
+      onDragEnd={(event) => {
+        const battlefield = document.querySelector<HTMLElement>("[data-own-battlefield='true']");
+        const bounds = battlefield?.getBoundingClientRect();
+        if (
+          canDrag
+          && ref
+          && bounds
+          && event.clientX >= bounds.left
+          && event.clientX <= bounds.right
+          && event.clientY >= bounds.top
+          && event.clientY <= bounds.bottom
+        ) {
+          onDropCard?.(ref);
+        }
+        window.setTimeout(() => onDragCard?.(null), 0);
+      }}
     >
       {showImage && (
         <img
-          src={`/api/v1/cards/${cid}/image?size=${compact ? "small" : "normal"}&face=${face}`}
+          src={`/api/v1/cards/${cid}/image?size=${compact || table ? "small" : "normal"}&face=${face}`}
           alt=""
           loading="lazy"
           onError={() => setShowImage(false)}
@@ -776,6 +802,7 @@ function PlayerBoard({
   onCardDrop,
   onCardDrag,
   getDraggedCard,
+  dragRelease,
 }: {
   seat: string;
   player: Record<string, JsonValue>;
@@ -794,8 +821,10 @@ function PlayerBoard({
   onCardDrop: (cardRef: string) => void;
   onCardDrag: (cardRef: string | null) => void;
   getDraggedCard: () => string;
+  dragRelease: number;
 }) {
   const [dragActive, setDragActive] = useState(false);
+  useEffect(() => setDragActive(false), [dragRelease]);
   const battlefield = asList(player.bf);
   const command = asList(player.cmd);
   const graveyard = asList(player.gy);
@@ -825,12 +854,13 @@ function PlayerBoard({
         const actions = mine
           ? cardActions.filter((action) => String(action.card ?? action.source ?? "") === ref)
           : [];
-        return <CardTile key={ref || index} value={card} view={view} compact actions={actions} onIntent={onCardIntent} onInspect={onInspectCard} onDragCard={onCardDrag} selected={selectedCardRef === ref} />;
+        return <CardTile key={ref || index} value={card} view={view} compact actions={actions} onIntent={onCardIntent} onInspect={onInspectCard} onDragCard={onCardDrag} onDropCard={onCardDrop} selected={selectedCardRef === ref} />;
       }) : <em>Empty</em>}</div>
       <div className="zone-label">BATTLEFIELD</div>
       <div
         className={`card-strip battlefield${mine && dropEnabled ? " drop-target" : ""}${dragActive ? " drag-active" : ""}`}
         data-testid={mine ? "own-battlefield" : undefined}
+        data-own-battlefield={mine ? "true" : undefined}
         onDragOver={(event) => {
           if (!mine || !dropEnabled) return;
           event.preventDefault();
@@ -867,7 +897,11 @@ function PlayerBoard({
               )
             : [];
           const manaOnly = actions.length > 0 && actions.every((action) => action.mana_ability === true);
-          return <CardTile key={ref || index} value={card} view={view} compact actions={actions} onIntent={manaOnly ? onManaIntent : onCardIntent} onInspect={onInspectCard} manualMana={manaOnly} selected={selectedCardRef === ref} />;
+          return (
+            <div className="battlefield-card-slot" key={ref || index}>
+              <CardTile value={card} view={view} table actions={actions} onIntent={manaOnly ? onManaIntent : onCardIntent} onInspect={onInspectCard} manualMana={manaOnly} selected={selectedCardRef === ref} />
+            </div>
+          );
         }) : <em>{mine && dropEnabled ? "Drop a playable card here" : "Empty battlefield"}</em>}
       </div>
       <footer className="zone-summary">
@@ -954,7 +988,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   const [notice, setNotice] = useState("");
   const [selectedAction, setSelectedAction] = useState<LegalAction | null>(null);
   const [actionChoices, setActionChoices] = useState<LegalAction[]>([]);
-  const [manualMana, setManualMana] = useState(false);
+  const [tablePreferences, setTablePreferences] = useState<TablePreferences>(loadTablePreferences);
   const [inspectedCard, setInspectedCard] = useState<JsonValue | null>(null);
   const [cardContext, setCardContext] = useState<JsonValue | null>(null);
   const [zoneBrowser, setZoneBrowser] = useState<{ seat: string; zone: "gy" | "ex" } | null>(null);
@@ -970,6 +1004,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   const [publicLogLoading, setPublicLogLoading] = useState(false);
   const [controlling, setControlling] = useState(false);
   const [pendingRetry, setPendingRetry] = useState<{ envelope: CommandEnvelope; label: string } | null>(null);
+  const [dragRelease, setDragRelease] = useState(0);
   const choiceDialogRef = useRef<HTMLFormElement | null>(null);
   const actionPickerRef = useRef<HTMLElement | null>(null);
   const zoneDialogRef = useRef<HTMLElement | null>(null);
@@ -978,7 +1013,11 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   const publicEventCursor = useRef(0);
   const publicLogChain = useRef(Promise.resolve());
   const draggedCardRef = useRef("");
+  const dragOverOwnBattlefieldRef = useRef(false);
   const lastDroppedCardRef = useRef("");
+  const cardDropHandlerRef = useRef<(cardRef: string) => void>(() => undefined);
+  const autoPassDecisionRef = useRef("");
+  const manualMana = !tablePreferences.autoMana;
 
   function refreshPublicLog(reset = false): Promise<void> {
     publicLogChain.current = publicLogChain.current
@@ -1009,12 +1048,58 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
     return publicLogChain.current;
   }
 
+  useEffect(() => saveTablePreferences(tablePreferences), [tablePreferences]);
+
   useEffect(() => {
-    const clearReleasedCard = () => {
+    const overOwnBattlefield = (target: EventTarget | null) =>
+      target instanceof Element && Boolean(target.closest("[data-own-battlefield='true']"));
+    const beginCardDrag = (target: EventTarget | null) => {
+      if (!(target instanceof Element)) return;
+      const card = target.closest<HTMLElement>("[data-card-ref][draggable='true']");
+      if (card?.dataset.cardRef) {
+        draggedCardRef.current = card.dataset.cardRef;
+      }
+    };
+    const finishCardDrag = (overBattlefield: boolean) => {
+      const ref = draggedCardRef.current;
+      if (!ref) {
+        dragOverOwnBattlefieldRef.current = false;
+        return;
+      }
+      if (ref && overBattlefield) cardDropHandlerRef.current(ref);
+      dragOverOwnBattlefieldRef.current = false;
+      setDragRelease((value) => value + 1);
       window.setTimeout(() => { draggedCardRef.current = ""; }, 0);
     };
-    window.addEventListener("pointerup", clearReleasedCard);
-    return () => window.removeEventListener("pointerup", clearReleasedCard);
+    const trackNativeDrag = (event: globalThis.DragEvent) => {
+      beginCardDrag(event.target);
+      dragOverOwnBattlefieldRef.current = overOwnBattlefield(event.target);
+    };
+    const finishNativeDrop = (event: globalThis.DragEvent) => {
+      finishCardDrag(overOwnBattlefield(event.target));
+    };
+    const finishNativeDrag = () => {
+      finishCardDrag(dragOverOwnBattlefieldRef.current);
+    };
+    const finishPointerDrag = (event: PointerEvent) => {
+      const target = document.elementFromPoint(event.clientX, event.clientY);
+      finishCardDrag(overOwnBattlefield(target));
+    };
+    const beginPointerDrag = (event: PointerEvent) => {
+      if (event.button === 0) beginCardDrag(event.target);
+    };
+    window.addEventListener("pointerdown", beginPointerDrag);
+    window.addEventListener("dragover", trackNativeDrag);
+    window.addEventListener("drop", finishNativeDrop);
+    window.addEventListener("dragend", finishNativeDrag);
+    window.addEventListener("pointerup", finishPointerDrag);
+    return () => {
+      window.removeEventListener("pointerdown", beginPointerDrag);
+      window.removeEventListener("dragover", trackNativeDrag);
+      window.removeEventListener("drop", finishNativeDrop);
+      window.removeEventListener("dragend", finishNativeDrag);
+      window.removeEventListener("pointerup", finishPointerDrag);
+    };
   }, []);
 
   useEffect(() => {
@@ -1099,6 +1184,31 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
       setPendingRetry(null);
     }
   }, [pendingRetry, view?.decision?.id]);
+
+  useEffect(() => {
+    const decision = view?.decision;
+    if (
+      !tablePreferences.autoPass
+      || !decision
+      || decision.kind !== "priority"
+      || lifecycle?.status !== "active"
+      || connection !== "LIVE"
+      || submitting
+      || pendingRetry
+      || autoPassDecisionRef.current === decision.id
+    ) return;
+    const pass = findSafeAutoPass(decision.legal_actions);
+    if (!pass) return;
+    autoPassDecisionRef.current = decision.id;
+    void act(pass);
+  }, [
+    connection,
+    lifecycle?.status,
+    pendingRetry,
+    submitting,
+    tablePreferences.autoPass,
+    view?.decision?.id,
+  ]);
 
   useEffect(() => {
     if (!selectedAction && actionChoices.length === 0 && !zoneBrowser && !expandedInspector && !showPublicLog) return;
@@ -1248,6 +1358,14 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
     }
     chooseCardAction(actions);
   }
+  cardDropHandlerRef.current = handleCardDrop;
+  function setTablePreference(
+    key: keyof TablePreferences,
+    value: boolean,
+  ) {
+    if (key === "autoPass" && value) autoPassDecisionRef.current = "";
+    setTablePreferences((current) => ({ ...current, [key]: value }));
+  }
 
   function submitChoice(event: FormEvent) {
     event.preventDefault();
@@ -1341,6 +1459,26 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
       )}
       <section className="operations-panel" aria-label="Match operations">
         <div className="operations-heading"><span className="eyebrow">{isSpectator ? "TABLE VIEW" : "TABLE CONTROLS"}</span><strong>{isSpectator ? "Spectator" : `Seat ${ownSeat}`}</strong></div>
+        {!isSpectator && (
+          <>
+            <button
+              type="button"
+              className={`table-control-toggle${tablePreferences.autoPass ? " active" : " full-control"}`}
+              aria-pressed={tablePreferences.autoPass}
+              data-testid="auto-pass-toggle"
+              title="Automatically submit pass-only priority capabilities. Turn this off to hold every priority stop."
+              onClick={() => setTablePreference("autoPass", !tablePreferences.autoPass)}
+            >{tablePreferences.autoPass ? "Auto-pass on" : "Full control on"}</button>
+            <button
+              type="button"
+              className={`table-control-toggle${tablePreferences.autoMana ? " active" : " manual-control"}`}
+              aria-pressed={tablePreferences.autoMana}
+              data-testid="auto-mana-toggle"
+              title="Automatically derive routine mana payments. Turn this off to tap mana sources yourself."
+              onClick={() => setTablePreference("autoMana", !tablePreferences.autoMana)}
+            >{tablePreferences.autoMana ? "Auto-mana on" : "Manual mana on"}</button>
+          </>
+        )}
         <button
           type="button"
           className="secondary-button"
@@ -1432,6 +1570,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
               onCardDrop={handleCardDrop}
               onCardDrag={(ref) => { draggedCardRef.current = ref ?? ""; }}
               getDraggedCard={() => draggedCardRef.current}
+              dragRelease={dragRelease}
             />
           ))}
         </section>
@@ -1474,7 +1613,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
         <div className="hand-cards" data-testid="own-hand">
           {hand.map((card, index) => {
             const ref = String(asRecord(card).id ?? "");
-            return <CardTile key={ref || index} value={card} view={view} actions={actionsForCard(ref)} onIntent={selectCardActions} onInspect={setInspectedCard} onDragCard={(nextRef) => { draggedCardRef.current = nextRef ?? ""; }} selected={selectedCardRef === ref} />;
+            return <CardTile key={ref || index} value={card} view={view} actions={actionsForCard(ref)} onIntent={selectCardActions} onInspect={setInspectedCard} onDragCard={(nextRef) => { draggedCardRef.current = nextRef ?? ""; }} onDropCard={handleCardDrop} selected={selectedCardRef === ref} />;
           })}
         </div>
       </section>}
@@ -1501,7 +1640,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
                   className={`mana-toggle${manualMana ? " active" : ""}`}
                   aria-pressed={manualMana}
                   data-testid="manual-mana-toggle"
-                  onClick={() => setManualMana((value) => !value)}
+                  onClick={() => setTablePreference("autoMana", manualMana)}
                 >
                   {manualMana ? "Manual mana on" : "Manual mana"}
                 </button>
@@ -1639,7 +1778,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
             )}
             <div className="choice-submit-row">
               {selectedAction.action === "cast" && !manualMana && (
-                <button type="button" className="secondary-button" onClick={() => { setManualMana(true); setSelectedAction(null); setNotice("Manual mana enabled. Click highlighted mana sources, then choose the spell again."); }}>Use manual mana</button>
+                <button type="button" className="secondary-button" onClick={() => { setTablePreference("autoMana", false); setSelectedAction(null); setNotice("Manual mana enabled. Click highlighted mana sources, then choose the spell again."); }}>Use manual mana</button>
               )}
               <button type="submit" data-testid="submit-choice" disabled={submitting || connection !== "LIVE"}>
                 {submitting ? "Submitting…" : selectedAction.action === "cast" ? manualMana ? selectedAction.label ?? "Cast" : `Auto-mana & ${selectedAction.label ?? "Cast"}` : selectedAction.form?.submit_label ?? "Submit"}

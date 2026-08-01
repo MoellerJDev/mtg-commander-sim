@@ -970,6 +970,10 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
                     profile=profile,
                     review_profile="commander_review",
                     semantic_policy="trusted_only",
+                    # Browser clients receive every empty priority capability.
+                    # Their saved auto-pass preference may submit that ordinary
+                    # command, while full-control users can hold priority.
+                    auto_pass_empty_priority=False,
                     manual_active_main_phase=True,
                     # Browser tables expose a durable complete public log.
                     # Retain every engine event in the private Game Record;

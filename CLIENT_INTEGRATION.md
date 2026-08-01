@@ -149,6 +149,20 @@ state change. It is deliberately excluded from meaningful-action/yield
 telemetry so merely being allowed to concede does not force a pilot prompt in
 an otherwise empty response window.
 
+Browser-created games set kernel empty-priority auto-pass to false. The owning
+tab therefore receives each pass-only capability and may either submit it
+automatically or hold it for explicit approval. The browser's saved
+**Auto-pass** mode submits the same capability-scoped `pass` command only when
+no nonmana legal action or player choice is present. **Full control** submits
+nothing until the player presses **Pass priority**. This is presentation and
+strategy policy, not a second priority engine: meaningful actions, decision
+IDs, stale-command rejection, event history, and exact replay remain entirely
+server-authoritative.
+
+Auto-mana/Manual mana and Auto-pass/Full control are non-secret local browser
+preferences. They do not enter a projected packet, capability, checkpoint, or
+opposing seat view.
+
 ## Persistence model
 
 Server persistence separates:
