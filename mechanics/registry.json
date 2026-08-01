@@ -1,5 +1,5 @@
 {
-  "contract_count": 56,
+  "contract_count": 57,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -106,8 +106,8 @@
     {
       "mechanic_id": "cr-508-declare-attackers-step",
       "path": "mechanics/contracts/declare-attackers-step.json",
-      "sha256": "1c2f07f080ea5c43f6c72db9919411fad727cea77f843ea8ba9b1ebe5eb16c77",
-      "version": 3
+      "sha256": "7ad76e034b9d0216dfbe4435350af378bcfea2efbf3741af614e8f80570e825f",
+      "version": 4
     },
     {
       "mechanic_id": "cr-509-declare-blockers-step",
@@ -179,6 +179,12 @@
       "mechanic_id": "flying",
       "path": "mechanics/contracts/flying.json",
       "sha256": "e75cae496f5ecaa720ef71ae1c7d73eab1066fd69b5f2e9ca98c12128b4b35c2",
+      "version": 1
+    },
+    {
+      "mechanic_id": "goad",
+      "path": "mechanics/contracts/goad.json",
+      "sha256": "36922ee7efada56b65a7325085112d7650d04623f2e0e299f6f044b19f47bef3",
       "version": 1
     },
     {
@@ -4528,19 +4534,40 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/goad.json",
+      "contract_sha256": "36922ee7efada56b65a7325085112d7650d04623f2e0e299f6f044b19f47bef3",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [
         "701"
       ],
-      "implementation_component": null,
+      "implementation_component": "GoadDesignation, oracle_ir target-goad template, CommanderEngine.apply_effect/_attack_declaration_problem, and DeclarationProblem",
+      "implementation_version": "goad-v1",
       "kind": "keyword_action",
+      "known_blockers": [
+        "bulk, optional, pronoun-linked, counter-linked, and duration-qualified goad Oracle grammar is not compiled",
+        "continuous effects that state a creature is goaded are not represented by the designation registry",
+        "duration until an eliminated player's next turn would have begun is not modeled",
+        "effects that remove goad designations are not compiled",
+        "the complete continuous-effect grammar for preventing goad is not implemented"
+      ],
       "mechanic_id": "goad",
       "official_name": "Goad",
       "rule_references": [
         "701.15"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_goad_rule",
+        "test_single_goad_requires_another_player_when_available_and_replays",
+        "test_goad_in_duel_still_requires_attacking_the_goader",
+        "test_multiple_goaders_create_independent_maximized_requirements",
+        "test_goaded_by_every_opponent_accepts_any_maximal_attack",
+        "test_same_player_goad_is_redundant_and_expires_on_their_next_turn",
+        "test_zone_change_removes_the_noncopiable_designation",
+        "test_goad_accepts_a_permanent_that_is_both_creature_and_battle",
+        "test_exact_static_prohibition_makes_goad_have_no_effect",
+        "test_oracle_compiler_lowers_only_anchored_target_goad_templates"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -6707,16 +6734,16 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-attackers-step.json",
-      "contract_sha256": "1c2f07f080ea5c43f6c72db9919411fad727cea77f843ea8ba9b1ebe5eb16c77",
-      "contract_version": 3,
+      "contract_sha256": "7ad76e034b9d0216dfbe4435350af378bcfea2efbf3741af614e8f80570e825f",
+      "contract_version": 4,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "DeclarationProblem plus CommanderEngine attacker declaration and combat-step transition",
-      "implementation_version": "declare-attackers-step-v3",
+      "implementation_version": "declare-attackers-step-v4",
       "kind": "rules_section",
       "known_blockers": [
         "planeswalker attack targets are not implemented",
-        "only exact attacks-each-combat Oracle requirements and the finite declarative constraint grammar are represented; conditional, defender-specific, goad, and effect-granted grammar remains incomplete",
+        "exact attacks-each-combat and typed goad requirements are represented; conditional, non-goad defender-specific, and other effect-granted grammar remains incomplete",
         "banding declarations are not implemented",
         "attack costs, cost locking, mana abilities, and ordered payment are not implemented",
         "declare-attackers trigger generation and APNAP placement are incomplete",
@@ -6745,7 +6772,11 @@
         "test_attack_requirement_is_projected_maximized_and_replayed",
         "test_conflicting_requirements_accept_any_maximal_declaration",
         "test_impossible_requirement_has_zero_maximum",
-        "test_search_limit_fails_closed"
+        "test_search_limit_fails_closed",
+        "test_single_goad_requires_another_player_when_available_and_replays",
+        "test_goad_in_duel_still_requires_attacking_the_goader",
+        "test_multiple_goaders_create_independent_maximized_requirements",
+        "test_goaded_by_every_opponent_accepts_any_maximal_attack"
       ],
       "trust_level": "untrusted"
     },

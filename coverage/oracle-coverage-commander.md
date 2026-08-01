@@ -1,12 +1,12 @@
 # Commander-legal Oracle IR coverage
 
-- Compiler: `oracle-ir-v2`
-- Commander-legal Oracle IDs in this compact snapshot: 31,622
-- Faces: 32,430
-- Exact: 338 (1.0689%)
-- Partially lowerable: 14,354
-- Unresolved: 16,930
-- Material residuals: 61,212
+- Compiler: `oracle-ir-v3`
+- Commander-legal Oracle IDs in this local snapshot: 31,623
+- Faces: 32,431
+- Exact: 338 (1.0688%)
+- Partially lowerable: 14,343
+- Unresolved: 16,942
+- Material residuals: 61,213
 - Current snapshot complete: false
 
 The low exact count is expected: recognized cards remain partial until their

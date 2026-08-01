@@ -62,6 +62,7 @@ from .model import (
     Event,
     GameConfig,
     GameState,
+    GoadDesignation,
     PlayerState,
     StackItem,
     TurnEntry,
@@ -492,6 +493,8 @@ class CommanderEngine:
             "land.play",
             "token.create",
             "control.change",
+            "permanent.goad",
+            "permanent.goad.expire",
             "player.eliminated",
         }:
             self._increment_yield_change_epoch("public")
@@ -527,6 +530,24 @@ class CommanderEngine:
                 )
         for object_id, card in self.state.cards.items():
             locations = membership.get(object_id, [])
+            goading_players = [
+                designation.player for designation in card.goaded_by
+            ]
+            if card.goaded_by and card.zone != "battlefield":
+                raise StateInvariantError(
+                    f"Nonbattlefield object {card.ref} is still goaded"
+                )
+            if len(goading_players) != len(set(goading_players)):
+                raise StateInvariantError(
+                    f"{card.ref} has duplicate goad designations"
+                )
+            if any(
+                player not in self.state.players
+                for player in goading_players
+            ):
+                raise StateInvariantError(
+                    f"{card.ref} has a goad designation from an unknown player"
+                )
             if card.zone == "stack":
                 if object_id not in stack_cards or locations:
                     raise StateInvariantError(f"Invalid stack membership for {card.ref}")
@@ -1420,6 +1441,7 @@ class CommanderEngine:
         card.marked_damage = 0
         card.deathtouch_damage = False
         card.temporary_keywords.clear()
+        card.goaded_by.clear()
         card.attacking = None
         card.blocking = None
         card.attached_to = None
@@ -3348,6 +3370,7 @@ class CommanderEngine:
         else:
             player.stats.pop("turn_controlled_by", None)
         player.turns_begun += 1
+        self._expire_goad_designations(entry.player)
         player.land_plays_remaining = 1
         if player.yield_policy.mode != "none":
             self._increment_optimization(
@@ -3367,6 +3390,40 @@ class CommanderEngine:
             changed_players=[entry.player],
         )
         self._enter_step()
+
+    def _expire_goad_designations(self, player: str) -> None:
+        """Expire CR 701.15 designations at the goading player's turn."""
+
+        turns_begun = self.state.players[player].turns_begun
+        changed: list[str] = []
+        for card in self.state.cards.values():
+            retained = [
+                designation
+                for designation in card.goaded_by
+                if not (
+                    designation.player == player
+                    and designation.expires_at_turns_begun <= turns_begun
+                )
+            ]
+            if len(retained) != len(card.goaded_by):
+                card.goaded_by = retained
+                changed.append(card.object_id)
+        if changed:
+            self._log(
+                player,
+                "permanent.goad.expire",
+                f"{len(changed)} goad designation(s) expired as {player}'s turn began.",
+                {
+                    "player": player,
+                    "turns_begun": turns_begun,
+                    "objects": [
+                        self.state.cards[object_id].ref
+                        for object_id in changed
+                    ],
+                },
+                importance=1,
+                changed_objects=changed,
+            )
 
     def _clear_mana(self, *, reason: str) -> None:
         for seat, player in self.state.players.items():
@@ -17285,6 +17342,44 @@ class CommanderEngine:
         name = " ".join(str(card.printed_name).casefold().split())
         return text.replace(name, "this creature") if name else text
 
+    def _active_goad_designations(
+        self,
+        card: CardInstance,
+    ) -> tuple[GoadDesignation, ...]:
+        return tuple(
+            designation
+            for designation in card.goaded_by
+            if designation.player in self.state.players
+            and self.state.players[
+                designation.player
+            ].turns_begun < designation.expires_at_turns_begun
+        )
+
+    def _goad_prohibition_source(
+        self,
+        card: CardInstance,
+    ) -> CardInstance | None:
+        """Return an active exact static source that forbids goading."""
+
+        for source in self.state.cards.values():
+            if (
+                source.zone != "battlefield"
+                or source.phased_out
+                or source.controller != card.controller
+            ):
+                continue
+            oracle = " ".join(
+                str(
+                    self._effective_card_data(source).get("oracle_text")
+                    or ""
+                )
+                .casefold()
+                .split()
+            )
+            if "creatures you control can't be goaded." in oracle:
+                return source
+        return None
+
     def _attack_declaration_problem(self, active: str) -> DeclarationProblem:
         defenders = [
             *[seat for seat in self.active_seats if seat != active],
@@ -17308,6 +17403,39 @@ class CommanderEngine:
                         label=(
                             f"{self.display_name(card.object_id)} attacks "
                             "this combat if able."
+                        ),
+                    )
+                )
+            for designation in self._active_goad_designations(card):
+                requirements.extend(
+                    (
+                        DeclarationRequirement(
+                            requirement_id=(
+                                f"attack:{card.ref}:goad:{designation.player}:attack"
+                            ),
+                            kind="choose",
+                            variable=card.ref,
+                            label=(
+                                f"{self.display_name(card.object_id)} attacks "
+                                f"this combat if able because {designation.player} "
+                                "goaded it."
+                            ),
+                        ),
+                        DeclarationRequirement(
+                            requirement_id=(
+                                f"attack:{card.ref}:goad:{designation.player}:other"
+                            ),
+                            kind="choose_option_in",
+                            variable=card.ref,
+                            options=tuple(
+                                seat
+                                for seat in self.active_seats
+                                if seat not in {active, designation.player}
+                            ),
+                            label=(
+                                f"{self.display_name(card.object_id)} attacks "
+                                f"a player other than {designation.player} if able."
+                            ),
                         ),
                     )
                 )
@@ -19684,6 +19812,78 @@ class CommanderEngine:
                 for seat in self.apnap_order()
                 if seat in self.active_seats
             }
+        if op == "goad":
+            self._require_seat(actor, in_game=True)
+            card = self._resolve_object(
+                actor,
+                str(effect["card"]),
+                zones={"battlefield"},
+            )
+            card_types, _, _ = self._type_parts(
+                str(self._effective_card_data(card).get("type_line") or "")
+            )
+            if "creature" not in card_types:
+                raise GameRuleError("Only a creature can be goaded")
+            prohibition = self._goad_prohibition_source(card)
+            if prohibition is not None:
+                self._log(
+                    actor,
+                    "permanent.goad.prevented",
+                    f"{card.ref} can't be goaded.",
+                    {
+                        "object": card.ref,
+                        "player": actor,
+                        "source": prohibition.ref,
+                        "reason": reason,
+                    },
+                    importance=1,
+                )
+                return card.ref
+            existing = next(
+                (
+                    designation
+                    for designation in self._active_goad_designations(card)
+                    if designation.player == actor
+                ),
+                None,
+            )
+            if existing is not None:
+                self._log(
+                    actor,
+                    "permanent.goad.redundant",
+                    f"{card.ref} was already goaded by {actor}.",
+                    {
+                        "object": card.ref,
+                        "player": actor,
+                        "reason": reason,
+                    },
+                    importance=1,
+                )
+                return card.ref
+            designation = GoadDesignation(
+                player=actor,
+                expires_at_turns_begun=(
+                    self.state.players[actor].turns_begun + 1
+                ),
+                created_turn_sequence=self.state.turn_sequence,
+            )
+            card.goaded_by.append(designation)
+            self._log(
+                actor,
+                "permanent.goad",
+                f"{card.ref} was goaded by {actor}.",
+                {
+                    "object": card.ref,
+                    "player": actor,
+                    "expires_at_turns_begun": (
+                        designation.expires_at_turns_begun
+                    ),
+                    "reason": reason,
+                },
+                importance=2,
+                changed_objects=[card.object_id],
+            )
+            return card.ref
         if op in {
             "next_spell_improvise",
             "next_spell_uncounterable",

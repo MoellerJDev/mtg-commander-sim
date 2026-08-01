@@ -53,19 +53,20 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#36](https://github.com/MoellerJDev/mtg-commander-sim/pull/36) | `agent/browser-lifecycle-journey` | `main` | `merged` |
 | [#37](https://github.com/MoellerJDev/mtg-commander-sim/pull/37) | `agent/rules-combat-damage` | `main` | `merged` |
 | [#38](https://github.com/MoellerJDev/mtg-commander-sim/pull/38) | `agent/rules-combat-tba-triggers` | `main` | `merged` |
+| [#39](https://github.com/MoellerJDev/mtg-commander-sim/pull/39) | `agent/rules-combat-constraints` | `main` | `merged` |
 
 ## Pinned snapshots and coverage
 
 - Comprehensive Rules: pinned_corpus_on_main
-- Oracle: pinned_partial_corpus_coverage (2026-07-28)
-- Rulings: pinned_partial_corpus_coverage (2026-07-28)
+- Oracle: pinned_partial_corpus_coverage (2026-07-31)
+- Rulings: pinned_partial_corpus_coverage (2026-07-31)
 - Rules manifest present on this branch: yes
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
-- Rules cases: blocked=365, definition_only=80, passing=113, total=3300, unreviewed=2742
-- Mechanics: status_counts={'partial': 56, 'unclassified': 369}, total=425, trusted=0
-- Oracle coverage: material_residuals=69664, status_counts={'exact': 2957, 'partial': 15691, 'unresolved': 19725}, total=38373
-- Commander-legal Oracle coverage: material_residuals=61212, status_counts={'exact': 338, 'partial': 14354, 'unresolved': 16930}, total=31622
+- Rules cases: blocked=367, definition_only=81, passing=115, total=3300, unreviewed=2737
+- Mechanics: status_counts={'partial': 57, 'unclassified': 368}, total=425, trusted=0
+- Oracle coverage: material_residuals=69890, status_counts={'exact': 2959, 'partial': 15732, 'unresolved': 19793}, total=38484
+- Commander-legal Oracle coverage: material_residuals=61213, status_counts={'exact': 338, 'partial': 14343, 'unresolved': 16942}, total=31623
 - Current rules/Oracle snapshot complete: no
 
 ## Platform milestone status
@@ -94,9 +95,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 4022
+- Tests discovered: 4033
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30687058403](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30687058403) — `pass`
+- Baseline CI: [30687987451](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30687987451) — `pass`
 - Compile: `pass`
 - Deterministic tests: `pass_full_exact_commit_gate`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
@@ -118,7 +119,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Extend the shared finite combat declaration solver to conditional, defender-specific, goad, effect-granted, optional-cost, and multi-block grammar, then route declaration triggers through the same boundary; keep the universal CR 120.4 damage transformation pipeline as the next deeper dependency.
+Extend the shared finite combat declaration solver beyond source-local and typed goad witnesses to conditional, non-goad defender-specific, other effect-granted, optional-cost, and multi-block grammar, then route declaration triggers through the same boundary; keep the universal CR 120.4 damage transformation pipeline as the next deeper dependency.
 
 ## Regeneration
 

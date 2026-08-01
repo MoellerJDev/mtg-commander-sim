@@ -15,7 +15,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v2"
+ORACLE_COMPILER_VERSION = "oracle-ir-v3"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 
 _NUMBER_WORDS = {
@@ -543,6 +543,32 @@ def _effect_template(
                 "cr-701-keyword-actions",
                 "cr-115-targets",
             ),
+        )
+    match = re.fullmatch(
+        r"goad target creature"
+        r"(?P<relation> an opponent controls| you don't control)?\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    if match:
+        opponent = bool(match.group("relation"))
+        schema: dict[str, Any] = {
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "types_any": ["creature"],
+            "count": 1,
+        }
+        if opponent:
+            schema["controller_relation"] = "opponent"
+        return (
+            (
+                "goad-target-opponent-creature-v1"
+                if opponent
+                else "goad-target-creature-v1"
+            ),
+            ({"op": "goad", "card": "$target.0"},),
+            schema,
+            ("goad", "cr-115-targets"),
         )
     match = re.fullmatch(
         r"target creature gets (?P<power>[+-]\d+)/(?P<toughness>[+-]\d+) "

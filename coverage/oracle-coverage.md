@@ -1,12 +1,12 @@
 # Oracle IR coverage
 
-- Compiler: `oracle-ir-v2`
-- Oracle IDs: 38,373
-- Faces: 41,582
-- Exact: 2,957 (7.7059%)
-- Partially lowerable: 15,691
-- Unresolved: 19,725
-- Material residuals: 69,664
+- Compiler: `oracle-ir-v3`
+- Oracle IDs: 38,484
+- Faces: 41,701
+- Exact: 2,959 (7.6889%)
+- Partially lowerable: 15,732
+- Unresolved: 19,793
+- Material residuals: 69,890
 - Current snapshot complete: false
 
 `exact` includes textless cards. Recognized templates with untrusted mechanic

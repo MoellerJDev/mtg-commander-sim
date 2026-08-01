@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 3,
+  "contract_version": 4,
   "mechanic_id": "cr-508-declare-attackers-step",
   "official_name": "Declare Attackers Step",
   "effective_date": "2026-06-19",
@@ -79,7 +79,8 @@
       "creature and battle types",
       "summoning sickness, haste, and defender",
       "vigilance",
-      "attack target and Battle protector"
+      "attack target and Battle protector",
+      "active typed goad designations and their originating players"
     ],
     "state_writes": [
       "tapped state",
@@ -134,7 +135,8 @@
     "multiplayer split attacks",
     "opponent-protected Battle",
     "illegal declaration rollback",
-    "empty-combat step skipping"
+    "empty-combat step skipping",
+    "single and multiple goaders in duel and multiplayer"
   ],
   "witness_cards": [],
   "rulings": [],
@@ -155,15 +157,19 @@
     "test_attack_requirement_is_projected_maximized_and_replayed",
     "test_conflicting_requirements_accept_any_maximal_declaration",
     "test_impossible_requirement_has_zero_maximum",
-    "test_search_limit_fails_closed"
+    "test_search_limit_fails_closed",
+    "test_single_goad_requires_another_player_when_available_and_replays",
+    "test_goad_in_duel_still_requires_attacking_the_goader",
+    "test_multiple_goaders_create_independent_maximized_requirements",
+    "test_goaded_by_every_opponent_accepts_any_maximal_attack"
   ],
   "implementation": {
     "component": "DeclarationProblem plus CommanderEngine attacker declaration and combat-step transition",
-    "version": "declare-attackers-step-v3"
+    "version": "declare-attackers-step-v4"
   },
   "known_blockers": [
     "planeswalker attack targets are not implemented",
-    "only exact attacks-each-combat Oracle requirements and the finite declarative constraint grammar are represented; conditional, defender-specific, goad, and effect-granted grammar remains incomplete",
+    "exact attacks-each-combat and typed goad requirements are represented; conditional, non-goad defender-specific, and other effect-granted grammar remains incomplete",
     "banding declarations are not implemented",
     "attack costs, cost locking, mana abilities, and ordered payment are not implemented",
     "declare-attackers trigger generation and APNAP placement are incomplete",

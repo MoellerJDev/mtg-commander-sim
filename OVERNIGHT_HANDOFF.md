@@ -1,6 +1,6 @@
 # Integration handoff
 
-Last updated: 2026-07-31
+Last updated: 2026-08-01
 
 This is a sanitized operational summary. It contains no credentials,
 capabilities, private hands, library order, private choices, live Game Records,
@@ -12,40 +12,42 @@ or provider session data. Current generated metrics live in
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
 - Latest integrated `main` merge:
-  `3baab1cd13689657421146cdbcc92f75cf1517c9`
+  `939409d1e2b5a41ade9d9ae71577dd5d653d4934`
 - Latest certified feature head:
-  `66b553d82fd9fc9d7ba7fd6b7cdf8355b2e07c97`
-- Current focused branch: `agent/rules-combat-constraints`, based on
-  `3baab1c`; its
+  `860fb2aabee2bd941e2aafedccec57f001f856b7`
+- Current focused branch: `feat/rules-goad-requirements`, based on
+  `939409d`; its
   candidate commit is the commit containing this handoff.
-- Current focused slice: one finite attack/block declaration constraint solver,
-  exact source-local requirement lowering, projected maximum explanations,
-  transactional rejection, bounded fail-closed search, and exact replay
+- Current focused slice: typed noncopiable goad designations, anchored generic
+  Oracle lowering, single/multiple-player declaration requirements, exact
+  duration/zone identity, public projection, static prohibition, bounded
+  maximization, and exact replay
 - Package: `0.8.0`
 - Tags: `v0.6.0`, `v0.7.0`
 - No `v0.8.0` release tag has been created.
 
-PRs #1–#17 and #24–#38 are merged through ordinary merge commits. PR #24
+PRs #1–#17 and #24–#39 are merged through ordinary merge commits. PR #24
 incorporated the ancestry-proven CR 400–408 stack; PRs #18–#23 were closed as
 superseded only after their exact heads were reachable from `main`. PRs #27–#35
 integrated the authoritative browser/server vertical slice, restart and
 lifecycle hardening, managed local data, UI interaction, spectators/public
 logs, the visible fail-closed browser rules boundary, current trigger/token
-mana stabilization, and the core combat-keyword slice. No force push or tag
-movement was used.
+mana stabilization, and the core combat-keyword slice. PRs #37–#39 add real
+combat damage steps, APNAP damage/trigger batching, and the shared finite
+attack/block declaration solver. No force push or tag movement was used.
 
 ## Deterministic evidence
 
 - The latest integrated feature head `fc5e8be` passed the exact 18-stage local
   merge gate and public matrix before PR #36 merged.
-- The integrated 4,013-test suite passed PR #38's Python 3.11/3.12
-  Ubuntu/Windows and Browser/Chromium matrix. Nine additional focused
-  declaration-constraint witnesses pass locally on the current branch; its
-  full regression remains delegated to PR CI.
+- The integrated 4,022-test suite passed PR #39 and its `main` merge across
+  Python 3.11/3.12 on Ubuntu/Windows plus Browser/Chromium. One hundred new
+  and directly impacted test cases pass locally on the current goad branch;
+  its full regression remains delegated to PR CI.
 - All 3,300 pinned rule records and 425 mechanic records verify against the
   June 19, 2026 rules source. Generated per-rule inventory tests do not imply
   semantic completeness.
-- Conformance is 113 passing, 365 blocked, 80 definition-only, and 2,742
+- Conformance is 115 passing, 367 blocked, 81 definition-only, and 2,737
   unreviewed. No complete-rules claim is authorized.
 - The deterministic four-player natural-winner, seed-20260730 replay,
   projection/privacy, protocol demo, dependency, repository/history/security,
@@ -59,9 +61,9 @@ movement was used.
   replayed to the exact final hash, reported zero suppressed meaningful
   windows, and passed its hidden-information audit. A completed concession also
   restores as terminal after server restart and exact replay.
-- Feature head `66b553d` and merge commit `3baab1c` are covered by PR #38 run
-  `30687058403` across Python 3.11/3.12, Ubuntu/Windows, and
-  Browser/Chromium.
+- Feature head `860fb2a` is covered by PR #39 run `30687795802`; merge commit
+  `939409d` is covered by `main` run `30687987451`, both across Python
+  3.11/3.12, Ubuntu/Windows, and Browser/Chromium.
 
 GitHub Actions is operating normally. Historical zero-step billing failures
 are not current evidence and no administrator bypass is authorized or needed.
@@ -134,8 +136,10 @@ The lifecycle/browser milestone is integrated. Rules work now proceeds in
 coherent dependency families. Reusable combat keyword interactions, real split
 damage steps, APNAP assignment announcements, typed final combat results, and
 post-damage trigger batching are implemented without promoting their broader
-contracts beyond partial/untrusted. The next dependency is one shared
-attack/block restrictions-and-requirements solver. The universal typed CR
+contracts beyond partial/untrusted. The shared attack/block solver now handles
+exact source-local requirements, lure/menace restrictions, and typed goad; the
+next declaration slices are conditional and other effect-granted requirements,
+optional attack/block costs, and multi-block grammar. The universal typed CR
 120.4/614/615/616 damage replacement/prevention/result pipeline remains the
 deeper prerequisite for noncombat damage and broader Oracle trust.
 

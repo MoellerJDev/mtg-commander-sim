@@ -116,6 +116,7 @@ VALID_EFFECT_OPERATIONS = {
     "retarget_stack_item",
     "remora_tax",
     "grant_keyword_until_end_of_turn",
+    "goad",
     "grant_cast_permission",
     "grant_play_without_mana_cost",
     "put_artifact_from_hand",

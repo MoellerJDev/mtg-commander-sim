@@ -242,6 +242,10 @@ class StateProjector:
             obj["at"] = attached.ref if attached else card.attached_to
         if card.attacking:
             obj["atk"] = card.attacking
+        if card.goaded_by:
+            obj["goad"] = sorted(
+                designation.player for designation in card.goaded_by
+            )
         if card.battle_protector:
             obj["protect"] = card.battle_protector
         return obj

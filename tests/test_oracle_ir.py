@@ -117,6 +117,7 @@ class MechanicContractTests(unittest.TestCase):
                 "double-strike",
                 "first-strike",
                 "flying",
+                "goad",
                 "lifelink",
                 "menace",
                 "protection",

@@ -11,8 +11,15 @@
   and replays exactly.
 - Lowered exact source-local attacks-each-combat, blocks-each-combat,
   must-be-blocked, and lure Oracle wording into that solver; menace is now an
-  ordinary inviolable constraint in the same problem. Conditional, goad,
-  effect-granted, paid, and multi-block grammar remains blocked.
+  ordinary inviolable constraint in the same problem.
+- Added typed public, noncopiable goad designations and anchored generic Oracle
+  lowering. Single, multiple, and all-opponent goaders now contribute their
+  independent attack/other-player requirements to the same exact maximizer;
+  duel fallback, same-player redundancy, next-turn expiration, zone changes,
+  static prohibition, projection, rollback, and replay have focused evidence.
+  Conditional and other effect-granted requirements, optional attack/block
+  costs, multi-block grammar, eliminated-player duration boundaries, and the
+  remaining goad Oracle grammar remain blocked.
 
 - Combat-damage assignments now proceed in public APNAP order. Forced
   assignments are derived without a pilot task, discretionary divisions are

@@ -451,10 +451,14 @@ generated documentation fixtures with bearer capabilities redacted. See
   revalidates only currently eligible creatures and live opponent/Battle
   destinations, enforces defender, preserves vigilance, rejects duplicate or
   phased submissions, and uses a shared finite constraint solver to maximize
-  represented attacks-each-combat requirements
+  represented attacks-each-combat and typed single/multiple-player goad
+  requirements—including duel and all-opponents-goaded cases—
   atomically, skips empty-combat blocker/damage steps, and command-replays the
-  declaration; restrictions, requirements, costs, planeswalkers, attack
-  triggers, entry-attacking, and target reselection remain blocked
+  declaration. Goad designations are public, noncopiable, same-player
+  redundant, removed by zone changes, and expire at the goading player's next
+  represented turn. Conditional and non-goad defender-specific requirements,
+  costs, planeswalkers, attack triggers, entry-attacking, eliminated-player
+  duration boundaries, and target reselection remain blocked
 - source-reviewed CR 509 ordinary blocker declaration: the server derives
   eligible blockers and defended attackers, rejects phased-out submissions,
   enforces menace's zero-or-two minimum, preserves blocking relationships
@@ -584,9 +588,9 @@ python simctl.py rules conformance --root .
 ```
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
-generated source-linkage tests. Of those cases, 558 are source-reviewed:
-113 have narrow executable semantic evidence, 365 are explicitly blocked, and
-80 are definition-only; 2,742 remain unreviewed. A generated inventory test
+generated source-linkage tests. Of those cases, 563 are source-reviewed:
+115 have narrow executable semantic evidence, 367 are explicitly blocked, and
+81 are definition-only; 2,737 remain unreviewed. A generated inventory test
 cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
 invalidation, and reporting policy.
 
@@ -680,9 +684,9 @@ python simctl.py oracle coverage \
   --db data/scryfall-current.sqlite3
 ```
 
-This is still not a completeness declaration. The measured compact snapshot
-has 38,373 Oracle IDs: 2,957 exact, 15,691 partially lowerable, and 19,725
-unresolved under current dependency gates. All 69,664 material residuals must
+This is still not a completeness declaration. The measured July 31 local
+snapshot has 38,484 Oracle IDs: 2,959 exact, 15,732 partially lowerable, and
+19,793 unresolved under current dependency gates. All 69,890 material residuals must
 be eliminated or covered by reviewed, hash-pinned overrides before complete
 Oracle support can be claimed. Genuinely unique cards may use reviewed
 overrides; common cards and mechanics compile through reusable primitives.
