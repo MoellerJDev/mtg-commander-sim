@@ -1,0 +1,57 @@
+{
+  "cards": [
+    {
+      "cmc": 6.0,
+      "color_identity": [
+        "B",
+        "G"
+      ],
+      "colors": [
+        "B",
+        "G"
+      ],
+      "defense": null,
+      "keywords": [],
+      "layout": "normal",
+      "legalities": {
+        "alchemy": "not_legal",
+        "brawl": "legal",
+        "commander": "legal",
+        "competitivebrawl": "legal",
+        "duel": "legal",
+        "future": "not_legal",
+        "gladiator": "legal",
+        "historic": "legal",
+        "legacy": "legal",
+        "modern": "legal",
+        "oathbreaker": "legal",
+        "oldschool": "not_legal",
+        "pauper": "not_legal",
+        "paupercommander": "not_legal",
+        "penny": "legal",
+        "pioneer": "legal",
+        "predh": "not_legal",
+        "premodern": "not_legal",
+        "standard": "not_legal",
+        "standardbrawl": "not_legal",
+        "timeless": "legal",
+        "tlr": "not_legal",
+        "vintage": "legal"
+      },
+      "loyalty": null,
+      "mana_cost": "{3}{B}{B}{G}",
+      "name": "Yargle and Multani",
+      "oracle_id": "980e1721-3717-4425-95a4-938dbf2ac661",
+      "oracle_text": "",
+      "power": "18",
+      "produced_mana": [],
+      "released_at": "2023-04-21",
+      "toughness": "6",
+      "type_line": "Legendary Creature — Frog Spirit Elemental"
+    }
+  ],
+  "fixture_kind": "public_browser_lifecycle_card_data",
+  "rulings": [],
+  "schema_version": 1,
+  "source": "Scryfall Oracle subset for deterministic browser lifecycle tests"
+}

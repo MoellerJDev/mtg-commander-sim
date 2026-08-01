@@ -801,6 +801,7 @@ function PlayerBoard({
   const graveyard = asList(player.gy);
   const exile = asList(player.ex);
   const mana = asRecord(player.mana);
+  const commanderDamage = asList(player.cmd_dmg).map(asRecord);
   return (
     <article className={`player-board${active ? " active-player" : ""}${priority ? " has-priority" : ""}${mine ? " own-board" : ""}`} data-testid={`player-${seat}`}>
       <header>
@@ -812,6 +813,12 @@ function PlayerBoard({
         <div className="life" aria-label={`${String(player.life ?? 0)} life`}><span>{String(player.life ?? 0)}</span><small>LIFE</small></div>
       </header>
       {(active || priority) && <div className="turn-flags">{active && <span>Active player</span>}{priority && <span>Priority</span>}</div>}
+      {commanderDamage.length > 0 && (
+        <div className="commander-damage" data-testid={`commander-damage-${seat}`}>
+          <span>Commander damage</span>
+          <strong>{commanderDamage.map((source) => `${String(source.amount ?? 0)} from ${String(source.n ?? "commander")}`).join(" · ")}</strong>
+        </div>
+      )}
       <div className="zone-label">COMMAND</div>
       <div className="card-strip command-zone">{command.length ? command.map((card, index) => {
         const ref = String(asRecord(card).id ?? "");
@@ -1387,6 +1394,18 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
           <span>{lifecycle.pause_reason?.label ?? "Waiting for the room owner to resume."}</span>
         </div>
       )}
+      {lifecycle?.status === "complete" && (
+        <div className="game-over-banner" role="status" data-testid="game-over-banner">
+          <strong>Game complete</strong>
+          <span>
+            {lifecycle.draw
+              ? "The game ended in a draw."
+              : lifecycle.winner
+                ? `Seat ${lifecycle.winner} wins.`
+                : "The authoritative game record is complete."}
+          </span>
+        </div>
+      )}
       <div className="table-workspace">
         <section className="boards-grid" aria-label="Commander battlefield">
           {Object.entries(players).map(([seat, player]) => (
@@ -1466,7 +1485,9 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
         </section>
       )}
       <section id="decision-tray" className="decision-panel" data-testid="decision-panel" aria-live="polite">
-        {lifecycle?.status === "paused" ? (
+        {lifecycle?.status === "complete" ? (
+          <div className="waiting-decision" data-testid="complete-decision"><span className="status-dot muted" /><div><strong>Game complete</strong><p>{lifecycle.draw ? "The game ended in a draw." : lifecycle.winner ? `Seat ${lifecycle.winner} won the game.` : "No further actions are available."}</p></div></div>
+        ) : lifecycle?.status === "paused" ? (
           <div className="waiting-decision" data-testid="paused-decision"><span className="status-dot muted" /><div><strong>Match paused</strong><p>No player action or priority pass is pending while this boundary is reviewed.</p></div></div>
         ) : isSpectator ? (
           <div className="waiting-decision"><span className="status-dot muted" /><div><strong>Watching the table</strong><p>Player decisions and private information remain seat-scoped.</p></div></div>

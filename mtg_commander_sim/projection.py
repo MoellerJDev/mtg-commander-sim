@@ -317,6 +317,34 @@ class StateProjector:
                 "ex": self._zone(p.zones["exile"], principal),
                 "cmd": self._zone(p.zones["command"], principal),
             }
+            commander_damage = []
+            for oracle_id, amount in sorted(
+                p.commander_damage_received.items()
+            ):
+                if amount <= 0:
+                    continue
+                source = next(
+                    (
+                        card
+                        for card in self.state.cards.values()
+                        if card.is_commander
+                        and card.oracle_id == oracle_id
+                    ),
+                    None,
+                )
+                commander_damage.append(
+                    {
+                        "cid": oracle_id[:8],
+                        "n": (
+                            source.printed_name
+                            if source is not None
+                            else oracle_id[:8]
+                        ),
+                        "amount": amount,
+                    }
+                )
+            if commander_damage:
+                summary["cmd_dmg"] = commander_damage
             restricted_mana = p.stats.get("restricted_mana")
             if restricted_mana:
                 summary["restricted_mana"] = restricted_mana

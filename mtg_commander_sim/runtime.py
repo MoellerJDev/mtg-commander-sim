@@ -176,6 +176,7 @@ class GameActor:
             "pending_principals": session.pending_principals(),
             "game_over": state.game_over,
             "winner": state.winner,
+            "draw": state.draw,
             "pause_reason": (
                 {
                     "kind": str(pause_reason.get("kind") or "paused"),

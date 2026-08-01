@@ -215,6 +215,7 @@ p { line-height: 1.65; }
 .game-status { padding: .25rem .55rem; border: 1px solid #607266; border-radius: 99px; font-size: .62rem; letter-spacing: .08em; }
 .game-status.active { border-color: #4d8b5a; color: #b9f3c3; }
 .game-status.paused { border-color: #a87935; color: #ffd79b; }
+.game-status.complete { border-color: #6ea452; color: #d7ffc2; }
 .connection-banner, .retry-panel { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: .6rem; padding: .8rem 1rem; border: 1px solid #856934; border-radius: var(--radius-sm); color: #ffdda6; background: #2c220f; }
 .connection-banner div, .retry-panel div { display: grid; gap: .15rem; }
 .connection-banner span, .retry-panel span { color: #c7a873; font-size: .72rem; }
@@ -231,6 +232,7 @@ p { line-height: 1.65; }
 .inspection-panel dt { color: var(--muted); font-size: .65rem; text-transform: uppercase; }
 .inspection-panel dd { margin: .25rem 0 0; font-weight: 750; }
 .paused-banner { display: flex; align-items: center; gap: .75rem; margin-top: .6rem; padding: .8rem 1rem; border: 1px solid #8d682d; border-radius: var(--radius-sm); color: #ffe0ad; background: #39280d; }
+.game-over-banner { display: flex; align-items: center; gap: .75rem; margin-top: .6rem; padding: .8rem 1rem; border: 1px solid #568243; border-radius: var(--radius-sm); color: #d7ffc2; background: #172f18; }
 .table-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(275px, 320px); gap: .6rem; margin-top: .6rem; }
 .boards-grid { min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
 .player-board { min-width: 0; min-height: 236px; padding: .8rem; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: rgb(15 24 18 / 93%); transition: border-color 160ms ease, box-shadow 160ms ease; }
@@ -239,6 +241,8 @@ p { line-height: 1.65; }
 .player-board.own-board { background: linear-gradient(145deg, rgb(22 36 27 / 98%), rgb(14 23 17 / 96%)); }
 .player-board > header { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: .65rem; margin-bottom: .55rem; }
 .player-board header small { display: block; margin-top: .15rem; color: var(--muted); font-size: .68rem; }
+.commander-damage { display: flex; justify-content: space-between; gap: .55rem; margin: -.15rem 0 .55rem; padding: .32rem .45rem; border: 1px solid #684d36; border-radius: var(--radius-sm); color: #ffd7ad; background: #2d1d12; font-size: .66rem; }
+.commander-damage span { color: #c99b70; text-transform: uppercase; letter-spacing: .05em; }
 .player-name { display: flex; align-items: center; gap: .45rem; }
 .you-chip { padding: .15rem .35rem; border-radius: 99px; color: var(--accent); background: rgb(166 237 114 / 10%); font: 600 .52rem var(--mono); text-transform: uppercase; }
 .life { display: grid; text-align: right; }

@@ -2,8 +2,11 @@ import { defineConfig, devices } from "@playwright/test";
 import path from "node:path";
 
 const serverData = path.resolve("..", "local", `playwright-${process.pid}`);
-const serverPort = Number(process.env.MTG_E2E_SERVER_PORT ?? "8000");
-const webPort = Number(process.env.MTG_E2E_WEB_PORT ?? "5173");
+// Do not borrow the documented manual-development ports. Browser cookies are
+// host scoped rather than port scoped, and an open manual table may otherwise
+// reconnect to Playwright's disposable server while the suite is running.
+const serverPort = Number(process.env.MTG_E2E_SERVER_PORT ?? "18080");
+const webPort = Number(process.env.MTG_E2E_WEB_PORT ?? "15173");
 
 export default defineConfig({
   testDir: "./tests",
@@ -39,10 +42,15 @@ export default defineConfig({
       },
     },
     {
-      command: "npm run dev",
+      command: `npm run dev -- --port ${webPort}`,
       url: `http://127.0.0.1:${webPort}`,
       reuseExistingServer: false,
       timeout: 60_000,
+      env: {
+        ...process.env,
+        MTG_E2E_SERVER_PORT: String(serverPort),
+        MTG_E2E_WEB_PORT: String(webPort),
+      },
     },
   ],
 });

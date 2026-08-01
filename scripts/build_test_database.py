@@ -94,10 +94,37 @@ def export_fixture(
     }
 
 
-def build_fixture_database(fixture: Path, output: Path) -> dict:
-    payload = json.loads(fixture.read_text(encoding="utf-8"))
-    if int(payload.get("schema_version", 0)) != 1:
-        raise ValueError("Unsupported public card fixture schema")
+def build_fixture_database(
+    fixtures: Path | list[Path], output: Path
+) -> dict:
+    fixture_paths = [fixtures] if isinstance(fixtures, Path) else fixtures
+    cards_by_oracle: dict[str, dict] = {}
+    oracle_by_name: dict[str, str] = {}
+    ruling_rows: list[dict] = []
+    for fixture in fixture_paths:
+        payload = json.loads(fixture.read_text(encoding="utf-8"))
+        if int(payload.get("schema_version", 0)) != 1:
+            raise ValueError(
+                f"Unsupported public card fixture schema: {fixture}"
+            )
+        for card in payload.get("cards", []):
+            oracle_id = str(card.get("oracle_id") or "")
+            name = str(card.get("name") or "")
+            if not oracle_id or not name:
+                raise ValueError(f"Card fixture entry is missing identity: {fixture}")
+            existing = cards_by_oracle.get(oracle_id)
+            if existing is not None and existing != card:
+                raise ValueError(
+                    f"Conflicting card fixture for Oracle ID {oracle_id}"
+                )
+            named_oracle = oracle_by_name.get(name.casefold())
+            if named_oracle is not None and named_oracle != oracle_id:
+                raise ValueError(f"Conflicting card fixture name: {name}")
+            cards_by_oracle[oracle_id] = card
+            oracle_by_name[name.casefold()] = oracle_id
+        # Preserve multiplicity. Scryfall can publish text-identical ruling
+        # rows, and reviewed semantic provenance hashes that exact multiset.
+        ruling_rows.extend(payload.get("rulings", []))
     with tempfile.TemporaryDirectory() as temporary:
         work = Path(temporary)
         oracle_path = work / "oracle-cards.jsonl"
@@ -105,14 +132,25 @@ def build_fixture_database(fixture: Path, output: Path) -> dict:
         oracle_path.write_text(
             "".join(
                 json.dumps(card, sort_keys=True, separators=(",", ":")) + "\n"
-                for card in payload.get("cards", [])
+                for card in sorted(
+                    cards_by_oracle.values(),
+                    key=lambda value: (value["name"], value["oracle_id"]),
+                )
             ),
             encoding="utf-8",
         )
         rulings_path.write_text(
             "".join(
                 json.dumps(ruling, sort_keys=True, separators=(",", ":")) + "\n"
-                for ruling in payload.get("rulings", [])
+                for ruling in sorted(
+                    ruling_rows,
+                    key=lambda value: (
+                        str(value.get("oracle_id") or ""),
+                        str(value.get("published_at") or ""),
+                        str(value.get("source") or ""),
+                        str(value.get("comment") or ""),
+                    ),
+                )
             ),
             encoding="utf-8",
         )
@@ -122,7 +160,8 @@ def build_fixture_database(fixture: Path, output: Path) -> dict:
             output,
             overwrite=True,
         )
-    result["fixture"] = str(fixture)
+    result["fixture"] = str(fixture_paths[0])
+    result["fixtures"] = [str(fixture) for fixture in fixture_paths]
     return result
 
 
@@ -139,7 +178,9 @@ def main() -> int:
     export.add_argument("--extra-card", action="append", default=[])
 
     build = subparsers.add_parser("build")
-    build.add_argument("--fixture", required=True, type=Path)
+    build.add_argument(
+        "--fixture", required=True, action="append", type=Path
+    )
     build.add_argument("--output", required=True, type=Path)
 
     args = parser.parse_args()

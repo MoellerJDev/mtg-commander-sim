@@ -39,7 +39,10 @@
 
 ```bash
 python -m compileall -q mtg_commander_sim tests scripts simctl.py
-python scripts/build_test_database.py build --fixture tests/fixtures/scryfall-exact-lists.json --output data/test-ci.sqlite3
+python scripts/build_test_database.py build \
+  --fixture tests/fixtures/scryfall-exact-lists.json \
+  --fixture tests/fixtures/browser-lifecycle-cards.json \
+  --output data/test-ci.sqlite3
 # Set MTG_CARD_DB=data/test-ci.sqlite3 for the remaining commands.
 python -m unittest discover -s tests -p 'test_*.py' -v
 python scripts/demo_four_player_protocol.py --db data/test-ci.sqlite3 --out demo
