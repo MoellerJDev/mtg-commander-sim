@@ -138,6 +138,62 @@ class CombatDeclarationConstraintTests(unittest.TestCase):
             problem.evaluate({"A1": "B", "A2": "C"}).legal
         )
 
+    def test_selected_creature_can_require_a_matching_declaration(self):
+        problem = DeclarationProblem(
+            domains={"A1": ("B",), "A2": ("B",), "A3": ("C",)},
+            restrictions=(
+                DeclarationRestriction(
+                    "matching-companion",
+                    "minimum_variable_selections",
+                    count=1,
+                    trigger_variable="A1",
+                    variables=("A2",),
+                ),
+            ),
+        )
+
+        self.assertTrue(problem.evaluate({}).legal)
+        self.assertFalse(problem.evaluate({"A1": "B"}).legal)
+        self.assertFalse(
+            problem.evaluate({"A1": "B", "A3": "C"}).legal
+        )
+        self.assertTrue(
+            problem.evaluate({"A1": "B", "A2": "B"}).legal
+        )
+        self.assertEqual(
+            ["A2"], problem.projection()["restrictions"][0]["variables"]
+        )
+
+    def test_absent_matching_companion_makes_trigger_selection_illegal(self):
+        problem = DeclarationProblem(
+            domains={"A1": ("B",)},
+            restrictions=(
+                DeclarationRestriction(
+                    "missing-companion",
+                    "minimum_variable_selections",
+                    count=1,
+                    trigger_variable="A1",
+                ),
+            ),
+        )
+
+        self.assertTrue(problem.evaluate({}).legal)
+        self.assertFalse(problem.evaluate({"A1": "B"}).legal)
+
+    def test_matching_selection_restriction_rejects_ambiguous_shape(self):
+        with self.assertRaisesRegex(ValueError, "does not accept an option"):
+            DeclarationRestriction(
+                "bad-option",
+                "minimum_variable_selections",
+                option="B",
+            )
+        with self.assertRaisesRegex(ValueError, "must be unique"):
+            DeclarationRestriction(
+                "duplicate-variable",
+                "minimum_variable_selections",
+                variables=("A2", "A2"),
+            )
+
     def test_global_maximum_applies_before_requirement_maximization(self):
         problem = DeclarationProblem(
             domains={"A1": ("B",), "A2": ("B",)},

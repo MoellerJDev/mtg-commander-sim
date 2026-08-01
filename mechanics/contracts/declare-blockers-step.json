@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 7,
+  "contract_version": 8,
   "mechanic_id": "cr-509-declare-blockers-step",
   "official_name": "Declare Blockers Step",
   "effective_date": "2026-06-19",
@@ -65,7 +65,8 @@
       "attack target and defending player",
       "supported evasion, protection, and menace restrictions",
       "whole-line static restrictions over effective type, supertype, subtype, token status, keyword, color, power, toughness, goad, attachment, controller, and public combat relationships",
-      "defending-player, attacking-player, and source-controller battlefield existence, tapped-state, minimum-count, and relative-count conditions"
+      "defending-player, attacking-player, and source-controller battlefield existence, tapped-state, minimum-count, and relative-count conditions",
+      "current attacker composition, filtered companion eligibility, attacking-alone state, and source-controller-relative opposing attackers"
     ],
     "state_writes": [
       "blocking relationship",
@@ -89,7 +90,7 @@
     "choices": [
       "each defending player chooses zero or more legal blocks",
       "a menace attacker receives zero or at least two blockers",
-      "not-alone, minimum/maximum blocker-count, and table-wide count restrictions are inviolable",
+      "not-alone, matching-companion, other-blocker, minimum/maximum blocker-count, and table-wide count restrictions are inviolable",
       "the declaration must maximize represented block requirements only within the restriction-obeying declaration space"
     ],
     "hidden_information": [
@@ -142,6 +143,10 @@
     "controller versus attacking-player land and creature count comparisons",
     "defending-player artifact, enchantment, land, snow, and filtered conditional evasion",
     "condition changes reflected identically in direct pair checks and declaration domains",
+    "one or two required other blockers, including a companion filtered by greater power",
+    "intrinsic and attached attacking-alone evasion recomputed from the current attacker declaration",
+    "no-other-creature evasion recomputed from the source controller's battlefield",
+    "source-controller-relative block restrictions scoped to opposing attacker control",
     "exact filtered declarations replaying from the same projected domain",
     "pass-only blocker tasks skipped when no legal domain remains",
     "recognized unsupported conditional block restrictions stopping fail closed"
@@ -168,7 +173,13 @@
     {"name": "Topiary Stomper", "oracle_id": "e3fc10d2-2733-4265-8275-112c285fd11a"},
     {"name": "Mindless Null", "oracle_id": "22ff4e16-5c66-4076-94cc-32c281d42f03"},
     {"name": "Bouncing Beebles", "oracle_id": "4fa46972-d953-4328-9c31-96e134234133"},
-    {"name": "Arctic Foxes", "oracle_id": "898f0824-cf4c-4e34-8407-9a32fdae6dcb"}
+    {"name": "Arctic Foxes", "oracle_id": "898f0824-cf4c-4e34-8407-9a32fdae6dcb"},
+    {"name": "Orcish Conscripts", "oracle_id": "d99e1d08-32ca-49c5-97cc-e064d661202f"},
+    {"name": "Okk", "oracle_id": "f835a8d3-e117-4669-9952-6e9ce13b35fa"},
+    {"name": "Dream Prowler", "oracle_id": "b56c5b39-2465-4a25-b806-bb84866e576f"},
+    {"name": "Gutter Skulker // Gutter Shortcut", "oracle_id": "d2d753d4-3bb7-4503-8cc0-8f948b7a461e"},
+    {"name": "Jeskai Infiltrator", "oracle_id": "39b359c1-48b8-43a7-b972-54764eadd2c7"},
+    {"name": "Storm, Windrider", "oracle_id": "06e9287b-56d4-443e-97ba-b5dcdc4fa989"}
   ],
   "rulings": [
     "Mogg Flunkies — 2018-03-16 — The other blocker need not block the same attacker.",
@@ -222,14 +233,21 @@
     "test_block_only_keyword_filters_opposing_attackers",
     "test_only_unblockable_attackers_skip_pass_only_blocker_task",
     "test_relevant_unsupported_blocker_filter_pauses_fail_closed",
-    "test_oracle_ir_uses_runtime_restriction_grammar"
+    "test_oracle_ir_uses_runtime_restriction_grammar",
+    "test_selected_creature_can_require_a_matching_declaration",
+    "test_absent_matching_companion_makes_trigger_selection_illegal",
+    "test_matching_attack_and_block_companions_are_exact",
+    "test_source_can_require_two_other_blockers",
+    "test_attacking_alone_and_no_other_creature_evasion_recompute",
+    "test_attached_attacking_alone_evasion_uses_current_combat",
+    "test_filtered_attack_and_block_target_relations"
   ],
   "implementation": {
     "component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine blocker declaration/payment transition",
-    "version": "declare-blockers-step-v7"
+    "version": "declare-blockers-step-v8"
   },
   "known_blockers": [
-    "history-, monarch-, poison-, declaration-history-, shared-subtype-quantifier-, compound-with-unrelated-effects-, target-specific-, temporary-, broader-, and multi-block restriction/evasion grammar remains incomplete and recognized static families fail closed",
+    "history-, monarch-, poison-, shared-subtype-quantifier-, compound-with-unrelated-effects-, temporary-, broader-, and multi-block restriction/evasion grammar remains incomplete and recognized static families fail closed",
     "only exact blocks-each-combat, must-be-blocked, lure, and menace grammar is represented; conditional, effect-granted, multi-block, and optional-cost grammar remains incomplete",
     "optional, nonmana, variable, alternative, modified, and broader conditional block costs are not implemented",
     "declare-blockers trigger generation and APNAP placement are incomplete",

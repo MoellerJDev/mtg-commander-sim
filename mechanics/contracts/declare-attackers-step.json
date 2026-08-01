@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 7,
+  "contract_version": 8,
   "mechanic_id": "cr-508-declare-attackers-step",
   "official_name": "Declare Attackers Step",
   "effective_date": "2026-06-19",
@@ -82,7 +82,8 @@
       "attack target and Battle protector",
       "active typed goad designations and their originating players",
       "whole-line static declaration restrictions and their relevant effective keyword, attachment, controller, and typed battlefield-count predicates",
-      "defending-player and source-controller permanent existence, tapped state, subtype, color, keyword, power, toughness, minimum-count, and relative-count conditions"
+      "defending-player and source-controller permanent existence, tapped state, subtype, color, keyword, power, toughness, minimum-count, and relative-count conditions",
+      "current combat declaration composition, filtered companion eligibility, and source-controller-relative attack targets"
     ],
     "state_writes": [
       "tapped state",
@@ -106,7 +107,7 @@
     ],
     "choices": [
       "the active player chooses zero or more eligible attackers and one represented defender for each",
-      "the declaration must obey every represented absolute, not-alone, and table-wide count restriction",
+      "the declaration must obey every represented absolute, not-alone, matching-companion, other-attacker, table-wide count, and per-defender count restriction",
       "the declaration must maximize represented attack requirements only within the restriction-obeying declaration space"
     ],
     "hidden_information": [
@@ -159,6 +160,11 @@
     "source-controller versus defending-player creature and land count comparisons in multiplayer",
     "condition polarity for unless and if restrictions",
     "conditional attack declarations replaying from identical public battlefield state",
+    "one or two required other attackers, including companions filtered by color or greater power",
+    "source-controller-relative player restrictions filtered by keyword or power in multiplayer",
+    "attached player and planeswalker wording scoped to the attachment controller",
+    "one- and two-attacker limits scoped independently to the protected player",
+    "named planeswalker attack limits stopping fail closed while planeswalker attack targets remain unsupported",
     "recognized unsupported conditional attack restrictions stopping fail closed"
   ],
   "witness_cards": [
@@ -172,7 +178,12 @@
     {"name": "Steelclad Serpent", "oracle_id": "6410e2bb-5ae6-4190-8b4a-6b2d5c9dff8d"},
     {"name": "Mogg Toady", "oracle_id": "77c7ba06-d247-421d-9e0c-54c3000c1b78"},
     {"name": "Topiary Stomper", "oracle_id": "e3fc10d2-2733-4265-8275-112c285fd11a"},
-    {"name": "Godhunter Octopus", "oracle_id": "930b48b8-dbd1-4109-9eaa-7d7e9a04fa5b"}
+    {"name": "Godhunter Octopus", "oracle_id": "930b48b8-dbd1-4109-9eaa-7d7e9a04fa5b"},
+    {"name": "Orcish Conscripts", "oracle_id": "d99e1d08-32ca-49c5-97cc-e064d661202f"},
+    {"name": "Scarred Puma", "oracle_id": "e28e1921-797b-4e6e-8058-3929af46eeb5"},
+    {"name": "Okk", "oracle_id": "f835a8d3-e117-4669-9952-6e9ce13b35fa"},
+    {"name": "Blazing Archon", "oracle_id": "82a70e4c-01ed-4280-80e4-86cb2bf6e63d"},
+    {"name": "Crawlspace", "oracle_id": "2296370c-fe34-4df6-92a5-260f1634bede"}
   ],
   "rulings": [
     "Mogg Flunkies — 2018-03-16 — The other attacker may attack a different player, planeswalker, or battle.",
@@ -230,16 +241,24 @@
     "test_minimum_and_relative_counts_are_defender_specific",
     "test_relevant_unsupported_condition_pauses_fail_closed",
     "test_triggered_text_is_not_misread_as_a_static_restriction",
-    "test_oracle_ir_uses_runtime_restriction_grammar"
+    "test_oracle_ir_uses_runtime_restriction_grammar",
+    "test_selected_creature_can_require_a_matching_declaration",
+    "test_absent_matching_companion_makes_trigger_selection_illegal",
+    "test_source_can_require_two_other_attackers_and_replays",
+    "test_matching_attack_and_block_companions_are_exact",
+    "test_attack_target_restrictions_are_source_controller_scoped",
+    "test_filtered_attack_and_block_target_relations",
+    "test_source_controller_attack_cap_is_per_target_and_replays",
+    "test_unsupported_named_attack_target_cap_pauses_fail_closed"
   ],
   "implementation": {
     "component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine attacker declaration/payment transition",
-    "version": "declare-attackers-step-v7"
+    "version": "declare-attackers-step-v8"
   },
   "known_blockers": [
     "planeswalker attack targets are not implemented",
     "exact attacks-each-combat and typed goad requirements are represented; conditional, non-goad defender-specific, and other effect-granted requirement grammar remains incomplete",
-    "history-, monarch-, poison-, declaration-history-, compound-, target-specific-, temporary-, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
+    "history-, monarch-, poison-, shared-subtype-quantifier-, compound-, named/nonplayer-target-, temporary-, and broader attack-restriction grammar remains incomplete and recognized static families fail closed",
     "banding declarations are not implemented",
     "optional, nonmana, variable, alternative, modified, and broader conditional attack costs are not implemented",
     "declare-attackers trigger generation and APNAP placement are incomplete",
