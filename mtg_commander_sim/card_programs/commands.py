@@ -7,6 +7,7 @@ from typing import Any, Mapping
 
 from ..carddb import CardDatabase, CardRecord
 from ..rules.capabilities import load_default_capability_registry
+from ..semantic_runtime import default_semantic_handler_registry
 from ..semantics import SemanticRegistry
 from ..util import stable_json
 from .adapters import compile_card_program
@@ -21,6 +22,33 @@ CARD_PROGRAM_OPERATIONS = {
     "overrides",
     "coverage",
 }
+
+
+def _typed_handler_mapping(
+    operations: list[str],
+) -> list[dict[str, Any]]:
+    registry = default_semantic_handler_registry()
+    return [
+        descriptor
+        for operation in operations
+        if (descriptor := registry.describe(operation)) is not None
+    ]
+
+
+def _runtime_handler_mapping(
+    effects: list[Mapping[str, Any]],
+    *,
+    event_handlers: list[dict[str, Any]] | None = None,
+    operation_key: str = "effect_operations",
+) -> dict[str, Any]:
+    operations = [str(effect.get("op") or "") for effect in effects]
+    result = {
+        operation_key: operations,
+        "typed_handlers": _typed_handler_mapping(operations),
+    }
+    if event_handlers is not None:
+        result["event_handlers"] = event_handlers
+    return result
 
 
 def _compile_best_available(
@@ -96,13 +124,10 @@ def explain_card_program(program: CardProgram) -> dict[str, Any]:
                     ),
                     "template_id": runtime["provenance"].get("template_id"),
                 },
-                "runtime_handler_mapping": {
-                    "effect_operations": [
-                        str(node.get("op") or "")
-                        for node in ability["effect_nodes"]
-                    ],
-                    "event_handlers": runtime["handlers"],
-                },
+                "runtime_handler_mapping": _runtime_handler_mapping(
+                    ability["effect_nodes"],
+                    event_handlers=runtime["handlers"],
+                ),
             }
         )
     return {
@@ -149,10 +174,10 @@ def audit_card_program(program: CardProgram) -> dict[str, Any]:
             ability.ability_id: {
                 "semantic_key": ability.key,
                 "event": ability.event,
-                "operations": [
-                    str(effect.get("op") or "")
-                    for effect in ability.effects
-                ],
+                **_runtime_handler_mapping(
+                    ability.effects,
+                    operation_key="operations",
+                ),
             }
             for ability in program.abilities
         },

@@ -164,7 +164,12 @@ class CapabilityRegistryTests(unittest.TestCase):
 
     def test_registry_rejects_cycles_and_incomplete_trust_evidence(self):
         value = _registry_value()
-        value["capabilities"][0]["dependencies"] = [
+        target_revalidation = next(
+            row
+            for row in value["capabilities"]
+            if row["id"] == "target.revalidate_resolution"
+        )
+        target_revalidation["dependencies"] = [
             "target.public.player_or_damageable_permanent"
         ]
         with self.assertRaisesRegex(
@@ -173,7 +178,12 @@ class CapabilityRegistryTests(unittest.TestCase):
             CapabilityRegistry(value)
 
         value = _registry_value()
-        value["capabilities"][0]["negative_tests"] = []
+        target_revalidation = next(
+            row
+            for row in value["capabilities"]
+            if row["id"] == "target.revalidate_resolution"
+        )
+        target_revalidation["negative_tests"] = []
         with self.assertRaisesRegex(
             CapabilityRegistryError, "requires negative_tests"
         ):

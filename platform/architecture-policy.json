@@ -32,6 +32,7 @@
     "mtg_commander_sim/domain/",
     "mtg_commander_sim/card_programs/",
     "mtg_commander_sim/compiler/",
+    "mtg_commander_sim/semantic_runtime/",
     "mtg_commander_sim/rules/",
     "mtg_commander_sim/semantics/",
     "mtg_commander_sim/card_overrides/"
@@ -56,6 +57,17 @@
     "mtg_commander_sim.runtime",
     "mtg_commander_sim.service",
     "mtg_commander_sim.session"
+  ],
+  "scoped_forbidden_imports": [
+    {
+      "path_prefix": "mtg_commander_sim/semantic_runtime/",
+      "import_prefixes": [
+        "mtg_commander_sim.engine",
+        "mtg_commander_sim.model",
+        "mtg_commander_sim.record",
+        "mtg_commander_sim.projection"
+      ]
+    }
   ],
   "game_state_access": {
     "mutable_owners": {

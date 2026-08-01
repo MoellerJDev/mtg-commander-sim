@@ -751,6 +751,14 @@ compatibility input, not a second rules authority. New Game Record v3 files pin
 the complete card-program map and the subset used by every command while
 remaining replay-compatible with older v3 records.
 
+Phase 4 is migrating executable effect families into
+`mtg_commander_sim/semantic_runtime/`. Registered handlers receive only an
+immutable seat/order query, produce typed intents, and declare bounded rule
+capabilities. The executor reuses canonical engine mutation methods. Draw,
+table-wide draw, and monarch designation are the first migrated operations;
+all other operations remain explicitly on the measured legacy path. This is an
+architecture milestone, not a broader rules-completeness claim.
+
 This is still not a completeness declaration. Current exact, partial,
 unresolved, and material-residual figures are generated in
 [`docs/COMPILER_COVERAGE_STATUS.md`](docs/COMPILER_COVERAGE_STATUS.md). Every
@@ -1035,6 +1043,8 @@ container isolation when filesystem-level isolation must also be proven.
 - `mtg_commander_sim/semantics.py` — reusable effect-program registry
 - `mtg_commander_sim/card_programs/` — canonical CardProgram V2 model,
   semantic/generated adapters, audit commands, and runtime validation
+- `mtg_commander_sim/semantic_runtime/` — frozen typed-handler registry,
+  immutable rules queries, typed intents, and canonical intent execution
 - `mtg_commander_sim/mana.py` — conservative mana source parsing/planning
 - `mtg_commander_sim/abilities.py` — explicit Oracle ability/cost extraction and zone authorization
 - `mtg_commander_sim/session.py` — deterministic session façade

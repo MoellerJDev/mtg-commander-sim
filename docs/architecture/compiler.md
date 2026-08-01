@@ -27,6 +27,7 @@ flowchart LR
     Lower --> Gate["trust/dependency gate"]
     Residuals --> Gate
     Gate --> Program["canonical CardProgram V2"]
+    Program --> Handlers["registered typed handlers or measured legacy fallback"]
 ```
 
 ## Invariants

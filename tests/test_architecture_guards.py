@@ -46,6 +46,16 @@ class ArchitectureGuardTests(unittest.TestCase):
             [{"file": protected, "import": "fastapi"}],
         )
 
+    def test_typed_handler_cannot_import_authoritative_engine(self):
+        relative = "mtg_commander_sim/semantic_runtime/generic.py"
+        analyses = {
+            relative: SimpleNamespace(imports=("mtg_commander_sim.engine",))
+        }
+        self.assertEqual(
+            forbidden_import_violations(analyses, self.policy),
+            [{"file": relative, "import": "mtg_commander_sim.engine"}],
+        )
+
     def test_game_state_access_and_nonowner_mutation_are_rejected(self):
         tree = ast.parse("from mtg_commander_sim.model import GameState\n")
         self.assertTrue(_game_state_imports(tree))

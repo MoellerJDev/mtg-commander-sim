@@ -633,6 +633,53 @@ def _state_and_dispatch_metrics(
     }
 
 
+def _semantic_handler_metrics(
+    state_dispatch: Mapping[str, Any],
+) -> dict[str, Any]:
+    from mtg_commander_sim.semantic_runtime import (
+        default_semantic_handler_registry,
+    )
+
+    registry = default_semantic_handler_registry()
+    inventory = registry.inventory()
+    legacy_branches = [
+        branch
+        for branch in state_dispatch["semantic_operation_branches"][
+            "locations"
+        ]
+        if branch["file"] == "mtg_commander_sim/engine.py"
+        and branch["symbol"] == "apply_effect"
+    ]
+    legacy_operations = {
+        literal
+        for branch in legacy_branches
+        for literal in branch["string_literals"]
+    }
+    registered_operations = {
+        str(handler["operation"]) for handler in inventory
+    }
+    return {
+        "schema_version": 1,
+        "registry_fingerprint": registry.fingerprint,
+        "registered_handler_count": len(inventory),
+        "registered_operation_count": len(registered_operations),
+        "registered_operations": sorted(registered_operations),
+        "handlers": inventory,
+        "legacy_apply_effect_branch_count": len(legacy_branches),
+        "registered_operations_still_in_legacy_dispatch": sorted(
+            registered_operations & legacy_operations
+        ),
+        "read_only_context": (
+            "mtg_commander_sim.semantic_runtime.context."
+            "ReadOnlyHandlerContext"
+        ),
+        "typed_intent_executor": (
+            "mtg_commander_sim.semantic_runtime.executor."
+            "execute_intent_plan"
+        ),
+    }
+
+
 def _card_names(database: Path) -> tuple[dict[str, str], dict[str, str]]:
     names: dict[str, str] = {}
     metadata: dict[str, str] = {}
@@ -1222,6 +1269,7 @@ def build_report() -> dict[str, Any]:
             "Core code contains printed-name literals outside the reviewed baseline"
         )
     state_dispatch = _state_and_dispatch_metrics(analyses, source)
+    semantic_handlers = _semantic_handler_metrics(state_dispatch)
     production = _production_metrics(paths, analyses, source)
     engine = _engine_metrics(analyses, source)
     return {
@@ -1242,6 +1290,7 @@ def build_report() -> dict[str, Any]:
             "engine": engine,
             "imports": _import_metrics(analyses),
             **state_dispatch,
+            "semantic_handlers": semantic_handlers,
             "printed_name_literals": card_validation,
             "card_named_helpers": source["card_named_helpers"],
             "subsystem_ownership": source["subsystem_ownership"],
@@ -1340,6 +1389,12 @@ def render_architecture_status(report: Mapping[str, Any]) -> str:
             f"{architecture['direct_game_state_write_heuristic']['count']} locations",
             f"- Semantic-operation branches: "
             f"{architecture['semantic_operation_branches']['count']}",
+            f"- Registered typed semantic handlers: "
+            f"{architecture['semantic_handlers']['registered_handler_count']} "
+            f"across {architecture['semantic_handlers']['registered_operation_count']} "
+            "operations",
+            f"- Remaining legacy `apply_effect` branches: "
+            f"{architecture['semantic_handlers']['legacy_apply_effect_branch_count']}",
             f"- Exact printed-name literals in configured core files: "
             f"{architecture['printed_name_literals']['entry_count']} "
             f"({architecture['printed_name_literals']['conditional_entry_count']} conditional)",

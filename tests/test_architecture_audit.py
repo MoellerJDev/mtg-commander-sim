@@ -47,6 +47,16 @@ class ArchitectureAuditTests(unittest.TestCase):
             architecture["direct_game_state_write_heuristic"]["count"],
             len(architecture["direct_game_state_write_heuristic"]["locations"]),
         )
+        handlers = architecture["semantic_handlers"]
+        self.assertEqual(3, handlers["registered_handler_count"])
+        self.assertEqual(
+            ["become_monarch", "draw", "draw_each_player"],
+            handlers["registered_operations"],
+        )
+        self.assertEqual(
+            [], handlers["registered_operations_still_in_legacy_dispatch"]
+        )
+        self.assertGreater(handlers["legacy_apply_effect_branch_count"], 0)
         self.assertTrue(tests["python"]["reconciles"])
         self.assertEqual(
             tests["python"]["discovered_total"],
