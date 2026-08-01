@@ -100,6 +100,15 @@ async function submitFormAction(page: Page, actionId: string) {
   await submitOpenChoice(page);
 }
 
+async function ensureFullControl(page: Page) {
+  const toggle = page.getByTestId("auto-pass-toggle");
+  if (await toggle.getAttribute("aria-pressed") === "true") {
+    await toggle.click();
+  }
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await expect(toggle).toContainText("Full control on");
+}
+
 async function passUntilDraggable(page: Page, card: Locator) {
   const pass = page.getByTestId("action-pass");
   const meaningful = page.locator(
@@ -225,8 +234,7 @@ test("four shared-cookie browser tabs retain isolated seats through mulligans an
       await expect(page.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
       await expect(page.getByTestId("decision-panel")).toBeVisible();
       await expectCardSurface(page, "ABCD"[index]);
-      await page.getByTestId("auto-pass-toggle").click();
-      await expect(page.getByTestId("auto-pass-toggle")).toContainText("Full control on");
+      await ensureFullControl(page);
     }
     const handA = await pages[0].getByTestId("own-hand").textContent();
     const handB = await pages[1].getByTestId("own-hand").textContent();
