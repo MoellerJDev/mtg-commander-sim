@@ -45,6 +45,11 @@ from .combat_constraints import (
     DeclarationRestriction,
     DeclarationSearchLimitError,
 )
+from .declaration_costs import (
+    DeclarationCost,
+    normalized_oracle_line,
+    parse_declaration_cost_line,
+)
 from .damage import DamageEvent, DamageRecipientKind
 from .deck import DeckDefinition
 from .mana import (
@@ -17310,9 +17315,9 @@ class CommanderEngine:
         )
         if "battle" in blocker_types:
             return False, "blocker_is_battle"
-        if "can't block" in str(
-            blocker_data.get("oracle_text") or ""
-        ).casefold():
+        if "this creature can't block." in self._combat_oracle_lines(
+            blocker
+        ):
             return False, "blocker_cannot_block"
         if "shadow" in attacker_keywords and "shadow" not in blocker_keywords:
             return False, "attacker_has_shadow"
@@ -17332,15 +17337,7 @@ class CommanderEngine:
         return True, None
 
     def _combat_oracle_text(self, card: CardInstance) -> str:
-        text = " ".join(
-            str(
-                self._effective_card_data(card).get("oracle_text") or ""
-            )
-            .casefold()
-            .split()
-        )
-        name = " ".join(str(card.printed_name).casefold().split())
-        return text.replace(name, "this creature") if name else text
+        return " ".join(self._combat_oracle_lines(card))
 
     def _active_goad_designations(
         self,
@@ -17380,7 +17377,180 @@ class CommanderEngine:
                 return source
         return None
 
-    def _attack_declaration_problem(self, active: str) -> DeclarationProblem:
+    def _combat_oracle_lines(
+        self,
+        card: CardInstance,
+    ) -> tuple[str, ...]:
+        """Return source-local normalized Oracle lines for combat grammar."""
+
+        lines: list[str] = []
+        for raw_line in str(
+            self._effective_card_data(card).get("oracle_text") or ""
+        ).splitlines():
+            line = normalized_oracle_line(
+                raw_line,
+                card_name=card.printed_name,
+            )
+            if not line:
+                continue
+            lines.append(line)
+        return tuple(lines)
+
+    @staticmethod
+    def _declaration_cost(
+        *,
+        cost_id: str,
+        variable: str,
+        option: str,
+        payer: str,
+        mana: tuple[tuple[str, int], ...],
+        source: CardInstance,
+        label: str,
+    ) -> DeclarationCost:
+        return DeclarationCost(
+            cost_id=cost_id,
+            variable=variable,
+            option=option,
+            payer=payer,
+            mana=mana,
+            source=source.ref,
+            label=label,
+        )
+
+    def _declaration_costs(
+        self,
+        kind: str,
+        payer: str,
+        domains: Mapping[str, Sequence[str]],
+    ) -> tuple[
+        tuple[DeclarationCost, ...],
+        tuple[tuple[CardInstance, str], ...],
+    ]:
+        """Derive a represented CR 508.1h or 509.1d locked-cost set."""
+
+        costs: list[DeclarationCost] = []
+        unresolved: list[tuple[CardInstance, str]] = []
+        for source in sorted(
+            self.state.cards.values(), key=lambda value: value.ref
+        ):
+            if source.zone != "battlefield" or source.phased_out:
+                continue
+            for line_index, line in enumerate(
+                self._combat_oracle_lines(source)
+            ):
+                parsed = parse_declaration_cost_line(line)
+                if kind not in parsed.declarations:
+                    continue
+                selections: list[tuple[str, str]] = []
+                if parsed.scope == "self" and source.ref in domains:
+                    selections.extend(
+                        (source.ref, str(option))
+                        for option in domains[source.ref]
+                    )
+                elif parsed.scope == "attached":
+                    attached = self.state.cards.get(
+                        source.attached_to or ""
+                    )
+                    if attached is not None and attached.ref in domains:
+                        selections.extend(
+                            (attached.ref, str(option))
+                            for option in domains[attached.ref]
+                        )
+                elif (
+                    parsed.scope == "source_controller"
+                    and kind == "attack"
+                ):
+                    selections.extend(
+                        (variable, source.controller)
+                        for variable, options in sorted(domains.items())
+                        if source.controller in options
+                    )
+                elif parsed.scope == "global" and kind == "block":
+                    selections.extend(
+                        (variable, str(option))
+                        for variable, options in sorted(domains.items())
+                        for option in options
+                    )
+                if not selections:
+                    continue
+                if not parsed.exact:
+                    unresolved.append((source, line))
+                    continue
+                template = parsed.template
+                assert template is not None
+                if (
+                    template.source_condition == "source_untapped"
+                    and source.tapped
+                ):
+                    continue
+                if (
+                    template.source_condition == "source_attacking"
+                    and not source.attacking
+                ):
+                    continue
+                for variable, option in selections:
+                    costs.append(
+                        self._declaration_cost(
+                            cost_id=(
+                                f"{kind}-cost:{parsed.scope}:{source.ref}:"
+                                f"{line_index}:{variable}:{option}"
+                            ),
+                            variable=variable,
+                            option=option,
+                            payer=payer,
+                            mana=template.mana,
+                            source=source,
+                            label=(
+                                f"{self.display_name(source.object_id)} "
+                                f"requires {template.printed_cost} for "
+                                f"{variable} to {kind}."
+                            ),
+                        )
+                    )
+        return tuple(costs), tuple(unresolved)
+
+    def _attack_declaration_costs(
+        self,
+        active: str,
+        domains: Mapping[str, Sequence[str]],
+    ) -> tuple[
+        tuple[DeclarationCost, ...],
+        tuple[tuple[CardInstance, str], ...],
+    ]:
+        return self._declaration_costs("attack", active, domains)
+
+    def _selected_declaration_mana(
+        self,
+        costs: Sequence[DeclarationCost],
+        declaration: Mapping[str, str],
+        *,
+        payer: str,
+    ) -> tuple[dict[str, int], tuple[DeclarationCost, ...]]:
+        requirements = {
+            key: 0
+            for key in ("GENERIC", "W", "U", "B", "R", "G", "C")
+        }
+        selected: list[DeclarationCost] = []
+        for cost in costs:
+            if declaration.get(cost.variable) != cost.option:
+                continue
+            if cost.payer != payer:
+                raise GameRuleError(
+                    "A declaration cost named a different payer"
+                )
+            selected.append(cost)
+            for key, amount in cost.mana_requirements().items():
+                requirements[key] += amount
+        return requirements, tuple(selected)
+
+    def _attack_declaration_components(
+        self,
+        active: str,
+    ) -> tuple[
+        DeclarationProblem,
+        tuple[DeclarationCost, ...],
+        tuple[tuple[CardInstance, str], ...],
+    ]:
         defenders = [
             *[seat for seat in self.active_seats if seat != active],
             *[battle["id"] for battle in self._attackable_battles(active)],
@@ -17439,15 +17609,37 @@ class CommanderEngine:
                         ),
                     )
                 )
-        return DeclarationProblem(
+        costs, unresolved = self._attack_declaration_costs(
+            active, domains
+        )
+        problem = DeclarationProblem(
             domains=domains,
             requirements=tuple(requirements),
+            costed_options=frozenset(cost.selection for cost in costs),
         )
+        return problem, costs, unresolved
 
-    def _block_declaration_problem(
+    def _attack_declaration_problem(self, active: str) -> DeclarationProblem:
+        return self._attack_declaration_components(active)[0]
+
+    def _block_declaration_costs(
         self,
         defender: str,
-    ) -> DeclarationProblem:
+        domains: Mapping[str, Sequence[str]],
+    ) -> tuple[
+        tuple[DeclarationCost, ...],
+        tuple[tuple[CardInstance, str], ...],
+    ]:
+        return self._declaration_costs("block", defender, domains)
+
+    def _block_declaration_components(
+        self,
+        defender: str,
+    ) -> tuple[
+        DeclarationProblem,
+        tuple[DeclarationCost, ...],
+        tuple[tuple[CardInstance, str], ...],
+    ]:
         attacker_cards = [
             card
             for card in self._current_attacker_cards()
@@ -17548,11 +17740,22 @@ class CommanderEngine:
                         ),
                     )
                 )
-        return DeclarationProblem(
+        costs, unresolved = self._block_declaration_costs(
+            defender, domains
+        )
+        problem = DeclarationProblem(
             domains=domains,
             requirements=tuple(requirements),
             restrictions=tuple(restrictions),
+            costed_options=frozenset(cost.selection for cost in costs),
         )
+        return problem, costs, unresolved
+
+    def _block_declaration_problem(
+        self,
+        defender: str,
+    ) -> DeclarationProblem:
+        return self._block_declaration_components(defender)[0]
 
     @staticmethod
     def _validate_declaration_requirements(
@@ -17599,7 +17802,16 @@ class CommanderEngine:
             ]
             self._grant_priority(active)
             return
-        problem = self._attack_declaration_problem(active)
+        problem, costs, unresolved = self._attack_declaration_components(
+            active
+        )
+        if unresolved:
+            source, line = unresolved[0]
+            self._pause_for_unsupported_semantic(
+                event=f"combat.attack_cost:{line}",
+                source=source,
+            )
+            return
         self.permissions.issue(
             kind="combat.attackers",
             role="pilot",
@@ -17625,6 +17837,14 @@ class CommanderEngine:
                         active
                     ),
                     "declaration_constraints": problem.projection(),
+                    "declaration_costs": [
+                        cost.to_dict() for cost in costs
+                    ],
+                    "payment": {
+                        "default": "auto",
+                        "manual_fields": ["mana", "payment"],
+                        "spend_context": "combat_declaration",
+                    },
                 }
             },
         )
@@ -17758,16 +17978,51 @@ class CommanderEngine:
             canonical[card.ref] = defender
             used.add(card.object_id)
 
-        self._validate_declaration_requirements(
-            self._attack_declaration_problem(active),
-            canonical,
+        problem, _, unresolved = self._attack_declaration_components(
+            active
         )
+        if unresolved:
+            raise GameRuleError(
+                "The attack declaration has an unresolved required cost"
+            )
+        self._validate_declaration_requirements(problem, canonical)
         for card, defender in chosen:
             data = self._effective_card_data(card)
             if "Vigilance" not in data.get("keywords", []):
                 card.tapped = True
+        locked_costs, unresolved = self._attack_declaration_costs(
+            active, problem.domains
+        )
+        if unresolved:
+            raise GameRuleError(
+                "The locked attack cost contains unresolved semantics"
+            )
+        requirements, selected_costs = self._selected_declaration_mana(
+            locked_costs,
+            canonical,
+            payer=active,
+        )
+        spent = normalize_mana_bundle(None)
+        activations: list[dict[str, Any]] = []
+        if sum(requirements.values()):
+            spent, activations = self._pay_for_cost(
+                active,
+                requirements,
+                response,
+                spend_context="combat_declaration",
+            )
+        surviving_attackers: list[tuple[CardInstance, str]] = []
+        for card, defender in chosen:
+            if (
+                card.zone != "battlefield"
+                or card.controller != active
+                or card.phased_out
+            ):
+                continue
             card.attacking = str(defender)
             self.state.combat.attackers[card.object_id] = str(defender)
+            surviving_attackers.append((card, defender))
+        used = {card.object_id for card, _ in surviving_attackers}
         self.state.combat.attackers_declared = True
         if used:
             self.state.combat.had_attacking_creature = True
@@ -17776,7 +18031,37 @@ class CommanderEngine:
             for seat in self.active_seats
             if seat != active
         ]
-        self._log(active, "combat.attack", f"{active} attacked with {len(used)} creature(s).", {"attackers": {self.state.cards[oid].ref: defender for oid, defender in self.state.combat.attackers.items()}}, importance=2, changed_objects=list(used), changed_players=[active])
+        self._log(
+            active,
+            "combat.attack",
+            f"{active} attacked with {len(used)} creature(s).",
+            {
+                "attackers": {
+                    self.state.cards[oid].ref: defender
+                    for oid, defender in self.state.combat.attackers.items()
+                },
+                "costs": [cost.cost_id for cost in selected_costs],
+                "requirements": {
+                    key: value
+                    for key, value in requirements.items()
+                    if value
+                },
+                "payment": {
+                    key: value for key, value in spent.items() if value
+                },
+                "mana_sources": [
+                    {
+                        "source": activation.get("source_ref")
+                        or activation.get("source"),
+                        "bundle": activation.get("bundle"),
+                    }
+                    for activation in activations
+                ],
+            },
+            importance=2,
+            changed_objects=list(used),
+            changed_players=[active],
+        )
         attack_triggers: list[StackItem] = []
         for object_id in used:
             attacker = self.state.cards[object_id]
@@ -17872,7 +18157,16 @@ class CommanderEngine:
             for card in attacker_cards
             if MENACE in self._combat_keywords(card)
         }
-        problem = self._block_declaration_problem(defender)
+        problem, costs, unresolved = self._block_declaration_components(
+            defender
+        )
+        if unresolved:
+            source, line = unresolved[0]
+            self._pause_for_unsupported_semantic(
+                event=f"combat.block_cost:{line}",
+                source=source,
+            )
+            return
         blockers = []
         legal_blocks: dict[str, list[str]] = {}
         for oid in self.state.players[defender].zones["battlefield"]:
@@ -17910,6 +18204,14 @@ class CommanderEngine:
                     "legal_blocks": legal_blocks,
                     "minimum_blockers": minimum_blockers,
                     "declaration_constraints": problem.projection(),
+                    "declaration_costs": [
+                        cost.to_dict() for cost in costs
+                    ],
+                    "payment": {
+                        "default": "auto",
+                        "manual_fields": ["mana", "payment"],
+                        "spend_context": "combat_declaration",
+                    },
                 }
             },
         )
@@ -17962,14 +18264,75 @@ class CommanderEngine:
             canonical[blocker.ref] = attacker.ref
             used_blockers.add(blocker.object_id)
 
-        self._validate_declaration_requirements(
-            self._block_declaration_problem(defender),
-            canonical,
+        problem, costs, unresolved = self._block_declaration_components(
+            defender
         )
+        if unresolved:
+            raise GameRuleError(
+                "The block declaration has an unresolved required cost"
+            )
+        self._validate_declaration_requirements(problem, canonical)
+        requirements, selected_costs = self._selected_declaration_mana(
+            costs,
+            canonical,
+            payer=defender,
+        )
+        spent = normalize_mana_bundle(None)
+        activations: list[dict[str, Any]] = []
+        if sum(requirements.values()):
+            spent, activations = self._pay_for_cost(
+                defender,
+                requirements,
+                response,
+                spend_context="combat_declaration",
+            )
+        surviving_blockers: list[tuple[CardInstance, CardInstance]] = []
         for blocker, attacker in chosen:
+            if (
+                blocker.zone != "battlefield"
+                or blocker.controller != defender
+                or blocker.phased_out
+            ):
+                continue
             self.state.combat.blockers.setdefault(attacker.object_id, []).append(blocker.object_id)
             blocker.blocking = attacker.object_id
-        self._log(defender, "combat.block", f"{defender} declared {len(used_blockers)} blocker(s).", {"blocks": {self.state.cards[b].ref: self.state.cards[a].ref for a, bs in self.state.combat.blockers.items() for b in bs if b in used_blockers}}, importance=2, changed_objects=list(used_blockers), changed_players=[defender])
+            surviving_blockers.append((blocker, attacker))
+        used_blockers = {
+            blocker.object_id for blocker, _ in surviving_blockers
+        }
+        self._log(
+            defender,
+            "combat.block",
+            f"{defender} declared {len(used_blockers)} blocker(s).",
+            {
+                "blocks": {
+                    self.state.cards[b].ref: self.state.cards[a].ref
+                    for a, blockers in self.state.combat.blockers.items()
+                    for b in blockers
+                    if b in used_blockers
+                },
+                "costs": [cost.cost_id for cost in selected_costs],
+                "requirements": {
+                    key: value
+                    for key, value in requirements.items()
+                    if value
+                },
+                "payment": {
+                    key: value for key, value in spent.items() if value
+                },
+                "mana_sources": [
+                    {
+                        "source": activation.get("source_ref")
+                        or activation.get("source"),
+                        "bundle": activation.get("bundle"),
+                    }
+                    for activation in activations
+                ],
+            },
+            importance=2,
+            changed_objects=list(used_blockers),
+            changed_players=[defender],
+        )
         self.state.combat.blocker_cursor += 1
         self._issue_next_blocker()
 

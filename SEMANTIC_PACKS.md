@@ -32,6 +32,13 @@ contracts, and compiles Oracle text into a typed intermediate representation.
 Recognized whole-text templates lower into the same generic DSL and kernel
 primitives used by current packs.
 
+Oracle IR v4 includes a shared combat-declaration cost grammar for exact
+fixed ordinary-mana intrinsic, attached-Aura, defending-player attack, and global block-tax
+sentences. The compiler records a typed static-cost node and the engine uses
+the same parser to derive live costs. Complex symbols, appended instructions,
+and broader conditional forms retain material residuals and stop fail closed;
+this is reusable sentence-family support, not card-name coverage.
+
 At deck creation, generated programs are added only when their stable
 Oracle/face/ability key is not already supplied by a reviewed pack. Reviewed
 trigger event handlers also shadow equivalent generated event handlers even

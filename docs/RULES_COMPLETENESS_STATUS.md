@@ -11,10 +11,10 @@ coverage.
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Current integration branch: `main`
-- Rules integration PRs #1–#17 and #24–#39 are merged; the cumulative PR #24
+- Rules integration PRs #1–#17 and #24–#40 are merged; the cumulative PR #24
   tip incorporated the exact CR 400–408 heads before PRs #18–#23 closed as
   superseded
-- Current integrated merge: `939409d`
+- Current integrated merge: `a8eb987`
 - Package version: `0.8.0`
 - Comprehensive Rules effective date: 2026-06-19
 - CR SHA-256:
@@ -28,7 +28,7 @@ coverage.
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
 | Mechanic contracts | In progress | 57 partial/untrusted contracts; 368 mechanics unclassified; 0 trusted |
-| Typed Oracle IR | In progress | `oracle-ir-v3`, source spans, fail-closed material residuals, and anchored target-creature goad lowering |
+| Typed Oracle IR | In progress | `oracle-ir-v4`, source spans, fail-closed material residuals, anchored target-creature goad lowering, and a shared whole-line fixed-mana declaration-cost grammar |
 | Object and zone identity | Partial | All 30 CR 400 records reviewed; owner-zone routing, logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, hidden outside-game movement, and selected linked-effect guards |
 | Library | Partial | All 8 CR 401 records reviewed; hidden order/public count, bounded look/reorder, shuffle knowledge clearing, and Nth-from-top placement; simultaneous owner ordering and continuous top-card visibility remain blocked |
 | Hand | Partial | All 4 CR 402 records reviewed; starting/maximum size, cleanup-only excess discard, public count, scoped identity, public-to-hand knowledge, and controller dual-hand access; continuous no-maximum and arbitrary reveal/look grammar remain blocked |
@@ -42,8 +42,8 @@ coverage.
 | Replacement/prevention ordering | Partial | CR 615/616 typed primitives; stateful shields and event-producer integration incomplete |
 | Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, immutable final combat source-recipient events, combat damage/death trigger batching, counter-derived battlefield defense, copied printed defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
-| Full Oracle compilation | In progress | exact 2,959; partial 15,732; unresolved 19,793; 69,890 material residuals |
-| Commander-legal Oracle compilation | In progress | exact 338; partial 14,343; unresolved 16,942; 61,213 material residuals |
+| Full Oracle compilation | In progress | exact 2,959; partial 15,736; unresolved 19,789; 69,890 material residuals |
+| Commander-legal Oracle compilation | In progress | exact 338; partial 14,347; unresolved 16,938; 61,213 material residuals |
 | Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 563 cases are reviewed, with 115 executable passes, 367 blocked cases, and 81 definition-only cases; 2,737 remain unreviewed |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
@@ -276,14 +276,19 @@ coverage.
 - [x] Reviewed all 39 CR 508 Declare Attackers Step records. Ordinary
   eligibility, defender, current target validation, tapping/vigilance, attacking-state
   lifetime, active-player priority, atomic rejection, exact replay, and
-  empty-combat step skipping pass for the represented boundary. Planeswalkers,
-  restrictions, requirements, banding, attack costs, declaration triggers,
-  entry-attacking effects, defending-player LKI, and target reselection remain
-  dependency-blocked.
+  empty-combat step skipping pass for the represented boundary. Fixed ordinary-
+  mana intrinsic, attached-Aura, and defending-player attack taxes now aggregate, lock after
+  attacker tapping, accept manual/automatic mana plans, and roll back
+  atomically; paid choices do not raise the free requirement maximum.
+  Planeswalkers, complete restrictions/requirements, banding, optional/nonmana/
+  variable/modified costs, declaration triggers, entry-attacking effects,
+  defending-player LKI, and target reselection remain dependency-blocked.
 - [x] Reviewed all 24 CR 509 Declare Blockers Step records. Ordinary
   eligible-blocker derivation, menace, declaration state, lifetime, priority handoff,
   atomic rejection, multiplayer sequencing, and exact replay pass for the
-  represented boundary. Requirements, complete restrictions, block costs,
+  represented boundary. Fixed ordinary-mana intrinsic, attached-Aura, and global block taxes
+  now lock and pay atomically through represented mana abilities. Complete
+  requirements/restrictions, optional/nonmana/variable/modified block costs,
   declaration triggers, multi-attacker blocking, blocked-status effects, and
   entry-blocking remain dependency-blocked.
 
@@ -320,7 +325,7 @@ requirements. Goad supports independent designations from multiple players,
 duel and all-opponents cases, public projection, same-player redundancy,
 next-turn expiration, zone-change clearing, exact static prohibition, and
 replay. Planeswalkers, conditional and non-goad defender-specific
-requirements, banding, attack costs, generic declaration triggers,
+requirements, banding, optional/nonmana/variable/modified attack costs, generic declaration triggers,
 entry-attacking effects, eliminated-player duration boundaries, defending-
 player LKI, and target reselection remain blocked.
 
@@ -331,9 +336,12 @@ declaring defender. The complete declaration is transactional, blocking
 relationships persist until removal from combat or combat finalization, and
 menace declarations are constrained to zero or at least two blockers through
 generic projected form metadata plus authoritative revalidation. The command
-replays exactly. The engine does not claim the complete combined
-restriction/requirement constraint problem, block costs, declaration-trigger
-provenance, one blocker blocking several attackers, or entry-blocking effects.
+replays exactly. Fixed ordinary-mana intrinsic and global block taxes use the
+same typed grammar as Oracle IR, exclude paid choices from the free requirement
+maximum, and lock/pay atomically. The engine does not claim the complete
+combined restriction/requirement constraint problem, optional/nonmana/
+variable/modified block costs, declaration-trigger provenance, one blocker
+blocking several attackers, or entry-blocking effects.
 
 Manual combat-damage assignment is server-authoritative. The engine derives
 the current combat sources, permitted recipients, and required effective-power

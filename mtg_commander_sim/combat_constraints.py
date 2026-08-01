@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal, Mapping, Sequence
+from typing import Iterable, Literal, Mapping, Sequence
 
 
 RequirementKind = Literal[
@@ -112,11 +112,14 @@ class DeclarationProblem:
     Each variable may be omitted or select exactly one option from its domain.
     Restrictions are inviolable. Among declarations that obey them, a legal
     declaration must satisfy the greatest possible number of requirements.
+    Costed options do not contribute to the free maximum unless the submitted
+    declaration elects that exact option.
     """
 
     domains: Mapping[str, Sequence[str]]
     requirements: tuple[DeclarationRequirement, ...] = ()
     restrictions: tuple[DeclarationRestriction, ...] = ()
+    costed_options: frozenset[tuple[str, str]] = frozenset()
     max_search_states: int = 200_000
 
     def __post_init__(self) -> None:
@@ -130,6 +133,14 @@ class DeclarationProblem:
             self.restrictions
         ):
             raise ValueError("Declaration restriction ids must be unique")
+        for variable, option in self.costed_options:
+            if (
+                variable not in self.domains
+                or option not in self.domains[variable]
+            ):
+                raise ValueError(
+                    "Every costed declaration option must belong to its domain"
+                )
 
     def canonical_declaration(
         self,
@@ -174,12 +185,29 @@ class DeclarationProblem:
             if requirement.satisfied_by(declaration)
         )
 
-    def maximum_satisfied_requirements(self) -> int:
+    def maximum_satisfied_requirements(
+        self,
+        *,
+        enabled_costed_options: Iterable[tuple[str, str]] = (),
+    ) -> int:
         if not self.requirements:
             return 0
+        enabled = frozenset(
+            (str(variable), str(option))
+            for variable, option in enabled_costed_options
+        )
+        if not enabled.issubset(self.costed_options):
+            raise DeclarationConstraintError(
+                "Only represented declaration costs may be enabled"
+            )
         variables = sorted(self.domains)
         domains = {
-            variable: tuple(dict.fromkeys(self.domains[variable]))
+            variable: tuple(
+                option
+                for option in dict.fromkeys(self.domains[variable])
+                if (variable, option) not in self.costed_options
+                or (variable, option) in enabled
+            )
             for variable in variables
         }
         best = 0
@@ -223,6 +251,11 @@ class DeclarationProblem:
         canonical = self.canonical_declaration(declaration)
         satisfied = self.satisfied_requirement_ids(canonical)
         satisfied_set = set(satisfied)
+        enabled_costed_options = frozenset(
+            selection
+            for selection in canonical.items()
+            if selection in self.costed_options
+        )
         return DeclarationEvaluation(
             satisfied=satisfied,
             unmet=tuple(
@@ -230,7 +263,9 @@ class DeclarationProblem:
                 for item in self.requirements
                 if item.requirement_id not in satisfied_set
             ),
-            maximum=self.maximum_satisfied_requirements(),
+            maximum=self.maximum_satisfied_requirements(
+                enabled_costed_options=enabled_costed_options,
+            ),
             restriction_errors=self.restriction_errors(canonical),
         )
 
@@ -239,4 +274,8 @@ class DeclarationProblem:
             "requirements": [item.to_dict() for item in self.requirements],
             "restrictions": [item.to_dict() for item in self.restrictions],
             "maximum_requirements": self.maximum_satisfied_requirements(),
+            "costed_options": [
+                {"variable": variable, "option": option}
+                for variable, option in sorted(self.costed_options)
+            ],
         }

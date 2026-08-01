@@ -225,9 +225,12 @@ update cannot inherit stale conformance. Missing or duplicate cases fail
 corpus verification.
 
 The Oracle compiler preserves source spans and emits typed ability, cost,
-target, trigger, replacement, and effect nodes. Oracle IR v2 lowers simple
+target, trigger, replacement, and effect nodes. Oracle IR v4 lowers simple
 self enters/dies/leaves triggers, unconditional enters-tapped text, fixed
-self/target effects, and basic creature-token creation. Generated handlers
+self/target effects, basic creature-token creation, and reviewed whole-line
+fixed-mana attack/block declaration costs. The engine and compiler share that
+declaration-cost grammar, so a new matching card cannot compile differently
+from the rule path that enforces it. Generated handlers
 remain provisional, and reviewed trigger handlers shadow equivalent generated
 events. A material residual prevents trusted preflight. Card-specific
 overrides are a reviewed escape hatch for irreducible exceptions, not a
@@ -319,11 +322,20 @@ validation, transaction rollback, and exact replay path is used for attacking
 and blocking. A deterministic state bound fails closed instead of accepting an
 unproven declaration.
 
-This slice lowers only exact source-local attacks-each-combat,
-blocks-each-combat, must-be-blocked, lure, and menace text. Conditional,
-defender-specific, goad, effect-granted, optional-cost, multi-block, and
-repeated-combat grammar remains explicitly unsupported; the finite solver is a
-semantic substrate, not complete Oracle coverage.
+This slice lowers exact source-local attacks-each-combat, blocks-each-combat,
+must-be-blocked, lure, menace, and typed goad requirements. Costed declaration
+options are excluded from the free maximum unless the player elects them, as
+required by CR 508.1d and 509.1c. A shared whole-line grammar derives fixed
+ordinary-mana intrinsic, attached-Aura, defending-player attack, and global block taxes;
+multiple costs aggregate, lock at the rule-defined boundary, and use the same
+manual/automatic mana plan and transactional rollback path as other costs.
+Chosen creatures sacrificed in that mana window pay the locked cost but are
+filtered before CR 508.1k/509.1g creates attacking or blocking relationships.
+Complex or mutated members of the recognized family stop fail closed.
+Conditional requirement grammar, non-goad defender-specific requirements,
+effect-granted and repeated-combat requirements, optional/nonmana/variable/
+alternative/modified costs, and multi-block remain explicitly unsupported;
+the finite solver is a semantic substrate, not complete Oracle coverage.
 
 Legal-action telemetry records candidates generated, actions removed for
 missing targets or failed modal targets, rejected submissions, targets that

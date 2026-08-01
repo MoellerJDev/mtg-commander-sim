@@ -75,7 +75,7 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": ["DeclarationProblem", "CommanderEngine._block_declaration_problem", "CommanderEngine._validate_declaration_requirements"],
+      "implementation_components": ["DeclarationProblem", "CommanderEngine._block_declaration_components", "CommanderEngine._validate_declaration_requirements"],
       "executable_test_ids": [
         "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_conflicting_requirements_accept_any_maximal_declaration",
         "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_impossible_requirement_has_zero_maximum",
@@ -84,12 +84,13 @@
         "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_menace_can_make_a_block_requirement_impossible",
         "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_two_blockers_satisfy_menace_and_the_block_requirement",
         "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_blocker_each_combat_requirement_is_enforced",
-        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_lure_requirement_maximizes_every_able_blocker"
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_lure_requirement_maximizes_every_able_blocker",
+        "tests.test_combat_declaration_constraints.CombatDeclarationConstraintTests.test_costed_menace_blocks_must_be_elected_together"
       ],
       "required_scenarios": ["positive", "negative", "interaction", "multiplayer"],
       "covered_scenarios": ["positive", "negative", "interaction"],
       "blockers": ["complete_block_restriction_requirement_and_cost_grammar_not_implemented"],
-      "notes": ["The shared finite solver maximizes exact blocks-each-combat, must-be-blocked, and lure requirements together with menace, including impossible and conflicting cases. Conditional, effect-granted, multi-block, optional-cost, and repeated-combat grammar remains blocked."]
+      "notes": ["The shared finite solver maximizes exact blocks-each-combat, must-be-blocked, and lure requirements together with menace, including impossible, conflicting, and costed choices. A block cost is never compelled merely to satisfy more requirements. Conditional, effect-granted, multi-block, optional-cost, and repeated-combat grammar remains blocked."]
     },
     {
       "rule_id": "509.1d",
@@ -98,12 +99,18 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": [],
-      "executable_test_ids": [],
+      "implementation_components": ["parse_declaration_cost_line", "CommanderEngine._block_declaration_costs", "CommanderEngine._complete_blockers"],
+      "executable_test_ids": [
+        "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_attacking_archangel_taxes_each_declared_blocker",
+        "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_intrinsic_attack_or_block_cost_is_paid_to_block",
+        "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_fixed_attached_block_cost_is_paid_to_block",
+        "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_broader_conditional_block_cost_stops_fail_closed",
+        "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_oracle_ir_uses_the_runtime_declaration_cost_grammar"
+      ],
       "required_scenarios": ["positive", "negative", "interaction"],
-      "covered_scenarios": [],
-      "blockers": ["block_cost_grammar_and_locked_total_not_implemented"],
-      "notes": ["Generic mana, tap, sacrifice, discard, and other block-cost collection and locking are absent."]
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": ["nonmana_optional_variable_alternative_modified_and_broader_conditional_block_costs_not_implemented"],
+      "notes": ["Whole-line fixed ordinary-mana intrinsic, attached, and global block taxes are derived without card-name branches and locked before payment. Attachment identity scopes Aura costs to the enchanted blocker. Complex, conditional, or mutated members of the recognized family pause fail closed; optional, nonmana, variable, alternative, modified, and broader conditional costs remain blocked."]
     },
     {
       "rule_id": "509.1e",
@@ -112,12 +119,16 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": [],
-      "executable_test_ids": [],
+      "implementation_components": ["CommanderEngine._pay_for_cost", "CommanderEngine._complete_blockers"],
+      "executable_test_ids": [
+        "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_attacking_archangel_taxes_each_declared_blocker",
+        "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_intrinsic_attack_or_block_cost_is_paid_to_block",
+        "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_sacrificed_mana_source_does_not_become_a_blocker"
+      ],
       "required_scenarios": ["positive", "interaction"],
-      "covered_scenarios": [],
-      "blockers": ["block_cost_mana_ability_window_not_implemented"],
-      "notes": ["The CR 605 mana-ability payment window is not connected to blocker costs."]
+      "covered_scenarios": ["positive", "interaction"],
+      "blockers": ["complete_triggered_conditional_and_choice_dependent_mana_ability_grammar_not_implemented"],
+      "notes": ["Represented mana abilities can be selected manually or automatically after the block total is locked and before it is paid. A chosen source sacrificed for mana pays the locked cost but does not become blocking at CR 509.1g. Complete CR 605 output and restriction grammar remains blocked."]
     },
     {
       "rule_id": "509.1f",
@@ -126,12 +137,15 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": [],
-      "executable_test_ids": [],
+      "implementation_components": ["CommanderEngine.transaction", "CommanderEngine._pay_for_cost", "CommanderEngine._complete_blockers"],
+      "executable_test_ids": [
+        "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_attacking_archangel_taxes_each_declared_blocker",
+        "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_intrinsic_attack_or_block_cost_is_paid_to_block"
+      ],
       "required_scenarios": ["positive", "negative", "interaction"],
-      "covered_scenarios": [],
-      "blockers": ["ordered_atomic_block_cost_payment_not_implemented"],
-      "notes": ["There is no generic all-or-nothing payment transaction for blocker costs."]
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": ["nonmana_declaration_cost_ordering_not_implemented"],
+      "notes": ["Fixed ordinary-mana block costs aggregate into one locked total; manual mana activations retain submitted order, automatic payment is deterministic, and any failed payment rolls the entire declaration back. Ordering among nonmana costs remains blocked."]
     },
     {
       "rule_id": "509.1g",
@@ -143,12 +157,13 @@
       "implementation_components": ["CommanderEngine._complete_blockers", "CommanderEngine._finish_combat_phase"],
       "executable_test_ids": [
         "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_ordinary_block_becomes_blocking_then_grants_priority",
-        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_blocking_marker_clears_when_combat_phase_ends"
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_blocking_marker_clears_when_combat_phase_ends",
+        "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_sacrificed_mana_source_does_not_become_a_blocker"
       ],
       "required_scenarios": ["positive", "interaction"],
       "covered_scenarios": ["positive", "interaction"],
       "blockers": [],
-      "notes": ["A still-controlled chosen creature receives the authoritative blocking relationship and keeps it until removal from combat or combat-phase finalization."]
+      "notes": ["A chosen creature still controlled after declaration-cost payment receives the authoritative blocking relationship and keeps it until removal from combat or combat-phase finalization. A chosen creature sacrificed for mana never receives that relationship."]
     },
     {
       "rule_id": "509.1h",

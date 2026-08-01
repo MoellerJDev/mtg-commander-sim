@@ -106,14 +106,14 @@
     {
       "mechanic_id": "cr-508-declare-attackers-step",
       "path": "mechanics/contracts/declare-attackers-step.json",
-      "sha256": "7ad76e034b9d0216dfbe4435350af378bcfea2efbf3741af614e8f80570e825f",
-      "version": 4
+      "sha256": "6b72dc4807aa74625eefcb054d1e4e52543bf9281ecb5b457414bddf346cf706",
+      "version": 5
     },
     {
       "mechanic_id": "cr-509-declare-blockers-step",
       "path": "mechanics/contracts/declare-blockers-step.json",
-      "sha256": "b0b2be80999453ca60ed76a2cb389c2b3773135cdfbd0e93bbc45764846afda9",
-      "version": 3
+      "sha256": "a47b26d275c2f76944ca1de4b3ed8c4ccaa7e61ffc532667e0be661fc9ce13a2",
+      "version": 4
     },
     {
       "mechanic_id": "defender",
@@ -6734,18 +6734,18 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-attackers-step.json",
-      "contract_sha256": "7ad76e034b9d0216dfbe4435350af378bcfea2efbf3741af614e8f80570e825f",
-      "contract_version": 4,
+      "contract_sha256": "6b72dc4807aa74625eefcb054d1e4e52543bf9281ecb5b457414bddf346cf706",
+      "contract_version": 5,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "DeclarationProblem plus CommanderEngine attacker declaration and combat-step transition",
-      "implementation_version": "declare-attackers-step-v4",
+      "implementation_component": "DeclarationProblem, the shared declaration-cost Oracle grammar, and CommanderEngine attacker declaration/payment transition",
+      "implementation_version": "declare-attackers-step-v5",
       "kind": "rules_section",
       "known_blockers": [
         "planeswalker attack targets are not implemented",
         "exact attacks-each-combat and typed goad requirements are represented; conditional, non-goad defender-specific, and other effect-granted grammar remains incomplete",
         "banding declarations are not implemented",
-        "attack costs, cost locking, mana abilities, and ordered payment are not implemented",
+        "optional, nonmana, variable, alternative, modified, and broader conditional attack costs are not implemented",
         "declare-attackers trigger generation and APNAP placement are incomplete",
         "effects that put creatures onto the battlefield attacking are not implemented",
         "defending-player last-known information and attack-target reselection are not implemented"
@@ -6776,24 +6776,41 @@
         "test_single_goad_requires_another_player_when_available_and_replays",
         "test_goad_in_duel_still_requires_attacking_the_goader",
         "test_multiple_goaders_create_independent_maximized_requirements",
-        "test_goaded_by_every_opponent_accepts_any_maximal_attack"
+        "test_goaded_by_every_opponent_accepts_any_maximal_attack",
+        "test_costed_option_is_optional_for_requirement_maximization",
+        "test_elected_cost_does_not_hide_free_requirements",
+        "test_prison_tax_is_projected_paid_atomically_and_replays",
+        "test_goad_does_not_force_payment_in_duel",
+        "test_goad_still_requires_a_free_other_player",
+        "test_stacked_prisons_lock_one_aggregate_cost",
+        "test_manual_attack_payment_uses_only_the_selected_mana_source",
+        "test_attack_player_tax_does_not_apply_to_a_battle",
+        "test_untapped_source_condition_controls_attack_tax",
+        "test_nonvigilant_attacker_cannot_fund_its_own_attack_cost",
+        "test_vigilant_attacker_may_activate_mana_while_cost_is_paid",
+        "test_sacrificed_mana_source_does_not_become_an_attacker",
+        "test_complex_attack_tax_pauses_fail_closed",
+        "test_fixed_attached_attack_cost_uses_existing_attachment_identity",
+        "test_broader_conditional_attack_tax_stops_fail_closed",
+        "test_planeswalker_only_tax_does_not_tax_a_player_attack",
+        "test_oracle_ir_uses_the_runtime_declaration_cost_grammar"
       ],
       "trust_level": "untrusted"
     },
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-blockers-step.json",
-      "contract_sha256": "b0b2be80999453ca60ed76a2cb389c2b3773135cdfbd0e93bbc45764846afda9",
-      "contract_version": 3,
+      "contract_sha256": "a47b26d275c2f76944ca1de4b3ed8c4ccaa7e61ffc532667e0be661fc9ce13a2",
+      "contract_version": 4,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "DeclarationProblem plus CommanderEngine blocker declaration and combat-state transition",
-      "implementation_version": "declare-blockers-step-v3",
+      "implementation_component": "DeclarationProblem, the shared declaration-cost Oracle grammar, and CommanderEngine blocker declaration/payment transition",
+      "implementation_version": "declare-blockers-step-v4",
       "kind": "rules_section",
       "known_blockers": [
         "the complete restriction and evasion grammar is not implemented",
         "only exact blocks-each-combat, must-be-blocked, lure, and menace grammar is represented; conditional, effect-granted, multi-block, and optional-cost grammar remains incomplete",
-        "block costs, cost locking, mana abilities, and ordered payment are not implemented",
+        "optional, nonmana, variable, alternative, modified, and broader conditional block costs are not implemented",
         "declare-blockers trigger generation and APNAP placement are incomplete",
         "effects that cause blocks or put creatures onto the battlefield blocking are not implemented",
         "one creature blocking several attackers is not supported"
@@ -6823,7 +6840,14 @@
         "test_lure_requirement_maximizes_every_able_blocker",
         "test_conflicting_requirements_accept_any_maximal_declaration",
         "test_impossible_requirement_has_zero_maximum",
-        "test_search_limit_fails_closed"
+        "test_search_limit_fails_closed",
+        "test_costed_menace_blocks_must_be_elected_together",
+        "test_attacking_archangel_taxes_each_declared_blocker",
+        "test_intrinsic_attack_or_block_cost_is_paid_to_block",
+        "test_fixed_attached_block_cost_is_paid_to_block",
+        "test_broader_conditional_block_cost_stops_fail_closed",
+        "test_sacrificed_mana_source_does_not_become_a_blocker",
+        "test_oracle_ir_uses_the_runtime_declaration_cost_grammar"
       ],
       "trust_level": "untrusted"
     },

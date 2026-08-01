@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 3,
+  "contract_version": 4,
   "mechanic_id": "cr-509-declare-blockers-step",
   "official_name": "Declare Blockers Step",
   "effective_date": "2026-06-19",
@@ -72,7 +72,9 @@
       "priority player"
     ],
     "costs": [
-      "generic blocker costs and their mana-ability window remain blocked"
+      "whole-line fixed ordinary-mana intrinsic, attached, and global block taxes are locked and paid atomically",
+      "represented manual or automatic mana plans use the ordinary mana-ability payment path",
+      "optional, nonmana, variable, alternative, modified, and broader conditional block costs remain blocked"
     ],
     "timing": [
       "ordinary declaration is a turn-based action",
@@ -117,7 +119,13 @@
     "flying, reach, shadow, protection, menace, and cannot-block restrictions",
     "multiplayer sequential defenders",
     "illegal declaration rollback",
-    "blocked attacker whose blockers leave"
+    "blocked attacker whose blockers leave",
+    "fixed-mana intrinsic and attacking-source block taxes",
+    "fixed-mana costs from attached Auras",
+    "a chosen blocker sacrificed for mana before CR 509.1g",
+    "broader recognized block-cost grammar stopping fail closed",
+    "costed menace declarations",
+    "manual or automatic declaration-cost payment"
   ],
   "witness_cards": [],
   "rulings": [],
@@ -141,16 +149,23 @@
     "test_lure_requirement_maximizes_every_able_blocker",
     "test_conflicting_requirements_accept_any_maximal_declaration",
     "test_impossible_requirement_has_zero_maximum",
-    "test_search_limit_fails_closed"
+    "test_search_limit_fails_closed",
+    "test_costed_menace_blocks_must_be_elected_together",
+    "test_attacking_archangel_taxes_each_declared_blocker",
+    "test_intrinsic_attack_or_block_cost_is_paid_to_block",
+    "test_fixed_attached_block_cost_is_paid_to_block",
+    "test_broader_conditional_block_cost_stops_fail_closed",
+    "test_sacrificed_mana_source_does_not_become_a_blocker",
+    "test_oracle_ir_uses_the_runtime_declaration_cost_grammar"
   ],
   "implementation": {
-    "component": "DeclarationProblem plus CommanderEngine blocker declaration and combat-state transition",
-    "version": "declare-blockers-step-v3"
+    "component": "DeclarationProblem, the shared declaration-cost Oracle grammar, and CommanderEngine blocker declaration/payment transition",
+    "version": "declare-blockers-step-v4"
   },
   "known_blockers": [
     "the complete restriction and evasion grammar is not implemented",
     "only exact blocks-each-combat, must-be-blocked, lure, and menace grammar is represented; conditional, effect-granted, multi-block, and optional-cost grammar remains incomplete",
-    "block costs, cost locking, mana abilities, and ordered payment are not implemented",
+    "optional, nonmana, variable, alternative, modified, and broader conditional block costs are not implemented",
     "declare-blockers trigger generation and APNAP placement are incomplete",
     "effects that cause blocks or put creatures onto the battlefield blocking are not implemented",
     "one creature blocking several attackers is not supported"
