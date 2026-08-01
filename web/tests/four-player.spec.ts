@@ -122,6 +122,35 @@ Mainboard:
 32 Forest
 `;
 
+const browserCombatDeck = `Commander:
+1 Zimone and Dina
+
+Mainboard:
+33 Island
+33 Swamp
+33 Forest
+`;
+
+const browserCombatDefenderDeck = `Commander:
+1 Mishra, Eminent One
+
+Mainboard:
+33 Island
+33 Swamp
+33 Mountain
+`;
+
+// This intentionally duplicated vanilla-commander list is a deterministic
+// lifecycle witness. It proves natural browser completion, never matchup
+// strength or broader Oracle coverage.
+const browserNaturalWinnerDeck = `Commander:
+1 Yargle and Multani
+
+Mainboard:
+50 Swamp
+49 Forest
+`;
+
 test("four shared-cookie browser tabs retain isolated seats through mulligans and reconnect", async ({ browser }) => {
   const contexts: BrowserContext[] = [];
   const pages: Page[] = [];
@@ -393,6 +422,22 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
     await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeDrop);
     await expect(host.getByTestId("own-battlefield")).toContainText("Swamp");
     await expect(host.getByTestId("own-hand").locator(".hand-card")).toHaveCount(6);
+
+    await host.getByTestId("action-concede").click();
+    await expect(host.getByTestId("choice-dialog")).toContainText("Concede game");
+    await expect(host.getByTestId("choice-confirm_concede")).toHaveValue("true");
+    await host.getByTestId("cancel-choice").click();
+    await expect(host.getByTestId("choice-dialog")).toHaveCount(0);
+    await expect(host.getByTestId("game-status")).toHaveText("ACTIVE");
+
+    await host.getByTestId("action-concede").click();
+    await submitOpenChoice(host);
+    for (const page of [host, opponent]) {
+      await expect(page.getByTestId("game-status")).toHaveText("COMPLETE");
+      await expect(page.getByTestId("game-over-banner")).toContainText("Seat B wins");
+      await expect(page.getByTestId("complete-decision")).toContainText("Seat B won");
+      await expect(page.locator('[data-testid^="action-"]')).toHaveCount(0);
+    }
   } finally {
     await context.close();
   }
@@ -507,6 +552,199 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
     await expect(host.getByTestId("own-battlefield")).toContainText("Army");
     await expect(host.getByTestId("game-status")).toHaveText("ACTIVE");
     await expect(host.getByTestId("paused-banner")).toHaveCount(0);
+  } finally {
+    await Promise.all([hostContext.close(), opponentContext.close()]);
+  }
+});
+
+test("a duel declares an attacker in the browser and applies commander combat damage", async ({ browser }) => {
+  const hostContext = await browser.newContext();
+  const opponentContext = await browser.newContext();
+  const host = await hostContext.newPage();
+  const opponent = await opponentContext.newPage();
+  try {
+    await host.route(/\/api\/v1\/rooms$/, async (route) => {
+      const request = route.request();
+      const payload = request.postDataJSON() as Record<string, unknown>;
+      await route.continue({
+        postData: JSON.stringify({ ...payload, seed: 1 }),
+        headers: { ...request.headers(), "content-type": "application/json" },
+      });
+    });
+    await enter(host, "Combat host");
+    await enter(opponent, "Combat defender");
+    await host.getByTestId("room-size").selectOption("2");
+    await host.getByTestId("create-room").click();
+    const invite = await host.getByTestId("room-invite").textContent();
+    expect(invite).toBeTruthy();
+    await opponent.getByTestId("invite-code").fill(invite!);
+    await opponent.getByTestId("seat-select").selectOption("B");
+    await opponent.getByTestId("join-room").click();
+    await submitNamedDeck(host, "Combat attacker", "Zimone and Dina", browserCombatDeck);
+    await submitNamedDeck(opponent, "Combat defender", "Mishra, Eminent One", browserCombatDefenderDeck);
+    await host.getByTestId("start-game").click();
+    await submitImmediateAction(host, "keep");
+    await submitImmediateAction(opponent, "keep");
+
+    async function playLand(page: Page, name?: string) {
+      const cards = page.getByTestId("own-hand").locator(".hand-card");
+      const land = name
+        ? cards.filter({ has: page.locator(".card-copy strong", { hasText: new RegExp(`^${name}$`) }) }).first()
+        : cards.first();
+      await expect(land).toHaveAttribute("draggable", "true");
+      const revision = await viewRevision(page);
+      await land.dragTo(page.getByTestId("own-battlefield"));
+      await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
+    }
+
+    async function finishTurn(page: Page) {
+      await submitFormAction(page, "pass");
+      await submitFormAction(page, "pass");
+    }
+
+    await playLand(host, "Forest");
+    await finishTurn(host);
+    await playLand(opponent);
+    await finishTurn(opponent);
+    await playLand(host, "Swamp");
+    await finishTurn(host);
+    await playLand(opponent);
+    await finishTurn(opponent);
+    await playLand(host, "Island");
+
+    const commander = host
+      .getByTestId("player-A")
+      .locator(".command-zone .card-tile")
+      .filter({ has: host.locator(".card-copy strong", { hasText: "Zimone and Dina" }) });
+    await expect(commander).toHaveAttribute("draggable", "true");
+    await commander.dragTo(host.getByTestId("own-battlefield"));
+    await expect(host.getByTestId("choice-dialog")).toContainText("Cast Zimone and Dina");
+    await submitOpenChoice(host);
+    await expect(host.getByTestId("own-battlefield")).toContainText("Zimone and Dina");
+    await finishTurn(host);
+
+    await playLand(opponent);
+    await finishTurn(opponent);
+    await playLand(host);
+    await submitFormAction(host, "pass");
+
+    await expect(host.getByTestId("decision-panel")).toContainText("Combat.Attackers");
+    await host.getByTestId("action-attack").click();
+    const attackerChoice = host.locator('[data-testid^="choice-attackers-"]').first();
+    await expect(attackerChoice).toBeVisible();
+    await attackerChoice.selectOption("B");
+    await submitOpenChoice(host);
+    await expect(opponent.getByTestId("decision-panel")).toContainText("Combat.Blockers");
+    await submitFormAction(opponent, "block");
+
+    await expect(host.getByTestId("player-B").getByLabel("37 life")).toBeVisible();
+    await expect(opponent.getByTestId("player-B").getByLabel("37 life")).toBeVisible();
+    await host.getByTestId("open-public-log").click();
+    await expect(host.getByTestId("public-game-log")).toContainText("attacked with 1 creature");
+    await expect(host.getByTestId("public-game-log")).toContainText("Combat damage was dealt");
+  } finally {
+    await Promise.all([hostContext.close(), opponentContext.close()]);
+  }
+});
+
+test("a trusted browser duel reaches a natural commander-damage winner", async ({ browser }) => {
+  test.setTimeout(150_000);
+  const hostContext = await browser.newContext();
+  const opponentContext = await browser.newContext();
+  const host = await hostContext.newPage();
+  const opponent = await opponentContext.newPage();
+  try {
+    await host.route(/\/api\/v1\/rooms$/, async (route) => {
+      const request = route.request();
+      const payload = request.postDataJSON() as Record<string, unknown>;
+      await route.continue({
+        postData: JSON.stringify({ ...payload, seed: 1 }),
+        headers: { ...request.headers(), "content-type": "application/json" },
+      });
+    });
+    await enter(host, "Natural winner host");
+    await enter(opponent, "Natural winner defender");
+    await host.getByTestId("room-size").selectOption("2");
+    await host.getByTestId("create-room").click();
+    const invite = await host.getByTestId("room-invite").textContent();
+    expect(invite).toBeTruthy();
+    await opponent.getByTestId("invite-code").fill(invite!);
+    await opponent.getByTestId("seat-select").selectOption("B");
+    await opponent.getByTestId("join-room").click();
+    await submitNamedDeck(host, "Natural winner A", "Yargle and Multani", browserNaturalWinnerDeck);
+    await submitNamedDeck(opponent, "Natural winner B", "Yargle and Multani", browserNaturalWinnerDeck);
+    await host.getByTestId("start-game").click();
+    await submitImmediateAction(host, "keep");
+    await submitImmediateAction(opponent, "keep");
+
+    async function playLand(page: Page, name?: "Swamp" | "Forest") {
+      const cards = page.getByTestId("own-hand").locator(".hand-card");
+      const land = name
+        ? cards.filter({ has: page.locator(".card-copy strong", { hasText: new RegExp(`^${name}$`) }) }).first()
+        : cards.first();
+      await expect(land).toHaveAttribute("draggable", "true");
+      const revision = await viewRevision(page);
+      await land.dragTo(page.getByTestId("own-battlefield"));
+      await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
+    }
+
+    async function finishTurn(page: Page) {
+      await submitFormAction(page, "pass");
+      await submitFormAction(page, "pass");
+    }
+
+    const requiredMana: Array<"Swamp" | "Forest"> = [
+      "Swamp", "Swamp", "Forest", "Forest", "Swamp", "Forest",
+    ];
+    for (let turn = 0; turn < requiredMana.length; turn += 1) {
+      await playLand(host, requiredMana[turn]);
+      if (turn === requiredMana.length - 1) {
+        const commander = host
+          .getByTestId("player-A")
+          .locator(".command-zone .card-tile")
+          .filter({ has: host.locator(".card-copy strong", { hasText: "Yargle and Multani" }) });
+        await expect(commander).toHaveAttribute("draggable", "true");
+        await commander.dragTo(host.getByTestId("own-battlefield"));
+        await expect(host.getByTestId("choice-dialog")).toContainText("Cast Yargle and Multani");
+        await submitOpenChoice(host);
+        await expect(host.getByTestId("own-battlefield")).toContainText("Yargle and Multani");
+      }
+      await finishTurn(host);
+      await playLand(opponent);
+      await finishTurn(opponent);
+    }
+
+    async function attackWithCommander() {
+      await submitFormAction(host, "pass");
+      await expect(host.getByTestId("decision-panel")).toContainText("Combat.Attackers");
+      await host.getByTestId("action-attack").click();
+      const attackerChoice = host.locator('[data-testid^="choice-attackers-"]').first();
+      await expect(attackerChoice).toBeVisible();
+      await attackerChoice.selectOption("B");
+      await submitOpenChoice(host);
+      await expect(opponent.getByTestId("decision-panel")).toContainText("Combat.Blockers");
+      await submitFormAction(opponent, "block");
+    }
+
+    await attackWithCommander();
+    for (const page of [host, opponent]) {
+      await expect(page.getByTestId("player-B").getByLabel("22 life")).toBeVisible();
+      await expect(page.getByTestId("commander-damage-B")).toContainText("18 from Yargle and Multani");
+    }
+    await submitFormAction(host, "pass");
+    await playLand(opponent);
+    await finishTurn(opponent);
+
+    await attackWithCommander();
+    for (const page of [host, opponent]) {
+      await expect(page.getByTestId("game-status")).toHaveText("COMPLETE");
+      await expect(page.getByTestId("game-over-banner")).toContainText("Seat A wins");
+      await expect(page.getByTestId("complete-decision")).toContainText("Seat A won");
+      await expect(page.locator('[data-testid^="action-"]')).toHaveCount(0);
+    }
+    await host.getByTestId("open-public-log").click();
+    await expect(host.getByTestId("public-game-log")).toContainText("B left the game: state-based loss");
+    await expect(host.getByTestId("public-game-log")).toContainText("A won the game");
   } finally {
     await Promise.all([hostContext.close(), opponentContext.close()]);
   }

@@ -49,6 +49,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#32](https://github.com/MoellerJDev/mtg-commander-sim/pull/32) | `agent/reconcile-browser-handoff` | `main` | `merged` |
 | [#33](https://github.com/MoellerJDev/mtg-commander-sim/pull/33) | `agent/spectator-public-log` | `main` | `merged` |
 | [#34](https://github.com/MoellerJDev/mtg-commander-sim/pull/34) | `agent/browser-rules-boundary` | `main` | `merged` |
+| [#35](https://github.com/MoellerJDev/mtg-commander-sim/pull/35) | `agent/browser-trigger-stabilization` | `main` | `merged` |
 
 ## Pinned snapshots and coverage
 
@@ -68,8 +69,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 | Milestone | Status | Evidence |
 |---|---|---|
-| Integrated deterministic foundation | `complete` | Integration PRs #1-17 and #24-34 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
-| Browser Commander MVP | `development_local_runtime_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and two/four-player Chromium coverage, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, Chromium-verified card-scoped click/drag actions, optional manual mana activation, explicit active-player main-phase advancement, terminal stale-game recovery, exact command retry, invited read-only spectators, a durable complete public-log dialog, fail-closed handling for legacy arbiter-only records, and one-command managed Scryfall/browser startup. Compact trusted-only coverage now includes modal land faces and a deterministic two-browser journey through an immediate targeted Sunscorched Desert ETB, a stack response, rules-created Treasure payment, Orcish Bowmasters resolution, and Amass. The inspected full-database failure was a pinned pre-fix record; a fresh post-restart full-database journey through the remaining lifecycle paths is still required as current browser evidence. Future schemas, full accounts, expiry/rate limits, and production deployment remain open. |
+| Integrated deterministic foundation | `complete` | Integration PRs #1-17 and #24-35 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
+| Browser Commander MVP | `development_local_runtime_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and seven two/four-player Chromium journeys, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, Chromium-verified card-scoped click/drag actions, optional manual mana activation, explicit active-player main-phase advancement, confirmed concession, public commander-damage tracking, terminal winner/draw rendering, exact command retry, invited read-only spectators, a durable complete public-log dialog, fail-closed handling for legacy arbiter-only records, and one-command managed Scryfall/browser startup. Compact trusted-only coverage includes modal land faces, targeted Sunscorched Desert ETB damage, a stack response, rules-created Treasure payment, Orcish Bowmasters/Amass, explicit attack and block declarations, combat damage, and a natural commander-damage winner. The 49-command natural-winner record replayed to its exact state hash with zero suppressed meaningful windows and a clean seat-projection audit; completed games also survive process restart. The inspected full-database failure remains a pinned pre-fix record, and a fresh post-restart full-database manual journey is still required as broader current-snapshot evidence. Future schemas, full accounts, expiry/rate limits, and production deployment remain open. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408 and CR 500-512 slices are on main. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -79,8 +80,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 - `transport_neutral_service`: `implemented_strict_protocol_3`
 - `single_writer_game_actor`: `implemented_single_process`
 - `durable_database`: `implemented_sqlite_control_plane_plus_game_record_v3`
-- `http_websocket_server`: `implemented_single_process_managed_data_static_browser_restart_lifecycle_spectator_public_log_and_rules_boundary_recovery`
-- `browser_client`: `implemented_card_inspector_public_zone_browser_card_scoped_click_drag_manual_mana_explicit_main_phase_current_choice_forms_local_art_terminal_stale_game_recovery_exact_retry_spectator_public_log_and_rules_boundary_pause`
+- `http_websocket_server`: `implemented_single_process_managed_data_static_browser_restart_terminal_lifecycle_spectator_public_log_and_rules_boundary_recovery`
+- `browser_client`: `implemented_card_inspector_public_zone_browser_card_scoped_click_drag_manual_mana_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause`
 - `guest_or_account_identity`: `implemented_expiring_per_tab_guest_sessions`
 - `rooms_and_lobbies`: `implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch`
 - `replay`: `implemented_command_replay`
@@ -90,31 +91,31 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 3991
+- Tests discovered: 3997
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30679272776](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30679272776) — `pass`
+- Baseline CI: [30681492014](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30681492014) — `pass`
 - Compile: `pass`
 - Deterministic tests: `pass_full_exact_commit_gate`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
 - Four-player protocol demo: `pass`
 - Repository/history/security audit: `pass`
 - Wheel build and clean install: `pass`
-- Replay: `pass_for_seed_20260730_and_native_v3_regressions`
-- Privacy: `pass_for_principal_projection_command_objects_and_sanitized_fixtures`
+- Replay: `pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner`
+- Privacy: `pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner`
 - Semantic preflight: `trusted_only_for_two_pinned_exact_lists`
 
 AI/Codex pilot runs are optional client experiments. They are not product, rules, CI, merge, or release gates.
 
 ## Current blockers
 
-- a fresh full-database browser journey created after a clean current-server restart is still required; compact two-browser evidence now covers target and response handling, but not the remaining full-database combat and lifecycle paths
+- a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence
 - future engine choice schemas and complete screen-reader audits remain incomplete
 - production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete
 - full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete
 
 ## Exact next task
 
-Run a fresh post-restart full-database browser journey that reconfirms targeted ETBs and stack response, then continues through combat, concession, natural completion, and process restart; fix only failures reproduced in that current record without weakening replay or hidden-information gates.
+Run a fresh post-restart full-database manual/browser journey that reconfirms the compact target, response, combat, concession, natural-completion, replay, and restart paths against the active full snapshot; fix only failures reproduced in that current record without weakening replay or hidden-information gates.
 
 ## Regeneration
 

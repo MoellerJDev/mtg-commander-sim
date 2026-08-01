@@ -4210,6 +4210,10 @@ class CommanderEngine:
         elif action == "activate":
             self._activate(seat, response)
         elif action == "concede":
+            if response.get("confirm_concede") is not True:
+                raise GameRuleError(
+                    "Concession requires explicit confirmation"
+                )
             self._eliminate_players([seat], reason="conceded")
         else:
             raise GameRuleError(f"Unsupported priority action {action}")
@@ -4288,7 +4292,9 @@ class CommanderEngine:
             if item not in hints.get("abilities", [])
         }
         for action in hints.get("actions", []):
-            if action.get("id") == "pass" or action.get("id") in ordinary_mana_ids:
+            if action.get("id") in {"pass", "concede"} or action.get(
+                "id"
+            ) in ordinary_mana_ids:
                 continue
             meaningful_actions.append(copy.deepcopy(action))
         payload: dict[str, Any] = {
@@ -4468,7 +4474,7 @@ class CommanderEngine:
         meaningful_ids = [
             action["id"]
             for action in hints.get("actions", [])
-            if action.get("id") != "pass"
+            if action.get("id") not in {"pass", "concede"}
             and action.get("kind") != "mana"
             and (
                 action.get("kind") != "activate"
@@ -9476,6 +9482,26 @@ class CommanderEngine:
                     ability_target_schemas[action_id]
                 )
             actions.append(action)
+        actions.append(
+            {
+                "id": "concede",
+                "action": "concede",
+                "kind": "concede",
+                "label": "Concede game",
+                "choice_schema": {
+                    "confirm_concede": {
+                        "type": "boolean",
+                        "label": (
+                            "Concede and leave the remaining players in "
+                            "the game"
+                        ),
+                        "legal_values": [True],
+                        "default": True,
+                        "required": True,
+                    }
+                },
+            }
+        )
         return {
             "cast": castable,
             "lands": lands,

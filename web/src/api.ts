@@ -138,6 +138,7 @@ export interface GameLifecycle {
   pending_principals: string[];
   game_over: boolean;
   winner: string | null;
+  draw: boolean;
   pause_reason: { kind?: string; label?: string } | null;
   commands: number;
   decisions: number;

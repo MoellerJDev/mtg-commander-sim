@@ -104,6 +104,8 @@ def build_steps(
                 "build",
                 "--fixture",
                 "tests/fixtures/scryfall-exact-lists.json",
+                "--fixture",
+                "tests/fixtures/browser-lifecycle-cards.json",
                 "--output",
                 str(database),
             ),

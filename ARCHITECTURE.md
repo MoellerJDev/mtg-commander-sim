@@ -574,6 +574,15 @@ cast. Auto-mana remains the default. Modal double-faced land plays carry a
 fixed selected face into land-entry derivation and projection, so the client
 cannot substitute the spell face or invent a life payment.
 
+Concession is an ordinary server-issued priority action, not a client-side
+state edit. Its choice form admits only the literal `true` confirmation and the
+engine repeats that check inside the command transaction. Because concession
+is always available but is not a strategic rules opportunity, it is excluded
+from meaningful-action/yield signatures. Public player summaries expose
+commander damage by source commander; terminal lifecycle projections expose
+only the authoritative winner/draw result and contain no reusable player
+decision capability.
+
 The table layout is responsive rather than fixed to a particular viewport.
 Choice dialogs contain keyboard focus and restore it to the triggering action;
 connection loss disables actions and exposes a manual reconnect control. If an

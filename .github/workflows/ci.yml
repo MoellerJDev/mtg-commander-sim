@@ -32,6 +32,7 @@ jobs:
         run: >-
           python scripts/build_test_database.py build
           --fixture tests/fixtures/scryfall-exact-lists.json
+          --fixture tests/fixtures/browser-lifecycle-cards.json
           --output data/test-ci.sqlite3
       - name: Compile
         run: python -m compileall -q mtg_commander_sim tests scripts simctl.py
@@ -73,6 +74,7 @@ jobs:
         run: >-
           python scripts/build_test_database.py build
           --fixture tests/fixtures/scryfall-exact-lists.json
+          --fixture tests/fixtures/browser-lifecycle-cards.json
           --output data/test-ci.sqlite3
       - name: Verify generated protocol types
         run: |

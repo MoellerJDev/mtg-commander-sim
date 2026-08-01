@@ -39,6 +39,22 @@
 - Browser games now require the active player to explicitly leave precombat
   and postcombat main. The same pass action is labeled **Continue to combat**
   or **End turn**; empty nonactive response windows remain safely automatic.
+- Added browser combat and lifecycle completion: server-issued attack/block
+  forms apply combat damage, every public board displays commander damage by
+  source, and authoritative winners or draws replace the decision tray with a
+  terminal result.
+- Added a confirmed **Concede game** action. The browser requires the exact
+  server-issued true-only confirmation, the engine revalidates it
+  transactionally, concession remains outside meaningful-action telemetry,
+  and completed results survive restart and exact replay.
+- Added an offline vanilla-commander lifecycle fixture and a deterministic
+  two-browser natural-winner journey. Its 49 accepted commands replay to the
+  exact final hash, the hidden-information audit passes, and suppressed
+  meaningful windows remain zero. The duplicated list is lifecycle evidence,
+  never matchup evidence.
+- Isolated Playwright's disposable API and Vite servers from the documented
+  manual development ports so open local game tabs cannot reconnect to a test
+  runtime.
 - Added reviewed Sunscorched Desert and Orcish Bowmasters semantics, including
   targeted ETB damage, permanent-spell resolution, opponent extra-draw
   triggers, and generic Amass Orcs execution. Unsupported trusted-only

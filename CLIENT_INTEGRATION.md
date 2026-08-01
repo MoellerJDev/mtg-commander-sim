@@ -54,6 +54,8 @@ not pilot actions: they never accept a seat or principal in the body and never
 mint an engine capability. The WebSocket carries the same lifecycle projection
 beside each ordinary seat packet. Clients must disable action submission while
 status is not `active`; the service independently enforces that rule.
+Terminal lifecycle metadata includes `winner` and `draw`; a complete game has
+no player decision or reusable capability after reconnect or process restart.
 
 Example command body:
 
@@ -135,11 +137,17 @@ The server packet contains the capability's allowed action categories and contex
 Examples:
 
 - `mulligan.declare` → Keep / Mulligan
-- `priority` → pass, land, cast, activate
+- `priority` → pass, land, cast, activate, or confirmed concede
 - `combat.attackers` → attacker-to-defender mapping
 - `combat.blockers` → blocker-to-attacker mapping for that defender
 - `state.legend` → choose one object to keep
 - `arbiter.resolve` → rules effect form; never shown to ordinary pilots
+
+Concession uses the ordinary current priority capability. Its generated form
+requires `{"confirm_concede": true}`; omission or false is rejected without a
+state change. It is deliberately excluded from meaningful-action/yield
+telemetry so merely being allowed to concede does not force a pilot prompt in
+an otherwise empty response window.
 
 ## Persistence model
 

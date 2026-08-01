@@ -53,6 +53,31 @@ class PermissionProjectionTests(unittest.TestCase):
             serialized = json.dumps(packet)
             self.assertTrue(all(name not in serialized for name in unique))
 
+    def test_commander_damage_is_public_and_names_its_source(self):
+        session = make_session(self.db, self.mishra, self.zimone, seed=231)
+        commander = next(
+            card
+            for card in session.state.cards.values()
+            if card.owner == "A" and card.is_commander
+        )
+        session.state.players["B"].commander_damage_received[
+            commander.oracle_id
+        ] = 18
+
+        for principal in ("pilot:A", "pilot:B", "spectator"):
+            packet = session.packet(principal, full=True)
+            damage = packet["state"]["players"]["B"]["cmd_dmg"]
+            self.assertEqual(
+                [
+                    {
+                        "cid": commander.oracle_id[:8],
+                        "n": commander.printed_name,
+                        "amount": 18,
+                    }
+                ],
+                damage,
+            )
+
     def test_public_spell_on_stack_includes_visible_card_definition(self):
         from mtg_commander_sim.model import StackItem
 

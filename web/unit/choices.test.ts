@@ -197,6 +197,26 @@ test("mana modes preserve an exact server-issued bundle", () => {
   assert.match(validateChoices(mana, choices)[0], /legal mana choice/);
 });
 
+test("destructive boolean choices require the exact server-issued confirmation", () => {
+  const concede = form([
+    {
+      name: "confirm_concede",
+      label: "Concede game",
+      control: "boolean",
+      required: true,
+      legal_values: [true],
+      default: true,
+    },
+  ]);
+  const choices = initialChoices(concede);
+  assert.deepEqual(choices, { confirm_concede: true });
+  assert.deepEqual(validateChoices(concede, choices), []);
+  choices.confirm_concede = false;
+  assert.match(validateChoices(concede, choices)[0], /explicit confirmation/);
+  choices.confirm_concede = "true";
+  assert.match(validateChoices(concede, choices)[0], /explicit confirmation/);
+});
+
 test("copy targets preserve defaults and validate each copy", () => {
   const copies = form([
     {

@@ -372,25 +372,28 @@ class ServerApplicationTests(unittest.TestCase):
         self.assertEqual(200, response.status_code, response.text)
         self.assertEqual(game_id, response.json()["packet"]["state"]["game"]["id"])
 
-    def create_ready_game(self) -> tuple[str, list[str], str]:
-        tokens = [self.guest(f"Player {seat}")[0] for seat in "ABCD"]
+    def create_ready_game(
+        self, player_count: int = 4
+    ) -> tuple[str, list[str], str]:
+        seats = "ABCD"[:player_count]
+        tokens = [self.guest(f"Player {seat}")[0] for seat in seats]
         response = self.client.post(
             "/api/v1/rooms",
             headers=self.auth(tokens[0]),
-            json={"seed": 20260730},
+            json={"seed": 20260730, "player_count": player_count},
         )
         self.assertEqual(201, response.status_code, response.text)
         room_id = response.json()["room"]["room_id"]
         invite = response.json()["invite_code"]
         self.last_ready_invite = invite
-        for index, seat in enumerate("BCD", 1):
+        for index, seat in enumerate(seats[1:], 1):
             response = self.client.post(
                 "/api/v1/rooms/join",
                 headers=self.auth(tokens[index]),
                 json={"invite_code": invite, "seat": seat},
             )
             self.assertEqual(200, response.status_code, response.text)
-        for index, seat in enumerate("ABCD"):
+        for index, seat in enumerate(seats):
             zimone = seat in "AC"
             path = ROOT / "examples" / (
                 "zimone-and-dina.txt"
@@ -1038,6 +1041,77 @@ class ServerApplicationTests(unittest.TestCase):
             )
         finally:
             database.close()
+        self.assertTrue(replay["ok"])
+
+    def test_completed_concession_survives_restart_and_exact_replay(self):
+        game_id, tokens, _ = self.create_ready_game(player_count=2)
+        for index in range(2):
+            projected = self.client.get(
+                f"/api/v1/games/{game_id}/state?full=true",
+                headers=self.auth(tokens[index]),
+            )
+            self.assertEqual(200, projected.status_code, projected.text)
+            packet = projected.json()["packet"]
+            accepted = self.client.post(
+                f"/api/v1/games/{game_id}/commands",
+                headers=self.auth(tokens[index]),
+                json={
+                    "protocol_version": "3.0",
+                    "game_id": game_id,
+                    "command_id": f"terminal-keep-{index}",
+                    "decision_id": packet["decision"]["id"],
+                    "action_id": "keep",
+                    "capability": packet["decision"]["cap"],
+                    "expected_view_revision": packet["view_revision"],
+                    "choices": {},
+                },
+            )
+            self.assertEqual(200, accepted.status_code, accepted.text)
+            self.assertTrue(accepted.json()["receipt"]["ok"])
+
+        active = self.client.get(
+            f"/api/v1/games/{game_id}/state?full=true",
+            headers=self.auth(tokens[0]),
+        )
+        packet = active.json()["packet"]
+        concession = self.client.post(
+            f"/api/v1/games/{game_id}/commands",
+            headers=self.auth(tokens[0]),
+            json={
+                "protocol_version": "3.0",
+                "game_id": game_id,
+                "command_id": "terminal-concede-A",
+                "decision_id": packet["decision"]["id"],
+                "action_id": "concede",
+                "capability": packet["decision"]["cap"],
+                "expected_view_revision": packet["view_revision"],
+                "choices": {"confirm_concede": True},
+            },
+        )
+        self.assertEqual(200, concession.status_code, concession.text)
+        self.assertTrue(concession.json()["receipt"]["ok"])
+
+        self.restart_client()
+
+        recovered = self.client.get(
+            f"/api/v1/games/{game_id}/state?full=true",
+            headers=self.auth(tokens[1]),
+        )
+        self.assertEqual(200, recovered.status_code, recovered.text)
+        payload = recovered.json()
+        self.assertEqual("complete", payload["game"]["status"])
+        self.assertTrue(payload["game"]["game_over"])
+        self.assertEqual("B", payload["game"]["winner"])
+        self.assertFalse(payload["game"]["draw"])
+        self.assertIsNone(payload["packet"]["decision"])
+        self.assertEqual(0, payload["packet"]["state"]["players"]["A"]["in"])
+
+        with CardDatabase(DB_PATH) as database:
+            replay = replay_record(
+                self.settings.game_root / game_id,
+                database,
+                verify=True,
+            )
         self.assertTrue(replay["ok"])
 
     def test_owner_stop_resume_inspection_and_restart_are_durable(self):

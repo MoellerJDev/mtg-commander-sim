@@ -109,6 +109,15 @@ the pass control is labeled **Continue to combat** during precombat main and
 nonactive response window only after its legal-action generator verifies that
 the seat has no meaningful response.
 
+Attack and block forms use only the server's current legal assignment maps.
+Combat damage updates life and separately projects commander damage by source
+commander on every public board. During a current player priority decision,
+**Concede game** opens a true-only confirmation form; cancelling leaves the
+record unchanged. A completed game shows the authoritative winner or draw,
+removes all action controls, persists that lifecycle state, and restores the
+same terminal result after a server restart. Concession outside a current
+projected player decision is not yet exposed as an out-of-band command.
+
 Casting defaults to **Auto-mana**, which asks the authoritative engine to use a
 valid routine payment. Select **Manual mana** to highlight untapped permanents
 with currently legal mana abilities. Click those sources in the desired
@@ -312,9 +321,11 @@ npx playwright install chromium
 npm run e2e
 ```
 
-The end-to-end suite includes four tabs sharing one Chromium cookie jar,
-creates four isolated tab-bound guest sessions, atomically fills seats A–D, uploads the two
-duplicated exact-list fixtures, and starts a game. One scenario submits all four
+The seven-scenario end-to-end suite uses dedicated ports `15173` and `18080`,
+so it cannot borrow the normal manual development ports. It includes four tabs
+sharing one Chromium cookie jar, creates four isolated tab-bound guest sessions,
+atomically fills seats A–D, uploads the two duplicated exact-list fixtures, and
+starts a game. One scenario submits all four
 keep decisions, proves owner-only stop controls, propagates a durable paused
 status to all four contexts, disables the current decision, reloads a nonowner
 while paused, resumes, aborts one command request, retries the byte-equivalent
@@ -331,8 +342,13 @@ three DOMs never receive that seat-scoped control, and submits the resulting
 six-card keep. An additional isolated browser joins the active game as a
 spectator, verifies all four public boards with no hand or action controls,
 opens the complete public log, observes a live revision, and reloads without
-gaining seat authority. The duplicated pod is protocol evidence only, never
-matchup evidence.
+gaining seat authority. Further two-browser scenarios exercise targeted ETBs,
+a stack response, rules-created Treasure, Orcish Bowmasters and Amass, explicit
+attacker and blocker declarations, combat damage, confirmed concession, and a
+natural commander-damage winner. The natural-winner record must report zero
+suppressed meaningful windows, pass its hidden-information audit, and replay
+to the exact final state hash. The duplicated lists are protocol/lifecycle
+evidence only, never matchup evidence.
 
 ## Generic decision forms
 

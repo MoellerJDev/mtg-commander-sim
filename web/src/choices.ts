@@ -19,8 +19,10 @@ function initialField(field: ChoiceField): JsonValue | undefined {
   if (field.default !== undefined) return structuredClone(field.default);
   const control = stringValue(field.control);
   if (control === "boolean") {
-    const legal = list(field.legal_values);
-    return legal.length ? Boolean(legal[0]) : false;
+    const legal = list(field.legal_values).filter(
+      (candidate): candidate is boolean => typeof candidate === "boolean",
+    );
+    return legal.length ? legal[0] : false;
   }
   if (control === "integer") return Number(field.minimum ?? 0);
   if (control === "mana_modes") {
@@ -171,6 +173,15 @@ function fieldErrors(field: ChoiceField, values: ChoiceValues): string[] {
   if (["text", "select", "ref"].includes(control)) {
     if (required && (value === undefined || value === null || value === "")) {
       errors.push(`${label} is required.`);
+    }
+  } else if (control === "boolean") {
+    const legal = list(field.legal_values).filter(
+      (candidate): candidate is boolean => typeof candidate === "boolean",
+    );
+    if (required && value === undefined) {
+      errors.push(`${label} is required.`);
+    } else if (typeof value !== "boolean" || (legal.length && !legal.includes(value))) {
+      errors.push(`${label} requires explicit confirmation.`);
     }
   } else if (control === "mana_modes") {
     const serialized = JSON.stringify(value ?? {});

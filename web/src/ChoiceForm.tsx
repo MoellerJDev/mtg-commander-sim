@@ -454,12 +454,15 @@ function ChoiceControl({
   if (control === "damage_assignments") return <DamageAssignments field={field} value={value} onValue={set} labelFor={labelFor} />;
   if (control === "object_map") return <ObjectMap field={field} value={value} onValue={set} labelFor={labelFor} />;
   if (control === "boolean") {
-    const legalValues = list(field.legal_values);
-    const options = legalValues.length ? legalValues.map(Boolean) : [false, true];
+    const legalValues = list(field.legal_values).filter(
+      (candidate): candidate is boolean => typeof candidate === "boolean",
+    );
+    const options = legalValues.length ? legalValues : [false, true];
+    const selected = typeof value === "boolean" ? value : options[0];
     return (
       <label className="choice-field">
         <FieldLabel field={field} />
-        <select data-testid={`choice-${name}`} value={String(Boolean(value))} onChange={(event) => set(event.target.value === "true")}>
+        <select data-testid={`choice-${name}`} value={String(selected)} onChange={(event) => set(event.target.value === "true")}>
           {options.map((option) => <option key={String(option)} value={String(option)}>{option ? "Yes" : "No"}</option>)}
         </select>
       </label>

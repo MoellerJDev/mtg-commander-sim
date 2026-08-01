@@ -22,13 +22,16 @@ The browser renders the engine's current generic choice vocabulary, locally
   cached card art, a persistent hover/focus card viewer, browsable public zones,
   card-specific play/cast/activate controls, drag-to-play interaction, optional
   manual mana-source activation, reconnect and exact-command retry states,
-  explicit active-player main-phase advancement,
+  explicit active-player main-phase advancement, attack/block interaction,
+  public commander-damage tracking, confirmed concession, and terminal
+  winner/draw presentation,
   owner-only durable stop/resume controls, and a seat-safe record inspection
   panel. These paths are
 end-to-end tested with four shared-cookie tab-isolated seats and a two-player
 duel, plus an isolated invited spectator. A deterministic two-browser rules
 journey also covers immediate targeted land ETBs, a real stack response,
-rules-created Treasure payment, permanent-spell resolution, and Amass. Future choice schemas, full account
+rules-created Treasure payment, permanent-spell resolution, Amass, combat, and
+a natural commander-damage winner. Future choice schemas, full account
 identity, expiry/rate limits, and production operations remain incomplete.
 The generated platform ledger records the exact current test and coverage
 counts.
@@ -145,6 +148,13 @@ precombat main and **End turn** in postcombat main. Pass-only response windows
 for nonactive players can still be suppressed when the engine verifies that no
 meaningful response exists.
 
+Commander combat damage is displayed separately by source commander on every
+public player board. **Concede game** is a server-issued action with an explicit
+confirmation; cancelling it does nothing, while acceptance follows the same
+transaction, persistence, projection, and replay path as any other command.
+When a winner or draw is authoritative, both seats receive a terminal banner,
+all action controls disappear, and that result survives process restart.
+
 For offline development with an existing database:
 
 ```powershell
@@ -159,6 +169,7 @@ fixture:
 ```bash
 python scripts/build_test_database.py build \
   --fixture tests/fixtures/scryfall-exact-lists.json \
+  --fixture tests/fixtures/browser-lifecycle-cards.json \
   --output data/test-ci.sqlite3
 MTG_CARD_DB=data/test-ci.sqlite3 \
   python -m unittest discover -s tests -p "test_*.py" -v
@@ -166,8 +177,10 @@ MTG_CARD_DB=data/test-ci.sqlite3 \
 
 In PowerShell, set the variable with
 `$env:MTG_CARD_DB = "data/test-ci.sqlite3"` before running the tests. The
-compact fixture covers the bundled Zimone and Dina and Mishra, Eminent One
-lists; it is not a substitute for the complete Oracle corpus.
+compact fixtures cover the bundled Zimone and Dina and Mishra, Eminent One
+lists plus one vanilla commander used only for deterministic combat/lifecycle
+testing; they are not a substitute for the complete Oracle corpus or matchup
+evidence.
 
 For an exact-commit merge candidate, use the reusable gate after committing all
 intended changes:

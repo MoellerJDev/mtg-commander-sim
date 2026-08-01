@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import json
 import os
 import tempfile
 import unittest
 from pathlib import Path
 
+from mtg_commander_sim import CardDatabase
+from scripts.build_test_database import build_fixture_database
 from scripts.local_merge_gate import (
     DEFAULT_FOCUSED_TESTS,
     PRIVACY_TESTS,
@@ -14,6 +17,26 @@ from scripts.local_merge_gate import (
 
 
 class LocalMergeGateTests(unittest.TestCase):
+    def test_compact_card_fixtures_compose_without_external_data(self):
+        root = Path(__file__).resolve().parents[1]
+        fixtures = [
+            root / "tests" / "fixtures" / "scryfall-exact-lists.json",
+            root / "tests" / "fixtures" / "browser-lifecycle-cards.json",
+        ]
+        with tempfile.TemporaryDirectory() as temporary:
+            database = Path(temporary) / "test-ci.sqlite3"
+            result = build_fixture_database(fixtures, database)
+            with CardDatabase(database) as card_db:
+                self.assertEqual("Zimone and Dina", card_db.lookup("Zimone and Dina").name)
+                self.assertEqual(
+                    "Yargle and Multani",
+                    card_db.lookup("Yargle and Multani").name,
+                )
+
+        self.assertEqual([str(fixture) for fixture in fixtures], result["fixtures"])
+        primary = json.loads(fixtures[0].read_text(encoding="utf-8"))
+        self.assertEqual(len(primary["rulings"]), result["rulings"])
+
     def test_gate_orchestrates_every_required_existing_command(self):
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary)
@@ -51,6 +74,10 @@ class LocalMergeGateTests(unittest.TestCase):
         self.assertIn("discover", by_name["full_deterministic_suite"])
         self.assertIn(
             "tests/fixtures/scryfall-exact-lists.json",
+            by_name["build_test_database"],
+        )
+        self.assertIn(
+            "tests/fixtures/browser-lifecycle-cards.json",
             by_name["build_test_database"],
         )
         self.assertIn(
