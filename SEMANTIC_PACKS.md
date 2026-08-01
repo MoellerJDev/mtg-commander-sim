@@ -46,6 +46,23 @@ hash mismatch fails trusted preflight. A card-specific override must record why
 generic compilation failed and pin its Oracle/rulings/rule/test provenance.
 See `RULES_COMPLETENESS.md`.
 
+## Normalized damage events
+
+The current combat path emits `damage.dealt` only for a positive final dealt
+result. Its immutable context correlates the exact source and recipient,
+logical source incarnation, controllers, public characteristics, assigned,
+dealt, and prevented amounts, combat step, and first-strike-step status.
+Programs for “this source” use `damage.dealt.self`; broader programs use
+`damage.dealt` with declarative event conditions. Prevented and zero damage do
+not dispatch the event.
+
+Represented damage triggers remain pending while post-damage state-based
+actions run. Any represented triggers discovered by those actions merge into
+the same unstarted APNAP/controller-order batch before priority. This is not a
+claim that arbitrary damage Oracle text is compiled: noncombat damage, the
+complete CR 120.4 replacement/prevention/result sequence, excess damage, and
+trigger-on-trigger placement remain explicit untrusted dependencies.
+
 ## Trust
 
 `trusted` means the declared behavior is reviewed and characterized for this

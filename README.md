@@ -438,11 +438,15 @@ generated documentation fixtures with bearer capabilities redacted. See
   multiplayer variants fail closed
 - source-reviewed CR 510 combat-damage assignment validation: the server
   derives sources, recipients, and exact power totals, rejects client-supplied
-  semantics, and rolls illegal assignments back atomically. First/double
-  strike use two real damage steps; normal trample validates lethal before
-  spill using marked damage and deathtouch; combat lifelink counts only damage
-  dealt. Trample over planeswalkers, banding, universal damage replacement,
-  source LKI, and post-damage trigger batching remain blocked
+  semantics, collects discretionary announcements in APNAP order, derives
+  forced assignments without a pilot task, and rolls each illegal announcement
+  back atomically. First/double strike use two real damage steps; normal trample
+  validates lethal before spill using marked damage and deathtouch; combat
+  lifelink counts only damage dealt. Final combat source-recipient results emit
+  normalized `damage.dealt` contexts, and represented damage/death triggers
+  share one APNAP/controller-order batch before priority. Trample over
+  planeswalkers, banding, the universal CR 120.4 replacement/result pipeline,
+  noncombat damage events, and source LKI remain blocked
 - source-reviewed CR 508 ordinary attacker declaration: the server offers and
   revalidates only currently eligible creatures and live opponent/Battle
   destinations, enforces defender, preserves vigilance, rejects duplicate or phased submissions
@@ -454,6 +458,10 @@ generated documentation fixtures with bearer capabilities redacted. See
   enforces menace's zero-or-two minimum, preserves blocking relationships
   through combat, and command-replays the declaration; the complete combined
   requirement solver, costs, triggers, and entry-blocking remain blocked
+- source-reviewed CR 802.5 multiplayer combat-damage ordering: assigning
+  players proceed in APNAP order, later players receive earlier public
+  assignments, forced divisions are automatic, and an illegal later division
+  preserves the earlier accepted announcement
 - source-reviewed CR 511 end-of-combat priority, trigger coexistence, and exact
   removal-from-combat handoff into postcombat main; generic effects lasting
   until end of combat remain explicitly blocked
@@ -572,9 +580,9 @@ python simctl.py rules conformance --root .
 ```
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
-generated source-linkage tests. Of those cases, 557 are source-reviewed:
-106 have narrow executable semantic evidence, 371 are explicitly blocked, and
-80 are definition-only; 2,743 remain unreviewed. A generated inventory test
+generated source-linkage tests. Of those cases, 558 are source-reviewed:
+113 have narrow executable semantic evidence, 365 are explicitly blocked, and
+80 are definition-only; 2,742 remain unreviewed. A generated inventory test
 cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
 invalidation, and reporting policy.
 

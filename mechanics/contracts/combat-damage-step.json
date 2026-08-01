@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "cr-510-combat-damage-step",
   "official_name": "Combat Damage Step",
   "effective_date": "2026-06-19",
@@ -48,6 +48,7 @@
       "combat damage is assigned",
       "the complete assignment is validated",
       "combat damage is dealt simultaneously",
+      "final dealt source-recipient results emit normalized damage.dealt events",
       "state-based actions and triggers stabilize",
       "active player receives priority"
     ],
@@ -62,12 +63,15 @@
       "life",
       "loyalty and defense counters",
       "commander damage",
-      "combat damage journal"
+      "combat damage journal",
+      "pending APNAP trigger batch"
     ],
     "costs": [],
     "timing": [
       "assignment and dealing are turn-based actions that do not use the stack",
       "no priority window occurs between assignment and dealing",
+      "assignments are announced in APNAP order before any damage is dealt",
+      "damage and resulting state-action triggers are combined before priority",
       "first strike and double strike create two real damage steps with priority after each"
     ],
     "targets": [
@@ -77,13 +81,16 @@
     ],
     "choices": [
       "a controller divides a positive-power source's full damage among currently legal recipients",
-      "the complete per-player assignment is validated atomically"
+      "the complete per-player assignment is validated atomically",
+      "forced assignments are derived without issuing a strategic decision"
     ],
     "hidden_information": [
       "combat assignments contain public battlefield and player references only"
     ],
     "apnap": [
-      "the official active-player-then-defending-player announcement sequence remains blocked"
+      "players with assigning creatures announce in APNAP order",
+      "earlier announcements are public to later assigning players",
+      "represented damage and resulting state-action triggers share one APNAP/controller-order batch"
     ],
     "layers": [
       "effective power is read through the shared derived-characteristics path"
@@ -113,7 +120,9 @@
     "illegal unrelated source or recipient",
     "first strike and double strike step eligibility",
     "ordinary trample with marked damage, deathtouch, prevention, and departed blockers",
-    "combat lifelink based on damage actually dealt"
+    "combat lifelink based on damage actually dealt",
+    "sequential APNAP assignment announcements",
+    "damage-dealt and resulting death-trigger batching"
   ],
   "witness_cards": [],
   "rulings": [],
@@ -135,19 +144,21 @@
     "test_trample_rejects_spill_before_lethal_atomically",
     "test_trample_accepts_lethal_then_spill",
     "test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
-    "test_trample_deals_to_defender_after_all_blockers_leave"
+    "test_trample_deals_to_defender_after_all_blockers_leave",
+    "test_discretionary_assignments_are_collected_in_apnap_order_and_replay",
+    "test_multiplayer_assignment_announcements_follow_apnap",
+    "test_damage_and_resulting_death_triggers_share_one_order_batch"
   ],
   "implementation": {
-    "component": "CommanderEngine combat-damage assignment validation and damage application",
-    "version": "combat-damage-step-v2"
+    "component": "CommanderEngine APNAP combat assignment, typed damage-event, trigger-batch, and damage application paths",
+    "version": "combat-damage-step-v3"
   },
   "known_blockers": [
-    "active-player then defending-player public assignment announcement order is not represented",
     "trample over planeswalkers, banding assignment control, and complete combat assignment exceptions are not implemented",
     "lifelink outside the combat damage path and source last-known information are incomplete",
     "a blocker blocking several attackers is not produced by the declaration system",
     "simultaneous damage replacement and prevention require the universal typed event pipeline",
-    "damage-trigger APNAP placement before priority is incomplete"
+    "trigger-on-trigger two-part placement and complete triggered-ability choice grammar remain CR 603 dependencies"
   ],
   "review_status": "draft"
 }

@@ -355,16 +355,22 @@ class CombatKeywordRuleTests(unittest.TestCase):
             ],
         )
         self.assertTrue(result_a.ok, result_a.summary)
-        result_b = self.submit_damage(
-            session,
-            "B",
-            [{"source": blocker.ref, "target": attacker.ref, "amount": 2}],
-        )
-
-        self.assertTrue(result_b.ok, result_b.summary)
         self.assertEqual(life_a + 3, engine.state.players["A"].life)
         self.assertEqual(life_b - 3, engine.state.players["B"].life)
         self.assertEqual(0, blocker.marked_damage)
+        combat_event = next(
+            event
+            for event in reversed(engine.state.events)
+            if event.code == "combat.damage"
+        )
+        by_target = {
+            value["target"]: value
+            for value in combat_event.details["damage_events"]
+        }
+        self.assertEqual(0, by_target[blocker.ref]["amount"])
+        self.assertEqual(2, by_target[blocker.ref]["prevented_amount"])
+        self.assertEqual(3, by_target["B"]["amount"])
+        self.assertEqual(0, by_target["B"]["prevented_amount"])
 
     def test_trample_rejects_spill_before_lethal_atomically(self):
         session = self.make_session(51043)
@@ -380,7 +386,8 @@ class CombatKeywordRuleTests(unittest.TestCase):
         blocker = self.token(engine, "B", "Blocker")
         self.set_combat(engine, attacker, blocker)
         engine._begin_combat_damage()
-        first = self.submit_damage(
+        before = authoritative_state_hash(session.state)
+        result = self.submit_damage(
             session,
             "A",
             [
@@ -388,15 +395,6 @@ class CombatKeywordRuleTests(unittest.TestCase):
                 {"source": attacker.ref, "target": "B", "amount": 4},
             ],
         )
-        self.assertTrue(first.ok, first.summary)
-        before = authoritative_state_hash(session.state)
-
-        result = self.submit_damage(
-            session,
-            "B",
-            [{"source": blocker.ref, "target": attacker.ref, "amount": 2}],
-        )
-
         self.assertFalse(result.ok)
         self.assertIn("until", result.summary)
         self.assertIn("lethal damage", result.summary)
@@ -419,22 +417,14 @@ class CombatKeywordRuleTests(unittest.TestCase):
         self.set_combat(engine, attacker, blocker)
         engine._begin_combat_damage()
 
-        self.assertTrue(
-            self.submit_damage(
-                session,
-                "A",
-                [
-                    {"source": attacker.ref, "target": blocker.ref, "amount": 2},
-                    {"source": attacker.ref, "target": "B", "amount": 3},
-                ],
-            ).ok
-        )
         result = self.submit_damage(
             session,
-            "B",
-            [{"source": blocker.ref, "target": attacker.ref, "amount": 2}],
+            "A",
+            [
+                {"source": attacker.ref, "target": blocker.ref, "amount": 2},
+                {"source": attacker.ref, "target": "B", "amount": 3},
+            ],
         )
-
         self.assertTrue(result.ok, result.summary)
         self.assertEqual(37, engine.state.players["B"].life)
         self.assertEqual("outside", blocker.zone)
@@ -465,28 +455,21 @@ class CombatKeywordRuleTests(unittest.TestCase):
                 blocker.marked_damage = marked
                 self.set_combat(engine, attacker, blocker)
                 engine._begin_combat_damage()
-                self.assertTrue(
-                    self.submit_damage(
-                        session,
-                        "A",
-                        [
-                            {
-                                "source": attacker.ref,
-                                "target": blocker.ref,
-                                "amount": lethal,
-                            },
-                            {
-                                "source": attacker.ref,
-                                "target": "B",
-                                "amount": 5 - lethal,
-                            },
-                        ],
-                    ).ok
-                )
                 result = self.submit_damage(
                     session,
-                    "B",
-                    [{"source": blocker.ref, "target": attacker.ref, "amount": 1}],
+                    "A",
+                    [
+                        {
+                            "source": attacker.ref,
+                            "target": blocker.ref,
+                            "amount": lethal,
+                        },
+                        {
+                            "source": attacker.ref,
+                            "target": "B",
+                            "amount": 5 - lethal,
+                        },
+                    ],
                 )
                 self.assertTrue(result.ok, result.summary)
                 self.assertEqual(35 + lethal, engine.state.players["B"].life)

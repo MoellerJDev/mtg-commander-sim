@@ -101,14 +101,14 @@ rules concepts, not the names of decks or cards that happened to reveal them.
 ## Current checkpoint
 
 All 3,300 cases exist and all 3,300 inventory/source-linkage tests pass.
-All 557 cases in CR 120, CR 210, CR 310, CR 400, CR 401, CR 402, CR 403,
+All 558 cases in CR 120, CR 210, CR 310, CR 400, CR 401, CR 402, CR 403,
 CR 404, CR 405, CR 406, CR 407, CR 408, CR 500, CR 501, CR 502, CR 503,
 CR 504, CR 505, CR 506, CR 507, CR 508, CR 509, CR 510, CR 511, CR 512,
 CR 513, CR 514, CR 600, CR 601, CR 602, CR 603, CR 604, CR 605, CR 606,
-CR 607, CR 608, CR 609, CR 614, CR 615, and CR 616 are source-reviewed:
-106 narrow behavioral or structural rules pass with generic executable
-evidence, 371 are blocked with exact missing dependencies, and 80 are
-definition-only with contract traceability. The remaining 2,743 cases are
+CR 607, CR 608, CR 609, CR 614, CR 615, CR 616, and CR 802.5 are
+source-reviewed: 113 narrow behavioral or structural rules pass with generic
+executable evidence, 365 are blocked with exact missing dependencies, and 80
+are definition-only with contract traceability. The remaining 2,742 cases are
 unreviewed and inventory-only.
 
 The passing CR 310 rules are battlefield defense (310.4c), Battle damage
@@ -121,10 +121,15 @@ blocked. CR 210.1 additionally records that represented printed defense and
 fail-closed validation are tested, but it cannot pass while complete intrinsic
 entry-replacement ordering and face/copy interactions remain incomplete.
 CR 120 adds passing evidence for damageable permanent types, planeswalker and
-Battle results, state-action timing, and zero-damage suppression. Infect,
-wither, lifelink, toxic, the full four-part replacement/prevention pipeline,
-excess damage, regeneration, source selection, damage-trigger correlation,
-and advanced combat remain explicitly blocked.
+Battle results, state-action timing, zero-damage suppression, and immutable
+source-recipient correlation for final combat results. Infect, wither, toxic,
+noncombat lifelink and damage events, the full four-part
+replacement/prevention pipeline, excess damage, regeneration, source
+selection, and universal damage-trigger correlation remain explicitly blocked.
+CR 510.1/510.3 and multiplayer CR 802.5 add executable APNAP assignment,
+per-player rollback, simultaneous dealing, state-action stabilization, and
+damage/death trigger batching before active-player priority. These do not
+promote banding, the complete recipient matrix, or universal damage semantics.
 CR 616 adds passing evidence for self-replacement, enters-control,
 enters-copy, enters-back-face, ordinary-choice, repeat/recheck, and
 newly-applicable-effect ordering. Simultaneous affected-player or

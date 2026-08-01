@@ -51,6 +51,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#34](https://github.com/MoellerJDev/mtg-commander-sim/pull/34) | `agent/browser-rules-boundary` | `main` | `merged` |
 | [#35](https://github.com/MoellerJDev/mtg-commander-sim/pull/35) | `agent/browser-trigger-stabilization` | `main` | `merged` |
 | [#36](https://github.com/MoellerJDev/mtg-commander-sim/pull/36) | `agent/browser-lifecycle-journey` | `main` | `merged` |
+| [#37](https://github.com/MoellerJDev/mtg-commander-sim/pull/37) | `agent/rules-combat-damage` | `main` | `merged` |
 
 ## Pinned snapshots and coverage
 
@@ -60,8 +61,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 - Rules manifest present on this branch: yes
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
-- Rules cases: blocked=369, definition_only=80, passing=108, total=3300, unreviewed=2743
-- Mechanics: status_counts={'partial': 55, 'unclassified': 370}, total=425, trusted=0
+- Rules cases: blocked=365, definition_only=80, passing=113, total=3300, unreviewed=2742
+- Mechanics: status_counts={'partial': 56, 'unclassified': 369}, total=425, trusted=0
 - Oracle coverage: material_residuals=69664, status_counts={'exact': 2957, 'partial': 15691, 'unresolved': 19725}, total=38373
 - Commander-legal Oracle coverage: material_residuals=61212, status_counts={'exact': 338, 'partial': 14354, 'unresolved': 16930}, total=31622
 - Current rules/Oracle snapshot complete: no
@@ -92,9 +93,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 4009
+- Tests discovered: 4013
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30684463002](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30684463002) — `pass`
+- Baseline CI: [30685770054](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30685770054) — `pass`
 - Compile: `pass`
 - Deterministic tests: `pass_full_exact_commit_gate`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
@@ -116,7 +117,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Continue the dependency-ordered combat rules family: correct turn-based-action and trigger batching around declare attackers, declare blockers, and combat damage, then introduce the shared restrictions-and-requirements solver without weakening exact replay, rollback, or hidden-information gates.
+Introduce one shared attack/block restrictions-and-requirements solver with deterministic satisfiability, projected explanations, transaction rollback, hidden-information safety, and exact replay; keep the universal CR 120.4 damage transformation pipeline as the next deeper dependency.
 
 ## Regeneration
 

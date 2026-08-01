@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "cr-120-damage",
   "official_name": "Damage",
   "effective_date": "2026-06-19",
@@ -62,6 +62,8 @@
       "combat damage assignment",
       "represented spell or ability damage",
       "damage-result processing",
+      "typed final combat source-recipient result",
+      "normalized combat damage.dealt trigger event",
       "zero damage is suppressed before a damage event exists",
       "negative damage amounts fail closed"
     ],
@@ -82,6 +84,7 @@
     "costs": [],
     "timing": [
       "simple combat assignments are applied as one batch before state-based actions",
+      "represented combat damage triggers wait with triggers created by resulting state-based actions",
       "semantic damage is processed during the resolving effect",
       "damage results do not destroy a permanent before state-based actions",
       "marked damage persists through loss of creature type until cleanup"
@@ -97,7 +100,8 @@
       "damage recipients and results are public"
     ],
     "apnap": [
-      "simultaneous simple combat assignments are collected before state stabilization"
+      "combat assignments are announced in APNAP order before simultaneous dealing",
+      "represented combat damage and resulting state-action triggers share one APNAP batch"
     ],
     "layers": [
       "derived recipient card types and source colors or keywords are read before applying represented results"
@@ -151,17 +155,20 @@
     "test_damage_to_battle_creature_applies_both_results",
     "test_planeswalker_damage_removes_loyalty_counters",
     "test_departed_combat_source_deals_no_damage",
-    "test_battle_damage_and_state_action_replay_exactly"
+    "test_battle_damage_and_state_action_replay_exactly",
+    "test_discretionary_assignments_are_collected_in_apnap_order_and_replay",
+    "test_damage_and_resulting_death_triggers_share_one_order_batch",
+    "test_lifelink_counts_only_damage_not_prevented_by_protection"
   ],
   "implementation": {
-    "component": "CommanderEngine._apply_damage_results_to_permanent and CommanderEngine._apply_combat_assignments",
-    "version": "damage-results-v3"
+    "component": "DamageEvent plus CommanderEngine._apply_damage_results_to_permanent and CommanderEngine._apply_combat_assignments",
+    "version": "damage-results-v4"
   },
   "known_blockers": [
     "the complete CR 120.4 damage-event pipeline, excess damage, replacement, and prevention ordering are not implemented",
     "infect, wither, lifelink, toxic, and all source-result combinations are not implemented generically",
-    "damage-trigger generation and source-specific event correlation are not complete",
-    "combat assignment order, first strike, double strike, trample, regeneration, and damage-source selection remain incomplete"
+    "noncombat damage-trigger generation and the universal CR 120.4 event order are not complete",
+    "infect, wither, toxic, regeneration, and damage-source selection remain incomplete"
   ],
   "review_status": "reviewed"
 }

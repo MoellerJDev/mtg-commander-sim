@@ -11,14 +11,14 @@ Implemented rule families include:
 - 603.7 — native delayed triggered abilities for implemented event windows
 - 704 — core state-based actions
 - 800.4 — players leaving multiplayer games
-- 802 — attacking multiple players and defender-order blocking
+- 802 — attacking multiple players, defender-order blocking, and APNAP combat-damage assignment
 - 903 — Commander life, command-zone, tax, and commander-damage foundations
 
 The conformance ledger additionally source-reviews the CR 400–408 zone
 families, CR 500–514 turn/combat/ending families, and selected CR 120, 210,
 310, 600–609, 614–616, and 704 families. A reviewed family may contain passing,
 definition-only, and explicitly blocked records; review is not a completeness
-claim. Current generated totals are 557 reviewed out of 3,300 rules and 49
+claim. Current generated totals are 558 reviewed out of 3,300 rules and 56
 partial out of 425 mechanics.
 
 The Comprehensive Rules remain authoritative. `ARCHITECTURE.md` documents the
