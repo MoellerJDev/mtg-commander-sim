@@ -1,0 +1,125 @@
+---
+title: "Architecture debt status"
+status: "generated"
+authoritative_source: "coverage/architecture-audit.json"
+verified: "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d"
+audience: "maintainers and rules contributors"
+maintenance: "generated"
+---
+
+# Architecture debt status
+
+This is the generated Phase 0 migration baseline. It measures the current tree and does not claim architectural completion, rules completeness, or universal card support.
+
+## Baseline coordinates
+
+- Main commit: `65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d`
+- Package: `0.8.0`
+- CI run: [30705718025](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30705718025) — `pass`
+- Production scope: 59 files, 56,042 physical lines, 52,575 logical lines
+
+## Central engine debt
+
+- `engine.py`: 23,996 physical / 23,155 logical lines
+- Methods: 28 public, 303 private, 1 dunder
+- Cross-subsystem responsibility groups: 7
+- Direct GameState-write heuristic: 190 locations
+- Semantic-operation branches: 203
+- Exact printed-name literals in configured core files: 416 (65 conditional)
+- Oracle-ID literals in Python production code: 8
+- Card-named helpers: 1
+- Modules above the 1,500-logical-line review threshold: 6
+- Functions/methods above the 150-logical-line review threshold: 50
+- Printed-name matching is deliberately over-inclusive: ordinary words that are also printed card names remain baseline candidates for Phase 1 review.
+
+## Largest production modules
+
+| File | Language | Physical | Logical |
+|---|---:|---:|---:|
+| `mtg_commander_sim/engine.py` | python | 23,996 | 23,155 |
+| `web/src/App.tsx` | web | 1,889 | 1,828 |
+| `mtg_commander_sim/report.py` | python | 1,853 | 1,813 |
+| `mtg_commander_sim/oracle_ir.py` | python | 1,854 | 1,780 |
+| `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
+| `mtg_commander_sim/record.py` | python | 1,657 | 1,551 |
+| `mtg_commander_sim/rules_corpus.py` | python | 1,590 | 1,495 |
+| `mtg_commander_sim/cli.py` | python | 1,330 | 1,279 |
+| `server/app.py` | python | 1,304 | 1,171 |
+| `mtg_commander_sim/codex_cli.py` | python | 1,214 | 1,154 |
+| `mtg_commander_sim/session.py` | python | 1,138 | 1,095 |
+| `mtg_commander_sim/arena.py` | python | 1,106 | 1,033 |
+| `mtg_commander_sim/preflight.py` | python | 844 | 781 |
+| `server/store.py` | python | 810 | 689 |
+| `mtg_commander_sim/pilot.py` | python | 652 | 598 |
+
+## Largest functions and methods
+
+| Symbol | File:line | Logical | Physical |
+|---|---|---:|---:|
+| `CommanderEngine.apply_effect` | `mtg_commander_sim/engine.py:21430` | 2174 | 2182 |
+| `CommanderEngine._begin_semantic_choice` | `mtg_commander_sim/engine.py:13435` | 1640 | 1640 |
+| `CommanderEngine._complete_semantic_choice` | `mtg_commander_sim/engine.py:15076` | 1454 | 1456 |
+| `derive_review` | `mtg_commander_sim/report.py:565` | 1085 | 1089 |
+| `parse_declaration_restriction_line` | `mtg_commander_sim/declaration_restrictions.py:892` | 881 | 942 |
+| `create_app` | `server/app.py:536` | 724 | 769 |
+| `CommanderEngine._cast` | `mtg_commander_sim/engine.py:6184` | 622 | 625 |
+| `main` | `mtg_commander_sim/cli.py:718` | 599 | 609 |
+| `_compile_face` | `mtg_commander_sim/oracle_ir.py:860` | 590 | 598 |
+| `CommanderEngine._priority_action_hints` | `mtg_commander_sim/engine.py:9304` | 579 | 581 |
+| `_effect_template` | `mtg_commander_sim/oracle_ir.py:251` | 539 | 540 |
+| `CommanderEngine._cast_cost_options` | `mtg_commander_sim/engine.py:8879` | 418 | 424 |
+| `CommanderEngine._activate` | `mtg_commander_sim/engine.py:7384` | 375 | 383 |
+| `CommanderSession.act` | `mtg_commander_sim/session.py:531` | 360 | 364 |
+| `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1984` | 350 | 356 |
+
+## Engine responsibility spread
+
+| Responsibility | Matched methods |
+|---|---:|
+| `turn_priority_decisions` | 39 |
+| `casting_activation_and_costs` | 52 |
+| `semantics_resolution_and_choices` | 84 |
+| `combat_and_damage` | 31 |
+| `zones_objects_and_state` | 17 |
+| `commander_and_multiplayer` | 8 |
+| `persistence_logging_and_invariants` | 6 |
+
+## Missing dedicated ownership
+
+- `turn_priority_and_decisions`
+- `zones_and_object_identity`
+- `casting_activation_and_costs`
+- `semantic_effect_execution`
+- `search_target_and_choice`
+- `trigger_processing`
+- `commander_variant`
+- `card_overrides`
+
+These are review classifications from the machine-readable source, not automatic proof that an extraction boundary is correct.
+
+## Test classes
+
+- Python discovered: 4,130
+- Conventional Python cases: 830
+- Generated CR conformance cases: 3,300
+- Playwright journeys: 7
+- Browser unit cases: 14
+- Dedicated property suite: false
+- Mutation score: None
+- Performance baseline: None
+
+## Documentation drift
+
+- Required: 26
+- Present after generated Phase 0 outputs: 6
+- Missing: 20
+- Metadata complete: 6
+
+The missing document set is recorded in `coverage/architecture-audit.json`. Phase 1 establishes the authoritative documentation index and enforcement.
+
+## Regeneration
+
+```bash
+python scripts/update_architecture_audit.py --write --card-db data/scryfall-current.sqlite3
+python scripts/update_architecture_audit.py --check
+```

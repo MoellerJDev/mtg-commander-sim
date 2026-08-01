@@ -35,6 +35,29 @@
   provider sessions. Keep existing provider-specific adapters isolated from the
   authoritative rules and application layers.
 
+## Current architecture migration
+
+The repository is migrating incrementally from the current centralized engine
+to domain-owned rules modules. Follow the ordered phases recorded in the active
+project objective; do not use a feature request as permission for a big-bang
+rewrite.
+
+- Phase 0 records the measured current-state baseline. Broad new card-family
+  expansion is paused until it merges.
+- Phase 1 establishes dependency, mutation-ownership, card-specificity,
+  generated-document, documentation-index, and ADR enforcement.
+- Preserve Game Record v3 commands, exact replay, principal projections, and
+  fail-closed semantics during every extraction.
+- Do not add printed-card-name or Oracle-ID conditionals, card-named semantic
+  operations, or card-specific helpers to the universal engine.
+- A production module above 1,500 logical lines or a function above 150 logical
+  lines is measured debt and requires the documented review path for new growth.
+
+The machine-readable baseline is `coverage/architecture-audit.json`; its
+generated presentations are `docs/ARCHITECTURE_DEBT_STATUS.md` and
+`docs/COMPILER_COVERAGE_STATUS.md`. Hand-maintained documents must link to those
+figures rather than copying them.
+
 ## Before committing
 
 ```bash
@@ -47,6 +70,7 @@ python scripts/build_test_database.py build \
 python -m unittest discover -s tests -p 'test_*.py' -v
 python scripts/demo_four_player_protocol.py --db data/test-ci.sqlite3 --out demo
 python scripts/update_platform_status.py --check
+python scripts/update_architecture_audit.py --check
 python scripts/validate_repository.py
 python simctl.py rules verify --root .
 python -m build --wheel

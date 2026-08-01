@@ -7,9 +7,9 @@ snapshot-scoped rules enforcement. The current development line is a kernel and
 protocol foundation, not a complete implementation of Magic's rules or Oracle
 corpus.
 
-Current development checkpoint: the deterministic foundation and reviewed CR
-400–408 and CR 500–512 slices now have an executable server/browser vertical
-slice. It provides tab-isolated guest sessions, invite-only two- or four-seat rooms, deck
+Current development checkpoint: the deterministic foundation and reviewed
+rules slices have an executable server/browser vertical slice. It provides
+tab-isolated guest sessions, invite-only two- or four-seat rooms, deck
 validation/preflight, a serialized single-writer game actor, SQLite control
 plane, durable Game Record v3 acknowledgement, strict idempotent protocol 3.0
 commands, seat-scoped WebSockets, reconnect and process-restart recovery, and a
@@ -34,8 +34,10 @@ journey also covers immediate targeted land ETBs, a real stack response,
 rules-created Treasure payment, permanent-spell resolution, Amass, combat, and
 a natural commander-damage winner. Future choice schemas, full account
 identity, expiry/rate limits, and production operations remain incomplete.
-The generated platform ledger records the exact current test and coverage
-counts.
+The browser interaction slice is integrated. Development is now in a measured
+architecture migration: broad rules expansion is paused while dependency,
+mutation, card-specificity, compiler, and documentation boundaries become
+enforceable. Generated status documents record exact current counts.
 
 This is a structural rewrite of the earlier two-player duel lab. The server-side game kernel is now separate from:
 
@@ -52,6 +54,9 @@ require an LLM, Codex runtime, provider credential, or live AI ruling.
 
 See `docs/PLATFORM_IMPLEMENTATION_STATUS.md` for the generated integration,
 rules, server, browser, persistence, replay, privacy, and validation ledger.
+See `docs/ARCHITECTURE_DEBT_STATUS.md` and
+`docs/COMPILER_COVERAGE_STATUS.md` for the measured migration baseline and the
+current compiler/Oracle boundary.
 See `SERVER_BROWSER.md` for the executable API, local run commands, browser
 workflow, security boundary, and remaining UI/operations limits.
 

@@ -195,6 +195,15 @@ def render_status(report: dict) -> str:
     validation = report["validation"]
     rules = report["rules_coverage"]
     lines = [
+        "---",
+        'title: "Platform implementation status"',
+        'status: "generated"',
+        'authoritative_source: "platform/readiness-source.json"',
+        f'verified: "{validation["baseline_commit"]}"',
+        'audience: "maintainers, operators, and contributors"',
+        'maintenance: "generated"',
+        "---",
+        "",
         "# Platform implementation status",
         "",
         "This is the durable program ledger. It is generated from "

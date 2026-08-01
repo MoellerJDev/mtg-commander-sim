@@ -1,3 +1,12 @@
+---
+title: "Platform implementation status"
+status: "generated"
+authoritative_source: "platform/readiness-source.json"
+verified: "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d"
+audience: "maintainers, operators, and contributors"
+maintenance: "generated"
+---
+
 # Platform implementation status
 
 This is the durable program ledger. It is generated from `platform/readiness-source.json`; generated metrics are read from the repository rather than copied by hand.
@@ -6,9 +15,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Active branch: `feat/browser-full-control-table-ui`
+- Active branch: `feat/phase0-architecture-audit`
 - Current commit: the commit containing this ledger
-- Active phase: `browser_full_control_table_interaction`
+- Active phase: `phase_0_current_state_audit`
 - Package version: `0.8.0`
 
 ### Pull requests
@@ -63,6 +72,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#46](https://github.com/MoellerJDev/mtg-commander-sim/pull/46) | `feat/rules-combat-quantifiers-planeswalkers` | `main` | `merged` |
 | [#47](https://github.com/MoellerJDev/mtg-commander-sim/pull/47) | `feat/rules-combat-player-state-conditions` | `main` | `merged` |
 | [#48](https://github.com/MoellerJDev/mtg-commander-sim/pull/48) | `feat/rules-combat-history-conditions` | `main` | `merged` |
+| [#49](https://github.com/MoellerJDev/mtg-commander-sim/pull/49) | `feat/browser-full-control-table-ui` | `main` | `merged` |
 
 ## Pinned snapshots and coverage
 
@@ -82,7 +92,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 | Milestone | Status | Evidence |
 |---|---|---|
-| Integrated deterministic foundation | `complete` | Integration PRs #1-17 and #24-48 are on main; the focused browser full-control/table-interaction slice is active. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
+| Integrated deterministic foundation | `complete` | Integration PRs #1-17 and #24-49 are on main. PR #49 completed the browser full-control/table-interaction slice. The current Phase 0 slice records measured architecture, compiler, test, semantic-pack, and documentation debt before structural migration. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
 | Browser Commander MVP | `development_local_runtime_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and seven two/four-player Chromium journeys, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, resilient card-scoped click/drag actions, saved Auto-mana/Manual mana and Auto-pass/Full control preferences, public tapped-card orientation, explicit active-player main-phase advancement, confirmed concession, public commander-damage tracking, terminal winner/draw rendering, exact command retry, invited read-only spectators, a durable complete public-log dialog, fail-closed handling for legacy arbiter-only records, and one-command managed Scryfall/browser startup. Compact trusted-only coverage includes modal land faces, targeted Sunscorched Desert ETB damage, a stack response, rules-created Treasure payment, Orcish Bowmasters/Amass, explicit attack and block declarations, combat damage, and a natural commander-damage winner. The 49-command natural-winner record replayed to its exact state hash with zero suppressed meaningful windows and a clean seat-projection audit; completed games also survive process restart. The inspected full-database failure remains a pinned pre-fix record, and a fresh post-restart full-database manual journey is still required as broader current-snapshot evidence. Saved board-layout customization, future schemas, full accounts, expiry/rate limits, and production deployment remain open. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408, CR 500-514, focused CR 725, and focused CR 508-509/608 current-turn history slices are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
@@ -104,9 +114,9 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 ## Deterministic validation
 
-- Tests discovered: 4127
+- Tests discovered: 4130
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30702706411](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30702706411) — `pass`
+- Baseline CI: [30705718025](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30705718025) — `pass`
 - Compile: `pass`
 - Deterministic tests: `pass_full_exact_commit_gate`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
@@ -122,14 +132,15 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 ## Current blockers
 
 - a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence
-- saved customizable board tabs and denser public-zone dashboard preferences remain incomplete
+- saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit
+- the authoritative engine remains a 23,996-line module with interleaved turn, mutation, casting, effect, and variant responsibilities; Phase 1 must add enforceable dependency and mutation guards before extraction
 - future engine choice schemas and complete screen-reader audits remain incomplete
 - production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete
 - full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete
 
 ## Exact next task
 
-Finish the saved customizable board/public-zone dashboard and split the browser table into maintainable components; then begin a behavior-preserving CommanderEngine domain decomposition before resuming dependency-ordered rules slices and the universal CR 120.4 damage transformation pipeline.
+Complete and merge the Phase 0 generated architecture/compiler/test/documentation baseline, then start Phase 1 on a fresh branch with enforceable dependency, direct-state-mutation, card-specificity, generated-document, and ADR guards. Broad rules expansion remains paused until those migration rails are green.
 
 ## Regeneration
 

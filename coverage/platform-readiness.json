@@ -1,7 +1,8 @@
 {
   "blockers": [
     "a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence",
-    "saved customizable board tabs and denser public-zone dashboard preferences remain incomplete",
+    "saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit",
+    "the authoritative engine remains a 23,996-line module with interleaved turn, mutation, casting, effect, and variant responsibilities; Phase 1 must add enforceable dependency and mutation guards before extraction",
     "future engine choice schemas and complete screen-reader audits remain incomplete",
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
@@ -12,10 +13,10 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "browser_full_control_table_interaction",
-    "branch": "feat/browser-full-control-table-ui",
+    "active_phase": "phase_0_current_state_audit",
+    "branch": "feat/phase0-architecture-audit",
     "branch_ancestry": {
-      "focused_branch_base": "b416c975a2cd2f4f379da081e9310dfb3a4345e9",
+      "focused_branch_base": "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d",
       "focused_branch_unique_commits_over_main": 1
     },
     "commit_reference": "the commit containing this ledger",
@@ -355,6 +356,13 @@
         "number": 48,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/48"
+      },
+      {
+        "base": "main",
+        "head": "feat/browser-full-control-table-ui",
+        "number": 49,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/49"
       }
     ],
     "tags": [
@@ -370,7 +378,7 @@
   },
   "milestones": [
     {
-      "evidence": "Integration PRs #1-17 and #24-48 are on main; the focused browser full-control/table-interaction slice is active. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
+      "evidence": "Integration PRs #1-17 and #24-49 are on main. PR #49 completed the browser full-control/table-interaction slice. The current Phase 0 slice records measured architecture, compiler, test, semantic-pack, and documentation debt before structural migration. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete"
@@ -394,7 +402,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Finish the saved customizable board/public-zone dashboard and split the browser table into maintainable components; then begin a behavior-preserving CommanderEngine domain decomposition before resuming dependency-ordered rules slices and the universal CR 120.4 damage transformation pipeline.",
+  "next_task": "Complete and merge the Phase 0 generated architecture/compiler/test/documentation baseline, then start Phase 1 on a fresh branch with enforceable dependency, direct-state-mutation, card-specificity, generated-document, and ADR guards. Broad rules expansion remains paused until those migration rails are green.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -477,19 +485,19 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4127,
+    "deterministic_cases_discovered": 4130,
     "migration_files": 1,
     "schema_files": 14,
     "server_files": 5,
     "web_files": 24
   },
   "validation": {
-    "baseline_commit": "b416c975a2cd2f4f379da081e9310dfb3a4345e9",
+    "baseline_commit": "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30702706411,
+      "run_id": 30705718025,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30702706411"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30705718025"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
