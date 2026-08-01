@@ -8,6 +8,7 @@ class DrawNode:
     player: str
     count: int
     reason: str
+    private: bool = False
 
 
 @dataclass(frozen=True, slots=True)

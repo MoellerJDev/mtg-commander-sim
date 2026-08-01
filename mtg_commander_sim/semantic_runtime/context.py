@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Iterable
 
 
 class SemanticNodeError(ValueError):
@@ -50,6 +51,26 @@ class ReadOnlyHandlerContext:
     actor: str
     default_reason: str
     query: ReadOnlyRulesQuery
+
+    @classmethod
+    def from_sequences(
+        cls,
+        *,
+        actor: str,
+        default_reason: str,
+        seats: Iterable[str],
+        active_seats: Iterable[str],
+        apnap_order: Iterable[str],
+    ) -> "ReadOnlyHandlerContext":
+        return cls(
+            actor=actor,
+            default_reason=default_reason,
+            query=ReadOnlyRulesQuery(
+                seats=tuple(seats),
+                active_seats=tuple(active_seats),
+                apnap_order=tuple(apnap_order),
+            ),
+        )
 
     def __post_init__(self) -> None:
         self.query.require_known_seat(self.actor)

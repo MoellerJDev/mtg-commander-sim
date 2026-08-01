@@ -35,19 +35,27 @@ capability dependencies. Registration rejects duplicate ownership and unknown
 capability IDs. Malformed input for a registered operation is a rules error;
 it never falls back to permissive string dispatch.
 
-The executor is intentionally small. It applies `DrawCardsIntent` and
-`BecomeMonarchIntent` through `CommanderEngine.draw` and
-`CommanderEngine.become_monarch`, preserving their event, trigger, private-log,
-and replay behavior. Handlers themselves never mutate state.
+The executor is intentionally small. Direct effect application sends
+`DrawCardsIntent` and `BecomeMonarchIntent` through
+`CommanderEngine.draw` and `CommanderEngine.become_monarch`. Ordinary
+CardProgram stack resolution also lowers registered nodes through this same
+handler registry. Draw intents then enter the engine's replacement-aware draw
+sequence so represented draw replacements and private draw continuations keep
+their existing behavior. Handlers themselves never mutate state.
+
+The architecture audit scans every semantic-operation branch in the engine,
+not only `apply_effect`. A registered operation intercepted before the handler
+boundary is therefore reported as migration drift.
 
 ## Migration checklist
 
 1. Characterize the current operation and exact return/event behavior.
 2. Define a typed node and intent with the smallest read-only query surface.
 3. Register one stable handler and bounded capability dependencies.
-4. Add direct lowering, malformed-input rollback, engine integration, and
-   exact replay tests.
-5. Remove the corresponding central-dispatch branch.
+4. Add direct lowering, malformed-input rollback, ordinary stack-resolution,
+   and exact replay tests.
+5. Remove every corresponding engine dispatch branch, including any
+   pre-resolution special case outside `apply_effect`.
 6. Update CardProgram explain/audit mapping and generated architecture status.
 
 Do not use this boundary to widen Oracle coverage or conceal unresolved cost,

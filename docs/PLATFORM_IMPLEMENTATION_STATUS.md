@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "1eb40f99b7269870c7e419aa75ea3e997e7aff0e"
+verified: "c361dfe376352cbf6798dff96430c8c6d294a830"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -39,7 +39,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 | Milestone | Status | Evidence |
 |---|---|---|
-| Integrated deterministic foundation | `complete` | The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, ratcheted guards, documentation enforcement, fine-grained capability closure, and CardProgram V2 are integrated on verified main. The active Phase 4 slice adds a registered typed-handler boundary, immutable rules queries, typed intents, and canonical execution for the first generic effects while preserving a measured legacy fallback. |
+| Integrated deterministic foundation | `complete` | The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, ratcheted guards, documentation enforcement, fine-grained capability closure, CardProgram V2, and the first Phase 4 typed-handler slice are integrated on verified main. Registered draw, table-wide draw, and monarch handlers use immutable rules queries, typed intents, and canonical execution while preserving a measured legacy fallback for unmigrated operations. |
 | Browser Commander MVP | `development_local_runtime_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and seven two/four-player Chromium journeys, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, resilient card-scoped click/drag actions, saved Auto-mana/Manual mana and Auto-pass/Full control preferences, public tapped-card orientation, explicit active-player main-phase advancement, confirmed concession, public commander-damage tracking, terminal winner/draw rendering, exact command retry, invited read-only spectators, a durable complete public-log dialog, fail-closed handling for legacy arbiter-only records, and one-command managed Scryfall/browser startup. Compact trusted-only coverage includes modal land faces, targeted Sunscorched Desert ETB damage, a stack response, rules-created Treasure payment, Orcish Bowmasters/Amass, explicit attack and block declarations, combat damage, and a natural commander-damage winner. The 49-command natural-winner record replayed to its exact state hash with zero suppressed meaningful windows and a clean seat-projection audit; completed games also survive process restart. The inspected full-database failure remains a pinned pre-fix record, and a fresh post-restart full-database manual journey is still required as broader current-snapshot evidence. Saved board-layout customization, future schemas, full accounts, expiry/rate limits, and production deployment remain open. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408, CR 500-514, focused CR 725, and focused CR 508-509/608 current-turn history slices are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
@@ -63,9 +63,9 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4169
+- Tests discovered: 4171
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30716628726](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30716628726) — `pass`
+- Baseline CI: [30718156376](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30718156376) — `pass`
 - Compile: `pass`
 - Deterministic tests: `pass_full_exact_commit_gate`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
@@ -89,7 +89,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Merge the first focused Phase 4 typed-handler slice, then migrate the next generic effect family without widening card-specific coverage or changing Game Record v3.
+Complete the focused Phase 4 stack-resolution routing correction, then migrate the next generic effect family without widening card-specific coverage or changing Game Record v3.
 
 ## Regeneration
 

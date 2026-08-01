@@ -391,6 +391,13 @@
         "number": 54,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/54"
+      },
+      {
+        "base": "main",
+        "head": "feat/phase4-typed-semantic-handlers",
+        "number": 55,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/55"
       }
     ],
     "tags": [
@@ -426,7 +433,7 @@
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete",
-      "evidence": "The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, ratcheted guards, documentation enforcement, fine-grained capability closure, and CardProgram V2 are integrated on verified main. The active Phase 4 slice adds a registered typed-handler boundary, immutable rules queries, typed intents, and canonical execution for the first generic effects while preserving a measured legacy fallback."
+      "evidence": "The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, ratcheted guards, documentation enforcement, fine-grained capability closure, CardProgram V2, and the first Phase 4 typed-handler slice are integrated on verified main. Registered draw, table-wide draw, and monarch handlers use immutable rules queries, typed intents, and canonical execution while preserving a measured legacy fallback for unmigrated operations."
     },
     {
       "id": "browser_commander_mvp",
@@ -464,12 +471,12 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "1eb40f99b7269870c7e419aa75ea3e997e7aff0e",
+    "baseline_commit": "c361dfe376352cbf6798dff96430c8c6d294a830",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30716628726,
+      "run_id": 30718156376,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30716628726"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30718156376"
     },
     "local": {
       "compile": "pass",
@@ -499,5 +506,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Merge the first focused Phase 4 typed-handler slice, then migrate the next generic effect family without widening card-specific coverage or changing Game Record v3."
+  "next_task": "Complete the focused Phase 4 stack-resolution routing correction, then migrate the next generic effect family without widening card-specific coverage or changing Game Record v3."
 }

@@ -95,11 +95,10 @@ from .model import (
 from .permissions import AuthorizedCommand, CapabilityManager, PermissionDenied
 from .semantics import SemanticProgram, SemanticRegistry
 from .semantic_runtime import (
-    ReadOnlyHandlerContext,
-    ReadOnlyRulesQuery,
     SemanticNodeError,
     default_semantic_interpreter,
     execute_intent_plan,
+    prepare_draw_resolution,
 )
 from .state_based_actions import (
     ObjectSnapshot,
@@ -13272,47 +13271,50 @@ class CommanderEngine:
                     instruction_pointer=instruction_pointer + index,
                 )
                 return
-            if effect.get("op") == "draw":
-                self._begin_draw_sequence(
-                    str(effect.get("player") or item.controller),
-                    int(effect.get("count", 1)),
-                    reason=str(effect.get("reason") or item.label),
-                    private=bool(effect.get("private", False)),
-                    continuation={
-                        "kind": "semantic_resolution",
-                        "stack_ref": stack_ref,
-                        "effects": effects[index + 1 :],
-                        "destination": destination,
-                        "note": note,
-                        "instruction_pointer": (
-                            instruction_pointer + index + 1
-                        ),
-                    },
+            try:
+                typed_plan = default_semantic_interpreter().lower_for_seats(
+                    effect,
+                    actor=item.controller,
+                    default_reason=item.label,
+                    seats=self.seats,
+                    active_seats=self.active_seats,
+                    apnap_order=self.apnap_order(),
                 )
-                return
-            if effect.get("op") == "draw_each_player":
-                count = int(effect.get("count", 1))
-                expanded = [
-                    {
-                        "op": "draw",
-                        "player": seat,
-                        "count": count,
-                        "private": True,
-                        "reason": str(
-                            effect.get("reason") or item.label
-                        ),
-                    }
-                    for seat in self.apnap_order()
-                    if seat in self.active_seats
-                ]
-                self._continue_resolution(
-                    stack_ref=stack_ref,
-                    effects=[*expanded, *effects[index + 1 :]],
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + index,
+            except SemanticNodeError as exc:
+                raise GameRuleError(str(exc)) from exc
+            if typed_plan is not None:
+                draw_request = prepare_draw_resolution(
+                    typed_plan,
+                    tuple(effects[index + 1 :]),
                 )
-                return
+                if draw_request is not None:
+                    if draw_request.current is None:
+                        index += 1
+                        continue
+                    self._begin_draw_sequence(
+                        draw_request.current.player,
+                        draw_request.current.count,
+                        reason=draw_request.current.reason,
+                        private=draw_request.current.private,
+                        continuation={
+                            "kind": "semantic_resolution",
+                            "stack_ref": stack_ref,
+                            "effects": list(
+                                draw_request.remaining_effects
+                            ),
+                            "destination": destination,
+                            "note": note,
+                            "instruction_pointer": (
+                                instruction_pointer + index + 1
+                            ),
+                        },
+                    )
+                    return
+                execute_intent_plan(self, typed_plan)
+                if item not in self.state.stack:
+                    return
+                index += 1
+                continue
             if effect.get("op") in {
                 "choose_card_name",
                 "choose_creature_type",
@@ -21415,17 +21417,13 @@ class CommanderEngine:
         op = str(effect.get("op") or "").casefold()
         reason = str(effect.get("reason") or ("cost" if as_cost else "effect"))
         try:
-            typed_plan = default_semantic_interpreter().lower(
+            typed_plan = default_semantic_interpreter().lower_for_seats(
                 effect,
-                ReadOnlyHandlerContext(
-                    actor=actor,
-                    default_reason=reason,
-                    query=ReadOnlyRulesQuery(
-                        seats=self.seats,
-                        active_seats=tuple(self.active_seats),
-                        apnap_order=tuple(self.apnap_order()),
-                    ),
-                ),
+                actor=actor,
+                default_reason=reason,
+                seats=self.seats,
+                active_seats=self.active_seats,
+                apnap_order=self.apnap_order(),
             )
         except SemanticNodeError as exc:
             raise GameRuleError(str(exc)) from exc

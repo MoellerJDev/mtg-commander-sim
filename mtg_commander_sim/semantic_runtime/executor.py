@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Protocol
+from dataclasses import dataclass
+from typing import Any, Mapping, Protocol
 
 from .intents import BecomeMonarchIntent, DrawCardsIntent, IntentPlan
 
@@ -16,6 +17,63 @@ class SemanticIntentSink(Protocol):
     ) -> list[str]: ...
 
     def become_monarch(self, seat: str, *, reason: str) -> str: ...
+
+
+@dataclass(frozen=True, slots=True)
+class DrawResolutionBatch:
+    """Draw intents that must use the replacement-aware resolution path."""
+
+    intents: tuple[DrawCardsIntent, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class DrawResolutionRequest:
+    current: DrawCardsIntent | None
+    remaining_effects: tuple[dict[str, Any], ...]
+
+
+def draw_resolution_batch(plan: IntentPlan) -> DrawResolutionBatch | None:
+    if not all(isinstance(intent, DrawCardsIntent) for intent in plan.intents):
+        return None
+    return DrawResolutionBatch(
+        intents=tuple(
+            intent
+            for intent in plan.intents
+            if isinstance(intent, DrawCardsIntent)
+        )
+    )
+
+
+def draw_intent_effect(intent: DrawCardsIntent) -> dict[str, Any]:
+    """Serialize a queued typed draw without reintroducing untyped defaults."""
+
+    return {
+        "op": "draw",
+        "player": intent.player,
+        "count": intent.count,
+        "private": intent.private,
+        "reason": intent.reason,
+    }
+
+
+def prepare_draw_resolution(
+    plan: IntentPlan,
+    following_effects: tuple[Mapping[str, Any], ...],
+) -> DrawResolutionRequest | None:
+    batch = draw_resolution_batch(plan)
+    if batch is None:
+        return None
+    current = batch.intents[0] if batch.intents else None
+    return DrawResolutionRequest(
+        current=current,
+        remaining_effects=(
+            *(
+                draw_intent_effect(intent)
+                for intent in batch.intents[1:]
+            ),
+            *(dict(effect) for effect in following_effects),
+        ),
+    )
 
 
 def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:

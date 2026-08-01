@@ -642,17 +642,21 @@ def _semantic_handler_metrics(
 
     registry = default_semantic_handler_registry()
     inventory = registry.inventory()
-    legacy_branches = [
+    engine_branches = [
         branch
         for branch in state_dispatch["semantic_operation_branches"][
             "locations"
         ]
         if branch["file"] == "mtg_commander_sim/engine.py"
-        and branch["symbol"] == "apply_effect"
     ]
-    legacy_operations = {
+    legacy_apply_effect_branches = [
+        branch
+        for branch in engine_branches
+        if branch["symbol"] == "apply_effect"
+    ]
+    engine_dispatch_operations = {
         literal
-        for branch in legacy_branches
+        for branch in engine_branches
         for literal in branch["string_literals"]
     }
     registered_operations = {
@@ -665,9 +669,12 @@ def _semantic_handler_metrics(
         "registered_operation_count": len(registered_operations),
         "registered_operations": sorted(registered_operations),
         "handlers": inventory,
-        "legacy_apply_effect_branch_count": len(legacy_branches),
+        "engine_string_dispatch_branch_count": len(engine_branches),
+        "legacy_apply_effect_branch_count": len(
+            legacy_apply_effect_branches
+        ),
         "registered_operations_still_in_legacy_dispatch": sorted(
-            registered_operations & legacy_operations
+            registered_operations & engine_dispatch_operations
         ),
         "read_only_context": (
             "mtg_commander_sim.semantic_runtime.context."
@@ -1395,6 +1402,8 @@ def render_architecture_status(report: Mapping[str, Any]) -> str:
             "operations",
             f"- Remaining legacy `apply_effect` branches: "
             f"{architecture['semantic_handlers']['legacy_apply_effect_branch_count']}",
+            f"- Registered operations still intercepted by engine string dispatch: "
+            f"{len(architecture['semantic_handlers']['registered_operations_still_in_legacy_dispatch'])}",
             f"- Exact printed-name literals in configured core files: "
             f"{architecture['printed_name_literals']['entry_count']} "
             f"({architecture['printed_name_literals']['conditional_entry_count']} conditional)",

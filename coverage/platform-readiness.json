@@ -28,7 +28,7 @@
   },
   "milestones": [
     {
-      "evidence": "The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, ratcheted guards, documentation enforcement, fine-grained capability closure, and CardProgram V2 are integrated on verified main. The active Phase 4 slice adds a registered typed-handler boundary, immutable rules queries, typed intents, and canonical execution for the first generic effects while preserving a measured legacy fallback.",
+      "evidence": "The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, ratcheted guards, documentation enforcement, fine-grained capability closure, CardProgram V2, and the first Phase 4 typed-handler slice are integrated on verified main. Registered draw, table-wide draw, and monarch handlers use immutable rules queries, typed intents, and canonical execution while preserving a measured legacy fallback for unmigrated operations.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete"
@@ -52,7 +52,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Merge the first focused Phase 4 typed-handler slice, then migrate the next generic effect family without widening card-specific coverage or changing Game Record v3.",
+  "next_task": "Complete the focused Phase 4 stack-resolution routing correction, then migrate the next generic effect family without widening card-specific coverage or changing Game Record v3.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -137,19 +137,19 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4169,
+    "deterministic_cases_discovered": 4171,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
     "web_files": 24
   },
   "validation": {
-    "baseline_commit": "1eb40f99b7269870c7e419aa75ea3e997e7aff0e",
+    "baseline_commit": "c361dfe376352cbf6798dff96430c8c6d294a830",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30716628726,
+      "run_id": 30718156376,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30716628726"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30718156376"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",

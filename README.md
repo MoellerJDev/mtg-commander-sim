@@ -756,7 +756,9 @@ Phase 4 is migrating executable effect families into
 immutable seat/order query, produce typed intents, and declare bounded rule
 capabilities. The executor reuses canonical engine mutation methods. Draw,
 table-wide draw, and monarch designation are the first migrated operations;
-all other operations remain explicitly on the measured legacy path. This is an
+ordinary CardProgram stack resolution now reaches those handlers, and draw
+intents retain the existing replacement-aware draw sequence. All other
+operations remain explicitly on the measured legacy path. This is an
 architecture milestone, not a broader rules-completeness claim.
 
 This is still not a completeness declaration. Current exact, partial,

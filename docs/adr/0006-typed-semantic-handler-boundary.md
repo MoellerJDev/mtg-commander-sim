@@ -15,9 +15,10 @@ date: "2026-08-01"
 ## Context
 
 CardProgram V2 provides a canonical card artifact, but its effect nodes still
-entered one large `CommanderEngine.apply_effect` string dispatcher. Moving that
-switch wholesale would make behavior and replay regressions difficult to
-localize. Giving handlers the engine or `GameState` would merely distribute
+entered `CommanderEngine` string dispatch, principally through
+`apply_effect` and sometimes through pre-resolution special cases. Moving
+those switches wholesale would make behavior and replay regressions difficult
+to localize. Giving handlers the engine or `GameState` would merely distribute
 mutation authority across more files.
 
 ## Decision
@@ -35,8 +36,12 @@ continue through the measured legacy dispatcher until separately migrated.
 Removing the old branch is part of each migration.
 
 The first slice migrates single-player draw, APNAP table-wide draw, and monarch
-designation. It does not claim complete draw replacement behavior or complete
-monarch rules; the declared capabilities are deliberately narrower.
+designation. Both direct effect application and ordinary CardProgram stack
+resolution use the registered handlers. During stack resolution, typed draw
+intents continue through the existing replacement-aware draw sequence rather
+than bypassing represented replacements. This does not claim complete draw
+replacement behavior or complete monarch rules; the declared capabilities are
+deliberately narrower.
 
 Game Record remains schema version 3. Commands and CardProgram nodes do not
 change, so current and historical records use the same replay path. Card
@@ -49,8 +54,8 @@ explain/audit output adds the registered handler mapping as derived data.
 - Capability references are validated against the versioned registry, while
   trust remains bounded by the capability's own status and blockers.
 - The architecture audit reports registered operations and remaining legacy
-  branches. A registered operation still present in the central dispatcher is
-  measurable drift.
+  branches across the engine. A registered operation still intercepted by any
+  engine string-dispatch branch is measurable drift.
 - New handler families require direct lowering, rollback/illegal-input,
   canonical engine, and replay evidence before their legacy branches are
   removed.

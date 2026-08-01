@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Mapping
+from typing import Any, Iterable, Mapping
 
 from .context import ReadOnlyHandlerContext
 from .intents import IntentPlan
@@ -19,3 +19,24 @@ class SemanticInterpreter:
         context: ReadOnlyHandlerContext,
     ) -> IntentPlan | None:
         return self.registry.lower(effect, context)
+
+    def lower_for_seats(
+        self,
+        effect: Mapping[str, Any],
+        *,
+        actor: str,
+        default_reason: str,
+        seats: Iterable[str],
+        active_seats: Iterable[str],
+        apnap_order: Iterable[str],
+    ) -> IntentPlan | None:
+        return self.lower(
+            effect,
+            ReadOnlyHandlerContext.from_sequences(
+                actor=actor,
+                default_reason=default_reason,
+                seats=seats,
+                active_seats=active_seats,
+                apnap_order=apnap_order,
+            ),
+        )
