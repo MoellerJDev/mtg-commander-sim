@@ -17338,6 +17338,9 @@ class CommanderEngine:
                 applies = {
                     "self": source.object_id == blocker.object_id,
                     "attached": source.attached_to == blocker.object_id,
+                    "attached_option": (
+                        source.attached_to == attacker.object_id
+                    ),
                     "source_opponents": (
                         blocker.controller != source.controller
                     ),
@@ -17565,7 +17568,7 @@ class CommanderEngine:
         source: CardInstance,
     ) -> bool:
         data = self._effective_card_data(card)
-        card_types, subtypes, _ = self._type_parts(
+        card_types, subtypes, supertypes = self._type_parts(
             str(data.get("type_line") or "")
         )
         normalized_types = {value.casefold() for value in card_types}
@@ -17575,6 +17578,17 @@ class CommanderEngine:
             return False
         if predicate.types_none and normalized_types.intersection(
             value.casefold() for value in predicate.types_none
+        ):
+            return False
+        normalized_supertypes = {
+            value.casefold() for value in supertypes
+        }
+        if predicate.supertypes_any and not normalized_supertypes.intersection(
+            value.casefold() for value in predicate.supertypes_any
+        ):
+            return False
+        if predicate.supertypes_none and normalized_supertypes.intersection(
+            value.casefold() for value in predicate.supertypes_none
         ):
             return False
         normalized_subtypes = {value.casefold() for value in subtypes}
@@ -17591,6 +17605,10 @@ class CommanderEngine:
         }
         if predicate.colors_any and not colors.intersection(
             str(value).upper() for value in predicate.colors_any
+        ):
+            return False
+        if predicate.colors_none and colors.intersection(
+            str(value).upper() for value in predicate.colors_none
         ):
             return False
         keywords = normalized_keywords(data.get("keywords", []))
@@ -17644,6 +17662,8 @@ class CommanderEngine:
                 if attached is not None and attached.ref in domains
                 else ()
             )
+        if template.scope == "attached_option":
+            return tuple(sorted(domains))
         if template.scope == "source_opponents":
             by_ref = {
                 card.ref: card for card in self.state.cards.values()
@@ -17669,6 +17689,11 @@ class CommanderEngine:
         if scope == "attached":
             attached = self.state.cards.get(source.attached_to or "")
             return attached is not None and attached.ref in domains
+        if scope == "attached_option":
+            attached = self.state.cards.get(source.attached_to or "")
+            return attached is not None and any(
+                attached.ref in options for options in domains.values()
+            )
         if scope == "source_opponents":
             return any(
                 card.ref in domains and card.controller != source.controller
@@ -17795,9 +17820,23 @@ class CommanderEngine:
                         continue
                     legal_options: list[str] = []
                     for option in remaining.get(variable, []):
+                        attached_option = (
+                            self.state.cards.get(source.attached_to or "")
+                            if template.scope == "attached_option"
+                            else None
+                        )
                         if (
                             template.scope == "source_option"
                             and option != source.ref
+                        ):
+                            legal_options.append(option)
+                            continue
+                        if (
+                            template.scope == "attached_option"
+                            and (
+                                attached_option is None
+                                or option != attached_option.ref
+                            )
                         ):
                             legal_options.append(option)
                             continue

@@ -62,12 +62,13 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         toughness: str = "2",
         subtype: str = "Test",
         colors: tuple[str, ...] = (),
+        type_line: str | None = None,
     ):
         ref = engine.create_token(
             seat,
             name=name,
             characteristics={
-                "type_line": f"Token Creature — {subtype}",
+                "type_line": type_line or f"Token Creature — {subtype}",
                 "oracle_text": oracle_text,
                 "power": power,
                 "toughness": toughness,
@@ -138,6 +139,30 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
                 "intrinsic-block-only-keyword-v1",
                 ("block",),
             ),
+            "This creature can't be blocked by artifact creatures.": (
+                "intrinsic-blocker-filter-evasion-v1",
+                ("block",),
+            ),
+            "This creature can't be blocked except by creatures with flying or reach.": (
+                "intrinsic-allowed-blocker-filter-v1",
+                ("block",),
+            ),
+            "Enchanted creature can't be blocked by black creatures.": (
+                "attached-blocker-filter-evasion-v1",
+                ("block",),
+            ),
+            "Enchanted creature can't be blocked except by walls.": (
+                "attached-allowed-blocker-filter-v1",
+                ("block",),
+            ),
+            "This creature can't block Humans.": (
+                "intrinsic-block-filter-prohibition-v1",
+                ("block",),
+            ),
+            "Creatures with flying can block only creatures with flying.": (
+                "global-block-only-filter-v1",
+                ("block",),
+            ),
         }
         for text, (template_id, declarations) in cases.items():
             with self.subTest(text=text):
@@ -157,6 +182,14 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         self.assertTrue(unsupported.recognized)
         self.assertFalse(unsupported.exact)
         self.assertEqual(("attack",), unsupported.declarations)
+        for complex_filter in (
+            "This creature can't be blocked by creatures that don't have a name.",
+            "This creature can't block unless you control a Vampire.",
+        ):
+            with self.subTest(complex_filter=complex_filter):
+                parsed = parse_declaration_restriction_line(complex_filter)
+                self.assertTrue(parsed.recognized)
+                self.assertFalse(parsed.exact)
 
     def test_absolute_self_and_attached_restrictions_remove_domains(self):
         session = self.make_combat_session(508010901, players=2)
@@ -456,6 +489,238 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         self.assertEqual([limited.ref], domains[small.ref])
         self.assertNotIn(large.ref, domains)
 
+    def test_type_color_keyword_and_attached_evasion_filters_are_cumulative(self):
+        session = self.make_combat_session(509010910, players=2)
+        engine = session.engine
+        artifact_evasion = self.creature(
+            engine,
+            "A",
+            "Artifact Evasion",
+            oracle_text="This creature can't be blocked by artifact creatures.",
+            keywords=("Haste",),
+        )
+        allowed_union = self.creature(
+            engine,
+            "A",
+            "Allowed Union",
+            oracle_text=(
+                "This creature can't be blocked except by artifact creatures "
+                "and/or white creatures."
+            ),
+            keywords=("Haste",),
+        )
+        attached = self.creature(
+            engine, "A", "Attached Evasion", keywords=("Haste",)
+        )
+        aura = self.static_source(
+            engine,
+            "A",
+            "Attached Filter",
+            (
+                "Enchanted creature can't be blocked except by walls and/or "
+                "creatures with flying."
+            ),
+        )
+        aura.attached_to = attached.object_id
+        attached.attachments.append(aura.object_id)
+        artifact = self.creature(
+            engine,
+            "B",
+            "Artifact Blocker",
+            type_line="Artifact Creature — Construct",
+        )
+        white = self.creature(
+            engine, "B", "White Blocker", colors=("W",)
+        )
+        flying = self.creature(
+            engine, "B", "Flying Blocker", keywords=("Flying",)
+        )
+        wall = self.creature(engine, "B", "Wall", subtype="Wall")
+        ground = self.creature(engine, "B", "Ground Blocker")
+        self.set_block_step(
+            engine,
+            [
+                (artifact_evasion, "B"),
+                (allowed_union, "B"),
+                (attached, "B"),
+            ],
+        )
+        engine._issue_next_blocker()
+        session.initial_checkpoint = checkpoint_envelope(session.state)
+
+        domains = engine.state.pending_decision.payload_by_actor["B"][
+            "declaration_constraints"
+        ]["domains"]
+        self.assertEqual([allowed_union.ref], domains[artifact.ref])
+        self.assertEqual(
+            [artifact_evasion.ref, allowed_union.ref], domains[white.ref]
+        )
+        self.assertEqual(
+            [artifact_evasion.ref, attached.ref], domains[flying.ref]
+        )
+        self.assertEqual(
+            [artifact_evasion.ref, attached.ref], domains[wall.ref]
+        )
+        self.assertEqual([artifact_evasion.ref], domains[ground.ref])
+        self.assertFalse(engine._can_block(artifact_evasion, artifact)[0])
+        result = session.act(
+            "pilot:B",
+            {"a": "block", "blocks": {artifact.ref: allowed_union.ref}},
+        )
+        self.assertTrue(result.ok, result.summary)
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "filter-replay"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+            self.assertTrue(replay["ok"], replay)
+
+    def test_self_attached_and_global_block_only_filters_share_domains(self):
+        session = self.make_combat_session(509010911, players=2)
+        engine = session.engine
+        human = self.creature(
+            engine, "A", "Human", keywords=("Haste",), subtype="Human"
+        )
+        beast = self.creature(
+            engine, "A", "Beast", keywords=("Haste",), subtype="Beast"
+        )
+        flying = self.creature(
+            engine,
+            "A",
+            "Flying",
+            keywords=("Haste", "Flying"),
+        )
+        self_limited = self.creature(
+            engine,
+            "B",
+            "Human Limited",
+            oracle_text="This creature can't block Humans.",
+            keywords=("Reach",),
+        )
+        attached_limited = self.creature(
+            engine, "B", "Attached Limited", keywords=("Reach",)
+        )
+        aura = self.static_source(
+            engine,
+            "B",
+            "Attached Cloud Rule",
+            "Enchanted creature can block only creatures with flying.",
+        )
+        aura.attached_to = attached_limited.object_id
+        attached_limited.attachments.append(aura.object_id)
+        flying_limited = self.creature(
+            engine, "B", "Flying Limited", keywords=("Flying",)
+        )
+        self.static_source(
+            engine,
+            "B",
+            "Global Cloud Rule",
+            "Creatures with flying can block only creatures with flying.",
+        )
+        self.set_block_step(
+            engine, [(human, "B"), (beast, "B"), (flying, "B")]
+        )
+        engine._issue_next_blocker()
+
+        domains = engine.state.pending_decision.payload_by_actor["B"][
+            "declaration_constraints"
+        ]["domains"]
+        self.assertEqual(
+            [beast.ref, flying.ref], domains[self_limited.ref]
+        )
+        self.assertEqual([flying.ref], domains[attached_limited.ref])
+        self.assertEqual([flying.ref], domains[flying_limited.ref])
+
+    def test_token_supertype_and_subtype_filters_use_public_characteristics(self):
+        session = self.make_combat_session(509010912, players=2)
+        engine = session.engine
+        token_evasion = self.creature(
+            engine,
+            "A",
+            "Token Evasion",
+            oracle_text="This creature can't be blocked by creature tokens.",
+            keywords=("Haste",),
+        )
+        legendary_only = self.creature(
+            engine,
+            "A",
+            "Legendary Only",
+            oracle_text=(
+                "This creature can't be blocked except by legendary creatures."
+            ),
+            keywords=("Haste",),
+        )
+        token = self.creature(engine, "B", "Token Blocker")
+        ordinary = self.creature(engine, "B", "Ordinary Blocker")
+        ordinary.is_token = False
+        legendary = self.creature(
+            engine,
+            "B",
+            "Legendary Blocker",
+            type_line="Legendary Creature — Hero",
+        )
+        legendary.is_token = False
+        self.set_block_step(
+            engine, [(token_evasion, "B"), (legendary_only, "B")]
+        )
+        engine._issue_next_blocker()
+
+        domains = engine.state.pending_decision.payload_by_actor["B"][
+            "declaration_constraints"
+        ]["domains"]
+        self.assertNotIn(token.ref, domains)
+        self.assertEqual([token_evasion.ref], domains[ordinary.ref])
+        self.assertEqual(
+            [token_evasion.ref, legendary_only.ref], domains[legendary.ref]
+        )
+
+    def test_source_relative_power_filters_use_effective_stats(self):
+        session = self.make_combat_session(509010913, players=2)
+        engine = session.engine
+        small = self.creature(
+            engine, "A", "Small", keywords=("Haste",), power="2"
+        )
+        large = self.creature(
+            engine, "A", "Large", keywords=("Haste",), power="4"
+        )
+        limited_blocker = self.creature(
+            engine,
+            "B",
+            "Relative Blocker",
+            oracle_text=(
+                "This creature can't block creatures with power greater than "
+                "this creature's power."
+            ),
+            power="3",
+        )
+        relative_evasion = self.creature(
+            engine,
+            "A",
+            "Relative Evasion",
+            oracle_text=(
+                "This creature can't be blocked by creatures with greater power."
+            ),
+            keywords=("Haste",),
+            power="3",
+        )
+        bigger = self.creature(engine, "B", "Bigger", power="4")
+        equal = self.creature(engine, "B", "Equal", power="3")
+        self.set_block_step(
+            engine,
+            [(small, "B"), (large, "B"), (relative_evasion, "B")],
+        )
+        engine._issue_next_blocker()
+
+        domains = engine.state.pending_decision.payload_by_actor["B"][
+            "declaration_constraints"
+        ]["domains"]
+        self.assertEqual(
+            [small.ref, relative_evasion.ref], domains[limited_blocker.ref]
+        )
+        self.assertEqual([small.ref, large.ref], domains[bigger.ref])
+        self.assertEqual(
+            [small.ref, large.ref, relative_evasion.ref], domains[equal.ref]
+        )
+
     def test_only_unblockable_attackers_skip_pass_only_blocker_task(self):
         session = self.make_combat_session(509010909, players=2)
         engine = session.engine
@@ -612,6 +877,29 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         self.assertIsNotNone(pause)
         self.assertIn("combat.attack_restriction", pause["event"])
 
+    def test_relevant_unsupported_blocker_filter_pauses_fail_closed(self):
+        session = self.make_combat_session(509010914, players=2)
+        engine = session.engine
+        attacker = self.creature(
+            engine,
+            "A",
+            "Complex Evasion",
+            oracle_text=(
+                "This creature can't be blocked by creatures the monarch "
+                "controls."
+            ),
+            keywords=("Haste",),
+        )
+        self.creature(engine, "B", "Potential Blocker")
+        self.set_block_step(engine, [(attacker, "B")])
+
+        engine._issue_next_blocker()
+
+        self.assertIsNone(engine.state.pending_decision)
+        pause = engine._semantic_pause_annotation()
+        self.assertIsNotNone(pause)
+        self.assertIn("combat.block_restriction", pause["event"])
+
     def test_triggered_text_is_not_misread_as_a_static_restriction(self):
         session = self.make_combat_session(508010906, players=2)
         engine = session.engine
@@ -652,6 +940,22 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         node = ir.faces[0].nodes[0]
         self.assertEqual("intrinsic-attack-block-not-alone-v1", node.template_id)
         self.assertEqual("declaration_restriction", node.effects[0]["op"])
+
+        evasion = compile_oracle_card(
+            replace(
+                exact,
+                oracle_text=(
+                    "This creature can't be blocked except by artifact "
+                    "creatures and/or white creatures."
+                ),
+            ),
+            trusted_mechanics={"cr-509-declare-blockers-step"},
+        )
+        self.assertEqual("exact", evasion.status)
+        self.assertEqual(
+            "intrinsic-allowed-blocker-filter-v1",
+            evasion.faces[0].nodes[0].template_id,
+        )
 
         unresolved = compile_oracle_card(
             replace(

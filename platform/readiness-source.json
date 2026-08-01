@@ -300,6 +300,13 @@
         "number": 41,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/41"
+      },
+      {
+        "base": "main",
+        "head": "feat/rules-combat-restrictions",
+        "number": 42,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/42"
       }
     ],
     "tags": [
@@ -335,7 +342,7 @@
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete",
-      "evidence": "Integration PRs #1-17 and #24-41 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main."
+      "evidence": "Integration PRs #1-17 and #24-42 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main."
     },
     {
       "id": "browser_commander_mvp",

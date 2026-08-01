@@ -68,16 +68,21 @@
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_power_color_and_subtype_block_restrictions_are_cumulative",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_numeric_power_block_restriction_uses_effective_power",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_unblockable_and_blocker_stat_evasion_filter_domains",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_type_color_keyword_and_attached_evasion_filters_are_cumulative",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_self_attached_and_global_block_only_filters_share_domains",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_token_supertype_and_subtype_filters_use_public_characteristics",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_source_relative_power_filters_use_effective_stats",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_only_unblockable_attackers_skip_pass_only_blocker_task",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_minimum_and_maximum_blocker_counts_are_inviolable",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_block_only_keyword_filters_opposing_attackers",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_relevant_unsupported_condition_pauses_fail_closed",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_relevant_unsupported_blocker_filter_pauses_fail_closed",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_oracle_ir_uses_runtime_restriction_grammar"
       ],
       "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
       "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
-      "blockers": ["conditional_compound_attached_evasion_target_specific_temporary_and_multi_block_grammar_not_implemented"],
-      "notes": ["The same typed declaration grammar and finite solver enforce represented blocking restrictions cumulatively with intrinsic flying, reach, shadow, and protection. Exact self, attached, global, not-alone, goaded-opponent, blocker-count, keyword, color, subtype, and effective-stat predicates are supported; pass-only blocker tasks are skipped only after the legal domain is empty. Relevant unsupported static restriction text pauses fail closed. Conditional, compound, attached-evasion, target-specific, temporary, and multi-block grammar remains blocked."]
+      "blockers": ["conditional_compound_controller_history_target_specific_temporary_and_multi_block_grammar_not_implemented"],
+      "notes": ["The same typed declaration grammar and finite solver enforce represented blocking restrictions cumulatively with intrinsic flying, reach, shadow, and protection. Exact self, attached, global, not-alone, goaded-opponent, blocker-count, type, supertype, subtype, token-status, keyword, color, source-stat, denied-blocker, except-by, and can-block-only predicates are supported from the same projected and submitted domain and replay exactly; pass-only blocker tasks are skipped only after the legal domain is empty. Relevant unsupported static restriction text pauses fail closed. Conditional, compound-with-unrelated-effects, controller/history-dependent, target-specific, temporary, and multi-block grammar remains blocked."]
     },
     {
       "rule_id": "509.1c",

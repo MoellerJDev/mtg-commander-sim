@@ -315,9 +315,9 @@ generated documentation fixtures with bearer capabilities redacted. See
   fail-closed material residuals
 - automatic deck-time generic compilation into provisional, arbiter-gated
   semantic programs
-- Oracle IR v5 simple self-trigger, unconditional-entry, counter, pump, basic
+- Oracle IR v6 simple self-trigger, unconditional-entry, counter, pump, basic
   creature-token, fixed-mana combat-declaration cost, and exact combat-
-  declaration restriction templates with reviewed-handler precedence
+  declaration restriction/evasion templates with reviewed-handler precedence
 - CR 613 layer/sublayer, timestamp, dependency, and cycle-audit primitives,
   now used for common copy/type/keyword annotations
 - CR 616 replacement/prevention priority and affected-player-choice
