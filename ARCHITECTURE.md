@@ -345,8 +345,11 @@ the finite declaration solver share that evaluator. Filtered companion and
 minimum-other declarations become conditional variable-count constraints;
 attacking-alone and no-other-creature evasion are recomputed from current
 public state. Source-controller-relative restrictions filter only attacks on
-that player or blocks of that controller's attackers, and per-player attack
-caps count only that destination.
+that player's represented player/planeswalker destinations or blocks of that
+controller's attackers. Per-destination attack caps and source-specific attack
+maxima use the same solver. Player, planeswalker, and Battle destinations
+retain their declaration-time defending-player relationship for the blocking
+step even if the attacked permanent leaves combat.
 The engine removes illegal options before requirement maximization, applies
 represented restrictions cumulatively, and uses the same domain for task
 projection and command validation. An empty blocking domain is an automatic
@@ -354,9 +357,10 @@ pass-only declaration rather than a player task.
 Chosen creatures sacrificed in that mana window pay the locked cost but are
 filtered before CR 508.1k/509.1g creates attacking or blocking relationships.
 Complex or mutated members of the recognized family stop fail closed.
-History-, monarch-, poison-, shared-subtype-quantifier-, and compound-with-
-unrelated-effects restriction/requirement grammar, named or nonplayer target
-restrictions, temporary restrictions, non-goad defender-specific
+Shared-creature-subtype blocking thresholds use effective public subtypes and
+count each Changeling once for every type. History-, monarch-, poison-, and
+compound-with-unrelated-effects restriction/requirement grammar, temporary
+restrictions, non-goad defender-specific
 requirements, effect-granted and
 repeated-combat requirements,
 optional/nonmana/variable/alternative/modified costs, and multi-block remain

@@ -45,15 +45,18 @@ goad, source-stat, denied-blocker, except-by, attached-evasion, and
 can-block-only families compile into typed static nodes and feed the same
 finite solver at runtime. The grammar also represents minimum-other and
 filtered-companion declarations, attacking-alone and no-other-creature
-evasion, source-controller-relative attack/block options, and per-player
-attack caps. Multiple represented restrictions are cumulative.
+evasion, source-controller-relative attack/block options, per-player attack
+caps, source-specific attack maxima, and defending-player shared-creature-
+subtype thresholds. Changeling contributes once to every shared subtype.
+Multiple represented restrictions are cumulative.
 Typed battlefield conditions cover controller, attacking-player, and
 defending-player permanent existence; another-object exclusion; tapped state;
 type, supertype, subtype, color, keyword, power, and toughness filters; minimum
 counts; and relative creature/land counts. They are destination-specific in
 multiplayer and use the same evaluator for direct block-pair checks and solver
-domains. History, monarch, poison, shared-subtype quantifiers, compound-with-
-unrelated-effects, temporary, named/nonplayer-target, and multi-block families
+domains. Player, planeswalker, and Battle destinations are typed rather than
+inferred from card names. History, monarch, poison, compound-with-unrelated-
+effects, temporary, and multi-block families
 retain material residuals instead of being guessed.
 
 At deck creation, generated programs are added only when their stable

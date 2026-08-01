@@ -47,6 +47,11 @@ _ATTACK_TAX_PREFIX = re.compile(
     r"creatures can't attack you(?: or planeswalkers you control)? unless "
     r"their controller pays"
 )
+_PLANESWALKER_ATTACK_TAX = re.compile(
+    r"creatures can't attack planeswalkers you control unless their "
+    r"controller pays (?P<cost>(?:\{[^{}]+\})+) for each creature they "
+    r"control that's attacking a planeswalker you control\."
+)
 _BLOCK_TAX = re.compile(
     r"(?:(?P<attacking>as long as this creature is attacking), )?"
     r"creatures can't block unless their controller pays "
@@ -347,6 +352,33 @@ def parse_declaration_cost_line(
             reason="attack tax grammar is unresolved",
             declarations=("attack",),
             scope="source_controller",
+        )
+
+    match = _PLANESWALKER_ATTACK_TAX.fullmatch(line)
+    if match:
+        mana = fixed_declaration_mana(match.group("cost"))
+        if mana is None:
+            return DeclarationCostParse(
+                True,
+                reason="planeswalker attack tax uses non-fixed mana symbols",
+                declarations=("attack",),
+                scope="source_planeswalkers",
+            )
+        return DeclarationCostParse(
+            True,
+            DeclarationCostTemplate(
+                template_id=(
+                    "source-controller-fixed-mana-attack-tax-"
+                    "planeswalker-v1"
+                ),
+                declarations=("attack",),
+                scope="source_planeswalkers",
+                mana=mana,
+                printed_cost=match.group("cost"),
+                includes_planeswalkers=True,
+            ),
+            declarations=("attack",),
+            scope="source_planeswalkers",
         )
 
     match = _BLOCK_TAX.fullmatch(line)

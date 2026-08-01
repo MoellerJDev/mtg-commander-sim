@@ -297,6 +297,12 @@ class CombatState:
     # Historical CR 508.8 predicate. It survives removal from combat.
     had_attacking_creature: bool = False
     attackers: dict[str, str] = field(default_factory=dict)  # attacker object -> defender seat/object
+    # The defending-player relationship and attacked-object kind are fixed
+    # when an attacker is declared.  They remain available if an attacked
+    # permanent later leaves combat, as required by CR 506.4c and 508.5.
+    attack_target_context: dict[str, dict[str, str]] = field(
+        default_factory=dict
+    )
     # Every rules-defined defending player, including opponents not attacked.
     # Decision scheduling derives the actually attacked subset separately.
     defending_players: list[str] = field(default_factory=list)

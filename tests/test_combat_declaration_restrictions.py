@@ -99,13 +99,16 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         type_line: str,
         tapped: bool = False,
     ):
+        characteristics = {
+            "type_line": type_line,
+            "oracle_text": "",
+        }
+        if "planeswalker" in type_line.casefold():
+            characteristics["loyalty"] = "3"
         ref = engine.create_token(
             seat,
             name=name,
-            characteristics={
-                "type_line": type_line,
-                "oracle_text": "",
-            },
+            characteristics=characteristics,
             tapped=tapped,
         )[0]
         return engine._resolve_object(seat, ref, zones={"battlefield"})
@@ -227,6 +230,10 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
                 "attached-source-controller-attack-v1",
                 ("attack",),
             ),
+            "This creature can't be blocked unless defending player controls three or more creatures that share a creature type.": (
+                "intrinsic-defending-player-shared-subtype-block-unless-v1",
+                ("block",),
+            ),
             "No more than two creatures can attack you each combat.": (
                 "source-controller-attack-maximum-v1",
                 ("attack",),
@@ -238,6 +245,16 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
                 self.assertTrue(parsed.exact)
                 self.assertEqual(template_id, parsed.template.template_id)
                 self.assertEqual(declarations, parsed.declarations)
+
+        named_source = parse_declaration_restriction_line(
+            "No more than one creature can attack The Eternal Wanderer each combat.",
+            card_name="The Eternal Wanderer",
+        )
+        self.assertTrue(named_source.exact)
+        self.assertEqual(
+            "source-attack-maximum-v1",
+            named_source.template.template_id,
+        )
 
         triggered = parse_declaration_restriction_line(
             "Whenever this creature attacks, target creature can't block this turn."
@@ -1348,6 +1365,18 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         attached_session = self.make_combat_session(508010922)
         engine = attached_session.engine
         attached = self.creature(engine, "A", "Attached", keywords=("Haste",))
+        b_walker = self.permanent(
+            engine,
+            "B",
+            "B Walker",
+            type_line="Token Planeswalker — Test",
+        )
+        c_walker = self.permanent(
+            engine,
+            "C",
+            "C Walker",
+            type_line="Token Planeswalker — Test",
+        )
         aura = self.static_source(
             engine,
             "C",
@@ -1357,7 +1386,12 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         aura.attached_to = attached.object_id
         attached.attachments.append(aura.object_id)
         self.assertEqual(
-            ("B",), engine._attack_declaration_problem("A").domains[attached.ref]
+            ("B", b_walker.ref),
+            engine._attack_declaration_problem("A").domains[attached.ref],
+        )
+        self.assertNotIn(
+            c_walker.ref,
+            engine._attack_declaration_problem("A").domains[attached.ref],
         )
 
     def test_filtered_attack_and_block_target_relations(self):
@@ -1629,26 +1663,124 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         self.assertIsNotNone(pause)
         self.assertIn("combat.attack_restriction", pause["event"])
 
-    def test_unsupported_named_attack_target_cap_pauses_fail_closed(self):
+    def test_named_planeswalker_attack_cap_is_target_scoped_and_replays(self):
         session = self.make_combat_session(508010925, players=2)
         engine = session.engine
-        self.creature(engine, "A", "Attacker", keywords=("Haste",))
-        self.static_source(
+        attackers = [
+            self.creature(
+                engine, "A", f"Attacker {index}", keywords=("Haste",)
+            )
+            for index in range(2)
+        ]
+        walker = self.permanent(
             engine,
             "B",
-            "Named Target Cap",
-            (
-                "No more than one creature can attack The Eternal Wanderer "
-                "each combat."
-            ),
+            "The Eternal Wanderer",
+            type_line="Token Planeswalker — Wanderer",
         )
+        walker.annotations["copy_overrides"].update(
+            {
+                "loyalty": "5",
+                "oracle_text": (
+                    "No more than one creature can attack "
+                    "The Eternal Wanderer each combat."
+                ),
+            }
+        )
+        walker.counters["loyalty"] = 5
 
         engine._issue_attackers()
+        session.initial_checkpoint = checkpoint_envelope(session.state)
 
-        self.assertIsNone(engine.state.pending_decision)
-        pause = engine._semantic_pause_annotation()
-        self.assertIsNotNone(pause)
-        self.assertIn("combat.attack_restriction", pause["event"])
+        constraint = next(
+            item
+            for item in engine.state.pending_decision.payload_by_actor["A"]
+            ["declaration_constraints"]["restrictions"]
+            if item["kind"] == "maximum_option_uses"
+        )
+        self.assertEqual(walker.ref, constraint["option"])
+        self.assertFalse(
+            session.act(
+                "pilot:A",
+                {
+                    "a": "attack",
+                    "atk": {
+                        attackers[0].ref: walker.ref,
+                        attackers[1].ref: walker.ref,
+                    },
+                },
+            ).ok
+        )
+        self.assertTrue(
+            session.act(
+                "pilot:A",
+                {
+                    "a": "attack",
+                    "atk": {
+                        attackers[0].ref: walker.ref,
+                        attackers[1].ref: "B",
+                    },
+                },
+            ).ok
+        )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "planeswalker-target-cap"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+            self.assertTrue(replay["ok"], replay)
+            self.assertEqual(1, replay["commands"])
+
+    def test_shared_creature_subtype_condition_includes_changeling(self):
+        session = self.make_combat_session(509010926, players=2)
+        engine = session.engine
+        attacker = self.creature(
+            engine,
+            "A",
+            "Graxiplon",
+            oracle_text=(
+                "This creature can't be blocked unless defending player "
+                "controls three or more creatures that share a creature type."
+            ),
+            keywords=("Haste",),
+        )
+        blocker = self.creature(
+            engine, "B", "Human Blocker", subtype="Human"
+        )
+        self.creature(engine, "B", "Lone Elf", subtype="Elf")
+        self.creature(engine, "B", "First Goblin", subtype="Goblin")
+        self.set_block_step(engine, [(attacker, "B")])
+        self.assertFalse(engine._can_block(attacker, blocker)[0])
+
+        self.creature(
+            engine,
+            "B",
+            "Changeling Ally",
+            subtype="Shapeshifter",
+            keywords=("Changeling",),
+        )
+        self.assertFalse(engine._can_block(attacker, blocker)[0])
+
+        self.creature(engine, "B", "Second Goblin", subtype="Goblin")
+        self.assertTrue(engine._can_block(attacker, blocker)[0])
+        engine._issue_next_blocker()
+        session.initial_checkpoint = checkpoint_envelope(session.state)
+        self.assertIn(
+            attacker.ref,
+            engine._block_declaration_problem("B").domains[blocker.ref],
+        )
+        result = session.act(
+            "pilot:B",
+            {"a": "block", "blocks": {blocker.ref: attacker.ref}},
+        )
+        self.assertTrue(result.ok, result.summary)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "shared-subtype-block"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+            self.assertTrue(replay["ok"], replay)
+            self.assertEqual(1, replay["commands"])
 
     def test_relevant_unsupported_blocker_filter_pauses_fail_closed(self):
         session = self.make_combat_session(509010914, players=2)

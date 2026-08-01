@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 8,
+  "contract_version": 9,
   "mechanic_id": "cr-509-declare-blockers-step",
   "official_name": "Declare Blockers Step",
   "effective_date": "2026-06-19",
@@ -66,7 +66,7 @@
       "supported evasion, protection, and menace restrictions",
       "whole-line static restrictions over effective type, supertype, subtype, token status, keyword, color, power, toughness, goad, attachment, controller, and public combat relationships",
       "defending-player, attacking-player, and source-controller battlefield existence, tapped-state, minimum-count, and relative-count conditions",
-      "current attacker composition, filtered companion eligibility, attacking-alone state, and source-controller-relative opposing attackers"
+      "current attacker composition, filtered companion eligibility, attacking-alone state, source-controller-relative opposing attackers, and shared effective creature-subtype counts including changeling"
     ],
     "state_writes": [
       "blocking relationship",
@@ -146,6 +146,7 @@
     "one or two required other blockers, including a companion filtered by greater power",
     "intrinsic and attached attacking-alone evasion recomputed from the current attacker declaration",
     "no-other-creature evasion recomputed from the source controller's battlefield",
+    "shared-creature-type defender thresholds, including changeling as every creature type",
     "source-controller-relative block restrictions scoped to opposing attacker control",
     "exact filtered declarations replaying from the same projected domain",
     "pass-only blocker tasks skipped when no legal domain remains",
@@ -179,7 +180,8 @@
     {"name": "Dream Prowler", "oracle_id": "b56c5b39-2465-4a25-b806-bb84866e576f"},
     {"name": "Gutter Skulker // Gutter Shortcut", "oracle_id": "d2d753d4-3bb7-4503-8cc0-8f948b7a461e"},
     {"name": "Jeskai Infiltrator", "oracle_id": "39b359c1-48b8-43a7-b972-54764eadd2c7"},
-    {"name": "Storm, Windrider", "oracle_id": "06e9287b-56d4-443e-97ba-b5dcdc4fa989"}
+    {"name": "Storm, Windrider", "oracle_id": "06e9287b-56d4-443e-97ba-b5dcdc4fa989"},
+    {"name": "Graxiplon", "oracle_id": "b81ed78a-1bcc-4a98-8d06-6c9fdff0a8d3"}
   ],
   "rulings": [
     "Mogg Flunkies — 2018-03-16 — The other blocker need not block the same attacker.",
@@ -240,14 +242,15 @@
     "test_source_can_require_two_other_blockers",
     "test_attacking_alone_and_no_other_creature_evasion_recompute",
     "test_attached_attacking_alone_evasion_uses_current_combat",
-    "test_filtered_attack_and_block_target_relations"
+    "test_filtered_attack_and_block_target_relations",
+    "test_shared_creature_subtype_condition_includes_changeling"
   ],
   "implementation": {
     "component": "DeclarationProblem, shared declaration-cost and declaration-restriction Oracle grammars, and the CommanderEngine blocker declaration/payment transition",
-    "version": "declare-blockers-step-v8"
+    "version": "declare-blockers-step-v9"
   },
   "known_blockers": [
-    "history-, monarch-, poison-, shared-subtype-quantifier-, compound-with-unrelated-effects-, temporary-, broader-, and multi-block restriction/evasion grammar remains incomplete and recognized static families fail closed",
+    "history-, monarch-, poison-, compound-with-unrelated-effects-, temporary-, broader-, and multi-block restriction/evasion grammar remains incomplete and recognized static families fail closed",
     "only exact blocks-each-combat, must-be-blocked, lure, and menace grammar is represented; conditional, effect-granted, multi-block, and optional-cost grammar remains incomplete",
     "optional, nonmana, variable, alternative, modified, and broader conditional block costs are not implemented",
     "declare-blockers trigger generation and APNAP placement are incomplete",

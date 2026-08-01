@@ -55,19 +55,20 @@
       "rule_id": "508.1b",
       "rule_text_sha256": "2c1d8209e25a7245d0a4daa1ea6eb89bde1688798a17ef5634a4b171a52bfe05",
       "classification": "behavioral",
-      "status": "blocked",
-      "assertion_kind": "unsupported_fail_closed",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
       "reviewed": true,
-      "implementation_components": ["CommanderEngine._attackable_battles", "CommanderEngine._battle_for_attack_target", "CommanderEngine._complete_attackers"],
+      "implementation_components": ["CommanderEngine._attackable_planeswalkers", "CommanderEngine._attackable_battles", "CommanderEngine._attack_target_details", "CommanderEngine._complete_attackers"],
       "executable_test_ids": [
         "tests.test_multiplayer_rules.MultiplayerRuleTests.test_structured_attack_list_reaches_authoritative_combat_state",
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_is_attackable_and_its_protector_blocks",
-        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_phased_out_battle_is_not_an_attack_target"
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_phased_out_battle_is_not_an_attack_target",
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_planeswalker_is_labeled_attackable_and_replays_exactly"
       ],
       "required_scenarios": ["positive", "negative", "interaction", "multiplayer"],
-      "covered_scenarios": ["positive", "negative", "multiplayer"],
-      "blockers": ["planeswalker_attack_targets_and_nondefault_attack_options_not_implemented"],
-      "notes": ["Opposing players and opponent-protected Battles are represented, including split multiplayer attacks and phased-target rejection; planeswalkers and the full option matrix remain absent."]
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer"],
+      "blockers": [],
+      "notes": ["Supported two-player and Commander attack-multiple profiles expose opposing players, planeswalkers they control, and Battles they protect. The server validates every selected destination and exact command replay preserves the declaration-time target context."]
     },
     {
       "rule_id": "508.1c",
@@ -90,15 +91,15 @@
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_attack_target_restrictions_are_source_controller_scoped",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_filtered_attack_and_block_target_relations",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_source_controller_attack_cap_is_per_target_and_replays",
-        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_unsupported_named_attack_target_cap_pauses_fail_closed",
+        "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_named_planeswalker_attack_cap_is_target_scoped_and_replays",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_relevant_unsupported_condition_pauses_fail_closed",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_triggered_text_is_not_misread_as_a_static_restriction",
         "tests.test_combat_declaration_restrictions.CombatDeclarationRestrictionTests.test_oracle_ir_uses_runtime_restriction_grammar"
       ],
       "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
       "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
-      "blockers": ["history_monarch_poison_shared_subtype_compound_named_nonplayer_target_temporary_and_broader_attack_restriction_grammar_not_implemented"],
-      "notes": ["A shared whole-line Oracle grammar lowers exact self, attached, global, keyword-filtered, not-alone, matching-companion, other-attacker, table-wide count, per-defender count, source-controller target, and typed battlefield-condition restrictions into the finite declaration solver. Represented defender/controller permanent existence, another-object, tapped-state, characteristic/stat, minimum-count, relative-count, and declaration-composition predicates are inviolable, defender-specific in multiplayer, projected from the same legal domains used for submission, and replay exactly. Relevant unsupported static restriction text pauses fail closed; history, monarch, poison, shared-subtype quantifiers, compound, named/nonplayer target, temporary, and broader predicate grammar remains blocked."]
+      "blockers": ["history_monarch_poison_compound_other_named_target_temporary_and_broader_attack_restriction_grammar_not_implemented"],
+      "notes": ["A shared whole-line Oracle grammar lowers exact self, attached, global, keyword-filtered, not-alone, matching-companion, other-attacker, table-wide count, per-defender count, source-controller target, named-source target, and typed battlefield-condition restrictions into the finite declaration solver. Represented defender/controller permanent existence, another-object, tapped-state, characteristic/stat, minimum-count, relative-count, and declaration-composition predicates are inviolable, defender-specific in multiplayer, projected from the same legal domains used for submission, and replay exactly. Relevant unsupported static restriction text pauses fail closed; history, monarch, poison, compound, other named-target, temporary, and broader predicate grammar remains blocked."]
     },
     {
       "rule_id": "508.1d",
@@ -193,12 +194,15 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": [],
-      "executable_test_ids": [],
+      "implementation_components": ["parse_declaration_cost_line", "CommanderEngine._attack_declaration_costs", "CommanderEngine._complete_attackers"],
+      "executable_test_ids": [
+        "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_planeswalker_only_tax_is_locked_for_planeswalker_attack",
+        "tests.test_combat_declaration_costs.CombatDeclarationCostTests.test_player_and_planeswalker_tax_covers_both_target_kinds"
+      ],
       "required_scenarios": ["positive", "negative", "interaction"],
       "covered_scenarios": ["positive", "negative", "interaction"],
       "blockers": ["nonmana_optional_variable_alternative_modified_and_broader_conditional_attack_costs_not_implemented"],
-      "notes": ["Whole-line fixed ordinary-mana intrinsic, attached, and defending-player taxes are derived without card-name branches, aggregated, and locked after attackers tap. Attachment identity scopes Aura costs to the enchanted candidate; a planeswalker-only tax does not affect the currently represented player/Battle destinations. Complex, conditional, or mutated members of the recognized family pause fail closed; optional, nonmana, variable, alternative, modified, and broader conditional costs remain blocked."]
+      "notes": ["Whole-line fixed ordinary-mana intrinsic, attached, player, player-and-planeswalker, and planeswalker-only taxes are derived without card-name branches, aggregated, and locked after attackers tap. Attachment identity scopes Aura costs to the enchanted candidate, and each tax is bound only to its represented destination class. Complex, conditional, or mutated members of the recognized family pause fail closed; optional, nonmana, variable, alternative, modified, and broader conditional costs remain blocked."]
     },
     {
       "rule_id": "508.1i",
@@ -484,15 +488,19 @@
       "rule_id": "508.5",
       "rule_text_sha256": "3ac32f5afb969565981110201c524ad3f12bcbdd70c3797f79392ff8f589aa17",
       "classification": "behavioral",
-      "status": "blocked",
-      "assertion_kind": "unsupported_fail_closed",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
       "reviewed": true,
-      "implementation_components": ["CommanderEngine._defending_player_for_attack_target"],
-      "executable_test_ids": ["tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_is_attackable_and_its_protector_blocks"],
+      "implementation_components": ["CombatState.attack_target_context", "CommanderEngine._attack_target_details", "CommanderEngine._defending_player_for_attack_target", "CommanderEngine._defending_player_for_attacker"],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_is_attackable_and_its_protector_blocks",
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_planeswalker_is_labeled_attackable_and_replays_exactly",
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_departed_planeswalker_keeps_defender_but_not_damage_target"
+      ],
       "required_scenarios": ["positive", "negative", "interaction", "multiplayer"],
-      "covered_scenarios": ["positive", "multiplayer"],
-      "blockers": ["planeswalker_and_removed_from_combat_defender_lki_not_implemented"],
-      "notes": ["Current player and Battle targets derive a defending player, but planeswalkers and the required last-known attacked object relationship are absent."]
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer"],
+      "blockers": [],
+      "notes": ["Each declared attack records its player, planeswalker, or Battle destination and defending player. That declaration-time relationship continues to identify the blocker-declaring player after an attacked permanent leaves, while combat damage independently validates whether the attacked object still exists."]
     },
     {
       "rule_id": "508.5a",

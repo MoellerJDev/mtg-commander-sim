@@ -26,6 +26,7 @@ def _labels(context: Mapping[str, Any]) -> dict[str, str]:
         "options",
         "triggers",
         "battle_defenders",
+        "planeswalker_defenders",
     ):
         for row in _rows(context.get(key)):
             value = row.get("id")

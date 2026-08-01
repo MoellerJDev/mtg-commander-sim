@@ -12,21 +12,21 @@ or provider session data. Current generated metrics live in
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
 - Latest integrated `main` merge:
-  `c544dafd6c99c777b7b43fc95f02d4115600ca2b`
+  `81ce825b72ed1edaf2cd7d51881859a4bebb6dde`
 - Latest certified feature head:
-  `d1456cd`
-- Current focused branch: `feat/rules-combat-composition-targets`, based on
-  `c544daf`; its
+  `301b9f7`
+- Current focused branch: `feat/rules-combat-quantifiers-planeswalkers`, based
+  on `81ce825`; its
   candidate commit is the commit containing this handoff.
-- Current focused slice: typed filtered co-declarations, minimum-other
-  declarations, attacking-alone/no-other-creature evasion, source-controller-
-  relative attack/block targets, per-player attack caps, bounded finite
-  solving, fail-closed named-target residuals, and exact replay
+- Current focused slice: typed planeswalker attack targets, durable defending-
+  player context, player/planeswalker/Battle combat damage, planeswalker attack
+  taxes, source-specific attack maxima, shared-subtype block conditions, and
+  exact replay
 - Package: `0.8.0`
 - Tags: `v0.6.0`, `v0.7.0`
 - No `v0.8.0` release tag has been created.
 
-PRs #1–#17 and #24–#44 are merged through ordinary merge commits. PR #24
+PRs #1–#17 and #24–#45 are merged through ordinary merge commits. PR #24
 incorporated the ancestry-proven CR 400–408 stack; PRs #18–#23 were closed as
 superseded only after their exact heads were reachable from `main`. PRs #27–#35
 integrated the authoritative browser/server vertical slice, restart and
@@ -36,22 +36,24 @@ mana stabilization, and the core combat-keyword slice. PRs #37–#39 add real
 combat damage steps, APNAP damage/trigger batching, and the shared finite
 attack/block declaration solver. PRs #40–#44 add typed goad, declaration costs,
 generic restrictions, evasion/characteristic filters, and conditional public-
-state restrictions. No force push or tag movement was used.
+state restrictions. PR #45 adds typed declaration composition and target-scope
+constraints. No force push or tag movement was used.
 
 ## Deterministic evidence
 
-- The integrated `c544daf` baseline passed all five public CI gates across
+- The integrated `81ce825` baseline passed all five public CI gates across
   Python 3.11/3.12 on Ubuntu/Windows plus Browser/Chromium. The current branch
-  passed 3,417 new and directly impacted combat/Oracle/conformance tests plus
-  32 subtests locally; its full regression remains delegated to PR CI.
+  passed 172 new and directly impacted tests plus 3 subtests locally; its full
+  regression remains delegated to PR CI.
 - All 3,300 pinned rule records and 425 mechanic records verify against the
   June 19, 2026 rules source. Generated per-rule inventory tests do not imply
   semantic completeness.
-- Oracle IR v8 scans 38,484 IDs: 2,959 exact, 16,039 partial, and 19,486
+- Oracle IR v9 scans 38,484 IDs: 2,959 exact, 16,042 partial, and 19,483
   unresolved with 69,890 material residuals. Declaration-restriction residuals
-  are 165 overall and 150 for Commander-legal cards; CR 508/509 remain
-  partial/untrusted, so no completeness promotion is authorized.
-- Conformance is 115 passing, 367 blocked, 81 definition-only, and 2,737
+  are 163 overall and 148 for Commander-legal cards; declaration-cost residuals
+  are 11 and 10 respectively. Broader CR 508/509 contracts remain partial and
+  untrusted, so no completeness promotion is authorized.
+- Conformance is 120 passing, 362 blocked, 81 definition-only, and 2,737
   unreviewed. No complete-rules claim is authorized.
 - The deterministic four-player natural-winner, seed-20260730 replay,
   projection/privacy, protocol demo, dependency, repository/history/security,
@@ -65,7 +67,7 @@ state restrictions. No force push or tag movement was used.
   replayed to the exact final hash, reported zero suppressed meaningful
   windows, and passed its hidden-information audit. A completed concession also
   restores as terminal after server restart and exact replay.
-- Merge commit `c544daf` is covered by `main` run `30695738424` across Python
+- Merge commit `81ce825` is covered by `main` run `30697071401` across Python
   3.11/3.12, Ubuntu/Windows, and Browser/Chromium.
 
 GitHub Actions is operating normally. Historical zero-step billing failures
@@ -143,8 +145,8 @@ contracts beyond partial/untrusted. The shared attack/block solver now handles
 exact source-local requirements, lure/menace restrictions, typed goad, public
 battlefield conditions, minimum-other and filtered-companion implications,
 attacking-alone evasion, source-controller target scopes, and per-player caps.
-The next declaration slices are shared-subtype quantifiers, named/planeswalker
-targets, history/monarch/poison conditions, other effect-granted requirements,
+The next declaration slices are history/monarch/poison conditions,
+other effect-granted requirements,
 optional attack/block costs, and multi-block grammar. The universal typed CR
 120.4/614/615/616 damage replacement/prevention/result pipeline remains the
 deeper prerequisite for noncombat damage and broader Oracle trust.

@@ -428,7 +428,8 @@ generated documentation fixtures with bearer capabilities redacted. See
   complete untap events, additional upkeeps, and after-upkeep casting grammar
   remain blocked
 - source-reviewed CR 506 combat-phase boundary: authoritative attacking and
-  defending roles, durable combat history, represented removal from combat
+  defending roles, declaration-time player/planeswalker/Battle target context,
+  durable combat history, represented removal from combat
   after zone/control/phasing/type changes, and the real second combat-damage
   step required by first/double strike; alternate multiplayer options, generic
   effect-created combatants, restriction snapshots, extra combats, and
@@ -450,8 +451,9 @@ generated documentation fixtures with bearer capabilities redacted. See
   planeswalkers, banding, the universal CR 120.4 replacement/result pipeline,
   noncombat damage events, and source LKI remain blocked
 - source-reviewed CR 508 ordinary attacker declaration: the server offers and
-  revalidates only currently eligible creatures and live opponent/Battle
-  destinations, enforces defender, preserves vigilance, rejects duplicate or
+  revalidates only currently eligible creatures and live opponent,
+  planeswalker, and Battle destinations, enforces defender, preserves
+  vigilance, rejects duplicate or
   phased submissions, and uses a shared finite constraint solver to maximize
   represented attacks-each-combat and typed single/multiple-player goad
   requirements—including duel and all-opponents-goaded cases—
@@ -460,16 +462,17 @@ generated documentation fixtures with bearer capabilities redacted. See
   permanent existence, another-object exclusion, tapped state, characteristics,
   fixed stats, minimum counts, and relative creature/land counts per multiplayer
   defender. Exact other-attacker and filtered-companion implications, source-
-  controller player restrictions, and per-defender attacker caps use the same
-  solver and projected domains. Goad designations are public, noncopiable, same-player
+  controller target restrictions, per-defender attacker caps, and exact
+  source-specific attack maxima use the same solver and projected domains.
+  Goad designations are public, noncopiable, same-player
   redundant, removed by zone changes, and expire at the goading player's next
-  represented turn. Whole-line fixed ordinary-mana intrinsic and defending-
-  player and attached-Aura attack taxes are projected, locked after attackers tap, and paid
-  atomically through manual or automatic mana plans; electing a taxed attack
-  never raises the free requirement maximum. Optional, nonmana, variable,
-  alternative, modified, and broader conditional costs, planeswalkers, attack
-  triggers, entry-attacking, eliminated-player duration boundaries, and target
-  reselection remain blocked
+  represented turn. Whole-line fixed ordinary-mana intrinsic, defending-
+  player, player-and-planeswalker, planeswalker-only, and attached-Aura attack
+  taxes are projected, locked after attackers tap, and paid atomically through
+  manual or automatic mana plans; electing a taxed attack never raises the
+  free requirement maximum. Optional, nonmana, variable, alternative,
+  modified, and broader conditional costs, attack triggers, entry-attacking,
+  eliminated-player duration boundaries, and target reselection remain blocked
 - source-reviewed CR 509 ordinary blocker declaration: the server derives
   eligible blockers and defended attackers, rejects phased-out submissions,
   enforces menace's zero-or-two minimum, preserves blocking relationships
@@ -480,6 +483,8 @@ generated documentation fixtures with bearer capabilities redacted. See
   constraints use the same solver, including impossible/conflicting cases.
   Typed controller/defender battlefield conditions and conditional evasion use
   the same evaluator for projected domains and direct block-pair validation.
+  Shared-creature-subtype thresholds count distinct creatures, with Changeling
+  contributing once to every creature type.
   Other-blocker and filtered-companion implications, attacking-alone and no-
   other-creature evasion, and source-controller-relative block restrictions
   are recomputed from the current public declaration state.
@@ -608,7 +613,7 @@ python simctl.py rules conformance --root .
 
 The pinned snapshot currently has 3,300 stable conformance cases and 3,300
 generated source-linkage tests. Of those cases, 563 are source-reviewed:
-115 have narrow executable semantic evidence, 367 are explicitly blocked, and
+120 have narrow executable semantic evidence, 362 are explicitly blocked, and
 81 are definition-only; 2,737 remain unreviewed. A generated inventory test
 cannot prove rules behavior. See `RULE_CONFORMANCE.md` for the promotion,
 invalidation, and reporting policy.
@@ -704,8 +709,8 @@ python simctl.py oracle coverage \
 ```
 
 This is still not a completeness declaration. The measured July 31 local
-snapshot has 38,484 Oracle IDs: 2,959 exact, 16,039 partially lowerable, and
-19,486 unresolved under current dependency gates. All 69,890 material residuals must
+snapshot has 38,484 Oracle IDs: 2,959 exact, 16,042 partially lowerable, and
+19,483 unresolved under current dependency gates. All 69,890 material residuals must
 be eliminated or covered by reviewed, hash-pinned overrides before complete
 Oracle support can be claimed. Genuinely unique cards may use reviewed
 overrides; common cards and mechanics compile through reusable primitives.

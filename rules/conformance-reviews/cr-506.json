@@ -40,15 +40,18 @@
       "rule_id": "506.2",
       "rule_text_sha256": "6570c9c147aff370bade41b1e6052c33f5c630b79afe8155eae5d7b3641cbda7",
       "classification": "behavioral",
-      "status": "blocked",
-      "assertion_kind": "unsupported_fail_closed",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
       "reviewed": true,
       "implementation_components": ["CommanderEngine._enter_step", "CommanderEngine._issue_attackers", "CommanderEngine._complete_attackers"],
-      "executable_test_ids": ["tests.test_combat_phase_rules.CombatPhaseRuleTests.test_supported_attacking_and_defending_roles_are_authoritative"],
+      "executable_test_ids": [
+        "tests.test_combat_phase_rules.CombatPhaseRuleTests.test_supported_attacking_and_defending_roles_are_authoritative",
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_planeswalker_is_labeled_attackable_and_replays_exactly"
+      ],
       "required_scenarios": ["positive", "negative", "multiplayer"],
       "covered_scenarios": ["positive", "negative", "multiplayer"],
-      "blockers": ["planeswalker_attack_destinations_not_implemented"],
-      "notes": ["Only the active player's eligible creatures are offered and two-player/Commander opponents are defenders, but planeswalker destinations are absent."]
+      "blockers": [],
+      "notes": ["Only the active player's eligible creatures are offered. Supported two-player and Commander attack-multiple profiles expose opponent players, planeswalkers they control, and Battles they protect as authoritative attack destinations."]
     },
     {
       "rule_id": "506.2a",
@@ -95,8 +98,8 @@
       ],
       "required_scenarios": ["positive", "negative", "interaction", "multiplayer"],
       "covered_scenarios": ["positive", "negative", "multiplayer"],
-      "blockers": ["planeswalker_targets_and_generic_entry_attacking_or_blocking_not_implemented"],
-      "notes": ["Declarations require non-Battle creatures and represented destinations are players/Battles; planeswalkers and generic effect-created combatants remain absent."]
+      "blockers": ["generic_entry_attacking_or_blocking_not_implemented"],
+      "notes": ["Declarations require non-Battle creatures and represented destinations are players, planeswalkers, and Battles. Generic effect-created attacking or blocking combatants remain absent."]
     },
     {
       "rule_id": "506.3a",
@@ -219,15 +222,15 @@
       "rule_id": "506.4a",
       "rule_text_sha256": "ab271b64dbd4926623848443d17cc168db66ae0eadd5204a24effd0d9c8a482e",
       "classification": "behavioral",
-      "status": "blocked",
-      "assertion_kind": "unsupported_fail_closed",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
       "reviewed": true,
-      "implementation_components": [],
-      "executable_test_ids": [],
+      "implementation_components": ["CommanderEngine._remove_invalid_combat_objects", "CommanderEngine._declaration_restrictions"],
+      "executable_test_ids": ["tests.test_combat_phase_rules.CombatPhaseRuleTests.test_postdeclaration_restriction_does_not_remove_attacker"],
       "required_scenarios": ["positive", "negative", "interaction"],
-      "covered_scenarios": [],
-      "blockers": ["post_declaration_attack_and_block_restriction_effect_grammar_not_implemented"],
-      "notes": ["The generic restriction solver needed to distinguish declaration legality from removal is absent."]
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": [],
+      "notes": ["Declaration restrictions are checked only while declaring combatants; a restriction that appears afterward does not satisfy any represented remove-from-combat predicate."]
     },
     {
       "rule_id": "506.4b",
@@ -250,12 +253,12 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": ["CommanderEngine._combat_damage_target_exists"],
-      "executable_test_ids": [],
+      "implementation_components": ["CombatState.attack_target_context", "CommanderEngine._defending_player_for_attacker", "CommanderEngine._combat_damage_target_exists"],
+      "executable_test_ids": ["tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_departed_planeswalker_keeps_defender_but_not_damage_target"],
       "required_scenarios": ["positive", "negative", "interaction", "multiplayer"],
-      "covered_scenarios": [],
-      "blockers": ["targetless_attacker_state_blockability_and_defending_player_lki_not_implemented"],
-      "notes": ["Damage to a departed target is suppressed, but targetless attacking state, continued blockability, and defending-player LKI are incomplete."]
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": ["explicit_remove_attacked_permanent_from_combat_effect_and_hybrid_target_matrix_not_implemented"],
+      "notes": ["A declaration-time target context keeps an attacker in combat and routable to the original defending player after its attacked planeswalker or Battle becomes invalid, while ordinary combat damage to that stale target is suppressed. Explicit remove-from-combat effects and the complete hybrid target matrix remain blocked."]
     },
     {
       "rule_id": "506.4d",

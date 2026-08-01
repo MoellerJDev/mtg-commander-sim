@@ -5,7 +5,7 @@
 - Indexed rules: 3300
 - Trusted rules: 0
 - Trusted fraction: 0.00%
-- Semantic conformance passes: 115
+- Semantic conformance passes: 120
 - Unreviewed conformance cases: 2737
 - Current snapshot complete: false
 

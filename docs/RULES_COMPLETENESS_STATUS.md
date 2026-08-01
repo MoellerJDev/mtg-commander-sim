@@ -11,10 +11,10 @@ coverage.
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Current integration branch: `main`
-- Rules integration PRs #1–#17 and #24–#44 are merged; the cumulative PR #24
+- Rules integration PRs #1–#17 and #24–#45 are merged; the cumulative PR #24
   tip incorporated the exact CR 400–408 heads before PRs #18–#23 closed as
   superseded
-- Current integrated merge: `c544daf`
+- Current integrated merge: `81ce825`
 - Package version: `0.8.0`
 - Comprehensive Rules effective date: 2026-06-19
 - CR SHA-256:
@@ -28,7 +28,7 @@ coverage.
 |---|---|---|
 | Versioned rules corpus | Implemented, not complete | 3,300 rules, 156 sections, 733 glossary entries, 425 mechanics |
 | Mechanic contracts | In progress | 57 partial/untrusted contracts; 368 mechanics unclassified; 0 trusted |
-| Typed Oracle IR | In progress | `oracle-ir-v8`, source spans, fail-closed material residuals, anchored target-creature goad lowering, and shared whole-line declaration cost/restriction/evasion/battlefield-condition/composition/target-scope grammars |
+| Typed Oracle IR | In progress | `oracle-ir-v9`, source spans, fail-closed material residuals, anchored target-creature goad lowering, and shared whole-line declaration cost/restriction/evasion/battlefield-condition/composition/target-scope grammars |
 | Object and zone identity | Partial | All 30 CR 400 records reviewed; owner-zone routing, logical incarnations, permanent-spell continuation, serialized zone timestamps, target revalidation, hidden outside-game movement, and selected linked-effect guards |
 | Library | Partial | All 8 CR 401 records reviewed; hidden order/public count, bounded look/reorder, shuffle knowledge clearing, and Nth-from-top placement; simultaneous owner ordering and continuous top-card visibility remain blocked |
 | Hand | Partial | All 4 CR 402 records reviewed; starting/maximum size, cleanup-only excess discard, public count, scoped identity, public-to-hand knowledge, and controller dual-hand access; continuous no-maximum and arbitrary reveal/look grammar remain blocked |
@@ -40,11 +40,11 @@ coverage.
 | Command | Partial | All 4 CR 408 records reviewed; public Commander cards and typed emblem objects are represented, while non-Commander casual variants and arbitrary emblem compilation remain blocked |
 | Continuous-effect layers | Partial | CR 613 evaluator and engine integration for selected derived characteristics |
 | Replacement/prevention ordering | Partial | CR 615/616 typed primitives; stateful shields and event-producer integration incomplete |
-| Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, immutable final combat source-recipient events, combat damage/death trigger batching, counter-derived battlefield defense, copied printed defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
+| Damage, defense, and Battles | Partial | Type-driven CR 120/210/310 damage results, immutable final combat source-recipient events, combat damage/death trigger batching, player/planeswalker/Battle combat targets, counter-derived battlefield defense, copied printed defense, Siege protector/combat routing, and exact-incarnation defeated-trigger exile/optional transformed cast |
 | State-based actions | Partial | CR 704 snapshot evaluator, token/copy cessation, World rule, numeric maximum-counter restrictions, Battle defense/protector checks, and fixed-point engine integration for the reviewed subset |
-| Full Oracle compilation | In progress | exact 2,959; partial 16,039; unresolved 19,486; 69,890 material residuals |
-| Commander-legal Oracle compilation | In progress | exact 338; partial 14,613; unresolved 16,672; 61,213 material residuals |
-| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 563 cases are reviewed, with 115 executable passes, 367 blocked cases, and 81 definition-only cases; 2,737 remain unreviewed |
+| Full Oracle compilation | In progress | exact 2,959; partial 16,042; unresolved 19,483; 69,890 material residuals |
+| Commander-legal Oracle compilation | In progress | exact 338; partial 14,616; unresolved 16,669; 61,213 material residuals |
+| Official-source conformance/property/mutation gates | In progress | 3,300 source-pinned cases and per-rule inventory tests exist; 563 cases are reviewed, with 120 executable passes, 362 blocked cases, and 81 definition-only cases; 2,737 remain unreviewed |
 | Complete-rules claim gate | Failing by design | `current_snapshot_complete=false`, 0 trusted mechanics |
 
 ## Completed rules-program checkpoints
@@ -252,8 +252,10 @@ coverage.
   before spill using marked damage, simultaneous assignments, and deathtouch;
   combat lifelink uses damage actually dealt. Immutable final combat results
   drive represented damage triggers, which combine with resulting death
-  triggers before priority. The complete recipient matrix, trample over
-  planeswalkers, banding assignment control, universal replacement/prevention,
+  triggers before priority. Unblocked damage to the recorded player,
+  planeswalker, or Battle destination and departed-target suppression now have
+  executable evidence. Trample over planeswalkers, banding assignment control,
+  universal replacement/prevention,
   noncombat damage events, and source LKI remain dependency-blocked.
 - [x] Reviewed CR 802.5 for multiplayer combat-damage assignment order.
   Assigning players proceed in APNAP order, later players receive earlier
@@ -263,9 +265,11 @@ coverage.
   preserve represented attacking and blocking relationships. Zone, control,
   phasing, creature-type, Battle-type, and attacking-controller invalidation
   remove represented combatants while retaining the historical attacker
-  predicate required by CR 508.8. Alternate multiplayer options, generic
-  effect-created or effect-removed combatants, planeswalker destinations,
-  complete restrictions and requirements, “alone” provenance, extra combats,
+  predicate required by CR 508.8. Declared player, planeswalker, and Battle
+  targets retain their defending-player relationship through the blocking
+  step even if an attacked permanent leaves. Alternate multiplayer options,
+  generic effect-created or effect-removed combatants, complete restrictions
+  and requirements, “alone” provenance, extra combats,
   and combat-relative timing grammar remain dependency-blocked.
 - [x] Reviewed all 3 CR 507 Beginning of Combat Step records. Supported
   Commander profiles establish all active opponents as defending players
@@ -274,25 +278,28 @@ coverage.
   attackers. Single-defender multiplayer variants remain fail-closed and
   dependency-blocked.
 - [x] Reviewed all 39 CR 508 Declare Attackers Step records. Ordinary
-  eligibility, defender, current target validation, tapping/vigilance, attacking-state
+  eligibility, defender, player/planeswalker/Battle target validation,
+  declaration-time defending-player identity, tapping/vigilance, attacking-state
   lifetime, active-player priority, atomic rejection, exact replay, and
   empty-combat step skipping pass for the represented boundary. Fixed ordinary-
-  mana intrinsic, attached-Aura, and defending-player attack taxes now aggregate, lock after
-  attacker tapping, accept manual/automatic mana plans, and roll back
-  atomically; paid choices do not raise the free requirement maximum.
-  Minimum-other and filtered-companion implications, source-controller player
-  restrictions, and per-player attack caps share the finite solver and exact
-  replay path.
-  Planeswalkers, complete restrictions/requirements, banding, optional/nonmana/
+  mana intrinsic, attached-Aura, defending-player, player-and-planeswalker,
+  and planeswalker-only attack taxes now aggregate, lock after attacker
+  tapping, accept manual/automatic mana plans, and roll back atomically; paid
+  choices do not raise the free requirement maximum. Minimum-other and
+  filtered-companion implications, source-controller target restrictions,
+  per-player attack caps, and source-specific attack maxima share the finite
+  solver and exact replay path.
+  Complete restrictions/requirements, banding, optional/nonmana/
   variable/modified costs, declaration triggers, entry-attacking effects,
-  defending-player LKI, and target reselection remain dependency-blocked.
+  and target reselection remain dependency-blocked.
 - [x] Reviewed all 24 CR 509 Declare Blockers Step records. Ordinary
   eligible-blocker derivation, menace, declaration state, lifetime, priority handoff,
   atomic rejection, multiplayer sequencing, and exact replay pass for the
   represented boundary. Fixed ordinary-mana intrinsic, attached-Aura, and global block taxes
   now lock and pay atomically through represented mana abilities. Minimum-
   other and filtered-companion implications, attacking-alone and no-other-
-  creature evasion, and source-controller block relations use current public
+  creature evasion, source-controller block relations, and defending-player
+  shared-creature-subtype thresholds (including Changeling) use current public
   state in both direct pair checks and declaration domains. Complete
   requirements/restrictions, optional/nonmana/variable/modified block costs,
   declaration triggers, multi-attacker blocking, blocked-status effects, and
@@ -309,20 +316,22 @@ at the profile boundary and remain blocked.
 
 The combat snapshot authoritatively records the active attacking player, all
 rules-defined defending players for supported Commander profiles, current
-attacker/blocker relationships, and whether any attacking creature existed
-during the combat. Represented combatants are removed when they leave the
+attacker/blocker relationships, each declared player/planeswalker/Battle
+destination and its defending player, and whether any attacking creature
+existed during the combat. Represented combatants are removed when they leave the
 battlefield, phase out, cease to be creatures, become Battles, or undergo an
 invalidating control change. Tapping and untapping alone preserve combat
 status. Generic effects that put creatures into combat or remove them, the
 remaining history/declaration-dependent restriction and requirement families,
-broader combat-relative query systems, alternate multiplayer options, extra combats, planeswalker
-destinations, and universal combat-relative timing remain blocked.
+broader combat-relative query systems, alternate multiplayer options, extra
+combats, and universal combat-relative timing remain blocked.
 
 Ordinary attacker declarations are server-derived from current public combat
 state. Only controlled, untapped, present, nonphased creature permanents that
 are not Battles, do not have defender, and are not summoning sick without haste are offered and
-revalidated. Opponent and opponent-protected Battle destinations are
-validated, ordinary attackers tap while vigilance is preserved, illegal mixed
+revalidated. Opponent, opponent-controlled planeswalker, and opponent-
+protected Battle destinations are validated, ordinary attackers tap while
+vigilance is preserved, illegal mixed
 declarations roll back atomically, and attacking relationships last through
 combat. If combat has no attackers after the required priority window, declare
 blockers and combat damage are skipped. The shared finite solver maximizes
@@ -330,19 +339,18 @@ exact source-local attacks-each-combat requirements and typed goad
 requirements. Goad supports independent designations from multiple players,
 duel and all-opponents cases, public projection, same-player redundancy,
 next-turn expiration, zone-change clearing, exact static prohibition, and
-replay. Planeswalkers, conditional and non-goad defender-specific
-requirements, banding, optional/nonmana/variable/modified attack costs, generic declaration triggers,
-entry-attacking effects, eliminated-player duration boundaries, defending-
-player LKI, and target reselection remain blocked. Exact self, attached, global,
+replay. Conditional and non-goad defender-specific requirements, banding,
+optional/nonmana/variable/modified attack costs, generic declaration triggers,
+entry-attacking effects, eliminated-player duration boundaries, and target
+reselection remain blocked. Exact self, attached, global,
 not-alone, goaded-opponent, table-wide count, keyword-filtered, and typed
 battlefield-condition attack restrictions remove illegal domains before
 requirement maximization. Minimum-other and filtered-companion implications,
-source-controller player restrictions, and per-player attack caps are also
-represented. Conditions cover controller/defender permanent
+source-controller target restrictions, per-player attack caps, and source-
+specific attack maxima are also represented. Conditions cover controller/defender permanent
 existence, another-object exclusion, tapped state, characteristics and fixed
 stats, minimum counts, and relative creature/land counts per multiplayer
-destination. History, monarch, poison, shared-subtype quantifiers, compound,
-named/nonplayer-target, temporary, and broader predicate
+destination. History, monarch, poison, compound, temporary, and broader predicate
 families remain fail-closed residuals.
 
 Ordinary blocker declarations are server-derived from current public combat
@@ -362,9 +370,10 @@ can-block-only restrictions are cumulative and share one projected and
 validated legal domain. Typed controller/defender battlefield conditions and
 conditional evasion share one evaluator between direct block-pair checks and
 declaration domains. Minimum-other and filtered-companion implications,
-attacking-alone and no-other-creature evasion, and source-controller-relative
-block restrictions use the same public-state boundary. History, monarch,
-poison, shared-subtype quantifiers, compound-with-unrelated-effects,
+attacking-alone and no-other-creature evasion, source-controller-relative
+block restrictions, and shared-creature-subtype thresholds use the same
+public-state boundary. Changeling contributes once to every subtype. History,
+monarch, poison, compound-with-unrelated-effects,
 temporary, broader, and multi-block grammar, optional/nonmana/variable/modified block costs, declaration-trigger
 provenance, one blocker blocking several attackers, and entry-blocking effects
 remain blocked.
@@ -387,7 +396,10 @@ deathtouch but not prevention. Combat lifelink gains life only for damage
 actually dealt. Each positive final combat result emits a source-correlated
 `damage.dealt` context; represented damage triggers and triggers caused by
 post-damage state-based actions merge into one APNAP/controller-order batch
-before active-player priority. Trample over planeswalkers, noncombat
+before active-player priority. Unblocked attackers damage their recorded
+player, planeswalker, or Battle destination; a departed or no-longer-matching
+permanent destination receives no damage while its declaration-time defender
+still receives the blocker window. Trample over planeswalkers, noncombat
 lifelink/LKI and damage events, banding assignment control, and universal
 simultaneous damage replacement/result ordering remain blocked.
 
@@ -655,7 +667,7 @@ Outstanding blockers include:
 - Rules corpus verification passes for all 3,300 indexed rules, 3,300
   conformance records, and 425 mechanics. The 3,300 generated per-rule tests
   establish inventory linkage only. All 563 cases in the current reviewed
-  families are source-reviewed: 115 pass with executable engine evidence, 367
+  families are source-reviewed: 120 pass with executable engine evidence, 362
   remain blocked, and 81 are definition-only. The other 2,737 cases remain
   unreviewed.
 
@@ -670,11 +682,10 @@ dependency families. Combat damage now has exact step splitting, keyword
 assignment constraints, APNAP announcements, typed final combat events, and
 post-damage trigger batching. The next rules work is:
 
-1. Extend the shared finite attack/block constraint vocabulary to shared-
-   subtype quantifiers, named/planeswalker attack targets, history-, monarch-,
-   poison-, non-goad requirement-, other effect-granted-, optional-cost-, and
-   multi-block grammar without weakening the deterministic search bound or
-   projected explanations.
+1. Extend the shared finite attack/block constraint vocabulary to history-,
+   monarch-, poison-, non-goad requirement-, other effect-granted-, optional-
+   cost-, and multi-block grammar without weakening the deterministic search
+   bound or projected explanations.
 2. Route represented declaration triggers and effect-created/removed combatants
    through that solver while preserving public APNAP ordering and exact replay.
 3. Build the universal CR 120.4/614/615/616 typed damage transformation pipeline

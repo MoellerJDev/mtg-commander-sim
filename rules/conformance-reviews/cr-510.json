@@ -58,15 +58,20 @@
       "rule_id": "510.1b",
       "rule_text_sha256": "81d9279ec4a30c0fd140c21ab4db11b8cdc36177c6c6acd6bd19c5e9d42d96d8",
       "classification": "behavioral",
-      "status": "blocked",
-      "assertion_kind": "unsupported_fail_closed",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
       "reviewed": true,
-      "implementation_components": ["CommanderEngine._validated_combat_damage_assignments"],
-      "executable_test_ids": [],
+      "implementation_components": ["CombatState.attack_target_context", "CommanderEngine._combat_damage_source_options", "CommanderEngine._validated_combat_damage_assignments", "CommanderEngine._apply_combat_damage_assignments"],
+      "executable_test_ids": [
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_unblocked_attacker_damages_planeswalker_loyalty",
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_lethal_planeswalker_combat_damage_applies_state_action",
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_unblocked_attacker_damages_battle_defense",
+        "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_departed_planeswalker_keeps_defender_but_not_damage_target"
+      ],
       "required_scenarios": ["positive", "negative", "interaction"],
-      "covered_scenarios": [],
-      "blockers": ["complete_player_planeswalker_battle_departure_matrix_not_tested"],
-      "notes": ["Current targets are constrained to the recorded attack target, but the complete player, planeswalker, Battle, and departed-target matrix is not yet executable evidence."]
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": [],
+      "notes": ["An unblocked attacker assigns damage only to its recorded attack target. Player life, planeswalker loyalty, and Battle defense are updated by target kind; a departed or no-longer-matching attacked permanent is not offered as a damage recipient."]
     },
     {
       "rule_id": "510.1c",
