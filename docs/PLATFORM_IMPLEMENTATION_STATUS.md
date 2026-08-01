@@ -16,7 +16,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
 - Current commit: the commit containing this ledger
-- Active phase: `phase_1_documentation_enforcement`
+- Active phase: `phase_2_capability_trust_model`
 - Package version: `0.8.0`
 
 Historical integration chronology belongs in `CHANGELOG.md`; this current report intentionally does not reproduce a pull-request ledger.
@@ -39,7 +39,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 | Milestone | Status | Evidence |
 |---|---|---|
-| Integrated deterministic foundation | `complete` | The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, and ratcheted dependency, mutation, specificity, and maintainability guards are integrated on verified main. The active documentation slice establishes authoritative current/target separation, ADR governance, link validation, and generated-only numerical status. |
+| Integrated deterministic foundation | `complete` | The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, ratcheted architecture guards, and documentation enforcement are integrated on verified main. The active capability-trust slice adds a versioned fine-grained registry, deterministic profile-scoped closure, and a conservative legacy-contract fallback. |
 | Browser Commander MVP | `development_local_runtime_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and seven two/four-player Chromium journeys, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, resilient card-scoped click/drag actions, saved Auto-mana/Manual mana and Auto-pass/Full control preferences, public tapped-card orientation, explicit active-player main-phase advancement, confirmed concession, public commander-damage tracking, terminal winner/draw rendering, exact command retry, invited read-only spectators, a durable complete public-log dialog, fail-closed handling for legacy arbiter-only records, and one-command managed Scryfall/browser startup. Compact trusted-only coverage includes modal land faces, targeted Sunscorched Desert ETB damage, a stack response, rules-created Treasure payment, Orcish Bowmasters/Amass, explicit attack and block declarations, combat damage, and a natural commander-damage winner. The 49-command natural-winner record replayed to its exact state hash with zero suppressed meaningful windows and a clean seat-projection audit; completed games also survive process restart. The inspected full-database failure remains a pinned pre-fix record, and a fresh post-restart full-database manual journey is still required as broader current-snapshot evidence. Saved board-layout customization, future schemas, full accounts, expiry/rate limits, and production deployment remain open. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408, CR 500-514, focused CR 725, and focused CR 508-509/608 current-turn history slices are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
@@ -61,7 +61,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4141
+- Tests discovered: 4151
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
 - Baseline CI: [30708805772](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30708805772) — `pass`
 - Compile: `pass`
@@ -87,7 +87,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Merge the focused Phase 1 documentation enforcement slice; then begin Phase 2 with a versioned fine-grained capability schema and one representative compiler/runtime trust migration on a fresh branch.
+Merge the focused Phase 2 capability-trust slice; then begin CardProgram V2 with deterministic serialization and compatibility adapters for existing generated and reviewed semantics.
 
 ## Regeneration
 

@@ -1,0 +1,532 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+import hashlib
+import json
+from pathlib import Path
+import re
+from typing import Any, Iterable, Mapping, Sequence
+
+from ..util import stable_json
+
+
+CAPABILITY_REGISTRY_SCHEMA_VERSION = 1
+CAPABILITY_STATUSES = {
+    "unclassified",
+    "specified",
+    "implemented",
+    "tested",
+    "interaction_tested",
+    "trusted",
+    "blocked",
+    "not_applicable",
+    "non_rules_governed",
+}
+MUTATION_STATUSES = {
+    "not_run",
+    "dependency_mutation_tested",
+    "survived",
+    "not_applicable",
+}
+EVIDENCE_FIELDS = {
+    "positive": "positive_tests",
+    "negative": "negative_tests",
+    "interaction": "interaction_tests",
+    "multiplayer": "multiplayer_tests",
+    "privacy": "privacy_tests",
+    "replay": "replay_tests",
+}
+_CAPABILITY_ID = re.compile(r"^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$")
+_EFFECTIVE_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_REGISTRY_FIELDS = {
+    "schema_version",
+    "registry_version",
+    "effective_date",
+    "source_sha256",
+    "profiles",
+    "aggregates",
+    "capabilities",
+}
+_AGGREGATE_FIELDS = {"mechanic_id", "capabilities"}
+_CAPABILITY_FIELDS = {
+    "id",
+    "version",
+    "official_rules",
+    "supported_profiles",
+    "applicability",
+    "dependencies",
+    "implementation_components",
+    "positive_tests",
+    "negative_tests",
+    "interaction_tests",
+    "multiplayer_tests",
+    "privacy_tests",
+    "replay_tests",
+    "required_evidence",
+    "mutation_status",
+    "blockers",
+    "status",
+}
+_APPLICABILITY_FIELDS = {"summary", "inputs", "outputs", "exclusions"}
+DEFAULT_CAPABILITY_REGISTRY = (
+    Path(__file__).resolve().with_name("capability-registry.json")
+)
+
+
+class CapabilityRegistryError(ValueError):
+    """The capability graph is malformed or cannot be resolved safely."""
+
+
+def _require_exact_fields(
+    value: Mapping[str, Any],
+    expected: set[str],
+    *,
+    field: str,
+) -> None:
+    actual = set(value)
+    missing = sorted(expected - actual)
+    unknown = sorted(actual - expected)
+    if missing:
+        raise CapabilityRegistryError(
+            f"{field} is missing required fields: {', '.join(missing)}"
+        )
+    if unknown:
+        raise CapabilityRegistryError(
+            f"{field} has unknown fields: {', '.join(unknown)}"
+        )
+
+
+def _strings(
+    value: Any,
+    *,
+    field: str,
+    required: bool = False,
+) -> tuple[str, ...]:
+    if not isinstance(value, list) or any(
+        not isinstance(item, str) or not item.strip() for item in value
+    ):
+        raise CapabilityRegistryError(
+            f"{field} must be a list of nonempty strings"
+        )
+    result = tuple(str(item) for item in value)
+    if required and not result:
+        raise CapabilityRegistryError(f"{field} must not be empty")
+    if len(result) != len(set(result)):
+        raise CapabilityRegistryError(f"{field} must contain unique values")
+    return result
+
+
+def _hash(value: Any) -> str:
+    return hashlib.sha256(stable_json(value).encode("utf-8")).hexdigest()
+
+
+@dataclass(frozen=True, slots=True)
+class CapabilityClosure:
+    requested: tuple[str, ...]
+    reachable: tuple[str, ...]
+    profile: str
+    trusted: bool
+    blockers: tuple[str, ...]
+    registry_fingerprint: str
+    fingerprint: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "requested": list(self.requested),
+            "reachable": list(self.reachable),
+            "profile": self.profile,
+            "trusted": self.trusted,
+            "blockers": list(self.blockers),
+            "registry_fingerprint": self.registry_fingerprint,
+            "fingerprint": self.fingerprint,
+        }
+
+
+class CapabilityRegistry:
+    """Validated immutable view of fine-grained rules capabilities.
+
+    The registry deliberately contains metadata, not mutable game state. A
+    closure is a deterministic statement about exactly which bounded promises
+    a program requests for one rules profile. Broad mechanic aggregates remain
+    available for migration reporting, but they do not gate a smaller closure.
+    """
+
+    def __init__(self, value: Mapping[str, Any]):
+        raw = json.loads(json.dumps(dict(value)))
+        _require_exact_fields(raw, _REGISTRY_FIELDS, field="registry")
+        if type(raw.get("schema_version")) is not int or raw[
+            "schema_version"
+        ] != (
+            CAPABILITY_REGISTRY_SCHEMA_VERSION
+        ):
+            raise CapabilityRegistryError(
+                "Unsupported capability registry schema_version"
+            )
+        if (
+            type(raw.get("registry_version")) is not int
+            or raw["registry_version"] < 1
+        ):
+            raise CapabilityRegistryError(
+                "registry_version must be positive"
+            )
+        if _EFFECTIVE_DATE.fullmatch(str(raw["effective_date"])) is None:
+            raise CapabilityRegistryError(
+                "effective_date must use YYYY-MM-DD"
+            )
+        source_hash = str(raw["source_sha256"])
+        if re.fullmatch(r"[0-9a-f]{64}", source_hash) is None:
+            raise CapabilityRegistryError(
+                "source_sha256 must be a lowercase SHA-256"
+            )
+        self._profiles = _strings(
+            raw.get("profiles"), field="profiles", required=True
+        )
+        capability_rows = raw.get("capabilities")
+        if not isinstance(capability_rows, list):
+            raise CapabilityRegistryError("capabilities must be a list")
+        self._capabilities: dict[str, dict[str, Any]] = {}
+        for index, candidate in enumerate(capability_rows):
+            if not isinstance(candidate, Mapping):
+                raise CapabilityRegistryError(
+                    f"capabilities[{index}] must be an object"
+                )
+            row = self._validate_capability(dict(candidate), index=index)
+            capability_id = str(row["id"])
+            if capability_id in self._capabilities:
+                raise CapabilityRegistryError(
+                    f"Duplicate capability id: {capability_id}"
+                )
+            self._capabilities[capability_id] = row
+
+        self._aggregates: dict[str, tuple[str, ...]] = {}
+        aggregate_rows = raw.get("aggregates")
+        if not isinstance(aggregate_rows, list):
+            raise CapabilityRegistryError("aggregates must be a list")
+        for index, candidate in enumerate(aggregate_rows):
+            if not isinstance(candidate, Mapping):
+                raise CapabilityRegistryError(
+                    f"aggregates[{index}] must be an object"
+                )
+            _require_exact_fields(
+                candidate,
+                _AGGREGATE_FIELDS,
+                field=f"aggregates[{index}]",
+            )
+            mechanic_id = str(candidate.get("mechanic_id") or "").strip()
+            if not mechanic_id:
+                raise CapabilityRegistryError(
+                    f"aggregates[{index}].mechanic_id is required"
+                )
+            if mechanic_id in self._aggregates:
+                raise CapabilityRegistryError(
+                    f"Duplicate aggregate mechanic: {mechanic_id}"
+                )
+            self._aggregates[mechanic_id] = _strings(
+                candidate.get("capabilities"),
+                field=f"aggregates[{index}].capabilities",
+                required=True,
+            )
+
+        self._validate_references()
+        self._validate_acyclic()
+        self._raw = raw
+        self._fingerprint = _hash(raw)
+
+    def _validate_capability(
+        self,
+        row: dict[str, Any],
+        *,
+        index: int,
+    ) -> dict[str, Any]:
+        prefix = f"capabilities[{index}]"
+        _require_exact_fields(row, _CAPABILITY_FIELDS, field=prefix)
+        capability_id = str(row.get("id") or "")
+        if _CAPABILITY_ID.fullmatch(capability_id) is None:
+            raise CapabilityRegistryError(
+                f"{prefix}.id is not a stable capability id"
+            )
+        if type(row.get("version")) is not int or row["version"] < 1:
+            raise CapabilityRegistryError(
+                f"{prefix}.version must be positive"
+            )
+        status = str(row.get("status") or "")
+        if status not in CAPABILITY_STATUSES:
+            raise CapabilityRegistryError(
+                f"{prefix}.status is unknown: {status!r}"
+            )
+        mutation_status = str(row.get("mutation_status") or "")
+        if mutation_status not in MUTATION_STATUSES:
+            raise CapabilityRegistryError(
+                f"{prefix}.mutation_status is unknown: "
+                f"{mutation_status!r}"
+            )
+        for field, required in (
+            ("official_rules", True),
+            ("supported_profiles", True),
+            ("dependencies", False),
+            ("implementation_components", False),
+            ("positive_tests", False),
+            ("negative_tests", False),
+            ("interaction_tests", False),
+            ("multiplayer_tests", False),
+            ("privacy_tests", False),
+            ("replay_tests", False),
+            ("required_evidence", False),
+            ("blockers", False),
+        ):
+            row[field] = list(
+                _strings(
+                    row.get(field),
+                    field=f"{prefix}.{field}",
+                    required=required,
+                )
+            )
+        unsupported_profiles = sorted(
+            set(row["supported_profiles"]) - set(self._profiles)
+        )
+        if unsupported_profiles:
+            raise CapabilityRegistryError(
+                f"{prefix} uses unknown profile(s): "
+                + ", ".join(unsupported_profiles)
+            )
+        unknown_evidence = sorted(
+            set(row["required_evidence"]) - set(EVIDENCE_FIELDS)
+        )
+        if unknown_evidence:
+            raise CapabilityRegistryError(
+                f"{prefix} uses unknown evidence class(es): "
+                + ", ".join(unknown_evidence)
+            )
+        applicability = row.get("applicability")
+        if not isinstance(applicability, Mapping):
+            raise CapabilityRegistryError(
+                f"{prefix}.applicability must be an object"
+            )
+        _require_exact_fields(
+            applicability,
+            _APPLICABILITY_FIELDS,
+            field=f"{prefix}.applicability",
+        )
+        for field in ("summary", "inputs", "outputs", "exclusions"):
+            if field == "summary":
+                if not str(applicability.get(field) or "").strip():
+                    raise CapabilityRegistryError(
+                        f"{prefix}.applicability.summary is required"
+                    )
+            else:
+                _strings(
+                    applicability.get(field),
+                    field=f"{prefix}.applicability.{field}",
+                )
+        row["applicability"] = json.loads(json.dumps(applicability))
+        if status == "trusted":
+            if row["blockers"]:
+                raise CapabilityRegistryError(
+                    f"Trusted {capability_id} cannot retain blockers"
+                )
+            if not row["implementation_components"]:
+                raise CapabilityRegistryError(
+                    f"Trusted {capability_id} requires an implementation"
+                )
+            if mutation_status == "not_run":
+                raise CapabilityRegistryError(
+                    f"Trusted {capability_id} requires mutation evidence"
+                )
+            for evidence in row["required_evidence"]:
+                field = EVIDENCE_FIELDS[evidence]
+                if not row[field]:
+                    raise CapabilityRegistryError(
+                        f"Trusted {capability_id} requires {field}"
+                    )
+        return row
+
+    def _validate_references(self) -> None:
+        known = set(self._capabilities)
+        for capability_id, row in self._capabilities.items():
+            missing = sorted(set(row["dependencies"]) - known)
+            if missing:
+                raise CapabilityRegistryError(
+                    f"{capability_id} has unknown dependencies: "
+                    + ", ".join(missing)
+                )
+        for mechanic_id, dependencies in self._aggregates.items():
+            missing = sorted(set(dependencies) - known)
+            if missing:
+                raise CapabilityRegistryError(
+                    f"{mechanic_id} aggregate has unknown capabilities: "
+                    + ", ".join(missing)
+                )
+
+    def _validate_acyclic(self) -> None:
+        visiting: list[str] = []
+        complete: set[str] = set()
+
+        def visit(capability_id: str) -> None:
+            if capability_id in complete:
+                return
+            if capability_id in visiting:
+                start = visiting.index(capability_id)
+                cycle = [*visiting[start:], capability_id]
+                raise CapabilityRegistryError(
+                    "Capability dependency cycle: " + " -> ".join(cycle)
+                )
+            visiting.append(capability_id)
+            for dependency in self._capabilities[capability_id][
+                "dependencies"
+            ]:
+                visit(str(dependency))
+            visiting.pop()
+            complete.add(capability_id)
+
+        for capability_id in sorted(self._capabilities):
+            visit(capability_id)
+
+    @classmethod
+    def from_path(cls, path: str | Path) -> "CapabilityRegistry":
+        return cls(json.loads(Path(path).read_text(encoding="utf-8")))
+
+    @property
+    def fingerprint(self) -> str:
+        return self._fingerprint
+
+    @property
+    def profiles(self) -> tuple[str, ...]:
+        return self._profiles
+
+    def capability(self, capability_id: str) -> dict[str, Any] | None:
+        row = self._capabilities.get(capability_id)
+        return json.loads(json.dumps(row)) if row is not None else None
+
+    def capabilities(self) -> list[dict[str, Any]]:
+        return [
+            json.loads(json.dumps(self._capabilities[capability_id]))
+            for capability_id in sorted(self._capabilities)
+        ]
+
+    def aggregate_dependencies(self, mechanic_id: str) -> tuple[str, ...]:
+        return self._aggregates.get(mechanic_id, ())
+
+    def closure(
+        self,
+        requested: Iterable[str],
+        *,
+        profile: str,
+    ) -> CapabilityClosure:
+        if profile not in self._profiles:
+            raise CapabilityRegistryError(
+                f"Unknown capability profile: {profile}"
+            )
+        requested_ids = tuple(sorted(set(str(value) for value in requested)))
+        reachable: set[str] = set()
+        blockers: set[str] = set()
+
+        def visit(capability_id: str) -> None:
+            if capability_id in reachable:
+                return
+            row = self._capabilities.get(capability_id)
+            if row is None:
+                blockers.add(f"missing:{capability_id}")
+                return
+            reachable.add(capability_id)
+            if profile not in row["supported_profiles"]:
+                blockers.add(f"profile:{capability_id}:{profile}")
+            if row["status"] != "trusted":
+                blockers.add(f"status:{capability_id}:{row['status']}")
+            blockers.update(
+                f"blocker:{capability_id}:{blocker}"
+                for blocker in row["blockers"]
+            )
+            for dependency in row["dependencies"]:
+                visit(str(dependency))
+
+        for capability_id in requested_ids:
+            visit(capability_id)
+        reachable_ids = tuple(sorted(reachable))
+        blocker_ids = tuple(sorted(blockers))
+        closure_payload = {
+            "requested": requested_ids,
+            "reachable": [
+                {
+                    "id": capability_id,
+                    "version": self._capabilities[capability_id]["version"],
+                    "status": self._capabilities[capability_id]["status"],
+                }
+                for capability_id in reachable_ids
+            ],
+            "missing": sorted(
+                blocker.removeprefix("missing:")
+                for blocker in blocker_ids
+                if blocker.startswith("missing:")
+            ),
+            "profile": profile,
+            "registry_fingerprint": self._fingerprint,
+        }
+        return CapabilityClosure(
+            requested=requested_ids,
+            reachable=reachable_ids,
+            profile=profile,
+            trusted=not blocker_ids,
+            blockers=blocker_ids,
+            registry_fingerprint=self._fingerprint,
+            fingerprint=_hash(closure_payload),
+        )
+
+    def aggregate_closure(
+        self,
+        mechanic_id: str,
+        *,
+        profile: str,
+    ) -> CapabilityClosure:
+        if mechanic_id not in self._aggregates:
+            raise CapabilityRegistryError(
+                f"Unknown mechanic aggregate: {mechanic_id}"
+            )
+        return self.closure(
+            self._aggregates[mechanic_id], profile=profile
+        )
+
+
+def load_default_capability_registry() -> CapabilityRegistry:
+    return CapabilityRegistry.from_path(DEFAULT_CAPABILITY_REGISTRY)
+
+
+def capability_dependencies_for_node(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    mechanic_ids: Iterable[str],
+) -> tuple[str, ...]:
+    """Return reviewed fine-grained dependencies for recognized node shapes.
+
+    This bridge is intentionally narrow. Unknown operations return no mapping
+    and continue through the legacy broad-contract gate until their capability
+    declarations are reviewed.
+    """
+
+    mechanics = {str(value).casefold() for value in mechanic_ids}
+    operations = {str(effect.get("op") or "") for effect in effects}
+    dependencies: set[str] = set()
+    schema = dict(target_schema or {})
+    reviewed_damage_shape = (
+        mechanics == {"cr-120-damage", "cr-115-targets"}
+        and operations == {"damage"}
+        and schema
+        == {
+            "zones": ["player", "battlefield"],
+            "categories": ["player", "permanent"],
+            "predicate": "damageable",
+            "count": 1,
+        }
+    )
+    if reviewed_damage_shape:
+        dependencies.add("damage.amount.positive")
+        categories = {str(value) for value in schema.get("categories", [])}
+        if "player" in categories:
+            dependencies.add("damage.result.player_life")
+        if (
+            "permanent" in categories
+            and schema.get("predicate") == "damageable"
+        ):
+            dependencies.add("damage.result.multitype_permanent")
+        dependencies.add("target.public.player_or_damageable_permanent")
+    return tuple(sorted(dependencies))

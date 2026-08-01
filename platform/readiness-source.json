@@ -6,7 +6,7 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "phase_1_documentation_enforcement",
+    "active_phase": "phase_2_capability_trust_model",
     "branch": "feat/phase1-documentation-enforcement",
     "commit_reference": "the commit containing this ledger",
     "branch_ancestry": {
@@ -398,7 +398,7 @@
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete",
-      "evidence": "The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, and ratcheted dependency, mutation, specificity, and maintainability guards are integrated on verified main. The active documentation slice establishes authoritative current/target separation, ADR governance, link validation, and generated-only numerical status."
+      "evidence": "The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, ratcheted architecture guards, and documentation enforcement are integrated on verified main. The active capability-trust slice adds a versioned fine-grained registry, deterministic profile-scoped closure, and a conservative legacy-contract fallback."
     },
     {
       "id": "browser_commander_mvp",
@@ -469,5 +469,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Merge the focused Phase 1 documentation enforcement slice; then begin Phase 2 with a versioned fine-grained capability schema and one representative compiler/runtime trust migration on a fresh branch."
+  "next_task": "Merge the focused Phase 2 capability-trust slice; then begin CardProgram V2 with deterministic serialization and compatibility adapters for existing generated and reviewed semantics."
 }

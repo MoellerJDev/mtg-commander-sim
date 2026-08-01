@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mtg-commander-sim.local/schemas/rule-capability-registry-v1.json",
+  "title": "Fine-grained rules capability registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "registry_version",
+    "effective_date",
+    "source_sha256",
+    "profiles",
+    "aggregates",
+    "capabilities"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "registry_version": {"type": "integer", "minimum": 1},
+    "effective_date": {"type": "string", "format": "date"},
+    "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "profiles": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "aggregates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["mechanic_id", "capabilities"],
+        "properties": {
+          "mechanic_id": {"type": "string", "minLength": 1},
+          "capabilities": {"$ref": "#/$defs/nonempty_strings"}
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/capability"}
+    }
+  },
+  "$defs": {
+    "strings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "nonempty_strings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "official_rules",
+        "supported_profiles",
+        "applicability",
+        "dependencies",
+        "implementation_components",
+        "positive_tests",
+        "negative_tests",
+        "interaction_tests",
+        "multiplayer_tests",
+        "privacy_tests",
+        "replay_tests",
+        "required_evidence",
+        "mutation_status",
+        "blockers",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$"
+        },
+        "version": {"type": "integer", "minimum": 1},
+        "official_rules": {"$ref": "#/$defs/nonempty_strings"},
+        "supported_profiles": {"$ref": "#/$defs/nonempty_strings"},
+        "applicability": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["summary", "inputs", "outputs", "exclusions"],
+          "properties": {
+            "summary": {"type": "string", "minLength": 1},
+            "inputs": {"$ref": "#/$defs/strings"},
+            "outputs": {"$ref": "#/$defs/strings"},
+            "exclusions": {"$ref": "#/$defs/strings"}
+          }
+        },
+        "dependencies": {"$ref": "#/$defs/strings"},
+        "implementation_components": {"$ref": "#/$defs/strings"},
+        "positive_tests": {"$ref": "#/$defs/strings"},
+        "negative_tests": {"$ref": "#/$defs/strings"},
+        "interaction_tests": {"$ref": "#/$defs/strings"},
+        "multiplayer_tests": {"$ref": "#/$defs/strings"},
+        "privacy_tests": {"$ref": "#/$defs/strings"},
+        "replay_tests": {"$ref": "#/$defs/strings"},
+        "required_evidence": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "positive",
+              "negative",
+              "interaction",
+              "multiplayer",
+              "privacy",
+              "replay"
+            ]
+          }
+        },
+        "mutation_status": {
+          "enum": [
+            "not_run",
+            "dependency_mutation_tested",
+            "survived",
+            "not_applicable"
+          ]
+        },
+        "blockers": {"$ref": "#/$defs/strings"},
+        "status": {
+          "enum": [
+            "unclassified",
+            "specified",
+            "implemented",
+            "tested",
+            "interaction_tested",
+            "trusted",
+            "blocked",
+            "not_applicable",
+            "non_rules_governed"
+          ]
+        }
+      }
+    }
+  }
+}

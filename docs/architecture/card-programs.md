@@ -1,8 +1,8 @@
 ---
 title: "Card programs"
 status: "current"
-authoritative_source: "mtg_commander_sim/semantics.py and semantic pack schemas"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+authoritative_source: "mtg_commander_sim/semantics.py, capability registry, and semantic pack schemas"
+verified: "2026-08-01"
 audience: "compiler, rules, and semantic-pack contributors"
 maintenance: "hand-maintained"
 ---
@@ -15,12 +15,22 @@ triggers, trust metadata, source hashes, and dependency evidence. The registry
 merges reviewed packs and provisional compiler output while rejecting
 incompatible or conflicting definitions.
 
+Capability-aware generated programs may also carry additive direct capability
+IDs and the resolved profile-scoped closure with registry and closure
+fingerprints. Programs without those fields retain their prior serialized
+shape. This is the compatibility rail for CardProgram V2, not CardProgram V2
+itself.
+
 ## Trust boundary
 
 - Reviewed packs may be trusted only when their source fingerprints and tests
   match.
 - Compiler output remains provisional when any material residual or dependency
   is unresolved.
+- A capability-aware compiler promotion requires every member of the exact
+  transitive closure to be trusted for the selected profile.
+- Broad mechanic aggregate status neither grants nor revokes a smaller exact
+  closure; unmigrated nodes keep using the conservative broad-contract gate.
 - Game creation pins the semantic registry fingerprint. A saved game is not
   silently upgraded by a later pack.
 - Runtime execution accepts registered operations only. Unknown operations and

@@ -18,3 +18,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0001 — one serialized writer per game](0001-single-writer-game-actor.md)
 - [ADR 0002 — seat-projected network protocol](0002-seat-projected-network-protocol.md)
 - [ADR 0003 — ratcheted architecture and documentation enforcement](0003-ratcheted-architecture-enforcement.md)
+- [ADR 0004 — fine-grained capability trust](0004-fine-grained-capability-trust.md)

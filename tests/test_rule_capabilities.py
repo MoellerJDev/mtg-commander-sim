@@ -1,0 +1,345 @@
+from __future__ import annotations
+
+import ast
+from dataclasses import replace
+import json
+from pathlib import Path
+import unittest
+
+import jsonschema
+
+from common import DB_PATH
+from mtg_commander_sim.carddb import CardDatabase, CardRecord
+from mtg_commander_sim.oracle_ir import (
+    compile_oracle_card,
+    generated_programs,
+)
+from mtg_commander_sim.rules.capabilities import (
+    CapabilityRegistry,
+    CapabilityRegistryError,
+    capability_dependencies_for_node,
+    load_default_capability_registry,
+)
+from mtg_commander_sim.semantics import SemanticProgram
+
+
+ROOT = Path(__file__).resolve().parents[1]
+REGISTRY_PATH = (
+    ROOT
+    / "mtg_commander_sim"
+    / "rules"
+    / "capability-registry.json"
+)
+
+
+def _registry_value() -> dict:
+    return json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
+
+
+def _test_ids() -> set[str]:
+    result: set[str] = set()
+    for path in sorted((ROOT / "tests").glob("test_*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        result.update(
+            node.name
+            for node in ast.walk(tree)
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and node.name.startswith("test_")
+        )
+    return result
+
+
+def _lightning_bolt_record() -> CardRecord:
+    """Return a compiler fixture independent of the selected card database."""
+
+    return CardRecord(
+        oracle_id="00000000-0000-4000-8000-00000000b017",
+        name="Lightning Bolt",
+        mana_cost="{R}",
+        mana_value=1.0,
+        type_line="Instant",
+        oracle_text="Lightning Bolt deals 3 damage to any target.",
+        power=None,
+        toughness=None,
+        loyalty=None,
+        defense=None,
+        colors=("R",),
+        color_identity=("R",),
+        keywords=(),
+        produced_mana=(),
+        layout="normal",
+        released_at="1993-08-05",
+        legalities={"commander": "legal"},
+        faces=(),
+        raw={},
+    )
+
+
+class CapabilityRegistryTests(unittest.TestCase):
+    def test_registry_matches_schema_rules_snapshot_and_test_evidence(self):
+        value = _registry_value()
+        schema = json.loads(
+            (
+                ROOT
+                / "schemas"
+                / "rule-capability-registry.schema.json"
+            ).read_text(encoding="utf-8")
+        )
+        jsonschema.Draft202012Validator(schema).validate(value)
+        rule_index = json.loads(
+            (ROOT / "rules" / "rule-index.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(
+            rule_index["effective_date"], value["effective_date"]
+        )
+        self.assertEqual(
+            rule_index["source_sha256"], value["source_sha256"]
+        )
+        known_rules = {row["rule_id"] for row in rule_index["rules"]}
+        known_tests = _test_ids()
+        for capability in value["capabilities"]:
+            with self.subTest(capability["id"]):
+                self.assertFalse(
+                    set(capability["official_rules"]) - known_rules
+                )
+                evidence = {
+                    test_id
+                    for field in (
+                        "positive_tests",
+                        "negative_tests",
+                        "interaction_tests",
+                        "multiplayer_tests",
+                        "privacy_tests",
+                        "replay_tests",
+                    )
+                    for test_id in capability[field]
+                }
+                self.assertFalse(evidence - known_tests)
+
+    def test_broad_damage_aggregate_stays_blocked(self):
+        registry = load_default_capability_registry()
+        closure = registry.aggregate_closure(
+            "cr-120-damage", profile="commander_duel"
+        )
+        self.assertFalse(closure.trusted)
+        self.assertTrue(
+            any(
+                "damage.replacement.order" in blocker
+                for blocker in closure.blockers
+            )
+        )
+        self.assertTrue(
+            any(
+                "damage.trigger.noncombat" in blocker
+                for blocker in closure.blockers
+            )
+        )
+
+    def test_closure_is_transitive_deterministic_and_profile_scoped(self):
+        registry = load_default_capability_registry()
+        first = registry.closure(
+            [
+                "damage.result.multitype_permanent",
+                "damage.result.player_life",
+                "target.public.player_or_damageable_permanent",
+            ],
+            profile="commander_review",
+        )
+        second = registry.closure(
+            reversed(first.requested), profile="commander_review"
+        )
+        self.assertTrue(first.trusted)
+        self.assertEqual(first, second)
+        self.assertIn("damage.amount.positive", first.reachable)
+        self.assertIn("target.revalidate_resolution", first.reachable)
+        self.assertNotIn("damage.result.infect", first.reachable)
+        self.assertNotIn("damage.result.wither", first.reachable)
+        self.assertNotIn("damage.replacement.order", first.reachable)
+        with self.assertRaisesRegex(
+            CapabilityRegistryError, "Unknown capability profile"
+        ):
+            registry.closure(first.requested, profile="vintage-chaos")
+
+    def test_registry_rejects_cycles_and_incomplete_trust_evidence(self):
+        value = _registry_value()
+        value["capabilities"][0]["dependencies"] = [
+            "target.public.player_or_damageable_permanent"
+        ]
+        with self.assertRaisesRegex(
+            CapabilityRegistryError, "dependency cycle"
+        ):
+            CapabilityRegistry(value)
+
+        value = _registry_value()
+        value["capabilities"][0]["negative_tests"] = []
+        with self.assertRaisesRegex(
+            CapabilityRegistryError, "requires negative_tests"
+        ):
+            CapabilityRegistry(value)
+
+    def test_registry_rejects_schema_drift_and_type_coercion(self):
+        value = _registry_value()
+        value["future_trust_switch"] = True
+        with self.assertRaisesRegex(
+            CapabilityRegistryError, "unknown fields"
+        ):
+            CapabilityRegistry(value)
+
+        value = _registry_value()
+        value["capabilities"][0]["version"] = "1"
+        with self.assertRaisesRegex(
+            CapabilityRegistryError, "version must be positive"
+        ):
+            CapabilityRegistry(value)
+
+    def test_unreviewed_node_shape_has_no_capability_mapping(self):
+        self.assertEqual(
+            (),
+            capability_dependencies_for_node(
+                effects=[{"op": "damage", "target": "$controller"}],
+                target_schema=None,
+                mechanic_ids=["cr-120-damage"],
+            ),
+        )
+
+
+class GeneratedCapabilityTrustTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.db = CardDatabase(DB_PATH)
+        cls.registry = load_default_capability_registry()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.db.close()
+
+    def test_generated_bolt_uses_exact_trusted_capability_closure(self):
+        record = _lightning_bolt_record()
+        ir = compile_oracle_card(
+            record,
+            capability_registry=self.registry,
+            capability_profile="commander_duel",
+        )
+        self.assertEqual("exact", ir.status)
+        node = ir.faces[0].nodes[0]
+        self.assertEqual(
+            (
+                "damage.amount.positive",
+                "damage.result.multitype_permanent",
+                "damage.result.player_life",
+                "target.public.player_or_damageable_permanent",
+            ),
+            node.capability_dependencies,
+        )
+        self.assertIn("damage.result.battle_defense", node.capability_closure)
+        self.assertNotIn("damage.result.infect", node.capability_closure)
+        self.assertIsNotNone(node.capability_fingerprint)
+
+        program = generated_programs(
+            self.db,
+            record,
+            trust_level="trusted",
+            capability_registry=self.registry,
+            capability_profile="commander_duel",
+        )[0]
+        self.assertEqual("trusted", program.trust_level)
+        self.assertFalse(program.requires_arbiter)
+        self.assertEqual(
+            list(node.capability_dependencies),
+            program.capability_dependencies,
+        )
+        self.assertTrue(program.capability_closure["trusted"])
+        self.assertEqual(
+            "capability_closure_verified",
+            program.provenance["dependency_trust"],
+        )
+        self.assertEqual(
+            "capability_closure_verified",
+            program.provenance["review_status"],
+        )
+        self.assertEqual(
+            self.registry.fingerprint,
+            program.provenance["capability_registry_fingerprint"],
+        )
+        self.assertEqual(
+            program.to_dict(),
+            SemanticProgram.from_dict(program.to_dict()).to_dict(),
+        )
+        semantic_schema = json.loads(
+            (
+                ROOT / "schemas" / "semantic-program.schema.json"
+            ).read_text(encoding="utf-8")
+        )
+        jsonschema.Draft202012Validator(semantic_schema).validate(
+            program.to_dict()
+        )
+        tampered = program.to_dict()
+        tampered["capability_closure"]["trusted"] = False
+        tampered["capability_closure"]["blockers"] = ["tampered"]
+        with self.assertRaisesRegex(
+            ValueError, "trusted unblocked capability closure"
+        ):
+            SemanticProgram.from_dict(tampered)
+
+    def test_mutated_dependency_fails_closed_without_broad_family_wait(self):
+        value = _registry_value()
+        result = next(
+            row
+            for row in value["capabilities"]
+            if row["id"] == "damage.result.player_life"
+        )
+        result["status"] = "blocked"
+        result["blockers"] = ["test mutation"]
+        mutated = CapabilityRegistry(value)
+        record = _lightning_bolt_record()
+        ir = compile_oracle_card(
+            record,
+            capability_registry=mutated,
+            capability_profile="commander_duel",
+        )
+        self.assertNotEqual("exact", ir.status)
+        self.assertTrue(ir.material_residuals)
+        self.assertTrue(
+            any(
+                "damage.result.player_life" in blocker
+                for blocker in ir.material_residuals[0].blockers
+            )
+        )
+        with self.assertRaisesRegex(
+            ValueError, "material Oracle residuals remain"
+        ):
+            generated_programs(
+                self.db,
+                record,
+                trust_level="trusted",
+                capability_registry=mutated,
+                capability_profile="commander_duel",
+            )
+
+    def test_unrecognized_text_remains_residual_with_capability_registry(self):
+        record = _lightning_bolt_record()
+        changed = replace(
+            record,
+            oracle_text=record.oracle_text + " Then copy this spell.",
+        )
+        ir = compile_oracle_card(
+            changed,
+            capability_registry=self.registry,
+            capability_profile="commander_duel",
+        )
+        self.assertNotEqual("exact", ir.status)
+        self.assertTrue(ir.material_residuals)
+
+    def test_capability_profile_is_validated_even_for_textless_card(self):
+        with self.assertRaisesRegex(ValueError, "Unknown capability profile"):
+            compile_oracle_card(
+                replace(_lightning_bolt_record(), oracle_text=""),
+                capability_registry=self.registry,
+                capability_profile="unknown-profile",
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()

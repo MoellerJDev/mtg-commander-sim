@@ -27,6 +27,7 @@ include = ["mtg_commander_sim*", "server*"]
 [tool.setuptools.package-data]
 mtg_commander_sim = [
   "deck_profiles/*.json",
+  "rules/*.json",
   "semantic_packs/*.json",
   "schemas/*.json"
 ]
