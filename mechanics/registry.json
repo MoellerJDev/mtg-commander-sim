@@ -1,5 +1,5 @@
 {
-  "contract_count": 49,
+  "contract_count": 55,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -64,14 +64,14 @@
     {
       "mechanic_id": "cr-510-combat-damage-step",
       "path": "mechanics/contracts/combat-damage-step.json",
-      "sha256": "e69d94b32ffd724fc770dacaa2f8b573450f0f04625a5d249262cdbe84e90d63",
-      "version": 1
+      "sha256": "870cf77a9ec297c95bee1e49f6c2e18d0aba49c32d587af8eb0c18cdb83ca75a",
+      "version": 2
     },
     {
       "mechanic_id": "cr-506-combat-phase",
       "path": "mechanics/contracts/combat-phase.json",
-      "sha256": "b00a1774a8c461d0d7377ad7e96f9fd00d769d4808c09b20cc8561a4950152f3",
-      "version": 1
+      "sha256": "a6e929326cd8e1cb82904f5eaee4220b76cfd54513936fd5be9cd3ced23ef3f0",
+      "version": 2
     },
     {
       "mechanic_id": "cr-408-command",
@@ -100,19 +100,25 @@
     {
       "mechanic_id": "deathtouch",
       "path": "mechanics/contracts/deathtouch.json",
-      "sha256": "9c3c4b6ed7f7a54ff49d8cdfd7c9bfe112cac135aaa126a1a7b8a87d0df7f8e9",
-      "version": 1
+      "sha256": "b6136559ddad94bbb5dcdd5390ded0b64ee775cf775f10f21f6562b1259f9162",
+      "version": 2
     },
     {
       "mechanic_id": "cr-508-declare-attackers-step",
       "path": "mechanics/contracts/declare-attackers-step.json",
-      "sha256": "75f3a1bc31bb5c5e9d3104107cbc2f334d28a290166adf8baef7b9249a3351da",
-      "version": 1
+      "sha256": "698e21822a398ceb8d42a49a80cae4e34bb6a3fe18c1b95f1bc3de9bc6dc3643",
+      "version": 2
     },
     {
       "mechanic_id": "cr-509-declare-blockers-step",
       "path": "mechanics/contracts/declare-blockers-step.json",
-      "sha256": "31b5402e1adab1ffe9459e0eee1ca2841dd2e5e7f9ea9eb75debbe251a2272f1",
+      "sha256": "f526f657548a29a6552fe8559503d980c0afe52a037433128585e2f491ab9514",
+      "version": 2
+    },
+    {
+      "mechanic_id": "defender",
+      "path": "mechanics/contracts/defender.json",
+      "sha256": "09d1c3715429fc3c373f516f1edeb67af3a17ec2db30971a2ee3477b3a1844c9",
       "version": 1
     },
     {
@@ -120,6 +126,12 @@
       "path": "mechanics/contracts/defense.json",
       "sha256": "d91f723c5f4cc92a3201fb51ef88145a896e08f1dc967e3bb89e122294f6e6f4",
       "version": 2
+    },
+    {
+      "mechanic_id": "double-strike",
+      "path": "mechanics/contracts/double-strike.json",
+      "sha256": "399c38643a7c3b14049528f9987ab7b13e88fd3310da4e70d1df4ac6b8ba3aff",
+      "version": 1
     },
     {
       "mechanic_id": "cr-504-draw-step",
@@ -155,6 +167,12 @@
       "mechanic_id": "cr-406-exile",
       "path": "mechanics/contracts/exile.json",
       "sha256": "b14115d08b3ba68d0120dbc44d825ced9b19810582a7dd9a59e118c29af82fee",
+      "version": 1
+    },
+    {
+      "mechanic_id": "first-strike",
+      "path": "mechanics/contracts/first-strike.json",
+      "sha256": "ef3070188940785b894f5c26952521c2e87610aa290f347ca6ecf7528e3c1899",
       "version": 1
     },
     {
@@ -194,6 +212,12 @@
       "version": 1
     },
     {
+      "mechanic_id": "lifelink",
+      "path": "mechanics/contracts/lifelink.json",
+      "sha256": "fbb4aef3dc45edd23106ed6a66dadef131d899ff2d9d085ec5fc4d6e81239b9a",
+      "version": 1
+    },
+    {
       "mechanic_id": "cr-607-linked-abilities",
       "path": "mechanics/contracts/linked-abilities.json",
       "sha256": "62e669b98c3cb4c34961faea034759a87235e3b025b777906529d06261571349",
@@ -215,6 +239,12 @@
       "mechanic_id": "cr-605-mana-abilities",
       "path": "mechanics/contracts/mana-abilities.json",
       "sha256": "e2b3bd043b4b46ed8ef61d8297613c52fb82850e7037c20a3db5ddbd605be5b9",
+      "version": 1
+    },
+    {
+      "mechanic_id": "menace",
+      "path": "mechanics/contracts/menace.json",
+      "sha256": "34e37987949e47919ffa87a4a214ee8143de46620640970104aa12d9c048f150",
       "version": 1
     },
     {
@@ -270,6 +300,12 @@
       "path": "mechanics/contracts/state-based-actions.json",
       "sha256": "2ebd4a0dd11e2bf308a4251d2534ac5d2c6179dad0ef67b3052797e700fef20c",
       "version": 6
+    },
+    {
+      "mechanic_id": "trample",
+      "path": "mechanics/contracts/trample.json",
+      "sha256": "7af7b55470f9a0e31a415b99735fc8a825865e03640a7910db53bc40a4925d42",
+      "version": 1
     },
     {
       "mechanic_id": "cr-500-general",
@@ -982,14 +1018,14 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/deathtouch.json",
-      "contract_sha256": "9c3c4b6ed7f7a54ff49d8cdfd7c9bfe112cac135aaa126a1a7b8a87d0df7f8e9",
-      "contract_version": 1,
+      "contract_sha256": "b6136559ddad94bbb5dcdd5390ded0b64ee775cf775f10f21f6562b1259f9162",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
       "implementation_component": "CommanderEngine.combat_damage and CommanderEngine._stabilize",
-      "implementation_version": "combat-keywords-v1",
+      "implementation_version": "combat-keywords-v2",
       "kind": "keyword_ability",
       "known_blockers": [
         "full continuous-effect layers and last-known-information",
@@ -1002,7 +1038,8 @@
         "702.2"
       ],
       "test_ids": [
-        "test_deathtouch_is_derived_from_source_not_pilot_claim"
+        "test_deathtouch_is_derived_from_source_not_pilot_claim",
+        "test_deathtouch_and_marked_damage_each_reduce_trample_lethal"
       ],
       "trust_level": "untrusted"
     },
@@ -1025,19 +1062,29 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/defender.json",
+      "contract_sha256": "09d1c3715429fc3c373f516f1edeb67af3a17ec2db30971a2ee3477b3a1844c9",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.combat and CommanderEngine._attack_declaration_error",
+      "implementation_version": "combat-keywords-v2",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "the general CR 508.1 restrictions-and-requirements solver remains incomplete",
+        "full continuous-effect dependencies and copy/face-down characteristics remain incomplete"
+      ],
       "mechanic_id": "defender",
       "official_name": "Defender",
       "rule_references": [
         "702.3"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_defender_is_not_offered_and_cannot_be_injected_as_an_attacker",
+        "test_keyword_contracts_trace_the_pinned_rules"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -1161,19 +1208,32 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/double-strike.json",
+      "contract_sha256": "399c38643a7c3b14049528f9987ab7b13e88fd3310da4e70d1df4ac6b8ba3aff",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.combat and CommanderEngine combat-damage step state machine",
+      "implementation_version": "combat-keywords-v2",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "full continuous-effect dependencies, copy, and face-down characteristic evaluation remain incomplete",
+        "the universal simultaneous damage replacement/prevention pipeline remains incomplete",
+        "combat-damage trigger batching before priority remains incomplete"
+      ],
       "mechanic_id": "double-strike",
       "official_name": "Double Strike",
       "rule_references": [
         "702.4"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_second_step_uses_the_first_step_snapshot_and_current_double_strike",
+        "test_double_strike_creates_two_real_damage_steps_and_replays",
+        "test_double_strike_does_not_hit_player_after_its_blocker_dies",
+        "test_keyword_contracts_trace_the_pinned_rules"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -1569,19 +1629,32 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/first-strike.json",
+      "contract_sha256": "ef3070188940785b894f5c26952521c2e87610aa290f347ca6ecf7528e3c1899",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.combat and CommanderEngine combat-damage step state machine",
+      "implementation_version": "combat-keywords-v2",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "full continuous-effect dependencies, copy, and face-down characteristic evaluation remain incomplete",
+        "the universal simultaneous damage replacement/prevention pipeline remains incomplete",
+        "combat-damage trigger batching before priority remains incomplete"
+      ],
       "mechanic_id": "first-strike",
       "official_name": "First Strike",
       "rule_references": [
         "702.7"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_second_step_uses_the_first_step_snapshot_and_current_double_strike",
+        "test_first_strike_destroys_blocker_before_ordinary_damage",
+        "test_first_strike_creates_the_initial_combat_damage_step",
+        "test_keyword_contracts_trace_the_pinned_rules"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -2292,19 +2365,30 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/lifelink.json",
+      "contract_sha256": "fbb4aef3dc45edd23106ed6a66dadef131d899ff2d9d085ec5fc4d6e81239b9a",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "CommanderEngine._apply_combat_assignments",
+      "implementation_version": "combat-keywords-v2",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "lifelink is not yet integrated into every noncombat damage operation",
+        "last-known-information for damage sources outside their expected zones is incomplete",
+        "the universal replacement/prevention and life-gain replacement pipeline remains incomplete"
+      ],
       "mechanic_id": "lifelink",
       "official_name": "Lifelink",
       "rule_references": [
         "702.15"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_lifelink_counts_only_damage_not_prevented_by_protection",
+        "test_keyword_contracts_trace_the_pinned_rules"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -2411,19 +2495,31 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/menace.json",
+      "contract_sha256": "34e37987949e47919ffa87a4a214ee8143de46620640970104aa12d9c048f150",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.combat, CommanderEngine blocker validation, and the generic assignment-map choice form",
+      "implementation_version": "combat-keywords-v2",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "the general CR 509.1 restrictions-and-requirements solver remains incomplete",
+        "creatures allowed to block additional attackers are not yet represented",
+        "full continuous-effect dependencies and copy/face-down characteristics remain incomplete"
+      ],
       "mechanic_id": "menace",
       "official_name": "Menace",
       "rule_references": [
         "702.111"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_menace_requires_zero_or_two_blockers_and_projects_the_minimum",
+        "test_keyword_contracts_trace_the_pinned_rules",
+        "assignment maps enforce server-issued conditional group minimums"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -3527,19 +3623,34 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/trample.json",
+      "contract_sha256": "7af7b55470f9a0e31a415b99735fc8a825865e03640a7910db53bc40a4925d42",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.combat and CommanderEngine combat-damage assignment validation",
+      "implementation_version": "combat-keywords-v2",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "trample over planeswalkers is not implemented",
+        "banding and controller-substitution assignment exceptions are not implemented",
+        "full continuous-effect dependencies and the universal replacement/prevention pipeline remain incomplete"
+      ],
       "mechanic_id": "trample",
       "official_name": "Trample",
       "rule_references": [
         "702.19"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_trample_rejects_spill_before_lethal_atomically",
+        "test_trample_accepts_lethal_then_spill",
+        "test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
+        "test_lifelink_counts_only_damage_not_prevented_by_protection",
+        "test_trample_deals_to_defender_after_all_blockers_leave",
+        "test_keyword_contracts_trace_the_pinned_rules"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -6517,15 +6628,14 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/combat-phase.json",
-      "contract_sha256": "b00a1774a8c461d0d7377ad7e96f9fd00d769d4808c09b20cc8561a4950152f3",
-      "contract_version": 1,
+      "contract_sha256": "a6e929326cd8e1cb82904f5eaee4220b76cfd54513936fd5be9cd3ced23ef3f0",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "TURN_STEPS and CommanderEngine combat entry, declaration, removal, stabilization, damage, finalization, and step-advance paths",
-      "implementation_version": "combat-phase-v1",
+      "implementation_version": "combat-phase-v2",
       "kind": "rules_section",
       "known_blockers": [
-        "first strike and double strike do not create the required second combat-damage step",
         "planeswalker attack destinations are not represented",
         "single-defender, shared-team-turn, limited-range, and other multiplayer combat options are not implemented",
         "generic effects that put objects attacking or blocking are not implemented",
@@ -6548,7 +6658,7 @@
         "test_zone_and_control_changes_remove_objects_from_combat",
         "test_phasing_and_type_loss_remove_combatants_during_stabilization",
         "test_tapping_and_untapping_do_not_remove_a_creature_from_combat",
-        "test_first_strike_fails_closed_before_damage_decision",
+        "test_double_strike_creates_two_real_damage_steps_and_replays",
         "test_no_attackers_skips_blockers_and_combat_damage_steps",
         "test_objects_leave_combat_only_after_step_ends_and_replay_exactly"
       ],
@@ -6588,12 +6698,12 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-attackers-step.json",
-      "contract_sha256": "75f3a1bc31bb5c5e9d3104107cbc2f334d28a290166adf8baef7b9249a3351da",
-      "contract_version": 1,
+      "contract_sha256": "698e21822a398ceb8d42a49a80cae4e34bb6a3fe18c1b95f1bc3de9bc6dc3643",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "CommanderEngine attacker declaration and combat-step transition",
-      "implementation_version": "declare-attackers-step-v1",
+      "implementation_version": "declare-attackers-step-v2",
       "kind": "rules_section",
       "known_blockers": [
         "planeswalker attack targets are not implemented",
@@ -6621,19 +6731,20 @@
         "test_multiple_defenders_block_sequentially",
         "test_structured_attack_list_reaches_authoritative_combat_state",
         "test_siege_is_attackable_and_its_protector_blocks",
-        "test_battle_creature_cannot_attack_or_block"
+        "test_battle_creature_cannot_attack_or_block",
+        "test_defender_is_not_offered_and_cannot_be_injected_as_an_attacker"
       ],
       "trust_level": "untrusted"
     },
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/declare-blockers-step.json",
-      "contract_sha256": "31b5402e1adab1ffe9459e0eee1ca2841dd2e5e7f9ea9eb75debbe251a2272f1",
-      "contract_version": 1,
+      "contract_sha256": "f526f657548a29a6552fe8559503d980c0afe52a037433128585e2f491ab9514",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "CommanderEngine blocker declaration and combat-state transition",
-      "implementation_version": "declare-blockers-step-v1",
+      "implementation_version": "declare-blockers-step-v2",
       "kind": "rules_section",
       "known_blockers": [
         "the complete restriction and evasion grammar is not implemented",
@@ -6659,27 +6770,28 @@
         "test_shadow_and_protection_restrict_blocking",
         "test_siege_is_attackable_and_its_protector_blocks",
         "test_battle_creature_cannot_attack_or_block",
-        "test_blocked_attacker_assigns_nothing_after_blocker_leaves"
+        "test_blocked_attacker_assigns_nothing_after_blocker_leaves",
+        "test_menace_requires_zero_or_two_blockers_and_projects_the_minimum"
       ],
       "trust_level": "untrusted"
     },
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/combat-damage-step.json",
-      "contract_sha256": "e69d94b32ffd724fc770dacaa2f8b573450f0f04625a5d249262cdbe84e90d63",
-      "contract_version": 1,
+      "contract_sha256": "870cf77a9ec297c95bee1e49f6c2e18d0aba49c32d587af8eb0c18cdb83ca75a",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [],
       "implementation_component": "CommanderEngine combat-damage assignment validation and damage application",
-      "implementation_version": "combat-damage-step-v1",
+      "implementation_version": "combat-damage-step-v2",
       "kind": "rules_section",
       "known_blockers": [
         "active-player then defending-player public assignment announcement order is not represented",
-        "trample and lifelink combat damage semantics are not complete",
+        "trample over planeswalkers, banding assignment control, and complete combat assignment exceptions are not implemented",
+        "lifelink outside the combat damage path and source last-known information are incomplete",
         "a blocker blocking several attackers is not produced by the declaration system",
         "simultaneous damage replacement and prevention require the universal typed event pipeline",
-        "damage-trigger APNAP placement before priority is incomplete",
-        "first strike and double strike require multiple combat damage steps"
+        "damage-trigger APNAP placement before priority is incomplete"
       ],
       "mechanic_id": "cr-510-combat-damage-step",
       "official_name": "Combat Damage Step",
@@ -6695,8 +6807,16 @@
         "test_assignment_rejects_client_supplied_semantic_fields",
         "test_nonpositive_source_cannot_submit_zero_assignment",
         "test_blocked_attacker_assigns_nothing_after_blocker_leaves",
-        "test_first_strike_fails_closed_before_damage_decision",
-        "test_negative_power_combat_source_assigns_no_damage"
+        "test_first_strike_creates_the_initial_combat_damage_step",
+        "test_negative_power_combat_source_assigns_no_damage",
+        "test_first_strike_destroys_blocker_before_ordinary_damage",
+        "test_double_strike_creates_two_real_damage_steps_and_replays",
+        "test_double_strike_does_not_hit_player_after_its_blocker_dies",
+        "test_lifelink_counts_only_damage_not_prevented_by_protection",
+        "test_trample_rejects_spill_before_lethal_atomically",
+        "test_trample_accepts_lethal_then_spill",
+        "test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
+        "test_trample_deals_to_defender_after_all_blockers_leave"
       ],
       "trust_level": "untrusted"
     },

@@ -6,7 +6,6 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.engine import GameRuleError
 from mtg_commander_sim.model import CombatState
 from mtg_commander_sim.record import (
     authoritative_state_hash,
@@ -409,7 +408,7 @@ class CombatDamageRuleTests(unittest.TestCase):
         )
         self.assertEqual([], event.details["declared_assignments"])
 
-    def test_first_strike_fails_closed_before_damage_decision(self):
+    def test_first_strike_creates_the_initial_combat_damage_step(self):
         session = self.make_session(51005)
         engine = session.engine
         ref = engine.create_token(
@@ -434,15 +433,13 @@ class CombatDamageRuleTests(unittest.TestCase):
             attackers={attacker.object_id: "B"},
             defending_players=["B"],
         )
-        before = authoritative_state_hash(engine.state)
+        life_before = engine.state.players["B"].life
 
-        with self.assertRaisesRegex(
-            GameRuleError,
-            "unsupported keyword semantics: first strike",
-        ):
-            engine._begin_combat_damage()
+        engine._begin_combat_damage()
 
-        self.assertEqual(before, authoritative_state_hash(engine.state))
+        self.assertTrue(engine.state.combat.first_strike_step)
+        self.assertEqual(0, engine.state.combat.damage_step_index)
+        self.assertEqual(life_before - 2, engine.state.players["B"].life)
         self.assertIsNone(engine.state.pending_decision)
 
 

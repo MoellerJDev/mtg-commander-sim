@@ -223,6 +223,19 @@ function fieldErrors(field: ChoiceField, values: ChoiceValues): string[] {
     if (field.minimum !== undefined && count < Number(field.minimum)) {
       errors.push(`${label} requires ${field.minimum} choice(s).`);
     }
+  } else if (control === "assignment_map") {
+    const assignments = Object.values(record(value)).map(stringValue);
+    for (const [group, rawMinimum] of Object.entries(
+      record(field.minimum_group_sizes),
+    )) {
+      const minimum = Number(rawMinimum);
+      const count = assignments.filter((target) => target === group).length;
+      if (count > 0 && count < minimum) {
+        errors.push(
+          `${label} requires either no assignments or at least ${minimum} assignments to ${group}.`,
+        );
+      }
+    }
   } else if (control === "targets") {
     const schema = record(field.schema);
     const modes = list(values.modes);

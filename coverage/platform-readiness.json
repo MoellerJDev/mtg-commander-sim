@@ -11,10 +11,10 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "browser_commander_mvp_validation_and_operations",
+    "active_phase": "rules_combat_dependency_families",
     "branch": "main",
     "branch_ancestry": {
-      "focused_branch_base": "00bd8e1abe08fd254794ab5e1f1b2386291bcbe9",
+      "focused_branch_base": "b39edeb62e984ab1785948223d4e7d5b99fbec2b",
       "focused_branch_unique_commits_over_main": 1
     },
     "commit_reference": "the commit containing this ledger",
@@ -263,6 +263,13 @@
         "number": 35,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/35"
+      },
+      {
+        "base": "main",
+        "head": "agent/browser-lifecycle-journey",
+        "number": 36,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/36"
       }
     ],
     "tags": [
@@ -278,7 +285,7 @@
   },
   "milestones": [
     {
-      "evidence": "Integration PRs #1-17 and #24-35 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
+      "evidence": "Integration PRs #1-17 and #24-36 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete"
@@ -302,7 +309,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Run a fresh post-restart full-database manual/browser journey that reconfirms the compact target, response, combat, concession, natural-completion, replay, and restart paths against the active full snapshot; fix only failures reproduced in that current record without weakening replay or hidden-information gates.",
+  "next_task": "Continue the dependency-ordered combat rules family: correct turn-based-action and trigger batching around declare attackers, declare blockers, and combat damage, then introduce the shared restrictions-and-requirements solver without weakening exact replay, rollback, or hidden-information gates.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -342,8 +349,8 @@
     "manifest_present": true,
     "mechanics": {
       "status_counts": {
-        "partial": 49,
-        "unclassified": 376
+        "partial": 55,
+        "unclassified": 370
       },
       "total": 425,
       "trusted": 0
@@ -358,9 +365,9 @@
       "total": 38373
     },
     "rules": {
-      "blocked": 371,
+      "blocked": 369,
       "definition_only": 80,
-      "passing": 106,
+      "passing": 108,
       "total": 3300,
       "unreviewed": 2743
     },
@@ -385,19 +392,19 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 3997,
+    "deterministic_cases_discovered": 4009,
     "migration_files": 1,
     "schema_files": 14,
     "server_files": 5,
     "web_files": 20
   },
   "validation": {
-    "baseline_commit": "00bd8e1abe08fd254794ab5e1f1b2386291bcbe9",
+    "baseline_commit": "b39edeb62e984ab1785948223d4e7d5b99fbec2b",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30681492014,
+      "run_id": 30684463002,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30681492014"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30684463002"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_card_drag_drop_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",

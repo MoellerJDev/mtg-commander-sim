@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+### Combat rules family
+
+- Added a reusable combat-rules module and a serialized two-damage-step state
+  machine for first strike and double strike, including the rules for gaining
+  or losing either ability between steps and priority after each real step.
+- Added authoritative normal-trample assignment validation. Marked damage,
+  simultaneous attacker assignments, and deathtouch contribute to lethal;
+  prevention does not lower the assignment threshold; an illegal spill rolls
+  the complete command back.
+- Added combat lifelink from damage actually dealt, menace's zero-or-two
+  blocker constraint, and defender's attack restriction. Conditional blocker
+  minimums travel through the generic projected choice form rather than a
+  card-specific UI path.
+- Added partial/untrusted source-pinned contracts for defender, first strike,
+  double strike, lifelink, menace, and trample, expanded deathtouch and combat
+  contracts, and promoted CR 506.1/510.4 only after focused mutation and exact
+  replay witnesses passed. Universal damage replacement, source LKI, trample
+  over planeswalkers, banding, and the general combat constraint solver remain
+  explicit blockers.
+
 ### Managed local runtime and responsive browser
 
 - Added a card-first table inspector: pointer hover and keyboard focus drive a

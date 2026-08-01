@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "cr-510-combat-damage-step",
   "official_name": "Combat Damage Step",
   "effective_date": "2026-06-19",
@@ -26,7 +26,12 @@
     "illegal-actions",
     "priority",
     "triggers",
-    "replacement-effects"
+    "replacement-effects",
+    "first-strike",
+    "double-strike",
+    "trample",
+    "lifelink",
+    "deathtouch"
   ],
   "coverage_status": "partial",
   "trust_level": "untrusted",
@@ -50,7 +55,7 @@
       "effective power",
       "current attacking and blocking relationships",
       "current attack target",
-      "first strike, double strike, trample, and lifelink"
+      "first strike, double strike, trample, deathtouch, and lifelink"
     ],
     "state_writes": [
       "marked damage",
@@ -63,11 +68,11 @@
     "timing": [
       "assignment and dealing are turn-based actions that do not use the stack",
       "no priority window occurs between assignment and dealing",
-      "unsupported keyword-dependent damage steps fail before a client decision is issued"
+      "first strike and double strike create two real damage steps with priority after each"
     ],
     "targets": [
       "unblocked attackers use their current attacked object or player",
-      "blocked attackers may assign only to their current blockers in this slice",
+      "blocked attackers may assign to current blockers, with ordinary trample spill after lethal assignment",
       "blockers may assign only to attackers they currently block"
     ],
     "choices": [
@@ -106,7 +111,9 @@
     "zero or negative power",
     "illegal excessive assignment",
     "illegal unrelated source or recipient",
-    "first strike and double strike fail-closed boundary"
+    "first strike and double strike step eligibility",
+    "ordinary trample with marked damage, deathtouch, prevention, and departed blockers",
+    "combat lifelink based on damage actually dealt"
   ],
   "witness_cards": [],
   "rulings": [],
@@ -119,20 +126,28 @@
     "test_assignment_rejects_client_supplied_semantic_fields",
     "test_nonpositive_source_cannot_submit_zero_assignment",
     "test_blocked_attacker_assigns_nothing_after_blocker_leaves",
-    "test_first_strike_fails_closed_before_damage_decision",
-    "test_negative_power_combat_source_assigns_no_damage"
+    "test_first_strike_creates_the_initial_combat_damage_step",
+    "test_negative_power_combat_source_assigns_no_damage",
+    "test_first_strike_destroys_blocker_before_ordinary_damage",
+    "test_double_strike_creates_two_real_damage_steps_and_replays",
+    "test_double_strike_does_not_hit_player_after_its_blocker_dies",
+    "test_lifelink_counts_only_damage_not_prevented_by_protection",
+    "test_trample_rejects_spill_before_lethal_atomically",
+    "test_trample_accepts_lethal_then_spill",
+    "test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
+    "test_trample_deals_to_defender_after_all_blockers_leave"
   ],
   "implementation": {
     "component": "CommanderEngine combat-damage assignment validation and damage application",
-    "version": "combat-damage-step-v1"
+    "version": "combat-damage-step-v2"
   },
   "known_blockers": [
     "active-player then defending-player public assignment announcement order is not represented",
-    "trample and lifelink combat damage semantics are not complete",
+    "trample over planeswalkers, banding assignment control, and complete combat assignment exceptions are not implemented",
+    "lifelink outside the combat damage path and source last-known information are incomplete",
     "a blocker blocking several attackers is not produced by the declaration system",
     "simultaneous damage replacement and prevention require the universal typed event pipeline",
-    "damage-trigger APNAP placement before priority is incomplete",
-    "first strike and double strike require multiple combat damage steps"
+    "damage-trigger APNAP placement before priority is incomplete"
   ],
   "review_status": "draft"
 }

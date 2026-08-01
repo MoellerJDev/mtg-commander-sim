@@ -426,10 +426,11 @@ generated documentation fixtures with bearer capabilities redacted. See
   complete untap events, additional upkeeps, and after-upkeep casting grammar
   remain blocked
 - source-reviewed CR 506 combat-phase boundary: authoritative attacking and
-  defending roles, durable combat history, and represented removal from
-  combat after zone, control, phasing, or type changes; alternate multiplayer
-  options, generic effect-created combatants, restriction snapshots, extra
-  combats, and combat-relative timing grammar remain blocked
+  defending roles, durable combat history, represented removal from combat
+  after zone/control/phasing/type changes, and the real second combat-damage
+  step required by first/double strike; alternate multiplayer options, generic
+  effect-created combatants, restriction snapshots, extra combats, and
+  combat-relative timing grammar remain blocked
 - source-reviewed CR 507 beginning-of-combat boundary: supported Commander
   profiles establish every active opponent as a defending player without a
   defender-choice task, coexisting permanent and delayed triggers are
@@ -437,18 +438,22 @@ generated documentation fixtures with bearer capabilities redacted. See
   multiplayer variants fail closed
 - source-reviewed CR 510 combat-damage assignment validation: the server
   derives sources, recipients, and exact power totals, rejects client-supplied
-  semantics, and rolls illegal assignments back atomically; complex keyword
-  and simultaneous-event dependencies remain blocked
+  semantics, and rolls illegal assignments back atomically. First/double
+  strike use two real damage steps; normal trample validates lethal before
+  spill using marked damage and deathtouch; combat lifelink counts only damage
+  dealt. Trample over planeswalkers, banding, universal damage replacement,
+  source LKI, and post-damage trigger batching remain blocked
 - source-reviewed CR 508 ordinary attacker declaration: the server offers and
   revalidates only currently eligible creatures and live opponent/Battle
-  destinations, preserves vigilance, rejects duplicate or phased submissions
+  destinations, enforces defender, preserves vigilance, rejects duplicate or phased submissions
   atomically, skips empty-combat blocker/damage steps, and command-replays the
   declaration; restrictions, requirements, costs, planeswalkers, attack
   triggers, entry-attacking, and target reselection remain blocked
 - source-reviewed CR 509 ordinary blocker declaration: the server derives
   eligible blockers and defended attackers, rejects phased-out submissions,
-  preserves blocking relationships through combat, and command-replays the
-  declaration; requirements, costs, triggers, and entry-blocking remain blocked
+  enforces menace's zero-or-two minimum, preserves blocking relationships
+  through combat, and command-replays the declaration; the complete combined
+  requirement solver, costs, triggers, and entry-blocking remain blocked
 - source-reviewed CR 511 end-of-combat priority, trigger coexistence, and exact
   removal-from-combat handoff into postcombat main; generic effects lasting
   until end of combat remain explicitly blocked

@@ -441,6 +441,9 @@ def _special_fields(
                 "required": True,
                 "allow_none": True,
                 "rows": rows,
+                "minimum_group_sizes": copy.deepcopy(
+                    dict(context.get("minimum_blockers") or {})
+                ),
             }
         ]
     if decision_kind == "combat.damage" and action_name == "assign_damage":

@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "deathtouch",
   "official_name": "Deathtouch",
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
-  "rule_references": ["702.2", "704.5h"],
+  "rule_references": ["702.2", "702.2a", "702.2b", "702.2c", "702.2d", "702.2e", "702.2f", "704.5h"],
   "glossary_references": ["deathtouch"],
   "dependencies": ["damage", "state-based-actions", "continuous-effects"],
   "coverage_status": "partial",
@@ -14,12 +14,12 @@
     "zones": ["battlefield"],
     "objects": ["creature source", "creature dealt damage"],
     "events": ["damage dealt", "state-based actions"],
-    "state_reads": ["source current deathtouch ability", "positive damage dealt"],
+    "state_reads": ["source current deathtouch ability", "positive damage dealt or assigned"],
     "state_writes": ["mark recipient as damaged by a deathtouch source"],
     "costs": [],
     "timing": ["state-based actions after damage"],
     "targets": [],
-    "choices": ["combat damage assignment remains constrained by lethal assignment rules"],
+    "choices": ["positive combat damage assigned by a deathtouch source counts as lethal for trample"],
     "hidden_information": [],
     "apnap": [],
     "layers": ["ability-adding/removing effects determine source state"],
@@ -29,7 +29,7 @@
     "zone_change": ["last known source characteristics may be required"],
     "source_leaves": ["damage remembers whether its source had deathtouch"]
   },
-  "variants": ["multiple instances are redundant"],
+  "variants": ["state-based destruction", "trample lethal assignment", "multiple instances are redundant"],
   "witness_cards": [
     {
       "name": "Gifted Aetherborn",
@@ -37,10 +37,10 @@
     }
   ],
   "rulings": [],
-  "test_ids": ["test_deathtouch_is_derived_from_source_not_pilot_claim"],
+  "test_ids": ["test_deathtouch_is_derived_from_source_not_pilot_claim", "test_deathtouch_and_marked_damage_each_reduce_trample_lethal"],
   "implementation": {
     "component": "CommanderEngine.combat_damage and CommanderEngine._stabilize",
-    "version": "combat-keywords-v1"
+    "version": "combat-keywords-v2"
   },
   "known_blockers": [
     "full continuous-effect layers and last-known-information",

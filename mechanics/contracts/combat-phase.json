@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "cr-506-combat-phase",
   "official_name": "Combat Phase",
   "effective_date": "2026-06-19",
@@ -139,7 +139,7 @@
     "zone and control changes",
     "phasing and effective type loss",
     "tapping and untapping",
-    "unsupported first/double-strike second damage step",
+    "first/double-strike second damage step",
     "unsupported shared-team and alternate-attack multiplayer",
     "unsupported combat-relative timing grammar"
   ],
@@ -152,16 +152,15 @@
     "test_zone_and_control_changes_remove_objects_from_combat",
     "test_phasing_and_type_loss_remove_combatants_during_stabilization",
     "test_tapping_and_untapping_do_not_remove_a_creature_from_combat",
-    "test_first_strike_fails_closed_before_damage_decision",
+    "test_double_strike_creates_two_real_damage_steps_and_replays",
     "test_no_attackers_skips_blockers_and_combat_damage_steps",
     "test_objects_leave_combat_only_after_step_ends_and_replay_exactly"
   ],
   "implementation": {
     "component": "TURN_STEPS and CommanderEngine combat entry, declaration, removal, stabilization, damage, finalization, and step-advance paths",
-    "version": "combat-phase-v1"
+    "version": "combat-phase-v2"
   },
   "known_blockers": [
-    "first strike and double strike do not create the required second combat-damage step",
     "planeswalker attack destinations are not represented",
     "single-defender, shared-team-turn, limited-range, and other multiplayer combat options are not implemented",
     "generic effects that put objects attacking or blocking are not implemented",

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "cr-509-declare-blockers-step",
   "official_name": "Declare Blockers Step",
   "effective_date": "2026-06-19",
@@ -63,7 +63,7 @@
       "tapped and phased-out state",
       "creature and battle types",
       "attack target and defending player",
-      "supported evasion and protection restrictions"
+      "supported evasion, protection, and menace restrictions"
     ],
     "state_writes": [
       "blocking relationship",
@@ -83,7 +83,8 @@
       "a blocker may be assigned only to an attacker attacking that defender or an object they defend"
     ],
     "choices": [
-      "each defending player chooses zero or more legal blocks"
+      "each defending player chooses zero or more legal blocks",
+      "a menace attacker receives zero or at least two blockers"
     ],
     "hidden_information": [
       "blocker declarations use public combat and battlefield information"
@@ -112,7 +113,7 @@
     "no blockers",
     "ordinary legal blocker",
     "tapped, phased-out, and battle nonblockers",
-    "flying, reach, shadow, protection, and cannot-block restrictions",
+    "flying, reach, shadow, protection, menace, and cannot-block restrictions",
     "multiplayer sequential defenders",
     "illegal declaration rollback",
     "blocked attacker whose blockers leave"
@@ -130,11 +131,12 @@
     "test_shadow_and_protection_restrict_blocking",
     "test_siege_is_attackable_and_its_protector_blocks",
     "test_battle_creature_cannot_attack_or_block",
-    "test_blocked_attacker_assigns_nothing_after_blocker_leaves"
+    "test_blocked_attacker_assigns_nothing_after_blocker_leaves",
+    "test_menace_requires_zero_or_two_blockers_and_projects_the_minimum"
   ],
   "implementation": {
     "component": "CommanderEngine blocker declaration and combat-state transition",
-    "version": "declare-blockers-step-v1"
+    "version": "declare-blockers-step-v2"
   },
   "known_blockers": [
     "the complete restriction and evasion grammar is not implemented",
