@@ -1,6 +1,6 @@
 {
   "blockers": [
-    "future engine choice schemas and complete screen-reader audits remain incomplete",
+    "spectator sessions, complete public-log presentation, future engine choice schemas, and complete screen-reader audits remain incomplete",
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
@@ -10,10 +10,10 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "managed_local_runtime_and_responsive_browser_validation",
+    "active_phase": "browser_commander_mvp_validation_and_operations",
     "branch": "main",
     "branch_ancestry": {
-      "focused_branch_base": "6f05661b05de423ed081572b062c47548380c8c6",
+      "focused_branch_base": "4c576494dfe6fe60ea31e6891fd8261f9714b4a6",
       "focused_branch_unique_commits_over_main": 0
     },
     "commit_reference": "the commit containing this ledger",
@@ -227,6 +227,13 @@
         "number": 30,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/30"
+      },
+      {
+        "base": "main",
+        "head": "agent/browser-ui-polish",
+        "number": 31,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/31"
       }
     ],
     "tags": [
@@ -242,13 +249,13 @@
   },
   "milestones": [
     {
-      "evidence": "Integration PRs #1-17 and #24-30 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
+      "evidence": "Integration PRs #1-17 and #24-31 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main.",
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete"
     },
     {
-      "evidence": "The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, shared-cookie tab-isolation and two/four-player Chromium coverage, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, Chromium-verified card-scoped click/drag actions, optional manual mana activation, explicit active-player main-phase advancement, terminal stale-game recovery, exact command retry, and one-command managed Scryfall/browser startup. Future schemas, full accounts, expiry/rate limits, and production deployment remain open.",
+      "evidence": "The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and two/four-player Chromium coverage, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, Chromium-verified card-scoped click/drag actions, optional manual mana activation, explicit active-player main-phase advancement, terminal stale-game recovery, exact command retry, and one-command managed Scryfall/browser startup. Modal land faces, Sunscorched Desert, Orcish Bowmasters, and pass-priority regressions have compact-fixture coverage. Spectators, complete public-log presentation, future schemas, full accounts, expiry/rate limits, and production deployment remain open.",
       "id": "browser_commander_mvp",
       "name": "Browser Commander MVP",
       "status": "development_local_runtime_hardened"
@@ -266,7 +273,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Continue the current two/four-seat manual browser test against the live July 31 Scryfall snapshot after the Sunscorched Desert, Orcish Bowmasters, explicit-main-phase, drag/drop, and stale-WebSocket regressions pass the exact merge gate.",
+  "next_task": "Add spectator-safe read-only projections and complete public-log presentation, then extend browser end-to-end coverage through targeting, stack response, combat, concession, natural completion, and process restart without weakening replay or hidden-information gates.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -356,15 +363,16 @@
     "web_files": 20
   },
   "validation": {
-    "baseline_commit": "6f05661b05de423ed081572b062c47548380c8c6",
+    "baseline_commit": "4c576494dfe6fe60ea31e6891fd8261f9714b4a6",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30656571388,
+      "run_id": 30674808173,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30656571388"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30674808173"
     },
     "local": {
-      "browser_four_isolated_contexts": "pass_shared_cookie_tab_isolation_duel_and_four_player_lifecycle_exact_retry_mobile_reconnect_focus_and_private_penalized_mulligan_form",
+      "browser_four_isolated_contexts": "pass_per_tab_seat_isolation_duel_and_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_and_card_drag_drop",
+      "browser_reported_rules_regressions": "pass_modal_land_face_life_payment_sunscorched_desert_target_damage_orcish_bowmasters_permanent_trigger_amass_and_explicit_main_phase",
       "browser_typecheck_and_production_build": "pass",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",

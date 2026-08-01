@@ -8,7 +8,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 - Default branch: `main`
 - Active branch: `main`
 - Current commit: the commit containing this ledger
-- Active phase: `managed_local_runtime_and_responsive_browser_validation`
+- Active phase: `browser_commander_mvp_validation_and_operations`
 - Package version: `0.8.0`
 
 ### Pull requests
@@ -45,6 +45,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 | [#28](https://github.com/MoellerJDev/mtg-commander-sim/pull/28) | `agent/reconcile-platform-docs` | `main` | `merged` |
 | [#29](https://github.com/MoellerJDev/mtg-commander-sim/pull/29) | `agent/browser-server-hardening` | `main` | `merged` |
 | [#30](https://github.com/MoellerJDev/mtg-commander-sim/pull/30) | `agent/browser-server-operations` | `main` | `merged` |
+| [#31](https://github.com/MoellerJDev/mtg-commander-sim/pull/31) | `agent/browser-ui-polish` | `main` | `merged` |
 
 ## Pinned snapshots and coverage
 
@@ -64,8 +65,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 | Milestone | Status | Evidence |
 |---|---|---|
-| Integrated deterministic foundation | `complete` | Integration PRs #1-17 and #24-30 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
-| Browser Commander MVP | `development_local_runtime_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, shared-cookie tab-isolation and two/four-player Chromium coverage, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, Chromium-verified card-scoped click/drag actions, optional manual mana activation, explicit active-player main-phase advancement, terminal stale-game recovery, exact command retry, and one-command managed Scryfall/browser startup. Future schemas, full accounts, expiry/rate limits, and production deployment remain open. |
+| Integrated deterministic foundation | `complete` | Integration PRs #1-17 and #24-31 are on main. PR #24 incorporated every ancestry-proven CR 400-408 head; GitHub auto-recorded PR #17 as merged and PRs #18-23 were closed as superseded only after their exact heads became reachable from main. |
+| Browser Commander MVP | `development_local_runtime_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and two/four-player Chromium coverage, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, Chromium-verified card-scoped click/drag actions, optional manual mana activation, explicit active-player main-phase advancement, terminal stale-game recovery, exact command retry, and one-command managed Scryfall/browser startup. Modal land faces, Sunscorched Desert, Orcish Bowmasters, and pass-priority regressions have compact-fixture coverage. Spectators, complete public-log presentation, future schemas, full accounts, expiry/rate limits, and production deployment remain open. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408 and CR 500-512 slices are on main. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -88,7 +89,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Tests discovered: 3986
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30656571388](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30656571388) — `pass`
+- Baseline CI: [30674808173](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30674808173) — `pass`
 - Compile: `pass`
 - Deterministic tests: `pass_full_exact_commit_gate`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
@@ -103,13 +104,13 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Current blockers
 
-- future engine choice schemas and complete screen-reader audits remain incomplete
+- spectator sessions, complete public-log presentation, future engine choice schemas, and complete screen-reader audits remain incomplete
 - production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete
 - full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete
 
 ## Exact next task
 
-Continue the current two/four-seat manual browser test against the live July 31 Scryfall snapshot after the Sunscorched Desert, Orcish Bowmasters, explicit-main-phase, drag/drop, and stale-WebSocket regressions pass the exact merge gate.
+Add spectator-safe read-only projections and complete public-log presentation, then extend browser end-to-end coverage through targeting, stack response, combat, concession, natural completion, and process restart without weakening replay or hidden-information gates.
 
 ## Regeneration
 
