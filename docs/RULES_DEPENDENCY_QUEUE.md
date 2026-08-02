@@ -14,28 +14,29 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,092
-- Reviewed behavioral blockers: 365
+- Queued rules: 3,091
+- Reviewed behavioral blockers: 364
 - Behavioral classification/review required: 2,727
-- Passing behavioral rules: 104
+- Passing behavioral rules: 105
 - Subsystems: 21
-- Queue fingerprint: `417be435f6f7ade1c536f149ef44c0e1d5ed11ce33dd5039126467d1d51eeb27`
+- Queue fingerprint: `142100948fbedf58893229414952c157700638f4897fb5754cce6de9e9b66003`
 
 ## Selected next batch
 
-- Batch: `replacement-choice-and-nested-events`
+- Batch: `counter-placement-replacement-events`
 - Subsystem: `replacement-prevention`
-- Rules: `614.1`, `614.13`, `614.13a`, `614.13b`, `614.13c`, `614.16`, `616.1`, `616.1g`
-- Target capabilities: `damage.replacement.order`, `damage.prevention.order`
-- Rationale: This reviewed blocked cluster shares the existing replacement event pipeline and unlocks affected-player choice, nested-event suspension, and applicability rediscovery needed by damage and tap-state work without pretending to complete every replacement family.
+- Rules: `614.1`, `614.16`, `616.1`
+- Target capabilities: none registered yet
+- Rationale: The replayable replacement event tree now establishes containing-event order and represented token/zone choices. The next dependency-ready boundary is authoritative counter placement, including replacement-created counter events and affected-object ordering, without claiming universal CR 614/616 producer coverage.
 
 Exit criteria:
 
-- Implement one generic replayable replacement-choice and nested-event boundary with no card-name dispatch.
+- Inventory authoritative counter-placement mutations and route one coherent generic family through a typed replaceable event before commit.
+- Apply replacement-created counter intents, including represented zone-change counters, through the same counter-placement boundary.
+- Suspend affected-object choices through principal-scoped packets and preserve exact replay without exposing authoritative event payloads.
 - Promote only source-pinned rules whose positive, negative, interaction, multiplayer where applicable, replay, and implementation-mutation witnesses pass.
-- Keep unsupported replacement families and unresolved ordering fail-closed.
 - Run complete pinned Oracle and Commander-legal card censuses and report exact deltas.
-- Preserve Game Record v3, principal projection, and zero suppressed meaningful windows.
+- Preserve Game Record v3, principal projection, zero suppressed meaningful windows, and fail-closed unsupported counter semantics.
 
 ## Dependency schedule
 
@@ -54,7 +55,7 @@ Exit criteria:
 | 11 | `triggered-static-linked` | `objects-permanents-tokens`, `turn-structure`, `casting-activation` | 71 | 71 | 0 | `oracle_parser`, `event_binding`, `card_program_lowering`, `mechanic_contracts` |
 | 12 | `resolution-effects` | `zones`, `casting-activation`, `triggered-static-linked` | 42 | 28 | 14 | `oracle_parser`, `card_program_lowering`, `semantic_handlers` |
 | 13 | `continuous-effects` | `characteristics`, `objects-permanents-tokens`, `triggered-static-linked`, `resolution-effects` | 68 | 0 | 68 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
-| 14 | `replacement-prevention` | `resources`, `damage`, `resolution-effects`, `continuous-effects` | 42 | 42 | 0 | `oracle_parser`, `card_program_lowering`, `event_binding`, `mechanic_contracts` |
+| 14 | `replacement-prevention` | `resources`, `damage`, `resolution-effects`, `continuous-effects` | 41 | 41 | 0 | `oracle_parser`, `card_program_lowering`, `event_binding`, `mechanic_contracts` |
 | 15 | `combat` | `damage`, `turn-structure`, `continuous-effects` | 75 | 75 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 16 | `game-actions-state` | `zones`, `turn-structure`, `combat`, `resolution-effects`, `replacement-prevention` | 516 | 4 | 512 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 768 | 0 | 768 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |

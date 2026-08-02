@@ -75,7 +75,7 @@ class ContinuousEffectComponentTests(unittest.TestCase):
 
     @staticmethod
     def raw_thopter(engine, controller: str = "A"):
-        object_id = engine._create_replacement_token_instance(
+        ref = engine.create_token(
             controller,
             name="Test Thopter",
             characteristics={
@@ -85,16 +85,19 @@ class ContinuousEffectComponentTests(unittest.TestCase):
                 "toughness": "1",
                 "keywords": ["Flying"],
             },
+            reason="continuous component witness",
+        )[0]
+        return engine._resolve_object(
+            controller, ref, zones={"battlefield"}
         )
-        return engine.state.cards[object_id]
 
     def test_registered_anthem_component_replaces_name_dispatch(self):
         session = self.session(1250601)
         engine = session.engine
+        thopter = self.raw_thopter(engine)
         automaton = self.card(engine, "Stridehangar Automaton")
         engine.move_card(automaton.object_id, "battlefield", controller="A")
         automaton.printed_name = "Renamed static source"
-        thopter = self.raw_thopter(engine)
 
         self.assertEqual(2, engine._numeric_stat(thopter.object_id, "power"))
         self.assertEqual(
@@ -131,6 +134,8 @@ class ContinuousEffectComponentTests(unittest.TestCase):
     def test_multiple_anthem_components_stack_and_respect_control(self):
         session = self.session(1250602)
         engine = session.engine
+        thopter_a = self.raw_thopter(engine, "A")
+        thopter_b = self.raw_thopter(engine, "B")
         automaton = self.card(engine, "Stridehangar Automaton")
         engine.move_card(automaton.object_id, "battlefield", controller="A")
         created = engine.create_token(
@@ -145,7 +150,6 @@ class ContinuousEffectComponentTests(unittest.TestCase):
             if engine._resolve_object("A", ref).oracle_id
             == automaton.oracle_id
         )
-        thopter_a = self.raw_thopter(engine, "A")
         self.assertEqual(
             3, engine._numeric_stat(thopter_a.object_id, "power")
         )
@@ -155,7 +159,6 @@ class ContinuousEffectComponentTests(unittest.TestCase):
             "B",
             reason="control applicability characterization",
         )
-        thopter_b = self.raw_thopter(engine, "B")
         self.assertEqual(
             2, engine._numeric_stat(thopter_a.object_id, "power")
         )
@@ -291,9 +294,9 @@ class ContinuousEffectComponentTests(unittest.TestCase):
         engine = session.engine
         engine.semantics = registry
         engine._semantic_trust_cache.clear()
+        thopter = self.raw_thopter(engine)
         automaton = self.card(engine, "Stridehangar Automaton")
         engine.move_card(automaton.object_id, "battlefield", controller="A")
-        thopter = self.raw_thopter(engine)
         self.assertEqual(2, engine._numeric_stat(thopter.object_id, "power"))
 
 

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "cr-614-replacement-effects",
   "official_name": "Replacement Effects",
   "effective_date": "2026-06-19",
@@ -46,33 +46,45 @@
     "614.17d"
   ],
   "glossary_references": [],
-  "dependencies": ["cr-110-permanents", "cr-403-battlefield"],
+  "dependencies": ["cr-110-permanents", "cr-111-tokens", "cr-400-zones", "cr-403-battlefield", "cr-616-interaction-of-replacement-and-or-prevention-effects"],
   "coverage_status": "partial",
   "trust_level": "untrusted",
   "behavior": {
-    "zones": ["any origin entering the battlefield"],
-    "objects": ["permanent entering the battlefield"],
-    "events": ["unconditional self enters tapped replacement"],
-    "state_reads": ["active face Oracle text and explicit entry override"],
-    "state_writes": ["battlefield tapped status"],
+    "zones": ["represented card moves between zones", "objects entering the battlefield"],
+    "objects": ["affected players", "affected card objects", "created tokens", "simultaneously entering objects"],
+    "events": ["typed token creation", "typed zone destination change", "nested replacement-created token and counter events", "unconditional self enters tapped replacement"],
+    "state_reads": ["active trusted runtime replacement descriptors", "affected object owner/controller", "pre-move simultaneous source snapshot", "active face Oracle text and explicit entry override"],
+    "state_writes": ["transformed token specifications", "transformed zone destination and post-move counter intents", "battlefield tapped status", "exact replacement journal"],
     "costs": [],
     "timing": ["before the permanent enters"],
     "targets": [],
-    "choices": [],
-    "hidden_information": ["hidden Oracle identities are not exposed by the entry evaluator"],
-    "apnap": [],
+    "choices": ["affected player or affected object's controller selects between competing represented replacements"],
+    "hidden_information": ["seat choice packets omit authoritative event payloads, event paths, batch IDs, and hidden library order"],
+    "apnap": ["simultaneous different-seat replacement choices use the shared APNAP batch traversal"],
     "layers": [],
-    "replacement_effects": ["exact whole-line unconditional enters-tapped template"],
+    "replacement_effects": ["exact whole-line unconditional enters-tapped template", "fixed additional-token descriptor", "card destination-and-counter descriptor", "nested event and entry reservation substrate"],
     "copy": ["active copied characteristics can supply the entry text"],
     "control_change": ["entry controller does not alter the unconditional result"],
-    "zone_change": ["derived status is applied as part of the move"],
-    "source_leaves": []
+    "zone_change": ["represented destination changes resolve before the authoritative move", "simultaneous moves prepare all replacements against one pre-move source snapshot"],
+    "source_leaves": ["a source leaving in the same batch retains its pre-move controller and active-zone facts for every simultaneous event"]
   },
   "variants": ["This land enters tapped", "This artifact enters tapped", "named permanent enters tapped"],
   "witness_cards": [
     {
       "name": "Moss Diamond",
       "oracle_id": "02500f21-6e15-423e-93ff-891e09fe9904"
+    },
+    {
+      "name": "Dauthi Voidwalker",
+      "oracle_id": "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786"
+    },
+    {
+      "name": "Stridehangar Automaton",
+      "oracle_id": "9070c98b-fd01-4eeb-a4ec-fc464946c7c0"
+    },
+    {
+      "name": "Worldwalker Helm",
+      "oracle_id": "9573c85a-e574-4b4e-aae0-2165c45fd27e"
     }
   ],
   "rulings": [],
@@ -84,18 +96,31 @@
     "test_self_replacement_must_be_chosen_before_other_effects",
     "test_zero_damage_creates_no_results_or_damage_event",
     "test_life_from_the_loam_returns_lands_and_dredge_replaces_draw",
-    "test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free"
+    "test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free",
+    "test_zone_replacement_descriptor_rejects_unknown_destinations",
+    "test_registered_additional_token_components_replace_without_name_dispatch",
+    "test_additional_token_does_not_inherit_original_entry_modifiers",
+    "test_resolution_suspends_for_seat_scoped_replacement_order",
+    "test_additional_token_component_replays_exactly",
+    "test_competing_zone_replacements_suspend_resume_and_replay_exactly",
+    "test_simultaneous_replacement_uses_the_sources_pre_move_controller",
+    "test_stack_object_controller_chooses_zone_replacement_order",
+    "test_replacement_created_token_and_counter_events_remain_replaceable",
+    "test_entering_objects_and_reserved_objects_cannot_change_zones",
+    "test_library_top_ignores_cards_entering_from_library"
   ],
   "implementation": {
-    "component": "CommanderEngine._unconditionally_enters_tapped and CommanderEngine.move_card",
-    "version": "replacement-effects-v2"
+    "component": "replacement_effects event substrate, token_creation mutation owner, semantic_runtime token and zone handlers, and CommanderEngine compatibility adapters",
+    "version": "replacement-effects-v3"
   },
   "known_blockers": [
     "conditional entry replacements remain in dedicated handlers or require arbitration",
-    "generic affected-player replacement ordering is not wired into every move",
+    "generic affected-subject ordering is not wired into every replaceable event producer",
+    "counter-placement replacement producers are not yet integrated",
+    "entry reservation scope is not yet connected to general as-enters choices",
     "copy-token entry text is not yet evaluated through move_card",
     "skip, regeneration, redirection, linked exile, and can't-event grammar are not generic",
-    "draw and graveyard replacements remain dedicated engine paths"
+    "draw replacement paths remain dedicated and commander-zone movement is not yet on the shared boundary"
   ],
-  "review_status": "draft"
+  "review_status": "reviewed"
 }

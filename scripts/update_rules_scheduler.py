@@ -70,9 +70,12 @@ def _markdown(value: Mapping[str, Any]) -> str:
         "- Rules: "
         + ", ".join(f'`{rule_id}`' for rule_id in selected["rule_ids"]),
         "- Target capabilities: "
-        + ", ".join(
-            f'`{capability_id}`'
-            for capability_id in selected["target_capability_ids"]
+        + (
+            ", ".join(
+                f'`{capability_id}`'
+                for capability_id in selected["target_capability_ids"]
+            )
+            or "none registered yet"
         ),
         f'- Rationale: {selected["rationale"]}',
         "",

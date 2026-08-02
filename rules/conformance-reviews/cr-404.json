@@ -37,7 +37,7 @@
         "CommanderEngine.apply_effect",
         "CommanderEngine._counter_stack_item",
         "CommanderEngine._begin_resolve_item",
-        "CommanderEngine._compiled_graveyard_replacement",
+        "semantic_runtime.zone_replacements.prepare_zone_change_replacement",
         "CommanderEngine._assert_invariants"
       ],
       "executable_test_ids": [

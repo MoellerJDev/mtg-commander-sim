@@ -2,7 +2,7 @@
 title: "Semantic packs"
 status: "current"
 authoritative_source: "CardProgram V2 adapter, semantic pack schema, loader, and tracked packs"
-verified: "2026-08-01"
+verified: "2026-08-02"
 audience: "rules and semantic-pack contributors"
 maintenance: "hand-maintained"
 ---
@@ -129,9 +129,30 @@ resolution roll back transactionally and replay through the same registered
 handler fingerprint.
 
 This migration does not promote a reviewed pack to capability-closed and does
-not claim all tap/untap interactions. General replacement ordering, tap/untap
+not claim all tap/untap interactions. Universal replacement participation, tap/untap
 prohibitions, and complete derived-characteristic closure remain explicit
 capability blockers.
+
+## Replacement runtime components
+
+Source-pinned `handlers` descriptors represent bounded replacement behavior
+without card-name or Oracle-ID dispatch in the universal engine.
+`replacement.token.additional.v1` contributes a fixed additional-token effect;
+`replacement.zone.destination.v1` contributes a reviewed destination rewrite
+and fixed counter intents. Multiple represented effects use the affected
+seat's choice, APNAP traversal, rediscovery, containing-event-before-contained-
+event ordering, and an exact selection journal. A suspended choice projects
+only chooser-safe labels and options and resumes the same semantic instruction
+through Game Record v3.
+
+The current zone witness is Dauthi Voidwalker, loaded from reviewed semantic
+data with exact Oracle/rulings fingerprints. Historical complete snapshots that
+predate the descriptor may use the validated pinned compatibility component;
+current snapshots pin the descriptor directly. This does not establish
+universal replacement/prevention coverage. In particular, fixed counter
+intents still await the counter-placement replacement boundary, and optional,
+quantity-changing, prohibition, damage, draw, and entry families remain
+blocked.
 
 ## Trust
 

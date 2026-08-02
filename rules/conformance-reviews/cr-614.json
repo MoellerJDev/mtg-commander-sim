@@ -25,12 +25,12 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": ["replacement_effects.ReplaceableEvent", "replacement_effects.replacement_choice"],
-      "executable_test_ids": ["tests.test_rules_primitives.ReplacementOrderingTests.test_applicability_is_recomputed_after_each_replacement"],
-      "required_scenarios": ["positive", "negative", "interaction"],
-      "covered_scenarios": ["positive"],
-      "blockers": ["replaceable engine events are not yet emitted by every event producer", "continuous replacement effects are not generically registered from Oracle semantics"],
-      "notes": ["The primitive continuously rechecks supplied effects against a proposed event, but registry and producer integration remain incomplete."]
+      "implementation_components": ["replacement_effects.ReplaceableEvent", "replacement_effects.ReplacementEventBatch", "token_creation.create_tokens", "semantic_runtime.zone_replacements.prepare_zone_change_replacement"],
+      "executable_test_ids": ["tests.test_rules_primitives.ReplacementOrderingTests.test_applicability_is_recomputed_after_each_replacement", "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_registered_additional_token_components_replace_without_name_dispatch", "tests.test_graveyard_rules.GraveyardRuleTests.test_graveyard_replacement_is_decided_before_the_move", "tests.test_graveyard_rules.GraveyardRuleTests.test_zone_replacement_descriptor_rejects_unknown_destinations"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": ["positive", "negative", "interaction", "replay"],
+      "blockers": ["replaceable engine events are not yet emitted by every event producer", "continuous replacement effects are registered only for reviewed runtime descriptor families"],
+      "notes": ["Token creation and represented card-destination changes now resolve through the shared event boundary, which continuously rediscovers applicable effects and records exact choices. Universal producer and Oracle-compiler coverage remain incomplete."]
     },
     {
       "rule_id": "614.1a",
@@ -375,12 +375,12 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": ["replacement_effects.apply_replacement", "CommanderEngine.move_card"],
-      "executable_test_ids": ["tests.test_rules_primitives.ReplacementOrderingTests.test_nested_event_operation_fails_closed"],
+      "implementation_components": ["replacement_effects.EntryReplacementScope", "replacement_effects.apply_replacement", "replacement_effects.replacement_tree_choice"],
+      "executable_test_ids": ["tests.test_replacement_event_tree.ReplacementEntryScopeTests.test_entering_objects_and_reserved_objects_cannot_change_zones", "tests.test_replacement_event_tree.ReplacementNestedEventTests.test_nested_event_operation_creates_replayable_child"],
       "required_scenarios": ["positive", "negative", "interaction"],
-      "covered_scenarios": ["negative"],
-      "blockers": ["entry replacements cannot contain ordered typed zone-change child events", "nested event choices are not represented in replay paths"],
-      "notes": ["Nested replacement events fail closed."]
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": ["entry replacement descriptors do not yet bind the scope to an executable as-enters choice transaction", "nested zone-change events are represented and ordered but are not yet universally committed by battlefield-entry producers"],
+      "notes": ["The immutable entry scope and nested event tree enforce candidate exclusions, reservations, and containing-event order. This is reusable substrate, not complete as-enters producer integration."]
     },
     {
       "rule_id": "614.13a",
@@ -389,12 +389,12 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": ["replacement_effects.apply_replacement"],
-      "executable_test_ids": ["tests.test_rules_primitives.ReplacementOrderingTests.test_nested_event_operation_fails_closed"],
+      "implementation_components": ["replacement_effects.EntryReplacementScope.eligible_zone_choices"],
+      "executable_test_ids": ["tests.test_replacement_event_tree.ReplacementEntryScopeTests.test_entering_objects_and_reserved_objects_cannot_change_zones"],
       "required_scenarios": ["positive", "negative", "interaction"],
-      "covered_scenarios": ["negative"],
-      "blockers": ["nested entry-zone-change choices cannot exclude all simultaneously entering objects from candidate selection"],
-      "notes": ["No candidate grammar exists for this nested event."]
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": ["the scope is not yet populated by every simultaneous battlefield-entry producer or exposed through a generic entry-choice schema"],
+      "notes": ["Entering objects are excluded from the candidate set by stable object ID before any reservation is accepted."]
     },
     {
       "rule_id": "614.13b",
@@ -403,12 +403,12 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": ["replacement_effects.apply_replacement"],
-      "executable_test_ids": ["tests.test_rules_primitives.ReplacementOrderingTests.test_nested_event_operation_fails_closed"],
+      "implementation_components": ["replacement_effects.EntryReplacementScope.reserve_zone_changes", "replacement_effects.apply_replacement"],
+      "executable_test_ids": ["tests.test_replacement_event_tree.ReplacementEntryScopeTests.test_entering_objects_and_reserved_objects_cannot_change_zones"],
       "required_scenarios": ["positive", "negative", "interaction"],
-      "covered_scenarios": ["negative"],
-      "blockers": ["cross-replacement uniqueness for nested zone-change choices is not tracked"],
-      "notes": ["The same-object-twice restriction cannot yet be represented."]
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": ["the immutable reservation journal is not yet connected to every as-enters cost and zone-choice producer"],
+      "notes": ["Once reserved, an object is rejected from later zone-changing choices in the same entry replacement scope."]
     },
     {
       "rule_id": "614.13c",
@@ -417,12 +417,12 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": ["replacement_effects.apply_replacement"],
-      "executable_test_ids": ["tests.test_rules_primitives.ReplacementOrderingTests.test_nested_event_operation_fails_closed"],
+      "implementation_components": ["replacement_effects.EntryReplacementScope.library_order_for_replacement"],
+      "executable_test_ids": ["tests.test_replacement_event_tree.ReplacementEntryScopeTests.test_library_top_ignores_cards_entering_from_library", "tests.test_replacement_event_tree.ReplacementBatchTests.test_choice_payload_does_not_expose_authoritative_event_payload"],
       "required_scenarios": ["positive", "negative", "interaction", "hidden_information"],
-      "covered_scenarios": ["negative"],
-      "blockers": ["nested mill/exile operations cannot reserve library cards already entering simultaneously", "private library candidate projection is not integrated"],
-      "notes": ["The library exclusion edge case remains unsupported."]
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": ["private mill and top-library exile choices do not yet consume the filtered scope through a seat-projected transaction"],
+      "notes": ["The filtered library view omits every card simultaneously entering from that library without revealing the underlying order. Hidden-information integration remains blocked."]
     },
     {
       "rule_id": "614.14",
@@ -431,12 +431,12 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": ["CommanderEngine._compiled_graveyard_replacement", "CommanderEngine._activate"],
+      "implementation_components": ["semantic_runtime.zone_replacements.ZoneDestinationReplacementHandler", "CommanderEngine._activate"],
       "executable_test_ids": ["tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free"],
       "required_scenarios": ["positive", "negative", "interaction", "replay"],
       "covered_scenarios": ["positive", "negative"],
       "blockers": ["linked replacement identity is implemented for the exact Dauthi family rather than generic linked abilities", "gained paired abilities and old/new object incarnations are not fully modeled"],
-      "notes": ["Dauthi links its exiled card permission to the represented effect, but this is not broad linked-ability coverage."]
+      "notes": ["Dauthi's destination replacement now comes from a source-pinned runtime descriptor and links its exiled-card permission to the represented effect, but this is not broad linked-ability coverage."]
     },
     {
       "rule_id": "614.15",
@@ -459,12 +459,12 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": ["replacement_effects.replacement_choice", "CommanderEngine._apply_effect"],
-      "executable_test_ids": ["tests.test_rules_primitives.ReplacementOrderingTests.test_applicability_is_recomputed_after_each_replacement"],
-      "required_scenarios": ["positive", "negative", "interaction"],
-      "covered_scenarios": ["interaction"],
-      "blockers": ["token-creation and counter-placement producers are not routed through the generic replacement registry", "effects created by replacement or prevention operations do not emit typed nested token/counter events"],
-      "notes": ["Applicability is recomputed after payload changes, but the specified producer families are not integrated."]
+      "implementation_components": ["replacement_effects.replacement_tree_choice", "semantic_runtime.token_replacements.resolve_token_creation_replacements", "token_creation.create_tokens"],
+      "executable_test_ids": ["tests.test_replacement_event_tree.ReplacementNestedEventTests.test_replacement_created_token_and_counter_events_remain_replaceable", "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_resolution_suspends_for_seat_scoped_replacement_order", "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_additional_token_component_replays_exactly"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": ["positive", "negative", "interaction", "replay"],
+      "blockers": ["ordinary and replacement-created counter placement is not yet routed through the shared producer boundary", "not every replacement or prevention operation that creates tokens or counters lowers to a typed nested event"],
+      "notes": ["Resolving effects and represented replacement components now share the token-creation event and rediscovery loop. Counter-placement producer integration remains incomplete, so the rule stays blocked."]
     },
     {
       "rule_id": "614.17",

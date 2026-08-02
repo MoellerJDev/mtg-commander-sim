@@ -22,13 +22,15 @@
     "mtg_commander_sim/model.py",
     "mtg_commander_sim/oracle_ir.py",
     "mtg_commander_sim/permissions.py",
+    "mtg_commander_sim/replacement_decisions.py",
     "mtg_commander_sim/replacement_effects.py",
     "mtg_commander_sim/rule_conformance.py",
     "mtg_commander_sim/rules_corpus.py",
     "mtg_commander_sim/semantics.py",
     "mtg_commander_sim/shortcuts.py",
     "mtg_commander_sim/state_based_actions.py",
-    "mtg_commander_sim/targets.py"
+    "mtg_commander_sim/targets.py",
+    "mtg_commander_sim/token_creation.py"
   ],
   "protected_future_prefixes": [
     "mtg_commander_sim/domain/",
@@ -76,11 +78,14 @@
       "mtg_commander_sim/engine.py": "legacy authoritative transaction and mutation boundary",
       "mtg_commander_sim/permissions.py": "decision and capability lifecycle owned by the transaction boundary",
       "mtg_commander_sim/record.py": "replay hydration, verification copies, and versioned migration",
-      "mtg_commander_sim/tap_state.py": "typed tap-state effect mutation owner behind the semantic intent executor"
+      "mtg_commander_sim/tap_state.py": "typed tap-state effect mutation owner behind the semantic intent executor",
+      "mtg_commander_sim/token_creation.py": "typed token-creation and replacement mutation owner behind CommanderEngine"
     },
     "read_only_consumers": {
       "mtg_commander_sim/projection.py": "principal-scoped projection",
-      "mtg_commander_sim/__init__.py": "public type re-export"
+      "mtg_commander_sim/__init__.py": "public type re-export",
+      "mtg_commander_sim/replacement_decisions.py": "replacement continuation validation and stack lookup",
+      "mtg_commander_sim/semantic_runtime/zone_replacements.py": "read-only replacement-source discovery and event identity"
     },
     "model_definition": "mtg_commander_sim/model.py"
   },

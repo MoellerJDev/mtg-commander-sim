@@ -11,12 +11,14 @@ from .continuous_components import (
 from .token_replacements import (
     default_token_creation_replacement_registry,
 )
+from .zone_replacements import default_zone_change_replacement_registry
 
 
 def runtime_component_registries() -> tuple[Any, ...]:
     return (
         default_continuous_effect_component_registry(),
         default_token_creation_replacement_registry(),
+        default_zone_change_replacement_registry(),
     )
 
 

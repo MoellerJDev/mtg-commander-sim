@@ -35,7 +35,8 @@
     "state_owner_modules": [
       "mtg_commander_sim/engine.py",
       "mtg_commander_sim/permissions.py",
-      "mtg_commander_sim/tap_state.py"
+      "mtg_commander_sim/tap_state.py",
+      "mtg_commander_sim/token_creation.py"
     ],
     "state_parameter_modules": [
       "mtg_commander_sim/record.py",
@@ -46,9 +47,11 @@
       "mtg_commander_sim/oracle_ir.py",
       "mtg_commander_sim/semantics.py",
       "mtg_commander_sim/abilities.py",
+      "mtg_commander_sim/replacement_decisions.py",
       "mtg_commander_sim/replacement_effects.py",
       "mtg_commander_sim/continuous_effects.py",
-      "mtg_commander_sim/state_based_actions.py"
+      "mtg_commander_sim/state_based_actions.py",
+      "mtg_commander_sim/token_creation.py"
     ],
     "card_specificity_exempt_prefixes": [
       "mtg_commander_sim/card_overrides/"
@@ -158,10 +161,23 @@
       "missing_dedicated_owner": true
     },
     {
+      "id": "tokens_and_token_creation",
+      "status": "focused_mutation_owner_with_engine_orchestration",
+      "owners": [
+        "mtg_commander_sim/token_creation.py",
+        "mtg_commander_sim/semantic_runtime/token_replacements.py",
+        "mtg_commander_sim/engine.py"
+      ],
+      "missing_dedicated_owner": false
+    },
+    {
       "id": "replacement_and_prevention",
-      "status": "partial_dedicated_module_with_engine_integration",
+      "status": "typed_event_tree_with_incremental_engine_integration",
       "owners": [
         "mtg_commander_sim/replacement_effects.py",
+        "mtg_commander_sim/replacement_decisions.py",
+        "mtg_commander_sim/semantic_runtime/token_replacements.py",
+        "mtg_commander_sim/semantic_runtime/zone_replacements.py",
         "mtg_commander_sim/engine.py"
       ],
       "missing_dedicated_owner": false

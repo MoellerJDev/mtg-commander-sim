@@ -248,12 +248,13 @@
       "implementation_components": [
         "CommanderEngine.move_card",
         "CommanderEngine._move_cards_simultaneously",
-        "CommanderEngine._compiled_graveyard_replacement",
+        "semantic_runtime.zone_replacements.prepare_zone_change_replacement",
         "replacement_effects"
       ],
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_simultaneous_move_captures_all_lki_before_mutation",
-        "tests.test_rules_primitives.ReplacementOrderingTests.test_affected_player_chooses_from_current_priority_class"
+        "tests.test_graveyard_rules.GraveyardRuleTests.test_simultaneous_replacement_uses_the_sources_pre_move_controller",
+        "tests.test_graveyard_rules.GraveyardRuleTests.test_competing_zone_replacements_suspend_resume_and_replay_exactly"
       ],
       "required_scenarios": [
         "positive",
@@ -266,7 +267,9 @@
       "covered_scenarios": [
         "positive",
         "interaction",
-        "multiplayer"
+        "multiplayer",
+        "hidden_information",
+        "replay"
       ],
       "blockers": [
         "universal_zone_move_replacement_discovery_not_implemented",

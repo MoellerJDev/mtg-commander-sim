@@ -6,12 +6,12 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "rules_dependency_scheduler",
-    "branch": "feat/rules-dependency-scheduler",
-    "commit_reference": "focused scheduler branch based on certified main 40241e6a7a4e77a3dab3df93c6a726b0f82186fb; exact-head certification pending",
+    "active_phase": "replacement_choice_nested_events",
+    "branch": "rules/replacement-choice-nested-events",
+    "commit_reference": "focused replacement-event branch based on certified main 9c0b1c4ec5b31c70bb5b9ca94510912edcf650e8; exact-head certification pending",
     "branch_ancestry": {
-      "focused_branch_base": "40241e6a7a4e77a3dab3df93c6a726b0f82186fb",
-      "focused_branch_unique_commits_over_main": 0
+      "focused_branch_base": "9c0b1c4ec5b31c70bb5b9ca94510912edcf650e8",
+      "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
       {
@@ -440,6 +440,13 @@
         "number": 61,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/61"
+      },
+      {
+        "base": "main",
+        "head": "feat/rules-dependency-scheduler",
+        "number": 62,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/62"
       }
     ],
     "tags": [
@@ -494,8 +501,14 @@
     {
       "id": "rules_dependency_scheduler",
       "name": "Dependency-ordered behavioral rules scheduler",
+      "status": "integrated_on_certified_main",
+      "evidence": "Certified main conservatively assigns every reviewed blocked behavioral rule and every unclassified nonpassing rule to one dependency-linked subsystem, records implementation/tests/profiles/compiler impact, rejects stale or incomplete catalogs, and selects bounded dependency-ready batches without promoting conformance or runtime trust."
+    },
+    {
+      "id": "replacement_choice_nested_events",
+      "name": "Replayable replacement-event and token/zone boundary",
       "status": "implementation_complete_certification_pending",
-      "evidence": "The focused scheduler branch conservatively assigns every reviewed blocked behavioral rule and every unclassified nonpassing rule to one dependency-linked subsystem, records implementation/tests/profiles/compiler impact, rejects stale or incomplete catalogs, and selects a bounded CR 614/616 replacement-choice and nested-event batch without promoting conformance or runtime trust."
+      "evidence": "The focused branch adds immutable nested replacement events, affected-object and APNAP choice ordering, optional decline, exact selection journals, seat-scoped Game Record v3 continuations, a focused token-creation mutation owner, and reviewed token-addition and zone-destination integrations. CR 616.1g containing-event ordering is behaviorally passing for this substrate; universal CR 614/616 participation, prevention, counter-placement replacement, and broad Oracle closure remain blocked."
     },
     {
       "id": "rules_snapshot",
@@ -558,7 +571,7 @@
     "semantic_preflight": "reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory"
   },
   "blockers": [
-    "typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, replacement ordering beyond represented stun counters, and complete effective-characteristic closure",
+    "typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, universal replacement participation beyond represented stun and runtime-component events, and complete effective-characteristic closure",
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
     "the continuous-effect baseline gates structural scan counts but records latency observationally; broader action, combat, copy, control-change, phasing, and invalidation performance scenarios remain incomplete",
@@ -569,5 +582,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Certify and merge the dependency scheduler, clean the branch, then implement the selected bounded CR 614/616 replacement-choice and nested-event batch from fresh certified main."
+  "next_task": "Certify and merge the replacement-choice and nested-event slice, clean the branch, then implement the selected universal counter-placement replacement boundary from fresh certified main."
 }

@@ -2,7 +2,7 @@
 title: "Codex project instructions"
 status: "current"
 authoritative_source: "repository contribution and architecture policy"
-verified: "2026-08-01"
+verified: "2026-08-02"
 audience: "Codex agents and contributors"
 maintenance: "hand-maintained"
 ---
@@ -60,6 +60,12 @@ maintenance: "hand-maintained"
   is a user-facing convenience and agents must never pass `--open` unless the
   user explicitly requests a visible browser launch in that same task. Printing
   or probing a localhost URL does not authorize navigation to it.
+- Treat every already-open system or Codex in-app browser as user-owned state.
+  Never reuse, focus, or navigate it for an automated check, including to a
+  localhost listener started by the agent. Verify HTTP endpoints with a CLI
+  client and UI behavior with isolated headless Playwright. Browser-control
+  tools are off limits unless the user explicitly requests visible browser
+  interaction in that same task.
 
 ## Current architecture program
 
@@ -69,7 +75,7 @@ project objective; do not use a feature request as permission for a big-bang
 rewrite.
 
 - Phase 1 runtime trust/default-deny governance is integrated on certified
-  `main` through PR #60. Its explicit evidence, trust/closure, component
+  `main`. Its explicit evidence, trust/closure, component
   binding, performance, and architecture ratchets are current policy.
 - Certified `main` integrates the typed `tap`, `untap`, and
   `untap_all_creatures`
@@ -77,14 +83,20 @@ rewrite.
   `tap_state.py` mutation port, with a negative engine delta and exact
   rollback/replay/mutation evidence.
 - Keep those capabilities tested and blocked until complete tap/untap
-  prohibitions, general replacement ordering, and effective-characteristic
+  prohibitions, universal replacement participation, and effective-characteristic
   closure are represented. Do not widen this slice into broad Oracle grammar,
   a new card family, or numerical Comprehensive Rules traversal.
-- The active rules-first planning branch is
-  `feat/rules-dependency-scheduler`. Its generated queue must conservatively
-  cover every reviewed blocked behavioral rule and every unclassified
-  nonpassing rule exactly once. Select subsystem batches from that queue; do
-  not resume numerical rule traversal.
+- Certified `main` integrates the dependency-ordered behavioral-rules
+  scheduler. Its generated queue must conservatively cover
+  every reviewed blocked behavioral rule and every unclassified nonpassing
+  rule exactly once. Select subsystem batches from that queue; do not resume
+  numerical rule traversal.
+- The active bounded slice is `rules/replacement-choice-nested-events`. It
+  extracts immutable nested replacement-event trees, seat-scoped replayable
+  replacement ordering, and focused token/zone mutation boundaries. CR 616.1g
+  may be promoted only for the represented containing-before-contained event
+  behavior; broader CR 614/616 remains blocked. The next selected scheduler
+  batch is the universal counter-placement replacement boundary.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic

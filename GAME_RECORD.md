@@ -2,7 +2,7 @@
 title: "Game Record v3"
 status: "current"
 authoritative_source: "mtg_commander_sim/record.py and record schemas"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-02"
 audience: "engine, persistence, replay, and analyst contributors"
 maintenance: "hand-maintained"
 ---
@@ -161,6 +161,17 @@ triggers discovered by subsequent state-based actions until placement begins,
 while `priority_epoch` prevents merging across priority windows and triggers
 created during placement remain a later CR 603.3b pass. These
 are additive checkpoint details, not a Game Record v3 redesign.
+
+Competing represented replacement effects use an ordinary additive
+`replacement.order` decision continuation. The authoritative continuation
+stores the immutable event batch, candidate effects, exact event path, and
+prior selection journal; the chooser projection contains only its current
+event label and legal effect/decline options. A response is accepted only when
+the event, path, affected seat, and choice reconstruct the same pending
+decision, after which the original semantic instruction resumes with the exact
+selection journal. Neither another seat's choice data nor raw authoritative
+replacement payloads enter the projected packet. This is an additive v3
+continuation, not a record redesign.
 
 Fresh native records use `manifest.replay.mode = "command_replay"`. The
 separate `legacy_snapshot` mode is reserved for migrated records whose accepted
