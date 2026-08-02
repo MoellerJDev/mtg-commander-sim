@@ -43,6 +43,11 @@ maintenance: "hand-maintained"
 - Do not spend product slices improving AI strategy, model routing, prompts, or
   provider sessions. Keep existing provider-specific adapters isolated from the
   authoritative rules and application layers.
+- Automated checks must never open or drive a contributor's system browser or
+  the Codex in-app browser. Run Playwright in its isolated headless browser,
+  start `python -m server` with `--no-open`, keep Vite `open: false`, and keep
+  HTML reporters configured with `open: "never"`. Only launch a visible browser
+  when the user explicitly asks for an interactive/manual browser session.
 
 ## Current architecture program
 

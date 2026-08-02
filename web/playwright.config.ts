@@ -17,6 +17,8 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
     baseURL: `http://127.0.0.1:${webPort}`,
+    // E2E automation must never take over a contributor's system browser.
+    headless: true,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
@@ -28,7 +30,10 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: `python -m server --host 127.0.0.1 --port ${serverPort}`,
+      // The normal launcher opens the system browser for manual play. Tests
+      // use Playwright's isolated headless browser and must suppress that side
+      // effect explicitly.
+      command: `python -m server --host 127.0.0.1 --port ${serverPort} --no-open --no-build-browser`,
       cwd: "..",
       url: `http://127.0.0.1:${serverPort}/api/v1/health`,
       reuseExistingServer: false,

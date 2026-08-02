@@ -100,6 +100,18 @@ async function submitFormAction(page: Page, actionId: string) {
   await submitOpenChoice(page);
 }
 
+async function submitMaybeFormAction(page: Page, actionId: string, clickTimeout = 15_000) {
+  const revision = await viewRevision(page);
+  const dialog = page.getByTestId("choice-dialog");
+  await page.getByTestId(`action-${actionId}`).click({ timeout: clickTimeout });
+  await expect
+    .poll(async () => (await dialog.isVisible()) || (await viewRevision(page)) > revision)
+    .toBe(true);
+  if (await dialog.isVisible()) {
+    await submitOpenChoice(page);
+  }
+}
+
 async function ensureFullControl(page: Page) {
   const toggle = page.getByTestId("auto-pass-toggle");
   if (await toggle.getAttribute("aria-pressed") === "true") {
@@ -769,7 +781,34 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
     async function attackWithCommander() {
       // A still has a legal land play, so advancing to combat is meaningful
       // and must not be consumed by Auto-pass.
-      await submitFormAction(host, "pass");
+      // Depending on the exact priority handoff, the first visible pass may be
+      // an immediate priority action rather than the form-backed main-phase
+      // pass. Advance through only those passes until attackers are requested.
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        const panel = host.getByTestId("decision-panel");
+        const pass = host.getByTestId("action-pass");
+        await expect
+          .poll(async () => {
+            if ((await panel.textContent())?.includes("Combat.Attackers")) {
+              return "attackers";
+            }
+            return (await pass.isVisible()) && (await pass.isEnabled()) ? "pass" : "waiting";
+          })
+          .not.toBe("waiting");
+        if ((await panel.textContent())?.includes("Combat.Attackers")) {
+          break;
+        }
+        try {
+          await submitMaybeFormAction(host, "pass", 2_000);
+        } catch (error) {
+          // A WebSocket projection may replace an enabled priority pass with
+          // the disabled attackers-window pass between the poll and click.
+          if ((await panel.textContent())?.includes("Combat.Attackers")) {
+            break;
+          }
+          throw error;
+        }
+      }
       await expect(host.getByTestId("decision-panel")).toContainText("Combat.Attackers");
       await host.getByTestId("action-attack").click();
       const attackerChoice = host.locator('[data-testid^="choice-attackers-"]').first();
