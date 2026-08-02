@@ -83,6 +83,12 @@ from .damage import (
     DamageProposal,
     resolve_damage_batch,
 )
+from .life_state import (
+    LifeChange,
+    LifeStateError,
+    commit_life_changes,
+    plan_life_changes,
+)
 from .deck import DeckDefinition
 from .mana import (
     ManaMode,
@@ -115,15 +121,45 @@ from .replacement_decisions import (
     issue_combat_damage_replacement_choice,
 )
 from .replacement_effects import ReplacementChoiceRequired
+from .replacement.immutable import thaw_value
 from .semantics import SemanticProgram, SemanticRegistry
 from .semantic_runtime import (
+    AddManaIntent,
+    AmassIntent,
+    CounterStackIntent,
+    CopyControlledTokensIntent,
+    CopyStackItemIntent,
+    CreateTokenIntent,
+    EliminatePlayersIntent,
+    IntentPlan,
+    LifeChangeIntent,
+    MoveLibraryCardsToBottomIntent,
+    PayManaCostIntent,
+    PlaceCountersIntent,
+    RecordChoiceIntent,
+    RecordZoneMoveIntent,
+    ReorderLibraryTopIntent,
+    RetargetStackItemIntent,
+    RevealLibraryCardsIntent,
     SemanticNodeError,
+    SetCardDesignationIntent,
+    ZoneMoveIntent,
     default_semantic_interpreter,
     execute_intent_plan,
     log_applied_zone_replacements,
     PreparedZoneChange,
     prepare_zone_change_replacement,
     prepare_draw_resolution,
+)
+from .semantic_choices import (
+    ChoiceObjectView,
+    ChoiceStackView,
+    SemanticChoiceContext,
+    SemanticChoiceContinuation,
+    SemanticChoiceError,
+    SemanticChoiceFrame,
+    SnapshotSemanticChoiceQuery,
+    default_semantic_choice_registry,
 )
 from .state_based_actions import (
     ObjectSnapshot,
@@ -13026,7 +13062,9 @@ class CommanderEngine:
     ) -> None:
         if str(frame.get("stack_object") or "") != item.ref:
             raise GameRuleError("Semantic continuation stack object changed")
-        if frame.get("semantic_program_id") != item.semantic_key:
+        if str(frame.get("semantic_program_id") or "") != str(
+            item.semantic_key or ""
+        ):
             raise GameRuleError("Semantic continuation program changed")
         program = self.semantics.get(item.semantic_key)
         expected_version = program.version if program else None
@@ -13305,6 +13343,881 @@ class CommanderEngine:
             return
         self._grant_priority(self.state.active_player)
 
+    def _semantic_choice_query(
+        self,
+        actor: str,
+        *,
+        response: Mapping[str, Any] | None = None,
+        effect: Mapping[str, Any] | None = None,
+    ) -> SnapshotSemanticChoiceQuery:
+        """Materialize the actor-scoped immutable facts choice handlers use."""
+
+        public_zones = {"battlefield", "graveyard", "exile", "command", "stack"}
+        object_rows: list[ChoiceObjectView] = []
+        for card in self.state.cards.values():
+            if card.zone not in public_zones and card.owner != actor:
+                continue
+            effective = self._effective_card_data(card)
+            types, subtypes, supertypes = self._type_parts(
+                str(effective.get("type_line") or "")
+            )
+            object_rows.append(
+                ChoiceObjectView(
+                    object_id=card.object_id,
+                    ref=card.ref,
+                    printed_name=card.printed_name,
+                    owner=card.owner,
+                    controller=card.controller,
+                    zone=card.zone,
+                    types=tuple(sorted(types)),
+                    subtypes=tuple(sorted(subtypes)),
+                    supertypes=tuple(sorted(supertypes)),
+                    colors=tuple(
+                        str(value).upper()
+                        for value in effective.get("colors", [])
+                    ),
+                    keywords=tuple(
+                        str(value).casefold()
+                        for value in effective.get("keywords", [])
+                    ),
+                    counters=dict(card.counters),
+                    mana_value=int(effective.get("mana_value") or 0),
+                    token=card.is_token,
+                    tapped=card.tapped,
+                    phased_out=card.phased_out,
+                    known_to_actor=(
+                        actor in card.known_to
+                        or card.zone in public_zones
+                    ),
+                )
+            )
+        stack_rows = tuple(
+            ChoiceStackView(
+                ref=item.ref,
+                controller=item.controller,
+                label=item.label,
+                semantic_key=item.semantic_key,
+                targets=tuple(item.targets),
+                modes=tuple(item.modes),
+                target_groups=dict(item.context.get("target_groups") or {}),
+            )
+            for item in self.state.stack
+        )
+        choice_effect = effect or {}
+        target_schemas: dict[str, Any] = {}
+        validated_targets: dict[str, Any] = {}
+        operation = str(choice_effect.get("op") or "")
+        if operation in {"copy_stack_item", "retarget_stack_item"}:
+            target_ref = str(
+                choice_effect.get("_target_stack_ref")
+                or choice_effect.get("stack")
+                or ""
+            )
+            target_item = next(
+                (item for item in self.state.stack if item.ref == target_ref),
+                None,
+            )
+            if target_item is not None:
+                validation_actor = str(
+                    choice_effect.get("_validation_actor")
+                    or (
+                        actor
+                        if operation == "copy_stack_item"
+                        else target_item.controller
+                    )
+                )
+                raw_schema = choice_effect.get("_target_schema")
+                if not isinstance(raw_schema, Mapping):
+                    raw_schema = self._stack_target_schema(
+                        target_item,
+                        self.semantics.get(target_item.semantic_key),
+                    )
+                public_schema: Mapping[str, Any] | None = None
+                if isinstance(raw_schema, Mapping) and target_item.targets:
+                    if operation == "retarget_stack_item" and available_modes(
+                        raw_schema
+                    ):
+                        plan = target_plan(
+                            raw_schema,
+                            target_item.modes,
+                            require_modes=True,
+                        )
+                        candidates = self._target_candidate_map(
+                            target_item.controller,
+                            plan,
+                            source_ref=self._stack_source_ref(target_item),
+                        )
+                        if self._target_plan_feasible(plan, candidates):
+                            public_schema = {
+                                "groups": [
+                                    group.public_dict(
+                                        candidates[group.group_id]
+                                    )
+                                    for group in plan.groups
+                                ],
+                                "legal_refs": unique_preserving_order(
+                                    ref
+                                    for group in plan.groups
+                                    for ref in candidates[group.group_id]
+                                ),
+                            }
+                    else:
+                        public_schema = self._public_target_schema(
+                            validation_actor,
+                            raw_schema,
+                            source_ref=self._stack_source_ref(target_item),
+                        )
+                    if public_schema is not None:
+                        key = f"{validation_actor}:{target_ref}"
+                        target_schemas[key] = {
+                            "authoritative": dict(raw_schema),
+                            "public": dict(public_schema),
+                        }
+                        submitted = (response or {}).get("targets")
+                        if submitted is not None:
+                            selected, grouped = self._validate_semantic_targets(
+                                validation_actor,
+                                self.semantics.get(target_item.semantic_key),
+                                self._normalize_target_submission(submitted),
+                                modes=list(target_item.modes),
+                                source_ref=self._stack_source_ref(target_item),
+                                target_schema=dict(raw_schema),
+                            )
+                            validated_targets[key] = {
+                                "targets": selected,
+                                "groups": grouped,
+                            }
+        submitted_names = {
+            str(value).strip()
+            for key, value in (response or {}).items()
+            if key == "card_name" and str(value).strip()
+        }
+        canonical_names: dict[str, str] = {}
+        for submitted in submitted_names:
+            try:
+                canonical_names[submitted.casefold()] = self.card_db.lookup(
+                    submitted
+                ).name
+            except KeyError:
+                continue
+        affordable_costs: set[str] = set()
+        cost_value: Mapping[str, Any] | None = None
+        if isinstance(choice_effect.get("_requirements"), Mapping):
+            cost_value = choice_effect["_requirements"]
+        elif isinstance(choice_effect.get("cost"), Mapping):
+            cost_value = choice_effect["cost"]
+        elif str(choice_effect.get("op") or "") == "remora_tax":
+            cost_value = {"GENERIC": 4}
+        elif str(choice_effect.get("op") or "") == "cumulative_upkeep":
+            per_counter = self._mana_vector(
+                choice_effect.get("cost_per_counter") or {"GENERIC": 1}
+            )
+            source = next(
+                (
+                    row
+                    for row in object_rows
+                    if row.ref == str(choice_effect.get("source") or "")
+                ),
+                None,
+            )
+            if source is not None:
+                age = int(source.counters.get("age", 0)) + 1
+                cost_value = {
+                    key: int(value) * age
+                    for key, value in per_counter.items()
+                }
+        if cost_value is not None:
+            requirements = self._mana_vector(cost_value)
+            if self._cost_is_affordable(actor, requirements):
+                affordable_costs.add(
+                    SnapshotSemanticChoiceQuery._cost_key(
+                        actor,
+                        requirements,
+                    )
+                )
+        return SnapshotSemanticChoiceQuery(
+            seat_order=tuple(self.seats),
+            active_order=tuple(self.active_seats),
+            object_rows=tuple(object_rows),
+            stack_rows=stack_rows,
+            life_by_seat={
+                seat: self.state.players[seat].life for seat in self.seats
+            },
+            counters_by_seat={
+                seat: {
+                    "poison": self.state.players[seat].poison,
+                    "energy": self.state.players[seat].energy,
+                }
+                for seat in self.seats
+            },
+            libraries_by_seat={
+                actor: [
+                    self.state.cards[object_id].ref
+                    for object_id in self.state.players[actor].zones["library"]
+                ]
+            },
+            mana_by_seat={
+                actor: dict(self.state.players[actor].mana_pool)
+            },
+            affordable_costs=frozenset(affordable_costs),
+            canonical_names=canonical_names,
+            target_schemas=target_schemas,
+            validated_targets=validated_targets,
+        )
+
+    def _semantic_choice_context(
+        self,
+        item: StackItem,
+        actor: str,
+        effect: Mapping[str, Any],
+    ) -> SemanticChoiceContext:
+        source_id = item.source_object_id or item.card_object_id or ""
+        source = self.state.cards.get(source_id)
+        program = self.semantics.get(item.semantic_key)
+        return SemanticChoiceContext(
+            actor=actor,
+            stack_ref=item.ref,
+            stack_controller=item.controller,
+            stack_label=item.label,
+            source_ref=source.ref if source is not None else None,
+            card_ref=(
+                self.state.cards[item.card_object_id].ref
+                if item.card_object_id in self.state.cards
+                else None
+            ),
+            semantic_program_id=item.semantic_key,
+            semantic_program_version=program.version if program else None,
+            query=self._semantic_choice_query(actor, effect=effect),
+        )
+
+    def _begin_registered_semantic_choice(
+        self,
+        *,
+        item: StackItem,
+        effect: Mapping[str, Any],
+        remaining: Sequence[Mapping[str, Any]],
+        destination: str | None,
+        note: str,
+        instruction_pointer: int,
+    ) -> None:
+        registry = default_semantic_choice_registry()
+        handler = registry.handler_for_operation(str(effect.get("op") or ""))
+        seat = str(effect.get("player") or item.controller)
+        try:
+            preparation = handler.prepare(
+                effect,
+                self._semantic_choice_context(item, seat, effect),
+            )
+        except SemanticChoiceError as exc:
+            raise GameRuleError(str(exc)) from exc
+        for intent in preparation.preparation_intents:
+            execute_intent_plan(
+                self,
+                IntentPlan(
+                    operation=handler.operation,
+                    handler_id=handler.handler_id,
+                    intents=(intent,),
+                ),
+            )
+        if preparation.auto_continue is not None:
+            self._continue_resolution(
+                stack_ref=item.ref,
+                effects=[
+                    *(
+                        dict(value)
+                        for value in preparation.auto_continue.prepend_effects
+                    ),
+                    *(dict(value) for value in remaining),
+                ],
+                destination=destination,
+                note=note,
+                instruction_pointer=instruction_pointer + 1,
+            )
+            return
+        assert preparation.request is not None
+        continuation = SemanticChoiceContinuation(
+            handler_id=handler.handler_id,
+            handler_version=handler.schema_version,
+            stack_ref=item.ref,
+            effect=preparation.continuation_effect,
+            remaining=tuple(dict(value) for value in remaining),
+            destination=destination,
+            note=note,
+            semantic_frame=SemanticChoiceFrame(
+                semantic_program_id=str(item.semantic_key or ""),
+                semantic_program_version=(
+                    self.semantics.get(item.semantic_key).version
+                    if self.semantics.get(item.semantic_key)
+                    else None
+                ),
+                stack_object=item.ref,
+                instruction_pointer=instruction_pointer,
+                controller=item.controller,
+            ),
+        )
+        decision = self.permissions.issue(
+            kind="semantic.choice",
+            role="pilot",
+            actors=[seat],
+            allowed_actions=["choose"],
+            payload_by_actor={seat: preparation.request.payload()},
+            continuation=continuation.to_dict(),
+        )
+        decision.continuation = continuation.with_pending_choice(
+            decision.decision_id
+        ).to_dict()
+
+    def _complete_registered_semantic_choice(self, decision: Any) -> None:
+        seat = decision.actors[0]
+        response = decision.responses[seat]
+        registry = default_semantic_choice_registry()
+        try:
+            handler, continuation = registry.decode_continuation(
+                decision.continuation
+            )
+        except SemanticChoiceError as exc:
+            raise GameRuleError(str(exc)) from exc
+        item = next(
+            (
+                candidate
+                for candidate in self.state.stack
+                if candidate.ref == continuation.stack_ref
+            ),
+            None,
+        )
+        if item is None:
+            raise GameRuleError(
+                "The semantic choice's stack object no longer exists"
+            )
+        self._validate_semantic_frame(
+            continuation.semantic_frame.to_dict(),
+            item,
+        )
+        try:
+            completion = handler.complete(
+                continuation,
+                response,
+                self._semantic_choice_query(
+                    seat,
+                    response=response,
+                    effect=continuation.effect,
+                ),
+            )
+        except SemanticChoiceError as exc:
+            raise GameRuleError(str(exc)) from exc
+        for intent in completion.intents:
+            execute_intent_plan(
+                self,
+                IntentPlan(
+                    operation=handler.operation,
+                    handler_id=handler.handler_id,
+                    intents=(intent,),
+                ),
+            )
+        if item not in self.state.stack:
+            return
+        remaining = [
+            *(dict(value) for value in completion.prepend_effects),
+            *(dict(value) for value in continuation.remaining),
+        ]
+        if completion.repeat_effect is not None:
+            remaining.insert(0, dict(completion.repeat_effect))
+        self._continue_resolution(
+            stack_ref=continuation.stack_ref,
+            effects=remaining,
+            destination=continuation.destination,
+            note=continuation.note,
+            instruction_pointer=(
+                continuation.semantic_frame.instruction_pointer + 1
+            ),
+        )
+
+    def apply_mana_intent(self, intent: AddManaIntent) -> int:
+        self._require_seat(intent.player, in_game=True)
+        if intent.color not in "WUBRGC" or len(intent.color) != 1:
+            raise GameRuleError("Invalid semantic mana color")
+        if intent.amount < 0:
+            raise GameRuleError("Semantic mana amount cannot be negative")
+        self.state.players[intent.player].mana_pool[intent.color] += intent.amount
+        self._log(
+            intent.actor,
+            "mana.semantic",
+            f"{intent.player} added {intent.amount} {intent.color}.",
+            {
+                "source": intent.source_ref,
+                "bundle": {intent.color: intent.amount},
+                "reason": intent.reason,
+            },
+            importance=1,
+            changed_players=[intent.player],
+        )
+        return intent.amount
+
+    def set_card_designation_intent(
+        self,
+        intent: SetCardDesignationIntent,
+    ) -> str:
+        card = self._resolve_object(intent.actor, intent.object_ref)
+        annotation_key = intent.designation
+        card.annotations[annotation_key] = intent.value
+        event_code = (
+            "card.name.chosen"
+            if annotation_key == "chosen_name"
+            else "creature_type.chosen"
+        )
+        detail_key = (
+            "card_name"
+            if annotation_key == "chosen_name"
+            else "creature_type"
+        )
+        self._log(
+            intent.actor,
+            event_code,
+            f"{intent.actor} chose {intent.value} for {card.ref}.",
+            {
+                "source": card.ref,
+                detail_key: intent.value,
+                "reason": intent.reason,
+            },
+            importance=2,
+            changed_objects=[card.object_id],
+        )
+        return intent.value
+
+    def record_choice_intent(self, intent: RecordChoiceIntent) -> None:
+        self._log(
+            intent.actor,
+            intent.event_code,
+            intent.message,
+            dict(intent.details),
+            importance=intent.importance,
+        )
+
+    def move_object_intent(self, intent: ZoneMoveIntent) -> str:
+        card = self._resolve_object(
+            intent.actor,
+            intent.object_ref,
+            zones=set(intent.expected_zones),
+            owned_only=intent.owned_only,
+            controlled_only=intent.controlled_only,
+        )
+        types, _, _ = self._type_parts(
+            str(self._effective_card_data(card).get("type_line") or "")
+        )
+        if any(required not in types for required in intent.required_types):
+            raise GameRuleError(
+                "The selected object no longer has the required card type"
+            )
+        tapped: bool | None = None
+        if intent.tapped_policy == "land_entry":
+            record = self.card_record(card)
+            if record is None or not record.is_land:
+                raise GameRuleError("Land-entry movement requires a land card")
+            tapped = self._land_enters_tapped(intent.actor, record)
+        elif intent.tapped_policy == "tapped":
+            tapped = True
+        elif intent.tapped_policy == "untapped":
+            tapped = False
+        self.move_card(
+            card.object_id,
+            intent.destination,
+            controller=intent.new_controller,
+            tapped=tapped,
+            reason=intent.reason,
+            semantic_events=intent.semantic_events,
+        )
+        return card.ref
+
+    def record_zone_move_intent(self, intent: RecordZoneMoveIntent) -> None:
+        card = self._resolve_object(intent.actor, intent.object_ref)
+        details = dict(intent.details)
+        if details.pop("include_tapped_state", False):
+            details["tapped"] = card.tapped
+        self._log(
+            intent.actor,
+            intent.event_code,
+            intent.message,
+            details,
+            importance=intent.importance,
+            changed_objects=[card.object_id],
+            changed_players=(
+                [intent.changed_player]
+                if intent.changed_player is not None
+                else []
+            ),
+        )
+
+    def apply_life_change_intent(self, intent: LifeChangeIntent) -> int:
+        try:
+            plan = plan_life_changes(
+                self,
+                (LifeChange(player=intent.player, amount=intent.amount),),
+            )
+            commit_life_changes(self, plan)
+        except LifeStateError as exc:
+            raise GameRuleError(str(exc)) from exc
+        self._log(
+            intent.actor,
+            "effect.life",
+            f"{intent.player}'s life changed by {intent.amount}.",
+            {
+                "player": intent.player,
+                "delta": intent.amount,
+                "reason": intent.reason,
+            },
+            importance=1,
+            changed_players=[intent.player],
+        )
+        return self.state.players[intent.player].life
+
+    def reveal_library_cards_intent(
+        self,
+        intent: RevealLibraryCardsIntent,
+    ) -> tuple[str, ...]:
+        self._require_seat(intent.player, in_game=True)
+        self._require_seat(intent.viewer, in_game=True)
+        library = self.state.players[intent.player].zones["library"]
+        refs = tuple(intent.refs_top_first)
+        current = tuple(
+            self.state.cards[object_id].ref
+            for object_id in reversed(library[-len(refs) :])
+        ) if refs else ()
+        if current != refs:
+            raise GameRuleError("The inspected library top changed")
+        object_ids: list[str] = []
+        for ref in refs:
+            card = self._resolve_object(
+                intent.viewer,
+                ref,
+                zones={"library"},
+                owned_only=(intent.viewer == intent.player),
+            )
+            card.known_to = sorted(set(card.known_to).union({intent.viewer}))
+            object_ids.append(card.object_id)
+        self._log(
+            intent.actor,
+            "library.look",
+            (
+                f"{intent.viewer} looked at the top {len(refs)} card(s) "
+                f"of {intent.player}'s library."
+            ),
+            {"player": intent.player, "count": len(refs)},
+            visibility=[intent.viewer, "analyst"],
+            importance=1,
+            changed_objects=object_ids,
+        )
+        return refs
+
+    def move_library_cards_to_bottom_intent(
+        self,
+        intent: MoveLibraryCardsToBottomIntent,
+    ) -> tuple[str, ...]:
+        library = self.state.players[intent.player].zones["library"]
+        object_ids: list[str] = []
+        for ref in intent.refs:
+            card = self._resolve_object(
+                intent.actor,
+                ref,
+                zones={"library"},
+                owned_only=True,
+            )
+            if card.object_id not in library:
+                raise GameRuleError(
+                    "A scry card left the library before the choice"
+                )
+            library.remove(card.object_id)
+            object_ids.append(card.object_id)
+        for object_id in reversed(object_ids):
+            library.insert(0, object_id)
+        self._log(
+            intent.actor,
+            "library.scry",
+            f"{intent.actor} put {len(object_ids)} card(s) on the bottom.",
+            {
+                "count": intent.looked_count,
+                "bottom_count": len(object_ids),
+            },
+            visibility=[intent.actor, "analyst"],
+            importance=1,
+            changed_objects=object_ids,
+        )
+        return intent.refs
+
+    def reorder_library_top_intent(
+        self,
+        intent: ReorderLibraryTopIntent,
+    ) -> tuple[str, ...]:
+        ids = [
+            self._resolve_object(
+                intent.viewer,
+                ref,
+                zones={"library"},
+            ).object_id
+            for ref in intent.refs_top_first
+        ]
+        library = self.state.players[intent.player].zones["library"]
+        current_top = (
+            list(reversed(library[-len(ids) :])) if ids else []
+        )
+        if (
+            len(ids) != len(set(ids))
+            or set(ids) != set(current_top)
+            or any(
+                intent.viewer not in self.state.cards[object_id].known_to
+                for object_id in ids
+            )
+        ):
+            raise GameRuleError(
+                "Can only reorder the exact known cards currently on top"
+            )
+        for object_id in ids:
+            library.remove(object_id)
+        library.extend(reversed(ids))
+        self._log(
+            intent.actor,
+            "library.reorder",
+            f"{intent.viewer} reordered {len(ids)} known top cards.",
+            {"count": len(ids)},
+            visibility=[intent.viewer, "analyst"],
+            importance=1,
+            changed_objects=ids,
+        )
+        return intent.refs_top_first
+
+    def pay_mana_cost_intent(self, intent: PayManaCostIntent) -> None:
+        requirements = self._mana_vector(dict(intent.requirements))
+        if not self._cost_is_affordable(intent.player, requirements):
+            raise GameRuleError("The optional payment is no longer payable")
+        self._pay_for_cost(
+            intent.player,
+            requirements,
+            {"pay": "auto"},
+        )
+        changed_objects: list[str] = []
+        if intent.changed_object_ref:
+            card = self._resolve_object(intent.actor, intent.changed_object_ref)
+            changed_objects.append(card.object_id)
+        self._log(
+            intent.actor,
+            intent.event_code,
+            intent.message,
+            dict(intent.details),
+            importance=2,
+            changed_objects=changed_objects,
+            changed_players=[intent.player],
+        )
+
+    def place_counters_intent(
+        self,
+        intent: PlaceCountersIntent,
+    ) -> tuple[str, ...]:
+        try:
+            results = place_counters_on_refs(
+                self,
+                actor=intent.actor,
+                object_refs=intent.object_refs,
+                counter_name=intent.counter_name,
+                amount=intent.amount,
+                reason=intent.reason,
+                source_ref=intent.source_ref,
+            )
+        except CounterPlacementError as exc:
+            raise GameRuleError(str(exc)) from exc
+        return tuple(
+            self.state.cards[result.object_id].ref for result in results
+        )
+
+    def counter_stack_intent(self, intent: CounterStackIntent) -> None:
+        if any(item.ref == intent.stack_ref for item in self.state.stack):
+            self._counter_stack_item(
+                intent.stack_ref,
+                reason=intent.reason,
+                countered_by=intent.countered_by,
+            )
+
+    def eliminate_players_intent(self, intent: EliminatePlayersIntent) -> None:
+        self._eliminate_players(list(intent.players), reason=intent.reason)
+
+    def copy_stack_item_intent(self, intent: CopyStackItemIntent) -> str:
+        target = next(
+            (
+                item
+                for item in self.state.stack
+                if item.ref == intent.target_stack_ref
+            ),
+            None,
+        )
+        if target is None:
+            raise GameRuleError(
+                "The stack object selected for copying no longer exists"
+            )
+        copied = self._copy_stack_item(
+            controller=intent.controller,
+            target=target,
+            targets=list(intent.targets),
+            target_groups=thaw_value(intent.target_groups),
+            reason=intent.reason,
+        )
+        return copied.ref
+
+    def retarget_stack_item_intent(
+        self,
+        intent: RetargetStackItemIntent,
+    ) -> str:
+        target = next(
+            (
+                item
+                for item in self.state.stack
+                if item.ref == intent.target_stack_ref
+            ),
+            None,
+        )
+        if target is None:
+            raise GameRuleError(
+                "The stack object selected for retargeting no longer exists"
+            )
+        target.targets = list(intent.targets)
+        target.context["target_groups"] = thaw_value(intent.target_groups)
+        target.context["target_snapshots"] = {
+            ref: self._target_snapshot(ref) for ref in intent.targets
+        }
+        target.context["targets_revalidated"] = False
+        self._log(
+            intent.actor,
+            "stack.retarget",
+            f"{intent.actor} chose targets for {target.ref}.",
+            {
+                "stack": target.ref,
+                "targets": list(intent.targets),
+                "source": intent.source_stack_ref,
+            },
+            importance=2,
+        )
+        return target.ref
+
+    def create_token_intent(
+        self,
+        intent: CreateTokenIntent,
+    ) -> tuple[str, ...]:
+        created_refs = tuple(
+            self.create_token(
+                intent.controller,
+                name=intent.name,
+                quantity=intent.quantity,
+                copy_of=intent.copy_of,
+                characteristics=thaw_value(intent.characteristics),
+                temporary_keywords=intent.temporary_keywords,
+                reason=intent.reason,
+            )
+        )
+        if not (
+            intent.sacrifice_at_end_step
+            or intent.sacrifice_on_controller_end_step
+        ):
+            return created_refs
+        for created_ref in created_refs:
+            created = self._resolve_object(
+                intent.actor,
+                created_ref,
+                zones={"battlefield"},
+                controlled_only=True,
+            )
+            condition: dict[str, Any] = {
+                "phase": "ending",
+                "step": "end_step",
+            }
+            if intent.sacrifice_on_controller_end_step:
+                condition["player"] = "controller"
+            self.schedule_delayed_trigger(
+                controller=intent.controller,
+                label=f"Sacrifice {created.ref}",
+                event_kind="step.begin",
+                condition=condition,
+                stack_template={
+                    "label": f"Sacrifice {created.ref}",
+                    "semantic_key": "builtin:sacrifice-source",
+                },
+                source_object_id=created.object_id,
+                once=True,
+            )
+        return created_refs
+
+    def copy_controlled_tokens_intent(
+        self,
+        intent: CopyControlledTokensIntent,
+    ) -> tuple[str, ...]:
+        original = self._resolve_object(
+            intent.actor,
+            intent.chosen_token_ref,
+            zones={"battlefield"},
+            controlled_only=True,
+        )
+        if not original.is_token:
+            raise GameRuleError("Token-copy choice requires a token")
+        characteristics = self._copyable_characteristics(original)
+        changed: list[str] = []
+        for object_id in tuple(
+            self.state.players[intent.controller].zones["battlefield"]
+        ):
+            token = self.state.cards[object_id]
+            if (
+                token.controller != intent.controller
+                or not token.is_token
+                or token.object_id == original.object_id
+            ):
+                continue
+            token.annotations["copy_overrides"] = copy.deepcopy(
+                characteristics
+            )
+            changed.append(token.object_id)
+        changed_refs = tuple(
+            self.state.cards[object_id].ref for object_id in changed
+        )
+        self._log(
+            intent.actor,
+            "token.copy_all",
+            (
+                f"{len(changed)} other token(s) became copies of "
+                f"{original.ref}."
+            ),
+            {
+                "source": intent.source_stack_ref,
+                "chosen_token": original.ref,
+                "objects": list(changed_refs),
+            },
+            importance=2,
+            changed_objects=changed,
+        )
+        return changed_refs
+
+    def apply_amass_intent(self, intent: AmassIntent) -> str:
+        army_ref = intent.army_ref
+        if army_ref is None:
+            created = self.create_token(
+                intent.controller,
+                name=f"{intent.subtype} Army",
+                characteristics={
+                    "type_line": (
+                        f"Token Creature — {intent.subtype} Army"
+                    ),
+                    "colors": ["B"],
+                    "power": "0",
+                    "toughness": "0",
+                },
+                reason=intent.reason,
+            )
+            if len(created) != 1:
+                raise GameRuleError("Amass must create exactly one Army")
+            army_ref = created[0]
+        self._apply_amass(
+            intent.controller,
+            army_ref,
+            subtype=intent.subtype,
+            amount=intent.amount,
+            reason=intent.reason,
+        )
+        return army_ref
+
     def _begin_semantic_choice(
         self,
         *,
@@ -13317,463 +14230,18 @@ class CommanderEngine:
     ) -> None:
         op = str(effect["op"])
         seat = str(effect.get("player") or item.controller)
+        if op in default_semantic_choice_registry().operations:
+            self._begin_registered_semantic_choice(
+                item=item,
+                effect=effect,
+                remaining=remaining,
+                destination=destination,
+                note=note,
+                instruction_pointer=instruction_pointer,
+            )
+            return
         context: dict[str, Any] = {"stack": item.ref, "operation": op}
-        if op == "choose_mana":
-            legal_colors = [
-                str(value).upper()
-                for value in effect.get("colors", list("WUBRGC"))
-                if str(value).upper() in "WUBRGC"
-                and len(str(value)) == 1
-            ]
-            if not legal_colors:
-                raise GameRuleError(
-                    "Semantic mana choice requires at least one legal color"
-                )
-            context.update(
-                {
-                    "prompt": "Choose a mana color.",
-                    "options": legal_colors,
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "choice",
-                                "legal_values": legal_colors,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "copy_stack_item":
-            target_ref = str(effect.get("stack") or "")
-            target_item = next(
-                (
-                    candidate
-                    for candidate in self.state.stack
-                    if candidate.ref == target_ref
-                    and candidate.ref != item.ref
-                ),
-                None,
-            )
-            if target_item is None:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            target_program = self.semantics.get(
-                target_item.semantic_key
-            )
-            target_schema = self._stack_target_schema(
-                target_item,
-                target_program,
-            )
-            if not target_schema or not target_item.targets:
-                self._copy_stack_item(
-                    controller=seat,
-                    target=target_item,
-                    targets=list(target_item.targets),
-                    target_groups=copy.deepcopy(
-                        dict(
-                            target_item.context.get(
-                                "target_groups", {}
-                            )
-                        )
-                    ),
-                    reason=item.label,
-                )
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            public_schema = self._public_target_schema(
-                seat,
-                target_schema,
-                source_ref=self._stack_source_ref(target_item),
-            )
-            if public_schema is None:
-                raise GameRuleError(
-                    "The copied stack object has no legal target assignment"
-                )
-            effect = {
-                **dict(effect),
-                "_target_stack_ref": target_item.ref,
-                "_target_schema": copy.deepcopy(dict(target_schema)),
-                "_default_targets": list(target_item.targets),
-            }
-            context.update(
-                {
-                    "prompt": (
-                        "Choose targets for the copy, or keep the "
-                        "original targets."
-                    ),
-                    "target_stack": target_item.ref,
-                    "default_targets": list(target_item.targets),
-                    "target_schema": public_schema,
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "targets",
-                                "optional": True,
-                                "default": list(target_item.targets),
-                                "target_schema": public_schema,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "retarget_stack_item":
-            target_ref = str(effect.get("stack") or "")
-            target_item = next(
-                (
-                    candidate
-                    for candidate in self.state.stack
-                    if candidate.ref == target_ref
-                    and candidate.ref != item.ref
-                ),
-                None,
-            )
-            if target_item is None:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            target_program = self.semantics.get(
-                target_item.semantic_key
-            )
-            target_schema = self._stack_target_schema(
-                target_item,
-                target_program,
-            )
-            if not target_schema or not target_item.targets:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            if available_modes(target_schema):
-                plan = target_plan(
-                    target_schema,
-                    target_item.modes,
-                    require_modes=True,
-                )
-                candidates = self._target_candidate_map(
-                    target_item.controller,
-                    plan,
-                    source_ref=self._stack_source_ref(target_item),
-                )
-                if not self._target_plan_feasible(plan, candidates):
-                    raise GameRuleError(
-                        "The target stack object has no legal new "
-                        "target assignment"
-                    )
-                public_schema = {
-                    "groups": [
-                        group.public_dict(candidates[group.group_id])
-                        for group in plan.groups
-                    ],
-                    "legal_refs": unique_preserving_order(
-                        ref
-                        for group in plan.groups
-                        for ref in candidates[group.group_id]
-                    ),
-                }
-            else:
-                public_schema = self._public_target_schema(
-                    target_item.controller,
-                    target_schema,
-                    source_ref=self._stack_source_ref(target_item),
-                )
-            if public_schema is None:
-                raise GameRuleError(
-                    "The target stack object has no legal new targets"
-                )
-            effect = {
-                **dict(effect),
-                "_target_stack_ref": target_item.ref,
-                "_target_schema": copy.deepcopy(dict(target_schema)),
-                "_default_targets": list(target_item.targets),
-            }
-            context.update(
-                {
-                    "prompt": (
-                        "Choose new targets, or keep the current "
-                        "targets."
-                    ),
-                    "target_stack": target_item.ref,
-                    "default_targets": list(target_item.targets),
-                    "target_schema": public_schema,
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "targets",
-                                "optional": True,
-                                "default": list(target_item.targets),
-                                "target_schema": public_schema,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "choose_card_name":
-            context.update(
-                {
-                    "prompt": "Choose a Magic card name.",
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "card_name",
-                                "type": "card_name",
-                                "nonempty": True,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "choose_creature_type":
-            context.update(
-                {
-                    "prompt": "Choose a creature type.",
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "creature_type",
-                                "type": "creature_type",
-                                "nonempty": True,
-                                "max_length": 48,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "fabricate":
-            source = self.state.cards.get(
-                item.source_object_id or item.card_object_id or ""
-            )
-            legal_values = ["token"]
-            if source is not None and source.zone == "battlefield":
-                legal_values.insert(0, "counter")
-            effect = {
-                **dict(effect),
-                "_legal_values": legal_values,
-            }
-            context.update(
-                {
-                    "prompt": (
-                        "Choose whether to put +1/+1 counter(s) on the "
-                        "source or create Servo token(s)."
-                    ),
-                    "options": [
-                        {
-                            "id": value,
-                            "label": (
-                                "Put +1/+1 counters on this creature"
-                                if value == "counter"
-                                else "Create Servo tokens"
-                            ),
-                        }
-                        for value in legal_values
-                    ],
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "choice",
-                                "legal_values": legal_values,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op in {"populate_with_haste", "copy_all_tokens"}:
-            options = [
-                self.state.cards[object_id].ref
-                for object_id in self.state.players[
-                    seat
-                ].zones["battlefield"]
-                if self.state.cards[object_id].controller == seat
-                and self.state.cards[object_id].is_token
-                and (
-                    op == "copy_all_tokens"
-                    or "creature"
-                    in self._type_parts(
-                        str(
-                            self._effective_card_data(object_id).get(
-                                "type_line"
-                            )
-                            or ""
-                        )
-                    )[0]
-                )
-            ]
-            if not options:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            effect = {**dict(effect), "_legal_refs": options}
-            context.update(
-                {
-                    "prompt": (
-                        "Choose a creature token to populate."
-                        if op == "populate_with_haste"
-                        else "Choose a token for every other token to copy."
-                    ),
-                    "options": options,
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "card",
-                                "legal_refs": options,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "put_land_from_hand":
-            options = [
-                self.state.cards[object_id].ref
-                for object_id in self.state.players[seat].zones["hand"]
-                if "land"
-                in self._type_parts(
-                    str(
-                        self._effective_card_data(object_id).get(
-                            "type_line"
-                        )
-                        or ""
-                    )
-                )[0]
-            ]
-            if not options:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            effect = {**dict(effect), "_legal_refs": options}
-            context.update(
-                {
-                    "prompt": str(
-                        effect.get("prompt")
-                        or (
-                            "You may put a land card from your hand "
-                            "onto the battlefield."
-                        )
-                    ),
-                    "objects": [
-                        {
-                            "id": ref,
-                            "name": self._resolve_object(
-                                seat,
-                                ref,
-                                zones={"hand"},
-                                owned_only=True,
-                            ).printed_name,
-                        }
-                        for ref in options
-                    ],
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "card",
-                                "legal_refs": options,
-                                "optional": True,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "put_artifact_from_hand":
-            options = [
-                self.state.cards[object_id].ref
-                for object_id in self.state.players[seat].zones["hand"]
-                if "artifact"
-                in self._type_parts(
-                    str(
-                        self._effective_card_data(object_id).get(
-                            "type_line"
-                        )
-                        or ""
-                    )
-                )[0]
-            ]
-            if not options:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            effect = {**dict(effect), "_legal_refs": options}
-            context.update(
-                {
-                    "prompt": (
-                        "You may put an artifact card from your hand "
-                        "onto the battlefield."
-                    ),
-                    "objects": [
-                        {
-                            "id": ref,
-                            "name": self._resolve_object(
-                                seat,
-                                ref,
-                                zones={"hand"},
-                                owned_only=True,
-                            ).printed_name,
-                        }
-                        for ref in options
-                    ],
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "card",
-                                "legal_refs": options,
-                                "optional": True,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "explore":
+        if op == "explore":
             explorer = self._resolve_object(
                 seat,
                 str(effect["card"]),
@@ -14273,81 +14741,6 @@ class CommanderEngine:
                     ],
                 }
             )
-        elif op == "amass":
-            subtype = str(effect.get("subtype") or "Orc").strip().title()
-            amount = int(effect.get("amount", 1))
-            if not subtype or amount < 0:
-                raise GameRuleError(
-                    "Amass requires a subtype and nonnegative amount"
-                )
-            armies = self._controlled_subtype_refs(
-                seat,
-                "army",
-                required_type="creature",
-            )
-            if not armies:
-                armies = self.create_token(
-                    seat,
-                    name=f"{subtype} Army",
-                    characteristics={
-                        "type_line": f"Token Creature — {subtype} Army",
-                        "colors": ["B"],
-                        "power": "0",
-                        "toughness": "0",
-                    },
-                    reason=item.label,
-                )
-            if len(armies) == 1:
-                self._apply_amass(
-                    seat,
-                    armies[0],
-                    subtype=subtype,
-                    amount=amount,
-                    reason=item.label,
-                )
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            effect = {
-                **dict(effect),
-                "_legal_refs": armies,
-                "_subtype": subtype,
-                "_amount": amount,
-            }
-            context.update(
-                {
-                    "prompt": (
-                        f"Choose an Army to amass {subtype}s {amount}."
-                    ),
-                    "objects": [
-                        {
-                            "id": ref,
-                            "name": self._resolve_object(
-                                seat, ref, zones={"battlefield"}
-                            ).printed_name,
-                        }
-                        for ref in armies
-                    ],
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "objects",
-                                "legal_refs": armies,
-                                "minimum": 1,
-                                "maximum": 1,
-                                "distinct": True,
-                            },
-                        }
-                    ],
-                }
-            )
         elif op == "sylvan_library_settle":
             hand_refs = {
                 self.state.cards[object_id].ref
@@ -14499,275 +14892,6 @@ class CommanderEngine:
                     ],
                 }
             )
-        elif op == "choose_option":
-            raw_options = list(effect.get("options") or [])
-            options = [
-                {
-                    "id": str(
-                        option.get("id")
-                        if isinstance(option, Mapping)
-                        else option
-                    ),
-                    "label": str(
-                        option.get("label")
-                        if isinstance(option, Mapping)
-                        else option
-                    ),
-                }
-                for option in raw_options
-            ]
-            if not options or any(not option["id"] for option in options):
-                raise GameRuleError(
-                    "Semantic option choice requires nonempty options"
-                )
-            legal_values = [option["id"] for option in options]
-            effect = {
-                **dict(effect),
-                "_legal_values": legal_values,
-            }
-            context.update(
-                {
-                    "prompt": str(
-                        effect.get("prompt") or "Choose one option."
-                    ),
-                    "options": options,
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "choice",
-                                "legal_values": legal_values,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "scry":
-            count = max(0, int(effect.get("count", 1)))
-            looked = self.apply_effect(
-                {
-                    "op": "look_top",
-                    "player": seat,
-                    "viewer": seat,
-                    "count": count,
-                    "reason": item.label,
-                },
-                actor=item.controller,
-            )
-            options = [str(value) for value in (looked or [])]
-            if not options:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            effect = {**dict(effect), "_looked_refs": options}
-            context.update(
-                {
-                    "prompt": (
-                        "Choose which looked-at cards to put on the "
-                        "bottom of your library."
-                    ),
-                    "objects": [
-                        {
-                            "id": ref,
-                            "name": self._resolve_object(
-                                seat,
-                                ref,
-                                zones={"library"},
-                                owned_only=True,
-                            ).printed_name,
-                        }
-                        for ref in options
-                    ],
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "cards",
-                                "legal_refs": options,
-                                "minimum": 0,
-                                "maximum": len(options),
-                                "destination": "library_bottom",
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "look_reorder_top":
-            count = max(0, int(effect.get("count", 1)))
-            looked = self.apply_effect(
-                {
-                    "op": "look_top",
-                    "player": seat,
-                    "viewer": seat,
-                    "count": count,
-                    "reason": item.label,
-                },
-                actor=item.controller,
-            )
-            options = [str(value) for value in (looked or [])]
-            if not options:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            effect = {**dict(effect), "_looked_refs": options}
-            context.update(
-                {
-                    "prompt": (
-                        "Put the looked-at cards back in top-to-bottom "
-                        "order."
-                    ),
-                    "cards": [
-                        {
-                            "id": ref,
-                            "name": self._resolve_object(
-                                seat,
-                                ref,
-                                zones={"library"},
-                            ).printed_name,
-                        }
-                        for ref in options
-                    ],
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "cards",
-                                "legal_refs": options,
-                                "minimum": len(options),
-                                "maximum": len(options),
-                                "distinct": True,
-                                "order": "top_to_bottom",
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "counter_unless_pay":
-            requirements = {
-                key: int((effect.get("cost") or {}).get(key, 0))
-                for key in (
-                    "GENERIC",
-                    "W",
-                    "U",
-                    "B",
-                    "R",
-                    "G",
-                    "C",
-                )
-            }
-            payable = self._cost_is_affordable(seat, requirements)
-            context.update(
-                {
-                    "prompt": "Pay the stated cost to prevent the spell from being countered.",
-                    "cost": requirements,
-                    "payable": payable,
-                    "target_stack": effect.get("stack"),
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "pay",
-                                "legal_values": (
-                                    [True, False] if payable else [False]
-                                ),
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "cumulative_upkeep":
-            source = self._resolve_object(
-                seat,
-                str(effect["source"]),
-                zones={"battlefield"},
-                controlled_only=True,
-            )
-            source.counters["age"] = (
-                int(source.counters.get("age", 0)) + 1
-            )
-            per_counter = self._mana_vector(
-                effect.get("cost_per_counter") or {"GENERIC": 1}
-            )
-            age = int(source.counters["age"])
-            requirements = {
-                key: int(value) * age
-                for key, value in per_counter.items()
-            }
-            payable = self._cost_is_affordable(seat, requirements)
-            effect = {
-                **dict(effect),
-                "_requirements": requirements,
-                "_source_ref": source.ref,
-            }
-            context.update(
-                {
-                    "prompt": (
-                        f"Pay cumulative upkeep {requirements} or "
-                        f"sacrifice {source.printed_name}."
-                    ),
-                    "age_counters": age,
-                    "cost": requirements,
-                    "payable": payable,
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "pay",
-                                "legal_values": (
-                                    [True, False]
-                                    if payable
-                                    else [False]
-                                ),
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "remora_tax":
-            requirements = self._mana_vector(
-                effect.get("cost") or {"GENERIC": 4}
-            )
-            payable = self._cost_is_affordable(seat, requirements)
-            context.update(
-                {
-                    "prompt": (
-                        "Pay {4} to prevent Mystic Remora's controller "
-                        "from drawing a card."
-                    ),
-                    "cost": requirements,
-                    "payable": payable,
-                    "beneficiary": effect.get("beneficiary"),
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "pay",
-                                "legal_values": (
-                                    [True, False]
-                                    if payable
-                                    else [False]
-                                ),
-                            },
-                        }
-                    ],
-                }
-            )
         elif op == "proliferate":
             objects = [
                 self.state.cards[object_id].ref
@@ -14802,33 +14926,6 @@ class CommanderEngine:
                                 "maximum": len(objects) + len(players),
                                 "legal_refs": [*objects, *players],
                                 "distinct": True,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "pay_or_lose":
-            requirements = {
-                key: int((effect.get("cost") or {}).get(key, 0))
-                for key in ("GENERIC", "W", "U", "B", "R", "G", "C")
-            }
-            payable = self._cost_is_affordable(seat, requirements)
-            context.update(
-                {
-                    "prompt": (
-                        "Pay the delayed Pact cost or lose the game."
-                    ),
-                    "cost": requirements,
-                    "payable": payable,
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "pay",
-                                "legal_values": (
-                                    [True, False] if payable else [False]
-                                ),
                             },
                         }
                     ],
@@ -14950,6 +15047,12 @@ class CommanderEngine:
         seat = decision.actors[0]
         response = decision.responses[seat]
         continuation = decision.continuation
+        continuation_effect = continuation.get("effect")
+        if isinstance(continuation_effect, Mapping) and str(
+            continuation_effect.get("op") or ""
+        ) in default_semantic_choice_registry().operations:
+            self._complete_registered_semantic_choice(decision)
+            return
         stack_ref = str(continuation["stack_ref"])
         item = next(
             (candidate for candidate in self.state.stack if candidate.ref == stack_ref),
@@ -14963,439 +15066,7 @@ class CommanderEngine:
         effect = dict(continuation["effect"])
         op = str(effect["op"])
         choice_effects: list[dict[str, Any]] = []
-        if op == "choose_mana":
-            choice = str(
-                response.get("choice")
-                or response.get("color")
-                or response.get("mana")
-                or ""
-            ).upper()
-            legal_colors = [
-                str(value).upper()
-                for value in effect.get("colors", list("WUBRGC"))
-                if str(value).upper() in "WUBRGC"
-                and len(str(value)) == 1
-            ]
-            if choice not in legal_colors:
-                raise GameRuleError(
-                    "Choose one of " + ", ".join(legal_colors)
-                )
-            amount = int(effect.get("amount", 1))
-            self.state.players[seat].mana_pool[choice] += amount
-            self._log(
-                seat,
-                "mana.semantic",
-                f"{seat} added {amount} {choice} from {item.label}.",
-                {"source": item.ref, "bundle": {choice: amount}},
-                importance=1,
-                changed_players=[seat],
-            )
-        elif op == "copy_stack_item":
-            target_ref = str(effect.get("_target_stack_ref") or "")
-            target_item = next(
-                (
-                    candidate
-                    for candidate in self.state.stack
-                    if candidate.ref == target_ref
-                ),
-                None,
-            )
-            if target_item is None:
-                raise GameRuleError(
-                    "The stack object selected for copying no longer exists"
-                )
-            submitted = response.get("targets")
-            if submitted is None:
-                selected = [
-                    str(value)
-                    for value in effect.get("_default_targets", [])
-                ]
-                grouped = copy.deepcopy(
-                    dict(
-                        target_item.context.get("target_groups", {})
-                    )
-                )
-            else:
-                target_program = self.semantics.get(
-                    target_item.semantic_key
-                )
-                selected, grouped = self._validate_semantic_targets(
-                    seat,
-                    target_program,
-                    self._normalize_target_submission(submitted),
-                    modes=list(target_item.modes),
-                    source_ref=self._stack_source_ref(target_item),
-                    target_schema=dict(
-                        effect.get("_target_schema") or {}
-                    ),
-                )
-            self._copy_stack_item(
-                controller=seat,
-                target=target_item,
-                targets=selected,
-                target_groups=grouped,
-                reason=item.label,
-            )
-        elif op == "retarget_stack_item":
-            target_ref = str(effect.get("_target_stack_ref") or "")
-            target_item = next(
-                (
-                    candidate
-                    for candidate in self.state.stack
-                    if candidate.ref == target_ref
-                ),
-                None,
-            )
-            if target_item is None:
-                raise GameRuleError(
-                    "The stack object selected for retargeting no "
-                    "longer exists"
-                )
-            submitted = response.get("targets")
-            if submitted is None:
-                selected = [
-                    str(value)
-                    for value in effect.get("_default_targets", [])
-                ]
-                grouped = copy.deepcopy(
-                    dict(
-                        target_item.context.get("target_groups", {})
-                    )
-                )
-            else:
-                target_program = self.semantics.get(
-                    target_item.semantic_key
-                )
-                selected, grouped = self._validate_semantic_targets(
-                    target_item.controller,
-                    target_program,
-                    self._normalize_target_submission(submitted),
-                    modes=list(target_item.modes),
-                    source_ref=self._stack_source_ref(target_item),
-                    target_schema=dict(
-                        effect.get("_target_schema") or {}
-                    ),
-                )
-            target_item.targets = list(selected)
-            target_item.context["target_groups"] = copy.deepcopy(grouped)
-            target_item.context["target_snapshots"] = {
-                ref: self._target_snapshot(ref) for ref in selected
-            }
-            target_item.context["targets_revalidated"] = False
-            self._log(
-                seat,
-                "stack.retarget",
-                f"{seat} chose targets for {target_item.ref}.",
-                {
-                    "stack": target_item.ref,
-                    "targets": list(selected),
-                    "source": item.ref,
-                },
-                importance=2,
-            )
-        elif op == "choose_card_name":
-            raw_name = str(response.get("card_name") or "").strip()
-            if not raw_name:
-                raise GameRuleError("A card name is required")
-            try:
-                chosen = self.card_db.lookup(raw_name).name
-            except KeyError as exc:
-                raise GameRuleError(
-                    f"{raw_name!r} is not a recognized Magic card name"
-                ) from exc
-            source_id = item.card_object_id or item.source_object_id
-            if source_id not in self.state.cards:
-                raise GameRuleError(
-                    "The naming effect no longer has a source object"
-                )
-            source = self.state.cards[source_id]
-            source.annotations["chosen_name"] = chosen
-            self._log(
-                seat,
-                "card.name.chosen",
-                f"{seat} chose {chosen} for {source.ref}.",
-                {"source": source.ref, "card_name": chosen},
-                importance=2,
-                changed_objects=[source.object_id],
-            )
-        elif op == "choose_creature_type":
-            creature_type = str(
-                response.get("creature_type")
-                or response.get("choice")
-                or ""
-            ).strip()
-            if (
-                not creature_type
-                or len(creature_type) > 48
-                or not re.fullmatch(
-                    r"[A-Za-z][A-Za-z '\\-]*",
-                    creature_type,
-                )
-            ):
-                raise GameRuleError(
-                    "Choose a valid nonempty creature type"
-                )
-            source_id = item.card_object_id or item.source_object_id
-            if source_id not in self.state.cards:
-                raise GameRuleError(
-                    "The creature-type choice has no source object"
-                )
-            source = self.state.cards[source_id]
-            source.annotations["chosen_creature_type"] = (
-                creature_type.title()
-            )
-            self._log(
-                seat,
-                "creature_type.chosen",
-                (
-                    f"{seat} chose {creature_type.title()} for "
-                    f"{source.ref}."
-                ),
-                {
-                    "source": source.ref,
-                    "creature_type": creature_type.title(),
-                },
-                importance=2,
-                changed_objects=[source.object_id],
-            )
-        elif op == "fabricate":
-            choice = str(response.get("choice") or "")
-            legal_values = {
-                str(value)
-                for value in effect.get("_legal_values") or []
-            }
-            if choice not in legal_values:
-                raise GameRuleError(
-                    "Choose an authoritative fabricate option"
-                )
-            amount = max(0, int(effect.get("amount", 1)))
-            source = self.state.cards.get(
-                item.source_object_id or item.card_object_id or ""
-            )
-            if choice == "counter":
-                if source is None or source.zone != "battlefield":
-                    raise GameRuleError(
-                        "The fabricate source is no longer on the battlefield"
-                    )
-                source.counters["+1/+1"] = (
-                    int(source.counters.get("+1/+1", 0)) + amount
-                )
-                self._log(
-                    seat,
-                    "fabricate.counter",
-                    f"{source.ref} received {amount} +1/+1 counter(s).",
-                    {"source": source.ref, "amount": amount},
-                    importance=2,
-                    changed_objects=[source.object_id],
-                )
-            else:
-                self.create_token(
-                    seat,
-                    name="Servo",
-                    quantity=amount,
-                    characteristics={
-                        "type_line": "Artifact Creature — Servo",
-                        "power": "1",
-                        "toughness": "1",
-                        "colors": [],
-                    },
-                    reason=item.label,
-                )
-        elif op in {"populate_with_haste", "copy_all_tokens"}:
-            selected = str(response.get("card") or "")
-            legal = {
-                str(value)
-                for value in effect.get("_legal_refs") or []
-            }
-            if selected not in legal:
-                raise GameRuleError(
-                    "Selected token is not an authoritative copy option"
-                )
-            original = self._resolve_object(
-                seat,
-                selected,
-                zones={"battlefield"},
-                controlled_only=True,
-            )
-            if not original.is_token:
-                raise GameRuleError("Token-copy choice requires a token")
-            if op == "populate_with_haste":
-                created_ref = self.create_token(
-                    seat,
-                    name="",
-                    copy_of=original.ref,
-                    temporary_keywords=["Haste"],
-                    reason=item.label,
-                )[0]
-                created = self._resolve_object(
-                    seat,
-                    created_ref,
-                    zones={"battlefield"},
-                    controlled_only=True,
-                )
-                self.schedule_delayed_trigger(
-                    controller=seat,
-                    label=f"Sacrifice {created.ref}",
-                    event_kind="step.begin",
-                    condition={
-                        "phase": "ending",
-                        "step": "end_step",
-                    },
-                    stack_template={
-                        "label": f"Sacrifice {created.ref}",
-                        "semantic_key": "builtin:sacrifice-source",
-                    },
-                    source_object_id=created.object_id,
-                    once=True,
-                )
-            else:
-                characteristics = self._copyable_characteristics(
-                    original
-                )
-                changed: list[str] = []
-                for object_id in self.state.players[
-                    seat
-                ].zones["battlefield"]:
-                    token = self.state.cards[object_id]
-                    if (
-                        token.controller != seat
-                        or not token.is_token
-                        or token.object_id == original.object_id
-                    ):
-                        continue
-                    token.annotations["copy_overrides"] = copy.deepcopy(
-                        characteristics
-                    )
-                    changed.append(token.object_id)
-                self._log(
-                    seat,
-                    "token.copy_all",
-                    (
-                        f"{len(changed)} other token(s) became copies of "
-                        f"{original.ref}."
-                    ),
-                    {
-                        "source": item.ref,
-                        "chosen_token": original.ref,
-                        "objects": [
-                            self.state.cards[object_id].ref
-                            for object_id in changed
-                        ],
-                    },
-                    importance=2,
-                    changed_objects=changed,
-                )
-        elif op == "put_land_from_hand":
-            selected = str(response.get("card") or "")
-            legal = {
-                str(value)
-                for value in effect.get("_legal_refs") or []
-            }
-            if selected and selected not in legal:
-                raise GameRuleError(
-                    "Selected card is not an authoritative land option"
-                )
-            if selected:
-                card = self._resolve_object(
-                    seat,
-                    selected,
-                    zones={"hand"},
-                    owned_only=True,
-                )
-                record = self.card_record(card)
-                if record is None or not record.is_land:
-                    raise GameRuleError(
-                        "Selected object is no longer a land card in hand"
-                    )
-                tapped = self._land_enters_tapped(seat, record)
-                self.move_card(
-                    card.object_id,
-                    "battlefield",
-                    controller=seat,
-                    tapped=tapped,
-                    reason=item.label,
-                    semantic_events=True,
-                )
-                _, subtypes, _ = self._type_parts(record.type_line)
-                if (
-                    "cave" in subtypes
-                    and int(effect.get("cave_life", 0))
-                ):
-                    self.apply_effect(
-                        {
-                            "op": "life",
-                            "player": seat,
-                            "delta": int(effect["cave_life"]),
-                            "reason": item.label,
-                        },
-                        actor=seat,
-                    )
-                self._log(
-                    seat,
-                    "land.put",
-                    f"{seat} put {card.ref} onto the battlefield.",
-                    {
-                        "card": card.ref,
-                        "tapped": tapped,
-                        "source": item.ref,
-                    },
-                    importance=2,
-                    changed_objects=[card.object_id],
-                    changed_players=[seat],
-                )
-        elif op == "put_artifact_from_hand":
-            selected = str(response.get("card") or "")
-            legal = {
-                str(value)
-                for value in effect.get("_legal_refs") or []
-            }
-            if selected and selected not in legal:
-                raise GameRuleError(
-                    "Selected card is not an authoritative artifact option"
-                )
-            if selected:
-                card = self._resolve_object(
-                    seat,
-                    selected,
-                    zones={"hand"},
-                    owned_only=True,
-                )
-                types, _, _ = self._type_parts(
-                    str(
-                        self._effective_card_data(card).get(
-                            "type_line"
-                        )
-                        or ""
-                    )
-                )
-                if "artifact" not in types:
-                    raise GameRuleError(
-                        "Selected object is no longer an artifact card "
-                        "in hand"
-                    )
-                self.move_card(
-                    card.object_id,
-                    "battlefield",
-                    controller=seat,
-                    reason=item.label,
-                    semantic_events=True,
-                )
-                self._log(
-                    seat,
-                    "artifact.put",
-                    (
-                        f"{seat} put {card.ref} onto the battlefield "
-                        "from hand."
-                    ),
-                    {
-                        "card": card.ref,
-                        "source": item.ref,
-                    },
-                    importance=2,
-                    changed_objects=[card.object_id],
-                    changed_players=[seat],
-                )
-        elif op == "explore":
+        if op == "explore":
             choice = str(response.get("choice") or "")
             if choice not in {"graveyard", "top"}:
                 raise GameRuleError(
@@ -15885,23 +15556,6 @@ class CommanderEngine:
                 {"stack": item.ref, "objects": selected},
                 importance=1,
             )
-        elif op == "amass":
-            selected = [
-                str(value)
-                for value in response.get(
-                    "objects", response.get("cards", [])
-                )
-            ]
-            legal = set(effect.get("_legal_refs") or [])
-            if len(selected) != 1 or selected[0] not in legal:
-                raise GameRuleError("Choose exactly one legal Army to amass")
-            self._apply_amass(
-                seat,
-                selected[0],
-                subtype=str(effect.get("_subtype") or "Orc"),
-                amount=int(effect.get("_amount", 1)),
-                reason=item.label,
-            )
         elif op == "sylvan_library_settle":
             decisions = {
                 str(key): str(value)
@@ -16044,242 +15698,6 @@ class CommanderEngine:
                     },
                     reason=item.label,
                 )
-        elif op == "choose_option":
-            choice = str(
-                response.get("choice")
-                or response.get("option")
-                or ""
-            )
-            legal_values = {
-                str(value)
-                for value in effect.get("_legal_values") or []
-            }
-            if choice not in legal_values:
-                raise GameRuleError(
-                    "Choose one of the authoritative option values"
-                )
-            by_choice = effect.get("then_by_choice") or {}
-            choice_effects = [
-                dict(value)
-                for value in by_choice.get(choice, [])
-            ]
-            self._log(
-                seat,
-                "semantic.option.chosen",
-                f"{seat} chose {choice} for {item.label}.",
-                {
-                    "stack": item.ref,
-                    "choice": choice,
-                },
-                importance=1,
-            )
-        elif op == "scry":
-            looked = [
-                str(value)
-                for value in effect.get("_looked_refs", [])
-            ]
-            bottom = [
-                str(value)
-                for value in response.get("cards", [])
-            ]
-            if (
-                len(bottom) != len(set(bottom))
-                or any(value not in looked for value in bottom)
-            ):
-                raise GameRuleError(
-                    "Scry bottom choices must be distinct looked-at cards"
-                )
-            library = self.state.players[seat].zones["library"]
-            bottom_ids: list[str] = []
-            for ref in bottom:
-                card = self._resolve_object(
-                    seat,
-                    ref,
-                    zones={"library"},
-                    owned_only=True,
-                )
-                if card.object_id not in library:
-                    raise GameRuleError(
-                        "A scry card left the library before the choice"
-                    )
-                library.remove(card.object_id)
-                bottom_ids.append(card.object_id)
-            for object_id in reversed(bottom_ids):
-                library.insert(0, object_id)
-            self._log(
-                seat,
-                "library.scry",
-                f"{seat} put {len(bottom_ids)} card(s) on the bottom.",
-                {
-                    "count": len(looked),
-                    "bottom_count": len(bottom_ids),
-                },
-                visibility=[seat, "analyst"],
-                importance=1,
-                changed_objects=bottom_ids,
-            )
-        elif op == "look_reorder_top":
-            expected = [
-                str(value)
-                for value in effect.get("_looked_refs", [])
-            ]
-            selected = [
-                str(value)
-                for value in response.get(
-                    "cards",
-                    response.get("order", []),
-                )
-            ]
-            if (
-                len(selected) != len(set(selected))
-                or sorted(selected) != sorted(expected)
-            ):
-                raise GameRuleError(
-                    "Top-card order must contain every looked-at card "
-                    "exactly once"
-                )
-            self.apply_effect(
-                {
-                    "op": "reorder_top",
-                    "player": seat,
-                    "viewer": seat,
-                    "cards": selected,
-                    "reason": item.label,
-                },
-                actor=item.controller,
-            )
-        elif op == "counter_unless_pay":
-            requirements = {
-                key: int((effect.get("cost") or {}).get(key, 0))
-                for key in (
-                    "GENERIC",
-                    "W",
-                    "U",
-                    "B",
-                    "R",
-                    "G",
-                    "C",
-                )
-            }
-            target_stack = str(effect.get("stack") or "")
-            if bool(response.get("pay", False)):
-                if not self._cost_is_affordable(seat, requirements):
-                    raise GameRuleError(
-                        "The counter-prevention cost is no longer payable"
-                    )
-                self._pay_for_cost(
-                    seat,
-                    requirements,
-                    {"pay": "auto"},
-                )
-                self._log(
-                    seat,
-                    "counter.unless.paid",
-                    f"{seat} paid to prevent {target_stack} from being countered.",
-                    {"stack": target_stack, "cost": requirements},
-                    importance=2,
-                    changed_players=[seat],
-                )
-            elif any(
-                candidate.ref == target_stack
-                for candidate in self.state.stack
-            ):
-                self._counter_stack_item(
-                    target_stack,
-                    reason=item.label,
-                    countered_by=item.controller,
-                )
-        elif op == "cumulative_upkeep":
-            source_ref = str(effect.get("_source_ref") or "")
-            source = self._resolve_object(
-                seat,
-                source_ref,
-                zones={"battlefield"},
-                controlled_only=True,
-            )
-            requirements = self._mana_vector(
-                effect.get("_requirements") or {}
-            )
-            if bool(response.get("pay", False)):
-                if not self._cost_is_affordable(seat, requirements):
-                    raise GameRuleError(
-                        "The cumulative upkeep cost is no longer payable"
-                    )
-                self._pay_for_cost(
-                    seat,
-                    requirements,
-                    {"pay": "auto"},
-                )
-                self._log(
-                    seat,
-                    "cumulative_upkeep.paid",
-                    f"{seat} paid cumulative upkeep for {source.ref}.",
-                    {
-                        "source": source.ref,
-                        "cost": requirements,
-                        "age_counters": source.counters.get("age", 0),
-                    },
-                    importance=2,
-                    changed_objects=[source.object_id],
-                    changed_players=[seat],
-                )
-            else:
-                self.move_card(
-                    source.object_id,
-                    "graveyard",
-                    reason="cumulative upkeep not paid",
-                    semantic_events=True,
-                )
-        elif op == "remora_tax":
-            requirements = self._mana_vector(
-                effect.get("cost") or {"GENERIC": 4}
-            )
-            if bool(response.get("pay", False)):
-                if not self._cost_is_affordable(seat, requirements):
-                    raise GameRuleError(
-                        "The Mystic Remora payment is no longer payable"
-                    )
-                self._pay_for_cost(
-                    seat,
-                    requirements,
-                    {"pay": "auto"},
-                )
-                self._log(
-                    seat,
-                    "mystic_remora.paid",
-                    f"{seat} paid for Mystic Remora.",
-                    {"cost": requirements, "stack": item.ref},
-                    importance=2,
-                    changed_players=[seat],
-                )
-            else:
-                beneficiary = str(effect.get("beneficiary") or "")
-                if beneficiary in self.active_seats:
-                    choice_effects = [
-                        {
-                            "op": "choose_option",
-                            "player": beneficiary,
-                            "prompt": "Draw a card with Mystic Remora?",
-                            "options": [
-                                {"id": "draw", "label": "Draw a card"},
-                                {
-                                    "id": "decline",
-                                    "label": "Do not draw",
-                                },
-                            ],
-                            "then_by_choice": {
-                                "draw": [
-                                    {
-                                        "op": "draw",
-                                        "player": beneficiary,
-                                        "count": 1,
-                                        "private": True,
-                                    }
-                                ],
-                                "decline": [],
-                            },
-                        }
-                    ]
         elif op == "proliferate":
             selected = [
                 str(value)
@@ -16326,34 +15744,6 @@ class CommanderEngine:
                 changed_objects=changed_objects,
                 changed_players=changed_players,
             )
-        elif op == "pay_or_lose":
-            requirements = {
-                key: int((effect.get("cost") or {}).get(key, 0))
-                for key in ("GENERIC", "W", "U", "B", "R", "G", "C")
-            }
-            if bool(response.get("pay", False)):
-                if not self._cost_is_affordable(seat, requirements):
-                    raise GameRuleError(
-                        "The delayed Pact cost is no longer payable"
-                    )
-                self._pay_for_cost(
-                    seat,
-                    requirements,
-                    {"pay": "auto"},
-                )
-                self._log(
-                    seat,
-                    "pact.paid",
-                    f"{seat} paid the delayed Pact cost.",
-                    {"cost": requirements, "stack": item.ref},
-                    importance=2,
-                    changed_players=[seat],
-                )
-            else:
-                self._eliminate_players(
-                    [seat],
-                    reason="failed to pay Pact of Negation",
-                )
         elif op == "draw_optional_land":
             selected = response.get("card")
             options = set(
