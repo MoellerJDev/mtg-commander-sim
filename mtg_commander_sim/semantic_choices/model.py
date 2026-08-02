@@ -265,6 +265,73 @@ class DistributionChoice:
                 )
 
 
+@dataclass(frozen=True, slots=True)
+class DecisionMapChoice:
+    field_name: str
+    legal_refs: tuple[str, ...]
+    required: int
+    legal_values: tuple[str, ...]
+    companion_schema: FrozenMap = field(default_factory=FrozenMap)
+
+    def __post_init__(self) -> None:
+        _string(self.field_name, field_name="decision-map field_name")
+        _integer(self.required, field_name="decision-map required")
+        if self.required > len(self.legal_refs):
+            raise SemanticChoiceError(
+                "Decision-map required count exceeds legal refs"
+            )
+        if not self.legal_values:
+            raise SemanticChoiceError(
+                "Decision-map choices require legal values"
+            )
+        if not isinstance(self.companion_schema, FrozenMap):
+            object.__setattr__(
+                self,
+                "companion_schema",
+                FrozenMap(self.companion_schema),
+            )
+
+    def choice_schema(self) -> dict[str, Any]:
+        result = {
+            "field": self.field_name,
+            "shape": "object_map",
+            "legal_refs": list(self.legal_refs),
+            "required": self.required,
+            "legal_values": list(self.legal_values),
+        }
+        result.update(thaw_value(self.companion_schema))
+        return result
+
+
+@dataclass(frozen=True, slots=True)
+class ReferenceSetChoice:
+    field_name: str
+    legal_refs: tuple[str, ...]
+    minimum: int = 0
+    maximum: int | None = None
+    distinct: bool = True
+
+    def __post_init__(self) -> None:
+        _string(self.field_name, field_name="reference-set field_name")
+        if len(self.legal_refs) != len(set(self.legal_refs)):
+            raise SemanticChoiceError("Reference-set legal refs must be unique")
+        _integer(self.minimum, field_name="reference-set minimum")
+        maximum = len(self.legal_refs) if self.maximum is None else self.maximum
+        _integer(maximum, field_name="reference-set maximum")
+        if self.minimum > maximum or maximum > len(self.legal_refs):
+            raise SemanticChoiceError("Invalid reference-set bounds")
+        object.__setattr__(self, "maximum", maximum)
+
+    def choice_schema(self) -> dict[str, Any]:
+        return {
+            "field": self.field_name,
+            "legal_refs": list(self.legal_refs),
+            "minimum": self.minimum,
+            "maximum": self.maximum,
+            "distinct": self.distinct,
+        }
+
+
 ChoiceModel = (
     ScalarChoice
     | ObjectChoice
@@ -272,6 +339,8 @@ ChoiceModel = (
     | OrderingChoice
     | SearchChoice
     | DistributionChoice
+    | DecisionMapChoice
+    | ReferenceSetChoice
 )
 
 

@@ -60,6 +60,9 @@ class RecordChoiceIntent:
     message: str
     details: FrozenMap
     importance: int = 1
+    visibility: tuple[str, ...] | None = None
+    changed_object_refs: tuple[str, ...] = ()
+    changed_players: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.details, FrozenMap):
@@ -81,6 +84,44 @@ class ZoneMoveIntent:
         "preserve", "land_entry", "tapped", "untapped"
     ] = "preserve"
     semantic_events: bool = True
+    optional_if_missing: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class MoveObjectsSimultaneouslyIntent:
+    actor: str
+    object_refs: tuple[str, ...]
+    expected_zones: tuple[str, ...]
+    destination: str
+    reason: str
+    owned_only: bool = False
+    controlled_only: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class ChooseOneRestBottomRandomIntent:
+    actor: str
+    player: str
+    chosen_ref: str
+    looked_refs: tuple[str, ...]
+    reason: str
+    source_stack_ref: str
+    event_code: str = "library.choose_one_rest_bottom_random"
+
+
+@dataclass(frozen=True, slots=True)
+class ShuffleLibraryIntent:
+    actor: str
+    player: str
+    reason: str
+
+
+@dataclass(frozen=True, slots=True)
+class ReturnCardsToLibraryTopIntent:
+    actor: str
+    player: str
+    refs_top_first: tuple[str, ...]
+    reason: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -107,12 +148,21 @@ class LifeChangeIntent:
 
 
 @dataclass(frozen=True, slots=True)
+class PayLifeIntent:
+    actor: str
+    player: str
+    amount: int
+    reason: str
+
+
+@dataclass(frozen=True, slots=True)
 class RevealLibraryCardsIntent:
     actor: str
     player: str
     viewer: str
     refs_top_first: tuple[str, ...]
     reason: str
+    public: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -256,6 +306,21 @@ class AmassIntent:
     army_ref: str | None = None
 
 
+@dataclass(frozen=True, slots=True)
+class AddSubtypeIntent:
+    actor: str
+    object_ref: str
+    subtype: str
+    reason: str
+
+
+@dataclass(frozen=True, slots=True)
+class ProliferateIntent:
+    actor: str
+    selections: tuple[str, ...]
+    reason: str
+
+
 SemanticIntent: TypeAlias = (
     DrawCardsIntent
     | BecomeMonarchIntent
@@ -265,8 +330,13 @@ SemanticIntent: TypeAlias = (
     | SetCardDesignationIntent
     | RecordChoiceIntent
     | ZoneMoveIntent
+    | MoveObjectsSimultaneouslyIntent
+    | ChooseOneRestBottomRandomIntent
+    | ShuffleLibraryIntent
+    | ReturnCardsToLibraryTopIntent
     | RecordZoneMoveIntent
     | LifeChangeIntent
+    | PayLifeIntent
     | RevealLibraryCardsIntent
     | MoveLibraryCardsToBottomIntent
     | ReorderLibraryTopIntent
@@ -279,6 +349,8 @@ SemanticIntent: TypeAlias = (
     | CreateTokenIntent
     | CopyControlledTokensIntent
     | AmassIntent
+    | AddSubtypeIntent
+    | ProliferateIntent
 )
 ResultShape: TypeAlias = Literal["single", "by_player"]
 

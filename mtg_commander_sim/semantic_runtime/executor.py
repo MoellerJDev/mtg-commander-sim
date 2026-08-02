@@ -7,9 +7,11 @@ from .. import tap_state
 from ..tap_state import TapStateHost
 from .intents import (
     AddManaIntent,
+    AddSubtypeIntent,
     AmassIntent,
     BecomeMonarchIntent,
     CounterStackIntent,
+    ChooseOneRestBottomRandomIntent,
     CopyControlledTokensIntent,
     CopyStackItemIntent,
     CreateTokenIntent,
@@ -17,18 +19,23 @@ from .intents import (
     IntentPlan,
     EliminatePlayersIntent,
     LifeChangeIntent,
+    MoveObjectsSimultaneouslyIntent,
     MoveLibraryCardsToBottomIntent,
     PayManaCostIntent,
+    PayLifeIntent,
     PlaceCountersIntent,
     RecordChoiceIntent,
     RecordZoneMoveIntent,
+    ReturnCardsToLibraryTopIntent,
     ReorderLibraryTopIntent,
     RetargetStackItemIntent,
     RevealLibraryCardsIntent,
     SetCardDesignationIntent,
     SetPermanentTappedIntent,
+    ShuffleLibraryIntent,
     UntapAllCreaturesIntent,
     ZoneMoveIntent,
+    ProliferateIntent,
 )
 
 
@@ -55,9 +62,28 @@ class SemanticIntentSink(TapStateHost, Protocol):
 
     def move_object_intent(self, intent: ZoneMoveIntent) -> str: ...
 
+    def move_objects_simultaneously_intent(
+        self,
+        intent: MoveObjectsSimultaneouslyIntent,
+    ) -> tuple[str, ...]: ...
+
+    def choose_one_rest_bottom_random_intent(
+        self,
+        intent: ChooseOneRestBottomRandomIntent,
+    ) -> tuple[str, ...]: ...
+
+    def shuffle_library_intent(self, intent: ShuffleLibraryIntent) -> None: ...
+
+    def return_cards_to_library_top_intent(
+        self,
+        intent: ReturnCardsToLibraryTopIntent,
+    ) -> tuple[str, ...]: ...
+
     def record_zone_move_intent(self, intent: RecordZoneMoveIntent) -> None: ...
 
     def apply_life_change_intent(self, intent: LifeChangeIntent) -> int: ...
+
+    def pay_life_intent(self, intent: PayLifeIntent) -> int: ...
 
     def reveal_library_cards_intent(
         self,
@@ -100,6 +126,10 @@ class SemanticIntentSink(TapStateHost, Protocol):
     ) -> tuple[str, ...]: ...
 
     def apply_amass_intent(self, intent: AmassIntent) -> str: ...
+
+    def add_subtype_intent(self, intent: AddSubtypeIntent) -> str: ...
+
+    def proliferate_intent(self, intent: ProliferateIntent) -> None: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -212,12 +242,32 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
             result = sink.move_object_intent(intent)
             results.append((intent.object_ref, result))
             continue
+        if isinstance(intent, MoveObjectsSimultaneouslyIntent):
+            result = sink.move_objects_simultaneously_intent(intent)
+            results.append((intent.actor, result))
+            continue
+        if isinstance(intent, ChooseOneRestBottomRandomIntent):
+            result = sink.choose_one_rest_bottom_random_intent(intent)
+            results.append((intent.player, result))
+            continue
+        if isinstance(intent, ShuffleLibraryIntent):
+            sink.shuffle_library_intent(intent)
+            results.append((intent.player, None))
+            continue
+        if isinstance(intent, ReturnCardsToLibraryTopIntent):
+            result = sink.return_cards_to_library_top_intent(intent)
+            results.append((intent.player, result))
+            continue
         if isinstance(intent, RecordZoneMoveIntent):
             sink.record_zone_move_intent(intent)
             results.append((intent.object_ref, None))
             continue
         if isinstance(intent, LifeChangeIntent):
             result = sink.apply_life_change_intent(intent)
+            results.append((intent.player, result))
+            continue
+        if isinstance(intent, PayLifeIntent):
+            result = sink.pay_life_intent(intent)
             results.append((intent.player, result))
             continue
         if isinstance(intent, RevealLibraryCardsIntent):
@@ -267,6 +317,14 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
         if isinstance(intent, AmassIntent):
             result = sink.apply_amass_intent(intent)
             results.append((intent.controller, result))
+            continue
+        if isinstance(intent, AddSubtypeIntent):
+            result = sink.add_subtype_intent(intent)
+            results.append((intent.object_ref, result))
+            continue
+        if isinstance(intent, ProliferateIntent):
+            sink.proliferate_intent(intent)
+            results.append((intent.actor, None))
             continue
         raise TypeError(f"Unsupported semantic intent {type(intent).__name__}")
     if plan.result_shape == "by_player":

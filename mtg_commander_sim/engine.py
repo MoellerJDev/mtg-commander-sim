@@ -51,6 +51,12 @@ from .counter_placement import (
     place_counters_on_controlled_subtype,
     place_counters_on_refs,
 )
+from .counter_state import (
+    CounterChange,
+    CounterStateError,
+    commit_counter_changes,
+    plan_counter_changes,
+)
 from .combat_constraints import (
     DeclarationConstraintError,
     DeclarationProblem,
@@ -125,7 +131,9 @@ from .replacement.immutable import thaw_value
 from .semantics import SemanticProgram, SemanticRegistry
 from .semantic_runtime import (
     AddManaIntent,
+    AddSubtypeIntent,
     AmassIntent,
+    ChooseOneRestBottomRandomIntent,
     CounterStackIntent,
     CopyControlledTokensIntent,
     CopyStackItemIntent,
@@ -133,17 +141,22 @@ from .semantic_runtime import (
     EliminatePlayersIntent,
     IntentPlan,
     LifeChangeIntent,
+    MoveObjectsSimultaneouslyIntent,
     MoveLibraryCardsToBottomIntent,
     PayManaCostIntent,
+    PayLifeIntent,
     PlaceCountersIntent,
     RecordChoiceIntent,
     RecordZoneMoveIntent,
+    ReturnCardsToLibraryTopIntent,
     ReorderLibraryTopIntent,
     RetargetStackItemIntent,
     RevealLibraryCardsIntent,
     SemanticNodeError,
     SetCardDesignationIntent,
+    ShuffleLibraryIntent,
     ZoneMoveIntent,
+    ProliferateIntent,
     default_semantic_interpreter,
     execute_intent_plan,
     log_applied_zone_replacements,
@@ -13349,6 +13362,7 @@ class CommanderEngine:
         *,
         response: Mapping[str, Any] | None = None,
         effect: Mapping[str, Any] | None = None,
+        source_ref: str | None = None,
     ) -> SnapshotSemanticChoiceQuery:
         """Materialize the actor-scoped immutable facts choice handlers use."""
 
@@ -13389,6 +13403,11 @@ class CommanderEngine:
                         actor in card.known_to
                         or card.zone in public_zones
                     ),
+                    attached_to_ref=(
+                        self.state.cards[card.attached_to].ref
+                        if card.attached_to in self.state.cards
+                        else None
+                    ),
                 )
             )
         stack_rows = tuple(
@@ -13407,6 +13426,30 @@ class CommanderEngine:
         target_schemas: dict[str, Any] = {}
         validated_targets: dict[str, Any] = {}
         operation = str(choice_effect.get("op") or "")
+        choice_candidates: tuple[str, ...] = ()
+        if operation == "choose_objects":
+            selector = dict(choice_effect.get("selector") or {})
+            selector.setdefault(
+                "min", int(choice_effect.get("minimum", 1))
+            )
+            selector.setdefault(
+                "max", int(choice_effect.get("maximum", selector["min"]))
+            )
+            group = TargetGroup.from_mapping(
+                selector,
+                default_id="choice",
+            )
+            choice_candidates = tuple(
+                str(row["ref"])
+                for row in self._target_candidate_rows(actor, group)
+                if self._target_row_matches(
+                    actor,
+                    group,
+                    row,
+                    source_ref=source_ref,
+                    as_target=False,
+                )
+            )
         if operation in {"copy_stack_item", "retarget_stack_item"}:
             target_ref = str(
                 choice_effect.get("_target_stack_ref")
@@ -13508,6 +13551,13 @@ class CommanderEngine:
             cost_value = choice_effect["cost"]
         elif str(choice_effect.get("op") or "") == "remora_tax":
             cost_value = {"GENERIC": 4}
+        elif (
+            str(choice_effect.get("op") or "") == "transmute_artifact"
+            and str(choice_effect.get("stage") or "") == "pay"
+        ):
+            cost_value = {
+                "GENERIC": max(0, int(choice_effect.get("difference", 0)))
+            }
         elif str(choice_effect.get("op") or "") == "cumulative_upkeep":
             per_counter = self._mana_vector(
                 choice_effect.get("cost_per_counter") or {"GENERIC": 1}
@@ -13563,6 +13613,16 @@ class CommanderEngine:
             canonical_names=canonical_names,
             target_schemas=target_schemas,
             validated_targets=validated_targets,
+            drawn_this_turn_by_seat={
+                actor: tuple(
+                    str(entry.get("object"))
+                    for entry in self.state.players[actor].draw_history
+                    if entry.get("turn_sequence")
+                    == self.state.turn_sequence
+                )
+            },
+            materialized_choice_candidates=choice_candidates,
+            current_turn_sequence=self.state.turn_sequence,
         )
 
     def _semantic_choice_context(
@@ -13587,7 +13647,11 @@ class CommanderEngine:
             ),
             semantic_program_id=item.semantic_key,
             semantic_program_version=program.version if program else None,
-            query=self._semantic_choice_query(actor, effect=effect),
+            query=self._semantic_choice_query(
+                actor,
+                effect=effect,
+                source_ref=source.ref if source is not None else None,
+            ),
         )
 
     def _begin_registered_semantic_choice(
@@ -13701,6 +13765,20 @@ class CommanderEngine:
                     seat,
                     response=response,
                     effect=continuation.effect,
+                    source_ref=(
+                        self.state.cards[
+                            item.source_object_id
+                            or item.card_object_id
+                            or ""
+                        ].ref
+                        if (
+                            item.source_object_id
+                            or item.card_object_id
+                            or ""
+                        )
+                        in self.state.cards
+                        else None
+                    ),
                 ),
             )
         except SemanticChoiceError as exc:
@@ -13785,22 +13863,45 @@ class CommanderEngine:
         return intent.value
 
     def record_choice_intent(self, intent: RecordChoiceIntent) -> None:
+        changed_objects = [
+            card.object_id
+            for ref in intent.changed_object_refs
+            for card in [
+                next(
+                    (
+                        candidate
+                        for candidate in self.state.cards.values()
+                        if candidate.ref == ref
+                    ),
+                    None,
+                )
+            ]
+            if card is not None
+        ]
         self._log(
             intent.actor,
             intent.event_code,
             intent.message,
             dict(intent.details),
             importance=intent.importance,
+            visibility=intent.visibility,
+            changed_objects=changed_objects,
+            changed_players=intent.changed_players,
         )
 
     def move_object_intent(self, intent: ZoneMoveIntent) -> str:
-        card = self._resolve_object(
-            intent.actor,
-            intent.object_ref,
-            zones=set(intent.expected_zones),
-            owned_only=intent.owned_only,
-            controlled_only=intent.controlled_only,
-        )
+        try:
+            card = self._resolve_object(
+                intent.actor,
+                intent.object_ref,
+                zones=set(intent.expected_zones),
+                owned_only=intent.owned_only,
+                controlled_only=intent.controlled_only,
+            )
+        except GameRuleError:
+            if intent.optional_if_missing:
+                return ""
+            raise
         types, _, _ = self._type_parts(
             str(self._effective_card_data(card).get("type_line") or "")
         )
@@ -13827,6 +13928,124 @@ class CommanderEngine:
             semantic_events=intent.semantic_events,
         )
         return card.ref
+
+    def move_objects_simultaneously_intent(
+        self,
+        intent: MoveObjectsSimultaneouslyIntent,
+    ) -> tuple[str, ...]:
+        cards = tuple(
+            self._resolve_object(
+                intent.actor,
+                ref,
+                zones=set(intent.expected_zones),
+                owned_only=intent.owned_only,
+                controlled_only=intent.controlled_only,
+            )
+            for ref in intent.object_refs
+        )
+        self._move_cards_simultaneously(
+            [
+                (card.object_id, intent.destination)
+                for card in cards
+            ],
+            reason=intent.reason,
+            log=False,
+        )
+        return tuple(card.ref for card in cards)
+
+    def choose_one_rest_bottom_random_intent(
+        self,
+        intent: ChooseOneRestBottomRandomIntent,
+    ) -> tuple[str, ...]:
+        if intent.chosen_ref not in intent.looked_refs:
+            raise GameRuleError("Chosen card was not in the looked-at set")
+        library = self.state.players[intent.player].zones["library"]
+        cards = tuple(
+            self._resolve_object(
+                intent.actor,
+                ref,
+                zones={"library"},
+                owned_only=True,
+            )
+            for ref in intent.looked_refs
+        )
+        if any(card.object_id not in library for card in cards):
+            raise GameRuleError("A looked-at card left the library")
+        chosen = next(
+            card for card in cards if card.ref == intent.chosen_ref
+        )
+        for card in cards:
+            if card is not chosen:
+                library.remove(card.object_id)
+        self.move_card(
+            chosen.object_id,
+            "hand",
+            reason=intent.reason,
+            log=False,
+        )
+        bottom = [
+            card.object_id for card in cards if card is not chosen
+        ]
+        random.Random(
+            f"{self.state.config.seed}|{intent.player}|fomori-vault|"
+            f"{self.state.event_sequence}|{intent.source_stack_ref}"
+        ).shuffle(bottom)
+        library[0:0] = bottom
+        for object_id in bottom:
+            card = self.state.cards[object_id]
+            card.known_to = [intent.player]
+            card.revealed_to = []
+        self._log(
+            intent.actor,
+            intent.event_code,
+            (
+                f"{intent.player} put one looked-at card into hand and "
+                f"{len(bottom)} on the bottom at random."
+            ),
+            {
+                "chosen": chosen.ref,
+                "bottom_count": len(bottom),
+                "looked_count": len(cards),
+            },
+            visibility=[intent.player, "analyst"],
+            importance=2,
+            changed_objects=[card.object_id for card in cards],
+            changed_players=[intent.player],
+        )
+        return tuple(card.ref for card in cards)
+
+    def shuffle_library_intent(self, intent: ShuffleLibraryIntent) -> None:
+        self.shuffle_library(intent.player, reason=intent.reason)
+
+    def return_cards_to_library_top_intent(
+        self,
+        intent: ReturnCardsToLibraryTopIntent,
+    ) -> tuple[str, ...]:
+        top_ids: list[str] = []
+        for ref in intent.refs_top_first:
+            card = self._resolve_object(
+                intent.actor,
+                ref,
+                zones={"hand"},
+                owned_only=True,
+            )
+            self.move_card(
+                card.object_id,
+                "library",
+                position="top",
+                reason=intent.reason,
+                log=False,
+            )
+            self.state.players[intent.player].zones["library"].remove(
+                card.object_id
+            )
+            top_ids.append(card.object_id)
+        self.state.players[intent.player].zones["library"].extend(
+            reversed(top_ids)
+        )
+        return tuple(
+            self.state.cards[object_id].ref for object_id in top_ids
+        )
 
     def record_zone_move_intent(self, intent: RecordZoneMoveIntent) -> None:
         card = self._resolve_object(intent.actor, intent.object_ref)
@@ -13870,6 +14089,27 @@ class CommanderEngine:
         )
         return self.state.players[intent.player].life
 
+    def pay_life_intent(self, intent: PayLifeIntent) -> int:
+        if intent.amount < 0:
+            raise GameRuleError("Life payments cannot be negative")
+        player = self.state.players[intent.player]
+        if player.life < intent.amount:
+            raise GameRuleError("The life payment is no longer payable")
+        player.life -= intent.amount
+        self._log(
+            intent.actor,
+            "life.pay",
+            f"{intent.player} paid {intent.amount} life.",
+            {
+                "player": intent.player,
+                "amount": intent.amount,
+                "reason": intent.reason,
+            },
+            importance=1,
+            changed_players=[intent.player],
+        )
+        return player.life
+
     def reveal_library_cards_intent(
         self,
         intent: RevealLibraryCardsIntent,
@@ -13892,7 +14132,12 @@ class CommanderEngine:
                 zones={"library"},
                 owned_only=(intent.viewer == intent.player),
             )
-            card.known_to = sorted(set(card.known_to).union({intent.viewer}))
+            viewers = set(self.seats) if intent.public else {intent.viewer}
+            card.known_to = sorted(set(card.known_to).union(viewers))
+            if intent.public:
+                card.revealed_to = sorted(
+                    set(card.revealed_to).union(viewers)
+                )
             object_ids.append(card.object_id)
         self._log(
             intent.actor,
@@ -13902,7 +14147,11 @@ class CommanderEngine:
                 f"of {intent.player}'s library."
             ),
             {"player": intent.player, "count": len(refs)},
-            visibility=[intent.viewer, "analyst"],
+            visibility=(
+                None
+                if intent.public
+                else [intent.viewer, "analyst"]
+            ),
             importance=1,
             changed_objects=object_ids,
         )
@@ -14218,6 +14467,96 @@ class CommanderEngine:
         )
         return army_ref
 
+    def add_subtype_intent(self, intent: AddSubtypeIntent) -> str:
+        card = self._resolve_object(
+            intent.actor,
+            intent.object_ref,
+            zones={"battlefield"},
+        )
+        subtype = intent.subtype.strip().title()
+        if not subtype:
+            raise GameRuleError("Subtype changes require a subtype")
+        card.annotations["continuous_add_subtypes"] = (
+            unique_preserving_order(
+                [
+                    *list(
+                        card.annotations.get(
+                            "continuous_add_subtypes", []
+                        )
+                    ),
+                    subtype,
+                ]
+            )
+        )
+        self._log(
+            intent.actor,
+            "permanent.subtype",
+            f"{card.ref} became a {subtype} in addition to its other types.",
+            {
+                "object": card.ref,
+                "subtype": subtype,
+                "reason": intent.reason,
+            },
+            importance=1,
+            changed_objects=[card.object_id],
+        )
+        return card.ref
+
+    def proliferate_intent(self, intent: ProliferateIntent) -> None:
+        changed_objects: list[str] = []
+        changed_players: list[str] = []
+        for selection in intent.selections:
+            if selection in self.state.players:
+                player = self.state.players[selection]
+                changes = [
+                    CounterChange(
+                        subject_kind="player",
+                        subject_id=selection,
+                        counter_name=name,
+                        amount=1,
+                    )
+                    for name in ("poison", "energy")
+                    if int(getattr(player, name)) > 0
+                ]
+                if changes:
+                    try:
+                        commit_counter_changes(
+                            self,
+                            plan_counter_changes(self, changes),
+                        )
+                    except CounterStateError as exc:
+                        raise GameRuleError(str(exc)) from exc
+                    changed_players.append(selection)
+                continue
+            card = self._resolve_object(
+                intent.actor,
+                selection,
+                zones={"battlefield"},
+            )
+            for counter_name, amount in tuple(card.counters.items()):
+                if int(amount) <= 0:
+                    continue
+                self.place_counters_intent(
+                    PlaceCountersIntent(
+                        actor=intent.actor,
+                        object_refs=(card.ref,),
+                        counter_name=counter_name,
+                        amount=1,
+                        reason=intent.reason,
+                        source_ref=None,
+                    )
+                )
+            changed_objects.append(card.object_id)
+        self._log(
+            intent.actor,
+            "counter.proliferate",
+            f"{intent.actor} proliferated {len(intent.selections)} object(s).",
+            {"objects": list(intent.selections)},
+            importance=2,
+            changed_objects=changed_objects,
+            changed_players=changed_players,
+        )
+
     def _begin_semantic_choice(
         self,
         *,
@@ -14228,1596 +14567,32 @@ class CommanderEngine:
         note: str,
         instruction_pointer: int = 0,
     ) -> None:
-        op = str(effect["op"])
-        seat = str(effect.get("player") or item.controller)
-        if op in default_semantic_choice_registry().operations:
-            self._begin_registered_semantic_choice(
-                item=item,
-                effect=effect,
-                remaining=remaining,
-                destination=destination,
-                note=note,
-                instruction_pointer=instruction_pointer,
+        operation = str(effect.get("op") or "")
+        if operation not in default_semantic_choice_registry().operations:
+            raise GameRuleError(
+                f"Unregistered semantic choice operation {operation!r}"
             )
-            return
-        context: dict[str, Any] = {"stack": item.ref, "operation": op}
-        if op == "explore":
-            explorer = self._resolve_object(
-                seat,
-                str(effect["card"]),
-                zones={"battlefield"},
-            )
-            library = self.state.players[seat].zones["library"]
-            if not library:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            top = self.state.cards[library[-1]]
-            top.known_to = list(self.seats)
-            top.revealed_to = list(self.seats)
-            top_types, _, _ = self._type_parts(
-                str(
-                    self._effective_card_data(top).get("type_line")
-                    or ""
-                )
-            )
-            self._log(
-                seat,
-                "explore.reveal",
-                f"{seat} revealed {top.printed_name} while exploring.",
-                {
-                    "player": seat,
-                    "card": top.ref,
-                    "explorer": explorer.ref,
-                },
-                importance=2,
-                changed_objects=[top.object_id, explorer.object_id],
-            )
-            if "land" in top_types:
-                self.move_card(
-                    top.object_id,
-                    "hand",
-                    reason="explore",
-                    semantic_events=True,
-                )
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            explorer.counters["+1/+1"] = (
-                int(explorer.counters.get("+1/+1", 0)) + 1
-            )
-            effect = {
-                **dict(effect),
-                "_top_ref": top.ref,
-                "_explorer_ref": explorer.ref,
-            }
-            context.update(
-                {
-                    "prompt": (
-                        "Put the revealed nonland card into your "
-                        "graveyard or leave it on top."
-                    ),
-                    "card": {
-                        "id": top.ref,
-                        "name": top.printed_name,
-                    },
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "choice",
-                                "legal_values": ["graveyard", "top"],
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "fomori_vault":
-            artifact_count = sum(
-                1
-                for object_id in self.state.players[seat].zones[
-                    "battlefield"
-                ]
-                if self.state.cards[object_id].controller == seat
-                and not self.state.cards[object_id].phased_out
-                and "artifact"
-                in self._type_parts(
-                    str(
-                        self._effective_card_data(object_id).get(
-                            "type_line"
-                        )
-                        or ""
-                    )
-                )[0]
-            )
-            looked = self.apply_effect(
-                {
-                    "op": "look_top",
-                    "player": seat,
-                    "viewer": seat,
-                    "count": artifact_count,
-                    "reason": item.label,
-                },
-                actor=item.controller,
-            )
-            options = [str(value) for value in (looked or [])]
-            if not options:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            effect = {
-                **dict(effect),
-                "_looked_refs": options,
-                "_artifact_count": artifact_count,
-            }
-            context.update(
-                {
-                    "prompt": (
-                        "Choose one looked-at card to put into your "
-                        "hand. The rest go to the bottom at random."
-                    ),
-                    "cards": [
-                        {
-                            "id": ref,
-                            "name": self._resolve_object(
-                                seat,
-                                ref,
-                                zones={"library"},
-                                owned_only=True,
-                            ).printed_name,
-                        }
-                        for ref in options
-                    ],
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "card",
-                                "legal_refs": options,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "discard_draw_up_to":
-            maximum = max(0, int(effect.get("maximum", 2)))
-            options = [
-                self.state.cards[object_id].ref
-                for object_id in self.state.players[seat].zones["hand"]
-            ]
-            if not options or maximum == 0:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            maximum = min(maximum, len(options))
-            effect = {
-                **dict(effect),
-                "_legal_refs": options,
-                "_maximum": maximum,
-            }
-            context.update(
-                {
-                    "prompt": (
-                        f"Discard up to {maximum} card(s), then draw "
-                        "that many cards."
-                    ),
-                    "cards": [
-                        {
-                            "id": ref,
-                            "name": self._resolve_object(
-                                seat,
-                                ref,
-                                zones={"hand"},
-                                owned_only=True,
-                            ).printed_name,
-                        }
-                        for ref in options
-                    ],
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "cards",
-                                "legal_refs": options,
-                                "minimum": 0,
-                                "maximum": maximum,
-                                "distinct": True,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "daretti_exchange":
-            options = [
-                self.state.cards[object_id].ref
-                for object_id in self.state.players[seat].zones[
-                    "battlefield"
-                ]
-                if self.state.cards[object_id].controller == seat
-                and not self.state.cards[object_id].phased_out
-                and "artifact"
-                in self._type_parts(
-                    str(
-                        self._effective_card_data(object_id).get(
-                            "type_line"
-                        )
-                        or ""
-                    )
-                )[0]
-            ]
-            if not options:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            effect = {
-                **dict(effect),
-                "_legal_refs": options,
-            }
-            context.update(
-                {
-                    "prompt": (
-                        "Choose an artifact you control to sacrifice."
-                    ),
-                    "objects": options,
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "card",
-                                "legal_refs": options,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "transmute_artifact":
-            stage = str(effect.get("stage") or "sacrifice")
-            if stage == "sacrifice":
-                options = [
-                    self.state.cards[object_id].ref
-                    for object_id in self.state.players[seat].zones[
-                        "battlefield"
-                    ]
-                    if self.state.cards[object_id].controller == seat
-                    and not self.state.cards[object_id].phased_out
-                    and "artifact"
-                    in self._type_parts(
-                        str(
-                            self._effective_card_data(object_id).get(
-                                "type_line"
-                            )
-                            or ""
-                        )
-                    )[0]
-                ]
-                if not options:
-                    self._continue_resolution(
-                        stack_ref=item.ref,
-                        effects=list(remaining),
-                        destination=destination,
-                        note=note,
-                        instruction_pointer=instruction_pointer + 1,
-                    )
-                    return
-                effect = {
-                    **dict(effect),
-                    "stage": stage,
-                    "_legal_refs": options,
-                }
-                context.update(
-                    {
-                        "prompt": (
-                            "Choose exactly one artifact to sacrifice "
-                            "while Transmute Artifact resolves."
-                        ),
-                        "objects": options,
-                        "legal_actions": [
-                            {
-                                "id": "choose",
-                                "action": "choose",
-                                "choice_schema": {
-                                    "field": "card",
-                                    "legal_refs": options,
-                                },
-                            }
-                        ],
-                    }
-                )
-            elif stage == "search":
-                options = [
-                    self.state.cards[object_id].ref
-                    for object_id in self.state.players[seat].zones[
-                        "library"
-                    ]
-                    if "artifact"
-                    in self._type_parts(
-                        str(
-                            self._effective_card_data(object_id).get(
-                                "type_line"
-                            )
-                            or ""
-                        )
-                    )[0]
-                ]
-                effect = {
-                    **dict(effect),
-                    "stage": stage,
-                    "_legal_refs": options,
-                }
-                context.update(
-                    {
-                        "prompt": (
-                            "Choose an artifact card from your library, "
-                            "or fail to find."
-                        ),
-                        "search_cards": [
-                            {
-                                "id": ref,
-                                "name": self._resolve_object(
-                                    seat,
-                                    ref,
-                                    zones={"library"},
-                                    owned_only=True,
-                                ).printed_name,
-                            }
-                            for ref in options
-                        ],
-                        "legal_actions": [
-                            {
-                                "id": "choose",
-                                "action": "choose",
-                                "choice_schema": {
-                                    "field": "card",
-                                    "legal_refs": options,
-                                    "optional": True,
-                                    "rules_may_fail_to_find": True,
-                                },
-                            }
-                        ],
-                    }
-                )
-            elif stage == "pay":
-                card = self._resolve_object(
-                    seat,
-                    str(effect.get("card") or ""),
-                    zones={"library"},
-                    owned_only=True,
-                )
-                difference = max(0, int(effect.get("difference", 0)))
-                requirements = {
-                    **normalize_mana_bundle(None),
-                    "GENERIC": difference,
-                }
-                if not self._cost_is_affordable(seat, requirements):
-                    self.move_card(
-                        card.object_id,
-                        "graveyard",
-                        reason="Transmute Artifact payment declined",
-                        semantic_events=True,
-                    )
-                    self.shuffle_library(
-                        seat, reason="Transmute Artifact resolved"
-                    )
-                    self._continue_resolution(
-                        stack_ref=item.ref,
-                        effects=list(remaining),
-                        destination=destination,
-                        note=note,
-                        instruction_pointer=instruction_pointer + 1,
-                    )
-                    return
-                effect = {
-                    **dict(effect),
-                    "stage": stage,
-                    "_requirements": requirements,
-                }
-                context.update(
-                    {
-                        "prompt": (
-                            f"Pay {difference} generic mana to put "
-                            f"{card.ref} onto the battlefield?"
-                        ),
-                        "card": {
-                            "id": card.ref,
-                            "name": card.printed_name,
-                        },
-                        "cost": requirements,
-                        "legal_actions": [
-                            {
-                                "id": "choose",
-                                "action": "choose",
-                                "choice_schema": {
-                                    "field": "pay",
-                                    "legal_values": [True, False],
-                                },
-                            }
-                        ],
-                    }
-                )
-            else:
-                raise GameRuleError(
-                    f"Unknown Transmute Artifact stage {stage!r}"
-                )
-        elif op == "choose_objects":
-            selector = dict(effect.get("selector") or {})
-            selector.setdefault(
-                "min", int(effect.get("minimum", 1))
-            )
-            selector.setdefault(
-                "max", int(effect.get("maximum", selector["min"]))
-            )
-            group = TargetGroup.from_mapping(
-                selector,
-                default_id="choice",
-            )
-            source = self.state.cards.get(
-                item.source_object_id or item.card_object_id or ""
-            )
-            source_ref = source.ref if source else None
-            options = [
-                str(row["ref"])
-                for row in self._target_candidate_rows(seat, group)
-                if self._target_row_matches(
-                    seat,
-                    group,
-                    row,
-                    source_ref=source_ref,
-                    as_target=False,
-                )
-            ]
-            if not options:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            minimum = min(group.min_targets, len(options))
-            maximum = min(group.max_targets, len(options))
-            effect = {
-                **dict(effect),
-                "_legal_refs": options,
-                "_minimum": minimum,
-                "_maximum": maximum,
-            }
-            context.update(
-                {
-                    "prompt": str(
-                        effect.get("prompt")
-                        or "Choose the required public object(s)."
-                    ),
-                    "objects": [
-                        {
-                            "id": ref,
-                            "name": self._resolve_object(
-                                seat, ref
-                            ).printed_name,
-                        }
-                        for ref in options
-                    ],
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "objects",
-                                "legal_refs": options,
-                                "minimum": minimum,
-                                "maximum": maximum,
-                                "distinct": True,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "sylvan_library_settle":
-            hand_refs = {
-                self.state.cards[object_id].ref
-                for object_id in self.state.players[seat].zones["hand"]
-            }
-            eligible = unique_preserving_order(
-                [
-                    str(entry.get("object"))
-                    for entry in self.state.players[seat].draw_history
-                    if entry.get("turn_sequence")
-                    == self.state.turn_sequence
-                    and str(entry.get("object")) in hand_refs
-                ]
-            )
-            required = min(2, len(eligible))
-            if required == 0:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            effect = {
-                **dict(effect),
-                "_eligible_refs": eligible,
-                "_required": required,
-            }
-            context.update(
-                {
-                    "prompt": (
-                        f"Choose {required} card(s) drawn this turn; for "
-                        "each, pay 4 life or put it on top of your library."
-                    ),
-                    "objects": [
-                        {
-                            "id": ref,
-                            "name": self._resolve_object(
-                                seat,
-                                ref,
-                                zones={"hand"},
-                                owned_only=True,
-                            ).printed_name,
-                        }
-                        for ref in eligible
-                    ],
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "decisions",
-                                "shape": "object_map",
-                                "legal_refs": eligible,
-                                "required": required,
-                                "legal_values": [
-                                    "pay_life",
-                                    "top",
-                                ],
-                                "top_order": {
-                                    "field": "top_order",
-                                    "required_when_value": "top",
-                                    "contains": (
-                                        "exactly every ref mapped to top"
-                                    ),
-                                    "order": "top-first",
-                                },
-                                "example": {
-                                    "decisions": {
-                                        ref: (
-                                            "pay_life"
-                                            if index == 0
-                                            else "top"
-                                        )
-                                        for index, ref in enumerate(
-                                            eligible[:required]
-                                        )
-                                    },
-                                    "top_order": list(
-                                        eligible[1:required]
-                                    ),
-                                },
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "springheart_landfall":
-            source = self._resolve_object(
-                seat,
-                str(effect["source"]),
-                zones={"battlefield"},
-                controlled_only=True,
-            )
-            attached = self.state.cards.get(source.attached_to or "")
-            requirements = self._mana_vector(
-                effect.get("cost") or {"GENERIC": 1, "G": 1}
-            )
-            can_copy = bool(
-                attached is not None
-                and attached.zone == "battlefield"
-                and attached.controller == seat
-                and self._cost_is_affordable(seat, requirements)
-            )
-            if not can_copy:
-                self.create_token(
-                    seat,
-                    name="Insect",
-                    characteristics={
-                        "type_line": "Token Creature — Insect",
-                        "colors": ["G"],
-                        "power": "1",
-                        "toughness": "1",
-                    },
-                    reason=item.label,
-                )
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=instruction_pointer + 1,
-                )
-                return
-            effect = {
-                **dict(effect),
-                "_source_ref": source.ref,
-                "_attached_ref": attached.ref,
-                "_requirements": requirements,
-            }
-            context.update(
-                {
-                    "prompt": (
-                        "Pay {1}{G} to create a token copy of the "
-                        "enchanted creature, or create a 1/1 Insect."
-                    ),
-                    "cost": requirements,
-                    "attached_creature": attached.ref,
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "pay",
-                                "legal_values": [True, False],
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "proliferate":
-            objects = [
-                self.state.cards[object_id].ref
-                for active_seat in self.active_seats
-                for object_id in self.state.players[
-                    active_seat
-                ].zones["battlefield"]
-                if any(
-                    amount > 0
-                    for amount in self.state.cards[
-                        object_id
-                    ].counters.values()
-                )
-            ]
-            players = [
-                active_seat
-                for active_seat in self.active_seats
-                if self.state.players[active_seat].poison > 0
-                or self.state.players[active_seat].energy > 0
-            ]
-            context.update(
-                {
-                    "prompt": "Choose any number of permanents and/or players with counters to proliferate.",
-                    "options": [*objects, *players],
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "objects",
-                                "minimum": 0,
-                                "maximum": len(objects) + len(players),
-                                "legal_refs": [*objects, *players],
-                                "distinct": True,
-                            },
-                        }
-                    ],
-                }
-            )
-        elif op == "draw_optional_land":
-            self.draw(seat, 1, reason=item.label)
-            options = [
-                self.state.cards[object_id].ref
-                for object_id in self.state.players[seat].zones["hand"]
-                if (
-                    self.card_record(object_id)
-                    and self.card_record(object_id).is_land
-                )
-            ]
-            repeat_threshold = effect.get("repeat_if_land_count")
-            repeat = bool(
-                repeat_threshold
-                and sum(
-                    bool(self.card_record(object_id) and self.card_record(object_id).is_land)
-                    for object_id in self.state.players[seat].zones["battlefield"]
-                    if self.state.cards[object_id].controller == seat
-                )
-                >= int(repeat_threshold)
-            )
-            if not options:
-                resumed = list(remaining)
-                if repeat:
-                    repeated = dict(effect)
-                    repeated.pop("repeat_if_land_count", None)
-                    resumed.insert(0, repeated)
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=resumed,
-                    destination=destination,
-                    note=note,
-                )
-                return
-            context.update(
-                {
-                    "prompt": "You may put a land card from your hand onto the battlefield tapped.",
-                    "optional": True,
-                    "options": options,
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "card",
-                                "legal_refs": options,
-                                "optional": True,
-                            },
-                        }
-                    ],
-                }
-            )
-            effect = {**dict(effect), "_repeat": repeat}
-        else:
-            options = [
-                self.state.cards[object_id].ref
-                for object_id in self.state.players[seat].zones["battlefield"]
-                if self.state.cards[object_id].controller == seat
-                and "artifact"
-                in str(
-                    self._effective_card_data(object_id).get("type_line") or ""
-                ).casefold()
-                and "creature"
-                not in str(
-                    self._effective_card_data(object_id).get("type_line") or ""
-                ).casefold()
-            ]
-            if not options:
-                self._continue_resolution(
-                    stack_ref=item.ref,
-                    effects=list(remaining),
-                    destination=destination,
-                    note=note,
-                )
-                return
-            context.update(
-                {
-                    "prompt": "Choose a noncreature artifact you control for Mishra's Warform.",
-                    "options": options,
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "card",
-                                "legal_refs": options,
-                            },
-                        }
-                    ],
-                }
-            )
-        decision = self.permissions.issue(
-            kind="semantic.choice",
-            role="pilot",
-            actors=[seat],
-            allowed_actions=["choose"],
-            payload_by_actor={seat: context},
-            continuation={
-                "stack_ref": item.ref,
-                "effect": copy.deepcopy(dict(effect)),
-                "remaining": copy.deepcopy(list(remaining)),
-                "destination": destination,
-                "note": note,
-                "semantic_frame": self._semantic_frame(
-                    item,
-                    instruction_pointer=instruction_pointer,
-                ),
-            },
+        self._begin_registered_semantic_choice(
+            item=item,
+            effect=effect,
+            remaining=remaining,
+            destination=destination,
+            note=note,
+            instruction_pointer=instruction_pointer,
         )
-        decision.continuation["semantic_frame"]["pending_choice_id"] = (
-            decision.decision_id
-        )
-
     def _complete_semantic_choice(self, decision: Any) -> None:
-        seat = decision.actors[0]
-        response = decision.responses[seat]
         continuation = decision.continuation
-        continuation_effect = continuation.get("effect")
-        if isinstance(continuation_effect, Mapping) and str(
-            continuation_effect.get("op") or ""
-        ) in default_semantic_choice_registry().operations:
-            self._complete_registered_semantic_choice(decision)
-            return
-        stack_ref = str(continuation["stack_ref"])
-        item = next(
-            (candidate for candidate in self.state.stack if candidate.ref == stack_ref),
-            None,
+        effect = continuation.get("effect")
+        operation = (
+            str(effect.get("op") or "")
+            if isinstance(effect, Mapping)
+            else ""
         )
-        if item is None:
-            raise GameRuleError("The semantic choice's stack object no longer exists")
-        frame = dict(continuation.get("semantic_frame") or {})
-        if frame:
-            self._validate_semantic_frame(frame, item)
-        effect = dict(continuation["effect"])
-        op = str(effect["op"])
-        choice_effects: list[dict[str, Any]] = []
-        if op == "explore":
-            choice = str(response.get("choice") or "")
-            if choice not in {"graveyard", "top"}:
-                raise GameRuleError(
-                    "Explore requires choosing graveyard or top"
-                )
-            top_ref = str(effect.get("_top_ref") or "")
-            top = self._resolve_object(
-                seat,
-                top_ref,
-                zones={"library"},
-                owned_only=True,
+        if operation not in default_semantic_choice_registry().operations:
+            raise GameRuleError(
+                f"Unregistered semantic choice continuation {operation!r}"
             )
-            if (
-                not self.state.players[seat].zones["library"]
-                or self.state.players[seat].zones["library"][-1]
-                != top.object_id
-            ):
-                raise GameRuleError(
-                    "The revealed explore card is no longer on top"
-                )
-            if choice == "graveyard":
-                self.move_card(
-                    top.object_id,
-                    "graveyard",
-                    reason="explore",
-                    semantic_events=True,
-                )
-            self._log(
-                seat,
-                "explore.complete",
-                (
-                    f"{seat} put {top.ref} into their graveyard."
-                    if choice == "graveyard"
-                    else f"{seat} left {top.ref} on top of their library."
-                ),
-                {
-                    "player": seat,
-                    "card": top.ref,
-                    "destination": choice,
-                    "explorer": effect.get("_explorer_ref"),
-                },
-                importance=2,
-                changed_objects=[top.object_id],
-                changed_players=[seat],
-            )
-        elif op == "fomori_vault":
-            selected = str(response.get("card") or "")
-            looked = [
-                str(value)
-                for value in effect.get("_looked_refs") or []
-            ]
-            if selected not in looked:
-                raise GameRuleError(
-                    "Choose one of the cards looked at by Fomori Vault"
-                )
-            library = self.state.players[seat].zones["library"]
-            cards = [
-                self._resolve_object(
-                    seat,
-                    ref,
-                    zones={"library"},
-                    owned_only=True,
-                )
-                for ref in looked
-            ]
-            if any(card.object_id not in library for card in cards):
-                raise GameRuleError(
-                    "A looked-at Fomori Vault card left the library"
-                )
-            chosen = next(card for card in cards if card.ref == selected)
-            for card in cards:
-                if card is not chosen:
-                    library.remove(card.object_id)
-            self.move_card(
-                chosen.object_id,
-                "hand",
-                reason="Fomori Vault selection",
-                log=False,
-            )
-            bottom = [
-                card.object_id for card in cards if card is not chosen
-            ]
-            randomizer = random.Random(
-                f"{self.state.config.seed}|{seat}|fomori-vault|"
-                f"{self.state.event_sequence}|{item.ref}"
-            )
-            randomizer.shuffle(bottom)
-            library[0:0] = bottom
-            for object_id in bottom:
-                card = self.state.cards[object_id]
-                card.known_to = [seat]
-                card.revealed_to = []
-            self._log(
-                seat,
-                "fomori_vault.select",
-                (
-                    f"{seat} put one looked-at card into hand and "
-                    f"{len(bottom)} on the bottom at random."
-                ),
-                {
-                    "chosen": chosen.ref,
-                    "bottom_count": len(bottom),
-                    "looked_count": len(looked),
-                },
-                visibility=[seat, "analyst"],
-                importance=2,
-                changed_objects=[card.object_id for card in cards],
-                changed_players=[seat],
-            )
-        elif op == "discard_draw_up_to":
-            selected = [
-                str(value) for value in response.get("cards", [])
-            ]
-            legal = {
-                str(value)
-                for value in effect.get("_legal_refs") or []
-            }
-            maximum = int(effect.get("_maximum", 0))
-            if (
-                len(selected) != len(set(selected))
-                or len(selected) > maximum
-                or any(value not in legal for value in selected)
-            ):
-                raise GameRuleError(
-                    "Discard selection must contain up to the offered "
-                    "number of distinct hand cards"
-                )
-            cards = [
-                self._resolve_object(
-                    seat,
-                    ref,
-                    zones={"hand"},
-                    owned_only=True,
-                )
-                for ref in selected
-            ]
-            if cards:
-                self._move_cards_simultaneously(
-                    [
-                        (card.object_id, "graveyard")
-                        for card in cards
-                    ],
-                    reason=item.label,
-                    log=False,
-                )
-                choice_effects = [
-                    {
-                        "op": "draw",
-                        "player": seat,
-                        "count": len(cards),
-                        "private": True,
-                        "reason": item.label,
-                    }
-                ]
-            self._log(
-                seat,
-                "daretti.discard_draw",
-                (
-                    f"{seat} discarded {len(cards)} card(s) and will "
-                    "draw that many."
-                ),
-                {
-                    "count": len(cards),
-                    "objects": [card.ref for card in cards],
-                },
-                visibility=[seat, "analyst"],
-                importance=2,
-                changed_objects=[card.object_id for card in cards],
-                changed_players=[seat],
-            )
-        elif op == "daretti_exchange":
-            selected = str(response.get("card") or "")
-            legal = {
-                str(value)
-                for value in effect.get("_legal_refs") or []
-            }
-            if selected not in legal:
-                raise GameRuleError(
-                    "Choose one of the authoritative artifact options"
-                )
-            sacrificed = self._resolve_object(
-                seat,
-                selected,
-                zones={"battlefield"},
-                controlled_only=True,
-            )
-            if "artifact" not in self._type_parts(
-                str(
-                    self._effective_card_data(sacrificed).get(
-                        "type_line"
-                    )
-                    or ""
-                )
-            )[0]:
-                raise GameRuleError(
-                    "Daretti's selected permanent is no longer an artifact"
-                )
-            self.move_card(
-                sacrificed.object_id,
-                "graveyard",
-                reason=item.label,
-                semantic_events=True,
-            )
-            target_ref = str(effect.get("card") or "")
-            try:
-                target = self._resolve_object(
-                    seat,
-                    target_ref,
-                    zones={"graveyard"},
-                    owned_only=True,
-                )
-            except GameRuleError:
-                target = None
-            if (
-                target is not None
-                and "artifact"
-                in self._type_parts(
-                    str(
-                        self._effective_card_data(target).get(
-                            "type_line"
-                        )
-                        or ""
-                    )
-                )[0]
-            ):
-                self.move_card(
-                    target.object_id,
-                    "battlefield",
-                    controller=seat,
-                    reason=item.label,
-                    semantic_events=True,
-                )
-            self._log(
-                seat,
-                "daretti.exchange",
-                f"{seat} sacrificed {sacrificed.ref} for Daretti.",
-                {
-                    "sacrificed": sacrificed.ref,
-                    "returned": target.ref if target is not None else None,
-                },
-                importance=2,
-                changed_objects=[
-                    sacrificed.object_id,
-                    *(
-                        [target.object_id]
-                        if target is not None
-                        else []
-                    ),
-                ],
-                changed_players=[seat],
-            )
-        elif op == "transmute_artifact":
-            stage = str(effect.get("stage") or "sacrifice")
-            legal = {
-                str(value)
-                for value in effect.get("_legal_refs") or []
-            }
-            if stage == "sacrifice":
-                selected = str(response.get("card") or "")
-                if selected not in legal:
-                    raise GameRuleError(
-                        "Choose one of the authoritative artifact options"
-                    )
-                sacrificed = self._resolve_object(
-                    seat,
-                    selected,
-                    zones={"battlefield"},
-                    controlled_only=True,
-                )
-                types, _, _ = self._type_parts(
-                    str(
-                        self._effective_card_data(sacrificed).get(
-                            "type_line"
-                        )
-                        or ""
-                    )
-                )
-                if "artifact" not in types:
-                    raise GameRuleError(
-                        "Transmute Artifact requires an artifact"
-                    )
-                mana_value = int(
-                    float(
-                        self._effective_card_data(sacrificed).get(
-                            "mana_value", 0
-                        )
-                        or 0
-                    )
-                )
-                self.move_card(
-                    sacrificed.object_id,
-                    "graveyard",
-                    reason=item.label,
-                    semantic_events=True,
-                )
-                choice_effects = [
-                    {
-                        "op": "transmute_artifact",
-                        "stage": "search",
-                        "sacrificed_mana_value": mana_value,
-                    }
-                ]
-            elif stage == "search":
-                selected = response.get("card")
-                if selected in {"", None}:
-                    selected = None
-                if selected is not None and str(selected) not in legal:
-                    raise GameRuleError(
-                        "Selected Transmute Artifact result is not legal"
-                    )
-                if selected is None:
-                    self.shuffle_library(
-                        seat, reason="Transmute Artifact resolved"
-                    )
-                else:
-                    found = self._resolve_object(
-                        seat,
-                        str(selected),
-                        zones={"library"},
-                        owned_only=True,
-                    )
-                    found_value = int(
-                        float(
-                            self._effective_card_data(found).get(
-                                "mana_value", 0
-                            )
-                            or 0
-                        )
-                    )
-                    sacrificed_value = int(
-                        effect.get("sacrificed_mana_value", 0)
-                    )
-                    difference = max(
-                        0, found_value - sacrificed_value
-                    )
-                    if difference == 0:
-                        self.move_card(
-                            found.object_id,
-                            "battlefield",
-                            controller=seat,
-                            reason=item.label,
-                            semantic_events=True,
-                        )
-                        self.shuffle_library(
-                            seat,
-                            reason="Transmute Artifact resolved",
-                        )
-                    else:
-                        choice_effects = [
-                            {
-                                "op": "transmute_artifact",
-                                "stage": "pay",
-                                "card": found.ref,
-                                "difference": difference,
-                            }
-                        ]
-            elif stage == "pay":
-                found = self._resolve_object(
-                    seat,
-                    str(effect.get("card") or ""),
-                    zones={"library"},
-                    owned_only=True,
-                )
-                pay = bool(response.get("pay", False))
-                requirements = self._mana_vector(
-                    effect.get("_requirements") or {}
-                )
-                if pay:
-                    if not self._cost_is_affordable(
-                        seat, requirements
-                    ):
-                        raise GameRuleError(
-                            "Transmute Artifact payment is no longer payable"
-                        )
-                    self._pay_for_cost(
-                        seat, requirements, {"pay": "auto"}
-                    )
-                self.move_card(
-                    found.object_id,
-                    "battlefield" if pay else "graveyard",
-                    controller=seat if pay else None,
-                    reason=item.label,
-                    semantic_events=True,
-                )
-                self.shuffle_library(
-                    seat, reason="Transmute Artifact resolved"
-                )
-            else:
-                raise GameRuleError(
-                    f"Unknown Transmute Artifact stage {stage!r}"
-                )
-        elif op == "choose_objects":
-            selected = [
-                str(value)
-                for value in response.get(
-                    "objects", response.get("cards", [])
-                )
-            ]
-            legal = set(effect.get("_legal_refs") or [])
-            minimum = int(effect.get("_minimum", 0))
-            maximum = int(effect.get("_maximum", len(legal)))
-            if (
-                len(selected) != len(set(selected))
-                or len(selected) < minimum
-                or len(selected) > maximum
-                or any(value not in legal for value in selected)
-            ):
-                raise GameRuleError(
-                    "Object choices do not satisfy the authoritative "
-                    "selection constraints"
-                )
-            for continuation_effect in effect.get("then") or []:
-                next_effect = dict(continuation_effect)
-                next_op = str(next_effect.get("op") or "")
-                if next_op in {
-                    "move_selected",
-                    "sacrifice_selected",
-                }:
-                    destination_name = (
-                        "graveyard"
-                        if next_op == "sacrifice_selected"
-                        else str(
-                            next_effect.get("destination")
-                            or "graveyard"
-                        )
-                    )
-                    cards = [
-                        self._resolve_object(seat, value)
-                        for value in selected
-                    ]
-                    self._move_cards_simultaneously(
-                        [
-                            (card.object_id, destination_name)
-                            for card in cards
-                        ],
-                        reason=str(
-                            next_effect.get("reason") or item.label
-                        ),
-                        log=True,
-                    )
-                elif next_op == "add_counter_selected":
-                    self.apply_effect(
-                        {
-                            **next_effect,
-                            "cards": selected,
-                        },
-                        actor=seat,
-                    )
-                elif next_op == "life_if_selected_subtype":
-                    subtype = str(
-                        next_effect.get("subtype") or ""
-                    ).casefold()
-                    amount = int(next_effect.get("amount", 0))
-                    matching = any(
-                        subtype
-                        in self._type_parts(
-                            str(
-                                self._effective_card_data(
-                                    self._resolve_object(seat, value)
-                                ).get("type_line")
-                                or ""
-                            )
-                        )[1]
-                        for value in selected
-                    )
-                    if matching and amount:
-                        self.apply_effect(
-                            {
-                                "op": "life",
-                                "player": seat,
-                                "delta": amount,
-                                "reason": str(
-                                    next_effect.get("reason")
-                                    or item.label
-                                ),
-                            },
-                            actor=seat,
-                        )
-                else:
-                    raise GameRuleError(
-                        f"Unsupported object-choice continuation {next_op!r}"
-                    )
-            self._log(
-                seat,
-                "semantic.objects.chosen",
-                f"{seat} chose {len(selected)} object(s) for {item.label}.",
-                {"stack": item.ref, "objects": selected},
-                importance=1,
-            )
-        elif op == "sylvan_library_settle":
-            decisions = {
-                str(key): str(value)
-                for key, value in dict(
-                    response.get("decisions") or {}
-                ).items()
-            }
-            eligible = {
-                str(value)
-                for value in effect.get("_eligible_refs") or []
-            }
-            required = int(effect.get("_required", 0))
-            if (
-                len(decisions) != required
-                or any(ref not in eligible for ref in decisions)
-                or any(
-                    value not in {"pay_life", "top"}
-                    for value in decisions.values()
-                )
-            ):
-                raise GameRuleError(
-                    "Sylvan Library requires an exact decision for each "
-                    "selected card"
-                )
-            life_cards = [
-                ref
-                for ref, value in decisions.items()
-                if value == "pay_life"
-            ]
-            life_cost = 4 * len(life_cards)
-            if self.state.players[seat].life < life_cost:
-                raise GameRuleError(
-                    "The selected Sylvan Library life payment is not payable"
-                )
-            top_cards = [
-                ref
-                for ref, value in decisions.items()
-                if value == "top"
-            ]
-            top_order = [
-                str(value)
-                for value in response.get("top_order", [])
-            ]
-            if set(top_order) != set(top_cards) or len(top_order) != len(
-                top_cards
-            ):
-                raise GameRuleError(
-                    "Sylvan Library top_order must list each card being "
-                    "returned exactly once"
-                )
-            top_ids: list[str] = []
-            for ref in top_order:
-                card = self._resolve_object(
-                    seat,
-                    ref,
-                    zones={"hand"},
-                    owned_only=True,
-                )
-                self.move_card(
-                    card.object_id,
-                    "library",
-                    position="top",
-                    reason="Sylvan Library",
-                    log=False,
-                )
-                # Assemble the simultaneous ordered return after each move
-                # has crossed the canonical CR 400.7 identity boundary.
-                self.state.players[seat].zones["library"].remove(
-                    card.object_id
-                )
-                top_ids.append(card.object_id)
-            self.state.players[seat].zones["library"].extend(
-                reversed(top_ids)
-            )
-            self.state.players[seat].life -= life_cost
-            self._log(
-                seat,
-                "sylvan_library.settle",
-                (
-                    f"{seat} paid {life_cost} life and returned "
-                    f"{len(top_ids)} card(s) to the top of their library."
-                ),
-                {
-                    "paid_life_for": life_cards,
-                    "life_paid": life_cost,
-                    "top_order": top_order,
-                },
-                visibility=[seat, "analyst"],
-                importance=2,
-                changed_objects=top_ids,
-                changed_players=[seat],
-            )
-        elif op == "springheart_landfall":
-            pay = bool(response.get("pay", False))
-            if pay:
-                requirements = self._mana_vector(
-                    effect.get("_requirements") or {}
-                )
-                if not self._cost_is_affordable(seat, requirements):
-                    raise GameRuleError(
-                        "Springheart Nantuko's payment is no longer payable"
-                    )
-                source = self._resolve_object(
-                    seat,
-                    str(effect.get("_source_ref") or ""),
-                    zones={"battlefield"},
-                    controlled_only=True,
-                )
-                attached = self._resolve_object(
-                    seat,
-                    str(effect.get("_attached_ref") or ""),
-                    zones={"battlefield"},
-                    controlled_only=True,
-                )
-                if source.attached_to != attached.object_id:
-                    raise GameRuleError(
-                        "Springheart Nantuko is no longer attached to "
-                        "that creature"
-                    )
-                self._pay_for_cost(
-                    seat,
-                    requirements,
-                    {"pay": "auto"},
-                )
-                self.create_token(
-                    seat,
-                    name="",
-                    copy_of=attached.ref,
-                    reason=item.label,
-                )
-            else:
-                self.create_token(
-                    seat,
-                    name="Insect",
-                    characteristics={
-                        "type_line": "Token Creature — Insect",
-                        "colors": ["G"],
-                        "power": "1",
-                        "toughness": "1",
-                    },
-                    reason=item.label,
-                )
-        elif op == "proliferate":
-            selected = [
-                str(value)
-                for value in response.get(
-                    "objects", response.get("choices", [])
-                )
-            ]
-            legal = set(
-                decision.payload_by_actor.get(seat, {}).get(
-                    "options", []
-                )
-            )
-            if (
-                len(selected) != len(set(selected))
-                or any(value not in legal for value in selected)
-            ):
-                raise GameRuleError(
-                    "Proliferate choices must be distinct eligible objects"
-                )
-            changed_objects: list[str] = []
-            changed_players: list[str] = []
-            for value in selected:
-                if value in self.state.players:
-                    player = self.state.players[value]
-                    if player.poison > 0:
-                        player.poison += 1
-                    if player.energy > 0:
-                        player.energy += 1
-                    changed_players.append(value)
-                    continue
-                card = self._resolve_object(
-                    seat, value, zones={"battlefield"}
-                )
-                for name, amount in list(card.counters.items()):
-                    if amount > 0:
-                        card.counters[name] = amount + 1
-                changed_objects.append(card.object_id)
-            self._log(
-                seat,
-                "counter.proliferate",
-                f"{seat} proliferated {len(selected)} object(s).",
-                {"objects": selected},
-                importance=2,
-                changed_objects=changed_objects,
-                changed_players=changed_players,
-            )
-        elif op == "draw_optional_land":
-            selected = response.get("card")
-            options = set(
-                decision.payload_by_actor.get(seat, {}).get("options") or []
-            )
-            if selected is not None:
-                if str(selected) not in options:
-                    raise GameRuleError("Selected land is not a legal option")
-                card = self._resolve_object(
-                    seat, str(selected), zones={"hand"}, owned_only=True
-                )
-                self.move_card(
-                    card.object_id,
-                    "battlefield",
-                    controller=seat,
-                    tapped=True,
-                    reason=item.label,
-                    semantic_events=True,
-                )
-        elif op == "choose_warform":
-            selected = str(response.get("card") or "")
-            options = set(
-                decision.payload_by_actor.get(seat, {}).get("options") or []
-            )
-            if selected not in options:
-                raise GameRuleError("Selected artifact is not a legal Warform target")
-            self._create_mishra_warform(
-                seat,
-                selected,
-                reason=item.label,
-            )
-        if item not in self.state.stack:
-            return
-        remaining = [dict(value) for value in continuation.get("remaining", [])]
-        if choice_effects:
-            remaining = [*choice_effects, *remaining]
-        if op == "draw_optional_land" and effect.get("_repeat"):
-            repeated = dict(effect)
-            repeated.pop("_repeat", None)
-            repeated.pop("repeat_if_land_count", None)
-            remaining.insert(0, repeated)
-        self._continue_resolution(
-            stack_ref=stack_ref,
-            effects=remaining,
-            destination=continuation.get("destination"),
-            note=str(continuation.get("note") or ""),
-            instruction_pointer=int(frame.get("instruction_pointer", 0)) + 1,
-        )
-
-    def _controlled_subtype_refs(
-        self,
-        seat: str,
-        subtype: str,
-        *,
-        required_type: str | None = None,
-    ) -> list[str]:
-        wanted = subtype.casefold()
-        wanted_type = (
-            required_type.casefold() if required_type is not None else None
-        )
-        matching: list[str] = []
-        for object_id in self.state.players[seat].zones["battlefield"]:
-            card = self.state.cards[object_id]
-            if card.controller != seat or card.phased_out:
-                continue
-            types, subtypes, _ = self._type_parts(
-                str(self._effective_card_data(card).get("type_line") or "")
-            )
-            if wanted in subtypes and (
-                wanted_type is None or wanted_type in types
-            ):
-                matching.append(card.ref)
-        return matching
-
+        self._complete_registered_semantic_choice(decision)
     def _apply_amass(
         self,
         seat: str,
@@ -15840,25 +14615,24 @@ class CommanderEngine:
             raise GameRuleError("Amass requires an Army creature")
         normalized_subtype = subtype.strip().title()
         if normalized_subtype.casefold() not in subtypes:
-            self.apply_effect(
-                {
-                    "op": "add_subtype",
-                    "card": army.ref,
-                    "subtype": normalized_subtype,
-                    "reason": reason,
-                },
-                actor=seat,
+            self.add_subtype_intent(
+                AddSubtypeIntent(
+                    actor=seat,
+                    object_ref=army.ref,
+                    subtype=normalized_subtype,
+                    reason=reason,
+                )
             )
         if amount:
-            self.apply_effect(
-                {
-                    "op": "add_counter_selected",
-                    "cards": [army.ref],
-                    "counter": "+1/+1",
-                    "amount": amount,
-                    "reason": reason,
-                },
-                actor=seat,
+            self.place_counters_intent(
+                PlaceCountersIntent(
+                    actor=seat,
+                    object_refs=(army.ref,),
+                    counter_name="+1/+1",
+                    amount=amount,
+                    reason=reason,
+                    source_ref=None,
+                )
             )
         self._log(
             seat,

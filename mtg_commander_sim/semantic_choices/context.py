@@ -25,6 +25,7 @@ class ChoiceObjectView:
     tapped: bool = False
     phased_out: bool = False
     known_to_actor: bool = True
+    attached_to_ref: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.counters, FrozenMap):
@@ -123,6 +124,13 @@ class SemanticChoiceQuery(
 
     def canonical_card_name(self, submitted: str) -> str | None: ...
 
+    def drawn_this_turn(self, seat: str) -> tuple[str, ...]: ...
+
+    def choice_candidate_refs(self) -> tuple[str, ...]: ...
+
+    @property
+    def turn_sequence(self) -> int: ...
+
 
 @dataclass(frozen=True, slots=True)
 class SnapshotSemanticChoiceQuery:
@@ -140,6 +148,9 @@ class SnapshotSemanticChoiceQuery:
     canonical_names: FrozenMap = field(default_factory=FrozenMap)
     target_schemas: FrozenMap = field(default_factory=FrozenMap)
     validated_targets: FrozenMap = field(default_factory=FrozenMap)
+    drawn_this_turn_by_seat: FrozenMap = field(default_factory=FrozenMap)
+    materialized_choice_candidates: tuple[str, ...] = ()
+    current_turn_sequence: int = 0
 
     def __post_init__(self) -> None:
         for field_name in (
@@ -150,6 +161,7 @@ class SnapshotSemanticChoiceQuery:
             "canonical_names",
             "target_schemas",
             "validated_targets",
+            "drawn_this_turn_by_seat",
         ):
             value = getattr(self, field_name)
             if not isinstance(value, FrozenMap):
@@ -244,6 +256,7 @@ class SnapshotSemanticChoiceQuery:
         body = ",".join(
             f"{key}:{int(requirements[key])}"
             for key in sorted(requirements)
+            if int(requirements[key])
         )
         return f"{seat}|{body}"
 
@@ -272,6 +285,19 @@ class SnapshotSemanticChoiceQuery:
     def canonical_card_name(self, submitted: str) -> str | None:
         value = self.canonical_names.get(submitted.casefold())
         return str(value) if value is not None else None
+
+    def drawn_this_turn(self, seat: str) -> tuple[str, ...]:
+        return tuple(
+            str(value)
+            for value in self.drawn_this_turn_by_seat.get(seat, ())
+        )
+
+    def choice_candidate_refs(self) -> tuple[str, ...]:
+        return self.materialized_choice_candidates
+
+    @property
+    def turn_sequence(self) -> int:
+        return self.current_turn_sequence
 
 
 @dataclass(frozen=True, slots=True)
