@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 122.1d — Stun Counter Untap Replacement",
+  "cases": [
+    {
+      "rule_id": "122.1d",
+      "rule_text_sha256": "4824fd84ba132e0663a611288eae06a88707b00a4139d8533eca5b9494c6cc93",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "CommanderEngine._untap_permanent",
+        "UntapPermanentHandler",
+        "UntapAllCreaturesHandler"
+      ],
+      "executable_test_ids": [
+        "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_stun_counter_replaces_typed_untap_without_false_event",
+        "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_untap_all_creatures_uses_effective_types_and_canonical_state_path",
+        "tests.test_untap_step_rules.UntapStepRuleTests.test_stun_and_next_untap_restrictions_precede_the_untap_batch"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "blockers": [
+        "complete_replacement_effect_discovery_ordering_and_replay_choices_not_implemented"
+      ],
+      "notes": [
+        "The represented mandatory stun replacement removes exactly one counter and leaves the permanent tapped without emitting a false untap event in one-shot, aggregate, and untap-step paths. Universal replacement discovery and ordering remain blocked."
+      ]
+    }
+  ]
+}

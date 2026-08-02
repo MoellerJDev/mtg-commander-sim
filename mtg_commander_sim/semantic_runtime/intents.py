@@ -18,7 +18,26 @@ class BecomeMonarchIntent:
     reason: str
 
 
-SemanticIntent: TypeAlias = DrawCardsIntent | BecomeMonarchIntent
+@dataclass(frozen=True, slots=True)
+class SetPermanentTappedIntent:
+    object_ref: str
+    actor: str
+    tapped: bool
+    reason: str
+
+
+@dataclass(frozen=True, slots=True)
+class UntapAllCreaturesIntent:
+    actor: str
+    reason: str
+
+
+SemanticIntent: TypeAlias = (
+    DrawCardsIntent
+    | BecomeMonarchIntent
+    | SetPermanentTappedIntent
+    | UntapAllCreaturesIntent
+)
 ResultShape: TypeAlias = Literal["single", "by_player"]
 
 

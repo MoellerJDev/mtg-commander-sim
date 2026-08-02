@@ -2,7 +2,7 @@
 title: "Codex project instructions"
 status: "current"
 authoritative_source: "repository contribution and architecture policy"
-verified: "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
+verified: "2026-08-01"
 audience: "Codex agents and contributors"
 maintenance: "hand-maintained"
 ---
@@ -48,6 +48,14 @@ maintenance: "hand-maintained"
   start `python -m server` with `--no-open`, keep Vite `open: false`, and keep
   HTML reporters configured with `open: "never"`. Only launch a visible browser
   when the user explicitly asks for an interactive/manual browser session.
+- Agent-driven server or UI checks must not run bare `python -m server`, invoke
+  `webbrowser`, use an OS browser-launch command, or navigate/focus the Codex
+  in-app browser. A listener such as `127.0.0.1:18080` is test infrastructure,
+  not permission to open a visible tab. Use `python -m server --no-open` and
+  headless Playwright, then stop any server process started for the check. This
+  restriction applies even when a visible browser is already open for unrelated
+  user work; explicit user authorization is required for every visible-browser
+  session.
 
 ## Current architecture program
 
@@ -56,18 +64,20 @@ to domain-owned rules modules. Follow the ordered phases recorded in the active
 project objective; do not use a feature request as permission for a big-bang
 rewrite.
 
-- The post-PR-58 reconciliation records the exact integrated baseline and
-  corrects stale phase guidance. Broad new card-family expansion remains
-  paused.
-- The next focused branch is `feat/runtime-trust-hardening`. It must add
-  explicit capability evidence and implementation-mutation status,
-  CardProgram trust basis and closure layers, strict handler/component
-  capability binding, compatibility provenance, continuous-effect performance
-  evidence, and default-deny architecture governance.
-- Do not add a new card family, resume numerical Comprehensive Rules traversal,
-  or widen the Oracle grammar during trust hardening.
-- Only after trust hardening merges should the next measured debt-migration
-  family be selected from a fresh `main` branch.
+- Phase 1 runtime trust/default-deny governance is integrated on certified
+  `main` through PR #60. Its explicit evidence, trust/closure, component
+  binding, performance, and architecture ratchets are current policy.
+- The active focused branch is `feat/typed-tap-untap-effects`. It migrates only
+  `tap`, `untap`, and `untap_all_creatures` through a dedicated typed semantic
+  family and the classified `tap_state.py` mutation port, with a negative
+  engine delta and exact rollback/replay/mutation evidence.
+- Keep those capabilities tested and blocked until complete tap/untap
+  prohibitions, general replacement ordering, and effective-characteristic
+  closure are represented. Do not widen this slice into broad Oracle grammar,
+  a new card family, or numerical Comprehensive Rules traversal.
+- After the exact feature head passes the complete local gate and public CI,
+  merge normally, clean the branch, return to fresh certified `main`, and
+  select the next measured debt-migration family.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic

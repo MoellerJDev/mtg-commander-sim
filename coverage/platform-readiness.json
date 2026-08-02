@@ -1,5 +1,6 @@
 {
   "blockers": [
+    "typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, replacement ordering beyond represented stun counters, and complete effective-characteristic closure",
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
     "the continuous-effect baseline gates structural scan counts but records latency observationally; broader action, combat, copy, control-change, phasing, and invalidation performance scenarios remain incomplete",
@@ -16,8 +17,8 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "phase_1_runtime_trust_hardening",
-    "commit_reference": "The current feat/runtime-trust-hardening branch head containing this ledger, rooted at certified main b1ecdc0f3446a37ffe31bfca1237a079691e6b22; exact-head certification is recorded by the linked pull request and CI run",
+    "active_phase": "phase_2_typed_tap_untap_effect_migration",
+    "commit_reference": "focused feature branch based on certified PR #60 merge e756950d52030b47a6cf81edcd7d7f60ca11d97e; exact-head certification pending",
     "tags": [
       {
         "commit": "4dc3feb625f824b9062e162808fd74b07e97c404",
@@ -43,6 +44,12 @@
       "status": "development_local_runtime_hardened"
     },
     {
+      "evidence": "The focused Phase 2 branch registers tap, untap, and all-creature untap as strict typed semantic operations, commits them through a classified tap-state mutation port, removes their legacy apply_effect branches, preserves stun replacement and effective-type/phasing behavior, and supplies rollback, replay, implementation-mutation, malformed-input, and source-linked evidence. The three capabilities remain tested and blocked rather than trusted because broader prohibitions, replacement ordering, and characteristic closure remain incomplete.",
+      "id": "phase_2_tap_state_migration",
+      "name": "Typed tap-state effect migration",
+      "status": "implementation_complete_certification_pending"
+    },
+    {
       "evidence": "The versioned 2026-06-19 corpus and reviewed CR 400-408, CR 500-514, focused CR 725, and focused CR 508-509/608 current-turn history slices are represented. Broader rules and Oracle completeness remain explicitly unclaimed.",
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
@@ -55,7 +62,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Certify and merge feat/runtime-trust-hardening, refresh post-merge status on main, then score and select one coherent Phase 2 debt migration that removes a measured legacy branch, operation, write responsibility, or central semantic family.",
+  "next_task": "Commit the coherent typed tap-state slice, run the complete exact-head local merge gate headlessly, require public CI for the same SHA, merge and clean the branch, then select the next measured migration from fresh certified main.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -66,7 +73,7 @@
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions",
     "authoritative_kernel": "implemented_partial",
     "browser_client": "implemented_card_inspector_public_zone_browser_resilient_card_scoped_click_drag_saved_manual_auto_mana_saved_auto_pass_full_control_tapped_orientation_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause",
-    "capability_evidence": "implemented_registry_v5_explicit_generated_test_rule_profile_evidence_index_with_separate_dependency_and_implementation_mutation_status",
+    "capability_evidence": "implemented_registry_v6_explicit_generated_test_rule_profile_evidence_index_with_separate_dependency_and_implementation_mutation_status",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "durable_database": "implemented_sqlite_control_plane_plus_game_record_v3",
@@ -76,7 +83,7 @@
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "security": "guest_hash_csrf_origin_capability_and_projection_baseline",
-    "semantic_handlers": "implemented_registered_read_only_typed_intent_boundary_with_exact_family_rule_capability_metadata_and_strict_binding_plus_two_bounded_runtime_component_registries",
+    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_with_family_modules_strict_binding_and_focused_tap_state_mutation_port_plus_two_bounded_runtime_component_registries",
     "single_writer_game_actor": "implemented_single_process",
     "transport_neutral_service": "implemented_strict_protocol_3"
   },
@@ -101,7 +108,8 @@
     "mechanics": {
       "status_counts": {
         "partial": 58,
-        "unclassified": 367
+        "tested": 1,
+        "unclassified": 366
       },
       "total": 425,
       "trusted": 0
@@ -116,11 +124,11 @@
       "total": 38484
     },
     "rules": {
-      "blocked": 362,
-      "definition_only": 82,
+      "blocked": 365,
+      "definition_only": 83,
       "passing": 125,
       "total": 3300,
-      "unreviewed": 2731
+      "unreviewed": 2727
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -145,19 +153,19 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4207,
+    "deterministic_cases_discovered": 4217,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
     "web_files": 24
   },
   "validation": {
-    "baseline_commit": "b1ecdc0f3446a37ffe31bfca1237a079691e6b22",
+    "baseline_commit": "e756950d52030b47a6cf81edcd7d7f60ca11d97e",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30725523797,
+      "run_id": 30729318546,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30725523797"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30729318546"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -166,7 +174,7 @@
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "deterministic_tests": "pass_full_exact_commit_gate",
-      "focused_rules_tests": "pass_current_turn_history_declaration_casting_zone_change_state_action_combat_damage_record_identity_turn_structure_oracle_resolution_and_exact_replay_tests_current_branch",
+      "focused_rules_tests": "pass_typed_tap_state_lowering_validation_stun_effective_type_phasing_rollback_replay_mutation_capability_binding_plus_adjacent_rules_tests_current_branch",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",

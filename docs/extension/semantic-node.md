@@ -20,11 +20,13 @@ runtime contract. A node is not trusted merely because parsing succeeds.
 - Lower exact positive grammar and retain unknown suffixes as residuals.
 - Reject malformed or ambiguous variants; do not broaden via substring guesses.
 - Define a stable typed handler with an immutable query, typed intent, and
-  explicit capability dependencies; never import engine/state authority.
+  explicit capability dependencies; place family logic in its family module
+  and never import engine/state authority.
 - Execute intents through canonical mutation methods with transactional
   validation and remove the migrated legacy-dispatch branch.
-- Add compiler positive/negative tests and runtime legal/illegal, rollback,
-  replay, projection, and interaction tests.
+- Add compiler positive/negative tests and runtime legal/illegal, malformed
+  schema, rollback, replay, projection, interaction, and implementation
+  mutation tests.
 - Update capability dependencies and generated coverage artifacts.
 
 New operations cannot be registered casually: the architecture baseline
@@ -32,4 +34,6 @@ ratchets the operation vocabulary. A new compiler stage, schema version, or
 custom runtime extension interface requires an ADR.
 
 See the [typed semantic handler architecture](../architecture/semantic-handlers.md)
-for the migration sequence and current operation inventory.
+for the migration sequence and current operation inventory. The tap-state
+family and its focused mutation port are the bounded example recorded in
+[ADR 0009](../adr/0009-typed-tap-state-mutation-owner.md).

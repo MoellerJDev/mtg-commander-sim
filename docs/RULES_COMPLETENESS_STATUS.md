@@ -40,9 +40,11 @@ server, provider, and pilot success never promote rules fidelity by themselves.
   incarnations, the stack, mana and costs, targets and choices, state-based
   actions, combat, Commander state, and selected continuous, replacement,
   prevention, trigger, and copy behavior.
-- Typed helpers exist for several rules families. The registered,
-  read-only semantic-handler boundary for the first generic operations, but
-  most orchestration and mutation remain centralized in `CommanderEngine`.
+- Typed helpers exist for several rules families. Six registered semantic
+  handlers cover draw, table-wide draw, monarch, and three bounded tap-state
+  operations. Their handlers are read-only; tap-state intent commit is owned by
+  a focused rules module. Most other orchestration and mutation remains
+  centralized in `CommanderEngine`.
 - Reviewed semantic packs close selected card and interaction slices through
   an explicit `legacy_reviewed` compatibility basis. They are not
   capability-closed evidence or universal Oracle support.
@@ -67,7 +69,7 @@ The principal architectural and behavioral gaps include:
 
 ## Current migration rule
 
-Runtime trust and governance hardening now supplies generated explicit
+Integrated runtime trust and governance hardening supplies generated explicit
 capability evidence, separate dependency and implementation-mutation status,
 CardProgram trust bases, intrinsic/format/match/dynamic closure, strict
 handler/component binding, compatibility provenance, default-deny module and
@@ -76,11 +78,20 @@ benchmark. Fixed additional-token replacements and fixed subtype anthems remain
 bounded promises; neither general CR 616 ordering nor complete CR 613
 dependencies are implied.
 
+The measured Phase 2 migration routes `tap`, `untap`, and
+`untap_all_creatures` through strict typed nodes and intents and a focused
+tap-state mutation port. It removes their legacy `apply_effect` branches,
+preserves stun-counter replacement, uses effective creature types, skips
+phased-out permanents, and emits events only for actual state changes. The
+three capabilities remain tested and blocked rather than trusted because
+complete tap/untap prohibitions, general replacement ordering, and complete
+derived-characteristic closure are not yet represented.
+
 The complete traditional/Commander format-capability inventory is still
 absent, so capability-only strict match creation fails closed while reviewed
-declared-pool compatibility remains available. After this hardening merges,
-the next slice is selected from measured central debt and must remove or migrate
-one coherent reusable responsibility before broad corpus expansion resumes.
+declared-pool compatibility remains available. Each later slice must continue
+to remove or migrate one coherent reusable responsibility before broad corpus
+expansion resumes.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,

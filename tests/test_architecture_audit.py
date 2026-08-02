@@ -48,9 +48,16 @@ class ArchitectureAuditTests(unittest.TestCase):
             len(architecture["direct_game_state_write_heuristic"]["locations"]),
         )
         handlers = architecture["semantic_handlers"]
-        self.assertEqual(3, handlers["registered_handler_count"])
+        self.assertEqual(6, handlers["registered_handler_count"])
         self.assertEqual(
-            ["become_monarch", "draw", "draw_each_player"],
+            [
+                "become_monarch",
+                "draw",
+                "draw_each_player",
+                "tap",
+                "untap",
+                "untap_all_creatures",
+            ],
             handlers["registered_operations"],
         )
         self.assertEqual(

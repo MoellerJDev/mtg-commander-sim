@@ -35,9 +35,17 @@ from .intents import (
     BecomeMonarchIntent,
     DrawCardsIntent,
     IntentPlan,
+    SetPermanentTappedIntent,
+    UntapAllCreaturesIntent,
 )
 from .interpreter import SemanticInterpreter
-from .nodes import BecomeMonarchNode, DrawEachPlayerNode, DrawNode
+from .nodes import (
+    BecomeMonarchNode,
+    DrawEachPlayerNode,
+    DrawNode,
+    SetPermanentTappedNode,
+    UntapAllCreaturesNode,
+)
 from .registry import (
     SemanticHandlerRegistry,
     SemanticHandlerRegistryError,
@@ -51,11 +59,14 @@ from .token_replacements import (
     TokenDefinition,
     default_token_creation_replacement_registry,
 )
+from .tap_state_handlers import TAP_STATE_HANDLERS
 
 
 @lru_cache(maxsize=1)
 def default_semantic_handler_registry() -> SemanticHandlerRegistry:
-    registry = SemanticHandlerRegistry(GENERIC_HANDLERS)
+    registry = SemanticHandlerRegistry(
+        (*GENERIC_HANDLERS, *TAP_STATE_HANDLERS)
+    )
     capabilities = load_default_capability_registry()
     missing = sorted(
         dependency
@@ -94,6 +105,8 @@ __all__ = [
     "IntentPlan",
     "ReadOnlyHandlerContext",
     "ReadOnlyRulesQuery",
+    "SetPermanentTappedIntent",
+    "SetPermanentTappedNode",
     "SemanticHandlerRegistry",
     "SemanticHandlerRegistryError",
     "SemanticIntentSink",
@@ -103,6 +116,8 @@ __all__ = [
     "TokenCreationReplacementContext",
     "TokenCreationReplacementRegistry",
     "TokenDefinition",
+    "UntapAllCreaturesIntent",
+    "UntapAllCreaturesNode",
     "default_token_creation_replacement_registry",
     "default_continuous_effect_component_registry",
     "default_semantic_handler_registry",

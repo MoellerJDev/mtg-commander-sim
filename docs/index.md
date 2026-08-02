@@ -50,6 +50,7 @@ indexed here but excluded from documentation front-matter validation.
 - [ADR 0006 — typed semantic handler boundary](adr/0006-typed-semantic-handler-boundary.md)
 - [ADR 0007 — CardProgram runtime components](adr/0007-cardprogram-runtime-components.md)
 - [ADR 0008 — runtime trust and default-deny governance](adr/0008-runtime-trust-and-governance-hardening.md)
+- [ADR 0009 — typed tap-state mutation owner](adr/0009-typed-tap-state-mutation-owner.md)
 - [Legacy consolidated architecture reference](../ARCHITECTURE.md)
 - [Client integration boundary](../CLIENT_INTEGRATION.md)
 - [Game Record v3](../GAME_RECORD.md)

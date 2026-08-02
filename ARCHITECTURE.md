@@ -123,6 +123,15 @@ semantic hash, and exact fingerprint. Runtime still consumes a derived
 Game Record v3 records pin CardProgram fingerprints without changing the record
 version.
 
+The frozen semantic-handler inventory currently owns draw, table-wide draw,
+monarch, single-permanent tap/untap, and all-creature untap. Tap-state handlers
+lower from immutable context into typed intents; `tap_state.py` is the focused
+rules-layer mutation owner behind the executor. It preserves the existing
+stun-counter replacement path, effective creature characteristics, phased-out
+exclusion, transaction rollback, and exact replay. These capabilities remain
+tested and explicitly blocked on broader replacement, prohibition, and layer
+closure; the inventory is not a complete tap/untap rules claim.
+
 Versioned CardProgram runtime component descriptors represent static
 participation in later events without printed-name dispatch in the engine.
 Registered families lower reviewed fixed additional-token replacements to
@@ -467,7 +476,12 @@ This development path never counts as a production rule decision, conformance
 evidence, or release evidence. Under `semantic_policy=trusted_only`, the engine
 fails closed before an unsupported material behavior can mutate state.
 
-Generic operations include draw, move, sacrifice, destroy, exile, bounce, discard, tap/untap, damage, counter, search, mill, token creation, copy, attachment, control change, delayed trigger scheduling, and player choice delegation.
+Generic operations include draw, move, sacrifice, destroy, exile, bounce,
+discard, tap/untap, damage, counter, search, mill, token creation, copy,
+attachment, control change, delayed trigger scheduling, and player choice
+delegation. Only the six operations in the generated semantic-handler inventory
+have completed the typed migration; the others remain measured compatibility
+operations until migrated.
 
 Runtime placeholders such as `$controller`, `$source`, `$stack`, and `$target.0` prevent semantics from hard-coding physical game object IDs.
 

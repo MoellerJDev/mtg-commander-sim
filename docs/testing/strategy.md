@@ -28,6 +28,13 @@ proportion to risk.
 7. Generated CR/Oracle coverage records source linkage, review state, and
    residuals; it is not executable evidence by itself.
 
+Capability evidence is an explicit generated relationship, not an inferred
+test-name match. A migrated semantic family supplies positive and negative
+behavior, malformed-input rollback, exact replay, and implementation-mutation
+evidence. The tap-state family additionally characterizes CR 122.1d stun
+replacement, effective creature types, phased-out objects, and no-op event
+suppression while retaining honest blockers for the broader systems.
+
 During iteration, run the new/focused tests and adjacent impacted modules.
 Before merge, commit an immutable head, run `scripts/local_merge_gate.py` for
 that exact branch/SHA, and require the public CI matrix for the same SHA. The

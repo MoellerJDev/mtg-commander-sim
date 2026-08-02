@@ -4,8 +4,16 @@ from dataclasses import dataclass
 from typing import Any, Mapping
 
 from .context import ReadOnlyHandlerContext, SemanticNodeError
-from .intents import BecomeMonarchIntent, DrawCardsIntent, IntentPlan
-from .nodes import BecomeMonarchNode, DrawEachPlayerNode, DrawNode
+from .intents import (
+    BecomeMonarchIntent,
+    DrawCardsIntent,
+    IntentPlan,
+)
+from .nodes import (
+    BecomeMonarchNode,
+    DrawEachPlayerNode,
+    DrawNode,
+)
 
 
 def _count(effect: Mapping[str, Any]) -> int:

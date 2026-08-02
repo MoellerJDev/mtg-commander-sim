@@ -38,6 +38,10 @@ query context, typed intents, deterministic registry, and canonical intent
 executor. Its scoped architecture policy additionally forbids imports of the
 engine, state model, record, or projection modules. The engine may call inward
 to this pure boundary; handlers cannot call outward to authoritative state.
+The executor may route a typed intent to a classified rules-layer mutation
+port. `mtg_commander_sim/tap_state.py` is such a port: it depends on a narrow
+structural host protocol, not the engine class, and is the only new mutable
+owner authorized by [ADR 0009](../adr/0009-typed-tap-state-mutation-owner.md).
 
 Every production Python module has one generated exact classification covering
 layer, owner, allowed dependency layers, GameState access, specificity,
