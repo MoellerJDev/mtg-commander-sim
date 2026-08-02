@@ -194,6 +194,7 @@ fixture:
 python scripts/build_test_database.py build \
   --fixture tests/fixtures/scryfall-exact-lists.json \
   --fixture tests/fixtures/browser-lifecycle-cards.json \
+  --fixture tests/fixtures/damage-result-cards.json \
   --output data/test-ci.sqlite3
 MTG_CARD_DB=data/test-ci.sqlite3 \
   python -m unittest discover -s tests -p "test_*.py" -v
@@ -202,7 +203,8 @@ MTG_CARD_DB=data/test-ci.sqlite3 \
 In PowerShell, set the variable with
 `$env:MTG_CARD_DB = "data/test-ci.sqlite3"` before running the tests. The
 compact fixtures cover the bundled Zimone and Dina and Mishra, Eminent One
-lists plus one vanilla commander used only for deterministic combat/lifecycle
+lists, the CR 120 damage-result witnesses, plus one vanilla commander used
+only for deterministic combat/lifecycle
 testing; they are not a substitute for the complete Oracle corpus or matchup
 evidence.
 
@@ -788,13 +790,18 @@ branch. The fixed subtype anthem remains a layer-7c modifier whose applicability
 is evaluated after earlier layers. Effect-generated permanent counters now use
 a focused transactional owner with a fixed quantity-replacement component.
 Represented combat, semantic, and mana-result damage use one typed transaction
-with fixed quantity replacement and fixed prevention components. These are
-bounded witnesses: persistent prevention shields, redirection, non-damage
-transformations, damage-result replacement, infect/wither/toxic outcomes,
-universal draw/entry replacement participation, broad CR 614/615/616 closure,
-layer dependencies, and state-derived modifiers remain unsupported.
+with fixed quantity replacement and fixed prevention components. Final dealt
+components now become immutable affected-subject result trees before atomic
+mutation. Generic effective-keyword dispatch covers represented Infect,
+Wither, Lifelink, and fixed Toxic outcomes; bounded source-pinned handlers
+cover fixed life-gain multiplication and a whole-result life floor. Persistent
+prevention shields, redirection, non-damage transformations, dynamic Toxic,
+unrepresented ability grants/source LKI, remaining result-replacement
+families, universal draw/entry replacement participation, broad CR
+614/615/616 closure, layer dependencies, and state-derived modifiers remain
+unsupported.
 
-Runtime trust and governance are now explicit. Capability registry v8 consumes
+Runtime trust and governance are now explicit. Capability registry v9 consumes
 a generated evidence index whose fully qualified tests, rules, profiles, and
 evidence classes are validated in CI. Dependency fail-closed status and killed
 implementation mutation status are separate. CardPrograms report one trust
@@ -806,9 +813,9 @@ dependencies and exact registry/evidence fingerprints.
 The complete Commander format-capability inventory is not yet present, so
 capability-only strict match readiness fails closed while reviewed declared-pool
 compatibility remains available. The dependency scheduler is integrated; the
-counter-placement boundary is on certified `main`, and the active batch is the
-bounded damage replacement/prevention transaction. Broad rules or Oracle
-expansion does not bypass these typed boundaries.
+damage-result boundary is the active branch, and the next dependency-ready
+batch is the bounded CR 210.1 Battle defense-characteristic/entry family.
+Broad rules or Oracle expansion does not bypass these typed boundaries.
 
 This is still not a completeness declaration. Current exact, partial,
 unresolved, and material-residual figures are generated in
@@ -1109,7 +1116,9 @@ container isolation when filesystem-level isolation must also be proven.
 - `mtg_commander_sim/counter_placement.py` — represented permanent-counter
   proposal, replacement, and commit owner
 - `mtg_commander_sim/damage.py` — represented damage proposal,
-  replacement/prevention, atomic result, and final-event owner
+  quantity replacement/prevention coordinator and final-event publisher
+- `mtg_commander_sim/damage_results.py` — immutable CR 120.3 result trees,
+  replacement preparation, commit planning, and atomic result mutation
 - `mtg_commander_sim/record.py` — Game Record v3 hashing, journals, migration, inspection, and replay
 - `mtg_commander_sim/report.py` — derived review and fidelity classification
 - `mtg_commander_sim/carddb.py` — local Oracle/rulings database

@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "12d55cede8e02e05f6f298a77a788d898e89e784",
+  "baseline_commit": "b29cc7ce3b048b94eb6483b10bbbc3e7f9364f16",
   "card_named_helpers": [
     {
       "file": "mtg_commander_sim/engine.py",
@@ -2607,9 +2607,9 @@
     "physical_lines": 23482
   },
   "exception_binding": {
-    "adr": "docs/adr/0012-damage-transaction-and-static-prevention.md",
-    "allowance_fingerprint": "ca225cb512e4cd4257e7407a1762ff3bcf9f044d060cf57e93a99c807ea34c96",
-    "exception_id": "ARCH-EXC-0001"
+    "adr": "docs/adr/0013-damage-result-event-ownership.md",
+    "allowance_fingerprint": "48d8147b49ea695c12ad92c282f5155d389c87669da0ffd721f66287532363e2",
+    "exception_id": "ARCH-EXC-0002"
   },
   "legacy_card_specific_operations": [
     "animate_dead_prepare",
@@ -2633,7 +2633,7 @@
       "column": 30,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 6795,
+      "line": 6796,
       "oracle_id": "883a4180-9ede-4249-a4b8-3a29c998fb63",
       "symbol": "_activated_abilities",
       "value": "883a4180-9ede-4249-a4b8-3a29c998fb63"
@@ -2642,7 +2642,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 6958,
+      "line": 6959,
       "oracle_id": "dae4815e-9025-4993-ab46-52a3f1a7219e",
       "symbol": "_semantic_key_for_ability",
       "value": "dae4815e-9025-4993-ab46-52a3f1a7219e:granted:damage"
@@ -2886,7 +2886,7 @@
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
-      "logical_lines": 539,
+      "logical_lines": 526,
       "symbol": "_effect_template"
     },
     {
@@ -2966,7 +2966,7 @@
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
-      "logical_lines": 1765
+      "logical_lines": 1761
     },
     {
       "file": "mtg_commander_sim/record.py",
@@ -3098,6 +3098,6 @@
   ],
   "schema_version": 2,
   "source_fingerprints": {
-    "printed_name_allowances_sha256": "1a2578dfef4c1d7d6c4757acd40842be20a3e35dca1932455d1d453238e51e0a"
+    "printed_name_allowances_sha256": "f052822d688acd66525601e75429ce6730879f76c5858f0ba2afdab24560edba"
   }
 }

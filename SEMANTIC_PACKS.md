@@ -111,10 +111,14 @@ not dispatch the event.
 
 Represented damage triggers remain pending while post-damage state-based
 actions run. Any represented triggers discovered by those actions merge into
-the same unstarted APNAP/controller-order batch before priority. This is not a
-claim that arbitrary damage Oracle text is compiled: noncombat damage, the
-complete CR 120.4 replacement/prevention/result sequence, excess damage, and
-trigger-on-trigger placement remain explicit untrusted dependencies.
+the same unstarted APNAP/controller-order batch before priority. Final dealt
+components become immutable affected-subject result trees; represented Infect,
+Wither, Lifelink, fixed Toxic, fixed life-gain multiplication, and a whole-
+result life floor resolve before one atomic commit. This is not a claim that
+arbitrary damage Oracle text is compiled: persistent prevention shields,
+redirection, dynamic Toxic, unrepresented source LKI/ability grants, remaining
+CR 120.4 result replacements, excess damage, and trigger-on-trigger placement
+remain explicit untrusted dependencies.
 
 ## Typed tap-state execution
 
@@ -148,11 +152,16 @@ through Game Record v3.
 The current zone witness is Dauthi Voidwalker, loaded from reviewed semantic
 data with exact Oracle/rulings fingerprints. Historical complete snapshots that
 predate the descriptor may use the validated pinned compatibility component;
-current snapshots pin the descriptor directly. This does not establish
-universal replacement/prevention coverage. In particular, fixed counter
-intents still await the counter-placement replacement boundary, and optional,
-quantity-changing, prohibition, damage, draw, and entry families remain
-blocked.
+current snapshots pin the descriptor directly. Effect-generated permanent
+counters use the shared counter-placement boundary. Damage uses fixed quantity
+and prevention descriptors before the result tree;
+`replacement.life.gain.multiplier.v1` and
+`replacement.damage.result.life_floor.v1` participate within that result tree.
+Boon Reflection and Worship are source-pinned shape witnesses, not engine
+branches. This does not establish universal replacement/prevention coverage:
+optional, persistent, divisible, redirection, prohibition, draw, entry, and
+remaining life/counter/result families remain blocked unless a separately
+trusted component covers their exact shape.
 
 ## Trust
 

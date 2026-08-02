@@ -6,11 +6,11 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "damage_replacement_prevention_events",
-    "branch": "rules/damage-replacement-prevention-events",
-    "commit_reference": "focused damage replacement/prevention branch based on certified main 12d55cede8e02e05f6f298a77a788d898e89e784; exact-head certification pending",
+    "active_phase": "damage_result_events",
+    "branch": "rules/damage-result-events",
+    "commit_reference": "focused CR 120.3/120.4c damage-result branch based on certified main b29cc7ce3b048b94eb6483b10bbbc3e7f9364f16; exact-head certification pending",
     "branch_ancestry": {
-      "focused_branch_base": "12d55cede8e02e05f6f298a77a788d898e89e784",
+      "focused_branch_base": "b29cc7ce3b048b94eb6483b10bbbc3e7f9364f16",
       "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
@@ -468,6 +468,13 @@
         "number": 65,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/65"
+      },
+      {
+        "base": "main",
+        "head": "rules/damage-replacement-prevention-events",
+        "number": 66,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/66"
       }
     ],
     "tags": [
@@ -540,8 +547,14 @@
     {
       "id": "damage_replacement_prevention_events",
       "name": "Typed damage replacement and prevention transaction",
+      "status": "integrated_on_certified_main",
+      "evidence": "Certified main routes represented combat, semantic, each-opponent, and mana-result damage through one typed proposal/prepare/commit coordinator. Fixed damage quantity replacement and fixed prevention components use affected-player/controller ordering, four-player APNAP traversal, atomic rollback, replayable combat/semantic continuations, and source-pinned Furnace of Rath and Daunting Defender witnesses."
+    },
+    {
+      "id": "damage_result_events",
+      "name": "Typed atomic damage-result event transaction",
       "status": "implementation_complete_certification_pending",
-      "evidence": "The focused branch routes represented combat, semantic, each-opponent, and mana-result damage through one typed proposal/prepare/commit owner. Fixed damage quantity replacement and fixed prevention components use affected-player/controller ordering, four-player APNAP traversal, atomic rollback, replayable combat/semantic continuations, and source-pinned Furnace of Rath and Daunting Defender witnesses. Persistent shields, redirection, result replacement, infect/wither/toxic outcomes, and resumable mana-payment choices remain blocked."
+      "evidence": "The focused branch groups final simultaneous CR 120.3 outcomes by affected subject, applies containing-event replacements before contained life/counter results, validates one mutation-only commit plan, and supports represented Infect, Wither, Lifelink, fixed Toxic, fixed life-gain multiplication, and a whole-result life floor. Tests cover prevention, multitype permanents, four-player source attribution/APNAP, seat-scoped choice privacy, exact command replay, atomic failure, source hashes, and killed implementation mutants. Persistent shields, redirection, dynamic Toxic, unrepresented source LKI/ability grants, remaining result-replacement families, excess selection, and resumable mana-payment choices remain blocked."
     },
     {
       "id": "rules_snapshot",
@@ -567,8 +580,8 @@
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
-    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_six_bounded_runtime_components_with_strict_binding_and_focused_tap_token_counter_and_damage_mutation_ports",
-    "capability_evidence": "implemented_registry_v8_explicit_generated_test_rule_profile_evidence_index_with_separate_dependency_and_implementation_mutation_status",
+    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_eight_bounded_runtime_components_with_strict_binding_and_focused_tap_token_counter_damage_and_damage_result_mutation_ports",
+    "capability_evidence": "implemented_registry_v9_explicit_generated_test_rule_profile_evidence_index_with_separate_dependency_and_implementation_mutation_status",
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "hidden_information": "implemented_projected_protocol",
@@ -605,7 +618,7 @@
       "card_program_census": "full_38484_trusted_741_residual_35494_failed_2249; commander_legal_31623_trusted_359_residual_31263_failed_1; damage_slice_exact_delta_zero"
   },
   "blockers": [
-    "damage replacement/prevention remains bounded to fixed static quantity changes and fixed prevention; persistent shields, redirection, non-damage transformations, result replacement, infect/wither/toxic outcomes, and replacement choices during mana payment remain unimplemented",
+    "damage replacement/prevention remains bounded to represented fixed static quantity changes, fixed prevention, typed result events, Infect, Wither, Lifelink, fixed Toxic, fixed life-gain multiplication, and a whole-result life floor; persistent/divisible shields, redirection, non-damage transformations, dynamic Toxic, unrepresented source LKI/ability grants, remaining result-replacement families, excess selection, and replacement choices during mana payment remain unimplemented",
     "typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, universal replacement participation beyond represented stun and runtime-component events, and complete effective-characteristic closure",
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
@@ -617,5 +630,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Certify and merge the focused damage replacement/prevention slice, clean the branch, then select the next dependency-ready subsystem from fresh certified main."
+  "next_task": "Certify and merge the focused damage-result slice, clean the branch, then begin the generated dependency-ready CR 210.1 Battle defense-characteristic/entry batch from fresh certified main."
 }

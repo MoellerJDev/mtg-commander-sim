@@ -56,6 +56,7 @@ indexed here but excluded from documentation front-matter validation.
 - [ADR 0010 — replacement-event trees and token mutation owner](adr/0010-replacement-event-tree-and-token-owner.md)
 - [ADR 0011 — counter-placement event and mutation owner](adr/0011-counter-placement-event-and-mutation-owner.md)
 - [ADR 0012 — damage transaction and static prevention owner](adr/0012-damage-transaction-and-static-prevention.md)
+- [ADR 0013 — typed damage-result event ownership](adr/0013-damage-result-event-ownership.md)
 - [Legacy consolidated architecture reference](../ARCHITECTURE.md)
 - [Client integration boundary](../CLIENT_INTEGRATION.md)
 - [Game Record v3](../GAME_RECORD.md)

@@ -39,11 +39,15 @@ _BUILTIN_STATIC_KEYWORDS = {
     "haste",
     "hexproof",
     "indestructible",
+    "infect",
+    "lifelink",
     "protection",
     "reach",
     "shadow",
     "shroud",
+    "toxic",
     "vigilance",
+    "wither",
 }
 
 _BUILTIN_MATERIAL_KEYWORDS = {
@@ -77,6 +81,7 @@ _MATERIAL_KEYWORDS = {
     "haste",
     "hexproof",
     "indestructible",
+    "infect",
     "lifelink",
     "menace",
     "populate",
@@ -86,8 +91,10 @@ _MATERIAL_KEYWORDS = {
     "shroud",
     "trample",
     "transform",
+    "toxic",
     "vigilance",
     "ward",
+    "wither",
 }
 
 

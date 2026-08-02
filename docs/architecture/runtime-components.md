@@ -90,14 +90,17 @@ component, timestamp, characteristic, and ruleset changes.
 commit and enter-event dispatch. `replacement_effects.py` and
 `replacement_decisions.py` own immutable event trees and replayable choice
 continuations. `counter_placement.py` owns pre-mutation preparation and final
-commit for represented permanent-counter events. `damage.py` owns represented
-damage snapshots, preparation, atomic result commit, and normalized final
-events. Runtime components remain pure participants.
+commit for represented permanent-counter events. `damage.py` coordinates
+represented damage snapshots, quantity replacement/prevention, and normalized
+final events; `damage_results.py` owns result-event materialization, commit
+planning, and atomic CR 120.3 result mutation. Runtime components remain pure
+participants.
 
 Primary tests are `test_replacement_event_tree.py`,
 `test_token_creation_replacements.py`, `test_graveyard_rules.py`,
 `test_counter_placement_replacements.py`,
 `test_damage_replacement_pipeline.py`,
+`test_damage_result_events.py`,
 `test_continuous_effect_components.py`, `test_card_program_trust.py`, and
 `test_continuous_effect_performance.py`. See the
 [extension guide](../extension/runtime-component.md) and
@@ -106,4 +109,5 @@ Primary tests are `test_replacement_event_tree.py`,
 [ADR 0011](../adr/0011-counter-placement-event-and-mutation-owner.md), and the
 [counter-placement architecture](counter-placement.md), plus
 [ADR 0012](../adr/0012-damage-transaction-and-static-prevention.md) and the
-[damage transaction](damage-transactions.md).
+[damage transaction](damage-transactions.md), plus
+[ADR 0013](../adr/0013-damage-result-event-ownership.md).

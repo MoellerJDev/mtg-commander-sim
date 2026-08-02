@@ -49,6 +49,15 @@ class CombatDamageStepUnitTests(unittest.TestCase):
                 "702.15e",
                 "702.15f",
             },
+            "infect": {
+                "702.90",
+                "702.90a",
+                "702.90b",
+                "702.90c",
+                "702.90d",
+                "702.90e",
+                "702.90f",
+            },
             "trample": {
                 "702.19",
                 "702.19a",
@@ -58,6 +67,19 @@ class CombatDamageStepUnitTests(unittest.TestCase):
                 "702.19e",
                 "702.19f",
                 "702.19g",
+            },
+            "toxic": {
+                "702.164",
+                "702.164a",
+                "702.164b",
+                "702.164c",
+            },
+            "wither": {
+                "702.80",
+                "702.80a",
+                "702.80b",
+                "702.80c",
+                "702.80d",
             },
             "menace": {
                 "702.111",

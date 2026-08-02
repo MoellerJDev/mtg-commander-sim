@@ -705,7 +705,7 @@
       "evidence_class": "interaction",
       "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_battle_creature_applies_both_results",
       "official_rule_ids": [
-        "120.3d"
+        "120.3h"
       ],
       "supported_profiles": [
         "traditional",
@@ -719,7 +719,7 @@
       "evidence_class": "mutation",
       "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_damage_result_dispatch_mutant_is_killed",
       "official_rule_ids": [
-        "120.3d"
+        "120.3h"
       ],
       "supported_profiles": [
         "traditional",
@@ -733,7 +733,7 @@
       "evidence_class": "negative",
       "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_rejects_nondamageable_permanent",
       "official_rule_ids": [
-        "120.3d"
+        "120.3h"
       ],
       "supported_profiles": [
         "traditional",
@@ -747,7 +747,7 @@
       "evidence_class": "positive",
       "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_removes_defense_instead_of_marking_damage",
       "official_rule_ids": [
-        "120.3d"
+        "120.3h"
       ],
       "supported_profiles": [
         "traditional",
@@ -761,7 +761,7 @@
       "evidence_class": "replay",
       "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_and_state_action_replay_exactly",
       "official_rule_ids": [
-        "120.3d"
+        "120.3h"
       ],
       "supported_profiles": [
         "traditional",
@@ -841,11 +841,235 @@
       "applicability_note": "Mark represented positive damage on a creature without destroying it before state-based actions."
     },
     {
+      "capability_id": "damage.result.infect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_infect_and_wither_use_minus_counters_only_on_creatures",
+      "official_rule_ids": [
+        "120.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply infect damage to players and creatures as poison or -1/-1 counters."
+    },
+    {
+      "capability_id": "damage.result.infect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_multitype_permanent_receives_every_applicable_result",
+      "official_rule_ids": [
+        "120.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply infect damage to players and creatures as poison or -1/-1 counters."
+    },
+    {
+      "capability_id": "damage.result.infect",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_four_player_keyword_results_keep_source_attribution",
+      "official_rule_ids": [
+        "120.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply infect damage to players and creatures as poison or -1/-1 counters."
+    },
+    {
+      "capability_id": "damage.result.infect",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_keyword_damage_result_mutants_are_killed",
+      "official_rule_ids": [
+        "120.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply infect damage to players and creatures as poison or -1/-1 counters."
+    },
+    {
+      "capability_id": "damage.result.infect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_prevented_infect_and_toxic_create_no_counter_results",
+      "official_rule_ids": [
+        "120.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply infect damage to players and creatures as poison or -1/-1 counters."
+    },
+    {
+      "capability_id": "damage.result.infect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_infect_player_damage_is_poison_not_life_loss",
+      "official_rule_ids": [
+        "120.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply infect damage to players and creatures as poison or -1/-1 counters."
+    },
+    {
+      "capability_id": "damage.result.infect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_source_pinned_keyword_witnesses_follow_damage_results",
+      "official_rule_ids": [
+        "120.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply infect damage to players and creatures as poison or -1/-1 counters."
+    },
+    {
+      "capability_id": "damage.result.infect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_keyword_damage_results_replay_from_combat_assignment",
+      "official_rule_ids": [
+        "120.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply infect damage to players and creatures as poison or -1/-1 counters."
+    },
+    {
+      "capability_id": "damage.result.lifelink",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_boon_reflection_doubles_lifelink_result",
+      "official_rule_ids": [
+        "120.3f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Gain life for a lifelink source's final dealt damage across every recipient kind."
+    },
+    {
+      "capability_id": "damage.result.lifelink",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_four_player_keyword_results_keep_source_attribution",
+      "official_rule_ids": [
+        "120.3f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Gain life for a lifelink source's final dealt damage across every recipient kind."
+    },
+    {
+      "capability_id": "damage.result.lifelink",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_keyword_damage_result_mutants_are_killed",
+      "official_rule_ids": [
+        "120.3f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Gain life for a lifelink source's final dealt damage across every recipient kind."
+    },
+    {
+      "capability_id": "damage.result.lifelink",
+      "evidence_class": "negative",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_prevented_infect_and_toxic_create_no_counter_results",
+      "official_rule_ids": [
+        "120.3f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Gain life for a lifelink source's final dealt damage across every recipient kind."
+    },
+    {
       "capability_id": "damage.result.lifelink",
       "evidence_class": "positive",
       "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_lifelink_counts_only_damage_not_prevented_by_protection",
       "official_rule_ids": [
-        "120.3g"
+        "120.3f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Gain life for a lifelink source's final dealt damage across every recipient kind."
+    },
+    {
+      "capability_id": "damage.result.lifelink",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_lifelink_gains_final_damage_across_multiple_recipients",
+      "official_rule_ids": [
+        "120.3f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Gain life for a lifelink source's final dealt damage across every recipient kind."
+    },
+    {
+      "capability_id": "damage.result.lifelink",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_source_pinned_keyword_witnesses_follow_damage_results",
+      "official_rule_ids": [
+        "120.3f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Gain life for a lifelink source's final dealt damage across every recipient kind."
+    },
+    {
+      "capability_id": "damage.result.lifelink",
+      "evidence_class": "replay",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_damage_result_replacement_choice_is_private_and_replays",
+      "official_rule_ids": [
+        "120.3f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Gain life for a lifelink source's final dealt damage across every recipient kind."
+    },
+    {
+      "capability_id": "damage.result.lifelink",
+      "evidence_class": "replay",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_keyword_damage_results_replay_from_combat_assignment",
+      "official_rule_ids": [
+        "120.3f"
       ],
       "supported_profiles": [
         "traditional",
@@ -1089,6 +1313,369 @@
       "applicability_note": "Apply represented positive damage to a player as that much life loss."
     },
     {
+      "capability_id": "damage.result.replacement_order",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_containing_result_replacement_precedes_life_gain_replacement",
+      "official_rule_ids": [
+        "120.4c",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Group simultaneous damage outcomes into affected-subject result trees and apply containing-event replacements before contained life and counter events."
+    },
+    {
+      "capability_id": "damage.result.replacement_order",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_worship_and_boon_follow_containing_event_order",
+      "official_rule_ids": [
+        "120.4c",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Group simultaneous damage outcomes into affected-subject result trees and apply containing-event replacements before contained life and counter events."
+    },
+    {
+      "capability_id": "damage.result.replacement_order",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_four_player_result_choices_follow_apnap_and_replay_exactly",
+      "official_rule_ids": [
+        "120.4c",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Group simultaneous damage outcomes into affected-subject result trees and apply containing-event replacements before contained life and counter events."
+    },
+    {
+      "capability_id": "damage.result.replacement_order",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_replacement_nested_order_mutant_is_killed",
+      "official_rule_ids": [
+        "120.4c",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Group simultaneous damage outcomes into affected-subject result trees and apply containing-event replacements before contained life and counter events."
+    },
+    {
+      "capability_id": "damage.result.replacement_order",
+      "evidence_class": "negative",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_invalid_result_leaf_keeps_the_whole_batch_atomic",
+      "official_rule_ids": [
+        "120.4c",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Group simultaneous damage outcomes into affected-subject result trees and apply containing-event replacements before contained life and counter events."
+    },
+    {
+      "capability_id": "damage.result.replacement_order",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_life_floor_caps_damage_result_without_an_offsetting_gain",
+      "official_rule_ids": [
+        "120.4c",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Group simultaneous damage outcomes into affected-subject result trees and apply containing-event replacements before contained life and counter events."
+    },
+    {
+      "capability_id": "damage.result.replacement_order",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_worship_caps_damage_result_at_one",
+      "official_rule_ids": [
+        "120.4c",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Group simultaneous damage outcomes into affected-subject result trees and apply containing-event replacements before contained life and counter events."
+    },
+    {
+      "capability_id": "damage.result.replacement_order",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_damage_result_replacement_choice_is_private_and_replays",
+      "official_rule_ids": [
+        "120.4c",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Group simultaneous damage outcomes into affected-subject result trees and apply containing-event replacements before contained life and counter events."
+    },
+    {
+      "capability_id": "damage.result.replacement_order",
+      "evidence_class": "replay",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_damage_result_replacement_choice_is_private_and_replays",
+      "official_rule_ids": [
+        "120.4c",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Group simultaneous damage outcomes into affected-subject result trees and apply containing-event replacements before contained life and counter events."
+    },
+    {
+      "capability_id": "damage.result.toxic",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_source_pinned_keyword_witnesses_follow_damage_results",
+      "official_rule_ids": [
+        "120.3g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Give a player poison counters equal to a creature damage source's represented total toxic value after combat damage is dealt."
+    },
+    {
+      "capability_id": "damage.result.toxic",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_four_player_keyword_results_keep_source_attribution",
+      "official_rule_ids": [
+        "120.3g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Give a player poison counters equal to a creature damage source's represented total toxic value after combat damage is dealt."
+    },
+    {
+      "capability_id": "damage.result.toxic",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_keyword_damage_result_mutants_are_killed",
+      "official_rule_ids": [
+        "120.3g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Give a player poison counters equal to a creature damage source's represented total toxic value after combat damage is dealt."
+    },
+    {
+      "capability_id": "damage.result.toxic",
+      "evidence_class": "negative",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_prevented_infect_and_toxic_create_no_counter_results",
+      "official_rule_ids": [
+        "120.3g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Give a player poison counters equal to a creature damage source's represented total toxic value after combat damage is dealt."
+    },
+    {
+      "capability_id": "damage.result.toxic",
+      "evidence_class": "negative",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_unresolved_toxic_value_fails_before_mutation",
+      "official_rule_ids": [
+        "120.3g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Give a player poison counters equal to a creature damage source's represented total toxic value after combat damage is dealt."
+    },
+    {
+      "capability_id": "damage.result.toxic",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_multiple_toxic_abilities_are_cumulative",
+      "official_rule_ids": [
+        "120.3g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Give a player poison counters equal to a creature damage source's represented total toxic value after combat damage is dealt."
+    },
+    {
+      "capability_id": "damage.result.toxic",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_source_pinned_keyword_witnesses_follow_damage_results",
+      "official_rule_ids": [
+        "120.3g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Give a player poison counters equal to a creature damage source's represented total toxic value after combat damage is dealt."
+    },
+    {
+      "capability_id": "damage.result.toxic",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_toxic_is_additional_only_for_creature_combat_damage_to_player",
+      "official_rule_ids": [
+        "120.3g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Give a player poison counters equal to a creature damage source's represented total toxic value after combat damage is dealt."
+    },
+    {
+      "capability_id": "damage.result.toxic",
+      "evidence_class": "replay",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_keyword_damage_results_replay_from_combat_assignment",
+      "official_rule_ids": [
+        "120.3g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Give a player poison counters equal to a creature damage source's represented total toxic value after combat damage is dealt."
+    },
+    {
+      "capability_id": "damage.result.wither",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_wither_damage_still_records_deathtouch_result",
+      "official_rule_ids": [
+        "120.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply wither damage to creatures as -1/-1 counters."
+    },
+    {
+      "capability_id": "damage.result.wither",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_keyword_damage_result_mutants_are_killed",
+      "official_rule_ids": [
+        "120.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply wither damage to creatures as -1/-1 counters."
+    },
+    {
+      "capability_id": "damage.result.wither",
+      "evidence_class": "negative",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_infect_and_wither_use_minus_counters_only_on_creatures",
+      "official_rule_ids": [
+        "120.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply wither damage to creatures as -1/-1 counters."
+    },
+    {
+      "capability_id": "damage.result.wither",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_infect_and_wither_use_minus_counters_only_on_creatures",
+      "official_rule_ids": [
+        "120.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply wither damage to creatures as -1/-1 counters."
+    },
+    {
+      "capability_id": "damage.result.wither",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_source_pinned_keyword_witnesses_follow_damage_results",
+      "official_rule_ids": [
+        "120.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply wither damage to creatures as -1/-1 counters."
+    },
+    {
+      "capability_id": "damage.result.wither",
+      "evidence_class": "replay",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_keyword_damage_results_replay_from_combat_assignment",
+      "official_rule_ids": [
+        "120.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply wither damage to creatures as -1/-1 counters."
+    },
+    {
       "capability_id": "damage.trigger.noncombat",
       "evidence_class": "negative",
       "test_id": "tests.test_monarch_rules.MonarchRuleTests.test_nonqualifying_damage_does_not_create_a_transfer_trigger",
@@ -1117,6 +1704,106 @@
         "commander_review"
       ],
       "applicability_note": "Emit normalized noncombat damage events after final damage results for trigger discovery."
+    },
+    {
+      "capability_id": "life.gain.replacement.static_multiplier",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_worship_and_boon_follow_containing_event_order",
+      "official_rule_ids": [
+        "119.3",
+        "119.10",
+        "120.4c",
+        "614.1",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a trusted source-pinned fixed integral multiplier to a positive life-gain result event."
+    },
+    {
+      "capability_id": "life.gain.replacement.static_multiplier",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_damage_result_replacement_component_mutants_are_killed",
+      "official_rule_ids": [
+        "119.3",
+        "119.10",
+        "120.4c",
+        "614.1",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a trusted source-pinned fixed integral multiplier to a positive life-gain result event."
+    },
+    {
+      "capability_id": "life.gain.replacement.static_multiplier",
+      "evidence_class": "negative",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_life_gain_multiplier_ignores_losses_and_rejects_bad_shape",
+      "official_rule_ids": [
+        "119.3",
+        "119.10",
+        "120.4c",
+        "614.1",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a trusted source-pinned fixed integral multiplier to a positive life-gain result event."
+    },
+    {
+      "capability_id": "life.gain.replacement.static_multiplier",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_boon_reflection_doubles_lifelink_result",
+      "official_rule_ids": [
+        "119.3",
+        "119.10",
+        "120.4c",
+        "614.1",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a trusted source-pinned fixed integral multiplier to a positive life-gain result event."
+    },
+    {
+      "capability_id": "life.gain.replacement.static_multiplier",
+      "evidence_class": "replay",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_damage_result_replacement_choice_is_private_and_replays",
+      "official_rule_ids": [
+        "119.3",
+        "119.10",
+        "120.4c",
+        "614.1",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a trusted source-pinned fixed integral multiplier to a positive life-gain result event."
     },
     {
       "capability_id": "permanent.tap.effect",

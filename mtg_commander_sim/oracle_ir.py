@@ -51,7 +51,7 @@ _ABILITY_WORD = re.compile(
     r"^(?P<word>[A-Za-z][A-Za-z ']+)\s+[—-]\s+(?P<body>.+)$"
 )
 _KEYWORD_WITH_VALUE = re.compile(
-    r"^(?P<name>ward|equip|enchant|cycling|crew|kicker|"
+    r"^(?P<name>ward|equip|enchant|cycling|crew|kicker|toxic|"
     r"cumulative upkeep|echo|morph|bestow|evoke|unearth)"
     r"(?:\s+(?P<value>.+))?$",
     re.IGNORECASE,
@@ -66,6 +66,7 @@ _KNOWN_BARE_KEYWORDS = {
     "haste",
     "hexproof",
     "indestructible",
+    "infect",
     "lifelink",
     "menace",
     "reach",
@@ -73,6 +74,7 @@ _KNOWN_BARE_KEYWORDS = {
     "shroud",
     "trample",
     "vigilance",
+    "wither",
 }
 
 

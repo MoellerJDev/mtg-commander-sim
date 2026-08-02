@@ -156,6 +156,21 @@ class SemanticPreflightV2Tests(unittest.TestCase):
         self.assertNotIn("keyword:equip", row["unresolved"])
         self.assertEqual("fully_playable", row["status"])
 
+    def test_damage_result_keywords_are_recognized_by_preflight(self):
+        for name, keyword in (
+            ("Phyrexian Crusader", "infect"),
+            ("Boggart Ram-Gang", "wither"),
+            ("Healer's Hawk", "lifelink"),
+            ("Crawling Chorus", "toxic"),
+        ):
+            with self.subTest(name=name):
+                row = card_semantic_status(
+                    self.db.lookup(name),
+                    SemanticRegistry(),
+                    db=self.db,
+                )
+                self.assertNotIn(f"keyword:{keyword}", row["unresolved"])
+
 
 class TrustedOnlyPolicyTests(unittest.TestCase):
     @classmethod

@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "fixture_kind": "public_damage_result_card_data",
+  "source": "Scryfall Oracle/rulings subset for CR 120.3 and 120.4c tests",
+  "cards": [
+    {
+      "oracle_id": "b86d3142-568a-4eea-b1ae-5fcfc1453533",
+      "name": "Boon Reflection",
+      "mana_cost": "{4}{W}",
+      "cmc": 5.0,
+      "type_line": "Enchantment",
+      "oracle_text": "If you would gain life, you gain twice that much life instead.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "defense": null,
+      "colors": ["W"],
+      "color_identity": ["W"],
+      "keywords": [],
+      "produced_mana": [],
+      "layout": "normal",
+      "released_at": "2020-08-07",
+      "legalities": {"commander": "legal", "duel": "legal"}
+    },
+    {
+      "oracle_id": "99f9a4c8-b59f-4a41-8577-6c1e4684b240",
+      "name": "Worship",
+      "mana_cost": "{3}{W}",
+      "cmc": 4.0,
+      "type_line": "Enchantment",
+      "oracle_text": "If you control a creature, damage that would reduce your life total to less than 1 reduces it to 1 instead.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "defense": null,
+      "colors": ["W"],
+      "color_identity": ["W"],
+      "keywords": [],
+      "produced_mana": [],
+      "layout": "normal",
+      "released_at": "2005-07-29",
+      "legalities": {"commander": "legal", "duel": "legal"}
+    },
+    {
+      "oracle_id": "91760bdf-a82a-4f3d-b925-3bc81ffbd41f",
+      "name": "Phyrexian Crusader",
+      "mana_cost": "{1}{B}{B}",
+      "cmc": 3.0,
+      "type_line": "Creature — Phyrexian Zombie Knight",
+      "oracle_text": "First strike, protection from red and from white\nInfect (This creature deals damage to creatures in the form of -1/-1 counters and to players in the form of poison counters.)",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "defense": null,
+      "colors": ["B"],
+      "color_identity": ["B"],
+      "keywords": ["First strike", "Protection", "Infect"],
+      "produced_mana": [],
+      "layout": "normal",
+      "released_at": "2011-02-04",
+      "legalities": {"commander": "legal", "duel": "legal"}
+    },
+    {
+      "oracle_id": "30d2437a-87c9-4f88-8fb8-b686d6522677",
+      "name": "Boggart Ram-Gang",
+      "mana_cost": "{R/G}{R/G}{R/G}",
+      "cmc": 3.0,
+      "type_line": "Creature — Goblin Warrior",
+      "oracle_text": "Haste\nWither (This deals damage to creatures in the form of -1/-1 counters.)",
+      "power": "3",
+      "toughness": "3",
+      "loyalty": null,
+      "defense": null,
+      "colors": ["G", "R"],
+      "color_identity": ["G", "R"],
+      "keywords": ["Haste", "Wither"],
+      "produced_mana": [],
+      "layout": "normal",
+      "released_at": "2008-05-02",
+      "legalities": {"commander": "legal", "duel": "legal"}
+    },
+    {
+      "oracle_id": "28a52ba1-95da-44e1-8ac5-0dc23c902394",
+      "name": "Healer's Hawk",
+      "mana_cost": "{W}",
+      "cmc": 1.0,
+      "type_line": "Creature — Bird",
+      "oracle_text": "Flying\nLifelink (Damage dealt by this creature also causes you to gain that much life.)",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "defense": null,
+      "colors": ["W"],
+      "color_identity": ["W"],
+      "keywords": ["Flying", "Lifelink"],
+      "produced_mana": [],
+      "layout": "normal",
+      "released_at": "2026-04-24",
+      "legalities": {"commander": "legal", "duel": "legal"}
+    },
+    {
+      "oracle_id": "99ba0d4f-b2bf-48ea-95d6-b6b85ee077ab",
+      "name": "Crawling Chorus",
+      "mana_cost": "{W}",
+      "cmc": 1.0,
+      "type_line": "Creature — Phyrexian Horror",
+      "oracle_text": "Toxic 1 (Players dealt combat damage by this creature also get a poison counter.)\nWhen this creature dies, create a 1/1 colorless Phyrexian Mite artifact creature token with toxic 1 and \"This token can't block.\"",
+      "power": "1",
+      "toughness": "1",
+      "loyalty": null,
+      "defense": null,
+      "colors": ["W"],
+      "color_identity": ["W"],
+      "keywords": ["Toxic"],
+      "produced_mana": [],
+      "layout": "normal",
+      "released_at": "2023-02-10",
+      "legalities": {"commander": "legal", "duel": "legal"}
+    }
+  ],
+  "rulings": [
+    {
+      "oracle_id": "b86d3142-568a-4eea-b1ae-5fcfc1453533",
+      "published_at": "2020-08-07",
+      "source": "wotc",
+      "comment": "In a Two-Headed Giant game, only Boon Reflection's controller is affected by it. If that player's teammate gains life, Boon Reflection will have no effect, even when that life gain is applied to the shared team life total."
+    },
+    {
+      "oracle_id": "b86d3142-568a-4eea-b1ae-5fcfc1453533",
+      "published_at": "2020-08-07",
+      "source": "wotc",
+      "comment": "If an effect would set your life total to a specific number that's higher than your current life total, that effect would cause you to gain life equal to the difference. Boon Reflection will then double the amount of life that effect would cause you to gain. For example, if you have 3 life and an effect says that your life total “becomes 10,” your life total will actually become 17."
+    },
+    {
+      "oracle_id": "b86d3142-568a-4eea-b1ae-5fcfc1453533",
+      "published_at": "2020-08-07",
+      "source": "wotc",
+      "comment": "The effects of multiple Boon Reflections are cumulative. For example, if you control two Boon Reflections, you'll gain four times the original amount of life. If you control three Boon Reflections, you'll gain eight times the original amount, and so on."
+    },
+    {
+      "oracle_id": "99f9a4c8-b59f-4a41-8577-6c1e4684b240",
+      "published_at": "2004-10-04",
+      "source": "wotc",
+      "comment": "Worship does not prevent damage. It causes some damage to be unable to lower your life total. So any damage rendered useless by Worship was still dealt and is counted by effects that track the amount of damage done to a player. In addition, Worship does not prevent loss of life, so loss of life bypasses Worship."
+    },
+    {
+      "oracle_id": "99f9a4c8-b59f-4a41-8577-6c1e4684b240",
+      "published_at": "2004-10-04",
+      "source": "wotc",
+      "comment": "It reduces your life total to 1, not the damage to 1."
+    }
+  ]
+}

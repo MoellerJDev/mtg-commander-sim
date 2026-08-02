@@ -12474,16 +12474,15 @@
       "status": "definition_only"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "player-damage paths do not generically inspect infect before choosing life loss versus poison counters",
-        "life-loss replacement ordering is not integrated with the damage-result event"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-120.3a",
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
-        "positive"
+        "positive",
+        "negative",
+        "interaction"
       ],
       "dependency_rule_ids": [
         "120.3"
@@ -12491,14 +12490,17 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [
         "tests.test_exact_deck_triggers.ExactDeckTriggerFamilyTests.test_reckless_fireweaver_damages_each_opponent",
-        "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event"
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event",
+        "tests.test_damage_result_events.DamageResultEventTests.test_infect_player_damage_is_poison_not_life_loss",
+        "tests.test_damage_result_events.DamageResultEventTests.test_lifelink_gains_final_damage_across_multiple_recipients"
       ],
       "implementation_components": [
-        "CommanderEngine._apply_combat_assignments",
-        "CommanderEngine._apply_effect"
+        "damage_results.materialize_damage_results",
+        "damage_results.plan_damage_result_commit",
+        "damage_results.commit_damage_result_plan"
       ],
       "notes": [
-        "Ordinary represented player damage reduces life, but the required noninfect predicate is not universally enforced."
+        "Final positive noninfect damage creates a typed life-loss result; infect takes the poison path, and the result batch commits atomically after replacements."
       ],
       "required_scenarios": [
         "positive",
@@ -12514,29 +12516,38 @@
         "end_line": 1100,
         "start_line": 1099
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "infect damage to players is not implemented generically",
-        "poison-counter replacement and source-controller attribution are not integrated with the damage event"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-120.3b",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "120.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_infect_player_damage_is_poison_not_life_loss",
+        "tests.test_damage_result_events.DamageResultEventTests.test_prevented_infect_and_toxic_create_no_counter_results",
+        "tests.test_damage_result_events.DamageResultEventTests.test_source_pinned_keyword_witnesses_follow_damage_results",
+        "tests.test_damage_result_events.DamageResultEventTests.test_four_player_keyword_results_keep_source_attribution",
+        "tests.test_damage_result_events.DamageResultEventTests.test_keyword_damage_results_replay_from_combat_assignment"
+      ],
       "implementation_components": [
-        "PlayerState.poison",
-        "CommanderEngine._apply_combat_assignments"
+        "damage_results.materialize_damage_results",
+        "damage_results.plan_damage_result_commit",
+        "damage_results.commit_damage_result_plan"
       ],
       "notes": [
-        "The player model stores poison counters, but damage does not yet route through infect semantics."
+        "Final infect damage to a player creates source-controller-attributed poison-counter results, including simultaneous multiplayer batches and exact command replay."
       ],
       "required_scenarios": [
         "positive",
@@ -12553,7 +12564,7 @@
         "end_line": 1102,
         "start_line": 1101
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
       "assertion_kind": "executable_engine",
@@ -12571,11 +12582,13 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_planeswalker_damage_removes_loyalty_counters",
-        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result"
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result",
+        "tests.test_damage_result_events.DamageResultEventTests.test_multitype_permanent_receives_every_applicable_result"
       ],
       "implementation_components": [
-        "CommanderEngine._apply_damage_results_to_permanent",
-        "CommanderEngine._change_permanent_counter"
+        "damage_results.materialize_damage_results",
+        "damage_results.plan_damage_result_commit",
+        "damage_results.commit_damage_result_plan"
       ],
       "notes": [
         "Damage dealt to a derived planeswalker removes that many loyalty counters, including when the permanent has multiple damageable card types."
@@ -12596,25 +12609,33 @@
       "status": "passing"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "wither and infect damage to creatures do not generically create -1/-1 counters instead of marked damage",
-        "source-controller counter placement and replacement ordering are incomplete"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-120.3d",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "120.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_infect_and_wither_use_minus_counters_only_on_creatures",
+        "tests.test_damage_result_events.DamageResultEventTests.test_source_pinned_keyword_witnesses_follow_damage_results",
+        "tests.test_damage_result_events.DamageResultEventTests.test_wither_damage_still_records_deathtouch_result",
+        "tests.test_damage_result_events.DamageResultEventTests.test_keyword_damage_results_replay_from_combat_assignment"
+      ],
       "implementation_components": [
-        "CommanderEngine._apply_damage_results_to_permanent"
+        "damage_results.materialize_damage_results",
+        "damage_results.plan_damage_result_commit",
+        "damage_results.commit_damage_result_plan"
       ],
       "notes": [
-        "Unsupported source keywords remain an explicit damage-family blocker."
+        "Final infect or wither damage to a creature creates source-controller-attributed -1/-1 counter results instead of marked damage while retaining applicable deathtouch results."
       ],
       "required_scenarios": [
         "positive",
@@ -12630,18 +12651,17 @@
         "end_line": 1106,
         "start_line": 1105
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "the result path cannot yet prove that a source has neither infect nor wither before marking creature damage"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-120.3e",
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
         "positive",
+        "negative",
         "interaction"
       ],
       "dependency_rule_ids": [
@@ -12650,13 +12670,17 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_battle_creature_applies_both_results",
-        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result"
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result",
+        "tests.test_damage_result_events.DamageResultEventTests.test_infect_and_wither_use_minus_counters_only_on_creatures",
+        "tests.test_damage_result_events.DamageResultEventTests.test_multitype_permanent_receives_every_applicable_result"
       ],
       "implementation_components": [
-        "CommanderEngine._apply_damage_results_to_permanent"
+        "damage_results.materialize_damage_results",
+        "damage_results.plan_damage_result_commit",
+        "damage_results.commit_damage_result_plan"
       ],
       "notes": [
-        "Ordinary represented creature damage is marked and multi-typed permanents receive every applicable result."
+        "Final creature damage without infect or wither is marked, while keyword damage takes the -1/-1-counter path and multi-typed permanents receive every applicable result."
       ],
       "required_scenarios": [
         "positive",
@@ -12672,28 +12696,38 @@
         "end_line": 1108,
         "start_line": 1107
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "lifelink is not processed as a simultaneous damage result across combat and noncombat damage",
-        "life-gain replacement effects are not integrated into the damage event"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-120.3f",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "120.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_lifelink_counts_only_damage_not_prevented_by_protection",
+        "tests.test_damage_result_events.DamageResultEventTests.test_lifelink_gains_final_damage_across_multiple_recipients",
+        "tests.test_damage_result_events.DamageResultEventTests.test_boon_reflection_doubles_lifelink_result",
+        "tests.test_damage_result_events.DamageResultEventTests.test_four_player_keyword_results_keep_source_attribution",
+        "tests.test_damage_result_events.DamageResultEventTests.test_keyword_damage_results_replay_from_combat_assignment"
+      ],
       "implementation_components": [
-        "CommanderEngine._apply_combat_assignments"
+        "damage_results.materialize_damage_results",
+        "damage_results.plan_damage_result_commit",
+        "damage_results.commit_damage_result_plan"
       ],
       "notes": [
-        "The combat complexity gate recognizes Lifelink but does not yet apply its result."
+        "Lifelink creates one simultaneous life-gain result per source and controller from final dealt damage across recipients; prevention and represented life-gain replacements participate before atomic commit."
       ],
       "required_scenarios": [
         "positive",
@@ -12710,29 +12744,39 @@
         "end_line": 1110,
         "start_line": 1109
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "toxic values are not compiled or applied after combat damage to a player",
-        "combined toxic values and poison-counter replacement ordering remain incomplete"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-120.3g",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "120.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_toxic_is_additional_only_for_creature_combat_damage_to_player",
+        "tests.test_damage_result_events.DamageResultEventTests.test_multiple_toxic_abilities_are_cumulative",
+        "tests.test_damage_result_events.DamageResultEventTests.test_unresolved_toxic_value_fails_before_mutation",
+        "tests.test_damage_result_events.DamageResultEventTests.test_prevented_infect_and_toxic_create_no_counter_results",
+        "tests.test_damage_result_events.DamageResultEventTests.test_four_player_keyword_results_keep_source_attribution",
+        "tests.test_damage_result_events.DamageResultEventTests.test_keyword_damage_results_replay_from_combat_assignment"
+      ],
       "implementation_components": [
-        "PlayerState.poison",
-        "CommanderEngine._apply_combat_assignments"
+        "damage._total_toxic_value",
+        "damage_results.materialize_damage_results",
+        "damage_results.commit_damage_result_plan"
       ],
       "notes": [
-        "No toxic damage result is advertised as implemented."
+        "A creature's fixed total toxic value creates additional source-controller-attributed poison counters only after positive combat damage to a player; dynamic unresolved values fail before mutation."
       ],
       "required_scenarios": [
         "positive",
@@ -12749,7 +12793,7 @@
         "end_line": 1112,
         "start_line": 1111
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
       "assertion_kind": "executable_engine",
@@ -12769,11 +12813,13 @@
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_removes_defense_instead_of_marking_damage",
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result",
-        "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_and_state_action_replay_exactly"
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_and_state_action_replay_exactly",
+        "tests.test_damage_result_events.DamageResultEventTests.test_multitype_permanent_receives_every_applicable_result"
       ],
       "implementation_components": [
-        "CommanderEngine._apply_damage_results_to_permanent",
-        "CommanderEngine._change_permanent_counter"
+        "damage_results.materialize_damage_results",
+        "damage_results.plan_damage_result_commit",
+        "damage_results.commit_damage_result_plan"
       ],
       "notes": [
         "Damage dealt to a Battle removes that many defense counters, including on a multi-typed permanent, and the resulting state command-replays exactly."
@@ -12798,7 +12844,7 @@
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
         "excess-damage redirection and greatest-excess selection remain incomplete",
-        "damage-result replacements, infect, wither, and persistent prevention shields remain incomplete",
+        "persistent and divisible prevention shields, redirection, and remaining damage-result replacement families remain incomplete",
         "explicit replacement choices during mana-result damage are not yet resumable"
       ],
       "case_id": "cr-120.4",
@@ -12821,7 +12867,9 @@
         "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_damage_replacement_choices_follow_apnap",
         "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_validation_failure_is_atomic_before_any_damage_result",
         "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_unsupported_infect_result_rolls_back_entire_batch"
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_infect_creature_result_commits_with_other_damage_atomically",
+        "tests.test_damage_result_events.DamageResultEventTests.test_damage_result_replacement_choice_is_private_and_replays",
+        "tests.test_damage_result_events.DamageResultEventTests.test_keyword_damage_results_replay_from_combat_assignment"
       ],
       "implementation_components": [
         "damage.prepare_damage_batch",
@@ -12830,7 +12878,7 @@
         "replacement_decisions.issue_combat_damage_replacement_choice"
       ],
       "notes": [
-        "Combat, semantic single-target, each-opponent, and mana-result damage now share a typed precommit event and final result path. Unsupported result families fail before mutation; the remaining blockers prevent a universal four-stage claim."
+        "Combat, semantic single-target, each-opponent, and mana-result damage share typed proposal, preparation, result-event, and atomic commit paths. Represented infect, wither, lifelink, toxic, and result replacements are covered, but the remaining blockers prevent a universal four-stage claim."
       ],
       "required_scenarios": [
         "positive",
@@ -12948,29 +12996,38 @@
       "status": "blocked"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "life-loss, life-gain, poison, loyalty, defense, -1/-1-counter, and marked-damage result replacements are not ordered through one event"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-120.4c",
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
-        "positive"
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
       ],
       "dependency_rule_ids": [
         "120.4"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result"
+        "tests.test_damage_result_events.DamageResultEventTests.test_containing_result_replacement_precedes_life_gain_replacement",
+        "tests.test_damage_result_events.DamageResultEventTests.test_invalid_result_leaf_keeps_the_whole_batch_atomic",
+        "tests.test_damage_result_events.DamageResultEventTests.test_worship_and_boon_follow_containing_event_order",
+        "tests.test_damage_result_events.DamageResultEventTests.test_four_player_result_choices_follow_apnap_and_replay_exactly",
+        "tests.test_damage_result_events.DamageResultEventTests.test_damage_result_replacement_choice_is_private_and_replays"
       ],
       "implementation_components": [
-        "damage.apply_damage_results_to_permanent",
-        "damage.commit_prepared_damage_batch"
+        "damage_results.materialize_damage_results",
+        "damage_results.prepare_damage_results",
+        "damage_results.plan_damage_result_commit",
+        "damage_results.commit_damage_result_plan",
+        "replacement_effects.advance_replacement_batch"
       ],
       "notes": [
-        "The native permanent result fan-out is type-driven, but result replacement ordering remains incomplete."
+        "Every represented simultaneous result for an affected player or permanent is grouped into an immutable containing event; containing-event replacements precede contained results, choices follow APNAP, and the choice command replays exactly without exposing authoritative internals."
       ],
       "required_scenarios": [
         "positive",
@@ -12988,7 +13045,7 @@
         "end_line": 1122,
         "start_line": 1121
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
       "assertion_kind": "executable_engine",

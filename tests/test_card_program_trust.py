@@ -126,12 +126,12 @@ class CardProgramTrustTests(unittest.TestCase):
             [self.bolt],
             registry=self.capabilities,
             profile="commander_duel",
-            dynamic_capabilities=["damage.result.infect"],
+            dynamic_capabilities=["damage.combat.excess"],
         )
         self.assertFalse(blocked["strict_capability_ready"])
         self.assertTrue(
             any(
-                "damage.result.infect" in blocker
+                "damage.combat.excess" in blocker
                 for blocker in blocked["blockers"]
             )
         )
@@ -139,14 +139,16 @@ class CardProgramTrustTests(unittest.TestCase):
     def test_global_handler_and_component_inventory_is_capability_bound(self):
         status = runtime_component_status("commander_review")
         self.assertEqual(6, len(status["semantic_handlers"]))
-        self.assertEqual(6, len(status["runtime_components"]))
+        self.assertEqual(8, len(status["runtime_components"]))
         self.assertEqual(
             {
                 "continuous.fixed_power_toughness_anthem",
                 "prevention.damage.fixed",
                 "replacement.counter.quantity",
                 "replacement.damage.quantity",
+                "replacement.damage.result.life_floor",
                 "replacement.fixed_additional_token",
+                "replacement.life.gain.multiplier",
                 "replacement.zone.destination",
             },
             {row["family"] for row in status["runtime_components"]},

@@ -88,6 +88,36 @@ MUTATION_TESTS = {
         "CapabilityImplementationMutationTests."
         "test_damage_result_dispatch_mutant_is_killed"
     ),
+    "damage.result.infect": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_keyword_damage_result_mutants_are_killed"
+    ),
+    "damage.result.wither": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_keyword_damage_result_mutants_are_killed"
+    ),
+    "damage.result.lifelink": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_keyword_damage_result_mutants_are_killed"
+    ),
+    "damage.result.toxic": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_keyword_damage_result_mutants_are_killed"
+    ),
+    "damage.result.replacement_order": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_replacement_nested_order_mutant_is_killed"
+    ),
+    "life.gain.replacement.static_multiplier": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_damage_result_replacement_component_mutants_are_killed"
+    ),
     "permanent.tap.effect": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

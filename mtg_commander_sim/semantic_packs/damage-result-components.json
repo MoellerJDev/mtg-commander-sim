@@ -1,0 +1,69 @@
+{
+  "schema_version": 3,
+  "name": "damage-result-components",
+  "programs": [
+    {
+      "key": "b86d3142-568a-4eea-b1ae-5fcfc1453533:replacement:life-gain-multiplier",
+      "label": "Boon Reflection life-gain replacement",
+      "oracle_id": "b86d3142-568a-4eea-b1ae-5fcfc1453533",
+      "ability_id": "replacement:life-gain-multiplier",
+      "active_zone": "battlefield",
+      "event": "life.change",
+      "effects": [],
+      "handlers": [
+        {
+          "handler_id": "replacement.life.gain.multiplier.v1",
+          "schema_version": 1,
+          "event": "life.change",
+          "condition": {"affected_player_relation": "source_controller"},
+          "modification": {"multiplier": 2}
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["replacement_effect", "life_gain", "fixed_multiplier"],
+      "tests": [
+        "test_boon_reflection_doubles_lifelink_result",
+        "test_worship_and_boon_follow_containing_event_order"
+      ],
+      "provenance": {
+        "source_oracle_hash": "6ca7e954c18ff46e3ce795d462f08e046db35992e6116ec25f2101b93c3e00b4",
+        "source_rulings_hash": "206866f81b24c1f5f607ff285d3fb0673200aff61d3938b422379ed4ff30a36e",
+        "authored_by": "damage-result-events",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "99f9a4c8-b59f-4a41-8577-6c1e4684b240:replacement:damage-life-floor",
+      "label": "Worship damage-result replacement",
+      "oracle_id": "99f9a4c8-b59f-4a41-8577-6c1e4684b240",
+      "ability_id": "replacement:damage-life-floor",
+      "active_zone": "battlefield",
+      "event": "damage.results",
+      "effects": [],
+      "handlers": [
+        {
+          "handler_id": "replacement.damage.result.life_floor.v1",
+          "schema_version": 1,
+          "event": "damage.results",
+          "condition": {
+            "affected_player_relation": "source_controller",
+            "requires_controlled_creature": true
+          },
+          "modification": {"minimum_life": 1}
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["replacement_effect", "damage_result", "life_floor"],
+      "tests": [
+        "test_worship_caps_damage_result_at_one",
+        "test_worship_and_boon_follow_containing_event_order"
+      ],
+      "provenance": {
+        "source_oracle_hash": "e9a2bd5123c837fee44714559f560756def548254862c6374b8cb1c3663994f3",
+        "source_rulings_hash": "b24ad9fa756221ccd5bf5f6a88c46d9b3711b0308e0e349603c27a400210f3c0",
+        "authored_by": "damage-result-events",
+        "review_status": "reviewed"
+      }
+    }
+  ]
+}

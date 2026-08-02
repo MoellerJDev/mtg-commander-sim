@@ -5,6 +5,7 @@ import unittest
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim import damage_results as damage_results_module
 from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
 from mtg_commander_sim import damage as damage_module
@@ -20,6 +21,11 @@ from mtg_commander_sim.semantic_runtime.damage_replacements import (
     DamageQuantityReplacementHandler,
     DamageReplacementSourceContext,
     FixedDamagePreventionHandler,
+)
+from mtg_commander_sim.semantic_runtime.damage_results import (
+    DamageResultLifeFloorHandler,
+    DamageResultReplacementSourceContext,
+    LifeGainMultiplierHandler,
 )
 from mtg_commander_sim.targets import PUBLIC_TARGET_ZONES, TargetGroup
 
@@ -103,8 +109,11 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
             value
             for value in engine.state.cards.values()
             if value.owner == "A" and not value.is_commander
+            and not engine._type_parts(
+                str(engine._effective_card_data(value).get("type_line") or "")
+            )[0].intersection({"instant", "sorcery"})
         )
-        engine.move_card(
+        card = engine.move_card(
             card.object_id,
             "battlefield",
             controller="A",
@@ -118,38 +127,269 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         }
         card.counters["loyalty"] = 4
         card.counters["defense"] = 5
+        source_ref = engine.create_token(
+            "A",
+            name="Damage Result Mutation Source",
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "power": "2",
+                "toughness": "2",
+            },
+        )[0]
+        source = engine._resolve_object(
+            "A", source_ref, zones={"battlefield"}
+        )
 
         def assert_all_permanent_results() -> None:
             card.marked_damage = 0
             card.counters["loyalty"] = 4
             card.counters["defense"] = 5
-            result = damage_module.apply_damage_results_to_permanent(
-                engine, card, 2
+            damage = damage_module.damage_proposal(
+                engine,
+                proposal_id="damage:result-dispatch-mutation",
+                actor="A",
+                source_ref=source.ref,
+                target=card.ref,
+                amount=2,
+                combat=False,
+                reason="implementation mutation fixture",
+            ).event()
+            prepared = damage_results_module.prepare_damage_results(
+                engine,
+                (damage,),
+                effects=(),
             )
-            self.assertEqual(2, result["marked_damage"])
-            self.assertEqual(2, result["loyalty_removed"])
-            self.assertEqual(2, result["defense_removed"])
+            plan = damage_results_module.plan_damage_result_commit(
+                engine, prepared
+            )
+            damage_results_module.commit_damage_result_plan(engine, plan)
+            self.assertEqual(2, card.marked_damage)
+            self.assertEqual(2, card.counters["loyalty"])
+            self.assertEqual(3, card.counters["defense"])
 
         assert_all_permanent_results()
 
-        def creature_only_mutant(
-            _engine,
-            target,
-            amount: int,
-            *,
-            deathtouch: bool = False,
+        with patch.object(
+            damage_results_module,
+            "materialize_damage_results",
+            lambda _host, _events: (),
         ):
-            target.marked_damage += int(amount)
-            target.deathtouch_damage = target.deathtouch_damage or deathtouch
-            return {"amount": int(amount), "marked_damage": int(amount)}
+            with self.assertRaises(AssertionError):
+                assert_all_permanent_results()
+
+    def test_keyword_damage_result_mutants_are_killed(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=2,
+            seed=12031,
+        )
+        keep_all(session)
+        engine = session.engine
+
+        def token(name: str, *, keywords=(), oracle_text=""):
+            ref = engine.create_token(
+                "A" if "Source" in name else "B",
+                name=name,
+                characteristics={
+                    "type_line": "Token Creature — Test",
+                    "power": "3",
+                    "toughness": "5",
+                    "keywords": list(keywords),
+                    "oracle_text": oracle_text,
+                },
+            )[0]
+            return engine._resolve_object(
+                "A" if "Source" in name else "B",
+                ref,
+                zones={"battlefield"},
+            )
+
+        infect = token(
+            "Infect Lifelink Toxic Source",
+            keywords=("Infect", "Lifelink", "Toxic"),
+            oracle_text="Toxic 2",
+        )
+        wither = token("Wither Source", keywords=("Wither",))
+        target = token("Mutation Target")
+        damage_events = (
+            damage_module.damage_proposal(
+                engine,
+                proposal_id="damage:keyword-mutation:player",
+                actor="A",
+                source_ref=infect.ref,
+                target="B",
+                amount=3,
+                combat=True,
+                reason="implementation mutation fixture",
+            ).event(),
+            damage_module.damage_proposal(
+                engine,
+                proposal_id="damage:keyword-mutation:creature",
+                actor="A",
+                source_ref=wither.ref,
+                target=target.ref,
+                amount=2,
+                combat=True,
+                reason="implementation mutation fixture",
+            ).event(),
+        )
+
+        def assert_keyword_results() -> None:
+            roots = damage_results_module.materialize_damage_results(
+                engine, damage_events
+            )
+            leaves = [child for root in roots for child in root.children]
+            amounts = {
+                str(child.payload.get("cause")): int(
+                    child.payload.get("amount", 0)
+                )
+                for child in leaves
+            }
+            self.assertEqual(3, amounts["infect"])
+            self.assertEqual(2, amounts["toxic"])
+            self.assertEqual(3, amounts["lifelink"])
+            self.assertEqual(2, amounts["infect_or_wither"])
+
+        assert_keyword_results()
+        original = damage_results_module.materialize_damage_results
+
+        def strip_cause(cause: str):
+            def mutant(host, events):
+                def visit(event):
+                    return replace(
+                        event,
+                        children=tuple(
+                            visit(child)
+                            for child in event.children
+                            if child.payload.get("cause") != cause
+                        ),
+                    )
+
+                return tuple(visit(event) for event in original(host, events))
+
+            return mutant
+
+        for cause in ("infect", "toxic", "lifelink", "infect_or_wither"):
+            with self.subTest(cause=cause), patch.object(
+                damage_results_module,
+                "materialize_damage_results",
+                strip_cause(cause),
+            ):
+                with self.assertRaises((AssertionError, KeyError)):
+                    assert_keyword_results()
+
+    def test_damage_result_replacement_component_mutants_are_killed(self):
+        gain_descriptor = {
+            "handler_id": "replacement.life.gain.multiplier.v1",
+            "schema_version": 1,
+            "event": "life.change",
+            "condition": {
+                "affected_player_relation": "source_controller",
+            },
+            "modification": {"multiplier": 2},
+        }
+        floor_descriptor = {
+            "handler_id": "replacement.damage.result.life_floor.v1",
+            "schema_version": 1,
+            "event": "damage.results",
+            "condition": {
+                "affected_player_relation": "source_controller",
+                "requires_controlled_creature": True,
+            },
+            "modification": {"minimum_life": 1},
+        }
+        context = DamageResultReplacementSourceContext(
+            source_ref="result-replacement-mutation-source",
+            source_controller="A",
+        )
+        gain = replacement_effects.ReplaceableEvent(
+            event_id="life:gain:mutation",
+            kind="life.change",
+            affected_player="A",
+            payload={"direction": "gain", "amount": 3},
+        )
+        loss = replacement_effects.ReplaceableEvent(
+            event_id="life:loss:mutation",
+            kind="life.change",
+            affected_player="A",
+            payload={
+                "direction": "loss",
+                "amount": 5,
+                "requested_amount": 5,
+            },
+        )
+        root = replacement_effects.ReplaceableEvent(
+            event_id="damage:results:mutation",
+            kind="damage.results",
+            affected_player="A",
+            payload={
+                "subject_kind": "player",
+                "life_before": 5,
+                "life_loss_amount": 5,
+                "life_after_without_replacement": 0,
+                "controls_creature": True,
+            },
+            children=(loss,),
+        )
+
+        def assert_components_transform_results() -> None:
+            gain_effect = LifeGainMultiplierHandler().replacement_effect(
+                gain_descriptor, context
+            )
+            floor_effect = DamageResultLifeFloorHandler().replacement_effect(
+                floor_descriptor, context
+            )
+            doubled = replacement_effects.resolve_replacements(
+                gain, (gain_effect,), selections=(gain_effect.effect_id,)
+            )
+            floored = replacement_effects.resolve_replacements(
+                root, (floor_effect,), selections=(floor_effect.effect_id,)
+            )
+            self.assertEqual(6, doubled.payload["amount"])
+            self.assertEqual(4, floored.children[0].payload["amount"])
+
+        assert_components_transform_results()
+        original_gain = LifeGainMultiplierHandler.replacement_effect
+
+        def identity_gain(handler, descriptor, source_context):
+            effect = original_gain(handler, descriptor, source_context)
+            return replace(
+                effect,
+                operations=(
+                    {"op": "multiply", "field": "amount", "factor": 1},
+                ),
+            )
 
         with patch.object(
-            damage_module,
-            "apply_damage_results_to_permanent",
-            creature_only_mutant,
+            LifeGainMultiplierHandler,
+            "replacement_effect",
+            identity_gain,
         ):
-            with self.assertRaises((AssertionError, KeyError)):
-                assert_all_permanent_results()
+            with self.assertRaises(AssertionError):
+                assert_components_transform_results()
+
+        original_floor = DamageResultLifeFloorHandler.replacement_effect
+
+        def skip_floor(handler, descriptor, source_context):
+            effect = original_floor(handler, descriptor, source_context)
+            return replace(
+                effect,
+                operations=(
+                    {"op": "cap_result_life_loss", "minimum": -100},
+                ),
+            )
+
+        with patch.object(
+            DamageResultLifeFloorHandler,
+            "replacement_effect",
+            skip_floor,
+        ):
+            with self.assertRaises(
+                (AssertionError, replacement_effects.ReplacementEffectError)
+            ):
+                assert_components_transform_results()
 
     def test_semantic_tap_state_mutants_are_killed(self):
         session = make_session(

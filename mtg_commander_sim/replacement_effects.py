@@ -580,6 +580,7 @@ class ReplacementBatchChoice:
 class ReplacementBatchProgress:
     batch: ReplacementEventBatch
     pending: ReplacementBatchChoice | None
+    consumed_selections: int = 0
 
 
 class ReplacementChoiceRequired(ReplacementEffectError):
@@ -638,6 +639,10 @@ def _condition_matches(
                 "eq",
                 "contains",
                 "contains_all",
+                "lt",
+                "lte",
+                "gt",
+                "gte",
             }
             unsupported = sorted(
                 str(predicate)
@@ -667,6 +672,23 @@ def _condition_matches(
                 expected["contains_all"]
             ).issubset(set(actual or ())):
                 return False
+            for predicate, comparison in (
+                ("lt", lambda left, right: left < right),
+                ("lte", lambda left, right: left <= right),
+                ("gt", lambda left, right: left > right),
+                ("gte", lambda left, right: left >= right),
+            ):
+                if predicate not in expected:
+                    continue
+                try:
+                    matches = comparison(actual, expected[predicate])
+                except TypeError as exc:
+                    raise ReplacementEffectError(
+                        f"Replacement condition {predicate} values are not "
+                        "comparable"
+                    ) from exc
+                if not matches:
+                    return False
             continue
         if actual != expected:
             return False
@@ -808,6 +830,211 @@ def _nested_event_from_mapping(
     )
 
 
+def _apply_scalar_operation(
+    payload: dict[str, Any], operation: Mapping[str, Any]
+) -> bool:
+    op = str(operation.get("op") or "")
+    if op == "set":
+        field_name = str(operation.get("field") or "")
+        if not field_name:
+            raise ReplacementEffectError(
+                "Replacement set operation requires a field"
+            )
+        payload[field_name] = copy.deepcopy(operation.get("value"))
+        return True
+    if op == "prevent":
+        available = int(payload.get("amount", 0))
+        requested = int(operation.get("amount", available))
+        if available < 0 or requested < 0:
+            raise ReplacementEffectError(
+                "Damage and prevention amounts cannot be negative"
+            )
+        amount = (
+            0
+            if bool(payload.get("unpreventable"))
+            else min(available, requested)
+        )
+        payload["amount"] = available - amount
+        payload["prevented"] = int(payload.get("prevented", 0)) + amount
+        return True
+    if op in {"multiply", "add"}:
+        field_name = str(operation.get("field") or "amount")
+        current = int(payload.get(field_name, 0))
+        payload[field_name] = (
+            current * int(operation.get("factor", 1))
+            if op == "multiply"
+            else current + int(operation.get("amount", 0))
+        )
+        return True
+    return False
+
+
+def _apply_sequence_operation(
+    payload: dict[str, Any], operation: Mapping[str, Any]
+) -> bool:
+    op = str(operation.get("op") or "")
+    if op not in {"append", "union"}:
+        return False
+    field_name = str(operation.get("field") or "")
+    values = operation.get("values")
+    if not field_name or not isinstance(values, Sequence) or isinstance(
+        values, (str, bytes)
+    ):
+        raise ReplacementEffectError(
+            f"Replacement {op} operation requires a field and values"
+        )
+    current = payload.get(field_name, [])
+    if not isinstance(current, Sequence) or isinstance(current, (str, bytes)):
+        raise ReplacementEffectError(
+            f"Replacement {op} destination must be a sequence"
+        )
+    combined = [
+        *copy.deepcopy(list(current)),
+        *copy.deepcopy(list(values)),
+    ]
+    payload[field_name] = (
+        combined if op == "append" else sorted(set(combined), key=str)
+    )
+    return True
+
+
+def _apply_nested_or_scope_operation(
+    event: ReplaceableEvent,
+    payload: dict[str, Any],
+    children: list[ReplaceableEvent],
+    entry_scope: EntryReplacementScope | None,
+    operation: Mapping[str, Any],
+) -> tuple[bool, EntryReplacementScope | None]:
+    op = str(operation.get("op") or "")
+    if op == "nested_event":
+        nested = operation.get("event")
+        if not isinstance(nested, Mapping):
+            raise ReplacementEffectError(
+                "Nested replacement operation requires an event object"
+            )
+        children.append(
+            _nested_event_from_mapping(
+                event,
+                nested,
+                suffix=str(len(children)),
+            )
+        )
+        return True, entry_scope
+    if op != "reserve_zone_change":
+        return False, entry_scope
+    if entry_scope is None:
+        raise ReplacementEffectError(
+            "Zone-change reservation requires an entry replacement scope"
+        )
+    values = operation.get("objects")
+    if values is None and operation.get("from_field"):
+        values = payload.get(str(operation["from_field"]), ())
+    if not isinstance(values, Sequence) or isinstance(values, (str, bytes)):
+        raise ReplacementEffectError(
+            "Zone-change reservation requires object IDs"
+        )
+    return True, entry_scope.reserve_zone_changes(str(value) for value in values)
+
+
+def _apply_result_life_floor(
+    event: ReplaceableEvent,
+    payload: dict[str, Any],
+    children: list[ReplaceableEvent],
+    operation: Mapping[str, Any],
+) -> None:
+    if event.kind != "damage.results" or event.affected_player is None:
+        raise ReplacementEffectError(
+            "A damage-result life floor requires a player result event"
+        )
+    minimum = operation.get("minimum")
+    if type(minimum) is not int:
+        raise ReplacementEffectError(
+            "A damage-result life floor requires an integer minimum"
+        )
+    try:
+        life_before = int(payload["life_before"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ReplacementEffectError(
+            "A damage-result life floor requires the prior life total"
+        ) from exc
+    losses = [
+        (index, child)
+        for index, child in enumerate(children)
+        if child.kind == "life.change"
+        and child.affected_player == event.affected_player
+        and child.payload.get("direction") == "loss"
+    ]
+    gains = [
+        child
+        for child in children
+        if child.kind == "life.change"
+        and child.affected_player == event.affected_player
+        and child.payload.get("direction") == "gain"
+    ]
+    if not losses:
+        raise ReplacementEffectError(
+            "A damage-result life floor requires a life-loss result"
+        )
+    loss_total = sum(
+        int(child.payload.get("amount", 0)) for _index, child in losses
+    )
+    gain_total = sum(int(child.payload.get("amount", 0)) for child in gains)
+    if life_before - loss_total + gain_total >= minimum:
+        raise ReplacementEffectError(
+            "A damage-result life floor is not applicable"
+        )
+    remaining_loss = max(0, life_before + gain_total - minimum)
+    for index, child in losses:
+        kept = min(int(child.payload.get("amount", 0)), remaining_loss)
+        remaining_loss -= kept
+        child_payload = copy.deepcopy(dict(child.payload))
+        child_payload["amount"] = kept
+        children[index] = ReplaceableEvent(
+            event_id=child.event_id,
+            kind=child.kind,
+            affected_player=child.affected_player,
+            affected_object=child.affected_object,
+            payload=child_payload,
+            applied_effects=child.applied_effects,
+            children=child.children,
+            entry_scope=child.entry_scope,
+        )
+    resolved_loss = sum(
+        int(child.payload.get("amount", 0))
+        for child in children
+        if child.kind == "life.change"
+        and child.affected_player == event.affected_player
+        and child.payload.get("direction") == "loss"
+    )
+    payload["life_loss_amount"] = resolved_loss
+    payload["life_after_without_replacement"] = (
+        life_before - resolved_loss + gain_total
+    )
+
+
+def _apply_operation(
+    event: ReplaceableEvent,
+    payload: dict[str, Any],
+    children: list[ReplaceableEvent],
+    entry_scope: EntryReplacementScope | None,
+    operation: Mapping[str, Any],
+) -> EntryReplacementScope | None:
+    if _apply_scalar_operation(payload, operation):
+        return entry_scope
+    if _apply_sequence_operation(payload, operation):
+        return entry_scope
+    handled, entry_scope = _apply_nested_or_scope_operation(
+        event, payload, children, entry_scope, operation
+    )
+    if handled:
+        return entry_scope
+    op = str(operation.get("op") or "")
+    if op == "cap_result_life_loss":
+        _apply_result_life_floor(event, payload, children, operation)
+        return entry_scope
+    raise ReplacementEffectError(f"Unsupported replacement operation {op!r}")
+
+
 def apply_replacement(
     choice: ReplacementChoice,
     effects: Iterable[ReplacementEffect],
@@ -848,118 +1075,19 @@ def apply_replacement(
     children = list(choice.event.children)
     entry_scope = choice.event.entry_scope
     for operation in effect.operations:
-        op = str(operation.get("op") or "")
-        if op == "set":
-            field_name = str(operation.get("field") or "")
-            if not field_name:
-                raise ReplacementEffectError(
-                    "Replacement set operation requires a field"
-                )
-            payload[field_name] = copy.deepcopy(operation.get("value"))
-        elif op == "prevent":
-            available = int(payload.get("amount", 0))
-            requested = int(operation.get("amount", available))
-            if available < 0 or requested < 0:
-                raise ReplacementEffectError(
-                    "Damage and prevention amounts cannot be negative"
-                )
-            amount = (
-                0
-                if bool(payload.get("unpreventable"))
-                else min(available, requested)
-            )
-            payload["amount"] = available - amount
-            payload["prevented"] = (
-                int(payload.get("prevented", 0)) + amount
-            )
-        elif op == "multiply":
-            field_name = str(operation.get("field") or "amount")
-            payload[field_name] = int(payload.get(field_name, 0)) * int(
-                operation.get("factor", 1)
-            )
-        elif op == "add":
-            field_name = str(operation.get("field") or "amount")
-            payload[field_name] = int(payload.get(field_name, 0)) + int(
-                operation.get("amount", 0)
-            )
-        elif op == "append":
-            field_name = str(operation.get("field") or "")
-            values = operation.get("values")
-            if not field_name or not isinstance(values, Sequence) or isinstance(
-                values, (str, bytes)
-            ):
-                raise ReplacementEffectError(
-                    "Replacement append operation requires a field and values"
-                )
-            current = payload.get(field_name, [])
-            if not isinstance(current, Sequence) or isinstance(
-                current, (str, bytes)
-            ):
-                raise ReplacementEffectError(
-                    "Replacement append destination must be a sequence"
-                )
-            payload[field_name] = [
-                *copy.deepcopy(list(current)),
-                *copy.deepcopy(list(values)),
-            ]
-        elif op == "union":
-            field_name = str(operation.get("field") or "")
-            values = operation.get("values")
-            if not field_name or not isinstance(values, Sequence) or isinstance(
-                values, (str, bytes)
-            ):
-                raise ReplacementEffectError(
-                    "Replacement union operation requires a field and values"
-                )
-            payload[field_name] = sorted(
-                {
-                    *list(payload.get(field_name, [])),
-                    *copy.deepcopy(list(values)),
-                },
-                key=str,
-            )
-        elif op == "nested_event":
-            nested = operation.get("event")
-            if not isinstance(nested, Mapping):
-                raise ReplacementEffectError(
-                    "Nested replacement operation requires an event object"
-                )
-            children.append(
-                _nested_event_from_mapping(
-                    choice.event,
-                    nested,
-                    suffix=str(len(children)),
-                )
-            )
-        elif op == "reserve_zone_change":
-            if entry_scope is None:
-                raise ReplacementEffectError(
-                    "Zone-change reservation requires an entry replacement scope"
-                )
-            values = operation.get("objects")
-            if values is None and operation.get("from_field"):
-                values = payload.get(str(operation["from_field"]), ())
-            if not isinstance(values, Sequence) or isinstance(
-                values, (str, bytes)
-            ):
-                raise ReplacementEffectError(
-                    "Zone-change reservation requires object IDs"
-                )
-            entry_scope = entry_scope.reserve_zone_changes(
-                str(value) for value in values
-            )
-        else:
-            raise ReplacementEffectError(
-                f"Unsupported replacement operation {op!r}"
-            )
+        entry_scope = _apply_operation(
+            choice.event,
+            payload,
+            children,
+            entry_scope,
+            operation,
+        )
     return choice.event.with_payload(
         payload,
         applied_effect=effect.effect_id,
         children=children,
         entry_scope=entry_scope,
     )
-
-
 def resolve_replacements(
     event: ReplaceableEvent,
     effects: Iterable[ReplacementEffect],
@@ -1178,6 +1306,7 @@ def advance_replacement_batch(
     effects: Iterable[ReplacementEffect],
     *,
     selections: Iterable[str | None] = (),
+    require_all_selections: bool = True,
 ) -> ReplacementBatchProgress:
     """Apply supplied choices and every forced singleton replacement.
 
@@ -1189,6 +1318,7 @@ def advance_replacement_batch(
 
     all_effects = _canonical_effects(effects)
     supplied = iter(selections)
+    consumed = 0
     current = batch
     while pending := next_batch_replacement_choice(current, all_effects):
         if (
@@ -1199,10 +1329,12 @@ def advance_replacement_batch(
         else:
             try:
                 selected = next(supplied)
+                consumed += 1
             except StopIteration:
                 return ReplacementBatchProgress(
                     batch=current,
                     pending=pending,
+                    consumed_selections=consumed,
                 )
         current = apply_batch_replacement(
             current,
@@ -1210,10 +1342,20 @@ def advance_replacement_batch(
             pending,
             selected,
         )
+    if not require_all_selections:
+        return ReplacementBatchProgress(
+            batch=current,
+            pending=None,
+            consumed_selections=consumed,
+        )
     try:
         next(supplied)
     except StopIteration:
-        return ReplacementBatchProgress(batch=current, pending=None)
+        return ReplacementBatchProgress(
+            batch=current,
+            pending=None,
+            consumed_selections=consumed,
+        )
     raise ReplacementEffectError(
         "Replacement selection sequence contains unused choices"
     )

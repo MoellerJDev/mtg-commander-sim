@@ -22,6 +22,7 @@ class LocalMergeGateTests(unittest.TestCase):
         fixtures = [
             root / "tests" / "fixtures" / "scryfall-exact-lists.json",
             root / "tests" / "fixtures" / "browser-lifecycle-cards.json",
+            root / "tests" / "fixtures" / "damage-result-cards.json",
         ]
         with tempfile.TemporaryDirectory() as temporary:
             database = Path(temporary) / "test-ci.sqlite3"
@@ -34,8 +35,14 @@ class LocalMergeGateTests(unittest.TestCase):
                 )
 
         self.assertEqual([str(fixture) for fixture in fixtures], result["fixtures"])
-        primary = json.loads(fixtures[0].read_text(encoding="utf-8"))
-        self.assertEqual(len(primary["rulings"]), result["rulings"])
+        fixture_data = [
+            json.loads(fixture.read_text(encoding="utf-8"))
+            for fixture in fixtures
+        ]
+        self.assertEqual(
+            sum(len(value.get("rulings", ())) for value in fixture_data),
+            result["rulings"],
+        )
 
     def test_gate_orchestrates_every_required_existing_command(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -84,6 +91,10 @@ class LocalMergeGateTests(unittest.TestCase):
         )
         self.assertIn(
             "tests/fixtures/browser-lifecycle-cards.json",
+            by_name["build_test_database"],
+        )
+        self.assertIn(
+            "tests/fixtures/damage-result-cards.json",
             by_name["build_test_database"],
         )
         self.assertIn(

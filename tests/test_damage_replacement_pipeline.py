@@ -785,7 +785,7 @@ class DamageReplacementPipelineTests(unittest.TestCase):
         self.assertIsNotNone(engine._semantic_pause_annotation())
         self.assertIn(item, engine.state.stack)
 
-    def test_unsupported_infect_result_rolls_back_entire_batch(self):
+    def test_infect_creature_result_commits_with_other_damage_atomically(self):
         session = self.session(120461509)
         engine = session.engine
         normal_source = self.add_permanent(
@@ -815,7 +815,6 @@ class DamageReplacementPipelineTests(unittest.TestCase):
             "A", infect_ref, zones={"battlefield"}
         )
         life_before = engine.state.players["B"].life
-        state_before = authoritative_state_hash(engine.state)
         prepared = prepare_damage_batch(
             engine,
             (
@@ -830,16 +829,20 @@ class DamageReplacementPipelineTests(unittest.TestCase):
                     source=infect_source,
                     target=target,
                     amount=1,
-                    event_id="damage:unsupported-second",
+                    event_id="damage:infect-second",
                 ),
             ),
         )
 
-        with self.assertRaisesRegex(DamageError, "Infect and wither"):
-            commit_prepared_damage_batch(engine, prepared)
-        self.assertEqual(life_before, engine.state.players["B"].life)
+        result = commit_prepared_damage_batch(engine, prepared)
+        self.assertEqual(life_before - 3, engine.state.players["B"].life)
         self.assertEqual(0, target.marked_damage)
-        self.assertEqual(state_before, authoritative_state_hash(engine.state))
+        self.assertEqual(1, target.counters["-1/-1"])
+        self.assertEqual(4, result.dealt_amount)
+        self.assertEqual(
+            {"life.change", "counter.place"},
+            {event.kind for event in result.result_events},
+        )
 
     def test_mana_ability_damage_uses_transaction_or_fails_before_damage(self):
         session = self.session(120461510)

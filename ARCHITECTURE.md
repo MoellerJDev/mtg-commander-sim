@@ -927,11 +927,14 @@ The new rules primitives sit below both generated and hand-authored semantics:
   generated counters on battlefield permanents. Fixed integral quantity
   replacements suspend to the affected permanent controller and traverse
   simultaneous events in APNAP order before any counter mutates.
-- `damage.py` owns source/recipient snapshots, immutable proposals,
-  replacement/prevention preparation, atomic result commit, and normalized
-  final events for represented combat, semantic, and mana-result damage.
-  Fixed quantity and fixed prevention components participate without state
-  access; unresolved choices during mana payment fail before mutation.
+- `damage.py` coordinates source/recipient snapshots, immutable proposals,
+  quantity replacement/prevention, and normalized final events for represented
+  combat, semantic, and mana-result damage. `damage_results.py` owns immutable
+  affected-subject CR 120.3 result trees, result replacement preparation,
+  mutation-only commit planning, and atomic result mutation. Fixed quantity,
+  fixed prevention, life-gain multiplication, and whole-result life-floor
+  components participate without state access; unresolved choices during mana
+  payment fail before mutation.
 - `state_based_actions.py` evaluates the deterministic permanent subset of CR
   704 plus token and represented spell/card-copy cessation from one immutable
   snapshot. The engine applies the resulting batch, captures last-known
@@ -960,9 +963,12 @@ The new rules primitives sit below both generated and hand-authored semantics:
 All of these contracts remain partial. Legacy static abilities have not all moved
 into the layer evaluator; entry counters, player counters, costs, rule actions,
 and continuation-sensitive legacy counter producers do not yet use the focused
-counter owner. Persistent prevention shields, redirection, non-damage
-transformations, damage-result replacement, infect/wither/toxic outcomes, and
-replacement choices during mana payment remain outside the damage transaction.
+counter owner. Represented Infect, Wither, Lifelink, fixed Toxic, and bounded
+damage-result replacements now share the damage-result transaction. Persistent
+prevention shields, redirection, non-damage transformations, dynamic Toxic,
+unrepresented source LKI/ability grants, remaining result-replacement families,
+and replacement choices during mana payment remain outside its certified
+boundary.
 Not every zone/draw/enters producer routes through the replacement engine, and
 the state-action evaluator does not yet
 cover Sagas, dungeons, Roles, speed, maximum-counter wording outside the
