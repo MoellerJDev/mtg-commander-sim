@@ -83,8 +83,10 @@ python -m server
 ```
 
 That is the entire local application startup. The server installs browser
-packages on the first run, rebuilds the browser when its sources change, opens
-`http://127.0.0.1:8000`, and shows first-run card-data progress in the UI.
+packages on the first run, rebuilds the browser when its sources change, and
+prints `http://127.0.0.1:8000` without interrupting another browser session.
+Open that URL yourself, or pass `--open` when you explicitly want automatic
+browser launch. The UI shows first-run card-data progress.
 Initial setup downloads Scryfall's compressed Oracle Cards and Rulings exports
 and builds `data/scryfall-current.sqlite3`. It checks again every 24 hours.
 Every startup checks the live manifest before enabling deck import. If the

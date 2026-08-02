@@ -137,7 +137,9 @@ maintenance: "hand-maintained"
   and Orcish Bowmasters programs.
 - Reduced normal local startup to `python -m server`: the launcher installs
   missing browser dependencies, rebuilds changed React sources, serves the
-  production client and API from one origin, and opens the local UI.
+  production client and API from one origin, and prints the local UI URL.
+  Browser opening is now an explicit `--open` opt-in so automated or agent-run
+  startup cannot disrupt an unrelated browser session.
 - Added visible first-run setup, 24-hour Scryfall bulk-manifest checks, atomic
   Oracle/rulings SQLite builds, current-pair archive retention, and
   fingerprinted database snapshots retained only for saved Game Records that
