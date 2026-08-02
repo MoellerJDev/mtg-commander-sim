@@ -481,10 +481,17 @@ def card_specificity_scope(
             "card_specificity_exempt_prefixes", []
         )
     )
+    metadata_exempt_files = {
+        str(value)
+        for value in source["scope"].get(
+            "card_specificity_metadata_exempt_files", []
+        )
+    }
     return sorted(
         relative
         for relative in analyses
-        if not any(relative.startswith(prefix) for prefix in exemptions)
+        if relative not in metadata_exempt_files
+        and not any(relative.startswith(prefix) for prefix in exemptions)
     )
 
 

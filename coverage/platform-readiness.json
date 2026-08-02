@@ -17,8 +17,8 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "phase_2_typed_tap_untap_effect_migration",
-    "commit_reference": "focused feature branch based on certified PR #60 merge e756950d52030b47a6cf81edcd7d7f60ca11d97e; exact-head certification pending",
+    "active_phase": "rules_dependency_scheduler",
+    "commit_reference": "focused scheduler branch based on certified main 40241e6a7a4e77a3dab3df93c6a726b0f82186fb; exact-head certification pending",
     "tags": [
       {
         "commit": "4dc3feb625f824b9062e162808fd74b07e97c404",
@@ -44,9 +44,15 @@
       "status": "development_local_runtime_hardened"
     },
     {
-      "evidence": "The focused Phase 2 branch registers tap, untap, and all-creature untap as strict typed semantic operations, commits them through a classified tap-state mutation port, removes their legacy apply_effect branches, preserves stun replacement and effective-type/phasing behavior, and supplies rollback, replay, implementation-mutation, malformed-input, and source-linked evidence. The three capabilities remain tested and blocked rather than trusted because broader prohibitions, replacement ordering, and characteristic closure remain incomplete.",
+      "evidence": "Certified main registers tap, untap, and all-creature untap as strict typed semantic operations, commits them through a classified tap-state mutation port, removes their legacy apply_effect branches, preserves stun replacement and effective-type/phasing behavior, and supplies rollback, replay, implementation-mutation, malformed-input, and source-linked evidence. The three capabilities remain tested and blocked rather than trusted because broader prohibitions, replacement ordering, and characteristic closure remain incomplete.",
       "id": "phase_2_tap_state_migration",
       "name": "Typed tap-state effect migration",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "The focused scheduler branch conservatively assigns every reviewed blocked behavioral rule and every unclassified nonpassing rule to one dependency-linked subsystem, records implementation/tests/profiles/compiler impact, rejects stale or incomplete catalogs, and selects a bounded CR 614/616 replacement-choice and nested-event batch without promoting conformance or runtime trust.",
+      "id": "rules_dependency_scheduler",
+      "name": "Dependency-ordered behavioral rules scheduler",
       "status": "implementation_complete_certification_pending"
     },
     {
@@ -62,7 +68,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Commit the coherent typed tap-state slice, run the complete exact-head local merge gate headlessly, require public CI for the same SHA, merge and clean the branch, then select the next measured migration from fresh certified main.",
+  "next_task": "Certify and merge the dependency scheduler, clean the branch, then implement the selected bounded CR 614/616 replacement-choice and nested-event batch from fresh certified main.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -153,19 +159,19 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4217,
+    "deterministic_cases_discovered": 4223,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
     "web_files": 24
   },
   "validation": {
-    "baseline_commit": "e756950d52030b47a6cf81edcd7d7f60ca11d97e",
+    "baseline_commit": "40241e6a7a4e77a3dab3df93c6a726b0f82186fb",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30729318546,
+      "run_id": 30732155279,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30729318546"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30732155279"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -174,7 +180,7 @@
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "deterministic_tests": "pass_full_exact_commit_gate",
-      "focused_rules_tests": "pass_typed_tap_state_lowering_validation_stun_effective_type_phasing_rollback_replay_mutation_capability_binding_plus_adjacent_rules_tests_current_branch",
+      "focused_rules_tests": "pass_rules_scheduler_complete_section_and_rule_assignment_dependency_order_profile_compiler_evidence_selected_batch_stale_output_and_invalid_catalog_checks",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",

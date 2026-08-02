@@ -13,6 +13,8 @@ This document states the current rules boundary without duplicating generated
 metrics. Exact counts and source fingerprints live in
 [`COMPILER_COVERAGE_STATUS.md`](COMPILER_COVERAGE_STATUS.md); architecture and
 test debt live in [`ARCHITECTURE_DEBT_STATUS.md`](ARCHITECTURE_DEBT_STATUS.md).
+Dependency-ordered rules work lives in the generated
+[`RULES_DEPENDENCY_QUEUE.md`](RULES_DEPENDENCY_QUEUE.md).
 
 ## Claim boundary
 
@@ -93,6 +95,12 @@ declared-pool compatibility remains available. Each later slice must continue
 to remove or migrate one coherent reusable responsibility before broad corpus
 expansion resumes.
 
+The scheduler conservatively queues every reviewed blocked behavioral rule and
+every unclassified nonpassing rule. Its first selected implementation batch is
+the coupled replacement-choice and nested-event cluster in CR 614/616. That is
+a bounded next slice, not a declaration that all replacement or prevention
+semantics can be completed in one pass.
+
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,
 capability requirements, interaction tests, replay tests, and an explicit
@@ -104,8 +112,10 @@ Use the generated reports instead of hand-copying counts:
 
 ```bash
 python scripts/update_architecture_audit.py --check
+python scripts/update_rules_scheduler.py --check
 python simctl.py rules verify
 python simctl.py rules coverage
+python simctl.py rules queue
 python simctl.py rules next
 ```
 

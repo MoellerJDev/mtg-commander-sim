@@ -20,6 +20,13 @@ Its default inventory-only status proves neither implementation nor rules
 correctness. See `RULE_CONFORMANCE.md` and
 `coverage/rules-conformance.json`.
 
+`platform/rules-subsystems.json` is the hand-maintained, prose-free subsystem
+and dependency catalog. `scripts/update_rules_scheduler.py` combines it with
+the rule index, conformance cases, and capability registry to generate
+`coverage/rules-dependency-queue.json` and
+`docs/RULES_DEPENDENCY_QUEUE.md`. Unclassified nonpassing rules stay queued
+until review proves that they are structural or definition-only.
+
 Run `simctl rules verify --root .` after regeneration. A successful structural
 verification is not a completeness claim; see `coverage/rules-coverage.json`
 and `RULES_COMPLETENESS.md`.

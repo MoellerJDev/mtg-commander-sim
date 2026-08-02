@@ -25,6 +25,11 @@ from .rule_conformance import (
     rule_conformance_coverage,
     validate_rule_conformance,
 )
+from .rules_scheduler import (
+    load_rules_dependency_queue,
+    rules_dependency_queue_errors,
+    rules_next_work,
+)
 
 RULES_CORPUS_SCHEMA_VERSION = 1
 RULES_PARSER_VERSION = "cr-index-v1"
@@ -47,6 +52,7 @@ CORPUS_OPERATIONS = {
     "diff",
     "coverage",
     "conformance",
+    "queue",
     "next",
     "verify",
     "report",
@@ -1236,62 +1242,57 @@ def rules_next(
     *,
     limit: int = 20,
 ) -> dict[str, Any]:
-    rule_index = _load_required(root, "rules/rule-index.json")
-    conformance = _load_required(
-        root, "rules/conformance-cases.json"
-    )
-    cases_by_rule = {
-        str(case["rule_id"]): case
-        for case in conformance.get("cases", [])
-    }
-    rules = list(rule_index.get("rules", []))
-    children: Counter[str] = Counter()
-    for rule in rules:
-        for dependency in rule.get("dependency_ids", []):
-            children[str(dependency)] += 1
-    rank = {
-        "failing": 0,
-        "blocked": 1,
-        "unreviewed": 2,
-        "skipped": 3,
-        "passing": 4,
-        "definition_only": 5,
-    }
-    candidates = sorted(
-        (
-            {
-                "rule_id": rule["rule_id"],
-                "section": rule.get("section"),
-                "coverage_status": rule.get("coverage_status"),
-                "conformance_status": cases_by_rule.get(
-                    str(rule["rule_id"]), {}
-                ).get("status"),
-                "classification": cases_by_rule.get(
-                    str(rule["rule_id"]), {}
-                ).get("classification"),
-                "assertion_kind": cases_by_rule.get(
-                    str(rule["rule_id"]), {}
-                ).get("assertion_kind"),
-                "dependent_rule_count": children[str(rule["rule_id"])],
-                "source_span": rule.get("source_span"),
-            }
-            for rule in rules
-            if cases_by_rule.get(str(rule["rule_id"]), {}).get(
-                "status"
+    return rules_next_work(root, limit=limit)
+
+
+def _mechanic_contract_errors(
+    root: Path,
+    mechanics_registry: Mapping[str, Any],
+    known_rules: set[str],
+) -> list[str]:
+    errors = []
+    try:
+        contracts = load_mechanic_contracts(
+            root,
+            expected_effective_date=str(
+                mechanics_registry.get("effective_date") or ""
+            ),
+            expected_source_sha256=str(
+                mechanics_registry.get("source_sha256") or ""
+            ),
+            known_rule_ids=known_rules,
+        )
+        expected_contracts = {
+            str(contract["mechanic_id"]): contract
+            for contract in contracts
+        }
+        registry_contracts = {
+            str(row.get("mechanic_id")): row
+            for row in mechanics_registry.get("mechanics", [])
+            if row.get("contract_path")
+        }
+        if set(expected_contracts) != set(registry_contracts):
+            errors.append(
+                "mechanics/registry.json contract set is stale"
             )
-            not in {"passing", "definition_only"}
-        ),
-        key=lambda row: (
-            rank.get(str(row["conformance_status"]), 99),
-            -int(row["dependent_rule_count"]),
-            str(row["rule_id"]),
-        ),
-    )
-    return {
-        "schema_version": RULES_CORPUS_SCHEMA_VERSION,
-        "effective_date": rule_index.get("effective_date"),
-        "next": candidates[: max(1, int(limit))],
-    }
+        for mechanic_id, contract in expected_contracts.items():
+            row = registry_contracts.get(mechanic_id, {})
+            if (
+                row.get("contract_path")
+                != contract.get("_contract_path")
+                or row.get("contract_sha256")
+                != contract.get("_contract_sha256")
+                or row.get("coverage_status")
+                != contract.get("coverage_status")
+                or row.get("trust_level")
+                != contract.get("trust_level")
+            ):
+                errors.append(
+                    f"Mechanic {mechanic_id} does not match its contract"
+                )
+    except MechanicContractError as exc:
+        errors.append(str(exc))
+    return errors
 
 
 def verify_rules_corpus(
@@ -1427,47 +1428,9 @@ def verify_rules_corpus(
                 f"Mechanic {mechanic.get('mechanic_id')} has an unknown "
                 "coverage status"
             )
-    try:
-        contracts = load_mechanic_contracts(
-            root,
-            expected_effective_date=str(
-                mechanics_registry.get("effective_date") or ""
-            ),
-            expected_source_sha256=str(
-                mechanics_registry.get("source_sha256") or ""
-            ),
-            known_rule_ids=known_rules,
-        )
-        expected_contracts = {
-            str(contract["mechanic_id"]): contract
-            for contract in contracts
-        }
-        registry_contracts = {
-            str(row.get("mechanic_id")): row
-            for row in mechanics_registry.get("mechanics", [])
-            if row.get("contract_path")
-        }
-        if set(expected_contracts) != set(registry_contracts):
-            errors.append(
-                "mechanics/registry.json contract set is stale"
-            )
-        for mechanic_id, contract in expected_contracts.items():
-            row = registry_contracts.get(mechanic_id, {})
-            if (
-                row.get("contract_path")
-                != contract.get("_contract_path")
-                or row.get("contract_sha256")
-                != contract.get("_contract_sha256")
-                or row.get("coverage_status")
-                != contract.get("coverage_status")
-                or row.get("trust_level")
-                != contract.get("trust_level")
-            ):
-                errors.append(
-                    f"Mechanic {mechanic_id} does not match its contract"
-                )
-    except MechanicContractError as exc:
-        errors.append(str(exc))
+    errors.extend(
+        _mechanic_contract_errors(root, mechanics_registry, known_rules)
+    )
 
     cache = (
         Path(cache_dir)
@@ -1484,6 +1447,12 @@ def verify_rules_corpus(
     coverage = rules_coverage(root)
     if coverage["invalid_statuses"]:
         errors.append("Coverage contains invalid status values")
+    scheduler_catalog = root / "platform" / "rules-subsystems.json"
+    scheduler_queue = (
+        root / "coverage" / "rules-dependency-queue.json"
+    )
+    if scheduler_catalog.exists() or scheduler_queue.exists():
+        errors.extend(rules_dependency_queue_errors(root))
     return {
         "ok": not errors,
         "errors": errors,
@@ -1574,6 +1543,8 @@ def execute_rules_corpus_operation(
         )
         _write_conformance_coverage(root, value)
         return value
+    if operation == "queue":
+        return load_rules_dependency_queue(root)
     if operation == "next":
         return rules_next(root, limit=limit)
     if operation == "verify":
