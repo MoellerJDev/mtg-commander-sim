@@ -159,7 +159,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4223,
+    "deterministic_cases_discovered": 4226,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,

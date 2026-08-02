@@ -3144,7 +3144,7 @@
           "visibility": "private"
         }
       ],
-      "logical_lines": 58475,
+      "logical_lines": 58483,
       "methods": {
         "dunder": 56,
         "private": 386,
@@ -3632,8 +3632,8 @@
           "file": "server/__main__.py",
           "functions_and_methods": 3,
           "language": "python",
-          "logical_lines": 80,
-          "physical_lines": 92
+          "logical_lines": 88,
+          "physical_lines": 100
         },
         {
           "file": "mtg_commander_sim/damage.py",
@@ -4407,7 +4407,7 @@
           "physical_lines": 1726
         }
       ],
-      "physical_lines": 62526,
+      "physical_lines": 62534,
       "python_file_count": 79,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -8086,18 +8086,18 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 923,
-      "discovered_total": 4223,
+      "conventional_ast_cases": 926,
+      "discovered_total": 4226,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 23,
         "fuzz_named": 1,
         "privacy_or_projection_named": 14,
         "replay_named": 52,
-        "server_named": 13
+        "server_named": 15
       },
       "reconciles": true,
-      "test_files": 103
+      "test_files": 104
     }
   }
 }

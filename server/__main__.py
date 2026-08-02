@@ -56,10 +56,18 @@ def main() -> None:
         help="Do not build the React client when its sources changed",
     )
     parser.add_argument(
-        "--no-open",
+        "--open",
+        dest="open_browser",
         action="store_true",
-        help="Do not open the local browser automatically",
+        help="Open the local browser after startup (opt in)",
     )
+    parser.add_argument(
+        "--no-open",
+        dest="open_browser",
+        action="store_false",
+        help=argparse.SUPPRESS,
+    )
+    parser.set_defaults(open_browser=False)
     parser.add_argument(
         "--offline",
         action="store_true",
@@ -73,7 +81,7 @@ def main() -> None:
     if args.offline:
         os.environ["MTG_AUTO_UPDATE_CARDS"] = "0"
     url = f"http://{args.host}:{args.port}"
-    if not args.no_open:
+    if args.open_browser:
         opener = threading.Timer(1.2, lambda: webbrowser.open(url))
         opener.daemon = True
         opener.start()

@@ -28,9 +28,12 @@ python -m server
 
 The launcher installs `web/` dependencies if needed, performs a production
 browser build when sources are newer than `web/dist`, starts the API and
-WebSocket server, serves the browser from the same origin, and opens
-`http://127.0.0.1:8000`. There is no second Vite terminal in the normal local
-workflow. Use `--no-open`, `--no-build-browser`, or `--offline` when needed.
+WebSocket server, serves the browser from the same origin, and prints
+`http://127.0.0.1:8000`. It does not open or focus a browser by default. Open
+the printed URL yourself or use `--open` as an explicit opt-in. There is no
+second Vite terminal in the normal local workflow. Use `--no-build-browser` or
+`--offline` when needed; the legacy `--no-open` flag remains a harmless
+compatibility alias.
 
 If `MTG_CARD_DB` is not set, the first run shows a setup screen while the
 server discovers the current Scryfall Oracle Cards and Rulings JSONL archives,

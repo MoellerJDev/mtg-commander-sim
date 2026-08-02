@@ -56,6 +56,10 @@ maintenance: "hand-maintained"
   restriction applies even when a visible browser is already open for unrelated
   user work; explicit user authorization is required for every visible-browser
   session.
+- The server is intentionally non-opening by default. `python -m server --open`
+  is a user-facing convenience and agents must never pass `--open` unless the
+  user explicitly requests a visible browser launch in that same task. Printing
+  or probing a localhost URL does not authorize navigation to it.
 
 ## Current architecture program
 

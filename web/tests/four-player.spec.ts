@@ -784,7 +784,7 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       // Depending on the exact priority handoff, the first visible pass may be
       // an immediate priority action rather than the form-backed main-phase
       // pass. Advance through only those passes until attackers are requested.
-      for (let attempt = 0; attempt < 4; attempt += 1) {
+      for (let attempt = 0; attempt < 8; attempt += 1) {
         const panel = host.getByTestId("decision-panel");
         const pass = host.getByTestId("action-pass");
         await expect
@@ -801,12 +801,21 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
         try {
           await submitMaybeFormAction(host, "pass", 2_000);
         } catch (error) {
-          // A WebSocket projection may replace an enabled priority pass with
-          // the disabled attackers-window pass between the poll and click.
+          // A projection or the safe auto-pass effect may consume the enabled
+          // pass between the poll and click. Wait for that in-flight command
+          // to reveal either the attackers window or the next manual pass.
+          await expect
+            .poll(async () => {
+              if ((await panel.textContent())?.includes("Combat.Attackers")) {
+                return "attackers";
+              }
+              return (await pass.isVisible()) && (await pass.isEnabled()) ? "pass" : "waiting";
+            })
+            .not.toBe("waiting");
           if ((await panel.textContent())?.includes("Combat.Attackers")) {
             break;
           }
-          throw error;
+          if (!(await pass.isEnabled())) throw error;
         }
       }
       await expect(host.getByTestId("decision-panel")).toContainText("Combat.Attackers");

@@ -22,8 +22,9 @@ python -m server
 
 The one process installs/builds the browser when needed, checks the Scryfall
 bulk manifest, creates or activates the local card/rulings SQLite snapshot,
-serves local card images on demand, starts HTTP/WebSocket endpoints, and opens
-the browser. First setup can remain on the progress screen while data builds.
+serves local card images on demand, starts HTTP/WebSocket endpoints, and prints
+the local URL. It does not open or focus a browser unless you explicitly add
+`--open`. First setup can remain on the progress screen while data builds.
 
 Use `Ctrl+C` for a clean stop and the same command to resume. Do not run two
 local servers against the same data root; on Windows, an older process can hold
@@ -32,13 +33,15 @@ the active SQLite file open and delay pending-snapshot activation.
 ## Useful modes
 
 ```powershell
-python -m server --no-open
+python -m server --open
 python -m server --offline
 $env:MTG_CARD_DB = "data/test-ci.sqlite3"
 python -m server --offline
 ```
 
-`--offline` requires a usable existing database. Runtime records, databases,
+`--open` opts into automatic browser launch. The legacy `--no-open` flag is
+still accepted but is now equivalent to the safe default. `--offline` requires
+a usable existing database. Runtime records, databases,
 bulk archives, images, logs, and capabilities are ignored local data. Do not
 commit them.
 
