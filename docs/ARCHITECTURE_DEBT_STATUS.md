@@ -2,7 +2,7 @@
 title: "Architecture debt status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
+verified: "b1ecdc0f3446a37ffe31bfca1237a079691e6b22"
 audience: "maintainers and rules contributors"
 maintenance: "generated"
 ---
@@ -13,10 +13,10 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 
 ## Baseline coordinates
 
-- Main commit: `7cc9ea1702c67519b14d2f177d82dcc8fab5458f`
+- Main commit: `b1ecdc0f3446a37ffe31bfca1237a079691e6b22`
 - Package: `0.8.0`
-- CI run: [30723562495](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30723562495) — `pass`
-- Production scope: 82 files, 60,208 physical lines, 56,347 logical lines
+- CI run: [30725523797](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30725523797) — `pass`
+- Production scope: 86 files, 61,625 physical lines, 57,665 logical lines
 
 ## Central engine debt
 
@@ -24,32 +24,32 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Methods: 28 public, 303 private, 1 dunder
 - Cross-subsystem responsibility groups: 7
 - Direct GameState-write heuristic: 190 locations
-- Semantic-operation branches: 209
+- Semantic-operation branches: 212
 - Registered typed semantic handlers: 3 across 3 operations
 - Registered typed runtime components: 2
 - Remaining legacy `apply_effect` branches: 73
 - Registered operations still intercepted by engine string dispatch: 0
-- Exact printed-name literals in configured core files: 407 (62 conditional)
+- Exact printed-name literals in configured core files: 724 (110 conditional)
 - Oracle-ID literals in Python production code: 8
 - Card-named helpers: 1
 - Modules above the 1,500-logical-line review threshold: 6
-- Functions/methods above the 150-logical-line review threshold: 50
+- Functions/methods above the 150-logical-line review threshold: 53
 - Printed-name matching is deliberately over-inclusive: ordinary words that are also printed card names remain baseline candidates for Phase 1 review.
 
 ## Enforced debt trend
 
-Baseline: `5197a91dcdac428c09980a39467a7a5c62bc17fa`. Guard: `python scripts/validate_architecture.py --check`.
+Baseline: `b1ecdc0f3446a37ffe31bfca1237a079691e6b22`. Guard: `python scripts/validate_architecture.py --check`.
 
 | Dimension | Baseline | Current | Delta |
 |---|---:|---:|---:|
-| `engine_logical_lines` | 23,155 | 23,147 | -8 |
+| `engine_logical_lines` | 23,147 | 23,147 | +0 |
 | `direct_game_state_writes` | 190 | 190 | +0 |
-| `printed_name_literals` | 416 | 407 | -9 |
+| `printed_name_literals` | 724 | 724 | +0 |
 | `oracle_id_literals` | 8 | 8 | +0 |
 | `legacy_card_specific_operations` | 15 | 15 | +0 |
 | `card_named_helpers` | 1 | 1 | +0 |
 | `oversized_modules` | 6 | 6 | +0 |
-| `oversized_functions_and_methods` | 50 | 50 | +0 |
+| `oversized_functions_and_methods` | 54 | 53 | -1 |
 
 ## Largest production modules
 
@@ -60,16 +60,16 @@ Baseline: `5197a91dcdac428c09980a39467a7a5c62bc17fa`. Guard: `python scripts/val
 | `mtg_commander_sim/report.py` | python | 1,853 | 1,813 |
 | `mtg_commander_sim/oracle_ir.py` | python | 1,832 | 1,765 |
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
-| `mtg_commander_sim/record.py` | python | 1,731 | 1,621 |
+| `mtg_commander_sim/record.py` | python | 1,726 | 1,620 |
 | `mtg_commander_sim/rules_corpus.py` | python | 1,590 | 1,495 |
-| `mtg_commander_sim/cli.py` | python | 1,377 | 1,325 |
+| `mtg_commander_sim/cli.py` | python | 1,388 | 1,336 |
 | `server/app.py` | python | 1,304 | 1,171 |
 | `mtg_commander_sim/codex_cli.py` | python | 1,214 | 1,154 |
-| `mtg_commander_sim/session.py` | python | 1,160 | 1,117 |
+| `mtg_commander_sim/session.py` | python | 1,142 | 1,099 |
 | `mtg_commander_sim/arena.py` | python | 1,106 | 1,033 |
-| `mtg_commander_sim/preflight.py` | python | 844 | 781 |
+| `mtg_commander_sim/preflight.py` | python | 922 | 857 |
 | `server/store.py` | python | 810 | 689 |
-| `mtg_commander_sim/card_programs/model.py` | python | 739 | 683 |
+| `mtg_commander_sim/semantics.py` | python | 674 | 631 |
 
 ## Largest functions and methods
 
@@ -82,14 +82,14 @@ Baseline: `5197a91dcdac428c09980a39467a7a5c62bc17fa`. Guard: `python scripts/val
 | `parse_declaration_restriction_line` | `mtg_commander_sim/declaration_restrictions.py:892` | 881 | 942 |
 | `create_app` | `server/app.py:536` | 724 | 769 |
 | `CommanderEngine._cast` | `mtg_commander_sim/engine.py:6169` | 622 | 625 |
-| `main` | `mtg_commander_sim/cli.py:747` | 617 | 627 |
+| `main` | `mtg_commander_sim/cli.py:758` | 617 | 627 |
 | `_compile_face` | `mtg_commander_sim/oracle_ir.py:919` | 615 | 623 |
 | `CommanderEngine._priority_action_hints` | `mtg_commander_sim/engine.py:9289` | 579 | 581 |
 | `_effect_template` | `mtg_commander_sim/oracle_ir.py:310` | 539 | 540 |
 | `CommanderEngine._cast_cost_options` | `mtg_commander_sim/engine.py:8864` | 418 | 424 |
-| `CommanderSession.act` | `mtg_commander_sim/session.py:531` | 382 | 386 |
+| `build_parser` | `mtg_commander_sim/cli.py:351` | 381 | 405 |
 | `CommanderEngine._activate` | `mtg_commander_sim/engine.py:7369` | 375 | 383 |
-| `build_parser` | `mtg_commander_sim/cli.py:351` | 370 | 394 |
+| `CommanderSession.act` | `mtg_commander_sim/session.py:533` | 362 | 366 |
 
 ## Engine responsibility spread
 
@@ -116,21 +116,23 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,183
-- Conventional Python cases: 883
+- Python discovered: 4,207
+- Conventional Python cases: 907
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 7
 - Browser unit cases: 14
 - Dedicated property suite: false
 - Mutation score: None
-- Performance baseline: None
+- Focused executable mutation suite: true
+- Capability mutation declarations: 8
+- Performance baseline: `platform/continuous-effect-performance-baseline.json` (5 scenarios; latency observational)
 
 ## Documentation drift
 
-- Required: 26
-- Present after generated Phase 0 outputs: 26
+- Required: 31
+- Present after generated Phase 0 outputs: 31
 - Missing: 0
-- Metadata complete: 26
+- Metadata complete: 31
 
 The authoritative index, metadata, internal-link, stale-claim, and ADR policies are enforced by `scripts/validate_documentation.py`. Detailed document records remain in `coverage/architecture-audit.json`.
 

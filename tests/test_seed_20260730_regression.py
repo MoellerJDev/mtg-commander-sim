@@ -241,6 +241,34 @@ class Seed20260730RegressionTests(unittest.TestCase):
                 )
             )
             self.assertTrue(hidden_audit["seat_projection_verified"])
+            implicit_rows = [
+                program
+                for command in session.commands
+                for program in command["semantics"]["programs_used"]
+                if program.get("implicit_fallback")
+            ]
+            self.assertIn(
+                {
+                    "oracle_id": "20347559-95a9-4689-bb79-c5bb3809b719",
+                    "version": 1,
+                    "builtin": False,
+                    "implicit_fallback": (
+                        "trusted_generic_permanent_spell"
+                    ),
+                },
+                [
+                    {
+                        key: row[key]
+                        for key in (
+                            "oracle_id",
+                            "version",
+                            "builtin",
+                            "implicit_fallback",
+                        )
+                    }
+                    for row in implicit_rows
+                ],
+            )
             replay = replay_record(output, self.db, verify=True)
             self.assertTrue(replay["ok"])
 

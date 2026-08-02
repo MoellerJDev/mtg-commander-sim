@@ -2,7 +2,7 @@
 title: "Rules completeness implementation status"
 status: "current"
 authoritative_source: "pinned rules and generated coverage artifacts"
-verified: "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
+verified: "2026-08-01"
 audience: "rules, compiler, and engine contributors"
 maintenance: "hand-maintained"
 ---
@@ -43,8 +43,9 @@ server, provider, and pilot success never promote rules fidelity by themselves.
 - Typed helpers exist for several rules families. The registered,
   read-only semantic-handler boundary for the first generic operations, but
   most orchestration and mutation remain centralized in `CommanderEngine`.
-- Semantic packs close selected card and interaction slices. They are explicit
-  overrides, not evidence of universal Oracle support.
+- Reviewed semantic packs close selected card and interaction slices through
+  an explicit `legacy_reviewed` compatibility basis. They are not
+  capability-closed evidence or universal Oracle support.
 
 ## Known incomplete families
 
@@ -66,20 +67,20 @@ The principal architectural and behavioral gaps include:
 
 ## Current migration rule
 
-Broad card-family expansion is paused during runtime trust and governance
-hardening. The integrated migration rails include enforceable architecture and
-documentation guards, the fine-grained capability registry, CardProgram V2,
-typed semantic handlers and intents, and the first registered versioned
-runtime-component families. Fixed additional-token replacements and fixed
-subtype anthems remain bounded promises; neither general CR 616 ordering nor
-complete CR 613 dependencies are implied.
+Runtime trust and governance hardening now supplies generated explicit
+capability evidence, separate dependency and implementation-mutation status,
+CardProgram trust bases, intrinsic/format/match/dynamic closure, strict
+handler/component binding, compatibility provenance, default-deny module and
+stable-write governance, and an uncached continuous-effect structural
+benchmark. Fixed additional-token replacements and fixed subtype anthems remain
+bounded promises; neither general CR 616 ordering nor complete CR 613
+dependencies are implied.
 
-The next phase must make capability evidence and implementation mutation
-status, CardProgram trust basis, intrinsic and ambient closure, strict
-handler/component binding, compatibility provenance, module classification,
-stable mutation identities, and continuous-effect performance evidence
-authoritative. Dependency-ordered rules and Oracle expansion resume only after
-that hardening passes.
+The complete traditional/Commander format-capability inventory is still
+absent, so capability-only strict match creation fails closed while reviewed
+declared-pool compatibility remains available. After this hardening merges,
+the next slice is selected from measured central debt and must remove or migrate
+one coherent reusable responsibility before broad corpus expansion resumes.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,

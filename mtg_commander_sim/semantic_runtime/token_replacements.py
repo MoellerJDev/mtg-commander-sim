@@ -121,6 +121,7 @@ class AdditionalTokenIntent:
 class TokenCreationReplacementHandler(Protocol):
     handler_id: str
     schema_version: int
+    family: str
     event: str
     rule_references: tuple[str, ...]
     capability_dependencies: tuple[str, ...]
@@ -140,6 +141,7 @@ class TokenCreationReplacementHandler(Protocol):
 class AdditionalTokenReplacementHandler:
     handler_id: str = _ADDITIONAL_TOKEN_HANDLER_ID
     schema_version: int = 1
+    family: str = "replacement.fixed_additional_token"
     event: str = "token.create"
     rule_references: tuple[str, ...] = (
         "111.2",

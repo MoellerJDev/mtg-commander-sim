@@ -212,6 +212,7 @@ class SemanticProgram:
                 "trusted",
                 "blockers",
                 "registry_fingerprint",
+                "evidence_fingerprint",
             ):
                 if field not in self.capability_closure:
                     raise ValueError(
@@ -234,7 +235,11 @@ class SemanticProgram:
                 )
             if not str(self.capability_closure.get("profile") or "").strip():
                 raise ValueError("Capability closure requires a profile")
-            for field in ("registry_fingerprint", "fingerprint"):
+            for field in (
+                "registry_fingerprint",
+                "evidence_fingerprint",
+                "fingerprint",
+            ):
                 fingerprint = str(
                     self.capability_closure.get(field) or ""
                 )

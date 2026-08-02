@@ -202,7 +202,7 @@ class NativeV3AuditAndPilotTests(unittest.TestCase):
 
     def test_preflight_is_trust_aware_and_fail_closed(self):
         report = semantic_preflight(self.db, self.zimone)
-        self.assertEqual(2, report["schema_version"])
+        self.assertEqual(3, report["schema_version"])
         self.assertEqual(100, report["total_cards"])
         self.assertTrue(report["deck_review_eligible_possible"])
         self.assertEqual(0, report["unresolved_cards"])

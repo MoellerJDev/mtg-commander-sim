@@ -68,6 +68,100 @@
             "type": "string",
             "pattern": "^[0-9a-f]{64}$"
           }
+        },
+        "trust": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "fingerprint",
+              "trust_basis",
+              "trust_closure_fingerprint",
+              "strict_capability_ready"
+            ],
+            "properties": {
+              "fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "trust_basis": {
+                "enum": [
+                  "capability_closed",
+                  "legacy_reviewed",
+                  "mixed",
+                  "provisional",
+                  "unresolved",
+                  "non_rules_governed"
+                ]
+              },
+              "trust_closure_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "strict_capability_ready": {"type": "boolean"}
+            }
+          }
+        }
+      }
+    },
+    "runtime_trust": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "capability_registry_fingerprint",
+        "capability_evidence_fingerprint",
+        "semantic_handler_registry_fingerprint",
+        "semantic_handler_inventory",
+        "runtime_component_registry_fingerprint",
+        "runtime_component_inventory"
+      ],
+      "properties": {
+        "schema_version": {"const": 1},
+        "capability_registry_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "capability_evidence_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "semantic_handler_registry_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "semantic_handler_inventory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "operation",
+              "handler_id",
+              "schema_version",
+              "family",
+              "rule_references",
+              "capability_dependencies"
+            ],
+            "properties": {
+              "operation": {"type": "string", "minLength": 1},
+              "handler_id": {"type": "string", "minLength": 1},
+              "schema_version": {"type": "integer", "minimum": 1},
+              "family": {"type": "string", "minLength": 1},
+              "rule_references": {"type": "array", "items": {"type": "string", "minLength": 1}},
+              "capability_dependencies": {"type": "array", "items": {"type": "string", "minLength": 1}}
+            }
+          }
+        },
+        "runtime_component_registry_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "runtime_component_inventory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "handler_id",
+              "schema_version",
+              "family",
+              "event",
+              "rule_references",
+              "capability_dependencies"
+            ],
+            "properties": {
+              "handler_id": {"type": "string", "minLength": 1},
+              "schema_version": {"type": "integer", "minimum": 1},
+              "family": {"type": "string", "minLength": 1},
+              "event": {"type": "string", "minLength": 1},
+              "rule_references": {"type": "array", "items": {"type": "string", "minLength": 1}},
+              "capability_dependencies": {"type": "array", "items": {"type": "string", "minLength": 1}}
+            }
+          }
         }
       }
     },

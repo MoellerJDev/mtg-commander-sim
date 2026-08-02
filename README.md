@@ -732,6 +732,10 @@ python simctl.py card diff "Lightning Bolt" \
 python simctl.py card overrides --db data/scryfall-current.sqlite3
 python simctl.py card coverage --limit 100 \
   --db data/scryfall-current.sqlite3
+python simctl.py card trust-closure "Lightning Bolt" \
+  --profile commander_duel --db data/scryfall-current.sqlite3
+python simctl.py card runtime-components \
+  --profile commander_review --db data/scryfall-current.sqlite3
 
 # Lower-level Oracle IR compatibility diagnostics remain available.
 python simctl.py oracle parse "Lightning Bolt" \
@@ -771,12 +775,20 @@ The anthem is a layer-7c modifier whose subtype applicability is evaluated
 after earlier layers. General replacement ordering, layer dependencies, and
 state-derived modifiers remain explicitly unsupported.
 
-The current architecture priority is runtime trust and governance hardening,
-not another card family. Capability evidence and implementation mutation
-status, CardProgram trust basis and closure layers, strict handler/component
-capability binding, compatibility provenance, module classification, stable
-mutation identities, and continuous-effect performance evidence must become
-authoritative before broad rules or Oracle expansion resumes.
+Runtime trust and governance are now explicit. Capability registry v5 consumes
+a generated evidence index whose fully qualified tests, rules, profiles, and
+evidence classes are validated in CI. Dependency fail-closed status and killed
+implementation mutation status are separate. CardPrograms report one trust
+basis plus intrinsic, format, match, and dynamic closure; reviewed semantic
+packs remain an identified compatibility path rather than being described as
+capability-closed. Strict binding includes registered handler/component
+dependencies and exact registry/evidence fingerprints.
+
+The complete Commander format-capability inventory is not yet present, so
+capability-only strict match readiness fails closed while reviewed declared-pool
+compatibility remains available. The next architecture work is selected from
+measured debt after this hardening slice; broad rules or Oracle expansion does
+not bypass this boundary.
 
 This is still not a completeness declaration. Current exact, partial,
 unresolved, and material-residual figures are generated in

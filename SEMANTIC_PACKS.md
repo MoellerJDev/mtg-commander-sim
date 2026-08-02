@@ -16,6 +16,9 @@ or grant pilots state-mutation authority.
 Pack schema v3 is now a compatibility input to canonical CardProgram V2. On
 load, programs are grouped by Oracle ID, source hashes and face identity are
 validated, and deterministic card/semantic/trust fingerprints are computed.
+The resulting CardProgram basis is `legacy_reviewed` (or `mixed` when combined
+with capability-closed generated abilities), never capability-closed merely
+because the pack is reviewed.
 The semantic-key map remains a derived runtime and historical-record index.
 Saved registries contain both views and reject any mismatch.
 
@@ -115,8 +118,10 @@ trigger-on-trigger placement remain explicit untrusted dependencies.
 
 ## Trust
 
-`trusted` means the declared behavior is reviewed and characterized for this
-implementation. `provisional` can support development characterization but
+The pack-level `trusted` label means the declared compatibility behavior is
+reviewed and characterized for this implementation. It is not fine-grained
+capability closure. CardProgram trust basis and applicable closure are the
+authoritative higher-level reports. `provisional` can support development characterization but
 cannot make a material interaction eligible as conformance or release evidence.
 `unresolved` fails closed in strict mode and requires future implementation.
 Development arbitration can help author a reviewed fixture, but it is never

@@ -2,7 +2,7 @@
 title: "Compiler coverage status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
+verified: "b1ecdc0f3446a37ffe31bfca1237a079691e6b22"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -27,6 +27,9 @@ This generated report describes only the pinned Oracle corpus and current compil
 - Model: `mtg_commander_sim/card_programs/model.py`
 - Generated/reviewed adapter: `mtg_commander_sim/card_programs/adapters.py`
 - Runtime validator: `mtg_commander_sim/card_programs/validation.py`
+- Canonical reviewed registry CardPrograms: 137
+- Intrinsic strict-capability-ready CardPrograms: 0
+- Trust bases: `{"legacy_reviewed": 137}`
 
 ## Stages
 
@@ -45,12 +48,16 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/4`
+- Registry schema/version: `1/5`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `31e021cb3b2e532cdfe25e8a84512b35b2033179c9637a48cfd953aab219100e`
+- Registry fingerprint: `2d74fcff2127577c4432191ab1bd4d2a29a63f8f21d7dd54aba5f10e29e4aba2`
+- Evidence fingerprint: `790af7e70c17d52b099937d30b531a7df006abc3a235fe915f117667b3da0879`
+- Explicit evidence declarations: 73
 - Capability records: 19
 - Trusted records: 8
 - Blocked records: 7
+- Dependency fail-closed statuses: `{"not_applicable": 7, "not_run": 6, "passed": 6}`
+- Implementation mutation statuses: `{"killed": 8, "not_run": 11}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|

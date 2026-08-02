@@ -39,11 +39,19 @@ executor. Its scoped architecture policy additionally forbids imports of the
 engine, state model, record, or projection modules. The engine may call inward
 to this pure boundary; handlers cannot call outward to authoritative state.
 
+Every production Python module has one generated exact classification covering
+layer, owner, allowed dependency layers, GameState access, specificity,
+visibility, and replay participation. A new unclassified module fails CI.
+Direct writes are ratcheted by stable file/symbol/mutation/state-path identity,
+not line number or aggregate count. Architecture exceptions bind to one exact
+ADR and allowance fingerprint.
+
 `CommanderEngine` remains a measured legacy mutation boundary while it is
 decomposed. New engine methods, direct `GameState` write sites, card-name/Oracle
 ID branches, card-specific operations/helpers, oversized modules/functions, or
 unreviewed dependency exceptions fail the architecture gate. Existing debt is
-ratcheted rather than endorsed.
+ratcheted rather than endorsed. Engine net logical growth defaults to zero, and
+existing oversized modules/functions may not grow.
 
 Any new subsystem documents ownership and dependencies. Changing mutation
 ownership or adding a cross-layer dependency requires an ADR. Reviewed legacy

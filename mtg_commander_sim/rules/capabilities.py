@@ -22,9 +22,15 @@ CAPABILITY_STATUSES = {
     "not_applicable",
     "non_rules_governed",
 }
-MUTATION_STATUSES = {
+DEPENDENCY_FAIL_CLOSED_STATUSES = {
     "not_run",
-    "dependency_mutation_tested",
+    "passed",
+    "failed",
+    "not_applicable",
+}
+IMPLEMENTATION_MUTATION_STATUSES = {
+    "not_run",
+    "killed",
     "survived",
     "not_applicable",
 }
@@ -63,7 +69,10 @@ _CAPABILITY_FIELDS = {
     "privacy_tests",
     "replay_tests",
     "required_evidence",
-    "mutation_status",
+    "dependency_fail_closed_status",
+    "dependency_fail_closed_rationale",
+    "implementation_mutation_status",
+    "implementation_mutation_rationale",
     "blockers",
     "status",
 }
@@ -128,6 +137,7 @@ class CapabilityClosure:
     trusted: bool
     blockers: tuple[str, ...]
     registry_fingerprint: str
+    evidence_fingerprint: str
     fingerprint: str
 
     def to_dict(self) -> dict[str, Any]:
@@ -138,6 +148,7 @@ class CapabilityClosure:
             "trusted": self.trusted,
             "blockers": list(self.blockers),
             "registry_fingerprint": self.registry_fingerprint,
+            "evidence_fingerprint": self.evidence_fingerprint,
             "fingerprint": self.fingerprint,
         }
 
@@ -231,6 +242,7 @@ class CapabilityRegistry:
         self._validate_acyclic()
         self._raw = raw
         self._fingerprint = _hash(raw)
+        self._evidence_fingerprint: str | None = None
 
     def _validate_capability(
         self,
@@ -254,11 +266,50 @@ class CapabilityRegistry:
             raise CapabilityRegistryError(
                 f"{prefix}.status is unknown: {status!r}"
             )
-        mutation_status = str(row.get("mutation_status") or "")
-        if mutation_status not in MUTATION_STATUSES:
+        dependency_status = str(
+            row.get("dependency_fail_closed_status") or ""
+        )
+        if dependency_status not in DEPENDENCY_FAIL_CLOSED_STATUSES:
             raise CapabilityRegistryError(
-                f"{prefix}.mutation_status is unknown: "
-                f"{mutation_status!r}"
+                f"{prefix}.dependency_fail_closed_status is unknown: "
+                f"{dependency_status!r}"
+            )
+        implementation_mutation_status = str(
+            row.get("implementation_mutation_status") or ""
+        )
+        if (
+            implementation_mutation_status
+            not in IMPLEMENTATION_MUTATION_STATUSES
+        ):
+            raise CapabilityRegistryError(
+                f"{prefix}.implementation_mutation_status is unknown: "
+                f"{implementation_mutation_status!r}"
+            )
+        for field in (
+            "dependency_fail_closed_rationale",
+            "implementation_mutation_rationale",
+        ):
+            if not isinstance(row.get(field), str):
+                raise CapabilityRegistryError(
+                    f"{prefix}.{field} must be a string"
+                )
+        if dependency_status == "not_applicable":
+            if not row["dependency_fail_closed_rationale"].strip():
+                raise CapabilityRegistryError(
+                    f"{prefix}.dependency_fail_closed_rationale is required "
+                    "when dependency fail-closed testing is not applicable"
+                )
+            if row.get("dependencies"):
+                raise CapabilityRegistryError(
+                    f"{prefix}.dependency_fail_closed_status cannot be "
+                    "not_applicable when dependencies exist"
+                )
+        if implementation_mutation_status == "not_applicable" and not row[
+            "implementation_mutation_rationale"
+        ].strip():
+            raise CapabilityRegistryError(
+                f"{prefix}.implementation_mutation_rationale is required "
+                "when implementation mutation testing is not applicable"
             )
         for field, required in (
             ("official_rules", True),
@@ -328,9 +379,15 @@ class CapabilityRegistry:
                 raise CapabilityRegistryError(
                     f"Trusted {capability_id} requires an implementation"
                 )
-            if mutation_status == "not_run":
+            if row["dependencies"] and dependency_status != "passed":
                 raise CapabilityRegistryError(
-                    f"Trusted {capability_id} requires mutation evidence"
+                    f"Trusted {capability_id} requires passed dependency "
+                    "fail-closed evidence"
+                )
+            if implementation_mutation_status != "killed":
+                raise CapabilityRegistryError(
+                    f"Trusted {capability_id} requires killed implementation "
+                    "mutation evidence"
                 )
             for evidence in row["required_evidence"]:
                 field = EVIDENCE_FIELDS[evidence]
@@ -393,6 +450,17 @@ class CapabilityRegistry:
     def profiles(self) -> tuple[str, ...]:
         return self._profiles
 
+    @property
+    def evidence_fingerprint(self) -> str | None:
+        return self._evidence_fingerprint
+
+    def mark_evidence_verified(self, fingerprint: str) -> None:
+        if re.fullmatch(r"[0-9a-f]{64}", str(fingerprint)) is None:
+            raise CapabilityRegistryError(
+                "Capability evidence fingerprint must be a lowercase SHA-256"
+            )
+        self._evidence_fingerprint = str(fingerprint)
+
     def capability(self, capability_id: str) -> dict[str, Any] | None:
         row = self._capabilities.get(capability_id)
         return json.loads(json.dumps(row)) if row is not None else None
@@ -417,8 +485,13 @@ class CapabilityRegistry:
                 f"Unknown capability profile: {profile}"
             )
         requested_ids = tuple(sorted(set(str(value) for value in requested)))
+        evidence_fingerprint = self._evidence_fingerprint or _hash(
+            {"capability_evidence": "unverified"}
+        )
         reachable: set[str] = set()
         blockers: set[str] = set()
+        if self._evidence_fingerprint is None:
+            blockers.add("evidence_index:unverified")
 
         def visit(capability_id: str) -> None:
             if capability_id in reachable:
@@ -460,6 +533,7 @@ class CapabilityRegistry:
             ),
             "profile": profile,
             "registry_fingerprint": self._fingerprint,
+            "evidence_fingerprint": evidence_fingerprint,
         }
         return CapabilityClosure(
             requested=requested_ids,
@@ -468,6 +542,7 @@ class CapabilityRegistry:
             trusted=not blocker_ids,
             blockers=blocker_ids,
             registry_fingerprint=self._fingerprint,
+            evidence_fingerprint=evidence_fingerprint,
             fingerprint=_hash(closure_payload),
         )
 
@@ -487,7 +562,12 @@ class CapabilityRegistry:
 
 
 def load_default_capability_registry() -> CapabilityRegistry:
-    return CapabilityRegistry.from_path(DEFAULT_CAPABILITY_REGISTRY)
+    from .evidence import load_capability_evidence_index
+
+    registry = CapabilityRegistry.from_path(DEFAULT_CAPABILITY_REGISTRY)
+    _, fingerprint = load_capability_evidence_index(registry=registry)
+    registry.mark_evidence_verified(fingerprint)
+    return registry
 
 
 def capability_dependencies_for_node(

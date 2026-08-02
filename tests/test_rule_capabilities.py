@@ -172,6 +172,8 @@ class CapabilityRegistryTests(unittest.TestCase):
         target_revalidation["dependencies"] = [
             "target.public.player_or_damageable_permanent"
         ]
+        target_revalidation["dependency_fail_closed_status"] = "passed"
+        target_revalidation["dependency_fail_closed_rationale"] = ""
         with self.assertRaisesRegex(
             CapabilityRegistryError, "dependency cycle"
         ):

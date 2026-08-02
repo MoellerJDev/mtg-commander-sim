@@ -130,6 +130,15 @@ typed intents and fixed subtype anthems to layer-7c continuous effects. Their
 scope remains deliberately narrower than general CR 616 replacement ordering
 or complete CR 613 dependency evaluation.
 
+CardProgram trust is now separated into `capability_closed`,
+`legacy_reviewed`, `mixed`, `provisional`, `unresolved`, and
+`non_rules_governed`. Intrinsic, format, match, and dynamic closure are
+fingerprinted separately. Strict binding recomputes capability closure and
+adds every registered semantic-handler/runtime-component dependency. The
+complete Commander format-capability inventory is not yet represented, so
+capability-only strict match readiness fails closed; reviewed compatibility is
+reported separately and is never presented as capability closure.
+
 ## Authoritative state versus projected state
 
 `GameState` is server-only. It includes every physical object, hidden zone, turn queue, delayed trigger, capability, event, and knowledge marker.
@@ -775,9 +784,11 @@ payload. Rejected attempts never enter the command journal. Loading a checkpoint
 reissues capabilities for unanswered actors, so a disk artifact cannot be used
 as a bearer credential.
 
-The manifest pins engine, semantic registry, Scryfall metadata, decks, seed, and
-the explicit Commander profile. Replay fails closed on a version/fingerprint or
-transition hash mismatch. V2 migrations use a separately named snapshot-only
+The manifest pins engine, semantic registry, Scryfall metadata, decks, seed,
+the explicit Commander profile, CardProgram trust closures, capability
+registry/evidence, and semantic-handler/runtime-component inventories. Each
+semantic command pins its compact runtime binding. Replay fails closed on a
+version/fingerprint or transition hash mismatch. V2 migrations use a separately named snapshot-only
 mode because their command payloads cannot be reconstructed.
 
 Record lifecycle is explicit (`created`, `in_progress`, `paused`, `complete`,

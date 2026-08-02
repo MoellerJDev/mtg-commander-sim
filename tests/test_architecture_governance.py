@@ -1,0 +1,147 @@
+from __future__ import annotations
+
+import ast
+import json
+from pathlib import Path
+from types import SimpleNamespace
+import unittest
+
+from scripts.update_architecture_audit import (
+    ROOT,
+    _parent_map,
+    _state_write_records,
+    analyze_production,
+    card_specificity_scope,
+)
+from scripts.validate_architecture import (
+    _load_json,
+    _size_debt_failures,
+    exception_binding_failures,
+    module_classification_failures,
+    state_write_identity,
+)
+
+
+class ArchitectureGovernanceTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.policy = _load_json(ROOT / "platform" / "architecture-policy.json")
+        cls.baseline = _load_json(
+            ROOT / cls.policy["baseline"]
+        )
+        cls.source, cls.paths, cls.analyses = analyze_production()
+
+    def test_exception_is_bound_to_exact_allowance_fingerprint(self):
+        self.assertEqual(
+            [], exception_binding_failures(self.policy, self.baseline)
+        )
+        changed = json.loads(json.dumps(self.baseline))
+        changed["engine"]["logical_lines"] += 1
+        failures = exception_binding_failures(self.policy, changed)
+        self.assertTrue(failures)
+        self.assertEqual(
+            "architecture_exception_binding", failures[0]["guard"]
+        )
+
+    def test_new_production_module_is_default_denied(self):
+        analyses = dict(self.analyses)
+        analyses["mtg_commander_sim/unclassified.py"] = SimpleNamespace(
+            module="mtg_commander_sim.unclassified",
+            imports=(),
+            tree=ast.parse(""),
+        )
+        failures = module_classification_failures(analyses, self.policy)
+        failure = next(
+            row
+            for row in failures
+            if row["guard"] == "module_classification_default_deny"
+        )
+        self.assertEqual(
+            ["mtg_commander_sim/unclassified.py"],
+            failure["evidence"]["unclassified"],
+        )
+
+    def test_specificity_scope_covers_all_generic_python_modules(self):
+        scope = card_specificity_scope(self.analyses, self.source)
+        self.assertEqual(set(self.analyses), set(scope))
+        self.assertGreater(len(scope), 7)
+
+    def test_state_write_identity_does_not_depend_on_source_line(self):
+        relative = "mtg_commander_sim/example.py"
+        source = {
+            "scope": {
+                "state_owner_modules": [relative],
+                "state_parameter_modules": [],
+            }
+        }
+
+        def identity(text: str):
+            tree = ast.parse(text)
+            records = _state_write_records(
+                tree,
+                tuple(text.splitlines(keepends=True)),
+                relative,
+                source,
+                _parent_map(tree),
+            )
+            self.assertEqual(1, len(records))
+            return state_write_identity(records[0])
+
+        first = identity(
+            "class Example:\n"
+            "    def mutate(self):\n"
+            "        self.state.winner = 'A'\n"
+        )
+        moved = identity(
+            "\n\nclass Example:\n"
+            "    def mutate(self):\n"
+            "        self.state.winner = 'A'\n"
+        )
+        self.assertEqual(first, moved)
+        self.assertEqual(
+            (relative, "mutate", "assignment", "winner"), first
+        )
+
+    def test_existing_oversized_symbol_growth_fails(self):
+        baseline = {
+            "engine": {"logical_lines": 100},
+            "oversized_modules": [
+                {"file": "mtg_commander_sim/engine.py", "logical_lines": 100}
+            ],
+            "oversized_functions_and_methods": [
+                {
+                    "file": "mtg_commander_sim/engine.py",
+                    "symbol": "CommanderEngine.large",
+                    "logical_lines": 20,
+                }
+            ],
+        }
+        production = {
+            "oversized_modules": [
+                {"file": "mtg_commander_sim/engine.py", "logical_lines": 101}
+            ],
+            "oversized_functions_and_methods": [
+                {
+                    "file": "mtg_commander_sim/engine.py",
+                    "symbol": "CommanderEngine.large",
+                    "logical_lines": 21,
+                }
+            ],
+        }
+        failures = _size_debt_failures(
+            {"review_thresholds": {"engine_net_logical_growth": 0}},
+            baseline,
+            production,
+            {"logical_lines": 100},
+        )
+        self.assertEqual(
+            {
+                "oversized_module_non_growth",
+                "oversized_function_non_growth",
+            },
+            {row["guard"] for row in failures},
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

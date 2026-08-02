@@ -90,6 +90,9 @@ python scripts/build_test_database.py build \
   --output data/test-ci.sqlite3
 # Set MTG_CARD_DB=data/test-ci.sqlite3 for the remaining commands.
 python -m unittest discover -s tests -p 'test_*.py' -v
+python scripts/update_capability_evidence.py --check
+python scripts/update_module_classifications.py --check
+python scripts/benchmark_continuous_effects.py --check
 python scripts/demo_four_player_protocol.py --db data/test-ci.sqlite3 --out demo
 python scripts/update_platform_status.py --check
 python scripts/update_architecture_audit.py --check

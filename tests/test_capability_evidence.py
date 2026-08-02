@@ -1,0 +1,145 @@
+from __future__ import annotations
+
+from copy import deepcopy
+import json
+from pathlib import Path
+import unittest
+
+from mtg_commander_sim.rules.capabilities import (
+    CapabilityRegistry,
+    CapabilityRegistryError,
+    load_default_capability_registry,
+)
+from mtg_commander_sim.rules.evidence import (
+    CapabilityEvidenceError,
+    load_capability_evidence_index,
+    validate_capability_evidence_index,
+)
+from scripts.update_capability_evidence import (
+    DECLARATIONS_PATH,
+    EvidenceGenerationError,
+    REGISTRY_PATH,
+    ROOT,
+    build_index,
+    discover_tests,
+)
+
+
+class CapabilityEvidenceTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.registry_value = json.loads(
+            REGISTRY_PATH.read_text(encoding="utf-8")
+        )
+        cls.declaration_source = json.loads(
+            DECLARATIONS_PATH.read_text(encoding="utf-8")
+        )
+        cls.discovered = discover_tests(ROOT)
+
+    def test_default_registry_is_bound_to_current_generated_evidence(self):
+        registry = load_default_capability_registry()
+        value, fingerprint = load_capability_evidence_index(
+            registry=registry
+        )
+        self.assertEqual(fingerprint, registry.evidence_fingerprint)
+        self.assertEqual(fingerprint, value["fingerprint"])
+        closure = registry.closure(
+            ["damage.result.player_life"], profile="commander_duel"
+        )
+        self.assertTrue(closure.trusted)
+        self.assertEqual(fingerprint, closure.evidence_fingerprint)
+
+    def test_unverified_registry_fails_closed(self):
+        registry = CapabilityRegistry(self.registry_value)
+        closure = registry.closure(
+            ["damage.result.player_life"], profile="commander_duel"
+        )
+        self.assertFalse(closure.trusted)
+        self.assertIn("evidence_index:unverified", closure.blockers)
+
+    def test_removed_or_renamed_test_invalidates_declaration(self):
+        source = deepcopy(self.declaration_source)
+        source["declarations"][0]["test_id"] += "_renamed"
+        with self.assertRaisesRegex(
+            EvidenceGenerationError, "Removed or renamed evidence test"
+        ):
+            build_index(
+                registry_value=self.registry_value,
+                declaration_source=source,
+                discovered_test_ids=set(self.discovered.values()),
+            )
+
+    def test_registry_validation_test_cannot_substitute_for_behavior(self):
+        source = deepcopy(self.declaration_source)
+        source["declarations"][0]["test_id"] = (
+            "tests.test_rule_capabilities.CapabilityRegistryTests."
+            "test_registry_matches_schema_rules_snapshot_and_test_evidence"
+        )
+        with self.assertRaisesRegex(
+            EvidenceGenerationError,
+            "Registry-validation tests cannot be behavioral evidence",
+        ):
+            build_index(
+                registry_value=self.registry_value,
+                declaration_source=source,
+                discovered_test_ids=set(self.discovered.values()),
+            )
+
+    def test_duplicate_and_wrong_rule_declarations_fail(self):
+        registry = CapabilityRegistry(self.registry_value)
+        source = deepcopy(self.declaration_source)
+        index = build_index(
+            registry_value=self.registry_value,
+            declaration_source=source,
+            discovered_test_ids=set(self.discovered.values()),
+        )
+        duplicate = deepcopy(index)
+        duplicate["declarations"].append(
+            deepcopy(duplicate["declarations"][0])
+        )
+        with self.assertRaisesRegex(
+            CapabilityEvidenceError, "Duplicate capability evidence"
+        ):
+            validate_capability_evidence_index(
+                duplicate, registry=registry
+            )
+
+        source = deepcopy(self.declaration_source)
+        source["declarations"][0]["official_rule_ids"] = ["999.999"]
+        with self.assertRaisesRegex(
+            EvidenceGenerationError, "unknown official rule"
+        ):
+            build_index(
+                registry_value=self.registry_value,
+                declaration_source=source,
+                discovered_test_ids=set(self.discovered.values()),
+            )
+
+    def test_trusted_status_rejects_conflated_or_surviving_mutation(self):
+        value = deepcopy(self.registry_value)
+        row = next(
+            item
+            for item in value["capabilities"]
+            if item["id"] == "damage.result.player_life"
+        )
+        row["implementation_mutation_status"] = "survived"
+        with self.assertRaisesRegex(
+            CapabilityRegistryError, "killed implementation mutation"
+        ):
+            CapabilityRegistry(value)
+
+        value = deepcopy(self.registry_value)
+        row = next(
+            item
+            for item in value["capabilities"]
+            if item["id"] == "damage.result.player_life"
+        )
+        row["dependency_fail_closed_status"] = "not_run"
+        with self.assertRaisesRegex(
+            CapabilityRegistryError, "passed dependency fail-closed"
+        ):
+            CapabilityRegistry(value)
+
+
+if __name__ == "__main__":
+    unittest.main()

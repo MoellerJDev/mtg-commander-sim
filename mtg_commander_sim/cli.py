@@ -460,6 +460,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     preflight.add_argument("--cache-dir")
     preflight.add_argument("--refresh-decks", action="store_true")
+    preflight.add_argument(
+        "--profile",
+        choices=("traditional", "commander_duel", "commander_review"),
+        default="commander_review",
+    )
     preflight.add_argument("--output")
 
     oracle = sub.add_parser(
@@ -497,7 +502,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     for operation in sorted(CARD_PROGRAM_OPERATIONS):
         child = card_program_sub.add_parser(operation)
-        if operation in {"compile", "explain", "audit", "diff"}:
+        if operation in {
+            "compile",
+            "explain",
+            "audit",
+            "diff",
+            "trust-closure",
+        }:
             child.add_argument("card")
         child.add_argument(
             "--db",

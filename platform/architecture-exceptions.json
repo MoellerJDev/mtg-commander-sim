@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "exceptions": [
+    {
+      "exception_id": "ARCH-EXC-0001",
+      "adr": "docs/adr/0008-runtime-trust-and-governance-hardening.md",
+      "artifact": "platform/architecture-guard-baseline.json",
+      "allowance_fingerprint": "ac2de3ab9718e3e9edbd6011940cff606de5c8addf67dfdfa386c60e02227cc7",
+      "exact_allowance": "Only the structural write identities, engine methods, size ceilings, specificity literals, Oracle-ID literals, effect operations, and legacy helpers serialized in the fingerprinted baseline.",
+      "rationale": "The centralized engine and compatibility paths predate the default-deny ratchet and must be migrated incrementally without a replay-breaking rewrite.",
+      "owner": "rules architecture maintainers",
+      "maximum_scope": "Existing identities and recorded logical-line ceilings only; removals are allowed and additions or growth are forbidden.",
+      "removal_condition": "Remove the exception when every serialized grandfathered allowance has been migrated to a reviewed owner or deleted.",
+      "target_milestone": "incremental post-Phase-1 debt migrations",
+      "replay_implications": "No replay behavior change is authorized; each migration must preserve exact command replay and state hashes where behavior is unchanged.",
+      "privacy_implications": "No hidden-information expansion is authorized; principal-scoped projections remain mandatory.",
+      "security_implications": "No capability, arbiter, transport, or state-mutation authority is added by this exception.",
+      "tests": [
+        "tests.test_architecture_guards.ArchitectureGuardTests.test_current_repository_passes_every_architecture_guard",
+        "tests.test_architecture_governance.ArchitectureGovernanceTests.test_exception_is_bound_to_exact_allowance_fingerprint"
+      ]
+    }
+  ]
+}

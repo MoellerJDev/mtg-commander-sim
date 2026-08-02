@@ -40,8 +40,9 @@ opaque tokens when loaded. Consumed capabilities are not retained.
 Native command rows also record the action-template ID, selected object refs,
 targets, modes, X, selected costs, RNG consumption/results, and semantic
 program versions used by the transition. New rows additionally record
-CardProgram schema version 2 and the exact card-level fingerprints used by the
-transition. Rejected attempts stay in
+CardProgram schema version 2, exact card-level/trust fingerprints, a compact
+runtime-binding fingerprint, and semantic-handler/runtime-component IDs used
+by the transition. Rejected attempts stay in
 `decisions.jsonl` and never enter `commands.jsonl`.
 
 Protocol 3.0 adds optional `client_command_id`,
@@ -63,7 +64,11 @@ checks:
 - engine version
 - semantic registry fingerprint
 - complete manifest CardProgram V2 fingerprint map, when present
+- manifest CardProgram trust basis and closure fingerprints, when present
+- capability registry and generated evidence fingerprints, when present
+- semantic-handler and runtime-component inventories/fingerprints, when present
 - command-scoped CardProgram V2 fingerprints for programs used, when present
+- command-scoped runtime binding and capability-closure fingerprints, when present
 - before-state hash for every command
 - after-state hash for every command
 - final authoritative state hash
@@ -77,7 +82,7 @@ python simctl.py replay run/duel --db data/scryfall-current.sqlite3 --verify
 A mismatch fails closed at the first divergent command. Event text and
 capability tokens do not participate in the authoritative hash.
 
-CardProgram pinning is an additive Game Record v3 extension, not a record
+CardProgram and runtime-trust pinning are additive Game Record v3 extensions, not a record
 redesign. Historical v3 records without these fields continue to verify the
 semantic registry as before. A new record stores the complete card-program map
 in `manifest.card_programs`, repeats it under replay provenance, and stores

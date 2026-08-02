@@ -27,7 +27,14 @@ class SemanticPreflightV2Tests(unittest.TestCase):
 
     def test_preflight_v2_records_exact_sources_and_material_fields(self):
         report = semantic_preflight(self.db, self.zimone)
-        self.assertEqual(2, report["schema_version"])
+        self.assertEqual(3, report["schema_version"])
+        self.assertEqual("commander_review", report["capability_profile"])
+        self.assertEqual(
+            64, len(report["capability_evidence_fingerprint"])
+        )
+        self.assertIn("match_trust_closure", report)
+        self.assertFalse(report["trusted_only_ready"])
+        self.assertTrue(report["compatibility_ready"])
         self.assertEqual(
             report["deck_fingerprint"],
             report["deck_list_fingerprint"],

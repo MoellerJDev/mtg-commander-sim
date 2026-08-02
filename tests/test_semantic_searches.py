@@ -190,8 +190,20 @@ class SemanticPrivateSearchTests(unittest.TestCase):
                     "card_program_fingerprint"
                 ],
             )
+            runtime_row = command["semantics"]["programs_used"][0]
+            self.assertEqual(64, len(runtime_row["runtime_binding_fingerprint"]))
+            self.assertTrue(runtime_row["legacy_compatibility"])
+            self.assertEqual([], runtime_row["runtime_component_ids"])
             replay = replay_record(record, self.db, verify=True)
             self.assertTrue(replay["ok"])
+            original_binding = runtime_row["runtime_binding_fingerprint"]
+            runtime_row["runtime_binding_fingerprint"] = "0" * 64
+            command_path.write_text(json.dumps(command), encoding="utf-8")
+            with self.assertRaisesRegex(
+                ValueError, "Runtime binding provenance mismatch"
+            ):
+                replay_record(record, self.db, verify=True)
+            runtime_row["runtime_binding_fingerprint"] = original_binding
             oracle_id = next(iter(used))
             command["semantics"]["card_programs_used"][oracle_id] = (
                 "0" * 64

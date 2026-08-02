@@ -32,7 +32,9 @@ def _private(effect: Mapping[str, Any]) -> bool:
 class DrawHandler:
     handler_id: str = "generic.draw.v1"
     schema_version: int = 1
+    family: str = "zone.draw"
     operation: str = "draw"
+    rule_references: tuple[str, ...] = ("121.1", "121.2")
     capability_dependencies: tuple[str, ...] = (
         "zone.draw.library_to_hand",
     )
@@ -68,7 +70,9 @@ class DrawHandler:
 class DrawEachPlayerHandler:
     handler_id: str = "generic.draw-each-player.v1"
     schema_version: int = 1
+    family: str = "zone.draw"
     operation: str = "draw_each_player"
+    rule_references: tuple[str, ...] = ("121.1", "121.2")
     capability_dependencies: tuple[str, ...] = (
         "zone.draw.library_to_hand",
     )
@@ -102,7 +106,9 @@ class DrawEachPlayerHandler:
 class BecomeMonarchHandler:
     handler_id: str = "generic.become-monarch.v1"
     schema_version: int = 1
+    family: str = "variant.monarch"
     operation: str = "become_monarch"
+    rule_references: tuple[str, ...] = ("725.1", "725.2")
     capability_dependencies: tuple[str, ...] = (
         "variant.monarch.designate",
     )

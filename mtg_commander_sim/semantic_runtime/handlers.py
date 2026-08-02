@@ -11,7 +11,9 @@ class SemanticNodeHandler(Protocol):
 
     handler_id: str
     schema_version: int
+    family: str
     operation: str
+    rule_references: tuple[str, ...]
     capability_dependencies: tuple[str, ...]
 
     def lower(

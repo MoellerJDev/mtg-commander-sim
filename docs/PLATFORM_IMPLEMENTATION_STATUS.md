@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
+verified: "b1ecdc0f3446a37ffe31bfca1237a079691e6b22"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,8 +15,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Current commit: PR #58 merge commit 7cc9ea1702c67519b14d2f177d82dcc8fab5458f plus the reconciliation commit containing this ledger
-- Active phase: `phase_0_post_pr58_reconciliation`
+- Current commit: The current feat/runtime-trust-hardening branch head containing this ledger, rooted at certified main b1ecdc0f3446a37ffe31bfca1237a079691e6b22; exact-head certification is recorded by the linked pull request and CI run
+- Active phase: `phase_1_runtime_trust_hardening`
 - Package version: `0.8.0`
 
 Historical integration chronology belongs in `CHANGELOG.md`; this current report intentionally does not reproduce a pull-request ledger.
@@ -54,18 +54,21 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - `browser_client`: `implemented_card_inspector_public_zone_browser_resilient_card_scoped_click_drag_saved_manual_auto_mana_saved_auto_pass_full_control_tapped_orientation_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause`
 - `guest_or_account_identity`: `implemented_expiring_per_tab_guest_sessions`
 - `rooms_and_lobbies`: `implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch`
-- `replay`: `implemented_command_replay_with_additive_card_program_v2_fingerprints`
-- `card_programs`: `implemented_schema_v2_generated_and_semantic_pack_adapters_registry_validation_cli_and_replay_pinning`
-- `semantic_handlers`: `implemented_registered_read_only_typed_intent_boundary_for_draw_table_draw_and_monarch_plus_versioned_token_replacement_and_continuous_effect_runtime_component_registries_with_legacy_fallback`
+- `replay`: `implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance`
+- `card_programs`: `implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning`
+- `semantic_handlers`: `implemented_registered_read_only_typed_intent_boundary_with_exact_family_rule_capability_metadata_and_strict_binding_plus_two_bounded_runtime_component_registries`
+- `capability_evidence`: `implemented_registry_v5_explicit_generated_test_rule_profile_evidence_index_with_separate_dependency_and_implementation_mutation_status`
+- `architecture_governance`: `implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions`
+- `continuous_effect_performance`: `implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency`
 - `hidden_information`: `implemented_projected_protocol`
 - `security`: `guest_hash_csrf_origin_capability_and_projection_baseline`
 - `ai_dependency`: `none_for_core_tests_or_runtime`
 
 ## Deterministic validation
 
-- Tests discovered: 4183
+- Tests discovered: 4207
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30723562495](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30723562495) — `pass`
+- Baseline CI: [30725523797](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30725523797) — `pass`
 - Compile: `pass`
 - Deterministic tests: `pass_full_exact_commit_gate`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
@@ -74,17 +77,15 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Wheel build and clean install: `pass`
 - Replay: `pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner`
 - Privacy: `pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner`
-- Semantic preflight: `trusted_only_for_two_pinned_exact_lists`
+- Semantic preflight: `reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory`
 
 AI/Codex pilot runs are optional client experiments. They are not product, rules, CI, merge, or release gates.
 
 ## Current blockers
 
-- trusted capabilities do not yet require an explicit generated evidence declaration, killed implementation mutation, and separate dependency fail-closed status
-- CardProgram trust basis and intrinsic, format, match, and dynamic closure are not yet represented or enforced as separate authoritative concepts
-- runtime handler and component execution validates registered capability IDs but is not yet bound to a trusted applicable closure at strict preflight and execution
-- the architecture policy does not yet default-deny unclassified production modules, use stable structural mutation identities, cover the complete generic specificity scope, or bind each exception to its exact ADR
-- continuous-effect runtime collection has boundary tests but no dedicated deterministic characteristic-query and component-collection performance baseline
+- traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed
+- most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted
+- the continuous-effect baseline gates structural scan counts but records latency observationally; broader action, combat, copy, control-change, phasing, and invalidation performance scenarios remain incomplete
 - a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence
 - saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit
 - the authoritative engine remains a measured oversized legacy module with interleaved turn, mutation, casting, effect, and variant responsibilities; ratcheted guards prevent new debt while later phases extract it
@@ -94,7 +95,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Create feat/runtime-trust-hardening from reconciled main and implement explicit capability evidence and mutation status, CardProgram trust basis and closure layers, strict handler/component capability binding and compatibility provenance, measured continuous-effect performance, and default-deny architecture governance without adding a new card family.
+Certify and merge feat/runtime-trust-hardening, refresh post-merge status on main, then score and select one coherent Phase 2 debt migration that removes a measured legacy branch, operation, write responsibility, or central semantic family.
 
 ## Regeneration
 

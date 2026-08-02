@@ -7,6 +7,7 @@ import re
 from typing import Any, Iterable, Mapping, Sequence, TYPE_CHECKING
 
 from ..util import stable_json
+from .trust import build_program_trust_closure
 
 if TYPE_CHECKING:
     from ..semantics import SemanticProgram
@@ -460,67 +461,6 @@ class CardProgramFace:
         )
 
 
-def _program_trust_closure(
-    abilities: Sequence["SemanticProgram"],
-    residuals: Sequence[Mapping[str, Any]],
-    *,
-    oracle_source_hash: str,
-    rulings_source_hash: str,
-) -> dict[str, Any]:
-    direct: set[str] = set()
-    reachable: set[str] = set()
-    blockers: set[str] = set()
-    profiles: set[str] = set()
-    registries: set[str] = set()
-    legacy: list[str] = []
-    for ability in abilities:
-        direct.update(ability.capability_dependencies)
-        closure = ability.capability_closure
-        if closure is None:
-            legacy.append(ability.ability_id)
-        else:
-            reachable.update(str(value) for value in closure.get("reachable", []))
-            blockers.update(str(value) for value in closure.get("blockers", []))
-            if closure.get("profile"):
-                profiles.add(str(closure["profile"]))
-            if closure.get("registry_fingerprint"):
-                registries.add(str(closure["registry_fingerprint"]))
-            if closure.get("trusted") is not True:
-                blockers.add(f"ability:{ability.ability_id}:capability_untrusted")
-        if ability.trust_level not in {"trusted", "intentionally_ignored"}:
-            blockers.add(
-                f"ability:{ability.ability_id}:trust:{ability.trust_level}"
-            )
-        if ability.requires_arbiter:
-            blockers.add(f"ability:{ability.ability_id}:requires_arbiter")
-        if (
-            ability.provenance.get("source_oracle_hash")
-            != oracle_source_hash
-        ):
-            blockers.add(f"ability:{ability.ability_id}:stale_oracle_source")
-        if (
-            ability.provenance.get("source_rulings_hash")
-            != rulings_source_hash
-        ):
-            blockers.add(f"ability:{ability.ability_id}:stale_rulings_source")
-    for residual in residuals:
-        if residual.get("material", True):
-            residual_id = str(residual.get("residual_id") or "unknown")
-            face_id = str(residual.get("face_id") or "unknown")
-            blockers.add(f"residual:{face_id}:{residual_id}")
-    result = {
-        "capability_dependencies": sorted(direct),
-        "capability_reachable": sorted(reachable),
-        "profiles": sorted(profiles),
-        "registry_fingerprints": sorted(registries),
-        "legacy_ability_ids": sorted(set(legacy)),
-        "blockers": sorted(blockers),
-        "trusted": not blockers,
-    }
-    result["fingerprint"] = _hash(result)
-    return result
-
-
 def _semantic_payload(
     faces: Sequence[CardProgramFace],
     abilities: Sequence["SemanticProgram"],
@@ -591,7 +531,7 @@ class CardProgram:
         )
         if self.semantic_hash != expected_semantic:
             raise CardProgramError("CardProgram semantic_hash does not match")
-        expected_trust = _program_trust_closure(
+        expected_trust = build_program_trust_closure(
             self.abilities,
             self.residuals,
             oracle_source_hash=self.oracle_source_hash,
@@ -640,7 +580,7 @@ class CardProgram:
             semantic_hash=_hash(
                 _semantic_payload(face_values, ability_values, residual_values)
             ),
-            trust_closure=_program_trust_closure(
+            trust_closure=build_program_trust_closure(
                 ability_values,
                 residual_values,
                 oracle_source_hash=oracle_source_hash,

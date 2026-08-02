@@ -22,6 +22,7 @@ try:
         _production_metrics,
         _state_and_dispatch_metrics,
         analyze_production,
+        card_specificity_scope,
     )
 except ModuleNotFoundError:  # Direct `python scripts/...` execution.
     from architecture_support import (
@@ -35,13 +36,34 @@ except ModuleNotFoundError:  # Direct `python scripts/...` execution.
         _production_metrics,
         _state_and_dispatch_metrics,
         analyze_production,
+        card_specificity_scope,
     )
 
 from mtg_commander_sim.semantics import VALID_EFFECT_OPERATIONS
+from mtg_commander_sim.util import stable_json
 
 
 POLICY = ROOT / "platform" / "architecture-policy.json"
 BASELINE = ROOT / "platform" / "architecture-guard-baseline.json"
+
+
+def _baseline_allowance_fingerprint(baseline: Mapping[str, Any]) -> str:
+    payload = {
+        key: baseline[key]
+        for key in (
+            "engine",
+            "direct_game_state_writes_by_file",
+            "direct_game_state_write_identities",
+            "oracle_id_literals",
+            "registered_effect_operations",
+            "legacy_card_specific_operations",
+            "card_named_helpers",
+            "oversized_modules",
+            "oversized_functions_and_methods",
+            "source_fingerprints",
+        )
+    }
+    return hashlib.sha256(stable_json(payload).encode("utf-8")).hexdigest()
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -117,6 +139,164 @@ def mutation_ownership_violations(
     return [item for item in locations if item["file"] not in owners]
 
 
+def state_write_identity(item: Mapping[str, Any]) -> tuple[Any, ...]:
+    return _identity(item, "file", "symbol", "kind", "state_path")
+
+
+def module_classification_failures(
+    analyses: Mapping[str, Any], policy: Mapping[str, Any]
+) -> list[dict[str, Any]]:
+    path = ROOT / str(policy["module_classifications"])
+    value = _load_json(path)
+    required_top = {
+        "schema_version",
+        "classification_policy",
+        "modules",
+        "fingerprint",
+    }
+    failures: list[dict[str, Any]] = []
+    if set(value) != required_top or value.get("schema_version") != 1:
+        return [
+            _failure(
+                "module_classification_schema",
+                "The default-deny module classification artifact is malformed.",
+                sorted(set(value) ^ required_top),
+            )
+        ]
+    payload = dict(value)
+    fingerprint = str(payload.pop("fingerprint") or "")
+    expected_fingerprint = hashlib.sha256(
+        stable_json(payload).encode("utf-8")
+    ).hexdigest()
+    if fingerprint != expected_fingerprint:
+        failures.append(
+            _failure(
+                "module_classification_fingerprint",
+                "The module classification fingerprint is stale.",
+                {"recorded": fingerprint, "expected": expected_fingerprint},
+            )
+        )
+    rows = value.get("modules")
+    if not isinstance(rows, list):
+        return failures + [
+            _failure(
+                "module_classification_schema",
+                "Module classifications must be a list.",
+                type(rows).__name__,
+            )
+        ]
+    required_row = {
+        "file",
+        "layer",
+        "owning_subsystem",
+        "allowed_dependency_layers",
+        "game_state_access",
+        "card_specificity_policy",
+        "visibility_sensitivity",
+        "replay_participation",
+    }
+    by_file: dict[str, Mapping[str, Any]] = {}
+    malformed = []
+    for index, row in enumerate(rows):
+        if not isinstance(row, Mapping) or set(row) != required_row:
+            malformed.append(index)
+            continue
+        relative = str(row["file"])
+        if relative in by_file:
+            malformed.append(index)
+            continue
+        by_file[relative] = row
+    if malformed:
+        failures.append(
+            _failure(
+                "module_classification_schema",
+                "Module classification rows are malformed or duplicated.",
+                malformed,
+            )
+        )
+    current_files = set(analyses)
+    classified_files = set(by_file)
+    if current_files != classified_files:
+        failures.append(
+            _failure(
+                "module_classification_default_deny",
+                "Every production Python module must be classified exactly once.",
+                {
+                    "unclassified": sorted(current_files - classified_files),
+                    "removed": sorted(classified_files - current_files),
+                },
+            )
+        )
+    valid_layers = {
+        "domain",
+        "rules",
+        "semantics",
+        "adapter",
+        "application",
+        "transport",
+    }
+    invalid_rows = []
+    for relative, row in by_file.items():
+        allowed = row["allowed_dependency_layers"]
+        if (
+            row["layer"] not in valid_layers
+            or not isinstance(allowed, list)
+            or not set(allowed).issubset(valid_layers)
+            or row["game_state_access"]
+            not in {"none", "read_only", "mutable_owner", "model_definition"}
+            or row["card_specificity_policy"]
+            not in {"generic_no_growth", "explicit_card_override"}
+            or row["visibility_sensitivity"]
+            not in {"authoritative_internal", "principal_scoped"}
+            or row["replay_participation"] not in {"none", "authoritative"}
+        ):
+            invalid_rows.append(relative)
+    if invalid_rows:
+        failures.append(
+            _failure(
+                "module_classification_values",
+                "Module classification values are outside the closed vocabulary.",
+                sorted(invalid_rows),
+            )
+        )
+    module_to_file = {
+        analysis.module: relative for relative, analysis in analyses.items()
+    }
+    dependency_violations = []
+    for relative, analysis in analyses.items():
+        row = by_file.get(relative)
+        if row is None:
+            continue
+        allowed = set(row["allowed_dependency_layers"])
+        for imported in analysis.imports:
+            candidate = imported
+            while candidate and candidate not in module_to_file and "." in candidate:
+                candidate = candidate.rsplit(".", 1)[0]
+            target_file = module_to_file.get(candidate)
+            target = by_file.get(target_file or "")
+            if target is not None and target["layer"] not in allowed:
+                dependency_violations.append(
+                    {
+                        "file": relative,
+                        "layer": row["layer"],
+                        "import": imported,
+                        "target_layer": target["layer"],
+                    }
+                )
+    if dependency_violations:
+        failures.append(
+            _failure(
+                "module_dependency_layers",
+                "A classified module imports a disallowed dependency layer.",
+                sorted(
+                    dependency_violations,
+                    key=lambda item: (item["file"], item["import"]),
+                ),
+            )
+        )
+    return failures
+
+
 def printed_name_literal_identities(
     analyses: Mapping[str, Any], scope: Iterable[str], digest_index: frozenset[bytes]
 ) -> list[tuple[Any, ...]]:
@@ -159,8 +339,8 @@ def build_baseline(baseline_commit: str) -> dict[str, Any]:
         for item in analyses["mtg_commander_sim/engine.py"].functions
         if item["kind"] == "method"
     ]
-    return {
-        "schema_version": 1,
+    result = {
+        "schema_version": 2,
         "baseline_commit": baseline_commit,
         "purpose": "Phase 1 non-growth allowances; removals remain allowed.",
         "engine": {
@@ -178,6 +358,28 @@ def build_baseline(baseline_commit: str) -> dict[str, Any]:
                 ).items()
             )
         ),
+        "direct_game_state_write_identities": [
+            {
+                "file": file,
+                "symbol": symbol,
+                "kind": kind,
+                "state_path": state_path,
+            }
+            for file, symbol, kind, state_path in sorted(
+                {
+                    (
+                        item["file"],
+                        item.get("symbol"),
+                        item["kind"],
+                        item["state_path"],
+                    )
+                    for item in state[
+                        "direct_game_state_write_heuristic"
+                    ]["locations"]
+                },
+                key=repr,
+            )
+        ],
         "oracle_id_literals": state["oracle_id_literals"]["locations"],
         "registered_effect_operations": sorted(VALID_EFFECT_OPERATIONS),
         "legacy_card_specific_operations": sorted(
@@ -185,18 +387,154 @@ def build_baseline(baseline_commit: str) -> dict[str, Any]:
         ),
         "card_named_helpers": source["card_named_helpers"],
         "oversized_modules": sorted(
-            item["file"] for item in production["oversized_modules"]
+            (
+                {
+                    "file": item["file"],
+                    "logical_lines": item["logical_lines"],
+                }
+                for item in production["oversized_modules"]
+            ),
+            key=lambda item: item["file"],
         ),
         "oversized_functions_and_methods": sorted(
-            {
-                f"{item['file']}::{item['symbol']}"
+            (
+                {
+                    "file": item["file"],
+                    "symbol": item["symbol"],
+                    "logical_lines": item["logical_lines"],
+                }
                 for item in production["oversized_functions_and_methods"]
-            }
+            ),
+            key=lambda item: (item["file"], item["symbol"]),
         ),
         "source_fingerprints": {
             "printed_name_allowances_sha256": _file_sha256(CARD_BASELINE),
         },
     }
+    return result
+
+
+def bind_baseline_exception(
+    baseline: dict[str, Any],
+    *,
+    exception_id: str,
+    adr: str,
+) -> dict[str, Any]:
+    baseline["exception_binding"] = {
+        "exception_id": exception_id,
+        "adr": adr,
+        "allowance_fingerprint": _baseline_allowance_fingerprint(baseline),
+    }
+    return baseline
+
+
+def exception_binding_failures(
+    policy: Mapping[str, Any], baseline: Mapping[str, Any]
+) -> list[dict[str, Any]]:
+    registry = _load_json(ROOT / str(policy["exception_registry"]))
+    if registry.get("schema_version") != 1 or not isinstance(
+        registry.get("exceptions"), list
+    ):
+        return [
+            _failure(
+                "architecture_exception_schema",
+                "The architecture exception registry is malformed.",
+                registry,
+            )
+        ]
+    binding = baseline.get("exception_binding")
+    if not isinstance(binding, Mapping):
+        return [
+            _failure(
+                "architecture_exception_binding",
+                "The guard baseline lacks an exact exception binding.",
+                binding,
+            )
+        ]
+    matches = [
+        row
+        for row in registry["exceptions"]
+        if isinstance(row, Mapping)
+        and row.get("exception_id") == binding.get("exception_id")
+    ]
+    if len(matches) != 1:
+        return [
+            _failure(
+                "architecture_exception_binding",
+                "The baseline exception ID must resolve exactly once.",
+                binding,
+            )
+        ]
+    row = matches[0]
+    required = {
+        "exception_id",
+        "adr",
+        "artifact",
+        "allowance_fingerprint",
+        "exact_allowance",
+        "rationale",
+        "owner",
+        "maximum_scope",
+        "removal_condition",
+        "target_milestone",
+        "replay_implications",
+        "privacy_implications",
+        "security_implications",
+        "tests",
+    }
+    failures = []
+    if set(row) != required:
+        failures.append(
+            _failure(
+                "architecture_exception_schema",
+                "The bound exception does not use the exact reviewed schema.",
+                sorted(set(row) ^ required),
+            )
+        )
+        return failures
+    current = _baseline_allowance_fingerprint(baseline)
+    if (
+        row["adr"] != binding.get("adr")
+        or row["artifact"] != policy["baseline"]
+        or row["allowance_fingerprint"] != current
+        or binding.get("allowance_fingerprint") != current
+    ):
+        failures.append(
+            _failure(
+                "architecture_exception_binding",
+                "The exception is not bound to this exact allowance payload.",
+                {
+                    "binding": binding,
+                    "registry_allowance_fingerprint": row[
+                        "allowance_fingerprint"
+                    ],
+                    "current_allowance_fingerprint": current,
+                },
+            )
+        )
+    adr = ROOT / str(row["adr"])
+    if not adr.is_file() or not all(
+        str(row[field]).strip()
+        for field in (
+            "exact_allowance",
+            "rationale",
+            "owner",
+            "maximum_scope",
+            "removal_condition",
+            "target_milestone",
+            "replay_implications",
+            "privacy_implications",
+            "security_implications",
+        )
+    ):
+        failures.append(
+            _failure(
+                "architecture_exception_metadata",
+                "The bound ADR or removal metadata is incomplete.",
+                row,
+            )
+        )
+    return failures
 
 
 def _failure(guard: str, detail: str, evidence: Any) -> dict[str, Any]:
@@ -252,6 +590,26 @@ def _dependency_and_mutation_failures(
                 nonowner_writes,
             )
         )
+    current_write_identities = {
+        state_write_identity(item)
+        for item in state_locations
+    }
+    allowed_write_identities = {
+        state_write_identity(item)
+        for item in baseline["direct_game_state_write_identities"]
+    }
+    new_write_identities = sorted(
+        current_write_identities - allowed_write_identities,
+        key=repr,
+    )
+    if new_write_identities:
+        failures.append(
+            _failure(
+                "mutation_identity_non_growth",
+                "A new structural GameState write identity appeared.",
+                new_write_identities,
+            )
+        )
     write_growth = {
         file: {"baseline": allowed, "current": write_counts[file]}
         for file, allowed in baseline["direct_game_state_writes_by_file"].items()
@@ -280,7 +638,7 @@ def _specificity_failures(
         _load_json(ROOT / str(policy["card_name_hash_index"]))
     )
     current_card_literals = printed_name_literal_identities(
-        analyses, policy["specificity_scope"], digest_index
+        analyses, card_specificity_scope(analyses, source), digest_index
     )
     allowances = _load_json(ROOT / str(policy["printed_name_allowances"]))
     allowed_card_literals = [
@@ -421,9 +779,16 @@ def _size_debt_failures(
                 {"logical_line_delta": engine_growth},
             )
         )
+    baseline_modules = {
+        item["file"]: int(item["logical_lines"])
+        for item in baseline["oversized_modules"]
+    }
+    current_modules = {
+        item["file"]: int(item["logical_lines"])
+        for item in production["oversized_modules"]
+    }
     new_oversized_modules = sorted(
-        {item["file"] for item in production["oversized_modules"]}
-        - set(baseline["oversized_modules"])
+        set(current_modules) - set(baseline_modules)
     )
     if new_oversized_modules:
         failures.append(
@@ -433,13 +798,32 @@ def _size_debt_failures(
                 new_oversized_modules,
             )
         )
+    grown_oversized_modules = {
+        file: {
+            "baseline": baseline_modules[file],
+            "current": current_modules[file],
+        }
+        for file in sorted(set(current_modules) & set(baseline_modules))
+        if current_modules[file] > baseline_modules[file]
+    }
+    if grown_oversized_modules:
+        failures.append(
+            _failure(
+                "oversized_module_non_growth",
+                "An existing oversized production module grew.",
+                grown_oversized_modules,
+            )
+        )
     current_oversized_functions = {
-        f"{item['file']}::{item['symbol']}"
+        (item["file"], item["symbol"]): int(item["logical_lines"])
         for item in production["oversized_functions_and_methods"]
     }
+    baseline_functions = {
+        (item["file"], item["symbol"]): int(item["logical_lines"])
+        for item in baseline["oversized_functions_and_methods"]
+    }
     new_oversized_functions = sorted(
-        current_oversized_functions
-        - set(baseline["oversized_functions_and_methods"])
+        set(current_oversized_functions) - set(baseline_functions)
     )
     if new_oversized_functions:
         failures.append(
@@ -447,6 +831,25 @@ def _size_debt_failures(
                 "oversized_functions",
                 "A new function exceeds the review threshold without a baseline ADR.",
                 new_oversized_functions,
+            )
+        )
+    grown_oversized_functions = {
+        f"{file}::{symbol}": {
+            "baseline": baseline_functions[(file, symbol)],
+            "current": current_oversized_functions[(file, symbol)],
+        }
+        for file, symbol in sorted(
+            set(current_oversized_functions) & set(baseline_functions)
+        )
+        if current_oversized_functions[(file, symbol)]
+        > baseline_functions[(file, symbol)]
+    }
+    if grown_oversized_functions:
+        failures.append(
+            _failure(
+                "oversized_function_non_growth",
+                "An existing oversized function or method grew.",
+                grown_oversized_functions,
             )
         )
     return failures
@@ -504,6 +907,8 @@ def evaluate_architecture() -> dict[str, Any]:
     failures = _dependency_and_mutation_failures(
         policy, baseline, analyses, state
     )
+    failures.extend(exception_binding_failures(policy, baseline))
+    failures.extend(module_classification_failures(analyses, policy))
     specificity_failures, specificity = _specificity_failures(
         policy, baseline, source, analyses, state
     )
@@ -525,7 +930,10 @@ def main() -> int:
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--check", action="store_true")
     mode.add_argument("--initialize-baseline", action="store_true")
+    mode.add_argument("--refresh-baseline", action="store_true")
     parser.add_argument("--baseline-commit")
+    parser.add_argument("--adr")
+    parser.add_argument("--exception-id")
     args = parser.parse_args()
     if args.initialize_baseline:
         if BASELINE.exists():
@@ -542,8 +950,34 @@ def main() -> int:
         )
         print(json.dumps({"ok": True, "baseline": str(BASELINE)}, indent=2))
         return 0
+    if args.refresh_baseline:
+        if not args.baseline_commit or not args.adr or not args.exception_id:
+            parser.error(
+                "--refresh-baseline requires --baseline-commit, --adr, and "
+                "--exception-id"
+            )
+        adr = (ROOT / args.adr).resolve()
+        if not adr.is_file() or ROOT not in adr.parents:
+            parser.error("--adr must name an existing repository ADR")
+        value = bind_baseline_exception(
+            build_baseline(args.baseline_commit),
+            exception_id=args.exception_id,
+            adr=adr.relative_to(ROOT).as_posix(),
+        )
+        BASELINE.write_text(
+            json.dumps(value, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        print(json.dumps({"ok": True, "baseline": str(BASELINE)}, indent=2))
+        return 0
     if args.baseline_commit:
-        parser.error("--baseline-commit is only valid with --initialize-baseline")
+        parser.error(
+            "--baseline-commit is only valid with baseline initialization "
+            "or reviewed refresh"
+        )
+    if args.adr or args.exception_id:
+        parser.error("--adr/--exception-id require --refresh-baseline")
     result = evaluate_architecture()
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if result["status"] == "pass" else 1

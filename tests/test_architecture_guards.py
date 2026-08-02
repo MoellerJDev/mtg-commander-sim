@@ -75,7 +75,7 @@ class ArchitectureGuardTests(unittest.TestCase):
         raw = self.card_index_path.read_text(encoding="utf-8")
         self.assertNotIn("Black Lotus", raw)
         self.assertIn(printed_name_digest("Black Lotus"), self.card_index)
-        relative = self.policy["specificity_scope"][0]
+        relative = self.policy["protected_rules_modules"][0]
         literal = {
             "file": relative,
             "symbol": "bad_branch",

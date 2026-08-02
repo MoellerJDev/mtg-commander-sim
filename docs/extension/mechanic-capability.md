@@ -9,7 +9,7 @@ maintenance: "hand-maintained"
 
 # Mechanic capability extension guide
 
-The capability registry is the current incremental trust boundary beside the
+Capability registry version 5 is the current incremental trust boundary beside the
 legacy broad mechanic contracts. The initial migration covers the generated
 base-damage spell shape and its public target/base-result dependencies. It is
 not a claim that the broad damage family or all compiler nodes have migrated.
@@ -23,8 +23,21 @@ executable evidence.
 `CapabilityRegistry.closure()` resolves a deterministic transitive graph for
 one supported rules profile. Missing IDs, cycles, unsupported profiles, blocked
 dependencies, retained blockers, and incomplete trust evidence fail closed.
-The registry fingerprint and closure fingerprint make the exact evaluation
-auditable.
+The registry fingerprint, generated evidence fingerprint, and closure
+fingerprint make the exact evaluation auditable.
+
+Evidence relationships live in
+`platform/capability-evidence-declarations.json` and are compiled into the
+packaged `capability-evidence.json`. Each declaration names a fully qualified
+test, evidence class, official rules, profiles, and applicability. The
+validator discovers test identities from the AST; removed or renamed tests,
+unknown rules/profiles, contradictory declarations, and registry-validation
+tests used as behavioral evidence fail CI.
+
+Dependency fail-closed and implementation mutation statuses are independent.
+A trusted capability with dependencies requires a passed dependency test and
+must have killed implementation mutation evidence. `not_applicable` requires a
+reviewed rationale.
 
 Broad mechanic aggregates are reporting and migration views. A trusted narrow
 closure does not promote its broad aggregate. Conversely, a blocked aggregate
@@ -37,8 +50,9 @@ preflight work.
 
 1. Define a stable capability ID and schema entry.
 2. Implement it behind a focused domain port without adding card-name logic.
-3. Add legal, illegal, rollback, replay, visibility, property/mutation, and
-   relevant interaction tests.
+3. Add explicit legal, illegal, rollback, replay, visibility, property, and
+   implementation-mutation evidence declarations plus relevant interaction
+   tests.
 4. Link applicable Comprehensive Rules and rulings.
 5. Let the compiler declare the direct capability dependency without removing
    the legacy fallback for unmigrated node shapes.
