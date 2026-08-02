@@ -122,6 +122,7 @@ class MechanicContractTests(unittest.TestCase):
                 "lifelink",
                 "menace",
                 "protection",
+                "tap-and-untap",
                 "trample",
             },
             {contract["mechanic_id"] for contract in contracts},
