@@ -21,12 +21,14 @@ pilot.
 
 `GameState` owns players, cards, zones, stack, turn/combat state, pending
 decisions, events, yields, and fidelity telemetry. During migration,
-`CommanderEngine` remains the declared general mutation owner. Capability
-lifecycle and replay hydration have narrowly declared compatibility ownership.
-All other rules helpers return values or operate through the engine boundary.
-Typed semantic handlers receive an immutable rules query and emit intents;
-they cannot import the engine or state model. The intent executor calls the
-existing canonical mutation methods.
+`CommanderEngine` remains the declared general mutation owner, while
+`tap_state.py` is the first focused effect mutation owner extracted behind a
+typed host protocol. Capability lifecycle and replay hydration have narrowly
+declared compatibility ownership. All other rules helpers return values or
+operate through an approved mutation boundary. Typed semantic handlers receive
+an immutable rules query and emit intents; they cannot import the engine or
+state model. The intent executor calls existing canonical engine methods or
+the focused tap-state port.
 
 ## Inputs and outputs
 
@@ -47,7 +49,10 @@ priority decision.
 ## Extension and event participation
 
 Reusable mechanics belong in focused rules modules and typed semantic
-operations.
+operations. The current tap-state owner commits only the represented single
+permanent and all-effective-creature operations; it preserves stun replacement
+and phased-out behavior without claiming the complete replacement or layer
+systems.
 Triggers consume normalized events; replacements transform represented events
 before final mutation; state-based actions run to a fixed point. New rules
 work must identify event/replacement participation and use capability IDs from
@@ -65,4 +70,5 @@ Unsupported grammar or behavior fails closed through semantic/preflight or
 runtime fidelity gates. The generated
 [rules status](../RULES_COMPLETENESS_STATUS.md) is the authority for remaining
 families. Primary evidence is the deterministic test suite, replay tests,
-privacy tests, and source-pinned conformance artifacts.
+privacy tests, mutation/rollback evidence, and source-pinned conformance
+artifacts.

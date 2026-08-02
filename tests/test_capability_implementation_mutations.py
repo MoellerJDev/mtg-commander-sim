@@ -6,6 +6,7 @@ from unittest.mock import patch
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim.damage import DamageEvent
 from mtg_commander_sim.engine import CommanderEngine
+from mtg_commander_sim import tap_state
 from mtg_commander_sim.targets import PUBLIC_TARGET_ZONES, TargetGroup
 
 
@@ -133,3 +134,95 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises((AssertionError, KeyError)):
                 assert_all_permanent_results()
+
+    def test_semantic_tap_state_mutants_are_killed(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=2,
+            seed=7012699,
+        )
+        keep_all(session)
+        engine = session.engine
+        first_ref = engine.create_token(
+            "A",
+            name="Tap Mutation Witness",
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "power": "1",
+                "toughness": "1",
+            },
+        )[0]
+        second_ref = engine.create_token(
+            "B",
+            name="Untap Mutation Witness",
+            tapped=True,
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "power": "1",
+                "toughness": "1",
+            },
+        )[0]
+        first = engine._resolve_object("A", first_ref, zones={"battlefield"})
+        second = engine._resolve_object("B", second_ref, zones={"battlefield"})
+
+        def assert_single_tap() -> None:
+            first.tapped = False
+            engine.apply_effect({"op": "tap", "card": first.ref}, actor="A")
+            self.assertTrue(first.tapped)
+
+        assert_single_tap()
+        with patch.object(
+            tap_state,
+            "set_permanent_tapped",
+            lambda _host, object_ref, **_kwargs: object_ref,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_single_tap()
+
+        def assert_stun_replaces_untap() -> None:
+            second.tapped = True
+            second.counters["stun"] = 1
+            engine.apply_effect(
+                {"op": "untap", "card": second.ref}, actor="A"
+            )
+            self.assertTrue(second.tapped)
+            self.assertNotIn("stun", second.counters)
+
+        assert_stun_replaces_untap()
+
+        def ignore_stun_mutant(
+            _engine: CommanderEngine,
+            card,
+            *,
+            actor,
+            reason,
+        ) -> bool:
+            card.tapped = False
+            return True
+
+        with patch.object(
+            CommanderEngine,
+            "_untap_permanent",
+            ignore_stun_mutant,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_stun_replaces_untap()
+
+        def assert_aggregate_untap() -> None:
+            first.tapped = True
+            second.tapped = True
+            second.counters.pop("stun", None)
+            engine.apply_effect({"op": "untap_all_creatures"}, actor="A")
+            self.assertFalse(first.tapped)
+            self.assertFalse(second.tapped)
+
+        assert_aggregate_untap()
+        with patch.object(
+            tap_state,
+            "untap_all_creatures",
+            lambda _host, **_kwargs: [],
+        ):
+            with self.assertRaises(AssertionError):
+                assert_aggregate_untap()

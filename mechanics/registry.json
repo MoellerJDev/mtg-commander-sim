@@ -1,5 +1,5 @@
 {
-  "contract_count": 58,
+  "contract_count": 59,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -318,6 +318,12 @@
       "path": "mechanics/contracts/state-based-actions.json",
       "sha256": "2ebd4a0dd11e2bf308a4251d2534ac5d2c6179dad0ef67b3052797e700fef20c",
       "version": 6
+    },
+    {
+      "mechanic_id": "tap-and-untap",
+      "path": "mechanics/contracts/tap-and-untap.json",
+      "sha256": "3234df16df3b3d8b066e19805accc6203bf8066c03d3eb88ccd23dfbb9f09580",
+      "version": 1
     },
     {
       "mechanic_id": "trample",
@@ -5037,19 +5043,38 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/tap-and-untap.json",
+      "contract_sha256": "3234df16df3b3d8b066e19805accc6203bf8066c03d3eb88ccd23dfbb9f09580",
+      "contract_version": 1,
+      "coverage_status": "tested",
       "dependencies": [
         "701"
       ],
-      "implementation_component": null,
+      "implementation_component": "typed tap, untap, and all-creatures semantic handlers with the canonical tap_state mutation port and stun-aware engine primitive",
+      "implementation_version": "tap-state-effects-v1",
       "kind": "keyword_action",
+      "known_blockers": [
+        "continuous effects that prohibit tapping or untapping are not represented generically in ambient closure",
+        "replacement discovery and affected-player ordering beyond the represented stun-counter replacement are incomplete",
+        "complete layer dependencies and dynamically granted types are not capability-closed",
+        "tap and untap costs and the untap-step selection procedure are separate incomplete capabilities"
+      ],
       "mechanic_id": "tap-and-untap",
       "official_name": "Tap and Untap",
       "rule_references": [
         "701.26"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_tap_and_untap_rules",
+        "test_tap_state_handlers_lower_typed_intents_through_read_only_context",
+        "test_tap_state_effects_change_only_eligible_state",
+        "test_stun_counter_replaces_typed_untap_without_false_event",
+        "test_untap_all_creatures_uses_effective_types_and_canonical_state_path",
+        "test_tap_state_validation_fails_before_mutation",
+        "test_tap_state_resolution_rolls_back_atomically",
+        "test_tap_state_effects_replay_exactly",
+        "test_semantic_tap_state_mutants_are_killed"
+      ],
       "trust_level": "untrusted"
     },
     {

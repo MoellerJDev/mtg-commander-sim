@@ -23030,62 +23030,6 @@ class CommanderEngine:
                 ),
                 reason=reason,
             )
-        if op == "tap" or op == "untap":
-            card = self._resolve_object(actor, str(effect["card"]), zones={"battlefield"})
-            if op == "tap":
-                card.tapped = True
-            else:
-                self._untap_permanent(
-                    card,
-                    actor=actor,
-                    reason=reason,
-                )
-            self._log(actor, f"permanent.{op}", f"{card.ref} was {op}ped.", {"object": card.ref, "reason": reason}, importance=1, changed_objects=[card.object_id])
-            return card.ref
-        if op == "untap_all_creatures":
-            changed: list[str] = []
-            for seat in self.active_seats:
-                for object_id in self.state.players[seat].zones[
-                    "battlefield"
-                ]:
-                    card = self.state.cards[object_id]
-                    if (
-                        card.phased_out
-                        or "creature"
-                        not in self._type_parts(
-                            str(
-                                self._effective_card_data(card).get(
-                                    "type_line"
-                                )
-                                or ""
-                            )
-                        )[0]
-                    ):
-                        continue
-                    if self._untap_permanent(
-                        card,
-                        actor=actor,
-                        reason=reason,
-                    ):
-                        changed.append(card.object_id)
-            if changed:
-                self._log(
-                    actor,
-                    "permanent.untap",
-                    f"Untapped {len(changed)} creature(s).",
-                    {
-                        "objects": [
-                            self.state.cards[object_id].ref
-                            for object_id in changed
-                        ],
-                        "reason": reason,
-                    },
-                    importance=2,
-                    changed_objects=changed,
-                )
-            return [
-                self.state.cards[object_id].ref for object_id in changed
-            ]
         if op == "add_type_until_end_of_turn":
             card = self._resolve_object(
                 actor,

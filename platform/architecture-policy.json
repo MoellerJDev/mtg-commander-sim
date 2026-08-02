@@ -75,7 +75,8 @@
     "mutable_owners": {
       "mtg_commander_sim/engine.py": "legacy authoritative transaction and mutation boundary",
       "mtg_commander_sim/permissions.py": "decision and capability lifecycle owned by the transaction boundary",
-      "mtg_commander_sim/record.py": "replay hydration, verification copies, and versioned migration"
+      "mtg_commander_sim/record.py": "replay hydration, verification copies, and versioned migration",
+      "mtg_commander_sim/tap_state.py": "typed tap-state effect mutation owner behind the semantic intent executor"
     },
     "read_only_consumers": {
       "mtg_commander_sim/projection.py": "principal-scoped projection",

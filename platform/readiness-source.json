@@ -6,12 +6,12 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "phase_1_runtime_trust_hardening",
-    "branch": "feat/runtime-trust-hardening",
-    "commit_reference": "The current feat/runtime-trust-hardening branch head containing this ledger, rooted at certified main b1ecdc0f3446a37ffe31bfca1237a079691e6b22; exact-head certification is recorded by the linked pull request and CI run",
+    "active_phase": "phase_2_typed_tap_untap_effect_migration",
+    "branch": "feat/typed-tap-untap-effects",
+    "commit_reference": "focused feature branch based on certified PR #60 merge e756950d52030b47a6cf81edcd7d7f60ca11d97e; exact-head certification pending",
     "branch_ancestry": {
-      "focused_branch_base": "b1ecdc0f3446a37ffe31bfca1237a079691e6b22",
-      "focused_branch_unique_commits_over_main": 1
+      "focused_branch_base": "e756950d52030b47a6cf81edcd7d7f60ca11d97e",
+      "focused_branch_unique_commits_over_main": 0
     },
     "pull_requests": [
       {
@@ -426,6 +426,13 @@
         "number": 59,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/59"
+      },
+      {
+        "base": "main",
+        "head": "feat/runtime-trust-hardening",
+        "number": 60,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/60"
       }
     ],
     "tags": [
@@ -472,6 +479,12 @@
       "evidence": "The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and seven two/four-player Chromium journeys, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, resilient card-scoped click/drag actions, saved Auto-mana/Manual mana and Auto-pass/Full control preferences, public tapped-card orientation, explicit active-player main-phase advancement, confirmed concession, public commander-damage tracking, terminal winner/draw rendering, exact command retry, invited read-only spectators, a durable complete public-log dialog, fail-closed handling for legacy arbiter-only records, and one-command managed Scryfall/browser startup. Compact trusted-only coverage includes modal land faces, targeted Sunscorched Desert ETB damage, a stack response, rules-created Treasure payment, Orcish Bowmasters/Amass, explicit attack and block declarations, combat damage, and a natural commander-damage winner. The 49-command natural-winner record replayed to its exact state hash with zero suppressed meaningful windows and a clean seat-projection audit; completed games also survive process restart. The inspected full-database failure remains a pinned pre-fix record, and a fresh post-restart full-database manual journey is still required as broader current-snapshot evidence. Saved board-layout customization, future schemas, full accounts, expiry/rate limits, and production deployment remain open."
     },
     {
+      "id": "phase_2_tap_state_migration",
+      "name": "Typed tap-state effect migration",
+      "status": "implementation_complete_certification_pending",
+      "evidence": "The focused Phase 2 branch registers tap, untap, and all-creature untap as strict typed semantic operations, commits them through a classified tap-state mutation port, removes their legacy apply_effect branches, preserves stun replacement and effective-type/phasing behavior, and supplies rollback, replay, implementation-mutation, malformed-input, and source-linked evidence. The three capabilities remain tested and blocked rather than trusted because broader prohibitions, replacement ordering, and characteristic closure remain incomplete."
+    },
+    {
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main",
@@ -495,8 +508,8 @@
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
-    "semantic_handlers": "implemented_registered_read_only_typed_intent_boundary_with_exact_family_rule_capability_metadata_and_strict_binding_plus_two_bounded_runtime_component_registries",
-    "capability_evidence": "implemented_registry_v5_explicit_generated_test_rule_profile_evidence_index_with_separate_dependency_and_implementation_mutation_status",
+    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_with_family_modules_strict_binding_and_focused_tap_state_mutation_port_plus_two_bounded_runtime_component_registries",
+    "capability_evidence": "implemented_registry_v6_explicit_generated_test_rule_profile_evidence_index_with_separate_dependency_and_implementation_mutation_status",
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "hidden_information": "implemented_projected_protocol",
@@ -504,17 +517,17 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "b1ecdc0f3446a37ffe31bfca1237a079691e6b22",
+    "baseline_commit": "e756950d52030b47a6cf81edcd7d7f60ca11d97e",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30725523797,
+      "run_id": 30729318546,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30725523797"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30729318546"
     },
     "local": {
       "compile": "pass",
       "deterministic_tests": "pass_full_exact_commit_gate",
-      "focused_rules_tests": "pass_current_turn_history_declaration_casting_zone_change_state_action_combat_damage_record_identity_turn_structure_oracle_resolution_and_exact_replay_tests_current_branch",
+      "focused_rules_tests": "pass_typed_tap_state_lowering_validation_stun_effective_type_phasing_rollback_replay_mutation_capability_binding_plus_adjacent_rules_tests_current_branch",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
@@ -532,6 +545,7 @@
     "semantic_preflight": "reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory"
   },
   "blockers": [
+    "typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, replacement ordering beyond represented stun counters, and complete effective-characteristic closure",
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
     "the continuous-effect baseline gates structural scan counts but records latency observationally; broader action, combat, copy, control-change, phasing, and invalidation performance scenarios remain incomplete",
@@ -542,5 +556,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Certify and merge feat/runtime-trust-hardening, refresh post-merge status on main, then score and select one coherent Phase 2 debt migration that removes a measured legacy branch, operation, write responsibility, or central semantic family."
+  "next_task": "Commit the coherent typed tap-state slice, run the complete exact-head local merge gate headlessly, require public CI for the same SHA, merge and clean the branch, then select the next measured migration from fresh certified main."
 }

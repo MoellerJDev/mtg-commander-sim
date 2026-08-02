@@ -2,7 +2,7 @@
 title: "Compiler coverage status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "b1ecdc0f3446a37ffe31bfca1237a079691e6b22"
+verified: "e756950d52030b47a6cf81edcd7d7f60ca11d97e"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -48,16 +48,16 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/5`
+- Registry schema/version: `1/6`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `2d74fcff2127577c4432191ab1bd4d2a29a63f8f21d7dd54aba5f10e29e4aba2`
-- Evidence fingerprint: `790af7e70c17d52b099937d30b531a7df006abc3a235fe915f117667b3da0879`
-- Explicit evidence declarations: 73
-- Capability records: 19
+- Registry fingerprint: `c025a3fcfccaa2c7870e02887ae9666dd0056d449942d23b36ac6ec47bf83c97`
+- Evidence fingerprint: `3202e1f32cba18d6c5b631a25a02b220e833d37334849c82c5f88018f8b66c8d`
+- Explicit evidence declarations: 94
+- Capability records: 22
 - Trusted records: 8
 - Blocked records: 7
-- Dependency fail-closed statuses: `{"not_applicable": 7, "not_run": 6, "passed": 6}`
-- Implementation mutation statuses: `{"killed": 8, "not_run": 11}`
+- Dependency fail-closed statuses: `{"not_applicable": 9, "not_run": 6, "passed": 7}`
+- Implementation mutation statuses: `{"killed": 11, "not_run": 11}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
@@ -66,6 +66,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 | `cr-725-the-monarch` | 1 | false | `variant.monarch.designate` |
 | `cr-111-tokens` | 1 | false | `token.creation.additional_replacement` |
 | `cr-613-continuous-effects` | 1 | false | `continuous.power_toughness.fixed_anthem` |
+| `tap-and-untap` | 3 | false | `permanent.tap.effect`, `permanent.untap.all_creatures`, `permanent.untap.effect` |
 
 ## Pinned corpus accounting
 

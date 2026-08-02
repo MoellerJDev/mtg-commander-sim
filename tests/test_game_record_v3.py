@@ -124,7 +124,7 @@ class GameRecordV3Tests(unittest.TestCase):
                 ),
             )
             self.assertEqual(
-                3,
+                6,
                 len(
                     manifest["runtime_trust"][
                         "semantic_handler_inventory"

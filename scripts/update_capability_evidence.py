@@ -78,6 +78,35 @@ MUTATION_TESTS = {
         "CapabilityImplementationMutationTests."
         "test_damage_result_dispatch_mutant_is_killed"
     ),
+    "permanent.tap.effect": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_semantic_tap_state_mutants_are_killed"
+    ),
+    "permanent.untap.effect": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_semantic_tap_state_mutants_are_killed"
+    ),
+    "permanent.untap.all_creatures": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_semantic_tap_state_mutants_are_killed"
+    ),
+}
+EXTRA_EVIDENCE_TESTS = {
+    capability_id: (
+        (
+            "rollback",
+            "tests.test_semantic_handlers.TypedSemanticHandlerTests."
+            "test_tap_state_resolution_rolls_back_atomically",
+        ),
+    )
+    for capability_id in (
+        "permanent.tap.effect",
+        "permanent.untap.effect",
+        "permanent.untap.all_creatures",
+    )
 }
 
 
@@ -161,6 +190,12 @@ def bootstrap_declarations(
         if mutation_test is not None:
             declarations.append(
                 _declaration(capability, "mutation", mutation_test)
+            )
+        for evidence_class, test_id in EXTRA_EVIDENCE_TESTS.get(
+            capability["id"], ()
+        ):
+            declarations.append(
+                _declaration(capability, evidence_class, test_id)
             )
     declarations.sort(
         key=lambda row: (

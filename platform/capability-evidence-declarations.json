@@ -674,6 +674,352 @@
       "applicability_note": "Emit normalized noncombat damage events after final damage results for trigger discovery."
     },
     {
+      "capability_id": "permanent.tap.effect",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_semantic_tap_state_mutants_are_killed",
+      "official_rule_ids": [
+        "701.26",
+        "701.26a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized instruction to tap one resolved battlefield permanent through the canonical tap-state path, producing a public change only when it was untapped."
+    },
+    {
+      "capability_id": "permanent.tap.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_validation_fails_before_mutation",
+      "official_rule_ids": [
+        "701.26",
+        "701.26a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized instruction to tap one resolved battlefield permanent through the canonical tap-state path, producing a public change only when it was untapped."
+    },
+    {
+      "capability_id": "permanent.tap.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_effects_change_only_eligible_state",
+      "official_rule_ids": [
+        "701.26",
+        "701.26a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized instruction to tap one resolved battlefield permanent through the canonical tap-state path, producing a public change only when it was untapped."
+    },
+    {
+      "capability_id": "permanent.tap.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_handlers_lower_typed_intents_through_read_only_context",
+      "official_rule_ids": [
+        "701.26",
+        "701.26a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized instruction to tap one resolved battlefield permanent through the canonical tap-state path, producing a public change only when it was untapped."
+    },
+    {
+      "capability_id": "permanent.tap.effect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_effects_replay_exactly",
+      "official_rule_ids": [
+        "701.26",
+        "701.26a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized instruction to tap one resolved battlefield permanent through the canonical tap-state path, producing a public change only when it was untapped."
+    },
+    {
+      "capability_id": "permanent.tap.effect",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_resolution_rolls_back_atomically",
+      "official_rule_ids": [
+        "701.26",
+        "701.26a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized instruction to tap one resolved battlefield permanent through the canonical tap-state path, producing a public change only when it was untapped."
+    },
+    {
+      "capability_id": "permanent.untap.all_creatures",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_stun_counter_replaces_typed_untap_without_false_event",
+      "official_rule_ids": [
+        "110.4",
+        "122.1d",
+        "701.26",
+        "701.26b",
+        "702.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Untap each phased-in battlefield permanent that is a creature under the represented effective-characteristics path, applying the bounded single-permanent untap behavior to every member."
+    },
+    {
+      "capability_id": "permanent.untap.all_creatures",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_untap_all_creatures_uses_effective_types_and_canonical_state_path",
+      "official_rule_ids": [
+        "110.4",
+        "122.1d",
+        "701.26",
+        "701.26b",
+        "702.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Untap each phased-in battlefield permanent that is a creature under the represented effective-characteristics path, applying the bounded single-permanent untap behavior to every member."
+    },
+    {
+      "capability_id": "permanent.untap.all_creatures",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_semantic_tap_state_mutants_are_killed",
+      "official_rule_ids": [
+        "110.4",
+        "122.1d",
+        "701.26",
+        "701.26b",
+        "702.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Untap each phased-in battlefield permanent that is a creature under the represented effective-characteristics path, applying the bounded single-permanent untap behavior to every member."
+    },
+    {
+      "capability_id": "permanent.untap.all_creatures",
+      "evidence_class": "negative",
+      "test_id": "tests.test_rule_capabilities.CapabilityRegistryTests.test_untap_all_dependency_fails_closed",
+      "official_rule_ids": [
+        "110.4",
+        "122.1d",
+        "701.26",
+        "701.26b",
+        "702.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Untap each phased-in battlefield permanent that is a creature under the represented effective-characteristics path, applying the bounded single-permanent untap behavior to every member."
+    },
+    {
+      "capability_id": "permanent.untap.all_creatures",
+      "evidence_class": "negative",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_validation_fails_before_mutation",
+      "official_rule_ids": [
+        "110.4",
+        "122.1d",
+        "701.26",
+        "701.26b",
+        "702.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Untap each phased-in battlefield permanent that is a creature under the represented effective-characteristics path, applying the bounded single-permanent untap behavior to every member."
+    },
+    {
+      "capability_id": "permanent.untap.all_creatures",
+      "evidence_class": "positive",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_untap_all_creatures_uses_effective_types_and_canonical_state_path",
+      "official_rule_ids": [
+        "110.4",
+        "122.1d",
+        "701.26",
+        "701.26b",
+        "702.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Untap each phased-in battlefield permanent that is a creature under the represented effective-characteristics path, applying the bounded single-permanent untap behavior to every member."
+    },
+    {
+      "capability_id": "permanent.untap.all_creatures",
+      "evidence_class": "replay",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_effects_replay_exactly",
+      "official_rule_ids": [
+        "110.4",
+        "122.1d",
+        "701.26",
+        "701.26b",
+        "702.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Untap each phased-in battlefield permanent that is a creature under the represented effective-characteristics path, applying the bounded single-permanent untap behavior to every member."
+    },
+    {
+      "capability_id": "permanent.untap.all_creatures",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_resolution_rolls_back_atomically",
+      "official_rule_ids": [
+        "110.4",
+        "122.1d",
+        "701.26",
+        "701.26b",
+        "702.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Untap each phased-in battlefield permanent that is a creature under the represented effective-characteristics path, applying the bounded single-permanent untap behavior to every member."
+    },
+    {
+      "capability_id": "permanent.untap.effect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_stun_counter_replaces_typed_untap_without_false_event",
+      "official_rule_ids": [
+        "122.1d",
+        "701.26",
+        "701.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized instruction to untap one resolved battlefield permanent through the canonical tap-state path, including the represented stun-counter replacement."
+    },
+    {
+      "capability_id": "permanent.untap.effect",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_semantic_tap_state_mutants_are_killed",
+      "official_rule_ids": [
+        "122.1d",
+        "701.26",
+        "701.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized instruction to untap one resolved battlefield permanent through the canonical tap-state path, including the represented stun-counter replacement."
+    },
+    {
+      "capability_id": "permanent.untap.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_validation_fails_before_mutation",
+      "official_rule_ids": [
+        "122.1d",
+        "701.26",
+        "701.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized instruction to untap one resolved battlefield permanent through the canonical tap-state path, including the represented stun-counter replacement."
+    },
+    {
+      "capability_id": "permanent.untap.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_effects_change_only_eligible_state",
+      "official_rule_ids": [
+        "122.1d",
+        "701.26",
+        "701.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized instruction to untap one resolved battlefield permanent through the canonical tap-state path, including the represented stun-counter replacement."
+    },
+    {
+      "capability_id": "permanent.untap.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_handlers_lower_typed_intents_through_read_only_context",
+      "official_rule_ids": [
+        "122.1d",
+        "701.26",
+        "701.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized instruction to untap one resolved battlefield permanent through the canonical tap-state path, including the represented stun-counter replacement."
+    },
+    {
+      "capability_id": "permanent.untap.effect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_effects_replay_exactly",
+      "official_rule_ids": [
+        "122.1d",
+        "701.26",
+        "701.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized instruction to untap one resolved battlefield permanent through the canonical tap-state path, including the represented stun-counter replacement."
+    },
+    {
+      "capability_id": "permanent.untap.effect",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_resolution_rolls_back_atomically",
+      "official_rule_ids": [
+        "122.1d",
+        "701.26",
+        "701.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized instruction to untap one resolved battlefield permanent through the canonical tap-state path, including the represented stun-counter replacement."
+    },
+    {
       "capability_id": "target.public.player_or_damageable_permanent",
       "evidence_class": "interaction",
       "test_id": "tests.test_exact_mishra_closure.ExactMishraClosureTests.test_stasis_coffin_protection_blocks_targeting_and_damage",

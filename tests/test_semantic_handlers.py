@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import FrozenInstanceError
+import json
 import tempfile
 from pathlib import Path
 import unittest
@@ -19,14 +20,21 @@ from mtg_commander_sim.semantic_runtime import (
     DrawCardsIntent,
     ReadOnlyHandlerContext,
     ReadOnlyRulesQuery,
+    SetPermanentTappedIntent,
     SemanticHandlerRegistry,
     SemanticHandlerRegistryError,
+    UntapAllCreaturesIntent,
     default_semantic_handler_registry,
 )
 from mtg_commander_sim.semantic_runtime.generic import (
     BecomeMonarchHandler,
     DrawEachPlayerHandler,
     DrawHandler,
+)
+from mtg_commander_sim.semantic_runtime.tap_state_handlers import (
+    TapPermanentHandler,
+    UntapAllCreaturesHandler,
+    UntapPermanentHandler,
 )
 from mtg_commander_sim.semantics import SemanticProgram
 
@@ -83,7 +91,7 @@ class TypedSemanticHandlerTests(unittest.TestCase):
         ))
         self.assertEqual(second.inventory(), reordered.inventory())
         self.assertEqual(second.fingerprint, reordered.fingerprint)
-        self.assertEqual(3, len(first.inventory()))
+        self.assertEqual(6, len(first.inventory()))
         with self.assertRaisesRegex(
             SemanticHandlerRegistryError, "Duplicate semantic operation"
         ):
@@ -92,6 +100,18 @@ class TypedSemanticHandlerTests(unittest.TestCase):
             SemanticHandlerRegistryError, "registry is frozen"
         ):
             first.register(DrawHandler())
+
+    def test_contract_traces_tap_and_untap_rules(self):
+        root = Path(__file__).resolve().parents[1]
+        contract = json.loads(
+            (root / "mechanics" / "contracts" / "tap-and-untap.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(
+            {"122.1d", "701.26", "701.26a", "701.26b"},
+            set(contract["rule_references"]),
+        )
 
     def test_draw_handler_lowers_typed_intent_through_read_only_context(self):
         context = self.context()
@@ -161,6 +181,188 @@ class TypedSemanticHandlerTests(unittest.TestCase):
             "monarch.change",
             [event for event in engine.state.events if event.code == "monarch.change"][-1].code,
         )
+
+    def test_tap_state_handlers_lower_typed_intents_through_read_only_context(self):
+        context = self.context(actor="B")
+        tap = TapPermanentHandler().lower(
+            {"op": "tap", "card": "C9"}, context
+        )
+        untap = UntapPermanentHandler().lower(
+            {"op": "untap", "card": "C9", "reason": "ready it"},
+            context,
+        )
+        all_creatures = UntapAllCreaturesHandler().lower(
+            {"op": "untap_all_creatures"}, context
+        )
+
+        self.assertEqual("generic.tap-permanent.v1", tap.handler_id)
+        self.assertEqual(
+            SetPermanentTappedIntent(
+                object_ref="C9",
+                actor="B",
+                tapped=True,
+                reason="test effect",
+            ),
+            tap.intents[0],
+        )
+        self.assertEqual(
+            SetPermanentTappedIntent(
+                object_ref="C9",
+                actor="B",
+                tapped=False,
+                reason="ready it",
+            ),
+            untap.intents[0],
+        )
+        self.assertEqual(
+            UntapAllCreaturesIntent(actor="B", reason="test effect"),
+            all_creatures.intents[0],
+        )
+        self.assertFalse(hasattr(context, "state"))
+
+    @staticmethod
+    def permanent(
+        engine,
+        seat: str,
+        name: str,
+        *,
+        type_line: str = "Token Creature — Test",
+        tapped: bool = False,
+    ):
+        ref = engine.create_token(
+            seat,
+            name=name,
+            tapped=tapped,
+            characteristics={
+                "type_line": type_line,
+                "power": "1" if "Creature" in type_line else None,
+                "toughness": "1" if "Creature" in type_line else None,
+            },
+            reason="tap-state fixture",
+        )[0]
+        return engine._resolve_object(seat, ref, zones={"battlefield"})
+
+    def test_tap_state_effects_change_only_eligible_state(self):
+        session = self.session(7012601)
+        engine = session.engine
+        card = self.permanent(engine, "A", "Tap-state Witness")
+
+        self.assertEqual(
+            card.ref,
+            engine.apply_effect(
+                {"op": "tap", "card": card.ref}, actor="A"
+            ),
+        )
+        self.assertTrue(card.tapped)
+        engine.apply_effect({"op": "tap", "card": card.ref}, actor="A")
+        engine.apply_effect({"op": "untap", "card": card.ref}, actor="A")
+        self.assertFalse(card.tapped)
+        engine.apply_effect({"op": "untap", "card": card.ref}, actor="A")
+
+        self.assertEqual(
+            1,
+            sum(event.code == "permanent.tap" for event in engine.state.events),
+        )
+        self.assertEqual(
+            1,
+            sum(
+                event.code == "permanent.untap"
+                for event in engine.state.events
+            ),
+        )
+
+    def test_stun_counter_replaces_typed_untap_without_false_event(self):
+        session = self.session(1220104)
+        engine = session.engine
+        card = self.permanent(
+            engine, "A", "Stunned Witness", tapped=True
+        )
+        card.counters["stun"] = 1
+        event_count = len(engine.state.events)
+
+        engine.apply_effect(
+            {"op": "untap", "card": card.ref}, actor="A"
+        )
+
+        self.assertTrue(card.tapped)
+        self.assertNotIn("stun", card.counters)
+        new_events = engine.state.events[event_count:]
+        self.assertEqual(
+            ["permanent.untap.replaced"],
+            [event.code for event in new_events],
+        )
+
+        engine.apply_effect(
+            {"op": "untap", "card": card.ref}, actor="A"
+        )
+        self.assertFalse(card.tapped)
+        self.assertEqual("permanent.untap", engine.state.events[-1].code)
+
+    def test_untap_all_creatures_uses_effective_types_and_canonical_state_path(self):
+        session = self.session(7012602)
+        engine = session.engine
+        ordinary = self.permanent(
+            engine, "A", "Ordinary Creature", tapped=True
+        )
+        animated = self.permanent(
+            engine,
+            "B",
+            "Animated Artifact",
+            type_line="Token Artifact",
+            tapped=True,
+        )
+        animated.annotations["until_end_of_turn"] = {
+            "add_types": ["Creature"]
+        }
+        stunned = self.permanent(
+            engine, "C", "Stunned Creature", tapped=True
+        )
+        stunned.counters["stun"] = 1
+        phased = self.permanent(
+            engine, "B", "Phased Creature", tapped=True
+        )
+        phased.phased_out = True
+        artifact = self.permanent(
+            engine,
+            "C",
+            "Plain Artifact",
+            type_line="Token Artifact",
+            tapped=True,
+        )
+
+        result = engine.apply_effect(
+            {"op": "untap_all_creatures"}, actor="A"
+        )
+
+        self.assertEqual([ordinary.ref, animated.ref], result)
+        self.assertFalse(ordinary.tapped)
+        self.assertFalse(animated.tapped)
+        self.assertTrue(stunned.tapped)
+        self.assertNotIn("stun", stunned.counters)
+        self.assertTrue(phased.tapped)
+        self.assertTrue(artifact.tapped)
+        self.assertEqual(
+            [ordinary.ref, animated.ref],
+            engine.state.events[-1].details["objects"],
+        )
+
+    def test_tap_state_validation_fails_before_mutation(self):
+        session = self.session(7012603)
+        engine = session.engine
+        card = self.permanent(engine, "A", "Validation Witness")
+        before = authoritative_state_hash(engine.state)
+        invalid = (
+            {"op": "tap", "card": ""},
+            {"op": "untap", "card": 7},
+            {"op": "untap_all_creatures", "card": card.ref},
+        )
+        for effect in invalid:
+            with self.assertRaisesRegex(
+                GameRuleError,
+                "nonempty permanent reference|unknown fields",
+            ):
+                engine.apply_effect(effect, actor="A")
+            self.assertEqual(before, authoritative_state_hash(engine.state))
 
     def test_registered_node_validation_fails_before_mutation(self):
         session = self.session(1210402)
@@ -296,6 +498,102 @@ class TypedSemanticHandlerTests(unittest.TestCase):
             ["S-invalid-typed-draw"],
             [item.ref for item in engine.state.stack],
         )
+
+    def test_tap_state_resolution_rolls_back_atomically(self):
+        session = self.session(7012604, players=2)
+        engine = session.engine
+        card = self.permanent(engine, "A", "Rollback Witness")
+        program = SemanticProgram(
+            key="test:invalid-typed-tap-sequence",
+            label="Invalid typed tap sequence",
+            effects=[
+                {"op": "tap", "card": card.ref},
+                {"op": "untap", "card": ""},
+            ],
+            trust_level="provisional",
+        )
+        engine.semantics.put(program)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="invalid-typed-tap-sequence",
+                ref="S-invalid-typed-tap-sequence",
+                kind="triggered_ability",
+                controller="A",
+                label=program.label,
+                semantic_key=program.key,
+                visibility=["A", "B"],
+            )
+        )
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine._grant_priority("A")
+        engine._issue_priority("A")
+
+        first = session.act("pilot:A", {"action_id": "pass"})
+        self.assertTrue(first.ok, first.summary)
+        before = authoritative_state_hash(engine.state)
+        second = session.act("pilot:B", {"action_id": "pass"})
+
+        self.assertFalse(second.ok)
+        self.assertIn("nonempty permanent reference", second.summary)
+        self.assertEqual(before, authoritative_state_hash(engine.state))
+        self.assertFalse(engine.state.cards[card.object_id].tapped)
+        self.assertEqual(
+            ["S-invalid-typed-tap-sequence"],
+            [item.ref for item in engine.state.stack],
+        )
+
+    def test_tap_state_effects_replay_exactly(self):
+        session = self.session(7012605, players=2)
+        engine = session.engine
+        first_card = self.permanent(engine, "A", "Replay Tap Witness")
+        second_card = self.permanent(
+            engine, "B", "Replay Untap Witness", tapped=True
+        )
+        program = SemanticProgram(
+            key="test:typed-tap-state-replay",
+            label="Typed tap-state replay",
+            effects=[
+                {"op": "tap", "card": first_card.ref},
+                {"op": "untap", "card": first_card.ref},
+                {"op": "untap_all_creatures"},
+            ],
+            trust_level="provisional",
+        )
+        engine.semantics.put(program)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="typed-tap-state-replay",
+                ref="S-typed-tap-state-replay",
+                kind="triggered_ability",
+                controller="A",
+                label=program.label,
+                semantic_key=program.key,
+                visibility=["A", "B"],
+            )
+        )
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine._grant_priority("A")
+        engine._issue_priority("A")
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        for principal in ("pilot:A", "pilot:B"):
+            result = session.act(principal, {"action_id": "pass"})
+            self.assertTrue(result.ok, result.summary)
+        self.assertFalse(first_card.tapped)
+        self.assertFalse(second_card.tapped)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "typed-tap-state-record"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+        self.assertTrue(replay["ok"], replay)
+        self.assertEqual(2, replay["commands"])
 
     def test_stack_draw_each_routes_through_handler_in_apnap_order(self):
         session = self.session(1210405)

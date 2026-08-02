@@ -3,10 +3,18 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping, Protocol
 
-from .intents import BecomeMonarchIntent, DrawCardsIntent, IntentPlan
+from .. import tap_state
+from ..tap_state import TapStateHost
+from .intents import (
+    BecomeMonarchIntent,
+    DrawCardsIntent,
+    IntentPlan,
+    SetPermanentTappedIntent,
+    UntapAllCreaturesIntent,
+)
 
 
-class SemanticIntentSink(Protocol):
+class SemanticIntentSink(TapStateHost, Protocol):
     def draw(
         self,
         seat: str,
@@ -17,7 +25,6 @@ class SemanticIntentSink(Protocol):
     ) -> list[str]: ...
 
     def become_monarch(self, seat: str, *, reason: str) -> str: ...
-
 
 @dataclass(frozen=True, slots=True)
 class DrawResolutionBatch:
@@ -94,6 +101,24 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
                 reason=intent.reason,
             )
             results.append((intent.player, result))
+            continue
+        if isinstance(intent, SetPermanentTappedIntent):
+            result = tap_state.set_permanent_tapped(
+                sink,
+                intent.object_ref,
+                actor=intent.actor,
+                tapped=intent.tapped,
+                reason=intent.reason,
+            )
+            results.append((intent.object_ref, result))
+            continue
+        if isinstance(intent, UntapAllCreaturesIntent):
+            result = tap_state.untap_all_creatures(
+                sink,
+                actor=intent.actor,
+                reason=intent.reason,
+            )
+            results.append(("creatures", result))
             continue
         raise TypeError(f"Unsupported semantic intent {type(intent).__name__}")
     if plan.result_shape == "by_player":

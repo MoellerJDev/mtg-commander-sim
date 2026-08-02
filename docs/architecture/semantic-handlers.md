@@ -10,9 +10,10 @@ maintenance: "hand-maintained"
 # Typed semantic handlers
 
 The typed semantic runtime is an incremental boundary between CardProgram
-effect nodes and authoritative mutation. It currently owns `draw`,
-`draw_each_player`, and `become_monarch`; every other operation remains on the
-explicit legacy fallback and is not implied to be migrated.
+effect nodes and authoritative mutation. Its frozen inventory currently owns
+`draw`, `draw_each_player`, `become_monarch`, `tap`, `untap`, and
+`untap_all_creatures`; every other operation remains on the explicit measured
+legacy fallback and is not implied to be migrated.
 
 ```mermaid
 flowchart LR
@@ -21,7 +22,8 @@ flowchart LR
     Registry --> Handler
     Handler --> Intents["typed intents"]
     Intents --> Executor["canonical intent executor"]
-    Executor --> Engine["existing engine mutation methods"]
+    Executor --> Engine["existing canonical engine methods"]
+    Executor --> TapPort["focused tap-state mutation port"]
     Registry -->|"unregistered only"| Legacy["measured legacy dispatcher"]
 ```
 
@@ -37,13 +39,32 @@ the semantic-handler registry fingerprint and recomputes its capability
 closure. Malformed input for a registered operation is a rules error;
 it never falls back to permissive string dispatch.
 
+The global registry aggregates family modules; it does not own family logic.
+Draw and monarch lowering remains in `generic.py`. The permanent tap-state
+schema and lowering live in `tap_state_handlers.py`, which prevents a
+catch-all handler module from becoming another semantic monolith.
+
 The executor is intentionally small. Direct effect application sends
 `DrawCardsIntent` and `BecomeMonarchIntent` through
 `CommanderEngine.draw` and `CommanderEngine.become_monarch`. Ordinary
 CardProgram stack resolution also lowers registered nodes through this same
 handler registry. Draw intents then enter the engine's replacement-aware draw
 sequence so represented draw replacements and private draw continuations keep
-their existing behavior. Handlers themselves never mutate state.
+their existing behavior.
+
+Tap-state intents use the focused `TapStateHost` port implemented by the
+authoritative engine and committed in `mtg_commander_sim/tap_state.py`. A
+single tap changes only an untapped battlefield permanent. Untap retains the
+existing CR 122.1d stun-counter replacement path and logs an untap only when
+the permanent actually untaps. The aggregate operation uses effective type
+data, ignores phased-out permanents, and commits each eligible creature in
+active-seat/battlefield order. Handlers themselves never inspect or mutate
+state; only the classified rules-layer mutation owner does so.
+
+The associated tap-state capabilities are intentionally `tested`, not
+`trusted`. Complete tap/untap prohibitions, general replacement ordering, and
+complete derived-characteristic interactions remain blockers. Registering an
+operation does not upgrade a legacy-reviewed CardProgram to capability-closed.
 
 The architecture audit scans every semantic-operation branch in the engine,
 not only `apply_effect`. A registered operation intercepted before the handler
@@ -91,5 +112,6 @@ still gates execution. Current records pin the descriptor directly.
 
 Do not use this boundary to widen Oracle coverage or conceal unresolved cost,
 target, replacement, prevention, visibility, or interaction semantics. See
-[ADR 0006](../adr/0006-typed-semantic-handler-boundary.md) and the separate
+[ADR 0006](../adr/0006-typed-semantic-handler-boundary.md),
+[ADR 0009](../adr/0009-typed-tap-state-mutation-owner.md), and the separate
 [runtime-component architecture](runtime-components.md).

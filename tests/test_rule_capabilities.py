@@ -137,6 +137,36 @@ class CapabilityRegistryTests(unittest.TestCase):
             )
         )
 
+    def test_untap_all_dependency_fails_closed(self):
+        value = _registry_value()
+        single = next(
+            row
+            for row in value["capabilities"]
+            if row["id"] == "permanent.untap.effect"
+        )
+        aggregate = next(
+            row
+            for row in value["capabilities"]
+            if row["id"] == "permanent.untap.all_creatures"
+        )
+        aggregate["status"] = "trusted"
+        aggregate["blockers"] = []
+        single["status"] = "blocked"
+        single["blockers"] = ["dependency mutation"]
+
+        closure = CapabilityRegistry(value).closure(
+            ["permanent.untap.all_creatures"],
+            profile="commander_review",
+        )
+
+        self.assertFalse(closure.trusted)
+        self.assertTrue(
+            any(
+                "status:permanent.untap.effect:blocked" in blocker
+                for blocker in closure.blockers
+            )
+        )
+
     def test_closure_is_transitive_deterministic_and_profile_scoped(self):
         registry = load_default_capability_registry()
         first = registry.closure(

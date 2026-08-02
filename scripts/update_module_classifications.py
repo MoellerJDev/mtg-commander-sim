@@ -91,6 +91,7 @@ def _layer(relative: str) -> str:
         "mtg_commander_sim/rules_corpus.py",
         "mtg_commander_sim/shortcuts.py",
         "mtg_commander_sim/state_based_actions.py",
+        "mtg_commander_sim/tap_state.py",
         "mtg_commander_sim/targets.py",
     }:
         return "rules"
@@ -108,6 +109,8 @@ def _owner(relative: str, layer: str) -> str:
         return "oracle_compiler"
     if relative.startswith("mtg_commander_sim/rules/"):
         return "rules_capabilities"
+    if relative == "mtg_commander_sim/tap_state.py":
+        return "tap_state_effects"
     if relative in {
         "mtg_commander_sim/record.py",
         "mtg_commander_sim/record_trust.py",
@@ -178,6 +181,7 @@ def build_classifications() -> dict[str, Any]:
                             "semantics.py",
                             "card_programs/",
                             "semantic_runtime/",
+                            "tap_state.py",
                         )
                     )
                     or relative in {

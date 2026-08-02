@@ -116,6 +116,23 @@ claim that arbitrary damage Oracle text is compiled: noncombat damage, the
 complete CR 120.4 replacement/prevention/result sequence, excess damage, and
 trigger-on-trigger placement remain explicit untrusted dependencies.
 
+## Typed tap-state execution
+
+Pack effects using `tap`, `untap`, or `untap_all_creatures` now lower through
+the frozen semantic-handler registry rather than their former
+`CommanderEngine.apply_effect` branches. Strict schemas produce typed
+tap-state intents from read-only context; the rules-layer tap-state port then
+resolves and commits authoritative battlefield changes. Single untap preserves
+the represented stun-counter replacement, while aggregate untap uses effective
+creature types and excludes phased-out permanents. Failed validation and
+resolution roll back transactionally and replay through the same registered
+handler fingerprint.
+
+This migration does not promote a reviewed pack to capability-closed and does
+not claim all tap/untap interactions. General replacement ordering, tap/untap
+prohibitions, and complete derived-characteristic closure remain explicit
+capability blockers.
+
 ## Trust
 
 The pack-level `trusted` label means the declared compatibility behavior is

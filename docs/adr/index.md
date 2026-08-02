@@ -23,3 +23,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0006 — typed semantic handler boundary](0006-typed-semantic-handler-boundary.md)
 - [ADR 0007 — CardProgram runtime components](0007-cardprogram-runtime-components.md)
 - [ADR 0008 — runtime trust and default-deny architecture governance](0008-runtime-trust-and-governance-hardening.md)
+- [ADR 0009 — typed tap-state effects and focused mutation ownership](0009-typed-tap-state-mutation-owner.md)

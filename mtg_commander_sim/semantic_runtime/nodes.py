@@ -21,3 +21,15 @@ class DrawEachPlayerNode:
 class BecomeMonarchNode:
     player: str
     reason: str
+
+
+@dataclass(frozen=True, slots=True)
+class SetPermanentTappedNode:
+    object_ref: str
+    tapped: bool
+    reason: str
+
+
+@dataclass(frozen=True, slots=True)
+class UntapAllCreaturesNode:
+    reason: str

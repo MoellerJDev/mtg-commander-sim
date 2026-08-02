@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 5,
+  "registry_version": 6,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -49,6 +49,14 @@
       "mechanic_id": "cr-613-continuous-effects",
       "capabilities": [
         "continuous.power_toughness.fixed_anthem"
+      ]
+    },
+    {
+      "mechanic_id": "tap-and-untap",
+      "capabilities": [
+        "permanent.tap.effect",
+        "permanent.untap.effect",
+        "permanent.untap.all_creatures"
       ]
     }
   ],
@@ -159,6 +167,87 @@
       "implementation_mutation_status": "not_run",
       "implementation_mutation_rationale": "",
       "blockers": ["General continuous-effect dependencies and dynamically computed modifiers remain outside this bounded component."],
+      "status": "tested"
+    },
+    {
+      "id": "permanent.tap.effect",
+      "version": 1,
+      "official_rules": ["701.26", "701.26a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Execute an already-authorized instruction to tap one resolved battlefield permanent through the canonical tap-state path, producing a public change only when it was untapped.",
+        "inputs": ["resolved battlefield permanent", "authoritative actor", "tap reason"],
+        "outputs": ["tapped permanent state", "public tap event on a real transition"],
+        "exclusions": ["tap-symbol costs", "combat declaration tapping", "continuous prohibitions against tapping", "replacement effects that modify tapping"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.tap_state_handlers.TapPermanentHandler", "mtg_commander_sim.semantic_runtime.executor.execute_intent_plan", "mtg_commander_sim.tap_state.set_permanent_tapped"],
+      "positive_tests": ["test_tap_state_handlers_lower_typed_intents_through_read_only_context", "test_tap_state_effects_change_only_eligible_state"],
+      "negative_tests": ["test_tap_state_validation_fails_before_mutation"],
+      "interaction_tests": [],
+      "multiplayer_tests": [],
+      "privacy_tests": [],
+      "replay_tests": ["test_tap_state_effects_replay_exactly"],
+      "required_evidence": ["positive", "negative", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This capability has no capability dependencies.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "The focused semantic tap-state mutation test proves that bypassing the canonical sink survives neither tap nor replay-visible state assertions.",
+      "blockers": ["General continuous prohibitions and replacement effects that modify tapping are not yet represented in ambient match closure."],
+      "status": "tested"
+    },
+    {
+      "id": "permanent.untap.effect",
+      "version": 1,
+      "official_rules": ["122.1d", "701.26", "701.26b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Execute an already-authorized instruction to untap one resolved battlefield permanent through the canonical tap-state path, including the represented stun-counter replacement.",
+        "inputs": ["resolved battlefield permanent", "authoritative actor", "untap reason", "represented stun counters"],
+        "outputs": ["untapped permanent state or one removed stun counter", "public event matching the transition that actually occurred"],
+        "exclusions": ["untap-symbol costs", "untap-step selection", "replacement ordering beyond stun counters", "continuous prohibitions against untapping"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.tap_state_handlers.UntapPermanentHandler", "mtg_commander_sim.semantic_runtime.executor.execute_intent_plan", "mtg_commander_sim.tap_state.set_permanent_tapped", "CommanderEngine._untap_permanent"],
+      "positive_tests": ["test_tap_state_handlers_lower_typed_intents_through_read_only_context", "test_tap_state_effects_change_only_eligible_state"],
+      "negative_tests": ["test_tap_state_validation_fails_before_mutation"],
+      "interaction_tests": ["test_stun_counter_replaces_typed_untap_without_false_event"],
+      "multiplayer_tests": [],
+      "privacy_tests": [],
+      "replay_tests": ["test_tap_state_effects_replay_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This capability has no capability dependencies.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "The focused semantic tap-state mutation test kills a sink that untaps through stun counters or skips the requested state transition.",
+      "blockers": ["Replacement ordering beyond the represented mandatory stun-counter effect and general untap prohibitions are not yet represented in ambient match closure."],
+      "status": "tested"
+    },
+    {
+      "id": "permanent.untap.all_creatures",
+      "version": 1,
+      "official_rules": ["110.4", "122.1d", "701.26", "701.26b", "702.26b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Untap each phased-in battlefield permanent that is a creature under the represented effective-characteristics path, applying the bounded single-permanent untap behavior to every member.",
+        "inputs": ["active multiplayer battlefield", "represented effective card types", "phased-out state", "authoritative actor", "untap reason"],
+        "outputs": ["ordered references for creatures actually untapped", "stun replacement events", "one aggregate public untap event"],
+        "exclusions": ["arbitrary selectors", "complete layer dependencies", "other untap replacements", "player choices", "noncreature permanent sets"]
+      },
+      "dependencies": ["permanent.untap.effect"],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.tap_state_handlers.UntapAllCreaturesHandler", "mtg_commander_sim.semantic_runtime.executor.execute_intent_plan", "mtg_commander_sim.tap_state.untap_all_creatures", "CommanderEngine._untap_permanent"],
+      "positive_tests": ["test_untap_all_creatures_uses_effective_types_and_canonical_state_path"],
+      "negative_tests": ["test_tap_state_validation_fails_before_mutation", "test_untap_all_dependency_fails_closed"],
+      "interaction_tests": ["test_stun_counter_replaces_typed_untap_without_false_event"],
+      "multiplayer_tests": ["test_untap_all_creatures_uses_effective_types_and_canonical_state_path"],
+      "privacy_tests": [],
+      "replay_tests": ["test_tap_state_effects_replay_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "Registry closure tests prove the aggregate operation cannot become trusted when its single-permanent untap dependency is blocked.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "The focused semantic tap-state mutation test kills an aggregate sink that omits eligible creatures or bypasses individual untap behavior.",
+      "blockers": ["Complete effective-characteristic dependencies and untap replacement ordering are not yet represented in ambient match closure."],
       "status": "tested"
     },
     {

@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "tap-and-untap",
+  "official_name": "Tap and Untap",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "122.1d",
+    "701.26",
+    "701.26a",
+    "701.26b"
+  ],
+  "glossary_references": [
+    "stun-counter",
+    "tap",
+    "tapped",
+    "untap",
+    "untapped"
+  ],
+  "dependencies": [
+    "permanents",
+    "continuous-effects",
+    "replacement-effects",
+    "phasing",
+    "replay"
+  ],
+  "coverage_status": "tested",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield"
+    ],
+    "objects": [
+      "resolved permanent",
+      "phased-in creature permanent under represented effective characteristics"
+    ],
+    "events": [
+      "one permanent becomes tapped",
+      "one permanent becomes untapped",
+      "a stun counter replaces an untap",
+      "all represented creatures become untapped"
+    ],
+    "state_reads": [
+      "permanent object identity",
+      "battlefield zone",
+      "tapped status",
+      "stun counters",
+      "phased-out status",
+      "represented effective card types"
+    ],
+    "state_writes": [
+      "permanent tapped status",
+      "stun counter quantity",
+      "public tap-state events"
+    ],
+    "costs": [
+      "tap-symbol and untap-symbol costs remain separate from effect execution"
+    ],
+    "timing": [
+      "typed tap-state effects execute during ordinary stack resolution or another authoritative semantic transition"
+    ],
+    "targets": [
+      "the semantic program supplies an already-validated battlefield permanent reference"
+    ],
+    "choices": [],
+    "hidden_information": [
+      "tapped state, stun counters, and the affected battlefield references are public"
+    ],
+    "apnap": [
+      "the aggregate creature operation traverses active seats in deterministic game order"
+    ],
+    "layers": [
+      "the aggregate creature operation uses the represented effective-characteristics query rather than printed type alone",
+      "complete layer dependency closure remains blocked"
+    ],
+    "replacement_effects": [
+      "one stun counter replaces one attempted untap",
+      "complete replacement discovery and ordering remain blocked"
+    ],
+    "copy": [
+      "tapped status is not a copiable characteristic",
+      "represented copied type changes participate through effective characteristics"
+    ],
+    "control_change": [
+      "tap-state instructions affect the same permanent regardless of controller when the resolved reference remains legal"
+    ],
+    "zone_change": [
+      "a reference that no longer identifies a battlefield permanent fails before mutation"
+    ],
+    "source_leaves": [
+      "a resolving one-shot tap-state instruction does not require its source to remain on the battlefield unless its target rules say otherwise"
+    ]
+  },
+  "variants": [
+    "tap an untapped permanent",
+    "tap an already tapped permanent without a false change event",
+    "untap a tapped permanent",
+    "untap an already untapped permanent without a false change event",
+    "replace untap by removing one stun counter",
+    "untap creatures across several players",
+    "skip phased-out permanents",
+    "use represented effective creature types",
+    "transaction rollback",
+    "exact command replay"
+  ],
+  "witness_cards": [
+    {
+      "name": "Minamo, School at Water's Edge",
+      "oracle_id": "17784f90-89a1-47a5-83ef-ae60dfc30bd1"
+    },
+    {
+      "name": "Retreat to Coralhelm",
+      "oracle_id": "c450f6b7-bb2a-4b8c-aec7-d27555137b63"
+    },
+    {
+      "name": "Intruder Alarm",
+      "oracle_id": "1e943e04-e213-4781-b1a7-935aad8790e1"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_tap_and_untap_rules",
+    "test_tap_state_handlers_lower_typed_intents_through_read_only_context",
+    "test_tap_state_effects_change_only_eligible_state",
+    "test_stun_counter_replaces_typed_untap_without_false_event",
+    "test_untap_all_creatures_uses_effective_types_and_canonical_state_path",
+    "test_tap_state_validation_fails_before_mutation",
+    "test_tap_state_resolution_rolls_back_atomically",
+    "test_tap_state_effects_replay_exactly",
+    "test_semantic_tap_state_mutants_are_killed"
+  ],
+  "implementation": {
+    "component": "typed tap, untap, and all-creatures semantic handlers with the canonical tap_state mutation port and stun-aware engine primitive",
+    "version": "tap-state-effects-v1"
+  },
+  "known_blockers": [
+    "continuous effects that prohibit tapping or untapping are not represented generically in ambient closure",
+    "replacement discovery and affected-player ordering beyond the represented stun-counter replacement are incomplete",
+    "complete layer dependencies and dynamically granted types are not capability-closed",
+    "tap and untap costs and the untap-step selection procedure are separate incomplete capabilities"
+  ],
+  "review_status": "reviewed"
+}

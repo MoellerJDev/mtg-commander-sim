@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "b1ecdc0f3446a37ffe31bfca1237a079691e6b22",
+    "baseline_main_commit": "e756950d52030b47a6cf81edcd7d7f60ca11d97e",
     "baseline_worktree_clean": true,
-    "verified_at": "2026-08-01",
-    "phase": "phase_1_runtime_trust_hardening",
-    "scope_note": "This Phase 1 audit adds explicit capability evidence, trust/binding provenance, deterministic component performance measurement, and default-deny structural governance. It is not a rules- or Oracle-completeness claim."
+    "verified_at": "2026-08-02",
+    "phase": "phase_2_typed_tap_untap_effect_migration",
+    "scope_note": "Certified main includes Phase 1 trust/governance hardening. The current focused branch migrates tap, untap, and all-creature untap through typed handlers and a classified mutation port with honest tested-but-blocked capability status; it is not a complete tap/untap, replacement, layer, rules, or Oracle claim."
   },
   "ci": {
     "workflow": "CI",
-    "run_id": 30725523797,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30725523797",
+    "run_id": 30729318546,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30729318546",
     "status": "pass",
     "python_versions": [
       "3.11",
@@ -34,7 +34,8 @@
     ],
     "state_owner_modules": [
       "mtg_commander_sim/engine.py",
-      "mtg_commander_sim/permissions.py"
+      "mtg_commander_sim/permissions.py",
+      "mtg_commander_sim/tap_state.py"
     ],
     "state_parameter_modules": [
       "mtg_commander_sim/record.py",
@@ -130,6 +131,7 @@
       "status": "incremental_typed_handler_registry_with_legacy_engine_fallback",
       "owners": [
         "mtg_commander_sim/semantic_runtime",
+        "mtg_commander_sim/tap_state.py",
         "mtg_commander_sim/engine.py"
       ],
       "missing_dedicated_owner": false
