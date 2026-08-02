@@ -32,9 +32,9 @@
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
       "implementation_components": [
-        "CommanderEngine._apply_damage_results_to_permanent",
-        "CommanderEngine._apply_combat_assignments",
-        "CommanderEngine._apply_effect"
+        "damage.recipient_snapshot",
+        "damage.apply_damage_results_to_permanent",
+        "damage.commit_prepared_damage_batch"
       ],
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_rejects_nondamageable_permanent",
@@ -92,8 +92,8 @@
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
       "implementation_components": [
-        "CommanderEngine._apply_combat_assignments",
-        "CommanderEngine._source_colors_for_ref",
+        "damage.source_snapshot",
+        "damage.DamageSourceSnapshot",
         "SemanticProgram"
       ],
       "executable_test_ids": [
@@ -185,7 +185,8 @@
       "reviewed": true,
       "implementation_components": [
         "mechanics/contracts/damage.json",
-        "CommanderEngine._apply_damage_results_to_permanent"
+        "damage.apply_damage_results_to_permanent",
+        "damage.commit_prepared_damage_batch"
       ],
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionPrimitiveTests.test_damage_contract_traces_every_cr_120_rule"
@@ -430,11 +431,18 @@
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
       "implementation_components": [
-        "replacement_effects.ReplaceableEvent",
-        "CommanderEngine._apply_damage_results_to_permanent"
+        "damage.prepare_damage_batch",
+        "damage.commit_prepared_damage_batch",
+        "replacement_effects.advance_replacement_batch",
+        "replacement_decisions.issue_combat_damage_replacement_choice"
       ],
       "executable_test_ids": [
-        "tests.test_rules_primitives.ReplacementOrderingTests.test_prevention_never_prevents_more_than_remaining_damage"
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_each_opponent_damage_uses_one_typed_batch",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_damage_replacement_choices_follow_apnap",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_validation_failure_is_atomic_before_any_damage_result",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_unsupported_infect_result_rolls_back_entire_batch"
       ],
       "required_scenarios": [
         "positive",
@@ -444,14 +452,19 @@
         "replay"
       ],
       "covered_scenarios": [
-        "positive"
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
       ],
       "blockers": [
-        "the four-part damage sequence is not one integrated engine event",
-        "replacement and prevention choices are not suspended, ordered, and replayed at every required boundary"
+        "excess-damage redirection and greatest-excess selection remain incomplete",
+        "damage-result replacements, infect, wither, and persistent prevention shields remain incomplete",
+        "explicit replacement choices during mana-result damage are not yet resumable"
       ],
       "notes": [
-        "A typed replacement primitive exists, but live damage producers do not yet route through the complete sequence."
+        "Combat, semantic single-target, each-opponent, and mana-result damage now share a typed precommit event and final result path. Unsupported result families fail before mutation; the remaining blockers prevent a universal four-stage claim."
       ]
     },
     {
@@ -490,12 +503,20 @@
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
       "implementation_components": [
-        "replacement_effects.resolve_replacements",
-        "CommanderEngine._protection_colors"
+        "damage.prepare_damage_batch",
+        "semantic_runtime.damage_replacements",
+        "replacement_effects.advance_replacement_batch",
+        "replacement_decisions.issue_replacement_order_choice"
       ],
       "executable_test_ids": [
-        "tests.test_rules_primitives.ReplacementOrderingTests.test_prevention_never_prevents_more_than_remaining_damage",
-        "tests.test_exact_mishra_closure.ExactMishraClosureTests.test_stasis_coffin_protection_blocks_targeting_and_damage"
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_static_prevention_applies_to_each_simultaneous_event",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_each_opponent_damage_uses_one_typed_batch",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_damage_replacement_choices_follow_apnap",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_fixed_prevention_applies_per_controller",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_protection_prevents_player_and_colored_permanent_damage",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly"
       ],
       "required_scenarios": [
         "positive",
@@ -505,14 +526,18 @@
         "replay"
       ],
       "covered_scenarios": [
-        "positive"
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
       ],
       "blockers": [
-        "live damage does not gather and order all applicable replacement and prevention effects",
-        "noncombat damage producers do not yet share the typed final-event trigger path"
+        "only reviewed source-pinned static quantity, fixed prevention, and represented protection effects are registered",
+        "persistent shields, redirection, non-damage transformations, and explicit mana-result replacement choices remain incomplete"
       ],
       "notes": [
-        "Selected combat prevention records a final dealt/prevented result and dispatches only positive dealt results to represented triggers before post-damage priority. Complete replacement, prevention, and noncombat event integration remains blocked."
+        "Every represented damage producer now prepares before mutation, re-evaluates applicability after each selected effect, and dispatches only the final positive dealt result. Broad Oracle and prevention-family coverage remains blocked."
       ]
     },
     {
@@ -523,8 +548,8 @@
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
       "implementation_components": [
-        "CommanderEngine._apply_damage_results_to_permanent",
-        "replacement_effects.resolve_replacements"
+        "damage.apply_damage_results_to_permanent",
+        "damage.commit_prepared_damage_batch"
       ],
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result"
@@ -550,18 +575,20 @@
       "rule_id": "120.4d",
       "rule_text_sha256": "94b4f61b48ff3fd2eb5144e3dee6e052a933dc819b1ed7f4785b27749e6a34de",
       "classification": "behavioral",
-      "status": "blocked",
-      "assertion_kind": "unsupported_fail_closed",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
       "reviewed": true,
       "implementation_components": [
-        "DamageEvent",
-        "CommanderEngine._apply_combat_assignments",
-        "Event"
+        "damage.DamageEvent",
+        "damage.commit_prepared_damage_batch",
+        "damage.resolve_damage_batch"
       ],
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event",
         "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_lifelink_counts_only_damage_not_prevented_by_protection",
-        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch"
+        "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_noncombat_damage_dispatches_final_damage_event",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly"
       ],
       "required_scenarios": [
         "positive",
@@ -575,11 +602,9 @@
         "interaction",
         "replay"
       ],
-      "blockers": [
-        "noncombat producers and the complete CR 120.4 replacement/result sequence do not yet share the canonical DamageEvent path"
-      ],
+      "blockers": [],
       "notes": [
-        "Combat damage journals a typed final source-recipient result, including assigned, dealt, and prevented amounts, and the same serialized context drives represented damage triggers and exact replay. The rule remains blocked for the universal damage pipeline."
+        "All represented damage producers apply results before emitting one normalized final source-recipient event. Zero or fully prevented damage emits no dealt-damage trigger, while combat and noncombat trigger contexts and replacement choices replay exactly."
       ]
     },
     {
@@ -685,12 +710,14 @@
       "assertion_kind": "executable_engine",
       "reviewed": true,
       "implementation_components": [
-        "CommanderEngine._begin_combat_damage",
+        "damage.DamageProposal",
+        "damage.prepare_damage_batch",
+        "semantic_runtime.damage_replacements._event_conditions",
         "CommanderEngine._apply_combat_assignments",
-        "CommanderEngine._apply_effect",
-        "CommanderEngine._apply_damage_results_to_permanent"
+        "CommanderEngine.apply_effect"
       ],
       "executable_test_ids": [
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_prevention_to_zero_ends_the_damage_replacement_event",
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event",
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_power_combat_source_assigns_no_damage",
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_damage_fails_closed"
@@ -708,6 +735,7 @@
       "blockers": [],
       "notes": [
         "Every represented damage entry point suppresses zero before life, counters, marked damage, commander attribution, or damage events.",
+        "A represented event reduced to zero by prevention no longer offers later replacement or prevention effects.",
         "Automatic combat clamps negative power to zero, while externally supplied negative damage fails closed."
       ]
     },

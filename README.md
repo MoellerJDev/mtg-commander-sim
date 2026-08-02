@@ -785,12 +785,16 @@ exact replay journal. A focused token-creation owner commits the final batch.
 A reviewed zone-destination component uses the same boundary; Dauthi
 Voidwalker is source-pinned semantic data rather than an Oracle-ID engine
 branch. The fixed subtype anthem remains a layer-7c modifier whose applicability
-is evaluated after earlier layers. These are bounded witnesses: optional and
-quantity-changing token descriptors, universal counter/draw/damage/entry
-replacement participation, CR 614/616 prevention and prohibition closure,
+is evaluated after earlier layers. Effect-generated permanent counters now use
+a focused transactional owner with a fixed quantity-replacement component.
+Represented combat, semantic, and mana-result damage use one typed transaction
+with fixed quantity replacement and fixed prevention components. These are
+bounded witnesses: persistent prevention shields, redirection, non-damage
+transformations, damage-result replacement, infect/wither/toxic outcomes,
+universal draw/entry replacement participation, broad CR 614/615/616 closure,
 layer dependencies, and state-derived modifiers remain unsupported.
 
-Runtime trust and governance are now explicit. Capability registry v5 consumes
+Runtime trust and governance are now explicit. Capability registry v8 consumes
 a generated evidence index whose fully qualified tests, rules, profiles, and
 evidence classes are validated in CI. Dependency fail-closed status and killed
 implementation mutation status are separate. CardPrograms report one trust
@@ -801,9 +805,10 @@ dependencies and exact registry/evidence fingerprints.
 
 The complete Commander format-capability inventory is not yet present, so
 capability-only strict match readiness fails closed while reviewed declared-pool
-compatibility remains available. The dependency scheduler is integrated and
-the next selected rules batch is the universal counter-placement replacement
-boundary. Broad rules or Oracle expansion does not bypass this boundary.
+compatibility remains available. The dependency scheduler is integrated; the
+counter-placement boundary is on certified `main`, and the active batch is the
+bounded damage replacement/prevention transaction. Broad rules or Oracle
+expansion does not bypass these typed boundaries.
 
 This is still not a completeness declaration. Current exact, partial,
 unresolved, and material-residual figures are generated in
@@ -1101,6 +1106,10 @@ container isolation when filesystem-level isolation must also be proven.
 - `mtg_commander_sim/shortcuts.py` — validated aggregate loop fixtures
 - `mtg_commander_sim/state_based_actions.py` — snapshot-based CR 704
   permanent-action and token-cessation evaluation
+- `mtg_commander_sim/counter_placement.py` — represented permanent-counter
+  proposal, replacement, and commit owner
+- `mtg_commander_sim/damage.py` — represented damage proposal,
+  replacement/prevention, atomic result, and final-event owner
 - `mtg_commander_sim/record.py` — Game Record v3 hashing, journals, migration, inspection, and replay
 - `mtg_commander_sim/report.py` — derived review and fidelity classification
 - `mtg_commander_sim/carddb.py` — local Oracle/rulings database

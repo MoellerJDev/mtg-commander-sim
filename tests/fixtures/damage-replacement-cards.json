@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "fixture_kind": "public_damage_replacement_card_data",
+  "source": "Scryfall Oracle/rulings subset for damage replacement tests",
+  "cards": [
+    {
+      "oracle_id": "68715465-6cf9-4006-87e9-31f227fe9ed3",
+      "name": "Furnace of Rath",
+      "mana_cost": "{1}{R}{R}{R}",
+      "cmc": 4.0,
+      "type_line": "Enchantment",
+      "oracle_text": "If a source would deal damage to a permanent or player, it deals double that damage to that permanent or player instead.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "defense": null,
+      "colors": ["R"],
+      "color_identity": ["R"],
+      "keywords": ["Double"],
+      "produced_mana": [],
+      "layout": "normal",
+      "released_at": "2009-09-04",
+      "legalities": {
+        "commander": "legal",
+        "duel": "legal",
+        "legacy": "legal",
+        "modern": "legal",
+        "oathbreaker": "legal",
+        "pauper": "not_legal",
+        "paupercommander": "not_legal",
+        "pioneer": "not_legal",
+        "predh": "legal",
+        "premodern": "legal",
+        "vintage": "legal"
+      }
+    },
+    {
+      "oracle_id": "618f29e1-0ea0-4457-91a6-7210f7619c9a",
+      "name": "Daunting Defender",
+      "mana_cost": "{4}{W}",
+      "cmc": 5.0,
+      "type_line": "Creature — Human Cleric",
+      "oracle_text": "If a source would deal damage to a Cleric creature you control, prevent 1 of that damage.",
+      "power": "3",
+      "toughness": "3",
+      "loyalty": null,
+      "defense": null,
+      "colors": ["W"],
+      "color_identity": ["W"],
+      "keywords": [],
+      "produced_mana": [],
+      "layout": "normal",
+      "released_at": "2002-10-07",
+      "legalities": {
+        "commander": "legal",
+        "duel": "legal",
+        "legacy": "legal",
+        "modern": "not_legal",
+        "oathbreaker": "legal",
+        "pauper": "legal",
+        "paupercommander": "legal",
+        "pioneer": "not_legal",
+        "predh": "legal",
+        "premodern": "legal",
+        "vintage": "legal"
+      }
+    },
+    {
+      "oracle_id": "ddb021df-ae4a-4ac1-8353-d0b375761714",
+      "name": "White Knight",
+      "mana_cost": "{W}{W}",
+      "cmc": 2.0,
+      "type_line": "Creature — Human Knight",
+      "oracle_text": "First strike (This creature deals combat damage before creatures without first strike.)\nProtection from black (This creature can't be blocked, targeted, dealt damage, or enchanted by anything black.)",
+      "power": "2",
+      "toughness": "2",
+      "loyalty": null,
+      "defense": null,
+      "colors": ["W"],
+      "color_identity": ["W"],
+      "keywords": ["First strike", "Protection"],
+      "produced_mana": [],
+      "layout": "normal",
+      "released_at": "2011-04-01",
+      "legalities": {
+        "commander": "legal",
+        "duel": "legal",
+        "legacy": "legal",
+        "modern": "legal",
+        "oathbreaker": "legal",
+        "pauper": "not_legal",
+        "paupercommander": "not_legal",
+        "pioneer": "not_legal",
+        "predh": "legal",
+        "premodern": "legal",
+        "vintage": "legal"
+      }
+    }
+  ],
+  "rulings": [
+    {
+      "oracle_id": "68715465-6cf9-4006-87e9-31f227fe9ed3",
+      "published_at": "2004-10-04",
+      "source": "wotc",
+      "comment": "If a spell or ability damages multiple things, divide up the damage before applying this effect. This means you can’t normally end up with an odd amount of damage on something."
+    },
+    {
+      "oracle_id": "68715465-6cf9-4006-87e9-31f227fe9ed3",
+      "published_at": "2004-10-04",
+      "source": "wotc",
+      "comment": "If you have two of these on the battlefield, the damage is multiplied by 4."
+    },
+    {
+      "oracle_id": "68715465-6cf9-4006-87e9-31f227fe9ed3",
+      "published_at": "2004-10-04",
+      "source": "wotc",
+      "comment": "The multiplied damage counts in all ways as if it came from the original source. Furnace of Rath is not the source."
+    },
+    {
+      "oracle_id": "68715465-6cf9-4006-87e9-31f227fe9ed3",
+      "published_at": "2004-10-04",
+      "source": "wotc",
+      "comment": "The trample rules cause damage to be divided before it is doubled."
+    },
+    {
+      "oracle_id": "68715465-6cf9-4006-87e9-31f227fe9ed3",
+      "published_at": "2005-08-01",
+      "source": "wotc",
+      "comment": "If multiple effects modify how damage will be dealt, the player who would be dealt damage or the controller of the creature that would be dealt damage chooses the order to apply the effects. For example, Mending Hands says, “Prevent the next 4 damage that would be dealt to any target this turn.” Suppose a spell would deal 5 damage to a player who has cast Mending Hands targeting themselves. That player can either (a) prevent 4 damage first and then let Furnace of Rath double the remaining 1 damage, taking 2 damage, or (b) double the damage to 10 and then prevent 4 damage, taking 6 damage."
+    }
+  ]
+}

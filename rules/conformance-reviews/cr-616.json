@@ -36,7 +36,9 @@
         "replacement_effects.ReplacementEventBatch",
         "replacement_effects.next_batch_replacement_choice",
         "replacement_decisions.issue_replacement_order_choice",
-        "counter_placement.prepare_counter_placements"
+        "counter_placement.prepare_counter_placements",
+        "damage.prepare_damage_batch",
+        "replacement_decisions.issue_combat_damage_replacement_choice"
       ],
       "executable_test_ids": [
         "tests.test_replacement_event_tree.ReplacementAffectedSubjectTests.test_affected_object_controller_chooses_before_owner",
@@ -47,7 +49,11 @@
         "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacements_apply_in_affected_players_chosen_order",
         "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_simultaneous_counter_choices_follow_apnap",
         "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacement_choice_is_seat_scoped",
-        "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacement_choice_replays_exactly"
+        "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacement_choice_replays_exactly",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_damage_replacement_choices_follow_apnap",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly"
       ],
       "required_scenarios": [
         "positive",
@@ -64,13 +70,13 @@
         "replay"
       ],
       "blockers": [
-        "generic engine choice packets are wired only into represented token-creation, semantic zone-change, and effect-generated permanent-counter producers",
+        "generic engine choice packets are wired only into represented token-creation, semantic zone-change, effect-generated permanent-counter, and ordinary combat/semantic damage producers",
         "multiple simultaneous events affecting the same chooser do not yet expose an explicit event-order choice when that order could matter"
       ],
       "notes": [
         "Affected-player and affected-object facts are captured before mutation, and simultaneous different-seat choices traverse APNAP order.",
         "Seat packets expose only visible option labels and IDs; authoritative batch IDs, event paths, payloads, and prior journals remain in the continuation.",
-        "The represented engine producers suspend and replay exact choices, including competing quantity replacements for effect-generated permanent counters, but universal producer coverage remains incomplete."
+        "The represented engine producers suspend and replay exact choices, including competing quantity replacements and prevention for ordinary damage, but universal producer coverage remains incomplete."
       ]
     },
     {
@@ -218,7 +224,9 @@
         "tests.test_rules_primitives.ReplacementOrderingTests.test_each_effect_applies_at_most_once_to_one_event",
         "tests.test_rules_primitives.ReplacementOrderingTests.test_applicability_is_recomputed_after_each_replacement",
         "tests.test_replacement_event_tree.ReplacementBatchTests.test_forced_singletons_do_not_consume_later_explicit_selection",
-        "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacements_apply_in_affected_players_chosen_order"
+        "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacements_apply_in_affected_players_chosen_order",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
+        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_damage_amount_pipeline_property_1000_deterministic_transitions"
       ],
       "required_scenarios": [
         "positive",

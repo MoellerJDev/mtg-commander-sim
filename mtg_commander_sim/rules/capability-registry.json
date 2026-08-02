@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 7,
+  "registry_version": 8,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -21,7 +21,9 @@
         "damage.amount.positive",
         "damage.combat.excess",
         "damage.prevention.order",
+        "damage.prevention.static_fixed",
         "damage.replacement.order",
+        "damage.replacement.static_quantity",
         "damage.result.battle_defense",
         "damage.result.creature_mark",
         "damage.result.infect",
@@ -403,7 +405,7 @@
         "exclusions": ["infect", "damage replacement", "damage prevention", "commander combat attribution"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["CommanderEngine.apply_effect damage player result"],
+      "implementation_components": ["mtg_commander_sim.damage.commit_prepared_damage_batch"],
       "positive_tests": ["test_sunscorched_desert_prompts_for_target_and_deals_damage"],
       "negative_tests": ["test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack"],
       "interaction_tests": ["test_lifelink_counts_only_damage_not_prevented_by_protection"],
@@ -430,7 +432,7 @@
         "exclusions": ["wither", "infect", "regeneration", "damage prevention"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["CommanderEngine._apply_damage_results_to_permanent"],
+      "implementation_components": ["mtg_commander_sim.damage.apply_damage_results_to_permanent"],
       "positive_tests": ["test_damage_results_do_not_destroy_before_state_actions"],
       "negative_tests": ["test_damage_rejects_nondamageable_permanent"],
       "interaction_tests": ["test_marked_damage_survives_type_loss_until_cleanup"],
@@ -457,7 +459,7 @@
         "exclusions": ["damage prevention", "counter replacement", "redirection under obsolete rules"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["CommanderEngine._apply_damage_results_to_permanent"],
+      "implementation_components": ["mtg_commander_sim.damage.apply_damage_results_to_permanent"],
       "positive_tests": ["test_planeswalker_damage_removes_loyalty_counters"],
       "negative_tests": ["test_damage_rejects_nondamageable_permanent"],
       "interaction_tests": ["test_lethal_planeswalker_combat_damage_applies_state_action"],
@@ -484,7 +486,7 @@
         "exclusions": ["damage prevention", "counter replacement", "defeated-battle cast permission"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["CommanderEngine._apply_damage_results_to_permanent"],
+      "implementation_components": ["mtg_commander_sim.damage.apply_damage_results_to_permanent"],
       "positive_tests": ["test_battle_damage_removes_defense_instead_of_marking_damage"],
       "negative_tests": ["test_damage_rejects_nondamageable_permanent"],
       "interaction_tests": ["test_damage_to_battle_creature_applies_both_results"],
@@ -511,7 +513,7 @@
         "exclusions": ["replacement effects", "prevention effects", "infect", "wither"]
       },
       "dependencies": ["damage.result.creature_mark", "damage.result.planeswalker_loyalty", "damage.result.battle_defense"],
-      "implementation_components": ["CommanderEngine._apply_damage_results_to_permanent"],
+      "implementation_components": ["mtg_commander_sim.damage.apply_damage_results_to_permanent"],
       "positive_tests": ["test_damage_to_multityped_permanent_applies_every_result"],
       "negative_tests": ["test_damage_rejects_nondamageable_permanent"],
       "interaction_tests": ["test_damage_to_battle_creature_applies_both_results"],
@@ -519,6 +521,60 @@
       "privacy_tests": [],
       "replay_tests": ["test_battle_damage_and_state_action_replay_exactly"],
       "required_evidence": ["positive", "negative", "interaction", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "damage.replacement.static_quantity",
+      "version": 1,
+      "official_rules": ["120.4b", "614.1", "614.5", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result.",
+        "inputs": ["typed positive damage proposal", "trusted battlefield runtime component", "affected subject replacement order"],
+        "outputs": ["choice-complete replayable damage event", "replacement journal"],
+        "exclusions": ["replacement with a non-damage event", "persistent prevention shields", "damage-result replacement", "mana-result damage requiring an explicit replacement choice"]
+      },
+      "dependencies": ["damage.amount.positive"],
+      "implementation_components": ["mtg_commander_sim.damage.prepare_damage_batch", "mtg_commander_sim.semantic_runtime.damage_replacements.DamageQuantityReplacementHandler", "mtg_commander_sim.replacement_effects.advance_replacement_batch"],
+      "positive_tests": ["test_furnace_and_daunting_order_changes_final_damage"],
+      "negative_tests": ["test_validation_failure_is_atomic_before_any_damage_result"],
+      "interaction_tests": ["test_static_prevention_applies_to_each_simultaneous_event"],
+      "multiplayer_tests": ["test_four_player_each_opponent_damage_uses_one_typed_batch", "test_four_player_damage_replacement_choices_follow_apnap"],
+      "privacy_tests": ["test_combat_replacement_choice_is_seat_scoped_and_precommit"],
+      "replay_tests": ["test_semantic_damage_replacement_choice_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "damage.prevention.static_fixed",
+      "version": 1,
+      "official_rules": ["120.4b", "615.1", "615.6", "615.10", "615.12", "615.12a", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order.",
+        "inputs": ["typed positive damage proposal", "trusted fixed prevention component or represented protection", "unpreventable flag"],
+        "outputs": ["final dealt and prevented amounts", "prevention journal"],
+        "exclusions": ["next-damage shields", "divisible prevention shields", "redirection", "damage-result replacement", "mana-result damage requiring an explicit replacement choice"]
+      },
+      "dependencies": ["damage.amount.positive", "damage.replacement.static_quantity"],
+      "implementation_components": ["mtg_commander_sim.damage.prepare_damage_batch", "mtg_commander_sim.damage.commit_prepared_damage_batch", "mtg_commander_sim.semantic_runtime.damage_replacements.FixedDamagePreventionHandler"],
+      "positive_tests": ["test_static_prevention_applies_to_each_simultaneous_event"],
+      "negative_tests": ["test_unpreventable_damage_applies_prevention_without_reducing_damage"],
+      "interaction_tests": ["test_furnace_and_daunting_order_changes_final_damage", "test_protection_prevents_player_and_colored_permanent_damage"],
+      "multiplayer_tests": ["test_four_player_fixed_prevention_applies_per_controller"],
+      "privacy_tests": ["test_combat_replacement_choice_is_seat_scoped_and_precommit"],
+      "replay_tests": ["test_semantic_damage_replacement_choice_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
       "dependency_fail_closed_status": "passed",
       "dependency_fail_closed_rationale": "",
       "implementation_mutation_status": "killed",
@@ -550,7 +606,7 @@
       "dependency_fail_closed_rationale": "This capability has no capability dependencies.",
       "implementation_mutation_status": "not_run",
       "implementation_mutation_rationale": "",
-      "blockers": ["complete affected-player ordering and replacement rediscovery are not implemented"],
+      "blockers": ["excess-damage redirection, non-damage transformations, result replacements, broad Oracle lowering, and every producer continuation are not implemented"],
       "status": "blocked"
     },
     {
@@ -577,7 +633,7 @@
       "dependency_fail_closed_rationale": "",
       "implementation_mutation_status": "not_run",
       "implementation_mutation_rationale": "",
-      "blockers": ["prevention is not yet composed with every damage replacement and result path"],
+      "blockers": ["persistent and divisible shields, prevention-trigger events, redirection, broad Oracle lowering, and every producer/result interaction are not implemented"],
       "status": "blocked"
     },
     {

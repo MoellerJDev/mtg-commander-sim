@@ -9,6 +9,23 @@ maintenance: "hand-maintained"
 
 # Codex project instructions
 
+## Browser ownership and headless testing
+
+- Treat every system-browser window and Codex in-app browser as user-owned
+  state. Never open, reuse, focus, or navigate a visible browser during agent
+  work unless the user explicitly requests visible browser interaction in that
+  same task. A prior request, an already-open browser, or a running localhost
+  listener is not authorization.
+- Starting a listener such as `127.0.0.1:18080` is test infrastructure only.
+  It must not launch or navigate a browser. Probe HTTP endpoints with a CLI
+  client and run UI checks in an isolated headless Playwright browser.
+- Agent-driven server checks must use `python -m server --no-open`; never run a
+  bare `python -m server`, pass `--open`, invoke `webbrowser`, use an OS
+  browser-launch command, or use a browser-control tool unless the user has
+  explicitly requested an interactive/manual browser session.
+- Keep Vite `open: false` and HTML reporters configured with `open: "never"`.
+  Stop server processes started for an automated check when the check ends.
+
 ## Nonnegotiable boundaries
 
 - `CommanderEngine` is authoritative. Never let a pilot mutate zones, life, mana, stack, counters, or effects directly.
@@ -43,29 +60,6 @@ maintenance: "hand-maintained"
 - Do not spend product slices improving AI strategy, model routing, prompts, or
   provider sessions. Keep existing provider-specific adapters isolated from the
   authoritative rules and application layers.
-- Automated checks must never open or drive a contributor's system browser or
-  the Codex in-app browser. Run Playwright in its isolated headless browser,
-  start `python -m server` with `--no-open`, keep Vite `open: false`, and keep
-  HTML reporters configured with `open: "never"`. Only launch a visible browser
-  when the user explicitly asks for an interactive/manual browser session.
-- Agent-driven server or UI checks must not run bare `python -m server`, invoke
-  `webbrowser`, use an OS browser-launch command, or navigate/focus the Codex
-  in-app browser. A listener such as `127.0.0.1:18080` is test infrastructure,
-  not permission to open a visible tab. Use `python -m server --no-open` and
-  headless Playwright, then stop any server process started for the check. This
-  restriction applies even when a visible browser is already open for unrelated
-  user work; explicit user authorization is required for every visible-browser
-  session.
-- The server is intentionally non-opening by default. `python -m server --open`
-  is a user-facing convenience and agents must never pass `--open` unless the
-  user explicitly requests a visible browser launch in that same task. Printing
-  or probing a localhost URL does not authorize navigation to it.
-- Treat every already-open system or Codex in-app browser as user-owned state.
-  Never reuse, focus, or navigate it for an automated check, including to a
-  localhost listener started by the agent. Verify HTTP endpoints with a CLI
-  client and UI behavior with isolated headless Playwright. Browser-control
-  tools are off limits unless the user explicitly requests visible browser
-  interaction in that same task.
 
 ## Current architecture program
 
@@ -95,11 +89,17 @@ rewrite.
   seat-scoped replayable replacement ordering, and focused token/zone mutation
   boundaries. CR 616.1g is promoted only for represented containing-before-
   contained behavior; broader CR 614/616 remains blocked.
-- The active bounded slice is `rules/counter-placement-replacement-events`.
-  It adds a focused prepare/commit owner for represented effect-generated
-  permanent counters and fixed integral quantity-replacement descriptors.
-  Keep entry counters, player counters, costs, rule actions, and continuation-
-  sensitive legacy producers explicitly blocked until their own safe migration.
+- Certified `main` includes the focused counter-placement prepare/commit owner
+  for represented effect-generated permanent counters and fixed integral
+  quantity-replacement descriptors. Entry counters, player counters, costs,
+  rule actions, and continuation-sensitive legacy producers remain blocked.
+- The active bounded slice is
+  `rules/damage-replacement-prevention-events`. It routes represented combat,
+  semantic, and mana-result damage through one typed proposal/prepare/commit
+  owner and adds fixed quantity-replacement and fixed prevention components.
+  Keep persistent shields, redirection, non-damage transformations,
+  damage-result replacement, infect/wither/toxic outcomes, and resumable
+  replacement choices during mana payment explicitly blocked.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic

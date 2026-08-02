@@ -16,7 +16,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 - Compiler: `oracle-ir-v12`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
-- Compiler module: 1,832 physical / 1,765 logical lines
+- Compiler module: 1,828 physical / 1,759 logical lines
 
 ## Canonical CardProgram
 
@@ -27,9 +27,9 @@ This generated report describes only the pinned Oracle corpus and current compil
 - Model: `mtg_commander_sim/card_programs/model.py`
 - Generated/reviewed adapter: `mtg_commander_sim/card_programs/adapters.py`
 - Runtime validator: `mtg_commander_sim/card_programs/validation.py`
-- Canonical reviewed registry CardPrograms: 139
+- Canonical reviewed registry CardPrograms: 141
 - Intrinsic strict-capability-ready CardPrograms: 0
-- Trust bases: `{"legacy_reviewed": 139}`
+- Trust bases: `{"legacy_reviewed": 141}`
 
 ## Stages
 
@@ -48,21 +48,21 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/7`
+- Registry schema/version: `1/8`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `03fa520169c684618de0edac41d9aaf1623271fd71916e88556f87f25b01f725`
-- Evidence fingerprint: `b9f7ae483aa24c212fa2ef1169691a4abb45045376a0a134fcdbc528e090aae8`
-- Explicit evidence declarations: 119
-- Capability records: 24
-- Trusted records: 8
+- Registry fingerprint: `5636f0ae3861e0a632da40d07b552623acef1dadd0e52b8133074817d1dfd4ea`
+- Evidence fingerprint: `a1915340c8e19d75e2a6926367d2bc8438a3709e8621a7b3a529be596412c2fb`
+- Explicit evidence declarations: 131
+- Capability records: 26
+- Trusted records: 10
 - Blocked records: 7
-- Dependency fail-closed statuses: `{"not_applicable": 11, "not_run": 6, "passed": 7}`
-- Implementation mutation statuses: `{"killed": 12, "not_run": 12}`
+- Dependency fail-closed statuses: `{"not_applicable": 11, "not_run": 6, "passed": 9}`
+- Implementation mutation statuses: `{"killed": 14, "not_run": 12}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
 | `cr-121-drawing-a-card` | 1 | false | `zone.draw.library_to_hand` |
-| `cr-120-damage` | 13 | false | `damage.combat.excess`, `damage.prevention.order`, `damage.replacement.order`, `damage.result.infect`, `damage.result.lifelink`, `damage.result.wither`, `damage.trigger.noncombat` |
+| `cr-120-damage` | 15 | false | `damage.combat.excess`, `damage.prevention.order`, `damage.replacement.order`, `damage.result.infect`, `damage.result.lifelink`, `damage.result.wither`, `damage.trigger.noncombat` |
 | `cr-725-the-monarch` | 1 | false | `variant.monarch.designate` |
 | `cr-111-tokens` | 1 | false | `token.creation.additional_replacement` |
 | `cr-614-replacement-effects` | 1 | false | `zone.change.destination_replacement` |
@@ -92,11 +92,11 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Semantic packs and implicit overrides
 
-- Pack files: 13
-- Program entries: 261
-- Unique program keys: 249
+- Pack files: 14
+- Program entries: 263
+- Unique program keys: 251
 - Duplicate keys resolved by pack order: 12
-- Unique Oracle IDs represented: 139
+- Unique Oracle IDs represented: 141
 - Card-specific operation names: 15
 - Typed card-override boundary present: true
 - Explicit typed overrides: 0

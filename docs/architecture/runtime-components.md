@@ -1,7 +1,7 @@
 ---
 title: "CardProgram runtime components"
 status: "current"
-authoritative_source: "mtg_commander_sim/semantic_runtime component registries and ADRs 0007/0010"
+authoritative_source: "mtg_commander_sim/semantic_runtime component registries and ADRs 0007/0010/0011/0012"
 verified: "2026-08-02"
 audience: "rules, compiler, runtime, replay, and extension contributors"
 maintenance: "hand-maintained"
@@ -53,6 +53,17 @@ Player counters, costs, dynamic quantities, halving, movement, removal,
 prevention, full entry ordering, and continuation-sensitive legacy producers
 remain outside the component.
 
+`replacement.damage.quantity.v1` and `prevention.damage.fixed.v1` participate
+in the same immutable damage event before any life, marked-damage, defense,
+loyalty, commander-damage, or trigger mutation. They support fixed integral
+quantity changes or fixed positive prevention with declarative source,
+recipient, controller, characteristic, and combat predicates. Competing
+effects use the affected player or damaged permanent controller and traverse
+simultaneous four-player events in APNAP order. Persistent shields,
+redirection, allocation, non-damage transformations, result replacement,
+infect/wither/toxic outcomes, and replacement choices during mana payment are
+outside these components.
+
 `continuous.anthem.power_toughness.v1` supports a fixed same-controller subtype
 anthem in layer 7c. The source must be represented, on the battlefield, and not
 phased out. Applicability uses characteristics produced by prior layers, and
@@ -79,16 +90,20 @@ component, timestamp, characteristic, and ruleset changes.
 commit and enter-event dispatch. `replacement_effects.py` and
 `replacement_decisions.py` own immutable event trees and replayable choice
 continuations. `counter_placement.py` owns pre-mutation preparation and final
-commit for represented permanent-counter events; runtime components remain
-pure participants.
+commit for represented permanent-counter events. `damage.py` owns represented
+damage snapshots, preparation, atomic result commit, and normalized final
+events. Runtime components remain pure participants.
 
 Primary tests are `test_replacement_event_tree.py`,
 `test_token_creation_replacements.py`, `test_graveyard_rules.py`,
 `test_counter_placement_replacements.py`,
+`test_damage_replacement_pipeline.py`,
 `test_continuous_effect_components.py`, `test_card_program_trust.py`, and
 `test_continuous_effect_performance.py`. See the
 [extension guide](../extension/runtime-component.md) and
 [ADR 0007](../adr/0007-cardprogram-runtime-components.md) plus
 [ADR 0010](../adr/0010-replacement-event-tree-and-token-owner.md),
 [ADR 0011](../adr/0011-counter-placement-event-and-mutation-owner.md), and the
-[counter-placement architecture](counter-placement.md).
+[counter-placement architecture](counter-placement.md), plus
+[ADR 0012](../adr/0012-damage-transaction-and-static-prevention.md) and the
+[damage transaction](damage-transactions.md).

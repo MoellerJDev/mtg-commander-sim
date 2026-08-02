@@ -1,15 +1,15 @@
 {
   "conformance": {
     "assertion_kind_counts": {
-      "executable_engine": 126,
+      "executable_engine": 127,
       "inventory_only": 2724,
       "static_traceability": 84,
-      "unsupported_fail_closed": 366
+      "unsupported_fail_closed": 365
     },
     "behavioral_cases": 471,
-    "behavioral_passing_cases": 105,
-    "behavioral_passing_fraction": 0.22293,
-    "blocked_cases": 366,
+    "behavioral_passing_cases": 106,
+    "behavioral_passing_fraction": 0.225053,
+    "blocked_cases": 365,
     "classification_counts": {
       "behavioral": 471,
       "definition_only": 84,
@@ -22,13 +22,13 @@
     "inventory_only_cases": 2724,
     "schema_version": 1,
     "semantic_failing_cases": 0,
-    "semantic_passing_cases": 126,
+    "semantic_passing_cases": 127,
     "skipped_cases": 0,
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
     "status_counts": {
-      "blocked": 366,
+      "blocked": 365,
       "definition_only": 84,
-      "passing": 126,
+      "passing": 127,
       "unreviewed": 2724
     },
     "total_cases": 3300,

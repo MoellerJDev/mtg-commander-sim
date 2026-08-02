@@ -25,12 +25,12 @@
       "status": "blocked",
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
-      "implementation_components": ["replacement_effects.ReplaceableEvent", "replacement_effects.ReplacementEventBatch", "token_creation.create_tokens", "counter_placement.prepare_counter_placements", "semantic_runtime.zone_replacements.prepare_zone_change_replacement"],
-      "executable_test_ids": ["tests.test_rules_primitives.ReplacementOrderingTests.test_applicability_is_recomputed_after_each_replacement", "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_registered_additional_token_components_replace_without_name_dispatch", "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_quantity_component_changes_effect_generated_placement", "tests.test_graveyard_rules.GraveyardRuleTests.test_graveyard_replacement_is_decided_before_the_move", "tests.test_graveyard_rules.GraveyardRuleTests.test_zone_replacement_descriptor_rejects_unknown_destinations"],
+      "implementation_components": ["replacement_effects.ReplaceableEvent", "replacement_effects.ReplacementEventBatch", "token_creation.create_tokens", "counter_placement.prepare_counter_placements", "semantic_runtime.zone_replacements.prepare_zone_change_replacement", "damage.prepare_damage_batch", "semantic_runtime.damage_replacements"],
+      "executable_test_ids": ["tests.test_rules_primitives.ReplacementOrderingTests.test_applicability_is_recomputed_after_each_replacement", "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_registered_additional_token_components_replace_without_name_dispatch", "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_quantity_component_changes_effect_generated_placement", "tests.test_graveyard_rules.GraveyardRuleTests.test_graveyard_replacement_is_decided_before_the_move", "tests.test_graveyard_rules.GraveyardRuleTests.test_zone_replacement_descriptor_rejects_unknown_destinations", "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage", "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_damage_replacement_choices_follow_apnap", "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_combat_replacement_choice_is_seat_scoped_and_precommit", "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly"],
       "required_scenarios": ["positive", "negative", "interaction", "replay"],
       "covered_scenarios": ["positive", "negative", "interaction", "replay"],
       "blockers": ["replaceable engine events are not yet emitted by every event producer", "continuous replacement effects are registered only for reviewed runtime descriptor families"],
-      "notes": ["Token creation, represented effect-generated permanent-counter placement, and represented card-destination changes now resolve through the shared event boundary, which continuously rediscovers applicable effects and records exact choices. Universal producer and Oracle-compiler coverage remain incomplete."]
+      "notes": ["Token creation, represented effect-generated permanent-counter placement, represented card-destination changes, and all represented damage producers now resolve through the shared event boundary, which continuously rediscovers applicable effects and records exact choices. Universal producer and Oracle-compiler coverage remain incomplete."]
     },
     {
       "rule_id": "614.1a",
@@ -193,12 +193,12 @@
       "status": "passing",
       "assertion_kind": "executable_engine",
       "reviewed": true,
-      "implementation_components": ["CommanderEngine._apply_combat_assignments", "CommanderEngine._apply_effect"],
-      "executable_test_ids": ["tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event"],
+      "implementation_components": ["damage.prepare_damage_batch", "semantic_runtime.damage_replacements._event_conditions", "CommanderEngine._apply_combat_assignments", "CommanderEngine.apply_effect"],
+      "executable_test_ids": ["tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_prevention_to_zero_ends_the_damage_replacement_event", "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event"],
       "required_scenarios": ["positive", "negative", "interaction"],
       "covered_scenarios": ["positive", "negative", "interaction"],
       "blockers": [],
-      "notes": ["Zero is suppressed before a damage event, result, attribution, or replacement opportunity can exist."]
+      "notes": ["Zero is suppressed before a damage event, result, attribution, or replacement opportunity can exist, including when prevention reduces a represented event to zero."]
     },
     {
       "rule_id": "614.8",

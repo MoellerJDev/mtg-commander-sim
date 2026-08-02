@@ -14,29 +14,30 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,090
-- Reviewed behavioral blockers: 366
+- Queued rules: 3,089
+- Reviewed behavioral blockers: 365
 - Behavioral classification/review required: 2,724
-- Passing behavioral rules: 105
+- Passing behavioral rules: 106
 - Subsystems: 21
-- Queue fingerprint: `79e5f35f1b2d6d7dc83ef5569c595861ec645cabce7f91e03f6f90fd1c20bd42`
+- Queue fingerprint: `8a1fd96f726593d838fd131be00ec53d24ab0a4c885c7a364a81938a082da1e5`
 
 ## Selected next batch
 
-- Batch: `counter-placement-replacement-events`
-- Subsystem: `replacement-prevention`
-- Rules: `614.1`, `614.16`, `616.1`
-- Target capabilities: none registered yet
-- Rationale: The replayable replacement event tree now establishes containing-event order and represented token/zone choices. The next dependency-ready boundary is authoritative counter placement, including replacement-created counter events and affected-object ordering, without claiming universal CR 614/616 producer coverage.
+- Batch: `damage-replacement-prevention-events`
+- Subsystem: `damage`
+- Rules: `120.4`, `120.4b`
+- Target capabilities: `damage.replacement.static_quantity`, `damage.prevention.static_fixed`
+- Rationale: The replacement event tree and counter-placement transaction establish precommit affected-subject ordering. This batch routes every represented damage producer through one typed transaction and adds source-pinned static quantity replacement, fixed prevention, protection prevention, final event dispatch, and exact replay without claiming persistent shields or result replacement.
 
 Exit criteria:
 
-- Inventory authoritative counter-placement mutations and route one coherent generic family through a typed replaceable event before commit.
-- Apply replacement-created counter intents, including represented zone-change counters, through the same counter-placement boundary.
-- Suspend affected-object choices through principal-scoped packets and preserve exact replay without exposing authoritative event payloads.
-- Promote only source-pinned rules whose positive, negative, interaction, multiplayer where applicable, replay, and implementation-mutation witnesses pass.
+- Route combat, semantic single-target, each-opponent, and mana-result damage through one typed precommit transaction.
+- Discover trusted source-pinned static quantity replacement, fixed prevention, and represented protection without printed-name engine dispatch.
+- Suspend affected-subject choices through principal-scoped packets and preserve exact replay without exposing authoritative event payloads.
+- Dispatch one normalized final damage event only after represented results and fail before mutation on unsupported infect, wither, toxic, or resumability semantics.
+- Promote only the narrow source-pinned capabilities whose positive, negative, interaction, privacy, replay, property, and implementation-mutation witnesses pass.
 - Run complete pinned Oracle and Commander-legal card censuses and report exact deltas.
-- Preserve Game Record v3, principal projection, zero suppressed meaningful windows, and fail-closed unsupported counter semantics.
+- Preserve Game Record v3, principal projection, zero suppressed meaningful windows, and fail-closed unsupported damage semantics.
 
 ## Dependency schedule
 
@@ -49,7 +50,7 @@ Exit criteria:
 | 5 | `card-types` | `characteristics`, `objects-permanents-tokens` | 168 | 13 | 155 | `oracle_normalization`, `card_program_typing`, `mechanic_contracts` |
 | 6 | `zones` | `objects-permanents-tokens`, `card-types` | 39 | 39 | 0 | `card_program_zone_permissions`, `mechanic_contracts` |
 | 7 | `resources` | `mana-costs-priority`, `zones` | 82 | 3 | 79 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
-| 8 | `damage` | `characteristics`, `objects-permanents-tokens`, `resources` | 19 | 19 | 0 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
+| 8 | `damage` | `characteristics`, `objects-permanents-tokens`, `resources` | 18 | 18 | 0 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 9 | `turn-structure` | `mana-costs-priority`, `zones`, `resources` | 26 | 26 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 10 | `casting-activation` | `mana-costs-priority`, `zones`, `turn-structure` | 46 | 46 | 0 | `oracle_parser`, `card_program_costs`, `card_program_lowering`, `mechanic_contracts` |
 | 11 | `triggered-static-linked` | `objects-permanents-tokens`, `turn-structure`, `casting-activation` | 71 | 71 | 0 | `oracle_parser`, `event_binding`, `card_program_lowering`, `mechanic_contracts` |
