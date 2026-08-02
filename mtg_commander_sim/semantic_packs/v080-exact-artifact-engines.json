@@ -401,7 +401,7 @@
       },
       "effects": [
         {
-          "op": "welder_exchange",
+          "op": "exchange_artifact_zones",
           "battlefield_card": "$target.0",
           "graveyard_card": "$target.1",
           "reason": "Goblin Welder"

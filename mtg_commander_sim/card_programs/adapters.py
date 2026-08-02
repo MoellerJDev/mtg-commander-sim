@@ -6,7 +6,11 @@ import hashlib
 from typing import Any, Iterable, Mapping
 
 from ..carddb import CardDatabase, CardRecord
-from ..compiler.program_generation import generated_programs, rulings_source_hash
+from ..compiler.program_generation import (
+    generated_programs,
+    rulings_source_hash,
+    runtime_handler_footprint,
+)
 from ..oracle_ir import ORACLE_COMPILER_VERSION, compile_oracle_card
 from ..rules.capabilities import CapabilityRegistry
 from ..semantics import SemanticProgram, SemanticRegistry
@@ -117,6 +121,11 @@ def compile_card_program(
     reviewed_keys: list[str] = []
     if semantic_registry is not None:
         for program in semantic_registry.programs_for_oracle(record.oracle_id):
+            reviewed_footprint = runtime_handler_footprint(program)
+            if reviewed_footprint is not None and program.trust_level == "trusted":
+                for key, generated in tuple(programs.items()):
+                    if runtime_handler_footprint(generated) == reviewed_footprint:
+                        programs.pop(key)
             programs[program.key] = program
             reviewed_keys.append(program.key)
     faces = _record_faces(

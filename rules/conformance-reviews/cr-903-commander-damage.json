@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 903.10 — Commander damage",
+  "cases": [
+    {
+      "rule_id": "903.10",
+      "rule_text_sha256": "15c4fd4a5477800da9f6120f4d4a46e499c325aa031e7b69d3317e42775a7c2f",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["commander.commander_damage_losers", "state_based_actions.evaluate_state_based_actions"],
+      "executable_test_ids": ["tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_same_named_commanders_remain_separate_and_drive_four_player_sba"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Commander-format losing-condition heading; the 21-combat-damage state-based action is reviewed in CR 903.10a."]
+    },
+    {
+      "rule_id": "903.10a",
+      "rule_text_sha256": "0e03ed901994f90d3e03eacfe8c2150b8d17b4c2c0a258db49b2abfa1023eae0",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["commander.commander_designation_id", "commander.commander_damage_key", "damage.commit_prepared_damage_batch", "commander.commander_damage_losers"],
+      "executable_test_ids": ["tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_same_named_commanders_remain_separate_and_drive_four_player_sba", "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_designation_survives_zone_and_control_changes", "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_ordinary_copy_of_commander_has_no_designation", "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_two_commander_setup_assigns_two_distinct_designations", "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_command_replay_preserves_designation_damage_key"],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "blockers": [],
+      "notes": ["New games track combat damage by a stable physical commander designation, not Oracle ID. The designation survives zone and control changes, is absent from ordinary copies, supports multiple commanders, and drives the 21-damage state-based action. Historical Game Record v3 checkpoints without the additive identity marker retain their original replay semantics."]
+    }
+  ]
+}

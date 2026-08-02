@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "40241e6a7a4e77a3dab3df93c6a726b0f82186fb",
+    "baseline_main_commit": "6c09dab765e615610f697a7a850bb6502093f0a0",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-02",
-    "phase": "rules_dependency_scheduler",
-    "scope_note": "Certified main includes the typed tap-state migration. The current focused branch adds a prose-free, source-pinned dependency scheduler for all reviewed blocked behavioral and unclassified nonpassing rules; it selects but does not implement or promote the bounded CR 614/616 replacement-choice batch."
+    "phase": "damage_results_and_replacement_hardening",
+    "scope_note": "Certified main through PR 67 includes typed damage-result events. The current focused branch adds stable physical Commander-damage identity, deep immutable and strictly replayed replacement trees, a closed typed replacement-operation vocabulary, canonical life/counter result owners, enforced minimum capability evidence, and generic damage-keyword plus static quantity/prevention compilation."
   },
   "ci": {
     "workflow": "CI",
-    "run_id": 30732155279,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30732155279",
+    "run_id": 30753764851,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30753764851",
     "status": "pass",
     "python_versions": [
       "3.11",
@@ -35,11 +35,23 @@
     "state_owner_modules": [
       "mtg_commander_sim/engine.py",
       "mtg_commander_sim/permissions.py",
+      "mtg_commander_sim/counter_placement.py",
+      "mtg_commander_sim/counter_state.py",
+      "mtg_commander_sim/damage.py",
+      "mtg_commander_sim/damage_results.py",
+      "mtg_commander_sim/life_state.py",
       "mtg_commander_sim/tap_state.py",
       "mtg_commander_sim/token_creation.py"
+      ,"mtg_commander_sim/mana_activation.py"
+      ,"mtg_commander_sim/semantic_choices/intent_host.py"
+      ,"mtg_commander_sim/effect_runtime/state_and_permissions.py"
+      ,"mtg_commander_sim/effect_runtime/zones_and_attachments.py"
+      ,"mtg_commander_sim/effect_runtime/damage_life_and_turns.py"
+      ,"mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py"
     ],
     "state_parameter_modules": [
       "mtg_commander_sim/record.py",
+      "mtg_commander_sim/commander.py",
       "mtg_commander_sim/state_based_actions.py"
     ],
     "core_card_specificity_files": [
@@ -172,13 +184,25 @@
     },
     {
       "id": "replacement_and_prevention",
-      "status": "typed_event_tree_with_incremental_engine_integration",
+      "status": "split_immutable_model_typed_operations_and_incremental_engine_integration",
       "owners": [
+        "mtg_commander_sim/replacement",
         "mtg_commander_sim/replacement_effects.py",
         "mtg_commander_sim/replacement_decisions.py",
         "mtg_commander_sim/semantic_runtime/token_replacements.py",
         "mtg_commander_sim/semantic_runtime/zone_replacements.py",
         "mtg_commander_sim/engine.py"
+      ],
+      "missing_dedicated_owner": false
+    },
+    {
+      "id": "damage_results_life_and_counters",
+      "status": "typed_precommit_owners_with_damage_coordinator",
+      "owners": [
+        "mtg_commander_sim/damage.py",
+        "mtg_commander_sim/damage_results.py",
+        "mtg_commander_sim/counter_state.py",
+        "mtg_commander_sim/life_state.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -215,11 +239,12 @@
     },
     {
       "id": "commander_variant",
-      "status": "embedded_in_commander_engine",
+      "status": "physical_identity_and_initial_state_extracted_with_engine_orchestration",
       "owners": [
+        "mtg_commander_sim/commander.py",
         "mtg_commander_sim/engine.py"
       ],
-      "missing_dedicated_owner": true
+      "missing_dedicated_owner": false
     },
     {
       "id": "projection_and_protocol",
@@ -350,21 +375,12 @@
     }
   ],
   "card_specific_semantic_operations": [
-    "animate_dead_prepare",
-    "animate_dead_reanimate",
-    "create_daretti_emblem",
-    "create_warform",
     "daretti_exchange",
-    "demonic_junker_resolve",
-    "field_of_dead_token",
     "fomori_vault",
     "remora_tax",
-    "scute_swarm_token",
     "springheart_landfall",
     "sylvan_library_settle",
-    "toxic_deluge",
-    "veil_of_summer",
-    "welder_exchange"
+    "veil_of_summer"
   ],
   "card_named_helpers": [
     {

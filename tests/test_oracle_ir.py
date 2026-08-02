@@ -19,6 +19,11 @@ from mtg_commander_sim import (
 )
 from mtg_commander_sim.cli import main
 from mtg_commander_sim.deck import DeckDefinition, DeckEntry
+from mtg_commander_sim.damage import (
+    commit_prepared_damage_batch,
+    damage_proposal,
+    prepare_damage_batch,
+)
 from mtg_commander_sim.mechanic_contracts import (
     MechanicContractError,
     apply_contracts_to_registry,
@@ -33,6 +38,9 @@ from mtg_commander_sim.oracle_ir import (
     register_generated_programs,
 )
 from mtg_commander_sim.rules_corpus import verify_rules_corpus
+from mtg_commander_sim.rules.capabilities import (
+    load_default_capability_registry,
+)
 from mtg_commander_sim.semantics import (
     SemanticProgram,
     SemanticRegistry,
@@ -442,6 +450,177 @@ class OracleIRTests(unittest.TestCase):
                     trusted_mechanics={keyword},
                 )
                 self.assertFalse(trusted.material_residuals)
+
+                capability_bound = compile_oracle_card(
+                    replace(
+                        base,
+                        oracle_text=oracle_text,
+                        keywords=(keyword.title(),),
+                    ),
+                    capability_registry=load_default_capability_registry(),
+                    capability_profile="commander_review",
+                )
+                node = capability_bound.faces[0].nodes[0]
+                self.assertEqual("exact", capability_bound.status)
+                self.assertEqual(
+                    (f"damage.result.{keyword}",),
+                    node.capability_dependencies,
+                )
+                self.assertIn(
+                    f"damage.result.{keyword}",
+                    node.capability_closure,
+                )
+                self.assertEqual(
+                    "commander_review", node.capability_profile
+                )
+                self.assertIsNotNone(node.capability_fingerprint)
+
+    def test_static_damage_replacement_wording_lowers_to_generic_handlers(self):
+        capabilities = load_default_capability_registry()
+        expectations = {
+            "Furnace of Rath": (
+                "replacement.damage.quantity.v1",
+                "damage.replacement.static_quantity",
+                {"multiplier": 2, "additional": 0},
+            ),
+            "Daunting Defender": (
+                "prevention.damage.fixed.v1",
+                "damage.prevention.static_fixed",
+                {"amount": 1},
+            ),
+            "Angrath's Marauders": (
+                "replacement.damage.quantity.v1",
+                "damage.replacement.static_quantity",
+                {"multiplier": 2, "additional": 0},
+            ),
+            "Urza's Armor": (
+                "prevention.damage.fixed.v1",
+                "damage.prevention.static_fixed",
+                {"amount": 1},
+            ),
+        }
+        for card_name, expected in expectations.items():
+            with self.subTest(card_name=card_name):
+                raw = compile_oracle_card(self.db.lookup(card_name))
+                self.assertTrue(raw.material_residuals)
+                ir = compile_oracle_card(
+                    self.db.lookup(card_name),
+                    capability_registry=capabilities,
+                    capability_profile="commander_review",
+                )
+                self.assertEqual("exact", ir.status)
+                node = ir.faces[0].nodes[0]
+                handler_id, capability_id, modification = expected
+                self.assertEqual((capability_id,), node.capability_dependencies)
+                self.assertEqual(handler_id, node.handlers[0]["handler_id"])
+                self.assertEqual(modification, node.handlers[0]["modification"])
+                programs = generated_programs(
+                    self.db,
+                    self.db.lookup(card_name),
+                    trust_level="trusted",
+                    capability_registry=capabilities,
+                    capability_profile="commander_review",
+                )
+                self.assertEqual(1, len(programs))
+                self.assertEqual(
+                    handler_id, programs[0].handlers[0]["handler_id"]
+                )
+
+        unsupported = compile_oracle_card(
+            self.db.lookup("Gisela, Blade of Goldnight"),
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+        self.assertNotEqual("exact", unsupported.status)
+        self.assertTrue(unsupported.material_residuals)
+
+    def test_exact_generic_damage_handler_is_trusted_and_active_in_session(self):
+        deck_a = DeckDefinition(
+            name="A",
+            commanders=["Zimone and Dina"],
+            entries=[
+                DeckEntry("Zimone and Dina", board="commander"),
+                DeckEntry("Angrath's Marauders"),
+            ],
+        )
+        deck_b = DeckDefinition(
+            name="B",
+            commanders=["Mishra, Eminent One"],
+            entries=[
+                DeckEntry("Mishra, Eminent One", board="commander"),
+                DeckEntry("Island"),
+            ],
+        )
+        session = CommanderSession.create(
+            self.db,
+            {"A": deck_a, "B": deck_b},
+            first_player="A",
+            seed=120_461_614,
+        )
+        engine = session.engine
+        marauders = next(
+            card
+            for card in engine.state.cards.values()
+            if card.printed_name == "Angrath's Marauders"
+        )
+        engine.move_card(marauders.object_id, "battlefield", controller="A")
+        programs = engine.semantics.programs_for_oracle(marauders.oracle_id)
+        generic = next(program for program in programs if program.handlers)
+        self.assertEqual("trusted", generic.trust_level)
+        self.assertEqual(
+            "replacement.damage.quantity.v1",
+            generic.handlers[0]["handler_id"],
+        )
+
+        life_before = engine.state.players["B"].life
+        proposal = damage_proposal(
+            engine,
+            proposal_id="damage:generic-marauders",
+            actor="A",
+            source_ref=marauders.ref,
+            target="B",
+            amount=2,
+            combat=False,
+            reason="generic static replacement compiler witness",
+        )
+        result = commit_prepared_damage_batch(
+            engine, prepare_damage_batch(engine, (proposal,))
+        )
+        self.assertEqual(4, result.events[0].dealt_amount)
+        self.assertEqual(life_before - 4, engine.state.players["B"].life)
+
+        registry = SemanticRegistry()
+        furnace = self.db.lookup("Furnace of Rath")
+        existing_handlers = [
+            program
+            for program in registry.programs_for_oracle(furnace.oracle_id)
+            if program.handlers
+        ]
+        self.assertEqual(1, len(existing_handlers))
+        generation = register_generated_programs(
+            self.db,
+            registry,
+            (furnace,),
+            trust_level="provisional",
+            capability_registry=load_default_capability_registry(),
+            capability_profile="commander_review",
+            promote_exact_runtime_handlers=True,
+        )
+        self.assertEqual(0, generation["programs_generated"])
+        self.assertEqual(1, generation["programs_skipped_existing"])
+        self.assertEqual(0, generation["runtime_handlers_promoted"])
+        self.assertEqual(
+            1,
+            len(
+                [
+                    program
+                    for program in registry.programs_for_oracle(
+                        furnace.oracle_id
+                    )
+                    if program.handlers
+                ]
+            ),
+        )
 
     def test_trusted_dependency_set_promotes_only_the_matching_template(self):
         bolt = compile_oracle_card(
@@ -969,6 +1148,25 @@ class OracleIRTests(unittest.TestCase):
             25, sum(coverage["status_counts"].values())
         )
 
+        capabilities = load_default_capability_registry()
+        capability_bound = oracle_corpus_coverage(
+            self.db,
+            limit=25,
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+        self.assertEqual(
+            "commander_review", capability_bound["capability_profile"]
+        )
+        self.assertEqual(
+            capabilities.fingerprint,
+            capability_bound["capability_registry_fingerprint"],
+        )
+        self.assertEqual(
+            capabilities.evidence_fingerprint,
+            capability_bound["capability_evidence_fingerprint"],
+        )
+
     def test_oracle_cli_parse_explain_and_coverage(self):
         for args in (
             [
@@ -992,6 +1190,8 @@ class OracleIRTests(unittest.TestCase):
                 str(self.db_path),
                 "--limit",
                 "5",
+                "--profile",
+                "commander_review",
             ],
         ):
             output = io.StringIO()

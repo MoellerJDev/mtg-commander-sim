@@ -510,7 +510,13 @@
       "key": "afaef788-34d1-460b-b884-9d7ae6ddeb18:spell:front",
       "label": "Toxic Deluge",
       "oracle_id": "afaef788-34d1-460b-b884-9d7ae6ddeb18",
-      "effects": [{"op": "toxic_deluge", "amount": "$x"}],
+      "effects": [{
+        "op": "modify_all_matching_permanents_until_end_of_turn",
+        "required_type": "creature",
+        "amount": "$x",
+        "scale": -1,
+        "event_code": "effect.toxic_deluge"
+      }],
       "destination": "graveyard",
       "cost_schema": {
         "additional_costs": [

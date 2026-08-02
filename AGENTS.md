@@ -93,18 +93,19 @@ rewrite.
   for represented effect-generated permanent counters and fixed integral
   quantity-replacement descriptors. Entry counters, player counters, costs,
   rule actions, and continuation-sensitive legacy producers remain blocked.
-- The active bounded slice is `rules/damage-result-events`. It delegates final
-  dealt components to immutable affected-subject CR 120.3 result trees, resolves
-  represented containing and contained replacements, and commits one validated
-  mutation plan. Generic represented Infect, Wither, Lifelink, and fixed Toxic
-  outcomes plus fixed life-gain multiplication and a whole-result life floor
-  are in scope. Keep persistent shields, redirection, non-damage
-  transformations, dynamic Toxic, unrepresented source LKI/ability grants,
+- The active bounded slice is
+  `rules/damage-results-and-replacement-hardening`. It gives designated physical
+  commanders stable identities, deep-freezes and strictly replays nested
+  replacement trees, lowers runtime descriptors to a closed typed operation
+  vocabulary, routes represented life and counters through typed precommit
+  owners, and generically compiles the implemented damage-result keywords plus
+  closed static quantity/prevention wording. Keep persistent shields,
+  redirection, non-damage transformations, unresolved dynamic Toxic values,
   remaining result-replacement families, and resumable replacement choices
   during mana payment explicitly blocked.
-- The generated post-merge queue selects the dependency-ready CR 210.1 Battle
-  defense-characteristic/entry batch. Do not implement it on the damage-result
-  branch; begin it only after this branch is certified and merged.
+- The generated post-merge queue selects the dependency-ready damage-prevention
+  shields and redirection family. Begin it only after this branch is certified,
+  merged, and cleaned up from fresh `main`.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic
@@ -198,10 +199,11 @@ For new card semantics:
    trusted contract
 8. add positive, negative, runtime, mutation, and source-hash tests
 
-Put reusable CR 613 operations in `continuous_effects.py` and CR 616 event
-transformations in `replacement_effects.py`. Record evidence and blockers in a
-versioned mechanic contract, regenerate the registry, and verify the pinned
-rules corpus.
+Put reusable CR 613 operations in `continuous_effects.py`. Put CR 614-616
+immutable models, typed operations, applicability, ordering, and replay logic
+under `mtg_commander_sim/replacement/`; `replacement_effects.py` is only the
+narrow compatibility facade. Record evidence and blockers in a versioned
+mechanic contract, regenerate the registry, and verify the pinned rules corpus.
 
 ## Performance targets
 

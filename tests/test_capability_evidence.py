@@ -12,6 +12,7 @@ from mtg_commander_sim.rules.capabilities import (
 )
 from mtg_commander_sim.rules.evidence import (
     CapabilityEvidenceError,
+    capability_evidence_fingerprint,
     load_capability_evidence_index,
     validate_capability_evidence_index,
 )
@@ -139,6 +140,83 @@ class CapabilityEvidenceTests(unittest.TestCase):
             CapabilityRegistryError, "passed dependency fail-closed"
         ):
             CapabilityRegistry(value)
+
+    def test_minimum_trusted_evidence_cannot_be_waived_by_registry_row(self):
+        target_id = "damage.result.player_life"
+        registry = CapabilityRegistry(self.registry_value)
+        index = build_index(
+            registry_value=self.registry_value,
+            declaration_source=self.declaration_source,
+            discovered_test_ids=set(self.discovered.values()),
+        )
+        for evidence_class in ("positive", "negative", "replay", "mutation"):
+            with self.subTest(evidence_class=evidence_class):
+                changed = deepcopy(index)
+                changed["declarations"] = [
+                    row
+                    for row in changed["declarations"]
+                    if not (
+                        row["capability_id"] == target_id
+                        and row["evidence_class"] == evidence_class
+                    )
+                ]
+                changed["fingerprint"] = capability_evidence_fingerprint(
+                    changed
+                )
+                with self.assertRaisesRegex(
+                    CapabilityEvidenceError,
+                    rf"{target_id} lacks explicit evidence:.*{evidence_class}",
+                ):
+                    validate_capability_evidence_index(
+                        changed, registry=registry
+                    )
+
+    def test_required_evidence_empty_and_unresolvable_component_fail_trust(self):
+        value = deepcopy(self.registry_value)
+        row = next(
+            item
+            for item in value["capabilities"]
+            if item["id"] == "damage.result.player_life"
+        )
+        row["required_evidence"] = []
+        with self.assertRaisesRegex(
+            CapabilityRegistryError, "must require minimum evidence"
+        ):
+            CapabilityRegistry(value)
+
+        value = deepcopy(self.registry_value)
+        row = next(
+            item
+            for item in value["capabilities"]
+            if item["id"] == "damage.result.player_life"
+        )
+        row["implementation_components"] = ["missing.module.Symbol"]
+        with self.assertRaisesRegex(
+            CapabilityRegistryError, "resolvable implementation component"
+        ):
+            CapabilityRegistry(value)
+
+    def test_required_evidence_must_cover_every_supported_profile(self):
+        registry = CapabilityRegistry(self.registry_value)
+        index = build_index(
+            registry_value=self.registry_value,
+            declaration_source=self.declaration_source,
+            discovered_test_ids=set(self.discovered.values()),
+        )
+        target_id = "damage.result.player_life"
+        changed = deepcopy(index)
+        for row in changed["declarations"]:
+            if (
+                row["capability_id"] == target_id
+                and row["evidence_class"] == "positive"
+            ):
+                row["supported_profiles"] = ["commander_duel"]
+        changed["fingerprint"] = capability_evidence_fingerprint(changed)
+        with self.assertRaisesRegex(
+            CapabilityEvidenceError,
+            "positive evidence does not cover supported profiles",
+        ):
+            validate_capability_evidence_index(changed, registry=registry)
 
 
 if __name__ == "__main__":

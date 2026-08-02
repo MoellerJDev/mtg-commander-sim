@@ -3,6 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping, Protocol, Sequence
 
+from .counter_state import (
+    CounterChange,
+    CounterStateError,
+    commit_counter_changes,
+    plan_counter_changes,
+)
 from .replacement_effects import (
     ReplaceableEvent,
     ReplacementChoiceRequired,
@@ -142,6 +148,7 @@ def _event_spec(
         amount=request.amount,
         source_ref=request.source_ref,
         effect_generated=request.effect_generated,
+        logical_object_id=card.logical_object_id,
     )
 
 
@@ -269,7 +276,7 @@ def commit_prepared_counter_placements(
 ) -> tuple[CounterPlacementResult, ...]:
     """Commit a choice-complete batch without rediscovering effects."""
 
-    results: list[CounterPlacementResult] = []
+    validated: list[tuple[ReplaceableEvent, Any, str, int, int]] = []
     for event in prepared.events:
         affected = event.affected_object
         if affected is None:
@@ -287,20 +294,44 @@ def commit_prepared_counter_placements(
                 "Counter placement target changed zones before commit"
             )
         name, requested, amount = _resolved_amount(event)
-        before = max(0, int(card.counters.get(name, 0)))
-        after = before + amount
-        if after:
-            card.counters[name] = after
-        else:
-            card.counters.pop(name, None)
+        validated.append((event, card, name, requested, amount))
+
+    try:
+        counter_plan = plan_counter_changes(
+            host,
+            tuple(
+                CounterChange(
+                    subject_kind="permanent",
+                    subject_id=card.object_id,
+                    counter_name=name,
+                    amount=amount,
+                    expected_zone=str(event.payload.get("target_zone") or ""),
+                    expected_logical_object_id=(
+                        str(event.payload["target_logical_object_id"])
+                        if event.payload.get("target_logical_object_id")
+                        is not None
+                        else None
+                    ),
+                )
+                for event, card, name, _requested, amount in validated
+            ),
+        )
+        transitions = commit_counter_changes(host, counter_plan)
+    except CounterStateError as exc:
+        raise CounterPlacementError(str(exc)) from exc
+
+    results: list[CounterPlacementResult] = []
+    for (event, card, name, requested, amount), transition in zip(
+        validated, transitions, strict=True
+    ):
         results.append(
             CounterPlacementResult(
                 object_id=card.object_id,
                 counter_name=name,
                 requested=requested,
                 placed=amount,
-                before=before,
-                after=after,
+                before=transition.before,
+                after=transition.after,
             )
         )
         if log:
@@ -313,8 +344,8 @@ def commit_prepared_counter_placements(
                     "counter": name,
                     "requested": requested,
                     "placed": amount,
-                    "before": before,
-                    "after": after,
+                    "before": transition.before,
+                    "after": transition.after,
                     "source": event.payload.get("source"),
                     "placement_reason": reason,
                 },

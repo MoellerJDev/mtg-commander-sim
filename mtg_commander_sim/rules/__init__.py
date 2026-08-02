@@ -5,6 +5,7 @@ from .capabilities import (
     CapabilityClosure,
     CapabilityRegistry,
     CapabilityRegistryError,
+    capability_covered_mechanics,
     capability_dependencies_for_node,
     load_default_capability_registry,
 )
@@ -14,6 +15,7 @@ __all__ = [
     "CapabilityClosure",
     "CapabilityRegistry",
     "CapabilityRegistryError",
+    "capability_covered_mechanics",
     "capability_dependencies_for_node",
     "load_default_capability_registry",
 ]

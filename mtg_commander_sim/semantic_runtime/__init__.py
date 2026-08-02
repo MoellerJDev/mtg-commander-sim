@@ -15,6 +15,8 @@ from .components import (
     validate_runtime_handler_descriptors,
 )
 from .continuous_components import (
+    AddBasicLandTypeHandler,
+    AddBasicLandTypeNode,
     ContinuousEffectComponentRegistry,
     ContinuousEffectSourceContext,
     FixedPowerToughnessAnthemHandler,
@@ -61,14 +63,41 @@ from .executor import (
     execute_intent_plan,
     prepare_draw_resolution,
 )
+from .effect_handlers import DOMAIN_EFFECT_HANDLERS, DomainEffectHandler
 from .generic import GENERIC_HANDLERS
 from .handlers import SemanticNodeHandler
 from .intents import (
+    AddManaIntent,
+    AddSubtypeIntent,
+    AmassIntent,
     BecomeMonarchIntent,
+    CounterStackIntent,
+    CopyControlledTokensIntent,
+    CopyStackItemIntent,
+    ChooseOneRestBottomRandomIntent,
+    CreateTokenIntent,
     DrawCardsIntent,
+    DomainEffectIntent,
     IntentPlan,
+    EliminatePlayersIntent,
+    LifeChangeIntent,
+    MoveObjectsSimultaneouslyIntent,
+    MoveLibraryCardsToBottomIntent,
+    PayManaCostIntent,
+    PayLifeIntent,
+    PlaceCountersIntent,
+    RecordChoiceIntent,
+    RecordZoneMoveIntent,
+    ReturnCardsToLibraryTopIntent,
+    ReorderLibraryTopIntent,
+    RetargetStackItemIntent,
+    RevealLibraryCardsIntent,
+    SetCardDesignationIntent,
     SetPermanentTappedIntent,
+    ShuffleLibraryIntent,
     UntapAllCreaturesIntent,
+    ZoneMoveIntent,
+    ProliferateIntent,
 )
 from .interpreter import SemanticInterpreter
 from .nodes import (
@@ -114,7 +143,7 @@ from .zone_replacements import (
 @lru_cache(maxsize=1)
 def default_semantic_handler_registry() -> SemanticHandlerRegistry:
     registry = SemanticHandlerRegistry(
-        (*GENERIC_HANDLERS, *TAP_STATE_HANDLERS)
+        (*GENERIC_HANDLERS, *TAP_STATE_HANDLERS, *DOMAIN_EFFECT_HANDLERS)
     )
     capabilities = load_default_capability_registry()
     missing = sorted(
@@ -137,12 +166,24 @@ def default_semantic_interpreter() -> SemanticInterpreter:
 
 
 __all__ = [
+    "AddBasicLandTypeHandler",
+    "AddBasicLandTypeNode",
+    "AddManaIntent",
+    "AddSubtypeIntent",
+    "AmassIntent",
     "BecomeMonarchIntent",
+    "CounterStackIntent",
+    "CopyControlledTokensIntent",
+    "CopyStackItemIntent",
+    "ChooseOneRestBottomRandomIntent",
+    "CreateTokenIntent",
     "BecomeMonarchNode",
     "AdditionalTokenIntent",
     "AdditionalTokenReplacementHandler",
     "AdditionalTokenReplacementNode",
     "DrawCardsIntent",
+    "DomainEffectHandler",
+    "DomainEffectIntent",
     "DrawEachPlayerNode",
     "DrawNode",
     "DrawResolutionBatch",
@@ -171,9 +212,24 @@ __all__ = [
     "LifeGainMultiplierHandler",
     "LifeGainMultiplierNode",
     "IntentPlan",
+    "EliminatePlayersIntent",
+    "LifeChangeIntent",
+    "MoveObjectsSimultaneouslyIntent",
+    "MoveLibraryCardsToBottomIntent",
+    "PayManaCostIntent",
+    "PayLifeIntent",
+    "PlaceCountersIntent",
     "ReadOnlyHandlerContext",
+    "RecordChoiceIntent",
+    "RecordZoneMoveIntent",
+    "ReturnCardsToLibraryTopIntent",
+    "ReorderLibraryTopIntent",
+    "RetargetStackItemIntent",
+    "RevealLibraryCardsIntent",
     "ReadOnlyRulesQuery",
+    "SetCardDesignationIntent",
     "SetPermanentTappedIntent",
+    "ShuffleLibraryIntent",
     "SetPermanentTappedNode",
     "SemanticHandlerRegistry",
     "SemanticHandlerRegistryError",
@@ -186,6 +242,8 @@ __all__ = [
     "TokenCreationReplacementResolution",
     "TokenDefinition",
     "UntapAllCreaturesIntent",
+    "ZoneMoveIntent",
+    "ProliferateIntent",
     "UntapAllCreaturesNode",
     "ZoneChangeReplacementContext",
     "ZoneChangeReplacementRegistry",

@@ -31,7 +31,8 @@ The browser renders the engine's current generic choice vocabulary, locally
   cached card art, a persistent hover/focus card viewer, browsable public zones,
   card-specific play/cast/activate controls, resilient drag-to-play interaction,
   saved Auto-mana/Manual mana and Auto-pass/Full control preferences, visible
-  tapped-card rotation for every seat, reconnect and exact-command retry states,
+  tapped-card rotation and labels for every seat, a bottom-anchored resizable
+  hand dock, reconnect and exact-command retry states,
   explicit active-player main-phase advancement, attack/block interaction,
   public commander-damage tracking, confirmed concession, and terminal
   winner/draw presentation,
@@ -149,6 +150,10 @@ abilities, then click those permanents in the order you want to activate them;
 multi-color sources ask which exact mana to add. Choose the spell again after
 floating mana. Manual mode controls source activation order while the server
 still validates the pool and may complete a routine remaining payment.
+Before that mana is spent, priority is passed, or the window otherwise changes,
+click the same tapped source again (or its **Undo mana** control) to remove the
+exact mana it produced and untap it. Activations with sacrifice, life payment,
+restricted mana, or another side effect are intentionally not reversible.
 Rules-created mana tokens are handled by the same path without requiring a
 Scryfall printing. For example, Treasure offers only the five legal color
 outputs and its tap/sacrifice costs are paid before mana is added; Auto-mana
@@ -162,6 +167,13 @@ then enters and renders using the chosen land face. Client labels and drag
 gestures never create legality; they invoke the same server-issued action IDs
 as the ordinary action tray.
 
+Additive basic-land-type effects use effective layer-4 characteristics rather
+than printed card names. Under Urborg, Tomb of Yawgmoth, for example, Darksteel
+Citadel keeps its Artifact/Land types, indestructible text, and colorless mana
+ability while also receiving the intrinsic Swamp black-mana ability. The same
+generic compiler/runtime path covers exact equivalent wording for every basic
+land type.
+
 Browser games expose every priority capability to the owning tab. **Auto-pass**
 is on by default and submits an ordinary replayable pass command only when the
 current capability contains no meaningful nonmana action. It never skips a
@@ -172,8 +184,9 @@ stack empty, the ordinary pass action reads **Continue to combat** in precombat
 main and **End turn** in postcombat main, so a meaningful main-phase action is
 never erased by automation.
 
-Commander combat damage is displayed separately by source commander on every
-public player board. **Concede game** is a server-issued action with an explicit
+Commander combat damage is always displayed separately by source commander on
+every public player board, including an explicit zero before any is dealt.
+**Concede game** is a server-issued action with an explicit
 confirmation; cancelling it does nothing, while acceptance follows the same
 transaction, persistence, projection, and replay path as any other command.
 When a winner or draw is authoritative, both seats receive a terminal banner,
@@ -793,18 +806,26 @@ Represented combat, semantic, and mana-result damage use one typed transaction
 with fixed quantity replacement and fixed prevention components. Final dealt
 components now become immutable affected-subject result trees before atomic
 mutation. Generic effective-keyword dispatch covers represented Infect,
-Wither, Lifelink, and fixed Toxic outcomes; bounded source-pinned handlers
-cover fixed life-gain multiplication and a whole-result life floor. Persistent
-prevention shields, redirection, non-damage transformations, dynamic Toxic,
-unrepresented ability grants/source LKI, remaining result-replacement
-families, universal draw/entry replacement participation, broad CR
-614/615/616 closure, layer dependencies, and state-derived modifiers remain
+Wither, Lifelink, and fixed Toxic outcomes. Damage source snapshots preserve
+represented keyword LKI across zone and control changes, and canonical typed
+life/counter owners validate the whole result batch before mutation. Stable
+physical commander designations—not Oracle IDs—own Commander-damage ledgers.
+The replacement model is split into deep-immutable model, applicability, typed
+operation, ordering, and strict replay modules. Generic compilation now covers
+those four keywords plus a closed family of static double-damage and fixed-
+prevention wording; bounded handlers cover fixed life-gain multiplication and
+a whole-result life floor. Persistent prevention shields, redirection,
+non-damage transformations, unresolved dynamic Toxic values, remaining result-
+replacement families, universal draw/entry replacement participation, broad
+CR 614/615/616 closure, layer dependencies, and state-derived modifiers remain
 unsupported.
 
-Runtime trust and governance are now explicit. Capability registry v9 consumes
-a generated evidence index whose fully qualified tests, rules, profiles, and
-evidence classes are validated in CI. Dependency fail-closed status and killed
-implementation mutation status are separate. CardPrograms report one trust
+Runtime trust and governance are now explicit. Capability registry v10 consumes
+a generated evidence index whose fully qualified tests, current rules,
+profiles, and evidence classes are validated in CI. Every trusted capability
+requires positive, negative, replay, and killed-mutation evidence regardless of
+an author's declaration, plus a resolvable component and dependency checks.
+CardPrograms report one trust
 basis plus intrinsic, format, match, and dynamic closure; reviewed semantic
 packs remain an identified compatibility path rather than being described as
 capability-closed. Strict binding includes registered handler/component
@@ -813,8 +834,9 @@ dependencies and exact registry/evidence fingerprints.
 The complete Commander format-capability inventory is not yet present, so
 capability-only strict match readiness fails closed while reviewed declared-pool
 compatibility remains available. The dependency scheduler is integrated; the
-damage-result boundary is the active branch, and the next dependency-ready
-batch is the bounded CR 210.1 Battle defense-characteristic/entry family.
+damage-result/Commander/replacement hardening is the active branch, and the
+next dependency-ready batch is persistent damage-prevention shields and typed
+redirection.
 Broad rules or Oracle expansion does not bypass these typed boundaries.
 
 This is still not a completeness declaration. Current exact, partial,

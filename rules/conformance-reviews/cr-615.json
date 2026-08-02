@@ -41,9 +41,9 @@
       "executable_test_ids": [
         "tests.test_rules_primitives.PreventionEffectTests.test_prevention_applies_only_to_matching_damage_events",
         "tests.test_rules_primitives.PreventionEffectTests.test_prevention_produces_a_modified_damage_event",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_static_prevention_applies_to_each_simultaneous_event",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_fixed_prevention_applies_per_controller",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_protection_prevents_player_and_colored_permanent_damage"
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_static_prevention_applies_to_each_simultaneous_event",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_fixed_prevention_applies_per_controller",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_protection_prevents_player_and_colored_permanent_damage"
       ],
       "required_scenarios": [
         "positive",
@@ -334,9 +334,9 @@
       ],
       "executable_test_ids": [
         "tests.test_rules_primitives.PreventionEffectTests.test_static_prevention_applies_separately_to_each_event",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_prevention_to_zero_ends_the_damage_replacement_event",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_static_prevention_applies_to_each_simultaneous_event",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_fixed_prevention_applies_per_controller"
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_prevention_to_zero_ends_the_damage_replacement_event",
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_static_prevention_applies_to_each_simultaneous_event",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_fixed_prevention_applies_per_controller"
       ],
       "required_scenarios": [
         "positive",
@@ -392,7 +392,7 @@
       ],
       "executable_test_ids": [
         "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_unpreventable_damage_applies_prevention_without_reducing_damage"
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_unpreventable_damage_applies_prevention_without_reducing_damage"
       ],
       "required_scenarios": [
         "positive",
@@ -428,7 +428,7 @@
       ],
       "executable_test_ids": [
         "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_unpreventable_damage_applies_prevention_without_reducing_damage"
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_unpreventable_damage_applies_prevention_without_reducing_damage"
       ],
       "required_scenarios": [
         "positive",

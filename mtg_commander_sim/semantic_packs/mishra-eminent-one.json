@@ -27,9 +27,19 @@
       "event": "step.begin",
       "effects": [
         {
-          "op": "create_warform",
+          "op": "create_modified_token_copy",
           "controller": "$controller",
-          "card": "$target.0"
+          "card": "$target.0",
+          "name": "Mishra's Warform",
+          "characteristics": {
+            "name": "Mishra's Warform",
+            "type_line": "Artifact Creature — Construct",
+            "power": "4",
+            "toughness": "4",
+            "mana_value": 0
+          },
+          "temporary_keywords": ["Haste"],
+          "sacrifice_on_controller_end_step": true
         }
       ],
       "target_schema": {

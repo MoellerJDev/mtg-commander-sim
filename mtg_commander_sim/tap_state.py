@@ -44,6 +44,8 @@ def set_permanent_tapped(
     actor: str,
     tapped: bool,
     reason: str,
+    revert: bool = False,
+    log: bool = True,
 ) -> str:
     """Commit one validated tap-state intent through authoritative state."""
 
@@ -51,13 +53,16 @@ def set_permanent_tapped(
     if tapped:
         changed = not card.tapped
         card.tapped = True
+    elif revert:
+        changed = card.tapped
+        card.tapped = False
     else:
         changed = host._untap_permanent(
             card,
             actor=actor,
             reason=reason,
         )
-    if changed:
+    if changed and log:
         operation = "tap" if tapped else "untap"
         host._log(
             actor,

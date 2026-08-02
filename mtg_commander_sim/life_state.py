@@ -1,0 +1,169 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Protocol, Sequence
+
+from .state_planner import (
+    apply_state_plan,
+    commit_state_plan,
+    plan_state_changes,
+    validate_state_plan,
+)
+
+
+class LifeStateError(ValueError):
+    """A typed life-total change cannot be planned or committed exactly."""
+
+
+class LifeStateHost(Protocol):
+    state: Any
+
+
+@dataclass(frozen=True, slots=True)
+class LifeChange:
+    player: str
+    amount: int
+
+    def __post_init__(self) -> None:
+        if not self.player:
+            raise LifeStateError("Life changes require a player")
+        if type(self.amount) is not int:
+            raise LifeStateError("Life change amounts must be integers")
+
+
+@dataclass(frozen=True, slots=True)
+class LifeTransition:
+    player: str
+    requested_delta: int
+    before: int
+    after: int
+
+
+@dataclass(frozen=True, slots=True)
+class LifeStatePlan:
+    transitions: tuple[LifeTransition, ...]
+
+    @property
+    def changed_players(self) -> tuple[str, ...]:
+        return tuple(
+            sorted(
+                {
+                    transition.player
+                    for transition in self.transitions
+                    if transition.before != transition.after
+                }
+            )
+        )
+
+
+def _current_life(host: LifeStateHost, player: str) -> int:
+    state = host.state.players.get(player)
+    if state is None or player not in host.state.active_seats():
+        raise LifeStateError("Life-change player is not active")
+    return int(state.life)
+
+
+class _LifeAdapter:
+    @staticmethod
+    def validate_change(change: LifeChange) -> None:
+        if not isinstance(change, LifeChange):
+            raise LifeStateError("Life plans require typed changes")
+
+    @staticmethod
+    def key(change: LifeChange) -> str:
+        return change.player
+
+    @staticmethod
+    def current_value(host: LifeStateHost, change: LifeChange) -> int:
+        return _current_life(host, change.player)
+
+    @staticmethod
+    def next_value(before: int, change: LifeChange) -> int:
+        return before + change.amount
+
+    @staticmethod
+    def transition(
+        change: LifeChange, *, before: int, after: int
+    ) -> LifeTransition:
+        return LifeTransition(change.player, change.amount, before, after)
+
+    @staticmethod
+    def change_from_transition(transition: LifeTransition) -> LifeChange:
+        return LifeChange(transition.player, transition.requested_delta)
+
+    @staticmethod
+    def transition_before(transition: LifeTransition) -> int:
+        return transition.before
+
+    @staticmethod
+    def transition_after(transition: LifeTransition) -> int:
+        return transition.after
+
+    @staticmethod
+    def validate_transition(transition: LifeTransition) -> None:
+        if not isinstance(transition, LifeTransition):
+            raise LifeStateError("Life commits require typed transitions")
+        if transition.after != transition.before + transition.requested_delta:
+            raise LifeStateError("Life transition arithmetic is invalid")
+
+    @staticmethod
+    def apply_final(host: LifeStateHost, transition: LifeTransition) -> None:
+        host.state.players[transition.player].life = transition.after
+
+
+_LIFE_ADAPTER = _LifeAdapter()
+
+
+def _life_planner_error(error: ValueError) -> LifeStateError:
+    if str(error) == "State plan is stale":
+        return LifeStateError("Life plan is stale")
+    if str(error) == "State plan changed before commit":
+        return LifeStateError("Life plan changed before commit")
+    return LifeStateError(str(error))
+
+
+def plan_life_changes(
+    host: LifeStateHost,
+    changes: Sequence[LifeChange],
+) -> LifeStatePlan:
+    """Validate and aggregate a simultaneous life-change batch."""
+
+    return LifeStatePlan(plan_state_changes(host, changes, _LIFE_ADAPTER))
+
+
+def validate_life_changes(host: LifeStateHost, plan: LifeStatePlan) -> None:
+    """Fail before mutation if any planned life total is stale."""
+
+    if not isinstance(plan, LifeStatePlan):
+        raise LifeStateError("Life commits require a typed plan")
+    try:
+        validate_state_plan(host, plan.transitions, _LIFE_ADAPTER)
+    except ValueError as exc:
+        if isinstance(exc, LifeStateError):
+            raise
+        raise _life_planner_error(exc) from exc
+
+
+def apply_life_changes(
+    host: LifeStateHost,
+    plan: LifeStatePlan,
+) -> tuple[LifeTransition, ...]:
+    """Apply a life plan after the caller completed precommit validation."""
+
+    return apply_state_plan(host, plan.transitions, _LIFE_ADAPTER)
+
+
+def commit_life_changes(
+    host: LifeStateHost,
+    plan: LifeStatePlan,
+) -> tuple[LifeTransition, ...]:
+    """Validate and commit one typed life-total batch."""
+
+    if not isinstance(plan, LifeStatePlan):
+        raise LifeStateError("Life commits require a typed plan")
+    try:
+        return commit_state_plan(host, plan.transitions, _LIFE_ADAPTER)
+    except ValueError as exc:
+        if isinstance(exc, LifeStateError):
+            raise
+        raise _life_planner_error(exc) from exc

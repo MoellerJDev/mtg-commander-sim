@@ -28,10 +28,12 @@ ownership and therefore requires an explicit architecture decision.
 
 ## Decision
 
-`replacement_effects.py` owns immutable replaceable events, affected-subject
-facts, nested event trees, entry reservations, simultaneous event batches,
-APNAP traversal, exact selection journals, and seat-safe choice projections.
-It remains independent of game state, card data, transport, and the browser.
+`replacement/` owns immutable replaceable events, affected-subject facts,
+nested event trees, typed operations, applicability, entry reservations,
+simultaneous event batches, APNAP traversal, strict replay, exact selection
+journals, and seat-safe choice projections. `replacement_effects.py` remains a
+narrow compatibility facade. The package is independent of game state, card
+data, transport, and the browser.
 
 Runtime components compile source-pinned token and zone-change descriptors into
 generic `ReplacementEffect` values. The engine discovers currently active,

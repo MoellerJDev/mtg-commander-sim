@@ -85,20 +85,14 @@ remain blocked.
 
 ## Corpus result
 
-The complete pinned Oracle census kept exact cards and material residuals
-unchanged while recognizing the newly represented keyword dependency rather
-than leaving it as an unknown static ability. In the full corpus, partial rose
-by 27 and unresolved fell by 27; in the Commander-legal subset, partial rose by
-21 and unresolved fell by 21. Exact-card and material-residual deltas are both
-zero because the keyword contracts deliberately remain partial until
-continuous grants/removals and source LKI are certified.
-
-The same snapshot contains 49 Infect, 27 Wither, 419 Lifelink, and 48 Toxic
-Oracle IDs; the Commander-legal subset contains 46, 26, 357, and 37. The
-CardProgram exact counts remain in the generated
-[compiler coverage report](../COMPILER_COVERAGE_STATUS.md) and the tracked
-`coverage/card-program-coverage*.json` snapshots. Those measurements are not
-a claim that the new keyword cards are fully trusted.
+The complete pinned census now binds Infect, Wither, Lifelink, and fixed Toxic
+nodes to trusted fine-grained result capabilities. It also recognizes a closed
+whole-line grammar for static double-damage and fixed-prevention effects and
+lowers those cards to typed runtime handlers. Commander-legal exact Oracle
+objects rise from 338 to 403, trusted CardPrograms from 359 to 403, and material
+residuals fall from 61,213 to 60,793. The generated
+[compiler coverage report](../COMPILER_COVERAGE_STATUS.md) is authoritative;
+these gains do not imply complete damage, prevention, or Oracle coverage.
 
 ## Choice, privacy, and replay
 
@@ -118,12 +112,15 @@ enclosing mana-payment continuation cannot yet resume safely.
 The next damage/prevention work must add persistent shield ownership and
 consumption, allocation/division, redirection, non-damage transformations,
 remaining result-replacement families, excess-damage selection, complete
-source LKI/continuous ability closure, and resumable choices during mana
+dynamic characteristic closure, and resumable choices during mana
 payment. Broader Oracle lowering must compile those families into typed
 descriptors before their capabilities can be promoted.
 
-Primary assurance lives in `test_damage_replacement_pipeline.py`, with legacy
-result regressions in the state-action, combat, monarch, mana, and turn-history
-test modules and focused mutants in
+Primary assurance is split across `test_damage_replacement_model.py`,
+`test_damage_replacement_multiplayer.py`, and
+`test_damage_replacement_integration.py`, with immutable-model hardening in
+`test_replacement_model_hardening.py`, physical designation coverage in
+`test_commander_damage_identity.py`, legacy result regressions in the state-
+action, combat, monarch, mana, and turn-history modules, and focused mutants in
 `test_capability_implementation_mutations.py` and the focused CR 120.3/120.4c
 witnesses in `test_damage_result_events.py`.

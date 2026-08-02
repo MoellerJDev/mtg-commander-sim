@@ -585,10 +585,21 @@
       },
       "effects": [
         {
-          "op": "scute_swarm_token",
+          "op": "create_token_copy_if_controlled_count",
           "controller": "$controller",
-          "source": "$source",
+          "copy_of": "$source",
+          "copy_name": "Scute Swarm",
+          "required_type": "land",
           "threshold": 6,
+          "fallback_token": {
+            "name": "Insect",
+            "characteristics": {
+              "type_line": "Token Creature — Insect",
+              "colors": ["G"],
+              "power": "1",
+              "toughness": "1"
+            }
+          },
           "reason": "Scute Swarm"
         }
       ],

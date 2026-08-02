@@ -14,7 +14,7 @@ test("automatic passing accepts only pass, concede, and bare mana actions", () =
 });
 
 test("automatic passing stops for every meaningful action category", () => {
-  for (const action of ["play_land", "cast", "activate", "choose", "attack", "block"]) {
+  for (const action of ["play_land", "cast", "activate", "undo_mana", "choose", "attack", "block"]) {
     assert.equal(
       findSafeAutoPass([{ action: "pass" }, { action }]),
       null,

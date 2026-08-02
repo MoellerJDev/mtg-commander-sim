@@ -248,7 +248,7 @@ class ReplacementOrderingTests(unittest.TestCase):
     def setUp(self):
         self.event = ReplaceableEvent(
             event_id="event:1",
-            kind="zone_change",
+            kind="zone.change",
             affected_player="A",
             payload={
                 "card": "A01",
@@ -269,7 +269,7 @@ class ReplacementOrderingTests(unittest.TestCase):
         return ReplacementEffect(
             effect_id=effect_id,
             source_id=f"source:{effect_id}",
-            event_kind="zone_change",
+            event_kind="zone.change",
             replacement_class=replacement_class,
             conditions=conditions or {},
             operations=(
@@ -380,23 +380,16 @@ class ReplacementOrderingTests(unittest.TestCase):
             "prohibit",
         ):
             with self.subTest(operation=operation):
-                effect = ReplacementEffect(
-                    effect_id=operation,
-                    source_id=f"source:{operation}",
-                    event_kind="zone_change",
-                    replacement_class=ReplacementClass.OTHER,
-                    operations=({"op": operation},),
-                )
-                choice = replacement_choice(self.event, [effect])
-
                 with self.assertRaisesRegex(
                     ReplacementEffectError,
                     "Unsupported replacement operation",
                 ):
-                    apply_replacement(
-                        choice,
-                        [effect],
-                        operation,
+                    ReplacementEffect(
+                        effect_id=operation,
+                        source_id=f"source:{operation}",
+                        event_kind="zone.change",
+                        replacement_class=ReplacementClass.OTHER,
+                        operations=({"op": operation},),
                     )
 
     def test_affected_player_chooses_from_current_priority_class(self):
@@ -581,7 +574,7 @@ class ReplacementOrderingTests(unittest.TestCase):
         nested = ReplacementEffect(
             effect_id="nested",
             source_id="source:nested",
-            event_kind="zone_change",
+            event_kind="zone.change",
             replacement_class=ReplacementClass.OTHER,
             operations=(
                 {
@@ -789,7 +782,7 @@ class PreventionEffectTests(unittest.TestCase):
                 {"op": "prevent", "amount": 2},
                 {
                     "op": "set",
-                    "field": "additional_effect",
+                    "field": "prevented_by",
                     "value": "applied",
                 },
             )
@@ -804,20 +797,17 @@ class PreventionEffectTests(unittest.TestCase):
         self.assertEqual(3, changed.payload["amount"])
         self.assertEqual(0, changed.payload["prevented"])
         self.assertEqual(
-            "applied", changed.payload["additional_effect"]
+            "applied", changed.payload["prevented_by"]
         )
         self.assertEqual(("prevent",), changed.applied_effects)
         self.assertIsNone(replacement_choice(changed, [prevention]))
 
     def test_negative_prevention_amount_fails_closed(self):
-        prevention = self.prevention(amount=-1)
-        choice = replacement_choice(self.event(), [prevention])
-
         with self.assertRaisesRegex(
             ReplacementEffectError,
-            "cannot be negative",
+            "at least 0",
         ):
-            apply_replacement(choice, [prevention], "prevent")
+            self.prevention(amount=-1)
 
     def test_negative_damage_amount_fails_closed_in_prevention(self):
         prevention = self.prevention(amount=1)

@@ -2,7 +2,7 @@
 title: "Compiler coverage status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "40241e6a7a4e77a3dab3df93c6a726b0f82186fb"
+verified: "6c09dab765e615610f697a7a850bb6502093f0a0"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -13,10 +13,10 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Current representation
 
-- Compiler: `oracle-ir-v12`
+- Compiler: `oracle-ir-v14`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
-- Compiler module: 1,830 physical / 1,761 logical lines
+- Compiler module: 1,760 physical / 1,694 logical lines
 
 ## Canonical CardProgram
 
@@ -48,45 +48,46 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/9`
+- Registry schema/version: `1/10`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `a6e6ebd5829f0fe651e7dc92fb5766139b7512a94b46f1b3cebda82f1a98666a`
-- Evidence fingerprint: `eae850177f1f2c5c9054ba36db9e8c832ab0b9b7660bfbb7faca249796bfa013`
-- Explicit evidence declarations: 176
-- Capability records: 29
-- Trusted records: 16
+- Registry fingerprint: `98a0fcf85c1405d31f13625f8bed606f4bdbc3b4d5989e3e238e1f3f555ecded`
+- Evidence fingerprint: `9d1adb96c436d99c941842acc3cfce530cb56b485782612cd02c7199bc8076c2`
+- Explicit evidence declarations: 195
+- Capability records: 31
+- Trusted records: 18
 - Blocked records: 4
-- Dependency fail-closed statuses: `{"not_applicable": 11, "not_run": 3, "passed": 15}`
-- Implementation mutation statuses: `{"killed": 20, "not_run": 9}`
+- Dependency fail-closed statuses: `{"not_applicable": 12, "not_run": 3, "passed": 16}`
+- Implementation mutation statuses: `{"killed": 22, "not_run": 9}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
 | `cr-121-drawing-a-card` | 1 | false | `zone.draw.library_to_hand` |
 | `cr-120-damage` | 18 | false | `damage.combat.excess`, `damage.prevention.order`, `damage.replacement.order`, `damage.trigger.noncombat` |
 | `cr-725-the-monarch` | 1 | false | `variant.monarch.designate` |
+| `cr-903-commander` | 1 | true | none |
 | `cr-111-tokens` | 1 | false | `token.creation.additional_replacement` |
 | `cr-614-replacement-effects` | 1 | false | `zone.change.destination_replacement` |
-| `cr-613-continuous-effects` | 1 | false | `continuous.power_toughness.fixed_anthem` |
+| `cr-613-continuous-effects` | 2 | false | `continuous.power_toughness.fixed_anthem` |
 | `tap-and-untap` | 3 | false | `permanent.tap.effect`, `permanent.untap.all_creatures`, `permanent.untap.effect` |
 
 ## Pinned corpus accounting
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,484 | 2,959 | 16,119 | 19,406 | 69,890 | false |
-| Commander legal | 31,623 | 338 | 14,684 | 16,601 | 61,213 | false |
+| Full Oracle | 38,485 | 3,046 | 16,050 | 19,389 | 69,413 | false |
+| Commander legal | 31,623 | 406 | 14,631 | 16,586 | 60,790 | false |
 
 ## Full-corpus residual kinds
 
 | Kind | Count |
 |---|---:|
-| `dependency_contract` | 19,817 |
+| `dependency_contract` | 19,364 |
 | `trigger` | 15,247 |
-| `static_ability` | 12,102 |
-| `spell_effect` | 11,392 |
+| `static_ability` | 12,090 |
+| `spell_effect` | 11,391 |
 | `effect` | 7,350 |
 | `cost` | 2,009 |
-| `replacement_effect` | 1,792 |
+| `replacement_effect` | 1,781 |
 | `declaration_restriction` | 170 |
 | `declaration_cost` | 11 |
 
@@ -97,16 +98,16 @@ This generated report describes only the pinned Oracle corpus and current compil
 - Unique program keys: 253
 - Duplicate keys resolved by pack order: 12
 - Unique Oracle IDs represented: 143
-- Card-specific operation names: 15
+- Card-specific operation names: 6
 - Typed card-override boundary present: true
 - Explicit typed overrides: 0
 
 ## Snapshot fingerprints
 
-- Oracle SHA-256: `34d43820bb1b85be99267367969396c81a0bc387061dbd00882d1e78a5e84aa9`
-- Rulings SHA-256: `edabb33f1354d577f4a337c182f1093519b3499e71cec304f7474e7b362c0537`
-- Oracle updated: `2026-07-31T21:03:00.228+00:00`
-- Rulings updated: `2026-07-31T21:00:39.181+00:00`
+- Oracle SHA-256: `47be914ae0e54bbf63b285c065b4eb823a5f42927dcff6a404c0023ca870fba0`
+- Rulings SHA-256: `6e0f7b8e73981df2da7d91329c1904e68a33c0269ec655d29484379beb3b725e`
+- Oracle updated: `2026-08-02T09:02:31.886+00:00`
+- Rulings updated: `2026-08-02T09:00:36.367+00:00`
 
 ## Boundary
 

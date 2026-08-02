@@ -1,0 +1,859 @@
+from __future__ import annotations
+
+import copy
+import random
+from typing import Any
+
+from ..counter_placement import CounterPlacementError, place_counters_on_refs
+from ..counter_state import (
+    CounterChange,
+    CounterStateError,
+    commit_counter_changes,
+    plan_counter_changes,
+)
+from ..errors import GameRuleError
+from ..effect_runtime import dispatch_effect
+from ..life_state import (
+    LifeChange,
+    LifeStateError,
+    commit_life_changes,
+    plan_life_changes,
+)
+from ..replacement.immutable import thaw_value
+from ..semantic_runtime import (
+    AddManaIntent,
+    AddSubtypeIntent,
+    AmassIntent,
+    ChooseOneRestBottomRandomIntent,
+    CopyControlledTokensIntent,
+    CopyStackItemIntent,
+    CounterStackIntent,
+    CreateTokenIntent,
+    DomainEffectIntent,
+    EliminatePlayersIntent,
+    LifeChangeIntent,
+    MoveLibraryCardsToBottomIntent,
+    MoveObjectsSimultaneouslyIntent,
+    PayLifeIntent,
+    PayManaCostIntent,
+    PlaceCountersIntent,
+    ProliferateIntent,
+    RecordChoiceIntent,
+    RecordZoneMoveIntent,
+    ReorderLibraryTopIntent,
+    RetargetStackItemIntent,
+    ReturnCardsToLibraryTopIntent,
+    RevealLibraryCardsIntent,
+    SetCardDesignationIntent,
+    ShuffleLibraryIntent,
+    ZoneMoveIntent,
+)
+from ..util import unique_preserving_order
+
+
+class SemanticChoiceIntentHostMixin:
+    def apply_domain_effect_intent(self, intent: DomainEffectIntent) -> Any:
+        try:
+            effect = thaw_value(intent.effect)
+            return dispatch_effect(
+                self,
+                effect,
+                actor=intent.actor,
+                operation=intent.operation,
+                reason=intent.reason,
+            )
+        except KeyError as exc:
+            raise GameRuleError(
+                f"Malformed {intent.operation!r} effect: missing {exc.args[0]!r}"
+            ) from exc
+
+    def apply_mana_intent(self, intent: AddManaIntent) -> int:
+        return int(
+            dispatch_effect(
+                self,
+                {
+                    "op": "mana",
+                    "player": intent.player,
+                    "color": intent.color,
+                    "amount": intent.amount,
+                },
+                actor=intent.actor,
+                operation="mana",
+                reason=intent.reason,
+            )
+        )
+
+    def set_card_designation_intent(
+        self,
+        intent: SetCardDesignationIntent,
+    ) -> str:
+        card = self._resolve_object(intent.actor, intent.object_ref)
+        annotation_key = intent.designation
+        card.annotations[annotation_key] = intent.value
+        event_code = (
+            "card.name.chosen"
+            if annotation_key == "chosen_name"
+            else "creature_type.chosen"
+        )
+        detail_key = (
+            "card_name"
+            if annotation_key == "chosen_name"
+            else "creature_type"
+        )
+        self._log(
+            intent.actor,
+            event_code,
+            f"{intent.actor} chose {intent.value} for {card.ref}.",
+            {
+                "source": card.ref,
+                detail_key: intent.value,
+                "reason": intent.reason,
+            },
+            importance=2,
+            changed_objects=[card.object_id],
+        )
+        return intent.value
+
+    def record_choice_intent(self, intent: RecordChoiceIntent) -> None:
+        changed_objects = [
+            card.object_id
+            for ref in intent.changed_object_refs
+            for card in [
+                next(
+                    (
+                        candidate
+                        for candidate in self.state.cards.values()
+                        if candidate.ref == ref
+                    ),
+                    None,
+                )
+            ]
+            if card is not None
+        ]
+        self._log(
+            intent.actor,
+            intent.event_code,
+            intent.message,
+            dict(intent.details),
+            importance=intent.importance,
+            visibility=intent.visibility,
+            changed_objects=changed_objects,
+            changed_players=intent.changed_players,
+        )
+
+    def move_object_intent(self, intent: ZoneMoveIntent) -> str:
+        try:
+            card = self._resolve_object(
+                intent.actor,
+                intent.object_ref,
+                zones=set(intent.expected_zones),
+                owned_only=intent.owned_only,
+                controlled_only=intent.controlled_only,
+            )
+        except GameRuleError:
+            if intent.optional_if_missing:
+                return ""
+            raise
+        types, _, _ = self._type_parts(
+            str(self._effective_card_data(card).get("type_line") or "")
+        )
+        if any(required not in types for required in intent.required_types):
+            raise GameRuleError(
+                "The selected object no longer has the required card type"
+            )
+        tapped: bool | None = None
+        if intent.tapped_policy == "land_entry":
+            record = self.card_record(card)
+            if record is None or not record.is_land:
+                raise GameRuleError("Land-entry movement requires a land card")
+            tapped = self._land_enters_tapped(intent.actor, record)
+        elif intent.tapped_policy == "tapped":
+            tapped = True
+        elif intent.tapped_policy == "untapped":
+            tapped = False
+        self.move_card(
+            card.object_id,
+            intent.destination,
+            controller=intent.new_controller,
+            tapped=tapped,
+            reason=intent.reason,
+            semantic_events=intent.semantic_events,
+        )
+        return card.ref
+
+    def move_objects_simultaneously_intent(
+        self,
+        intent: MoveObjectsSimultaneouslyIntent,
+    ) -> tuple[str, ...]:
+        cards = tuple(
+            self._resolve_object(
+                intent.actor,
+                ref,
+                zones=set(intent.expected_zones),
+                owned_only=intent.owned_only,
+                controlled_only=intent.controlled_only,
+            )
+            for ref in intent.object_refs
+        )
+        self._move_cards_simultaneously(
+            [
+                (card.object_id, intent.destination)
+                for card in cards
+            ],
+            reason=intent.reason,
+            log=False,
+        )
+        return tuple(card.ref for card in cards)
+
+    def choose_one_rest_bottom_random_intent(
+        self,
+        intent: ChooseOneRestBottomRandomIntent,
+    ) -> tuple[str, ...]:
+        if intent.chosen_ref not in intent.looked_refs:
+            raise GameRuleError("Chosen card was not in the looked-at set")
+        library = self.state.players[intent.player].zones["library"]
+        cards = tuple(
+            self._resolve_object(
+                intent.actor,
+                ref,
+                zones={"library"},
+                owned_only=True,
+            )
+            for ref in intent.looked_refs
+        )
+        if any(card.object_id not in library for card in cards):
+            raise GameRuleError("A looked-at card left the library")
+        chosen = next(
+            card for card in cards if card.ref == intent.chosen_ref
+        )
+        for card in cards:
+            if card is not chosen:
+                library.remove(card.object_id)
+        self.move_card(
+            chosen.object_id,
+            "hand",
+            reason=intent.reason,
+            log=False,
+        )
+        bottom = [
+            card.object_id for card in cards if card is not chosen
+        ]
+        random.Random(
+            f"{self.state.config.seed}|{intent.player}|fomori-vault|"
+            f"{self.state.event_sequence}|{intent.source_stack_ref}"
+        ).shuffle(bottom)
+        library[0:0] = bottom
+        for object_id in bottom:
+            card = self.state.cards[object_id]
+            card.known_to = [intent.player]
+            card.revealed_to = []
+        self._log(
+            intent.actor,
+            intent.event_code,
+            (
+                f"{intent.player} put one looked-at card into hand and "
+                f"{len(bottom)} on the bottom at random."
+            ),
+            {
+                "chosen": chosen.ref,
+                "bottom_count": len(bottom),
+                "looked_count": len(cards),
+            },
+            visibility=[intent.player, "analyst"],
+            importance=2,
+            changed_objects=[card.object_id for card in cards],
+            changed_players=[intent.player],
+        )
+        return tuple(card.ref for card in cards)
+
+    def shuffle_library_intent(self, intent: ShuffleLibraryIntent) -> None:
+        self.shuffle_library(intent.player, reason=intent.reason)
+
+    def return_cards_to_library_top_intent(
+        self,
+        intent: ReturnCardsToLibraryTopIntent,
+    ) -> tuple[str, ...]:
+        cards = [
+            self._resolve_object(
+                intent.actor,
+                ref,
+                zones={"hand"},
+                owned_only=True,
+            )
+            for ref in intent.refs_top_first
+        ]
+        for card in reversed(cards):
+            self.move_card(
+                card.object_id,
+                "library",
+                position="top",
+                reason=intent.reason,
+                log=False,
+            )
+        return tuple(card.ref for card in cards)
+
+    def record_zone_move_intent(self, intent: RecordZoneMoveIntent) -> None:
+        card = self._resolve_object(intent.actor, intent.object_ref)
+        details = dict(intent.details)
+        if details.pop("include_tapped_state", False):
+            details["tapped"] = card.tapped
+        self._log(
+            intent.actor,
+            intent.event_code,
+            intent.message,
+            details,
+            importance=intent.importance,
+            changed_objects=[card.object_id],
+            changed_players=(
+                [intent.changed_player]
+                if intent.changed_player is not None
+                else []
+            ),
+        )
+
+    def apply_life_change_intent(self, intent: LifeChangeIntent) -> int:
+        try:
+            plan = plan_life_changes(
+                self,
+                (LifeChange(player=intent.player, amount=intent.amount),),
+            )
+            commit_life_changes(self, plan)
+        except LifeStateError as exc:
+            raise GameRuleError(str(exc)) from exc
+        self._log(
+            intent.actor,
+            "effect.life",
+            f"{intent.player}'s life changed by {intent.amount}.",
+            {
+                "player": intent.player,
+                "delta": intent.amount,
+                "reason": intent.reason,
+            },
+            importance=1,
+            changed_players=[intent.player],
+        )
+        return self.state.players[intent.player].life
+
+    def pay_life_intent(self, intent: PayLifeIntent) -> int:
+        if intent.amount < 0:
+            raise GameRuleError("Life payments cannot be negative")
+        player = self.state.players[intent.player]
+        if player.life < intent.amount:
+            raise GameRuleError("The life payment is no longer payable")
+        player.life -= intent.amount
+        self._log(
+            intent.actor,
+            "life.pay",
+            f"{intent.player} paid {intent.amount} life.",
+            {
+                "player": intent.player,
+                "amount": intent.amount,
+                "reason": intent.reason,
+            },
+            importance=1,
+            changed_players=[intent.player],
+        )
+        return player.life
+
+    def reveal_library_cards_intent(
+        self,
+        intent: RevealLibraryCardsIntent,
+    ) -> tuple[str, ...]:
+        self._require_seat(intent.player, in_game=True)
+        self._require_seat(intent.viewer, in_game=True)
+        library = self.state.players[intent.player].zones["library"]
+        refs = tuple(intent.refs_top_first)
+        current = tuple(
+            self.state.cards[object_id].ref
+            for object_id in reversed(library[-len(refs) :])
+        ) if refs else ()
+        if current != refs:
+            raise GameRuleError("The inspected library top changed")
+        object_ids: list[str] = []
+        for ref in refs:
+            card = self._resolve_object(
+                intent.viewer,
+                ref,
+                zones={"library"},
+                owned_only=(intent.viewer == intent.player),
+            )
+            viewers = set(self.seats) if intent.public else {intent.viewer}
+            card.known_to = sorted(set(card.known_to).union(viewers))
+            if intent.public:
+                card.revealed_to = sorted(
+                    set(card.revealed_to).union(viewers)
+                )
+            object_ids.append(card.object_id)
+        self._log(
+            intent.actor,
+            "library.look",
+            (
+                f"{intent.viewer} looked at the top {len(refs)} card(s) "
+                f"of {intent.player}'s library."
+            ),
+            {"player": intent.player, "count": len(refs)},
+            visibility=(
+                None
+                if intent.public
+                else [intent.viewer, "analyst"]
+            ),
+            importance=1,
+            changed_objects=object_ids,
+        )
+        return refs
+
+    def move_library_cards_to_bottom_intent(
+        self,
+        intent: MoveLibraryCardsToBottomIntent,
+    ) -> tuple[str, ...]:
+        library = self.state.players[intent.player].zones["library"]
+        object_ids: list[str] = []
+        for ref in intent.refs:
+            card = self._resolve_object(
+                intent.actor,
+                ref,
+                zones={"library"},
+                owned_only=True,
+            )
+            if card.object_id not in library:
+                raise GameRuleError(
+                    "A scry card left the library before the choice"
+                )
+            library.remove(card.object_id)
+            object_ids.append(card.object_id)
+        for object_id in reversed(object_ids):
+            library.insert(0, object_id)
+        self._log(
+            intent.actor,
+            "library.scry",
+            f"{intent.actor} put {len(object_ids)} card(s) on the bottom.",
+            {
+                "count": intent.looked_count,
+                "bottom_count": len(object_ids),
+            },
+            visibility=[intent.actor, "analyst"],
+            importance=1,
+            changed_objects=object_ids,
+        )
+        return intent.refs
+
+    def reorder_library_top_intent(
+        self,
+        intent: ReorderLibraryTopIntent,
+    ) -> tuple[str, ...]:
+        ids = [
+            self._resolve_object(
+                intent.viewer,
+                ref,
+                zones={"library"},
+            ).object_id
+            for ref in intent.refs_top_first
+        ]
+        library = self.state.players[intent.player].zones["library"]
+        current_top = (
+            list(reversed(library[-len(ids) :])) if ids else []
+        )
+        if (
+            len(ids) != len(set(ids))
+            or set(ids) != set(current_top)
+            or any(
+                intent.viewer not in self.state.cards[object_id].known_to
+                for object_id in ids
+            )
+        ):
+            raise GameRuleError(
+                "Can only reorder the exact known cards currently on top"
+            )
+        for object_id in ids:
+            library.remove(object_id)
+        library.extend(reversed(ids))
+        self._log(
+            intent.actor,
+            "library.reorder",
+            f"{intent.viewer} reordered {len(ids)} known top cards.",
+            {"count": len(ids)},
+            visibility=[intent.viewer, "analyst"],
+            importance=1,
+            changed_objects=ids,
+        )
+        return intent.refs_top_first
+
+    def pay_mana_cost_intent(self, intent: PayManaCostIntent) -> None:
+        requirements = self._mana_vector(dict(intent.requirements))
+        if not self._cost_is_affordable(intent.player, requirements):
+            raise GameRuleError("The optional payment is no longer payable")
+        self._pay_for_cost(
+            intent.player,
+            requirements,
+            {"pay": "auto"},
+        )
+        changed_objects: list[str] = []
+        if intent.changed_object_ref:
+            card = self._resolve_object(intent.actor, intent.changed_object_ref)
+            changed_objects.append(card.object_id)
+        self._log(
+            intent.actor,
+            intent.event_code,
+            intent.message,
+            dict(intent.details),
+            importance=2,
+            changed_objects=changed_objects,
+            changed_players=[intent.player],
+        )
+
+    def place_counters_intent(
+        self,
+        intent: PlaceCountersIntent,
+    ) -> tuple[str, ...]:
+        try:
+            results = place_counters_on_refs(
+                self,
+                actor=intent.actor,
+                object_refs=intent.object_refs,
+                counter_name=intent.counter_name,
+                amount=intent.amount,
+                reason=intent.reason,
+                source_ref=intent.source_ref,
+            )
+        except CounterPlacementError as exc:
+            raise GameRuleError(str(exc)) from exc
+        return tuple(
+            self.state.cards[result.object_id].ref for result in results
+        )
+
+    def counter_stack_intent(self, intent: CounterStackIntent) -> None:
+        if any(item.ref == intent.stack_ref for item in self.state.stack):
+            self._counter_stack_item(
+                intent.stack_ref,
+                reason=intent.reason,
+                countered_by=intent.countered_by,
+            )
+
+    def eliminate_players_intent(self, intent: EliminatePlayersIntent) -> None:
+        self._eliminate_players(list(intent.players), reason=intent.reason)
+
+    def copy_stack_item_intent(self, intent: CopyStackItemIntent) -> str:
+        target = next(
+            (
+                item
+                for item in self.state.stack
+                if item.ref == intent.target_stack_ref
+            ),
+            None,
+        )
+        if target is None:
+            raise GameRuleError(
+                "The stack object selected for copying no longer exists"
+            )
+        copied = self._copy_stack_item(
+            controller=intent.controller,
+            target=target,
+            targets=list(intent.targets),
+            target_groups=thaw_value(intent.target_groups),
+            reason=intent.reason,
+        )
+        return copied.ref
+
+    def retarget_stack_item_intent(
+        self,
+        intent: RetargetStackItemIntent,
+    ) -> str:
+        target = next(
+            (
+                item
+                for item in self.state.stack
+                if item.ref == intent.target_stack_ref
+            ),
+            None,
+        )
+        if target is None:
+            raise GameRuleError(
+                "The stack object selected for retargeting no longer exists"
+            )
+        target.targets = list(intent.targets)
+        target.context["target_groups"] = thaw_value(intent.target_groups)
+        target.context["target_snapshots"] = {
+            ref: self._target_snapshot(ref) for ref in intent.targets
+        }
+        target.context["targets_revalidated"] = False
+        self._log(
+            intent.actor,
+            "stack.retarget",
+            f"{intent.actor} chose targets for {target.ref}.",
+            {
+                "stack": target.ref,
+                "targets": list(intent.targets),
+                "source": intent.source_stack_ref,
+            },
+            importance=2,
+        )
+        return target.ref
+
+    def create_token_intent(
+        self,
+        intent: CreateTokenIntent,
+    ) -> tuple[str, ...]:
+        created_refs = tuple(
+            self.create_token(
+                intent.controller,
+                name=intent.name,
+                quantity=intent.quantity,
+                copy_of=intent.copy_of,
+                characteristics=thaw_value(intent.characteristics),
+                temporary_keywords=intent.temporary_keywords,
+                reason=intent.reason,
+            )
+        )
+        if not (
+            intent.sacrifice_at_end_step
+            or intent.sacrifice_on_controller_end_step
+        ):
+            return created_refs
+        for created_ref in created_refs:
+            created = self._resolve_object(
+                intent.actor,
+                created_ref,
+                zones={"battlefield"},
+                controlled_only=True,
+            )
+            condition: dict[str, Any] = {
+                "phase": "ending",
+                "step": "end_step",
+            }
+            if intent.sacrifice_on_controller_end_step:
+                condition["player"] = "controller"
+            self.schedule_delayed_trigger(
+                controller=intent.controller,
+                label=f"Sacrifice {created.ref}",
+                event_kind="step.begin",
+                condition=condition,
+                stack_template={
+                    "label": f"Sacrifice {created.ref}",
+                    "semantic_key": "builtin:sacrifice-source",
+                },
+                source_object_id=created.object_id,
+                once=True,
+            )
+        return created_refs
+
+    def copy_controlled_tokens_intent(
+        self,
+        intent: CopyControlledTokensIntent,
+    ) -> tuple[str, ...]:
+        original = self._resolve_object(
+            intent.actor,
+            intent.chosen_token_ref,
+            zones={"battlefield"},
+            controlled_only=True,
+        )
+        if not original.is_token:
+            raise GameRuleError("Token-copy choice requires a token")
+        characteristics = self._copyable_characteristics(original)
+        changed: list[str] = []
+        for object_id in tuple(
+            self.state.players[intent.controller].zones["battlefield"]
+        ):
+            token = self.state.cards[object_id]
+            if (
+                token.controller != intent.controller
+                or not token.is_token
+                or token.object_id == original.object_id
+            ):
+                continue
+            token.annotations["copy_overrides"] = copy.deepcopy(
+                characteristics
+            )
+            changed.append(token.object_id)
+        changed_refs = tuple(
+            self.state.cards[object_id].ref for object_id in changed
+        )
+        self._log(
+            intent.actor,
+            "token.copy_all",
+            (
+                f"{len(changed)} other token(s) became copies of "
+                f"{original.ref}."
+            ),
+            {
+                "source": intent.source_stack_ref,
+                "chosen_token": original.ref,
+                "objects": list(changed_refs),
+            },
+            importance=2,
+            changed_objects=changed,
+        )
+        return changed_refs
+
+    def apply_amass_intent(self, intent: AmassIntent) -> str:
+        army_ref = intent.army_ref
+        if army_ref is None:
+            created = self.create_token(
+                intent.controller,
+                name=f"{intent.subtype} Army",
+                characteristics={
+                    "type_line": (
+                        f"Token Creature — {intent.subtype} Army"
+                    ),
+                    "colors": ["B"],
+                    "power": "0",
+                    "toughness": "0",
+                },
+                reason=intent.reason,
+            )
+            if len(created) != 1:
+                raise GameRuleError("Amass must create exactly one Army")
+            army_ref = created[0]
+        self._apply_amass(
+            intent.controller,
+            army_ref,
+            subtype=intent.subtype,
+            amount=intent.amount,
+            reason=intent.reason,
+        )
+        return army_ref
+
+    def add_subtype_intent(self, intent: AddSubtypeIntent) -> str:
+        card = self._resolve_object(
+            intent.actor,
+            intent.object_ref,
+            zones={"battlefield"},
+        )
+        subtype = intent.subtype.strip().title()
+        if not subtype:
+            raise GameRuleError("Subtype changes require a subtype")
+        card.annotations["continuous_add_subtypes"] = (
+            unique_preserving_order(
+                [
+                    *list(
+                        card.annotations.get(
+                            "continuous_add_subtypes", []
+                        )
+                    ),
+                    subtype,
+                ]
+            )
+        )
+        self._log(
+            intent.actor,
+            "permanent.subtype",
+            f"{card.ref} became a {subtype} in addition to its other types.",
+            {
+                "object": card.ref,
+                "subtype": subtype,
+                "reason": intent.reason,
+            },
+            importance=1,
+            changed_objects=[card.object_id],
+        )
+        return card.ref
+
+    def proliferate_intent(self, intent: ProliferateIntent) -> None:
+        changed_objects: list[str] = []
+        changed_players: list[str] = []
+        for selection in intent.selections:
+            if selection in self.state.players:
+                player = self.state.players[selection]
+                changes = [
+                    CounterChange(
+                        subject_kind="player",
+                        subject_id=selection,
+                        counter_name=name,
+                        amount=1,
+                    )
+                    for name in ("poison", "energy")
+                    if int(getattr(player, name)) > 0
+                ]
+                if changes:
+                    try:
+                        commit_counter_changes(
+                            self,
+                            plan_counter_changes(self, changes),
+                        )
+                    except CounterStateError as exc:
+                        raise GameRuleError(str(exc)) from exc
+                    changed_players.append(selection)
+                continue
+            card = self._resolve_object(
+                intent.actor,
+                selection,
+                zones={"battlefield"},
+            )
+            for counter_name, amount in tuple(card.counters.items()):
+                if int(amount) <= 0:
+                    continue
+                self.place_counters_intent(
+                    PlaceCountersIntent(
+                        actor=intent.actor,
+                        object_refs=(card.ref,),
+                        counter_name=counter_name,
+                        amount=1,
+                        reason=intent.reason,
+                        source_ref=None,
+                    )
+                )
+            changed_objects.append(card.object_id)
+        self._log(
+            intent.actor,
+            "counter.proliferate",
+            f"{intent.actor} proliferated {len(intent.selections)} object(s).",
+            {"objects": list(intent.selections)},
+            importance=2,
+            changed_objects=changed_objects,
+            changed_players=changed_players,
+        )
+
+    def _apply_amass(
+        self,
+        seat: str,
+        army_ref: str,
+        *,
+        subtype: str,
+        amount: int,
+        reason: str,
+    ) -> None:
+        army = self._resolve_object(
+            seat,
+            army_ref,
+            zones={"battlefield"},
+            controlled_only=True,
+        )
+        _, subtypes, _ = self._type_parts(
+            str(self._effective_card_data(army).get("type_line") or "")
+        )
+        if "army" not in subtypes:
+            raise GameRuleError("Amass requires an Army creature")
+        normalized_subtype = subtype.strip().title()
+        if normalized_subtype.casefold() not in subtypes:
+            self.add_subtype_intent(
+                AddSubtypeIntent(
+                    actor=seat,
+                    object_ref=army.ref,
+                    subtype=normalized_subtype,
+                    reason=reason,
+                )
+            )
+        if amount:
+            self.place_counters_intent(
+                PlaceCountersIntent(
+                    actor=seat,
+                    object_refs=(army.ref,),
+                    counter_name="+1/+1",
+                    amount=amount,
+                    reason=reason,
+                    source_ref=None,
+                )
+            )
+        self._log(
+            seat,
+            "keyword.amass",
+            f"{seat} amassed {normalized_subtype}s {amount} onto {army.ref}.",
+            {
+                "army": army.ref,
+                "subtype": normalized_subtype,
+                "amount": amount,
+                "reason": reason,
+            },
+            importance=2,
+            changed_objects=[army.object_id],
+        )
+

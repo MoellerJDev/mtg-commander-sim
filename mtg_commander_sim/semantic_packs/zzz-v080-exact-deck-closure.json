@@ -1373,7 +1373,7 @@
       },
       "effects": [
         {
-          "op": "animate_dead_prepare",
+          "op": "prepare_graveyard_creature_aura",
           "aura": "$card",
           "card": "$target.0"
         }
@@ -1406,8 +1406,10 @@
       "event": "permanent.enter.self",
       "effects": [
         {
-          "op": "animate_dead_reanimate",
-          "aura": "$source"
+          "op": "reanimate_attached_creature_aura",
+          "aura": "$source",
+          "link_annotation": "animate_dead_creature",
+          "event_code": "animate_dead.reanimate"
         }
       ],
       "trust_level": "trusted",
@@ -2558,7 +2560,14 @@
       "ability_id": "ability:ab3",
       "active_zone": "battlefield",
       "event": "activate",
-      "effects": [{"op": "create_daretti_emblem"}],
+      "effects": [{
+        "op": "create_emblem",
+        "controller": "$controller",
+        "abilities": ["Whenever an artifact is put into your graveyard from the battlefield, return that card to the battlefield at the beginning of the next end step."],
+        "display_label": "Daretti, Scrap Savant emblem",
+        "semantic_key": "builtin:daretti-emblem",
+        "stats_counter": "daretti_emblems"
+      }],
       "trust_level": "trusted",
       "coverage": ["activated_ability", "loyalty_cost", "emblem", "triggered_ability", "delayed_trigger"],
       "tests": ["test_daretti_loyalty_exchange_and_emblem_return"],
@@ -2604,7 +2613,13 @@
           {"id": "seat_d", "zones": ["battlefield"], "categories": ["permanent"], "creature": true, "controller_seat": "D", "min": 0, "max": 1}
         ]
       },
-      "effects": [{"op": "demonic_junker_resolve", "source": "$source", "cards": "$targets"}],
+      "effects": [{
+        "op": "destroy_selected_and_reward_source",
+        "source": "$source",
+        "cards": "$targets",
+        "counter": "+1/+1",
+        "counter_amount": 2
+      }],
       "trust_level": "trusted",
       "coverage": ["triggered_ability", "enters_trigger", "per_player_optional_targets", "simultaneous_destroy", "conditional_counters"],
       "tests": ["test_demonic_junker_targets_per_player_and_crews"],
@@ -2767,7 +2782,7 @@
       "ability_id": "trigger:chapter-1",
       "active_zone": "battlefield",
       "event": "saga.chapter.1",
-      "effects": [{"op": "grant_urzas_saga_chapter", "source": "$source", "chapter": 1}],
+      "effects": [{"op": "grant_ability_marker", "source": "$source", "marker": "urzas_saga_chapter_1"}],
       "trust_level": "trusted",
       "coverage": ["static_ability", "saga_chapter", "lore_counter", "granted_mana_ability"],
       "tests": ["test_urzas_saga_chapters_construct_search_and_sacrifice"],
@@ -2785,7 +2800,7 @@
       "ability_id": "trigger:chapter-2",
       "active_zone": "battlefield",
       "event": "saga.chapter.2",
-      "effects": [{"op": "grant_urzas_saga_chapter", "source": "$source", "chapter": 2}],
+      "effects": [{"op": "grant_ability_marker", "source": "$source", "marker": "urzas_saga_chapter_2"}],
       "trust_level": "trusted",
       "coverage": ["static_ability", "saga_chapter", "lore_counter", "granted_activated_ability"],
       "tests": ["test_urzas_saga_chapters_construct_search_and_sacrifice"],

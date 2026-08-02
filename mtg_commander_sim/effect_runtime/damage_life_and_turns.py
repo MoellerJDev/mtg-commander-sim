@@ -1,0 +1,897 @@
+from __future__ import annotations
+
+from typing import Any, Mapping
+
+from ..damage import DamageError, damage_proposal, resolve_damage_batch
+from ..errors import GameRuleError
+from ..effect_contracts import effect_family_contract
+from ..semantic_runtime.intents import PlaceCountersIntent
+
+
+OPERATIONS = effect_family_contract("damage-life-and-turns.v1").operations
+
+
+def _apply_damage(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    target = str(effect["target"])
+    amount = int(effect.get("amount", 0))
+    if amount < 0:
+        raise GameRuleError("Damage cannot be negative")
+    if amount == 0:
+        return 0
+    try:
+        proposal = damage_proposal(
+            host,
+            proposal_id=(
+                f"damage.effect:{host.state.revision}:"
+                f"{host.state.event_sequence + 1}:0"
+            ),
+            actor=actor,
+            source_ref=(
+                str(effect["source"])
+                if effect.get("source") is not None
+                else None
+            ),
+            target=target,
+            amount=amount,
+            combat=False,
+            reason=reason,
+            unpreventable=bool(effect.get("unpreventable", False)),
+            deathtouch=bool(effect.get("deathtouch", False)),
+        )
+        result = resolve_damage_batch(
+            host,
+            (proposal,),
+            replacement_selections=tuple(
+                effect.get("_replacement_selections") or ()
+            ),
+        )
+    except DamageError as exc:
+        raise GameRuleError(str(exc)) from exc
+    event = result.events[0]
+    host._log(
+        actor,
+        (
+            "effect.damage"
+            if event.was_dealt
+            else "effect.damage.prevented"
+        ),
+        (
+            f"{event.target} took {event.dealt_amount} damage."
+            if event.was_dealt
+            else f"Damage to {event.target} was prevented."
+        ),
+        {
+            "source": event.source,
+            "target": event.target,
+            "assigned_amount": event.assigned_amount,
+            "amount": event.dealt_amount,
+            "prevented_amount": event.prevented_amount,
+            "reason": reason,
+            "applied_effects": list(event.applied_effects),
+            "damage_event": event.semantic_context(),
+        },
+        importance=2,
+        changed_objects=result.changed_objects,
+        changed_players=result.changed_players,
+    )
+    return event.dealt_amount
+
+
+
+def _apply_damage_each_opponent(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    amount = int(effect.get("amount", 0))
+    if amount < 0:
+        raise GameRuleError("Damage cannot be negative")
+    if amount == 0:
+        return 0
+    opponents = [
+        seat
+        for seat in host.active_seats
+        if seat != actor
+    ]
+    try:
+        proposals = tuple(
+            damage_proposal(
+                host,
+                proposal_id=(
+                    f"damage.effect:{host.state.revision}:"
+                    f"{host.state.event_sequence + 1}:{index}"
+                ),
+                actor=actor,
+                source_ref=(
+                    str(effect["source"])
+                    if effect.get("source") is not None
+                    else None
+                ),
+                target=opponent,
+                amount=amount,
+                combat=False,
+                reason=reason,
+                unpreventable=bool(
+                    effect.get("unpreventable", False)
+                ),
+            )
+            for index, opponent in enumerate(opponents)
+        )
+        result = resolve_damage_batch(
+            host,
+            proposals,
+            replacement_selections=tuple(
+                effect.get("_replacement_selections") or ()
+            ),
+        )
+    except DamageError as exc:
+        raise GameRuleError(str(exc)) from exc
+    host._log(
+        actor,
+        "effect.damage",
+        f"Each opponent of {actor} was dealt damage.",
+        {
+            "opponents": opponents,
+            "assigned_amount": amount,
+            "dealt_amount": result.dealt_amount,
+            "reason": reason,
+            "damage_events": [
+                event.semantic_context() for event in result.events
+            ],
+        },
+        importance=2,
+        changed_players=result.changed_players,
+    )
+    return result.dealt_amount
+
+
+
+def _apply_life(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    seat = str(effect.get("player") or actor)
+    delta = int(effect.get("delta", 0))
+    host.state.players[seat].life += delta
+    host._log(actor, "effect.life", f"{seat}'s life changed by {delta}.", {"player": seat, "delta": delta}, importance=1, changed_players=[seat])
+    return host.state.players[seat].life
+
+
+
+def _apply_lose_life(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    seat = str(effect.get("player") or actor)
+    amount = max(0, int(effect.get("amount", 0)))
+    host.state.players[seat].life -= amount
+    host._log(
+        actor,
+        "effect.life",
+        f"{seat} lost {amount} life.",
+        {"player": seat, "delta": -amount},
+        importance=1,
+        changed_players=[seat],
+    )
+    return host.state.players[seat].life
+
+
+
+def _apply_lose_life_each_opponent(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    amount = max(0, int(effect.get("amount", 0)))
+    opponents = [
+        seat
+        for seat in host.active_seats
+        if seat != actor
+    ]
+    for opponent in opponents:
+        host.state.players[opponent].life -= amount
+    host._log(
+        actor,
+        "effect.life",
+        f"Each opponent of {actor} lost {amount} life.",
+        {
+            "opponents": opponents,
+            "delta": -amount,
+            "reason": reason,
+        },
+        importance=2,
+        changed_players=opponents,
+    )
+    return amount
+
+
+
+def _apply_lose_life_equal_mana_value(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    seat = str(effect.get("player") or actor)
+    card = host._resolve_object(actor, str(effect["card"]))
+    record = host.card_record(card)
+    amount = int(record.mana_value if record else 0)
+    host.state.players[seat].life -= amount
+    host._log(
+        actor,
+        "effect.life",
+        f"{seat} lost {amount} life.",
+        {
+            "player": seat,
+            "delta": -amount,
+            "card": card.ref,
+        },
+        importance=1,
+        changed_players=[seat],
+    )
+    return host.state.players[seat].life
+
+
+
+def _apply_energy(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    seat = str(effect.get("player") or actor)
+    delta = int(effect.get("delta", 0))
+    host.state.players[seat].energy += delta
+    host._log(actor, "effect.energy", f"{seat}'s energy changed by {delta}.", {"player": seat, "delta": delta}, importance=1, changed_players=[seat])
+    return host.state.players[seat].energy
+
+
+
+def _apply_drain_opponent(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    target = str(effect["target"])
+    amount = int(effect.get("amount", 1))
+    if target not in host.active_seats or target == actor:
+        raise GameRuleError("Drain effect requires an active opponent")
+    host.state.players[target].life -= amount
+    host.state.players[actor].life += amount
+    host._log(
+        actor,
+        "effect.life",
+        f"{target} lost {amount} life and {actor} gained {amount}.",
+        {"player": target, "delta": -amount, "gained_by": actor},
+        importance=2,
+        changed_players=[actor, target],
+    )
+    return amount
+
+
+
+def _apply_drain_each_opponent(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    amount = int(effect.get("amount", 1))
+    opponents = [
+        seat
+        for seat in host.active_seats
+        if seat != actor
+    ]
+    for opponent in opponents:
+        host.state.players[opponent].life -= amount
+    host.state.players[actor].life += amount
+    host._log(
+        actor,
+        "effect.life",
+        f"Each opponent of {actor} lost {amount} life; "
+        f"{actor} gained {amount} life.",
+        {
+            "opponents": opponents,
+            "amount": amount,
+            "gained_by": actor,
+        },
+        importance=2,
+        changed_players=[actor, *opponents],
+    )
+    return amount
+
+
+
+def _apply_create_treasure(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    return host.create_token(
+        str(effect.get("controller") or actor),
+        name="Treasure",
+        characteristics={
+            "type_line": "Token Artifact — Treasure",
+            "oracle_text": "{T}, Sacrifice this token: Add one mana of any color.",
+        },
+        reason=reason,
+    )
+
+
+
+def _apply_create_modified_token_copy(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    controller = str(effect.get("controller") or actor)
+    created = host.create_token(
+        controller,
+        name=str(effect.get("name") or ""),
+        copy_of=str(effect["card"]),
+        characteristics=dict(effect.get("characteristics") or {}),
+        temporary_keywords=tuple(effect.get("temporary_keywords") or ()),
+        reason=reason,
+    )
+    if not effect.get("sacrifice_on_controller_end_step"):
+        return created
+    for ref in created:
+        token = host._resolve_object(
+            actor, ref, zones={"battlefield"}, controlled_only=True
+        )
+        host.schedule_delayed_trigger(
+            controller=controller,
+            label=f"Sacrifice {token.ref}",
+            event_kind="step.begin",
+            condition={
+                "phase": "ending",
+                "step": "end_step",
+                "player": "$controller",
+            },
+            stack_template={
+                "label": f"Sacrifice {token.ref}",
+                "semantic_key": "builtin:sacrifice-source",
+            },
+            source_object_id=token.object_id,
+            once=True,
+        )
+    return created
+
+
+
+def _apply_create_token_if_distinct_controlled_names(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    required_type = str(effect.get("required_type") or "land").casefold()
+    names = {
+        host.display_name(object_id)
+        for object_id in host.state.players[actor].zones["battlefield"]
+        if host.state.cards[object_id].controller == actor
+        and host.card_record(object_id)
+        and required_type
+        in host._type_parts(
+            str(host._effective_card_data(object_id).get("type_line") or "")
+        )[0]
+    }
+    if len(names) < int(effect.get("minimum_distinct_names", 1)):
+        return []
+    token = dict(effect.get("token") or {})
+    return host.create_token(
+        str(effect.get("controller") or actor),
+        name=str(token.get("name") or ""),
+        quantity=int(token.get("quantity", 1)),
+        characteristics=dict(token.get("characteristics") or {}),
+        reason=reason,
+    )
+
+
+
+def _apply_create_token_copy_if_controlled_count(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    controller = str(effect.get("controller") or actor)
+    required_type = str(effect.get("required_type") or "land").casefold()
+    count = sum(
+        1
+        for object_id in host.state.players[
+            controller
+        ].zones["battlefield"]
+        if host.state.cards[object_id].controller == controller
+        and required_type
+        in host._type_parts(
+            str(
+                host._effective_card_data(object_id).get(
+                    "type_line"
+                )
+                or ""
+            )
+        )[0]
+    )
+    if count >= int(effect.get("threshold", 1)):
+        return host.create_token(
+            controller,
+            name=str(effect.get("copy_name") or ""),
+            copy_of=str(effect["copy_of"]),
+            reason=reason,
+        )
+    fallback = dict(effect.get("fallback_token") or {})
+    return host.create_token(
+        controller,
+        name=str(fallback.get("name") or ""),
+        quantity=int(fallback.get("quantity", 1)),
+        characteristics=dict(fallback.get("characteristics") or {}),
+        reason=reason,
+    )
+
+
+
+def _apply_counter_or_destroy_blue(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    target = str(effect["target"])
+    stack_item = next(
+        (
+            candidate
+            for candidate in host.state.stack
+            if candidate.ref == target
+        ),
+        None,
+    )
+    if stack_item is not None:
+        if not stack_item.card_object_id:
+            return None
+        record = host.card_record(stack_item.card_object_id)
+        if not record or "U" not in record.colors:
+            return None
+        return host._counter_stack_item(
+            target,
+            reason="Red/Pyroblast semantic",
+            countered_by=actor,
+        ).ref
+    try:
+        card = host._resolve_object(
+            actor, target, zones={"battlefield"}
+        )
+    except GameRuleError:
+        return None
+    record = host.card_record(card)
+    if not record or "U" not in record.colors:
+        return None
+    host.move_card(
+        card.object_id,
+        "graveyard",
+        reason="Red/Pyroblast semantic",
+        semantic_events=True,
+    )
+    return card.ref
+
+
+
+def _apply_sacrifice_if_present(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    value = effect.get("card")
+    if not value:
+        return None
+    try:
+        card = host._resolve_object(
+            actor, str(value), zones={"battlefield"}
+        )
+    except GameRuleError:
+        return None
+    host.move_card(
+        card.object_id,
+        "graveyard",
+        reason=reason,
+        semantic_events=True,
+    )
+    return card.ref
+
+
+
+def _apply_counter_stack(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    return host._counter_stack_item(
+        str(effect["stack"]),
+        destination=str(effect.get("destination") or "graveyard"),
+        reason=reason,
+        countered_by=actor,
+    ).ref
+
+
+
+def _apply_extra_turn(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    return host.schedule_extra_turn(str(effect.get("player") or actor), source=str(effect.get("source") or reason)).turn_id
+
+
+
+def _apply_control_next_turn(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    target = str(effect.get("player") or "")
+    if target not in host.active_seats:
+        raise GameRuleError(
+            "Turn-control effect requires an active player"
+        )
+    host.state.players[target].stats[
+        "next_turn_controlled_by"
+    ] = actor
+    host._log(
+        actor,
+        "turn.control.scheduled",
+        (
+            f"{actor} will control {target} during that "
+            "player's next turn."
+        ),
+        {
+            "controller": actor,
+            "player": target,
+            "reason": reason,
+        },
+        importance=3,
+        changed_players=[actor, target],
+    )
+    return target
+
+
+
+def _apply_protection_from_everything_until_next_turn(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    seat = str(effect.get("player") or actor)
+    host._require_seat(seat, in_game=True)
+    host.state.players[seat].stats[
+        "protection_from_everything_until_next_turn"
+    ] = True
+    host._log(
+        actor,
+        "player.protection",
+        (
+            f"{seat} gained protection from everything until "
+            "their next turn."
+        ),
+        {
+            "player": seat,
+            "duration": "until_next_turn",
+            "reason": reason,
+        },
+        importance=2,
+        changed_players=[seat],
+    )
+    return seat
+
+
+
+def _apply_end_turn(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    host._end_turn_now(actor=actor, reason=reason)
+    return None
+
+
+
+def _apply_create_emblem(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    controller = str(effect.get("controller") or actor)
+    result = host.create_emblem(
+        controller,
+        abilities=tuple(str(value) for value in effect.get("abilities") or ()),
+        display_label=str(effect.get("display_label") or "Emblem"),
+        semantic_key=str(effect.get("semantic_key") or ""),
+        reason=reason,
+    )
+    stats_counter = str(effect.get("stats_counter") or "")
+    if stats_counter:
+        player = host.state.players[controller]
+        player.stats[stats_counter] = (
+            int(player.stats.get(stats_counter, 0)) + 1
+        )
+    return result
+
+
+
+def _apply_grant_ability_marker(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    source = host._resolve_object(
+        actor,
+        str(effect.get("source") or ""),
+        zones={"battlefield"},
+        controlled_only=True,
+    )
+    marker = str(effect.get("marker") or "").strip()
+    if not marker:
+        raise GameRuleError("Ability markers require a stable marker")
+    source.annotations[marker] = True
+    host._log(
+        actor,
+        "saga.ability.gained",
+        f"{source.ref} gained an ability marker.",
+        {
+            "source": source.ref,
+            "marker": marker,
+            "reason": reason,
+        },
+        importance=2,
+        changed_objects=[source.object_id],
+        changed_players=[actor],
+    )
+    return marker
+
+
+
+def _apply_return_transformed(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    source = host._resolve_object(
+        actor,
+        str(effect.get("card") or effect.get("source") or ""),
+        zones={"exile"},
+    )
+    record = host.card_record(source)
+    if record is None or len(record.faces) < 2:
+        raise GameRuleError(
+            "Return transformed requires a transforming card"
+        )
+    host.move_card(
+        source.object_id,
+        "battlefield",
+        controller=source.owner,
+        enter_face=str(record.faces[1].get("name") or ""),
+        reason=reason,
+        semantic_events=True,
+    )
+    return source.ref
+
+
+
+def _apply_destroy_selected_and_reward_source(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    op = operation
+    source = host._resolve_object(
+        actor,
+        str(effect.get("source") or ""),
+    )
+    changes: list[tuple[str, str]] = []
+    destroyed_controlled = False
+    for raw_ref in effect.get("cards") or []:
+        if raw_ref is None:
+            continue
+        try:
+            creature = host._resolve_object(
+                actor,
+                str(raw_ref),
+                zones={"battlefield"},
+            )
+        except GameRuleError:
+            continue
+        types, _, _ = host._type_parts(
+            str(
+                host._effective_card_data(creature).get(
+                    "type_line"
+                )
+                or ""
+            )
+        )
+        keywords = {
+            str(value).casefold()
+            for value in host._effective_card_data(creature).get(
+                "keywords", []
+            )
+        }
+        if (
+            "creature" not in types
+            or "indestructible" in keywords
+        ):
+            continue
+        destroyed_controlled = (
+            destroyed_controlled
+            or creature.controller == actor
+        )
+        changes.append((creature.object_id, "graveyard"))
+    if changes:
+        host._move_cards_simultaneously(
+            changes,
+            reason=reason,
+            log=True,
+        )
+    if (
+        destroyed_controlled
+        and source.zone == "battlefield"
+        and source.controller == actor
+    ):
+        counter_name = str(effect.get("counter") or "+1/+1")
+        counter_amount = int(effect.get("counter_amount", 0))
+        host.place_counters_intent(
+            PlaceCountersIntent(
+                actor=actor,
+                object_refs=(source.ref,),
+                counter_name=counter_name,
+                amount=counter_amount,
+                reason=reason,
+                source_ref=source.ref,
+            )
+        )
+    return [
+        host.state.cards[object_id].ref
+        for object_id, _ in changes
+    ]
+
+
+HANDLERS = {
+    'control_next_turn': _apply_control_next_turn,
+    'counter_or_destroy_blue': _apply_counter_or_destroy_blue,
+    'counter_stack': _apply_counter_stack,
+    'create_emblem': _apply_create_emblem,
+    'create_treasure': _apply_create_treasure,
+    'create_modified_token_copy': _apply_create_modified_token_copy,
+    'create_token_copy_if_controlled_count': _apply_create_token_copy_if_controlled_count,
+    'create_token_if_distinct_controlled_names': _apply_create_token_if_distinct_controlled_names,
+    'damage': _apply_damage,
+    'damage_each_opponent': _apply_damage_each_opponent,
+    'destroy_selected_and_reward_source': _apply_destroy_selected_and_reward_source,
+    'drain_each_opponent': _apply_drain_each_opponent,
+    'drain_opponent': _apply_drain_opponent,
+    'end_turn': _apply_end_turn,
+    'energy': _apply_energy,
+    'extra_turn': _apply_extra_turn,
+    'grant_ability_marker': _apply_grant_ability_marker,
+    'life': _apply_life,
+    'lose_life': _apply_lose_life,
+    'lose_life_each_opponent': _apply_lose_life_each_opponent,
+    'lose_life_equal_mana_value': _apply_lose_life_equal_mana_value,
+    'protection_from_everything_until_next_turn': _apply_protection_from_everything_until_next_turn,
+    'return_transformed': _apply_return_transformed,
+    'sacrifice_if_present': _apply_sacrifice_if_present,
+}
+
+
+def apply_effect(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> Any:
+    handler = HANDLERS.get(operation)
+    if handler is None:
+        raise GameRuleError(
+            f"Unsupported owned effect {operation!r}"
+        )
+    return handler(
+        host,
+        effect,
+        actor=actor,
+        operation=operation,
+        reason=reason,
+    )

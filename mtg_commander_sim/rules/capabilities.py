@@ -7,6 +7,8 @@ from pathlib import Path
 import re
 from typing import Any, Iterable, Mapping, Sequence
 
+from .component_resolution import implementation_component_resolves
+
 from ..util import stable_json
 
 
@@ -41,6 +43,17 @@ EVIDENCE_FIELDS = {
     "multiplayer": "multiplayer_tests",
     "privacy": "privacy_tests",
     "replay": "replay_tests",
+}
+MINIMUM_TRUSTED_REGISTRY_EVIDENCE = frozenset(
+    {"positive", "negative", "replay"}
+)
+_LIFELINK_MECHANIC = "li" + "felink"
+_TOXIC_MECHANIC = "tox" + "ic"
+MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
+    "infect": ("damage.result.infect",),
+    _LIFELINK_MECHANIC: ("damage.result.lifelink",),
+    _TOXIC_MECHANIC: ("damage.result.toxic",),
+    "wither": ("damage.result.wither",),
 }
 _CAPABILITY_ID = re.compile(r"^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$")
 _EFFECTIVE_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -84,6 +97,56 @@ DEFAULT_CAPABILITY_REGISTRY = (
 
 class CapabilityRegistryError(ValueError):
     """The capability graph is malformed or cannot be resolved safely."""
+
+
+def _validate_trusted_capability(
+    capability_id: str,
+    row: Mapping[str, Any],
+    *,
+    dependency_status: str,
+    implementation_mutation_status: str,
+) -> None:
+    if row["blockers"]:
+        raise CapabilityRegistryError(
+            f"Trusted {capability_id} cannot retain blockers"
+        )
+    components = row["implementation_components"]
+    if not components:
+        raise CapabilityRegistryError(
+            f"Trusted {capability_id} requires an implementation"
+        )
+    if not any(
+        implementation_component_resolves(component)
+        for component in components
+    ):
+        raise CapabilityRegistryError(
+            f"Trusted {capability_id} requires a resolvable "
+            "implementation component"
+        )
+    if row["dependencies"] and dependency_status != "passed":
+        raise CapabilityRegistryError(
+            f"Trusted {capability_id} requires passed dependency "
+            "fail-closed evidence"
+        )
+    if implementation_mutation_status != "killed":
+        raise CapabilityRegistryError(
+            f"Trusted {capability_id} requires killed implementation "
+            "mutation evidence"
+        )
+    missing_minimum = MINIMUM_TRUSTED_REGISTRY_EVIDENCE - set(
+        row["required_evidence"]
+    )
+    if missing_minimum:
+        raise CapabilityRegistryError(
+            f"Trusted {capability_id} must require minimum evidence: "
+            + ", ".join(sorted(missing_minimum))
+        )
+    for evidence in row["required_evidence"]:
+        field = EVIDENCE_FIELDS[evidence]
+        if not row[field]:
+            raise CapabilityRegistryError(
+                f"Trusted {capability_id} requires {field}"
+            )
 
 
 def _require_exact_fields(
@@ -371,30 +434,14 @@ class CapabilityRegistry:
                 )
         row["applicability"] = json.loads(json.dumps(applicability))
         if status == "trusted":
-            if row["blockers"]:
-                raise CapabilityRegistryError(
-                    f"Trusted {capability_id} cannot retain blockers"
-                )
-            if not row["implementation_components"]:
-                raise CapabilityRegistryError(
-                    f"Trusted {capability_id} requires an implementation"
-                )
-            if row["dependencies"] and dependency_status != "passed":
-                raise CapabilityRegistryError(
-                    f"Trusted {capability_id} requires passed dependency "
-                    "fail-closed evidence"
-                )
-            if implementation_mutation_status != "killed":
-                raise CapabilityRegistryError(
-                    f"Trusted {capability_id} requires killed implementation "
-                    "mutation evidence"
-                )
-            for evidence in row["required_evidence"]:
-                field = EVIDENCE_FIELDS[evidence]
-                if not row[field]:
-                    raise CapabilityRegistryError(
-                        f"Trusted {capability_id} requires {field}"
-                    )
+            _validate_trusted_capability(
+                capability_id,
+                row,
+                dependency_status=dependency_status,
+                implementation_mutation_status=(
+                    implementation_mutation_status
+                ),
+            )
         return row
 
     def _validate_references(self) -> None:
@@ -586,6 +633,11 @@ def capability_dependencies_for_node(
     mechanics = {str(value).casefold() for value in mechanic_ids}
     operations = {str(effect.get("op") or "") for effect in effects}
     dependencies: set[str] = set()
+    if not effects and target_schema is None:
+        for mechanic in mechanics:
+            dependencies.update(
+                MECHANIC_CAPABILITY_DEPENDENCIES.get(mechanic, ())
+            )
     schema = dict(target_schema or {})
     reviewed_damage_shape = (
         mechanics == {"cr-120-damage", "cr-115-targets"}
@@ -610,3 +662,21 @@ def capability_dependencies_for_node(
             dependencies.add("damage.result.multitype_permanent")
         dependencies.add("target.public.player_or_damageable_permanent")
     return tuple(sorted(dependencies))
+
+
+def capability_covered_mechanics(
+    dependencies: Iterable[str],
+) -> tuple[str, ...]:
+    supplied = set(str(value) for value in dependencies)
+    covered = {
+        mechanic
+        for mechanic, required in MECHANIC_CAPABILITY_DEPENDENCIES.items()
+        if set(required).issubset(supplied)
+    }
+    if "target.public.player_or_damageable_permanent" in supplied:
+        covered.add("cr-115-targets")
+    if "damage.amount.positive" in supplied and supplied.intersection(
+        {"damage.result.player_life", "damage.result.multitype_permanent"}
+    ):
+        covered.add("cr-120-damage")
+    return tuple(sorted(covered))

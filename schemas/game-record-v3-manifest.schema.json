@@ -38,7 +38,11 @@
         "profile": {"enum": ["commander_duel", "commander_multiplayer"]},
         "starting_life": {"type": "integer", "minimum": 1},
         "free_mulligans": {"type": "integer", "minimum": 0},
-        "first_player_draws": {"type": "boolean"}
+        "first_player_draws": {"type": "boolean"},
+        "commander_damage_identity_version": {
+          "type": "integer",
+          "enum": [1, 2]
+        }
       },
       "additionalProperties": true
     },

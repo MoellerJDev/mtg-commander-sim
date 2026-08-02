@@ -464,6 +464,13 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
     await expect(opponent.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
     await expect(host.locator(".player-board")).toHaveCount(2);
     await expect(opponent.locator(".player-board")).toHaveCount(2);
+    await expect(host.getByTestId("commander-damage-A")).toContainText("0");
+    await expect(host.getByTestId("commander-damage-B")).toContainText("0");
+    await expect(host.getByTestId("hand-panel")).toHaveAttribute("data-resizable", "true");
+    expect(await host.getByTestId("hand-panel").evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { position: style.position, resize: style.resize };
+    })).toEqual({ position: "sticky", resize: "vertical" });
     await expect(host.getByTestId("auto-pass-toggle")).toHaveAttribute("aria-pressed", "true");
     await expect(host.getByTestId("auto-mana-toggle")).toHaveAttribute("aria-pressed", "true");
     await host.getByTestId("auto-pass-toggle").click();
@@ -579,6 +586,26 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
     await host.getByTestId("selected-card-actions").getByRole("button", { name: /^Play Swamp$/ }).click();
     await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeSwamp);
 
+    await host.getByTestId("auto-mana-toggle").click();
+    await expect(host.getByTestId("auto-mana-toggle")).toContainText("Manual mana on");
+    const battlefieldSwamp = host
+      .getByTestId("player-A")
+      .locator(".battlefield .table-card")
+      .filter({ has: host.locator(".card-copy strong", { hasText: /^Swamp$/ }) })
+      .first();
+    const beforeManualTap = await viewRevision(host);
+    await battlefieldSwamp.click();
+    await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeManualTap);
+    await expect(battlefieldSwamp).toHaveAttribute("data-tapped", "true");
+    await expect(host.getByTestId("player-A").locator(".zone-summary")).toContainText("B1");
+    const beforeManualUndo = await viewRevision(host);
+    await battlefieldSwamp.click();
+    await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeManualUndo);
+    await expect(battlefieldSwamp).toHaveAttribute("data-tapped", "false");
+    await expect(host.getByTestId("player-A").locator(".zone-summary")).not.toContainText("B1");
+    await host.getByTestId("auto-mana-toggle").click();
+    await expect(host.getByTestId("auto-mana-toggle")).toContainText("Auto-mana on");
+
     const ring = host
       .getByTestId("own-hand")
       .locator(".hand-card")
@@ -593,6 +620,8 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
     await expect(hostTappedLand).toHaveCount(1);
     await expect(opponentTappedLand).toHaveCount(1);
     await expect(hostTappedLand).toHaveAttribute("data-tapped", "true");
+    await expect(hostTappedLand.locator(".tapped-state")).toHaveText("TAPPED");
+    await expect(opponentTappedLand.locator(".tapped-state")).toHaveText("TAPPED");
     expect(await hostTappedLand.evaluate((element) => getComputedStyle(element).transform)).not.toBe("none");
 
     const offer = opponent
@@ -629,6 +658,10 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
 });
 
 test("a duel declares an attacker in the browser and applies commander combat damage", async ({ browser }) => {
+  // This journey crosses several auto-pass windows and normally finishes near
+  // the global 90-second limit on Windows. Preserve assertion-driven waits
+  // while leaving enough time for context cleanup under serial suite load.
+  test.setTimeout(180_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -708,7 +741,7 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
   // The deterministic game usually completes near three minutes after the
   // preceding serial journeys have warmed the shared runner. Keep enough
   // budget for terminal log assertions and context cleanup on slower hosts.
-  test.setTimeout(240_000);
+  test.setTimeout(300_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -742,7 +775,9 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       const land = name
         ? cards.filter({ has: page.locator(".card-copy strong", { hasText: new RegExp(`^${name}$`) }) }).first()
         : cards.first();
-      await expect(land).toHaveAttribute("draggable", "true");
+      await expect(land).toHaveAttribute("draggable", "true", {
+        timeout: 30_000,
+      });
       const revision = await viewRevision(page);
       await land.dragTo(page.getByTestId("own-battlefield"));
       await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);

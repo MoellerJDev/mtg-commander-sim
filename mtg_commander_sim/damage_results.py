@@ -3,6 +3,22 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Literal, Mapping, Protocol, Sequence
 
+from .counter_state import (
+    apply_counter_changes,
+    CounterChange,
+    CounterStateError,
+    CounterStatePlan,
+    plan_counter_changes,
+    validate_counter_changes,
+)
+from .life_state import (
+    apply_life_changes,
+    LifeChange,
+    LifeStateError,
+    LifeStatePlan,
+    plan_life_changes,
+    validate_life_changes,
+)
 from .replacement_effects import (
     AffectedObject,
     ReplaceableEvent,
@@ -70,16 +86,8 @@ class DamageResultRecord:
 
 
 @dataclass(frozen=True, slots=True)
-class _PlayerStatePlan:
-    player: str
-    life_after: int
-    poison_after: int
-
-
-@dataclass(frozen=True, slots=True)
 class _PermanentStatePlan:
     object_id: str
-    counters_after: tuple[tuple[str, int], ...]
     marked_damage_after: int
     deathtouch_damage_after: bool
     defeated_battle: bool
@@ -87,8 +95,9 @@ class _PermanentStatePlan:
 
 @dataclass(frozen=True, slots=True)
 class DamageResultCommitPlan:
-    players: tuple[_PlayerStatePlan, ...]
+    life: LifeStatePlan
     permanents: tuple[_PermanentStatePlan, ...]
+    counters: CounterStatePlan
     records: tuple[DamageResultRecord, ...]
     changed_players: tuple[str, ...]
     changed_objects: tuple[str, ...]
@@ -1105,53 +1114,105 @@ def _validate_counter_delta_conflicts(deltas: _CommitDeltas) -> None:
         )
 
 
-def _player_state_plans(
+def _life_state_plan(
     host: DamageResultHost, deltas: _CommitDeltas
-) -> tuple[_PlayerStatePlan, ...]:
-    plans: list[_PlayerStatePlan] = []
-    for player in sorted(set(deltas.player_life).union(deltas.player_poison)):
-        current = host.state.players[player]
-        poison_after = int(current.poison) + deltas.player_poison.get(player, 0)
-        if poison_after < 0:
-            raise DamageResultError("Poison counters cannot become negative")
-        plans.append(
-            _PlayerStatePlan(
-                player=player,
-                life_after=(
-                    int(current.life) + deltas.player_life.get(player, 0)
-                ),
-                poison_after=poison_after,
+) -> LifeStatePlan:
+    try:
+        return plan_life_changes(
+            host,
+            tuple(
+                LifeChange(player=player, amount=amount)
+                for player, amount in sorted(deltas.player_life.items())
+            ),
+        )
+    except LifeStateError as exc:
+        raise DamageResultError(str(exc)) from exc
+
+
+def _counter_state_plan(
+    host: DamageResultHost,
+    deltas: _CommitDeltas,
+) -> CounterStatePlan:
+    changes: list[CounterChange] = []
+    for player, amount in sorted(deltas.player_poison.items()):
+        changes.append(
+            CounterChange(
+                subject_kind="player",
+                subject_id=player,
+                counter_name="poison",
+                amount=amount,
             )
         )
-    return tuple(plans)
+    for (object_id, name), amount in sorted(
+        deltas.permanent_counter_remove.items()
+    ):
+        card = host.state.cards[object_id]
+        changes.append(
+            CounterChange(
+                subject_kind="permanent",
+                subject_id=object_id,
+                counter_name=name,
+                amount=-amount,
+                expected_zone="battlefield",
+                expected_logical_object_id=card.logical_object_id,
+            )
+        )
+    for (object_id, name), amount in sorted(
+        deltas.permanent_counter_add.items()
+    ):
+        card = host.state.cards[object_id]
+        changes.append(
+            CounterChange(
+                subject_kind="permanent",
+                subject_id=object_id,
+                counter_name=name,
+                amount=amount,
+                expected_zone="battlefield",
+                expected_logical_object_id=card.logical_object_id,
+            )
+        )
+    try:
+        return plan_counter_changes(host, tuple(changes))
+    except CounterStateError as exc:
+        raise DamageResultError(str(exc)) from exc
+
+
+def _counter_after(
+    plan: CounterStatePlan,
+    *,
+    subject_kind: str,
+    subject_id: str,
+    counter_name: str,
+    fallback: int,
+) -> int:
+    result = fallback
+    for transition in plan.transitions:
+        if (
+            transition.subject_kind == subject_kind
+            and transition.subject_id == subject_id
+            and transition.counter_name == counter_name
+        ):
+            result = transition.after
+    return result
 
 
 def _permanent_state_plan(
     host: DamageResultHost,
     object_id: str,
     deltas: _CommitDeltas,
+    counter_plan: CounterStatePlan,
 ) -> _PermanentStatePlan:
     card = host.state.cards[object_id]
-    counters = {
-        " ".join(str(name).casefold().split()): max(0, int(amount))
-        for name, amount in card.counters.items()
-        if int(amount) > 0
-    }
-    before_defense = counters.get("defense", 0)
-    for (target_id, name), amount in sorted(
-        deltas.permanent_counter_remove.items()
-    ):
-        if target_id == object_id:
-            counters[name] = max(0, counters.get(name, 0) - amount)
-    for (target_id, name), amount in sorted(
-        deltas.permanent_counter_add.items()
-    ):
-        if target_id == object_id:
-            counters[name] = counters.get(name, 0) + amount
-    counters = {name: amount for name, amount in counters.items() if amount}
+    before_defense = max(0, int(card.counters.get("defense", 0)))
+    after_defense = _counter_after(
+        counter_plan,
+        subject_kind="permanent",
+        subject_id=object_id,
+        counter_name="defense",
+        fallback=before_defense,
+    )
     return _PermanentStatePlan(
         object_id=object_id,
-        counters_after=tuple(sorted(counters.items())),
         marked_damage_after=(
             int(card.marked_damage) + deltas.permanent_mark.get(object_id, 0)
         ),
@@ -1160,21 +1221,21 @@ def _permanent_state_plan(
             or object_id in deltas.permanent_deathtouch
         ),
         defeated_battle=(
-            before_defense > 0 and counters.get("defense", 0) == 0
+            before_defense > 0 and after_defense == 0
         ),
     )
 
 
 def _permanent_state_plans(
-    host: DamageResultHost, deltas: _CommitDeltas
+    host: DamageResultHost,
+    deltas: _CommitDeltas,
+    counter_plan: CounterStatePlan,
 ) -> tuple[_PermanentStatePlan, ...]:
-    object_ids = {
-        object_id for object_id, _counter in deltas.permanent_counter_add
-    }.union(
-        object_id for object_id, _counter in deltas.permanent_counter_remove
-    ).union(deltas.permanent_mark).union(deltas.permanent_deathtouch)
+    object_ids = set(counter_plan.changed_objects).union(
+        deltas.permanent_mark
+    ).union(deltas.permanent_deathtouch)
     return tuple(
-        _permanent_state_plan(host, object_id, deltas)
+        _permanent_state_plan(host, object_id, deltas, counter_plan)
         for object_id in sorted(object_ids)
     )
 
@@ -1193,14 +1254,30 @@ def plan_damage_result_commit(
     for root in prepared.events:
         _accumulate_result_root(host, root, deltas)
     _validate_counter_delta_conflicts(deltas)
-    player_plans = _player_state_plans(host, deltas)
-    permanent_plans = _permanent_state_plans(host, deltas)
+    counter_plan = _counter_state_plan(host, deltas)
+    life_plan = _life_state_plan(host, deltas)
+    permanent_plans = _permanent_state_plans(
+        host, deltas, counter_plan
+    )
     return DamageResultCommitPlan(
-        players=player_plans,
+        life=life_plan,
         permanents=permanent_plans,
+        counters=counter_plan,
         records=tuple(deltas.records),
-        changed_players=tuple(plan.player for plan in player_plans),
-        changed_objects=tuple(plan.object_id for plan in permanent_plans),
+        changed_players=tuple(
+            sorted(
+                set(life_plan.changed_players).union(
+                    counter_plan.changed_players
+                )
+            )
+        ),
+        changed_objects=tuple(
+            sorted(
+                {plan.object_id for plan in permanent_plans}.union(
+                    counter_plan.changed_objects
+                )
+            )
+        ),
     )
 def commit_damage_result_plan(
     host: DamageResultHost,
@@ -1208,15 +1285,16 @@ def commit_damage_result_plan(
 ) -> DamageResultCommit:
     """Apply a fully validated result plan without rediscovery or choices."""
 
-    for player_plan in plan.players:
-        player = host.state.players[player_plan.player]
-        player.life = player_plan.life_after
-        player.poison = player_plan.poison_after
+    try:
+        validate_counter_changes(host, plan.counters)
+        validate_life_changes(host, plan.life)
+    except (CounterStateError, LifeStateError) as exc:
+        raise DamageResultError(str(exc)) from exc
+    apply_counter_changes(host, plan.counters)
+    apply_life_changes(host, plan.life)
     defeated: list[Any] = []
     for permanent_plan in plan.permanents:
         card = host.state.cards[permanent_plan.object_id]
-        card.counters.clear()
-        card.counters.update(dict(permanent_plan.counters_after))
         card.marked_damage = permanent_plan.marked_damage_after
         card.deathtouch_damage = permanent_plan.deathtouch_damage_after
         if permanent_plan.defeated_battle:

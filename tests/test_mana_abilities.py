@@ -2,11 +2,16 @@ from __future__ import annotations
 
 import json
 import unittest
+from types import SimpleNamespace
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim.abilities import parse_activated_abilities
 from mtg_commander_sim.engine import GameRuleError
+from mtg_commander_sim.mana_undo import (
+    available_mana_undo,
+    undo_mana_activation,
+)
 from mtg_commander_sim.model import StackItem
 
 
@@ -431,6 +436,87 @@ class ManaAbilityRuleTests(unittest.TestCase):
                 if ability.mana_ability
             ],
         )
+
+    def test_pure_manual_mana_activation_can_be_undone_in_same_window(self):
+        engine = self.make_engine(60508)
+        island = self.card(engine, "A", "Island")
+        engine.move_card(
+            island.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+        )
+        self.prepare_main(engine)
+        ability = engine._activated_abilities(island)[0]
+
+        engine._activate(
+            "A", {"source": island.ref, "ability": ability.ability_id}
+        )
+
+        self.assertTrue(island.tapped)
+        self.assertEqual(1, engine.state.players["A"].mana_pool["U"])
+        undo = next(
+            action
+            for action in engine._priority_action_hints("A")["actions"]
+            if action["action"] == "undo_mana"
+        )
+        self.assertEqual(island.ref, undo["source"])
+
+        undo_mana_activation(engine, "A", {"source": island.ref})
+
+        self.assertFalse(island.tapped)
+        self.assertEqual(0, engine.state.players["A"].mana_pool["U"])
+        self.assertIsNone(available_mana_undo(engine.state, "A"))
+
+    def test_passing_priority_closes_manual_mana_rollback_window(self):
+        engine = self.make_engine(60509)
+        island = self.card(engine, "A", "Island")
+        engine.move_card(
+            island.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+        )
+        self.prepare_main(engine)
+        ability = engine._activated_abilities(island)[0]
+        engine._activate(
+            "A", {"source": island.ref, "ability": ability.ability_id}
+        )
+        self.assertIsNotNone(available_mana_undo(engine.state, "A"))
+
+        engine._complete_priority(
+            SimpleNamespace(
+                actors=["A"],
+                responses={"A": {"action": "pass"}},
+            )
+        )
+
+        self.assertIsNone(available_mana_undo(engine.state, "A"))
+        self.assertTrue(island.tapped)
+        self.assertEqual(1, engine.state.players["A"].mana_pool["U"])
+
+    def test_mana_activation_with_side_effect_is_not_reversible(self):
+        engine = self.make_engine(60510)
+        elves = self.card(engine, "B", "Elves of Deep Shadow")
+        engine.move_card(
+            elves.object_id,
+            "battlefield",
+            controller="B",
+            log=False,
+        )
+        engine.state.players["B"].turns_begun = (
+            elves.acquired_control_turn_count + 1
+        )
+        self.prepare_main(engine, "B")
+        ability = next(
+            ability
+            for ability in engine._activated_abilities(elves)
+            if "Add {B}" in ability.effect_text
+        )
+        engine._activate(
+            "B", {"source": elves.ref, "ability": ability.ability_id}
+        )
+        self.assertIsNone(available_mana_undo(engine.state, "B"))
 
 
 if __name__ == "__main__":

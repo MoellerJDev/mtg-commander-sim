@@ -283,6 +283,7 @@ p { line-height: 1.65; }
 .card-tile.table-card.actionable:hover, .card-tile.table-card.actionable:focus-visible { transform: translateY(-3px) scale(1.04); }
 .card-tile.table-card.tapped.inspectable:hover, .card-tile.table-card.tapped.inspectable:focus-visible,
 .card-tile.table-card.tapped.actionable:hover, .card-tile.table-card.tapped.actionable:focus-visible { transform: rotate(90deg) scale(1.04); }
+.tapped-state { position: absolute; left: .28rem; bottom: .28rem; z-index: 3; padding: .16rem .28rem; border: 1px solid #d0a45d; border-radius: 4px; color: #fff0c8; background: rgb(54 36 14 / 94%); font: 800 .45rem var(--mono); letter-spacing: .06em; }
 .card-action-hint { position: absolute; top: .35rem; right: .35rem; z-index: 2; padding: .18rem .32rem; border-radius: 4px; color: #10200f; background: var(--accent); font: 800 .48rem var(--mono); letter-spacing: .08em; box-shadow: 0 2px 8px rgb(0 0 0 / 55%); }
 .card-tile.mana-source .card-action-hint { background: #f1c75d; }
 .battlefield.drop-target { border: 1px dashed #6f9f5b; border-radius: 7px; background: rgb(118 170 88 / 7%); }
@@ -322,7 +323,7 @@ p { line-height: 1.65; }
 .activity-panel li { display: grid; gap: .15rem; padding-bottom: .6rem; border-bottom: 1px solid #222f27; color: #b9c4bb; font-size: .68rem; line-height: 1.4; }
 .activity-panel li span { color: var(--accent); font: 500 .55rem var(--mono); }
 .activity-panel li.empty-activity { color: var(--faint); }
-.hand-panel { margin-top: .6rem; padding: .8rem 1rem 1rem; border: 1px solid var(--line-strong); border-radius: var(--radius); background: rgb(14 23 17 / 96%); }
+.hand-panel { position: sticky; bottom: 6.35rem; z-index: 5; height: clamp(230px, 34vh, 430px); min-height: 190px; max-height: calc(100vh - 11rem); display: flex; flex-direction: column; margin-top: .6rem; padding: .8rem 1rem 1rem; overflow: hidden; resize: vertical; border: 1px solid var(--line-strong); border-radius: var(--radius); background: rgb(14 23 17 / 98%); box-shadow: 0 -10px 32px rgb(0 0 0 / 24%); }
 .hand-panel > header { display: flex; justify-content: space-between; align-items: end; margin-bottom: .65rem; }
 .hand-panel h2 { margin: .15rem 0 0; font-size: 1.2rem; }
 .zone-count { color: var(--muted); font: 600 .65rem var(--mono); }
@@ -332,7 +333,7 @@ p { line-height: 1.65; }
 .selected-card-actions small { color: var(--muted); font-size: .65rem; }
 .selected-card-action-buttons { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .4rem; }
 .selected-card-action-buttons button { padding: .55rem .7rem; font-size: .6rem; }
-.hand-cards { display: flex; gap: .6rem; overflow-x: auto; padding: .1rem .1rem .5rem; scroll-snap-type: x proximity; }
+.hand-cards { min-height: 0; flex: 1 1 auto; display: flex; gap: .6rem; overflow: auto; padding: .1rem .1rem .5rem; scroll-snap-type: x proximity; }
 .hand-card { width: 168px; min-height: 230px; scroll-snap-align: start; }
 .hand-card:not(.has-image) .card-copy { position: absolute; inset: 0; align-content: end; }
 .hand-card.has-image > img { display: block; height: auto; aspect-ratio: 488 / 680; }
@@ -353,7 +354,8 @@ p { line-height: 1.65; }
 .waiting-decision p { margin: .15rem 0 0; color: var(--muted); font-size: .72rem; }
 .mana-toggle { flex: 0 0 auto; padding: .58rem .72rem; border-color: #8a7442; color: #f3d88f; background: #2d2513; font-size: .62rem; }
 .mana-toggle.active { border-color: #e0b84f; color: #211a09; background: #f0c65d; box-shadow: 0 0 18px rgb(240 198 93 / 22%); }
-.mana-help { position: sticky; bottom: 6.65rem; z-index: 6; margin: -.1rem .8rem 0; padding: .55rem .8rem; border: 1px solid #8a7442; border-radius: 0 0 var(--radius-sm) var(--radius-sm); color: #ead498; background: rgb(43 35 16 / 96%); font-size: .68rem; text-align: center; }
+.mana-help { position: sticky; bottom: 6.65rem; z-index: 6; display: flex; justify-content: center; align-items: center; gap: .65rem; margin: -.1rem .8rem 0; padding: .55rem .8rem; border: 1px solid #8a7442; border-radius: 0 0 var(--radius-sm) var(--radius-sm); color: #ead498; background: rgb(43 35 16 / 96%); font-size: .68rem; text-align: center; }
+.mana-help button { flex: 0 0 auto; padding: .4rem .55rem; border-color: #d4ad4f; color: #241b07; background: #edc45e; font-size: .55rem; }
 .mobile-inspector-trigger { display: none; }
 
 /* Choice dialog */
@@ -473,7 +475,8 @@ p { line-height: 1.65; }
   .connection-group { font-size: .58rem; }
   .operations-panel { align-items: stretch; }
   .operations-panel > button { flex: 1; }
-  .hand-panel { padding: .7rem; }
+  .hand-panel { bottom: 8.75rem; height: clamp(190px, 30vh, 300px); max-height: calc(100vh - 13rem); padding: .7rem; }
+  .mana-help { align-items: stretch; flex-direction: column; bottom: 9.05rem; }
   .hand-card { width: 132px; min-height: 182px; }
   .choice-overlay { padding: .35rem; }
   .choice-dialog { max-height: calc(100vh - .7rem); padding: .9rem; }

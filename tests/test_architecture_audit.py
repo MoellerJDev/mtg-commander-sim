@@ -48,39 +48,38 @@ class ArchitectureAuditTests(unittest.TestCase):
             len(architecture["direct_game_state_write_heuristic"]["locations"]),
         )
         handlers = architecture["semantic_handlers"]
-        self.assertEqual(6, handlers["registered_handler_count"])
+        self.assertEqual(81, handlers["registered_handler_count"])
         self.assertEqual(
-            [
+            handlers["registered_handler_count"],
+            len(handlers["registered_operations"]),
+        )
+        self.assertTrue(
+            {
                 "become_monarch",
                 "draw",
                 "draw_each_player",
+                "reanimate_attached_creature_aura",
                 "tap",
                 "untap",
                 "untap_all_creatures",
-            ],
-            handlers["registered_operations"],
+            }.issubset(handlers["registered_operations"])
         )
         self.assertEqual(
             [], handlers["registered_operations_still_in_legacy_dispatch"]
         )
-        self.assertGreater(handlers["legacy_apply_effect_branch_count"], 0)
-        self.assertGreater(handlers["engine_string_dispatch_branch_count"], 0)
-        self.assertEqual(8, handlers["registered_runtime_handler_count"])
+        self.assertEqual(0, handlers["legacy_apply_effect_branch_count"])
+        self.assertEqual(17, handlers["engine_string_dispatch_branch_count"])
+        self.assertEqual(9, handlers["registered_runtime_handler_count"])
         self.assertEqual(
-            [
-                "continuous.anthem.power_toughness.v1",
-                "prevention.damage.fixed.v1",
-                "replacement.counter.quantity.v1",
-                "replacement.damage.quantity.v1",
-                "replacement.damage.result.life_floor.v1",
-                "replacement.life.gain.multiplier.v1",
-                "replacement.token.additional.v1",
-                "replacement.zone.destination.v1",
-            ],
-            [
+            handlers["registered_runtime_handler_count"],
+            len(handlers["runtime_handlers"]),
+        )
+        self.assertIn(
+            "continuous.basic_land_type.add_all_lands.v1",
+            {
                 handler["handler_id"]
                 for handler in handlers["runtime_handlers"]
-            ],
+            },
         )
         self.assertTrue(tests["python"]["reconciles"])
         self.assertEqual(

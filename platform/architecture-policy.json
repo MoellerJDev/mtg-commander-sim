@@ -11,15 +11,20 @@
     "mtg_commander_sim/choice_forms.py",
     "mtg_commander_sim/combat.py",
     "mtg_commander_sim/combat_constraints.py",
+    "mtg_commander_sim/commander.py",
     "mtg_commander_sim/continuous_effects.py",
     "mtg_commander_sim/counter_placement.py",
+    "mtg_commander_sim/counter_state.py",
     "mtg_commander_sim/damage.py",
     "mtg_commander_sim/damage_results.py",
     "mtg_commander_sim/declaration_costs.py",
     "mtg_commander_sim/declaration_restrictions.py",
     "mtg_commander_sim/deck.py",
     "mtg_commander_sim/engine.py",
+    "mtg_commander_sim/life_state.py",
     "mtg_commander_sim/mana.py",
+    "mtg_commander_sim/mana_activation.py",
+    "mtg_commander_sim/mana_undo.py",
     "mtg_commander_sim/mechanic_contracts.py",
     "mtg_commander_sim/model.py",
     "mtg_commander_sim/oracle_ir.py",
@@ -31,15 +36,20 @@
     "mtg_commander_sim/semantics.py",
     "mtg_commander_sim/shortcuts.py",
     "mtg_commander_sim/state_based_actions.py",
+    "mtg_commander_sim/state_planner.py",
     "mtg_commander_sim/targets.py",
-    "mtg_commander_sim/token_creation.py"
+    "mtg_commander_sim/token_creation.py",
+    "mtg_commander_sim/object_query.py"
   ],
   "protected_future_prefixes": [
     "mtg_commander_sim/domain/",
     "mtg_commander_sim/card_programs/",
     "mtg_commander_sim/compiler/",
     "mtg_commander_sim/semantic_runtime/",
+    "mtg_commander_sim/semantic_choices/",
+    "mtg_commander_sim/effect_runtime/",
     "mtg_commander_sim/rules/",
+    "mtg_commander_sim/replacement/",
     "mtg_commander_sim/semantics/",
     "mtg_commander_sim/card_overrides/"
   ],
@@ -77,20 +87,34 @@
   ],
   "game_state_access": {
     "mutable_owners": {
+      "mtg_commander_sim/commander.py": "Commander game setup and stable physical designation state owner",
       "mtg_commander_sim/engine.py": "legacy authoritative transaction and mutation boundary",
       "mtg_commander_sim/permissions.py": "decision and capability lifecycle owned by the transaction boundary",
       "mtg_commander_sim/record.py": "replay hydration, verification copies, and versioned migration",
       "mtg_commander_sim/counter_placement.py": "typed effect-generated counter-placement replacement and mutation owner behind CommanderEngine",
       "mtg_commander_sim/damage.py": "typed damage proposal, quantity replacement, prevention, and final-event coordinator behind CommanderEngine",
       "mtg_commander_sim/damage_results.py": "typed CR 120.3 result-event preparation, validation, and atomic mutation owner behind the damage coordinator",
+      "mtg_commander_sim/counter_state.py": "canonical typed player and permanent counter mutation owner behind represented rules transactions",
+      "mtg_commander_sim/life_state.py": "canonical typed life-total mutation owner behind represented rules transactions",
       "mtg_commander_sim/tap_state.py": "typed tap-state effect mutation owner behind the semantic intent executor",
       "mtg_commander_sim/token_creation.py": "typed token-creation and replacement mutation owner behind CommanderEngine"
+      ,"mtg_commander_sim/mana_activation.py": "activated mana ability and reversible activation transaction owner"
+      ,"mtg_commander_sim/semantic_choices/intent_host.py": "typed semantic-choice intent application behind the immutable choice registry"
+      ,"mtg_commander_sim/effect_runtime/state_and_permissions.py": "registry-owned state and permission effect family"
+      ,"mtg_commander_sim/effect_runtime/zones_and_attachments.py": "registry-owned zone and attachment effect family"
+      ,"mtg_commander_sim/effect_runtime/damage_life_and_turns.py": "registry-owned damage, life, and turn effect family"
+      ,"mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py": "registry-owned object, stack, and token effect family"
     },
     "read_only_consumers": {
       "mtg_commander_sim/projection.py": "principal-scoped projection",
       "mtg_commander_sim/__init__.py": "public type re-export",
       "mtg_commander_sim/replacement_decisions.py": "replacement continuation validation and stack lookup",
+      "mtg_commander_sim/record_decks.py": "read-only exact deck-list provenance hashing",
+      "mtg_commander_sim/state_based_actions.py": "pure state-based action detection over an authoritative snapshot",
       "mtg_commander_sim/semantic_runtime/zone_replacements.py": "read-only replacement-source discovery and event identity"
+      ,"mtg_commander_sim/semantic_choices/engine_coordination.py": "actor-scoped immutable choice fact materialization and routing"
+      ,"mtg_commander_sim/mana_undo.py": "read-only reversible mana-window validation with commits delegated to canonical owners"
+      ,"mtg_commander_sim/object_query.py": "typed read-only object selection predicates"
     },
     "model_definition": "mtg_commander_sim/model.py"
   },

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 9,
+  "registry_version": 10,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -45,6 +45,12 @@
       ]
     },
     {
+      "mechanic_id": "cr-903-commander",
+      "capabilities": [
+        "format.commander.damage.physical_identity"
+      ]
+    },
+    {
       "mechanic_id": "cr-111-tokens",
       "capabilities": [
         "token.creation.additional_replacement"
@@ -59,6 +65,7 @@
     {
       "mechanic_id": "cr-613-continuous-effects",
       "capabilities": [
+        "continuous.basic_land_type.add_all_lands",
         "continuous.power_toughness.fixed_anthem"
       ]
     },
@@ -206,6 +213,33 @@
       "implementation_mutation_rationale": "test_counter_quantity_replacement_mutant_is_killed replaces the quantity transform with an identity operation and the behavioral assertion rejects the survivor.",
       "blockers": ["The current descriptor covers fixed integral multiply/add quantities on permanents only; broader counter producers and grammar remain outside this capability."],
       "status": "tested"
+    },
+    {
+      "id": "continuous.basic_land_type.add_all_lands",
+      "version": 1,
+      "official_rules": ["305.6", "305.7", "613.1d"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Apply the exact additive wording that gives every land one named basic land type in layer 4, preserving its existing types and rules text and deriving the corresponding intrinsic mana ability.",
+        "inputs": ["active battlefield source", "all phased-in land objects", "one named basic land type", "source timestamp"],
+        "outputs": ["typed layer-4 subtype addition", "preserved existing land subtypes and rules text", "intrinsic basic-land-type mana ability"],
+        "exclusions": ["type-setting effects", "conditional or restricted object sets", "dependency interactions that alter the source text", "effects that remove abilities or land types"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.continuous_components.AddBasicLandTypeHandler", "mtg_commander_sim.card_programs.runtime.collect_card_program_continuous_effects", "mtg_commander_sim.continuous_effects.evaluate_continuous_effects", "CommanderEngine._activated_abilities"],
+      "positive_tests": ["test_urborg_adds_swamp_and_intrinsic_black_mana_to_darksteel_citadel"],
+      "negative_tests": ["test_basic_land_type_component_rejects_malformed_descriptors"],
+      "interaction_tests": ["test_additive_basic_land_type_preserves_existing_types_text_and_mana"],
+      "multiplayer_tests": ["test_basic_land_type_component_applies_to_every_players_lands"],
+      "privacy_tests": [],
+      "replay_tests": ["test_urborg_intrinsic_black_mana_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This bounded additive type effect has no capability dependency beyond the shared continuous-effect evaluator.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_basic_land_type_intrinsic_mana_mutant_is_killed removes the layer-4 subtype addition and the black-mana legality assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
     },
     {
       "id": "continuous.power_toughness.fixed_anthem",
@@ -408,7 +442,7 @@
         "exclusions": ["infect", "damage replacement", "damage prevention", "commander combat attribution"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.damage_results.plan_damage_result_commit", "mtg_commander_sim.damage_results.commit_damage_result_plan"],
+      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.life_state.plan_life_changes", "mtg_commander_sim.life_state.apply_life_changes"],
       "positive_tests": ["test_sunscorched_desert_prompts_for_target_and_deals_damage"],
       "negative_tests": ["test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack"],
       "interaction_tests": ["test_lifelink_counts_only_damage_not_prevented_by_protection"],
@@ -462,7 +496,7 @@
         "exclusions": ["damage prevention", "counter replacement", "redirection under obsolete rules"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.damage_results.plan_damage_result_commit", "mtg_commander_sim.damage_results.commit_damage_result_plan"],
+      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.counter_state.plan_counter_changes", "mtg_commander_sim.counter_state.apply_counter_changes"],
       "positive_tests": ["test_planeswalker_damage_removes_loyalty_counters"],
       "negative_tests": ["test_damage_rejects_nondamageable_permanent"],
       "interaction_tests": ["test_lethal_planeswalker_combat_damage_applies_state_action"],
@@ -489,7 +523,7 @@
         "exclusions": ["damage prevention", "counter replacement", "defeated-battle cast permission"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.damage_results.plan_damage_result_commit", "mtg_commander_sim.damage_results.commit_damage_result_plan"],
+      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.counter_state.plan_counter_changes", "mtg_commander_sim.counter_state.apply_counter_changes"],
       "positive_tests": ["test_battle_damage_removes_defense_instead_of_marking_damage"],
       "negative_tests": ["test_damage_rejects_nondamageable_permanent"],
       "interaction_tests": ["test_damage_to_battle_creature_applies_both_results"],
@@ -537,15 +571,15 @@
       "official_rules": ["120.4b", "614.1", "614.5", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability": {
-        "summary": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result.",
+        "summary": "Apply trusted generic or reviewed static damage-quantity replacements to every represented combat and noncombat damage proposal before any result.",
         "inputs": ["typed positive damage proposal", "trusted battlefield runtime component", "affected subject replacement order"],
         "outputs": ["choice-complete replayable damage event", "replacement journal"],
         "exclusions": ["replacement with a non-damage event", "persistent prevention shields", "damage-result replacement", "mana-result damage requiring an explicit replacement choice"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage.prepare_damage_batch", "mtg_commander_sim.semantic_runtime.damage_replacements.DamageQuantityReplacementHandler", "mtg_commander_sim.replacement_effects.advance_replacement_batch"],
-      "positive_tests": ["test_furnace_and_daunting_order_changes_final_damage"],
-      "negative_tests": ["test_validation_failure_is_atomic_before_any_damage_result"],
+      "implementation_components": ["mtg_commander_sim.damage.prepare_damage_batch", "mtg_commander_sim.semantic_runtime.damage_replacements.DamageQuantityReplacementHandler", "mtg_commander_sim.replacement.ordering.advance_replacement_batch", "mtg_commander_sim.oracle_ir._static_damage_handler"],
+      "positive_tests": ["test_furnace_and_daunting_order_changes_final_damage", "test_exact_generic_damage_handler_is_trusted_and_active_in_session"],
+      "negative_tests": ["test_validation_failure_is_atomic_before_any_damage_result", "test_static_damage_replacement_wording_lowers_to_generic_handlers"],
       "interaction_tests": ["test_static_prevention_applies_to_each_simultaneous_event"],
       "multiplayer_tests": ["test_four_player_each_opponent_damage_uses_one_typed_batch", "test_four_player_damage_replacement_choices_follow_apnap"],
       "privacy_tests": ["test_combat_replacement_choice_is_seat_scoped_and_precommit"],
@@ -564,15 +598,15 @@
       "official_rules": ["120.4b", "615.1", "615.6", "615.10", "615.12", "615.12a", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability": {
-        "summary": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order.",
+        "summary": "Apply trusted generic or reviewed fixed static prevention and represented protection prevention to each typed damage event in affected-subject order.",
         "inputs": ["typed positive damage proposal", "trusted fixed prevention component or represented protection", "unpreventable flag"],
         "outputs": ["final dealt and prevented amounts", "prevention journal"],
         "exclusions": ["next-damage shields", "divisible prevention shields", "redirection", "damage-result replacement", "mana-result damage requiring an explicit replacement choice"]
       },
       "dependencies": ["damage.amount.positive", "damage.replacement.static_quantity"],
-      "implementation_components": ["mtg_commander_sim.damage.prepare_damage_batch", "mtg_commander_sim.damage.commit_prepared_damage_batch", "mtg_commander_sim.semantic_runtime.damage_replacements.FixedDamagePreventionHandler"],
-      "positive_tests": ["test_static_prevention_applies_to_each_simultaneous_event"],
-      "negative_tests": ["test_unpreventable_damage_applies_prevention_without_reducing_damage"],
+      "implementation_components": ["mtg_commander_sim.damage.prepare_damage_batch", "mtg_commander_sim.damage.commit_prepared_damage_batch", "mtg_commander_sim.semantic_runtime.damage_replacements.FixedDamagePreventionHandler", "mtg_commander_sim.oracle_ir._static_damage_handler"],
+      "positive_tests": ["test_static_prevention_applies_to_each_simultaneous_event", "test_static_damage_replacement_wording_lowers_to_generic_handlers"],
+      "negative_tests": ["test_unpreventable_damage_applies_prevention_without_reducing_damage", "test_static_damage_replacement_wording_lowers_to_generic_handlers"],
       "interaction_tests": ["test_furnace_and_daunting_order_changes_final_damage", "test_protection_prevents_player_and_colored_permanent_damage"],
       "multiplayer_tests": ["test_four_player_fixed_prevention_applies_per_controller"],
       "privacy_tests": ["test_combat_replacement_choice_is_seat_scoped_and_precommit"],
@@ -597,7 +631,7 @@
         "exclusions": []
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.replacement_effects"],
+      "implementation_components": ["mtg_commander_sim.replacement.ordering.advance_replacement_batch", "mtg_commander_sim.replacement.application.apply_replacement"],
       "positive_tests": ["test_prevention_produces_a_modified_damage_event"],
       "negative_tests": [],
       "interaction_tests": [],
@@ -624,7 +658,7 @@
         "exclusions": []
       },
       "dependencies": ["damage.replacement.order"],
-      "implementation_components": ["mtg_commander_sim.replacement_effects"],
+      "implementation_components": ["mtg_commander_sim.replacement.ordering.advance_replacement_batch", "mtg_commander_sim.replacement.application.apply_replacement"],
       "positive_tests": ["test_prevention_never_prevents_more_than_remaining_damage", "test_prevention_applies_only_to_matching_damage_events"],
       "negative_tests": ["test_negative_damage_amount_fails_closed_in_prevention"],
       "interaction_tests": ["test_unpreventable_damage_applies_effect_once_without_preventing"],
@@ -651,7 +685,7 @@
         "exclusions": []
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.damage_results.plan_damage_result_commit", "mtg_commander_sim.damage_results.commit_damage_result_plan"],
+      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.counter_state.plan_counter_changes", "mtg_commander_sim.counter_state.apply_counter_changes"],
       "positive_tests": ["test_infect_player_damage_is_poison_not_life_loss", "test_source_pinned_keyword_witnesses_follow_damage_results"],
       "negative_tests": ["test_prevented_infect_and_toxic_create_no_counter_results"],
       "interaction_tests": ["test_infect_and_wither_use_minus_counters_only_on_creatures", "test_multitype_permanent_receives_every_applicable_result"],
@@ -678,7 +712,7 @@
         "exclusions": []
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.damage_results.plan_damage_result_commit", "mtg_commander_sim.damage_results.commit_damage_result_plan"],
+      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.counter_state.plan_counter_changes", "mtg_commander_sim.counter_state.apply_counter_changes"],
       "positive_tests": ["test_infect_and_wither_use_minus_counters_only_on_creatures", "test_source_pinned_keyword_witnesses_follow_damage_results"],
       "negative_tests": ["test_infect_and_wither_use_minus_counters_only_on_creatures"],
       "interaction_tests": ["test_wither_damage_still_records_deathtouch_result"],
@@ -705,7 +739,7 @@
         "exclusions": []
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.damage_results.plan_damage_result_commit", "mtg_commander_sim.damage_results.commit_damage_result_plan"],
+      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.life_state.plan_life_changes", "mtg_commander_sim.life_state.apply_life_changes"],
       "positive_tests": ["test_lifelink_counts_only_damage_not_prevented_by_protection", "test_lifelink_gains_final_damage_across_multiple_recipients", "test_source_pinned_keyword_witnesses_follow_damage_results"],
       "negative_tests": ["test_prevented_infect_and_toxic_create_no_counter_results"],
       "interaction_tests": ["test_boon_reflection_doubles_lifelink_result"],
@@ -732,7 +766,7 @@
         "exclusions": ["unresolved or dynamic toxic values", "unrepresented ability-granting continuous effects"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results"],
+      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.counter_state.plan_counter_changes", "mtg_commander_sim.counter_state.apply_counter_changes"],
       "positive_tests": ["test_toxic_is_additional_only_for_creature_combat_damage_to_player", "test_multiple_toxic_abilities_are_cumulative", "test_source_pinned_keyword_witnesses_follow_damage_results"],
       "negative_tests": ["test_unresolved_toxic_value_fails_before_mutation", "test_prevented_infect_and_toxic_create_no_counter_results"],
       "interaction_tests": ["test_source_pinned_keyword_witnesses_follow_damage_results"],
@@ -748,6 +782,33 @@
       "status": "trusted"
     },
     {
+      "id": "format.commander.damage.physical_identity",
+      "version": 1,
+      "official_rules": ["903.3", "903.10", "903.10a"],
+      "supported_profiles": ["commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Attribute combat damage to the designated physical commander card across zone and control changes and apply the separate 21-damage state-based action ledger.",
+        "inputs": ["final positive combat damage event", "snapshotted physical commander designation", "defending player"],
+        "outputs": ["per-designation commander damage ledger", "Commander loss state-based action"],
+        "exclusions": ["ordinary copies without a designation", "noncombat damage", "historical records explicitly using legacy Oracle-ID attribution"]
+      },
+      "dependencies": ["damage.amount.positive"],
+      "implementation_components": ["mtg_commander_sim.commander.commander_damage_key", "mtg_commander_sim.damage.commit_prepared_damage_batch", "mtg_commander_sim.commander.commander_damage_losers"],
+      "positive_tests": ["test_same_named_commanders_remain_separate_and_drive_four_player_sba"],
+      "negative_tests": ["test_ordinary_copy_of_commander_has_no_designation"],
+      "interaction_tests": ["test_designation_survives_zone_and_control_changes", "test_prepared_damage_uses_source_snapshot_after_source_leaves"],
+      "multiplayer_tests": ["test_same_named_commanders_remain_separate_and_drive_four_player_sba"],
+      "privacy_tests": ["test_commander_damage_is_public_and_names_its_source"],
+      "replay_tests": ["test_command_replay_preserves_designation_damage_key", "test_save_load_preserves_new_identity_and_legacy_state_is_explicit"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_commander_identity_mutant_is_killed replaces the physical designation with the Oracle ID and the separate-ledger assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
       "id": "damage.result.replacement_order",
       "version": 1,
       "official_rules": ["120.4c", "616.1", "616.1f", "616.1g"],
@@ -759,7 +820,7 @@
         "exclusions": ["uncompiled life or counter replacement families", "damage-result transformations outside registered typed operations"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.prepare_damage_results", "mtg_commander_sim.replacement_effects.advance_replacement_batch"],
+      "implementation_components": ["mtg_commander_sim.damage_results.prepare_damage_results", "mtg_commander_sim.replacement.ordering.advance_replacement_batch"],
       "positive_tests": ["test_life_floor_caps_damage_result_without_an_offsetting_gain", "test_worship_caps_damage_result_at_one"],
       "negative_tests": ["test_invalid_result_leaf_keeps_the_whole_batch_atomic"],
       "interaction_tests": ["test_containing_result_replacement_precedes_life_gain_replacement", "test_worship_and_boon_follow_containing_event_order"],

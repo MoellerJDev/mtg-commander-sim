@@ -90,11 +90,11 @@ evidence in `test_capability_implementation_mutations.py`.
 
 ## Pinned-corpus effect
 
-Against the 2026-07-31 local Scryfall snapshot, the source pack adds two
-reviewed ability programs in both the 38,484-card full corpus and the
-31,623-card Commander-legal corpus. Capability-closed card counts do not
-increase: they remain 741 and 359 respectively, because this bounded
-counter-quantity capability is tested rather than trusted and the witness
-cards retain material behavior outside this slice. Residual counts likewise
-remain unchanged. These figures measure representation, not matchup or complete
-Oracle correctness.
+Against the 2026-07-31 local Scryfall snapshot, this counter-placement tranche
+added two reviewed ability programs but no capability-closed cards by itself,
+because the bounded counter-quantity capability remained tested and the
+witness cards retained material behavior outside the slice. Current aggregate
+counts are generated in
+[`docs/COMPILER_COVERAGE_STATUS.md`](../COMPILER_COVERAGE_STATUS.md); later
+damage work changes those totals. These figures measure representation, not
+matchup or complete Oracle correctness.

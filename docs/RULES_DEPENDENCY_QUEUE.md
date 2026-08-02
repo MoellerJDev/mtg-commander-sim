@@ -14,30 +14,32 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,082
+- Queued rules: 3,057
 - Reviewed behavioral blockers: 358
-- Behavioral classification/review required: 2,724
-- Passing behavioral rules: 113
+- Behavioral classification/review required: 2,699
+- Passing behavioral rules: 130
 - Subsystems: 21
-- Queue fingerprint: `8a39ab60b174f86ebf524b5397ef789e764b5641dfc9325516ec527e56a33f57`
+- Queue fingerprint: `533b79e06fd5c1bc061fc437a10efe8869959ce28dfb7683de670bcb2e39a4aa`
 
 ## Selected next batch
 
-- Batch: `battle-defense-characteristic`
-- Subsystem: `characteristics`
-- Rules: `210.1`
-- Target capabilities: none registered yet
-- Rationale: CR 210.1 is the first dependency-ready reviewed rule after the damage-result batch. Treat its printed-defense characteristic and intrinsic enters-with-defense event as one foundational Battle entry subsystem, rather than widening immediately into the downstream CR 310 casting, protector, combat, and defeated-trigger families.
+- Batch: `damage-prevention-shields-and-redirection`
+- Subsystem: `replacement-prevention`
+- Rules: `614.9`, `615.1`, `615.2`, `615.3`, `615.4`, `615.5`, `615.7`, `615.8`, `615.9`, `615.11`, `615.12`, `615.13`, `616.1`
+- Target capabilities: `damage.prevention.static_fixed`, `damage.replacement.static_quantity`, `replacement.order.choice`
+- Rationale: The typed immutable replacement tree and canonical damage-result boundary are now integrated. The next dependency-ready family is persistent damage prevention and redirection: it closes shield lifetime and consumption, source/LKI selection, simultaneous allocation, unpreventable interaction, and replayable affected-player ordering before widening into unrelated Battle rules.
 
 Exit criteria:
 
-- Represent printed defense as a typed effective characteristic across ordinary, copied, transformed, face-down, and off-battlefield card states without printed-name dispatch.
-- Prepare the intrinsic enters-with-defense counter placement before battlefield mutation and route it through the shared replacement-event and counter-placement ordering boundaries.
-- Let the affected player make every material replacement or as-enters choice through a seat-scoped replayable continuation before the permanent enters.
-- Fail closed for missing, malformed, dynamic, or semantically unresolved defense values and for entry paths that cannot suspend safely.
-- Preserve exact copy/new-object identity, zone-change replacement ordering, multiplayer APNAP behavior, privacy, and command replay.
-- Compile and preflight the complete pinned Battle census, report exact generic-exact and blocked deltas, and retain downstream CR 310 blockers honestly.
-- Extract intrinsic defense-entry ownership from CommanderEngine into a bounded characteristic/entry module without widening the central engine.
+- Represent persistent, next-instance, chosen-source, and divisible prevention shields with typed immutable state, explicit duration, remaining amount, and deterministic consumption.
+- Route every represented damage producer, including mana-result damage, through resumable affected-player replacement and prevention choices before mutation.
+- Implement typed damage redirection with source, destination, departed-player, target-legality, and recursively replaced redirected-damage handling.
+- Apply damage-can't-be-prevented without consuming a shield while preserving applicable nonprevention replacement effects.
+- Snapshot or derive chosen-source characteristics with exact last-known-information behavior when the source leaves.
+- Collect simultaneous divisible allocations and replacement order in APNAP order through seat-scoped replayable continuations.
+- Dispatch represented additional prevention results and prevention-applied events exactly once at the correct post-prevention boundary.
+- Widen generic Oracle/CardProgram lowering for the closed shield and redirection wording family, measure Commander-card gains, and leave unsupported dynamic grammar fail-closed.
+- Extract shield registry, consumption, and redirection ownership from CommanderEngine into bounded typed modules with independent rollback, replay, privacy, property, and mutation tests.
 
 ## Dependency schedule
 
@@ -59,11 +61,11 @@ Exit criteria:
 | 14 | `replacement-prevention` | `resources`, `damage`, `resolution-effects`, `continuous-effects` | 41 | 41 | 0 | `oracle_parser`, `card_program_lowering`, `event_binding`, `mechanic_contracts` |
 | 15 | `combat` | `damage`, `turn-structure`, `continuous-effects` | 75 | 75 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 16 | `game-actions-state` | `zones`, `turn-structure`, `combat`, `resolution-effects`, `replacement-prevention` | 516 | 4 | 512 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
-| 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 768 | 0 | 768 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
+| 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 745 | 0 | 745 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 18 | `alternate-card-forms` | `card-types`, `zones`, `casting-activation`, `continuous-effects`, `replacement-prevention`, `game-actions-state` | 249 | 0 | 249 | `oracle_normalization`, `oracle_parser`, `card_program_faces`, `card_program_zone_permissions`, `mechanic_contracts` |
 | 19 | `designations-variants` | `turn-structure`, `combat`, `triggered-static-linked` | 9 | 0 | 9 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 20 | `multiplayer` | `core-game`, `turn-structure`, `combat` | 182 | 0 | 182 | `runtime_contracts`, `mechanic_contracts` |
-| 21 | `formats` | `zones`, `casting-activation`, `alternate-card-forms`, `designations-variants`, `multiplayer` | 137 | 0 | 137 | `format_contracts`, `card_program_zone_permissions`, `mechanic_contracts` |
+| 21 | `formats` | `zones`, `casting-activation`, `alternate-card-forms`, `designations-variants`, `multiplayer` | 135 | 0 | 135 | `format_contracts`, `card_program_zone_permissions`, `mechanic_contracts` |
 
 ## Commands
 

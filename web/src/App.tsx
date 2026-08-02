@@ -22,6 +22,7 @@ import {
 import type { CommandEnvelope, DecisionPacket, JsonValue, LegalAction } from "./generated/protocol";
 import { ingestPacket, type ProjectedView } from "./protocol";
 import { findSafeAutoPass } from "./tableAutomation";
+import { AutomationControls, CommanderDamage, ManaHelp } from "./TableStatus";
 import {
   loadTablePreferences,
   saveTablePreferences,
@@ -95,7 +96,7 @@ function CardTile({
   const canDrag = interactive && actions.some((action) => ["play_land", "cast"].includes(action.action));
   const actionKinds = new Set(actions.map((action) => action.action));
   const actionHint = manualMana
-    ? "TAP"
+    ? actionKinds.has("undo_mana") ? "UNTAP" : "TAP"
     : actionKinds.size > 1
       ? "CHOOSE"
       : actionKinds.has("cast")
@@ -167,6 +168,7 @@ function CardTile({
         {!compact && (card.t ?? definition?.t) && <span>{String(card.t ?? definition?.t)}</span>}
         {card.ctr && <span>{Object.entries(asRecord(card.ctr)).map(([key, amount]) => `${key} ${amount}`).join(" · ")}</span>}
       </div>
+      {card.tap && table && <span className="tapped-state">TAPPED</span>}
       {interactive && <span className="card-action-hint">{actionHint}</span>}
     </article>
   );
@@ -830,7 +832,6 @@ function PlayerBoard({
   const graveyard = asList(player.gy);
   const exile = asList(player.ex);
   const mana = asRecord(player.mana);
-  const commanderDamage = asList(player.cmd_dmg).map(asRecord);
   return (
     <article className={`player-board${active ? " active-player" : ""}${priority ? " has-priority" : ""}${mine ? " own-board" : ""}`} data-testid={`player-${seat}`}>
       <header>
@@ -842,12 +843,7 @@ function PlayerBoard({
         <div className="life" aria-label={`${String(player.life ?? 0)} life`}><span>{String(player.life ?? 0)}</span><small>LIFE</small></div>
       </header>
       {(active || priority) && <div className="turn-flags">{active && <span>Active player</span>}{priority && <span>Priority</span>}</div>}
-      {commanderDamage.length > 0 && (
-        <div className="commander-damage" data-testid={`commander-damage-${seat}`}>
-          <span>Commander damage</span>
-          <strong>{commanderDamage.map((source) => `${String(source.amount ?? 0)} from ${String(source.n ?? "commander")}`).join(" · ")}</strong>
-        </div>
-      )}
+      <CommanderDamage seat={seat} value={player.cmd_dmg ?? []} />
       <div className="zone-label">COMMAND</div>
       <div className="card-strip command-zone">{command.length ? command.map((card, index) => {
         const ref = String(asRecord(card).id ?? "");
@@ -896,7 +892,9 @@ function PlayerBoard({
                 && (action.mana_ability !== true || manualMana),
               )
             : [];
-          const manaOnly = actions.length > 0 && actions.every((action) => action.mana_ability === true);
+          const manaOnly = actions.length > 0 && actions.every((action) =>
+            action.mana_ability === true || action.action === "undo_mana",
+          );
           return (
             <div className="battlefield-card-slot" key={ref || index}>
               <CardTile value={card} view={view} table actions={actions} onIntent={manaOnly ? onManaIntent : onCardIntent} onInspect={onInspectCard} manualMana={manaOnly} selected={selectedCardRef === ref} />
@@ -1404,6 +1402,9 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   const manaActions = legalActions.filter((action) =>
     action.action === "activate" && action.mana_ability === true,
   );
+  const manaUndoActions = legalActions.filter((action) =>
+    action.action === "undo_mana",
+  );
   const displayActions = legalActions.filter((action) =>
     action.mana_ability !== true || manualMana,
   );
@@ -1460,24 +1461,12 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
       <section className="operations-panel" aria-label="Match operations">
         <div className="operations-heading"><span className="eyebrow">{isSpectator ? "TABLE VIEW" : "TABLE CONTROLS"}</span><strong>{isSpectator ? "Spectator" : `Seat ${ownSeat}`}</strong></div>
         {!isSpectator && (
-          <>
-            <button
-              type="button"
-              className={`table-control-toggle${tablePreferences.autoPass ? " active" : " full-control"}`}
-              aria-pressed={tablePreferences.autoPass}
-              data-testid="auto-pass-toggle"
-              title="Automatically submit pass-only priority capabilities. Turn this off to hold every priority stop."
-              onClick={() => setTablePreference("autoPass", !tablePreferences.autoPass)}
-            >{tablePreferences.autoPass ? "Auto-pass on" : "Full control on"}</button>
-            <button
-              type="button"
-              className={`table-control-toggle${tablePreferences.autoMana ? " active" : " manual-control"}`}
-              aria-pressed={tablePreferences.autoMana}
-              data-testid="auto-mana-toggle"
-              title="Automatically derive routine mana payments. Turn this off to tap mana sources yourself."
-              onClick={() => setTablePreference("autoMana", !tablePreferences.autoMana)}
-            >{tablePreferences.autoMana ? "Auto-mana on" : "Manual mana on"}</button>
-          </>
+          <AutomationControls
+            autoPass={tablePreferences.autoPass}
+            autoMana={tablePreferences.autoMana}
+            onAutoPass={() => setTablePreference("autoPass", !tablePreferences.autoPass)}
+            onAutoMana={() => setTablePreference("autoMana", !tablePreferences.autoMana)}
+          />
         )}
         <button
           type="button"
@@ -1591,7 +1580,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
           </section>
         </aside>
       </div>
-      {!isSpectator && <section className="hand-panel">
+      {!isSpectator && <section className="hand-panel" data-testid="hand-panel" data-resizable="true">
         <header><div><span className="eyebrow">YOUR PRIVATE ZONE · SEAT {ownSeat}</span><h2>Your hand</h2></div><span className="zone-count">{hand.length} cards</span></header>
         {cardContext && (
           <div className="selected-card-actions" data-testid="selected-card-actions">
@@ -1654,10 +1643,12 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
           </>
         ) : <div className="waiting-decision"><span className="status-dot muted" /><div><strong>Waiting for the table</strong><p>Waiting for another player’s decision.</p></div></div>}
       </section>
-      {manualMana && manaActions.length > 0 && (
-        <div className="mana-help" role="status">
-          Click a highlighted untapped permanent to add mana in the order you choose. Floating mana appears on your board; then drag or select the spell.
-        </div>
+      {manualMana && (manaActions.length > 0 || manaUndoActions.length > 0) && (
+        <ManaHelp
+          actions={manaUndoActions}
+          disabled={submitting || Boolean(pendingRetry) || connection !== "LIVE" || lifecycle?.status !== "active"}
+          onSelect={chooseAction}
+        />
       )}
       {inspectionTarget && (
         <button type="button" className="mobile-inspector-trigger" onClick={() => setExpandedInspector(true)}>

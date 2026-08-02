@@ -61,7 +61,7 @@ class PermissionProjectionTests(unittest.TestCase):
             if card.owner == "A" and card.is_commander
         )
         session.state.players["B"].commander_damage_received[
-            commander.oracle_id
+            commander.commander_designation_id
         ] = 18
 
         for principal in ("pilot:A", "pilot:B", "spectator"):
@@ -70,8 +70,9 @@ class PermissionProjectionTests(unittest.TestCase):
             self.assertEqual(
                 [
                     {
-                        "cid": commander.oracle_id[:8],
+                        "cid": commander.commander_designation_id,
                         "n": commander.printed_name,
+                        "owner": "A",
                         "amount": 18,
                     }
                 ],

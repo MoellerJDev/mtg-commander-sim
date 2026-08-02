@@ -131,6 +131,10 @@ class CardInstance:
     zone: str
     is_token: bool = False
     is_commander: bool = False
+    # CR 903.3 designation belongs to this physical card, not its Oracle
+    # identity or current logical incarnation. ``None`` is retained for
+    # historical Game Record v3 checkpoints created before identity v2.
+    commander_designation_id: str | None = None
     zone_change_counter: int = 0
     zone_timestamp: int = 0
     world_supertype_timestamp: int | None = None
@@ -173,6 +177,12 @@ class CardInstance:
             raise ValueError(
                 f"Unsupported game object kind {self.object_kind!r}"
             )
+        if self.commander_designation_id == "":
+            raise ValueError("Commander designation IDs cannot be empty")
+        if self.commander_designation_id is not None and not self.is_commander:
+            raise ValueError(
+                "Only a designated commander card may carry a commander ID"
+            )
 
     @property
     def logical_object_id(self) -> str:
@@ -193,7 +203,12 @@ class CardInstance:
         return self.object_kind == "card_copy"
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        if self.commander_designation_id is None:
+            # Preserve byte-for-byte historical checkpoint payloads. The
+            # GameState identity-version marker distinguishes new records.
+            payload.pop("commander_designation_id")
+        return payload
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "CardInstance":
@@ -513,6 +528,10 @@ class GameState:
     turn_order: list[str]
     current_turn: TurnEntry | None
     last_normal_turn_player: str | None
+    # ``None`` is the explicit historical Game Record v3 compatibility mode
+    # whose commander-damage ledgers were keyed by Oracle ID. New games use
+    # physical commander designation identity version 2.
+    commander_damage_identity_version: int | None = None
     extra_turns: list[TurnEntry] = field(default_factory=list)
     active_player: str | None = None
     priority_player: str | None = None
@@ -564,6 +583,15 @@ class GameState:
             "commander_oracle_ids": {
                 seat: list(ids) for seat, ids in self.commander_oracle_ids.items()
             },
+            **(
+                {
+                    "commander_damage_identity_version": (
+                        self.commander_damage_identity_version
+                    )
+                }
+                if self.commander_damage_identity_version is not None
+                else {}
+            ),
             "turn_order": list(self.turn_order),
             "current_turn": self.current_turn.to_dict() if self.current_turn else None,
             "last_normal_turn_player": self.last_normal_turn_player,
@@ -619,6 +647,11 @@ class GameState:
             turn_order=list(data["turn_order"]),
             current_turn=(TurnEntry.from_dict(data["current_turn"]) if data.get("current_turn") else None),
             last_normal_turn_player=data.get("last_normal_turn_player"),
+            commander_damage_identity_version=(
+                int(data["commander_damage_identity_version"])
+                if data.get("commander_damage_identity_version") is not None
+                else None
+            ),
             extra_turns=[TurnEntry.from_dict(turn) for turn in data.get("extra_turns", [])],
             active_player=data.get("active_player"),
             priority_player=data.get("priority_player"),

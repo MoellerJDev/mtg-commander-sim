@@ -16,6 +16,7 @@ from mtg_commander_sim.card_programs import CardProgram, CardProgramError
 from mtg_commander_sim.card_programs.commands import (
     _compile_best_available,
     audit_card_program,
+    card_program_coverage,
     explain_card_program,
 )
 from mtg_commander_sim.card_programs.adapters import (
@@ -55,6 +56,30 @@ def _bolt() -> CardRecord:
         produced_mana=(),
         layout="normal",
         released_at="1993-08-05",
+        legalities={"commander": "legal"},
+        faces=(),
+        raw={},
+    )
+
+
+def _keyword_card(keyword: str, oracle_text: str, suffix: int) -> CardRecord:
+    return CardRecord(
+        oracle_id=f"00000000-0000-4000-8000-{suffix:012d}",
+        name=f"Generic {keyword.title()} Fixture",
+        mana_cost="{1}{B}",
+        mana_value=2.0,
+        type_line="Creature — Phyrexian Test",
+        oracle_text=oracle_text,
+        power="2",
+        toughness="2",
+        loyalty=None,
+        defense=None,
+        colors=("B",),
+        color_identity=("B",),
+        keywords=(keyword.title(),),
+        produced_mana=(),
+        layout="normal",
+        released_at="2026-01-01",
         legalities={"commander": "legal"},
         faces=(),
         raw={},
@@ -109,6 +134,35 @@ class CardProgramV2Tests(unittest.TestCase):
         jsonschema.Draft202012Validator(self.schema).validate(first.to_dict())
         restored = CardProgram.from_dict(first.to_dict())
         self.assertEqual(first.to_dict(), restored.to_dict())
+
+    def test_keyword_programs_declare_exact_damage_result_capabilities(self):
+        for index, (keyword, oracle_text) in enumerate(
+            (
+                ("infect", "Infect"),
+                ("wither", "Wither"),
+                ("lifelink", "Lifelink"),
+                ("toxic", "Toxic 2"),
+            ),
+            101,
+        ):
+            with self.subTest(keyword=keyword):
+                program = compile_card_program(
+                    self.db,
+                    _keyword_card(keyword, oracle_text, index),
+                    capability_registry=self.capabilities,
+                    capability_profile="commander_review",
+                    trust_level="trusted",
+                )
+                self.assertEqual(
+                    (f"damage.result.{keyword}",),
+                    program.capability_dependencies,
+                )
+                self.assertEqual("capability_closed", program.trust_closure["trust_basis"])
+                self.assertTrue(program.trust_closure["trusted"])
+                self.assertEqual(1, len(program.abilities))
+                ability = program.to_dict()["abilities"][0]
+                self.assertEqual("static", ability["kind"])
+                self.assertEqual([], ability["effect_nodes"])
 
     def test_tampered_projection_hash_and_closure_fail_closed(self):
         program = compile_card_program(
@@ -439,6 +493,49 @@ class CardProgramV2Tests(unittest.TestCase):
                     profile="traditional",
                 )
         compile_program.assert_called_once()
+
+    def test_coverage_reuses_one_validated_capability_registry(self):
+        program = compile_card_program(
+            self.db,
+            _bolt(),
+            capability_registry=self.capabilities,
+            capability_profile="commander_review",
+            trust_level="trusted",
+        )
+
+        class TwoCardCorpus:
+            def iter_cards(self, **_kwargs):
+                return iter((_bolt(), _bolt()))
+
+        with (
+            patch(
+                "mtg_commander_sim.card_programs.commands."
+                "load_default_capability_registry",
+                return_value=self.capabilities,
+            ) as load_capabilities,
+            patch(
+                "mtg_commander_sim.card_programs.commands."
+                "_compile_best_available",
+                return_value=program,
+            ) as compile_best,
+        ):
+            result = card_program_coverage(
+                TwoCardCorpus(),  # type: ignore[arg-type]
+                registry=SemanticRegistry(),
+                profile="commander_review",
+                commander_legal_only=True,
+                limit=None,
+            )
+
+        self.assertEqual(2, result["cards_considered"])
+        load_capabilities.assert_called_once_with()
+        self.assertEqual(2, compile_best.call_count)
+        self.assertTrue(
+            all(
+                call.kwargs["capabilities"] is self.capabilities
+                for call in compile_best.call_args_list
+            )
+        )
 
 
 if __name__ == "__main__":

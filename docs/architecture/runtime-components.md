@@ -87,8 +87,10 @@ exists. Any future cache requires exact invalidation for state, program,
 component, timestamp, characteristic, and ruleset changes.
 
 `token_creation.py` is the focused authoritative mutation owner for token
-commit and enter-event dispatch. `replacement_effects.py` and
-`replacement_decisions.py` own immutable event trees and replayable choice
+commit and enter-event dispatch. `replacement/` owns immutable models, typed
+operations, applicability, ordering, and strict replay;
+`replacement_effects.py` is its compatibility facade, and
+`replacement_decisions.py` owns replayable choice
 continuations. `counter_placement.py` owns pre-mutation preparation and final
 commit for represented permanent-counter events. `damage.py` coordinates
 represented damage snapshots, quantity replacement/prevention, and normalized
@@ -99,7 +101,10 @@ participants.
 Primary tests are `test_replacement_event_tree.py`,
 `test_token_creation_replacements.py`, `test_graveyard_rules.py`,
 `test_counter_placement_replacements.py`,
-`test_damage_replacement_pipeline.py`,
+`test_damage_replacement_model.py`,
+`test_damage_replacement_multiplayer.py`,
+`test_damage_replacement_integration.py`,
+`test_replacement_model_hardening.py`,
 `test_damage_result_events.py`,
 `test_continuous_effect_components.py`, `test_card_program_trust.py`, and
 `test_continuous_effect_performance.py`. See the
