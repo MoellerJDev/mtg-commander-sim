@@ -5,6 +5,7 @@ import random
 import unittest
 
 from mtg_commander_sim.replacement_effects import (
+    AddAmount,
     AffectedObject,
     EntryReplacementScope,
     ReplaceableEvent,
@@ -59,7 +60,7 @@ class ReplacementAffectedSubjectTests(unittest.TestCase):
         )
         owner_only = ReplaceableEvent(
             event_id="card:uncontrolled",
-            kind="zone_change",
+            kind="zone.change",
             affected_player=None,
             affected_object=AffectedObject(
                 object_id="card:1",
@@ -475,6 +476,7 @@ class ReplacementBatchTests(unittest.TestCase):
             kind="damage",
             affected_player="A",
             payload={"amount": 1, "top_library_object": "SECRET-OBJECT"},
+            applied_effects=("prior-secret-effect",),
         )
         batch = ReplacementEventBatch(
             batch_id="hidden:SECRET-OBJECT",
@@ -482,9 +484,9 @@ class ReplacementBatchTests(unittest.TestCase):
             apnap_order=("A", "B", "C", "D"),
             journal=(
                 ReplacementSelection(
-                    event_id="prior:SECRET-OBJECT",
-                    path=(4, 2),
-                    chooser="B",
+                    event_id="library:SECRET-OBJECT",
+                    path=(),
+                    chooser="A",
                     effect_id="prior-secret-effect",
                 ),
             ),
@@ -507,13 +509,13 @@ class ReplacementBatchTests(unittest.TestCase):
             effect(
                 "optional-one",
                 "damage",
-                {"op": "set", "field": "one", "value": True},
+                {"op": "set", "field": "prevented_by", "value": "one"},
                 optional=True,
             ),
             effect(
                 "optional-two",
                 "damage",
-                {"op": "set", "field": "two", "value": True},
+                {"op": "set", "field": "prevented_by", "value": "two"},
                 optional=True,
             ),
         )
@@ -531,12 +533,12 @@ class ReplacementBatchTests(unittest.TestCase):
             effect(
                 "duplicate",
                 "damage",
-                {"op": "set", "field": "first", "value": True},
+                {"op": "set", "field": "prevented_by", "value": "first"},
             ),
             effect(
                 "duplicate",
                 "damage",
-                {"op": "set", "field": "second", "value": True},
+                {"op": "set", "field": "prevented_by", "value": "second"},
             ),
         )
 
@@ -572,10 +574,10 @@ class ReplacementBatchTests(unittest.TestCase):
             by_id = {value.effect_id: value for value in effects}
             for effect_id in selected:
                 operation = by_id[effect_id].operations[0]
-                if operation["op"] == "add":
-                    expected += int(operation["amount"])
+                if isinstance(operation, AddAmount):
+                    expected += operation.amount
                 else:
-                    expected *= int(operation["factor"])
+                    expected *= operation.factor
             resolved = resolve_replacements(
                 ReplaceableEvent(
                     event_id=f"fuzz:{example}",

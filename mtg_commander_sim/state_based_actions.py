@@ -4,6 +4,9 @@ from dataclasses import dataclass, field
 import re
 from typing import Iterable, Mapping
 
+from .commander import commander_damage_losers
+from .model import GameState
+
 
 _NUMBER_WORDS = {
     "zero": 0,
@@ -49,6 +52,25 @@ def counter_maximums_from_oracle(
                 count,
             )
     return maximums
+
+
+def player_loss_seats(
+    state: GameState,
+    active_seats: Iterable[str],
+) -> tuple[str, ...]:
+    """Evaluate the implemented CR 704 player-loss conditions together."""
+
+    commander_losers = set(commander_damage_losers(state))
+    return tuple(
+        seat
+        for seat in active_seats
+        if (
+            state.players[seat].life <= 0
+            or state.players[seat].poison >= state.config.poison_to_lose
+            or state.players[seat].attempted_empty_draw
+            or seat in commander_losers
+        )
+    )
 
 
 @dataclass(frozen=True, slots=True)

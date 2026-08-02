@@ -7,9 +7,38 @@ from typing import Any, Iterable, Mapping
 
 from .carddb import CardDatabase
 from .choice_forms import build_action_form
+from .commander import commander_damage_source
 from .model import CardInstance, Event, GameState
 from .protocol import PROTOCOL_VERSION, json_patch, view_hash
 from .util import stable_json, truncate
+
+
+def _commander_damage_rows(
+    state: GameState,
+    received: Mapping[str, int],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for damage_key, amount in sorted(received.items()):
+        if amount <= 0:
+            continue
+        source = commander_damage_source(state, damage_key)
+        rows.append(
+            {
+                "cid": (
+                    damage_key[:8]
+                    if source is None or source.legacy_oracle_identity
+                    else damage_key
+                ),
+                "n": source.printed_name if source is not None else damage_key[:8],
+                **(
+                    {"owner": source.owner}
+                    if source is not None and not source.legacy_oracle_identity
+                    else {}
+                ),
+                "amount": amount,
+            }
+        )
+    return rows
 
 
 @dataclass(slots=True)
@@ -235,6 +264,8 @@ class StateProjector:
             obj["tok"] = 1
         if card.is_commander:
             obj["cmd"] = 1
+            if visible and card.commander_designation_id is not None:
+                obj["cmd_id"] = card.commander_designation_id
         if card.controller != card.owner:
             obj["ctl"] = card.controller
         if card.attached_to:
@@ -321,32 +352,9 @@ class StateProjector:
                 "ex": self._zone(p.zones["exile"], principal),
                 "cmd": self._zone(p.zones["command"], principal),
             }
-            commander_damage = []
-            for oracle_id, amount in sorted(
-                p.commander_damage_received.items()
-            ):
-                if amount <= 0:
-                    continue
-                source = next(
-                    (
-                        card
-                        for card in self.state.cards.values()
-                        if card.is_commander
-                        and card.oracle_id == oracle_id
-                    ),
-                    None,
-                )
-                commander_damage.append(
-                    {
-                        "cid": oracle_id[:8],
-                        "n": (
-                            source.printed_name
-                            if source is not None
-                            else oracle_id[:8]
-                        ),
-                        "amount": amount,
-                    }
-                )
+            commander_damage = _commander_damage_rows(
+                self.state, p.commander_damage_received
+            )
             if commander_damage:
                 summary["cmd_dmg"] = commander_damage
             restricted_mana = p.stats.get("restricted_mana")

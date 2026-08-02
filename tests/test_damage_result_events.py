@@ -321,6 +321,190 @@ class DamageResultEventTests(unittest.TestCase):
         self.assertEqual(1, len(result.lifelink_gains))
         self.assertEqual(5, result.lifelink_gains[0].amount)
 
+    def test_keyword_source_snapshot_survives_zone_and_control_change(self):
+        engine = self.session(702_150_001).engine
+        source = self.permanent(
+            engine, "A", "Healer's Hawk", ref="a-lki-hawk"
+        )
+        source.temporary_keywords.append("Infect")
+        engine.state.players["A"].life = 20
+        life_before = engine.state.players["B"].life
+        prepared = prepare_damage_batch(
+            engine,
+            (
+                self.proposal(
+                    engine,
+                    source,
+                    "B",
+                    3,
+                    event_id="damage:keyword-lki",
+                ),
+            ),
+        )
+
+        engine.move_card(
+            source.object_id,
+            "graveyard",
+            reason="keyword LKI witness leaves before result commit",
+            log=False,
+            semantic_events=False,
+        )
+        source.controller = "C"
+        result = commit_prepared_damage_batch(engine, prepared)
+
+        self.assertEqual(life_before, engine.state.players["B"].life)
+        self.assertEqual(3, engine.state.players["B"].poison)
+        self.assertEqual(23, engine.state.players["A"].life)
+        self.assertEqual("A", result.events[0].source_controller)
+
+        off_zone_lifelink = self.permanent(
+            engine, "A", "Healer's Hawk", ref="a-graveyard-hawk"
+        )
+        engine.move_card(
+            off_zone_lifelink.object_id,
+            "graveyard",
+            reason="off-zone lifelink witness",
+            log=False,
+            semantic_events=False,
+        )
+        self.commit(
+            engine,
+            self.proposal(
+                engine,
+                off_zone_lifelink,
+                "B",
+                1,
+                event_id="damage:off-zone-lifelink",
+            ),
+        )
+        self.assertEqual(24, engine.state.players["A"].life)
+
+        wither = self.permanent(
+            engine, "A", "Boggart Ram-Gang", ref="a-graveyard-wither"
+        )
+        lki_target = self.token(engine, "B", "Wither LKI Target", toughness=5)
+        wither_prepared = prepare_damage_batch(
+            engine,
+            (
+                self.proposal(
+                    engine,
+                    wither,
+                    lki_target,
+                    1,
+                    event_id="damage:wither-lki",
+                ),
+            ),
+        )
+        engine.move_card(
+            wither.object_id,
+            "graveyard",
+            reason="off-zone keyword witness",
+            log=False,
+            semantic_events=False,
+        )
+        commit_prepared_damage_batch(engine, wither_prepared)
+        self.assertEqual(1, lki_target.counters["-1/-1"])
+
+        target = self.token(engine, "B", "Off-zone Target", toughness=5)
+        self.commit(
+            engine,
+            self.proposal(
+                engine,
+                wither,
+                target,
+                2,
+                event_id="damage:off-zone-wither",
+            ),
+        )
+        self.assertEqual(2, target.counters["-1/-1"])
+        self.assertEqual(0, target.marked_damage)
+
+        infect = self.permanent(
+            engine, "A", "Phyrexian Crusader", ref="a-graveyard-infect"
+        )
+        engine.move_card(
+            infect.object_id,
+            "graveyard",
+            reason="off-zone infect witness",
+            log=False,
+            semantic_events=False,
+        )
+        self.commit(
+            engine,
+            self.proposal(
+                engine,
+                infect,
+                "B",
+                1,
+                event_id="damage:off-zone-infect",
+            ),
+        )
+        self.assertEqual(4, engine.state.players["B"].poison)
+
+    def test_multiple_sources_and_duplicate_keyword_instances_are_distinct(self):
+        engine = self.session(702_150_002).engine
+        engine.state.players["A"].life = 20
+        first = self.token(
+            engine,
+            "A",
+            "Duplicate Lifelink Source",
+            keywords=("Lifelink", "Lifelink"),
+        )
+        second = self.token(
+            engine, "A", "Second Lifelink Source", keywords=("Lifelink",)
+        )
+        result = self.commit(
+            engine,
+            self.proposal(
+                engine, first, "B", 2, event_id="damage:lifelink-first"
+            ),
+            self.proposal(
+                engine, second, "B", 3, event_id="damage:lifelink-second"
+            ),
+        )
+        self.assertEqual(25, engine.state.players["A"].life)
+        self.assertEqual(
+            [2, 3], sorted(gain.amount for gain in result.lifelink_gains)
+        )
+
+        infect = self.token(
+            engine,
+            "A",
+            "Duplicate Infect Source",
+            keywords=("Infect", "Infect"),
+        )
+        wither = self.token(
+            engine,
+            "A",
+            "Duplicate Wither Source",
+            keywords=("Wither", "Wither"),
+        )
+        infect_target = self.token(
+            engine, "B", "Duplicate Infect Target", toughness=5
+        )
+        wither_target = self.token(
+            engine, "B", "Duplicate Wither Target", toughness=5
+        )
+        self.commit(
+            engine,
+            self.proposal(
+                engine,
+                infect,
+                infect_target,
+                2,
+                event_id="damage:duplicate-infect",
+            ),
+            self.proposal(
+                engine,
+                wither,
+                wither_target,
+                2,
+                event_id="damage:duplicate-wither",
+            ),
+        )
+        self.assertEqual(2, infect_target.counters["-1/-1"])
+        self.assertEqual(2, wither_target.counters["-1/-1"])
+
     def test_toxic_is_additional_only_for_creature_combat_damage_to_player(self):
         engine = self.session(120_300_004).engine
         source = self.token(
@@ -368,6 +552,7 @@ class DamageResultEventTests(unittest.TestCase):
             keywords=("Toxic",),
             oracle_text="Toxic 1\nToxic 2",
         )
+        source.temporary_keywords.append("Toxic 3")
 
         self.commit(
             engine,
@@ -380,7 +565,7 @@ class DamageResultEventTests(unittest.TestCase):
                 combat=True,
             ),
         )
-        self.assertEqual(3, engine.state.players["B"].poison)
+        self.assertEqual(6, engine.state.players["B"].poison)
 
     def test_four_player_keyword_results_keep_source_attribution(self):
         engine = self.session(120_300_012, players=4).engine
@@ -1035,6 +1220,42 @@ class DamageResultEventTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unsupported resolved"):
             plan_damage_result_commit(engine, invalid)
         self.assertEqual(before, authoritative_state_hash(engine.state))
+
+    def test_stale_life_prevents_counter_and_life_commit_atomically(self):
+        engine = self.session(120_400_006).engine
+        source = self.token(
+            engine,
+            "A",
+            "Infect Lifelink Source",
+            keywords=("Infect", "Lifelink"),
+        )
+        engine.state.players["A"].life = 20
+        prepared_damage = prepare_damage_batch(
+            engine,
+            (
+                self.proposal(
+                    engine,
+                    source,
+                    "B",
+                    2,
+                    event_id="damage:life-counter-atomic",
+                ),
+            ),
+        )
+        plan = plan_damage_result_commit(
+            engine,
+            PreparedDamageResults(
+                events=prepared_damage.result_events,
+                effects=prepared_damage.result_effects,
+                journal=prepared_damage.result_journal,
+            ),
+        )
+        engine.state.players["A"].life = 19
+
+        with self.assertRaisesRegex(ValueError, "Life plan is stale"):
+            commit_damage_result_plan(engine, plan)
+        self.assertEqual(19, engine.state.players["A"].life)
+        self.assertEqual(0, engine.state.players["B"].poison)
 
     def test_damage_results_property_1000_deterministic_transitions(self):
         engine = self.session(120_400_005).engine

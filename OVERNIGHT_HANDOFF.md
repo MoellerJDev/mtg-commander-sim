@@ -17,10 +17,12 @@ or provider-session data.
 
 - Public repository: `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`; do not create `master`.
-- Certified `main` is `40241e6a7a4e77a3dab3df93c6a726b0f82186fb`;
-  its five post-merge CI jobs passed in run `30732155279`.
-- The typed tap-state branch is merged and deleted. Active work is the focused
-  `feat/rules-dependency-scheduler` branch based directly on certified `main`.
+- Certified `main` is `6c09dab765e615610f697a7a850bb6502093f0a0`;
+  its post-merge Ubuntu/Windows Python and Browser/Chromium jobs passed in run
+  `30753764851`.
+- PR #67 is merged. Active work is the focused
+  `rules/damage-results-and-replacement-hardening` branch based directly on
+  certified `main`.
 - The live branch, pull request, exact-head CI, and clean-tree state must be
   read from `git`, `gh`, and the generated platform ledger rather than inferred
   from an older handoff.
@@ -50,7 +52,7 @@ fixed same-controller subtype anthem. Generated Markdown remains presentation
 only; its JSON and source inputs are authoritative.
 
 The pinned development line is package `0.8.0`, Protocol `3.0`, CardProgram
-schema `2`, Oracle compiler `oracle-ir-v12`, and capability registry `1/6` on
+schema `2`, Oracle compiler `oracle-ir-v13`, and capability registry `1/10` on
 the current feature branch.
 Snapshot dates, source hashes, capability totals, CardProgram/compiler totals,
 test classes, replay/privacy/browser status, and architecture debt are generated
@@ -83,21 +85,20 @@ phased-out objects, rollback, replay, and implementation mutations. The
 architecture audit reports a negative engine delta with no new direct-write
 identity or specificity debt.
 
-These capabilities use registry `1/6` and remain `tested`, not `trusted`.
+These capabilities use the current registry and remain `tested`, not `trusted`.
 Complete tap/untap prohibitions, general replacement ordering, and complete
 derived-characteristic closure remain explicit blockers. This slice does not
 upgrade legacy-reviewed CardPrograms or claim complete CR 701.26/122.1d
 interactions.
 
-## Active dependency scheduler
+## Active rules batch
 
-The active branch adds one generated, source-pinned queue that groups all
-reviewed blocked behavioral rules and all unclassified nonpassing rules into
-dependency-ordered subsystems. It records current implementation/test evidence,
-active profiles, compiler impact, and a source-controlled selected batch. The
-first selection is the bounded CR 614/616 replacement-choice and nested-event
-cluster; no implementation or trust promotion for that cluster is part of the
-scheduler slice itself.
+The current branch fixes Commander damage to use stable physical commander
+designations, splits and hardens the replacement subsystem, enforces minimum
+trusted-capability evidence, routes represented life/counter results through
+typed precommit owners, and expands generic Oracle/CardProgram lowering for
+damage-result keywords plus closed static quantity/prevention wording. The
+generated next batch is persistent prevention shields and typed redirection.
 
 ## Merge discipline
 
@@ -111,7 +112,7 @@ scheduler slice itself.
 
 ## Next checkpoint
 
-Finish documentation/generator reconciliation and validate the focused branch:
+Finish exact-head validation and merge the focused branch:
 
 ```bash
 python scripts/update_capability_evidence.py --check
@@ -122,9 +123,8 @@ python scripts/update_architecture_audit.py --check
 python scripts/update_platform_status.py --check
 ```
 
-Validate queue completeness, dependency ordering, and stale-output rejection;
-then commit the coherent branch and run `scripts/local_merge_gate.py` against
-that exact SHA. Keep Playwright/server work headless with `--no-open`. Require
-the public CI matrix for the same SHA before merge. After normal merge and
-branch cleanup, start the selected replacement-event batch from fresh
+Commit the coherent branch and run `scripts/local_merge_gate.py` against that
+exact SHA. Keep Playwright/server work headless with `--no-open`. Require the
+public CI matrix for the same SHA before merge. After normal merge and branch
+cleanup, start the selected prevention-shield/redirection batch from fresh
 certified `main`.

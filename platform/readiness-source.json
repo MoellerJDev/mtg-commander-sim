@@ -6,11 +6,11 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "damage_result_events",
-    "branch": "rules/damage-result-events",
-    "commit_reference": "focused CR 120.3/120.4c damage-result branch based on certified main b29cc7ce3b048b94eb6483b10bbbc3e7f9364f16; exact-head certification pending",
+    "active_phase": "damage_results_and_replacement_hardening",
+    "branch": "rules/damage-results-and-replacement-hardening",
+    "commit_reference": "focused damage-result, physical Commander-identity, and replacement-hardening branch based on certified main 6c09dab765e615610f697a7a850bb6502093f0a0; exact-head certification pending",
     "branch_ancestry": {
-      "focused_branch_base": "b29cc7ce3b048b94eb6483b10bbbc3e7f9364f16",
+      "focused_branch_base": "6c09dab765e615610f697a7a850bb6502093f0a0",
       "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
@@ -475,6 +475,13 @@
         "number": 66,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/66"
+      },
+      {
+        "base": "main",
+        "head": "rules/damage-result-events",
+        "number": 67,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/67"
       }
     ],
     "tags": [
@@ -553,8 +560,14 @@
     {
       "id": "damage_result_events",
       "name": "Typed atomic damage-result event transaction",
+      "status": "integrated_on_certified_main",
+      "evidence": "Certified main through PR 67 groups final simultaneous CR 120.3 outcomes by affected subject, applies containing-event replacements before contained life/counter results, validates one mutation-only commit plan, and supports represented Infect, Wither, Lifelink, fixed Toxic, fixed life-gain multiplication, and a whole-result life floor. Prevention, multitype permanents, four-player attribution/APNAP, seat-scoped privacy, exact replay, atomic failure, source hashes, and killed implementation mutants are covered."
+    },
+    {
+      "id": "damage_results_replacement_hardening",
+      "name": "Damage-result, Commander identity, and replacement hardening",
       "status": "implementation_complete_certification_pending",
-      "evidence": "The focused branch groups final simultaneous CR 120.3 outcomes by affected subject, applies containing-event replacements before contained life/counter results, validates one mutation-only commit plan, and supports represented Infect, Wither, Lifelink, fixed Toxic, fixed life-gain multiplication, and a whole-result life floor. Tests cover prevention, multitype permanents, four-player source attribution/APNAP, seat-scoped choice privacy, exact command replay, atomic failure, source hashes, and killed implementation mutants. Persistent shields, redirection, dynamic Toxic, unrepresented source LKI/ability grants, remaining result-replacement families, excess selection, and resumable mana-payment choices remain blocked."
+      "evidence": "The focused branch attributes Commander combat damage to stable physical commander designations across zone and control changes; preserves explicit historical Game Record v3 behavior; splits the replacement monolith into immutable model, applicability, typed operation, ordering, and strict replay owners; validates nested APNAP choosers; canonicalizes declines; routes represented life and counter damage results through typed precommit owners; enforces nonempty positive, negative, replay, and mutation trust evidence; and generically compiles Infect, Wither, Lifelink, fixed Toxic, closed double-damage wording, and closed fixed-prevention wording. Commander-legal exact Oracle support rises from 338 to 403 and trusted CardPrograms from 359 to 403 without adding card-name dispatch."
     },
     {
       "id": "rules_snapshot",
@@ -580,8 +593,8 @@
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
-    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_eight_bounded_runtime_components_with_strict_binding_and_focused_tap_token_counter_damage_and_damage_result_mutation_ports",
-    "capability_evidence": "implemented_registry_v9_explicit_generated_test_rule_profile_evidence_index_with_separate_dependency_and_implementation_mutation_status",
+    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_eight_bounded_runtime_components_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_and_player_counter_mutation_ports",
+    "capability_evidence": "implemented_registry_v10_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status",
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "hidden_information": "implemented_projected_protocol",
@@ -589,17 +602,17 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "12d55cede8e02e05f6f298a77a788d898e89e784",
+    "baseline_commit": "6c09dab765e615610f697a7a850bb6502093f0a0",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30743425652,
+      "run_id": 30753764851,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30743425652"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30753764851"
     },
     "local": {
       "compile": "pass",
       "deterministic_tests": "pass_full_exact_commit_gate",
-      "focused_rules_tests": "pass_rules_scheduler_complete_section_and_rule_assignment_dependency_order_profile_compiler_evidence_selected_batch_stale_output_and_invalid_catalog_checks",
+      "focused_rules_tests": "pass_physical_commander_identity_nested_replacement_immutability_strict_replay_typed_operations_canonical_life_counter_damage_results_generic_keyword_static_damage_compilation_and_trust_evidence_mutations",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
@@ -615,10 +628,10 @@
     "replay": "pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner",
     "privacy": "pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner",
       "semantic_preflight": "reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory",
-      "card_program_census": "full_38484_trusted_741_residual_35494_failed_2249; commander_legal_31623_trusted_359_residual_31263_failed_1; damage_slice_exact_delta_zero"
+      "card_program_census": "full_38484_trusted_802_residual_35433_failed_2249; commander_legal_31623_trusted_403_residual_31219_failed_1; commander_trusted_delta_plus_44; commander_oracle_exact_delta_plus_65; commander_material_residual_delta_minus_420"
   },
   "blockers": [
-    "damage replacement/prevention remains bounded to represented fixed static quantity changes, fixed prevention, typed result events, Infect, Wither, Lifelink, fixed Toxic, fixed life-gain multiplication, and a whole-result life floor; persistent/divisible shields, redirection, non-damage transformations, dynamic Toxic, unrepresented source LKI/ability grants, remaining result-replacement families, excess selection, and replacement choices during mana payment remain unimplemented",
+    "damage replacement/prevention remains bounded to represented and closed generically compiled static quantity changes and fixed prevention plus typed result events; persistent/divisible shields, redirection, non-damage transformations, unresolved dynamic Toxic values, remaining result-replacement families, excess selection, and replacement choices during mana payment remain unimplemented",
     "typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, universal replacement participation beyond represented stun and runtime-component events, and complete effective-characteristic closure",
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
@@ -630,5 +643,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Certify and merge the focused damage-result slice, clean the branch, then begin the generated dependency-ready CR 210.1 Battle defense-characteristic/entry batch from fresh certified main."
+  "next_task": "Certify and merge the damage-result, physical Commander-identity, and replacement-hardening branch, clean the branch, then begin the generated damage-prevention shields and redirection batch from fresh certified main."
 }

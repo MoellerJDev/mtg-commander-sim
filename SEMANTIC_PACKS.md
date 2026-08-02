@@ -116,9 +116,11 @@ components become immutable affected-subject result trees; represented Infect,
 Wither, Lifelink, fixed Toxic, fixed life-gain multiplication, and a whole-
 result life floor resolve before one atomic commit. This is not a claim that
 arbitrary damage Oracle text is compiled: persistent prevention shields,
-redirection, dynamic Toxic, unrepresented source LKI/ability grants, remaining
-CR 120.4 result replacements, excess damage, and trigger-on-trigger placement
-remain explicit untrusted dependencies.
+redirection, unresolved dynamic Toxic values, incomplete continuous ability
+closure, remaining CR 120.4 result replacements, excess damage, and trigger-
+on-trigger placement remain explicit untrusted dependencies. Represented
+source keyword facts are snapshotted and use last-known information if the
+source leaves before the damage result commits.
 
 ## Typed tap-state execution
 

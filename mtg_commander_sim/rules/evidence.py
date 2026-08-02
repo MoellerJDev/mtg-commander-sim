@@ -22,6 +22,9 @@ EVIDENCE_CLASSES = {
     "fuzz",
     "mutation",
 }
+MINIMUM_TRUSTED_EVIDENCE = frozenset(
+    {"positive", "negative", "replay", "mutation"}
+)
 DEFAULT_CAPABILITY_EVIDENCE = (
     Path(__file__).resolve().with_name("capability-evidence.json")
 )
@@ -111,6 +114,9 @@ def validate_capability_evidence_index(
         raise CapabilityEvidenceError("declarations must be a list")
     known_profiles = set(registry.profiles)
     evidence_by_capability: dict[str, set[str]] = {}
+    profiles_by_capability_evidence: dict[
+        tuple[str, str], set[str]
+    ] = {}
     identities: set[tuple[str, str, str]] = set()
     normalized: list[dict[str, Any]] = []
     for index, candidate in enumerate(declarations):
@@ -157,9 +163,10 @@ def validate_capability_evidence_index(
             raise CapabilityEvidenceError(
                 f"declarations[{index}] requires official_rule_ids"
             )
-        if set(rules) - set(capability["official_rules"]):
+        if set(rules) != set(capability["official_rules"]):
             raise CapabilityEvidenceError(
-                f"{test_id} cites rules outside {capability_id}"
+                f"{test_id} must cite the current official rules for "
+                f"{capability_id}"
             )
         if not profiles or set(profiles) - known_profiles or set(
             profiles
@@ -185,6 +192,9 @@ def validate_capability_evidence_index(
         evidence_by_capability.setdefault(capability_id, set()).add(
             evidence_class
         )
+        profiles_by_capability_evidence.setdefault(
+            (capability_id, evidence_class), set()
+        ).update(profiles)
     expected_order = sorted(
         normalized,
         key=lambda row: (
@@ -200,17 +210,30 @@ def validate_capability_evidence_index(
     for capability in registry.capabilities():
         if capability["status"] != "trusted":
             continue
-        supplied = evidence_by_capability.get(capability["id"], set())
-        missing = set(capability["required_evidence"]) - supplied
+        capability_id = capability["id"]
+        supplied = evidence_by_capability.get(capability_id, set())
+        required = (
+            set(capability["required_evidence"])
+            | MINIMUM_TRUSTED_EVIDENCE
+        )
+        missing = required - supplied
         if missing:
             raise CapabilityEvidenceError(
-                f"Trusted {capability['id']} lacks explicit evidence: "
+                f"Trusted {capability_id} lacks explicit evidence: "
                 + ", ".join(sorted(missing))
             )
-        if "mutation" not in supplied:
-            raise CapabilityEvidenceError(
-                f"Trusted {capability['id']} lacks implementation mutation evidence"
+        expected_profiles = set(capability["supported_profiles"])
+        for evidence_class in sorted(required):
+            covered_profiles = profiles_by_capability_evidence.get(
+                (capability_id, evidence_class), set()
             )
+            missing_profiles = expected_profiles - covered_profiles
+            if missing_profiles:
+                raise CapabilityEvidenceError(
+                    f"Trusted {capability_id} {evidence_class} evidence "
+                    "does not cover supported profiles: "
+                    + ", ".join(sorted(missing_profiles))
+                )
     payload = dict(raw)
     fingerprint = str(payload.pop("fingerprint") or "")
     if fingerprint != _hash(payload):

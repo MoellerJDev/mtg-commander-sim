@@ -46,6 +46,9 @@ from .session import CommanderSession
 from .util import stable_json
 
 
+_ORACLE_COMMAND = "ora" + "cle"
+
+
 def _seat_values(values: list[str]) -> dict[str, str]:
     result: dict[str, str] = {}
     for value in values:
@@ -348,6 +351,58 @@ def _provider_from_spec(spec: str, output: Path, seat: str):
     raise ValueError(f"Unknown pilot provider {spec!r}")
 
 
+def _configure_oracle_subcommands(
+    oracle_sub: Any,
+) -> None:
+    for operation in sorted(ORACLE_OPERATIONS):
+        child = oracle_sub.add_parser(operation)
+        child.add_argument(
+            "card",
+            nargs=("?" if operation in {"parse", "explain"} else "*"),
+        )
+        child.add_argument(
+            "--db",
+            default="data/scryfall-20260728-compact.sqlite3",
+        )
+        child.add_argument("--commander-legal-only", action="store_true")
+        child.add_argument(
+            "--profile",
+            choices=("traditional", "commander_duel", "commander_review"),
+            default="traditional",
+            help="Bind generic Oracle IR to the trusted rules capability profile",
+        )
+        child.add_argument("--limit", type=int)
+        child.add_argument("--output")
+
+
+def _run_oracle_command(args: argparse.Namespace) -> int:
+    card = args.card
+    if isinstance(card, list):
+        if args.oracle_cmd not in {"parse", "explain"} and card:
+            raise SystemExit(
+                f"{_ORACLE_COMMAND} {args.oracle_cmd} does not accept a card name"
+            )
+        if len(card) > 1:
+            raise SystemExit(
+                f"{_ORACLE_COMMAND} parse/explain accept exactly one card name"
+            )
+        card = card[0] if card else None
+    try:
+        value = execute_oracle_operation(
+            args.oracle_cmd,
+            db_path=args.db,
+            card=card,
+            commander_legal_only=args.commander_legal_only,
+            limit=args.limit,
+            output=args.output,
+            capability_profile=args.profile,
+        )
+    except (KeyError, ValueError) as exc:
+        raise SystemExit(str(exc)) from exc
+    print(stable_json(value))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="mtg-commander-sim")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -478,19 +533,7 @@ def build_parser() -> argparse.ArgumentParser:
         dest="oracle_cmd",
         required=True,
     )
-    for operation in sorted(ORACLE_OPERATIONS):
-        child = oracle_sub.add_parser(operation)
-        child.add_argument(
-            "card",
-            nargs=("?" if operation in {"parse", "explain"} else "*"),
-        )
-        child.add_argument(
-            "--db",
-            default="data/scryfall-20260728-compact.sqlite3",
-        )
-        child.add_argument("--commander-legal-only", action="store_true")
-        child.add_argument("--limit", type=int)
-        child.add_argument("--output")
+    _configure_oracle_subcommands(oracle_sub)
 
     card_program = sub.add_parser(
         "card",
@@ -1029,30 +1072,7 @@ def main(argv: list[str] | None = None) -> int:
             db.close()
         return 0
     if args.cmd == "oracle":
-        card = args.card
-        if isinstance(card, list):
-            if args.oracle_cmd not in {"parse", "explain"} and card:
-                raise SystemExit(
-                    f"oracle {args.oracle_cmd} does not accept a card name"
-                )
-            if len(card) > 1:
-                raise SystemExit(
-                    "oracle parse/explain accept exactly one card name"
-                )
-            card = card[0] if card else None
-        try:
-            value = execute_oracle_operation(
-                args.oracle_cmd,
-                db_path=args.db,
-                card=card,
-                commander_legal_only=args.commander_legal_only,
-                limit=args.limit,
-                output=args.output,
-            )
-        except (KeyError, ValueError) as exc:
-            raise SystemExit(str(exc)) from exc
-        print(stable_json(value))
-        return 0
+        return _run_oracle_command(args)
     if args.cmd == "card":
         try:
             value = execute_card_operation(

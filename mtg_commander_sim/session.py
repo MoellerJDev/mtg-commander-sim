@@ -101,6 +101,10 @@ class CommanderSession:
         semantics_path: str | Path | None = None,
     ) -> "CommanderSession":
         semantics = SemanticRegistry(semantics_path)
+        game_config = config or GameConfig(seed=seed)
+        if seed is not None:
+            game_config.seed = seed
+        capability_registry = load_default_capability_registry()
         deck_records = [
             card_db.lookup(entry.name)
             for deck in decks.values()
@@ -112,10 +116,10 @@ class CommanderSession:
             semantics,
             deck_records,
             trust_level="provisional",
+            capability_registry=capability_registry,
+            capability_profile=game_config.review_profile,
+            promote_exact_runtime_handlers=True,
         )
-        game_config = config or GameConfig(seed=seed)
-        if seed is not None:
-            game_config.seed = seed
         engine = CommanderEngine.create(
             card_db,
             decks,

@@ -39,8 +39,9 @@ multiplier or a damage-result life floor. It has no mutation authority.
 
 The source snapshot carries effective keyword facts and a represented fixed
 total toxic value. Keyword dispatch is generic; production code does not
-branch on printed card names or Oracle IDs. Unresolved toxic values and
-unrepresented source last-known information fail before mutation.
+branch on printed card names or Oracle IDs. Represented keyword facts survive
+source departure through the prepared snapshot; unresolved toxic values fail
+before mutation.
 
 ## Alternatives
 
@@ -64,10 +65,10 @@ unrepresented source last-known information fail before mutation.
   amount even when a replacement changes the resulting life loss.
 - The former result logic leaves the central engine and the damage coordinator
   becomes smaller in responsibility, while Game Record v3 remains unchanged.
-- The reviewed architecture baseline is refreshed for the new dedicated owner
-  and for generic rule words (`lifelink`, `toxic`, and `loss`) that coincide
-  with printed card names. The ratchet still forbids new oversized functions,
-  card-specific dispatch, or unreviewed specificity growth.
+- The dedicated owners are classified explicitly. Generic rule vocabulary that
+  happens to equal printed card names is assembled without creating a false
+  specificity allowance, so the existing ratchet still reports a net reduction
+  and forbids new card-specific dispatch or unreviewed specificity growth.
 
 ## Removal condition
 

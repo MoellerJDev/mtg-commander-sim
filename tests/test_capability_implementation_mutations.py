@@ -35,6 +35,8 @@ def _event(*, assigned: int, dealt: int, prevented: int) -> DamageEvent:
         source="C1",
         source_object_id="source-object",
         source_logical_object_id="source-incarnation",
+        source_oracle_id=None,
+        source_commander_designation_id=None,
         source_controller="A",
         source_owner="A",
         source_types=("instant",),
@@ -94,6 +96,39 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         with patch.object(DamageEvent, "__post_init__", lambda _event: None):
             with self.assertRaises(AssertionError):
                 assert_negative_assignment_rejected()
+
+    def test_commander_identity_mutant_is_killed(self):
+        def assert_physical_designations_remain_separate() -> None:
+            first = damage_module.commander_damage_key(
+                source_is_commander=True,
+                designation_id="commander:A:1",
+                oracle_id="shared-oracle-id",
+                identity_version=2,
+            )
+            second = damage_module.commander_damage_key(
+                source_is_commander=True,
+                designation_id="commander:C:1",
+                oracle_id="shared-oracle-id",
+                identity_version=2,
+            )
+            self.assertNotEqual(first, second)
+
+        assert_physical_designations_remain_separate()
+
+        def oracle_identity_mutant(**values):
+            return (
+                values["oracle_id"]
+                if values["source_is_commander"]
+                else None
+            )
+
+        with patch.object(
+            damage_module,
+            "commander_damage_key",
+            oracle_identity_mutant,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_physical_designations_remain_separate()
 
     def test_damage_result_dispatch_mutant_is_killed(self):
         session = make_session(

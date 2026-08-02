@@ -25,7 +25,10 @@ from .profiles import (
 from .semantics import SemanticRegistry
 from .util import mana_cost_to_vector, stable_json
 
-from .rules.capabilities import load_default_capability_registry
+from .rules.capabilities import (
+    CapabilityRegistry,
+    load_default_capability_registry,
+)
 
 
 PREFLIGHT_SCHEMA_VERSION = 3
@@ -726,6 +729,28 @@ def card_semantic_status(
     }
 
 
+def _register_deck_programs(
+    db: CardDatabase,
+    deck: DeckDefinition,
+    registry: SemanticRegistry,
+    capability_registry: CapabilityRegistry,
+    capability_profile: str,
+) -> dict[str, Any]:
+    return register_generated_programs(
+        db,
+        registry,
+        (
+            db.lookup(entry.name)
+            for entry in deck.entries
+            if entry.board in {"mainboard", "commander"}
+        ),
+        trust_level="provisional",
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
+        promote_exact_runtime_handlers=True,
+    )
+
+
 def semantic_preflight(
     db: CardDatabase,
     deck_or_source: DeckDefinition | str | Path,
@@ -744,17 +769,8 @@ def semantic_preflight(
             deck_or_source, force_refresh=force_refresh
         )
     )
-    generation = register_generated_programs(
-        db,
-        registry,
-        (
-            db.lookup(entry.name)
-            for entry in deck.entries
-            if entry.board in {"mainboard", "commander"}
-        ),
-        trust_level="provisional",
-        capability_registry=capability_registry,
-        capability_profile=capability_profile,
+    generation = _register_deck_programs(
+        db, deck, registry, capability_registry, capability_profile
     )
     cards = []
     card_programs: dict[str, Any] = {}

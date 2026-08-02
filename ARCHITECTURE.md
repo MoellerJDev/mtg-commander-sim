@@ -911,10 +911,12 @@ The new rules primitives sit below both generated and hand-authored semantics:
   view; applicability is checked against the characteristics produced by
   earlier layers. The first reviewed component is a fixed subtype anthem in
   layer 7c, not a claim of general continuous-effect compilation.
-- `replacement_effects.py` represents immutable nested replaceable-event trees,
-  affected objects, priority classes, APNAP traversal, optional declines,
-  repeated applicability, containing-event-before-contained-event ordering,
-  entry replacement scope, and exact selection journals. The companion
+- `replacement/` owns deeply immutable nested replaceable-event trees, affected
+  objects, a closed versioned typed-operation vocabulary, applicability,
+  priority classes, APNAP traversal, canonical optional declines, repeated
+  applicability, containing-event-before-contained-event ordering, strict
+  deserialization, entry replacement scope, and exact selection journals.
+  `replacement_effects.py` is the narrow compatibility facade. The companion
   `replacement_decisions.py` suspends competing choices to the affected seat
   and resumes the same semantic instruction without exposing authoritative
   batches in projections.
@@ -927,6 +929,9 @@ The new rules primitives sit below both generated and hand-authored semantics:
   generated counters on battlefield permanents. Fixed integral quantity
   replacements suspend to the affected permanent controller and traverse
   simultaneous events in APNAP order before any counter mutates.
+- `counter_state.py` and `life_state.py` are canonical typed precommit owners
+  for represented player/permanent counters and life totals. They validate an
+  entire batch and stale-state conditions before applying any transition.
 - `damage.py` coordinates source/recipient snapshots, immutable proposals,
   quantity replacement/prevention, and normalized final events for represented
   combat, semantic, and mana-result damage. `damage_results.py` owns immutable
@@ -935,6 +940,10 @@ The new rules primitives sit below both generated and hand-authored semantics:
   fixed prevention, life-gain multiplication, and whole-result life-floor
   components participate without state access; unresolved choices during mana
   payment fail before mutation.
+- `commander.py` owns initial physical commander designation and the separate
+  21-combat-damage ledger key. Designations survive zone and control changes,
+  are absent from ordinary copies, and retain explicit legacy Game Record v3
+  replay behavior when the additive identity marker is absent.
 - `state_based_actions.py` evaluates the deterministic permanent subset of CR
   704 plus token and represented spell/card-copy cessation from one immutable
   snapshot. The engine applies the resulting batch, captures last-known
@@ -965,10 +974,10 @@ into the layer evaluator; entry counters, player counters, costs, rule actions,
 and continuation-sensitive legacy counter producers do not yet use the focused
 counter owner. Represented Infect, Wither, Lifelink, fixed Toxic, and bounded
 damage-result replacements now share the damage-result transaction. Persistent
-prevention shields, redirection, non-damage transformations, dynamic Toxic,
-unrepresented source LKI/ability grants, remaining result-replacement families,
-and replacement choices during mana payment remain outside its certified
-boundary.
+prevention shields, redirection, non-damage transformations, unresolved dynamic
+Toxic values, incomplete continuous characteristic closure, remaining result-
+replacement families, and replacement choices during mana payment remain
+outside its certified boundary.
 Not every zone/draw/enters producer routes through the replacement engine, and
 the state-action evaluator does not yet
 cover Sagas, dungeons, Roles, speed, maximum-counter wording outside the

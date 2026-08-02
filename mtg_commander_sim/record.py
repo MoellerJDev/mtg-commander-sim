@@ -12,6 +12,11 @@ from typing import Any, Iterable, Mapping, Sequence
 from .carddb import CardDatabase
 from .engine import CommanderEngine
 from .model import Event, GameState
+from .record_commander_identity import (
+    commander_damage_identity_version,
+    validate_commander_damage_identity_provenance,
+)
+from .record_decks import deck_fingerprints, deck_list_fingerprints
 from .record_trust import (
     card_program_trust_provenance,
     implicit_semantic_execution_provenance,
@@ -132,40 +137,6 @@ def database_fingerprint(card_db: CardDatabase) -> dict[str, Any]:
         "metadata_hash": _canonical_hash(stable_metadata),
         "metadata": stable_metadata,
     }
-
-
-def deck_list_fingerprints(state: GameState) -> dict[str, str]:
-    result: dict[str, str] = {}
-    for seat in state.turn_order:
-        counts = Counter(
-            (
-                card.printed_name,
-                "commander" if card.is_commander else "mainboard",
-            )
-            for card in state.cards.values()
-            if card.owner == seat and card.is_card_object
-        )
-        payload = {
-            "commanders": sorted(
-                card.printed_name
-                for card in state.cards.values()
-                if card.owner == seat
-                and card.is_card_object
-                and card.is_commander
-            ),
-            "cards": sorted(
-                (name, quantity, board)
-                for (name, board), quantity in counts.items()
-            ),
-        }
-        result[seat] = _canonical_hash(payload)
-    return result
-
-
-def deck_fingerprints(state: GameState) -> dict[str, str]:
-    """Compatibility alias; Game Record v3 now names this exact list hash."""
-
-    return deck_list_fingerprints(state)
 
 
 def event_for_trace(event: Event, trace_level: str) -> dict[str, Any] | None:
@@ -749,6 +720,9 @@ def build_manifest(
             "starting_life": state.config.starting_life,
             "free_mulligans": state.config.effective_free_mulligans(len(state.turn_order)),
             "first_player_draws": state.config.effective_first_player_draws(len(state.turn_order)),
+            "commander_damage_identity_version": commander_damage_identity_version(
+                state.commander_damage_identity_version
+            ),
         },
         "player_count": len(state.turn_order),
         "turn_order": list(state.turn_order),
@@ -1017,6 +991,9 @@ def replay_record(
         }
 
     state = GameState.from_dict(initial["state"])
+    validate_commander_damage_identity_provenance(
+        manifest, state.commander_damage_identity_version
+    )
     engine = CommanderEngine(card_db, state, semantics)
     engine.permissions.reissue_pending()
     applied = _apply_replay_commands(
@@ -1171,6 +1148,9 @@ def verify_record_suffix(
     state_payload = copy.deepcopy(dict(baseline_state))
     state_payload["capabilities"] = {}
     state = GameState.from_dict(state_payload)
+    validate_commander_damage_identity_provenance(
+        manifest, state.commander_damage_identity_version
+    )
     base_state_hash = authoritative_state_hash(state)
     if baseline_commands:
         recorded_base_hash = commands[baseline_commands - 1].get(

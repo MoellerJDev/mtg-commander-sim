@@ -5,7 +5,9 @@ from typing import Any, Mapping, Protocol, Sequence
 
 from .replacement_effects import (
     ReplacementChoiceRequired,
+    ReplacementContinuation,
     ReplacementEffect,
+    ReplacementEffectError,
     ReplacementEventBatch,
     next_batch_replacement_choice,
     replacement_choice_payload,
@@ -110,6 +112,11 @@ def issue_combat_damage_replacement_choice(
 ) -> None:
     """Suspend simultaneous combat damage before any damage mutation."""
 
+    if any(not isinstance(value, str) or not value for value in selections):
+        raise ReplacementEffectError(
+            "Combat replacement selections must be canonical strings"
+        )
+
     pending = required.pending
     seat = pending.choice.chooser
     context = replacement_choice_payload(pending, required.effects)
@@ -179,14 +186,12 @@ def complete_replacement_order_choice(
     if not isinstance(selected, str) or not selected:
         raise error_type("A replacement effect selection is required")
     continuation = decision.continuation
-    batch = ReplacementEventBatch.from_dict(
-        dict(continuation.get("replacement_batch") or {})
-    )
-    effects = tuple(
-        ReplacementEffect.from_dict(value)
-        for value in continuation.get("replacement_effects", ())
-        if isinstance(value, Mapping)
-    )
+    try:
+        restored = ReplacementContinuation.from_dict(continuation)
+    except ReplacementEffectError as exc:
+        raise error_type(str(exc)) from exc
+    batch = restored.batch
+    effects = restored.effects
     pending = next_batch_replacement_choice(batch, effects)
     if pending is None or pending.choice.chooser != seat:
         raise error_type(
@@ -194,33 +199,19 @@ def complete_replacement_order_choice(
         )
     if selected not in pending.choice.legal_selections:
         raise error_type("Selected replacement is not currently available")
-    if continuation.get("replacement_resume_kind") == "combat_damage":
-        assignments = continuation.get("combat_assignments") or ()
-        if not isinstance(assignments, Sequence) or isinstance(
-            assignments, (str, bytes)
-        ) or any(not isinstance(value, Mapping) for value in assignments):
-            raise error_type(
-                "Combat-damage replacement continuation is malformed"
-            )
-        prior = continuation.get("replacement_selections") or ()
-        if not isinstance(prior, Sequence) or isinstance(
-            prior, (str, bytes)
-        ) or any(
-            value is not None and not isinstance(value, str)
-            for value in prior
-        ):
-            raise error_type(
-                "Combat-damage replacement selections are malformed"
-            )
+    if restored.resume_kind == "combat_damage":
         waiting = host._apply_combat_assignments(
-            [dict(value) for value in assignments],
-            replacement_selections=[*prior, selected],
+            restored.thaw_combat_assignments(),
+            replacement_selections=[
+                *restored.replacement_selections,
+                selected,
+            ],
         )
         if not waiting:
             host._grant_priority(host.state.active_player)
         return
 
-    stack_ref = str(continuation.get("stack_ref") or "")
+    stack_ref = restored.stack_ref
     item = next(
         (
             candidate
@@ -234,12 +225,10 @@ def complete_replacement_order_choice(
             "Replacement continuation stack object no longer exists"
         )
     host._validate_semantic_frame(
-        dict(continuation.get("semantic_frame") or {}),
+        restored.thaw_semantic_frame(),
         item,
     )
-    current_effect = copy.deepcopy(
-        dict(continuation.get("effect") or {})
-    )
+    current_effect = restored.thaw_effect()
     current_effect["_replacement_selections"] = [
         *list(current_effect.get("_replacement_selections") or []),
         selected,
@@ -248,14 +237,9 @@ def complete_replacement_order_choice(
         stack_ref=stack_ref,
         effects=[
             current_effect,
-            *[
-                copy.deepcopy(dict(value))
-                for value in continuation.get("remaining", ())
-            ],
+            *restored.thaw_remaining(),
         ],
-        destination=continuation.get("destination"),
-        note=str(continuation.get("note") or ""),
-        instruction_pointer=int(
-            continuation.get("instruction_pointer", 0)
-        ),
+        destination=restored.destination,
+        note=restored.note,
+        instruction_pointer=restored.instruction_pointer,
     )

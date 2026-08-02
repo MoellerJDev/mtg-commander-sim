@@ -4,6 +4,12 @@ from dataclasses import dataclass
 import re
 from typing import Any, Literal, Mapping, Protocol, Sequence
 
+from .counter_state import (
+    CounterChange,
+    CounterStateError,
+    commit_counter_changes,
+    plan_counter_changes,
+)
 from .damage_results import (
     commit_damage_result_plan,
     DamageResultError,
@@ -12,6 +18,7 @@ from .damage_results import (
     prepare_damage_results,
     PreparedDamageResults,
 )
+from .commander import CommanderIdentityError, commander_damage_key
 from .replacement_effects import (
     AffectedObject,
     ReplaceableEvent,
@@ -122,6 +129,8 @@ class DamageSourceSnapshot:
     logical_object_id: str
     controller: str
     owner: str
+    oracle_id: str | None = None
+    commander_designation_id: str | None = None
     types: tuple[str, ...] = ()
     subtypes: tuple[str, ...] = ()
     colors: tuple[str, ...] = ()
@@ -147,6 +156,10 @@ class DamageSourceSnapshot:
         ):
             raise DamageError(
                 "A known total toxic value must be a nonnegative integer"
+            )
+        if self.commander_designation_id is not None and not self.is_commander:
+            raise DamageError(
+                "Only a commander source may carry a designation identity"
             )
 
 
@@ -229,6 +242,10 @@ class DamageProposal:
             "source": self.source.ref,
             "source_object_id": self.source.object_id,
             "source_logical_object_id": self.source.logical_object_id,
+            "source_oracle_id": self.source.oracle_id,
+            "source_commander_designation_id": (
+                self.source.commander_designation_id
+            ),
             "source_controller": self.source.controller,
             "source_owner": self.source.owner,
             "source_types": list(self.source.types),
@@ -287,6 +304,8 @@ class DamageEvent:
     source: str
     source_object_id: str
     source_logical_object_id: str
+    source_oracle_id: str | None
+    source_commander_designation_id: str | None
     source_controller: str
     source_owner: str
     source_types: tuple[str, ...]
@@ -349,6 +368,10 @@ class DamageEvent:
             "source": self.source,
             "source_object_id": self.source_object_id,
             "source_logical_object_id": self.source_logical_object_id,
+            "source_oracle_id": self.source_oracle_id,
+            "source_commander_designation_id": (
+                self.source_commander_designation_id
+            ),
             "source_controller": self.source_controller,
             "source_owner": self.source_owner,
             "source_types": list(self.source_types),
@@ -502,6 +525,8 @@ def source_snapshot(
             else controller
         ),
         owner=source.owner,
+        oracle_id=source.oracle_id,
+        commander_designation_id=source.commander_designation_id,
         types=tuple(sorted(card_types)),
         subtypes=tuple(sorted(subtypes)),
         colors=tuple(
@@ -796,15 +821,25 @@ def apply_damage_results_to_permanent(
     }
     if damage == 0:
         return result
+    counter_changes: list[CounterChange] = []
+    mark_damage = 0
+    mark_deathtouch = False
     if "creature" in card_types:
-        card.deathtouch_damage = card.deathtouch_damage or deathtouch
+        mark_deathtouch = deathtouch
         if keywords.intersection({"infect", "wither"}):
-            card.counters["-1/-1"] = (
-                int(card.counters.get("-1/-1", 0)) + damage
+            counter_changes.append(
+                CounterChange(
+                    subject_kind="permanent",
+                    subject_id=card.object_id,
+                    counter_name="-1/-1",
+                    amount=damage,
+                    expected_zone=card.zone,
+                    expected_logical_object_id=card.logical_object_id,
+                )
             )
             result["minus_one_counters"] = damage
         else:
-            card.marked_damage += damage
+            mark_damage = damage
             result["marked_damage"] = damage
     for card_type, counter_name, result_name in (
         ("planeswalker", "loyalty", "loyalty_removed"),
@@ -812,15 +847,34 @@ def apply_damage_results_to_permanent(
     ):
         if card_type not in card_types:
             continue
-        before = max(0, int(card.counters.get(counter_name, 0)))
-        after = max(0, before - damage)
-        if after:
-            card.counters[counter_name] = after
-        else:
-            card.counters.pop(counter_name, None)
-        result[result_name] = before - after
-        if counter_name == "defense" and before > 0 and after == 0:
-            host._queue_siege_defeated_trigger(card)
+        counter_changes.append(
+            CounterChange(
+                subject_kind="permanent",
+                subject_id=card.object_id,
+                counter_name=counter_name,
+                amount=-damage,
+                expected_zone=card.zone,
+                expected_logical_object_id=card.logical_object_id,
+            )
+        )
+    try:
+        transitions = commit_counter_changes(
+            host, plan_counter_changes(host, tuple(counter_changes))
+        )
+    except CounterStateError as exc:
+        raise DamageError(str(exc)) from exc
+    for transition in transitions:
+        if transition.counter_name == "loyalty":
+            result["loyalty_removed"] = -transition.applied_delta
+        elif transition.counter_name == "defense":
+            result["defense_removed"] = -transition.applied_delta
+            if transition.before > 0 and transition.after == 0:
+                host._queue_siege_defeated_trigger(card)
+    if "creature" in card_types:
+        card.deathtouch_damage = (
+            card.deathtouch_damage or mark_deathtouch
+        )
+        card.marked_damage += mark_damage
     return result
 
 
@@ -849,6 +903,16 @@ def _final_event(
         source_object_id=str(payload.get("source_object_id") or ""),
         source_logical_object_id=str(
             payload.get("source_logical_object_id") or ""
+        ),
+        source_oracle_id=(
+            str(payload["source_oracle_id"])
+            if payload.get("source_oracle_id") is not None
+            else None
+        ),
+        source_commander_designation_id=(
+            str(payload["source_commander_designation_id"])
+            if payload.get("source_commander_designation_id") is not None
+            else None
         ),
         source_controller=str(payload.get("source_controller") or ""),
         source_owner=str(payload.get("source_owner") or ""),
@@ -1053,11 +1117,18 @@ def commit_prepared_damage_batch(
             and final.source_is_commander
         ):
             continue
-        commander_key = final.source_object_id
-        source_card = host.state.cards.get(commander_key)
-        if source_card is not None:
-            commander_key = source_card.oracle_id
-        if not commander_key:
+        try:
+            commander_key = commander_damage_key(
+                source_is_commander=final.source_is_commander,
+                designation_id=final.source_commander_designation_id,
+                oracle_id=final.source_oracle_id,
+                identity_version=(
+                    host.state.commander_damage_identity_version
+                ),
+            )
+        except CommanderIdentityError as exc:
+            raise DamageError(str(exc)) from exc
+        if commander_key is None:
             raise DamageError("Commander damage lost its source identity")
         commander_updates.append(
             (final.target, commander_key, final.dealt_amount)

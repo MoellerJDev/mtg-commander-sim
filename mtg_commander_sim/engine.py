@@ -58,6 +58,7 @@ from .combat_constraints import (
     DeclarationRestriction,
     DeclarationSearchLimitError,
 )
+from .commander import initial_commander_state
 from .declaration_costs import (
     DeclarationCost,
     normalized_oracle_line,
@@ -129,6 +130,7 @@ from .state_based_actions import (
     PermanentSnapshot,
     counter_maximums_from_oracle,
     evaluate_state_based_actions,
+    player_loss_seats,
 )
 from .targets import (
     TargetGroup,
@@ -246,118 +248,33 @@ class CommanderEngine:
         config: GameConfig | None = None,
         semantics: SemanticRegistry | None = None,
     ) -> "CommanderEngine":
-        config = config or GameConfig()
-        if not 2 <= len(decks) <= config.max_players:
-            raise ValueError(f"CommanderEngine supports 2-{config.max_players} players")
-        config.profile = config.effective_profile(len(decks))
-        if config.review_profile != "commander_review":
-            raise ValueError(f"Unsupported review profile {config.review_profile!r}")
-        if config.profile not in {"commander_duel", "commander_multiplayer"}:
-            raise ValueError(f"Unsupported Commander format profile {config.profile!r}")
-        if config.trace_level not in {"minimal", "standard", "debug"}:
-            raise ValueError(f"Unsupported trace level {config.trace_level!r}")
-        if config.semantic_policy not in {
-            "arbitrate_or_pause",
-            "trusted_only",
-        }:
-            raise ValueError(
-                f"Unsupported semantic policy {config.semantic_policy!r}"
-            )
-        turn_order = list(decks)
-        first_player = first_player or turn_order[0]
-        if first_player not in decks:
-            raise ValueError("first_player must name one of the supplied seats")
-        while turn_order[0] != first_player:
-            turn_order.append(turn_order.pop(0))
-        names = dict(player_names or {})
-        all_seats = list(turn_order)
-        players = {
-            seat: PlayerState(
-                seat=seat,
-                name=names.get(seat, seat),
-                life=config.starting_life,
-            )
-            for seat in all_seats
-        }
-        cards: dict[str, CardInstance] = {}
-        commander_ids: dict[str, list[str]] = {seat: [] for seat in all_seats}
-        deck_names = {seat: decks[seat].name for seat in all_seats}
-        ref_counters: dict[str, int] = {}
-
-        for seat in all_seats:
-            deck = decks[seat]
-            commander_names = list(deck.commanders) or [
-                entry.name for entry in deck.entries if entry.board == "commander"
-            ]
-            commander_remaining: dict[str, int] = {}
-            for commander in commander_names:
-                canonical = card_db.lookup(commander).name
-                commander_remaining[canonical] = commander_remaining.get(canonical, 0) + 1
-            serial = 0
-            for entry in deck.entries:
-                if entry.board not in {"mainboard", "commander"}:
-                    continue
-                for _ in range(entry.quantity):
-                    serial += 1
-                    record = card_db.lookup(entry.name)
-                    is_commander = entry.board == "commander"
-                    if not is_commander and commander_remaining.get(record.name, 0) > 0:
-                        is_commander = True
-                    if is_commander and commander_remaining.get(record.name, 0) > 0:
-                        commander_remaining[record.name] -= 1
-                    object_id = uuid.uuid4().hex
-                    ref = f"{seat}{serial:02d}"
-                    zone = "command" if is_commander else "library"
-                    card = CardInstance(
-                        object_id=object_id,
-                        ref=ref,
-                        oracle_id=record.oracle_id,
-                        printed_name=record.name,
-                        owner=seat,
-                        controller=seat,
-                        zone=zone,
-                        is_commander=is_commander,
-                        known_to=(
-                            []
-                            if zone == "library"
-                            else [seat]
-                            if zone in HIDDEN_ZONES
-                            else list(all_seats)
-                        ),
-                        revealed_to=list(all_seats) if zone in PUBLIC_ZONES else [],
-                    )
-                    cards[object_id] = card
-                    players[seat].zones[zone].append(object_id)
-                    if is_commander:
-                        commander_ids[seat].append(record.oracle_id)
-            randomizer = random.Random(f"{config.seed}|{seat}|initial")
-            randomizer.shuffle(players[seat].zones["library"])
-
-        state = GameState(
-            game_id=uuid.uuid4().hex,
+        state = initial_commander_state(
+            card_db,
+            decks,
+            first_player=first_player,
+            player_names=player_names,
             config=config,
-            players=players,
-            cards=cards,
-            deck_names=deck_names,
-            commander_oracle_ids=commander_ids,
-            turn_order=turn_order,
-            current_turn=None,
-            last_normal_turn_player=None,
-            active_player=None,
-            phase="setup",
-            step="mulligan",
-            ref_counters=ref_counters,
         )
         engine = cls(card_db, state, semantics)
         engine._log(
             None,
             "game.created",
-            f"Created {len(turn_order)}-player Commander game; {first_player} starts.",
-            {"decks": deck_names, "turn_order": turn_order, "seed": config.seed},
+            f"Created {len(state.turn_order)}-player Commander game; "
+            f"{state.turn_order[0]} starts.",
+            {
+                "decks": state.deck_names,
+                "turn_order": state.turn_order,
+                "seed": state.config.seed,
+            },
             importance=3,
         )
-        for seat in turn_order:
-            engine.draw(seat, config.opening_hand_size, reason="opening hand", private=True)
+        for seat in state.turn_order:
+            engine.draw(
+                seat,
+                state.config.opening_hand_size,
+                reason="opening hand",
+                private=True,
+            )
         engine._issue_mulligan_declaration()
         return engine
 
@@ -20649,14 +20566,7 @@ class CommanderEngine:
         for _ in range(100):
             if self.state.game_over:
                 return True
-            losers = []
-            for seat in self.active_seats:
-                player = self.state.players[seat]
-                if player.life <= 0 or player.poison >= self.state.config.poison_to_lose or player.attempted_empty_draw:
-                    losers.append(seat)
-                    continue
-                if any(value >= self.state.config.commander_damage_to_lose for value in player.commander_damage_received.values()):
-                    losers.append(seat)
+            losers = player_loss_seats(self.state, self.active_seats)
             if losers:
                 self._eliminate_players(losers, reason="state-based loss")
                 if self.state.game_over:

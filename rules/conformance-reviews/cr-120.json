@@ -208,7 +208,8 @@
       "implementation_components": [
         "damage_results.materialize_damage_results",
         "damage_results.plan_damage_result_commit",
-        "damage_results.commit_damage_result_plan"
+        "damage_results.commit_damage_result_plan",
+        "life_state.commit_life_changes"
       ],
       "executable_test_ids": [
         "tests.test_exact_deck_triggers.ExactDeckTriggerFamilyTests.test_reckless_fireweaver_damages_each_opponent",
@@ -241,7 +242,8 @@
       "implementation_components": [
         "damage_results.materialize_damage_results",
         "damage_results.plan_damage_result_commit",
-        "damage_results.commit_damage_result_plan"
+        "damage_results.commit_damage_result_plan",
+        "counter_state.commit_counter_changes"
       ],
       "executable_test_ids": [
         "tests.test_damage_result_events.DamageResultEventTests.test_infect_player_damage_is_poison_not_life_loss",
@@ -277,7 +279,8 @@
       "implementation_components": [
         "damage_results.materialize_damage_results",
         "damage_results.plan_damage_result_commit",
-        "damage_results.commit_damage_result_plan"
+        "damage_results.commit_damage_result_plan",
+        "counter_state.commit_counter_changes"
       ],
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_planeswalker_damage_removes_loyalty_counters",
@@ -307,7 +310,8 @@
       "implementation_components": [
         "damage_results.materialize_damage_results",
         "damage_results.plan_damage_result_commit",
-        "damage_results.commit_damage_result_plan"
+        "damage_results.commit_damage_result_plan",
+        "counter_state.commit_counter_changes"
       ],
       "executable_test_ids": [
         "tests.test_damage_result_events.DamageResultEventTests.test_infect_and_wither_use_minus_counters_only_on_creatures",
@@ -373,7 +377,8 @@
       "implementation_components": [
         "damage_results.materialize_damage_results",
         "damage_results.plan_damage_result_commit",
-        "damage_results.commit_damage_result_plan"
+        "damage_results.commit_damage_result_plan",
+        "life_state.commit_life_changes"
       ],
       "executable_test_ids": [
         "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_lifelink_counts_only_damage_not_prevented_by_protection",
@@ -409,7 +414,8 @@
       "implementation_components": [
         "damage._total_toxic_value",
         "damage_results.materialize_damage_results",
-        "damage_results.commit_damage_result_plan"
+        "damage_results.commit_damage_result_plan",
+        "counter_state.commit_counter_changes"
       ],
       "executable_test_ids": [
         "tests.test_damage_result_events.DamageResultEventTests.test_toxic_is_additional_only_for_creature_combat_damage_to_player",
@@ -446,7 +452,8 @@
       "implementation_components": [
         "damage_results.materialize_damage_results",
         "damage_results.plan_damage_result_commit",
-        "damage_results.commit_damage_result_plan"
+        "damage_results.commit_damage_result_plan",
+        "counter_state.commit_counter_changes"
       ],
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_removes_defense_instead_of_marking_damage",
@@ -479,16 +486,16 @@
       "implementation_components": [
         "damage.prepare_damage_batch",
         "damage.commit_prepared_damage_batch",
-        "replacement_effects.advance_replacement_batch",
+        "replacement.ordering.advance_replacement_batch",
         "replacement_decisions.issue_combat_damage_replacement_choice"
       ],
       "executable_test_ids": [
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_each_opponent_damage_uses_one_typed_batch",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_damage_replacement_choices_follow_apnap",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_validation_failure_is_atomic_before_any_damage_result",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_infect_creature_result_commits_with_other_damage_atomically",
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_furnace_and_daunting_order_changes_final_damage",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_each_opponent_damage_uses_one_typed_batch",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_damage_replacement_choices_follow_apnap",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_validation_failure_is_atomic_before_any_damage_result",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_infect_creature_result_commits_with_other_damage_atomically",
         "tests.test_damage_result_events.DamageResultEventTests.test_damage_result_replacement_choice_is_private_and_replays",
         "tests.test_damage_result_events.DamageResultEventTests.test_keyword_damage_results_replay_from_combat_assignment"
       ],
@@ -553,18 +560,18 @@
       "implementation_components": [
         "damage.prepare_damage_batch",
         "semantic_runtime.damage_replacements",
-        "replacement_effects.advance_replacement_batch",
+        "replacement.ordering.advance_replacement_batch",
         "replacement_decisions.issue_replacement_order_choice"
       ],
       "executable_test_ids": [
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_static_prevention_applies_to_each_simultaneous_event",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_each_opponent_damage_uses_one_typed_batch",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_damage_replacement_choices_follow_apnap",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_fixed_prevention_applies_per_controller",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_protection_prevents_player_and_colored_permanent_damage",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly"
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_furnace_and_daunting_order_changes_final_damage",
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_static_prevention_applies_to_each_simultaneous_event",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_each_opponent_damage_uses_one_typed_batch",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_damage_replacement_choices_follow_apnap",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_fixed_prevention_applies_per_controller",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_protection_prevents_player_and_colored_permanent_damage",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly"
       ],
       "required_scenarios": [
         "positive",
@@ -581,7 +588,7 @@
         "replay"
       ],
       "blockers": [
-        "only reviewed source-pinned static quantity, fixed prevention, and represented protection effects are registered",
+        "generic compilation covers a closed family of static quantity and fixed prevention wording, but broader conditional and dynamic Oracle grammar remains incomplete",
         "persistent shields, redirection, non-damage transformations, and explicit mana-result replacement choices remain incomplete"
       ],
       "notes": [
@@ -600,7 +607,7 @@
         "damage_results.prepare_damage_results",
         "damage_results.plan_damage_result_commit",
         "damage_results.commit_damage_result_plan",
-        "replacement_effects.advance_replacement_batch"
+        "replacement.ordering.advance_replacement_batch"
       ],
       "executable_test_ids": [
         "tests.test_damage_result_events.DamageResultEventTests.test_containing_result_replacement_precedes_life_gain_replacement",
@@ -644,8 +651,8 @@
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event",
         "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_lifelink_counts_only_damage_not_prevented_by_protection",
         "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_noncombat_damage_dispatches_final_damage_event",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly"
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_noncombat_damage_dispatches_final_damage_event",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly"
       ],
       "required_scenarios": [
         "positive",
@@ -774,7 +781,7 @@
         "CommanderEngine.apply_effect"
       ],
       "executable_test_ids": [
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_prevention_to_zero_ends_the_damage_replacement_event",
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_prevention_to_zero_ends_the_damage_replacement_event",
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event",
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_power_combat_source_assigns_no_damage",
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_damage_fails_closed"

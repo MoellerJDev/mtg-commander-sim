@@ -73,18 +73,26 @@ def _layer(relative: str) -> str:
         "mtg_commander_sim/profiles.py",
     }:
         return "adapter"
-    if relative.startswith("mtg_commander_sim/rules/") or relative in {
+    if relative.startswith(
+        (
+            "mtg_commander_sim/replacement/",
+            "mtg_commander_sim/rules/",
+        )
+    ) or relative in {
         "mtg_commander_sim/abilities.py",
         "mtg_commander_sim/choice_forms.py",
         "mtg_commander_sim/combat.py",
         "mtg_commander_sim/combat_constraints.py",
+        "mtg_commander_sim/commander.py",
         "mtg_commander_sim/continuous_effects.py",
         "mtg_commander_sim/counter_placement.py",
+        "mtg_commander_sim/counter_state.py",
         "mtg_commander_sim/damage.py",
         "mtg_commander_sim/damage_results.py",
         "mtg_commander_sim/declaration_costs.py",
         "mtg_commander_sim/declaration_restrictions.py",
         "mtg_commander_sim/engine.py",
+        "mtg_commander_sim/life_state.py",
         "mtg_commander_sim/mana.py",
         "mtg_commander_sim/mechanic_contracts.py",
         "mtg_commander_sim/permissions.py",
@@ -114,6 +122,14 @@ def _owner(relative: str, layer: str) -> str:
         return "oracle_compiler"
     if relative.startswith("mtg_commander_sim/rules/"):
         return "rules_capabilities"
+    if relative.startswith("mtg_commander_sim/replacement/"):
+        return "replacement_effects"
+    if relative == "mtg_commander_sim/commander.py":
+        return "commander_variant"
+    if relative == "mtg_commander_sim/counter_state.py":
+        return "counter_state"
+    if relative == "mtg_commander_sim/life_state.py":
+        return "life_state"
     if relative == "mtg_commander_sim/tap_state.py":
         return "tap_state_effects"
     if relative == "mtg_commander_sim/counter_placement.py":
@@ -149,6 +165,7 @@ def build_classifications() -> dict[str, Any]:
         layer = _layer(relative)
         allowed_dependencies = list(ALLOWED_DEPENDENCIES[layer])
         if relative in {
+            "mtg_commander_sim/commander.py",
             "mtg_commander_sim/engine.py",
             "mtg_commander_sim/mana.py",
             "mtg_commander_sim/rules_corpus.py",
@@ -200,8 +217,12 @@ def build_classifications() -> dict[str, Any]:
                             "card_programs/",
                             "semantic_runtime/",
                             "counter_placement.py",
+                            "counter_state.py",
+                            "commander.py",
                             "damage.py",
                             "damage_results.py",
+                            "life_state.py",
+                            "replacement/",
                             "tap_state.py",
                             "token_creation.py",
                             "replacement_decisions.py",

@@ -113,6 +113,11 @@ MUTATION_TESTS = {
         "CapabilityImplementationMutationTests."
         "test_replacement_nested_order_mutant_is_killed"
     ),
+    "format.commander.damage.physical_identity": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_commander_identity_mutant_is_killed"
+    ),
     "life.gain.replacement.static_multiplier": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

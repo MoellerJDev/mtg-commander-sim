@@ -74,6 +74,7 @@ class CounterPlacementEventSpec:
     amount: int
     source_ref: str | None
     effect_generated: bool
+    logical_object_id: str | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -112,6 +113,7 @@ class CounterPlacementEventSpec:
                 "placing_player": self.placing_player,
                 "target_controller": self.controller,
                 "target_zone": self.target_zone,
+                "target_logical_object_id": self.logical_object_id,
                 "target_kind": self.target_kind,
                 "target_types": sorted(set(self.target_types)),
                 "counter_name": self.counter_name,

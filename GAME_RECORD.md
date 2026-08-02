@@ -108,6 +108,17 @@ cessation, permanent-spell-copy resolution, and represented emblem creation
 therefore command-replay exactly. This is another additive v3 state
 extension.
 
+New Commander games also serialize
+`GameState.commander_damage_identity_version = 2` and one public-stable
+`CardInstance.commander_designation_id` on each actually designated physical
+commander. The designation, rather than Oracle ID, keys the 21-combat-damage
+ledger, so two players using the same named commander remain separate. It
+survives ordinary zone and control changes and is never copied onto an ordinary
+copy. The manifest repeats the identity version and replay verifies it against
+the initial checkpoint. Historical v3 records that omit the additive marker
+and designations retain their prior Oracle-ID attribution explicitly; they are
+not silently reinterpreted or rehashed.
+
 The same checkpoint serializes `GameState.timestamp_sequence`,
 `CardInstance.zone_timestamp`, and `CardInstance.world_supertype_timestamp`.
 The first two establish deterministic CR 613.7d zone-entry moments, including

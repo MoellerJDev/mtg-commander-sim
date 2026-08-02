@@ -190,10 +190,13 @@ for copy overrides, bestow type changes, added types/subtypes, and temporary
 keyword grants. Other legacy static-ability paths have not all been migrated,
 so the contract remains partial.
 
-`replacement_effects.py` implements the CR 616 priority classes, affected
-player choice, optional decline, rechecking, and one application per
-effect/event for typed events. It is not yet connected to every zone, draw,
-damage, and enters event producer, so its contract also remains partial.
+`replacement/` implements deep-immutable CR 614-616 event trees, recursive
+affected-player/object chooser validation, canonical optional declines,
+strict continuation deserialization, rechecking, one application per
+effect/event, and a closed typed operation vocabulary. The small
+`replacement_effects.py` facade preserves imports. The subsystem is not yet
+connected to every zone, draw, damage, and enters producer, and persistent
+shields/redirection remain incomplete, so its contract remains partial.
 
 The zone kernel implements a stable physical card identity plus a serialized
 logical-incarnation counter and zone-entry timestamp moment. Ordinary

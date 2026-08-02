@@ -6,7 +6,10 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from ..carddb import CardDatabase, CardRecord
-from ..rules.capabilities import load_default_capability_registry
+from ..rules.capabilities import (
+    CapabilityRegistry,
+    load_default_capability_registry,
+)
 from ..semantic_runtime import (
     default_semantic_handler_registry,
     describe_runtime_handler,
@@ -72,8 +75,9 @@ def _compile_best_available(
     *,
     registry: SemanticRegistry,
     profile: str,
+    capabilities: CapabilityRegistry | None = None,
 ) -> CardProgram:
-    capabilities = load_default_capability_registry()
+    capabilities = capabilities or load_default_capability_registry()
     try:
         return compile_card_program(
             db,
@@ -345,6 +349,7 @@ def card_program_coverage(
     commander_legal_only: bool,
     limit: int | None,
 ) -> dict[str, Any]:
+    capabilities = load_default_capability_registry()
     statuses: Counter[str] = Counter()
     trust_bases: Counter[str] = Counter()
     ability_count = 0
@@ -356,7 +361,11 @@ def card_program_coverage(
     ):
         try:
             program = _compile_best_available(
-                db, record, registry=registry, profile=profile
+                db,
+                record,
+                registry=registry,
+                profile=profile,
+                capabilities=capabilities,
             )
         except (KeyError, ValueError) as exc:
             statuses["failed"] += 1

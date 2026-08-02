@@ -12497,7 +12497,8 @@
       "implementation_components": [
         "damage_results.materialize_damage_results",
         "damage_results.plan_damage_result_commit",
-        "damage_results.commit_damage_result_plan"
+        "damage_results.commit_damage_result_plan",
+        "life_state.commit_life_changes"
       ],
       "notes": [
         "Final positive noninfect damage creates a typed life-loss result; infect takes the poison path, and the result batch commits atomically after replacements."
@@ -12544,7 +12545,8 @@
       "implementation_components": [
         "damage_results.materialize_damage_results",
         "damage_results.plan_damage_result_commit",
-        "damage_results.commit_damage_result_plan"
+        "damage_results.commit_damage_result_plan",
+        "counter_state.commit_counter_changes"
       ],
       "notes": [
         "Final infect damage to a player creates source-controller-attributed poison-counter results, including simultaneous multiplayer batches and exact command replay."
@@ -12588,7 +12590,8 @@
       "implementation_components": [
         "damage_results.materialize_damage_results",
         "damage_results.plan_damage_result_commit",
-        "damage_results.commit_damage_result_plan"
+        "damage_results.commit_damage_result_plan",
+        "counter_state.commit_counter_changes"
       ],
       "notes": [
         "Damage dealt to a derived planeswalker removes that many loyalty counters, including when the permanent has multiple damageable card types."
@@ -12632,7 +12635,8 @@
       "implementation_components": [
         "damage_results.materialize_damage_results",
         "damage_results.plan_damage_result_commit",
-        "damage_results.commit_damage_result_plan"
+        "damage_results.commit_damage_result_plan",
+        "counter_state.commit_counter_changes"
       ],
       "notes": [
         "Final infect or wither damage to a creature creates source-controller-attributed -1/-1 counter results instead of marked damage while retaining applicable deathtouch results."
@@ -12724,7 +12728,8 @@
       "implementation_components": [
         "damage_results.materialize_damage_results",
         "damage_results.plan_damage_result_commit",
-        "damage_results.commit_damage_result_plan"
+        "damage_results.commit_damage_result_plan",
+        "life_state.commit_life_changes"
       ],
       "notes": [
         "Lifelink creates one simultaneous life-gain result per source and controller from final dealt damage across recipients; prevention and represented life-gain replacements participate before atomic commit."
@@ -12773,7 +12778,8 @@
       "implementation_components": [
         "damage._total_toxic_value",
         "damage_results.materialize_damage_results",
-        "damage_results.commit_damage_result_plan"
+        "damage_results.commit_damage_result_plan",
+        "counter_state.commit_counter_changes"
       ],
       "notes": [
         "A creature's fixed total toxic value creates additional source-controller-attributed poison counters only after positive combat damage to a player; dynamic unresolved values fail before mutation."
@@ -12819,7 +12825,8 @@
       "implementation_components": [
         "damage_results.materialize_damage_results",
         "damage_results.plan_damage_result_commit",
-        "damage_results.commit_damage_result_plan"
+        "damage_results.commit_damage_result_plan",
+        "counter_state.commit_counter_changes"
       ],
       "notes": [
         "Damage dealt to a Battle removes that many defense counters, including on a multi-typed permanent, and the resulting state command-replays exactly."
@@ -12862,19 +12869,19 @@
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_each_opponent_damage_uses_one_typed_batch",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_damage_replacement_choices_follow_apnap",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_validation_failure_is_atomic_before_any_damage_result",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_infect_creature_result_commits_with_other_damage_atomically",
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_furnace_and_daunting_order_changes_final_damage",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_each_opponent_damage_uses_one_typed_batch",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_damage_replacement_choices_follow_apnap",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_validation_failure_is_atomic_before_any_damage_result",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_infect_creature_result_commits_with_other_damage_atomically",
         "tests.test_damage_result_events.DamageResultEventTests.test_damage_result_replacement_choice_is_private_and_replays",
         "tests.test_damage_result_events.DamageResultEventTests.test_keyword_damage_results_replay_from_combat_assignment"
       ],
       "implementation_components": [
         "damage.prepare_damage_batch",
         "damage.commit_prepared_damage_batch",
-        "replacement_effects.advance_replacement_batch",
+        "replacement.ordering.advance_replacement_batch",
         "replacement_decisions.issue_combat_damage_replacement_choice"
       ],
       "notes": [
@@ -12941,7 +12948,7 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "only reviewed source-pinned static quantity, fixed prevention, and represented protection effects are registered",
+        "generic compilation covers a closed family of static quantity and fixed prevention wording, but broader conditional and dynamic Oracle grammar remains incomplete",
         "persistent shields, redirection, non-damage transformations, and explicit mana-result replacement choices remain incomplete"
       ],
       "case_id": "cr-120.4b",
@@ -12959,19 +12966,19 @@
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_static_prevention_applies_to_each_simultaneous_event",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_each_opponent_damage_uses_one_typed_batch",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_damage_replacement_choices_follow_apnap",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_fixed_prevention_applies_per_controller",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_protection_prevents_player_and_colored_permanent_damage",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly"
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_furnace_and_daunting_order_changes_final_damage",
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_static_prevention_applies_to_each_simultaneous_event",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_each_opponent_damage_uses_one_typed_batch",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_damage_replacement_choices_follow_apnap",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_fixed_prevention_applies_per_controller",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_protection_prevents_player_and_colored_permanent_damage",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly"
       ],
       "implementation_components": [
         "damage.prepare_damage_batch",
         "semantic_runtime.damage_replacements",
-        "replacement_effects.advance_replacement_batch",
+        "replacement.ordering.advance_replacement_batch",
         "replacement_decisions.issue_replacement_order_choice"
       ],
       "notes": [
@@ -13024,7 +13031,7 @@
         "damage_results.prepare_damage_results",
         "damage_results.plan_damage_result_commit",
         "damage_results.commit_damage_result_plan",
-        "replacement_effects.advance_replacement_batch"
+        "replacement.ordering.advance_replacement_batch"
       ],
       "notes": [
         "Every represented simultaneous result for an affected player or permanent is grouped into an immutable containing event; containing-event replacements precede contained results, choices follow APNAP, and the choice command replays exactly without exposing authoritative internals."
@@ -13067,8 +13074,8 @@
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event",
         "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_lifelink_counts_only_damage_not_prevented_by_protection",
         "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_noncombat_damage_dispatches_final_damage_event",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly"
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_noncombat_damage_dispatches_final_damage_event",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly"
       ],
       "implementation_components": [
         "damage.DamageEvent",
@@ -13242,7 +13249,7 @@
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_prevention_to_zero_ends_the_damage_replacement_event",
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_prevention_to_zero_ends_the_damage_replacement_event",
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event",
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_power_combat_source_assigns_no_damage",
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_damage_fails_closed"
@@ -44824,10 +44831,10 @@
         "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_quantity_component_changes_effect_generated_placement",
         "tests.test_graveyard_rules.GraveyardRuleTests.test_graveyard_replacement_is_decided_before_the_move",
         "tests.test_graveyard_rules.GraveyardRuleTests.test_zone_replacement_descriptor_rejects_unknown_destinations",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_damage_replacement_choices_follow_apnap",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly"
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_furnace_and_daunting_order_changes_final_damage",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_damage_replacement_choices_follow_apnap",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly"
       ],
       "implementation_components": [
         "replacement_effects.ReplaceableEvent",
@@ -45284,7 +45291,7 @@
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_prevention_to_zero_ends_the_damage_replacement_event",
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_prevention_to_zero_ends_the_damage_replacement_event",
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event"
       ],
       "implementation_components": [
@@ -46377,9 +46384,9 @@
       "executable_test_ids": [
         "tests.test_rules_primitives.PreventionEffectTests.test_prevention_applies_only_to_matching_damage_events",
         "tests.test_rules_primitives.PreventionEffectTests.test_prevention_produces_a_modified_damage_event",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_static_prevention_applies_to_each_simultaneous_event",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_fixed_prevention_applies_per_controller",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_protection_prevents_player_and_colored_permanent_damage"
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_static_prevention_applies_to_each_simultaneous_event",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_fixed_prevention_applies_per_controller",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_protection_prevents_player_and_colored_permanent_damage"
       ],
       "implementation_components": [
         "replacement_effects.ReplacementEffect",
@@ -46786,9 +46793,9 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [
         "tests.test_rules_primitives.PreventionEffectTests.test_static_prevention_applies_separately_to_each_event",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_prevention_to_zero_ends_the_damage_replacement_event",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_static_prevention_applies_to_each_simultaneous_event",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_fixed_prevention_applies_per_controller"
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_prevention_to_zero_ends_the_damage_replacement_event",
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_static_prevention_applies_to_each_simultaneous_event",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_fixed_prevention_applies_per_controller"
       ],
       "implementation_components": [
         "replacement_effects.ReplaceableEvent",
@@ -46874,7 +46881,7 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [
         "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_unpreventable_damage_applies_prevention_without_reducing_damage"
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_unpreventable_damage_applies_prevention_without_reducing_damage"
       ],
       "implementation_components": [
         "replacement_effects.apply_replacement",
@@ -46917,7 +46924,7 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [
         "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_unpreventable_damage_applies_prevention_without_reducing_damage"
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_unpreventable_damage_applies_prevention_without_reducing_damage"
       ],
       "implementation_components": [
         "replacement_effects.ReplaceableEvent.applied_effects",
@@ -47046,10 +47053,10 @@
         "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_simultaneous_counter_choices_follow_apnap",
         "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacement_choice_is_seat_scoped",
         "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacement_choice_replays_exactly",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_damage_replacement_choices_follow_apnap",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly"
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_furnace_and_daunting_order_changes_final_damage",
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_damage_replacement_choices_follow_apnap",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly"
       ],
       "implementation_components": [
         "replacement_effects.ReplaceableEvent",
@@ -47291,14 +47298,14 @@
         "tests.test_rules_primitives.ReplacementOrderingTests.test_applicability_is_recomputed_after_each_replacement",
         "tests.test_replacement_event_tree.ReplacementBatchTests.test_forced_singletons_do_not_consume_later_explicit_selection",
         "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacements_apply_in_affected_players_chosen_order",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
-        "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_damage_amount_pipeline_property_1000_deterministic_transitions"
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_furnace_and_daunting_order_changes_final_damage",
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_damage_amount_pipeline_property_1000_deterministic_transitions"
       ],
       "implementation_components": [
         "replacement_effects.ReplaceableEvent.applied_effects",
         "replacement_effects.replacement_choice",
         "replacement_effects.resolve_replacements",
-        "replacement_effects.advance_replacement_batch"
+        "replacement.ordering.advance_replacement_batch"
       ],
       "notes": [
         "The resolver repeats from current applicability until no effect remains and journals each used or declined effect so it cannot apply twice to the same event.",
@@ -58818,23 +58825,28 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.15",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_oracle_ir.OracleIRTests.test_damage_result_keywords_compile_as_generic_mechanics"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler",
+        "damage_results.materialize_damage_results"
+      ],
+      "notes": [
+        "Keyword heading; the behavioral lifelink rules are reviewed in the subrules."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.15",
       "rule_text_sha256": "8701c4216ab0c9a70ce992c6ad633b95b7b22843efa55b31fd1400fc813569e2",
       "schema_version": 1,
@@ -58843,26 +58855,31 @@
         "end_line": 4027,
         "start_line": 4026
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.15a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702.15"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_card_program_v2.CardProgramV2Tests.test_keyword_programs_declare_exact_damage_result_capabilities"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler",
+        "card_programs.adapters.compile_card_program"
+      ],
+      "notes": [
+        "Lifelink lowers to a static CardProgram ability with the exact damage.result.lifelink dependency."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.15a",
       "rule_text_sha256": "80206125cc7f422967f986a83995aaa3c9fa5c8418f58b58380463dd5b8b53f2",
       "schema_version": 1,
@@ -58871,26 +58888,41 @@
         "end_line": 4029,
         "start_line": 4028
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.15b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "702.15"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_lifelink_gains_final_damage_across_multiple_recipients",
+        "tests.test_damage_result_events.DamageResultEventTests.test_keyword_source_snapshot_survives_zone_and_control_change"
+      ],
+      "implementation_components": [
+        "damage.source_snapshot",
+        "damage_results.materialize_damage_results",
+        "life_state.commit_life_changes"
+      ],
+      "notes": [
+        "Final dealt damage creates source-controller-attributed canonical life-gain results in the same damage-result batch."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "702.15b",
       "rule_text_sha256": "1be6d385d65824fae11be8cce232acfe69da122f59fb389d613ac709ddd4cecf",
       "schema_version": 1,
@@ -58899,26 +58931,37 @@
         "end_line": 4031,
         "start_line": 4030
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.15c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.15"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_keyword_source_snapshot_survives_zone_and_control_change"
+      ],
+      "implementation_components": [
+        "damage.DamageSourceSnapshot",
+        "damage.source_snapshot"
+      ],
+      "notes": [
+        "The prepared damage transaction retains lifelink and the predeparture controller when the source leaves before commit."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.15c",
       "rule_text_sha256": "e72b17fcfef845dead2a5e1b38f0a111021089e5975d9a94e54ca1ec2b5f1d03",
       "schema_version": 1,
@@ -58927,26 +58970,37 @@
         "end_line": 4033,
         "start_line": 4032
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.15d",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.15"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_keyword_source_snapshot_survives_zone_and_control_change"
+      ],
+      "implementation_components": [
+        "damage.source_snapshot",
+        "damage_results.materialize_damage_results"
+      ],
+      "notes": [
+        "A represented source in a nonbattlefield zone retains lifelink for its damage result."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.15d",
       "rule_text_sha256": "653588a7f8add1632cbe13b05213b65eeff7f25de04b715846529337536cee8b",
       "schema_version": 1,
@@ -58955,26 +59009,37 @@
         "end_line": 4035,
         "start_line": 4034
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.15e",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.15"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_multiple_sources_and_duplicate_keyword_instances_are_distinct"
+      ],
+      "implementation_components": [
+        "damage_results.materialize_damage_results",
+        "life_state.plan_life_changes"
+      ],
+      "notes": [
+        "Simultaneous lifelink damage is grouped separately by physical source logical identity."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.15e",
       "rule_text_sha256": "086bfdf57316e2c7e57cc225b495b7318b9fa6aa65d94df60ee8ba3922906be4",
       "schema_version": 1,
@@ -58983,26 +59048,37 @@
         "end_line": 4038,
         "start_line": 4036
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.15f",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "702.15"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_multiple_sources_and_duplicate_keyword_instances_are_distinct"
+      ],
+      "implementation_components": [
+        "damage._normalized_keywords",
+        "damage_results.materialize_damage_results"
+      ],
+      "notes": [
+        "Duplicate lifelink instances collapse to one source characteristic and one gain for that source's damage."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative"
+      ],
+      "reviewed": true,
       "rule_id": "702.15f",
       "rule_text_sha256": "4f16ef981ff30bee128d624625a0d922f9dc3cb3f2db23f40dd972369754f187",
       "schema_version": 1,
@@ -59011,7 +59087,7 @@
         "end_line": 4040,
         "start_line": 4039
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",
@@ -66406,23 +66482,28 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.80",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_oracle_ir.OracleIRTests.test_damage_result_keywords_compile_as_generic_mechanics"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler",
+        "damage_results.materialize_damage_results"
+      ],
+      "notes": [
+        "Keyword heading; the behavioral wither rules are reviewed in the subrules."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.80",
       "rule_text_sha256": "cfb7f602aa54a0627ecaca48d3c795a068302c85d16fea6ceaf9cc2eb7ca70e6",
       "schema_version": 1,
@@ -66431,26 +66512,40 @@
         "end_line": 4585,
         "start_line": 4584
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.80a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.80"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_infect_and_wither_use_minus_counters_only_on_creatures",
+        "tests.test_card_program_v2.CardProgramV2Tests.test_keyword_programs_declare_exact_damage_result_capabilities"
+      ],
+      "implementation_components": [
+        "damage_results.materialize_damage_results",
+        "counter_state.commit_counter_changes"
+      ],
+      "notes": [
+        "Wither damage to a creature creates source-controller-attributed -1/-1 counter placement instead of marked damage through the canonical counter owner."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.80a",
       "rule_text_sha256": "b5bb0b07d322d0a054f063df3a00a6700e9b949f9774765e2c133809df689083",
       "schema_version": 1,
@@ -66459,26 +66554,37 @@
         "end_line": 4587,
         "start_line": 4586
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.80b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.80"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_keyword_source_snapshot_survives_zone_and_control_change"
+      ],
+      "implementation_components": [
+        "damage.DamageSourceSnapshot",
+        "damage.source_snapshot"
+      ],
+      "notes": [
+        "A prepared damage transaction retains wither when its source leaves before result commit."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.80b",
       "rule_text_sha256": "68b386883631cb81a3f765e4b68428948283f27439a362253a7f0d933e48f506",
       "schema_version": 1,
@@ -66487,26 +66593,37 @@
         "end_line": 4589,
         "start_line": 4588
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.80c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.80"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_keyword_source_snapshot_survives_zone_and_control_change"
+      ],
+      "implementation_components": [
+        "damage.source_snapshot",
+        "damage_results.materialize_damage_results"
+      ],
+      "notes": [
+        "A represented source in a nonbattlefield zone retains wither for its damage result."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.80c",
       "rule_text_sha256": "c1a0f30a23d97be879bf087e604cb7f67eaf692a4654dbf3b0c162232742c628",
       "schema_version": 1,
@@ -66515,26 +66632,37 @@
         "end_line": 4591,
         "start_line": 4590
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.80d",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "702.80"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_multiple_sources_and_duplicate_keyword_instances_are_distinct"
+      ],
+      "implementation_components": [
+        "damage._normalized_keywords",
+        "damage_results.materialize_damage_results"
+      ],
+      "notes": [
+        "Duplicate wither instances collapse to one source characteristic and do not multiply the counters placed."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative"
+      ],
+      "reviewed": true,
       "rule_id": "702.80d",
       "rule_text_sha256": "b534bdabe8ba124ee275b89a7376c5ad7aad0dbfc0215a878528455455b983f0",
       "schema_version": 1,
@@ -66543,7 +66671,7 @@
         "end_line": 4593,
         "start_line": 4592
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",
@@ -67358,23 +67486,28 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.90",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_oracle_ir.OracleIRTests.test_damage_result_keywords_compile_as_generic_mechanics"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler",
+        "damage_results.materialize_damage_results"
+      ],
+      "notes": [
+        "Keyword heading; the behavioral infect rules are reviewed in the subrules."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.90",
       "rule_text_sha256": "2fbf590166087ecb955ee683d812d78c0277d6dd6ab1dd1c537948b94aa8f3cb",
       "schema_version": 1,
@@ -67383,26 +67516,31 @@
         "end_line": 4653,
         "start_line": 4652
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.90a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702.90"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_card_program_v2.CardProgramV2Tests.test_keyword_programs_declare_exact_damage_result_capabilities"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler",
+        "card_programs.adapters.compile_card_program"
+      ],
+      "notes": [
+        "Infect lowers to a static CardProgram ability with the exact damage.result.infect dependency."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.90a",
       "rule_text_sha256": "e73eb5625ad324ab6401f59988db675a40ab1f4c614651e9b2b478b0b6d607ee",
       "schema_version": 1,
@@ -67411,26 +67549,42 @@
         "end_line": 4655,
         "start_line": 4654
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.90b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "702.90"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_infect_player_damage_is_poison_not_life_loss",
+        "tests.test_damage_result_events.DamageResultEventTests.test_four_player_keyword_results_keep_source_attribution"
+      ],
+      "implementation_components": [
+        "damage_results.materialize_damage_results",
+        "counter_state.commit_counter_changes"
+      ],
+      "notes": [
+        "Infect damage to a player creates source-controller-attributed poison placement instead of life loss through the canonical counter owner."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "702.90b",
       "rule_text_sha256": "05521d52df23ff4fe2b5d053fe544c427803fb958e557799e1f3f1153d47009f",
       "schema_version": 1,
@@ -67439,26 +67593,39 @@
         "end_line": 4657,
         "start_line": 4656
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.90c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.90"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_infect_and_wither_use_minus_counters_only_on_creatures"
+      ],
+      "implementation_components": [
+        "damage_results.materialize_damage_results",
+        "counter_state.commit_counter_changes"
+      ],
+      "notes": [
+        "Infect damage to a creature creates -1/-1 counter placement instead of marked damage."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.90c",
       "rule_text_sha256": "c3a6c477831fabe156e9b00cb1684d8664daafaee391cb6a57da03e76ea7c29b",
       "schema_version": 1,
@@ -67467,26 +67634,37 @@
         "end_line": 4659,
         "start_line": 4658
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.90d",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.90"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_keyword_source_snapshot_survives_zone_and_control_change"
+      ],
+      "implementation_components": [
+        "damage.DamageSourceSnapshot",
+        "damage.source_snapshot"
+      ],
+      "notes": [
+        "A prepared damage transaction retains infect when its source leaves before result commit."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.90d",
       "rule_text_sha256": "f41b2aeaa0ac23f6f8b5ff30f357bfa34017e1701c7c7c513fc378cd923ce0ae",
       "schema_version": 1,
@@ -67495,26 +67673,37 @@
         "end_line": 4661,
         "start_line": 4660
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.90e",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.90"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_keyword_source_snapshot_survives_zone_and_control_change"
+      ],
+      "implementation_components": [
+        "damage.source_snapshot",
+        "damage_results.materialize_damage_results"
+      ],
+      "notes": [
+        "A represented source in a nonbattlefield zone retains infect for its damage result."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.90e",
       "rule_text_sha256": "902c034dc855e5b07abcddf3f780f5d831965c3ac7eaa79e9641db8dc8630c2c",
       "schema_version": 1,
@@ -67523,26 +67712,37 @@
         "end_line": 4663,
         "start_line": 4662
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.90f",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "702.90"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_multiple_sources_and_duplicate_keyword_instances_are_distinct"
+      ],
+      "implementation_components": [
+        "damage._normalized_keywords",
+        "damage_results.materialize_damage_results"
+      ],
+      "notes": [
+        "Duplicate infect instances collapse to one source characteristic and do not multiply the counters placed."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative"
+      ],
+      "reviewed": true,
       "rule_id": "702.90f",
       "rule_text_sha256": "bda66165ff75f9ad0781ada39b33ee1d1294038fbb35fe2af6e05b539e04ee05",
       "schema_version": 1,
@@ -67551,7 +67751,7 @@
         "end_line": 4665,
         "start_line": 4664
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",
@@ -74862,23 +75062,28 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.164",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_oracle_ir.OracleIRTests.test_damage_result_keywords_compile_as_generic_mechanics"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler",
+        "damage._total_toxic_value"
+      ],
+      "notes": [
+        "Keyword heading; toxic value and combat-damage behavior are reviewed in the subrules."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.164",
       "rule_text_sha256": "bc2dfd1b79bd198847e269c1648c7d9ea193cd6083339a6d7a9f0a393c11bf81",
       "schema_version": 1,
@@ -74887,26 +75092,31 @@
         "end_line": 5191,
         "start_line": 5190
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.164a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702.164"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_card_program_v2.CardProgramV2Tests.test_keyword_programs_declare_exact_damage_result_capabilities"
+      ],
+      "implementation_components": [
+        "oracle_ir.OracleIRCompiler",
+        "damage._total_toxic_value"
+      ],
+      "notes": [
+        "Fixed toxic N syntax lowers to the damage.result.toxic capability; unresolved values fail closed."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.164a",
       "rule_text_sha256": "35cae0000f12cf81ecb1275284ac45ddf09f6d4e9e793de665cff4e0b4fa5aec",
       "schema_version": 1,
@@ -74915,26 +75125,40 @@
         "end_line": 5193,
         "start_line": 5192
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.164b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.164"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_multiple_toxic_abilities_are_cumulative",
+        "tests.test_damage_result_events.DamageResultEventTests.test_unresolved_toxic_value_fails_before_mutation"
+      ],
+      "implementation_components": [
+        "damage._total_toxic_value",
+        "damage.source_snapshot"
+      ],
+      "notes": [
+        "Printed and granted fixed toxic values are summed; a bare unresolved grant fails before mutation."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.164b",
       "rule_text_sha256": "a769abd78b028160739d471884a52c300fa8f27ce750120d63fae6310452e248",
       "schema_version": 1,
@@ -74943,26 +75167,43 @@
         "end_line": 5196,
         "start_line": 5194
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.164c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "702.164"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_toxic_is_additional_only_for_creature_combat_damage_to_player",
+        "tests.test_damage_result_events.DamageResultEventTests.test_four_player_keyword_results_keep_source_attribution",
+        "tests.test_damage_result_events.DamageResultEventTests.test_prevented_infect_and_toxic_create_no_counter_results"
+      ],
+      "implementation_components": [
+        "damage_results.materialize_damage_results",
+        "counter_state.commit_counter_changes"
+      ],
+      "notes": [
+        "Positive creature combat damage to a player creates additional poison placement equal to total toxic value; noncombat or prevented damage does not."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
+      ],
+      "reviewed": true,
       "rule_id": "702.164c",
       "rule_text_sha256": "88757330d88660477e908bede31e8a62c7058bf4e16de4558a255c444a51f289",
       "schema_version": 1,
@@ -74971,7 +75212,7 @@
         "end_line": 5198,
         "start_line": 5197
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",
@@ -98303,23 +98544,28 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-903.10",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "903"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_same_named_commanders_remain_separate_and_drive_four_player_sba"
+      ],
+      "implementation_components": [
+        "commander.commander_damage_losers",
+        "state_based_actions.evaluate_state_based_actions"
+      ],
+      "notes": [
+        "Commander-format losing-condition heading; the 21-combat-damage state-based action is reviewed in CR 903.10a."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "903.10",
       "rule_text_sha256": "15c4fd4a5477800da9f6120f4d4a46e499c325aa031e7b69d3317e42775a7c2f",
       "schema_version": 1,
@@ -98328,26 +98574,49 @@
         "end_line": 6967,
         "start_line": 6966
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-903.10a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "903.10"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_same_named_commanders_remain_separate_and_drive_four_player_sba",
+        "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_designation_survives_zone_and_control_changes",
+        "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_ordinary_copy_of_commander_has_no_designation",
+        "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_two_commander_setup_assigns_two_distinct_designations",
+        "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_command_replay_preserves_designation_damage_key"
+      ],
+      "implementation_components": [
+        "commander.commander_designation_id",
+        "commander.commander_damage_key",
+        "damage.commit_prepared_damage_batch",
+        "commander.commander_damage_losers"
+      ],
+      "notes": [
+        "New games track combat damage by a stable physical commander designation, not Oracle ID. The designation survives zone and control changes, is absent from ordinary copies, supports multiple commanders, and drives the 21-damage state-based action. Historical Game Record v3 checkpoints without the additive identity marker retain their original replay semantics."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "903.10a",
       "rule_text_sha256": "0e03ed901994f90d3e03eacfe8c2150b8d17b4c2c0a258db49b2abfa1023eae0",
       "schema_version": 1,
@@ -98356,7 +98625,7 @@
         "end_line": 6969,
         "start_line": 6968
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",

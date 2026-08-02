@@ -793,18 +793,26 @@ Represented combat, semantic, and mana-result damage use one typed transaction
 with fixed quantity replacement and fixed prevention components. Final dealt
 components now become immutable affected-subject result trees before atomic
 mutation. Generic effective-keyword dispatch covers represented Infect,
-Wither, Lifelink, and fixed Toxic outcomes; bounded source-pinned handlers
-cover fixed life-gain multiplication and a whole-result life floor. Persistent
-prevention shields, redirection, non-damage transformations, dynamic Toxic,
-unrepresented ability grants/source LKI, remaining result-replacement
-families, universal draw/entry replacement participation, broad CR
-614/615/616 closure, layer dependencies, and state-derived modifiers remain
+Wither, Lifelink, and fixed Toxic outcomes. Damage source snapshots preserve
+represented keyword LKI across zone and control changes, and canonical typed
+life/counter owners validate the whole result batch before mutation. Stable
+physical commander designations—not Oracle IDs—own Commander-damage ledgers.
+The replacement model is split into deep-immutable model, applicability, typed
+operation, ordering, and strict replay modules. Generic compilation now covers
+those four keywords plus a closed family of static double-damage and fixed-
+prevention wording; bounded handlers cover fixed life-gain multiplication and
+a whole-result life floor. Persistent prevention shields, redirection,
+non-damage transformations, unresolved dynamic Toxic values, remaining result-
+replacement families, universal draw/entry replacement participation, broad
+CR 614/615/616 closure, layer dependencies, and state-derived modifiers remain
 unsupported.
 
-Runtime trust and governance are now explicit. Capability registry v9 consumes
-a generated evidence index whose fully qualified tests, rules, profiles, and
-evidence classes are validated in CI. Dependency fail-closed status and killed
-implementation mutation status are separate. CardPrograms report one trust
+Runtime trust and governance are now explicit. Capability registry v10 consumes
+a generated evidence index whose fully qualified tests, current rules,
+profiles, and evidence classes are validated in CI. Every trusted capability
+requires positive, negative, replay, and killed-mutation evidence regardless of
+an author's declaration, plus a resolvable component and dependency checks.
+CardPrograms report one trust
 basis plus intrinsic, format, match, and dynamic closure; reviewed semantic
 packs remain an identified compatibility path rather than being described as
 capability-closed. Strict binding includes registered handler/component
@@ -813,8 +821,9 @@ dependencies and exact registry/evidence fingerprints.
 The complete Commander format-capability inventory is not yet present, so
 capability-only strict match readiness fails closed while reviewed declared-pool
 compatibility remains available. The dependency scheduler is integrated; the
-damage-result boundary is the active branch, and the next dependency-ready
-batch is the bounded CR 210.1 Battle defense-characteristic/entry family.
+damage-result/Commander/replacement hardening is the active branch, and the
+next dependency-ready batch is persistent damage-prevention shields and typed
+redirection.
 Broad rules or Oracle expansion does not bypass these typed boundaries.
 
 This is still not a completeness declaration. Current exact, partial,

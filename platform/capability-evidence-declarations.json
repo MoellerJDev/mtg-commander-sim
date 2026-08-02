@@ -376,7 +376,7 @@
     {
       "capability_id": "damage.prevention.static_fixed",
       "evidence_class": "interaction",
-      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
+      "test_id": "tests.test_damage_replacement_model.DamageReplacementModelTests.test_furnace_and_daunting_order_changes_final_damage",
       "official_rule_ids": [
         "120.4b",
         "615.1",
@@ -392,12 +392,12 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+      "applicability_note": "Apply trusted generic or reviewed fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
     },
     {
       "capability_id": "damage.prevention.static_fixed",
       "evidence_class": "interaction",
-      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_protection_prevents_player_and_colored_permanent_damage",
+      "test_id": "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_protection_prevents_player_and_colored_permanent_damage",
       "official_rule_ids": [
         "120.4b",
         "615.1",
@@ -413,12 +413,12 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+      "applicability_note": "Apply trusted generic or reviewed fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
     },
     {
       "capability_id": "damage.prevention.static_fixed",
       "evidence_class": "multiplayer",
-      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_fixed_prevention_applies_per_controller",
+      "test_id": "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_fixed_prevention_applies_per_controller",
       "official_rule_ids": [
         "120.4b",
         "615.1",
@@ -434,7 +434,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+      "applicability_note": "Apply trusted generic or reviewed fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
     },
     {
       "capability_id": "damage.prevention.static_fixed",
@@ -455,12 +455,12 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+      "applicability_note": "Apply trusted generic or reviewed fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
     },
     {
       "capability_id": "damage.prevention.static_fixed",
       "evidence_class": "negative",
-      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_unpreventable_damage_applies_prevention_without_reducing_damage",
+      "test_id": "tests.test_damage_replacement_model.DamageReplacementModelTests.test_unpreventable_damage_applies_prevention_without_reducing_damage",
       "official_rule_ids": [
         "120.4b",
         "615.1",
@@ -476,12 +476,33 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+      "applicability_note": "Apply trusted generic or reviewed fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+    },
+    {
+      "capability_id": "damage.prevention.static_fixed",
+      "evidence_class": "negative",
+      "test_id": "tests.test_oracle_ir.OracleIRTests.test_static_damage_replacement_wording_lowers_to_generic_handlers",
+      "official_rule_ids": [
+        "120.4b",
+        "615.1",
+        "615.6",
+        "615.10",
+        "615.12",
+        "615.12a",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply trusted generic or reviewed fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
     },
     {
       "capability_id": "damage.prevention.static_fixed",
       "evidence_class": "positive",
-      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_static_prevention_applies_to_each_simultaneous_event",
+      "test_id": "tests.test_damage_replacement_model.DamageReplacementModelTests.test_static_prevention_applies_to_each_simultaneous_event",
       "official_rule_ids": [
         "120.4b",
         "615.1",
@@ -497,12 +518,33 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+      "applicability_note": "Apply trusted generic or reviewed fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+    },
+    {
+      "capability_id": "damage.prevention.static_fixed",
+      "evidence_class": "positive",
+      "test_id": "tests.test_oracle_ir.OracleIRTests.test_static_damage_replacement_wording_lowers_to_generic_handlers",
+      "official_rule_ids": [
+        "120.4b",
+        "615.1",
+        "615.6",
+        "615.10",
+        "615.12",
+        "615.12a",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply trusted generic or reviewed fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
     },
     {
       "capability_id": "damage.prevention.static_fixed",
       "evidence_class": "privacy",
-      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
+      "test_id": "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
       "official_rule_ids": [
         "120.4b",
         "615.1",
@@ -518,12 +560,12 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+      "applicability_note": "Apply trusted generic or reviewed fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
     },
     {
       "capability_id": "damage.prevention.static_fixed",
       "evidence_class": "replay",
-      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly",
+      "test_id": "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly",
       "official_rule_ids": [
         "120.4b",
         "615.1",
@@ -539,7 +581,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+      "applicability_note": "Apply trusted generic or reviewed fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
     },
     {
       "capability_id": "damage.replacement.order",
@@ -559,7 +601,7 @@
     {
       "capability_id": "damage.replacement.static_quantity",
       "evidence_class": "interaction",
-      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_static_prevention_applies_to_each_simultaneous_event",
+      "test_id": "tests.test_damage_replacement_model.DamageReplacementModelTests.test_static_prevention_applies_to_each_simultaneous_event",
       "official_rule_ids": [
         "120.4b",
         "614.1",
@@ -572,12 +614,12 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+      "applicability_note": "Apply trusted generic or reviewed static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
     },
     {
       "capability_id": "damage.replacement.static_quantity",
       "evidence_class": "multiplayer",
-      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_damage_replacement_choices_follow_apnap",
+      "test_id": "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_damage_replacement_choices_follow_apnap",
       "official_rule_ids": [
         "120.4b",
         "614.1",
@@ -590,12 +632,12 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+      "applicability_note": "Apply trusted generic or reviewed static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
     },
     {
       "capability_id": "damage.replacement.static_quantity",
       "evidence_class": "multiplayer",
-      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_each_opponent_damage_uses_one_typed_batch",
+      "test_id": "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_each_opponent_damage_uses_one_typed_batch",
       "official_rule_ids": [
         "120.4b",
         "614.1",
@@ -608,7 +650,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+      "applicability_note": "Apply trusted generic or reviewed static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
     },
     {
       "capability_id": "damage.replacement.static_quantity",
@@ -626,12 +668,12 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+      "applicability_note": "Apply trusted generic or reviewed static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
     },
     {
       "capability_id": "damage.replacement.static_quantity",
       "evidence_class": "negative",
-      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_validation_failure_is_atomic_before_any_damage_result",
+      "test_id": "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_validation_failure_is_atomic_before_any_damage_result",
       "official_rule_ids": [
         "120.4b",
         "614.1",
@@ -644,12 +686,30 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+      "applicability_note": "Apply trusted generic or reviewed static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+    },
+    {
+      "capability_id": "damage.replacement.static_quantity",
+      "evidence_class": "negative",
+      "test_id": "tests.test_oracle_ir.OracleIRTests.test_static_damage_replacement_wording_lowers_to_generic_handlers",
+      "official_rule_ids": [
+        "120.4b",
+        "614.1",
+        "614.5",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply trusted generic or reviewed static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
     },
     {
       "capability_id": "damage.replacement.static_quantity",
       "evidence_class": "positive",
-      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
+      "test_id": "tests.test_damage_replacement_model.DamageReplacementModelTests.test_furnace_and_daunting_order_changes_final_damage",
       "official_rule_ids": [
         "120.4b",
         "614.1",
@@ -662,12 +722,30 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+      "applicability_note": "Apply trusted generic or reviewed static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+    },
+    {
+      "capability_id": "damage.replacement.static_quantity",
+      "evidence_class": "positive",
+      "test_id": "tests.test_oracle_ir.OracleIRTests.test_exact_generic_damage_handler_is_trusted_and_active_in_session",
+      "official_rule_ids": [
+        "120.4b",
+        "614.1",
+        "614.5",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply trusted generic or reviewed static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
     },
     {
       "capability_id": "damage.replacement.static_quantity",
       "evidence_class": "privacy",
-      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
+      "test_id": "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
       "official_rule_ids": [
         "120.4b",
         "614.1",
@@ -680,12 +758,12 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+      "applicability_note": "Apply trusted generic or reviewed static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
     },
     {
       "capability_id": "damage.replacement.static_quantity",
       "evidence_class": "replay",
-      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly",
+      "test_id": "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly",
       "official_rule_ids": [
         "120.4b",
         "614.1",
@@ -698,7 +776,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+      "applicability_note": "Apply trusted generic or reviewed static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
     },
     {
       "capability_id": "damage.result.battle_defense",
@@ -1704,6 +1782,141 @@
         "commander_review"
       ],
       "applicability_note": "Emit normalized noncombat damage events after final damage results for trigger discovery."
+    },
+    {
+      "capability_id": "format.commander.damage.physical_identity",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_designation_survives_zone_and_control_changes",
+      "official_rule_ids": [
+        "903.3",
+        "903.10",
+        "903.10a"
+      ],
+      "supported_profiles": [
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Attribute combat damage to the designated physical commander card across zone and control changes and apply the separate 21-damage state-based action ledger."
+    },
+    {
+      "capability_id": "format.commander.damage.physical_identity",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_prepared_damage_uses_source_snapshot_after_source_leaves",
+      "official_rule_ids": [
+        "903.3",
+        "903.10",
+        "903.10a"
+      ],
+      "supported_profiles": [
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Attribute combat damage to the designated physical commander card across zone and control changes and apply the separate 21-damage state-based action ledger."
+    },
+    {
+      "capability_id": "format.commander.damage.physical_identity",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_same_named_commanders_remain_separate_and_drive_four_player_sba",
+      "official_rule_ids": [
+        "903.3",
+        "903.10",
+        "903.10a"
+      ],
+      "supported_profiles": [
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Attribute combat damage to the designated physical commander card across zone and control changes and apply the separate 21-damage state-based action ledger."
+    },
+    {
+      "capability_id": "format.commander.damage.physical_identity",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_commander_identity_mutant_is_killed",
+      "official_rule_ids": [
+        "903.3",
+        "903.10",
+        "903.10a"
+      ],
+      "supported_profiles": [
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Attribute combat damage to the designated physical commander card across zone and control changes and apply the separate 21-damage state-based action ledger."
+    },
+    {
+      "capability_id": "format.commander.damage.physical_identity",
+      "evidence_class": "negative",
+      "test_id": "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_ordinary_copy_of_commander_has_no_designation",
+      "official_rule_ids": [
+        "903.3",
+        "903.10",
+        "903.10a"
+      ],
+      "supported_profiles": [
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Attribute combat damage to the designated physical commander card across zone and control changes and apply the separate 21-damage state-based action ledger."
+    },
+    {
+      "capability_id": "format.commander.damage.physical_identity",
+      "evidence_class": "positive",
+      "test_id": "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_same_named_commanders_remain_separate_and_drive_four_player_sba",
+      "official_rule_ids": [
+        "903.3",
+        "903.10",
+        "903.10a"
+      ],
+      "supported_profiles": [
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Attribute combat damage to the designated physical commander card across zone and control changes and apply the separate 21-damage state-based action ledger."
+    },
+    {
+      "capability_id": "format.commander.damage.physical_identity",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_permissions_projection.PermissionProjectionTests.test_commander_damage_is_public_and_names_its_source",
+      "official_rule_ids": [
+        "903.3",
+        "903.10",
+        "903.10a"
+      ],
+      "supported_profiles": [
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Attribute combat damage to the designated physical commander card across zone and control changes and apply the separate 21-damage state-based action ledger."
+    },
+    {
+      "capability_id": "format.commander.damage.physical_identity",
+      "evidence_class": "replay",
+      "test_id": "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_command_replay_preserves_designation_damage_key",
+      "official_rule_ids": [
+        "903.3",
+        "903.10",
+        "903.10a"
+      ],
+      "supported_profiles": [
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Attribute combat damage to the designated physical commander card across zone and control changes and apply the separate 21-damage state-based action ledger."
+    },
+    {
+      "capability_id": "format.commander.damage.physical_identity",
+      "evidence_class": "replay",
+      "test_id": "tests.test_commander_damage_identity.CommanderDamageIdentityTests.test_save_load_preserves_new_identity_and_legacy_state_is_explicit",
+      "official_rule_ids": [
+        "903.3",
+        "903.10",
+        "903.10a"
+      ],
+      "supported_profiles": [
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Attribute combat damage to the designated physical commander card across zone and control changes and apply the separate 21-damage state-based action ledger."
     },
     {
       "capability_id": "life.gain.replacement.static_multiplier",

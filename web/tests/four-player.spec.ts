@@ -629,6 +629,10 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
 });
 
 test("a duel declares an attacker in the browser and applies commander combat damage", async ({ browser }) => {
+  // This journey crosses several auto-pass windows and normally finishes near
+  // the global 90-second limit on Windows. Preserve assertion-driven waits
+  // while leaving enough time for context cleanup under serial suite load.
+  test.setTimeout(180_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -708,7 +712,7 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
   // The deterministic game usually completes near three minutes after the
   // preceding serial journeys have warmed the shared runner. Keep enough
   // budget for terminal log assertions and context cleanup on slower hosts.
-  test.setTimeout(240_000);
+  test.setTimeout(300_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -742,7 +746,9 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       const land = name
         ? cards.filter({ has: page.locator(".card-copy strong", { hasText: new RegExp(`^${name}$`) }) }).first()
         : cards.first();
-      await expect(land).toHaveAttribute("draggable", "true");
+      await expect(land).toHaveAttribute("draggable", "true", {
+        timeout: 30_000,
+      });
       const revision = await viewRevision(page);
       await land.dragTo(page.getByTestId("own-battlefield"));
       await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
