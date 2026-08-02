@@ -149,12 +149,13 @@ closure; the inventory is not a complete tap/untap rules claim.
 
 Versioned CardProgram runtime component descriptors represent static
 participation in later events without printed-name or Oracle-ID dispatch in the
-engine. Registered families contribute reviewed fixed additional-token and
-zone-destination replacement effects to immutable nested event trees, while a
-fixed subtype anthem contributes layer-7c continuous effects. A focused token-
-creation owner commits final token batches, and replacement choices suspend as
+engine. Registered families contribute reviewed fixed additional-token,
+zone-destination, counter-quantity, damage-quantity, and damage-prevention
+effects to immutable event trees, while a fixed subtype anthem contributes
+layer-7c continuous effects. Focused token-creation, counter-placement, and
+damage owners commit final results, and replacement choices suspend as
 seat-scoped replayable continuations. Their scope remains deliberately narrower
-than universal CR 614/616 participation or complete CR 613 dependency
+than universal CR 614/615/616 participation or complete CR 613 dependency
 evaluation.
 
 CardProgram trust is now separated into `capability_closed`,
@@ -922,6 +923,15 @@ The new rules primitives sit below both generated and hand-authored semantics:
   replacements, commits one timestamped token batch, and then dispatches enter
   events. The zone-destination runtime component uses the same event substrate
   before mutation and preserves one source snapshot for simultaneous moves.
+- `counter_placement.py` owns preparation and commit for represented effect-
+  generated counters on battlefield permanents. Fixed integral quantity
+  replacements suspend to the affected permanent controller and traverse
+  simultaneous events in APNAP order before any counter mutates.
+- `damage.py` owns source/recipient snapshots, immutable proposals,
+  replacement/prevention preparation, atomic result commit, and normalized
+  final events for represented combat, semantic, and mana-result damage.
+  Fixed quantity and fixed prevention components participate without state
+  access; unresolved choices during mana payment fail before mutation.
 - `state_based_actions.py` evaluates the deterministic permanent subset of CR
   704 plus token and represented spell/card-copy cessation from one immutable
   snapshot. The engine applies the resulting batch, captures last-known
@@ -948,10 +958,13 @@ The new rules primitives sit below both generated and hand-authored semantics:
   implying generic emblem or casual-variant coverage.
 
 All of these contracts remain partial. Legacy static abilities have not all moved
-into the layer evaluator, counter intents from represented zone replacements
-do not yet pass through a universal counter-placement event, not every zone/
-draw/damage/enters producer routes through the replacement engine, and the
-state-action evaluator does not yet
+into the layer evaluator; entry counters, player counters, costs, rule actions,
+and continuation-sensitive legacy counter producers do not yet use the focused
+counter owner. Persistent prevention shields, redirection, non-damage
+transformations, damage-result replacement, infect/wither/toxic outcomes, and
+replacement choices during mana payment remain outside the damage transaction.
+Not every zone/draw/enters producer routes through the replacement engine, and
+the state-action evaluator does not yet
 cover Sagas, dungeons, Roles, speed, maximum-counter wording outside the
 reviewed self-restriction family, or complete simultaneous loss replacement.
 Battle support still lacks complete replacement ordering for the defeated

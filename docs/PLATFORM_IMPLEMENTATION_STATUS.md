@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "40241e6a7a4e77a3dab3df93c6a726b0f82186fb"
+verified: "12d55cede8e02e05f6f298a77a788d898e89e784"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,8 +15,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Current commit: focused replacement-event branch based on certified main 9c0b1c4ec5b31c70bb5b9ca94510912edcf650e8; exact-head certification pending
-- Active phase: `replacement_choice_nested_events`
+- Current commit: focused damage replacement/prevention branch based on certified main 12d55cede8e02e05f6f298a77a788d898e89e784; exact-head certification pending
+- Active phase: `damage_replacement_prevention_events`
 - Package version: `0.8.0`
 
 Historical integration chronology belongs in `CHANGELOG.md`; this current report intentionally does not reproduce a pull-request ledger.
@@ -29,7 +29,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Rules manifest present on this branch: yes
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
-- Rules cases: blocked=366, definition_only=84, passing=126, total=3300, unreviewed=2724
+- Rules cases: blocked=365, definition_only=84, passing=127, total=3300, unreviewed=2724
 - Mechanics: status_counts={'partial': 58, 'tested': 1, 'unclassified': 366}, total=425, trusted=0
 - Oracle coverage: material_residuals=69890, status_counts={'exact': 2959, 'partial': 16092, 'unresolved': 19433}, total=38484
 - Commander-legal Oracle coverage: material_residuals=61213, status_counts={'exact': 338, 'partial': 14663, 'unresolved': 16622}, total=31623
@@ -43,7 +43,9 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 | Browser Commander MVP | `development_local_runtime_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and seven two/four-player Chromium journeys, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, resilient card-scoped click/drag actions, saved Auto-mana/Manual mana and Auto-pass/Full control preferences, public tapped-card orientation, explicit active-player main-phase advancement, confirmed concession, public commander-damage tracking, terminal winner/draw rendering, exact command retry, invited read-only spectators, a durable complete public-log dialog, fail-closed handling for legacy arbiter-only records, and one-command managed Scryfall/browser startup. Compact trusted-only coverage includes modal land faces, targeted Sunscorched Desert ETB damage, a stack response, rules-created Treasure payment, Orcish Bowmasters/Amass, explicit attack and block declarations, combat damage, and a natural commander-damage winner. The 49-command natural-winner record replayed to its exact state hash with zero suppressed meaningful windows and a clean seat-projection audit; completed games also survive process restart. The inspected full-database failure remains a pinned pre-fix record, and a fresh post-restart full-database manual journey is still required as broader current-snapshot evidence. Saved board-layout customization, future schemas, full accounts, expiry/rate limits, and production deployment remain open. |
 | Typed tap-state effect migration | `integrated_on_certified_main` | Certified main registers tap, untap, and all-creature untap as strict typed semantic operations, commits them through a classified tap-state mutation port, removes their legacy apply_effect branches, preserves stun replacement and effective-type/phasing behavior, and supplies rollback, replay, implementation-mutation, malformed-input, and source-linked evidence. The three capabilities remain tested and blocked rather than trusted because broader prohibitions, replacement ordering, and characteristic closure remain incomplete. |
 | Dependency-ordered behavioral rules scheduler | `integrated_on_certified_main` | Certified main conservatively assigns every reviewed blocked behavioral rule and every unclassified nonpassing rule to one dependency-linked subsystem, records implementation/tests/profiles/compiler impact, rejects stale or incomplete catalogs, and selects bounded dependency-ready batches without promoting conformance or runtime trust. |
-| Replayable replacement-event and token/zone boundary | `implementation_complete_certification_pending` | The focused branch adds immutable nested replacement events, affected-object and APNAP choice ordering, optional decline, exact selection journals, seat-scoped Game Record v3 continuations, a focused token-creation mutation owner, and reviewed token-addition and zone-destination integrations. CR 616.1g containing-event ordering is behaviorally passing for this substrate; universal CR 614/616 participation, prevention, counter-placement replacement, and broad Oracle closure remain blocked. |
+| Replayable replacement-event and token/zone boundary | `integrated_on_certified_main` | Certified main includes immutable nested replacement events, affected-object and APNAP choice ordering, optional decline, exact selection journals, seat-scoped Game Record v3 continuations, a focused token-creation mutation owner, and reviewed token-addition and zone-destination integrations. CR 616.1g containing-event ordering is behaviorally passing for this substrate; universal CR 614/616 participation and broad Oracle closure remain blocked. |
+| Effect-generated counter-placement replacement boundary | `integrated_on_certified_main` | Certified main routes represented effect-generated permanent counters through one prepare/commit owner with fixed integral quantity replacement, affected-controller selection, simultaneous APNAP traversal, rollback, replay, and source-pinned witnesses. Entry counters, player counters, costs, rule actions, and continuation-sensitive legacy producers remain blocked. |
+| Typed damage replacement and prevention transaction | `implementation_complete_certification_pending` | The focused branch routes represented combat, semantic, each-opponent, and mana-result damage through one typed proposal/prepare/commit owner. Fixed damage quantity replacement and fixed prevention components use affected-player/controller ordering, four-player APNAP traversal, atomic rollback, replayable combat/semantic continuations, and source-pinned Furnace of Rath and Daunting Defender witnesses. Persistent shields, redirection, result replacement, infect/wither/toxic outcomes, and resumable mana-payment choices remain blocked. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408, CR 500-514, focused CR 725, and focused CR 508-509/608 current-turn history slices are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -59,8 +61,8 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - `rooms_and_lobbies`: `implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch`
 - `replay`: `implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance`
 - `card_programs`: `implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning`
-- `semantic_handlers`: `implemented_six_registered_read_only_typed_intent_handlers_with_family_modules_strict_binding_and_focused_tap_state_mutation_port_plus_two_bounded_runtime_component_registries`
-- `capability_evidence`: `implemented_registry_v6_explicit_generated_test_rule_profile_evidence_index_with_separate_dependency_and_implementation_mutation_status`
+- `semantic_handlers`: `implemented_six_registered_read_only_typed_intent_handlers_plus_six_bounded_runtime_components_with_strict_binding_and_focused_tap_token_counter_and_damage_mutation_ports`
+- `capability_evidence`: `implemented_registry_v8_explicit_generated_test_rule_profile_evidence_index_with_separate_dependency_and_implementation_mutation_status`
 - `architecture_governance`: `implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions`
 - `continuous_effect_performance`: `implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency`
 - `hidden_information`: `implemented_projected_protocol`
@@ -69,9 +71,9 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4262
+- Tests discovered: 4282
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30732155279](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30732155279) — `pass`
+- Baseline CI: [30743425652](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30743425652) — `pass`
 - Compile: `pass`
 - Deterministic tests: `pass_full_exact_commit_gate`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
@@ -86,6 +88,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Current blockers
 
+- damage replacement/prevention remains bounded to fixed static quantity changes and fixed prevention; persistent shields, redirection, non-damage transformations, result replacement, infect/wither/toxic outcomes, and replacement choices during mana payment remain unimplemented
 - typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, universal replacement participation beyond represented stun and runtime-component events, and complete effective-characteristic closure
 - traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed
 - most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted
@@ -99,7 +102,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Certify and merge the replacement-choice and nested-event slice, clean the branch, then implement the selected universal counter-placement replacement boundary from fresh certified main.
+Certify and merge the focused damage replacement/prevention slice, clean the branch, then select the next dependency-ready subsystem from fresh certified main.
 
 ## Regeneration
 

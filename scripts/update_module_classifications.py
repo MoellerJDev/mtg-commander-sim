@@ -117,6 +117,8 @@ def _owner(relative: str, layer: str) -> str:
         return "tap_state_effects"
     if relative == "mtg_commander_sim/counter_placement.py":
         return "counter_placement"
+    if relative == "mtg_commander_sim/damage.py":
+        return "damage"
     if relative == "mtg_commander_sim/token_creation.py":
         return "token_creation"
     if relative == "mtg_commander_sim/replacement_decisions.py":
@@ -194,6 +196,7 @@ def build_classifications() -> dict[str, Any]:
                             "card_programs/",
                             "semantic_runtime/",
                             "counter_placement.py",
+                            "damage.py",
                             "tap_state.py",
                             "token_creation.py",
                             "replacement_decisions.py",

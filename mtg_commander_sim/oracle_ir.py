@@ -307,6 +307,15 @@ def _without_parenthetical_reminder(text: str) -> str:
     return "".join(result).strip()
 
 
+def _damage_to_target_effect(amount: int) -> dict[str, Any]:
+    return {
+        "op": "damage",
+        "source": "$source",
+        "target": "$target.0",
+        "amount": amount,
+    }
+
+
 def _effect_template(
     text: str,
     *,
@@ -453,13 +462,7 @@ def _effect_template(
     if match:
         return (
             "damage-any-target-v1",
-            (
-                {
-                    "op": "damage",
-                    "target": "$target.0",
-                    "amount": int(match.group("count")),
-                },
-            ),
+            (_damage_to_target_effect(int(match.group("count"))),),
             {
                 "zones": ["player", "battlefield"],
                 "categories": ["player", "permanent"],
@@ -477,14 +480,7 @@ def _effect_template(
     if match:
         return (
             f"damage-any-target-self-{match.group('kind').casefold()}-v1",
-            (
-                {
-                    "op": "damage",
-                    "target": "$target.0",
-                    "amount": int(match.group("count")),
-                    "source": "$source",
-                },
-            ),
+            (_damage_to_target_effect(int(match.group("count"))),),
             {
                 "zones": ["player", "battlefield"],
                 "categories": ["player", "permanent"],

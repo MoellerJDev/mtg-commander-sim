@@ -7,6 +7,7 @@ from unittest.mock import patch
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
+from mtg_commander_sim import damage as damage_module
 from mtg_commander_sim.damage import DamageEvent
 from mtg_commander_sim.engine import CommanderEngine
 from mtg_commander_sim.semantic_runtime.counter_replacements import (
@@ -14,6 +15,11 @@ from mtg_commander_sim.semantic_runtime.counter_replacements import (
     CounterQuantityReplacementHandler,
     CounterReplacementSourceContext,
     resolve_counter_placement_replacements,
+)
+from mtg_commander_sim.semantic_runtime.damage_replacements import (
+    DamageQuantityReplacementHandler,
+    DamageReplacementSourceContext,
+    FixedDamagePreventionHandler,
 )
 from mtg_commander_sim.targets import PUBLIC_TARGET_ZONES, TargetGroup
 
@@ -117,7 +123,9 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
             card.marked_damage = 0
             card.counters["loyalty"] = 4
             card.counters["defense"] = 5
-            result = engine._apply_damage_results_to_permanent(card, 2)
+            result = damage_module.apply_damage_results_to_permanent(
+                engine, card, 2
+            )
             self.assertEqual(2, result["marked_damage"])
             self.assertEqual(2, result["loyalty_removed"])
             self.assertEqual(2, result["defense_removed"])
@@ -125,7 +133,7 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         assert_all_permanent_results()
 
         def creature_only_mutant(
-            _engine: CommanderEngine,
+            _engine,
             target,
             amount: int,
             *,
@@ -136,8 +144,8 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
             return {"amount": int(amount), "marked_damage": int(amount)}
 
         with patch.object(
-            CommanderEngine,
-            "_apply_damage_results_to_permanent",
+            damage_module,
+            "apply_damage_results_to_permanent",
             creature_only_mutant,
         ):
             with self.assertRaises((AssertionError, KeyError)):
@@ -362,3 +370,96 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_quantity_replaced()
+
+    def test_damage_replacement_prevention_mutants_are_killed(self):
+        condition = {
+            "source_controller_relation": "any",
+            "target_controller_relation": "any",
+            "target_kinds": [],
+            "source_types_all": [],
+            "target_types_all": [],
+            "combat": None,
+        }
+        quantity_descriptor = {
+            "handler_id": "replacement.damage.quantity.v1",
+            "schema_version": 1,
+            "event": "damage",
+            "condition": condition,
+            "modification": {"multiplier": 2, "additional": 0},
+        }
+        prevention_descriptor = {
+            "handler_id": "prevention.damage.fixed.v1",
+            "schema_version": 1,
+            "event": "damage",
+            "condition": condition,
+            "modification": {"amount": 1},
+        }
+        context = DamageReplacementSourceContext(
+            source_ref="damage-mutation-source",
+            source_controller="A",
+        )
+        event = replacement_effects.ReplaceableEvent(
+            event_id="damage:mutation",
+            kind="damage",
+            affected_player="B",
+            payload={
+                "amount": 3,
+                "prevented": 0,
+                "unpreventable": False,
+            },
+        )
+
+        def assert_prevent_then_double() -> None:
+            quantity = (
+                DamageQuantityReplacementHandler().replacement_effect(
+                    quantity_descriptor, context
+                )
+            )
+            prevention = FixedDamagePreventionHandler().replacement_effect(
+                prevention_descriptor, context
+            )
+            resolved = replacement_effects.resolve_replacements(
+                event,
+                (quantity, prevention),
+                selections=(prevention.effect_id, quantity.effect_id),
+            )
+            self.assertEqual(4, resolved.payload["amount"])
+            self.assertEqual(1, resolved.payload["prevented"])
+
+        assert_prevent_then_double()
+        original_quantity = (
+            DamageQuantityReplacementHandler.replacement_effect
+        )
+
+        def identity_quantity_mutant(handler, descriptor, source_context):
+            effect = original_quantity(handler, descriptor, source_context)
+            return replace(
+                effect,
+                operations=(
+                    {"op": "multiply", "field": "amount", "factor": 1},
+                ),
+            )
+
+        with patch.object(
+            DamageQuantityReplacementHandler,
+            "replacement_effect",
+            identity_quantity_mutant,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_prevent_then_double()
+
+        original_prevention = FixedDamagePreventionHandler.replacement_effect
+
+        def skip_prevention_mutant(handler, descriptor, source_context):
+            effect = original_prevention(
+                handler, descriptor, source_context
+            )
+            return replace(effect, operations=({"op": "prevent", "amount": 0},))
+
+        with patch.object(
+            FixedDamagePreventionHandler,
+            "replacement_effect",
+            skip_prevention_mutant,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_prevent_then_double()

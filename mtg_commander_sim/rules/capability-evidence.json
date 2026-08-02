@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "03fa520169c684618de0edac41d9aaf1623271fd71916e88556f87f25b01f725",
-  "declaration_source_fingerprint": "d8e34dcd2bd2e78e5c9cf3383bdf67cfbd65d022fba3c07d862d12fd09f99911",
+  "registry_fingerprint": "5636f0ae3861e0a632da40d07b552623acef1dadd0e52b8133074817d1dfd4ea",
+  "declaration_source_fingerprint": "c16347cf0a399c29dba3632bdf1e4711b273d22c905a3f86f62452a3965315ce",
   "declarations": [
     {
       "capability_id": "continuous.power_toughness.fixed_anthem",
@@ -90,25 +90,6 @@
     },
     {
       "capability_id": "counter.placement.quantity_replacement",
-      "evidence_class": "fuzz",
-      "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacement_property_1000_deterministic_transitions",
-      "official_rule_ids": [
-        "122.1",
-        "122.6",
-        "614.1",
-        "614.16",
-        "616.1",
-        "616.1f"
-      ],
-      "supported_profiles": [
-        "traditional",
-        "commander_duel",
-        "commander_review"
-      ],
-      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
-    },
-    {
-      "capability_id": "counter.placement.quantity_replacement",
       "evidence_class": "interaction",
       "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacements_apply_in_affected_players_chosen_order",
       "official_rule_ids": [
@@ -124,7 +105,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+      "applicability_note": "Resolve represented effect-generated counter placements through affected-object ordering before committing the counters."
     },
     {
       "capability_id": "counter.placement.quantity_replacement",
@@ -143,7 +124,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+      "applicability_note": "Resolve represented effect-generated counter placements through affected-object ordering before committing the counters."
     },
     {
       "capability_id": "counter.placement.quantity_replacement",
@@ -162,26 +143,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
-    },
-    {
-      "capability_id": "counter.placement.quantity_replacement",
-      "evidence_class": "mutation",
-      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_counter_quantity_replacement_mutant_is_killed",
-      "official_rule_ids": [
-        "122.1",
-        "122.6",
-        "614.1",
-        "614.16",
-        "616.1",
-        "616.1f"
-      ],
-      "supported_profiles": [
-        "traditional",
-        "commander_duel",
-        "commander_review"
-      ],
-      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+      "applicability_note": "Resolve represented effect-generated counter placements through affected-object ordering before committing the counters."
     },
     {
       "capability_id": "counter.placement.quantity_replacement",
@@ -200,7 +162,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+      "applicability_note": "Resolve represented effect-generated counter placements through affected-object ordering before committing the counters."
     },
     {
       "capability_id": "counter.placement.quantity_replacement",
@@ -219,7 +181,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+      "applicability_note": "Resolve represented effect-generated counter placements through affected-object ordering before committing the counters."
     },
     {
       "capability_id": "counter.placement.quantity_replacement",
@@ -238,26 +200,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
-    },
-    {
-      "capability_id": "counter.placement.quantity_replacement",
-      "evidence_class": "property",
-      "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacement_property_1000_deterministic_transitions",
-      "official_rule_ids": [
-        "122.1",
-        "122.6",
-        "614.1",
-        "614.16",
-        "616.1",
-        "616.1f"
-      ],
-      "supported_profiles": [
-        "traditional",
-        "commander_duel",
-        "commander_review"
-      ],
-      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+      "applicability_note": "Resolve represented effect-generated counter placements through affected-object ordering before committing the counters."
     },
     {
       "capability_id": "counter.placement.quantity_replacement",
@@ -276,26 +219,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
-    },
-    {
-      "capability_id": "counter.placement.quantity_replacement",
-      "evidence_class": "rollback",
-      "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacements_apply_in_affected_players_chosen_order",
-      "official_rule_ids": [
-        "122.1",
-        "122.6",
-        "614.1",
-        "614.16",
-        "616.1",
-        "616.1f"
-      ],
-      "supported_profiles": [
-        "traditional",
-        "commander_duel",
-        "commander_review"
-      ],
-      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+      "applicability_note": "Resolve represented effect-generated counter placements through affected-object ordering before committing the counters."
     },
     {
       "capability_id": "damage.amount.positive",
@@ -452,6 +376,174 @@
       "applicability_note": "Apply prevention effects in the required damage-event ordering."
     },
     {
+      "capability_id": "damage.prevention.static_fixed",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
+      "official_rule_ids": [
+        "120.4b",
+        "615.1",
+        "615.6",
+        "615.10",
+        "615.12",
+        "615.12a",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+    },
+    {
+      "capability_id": "damage.prevention.static_fixed",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_protection_prevents_player_and_colored_permanent_damage",
+      "official_rule_ids": [
+        "120.4b",
+        "615.1",
+        "615.6",
+        "615.10",
+        "615.12",
+        "615.12a",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+    },
+    {
+      "capability_id": "damage.prevention.static_fixed",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_fixed_prevention_applies_per_controller",
+      "official_rule_ids": [
+        "120.4b",
+        "615.1",
+        "615.6",
+        "615.10",
+        "615.12",
+        "615.12a",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+    },
+    {
+      "capability_id": "damage.prevention.static_fixed",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_damage_replacement_prevention_mutants_are_killed",
+      "official_rule_ids": [
+        "120.4b",
+        "615.1",
+        "615.6",
+        "615.10",
+        "615.12",
+        "615.12a",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+    },
+    {
+      "capability_id": "damage.prevention.static_fixed",
+      "evidence_class": "negative",
+      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_unpreventable_damage_applies_prevention_without_reducing_damage",
+      "official_rule_ids": [
+        "120.4b",
+        "615.1",
+        "615.6",
+        "615.10",
+        "615.12",
+        "615.12a",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+    },
+    {
+      "capability_id": "damage.prevention.static_fixed",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_static_prevention_applies_to_each_simultaneous_event",
+      "official_rule_ids": [
+        "120.4b",
+        "615.1",
+        "615.6",
+        "615.10",
+        "615.12",
+        "615.12a",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+    },
+    {
+      "capability_id": "damage.prevention.static_fixed",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
+      "official_rule_ids": [
+        "120.4b",
+        "615.1",
+        "615.6",
+        "615.10",
+        "615.12",
+        "615.12a",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+    },
+    {
+      "capability_id": "damage.prevention.static_fixed",
+      "evidence_class": "replay",
+      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly",
+      "official_rule_ids": [
+        "120.4b",
+        "615.1",
+        "615.6",
+        "615.10",
+        "615.12",
+        "615.12a",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+    },
+    {
       "capability_id": "damage.replacement.order",
       "evidence_class": "positive",
       "test_id": "tests.test_rules_primitives.PreventionEffectTests.test_prevention_produces_a_modified_damage_event",
@@ -465,6 +557,150 @@
         "commander_review"
       ],
       "applicability_note": "Order and apply all applicable damage replacement effects before results."
+    },
+    {
+      "capability_id": "damage.replacement.static_quantity",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_static_prevention_applies_to_each_simultaneous_event",
+      "official_rule_ids": [
+        "120.4b",
+        "614.1",
+        "614.5",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+    },
+    {
+      "capability_id": "damage.replacement.static_quantity",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_damage_replacement_choices_follow_apnap",
+      "official_rule_ids": [
+        "120.4b",
+        "614.1",
+        "614.5",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+    },
+    {
+      "capability_id": "damage.replacement.static_quantity",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_four_player_each_opponent_damage_uses_one_typed_batch",
+      "official_rule_ids": [
+        "120.4b",
+        "614.1",
+        "614.5",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+    },
+    {
+      "capability_id": "damage.replacement.static_quantity",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_damage_replacement_prevention_mutants_are_killed",
+      "official_rule_ids": [
+        "120.4b",
+        "614.1",
+        "614.5",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+    },
+    {
+      "capability_id": "damage.replacement.static_quantity",
+      "evidence_class": "negative",
+      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_validation_failure_is_atomic_before_any_damage_result",
+      "official_rule_ids": [
+        "120.4b",
+        "614.1",
+        "614.5",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+    },
+    {
+      "capability_id": "damage.replacement.static_quantity",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_furnace_and_daunting_order_changes_final_damage",
+      "official_rule_ids": [
+        "120.4b",
+        "614.1",
+        "614.5",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+    },
+    {
+      "capability_id": "damage.replacement.static_quantity",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
+      "official_rule_ids": [
+        "120.4b",
+        "614.1",
+        "614.5",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
+    },
+    {
+      "capability_id": "damage.replacement.static_quantity",
+      "evidence_class": "replay",
+      "test_id": "tests.test_damage_replacement_pipeline.DamageReplacementPipelineTests.test_semantic_damage_replacement_choice_replays_exactly",
+      "official_rule_ids": [
+        "120.4b",
+        "614.1",
+        "614.5",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply current trusted source-pinned static damage-quantity replacements to every represented combat and noncombat damage proposal before any result."
     },
     {
       "capability_id": "damage.result.battle_defense",
@@ -1963,5 +2199,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "b9f7ae483aa24c212fa2ef1169691a4abb45045376a0a134fcdbc528e090aae8"
+  "fingerprint": "a1915340c8e19d75e2a6926367d2bc8438a3709e8621a7b3a529be596412c2fb"
 }

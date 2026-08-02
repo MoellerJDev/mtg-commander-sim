@@ -75,7 +75,13 @@ from .declaration_restrictions import (
     DeclarationTurnHistoryCondition,
     parse_declaration_restriction_line,
 )
-from .damage import DamageEvent, DamageRecipientKind
+from .damage import (
+    apply_damage_results_to_permanent,
+    damage_proposal,
+    DamageError,
+    DamageProposal,
+    resolve_damage_batch,
+)
 from .deck import DeckDefinition
 from .mana import (
     ManaMode,
@@ -105,7 +111,9 @@ from .permissions import AuthorizedCommand, CapabilityManager, PermissionDenied
 from .replacement_decisions import (
     apply_effect_with_replacement_choice,
     complete_replacement_order_choice,
+    issue_combat_damage_replacement_choice,
 )
+from .replacement_effects import ReplacementChoiceRequired
 from .semantics import SemanticProgram, SemanticRegistry
 from .semantic_runtime import (
     SemanticNodeError,
@@ -1894,50 +1902,17 @@ class CommanderEngine:
         *,
         deathtouch: bool = False,
     ) -> dict[str, Any]:
-        """Apply the represented CR 120.3 results of permanent damage."""
+        """Compatibility adapter for the dedicated damage mutation owner."""
 
-        damage = int(amount)
-        if damage < 0:
-            raise GameRuleError("Damage cannot be negative")
-        data = self._effective_card_data(card)
-        card_types, _, _ = self._type_parts(
-            str(data.get("type_line") or "")
-        )
-        damageable_types = card_types.intersection(
-            {"battle", "creature", "planeswalker"}
-        )
-        if not damageable_types:
-            raise GameRuleError(
-                f"Damage cannot be dealt to {card.ref}; it is not a "
-                "Battle, creature, or planeswalker"
-            )
-        result: dict[str, Any] = {
-            "amount": damage,
-            "types": sorted(damageable_types),
-        }
-        if damage == 0:
-            return result
-        if "creature" in card_types:
-            card.marked_damage += damage
-            card.deathtouch_damage = (
-                card.deathtouch_damage or deathtouch
-            )
-            result["marked_damage"] = damage
-        if "planeswalker" in card_types:
-            before, after = self._change_permanent_counter(
+        try:
+            return apply_damage_results_to_permanent(
+                self,
                 card,
-                "loyalty",
-                -damage,
+                amount,
+                deathtouch=deathtouch,
             )
-            result["loyalty_removed"] = before - after
-        if "battle" in card_types:
-            before, after = self._change_permanent_counter(
-                card,
-                "defense",
-                -damage,
-            )
-            result["defense_removed"] = before - after
-        return result
+        except DamageError as exc:
+            raise GameRuleError(str(exc)) from exc
 
     def move_card(
         self,
@@ -5671,20 +5646,36 @@ class CommanderEngine:
     ) -> None:
         """Apply compiled effects coupled to one selected mana mode."""
 
-        for effect in effects:
+        for effect_index, effect in enumerate(effects):
             if effect.get("op") == "damage_self":
                 amount = int(effect.get("amount", 1))
-                self.state.players[seat].life -= amount
-                self._record_turn_history(
-                    "player_damaged",
-                    actor=seat,
-                    object_incarnation=(
-                        source.logical_object_id if source is not None else None
-                    ),
-                    target=seat,
-                    target_kind="player",
-                    amount=amount,
-                )
+                if amount < 0:
+                    raise GameRuleError("Damage cannot be negative")
+                if amount == 0:
+                    continue
+                try:
+                    proposal = damage_proposal(
+                        self,
+                        proposal_id=(
+                            f"damage.mana:{self.state.revision}:"
+                            f"{self.state.event_sequence + 1}:"
+                            f"{effect_index}"
+                        ),
+                        actor=seat,
+                        source_ref=(source.ref if source is not None else None),
+                        target=seat,
+                        amount=amount,
+                        combat=False,
+                        reason="mana ability damage",
+                    )
+                    resolve_damage_batch(self, (proposal,))
+                except ReplacementChoiceRequired as exc:
+                    raise GameRuleError(
+                        "Damage replacement choices during mana ability "
+                        "resolution are not yet resumable"
+                    ) from exc
+                except DamageError as exc:
+                    raise GameRuleError(str(exc)) from exc
             elif effect.get("op") == "pay_life":
                 amount = int(effect.get("amount", 1))
                 if self.state.players[seat].life < amount:
@@ -7598,8 +7589,8 @@ class CommanderEngine:
             )
             if selected_mode is not None:
                 self._apply_mana_mode_side_effects(
-                    seat,
-                    selected_mode.side_effects,
+                    seat, selected_mode.side_effects,
+                    source=source,
                 )
             compiled_restriction = self._compiled_mana_restriction(
                 ability.effect_text
@@ -13143,8 +13134,7 @@ class CommanderEngine:
         if value == "$active":
             return self.state.active_player
         if value == "$source":
-            source = self.state.cards.get(item.source_object_id or "")
-            return source.ref if source else None
+            return self._stack_source_ref(item)
         if value == "$card":
             card = self.state.cards.get(item.card_object_id or "")
             return card.ref if card else None
@@ -19965,111 +19955,37 @@ class CommanderEngine:
     def _apply_combat_assignments(
         self,
         assignments: Sequence[Mapping[str, Any]],
+        *,
+        replacement_selections: Sequence[str | None] = (),
     ) -> bool:
         """Deal one simultaneous combat-damage batch and stabilize it.
 
-        Returns ``True`` when trigger ordering, another rules choice, a
-        semantic stop, or game end prevents the ordinary priority grant.
+        Returns ``True`` when replacement ordering, trigger ordering, another
+        rules choice, a semantic stop, or game end prevents the ordinary
+        priority grant.
         """
 
-        changed_objects: list[str] = []
-        changed_players: list[str] = []
-        dealt_assignments: list[dict[str, Any]] = []
-        lifelink_damage: dict[tuple[str, str], int] = {}
-        damage_events: list[DamageEvent] = []
-        trigger_sources = self._semantic_event_sources()
-        trigger_source_zones = {
-            source.object_id: source.zone for source in trigger_sources
-        }
-
-        def damage_event(
-            source: CardInstance,
-            *,
-            target: str,
-            target_kind: DamageRecipientKind,
-            target_card: CardInstance | None,
-            assigned: int,
-            dealt: int,
-        ) -> DamageEvent:
-            source_data = self._effective_card_data(source)
-            source_types, source_subtypes, _ = self._type_parts(
-                str(source_data.get("type_line") or "")
+        proposals: list[DamageProposal] = []
+        declared = [dict(value) for value in assignments]
+        for index, assignment in enumerate(declared):
+            source_ref = str(assignment.get("source") or "")
+            source = next(
+                (
+                    card
+                    for card in self.state.cards.values()
+                    if card.ref == source_ref
+                ),
+                None,
             )
-            target_types: set[str] = set()
-            target_subtypes: set[str] = set()
-            if target_card is not None:
-                target_types, target_subtypes, _ = self._type_parts(
-                    str(
-                        self._effective_card_data(target_card).get(
-                            "type_line"
-                        )
-                        or ""
-                    )
-                )
-            return DamageEvent(
-                source=source.ref,
-                source_object_id=source.object_id,
-                source_logical_object_id=source.logical_object_id,
-                source_controller=source.controller,
-                source_owner=source.owner,
-                source_types=tuple(sorted(source_types)),
-                source_subtypes=tuple(sorted(source_subtypes)),
-                source_colors=tuple(
-                    sorted(
-                        str(value).upper()
-                        for value in source_data.get("colors", [])
-                    )
-                ),
-                source_keywords=tuple(
-                    sorted(normalized_keywords(source_data.get("keywords", [])))
-                ),
-                source_is_commander=source.is_commander,
-                target=target,
-                target_kind=target_kind,
-                target_object_id=(
-                    target_card.object_id
-                    if target_card is not None
-                    else None
-                ),
-                target_controller=(
-                    target_card.controller
-                    if target_card is not None
-                    else target
-                ),
-                target_types=tuple(sorted(target_types)),
-                target_subtypes=tuple(sorted(target_subtypes)),
-                assigned_amount=assigned,
-                dealt_amount=dealt,
-                prevented_amount=assigned - dealt,
-                combat=True,
-                damage_step=self.state.combat.damage_step_index + 1,
-                first_strike_step=self.state.combat.first_strike_step,
-            )
-
-        def record_lifelink(source: CardInstance, amount: int) -> None:
-            if LIFELINK not in self._combat_keywords(source):
-                return
-            beneficiary = (
-                source.controller
-                if source.controller in self.state.players
-                else source.owner
-            )
-            key = (beneficiary, source.ref)
-            lifelink_damage[key] = lifelink_damage.get(key, 0) + amount
-
-        for assignment in assignments:
-            source = next((card for card in self.state.cards.values() if card.ref == str(assignment["source"])), None)
             if source is None:
-                raise GameRuleError(f"Unknown damage source {assignment['source']}")
+                raise GameRuleError(f"Unknown damage source {source_ref}")
             amount = int(assignment.get("amount", 0))
             if amount < 0:
                 raise GameRuleError("Damage cannot be negative")
             if amount == 0:
-                # CR 120.8: this is no damage event. In particular it
-                # cannot create commander damage, damage triggers, or a
-                # replacement/prevention opportunity.
+                # CR 120.8: zero produces no event or replacement window.
                 continue
-            target_value = str(assignment["target"])
+            target = str(assignment.get("target") or "")
             if source.zone != "battlefield":
                 self._log(
                     source.controller,
@@ -20080,156 +19996,111 @@ class CommanderEngine:
                     ),
                     {
                         "source": source.ref,
-                        "target": target_value,
+                        "target": target,
                         "amount": amount,
                     },
                     importance=1,
                 )
                 continue
-            if target_value in self.state.players:
-                target = self.state.players[target_value]
-                if target.stats.get(
-                    "protection_from_everything_until_next_turn"
-                ):
-                    damage_events.append(
-                        damage_event(
-                            source,
-                            target=target_value,
-                            target_kind="player",
-                            target_card=None,
-                            assigned=amount,
-                            dealt=0,
-                        )
-                    )
-                    self._log(
-                        target_value,
-                        "combat.damage.prevented",
-                        (
-                            f"Combat damage to {target_value} was "
-                            "prevented by protection."
-                        ),
-                        {
-                            "source": source.ref,
-                            "target": target_value,
-                            "amount": amount,
-                        },
-                        importance=1,
-                    )
-                else:
-                    target.life -= amount
-                    changed_players.append(target_value)
-                    if source.is_commander:
-                        key = source.oracle_id
-                        target.commander_damage_received[key] = target.commander_damage_received.get(key, 0) + amount
-                    dealt_assignments.append(dict(assignment))
-                    damage_events.append(
-                        damage_event(
-                            source,
-                            target=target_value,
-                            target_kind="player",
-                            target_card=None,
-                            assigned=amount,
-                            dealt=amount,
-                        )
-                    )
-                    record_lifelink(source, amount)
-            else:
-                target_card = next((card for card in self.state.cards.values() if card.ref == target_value), None)
-                if target_card is None or target_card.zone != "battlefield":
-                    self._log(
-                        source.controller,
-                        "combat.damage.no_target",
-                        (
-                            f"{source.ref} assigned no combat damage; "
-                            f"{target_value} was no longer on the "
-                            "battlefield."
-                        ),
-                        {
-                            "source": source.ref,
-                            "target": target_value,
-                            "amount": amount,
-                        },
-                        importance=1,
-                    )
-                    continue
-                source_colors = {
-                    str(color).upper()
-                    for color in self._effective_card_data(source).get(
-                        "colors", []
-                    )
-                }
-                if self._protection_colors(target_card).intersection(
-                    source_colors
-                ):
-                    damage_events.append(
-                        damage_event(
-                            source,
-                            target=target_card.ref,
-                            target_kind="permanent",
-                            target_card=target_card,
-                            assigned=amount,
-                            dealt=0,
-                        )
-                    )
-                    self._log(
-                        source.controller,
-                        "combat.damage.prevented",
-                        (
-                            f"Combat damage from {source.ref} to "
-                            f"{target_card.ref} was prevented by protection."
-                        ),
-                        {
-                            "source": source.ref,
-                            "target": target_card.ref,
-                            "amount": amount,
-                            "reason": "protection",
-                        },
-                        importance=1,
-                        changed_objects=[target_card.object_id],
-                    )
-                    continue
-                source_keywords = {
-                    str(value).casefold()
-                    for value in self._effective_card_data(source).get(
-                        "keywords", []
-                    )
-                }
-                self._apply_damage_results_to_permanent(
-                    target_card,
-                    amount,
-                    deathtouch=(
-                        amount > 0 and "deathtouch" in source_keywords
+            if not self._combat_damage_target_exists(target):
+                self._log(
+                    source.controller,
+                    "combat.damage.no_target",
+                    (
+                        f"{source.ref} assigned no combat damage; {target} "
+                        "was no longer a legal damage recipient."
                     ),
+                    {
+                        "source": source.ref,
+                        "target": target,
+                        "amount": amount,
+                    },
+                    importance=1,
                 )
-                changed_objects.append(target_card.object_id)
-                dealt_assignments.append(dict(assignment))
-                damage_events.append(
-                    damage_event(
-                        source,
-                        target=target_card.ref,
-                        target_kind="permanent",
-                        target_card=target_card,
-                        assigned=amount,
-                        dealt=amount,
+                continue
+            try:
+                proposals.append(
+                    damage_proposal(
+                        self,
+                        proposal_id=(
+                            f"damage.combat:{self.state.revision}:"
+                            f"{self.state.event_sequence + 1}:{index}"
+                        ),
+                        actor=source.controller,
+                        source_ref=source.ref,
+                        target=target,
+                        amount=amount,
+                        combat=True,
+                        reason="combat damage",
+                        deathtouch=(
+                            DEATHTOUCH in self._combat_keywords(source)
+                        ),
+                        damage_step=self.state.combat.damage_step_index + 1,
+                        first_strike_step=(
+                            self.state.combat.first_strike_step
+                        ),
                     )
                 )
-                record_lifelink(source, amount)
-        for (beneficiary, _source_ref), amount in sorted(
-            lifelink_damage.items()
-        ):
-            self.state.players[beneficiary].life += amount
-            changed_players.append(beneficiary)
-        for event in damage_events:
-            if event.was_dealt and event.target_kind == "player":
-                self._record_turn_history(
-                    "player_damaged",
-                    actor=event.source_controller,
-                    object_incarnation=event.source_logical_object_id,
-                    target=event.target,
-                    target_kind="player",
-                    amount=event.dealt_amount,
-                )
-        self.state.combat.damage_assignments.extend(dict(item) for item in assignments)
+            except DamageError as exc:
+                raise GameRuleError(str(exc)) from exc
+
+        try:
+            result = resolve_damage_batch(
+                self,
+                proposals,
+                replacement_selections=replacement_selections,
+            )
+        except ReplacementChoiceRequired as required:
+            issue_combat_damage_replacement_choice(
+                self,
+                assignments=declared,
+                selections=replacement_selections,
+                required=required,
+            )
+            return True
+        except DamageError as exc:
+            raise GameRuleError(str(exc)) from exc
+
+        self.state.combat.damage_assignments.extend(declared)
+        dealt_assignments = [
+            {
+                "source": event.source,
+                "target": event.target,
+                "amount": event.dealt_amount,
+            }
+            for event in result.events
+            if event.was_dealt
+        ]
+        for event in result.events:
+            if not event.prevented_amount:
+                continue
+            self._log(
+                event.target_controller,
+                "combat.damage.prevented",
+                (
+                    f"{event.prevented_amount} damage from {event.source} "
+                    f"to {event.target} was prevented."
+                ),
+                {
+                    "source": event.source,
+                    "target": event.target,
+                    "assigned_amount": event.assigned_amount,
+                    "dealt_amount": event.dealt_amount,
+                    "prevented_amount": event.prevented_amount,
+                    "applied_effects": list(event.applied_effects),
+                },
+                importance=1,
+                changed_objects=(
+                    [event.target_object_id]
+                    if event.target_object_id is not None
+                    else []
+                ),
+                changed_players=(
+                    [event.target]
+                    if event.target_kind == "player"
+                    else []
+                ),
+            )
         self._log(
             None,
             "combat.damage",
@@ -20240,91 +20111,21 @@ class CommanderEngine:
             ),
             {
                 "assignments": dealt_assignments,
-                "declared_assignments": [
-                    dict(item) for item in assignments
-                ],
+                "declared_assignments": declared,
                 "damage_step": self.state.combat.damage_step_index + 1,
                 "first_strike_step": self.state.combat.first_strike_step,
                 "damage_events": [
-                    event.semantic_context() for event in damage_events
+                    event.semantic_context() for event in result.events
                 ],
             },
             importance=2,
-            changed_objects=changed_objects,
-            changed_players=changed_players,
+            changed_objects=result.changed_objects,
+            changed_players=result.changed_players,
         )
-        for (beneficiary, source_ref), amount in sorted(
-            lifelink_damage.items()
-        ):
-            self._log(
-                beneficiary,
-                "combat.lifelink",
-                f"{beneficiary} gained {amount} life from {source_ref}.",
-                {
-                    "player": beneficiary,
-                    "source": source_ref,
-                    "amount": amount,
-                    "damage_step": self.state.combat.damage_step_index + 1,
-                },
-                importance=1,
-                changed_players=[beneficiary],
-            )
-        trigger_batch: list[StackItem] = []
-        for event in damage_events:
-            if not event.was_dealt:
-                continue
-            if (
-                self.state.monarch is not None
-                and event.target_kind == "player"
-                and event.target == self.state.monarch
-                and event.combat
-                and "creature" in event.source_types
-                and event.source_controller in self.active_seats
-            ):
-                old_monarch = str(self.state.monarch)
-                new_monarch = event.source_controller
-                trigger_batch.append(
-                    self._monarch_trigger(
-                        controller=old_monarch,
-                        label=(
-                            "The monarch — "
-                            f"{new_monarch} becomes the monarch"
-                        ),
-                        effects=(
-                            {
-                                "op": "become_monarch",
-                                "player": new_monarch,
-                                "reason": (
-                                    "a creature dealt combat damage to "
-                                    "the monarch"
-                                ),
-                            },
-                        ),
-                        context={
-                            "event": "damage.dealt",
-                            "source": event.source,
-                            "damaged_player": event.target,
-                            "new_monarch": new_monarch,
-                            "monarch_at_trigger": old_monarch,
-                            "inherent_rule": "CR 725.2b",
-                        },
-                    )
-                )
-            self._dispatch_semantic_event(
-                "damage.dealt",
-                event.semantic_context(),
-                sources=trigger_sources,
-                source_zones=trigger_source_zones,
-                trigger_batch=trigger_batch,
-            )
-            if self._semantic_pause_annotation() is not None:
-                break
-        self._enqueue_semantic_trigger_batch(trigger_batch)
         if self._semantic_pause_annotation() is not None:
             return True
         return self._stabilize()
 
-    # ------------------------------------------------------------------
     # Cleanup, state-based actions, and player elimination
     # ------------------------------------------------------------------
     def _complete_cleanup_discard(self, decision: Any) -> None:
@@ -22422,70 +22223,63 @@ class CommanderEngine:
                 raise GameRuleError("Damage cannot be negative")
             if amount == 0:
                 return 0
-            if target in self.state.players:
-                if self.state.players[target].stats.get(
-                    "protection_from_everything_until_next_turn"
-                ):
-                    self._log(
-                        actor,
-                        "effect.damage.prevented",
-                        f"Damage to {target} was prevented by protection.",
-                        {
-                            "target": target,
-                            "amount": amount,
-                            "reason": "protection from everything",
-                        },
-                        importance=1,
-                    )
-                else:
-                    self.state.players[target].life -= amount
-                    self._record_turn_history(
-                        "player_damaged",
-                        actor=actor,
-                        target=target,
-                        target_kind="player",
-                        amount=amount,
-                    )
-                    self._log(actor, "effect.damage", f"{target} took {amount} damage.", {"target": target, "amount": amount, "reason": reason}, importance=2, changed_players=[target])
-            else:
-                card = self._resolve_object(actor, target, zones={"battlefield"})
-                if self._protection_colors(card).intersection(
-                    self._source_colors_for_ref(
-                        str(effect.get("source") or "") or None
-                    )
-                ):
-                    self._log(
-                        actor,
-                        "effect.damage.prevented",
-                        f"Damage to {card.ref} was prevented by protection.",
-                        {
-                            "target": card.ref,
-                            "amount": amount,
-                            "reason": "protection",
-                        },
-                        importance=1,
-                        changed_objects=[card.object_id],
-                    )
-                    return 0
-                damage_results = self._apply_damage_results_to_permanent(
-                    card,
-                    amount,
-                    deathtouch=bool(effect.get("deathtouch")),
+            try:
+                proposal = damage_proposal(
+                    self,
+                    proposal_id=(
+                        f"damage.effect:{self.state.revision}:"
+                        f"{self.state.event_sequence + 1}:0"
+                    ),
+                    actor=actor,
+                    source_ref=(
+                        str(effect["source"])
+                        if effect.get("source") is not None
+                        else None
+                    ),
+                    target=target,
+                    amount=amount,
+                    combat=False,
+                    reason=reason,
+                    unpreventable=bool(effect.get("unpreventable", False)),
+                    deathtouch=bool(effect.get("deathtouch", False)),
                 )
-                self._log(
-                    actor,
-                    "effect.damage",
-                    f"{card.ref} took {amount} damage.",
-                    {
-                        "target": card.ref,
-                        "amount": amount,
-                        "reason": reason,
-                        "results": damage_results,
-                    },
-                    importance=2,
-                    changed_objects=[card.object_id],
+                result = resolve_damage_batch(
+                    self,
+                    (proposal,),
+                    replacement_selections=tuple(
+                        effect.get("_replacement_selections") or ()
+                    ),
                 )
-            return amount
+            except DamageError as exc:
+                raise GameRuleError(str(exc)) from exc
+            event = result.events[0]
+            self._log(
+                actor,
+                (
+                    "effect.damage"
+                    if event.was_dealt
+                    else "effect.damage.prevented"
+                ),
+                (
+                    f"{event.target} took {event.dealt_amount} damage."
+                    if event.was_dealt
+                    else f"Damage to {event.target} was prevented."
+                ),
+                {
+                    "source": event.source,
+                    "target": event.target,
+                    "assigned_amount": event.assigned_amount,
+                    "amount": event.dealt_amount,
+                    "prevented_amount": event.prevented_amount,
+                    "reason": reason,
+                    "applied_effects": list(event.applied_effects),
+                    "damage_event": event.semantic_context(),
+                },
+                importance=2,
+                changed_objects=result.changed_objects,
+                changed_players=result.changed_players,
+            )
+            return event.dealt_amount
         if op == "damage_each_opponent":
             amount = int(effect.get("amount", 0))
             if amount < 0:
@@ -22497,28 +22291,57 @@ class CommanderEngine:
                 for seat in self.active_seats
                 if seat != actor
             ]
-            for opponent in opponents:
-                self.state.players[opponent].life -= amount
-                self._record_turn_history(
-                    "player_damaged",
-                    actor=actor,
-                    target=opponent,
-                    target_kind="player",
-                    amount=amount,
+            try:
+                proposals = tuple(
+                    damage_proposal(
+                        self,
+                        proposal_id=(
+                            f"damage.effect:{self.state.revision}:"
+                            f"{self.state.event_sequence + 1}:{index}"
+                        ),
+                        actor=actor,
+                        source_ref=(
+                            str(effect["source"])
+                            if effect.get("source") is not None
+                            else None
+                        ),
+                        target=opponent,
+                        amount=amount,
+                        combat=False,
+                        reason=reason,
+                        unpreventable=bool(
+                            effect.get("unpreventable", False)
+                        ),
+                    )
+                    for index, opponent in enumerate(opponents)
                 )
+                result = resolve_damage_batch(
+                    self,
+                    proposals,
+                    replacement_selections=tuple(
+                        effect.get("_replacement_selections") or ()
+                    ),
+                )
+            except DamageError as exc:
+                raise GameRuleError(str(exc)) from exc
             self._log(
                 actor,
                 "effect.damage",
-                f"Each opponent of {actor} took {amount} damage.",
+                f"Each opponent of {actor} was dealt damage.",
                 {
                     "opponents": opponents,
-                    "amount": amount,
+                    "assigned_amount": amount,
+                    "dealt_amount": result.dealt_amount,
                     "reason": reason,
+                    "damage_events": [
+                        event.semantic_context() for event in result.events
+                    ],
                 },
                 importance=2,
-                changed_players=opponents,
+                changed_players=result.changed_players,
             )
-            return amount
+            return result.dealt_amount
+
         if op == "life":
             seat = str(effect.get("player") or actor)
             delta = int(effect.get("delta", 0))

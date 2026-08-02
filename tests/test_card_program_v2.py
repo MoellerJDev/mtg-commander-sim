@@ -385,8 +385,14 @@ class CardProgramV2Tests(unittest.TestCase):
                 "continuous.anthem.power_toughness.v1": [
                     "continuous.power_toughness.fixed_anthem"
                 ],
+                "prevention.damage.fixed.v1": [
+                    "damage.prevention.static_fixed"
+                ],
                 "replacement.counter.quantity.v1": [
                     "counter.placement.quantity_replacement"
+                ],
+                "replacement.damage.quantity.v1": [
+                    "damage.replacement.static_quantity"
                 ],
                 "replacement.token.additional.v1": [
                     "token.creation.additional_replacement"

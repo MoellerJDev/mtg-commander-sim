@@ -45,9 +45,11 @@ server, provider, and pilot success never promote rules fidelity by themselves.
 - Typed helpers exist for several rules families. Six registered immediate
   semantic handlers cover draw, table-wide draw, monarch, and three bounded
   tap-state operations. Their handlers are read-only; focused rules modules
-  now own tap-state and token-creation commits. Versioned runtime components
-  represent fixed token additions, a fixed subtype anthem, and a reviewed zone-
-  destination replacement without printed-name or Oracle-ID engine dispatch.
+  now own tap-state, token creation, effect-generated permanent counters, and
+  represented damage commits. Versioned runtime components represent fixed
+  token additions, counter and damage quantity changes, fixed damage
+  prevention, a fixed subtype anthem, and a reviewed zone-destination
+  replacement without printed-name or Oracle-ID engine dispatch.
   Most other orchestration and mutation remains centralized in
   `CommanderEngine`.
 - Reviewed semantic packs close selected card and interaction slices through
@@ -82,9 +84,10 @@ stable-write governance, and an uncached continuous-effect structural
 benchmark. Immutable replacement-event trees now provide affected-object
 identity, APNAP traversal, optional decline, containing-event-before-contained-
 event ordering, exact choice journals, and seat-scoped suspension/replay for
-the represented token-creation and zone-destination producers. Fixed token,
-zone, and anthem components remain bounded promises; neither universal CR
-614/616 participation nor complete CR 613 dependencies are implied.
+the represented token-creation, zone-destination, counter-placement, and damage
+producers. Fixed token, zone, counter, damage, prevention, and anthem
+components remain bounded promises; neither universal CR 614/615/616
+participation nor complete CR 613 dependencies are implied.
 
 The measured Phase 2 migration routes `tap`, `untap`, and
 `untap_all_creatures` through strict typed nodes and intents and a focused
@@ -102,12 +105,12 @@ to remove or migrate one coherent reusable responsibility before broad corpus
 expansion resumes.
 
 The scheduler conservatively queues every reviewed blocked behavioral rule and
-every unclassified nonpassing rule. The coupled replacement-choice and nested-
-event batch establishes the reusable substrate and promotes only the evidenced
-CR 616.1g containing-event ordering. The next selected batch is the universal
-counter-placement replacement boundary, including replacement-created counter
-events and zone-change counter intents. Neither batch declares all replacement
-or prevention semantics complete.
+every unclassified nonpassing rule. The integrated event-tree and counter-
+placement batches establish replayable replacement ordering and a focused
+counter mutation owner. The active damage batch adds one typed transaction for
+represented combat, semantic, and mana-result producers plus fixed quantity
+replacement and prevention. Only CR 120.4d is promoted for the evidenced final
+damage event; broad CR 614/615/616 behavior remains blocked.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,

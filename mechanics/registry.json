@@ -8589,7 +8589,22 @@
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "sources": {
     "card_data_snapshot": {
-      "available": false
+      "available": true,
+      "database_schema_version": "2",
+      "oracle_bulk": {
+        "download_uri": "https://data.scryfall.io/oracle-cards/oracle-cards-20260731210300.jsonl.gz",
+        "oracle_id_count": 38484,
+        "sha256": "34d43820bb1b85be99267367969396c81a0bc387061dbd00882d1e78a5e84aa9",
+        "source_filename": "oracle-cards-20260731210300.jsonl.gz",
+        "updated_at": "2026-07-31T21:03:00.228+00:00"
+      },
+      "rulings_bulk": {
+        "download_uri": "https://data.scryfall.io/rulings/rulings-20260731210039.jsonl.gz",
+        "ruling_count": 77998,
+        "sha256": "edabb33f1354d577f4a337c182f1093519b3499e71cec304f7474e7b362c0537",
+        "source_filename": "rulings-20260731210039.jsonl.gz",
+        "updated_at": "2026-07-31T21:00:39.181+00:00"
+      }
     },
     "comprehensive_rules": "indexed",
     "official_set_mechanics": "planned",

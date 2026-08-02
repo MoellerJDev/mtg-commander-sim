@@ -53,6 +53,16 @@ MUTATION_TESTS = {
         "CapabilityImplementationMutationTests."
         "test_damage_amount_guard_mutant_is_killed"
     ),
+    "damage.replacement.static_quantity": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_damage_replacement_prevention_mutants_are_killed"
+    ),
+    "damage.prevention.static_fixed": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_damage_replacement_prevention_mutants_are_killed"
+    ),
     "damage.result.player_life": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."
