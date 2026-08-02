@@ -59,6 +59,21 @@ modules/functions. `platform/card-name-hash-index.json` contains only
 irreversible digests, so CI can detect new printed-name literals without a
 Scryfall database or tracked card content.
 
+Rules work is scheduled by the generated
+[`coverage/rules-dependency-queue.json`](coverage/rules-dependency-queue.json),
+whose hand-maintained source is `platform/rules-subsystems.json`. The queue
+assigns every reviewed blocked behavioral rule and every unclassified
+nonpassing rule to one dependency-linked subsystem and carries current
+implementation, tests, active profiles, capability links, and compiler impact.
+It is planning authority only; it does not promote conformance or runtime
+trust.
+
+`rules_scheduler.py` is excluded only from the exact printed-card-name literal
+heuristic because prose-free metadata keys such as `status` and `order` collide
+with real printed card names. It remains classified as generic rules
+governance, has no game-state access, and is not exempt from dependency,
+module-size, or repository policy checks.
+
 ## Layered design
 
 ```text

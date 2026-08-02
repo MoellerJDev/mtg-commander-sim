@@ -100,6 +100,7 @@ indexed here but excluded from documentation front-matter validation.
 - [Mechanics coverage](../coverage/mechanics-coverage.md)
 - [Rules coverage](../coverage/rules-coverage.md)
 - [Rules conformance coverage](../coverage/rules-conformance.md)
+- [Rules dependency queue](RULES_DEPENDENCY_QUEUE.md)
 - [Rules delta](../coverage/rules-delta.md)
 
 The older [Oracle coverage](../coverage/oracle-coverage.md) and

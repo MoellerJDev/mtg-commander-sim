@@ -84,6 +84,14 @@ def build_steps(
             ),
         ),
         GateStep(
+            "generated_rules_scheduler_freshness",
+            (
+                python,
+                "scripts/update_rules_scheduler.py",
+                "--check",
+            ),
+        ),
+        GateStep(
             "module_classification_freshness",
             (
                 python,

@@ -89,6 +89,7 @@ def _layer(relative: str) -> str:
         "mtg_commander_sim/replacement_effects.py",
         "mtg_commander_sim/rule_conformance.py",
         "mtg_commander_sim/rules_corpus.py",
+        "mtg_commander_sim/rules_scheduler.py",
         "mtg_commander_sim/shortcuts.py",
         "mtg_commander_sim/state_based_actions.py",
         "mtg_commander_sim/tap_state.py",
@@ -111,6 +112,8 @@ def _owner(relative: str, layer: str) -> str:
         return "rules_capabilities"
     if relative == "mtg_commander_sim/tap_state.py":
         return "tap_state_effects"
+    if relative == "mtg_commander_sim/rules_scheduler.py":
+        return "rules_governance"
     if relative in {
         "mtg_commander_sim/record.py",
         "mtg_commander_sim/record_trust.py",

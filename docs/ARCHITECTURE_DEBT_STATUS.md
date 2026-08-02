@@ -2,7 +2,7 @@
 title: "Architecture debt status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "e756950d52030b47a6cf81edcd7d7f60ca11d97e"
+verified: "40241e6a7a4e77a3dab3df93c6a726b0f82186fb"
 audience: "maintainers and rules contributors"
 maintenance: "generated"
 ---
@@ -13,10 +13,10 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 
 ## Baseline coordinates
 
-- Main commit: `e756950d52030b47a6cf81edcd7d7f60ca11d97e`
+- Main commit: `40241e6a7a4e77a3dab3df93c6a726b0f82186fb`
 - Package: `0.8.0`
-- CI run: [30729318546](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30729318546) — `pass`
-- Production scope: 88 files, 61,915 physical lines, 57,911 logical lines
+- CI run: [30732155279](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30732155279) — `pass`
+- Production scope: 89 files, 62,526 physical lines, 58,475 logical lines
 
 ## Central engine debt
 
@@ -24,12 +24,12 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Methods: 28 public, 303 private, 1 dunder
 - Cross-subsystem responsibility groups: 7
 - Direct GameState-write heuristic: 190 locations
-- Semantic-operation branches: 209
+- Semantic-operation branches: 210
 - Registered typed semantic handlers: 6 across 6 operations
 - Registered typed runtime components: 2
 - Remaining legacy `apply_effect` branches: 70
 - Registered operations still intercepted by engine string dispatch: 0
-- Exact printed-name literals in configured core files: 722 (110 conditional)
+- Exact printed-name literals in configured core files: 720 (110 conditional)
 - Oracle-ID literals in Python production code: 8
 - Card-named helpers: 1
 - Modules above the 1,500-logical-line review threshold: 6
@@ -44,7 +44,7 @@ Baseline: `b1ecdc0f3446a37ffe31bfca1237a079691e6b22`. Guard: `python scripts/val
 |---|---:|---:|---:|
 | `engine_logical_lines` | 23,147 | 23,091 | -56 |
 | `direct_game_state_writes` | 190 | 190 | +0 |
-| `printed_name_literals` | 724 | 722 | -2 |
+| `printed_name_literals` | 724 | 720 | -4 |
 | `oracle_id_literals` | 8 | 8 | +0 |
 | `legacy_card_specific_operations` | 15 | 15 | +0 |
 | `card_named_helpers` | 1 | 1 | +0 |
@@ -61,7 +61,7 @@ Baseline: `b1ecdc0f3446a37ffe31bfca1237a079691e6b22`. Guard: `python scripts/val
 | `mtg_commander_sim/oracle_ir.py` | python | 1,832 | 1,765 |
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
 | `mtg_commander_sim/record.py` | python | 1,726 | 1,620 |
-| `mtg_commander_sim/rules_corpus.py` | python | 1,590 | 1,495 |
+| `mtg_commander_sim/rules_corpus.py` | python | 1,561 | 1,464 |
 | `mtg_commander_sim/cli.py` | python | 1,388 | 1,336 |
 | `server/app.py` | python | 1,304 | 1,171 |
 | `mtg_commander_sim/codex_cli.py` | python | 1,214 | 1,154 |
@@ -116,8 +116,8 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,217
-- Conventional Python cases: 917
+- Python discovered: 4,223
+- Conventional Python cases: 923
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 7
 - Browser unit cases: 14

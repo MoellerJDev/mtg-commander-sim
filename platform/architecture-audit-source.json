@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "e756950d52030b47a6cf81edcd7d7f60ca11d97e",
+    "baseline_main_commit": "40241e6a7a4e77a3dab3df93c6a726b0f82186fb",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-02",
-    "phase": "phase_2_typed_tap_untap_effect_migration",
-    "scope_note": "Certified main includes Phase 1 trust/governance hardening. The current focused branch migrates tap, untap, and all-creature untap through typed handlers and a classified mutation port with honest tested-but-blocked capability status; it is not a complete tap/untap, replacement, layer, rules, or Oracle claim."
+    "phase": "rules_dependency_scheduler",
+    "scope_note": "Certified main includes the typed tap-state migration. The current focused branch adds a prose-free, source-pinned dependency scheduler for all reviewed blocked behavioral and unclassified nonpassing rules; it selects but does not implement or promote the bounded CR 614/616 replacement-choice batch."
   },
   "ci": {
     "workflow": "CI",
-    "run_id": 30729318546,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30729318546",
+    "run_id": 30732155279,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30732155279",
     "status": "pass",
     "python_versions": [
       "3.11",
@@ -52,6 +52,9 @@
     ],
     "card_specificity_exempt_prefixes": [
       "mtg_commander_sim/card_overrides/"
+    ],
+    "card_specificity_metadata_exempt_files": [
+      "mtg_commander_sim/rules_scheduler.py"
     ]
   },
   "thresholds": {

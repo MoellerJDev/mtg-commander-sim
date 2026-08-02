@@ -628,6 +628,8 @@ python simctl.py rules sync \
 python simctl.py rules verify --root .
 python simctl.py rules coverage --root .
 python simctl.py rules conformance --root .
+python simctl.py rules queue --root .
+python simctl.py rules next --root . --limit 20
 ```
 
 The pinned snapshot has a generated conformance inventory with separately
@@ -636,6 +638,14 @@ generated inventory test cannot prove rules behavior. See the generated
 [`coverage/rules-conformance.md`](coverage/rules-conformance.md) for current
 figures and `RULE_CONFORMANCE.md` for promotion, invalidation, and reporting
 policy.
+
+The generated machine-readable dependency queue groups every reviewed blocked
+behavioral rule and every still-unclassified nonpassing rule into coupled
+subsystems. It records rule and subsystem dependencies, current implementation
+and test evidence, active profiles, compiler impact, and one explicitly
+selected next batch. `rules next` reads that selection; it no longer acts as a
+numerical rules walk when the generated queue is present. See
+[`docs/RULES_DEPENDENCY_QUEUE.md`](docs/RULES_DEPENDENCY_QUEUE.md).
 
 Deck creation now invokes the typed Oracle compiler automatically. Exact
 whole-text templates lower into the generic effect DSL without a printed-name

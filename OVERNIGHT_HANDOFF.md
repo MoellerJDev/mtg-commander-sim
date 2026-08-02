@@ -17,11 +17,10 @@ or provider-session data.
 
 - Public repository: `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`; do not create `master`.
-- Certified `main` is `e756950d52030b47a6cf81edcd7d7f60ca11d97e` after
-  PR #60; its five CI jobs passed in run `30729318546`.
-- Phase 1 is integrated and its feature branch is deleted. Active work is the
-  focused `feat/typed-tap-untap-effects` Phase 2 migration based directly on
-  certified `main`; its exact-head merge gate and public CI are still pending.
+- Certified `main` is `40241e6a7a4e77a3dab3df93c6a726b0f82186fb`;
+  its five post-merge CI jobs passed in run `30732155279`.
+- The typed tap-state branch is merged and deleted. Active work is the focused
+  `feat/rules-dependency-scheduler` branch based directly on certified `main`.
 - The live branch, pull request, exact-head CI, and clean-tree state must be
   read from `git`, `gh`, and the generated platform ledger rather than inferred
   from an older handoff.
@@ -73,9 +72,9 @@ bounded runtime-component families remain tested or blocked rather than
 trusted. Existing components are bounded promises, not general CR 613 or CR
 616 support.
 
-## Active typed tap-state migration
+## Integrated typed tap-state migration
 
-The current branch registers `tap`, `untap`, and `untap_all_creatures` in a
+Certified `main` registers `tap`, `untap`, and `untap_all_creatures` in a
 dedicated semantic family, lowers them to typed intents, and commits them
 through the classified `tap_state.py` mutation port. The legacy
 `apply_effect` branches are removed. Focused evidence covers strict schemas,
@@ -89,6 +88,16 @@ Complete tap/untap prohibitions, general replacement ordering, and complete
 derived-characteristic closure remain explicit blockers. This slice does not
 upgrade legacy-reviewed CardPrograms or claim complete CR 701.26/122.1d
 interactions.
+
+## Active dependency scheduler
+
+The active branch adds one generated, source-pinned queue that groups all
+reviewed blocked behavioral rules and all unclassified nonpassing rules into
+dependency-ordered subsystems. It records current implementation/test evidence,
+active profiles, compiler impact, and a source-controlled selected batch. The
+first selection is the bounded CR 614/616 replacement-choice and nested-event
+cluster; no implementation or trust promotion for that cluster is part of the
+scheduler slice itself.
 
 ## Merge discipline
 
@@ -106,14 +115,16 @@ Finish documentation/generator reconciliation and validate the focused branch:
 
 ```bash
 python scripts/update_capability_evidence.py --check
+python scripts/update_rules_scheduler.py --check
 python scripts/update_module_classifications.py --check
 python scripts/benchmark_continuous_effects.py --check
 python scripts/update_architecture_audit.py --check
 python scripts/update_platform_status.py --check
 ```
 
-Commit the coherent branch, run `scripts/local_merge_gate.py` against that
-exact SHA, and keep its Playwright/server work headless with `--no-open`.
-Require the public CI matrix for the same SHA before merge. After normal merge
-and branch cleanup, select the next coherent migration from fresh certified
-`main`; do not resume numerical rules traversal.
+Validate queue completeness, dependency ordering, and stale-output rejection;
+then commit the coherent branch and run `scripts/local_merge_gate.py` against
+that exact SHA. Keep Playwright/server work headless with `--no-open`. Require
+the public CI matrix for the same SHA before merge. After normal merge and
+branch cleanup, start the selected replacement-event batch from fresh
+certified `main`.

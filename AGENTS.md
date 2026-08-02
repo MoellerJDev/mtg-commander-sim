@@ -67,17 +67,20 @@ rewrite.
 - Phase 1 runtime trust/default-deny governance is integrated on certified
   `main` through PR #60. Its explicit evidence, trust/closure, component
   binding, performance, and architecture ratchets are current policy.
-- The active focused branch is `feat/typed-tap-untap-effects`. It migrates only
-  `tap`, `untap`, and `untap_all_creatures` through a dedicated typed semantic
-  family and the classified `tap_state.py` mutation port, with a negative
-  engine delta and exact rollback/replay/mutation evidence.
+- Certified `main` integrates the typed `tap`, `untap`, and
+  `untap_all_creatures`
+  migration through a dedicated semantic family and the classified
+  `tap_state.py` mutation port, with a negative engine delta and exact
+  rollback/replay/mutation evidence.
 - Keep those capabilities tested and blocked until complete tap/untap
   prohibitions, general replacement ordering, and effective-characteristic
   closure are represented. Do not widen this slice into broad Oracle grammar,
   a new card family, or numerical Comprehensive Rules traversal.
-- After the exact feature head passes the complete local gate and public CI,
-  merge normally, clean the branch, return to fresh certified `main`, and
-  select the next measured debt-migration family.
+- The active rules-first planning branch is
+  `feat/rules-dependency-scheduler`. Its generated queue must conservatively
+  cover every reviewed blocked behavioral rule and every unclassified
+  nonpassing rule exactly once. Select subsystem batches from that queue; do
+  not resume numerical rule traversal.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic
@@ -101,6 +104,7 @@ python scripts/build_test_database.py build \
 # Set MTG_CARD_DB=data/test-ci.sqlite3 for the remaining commands.
 python -m unittest discover -s tests -p 'test_*.py' -v
 python scripts/update_capability_evidence.py --check
+python scripts/update_rules_scheduler.py --check
 python scripts/update_module_classifications.py --check
 python scripts/benchmark_continuous_effects.py --check
 python scripts/demo_four_player_protocol.py --db data/test-ci.sqlite3 --out demo

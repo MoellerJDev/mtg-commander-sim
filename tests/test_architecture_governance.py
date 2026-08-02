@@ -63,7 +63,26 @@ class ArchitectureGovernanceTests(unittest.TestCase):
 
     def test_specificity_scope_covers_all_generic_python_modules(self):
         scope = card_specificity_scope(self.analyses, self.source)
-        self.assertEqual(set(self.analyses), set(scope))
+        metadata_exempt = set(
+            self.source["scope"].get(
+                "card_specificity_metadata_exempt_files", []
+            )
+        )
+        self.assertEqual(
+            {"mtg_commander_sim/rules_scheduler.py"}, metadata_exempt
+        )
+        exempt_prefixes = tuple(
+            self.source["scope"].get(
+                "card_specificity_exempt_prefixes", []
+            )
+        )
+        expected = {
+            relative
+            for relative in self.analyses
+            if relative not in metadata_exempt
+            and not relative.startswith(exempt_prefixes)
+        }
+        self.assertEqual(expected, set(scope))
         self.assertGreater(len(scope), 7)
 
     def test_state_write_identity_does_not_depend_on_source_line(self):

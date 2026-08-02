@@ -1,0 +1,363 @@
+{
+  "schema_version": 1,
+  "scheduler_version": 1,
+  "policy": "dependency_ordered_behavioral_rules_v1",
+  "active_profile_priority": [
+    "commander_review",
+    "commander_duel",
+    "traditional"
+  ],
+  "queue_statuses": [
+    "blocked",
+    "unreviewed"
+  ],
+  "queue_classifications": [
+    "behavioral",
+    "unclassified"
+  ],
+  "unclassified_policy": "Conservatively queue every unclassified nonpassing rule for behavioral review; classification is never inferred from rule numbering or prose-free metadata.",
+  "subsystems": [
+    {
+      "id": "core-game",
+      "title": "Core game, players, setup, and endings",
+      "order": 10,
+      "depends_on": [],
+      "section_ids": ["100", "101", "102", "103", "104"],
+      "compiler_impact": ["none"]
+    },
+    {
+      "id": "characteristics",
+      "title": "Object and card characteristics",
+      "order": 20,
+      "depends_on": ["core-game"],
+      "section_ids": [
+        "105", "107", "108", "109", "200", "201", "202", "203",
+        "204", "205", "206", "207", "208", "209", "210", "211",
+        "212", "213"
+      ],
+      "compiler_impact": [
+        "oracle_normalization",
+        "card_program_typing",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "objects-permanents-tokens",
+      "title": "Objects, permanents, tokens, and emblems",
+      "order": 30,
+      "depends_on": ["core-game", "characteristics"],
+      "section_ids": ["110", "111", "114"],
+      "compiler_impact": [
+        "oracle_parser",
+        "card_program_lowering",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "mana-costs-priority",
+      "title": "Mana, spells, abilities, targets, timing, and costs",
+      "order": 40,
+      "depends_on": [
+        "core-game",
+        "characteristics",
+        "objects-permanents-tokens"
+      ],
+      "section_ids": ["106", "112", "113", "115", "116", "117", "118"],
+      "compiler_impact": [
+        "oracle_parser",
+        "card_program_costs",
+        "card_program_targets",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "card-types",
+      "title": "Card and nontraditional card types",
+      "order": 50,
+      "depends_on": ["characteristics", "objects-permanents-tokens"],
+      "section_ids": [
+        "300", "301", "302", "303", "304", "305", "306", "307",
+        "308", "309", "310", "311", "312", "313", "314", "315"
+      ],
+      "compiler_impact": [
+        "oracle_normalization",
+        "card_program_typing",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "zones",
+      "title": "Zones and zone topology",
+      "order": 60,
+      "depends_on": ["objects-permanents-tokens", "card-types"],
+      "section_ids": ["400", "401", "402", "403", "404", "405", "406", "407", "408"],
+      "compiler_impact": [
+        "card_program_zone_permissions",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "resources",
+      "title": "Life, drawing, counters, and stickers",
+      "order": 70,
+      "depends_on": ["mana-costs-priority", "zones"],
+      "section_ids": ["119", "121", "122", "123"],
+      "compiler_impact": [
+        "oracle_parser",
+        "card_program_lowering",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "damage",
+      "title": "Damage events and results",
+      "order": 80,
+      "depends_on": [
+        "characteristics",
+        "objects-permanents-tokens",
+        "resources"
+      ],
+      "section_ids": ["120"],
+      "compiler_impact": [
+        "oracle_parser",
+        "card_program_lowering",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "turn-structure",
+      "title": "Turn, phases, and noncombat steps",
+      "order": 90,
+      "depends_on": ["mana-costs-priority", "zones", "resources"],
+      "section_ids": [
+        "500", "501", "502", "503", "504", "505", "511", "512",
+        "513", "514"
+      ],
+      "compiler_impact": ["runtime_contracts", "mechanic_contracts"]
+    },
+    {
+      "id": "casting-activation",
+      "title": "Casting, activation, mana abilities, and loyalty abilities",
+      "order": 100,
+      "depends_on": ["mana-costs-priority", "zones", "turn-structure"],
+      "section_ids": ["600", "601", "602", "605", "606"],
+      "compiler_impact": [
+        "oracle_parser",
+        "card_program_costs",
+        "card_program_lowering",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "triggered-static-linked",
+      "title": "Triggered, static, and linked abilities",
+      "order": 110,
+      "depends_on": [
+        "objects-permanents-tokens",
+        "turn-structure",
+        "casting-activation"
+      ],
+      "section_ids": ["603", "604", "607"],
+      "compiler_impact": [
+        "oracle_parser",
+        "event_binding",
+        "card_program_lowering",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "resolution-effects",
+      "title": "Resolution and one-shot effects",
+      "order": 120,
+      "depends_on": [
+        "zones",
+        "casting-activation",
+        "triggered-static-linked"
+      ],
+      "section_ids": ["608", "609", "610"],
+      "compiler_impact": [
+        "oracle_parser",
+        "card_program_lowering",
+        "semantic_handlers"
+      ]
+    },
+    {
+      "id": "continuous-effects",
+      "title": "Continuous and text-changing effects and layers",
+      "order": 130,
+      "depends_on": [
+        "characteristics",
+        "objects-permanents-tokens",
+        "triggered-static-linked",
+        "resolution-effects"
+      ],
+      "section_ids": ["611", "612", "613"],
+      "compiler_impact": [
+        "oracle_parser",
+        "card_program_lowering",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "replacement-prevention",
+      "title": "Replacement, prevention, and ordering",
+      "order": 140,
+      "depends_on": [
+        "resources",
+        "damage",
+        "resolution-effects",
+        "continuous-effects"
+      ],
+      "section_ids": ["614", "615", "616"],
+      "compiler_impact": [
+        "oracle_parser",
+        "card_program_lowering",
+        "event_binding",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "combat",
+      "title": "Combat phase and combat steps",
+      "order": 150,
+      "depends_on": [
+        "damage",
+        "turn-structure",
+        "continuous-effects"
+      ],
+      "section_ids": ["506", "507", "508", "509", "510"],
+      "compiler_impact": ["runtime_contracts", "mechanic_contracts"]
+    },
+    {
+      "id": "game-actions-state",
+      "title": "Keyword actions, turn/state actions, copying, and game control",
+      "order": 160,
+      "depends_on": [
+        "zones",
+        "turn-structure",
+        "combat",
+        "resolution-effects",
+        "replacement-prevention"
+      ],
+      "section_ids": [
+        "700", "701", "703", "704", "705", "706", "707", "723",
+        "724", "727", "729", "732", "733"
+      ],
+      "compiler_impact": [
+        "oracle_parser",
+        "card_program_lowering",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "keyword-abilities",
+      "title": "Keyword abilities",
+      "order": 170,
+      "depends_on": [
+        "casting-activation",
+        "continuous-effects",
+        "replacement-prevention",
+        "combat",
+        "game-actions-state"
+      ],
+      "section_ids": ["702"],
+      "compiler_impact": [
+        "oracle_parser",
+        "card_program_lowering",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "alternate-card-forms",
+      "title": "Face-down, multiface, and alternate card forms",
+      "order": 180,
+      "depends_on": [
+        "card-types",
+        "zones",
+        "casting-activation",
+        "continuous-effects",
+        "replacement-prevention",
+        "game-actions-state"
+      ],
+      "section_ids": [
+        "708", "709", "710", "711", "712", "713", "714", "715",
+        "716", "717", "718", "719", "720", "721", "722", "730",
+        "731"
+      ],
+      "compiler_impact": [
+        "oracle_normalization",
+        "oracle_parser",
+        "card_program_faces",
+        "card_program_zone_permissions",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "designations-variants",
+      "title": "Monarch, initiative, and special designations",
+      "order": 190,
+      "depends_on": ["turn-structure", "combat", "triggered-static-linked"],
+      "section_ids": ["725", "726", "728"],
+      "compiler_impact": [
+        "oracle_parser",
+        "card_program_lowering",
+        "mechanic_contracts"
+      ]
+    },
+    {
+      "id": "multiplayer",
+      "title": "Multiplayer options and team variants",
+      "order": 200,
+      "depends_on": ["core-game", "turn-structure", "combat"],
+      "section_ids": [
+        "800", "801", "802", "803", "804", "805", "806", "807",
+        "808", "809", "810", "811"
+      ],
+      "compiler_impact": ["runtime_contracts", "mechanic_contracts"]
+    },
+    {
+      "id": "formats",
+      "title": "Casual variants and Commander",
+      "order": 210,
+      "depends_on": [
+        "zones",
+        "casting-activation",
+        "alternate-card-forms",
+        "designations-variants",
+        "multiplayer"
+      ],
+      "section_ids": ["900", "901", "902", "903", "904", "905"],
+      "compiler_impact": [
+        "format_contracts",
+        "card_program_zone_permissions",
+        "mechanic_contracts"
+      ]
+    }
+  ],
+  "selected_batch": {
+    "batch_id": "replacement-choice-and-nested-events",
+    "subsystem_id": "replacement-prevention",
+    "rule_ids": [
+      "614.1",
+      "614.13",
+      "614.13a",
+      "614.13b",
+      "614.13c",
+      "614.16",
+      "616.1",
+      "616.1g"
+    ],
+    "target_capability_ids": [
+      "damage.replacement.order",
+      "damage.prevention.order"
+    ],
+    "rationale": "This reviewed blocked cluster shares the existing replacement event pipeline and unlocks affected-player choice, nested-event suspension, and applicability rediscovery needed by damage and tap-state work without pretending to complete every replacement family.",
+    "exit_criteria": [
+      "Implement one generic replayable replacement-choice and nested-event boundary with no card-name dispatch.",
+      "Promote only source-pinned rules whose positive, negative, interaction, multiplayer where applicable, replay, and implementation-mutation witnesses pass.",
+      "Keep unsupported replacement families and unresolved ordering fail-closed.",
+      "Run complete pinned Oracle and Commander-legal card censuses and report exact deltas.",
+      "Preserve Game Record v3, principal projection, and zero suppressed meaningful windows."
+    ]
+  }
+}
