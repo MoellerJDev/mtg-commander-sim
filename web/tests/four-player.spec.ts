@@ -693,7 +693,10 @@ test("a duel declares an attacker in the browser and applies commander combat da
 });
 
 test("a trusted browser duel reaches a natural commander-damage winner", async ({ browser }) => {
-  test.setTimeout(180_000);
+  // The deterministic game usually completes near three minutes after the
+  // preceding serial journeys have warmed the shared runner. Keep enough
+  // budget for terminal log assertions and context cleanup on slower hosts.
+  test.setTimeout(240_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
