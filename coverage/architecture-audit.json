@@ -6484,10 +6484,10 @@
     ]
   },
   "audit": {
-    "baseline_main_commit": "a3ea421d021c45002048909073eeef69e6c113d9",
+    "baseline_main_commit": "7cc9ea1702c67519b14d2f177d82dcc8fab5458f",
     "baseline_worktree_clean": true,
-    "phase": "phase_0_current_state_audit",
-    "scope_note": "This is a measured migration baseline, not a completeness or correctness claim.",
+    "phase": "phase_0_post_pr58_reconciliation",
+    "scope_note": "This is the measured post-PR-58 reconciliation baseline. It is not a completeness or correctness claim, and absent trust, mutation, closure, or performance evidence remains absent rather than inferred.",
     "verified_at": "2026-08-01"
   },
   "compiler": {
@@ -6843,7 +6843,7 @@
     ]
   },
   "coordinates": {
-    "baseline_main_commit": "a3ea421d021c45002048909073eeef69e6c113d9",
+    "baseline_main_commit": "7cc9ea1702c67519b14d2f177d82dcc8fab5458f",
     "baseline_worktree_clean": true,
     "ci": {
       "local_observed": {
@@ -6856,9 +6856,9 @@
         "3.11",
         "3.12"
       ],
-      "run_id": 30716628726,
+      "run_id": 30723562495,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30716628726",
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30723562495",
       "workflow": "CI"
     },
     "default_branch": "main",
@@ -7170,7 +7170,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "9547e143ad6c8f16ef1a964ce725c4ebebdb05c5"
+          "verified": "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -7184,7 +7184,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Rules completeness implementation status",
-          "verified": "1eb40f99b7269870c7e419aa75ea3e997e7aff0e"
+          "verified": "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -7198,7 +7198,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Compiler coverage status",
-          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+          "verified": "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -7212,7 +7212,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Architecture debt status",
-          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+          "verified": "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -7226,7 +7226,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Integration handoff",
-          "verified": "3bb415ef898e3c013eaf78007c4169cc530111f5"
+          "verified": "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -7251,7 +7251,7 @@
   "generated": {
     "card_specificity_source": "platform/card-specificity-baseline.json",
     "generator": "scripts/update_architecture_audit.py",
-    "scope_note": "This is a measured migration baseline, not a completeness or correctness claim.",
+    "scope_note": "This is the measured post-PR-58 reconciliation baseline. It is not a completeness or correctness claim, and absent trust, mutation, closure, or performance evidence remains absent rather than inferred.",
     "source": "platform/architecture-audit-source.json",
     "stale_check": "python scripts/update_architecture_audit.py --check"
   },

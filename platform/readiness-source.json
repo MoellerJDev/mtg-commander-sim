@@ -6,11 +6,11 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "phase_4_typed_semantic_handlers",
-    "branch": "feat/phase4-typed-semantic-handlers",
-    "commit_reference": "the commit containing this ledger",
+    "active_phase": "phase_0_post_pr58_reconciliation",
+    "branch": "main",
+    "commit_reference": "PR #58 merge commit 7cc9ea1702c67519b14d2f177d82dcc8fab5458f plus the reconciliation commit containing this ledger",
     "branch_ancestry": {
-      "focused_branch_base": "1eb40f99b7269870c7e419aa75ea3e997e7aff0e",
+      "focused_branch_base": "7cc9ea1702c67519b14d2f177d82dcc8fab5458f",
       "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
@@ -412,6 +412,13 @@
         "number": 57,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/57"
+      },
+      {
+        "base": "main",
+        "head": "feat/phase5-continuous-effect-components",
+        "number": 58,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/58"
       }
     ],
     "tags": [
@@ -434,12 +441,14 @@
     "oracle": {
       "scope": "full_and_commander_legal_oracle_snapshots_plus_exact_list_fixture",
       "status": "pinned_partial_corpus_coverage",
-      "updated_at": "2026-07-31"
+      "updated_at": "2026-07-31T21:03:00.228+00:00",
+      "sha256": "34d43820bb1b85be99267367969396c81a0bc387061dbd00882d1e78a5e84aa9"
     },
     "rulings": {
       "scope": "full_rulings_snapshot_plus_exact_list_fixture",
       "status": "pinned_partial_corpus_coverage",
-      "updated_at": "2026-07-31"
+      "updated_at": "2026-07-31T21:00:39.181+00:00",
+      "sha256": "edabb33f1354d577f4a337c182f1093519b3499e71cec304f7474e7b362c0537"
     }
   },
   "milestones": [
@@ -447,7 +456,7 @@
       "id": "integrated_foundation",
       "name": "Integrated deterministic foundation",
       "status": "complete",
-      "evidence": "The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, ratcheted guards, documentation enforcement, fine-grained capability closure, CardProgram V2, the Phase 4 typed-handler boundary, and the first bounded Phase 5 token-replacement runtime component are integrated on verified main. Registered draw, table-wide draw, and monarch handlers use immutable rules queries, typed intents, canonical stack resolution, and a measured legacy fallback for unmigrated operations."
+      "evidence": "The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, ratcheted guards, documentation enforcement, fine-grained capability closure, CardProgram V2, the typed-handler boundary, and the first bounded token-replacement and continuous-effect runtime components are integrated on verified main. Registered draw, table-wide draw, and monarch handlers use immutable rules queries, typed intents, canonical stack resolution, and a measured legacy fallback for unmigrated operations. Stridehangar Automaton and Worldwalker Helm token replacement behavior and Stridehangar Automaton's fixed Thopter anthem no longer depend on printed-name engine dispatch."
     },
     {
       "id": "browser_commander_mvp",
@@ -485,12 +494,12 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "9547e143ad6c8f16ef1a964ce725c4ebebdb05c5",
+    "baseline_commit": "7cc9ea1702c67519b14d2f177d82dcc8fab5458f",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30721336920,
+      "run_id": 30723562495,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30721336920"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30723562495"
     },
     "local": {
       "compile": "pass",
@@ -513,6 +522,11 @@
     "semantic_preflight": "trusted_only_for_two_pinned_exact_lists"
   },
   "blockers": [
+    "trusted capabilities do not yet require an explicit generated evidence declaration, killed implementation mutation, and separate dependency fail-closed status",
+    "CardProgram trust basis and intrinsic, format, match, and dynamic closure are not yet represented or enforced as separate authoritative concepts",
+    "runtime handler and component execution validates registered capability IDs but is not yet bound to a trusted applicable closure at strict preflight and execution",
+    "the architecture policy does not yet default-deny unclassified production modules, use stable structural mutation identities, cover the complete generic specificity scope, or bind each exception to its exact ADR",
+    "continuous-effect runtime collection has boundary tests but no dedicated deterministic characteristic-query and component-collection performance baseline",
     "a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence",
     "saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit",
     "the authoritative engine remains a measured oversized legacy module with interleaved turn, mutation, casting, effect, and variant responsibilities; ratcheted guards prevent new debt while later phases extract it",
@@ -520,5 +534,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Merge the bounded Phase 5 fixed-anthem component slice, then select the next measured card-specific core family for typed migration without widening Oracle coverage or changing Game Record v3."
+  "next_task": "Create feat/runtime-trust-hardening from reconciled main and implement explicit capability evidence and mutation status, CardProgram trust basis and closure layers, strict handler/component capability binding and compatibility provenance, measured continuous-effect performance, and default-deny architecture governance without adding a new card family."
 }

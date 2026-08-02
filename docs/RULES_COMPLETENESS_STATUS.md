@@ -2,7 +2,7 @@
 title: "Rules completeness implementation status"
 status: "current"
 authoritative_source: "pinned rules and generated coverage artifacts"
-verified: "1eb40f99b7269870c7e419aa75ea3e997e7aff0e"
+verified: "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
 audience: "rules, compiler, and engine contributors"
 maintenance: "hand-maintained"
 ---
@@ -40,7 +40,7 @@ server, provider, and pilot success never promote rules fidelity by themselves.
   incarnations, the stack, mana and costs, targets and choices, state-based
   actions, combat, Commander state, and selected continuous, replacement,
   prevention, trigger, and copy behavior.
-- Typed helpers exist for several rules families. Phase 4 has a registered,
+- Typed helpers exist for several rules families. The registered,
   read-only semantic-handler boundary for the first generic operations, but
   most orchestration and mutation remain centralized in `CommanderEngine`.
 - Semantic packs close selected card and interaction slices. They are explicit
@@ -66,16 +66,20 @@ The principal architectural and behavioral gaps include:
 
 ## Current migration rule
 
-Broad card-family expansion is paused during the architecture migration. Phase
-0 recorded the implementation and debt. Phase 1 added enforceable import,
-mutation, card-specificity, documentation, and ADR guards. Phase 2 added the
-fine-grained capability registry, Phase 3 added CardProgram V2, and Phase 4
-incrementally removed generic central-dispatch branches through typed handlers
-and intents. Phase 5 is now moving card-specific core branches into registered,
-versioned CardProgram runtime components. Fixed additional-token replacements
-and fixed subtype anthems are the first bounded families; neither general CR
-616 ordering nor complete CR 613 dependencies are implied. Later phases migrate
-domain-owned state before resuming dependency-ordered rules expansion.
+Broad card-family expansion is paused during runtime trust and governance
+hardening. The integrated migration rails include enforceable architecture and
+documentation guards, the fine-grained capability registry, CardProgram V2,
+typed semantic handlers and intents, and the first registered versioned
+runtime-component families. Fixed additional-token replacements and fixed
+subtype anthems remain bounded promises; neither general CR 616 ordering nor
+complete CR 613 dependencies are implied.
+
+The next phase must make capability evidence and implementation mutation
+status, CardProgram trust basis, intrinsic and ambient closure, strict
+handler/component binding, compatibility provenance, module classification,
+stable mutation identities, and continuous-effect performance evidence
+authoritative. Dependency-ordered rules and Oracle expansion resume only after
+that hardening passes.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,

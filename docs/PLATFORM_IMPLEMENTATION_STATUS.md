@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "9547e143ad6c8f16ef1a964ce725c4ebebdb05c5"
+verified: "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,8 +15,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Current commit: the commit containing this ledger
-- Active phase: `phase_4_typed_semantic_handlers`
+- Current commit: PR #58 merge commit 7cc9ea1702c67519b14d2f177d82dcc8fab5458f plus the reconciliation commit containing this ledger
+- Active phase: `phase_0_post_pr58_reconciliation`
 - Package version: `0.8.0`
 
 Historical integration chronology belongs in `CHANGELOG.md`; this current report intentionally does not reproduce a pull-request ledger.
@@ -24,8 +24,8 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 ## Pinned snapshots and coverage
 
 - Comprehensive Rules: pinned_corpus_on_main
-- Oracle: pinned_partial_corpus_coverage (2026-07-31)
-- Rulings: pinned_partial_corpus_coverage (2026-07-31)
+- Oracle: pinned_partial_corpus_coverage (2026-07-31T21:03:00.228+00:00)
+- Rulings: pinned_partial_corpus_coverage (2026-07-31T21:00:39.181+00:00)
 - Rules manifest present on this branch: yes
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
@@ -39,7 +39,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 | Milestone | Status | Evidence |
 |---|---|---|
-| Integrated deterministic foundation | `complete` | The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, ratcheted guards, documentation enforcement, fine-grained capability closure, CardProgram V2, the Phase 4 typed-handler boundary, and the first bounded Phase 5 token-replacement runtime component are integrated on verified main. Registered draw, table-wide draw, and monarch handlers use immutable rules queries, typed intents, canonical stack resolution, and a measured legacy fallback for unmigrated operations. |
+| Integrated deterministic foundation | `complete` | The deterministic foundation, browser/server vertical slice, reviewed combat/rules slices, generated architecture baseline, ratcheted guards, documentation enforcement, fine-grained capability closure, CardProgram V2, the typed-handler boundary, and the first bounded token-replacement and continuous-effect runtime components are integrated on verified main. Registered draw, table-wide draw, and monarch handlers use immutable rules queries, typed intents, canonical stack resolution, and a measured legacy fallback for unmigrated operations. Stridehangar Automaton and Worldwalker Helm token replacement behavior and Stridehangar Automaton's fixed Thopter anthem no longer depend on printed-name engine dispatch. |
 | Browser Commander MVP | `development_local_runtime_hardened` | The browser/server line has a strict protocol 3.0 boundary, serialized game actors, SQLite plus Game Record durability, per-tab seat isolation and seven two/four-player Chromium journeys, current generic choice schemas, process-restart recovery, durable lifecycle operations, a responsive local-art UI with hover/focus card inspection, public-zone browsing, resilient card-scoped click/drag actions, saved Auto-mana/Manual mana and Auto-pass/Full control preferences, public tapped-card orientation, explicit active-player main-phase advancement, confirmed concession, public commander-damage tracking, terminal winner/draw rendering, exact command retry, invited read-only spectators, a durable complete public-log dialog, fail-closed handling for legacy arbiter-only records, and one-command managed Scryfall/browser startup. Compact trusted-only coverage includes modal land faces, targeted Sunscorched Desert ETB damage, a stack response, rules-created Treasure payment, Orcish Bowmasters/Amass, explicit attack and block declarations, combat damage, and a natural commander-damage winner. The 49-command natural-winner record replayed to its exact state hash with zero suppressed meaningful windows and a clean seat-projection audit; completed games also survive process restart. The inspected full-database failure remains a pinned pre-fix record, and a fresh post-restart full-database manual journey is still required as broader current-snapshot evidence. Saved board-layout customization, future schemas, full accounts, expiry/rate limits, and production deployment remain open. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408, CR 500-514, focused CR 725, and focused CR 508-509/608 current-turn history slices are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
@@ -65,7 +65,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 - Tests discovered: 4183
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
-- Baseline CI: [30721336920](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30721336920) — `pass`
+- Baseline CI: [30723562495](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30723562495) — `pass`
 - Compile: `pass`
 - Deterministic tests: `pass_full_exact_commit_gate`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
@@ -80,6 +80,11 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Current blockers
 
+- trusted capabilities do not yet require an explicit generated evidence declaration, killed implementation mutation, and separate dependency fail-closed status
+- CardProgram trust basis and intrinsic, format, match, and dynamic closure are not yet represented or enforced as separate authoritative concepts
+- runtime handler and component execution validates registered capability IDs but is not yet bound to a trusted applicable closure at strict preflight and execution
+- the architecture policy does not yet default-deny unclassified production modules, use stable structural mutation identities, cover the complete generic specificity scope, or bind each exception to its exact ADR
+- continuous-effect runtime collection has boundary tests but no dedicated deterministic characteristic-query and component-collection performance baseline
 - a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence
 - saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit
 - the authoritative engine remains a measured oversized legacy module with interleaved turn, mutation, casting, effect, and variant responsibilities; ratcheted guards prevent new debt while later phases extract it
@@ -89,7 +94,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Merge the bounded Phase 5 fixed-anthem component slice, then select the next measured card-specific core family for typed migration without widening Oracle coverage or changing Game Record v3.
+Create feat/runtime-trust-hardening from reconciled main and implement explicit capability evidence and mutation status, CardProgram trust basis and closure layers, strict handler/component capability binding and compatibility provenance, measured continuous-effect performance, and default-deny architecture governance without adding a new card family.
 
 ## Regeneration
 

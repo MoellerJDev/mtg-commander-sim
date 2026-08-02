@@ -2,7 +2,7 @@
 title: "Compiler coverage status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---

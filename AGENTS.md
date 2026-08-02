@@ -2,7 +2,7 @@
 title: "Codex project instructions"
 status: "current"
 authoritative_source: "repository contribution and architecture policy"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "7cc9ea1702c67519b14d2f177d82dcc8fab5458f"
 audience: "Codex agents and contributors"
 maintenance: "hand-maintained"
 ---
@@ -43,18 +43,31 @@ maintenance: "hand-maintained"
 - Do not spend product slices improving AI strategy, model routing, prompts, or
   provider sessions. Keep existing provider-specific adapters isolated from the
   authoritative rules and application layers.
+- Automated checks must never open or drive a contributor's system browser or
+  the Codex in-app browser. Run Playwright in its isolated headless browser,
+  start `python -m server` with `--no-open`, keep Vite `open: false`, and keep
+  HTML reporters configured with `open: "never"`. Only launch a visible browser
+  when the user explicitly asks for an interactive/manual browser session.
 
-## Current architecture migration
+## Current architecture program
 
 The repository is migrating incrementally from the current centralized engine
 to domain-owned rules modules. Follow the ordered phases recorded in the active
 project objective; do not use a feature request as permission for a big-bang
 rewrite.
 
-- Phase 0 records the measured current-state baseline. Broad new card-family
-  expansion is paused until it merges.
-- Phase 1 establishes dependency, mutation-ownership, card-specificity,
-  generated-document, documentation-index, and ADR enforcement.
+- The post-PR-58 reconciliation records the exact integrated baseline and
+  corrects stale phase guidance. Broad new card-family expansion remains
+  paused.
+- The next focused branch is `feat/runtime-trust-hardening`. It must add
+  explicit capability evidence and implementation-mutation status,
+  CardProgram trust basis and closure layers, strict handler/component
+  capability binding, compatibility provenance, continuous-effect performance
+  evidence, and default-deny architecture governance.
+- Do not add a new card family, resume numerical Comprehensive Rules traversal,
+  or widen the Oracle grammar during trust hardening.
+- Only after trust hardening merges should the next measured debt-migration
+  family be selected from a fresh `main` branch.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic
