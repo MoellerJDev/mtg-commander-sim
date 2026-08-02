@@ -388,6 +388,9 @@ class CardProgramV2Tests(unittest.TestCase):
                 "replacement.token.additional.v1": [
                     "token.creation.additional_replacement"
                 ],
+                "replacement.zone.destination.v1": [
+                    "zone.change.destination_replacement"
+                ],
             },
             {
                 handler["handler_id"]: handler["registry"][
