@@ -9,6 +9,7 @@ from ..continuous_effects import (
     ContinuousOperation,
     Layer,
 )
+from ..mana import BASIC_LAND_MANA
 from ..rules.capabilities import load_default_capability_registry
 from .component_registry import (
     RuntimeComponentRegistry,
@@ -19,6 +20,9 @@ from .context import SemanticNodeError
 
 
 _FIXED_ANTHEM_HANDLER_ID = "continuous.anthem.power_toughness.v1"
+_BASIC_LAND_TYPE_HANDLER_ID = (
+    "continuous.basic_land_type.add_all_lands.v1"
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -27,6 +31,12 @@ class FixedPowerToughnessAnthemNode:
     target_subtypes_all: tuple[str, ...]
     power: int
     toughness: int
+
+
+@dataclass(frozen=True, slots=True)
+class AddBasicLandTypeNode:
+    target_types_all: tuple[str, ...]
+    basic_land_type: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -66,7 +76,7 @@ class ContinuousEffectComponentHandler(Protocol):
 
     def validate(
         self, descriptor: Mapping[str, Any]
-    ) -> FixedPowerToughnessAnthemNode: ...
+    ) -> Any: ...
 
     def lower(
         self,
@@ -200,6 +210,117 @@ class FixedPowerToughnessAnthemHandler:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class AddBasicLandTypeHandler:
+    handler_id: str = _BASIC_LAND_TYPE_HANDLER_ID
+    schema_version: int = 1
+    family: str = "continuous.basic_land_type.add_all_lands"
+    event: str = "characteristics.evaluate"
+    rule_references: tuple[str, ...] = (
+        "305.6",
+        "305.7",
+        "613.1d",
+    )
+    capability_dependencies: tuple[str, ...] = (
+        "continuous.basic_land_type.add_all_lands",
+    )
+
+    def validate(
+        self, descriptor: Mapping[str, Any]
+    ) -> AddBasicLandTypeNode:
+        exact_fields(
+            descriptor,
+            {
+                "handler_id",
+                "schema_version",
+                "event",
+                "condition",
+                "modifier",
+            },
+            field="runtime handler",
+        )
+        if descriptor["handler_id"] != self.handler_id:
+            raise SemanticNodeError("Runtime handler ID does not match registry")
+        if descriptor["schema_version"] != self.schema_version:
+            raise SemanticNodeError(
+                f"Unsupported {self.handler_id} schema version"
+            )
+        if descriptor["event"] != self.event:
+            raise SemanticNodeError(
+                f"{self.handler_id} must handle {self.event}"
+            )
+        condition = descriptor["condition"]
+        if not isinstance(condition, Mapping):
+            raise SemanticNodeError(
+                "runtime handler condition must be an object"
+            )
+        exact_fields(
+            condition,
+            {"target_types_all"},
+            field="runtime handler condition",
+        )
+        target_types = tuple(
+            value.casefold()
+            for value in nonempty_strings(
+                condition["target_types_all"],
+                field="condition.target_types_all",
+            )
+        )
+        if target_types != ("land",):
+            raise SemanticNodeError(
+                "basic-land-type addition currently requires all lands"
+            )
+        modifier = descriptor["modifier"]
+        if not isinstance(modifier, Mapping):
+            raise SemanticNodeError(
+                "runtime handler modifier must be an object"
+            )
+        exact_fields(
+            modifier,
+            {"basic_land_type"},
+            field="runtime handler modifier",
+        )
+        subtype = str(modifier["basic_land_type"]).casefold()
+        if subtype not in BASIC_LAND_MANA:
+            raise SemanticNodeError(
+                "basic_land_type must name a basic land type"
+            )
+        return AddBasicLandTypeNode(
+            target_types_all=target_types,
+            basic_land_type=subtype,
+        )
+
+    def lower(
+        self,
+        descriptor: Mapping[str, Any],
+        context: ContinuousEffectSourceContext,
+    ) -> tuple[ContinuousEffect, ...]:
+        node = self.validate(descriptor)
+        return (
+            ContinuousEffect(
+                effect_id=(
+                    f"{context.source_object_id}:{context.component_id}"
+                ),
+                source_id=context.source_object_id,
+                layer=Layer.TYPE,
+                sublayer="4",
+                timestamp=context.source_timestamp,
+                operations=(
+                    ContinuousOperation(
+                        "add_types",
+                        [node.basic_land_type],
+                        field="subtypes",
+                    ),
+                ),
+                applies={
+                    "card_types": {
+                        "contains_all": list(node.target_types_all)
+                    }
+                },
+            ),
+        )
+
+
 class ContinuousEffectComponentRegistry(
     RuntimeComponentRegistry[
         ContinuousEffectSourceContext,
@@ -213,7 +334,10 @@ class ContinuousEffectComponentRegistry(
 def default_continuous_effect_component_registry(
 ) -> ContinuousEffectComponentRegistry:
     registry = ContinuousEffectComponentRegistry(
-        (FixedPowerToughnessAnthemHandler(),)
+        (
+            FixedPowerToughnessAnthemHandler(),
+            AddBasicLandTypeHandler(),
+        )
     )
     registry.require_registered_capabilities(
         load_default_capability_registry()

@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
-from typing import Any, Iterable
+from dataclasses import dataclass, field, replace
+from typing import Any, Iterable, Mapping
 
 from .carddb import CardRecord
 from .util import mana_cost_to_vector, normalize_mana_bundle
 
 MANA_COLORS = ("W", "U", "B", "R", "G", "C")
+BASIC_LAND_MANA = dict(
+    zip("plains island swamp mountain forest".split(), "WUBRG", strict=True)
+)
 SYMBOL_RE = re.compile(r"\{([WUBRGC])\}")
 ADD_CLAUSE_RE = re.compile(
     r"\{T\}(?P<costs>(?:\s*,\s*[^:\n]+)?)\s*:\s*Add\s+(?P<output>[^\.\n]+)",
@@ -60,6 +63,35 @@ class ManaPlanError(RuntimeError):
     pass
 
 
+def effective_mana_record(
+    record: CardRecord | None,
+    effective: Mapping[str, Any],
+) -> CardRecord | None:
+    """Overlay current face/layer characteristics onto a printed record."""
+
+    if record is None:
+        return None
+    return replace(
+        record,
+        name=str(effective.get("name") or record.name),
+        type_line=str(effective.get("type_line") or ""),
+        oracle_text=str(effective.get("oracle_text") or ""),
+        keywords=tuple(effective.get("keywords") or ()),
+        produced_mana=tuple(effective.get("produced_mana") or ()),
+    )
+
+
+def extract_effective_mana_modes(
+    record: CardRecord,
+    effective: Mapping[str, Any],
+    commander_identity: Iterable[str] = (),
+) -> tuple[ManaMode, ...]:
+    return extract_mana_modes(
+        effective_mana_record(record, effective) or record,
+        commander_identity,
+    )
+
+
 def _bundle_from_symbols(text: str) -> dict[str, int]:
     bundle = normalize_mana_bundle(None)
     for symbol in SYMBOL_RE.findall(text.upper()):
@@ -85,14 +117,7 @@ def extract_mana_modes(record: CardRecord, commander_identity: Iterable[str] = (
     commander_colors = tuple(color for color in commander_identity if color in "WUBRG")
 
     # Basic land types confer intrinsic mana abilities.
-    basic_map = {
-        "plains": "W",
-        "island": "U",
-        "swamp": "B",
-        "mountain": "R",
-        "forest": "G",
-    }
-    for basic_type, color in basic_map.items():
+    for basic_type, color in BASIC_LAND_MANA.items():
         if basic_type in type_line:
             bundle = normalize_mana_bundle(None)
             bundle[color] = 1
@@ -152,6 +177,8 @@ def extract_mana_modes(record: CardRecord, commander_identity: Iterable[str] = (
         pay_life = re.search(r"pay\s+(\d+)\s+life", extra_costs)
         if pay_life:
             side_effects_list.append({"op": "pay_life", "amount": int(pay_life.group(1))})
+        if re.search(r"\bsacrifice this (?:artifact|creature|land|permanent|token)\b", extra_costs):
+            side_effects_list.append({"op": "sacrifice_source"})
         side_effects = tuple(side_effects_list)
 
         if "three mana of any one color" in lower:

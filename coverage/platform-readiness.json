@@ -131,11 +131,11 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 60793,
+      "material_residuals": 60790,
       "status_counts": {
-        "exact": 403,
+        "exact": 406,
         "partial": 14631,
-        "unresolved": 16589
+        "unresolved": 16586
       },
       "total": 31623
     },
@@ -152,13 +152,13 @@
       "trusted": 0
     },
     "oracle": {
-      "material_residuals": 69416,
+      "material_residuals": 69413,
       "status_counts": {
-        "exact": 3042,
+        "exact": 3046,
         "partial": 16050,
-        "unresolved": 19392
+        "unresolved": 19389
       },
-      "total": 38484
+      "total": 38485
     },
     "rules": {
       "blocked": 358,
@@ -190,11 +190,11 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4345,
+    "deterministic_cases_discovered": 4378,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
-    "web_files": 24
+    "web_files": 25
   },
   "validation": {
     "baseline_commit": "6c09dab765e615610f697a7a850bb6502093f0a0",

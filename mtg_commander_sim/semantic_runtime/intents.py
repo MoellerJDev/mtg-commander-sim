@@ -321,6 +321,18 @@ class ProliferateIntent:
     reason: str
 
 
+@dataclass(frozen=True, slots=True)
+class DomainEffectIntent:
+    actor: str
+    operation: str
+    effect: FrozenMap
+    reason: str
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.effect, FrozenMap):
+            object.__setattr__(self, "effect", FrozenMap(self.effect))
+
+
 SemanticIntent: TypeAlias = (
     DrawCardsIntent
     | BecomeMonarchIntent
@@ -351,6 +363,7 @@ SemanticIntent: TypeAlias = (
     | AmassIntent
     | AddSubtypeIntent
     | ProliferateIntent
+    | DomainEffectIntent
 )
 ResultShape: TypeAlias = Literal["single", "by_player"]
 

@@ -13,7 +13,8 @@ from .compiler.corpus_reporting import (
     explain_oracle_ir,
     oracle_corpus_coverage,
 )
-from .compiler.damage_templates import static_damage_handler
+from .compiler.keyword_templates import keyword_mechanics
+from .compiler.runtime_templates import static_runtime_template
 from .declaration_costs import parse_declaration_cost_line
 from .declaration_restrictions import parse_declaration_restriction_line
 from .rules.capabilities import (
@@ -27,7 +28,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v13"
+ORACLE_COMPILER_VERSION = "oracle-ir-v14"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 
 _NUMBER_WORDS = {
@@ -55,34 +56,6 @@ _REPLACEMENT_MARKERS = re.compile(
 _ABILITY_WORD = re.compile(
     r"^(?P<word>[A-Za-z][A-Za-z ']+)\s+[—-]\s+(?P<body>.+)$"
 )
-_KEYWORD_WITH_VALUE = re.compile(
-    r"^(?P<name>ward|equip|enchant|cycling|crew|kicker|toxic|"
-    r"cumulative upkeep|echo|morph|bestow|evoke|unearth)"
-    r"(?:\s+(?P<value>.+))?$",
-    re.IGNORECASE,
-)
-_KNOWN_BARE_KEYWORDS = {
-    "deathtouch",
-    "defender",
-    "double strike",
-    "first strike",
-    "flash",
-    "flying",
-    "haste",
-    "hexproof",
-    "indestructible",
-    "infect",
-    "lifelink",
-    "menace",
-    "reach",
-    "shadow",
-    "shroud",
-    "trample",
-    "vigilance",
-    "wither",
-}
-
-
 @dataclass(frozen=True, slots=True)
 class SourceSpan:
     start: int
@@ -903,31 +876,6 @@ def _cost_dict(ability: ActivatedAbility) -> dict[str, Any]:
     }
 
 
-def _keyword_mechanics(
-    text: str,
-    card_keywords: Sequence[str],
-) -> tuple[str, ...] | None:
-    parts = [part.strip() for part in text.rstrip(".").split(",")]
-    if not parts:
-        return None
-    known = {keyword.casefold() for keyword in card_keywords}
-    mechanics: list[str] = []
-    for part in parts:
-        lower = part.casefold()
-        if lower in _KNOWN_BARE_KEYWORDS or lower in known:
-            mechanics.append(lower)
-            continue
-        match = _KEYWORD_WITH_VALUE.fullmatch(part)
-        if match and match.group("name").casefold() in known:
-            mechanics.append(match.group("name").casefold())
-            continue
-        if lower.startswith("protection from ") and "protection" in known:
-            mechanics.append("protection")
-            continue
-        return None
-    return tuple(mechanics)
-
-
 def _residual(
     residuals: list[OracleResidual],
     *,
@@ -964,7 +912,7 @@ def _keyword_node(
     capability_profile: str,
     residuals: list[OracleResidual],
 ) -> OracleNode | None:
-    mechanics = _keyword_mechanics(material_line, keywords)
+    mechanics = keyword_mechanics(material_line, keywords)
     if mechanics is None:
         return None
     gate = _dependency_gate(
@@ -1014,20 +962,20 @@ def _keyword_node(
     )
 
 
-def _static_damage_node(
+def _runtime_handler_node(
     *,
     node_id: str,
     line: str,
-    material_line: str,
     span: SourceSpan,
+    compiled: tuple[str, Mapping[str, Any], str],
+    kind: str,
+    event: str,
+    dependency_reason: str,
     capability_registry: CapabilityRegistry | None,
     capability_profile: str,
     residuals: list[OracleResidual],
-) -> OracleNode | None:
-    static_damage = static_damage_handler(material_line)
-    if static_damage is None:
-        return None
-    template_id, handler, capability = static_damage
+) -> OracleNode:
+    template_id, handler, capability = compiled
     gate = _explicit_capability_gate(
         capability,
         capability_registry=capability_registry,
@@ -1040,10 +988,7 @@ def _static_damage_node(
                 kind="dependency_contract",
                 text=line,
                 span=span,
-                reason=(
-                    "generic damage replacement depends on an untrusted "
-                    "rules capability"
-                ),
+                reason=dependency_reason,
                 blockers=gate.blockers,
             ),
         )
@@ -1052,15 +997,11 @@ def _static_damage_node(
     )
     return OracleNode(
         node_id=node_id,
-        kind=(
-            "prevention_effect"
-            if handler["handler_id"].startswith("prevention.")
-            else "replacement_effect"
-        ),
+        kind=kind,
         text=line,
         span=span,
         active_zone="battlefield",
-        event="damage",
+        event=event,
         lowerable=True,
         exact=not gate.blockers,
         template_id=template_id,
@@ -1539,17 +1480,22 @@ def _compile_face(
             )
             continue
 
-        static_damage_node = _static_damage_node(
-            node_id=node_id,
-            line=line,
-            material_line=material_line,
-            span=span,
-            capability_registry=capability_registry,
-            capability_profile=capability_profile,
-            residuals=residuals,
-        )
-        if static_damage_node is not None:
-            nodes.append(static_damage_node)
+        runtime_template = static_runtime_template(material_line)
+        if runtime_template is not None:
+            nodes.append(
+                _runtime_handler_node(
+                    node_id=node_id,
+                    line=line,
+                    span=span,
+                    compiled=runtime_template.compiled,
+                    kind=runtime_template.kind,
+                    event=runtime_template.event,
+                    dependency_reason=runtime_template.dependency_reason,
+                    capability_registry=capability_registry,
+                    capability_profile=capability_profile,
+                    residuals=residuals,
+                )
+            )
             continue
 
         if _REPLACEMENT_MARKERS.search(line):

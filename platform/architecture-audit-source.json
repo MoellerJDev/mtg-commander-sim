@@ -42,6 +42,12 @@
       "mtg_commander_sim/life_state.py",
       "mtg_commander_sim/tap_state.py",
       "mtg_commander_sim/token_creation.py"
+      ,"mtg_commander_sim/mana_activation.py"
+      ,"mtg_commander_sim/semantic_choices/intent_host.py"
+      ,"mtg_commander_sim/effect_runtime/state_and_permissions.py"
+      ,"mtg_commander_sim/effect_runtime/zones_and_attachments.py"
+      ,"mtg_commander_sim/effect_runtime/damage_life_and_turns.py"
+      ,"mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py"
     ],
     "state_parameter_modules": [
       "mtg_commander_sim/record.py",
@@ -369,21 +375,12 @@
     }
   ],
   "card_specific_semantic_operations": [
-    "animate_dead_prepare",
-    "animate_dead_reanimate",
-    "create_daretti_emblem",
-    "create_warform",
     "daretti_exchange",
-    "demonic_junker_resolve",
-    "field_of_dead_token",
     "fomori_vault",
     "remora_tax",
-    "scute_swarm_token",
     "springheart_landfall",
     "sylvan_library_settle",
-    "toxic_deluge",
-    "veil_of_summer",
-    "welder_exchange"
+    "veil_of_summer"
   ],
   "card_named_helpers": [
     {

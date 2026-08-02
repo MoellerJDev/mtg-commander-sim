@@ -8,6 +8,10 @@ from common import keep_all, load_assets, make_session
 from mtg_commander_sim import damage_results as damage_results_module
 from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
+from mtg_commander_sim.continuous_effects import (
+    CharacteristicState,
+    evaluate_continuous_effects,
+)
 from mtg_commander_sim import damage as damage_module
 from mtg_commander_sim.damage import DamageEvent
 from mtg_commander_sim.engine import CommanderEngine
@@ -16,6 +20,10 @@ from mtg_commander_sim.semantic_runtime.counter_replacements import (
     CounterQuantityReplacementHandler,
     CounterReplacementSourceContext,
     resolve_counter_placement_replacements,
+)
+from mtg_commander_sim.semantic_runtime.continuous_components import (
+    AddBasicLandTypeHandler,
+    ContinuousEffectSourceContext,
 )
 from mtg_commander_sim.semantic_runtime.damage_replacements import (
     DamageQuantityReplacementHandler,
@@ -86,6 +94,47 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_hidden_target_rejected()
+
+    def test_basic_land_type_intrinsic_mana_mutant_is_killed(self):
+        descriptor = {
+            "handler_id": "continuous.basic_land_type.add_all_lands.v1",
+            "schema_version": 1,
+            "event": "characteristics.evaluate",
+            "condition": {"target_types_all": ["land"]},
+            "modifier": {"basic_land_type": "swamp"},
+        }
+        context = ContinuousEffectSourceContext(
+            source_object_id="urborg",
+            source_ref="U1",
+            source_controller="A",
+            source_timestamp=1,
+            component_id="mutation",
+        )
+
+        def assert_swamp_is_added() -> None:
+            effects = AddBasicLandTypeHandler().lower(
+                descriptor, context
+            )
+            result = evaluate_continuous_effects(
+                CharacteristicState(
+                    name="Darksteel Citadel",
+                    controller="A",
+                    card_types={"Artifact", "Land"},
+                    subtypes=set(),
+                    abilities=["Indestructible", "{T}: Add {C}."],
+                ),
+                effects,
+            )
+            self.assertIn("swamp", result.characteristics["subtypes"])
+
+        assert_swamp_is_added()
+        with patch.object(
+            AddBasicLandTypeHandler,
+            "lower",
+            lambda _handler, _descriptor, _context: (),
+        ):
+            with self.assertRaises(AssertionError):
+                assert_swamp_is_added()
 
     def test_damage_amount_guard_mutant_is_killed(self):
         def assert_negative_assignment_rejected() -> None:

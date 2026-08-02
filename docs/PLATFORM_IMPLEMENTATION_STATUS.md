@@ -31,8 +31,8 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
 - Rules cases: blocked=358, definition_only=92, passing=151, total=3300, unreviewed=2699
 - Mechanics: status_counts={'partial': 61, 'tested': 1, 'unclassified': 363}, total=425, trusted=0
-- Oracle coverage: material_residuals=69416, status_counts={'exact': 3042, 'partial': 16050, 'unresolved': 19392}, total=38484
-- Commander-legal Oracle coverage: material_residuals=60793, status_counts={'exact': 403, 'partial': 14631, 'unresolved': 16589}, total=31623
+- Oracle coverage: material_residuals=69413, status_counts={'exact': 3046, 'partial': 16050, 'unresolved': 19389}, total=38485
+- Commander-legal Oracle coverage: material_residuals=60790, status_counts={'exact': 406, 'partial': 14631, 'unresolved': 16586}, total=31623
 - Current rules/Oracle snapshot complete: no
 
 ## Platform milestone status
@@ -73,7 +73,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4345
+- Tests discovered: 4378
 - Python matrix: Python 3.11 and 3.12 on Ubuntu and Windows
 - Baseline CI: [30753764851](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30753764851) — `pass`
 - Compile: `pass`

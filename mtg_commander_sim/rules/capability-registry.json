@@ -65,6 +65,7 @@
     {
       "mechanic_id": "cr-613-continuous-effects",
       "capabilities": [
+        "continuous.basic_land_type.add_all_lands",
         "continuous.power_toughness.fixed_anthem"
       ]
     },
@@ -212,6 +213,33 @@
       "implementation_mutation_rationale": "test_counter_quantity_replacement_mutant_is_killed replaces the quantity transform with an identity operation and the behavioral assertion rejects the survivor.",
       "blockers": ["The current descriptor covers fixed integral multiply/add quantities on permanents only; broader counter producers and grammar remain outside this capability."],
       "status": "tested"
+    },
+    {
+      "id": "continuous.basic_land_type.add_all_lands",
+      "version": 1,
+      "official_rules": ["305.6", "305.7", "613.1d"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Apply the exact additive wording that gives every land one named basic land type in layer 4, preserving its existing types and rules text and deriving the corresponding intrinsic mana ability.",
+        "inputs": ["active battlefield source", "all phased-in land objects", "one named basic land type", "source timestamp"],
+        "outputs": ["typed layer-4 subtype addition", "preserved existing land subtypes and rules text", "intrinsic basic-land-type mana ability"],
+        "exclusions": ["type-setting effects", "conditional or restricted object sets", "dependency interactions that alter the source text", "effects that remove abilities or land types"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.continuous_components.AddBasicLandTypeHandler", "mtg_commander_sim.card_programs.runtime.collect_card_program_continuous_effects", "mtg_commander_sim.continuous_effects.evaluate_continuous_effects", "CommanderEngine._activated_abilities"],
+      "positive_tests": ["test_urborg_adds_swamp_and_intrinsic_black_mana_to_darksteel_citadel"],
+      "negative_tests": ["test_basic_land_type_component_rejects_malformed_descriptors"],
+      "interaction_tests": ["test_additive_basic_land_type_preserves_existing_types_text_and_mana"],
+      "multiplayer_tests": ["test_basic_land_type_component_applies_to_every_players_lands"],
+      "privacy_tests": [],
+      "replay_tests": ["test_urborg_intrinsic_black_mana_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This bounded additive type effect has no capability dependency beyond the shared continuous-effect evaluator.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_basic_land_type_intrinsic_mana_mutant_is_killed removes the layer-4 subtype addition and the black-mana legality assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
     },
     {
       "id": "continuous.power_toughness.fixed_anthem",

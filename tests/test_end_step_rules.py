@@ -159,10 +159,23 @@ class EndStepRuleTests(unittest.TestCase):
             log=False,
         )
         self.add_end_step_program(engine, source)
-        warform_ref = engine._create_mishra_warform(
-            "A",
-            artifact.ref,
-            reason="CR 513 delayed-trigger witness",
+        [warform_ref] = engine.apply_effect(
+            {
+                "op": "create_modified_token_copy",
+                "card": artifact.ref,
+                "name": "Modified copy",
+                "characteristics": {
+                    "name": "Modified copy",
+                    "type_line": "Artifact Creature — Construct",
+                    "power": "4",
+                    "toughness": "4",
+                    "mana_value": 0,
+                },
+                "temporary_keywords": ["Haste"],
+                "sacrifice_on_controller_end_step": True,
+                "reason": "CR 513 delayed-trigger witness",
+            },
+            actor="A",
         )
 
         self.enter_end_step(session)

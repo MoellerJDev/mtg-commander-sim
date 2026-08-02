@@ -85,6 +85,14 @@ maintenance: "hand-maintained"
   projected battlefield, activation order is recorded normally, exact
   multi-color modes are selected through a server-issued form, and casting
   consumes floated mana before routine automatic completion.
+- Added replay-safe same-window undo for pure tap-for-mana activations. Clicking
+  the tapped source again removes its exact unspent bundle and untaps it;
+  spending, passing, phase changes, restrictions, or side-effecting costs close
+  the rollback.
+- Added generic CR 305.7 additive basic-land-type lowering and runtime
+  evaluation. Urborg now lets Darksteel Citadel tap for black without losing
+  its existing types, text, or colorless ability, and the same component makes
+  Blanket of Night and Yavimaya exact capability-closed CardPrograms.
 - Made rules-created Treasure tokens first-class mana sources even though they
   have no Scryfall card record. Their manual action offers exactly five color
   choices, automatic payment can use them, and tap/sacrifice costs are applied
@@ -104,6 +112,9 @@ maintenance: "hand-maintained"
   forms apply combat damage, every public board displays commander damage by
   source, and authoritative winners or draws replace the decision tray with a
   terminal result.
+- Made tapped state unambiguous to every seat with both card rotation and a
+  **TAPPED** badge, kept Commander damage visible at zero, and converted the
+  private hand into a bottom-anchored, vertically resizable fixed-height dock.
 - Added a confirmed **Concede game** action. The browser requires the exact
   server-issued true-only confirmation, the engine revalidates it
   transactionally, concession remains outside meaningful-action telemetry,

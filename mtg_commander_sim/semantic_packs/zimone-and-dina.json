@@ -104,7 +104,21 @@
       "oracle_id": "aa959340-c869-4caa-92c7-572bd8d23eef",
       "active_zone": "battlefield",
       "event": "land.enter",
-      "effects": [{"op": "field_of_dead_token"}],
+      "effects": [{
+        "op": "create_token_if_distinct_controlled_names",
+        "controller": "$controller",
+        "required_type": "land",
+        "minimum_distinct_names": 7,
+        "token": {
+          "name": "Zombie",
+          "characteristics": {
+            "type_line": "Token Creature — Zombie",
+            "power": "2",
+            "toughness": "2",
+            "colors": ["B"]
+          }
+        }
+      }],
       "trust_level": "trusted",
       "coverage": ["land_entry", "triggered_ability", "landfall"],
       "tests": ["test_field_of_the_dead_threshold"],

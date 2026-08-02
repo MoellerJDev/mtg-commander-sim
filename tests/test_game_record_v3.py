@@ -115,21 +115,19 @@ class GameRecordV3Tests(unittest.TestCase):
                     ]
                 ),
             )
-            self.assertEqual(
-                8,
-                len(
-                    manifest["runtime_trust"][
-                        "runtime_component_inventory"
-                    ]
-                ),
+            inventory = manifest["runtime_trust"]["runtime_component_inventory"]
+            self.assertEqual(9, len(inventory))
+            self.assertIn(
+                "continuous.basic_land_type.add_all_lands.v1",
+                {item["handler_id"] for item in inventory},
             )
-            self.assertEqual(
-                6,
-                len(
-                    manifest["runtime_trust"][
-                        "semantic_handler_inventory"
-                    ]
-                ),
+            semantic_inventory = manifest["runtime_trust"][
+                "semantic_handler_inventory"
+            ]
+            self.assertEqual(81, len(semantic_inventory))
+            self.assertIn(
+                "effect.zone-attachment.reanimate_attached_creature_aura.v1",
+                {item["handler_id"] for item in semantic_inventory},
             )
             self.assertEqual(
                 64,

@@ -15,6 +15,7 @@ from .intents import (
     CopyControlledTokensIntent,
     CopyStackItemIntent,
     CreateTokenIntent,
+    DomainEffectIntent,
     DrawCardsIntent,
     IntentPlan,
     EliminatePlayersIntent,
@@ -40,6 +41,8 @@ from .intents import (
 
 
 class SemanticIntentSink(TapStateHost, Protocol):
+    def apply_domain_effect_intent(self, intent: DomainEffectIntent) -> Any: ...
+
     def draw(
         self,
         seat: str,
@@ -325,6 +328,10 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
         if isinstance(intent, ProliferateIntent):
             sink.proliferate_intent(intent)
             results.append((intent.actor, None))
+            continue
+        if isinstance(intent, DomainEffectIntent):
+            result = sink.apply_domain_effect_intent(intent)
+            results.append((intent.operation, result))
             continue
         raise TypeError(f"Unsupported semantic intent {type(intent).__name__}")
     if plan.result_shape == "by_player":

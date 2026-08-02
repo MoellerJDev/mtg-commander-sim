@@ -3,6 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Literal, Protocol, Sequence
 
+from .state_planner import (
+    apply_state_plan,
+    commit_state_plan,
+    plan_state_changes,
+    validate_state_plan,
+)
+
 
 CounterSubjectKind = Literal["player", "permanent"]
 _PLAYER_COUNTER_ATTRIBUTES = {
@@ -149,43 +156,98 @@ def _current_value(host: CounterStateHost, change: CounterChange) -> int:
     return _permanent_counter_value(host, change)
 
 
+class _CounterAdapter:
+    @staticmethod
+    def validate_change(change: CounterChange) -> None:
+        if not isinstance(change, CounterChange):
+            raise CounterStateError("Counter plans require typed changes")
+
+    @staticmethod
+    def key(change: CounterChange) -> tuple[str, str, str]:
+        return change.subject_kind, change.subject_id, change.counter_name
+
+    @staticmethod
+    def current_value(host: CounterStateHost, change: CounterChange) -> int:
+        return _current_value(host, change)
+
+    @staticmethod
+    def next_value(before: int, change: CounterChange) -> int:
+        return max(0, before + change.amount)
+
+    @staticmethod
+    def transition(
+        change: CounterChange, *, before: int, after: int
+    ) -> CounterTransition:
+        return CounterTransition(
+            subject_kind=change.subject_kind,
+            subject_id=change.subject_id,
+            counter_name=change.counter_name,
+            requested_delta=change.amount,
+            applied_delta=after - before,
+            before=before,
+            after=after,
+            expected_zone=change.expected_zone,
+            expected_logical_object_id=change.expected_logical_object_id,
+        )
+
+    @staticmethod
+    def change_from_transition(transition: CounterTransition) -> CounterChange:
+        return _transition_as_change(transition)
+
+    @staticmethod
+    def transition_before(transition: CounterTransition) -> int:
+        return transition.before
+
+    @staticmethod
+    def transition_after(transition: CounterTransition) -> int:
+        return transition.after
+
+    @staticmethod
+    def validate_transition(transition: CounterTransition) -> None:
+        if not isinstance(transition, CounterTransition):
+            raise CounterStateError("Counter commits require typed transitions")
+        expected_after = max(0, transition.before + transition.requested_delta)
+        if transition.after != expected_after:
+            raise CounterStateError("Counter transition arithmetic is invalid")
+        if transition.applied_delta != transition.after - transition.before:
+            raise CounterStateError("Counter applied delta is invalid")
+
+    @staticmethod
+    def apply_final(
+        host: CounterStateHost, transition: CounterTransition
+    ) -> None:
+        if transition.subject_kind == "player":
+            player = host.state.players[transition.subject_id]
+            attribute = _PLAYER_COUNTER_ATTRIBUTES[transition.counter_name]
+            setattr(player, attribute, transition.after)
+            return
+        card = host.state.cards[transition.subject_id]
+        if transition.after:
+            card.counters[transition.counter_name] = transition.after
+        else:
+            card.counters.pop(transition.counter_name, None)
+
+
+_COUNTER_ADAPTER = _CounterAdapter()
+
+
+def _counter_planner_error(error: ValueError) -> CounterStateError:
+    if str(error) == "State plan is stale":
+        return CounterStateError("Counter plan is stale")
+    if str(error) == "State plan changed before commit":
+        return CounterStateError("Counter plan changed before commit")
+    return CounterStateError(str(error))
+
+
 def plan_counter_changes(
     host: CounterStateHost,
     changes: Sequence[CounterChange],
 ) -> CounterStatePlan:
     """Validate a batch and compute every transition without mutation."""
 
-    shadow: dict[tuple[str, str, str], int] = {}
-    transitions: list[CounterTransition] = []
-    for change in changes:
-        if not isinstance(change, CounterChange):
-            raise CounterStateError("Counter plans require typed changes")
-        key = (
-            change.subject_kind,
-            change.subject_id,
-            change.counter_name,
-        )
-        before = shadow.get(key)
-        if before is None:
-            before = _current_value(host, change)
-        after = max(0, before + change.amount)
-        transitions.append(
-            CounterTransition(
-                subject_kind=change.subject_kind,
-                subject_id=change.subject_id,
-                counter_name=change.counter_name,
-                requested_delta=change.amount,
-                applied_delta=after - before,
-                before=before,
-                after=after,
-                expected_zone=change.expected_zone,
-                expected_logical_object_id=(
-                    change.expected_logical_object_id
-                ),
-            )
-        )
-        shadow[key] = after
-    return CounterStatePlan(tuple(transitions))
+    return CounterStatePlan(
+        plan_state_changes(host, changes, _COUNTER_ADAPTER)
+    )
 
 
 def _transition_as_change(transition: CounterTransition) -> CounterChange:
@@ -207,33 +269,12 @@ def validate_counter_changes(
 
     if not isinstance(plan, CounterStatePlan):
         raise CounterStateError("Counter commits require a typed plan")
-    expected: dict[tuple[str, str, str], int] = {}
-    for transition in plan.transitions:
-        key = (
-            transition.subject_kind,
-            transition.subject_id,
-            transition.counter_name,
-        )
-        change = _transition_as_change(transition)
-        if key not in expected:
-            expected[key] = _current_value(host, change)
-        if transition.before != expected[key]:
-            raise CounterStateError("Counter plan is stale")
-        expected[key] = transition.after
-
-    initial_keys: set[tuple[str, str, str]] = set()
-    for transition in plan.transitions:
-        key = (
-            transition.subject_kind,
-            transition.subject_id,
-            transition.counter_name,
-        )
-        if key in initial_keys:
-            continue
-        initial_keys.add(key)
-        current = _current_value(host, _transition_as_change(transition))
-        if current != transition.before:
-            raise CounterStateError("Counter plan changed before commit")
+    try:
+        validate_state_plan(host, plan.transitions, _COUNTER_ADAPTER)
+    except ValueError as exc:
+        if isinstance(exc, CounterStateError):
+            raise
+        raise _counter_planner_error(exc) from exc
 
 
 def apply_counter_changes(
@@ -242,28 +283,7 @@ def apply_counter_changes(
 ) -> tuple[CounterTransition, ...]:
     """Apply a counter plan after the caller completed precommit validation."""
 
-    final: dict[tuple[str, str, str], CounterTransition] = {}
-    for transition in plan.transitions:
-        final[
-            (
-                transition.subject_kind,
-                transition.subject_id,
-                transition.counter_name,
-            )
-        ] = transition
-
-    for transition in final.values():
-        if transition.subject_kind == "player":
-            player = host.state.players[transition.subject_id]
-            attribute = _PLAYER_COUNTER_ATTRIBUTES[transition.counter_name]
-            setattr(player, attribute, transition.after)
-            continue
-        card = host.state.cards[transition.subject_id]
-        if transition.after:
-            card.counters[transition.counter_name] = transition.after
-        else:
-            card.counters.pop(transition.counter_name, None)
-    return plan.transitions
+    return apply_state_plan(host, plan.transitions, _COUNTER_ADAPTER)
 
 
 def commit_counter_changes(
@@ -272,5 +292,11 @@ def commit_counter_changes(
 ) -> tuple[CounterTransition, ...]:
     """Validate and commit one typed counter batch."""
 
-    validate_counter_changes(host, plan)
-    return apply_counter_changes(host, plan)
+    if not isinstance(plan, CounterStatePlan):
+        raise CounterStateError("Counter commits require a typed plan")
+    try:
+        return commit_state_plan(host, plan.transitions, _COUNTER_ADAPTER)
+    except ValueError as exc:
+        if isinstance(exc, CounterStateError):
+            raise
+        raise _counter_planner_error(exc) from exc

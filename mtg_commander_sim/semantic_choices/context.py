@@ -4,32 +4,9 @@ from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol
 
 from ..replacement.immutable import FrozenMap
+from ..object_query import ObjectQueryResult
 
-
-@dataclass(frozen=True, slots=True)
-class ChoiceObjectView:
-    object_id: str
-    ref: str
-    printed_name: str
-    owner: str
-    controller: str
-    zone: str
-    types: tuple[str, ...] = ()
-    subtypes: tuple[str, ...] = ()
-    supertypes: tuple[str, ...] = ()
-    colors: tuple[str, ...] = ()
-    keywords: tuple[str, ...] = ()
-    counters: FrozenMap = field(default_factory=FrozenMap)
-    mana_value: int = 0
-    token: bool = False
-    tapped: bool = False
-    phased_out: bool = False
-    known_to_actor: bool = True
-    attached_to_ref: str | None = None
-
-    def __post_init__(self) -> None:
-        if not isinstance(self.counters, FrozenMap):
-            object.__setattr__(self, "counters", FrozenMap(self.counters))
+ChoiceObjectView = ObjectQueryResult
 
 
 @dataclass(frozen=True, slots=True)

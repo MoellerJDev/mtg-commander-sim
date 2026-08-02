@@ -12,6 +12,7 @@ from .replacement_effects import (
     next_batch_replacement_choice,
     replacement_choice_payload,
 )
+from .semantic_runtime import IntentPlan, execute_intent_plan
 
 
 _PILOT_ROLE = "pi" + "lot"
@@ -148,12 +149,17 @@ def apply_effect_with_replacement_choice(
     continuation: tuple[
         Sequence[Mapping[str, Any]], str | None, str, int
     ],
+    *,
+    plan: IntentPlan | None = None,
 ) -> bool:
-    """Apply one effect or suspend it before any replacement choice."""
+    """Execute one legacy or typed effect, suspending at replacement choice."""
 
     remaining, destination, note, instruction_pointer = continuation
     try:
-        host.apply_effect(effect, actor=item.controller, as_cost=False)
+        if plan is None:
+            host.apply_effect(effect, actor=item.controller, as_cost=False)
+        else:
+            execute_intent_plan(host, plan)
     except ReplacementChoiceRequired as required:
         issue_replacement_order_choice(
             host,

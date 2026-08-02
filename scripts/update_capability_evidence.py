@@ -38,6 +38,11 @@ LEGACY_EVIDENCE_FIELDS = {
     "replay": "replay_tests",
 }
 MUTATION_TESTS = {
+    "continuous.basic_land_type.add_all_lands": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_basic_land_type_intrinsic_mana_mutant_is_killed"
+    ),
     "target.revalidate_resolution": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

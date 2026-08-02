@@ -91,7 +91,21 @@ class TypedSemanticHandlerTests(unittest.TestCase):
         ))
         self.assertEqual(second.inventory(), reordered.inventory())
         self.assertEqual(second.fingerprint, reordered.fingerprint)
-        self.assertEqual(6, len(first.inventory()))
+        inventory = first.inventory()
+        self.assertEqual(
+            len(inventory),
+            len({row["operation"] for row in inventory}),
+        )
+        self.assertEqual(
+            75,
+            len(
+                [
+                    row
+                    for row in inventory
+                    if str(row["family"]).startswith("effect.")
+                ]
+            ),
+        )
         with self.assertRaisesRegex(
             SemanticHandlerRegistryError, "Duplicate semantic operation"
         ):

@@ -486,9 +486,9 @@ class TransmuteArtifactChoiceHandler:
 
 
 @dataclass(frozen=True, slots=True)
-class LegacyWarformChoiceHandler:
-    operation: str = "choose_warform"
-    handler_id: str = "choice.compat.warform.v1"
+class ModifiedTokenCopyChoiceHandler:
+    operation: str = "choose_modified_token_copy"
+    handler_id: str = "choice.token.modified-copy.v1"
     schema_version: int = 1
     rule_references: tuple[str, ...] = ("CR 707.2", "CR 603.7")
     capability_dependencies: tuple[str, ...] = ()
@@ -496,6 +496,10 @@ class LegacyWarformChoiceHandler:
         "_choice_actor",
         "_legal_refs",
         "_stack_label",
+        "name",
+        "characteristics",
+        "temporary_keywords",
+        "sacrifice_on_controller_end_step",
     )
     private_data: tuple[str, ...] = ()
     projected_fields: tuple[str, ...] = (
@@ -504,7 +508,7 @@ class LegacyWarformChoiceHandler:
         "legal_actions.choice_schema.legal_refs",
     )
     mutation_path: tuple[str, ...] = ("CreateTokenIntent",)
-    replay_fixture: str = "semantic-choice-warform-compat"
+    replay_fixture: str = "semantic-choice-modified-token-copy"
     test_modules: tuple[str, ...] = ("tests.test_end_step_rules",)
 
     def prepare(
@@ -532,8 +536,7 @@ class LegacyWarformChoiceHandler:
         return SemanticChoicePreparation(
             request=SemanticChoiceRequest(
                 prompt=(
-                    "Choose a noncreature artifact you control for the "
-                    "modified token copy."
+                    "Choose a noncreature artifact you control to copy."
                 ),
                 choice=ObjectChoice(
                     field_name="card",
@@ -585,20 +588,19 @@ class LegacyWarformChoiceHandler:
                 CreateTokenIntent(
                     actor=actor,
                     controller=actor,
-                    name="Mishra's Warform",
+                    name=str(effect.get("name") or ""),
                     quantity=1,
                     copy_of=row.ref,
                     characteristics=FrozenMap(
-                        {
-                            "name": "Mishra's Warform",
-                            "type_line": "Artifact Creature — Construct",
-                            "power": "4",
-                            "toughness": "4",
-                            "mana_value": 0,
-                        }
+                        effect.get("characteristics") or {}
                     ),
-                    temporary_keywords=("Haste",),
-                    sacrifice_on_controller_end_step=True,
+                    temporary_keywords=tuple(
+                        str(value)
+                        for value in effect.get("temporary_keywords", ())
+                    ),
+                    sacrifice_on_controller_end_step=bool(
+                        effect.get("sacrifice_on_controller_end_step", False)
+                    ),
                     reason=str(effect["_stack_label"]),
                 ),
             )
@@ -608,5 +610,5 @@ class LegacyWarformChoiceHandler:
 ARTIFACT_EXCHANGE_CHOICE_HANDLERS = (
     DarettiExchangeChoiceHandler(),
     TransmuteArtifactChoiceHandler(),
-    LegacyWarformChoiceHandler(),
+    ModifiedTokenCopyChoiceHandler(),
 )

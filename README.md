@@ -31,7 +31,8 @@ The browser renders the engine's current generic choice vocabulary, locally
   cached card art, a persistent hover/focus card viewer, browsable public zones,
   card-specific play/cast/activate controls, resilient drag-to-play interaction,
   saved Auto-mana/Manual mana and Auto-pass/Full control preferences, visible
-  tapped-card rotation for every seat, reconnect and exact-command retry states,
+  tapped-card rotation and labels for every seat, a bottom-anchored resizable
+  hand dock, reconnect and exact-command retry states,
   explicit active-player main-phase advancement, attack/block interaction,
   public commander-damage tracking, confirmed concession, and terminal
   winner/draw presentation,
@@ -149,6 +150,10 @@ abilities, then click those permanents in the order you want to activate them;
 multi-color sources ask which exact mana to add. Choose the spell again after
 floating mana. Manual mode controls source activation order while the server
 still validates the pool and may complete a routine remaining payment.
+Before that mana is spent, priority is passed, or the window otherwise changes,
+click the same tapped source again (or its **Undo mana** control) to remove the
+exact mana it produced and untap it. Activations with sacrifice, life payment,
+restricted mana, or another side effect are intentionally not reversible.
 Rules-created mana tokens are handled by the same path without requiring a
 Scryfall printing. For example, Treasure offers only the five legal color
 outputs and its tap/sacrifice costs are paid before mana is added; Auto-mana
@@ -162,6 +167,13 @@ then enters and renders using the chosen land face. Client labels and drag
 gestures never create legality; they invoke the same server-issued action IDs
 as the ordinary action tray.
 
+Additive basic-land-type effects use effective layer-4 characteristics rather
+than printed card names. Under Urborg, Tomb of Yawgmoth, for example, Darksteel
+Citadel keeps its Artifact/Land types, indestructible text, and colorless mana
+ability while also receiving the intrinsic Swamp black-mana ability. The same
+generic compiler/runtime path covers exact equivalent wording for every basic
+land type.
+
 Browser games expose every priority capability to the owning tab. **Auto-pass**
 is on by default and submits an ordinary replayable pass command only when the
 current capability contains no meaningful nonmana action. It never skips a
@@ -172,8 +184,9 @@ stack empty, the ordinary pass action reads **Continue to combat** in precombat
 main and **End turn** in postcombat main, so a meaningful main-phase action is
 never erased by automation.
 
-Commander combat damage is displayed separately by source commander on every
-public player board. **Concede game** is a server-issued action with an explicit
+Commander combat damage is always displayed separately by source commander on
+every public player board, including an explicit zero before any is dealt.
+**Concede game** is a server-issued action with an explicit
 confirmation; cancelling it does nothing, while acceptance follows the same
 transaction, persistence, projection, and replay path as any other command.
 When a winner or draw is authoritative, both seats receive a terminal banner,

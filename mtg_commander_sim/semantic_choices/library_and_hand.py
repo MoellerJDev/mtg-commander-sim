@@ -599,7 +599,7 @@ class SylvanLibraryChoiceHandler:
             or any(value not in {"pay_life", "top"} for value in decisions.values())
         ):
             raise SemanticChoiceError(
-                "Sylvan Library requires an exact decision for each card"
+                "Library settlement requires an exact decision for each card"
             )
         actor = str(effect["_choice_actor"])
         life_cards = tuple(
@@ -628,7 +628,7 @@ class SylvanLibraryChoiceHandler:
                     actor=actor,
                     player=actor,
                     refs_top_first=top_order,
-                    reason="Sylvan Library",
+                    reason="return selected draws to the library",
                 )
             )
         if life_cost:

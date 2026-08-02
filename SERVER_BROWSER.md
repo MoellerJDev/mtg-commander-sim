@@ -146,8 +146,12 @@ activation order; a source with multiple modes presents exact choices such as
 **Add {U}** or **Add {B}** and adds only the selected bundle. Floating mana is
 shown on the player's board. Then choose or drag the spell again. The engine
 uses the floated pool first, validates the complete payment, and may finish a
-routine unpaid remainder. The saved mode controls activation order; it is not yet a
-general restricted-mana or arbitrary cost-allocation editor.
+routine unpaid remainder. Before spending or passing, click the same tapped
+source again (or its **Undo mana** control) to remove exactly that activation's
+mana and untap it. Only a pure tap-for-mana activation in the unchanged priority
+window is reversible; sacrifice, life payment, restricted mana, and other side
+effects close the rollback. The saved mode controls activation order; it is not
+yet a general restricted-mana or arbitrary cost-allocation editor.
 
 Rules-created tokens do not need a Scryfall card row when their projected
 characteristics contain a fully compiled mana ability. Treasure presents exact
@@ -164,6 +168,17 @@ Dropping, selecting, or activating never bypasses timing, priority, cost,
 target, semantic, or fidelity checks: every gesture resolves to the same
 capability-scoped action ID as the action tray. The client contains no parallel
 legality rules.
+
+The generic layer-4 basic-land-type component implements the exact additive CR
+305.7 wording. Urborg therefore gives Darksteel Citadel an intrinsic black-mana
+ability without removing its Artifact/Land types, indestructible text, or
+colorless ability; Yavimaya and equivalent exact wording use the same path.
+
+The private hand is a bottom-anchored fixed-height dock whose internal card and
+action rows scroll instead of moving the table when selection changes. Its
+lower edge uses the browser's vertical resize control. Public permanents rotate
+and show a **TAPPED** badge for every seat, and every board always shows its
+Commander-damage total, including zero.
 
 Browser games use the strict `trusted_only` semantic policy. A material card
 interaction without a trusted program pauses the durable game and surfaces the

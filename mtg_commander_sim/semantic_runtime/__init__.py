@@ -15,6 +15,8 @@ from .components import (
     validate_runtime_handler_descriptors,
 )
 from .continuous_components import (
+    AddBasicLandTypeHandler,
+    AddBasicLandTypeNode,
     ContinuousEffectComponentRegistry,
     ContinuousEffectSourceContext,
     FixedPowerToughnessAnthemHandler,
@@ -61,6 +63,7 @@ from .executor import (
     execute_intent_plan,
     prepare_draw_resolution,
 )
+from .effect_handlers import DOMAIN_EFFECT_HANDLERS, DomainEffectHandler
 from .generic import GENERIC_HANDLERS
 from .handlers import SemanticNodeHandler
 from .intents import (
@@ -74,6 +77,7 @@ from .intents import (
     ChooseOneRestBottomRandomIntent,
     CreateTokenIntent,
     DrawCardsIntent,
+    DomainEffectIntent,
     IntentPlan,
     EliminatePlayersIntent,
     LifeChangeIntent,
@@ -139,7 +143,7 @@ from .zone_replacements import (
 @lru_cache(maxsize=1)
 def default_semantic_handler_registry() -> SemanticHandlerRegistry:
     registry = SemanticHandlerRegistry(
-        (*GENERIC_HANDLERS, *TAP_STATE_HANDLERS)
+        (*GENERIC_HANDLERS, *TAP_STATE_HANDLERS, *DOMAIN_EFFECT_HANDLERS)
     )
     capabilities = load_default_capability_registry()
     missing = sorted(
@@ -162,6 +166,8 @@ def default_semantic_interpreter() -> SemanticInterpreter:
 
 
 __all__ = [
+    "AddBasicLandTypeHandler",
+    "AddBasicLandTypeNode",
     "AddManaIntent",
     "AddSubtypeIntent",
     "AmassIntent",
@@ -176,6 +182,8 @@ __all__ = [
     "AdditionalTokenReplacementHandler",
     "AdditionalTokenReplacementNode",
     "DrawCardsIntent",
+    "DomainEffectHandler",
+    "DomainEffectIntent",
     "DrawEachPlayerNode",
     "DrawNode",
     "DrawResolutionBatch",

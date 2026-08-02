@@ -60,8 +60,12 @@ def _layer(relative: str) -> str:
             "mtg_commander_sim/card_programs/",
             "mtg_commander_sim/compiler/",
             "mtg_commander_sim/semantic_runtime/",
+            "mtg_commander_sim/semantic_choices/",
+            "mtg_commander_sim/effect_runtime/",
+            "mtg_commander_sim/card_overrides/",
         )
     ) or relative in {
+        "mtg_commander_sim/effect_contracts.py",
         "mtg_commander_sim/oracle_ir.py",
         "mtg_commander_sim/semantics.py",
     }:
@@ -92,8 +96,11 @@ def _layer(relative: str) -> str:
         "mtg_commander_sim/declaration_costs.py",
         "mtg_commander_sim/declaration_restrictions.py",
         "mtg_commander_sim/engine.py",
+        "mtg_commander_sim/errors.py",
         "mtg_commander_sim/life_state.py",
         "mtg_commander_sim/mana.py",
+        "mtg_commander_sim/mana_activation.py",
+        "mtg_commander_sim/mana_undo.py",
         "mtg_commander_sim/mechanic_contracts.py",
         "mtg_commander_sim/permissions.py",
         "mtg_commander_sim/replacement_decisions.py",
@@ -103,9 +110,11 @@ def _layer(relative: str) -> str:
         "mtg_commander_sim/rules_scheduler.py",
         "mtg_commander_sim/shortcuts.py",
         "mtg_commander_sim/state_based_actions.py",
+        "mtg_commander_sim/state_planner.py",
         "mtg_commander_sim/tap_state.py",
         "mtg_commander_sim/targets.py",
         "mtg_commander_sim/token_creation.py",
+        "mtg_commander_sim/object_query.py",
     }:
         return "rules"
     return "application"
@@ -116,6 +125,14 @@ def _owner(relative: str, layer: str) -> str:
         return "server_transport"
     if relative.startswith("mtg_commander_sim/semantic_runtime/"):
         return "semantic_runtime"
+    if relative.startswith("mtg_commander_sim/semantic_choices/"):
+        return "semantic_choices"
+    if relative.startswith("mtg_commander_sim/effect_runtime/"):
+        return "effect_runtime"
+    if relative.startswith("mtg_commander_sim/card_overrides/"):
+        return "game_record_compatibility"
+    if relative == "mtg_commander_sim/effect_contracts.py":
+        return "effect_runtime"
     if relative.startswith("mtg_commander_sim/card_programs/"):
         return "card_programs"
     if relative.startswith("mtg_commander_sim/compiler/"):
@@ -132,6 +149,16 @@ def _owner(relative: str, layer: str) -> str:
         return "life_state"
     if relative == "mtg_commander_sim/tap_state.py":
         return "tap_state_effects"
+    if relative in {
+        "mtg_commander_sim/mana.py",
+        "mtg_commander_sim/mana_activation.py",
+        "mtg_commander_sim/mana_undo.py",
+    }:
+        return "mana_rules"
+    if relative == "mtg_commander_sim/object_query.py":
+        return "object_query"
+    if relative == "mtg_commander_sim/state_planner.py":
+        return "state_change_planning"
     if relative == "mtg_commander_sim/counter_placement.py":
         return "counter_placement"
     if relative in {
@@ -216,13 +243,21 @@ def build_classifications() -> dict[str, Any]:
                             "semantics.py",
                             "card_programs/",
                             "semantic_runtime/",
+                            "semantic_choices/",
+                            "effect_runtime/",
+                            "card_overrides/",
+                            "effect_contracts.py",
                             "counter_placement.py",
                             "counter_state.py",
                             "commander.py",
                             "damage.py",
                             "damage_results.py",
                             "life_state.py",
+                            "mana_activation.py",
+                            "mana_undo.py",
+                            "object_query.py",
                             "replacement/",
+                            "state_planner.py",
                             "tap_state.py",
                             "token_creation.py",
                             "replacement_decisions.py",

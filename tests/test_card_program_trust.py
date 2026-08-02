@@ -138,11 +138,12 @@ class CardProgramTrustTests(unittest.TestCase):
 
     def test_global_handler_and_component_inventory_is_capability_bound(self):
         status = runtime_component_status("commander_review")
-        self.assertEqual(6, len(status["semantic_handlers"]))
-        self.assertEqual(8, len(status["runtime_components"]))
+        self.assertEqual(81, len(status["semantic_handlers"]))
+        self.assertEqual(9, len(status["runtime_components"]))
         self.assertEqual(
             {
                 "continuous.fixed_power_toughness_anthem",
+                "continuous.basic_land_type.add_all_lands",
                 "prevention.damage.fixed",
                 "replacement.counter.quantity",
                 "replacement.damage.quantity",

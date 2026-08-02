@@ -223,7 +223,6 @@ def _classified_effects(
         {"effect_index": index, "node": _clone(effect)}
         for index, effect in enumerate(effects)
         if "copy" in str(effect.get("op") or "").casefold()
-        or str(effect.get("op") or "") == "create_warform"
     ]
     zone_nodes = [
         {"effect_index": index, "node": _clone(effect)}

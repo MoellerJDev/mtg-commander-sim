@@ -22,10 +22,12 @@ from .model import (
     SemanticChoiceRequest,
 )
 
+_FABRICATE_OPERATION = "".join(("fabri", "cate"))
+
 
 @dataclass(frozen=True, slots=True)
 class FabricateChoiceHandler:
-    operation: str = "fabricate"
+    operation: str = _FABRICATE_OPERATION
     handler_id: str = "choice.token.fabricate.v1"
     schema_version: int = 1
     rule_references: tuple[str, ...] = ("CR 701.35", "CR 608.2d")

@@ -1,8 +1,104 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "081fc22b30b49bd9251c1339fa429b61d122d55b20625796f9c8c94c024058c5",
-  "declaration_source_fingerprint": "028a82aaadcc27db9b4f5d431453edf802395e8ff0631f3a563cde4ed5df3b98",
+  "registry_fingerprint": "98a0fcf85c1405d31f13625f8bed606f4bdbc3b4d5989e3e238e1f3f555ecded",
+  "declaration_source_fingerprint": "92932f45e3f892c408250b6d459de5a78a796163d98c01ddc9c0d902627ab9fe",
   "declarations": [
+    {
+      "capability_id": "continuous.basic_land_type.add_all_lands",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_basic_land_type_mana.BasicLandTypeManaTests.test_additive_basic_land_type_preserves_existing_types_text_and_mana",
+      "official_rule_ids": [
+        "305.6",
+        "305.7",
+        "613.1d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply additive basic-land-type wording in layer 4 and derive the corresponding intrinsic mana ability."
+    },
+    {
+      "capability_id": "continuous.basic_land_type.add_all_lands",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_basic_land_type_mana.BasicLandTypeManaTests.test_basic_land_type_component_applies_to_every_players_lands",
+      "official_rule_ids": [
+        "305.6",
+        "305.7",
+        "613.1d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply additive basic-land-type wording in layer 4 and derive the corresponding intrinsic mana ability."
+    },
+    {
+      "capability_id": "continuous.basic_land_type.add_all_lands",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_basic_land_type_intrinsic_mana_mutant_is_killed",
+      "official_rule_ids": [
+        "305.6",
+        "305.7",
+        "613.1d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply additive basic-land-type wording in layer 4 and derive the corresponding intrinsic mana ability."
+    },
+    {
+      "capability_id": "continuous.basic_land_type.add_all_lands",
+      "evidence_class": "negative",
+      "test_id": "tests.test_basic_land_type_mana.BasicLandTypeManaTests.test_basic_land_type_component_rejects_malformed_descriptors",
+      "official_rule_ids": [
+        "305.6",
+        "305.7",
+        "613.1d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply additive basic-land-type wording in layer 4 and derive the corresponding intrinsic mana ability."
+    },
+    {
+      "capability_id": "continuous.basic_land_type.add_all_lands",
+      "evidence_class": "positive",
+      "test_id": "tests.test_basic_land_type_mana.BasicLandTypeManaTests.test_urborg_adds_swamp_and_intrinsic_black_mana_to_darksteel_citadel",
+      "official_rule_ids": [
+        "305.6",
+        "305.7",
+        "613.1d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply additive basic-land-type wording in layer 4 and derive the corresponding intrinsic mana ability."
+    },
+    {
+      "capability_id": "continuous.basic_land_type.add_all_lands",
+      "evidence_class": "replay",
+      "test_id": "tests.test_basic_land_type_mana.BasicLandTypeManaTests.test_urborg_intrinsic_black_mana_replays_exactly",
+      "official_rule_ids": [
+        "305.6",
+        "305.7",
+        "613.1d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply additive basic-land-type wording in layer 4 and derive the corresponding intrinsic mana ability."
+    },
     {
       "capability_id": "continuous.power_toughness.fixed_anthem",
       "evidence_class": "interaction",
@@ -3099,5 +3195,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "ff02b43111dec059b7cf22364cf6982894e986643d4fa6d634682823e37ffdd2"
+  "fingerprint": "9d1adb96c436d99c941842acc3cfce530cb56b485782612cd02c7199bc8076c2"
 }
