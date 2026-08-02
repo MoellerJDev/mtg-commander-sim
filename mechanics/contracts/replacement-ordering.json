@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 3,
+  "contract_version": 4,
   "mechanic_id": "cr-616-interaction-of-replacement-and-or-prevention-effects",
   "official_name": "Interaction of Replacement and/or Prevention Effects",
   "effective_date": "2026-06-19",
@@ -50,6 +50,12 @@
     "test_simultaneous_choices_are_collected_in_apnap_order",
     "test_batch_round_trip_and_path_checked_replay_are_exact",
     "test_choice_payload_does_not_expose_authoritative_event_payload",
+    "test_forced_singletons_do_not_consume_later_explicit_selection",
+    "test_counter_replacements_apply_in_affected_players_chosen_order",
+    "test_simultaneous_counter_choices_follow_apnap",
+    "test_zone_replacement_counter_is_a_nested_precommit_event",
+    "test_counter_replacement_choice_is_seat_scoped",
+    "test_counter_replacement_choice_replays_exactly",
     "test_duplicate_effect_ids_fail_closed",
     "test_entering_objects_and_reserved_objects_cannot_change_zones",
     "test_library_top_ignores_cards_entering_from_library",
@@ -63,14 +69,14 @@
     "test_prevention_never_prevents_more_than_remaining_damage"
   ],
   "implementation": {
-    "component": "replacement_effects event trees and batches plus replacement_decisions suspension",
-    "version": "replacement-ordering-v3"
+    "component": "replacement_effects event trees and batches plus replacement_decisions suspension and the counter_placement transaction owner",
+    "version": "replacement-ordering-v4"
   },
   "known_blockers": [
-    "generic replacement choice packets are wired only into represented token-creation and semantic zone-change producers",
+    "generic replacement choice packets are wired only into represented token-creation, semantic zone-change, and effect-generated permanent-counter producers",
     "multiple simultaneous events for the same affected chooser do not expose an explicit event-order choice when order could matter",
     "entry reservation scopes are not yet consumed by general as-enters choice transactions",
-    "draw, damage, counter placement, commander movement, and other replacement producers remain outside the universal event boundary"
+    "draw, damage, remaining counter-placement producers, commander movement, and other replacement producers remain outside the universal event boundary"
   ],
   "review_status": "reviewed"
 }

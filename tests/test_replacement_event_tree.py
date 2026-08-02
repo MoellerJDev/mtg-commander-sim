@@ -12,6 +12,7 @@ from mtg_commander_sim.replacement_effects import (
     ReplacementEffect,
     ReplacementEventBatch,
     ReplacementSelection,
+    advance_replacement_batch,
     apply_batch_replacement,
     apply_replacement,
     apply_tree_replacement,
@@ -355,6 +356,56 @@ class ReplacementBatchTests(unittest.TestCase):
 
         self.assertIsNone(next_batch_replacement_choice(batch, self.effects))
         self.assertEqual(expected, tuple(item.chooser for item in batch.journal))
+
+    def test_forced_singletons_do_not_consume_later_explicit_selection(self):
+        events = (self.event("A"), self.event("B"))
+        alternatives = (
+            *self.effects,
+            effect(
+                "replace-A-alternative",
+                "damage",
+                {
+                    "op": "set",
+                    "field": "prevented_by",
+                    "value": "A-alt",
+                },
+                conditions={"affected_player": "A"},
+            ),
+            effect(
+                "replace-B-alternative",
+                "damage",
+                {
+                    "op": "set",
+                    "field": "prevented_by",
+                    "value": "B-alt",
+                },
+                conditions={"affected_player": "B"},
+            ),
+        )
+        progress = advance_replacement_batch(
+            ReplacementEventBatch(
+                batch_id="damage:choice-forced-choice",
+                events=events,
+                apnap_order=("A", "B", "C", "D"),
+            ),
+            alternatives,
+            selections=("replace-A", "replace-B"),
+        )
+
+        self.assertIsNone(progress.pending)
+        self.assertEqual(
+            ["A", "A", "B", "B"],
+            [selection.chooser for selection in progress.batch.journal],
+        )
+        self.assertEqual(
+            [
+                "replace-A",
+                "replace-A-alternative",
+                "replace-B",
+                "replace-B-alternative",
+            ],
+            [selection.effect_id for selection in progress.batch.journal],
+        )
 
     def test_batch_round_trip_and_path_checked_replay_are_exact(self):
         initial = ReplacementEventBatch(

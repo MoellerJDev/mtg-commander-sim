@@ -12,6 +12,7 @@
     "mtg_commander_sim/combat.py",
     "mtg_commander_sim/combat_constraints.py",
     "mtg_commander_sim/continuous_effects.py",
+    "mtg_commander_sim/counter_placement.py",
     "mtg_commander_sim/damage.py",
     "mtg_commander_sim/declaration_costs.py",
     "mtg_commander_sim/declaration_restrictions.py",
@@ -78,6 +79,7 @@
       "mtg_commander_sim/engine.py": "legacy authoritative transaction and mutation boundary",
       "mtg_commander_sim/permissions.py": "decision and capability lifecycle owned by the transaction boundary",
       "mtg_commander_sim/record.py": "replay hydration, verification copies, and versioned migration",
+      "mtg_commander_sim/counter_placement.py": "typed effect-generated counter-placement replacement and mutation owner behind CommanderEngine",
       "mtg_commander_sim/tap_state.py": "typed tap-state effect mutation owner behind the semantic intent executor",
       "mtg_commander_sim/token_creation.py": "typed token-creation and replacement mutation owner behind CommanderEngine"
     },

@@ -136,11 +136,11 @@
       "total": 38484
     },
     "rules": {
-      "blocked": 364,
-      "definition_only": 83,
+      "blocked": 366,
+      "definition_only": 84,
       "passing": 126,
       "total": 3300,
-      "unreviewed": 2727
+      "unreviewed": 2724
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -165,7 +165,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4251,
+    "deterministic_cases_discovered": 4262,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,

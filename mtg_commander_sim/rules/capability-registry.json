@@ -176,6 +176,33 @@
       "status": "tested"
     },
     {
+      "id": "counter.placement.quantity_replacement",
+      "version": 1,
+      "official_rules": ["122.1", "122.6", "614.1", "614.16", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Resolve represented effect-generated counter placements through affected-object ordering before committing the counters.",
+        "inputs": ["placing player", "affected card or permanent", "counter kind and positive amount", "fixed multiply/add runtime components"],
+        "outputs": ["resolved counter amount", "exact replacement journal", "principal-scoped competing choice", "authoritative counter mutation"],
+        "exclusions": ["player counters", "fractional or halving replacements", "counter movement", "counter removal", "cost and rule-generated placements", "complete enters-with-counter ordering", "uncompiled dynamic quantities"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.counter_replacements.CounterQuantityReplacementHandler", "mtg_commander_sim.counter_placement.prepare_counter_placements", "mtg_commander_sim.counter_placement.commit_prepared_counter_placements", "CommanderEngine.apply_effect"],
+      "positive_tests": ["test_counter_quantity_component_changes_effect_generated_placement"],
+      "negative_tests": ["test_counter_quantity_component_rejects_malformed_and_nonmatching_events"],
+      "interaction_tests": ["test_counter_replacements_apply_in_affected_players_chosen_order", "test_zone_replacement_counter_is_a_nested_precommit_event"],
+      "multiplayer_tests": ["test_simultaneous_counter_choices_follow_apnap"],
+      "privacy_tests": ["test_counter_replacement_choice_is_seat_scoped"],
+      "replay_tests": ["test_counter_replacement_choice_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This bounded counter producer has no capability dependencies beyond the shared replacement event substrate.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_counter_quantity_replacement_mutant_is_killed replaces the quantity transform with an identity operation and the behavioral assertion rejects the survivor.",
+      "blockers": ["The current descriptor covers fixed integral multiply/add quantities on permanents only; broader counter producers and grammar remain outside this capability."],
+      "status": "tested"
+    },
+    {
       "id": "continuous.power_toughness.fixed_anthem",
       "version": 1,
       "official_rules": ["604.1", "611.3a", "613.1g", "613.4c"],

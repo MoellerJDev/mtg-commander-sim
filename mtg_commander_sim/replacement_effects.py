@@ -1191,15 +1191,15 @@ def advance_replacement_batch(
     supplied = iter(selections)
     current = batch
     while pending := next_batch_replacement_choice(current, all_effects):
-        try:
-            selected = next(supplied)
-        except StopIteration:
-            if (
-                len(pending.choice.options) == 1
-                and not pending.choice.optional_options
-            ):
-                selected = pending.choice.options[0]
-            else:
+        if (
+            len(pending.choice.options) == 1
+            and not pending.choice.optional_options
+        ):
+            selected = pending.choice.options[0]
+        else:
+            try:
+                selected = next(supplied)
+            except StopIteration:
                 return ReplacementBatchProgress(
                     batch=current,
                     pending=pending,

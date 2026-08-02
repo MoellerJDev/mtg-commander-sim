@@ -14,12 +14,12 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,091
-- Reviewed behavioral blockers: 364
-- Behavioral classification/review required: 2,727
+- Queued rules: 3,090
+- Reviewed behavioral blockers: 366
+- Behavioral classification/review required: 2,724
 - Passing behavioral rules: 105
 - Subsystems: 21
-- Queue fingerprint: `142100948fbedf58893229414952c157700638f4897fb5754cce6de9e9b66003`
+- Queue fingerprint: `79e5f35f1b2d6d7dc83ef5569c595861ec645cabce7f91e03f6f90fd1c20bd42`
 
 ## Selected next batch
 
@@ -48,7 +48,7 @@ Exit criteria:
 | 4 | `mana-costs-priority` | `core-game`, `characteristics`, `objects-permanents-tokens` | 175 | 0 | 175 | `oracle_parser`, `card_program_costs`, `card_program_targets`, `mechanic_contracts` |
 | 5 | `card-types` | `characteristics`, `objects-permanents-tokens` | 168 | 13 | 155 | `oracle_normalization`, `card_program_typing`, `mechanic_contracts` |
 | 6 | `zones` | `objects-permanents-tokens`, `card-types` | 39 | 39 | 0 | `card_program_zone_permissions`, `mechanic_contracts` |
-| 7 | `resources` | `mana-costs-priority`, `zones` | 83 | 1 | 82 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
+| 7 | `resources` | `mana-costs-priority`, `zones` | 82 | 3 | 79 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 8 | `damage` | `characteristics`, `objects-permanents-tokens`, `resources` | 19 | 19 | 0 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 9 | `turn-structure` | `mana-costs-priority`, `zones`, `resources` | 26 | 26 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 10 | `casting-activation` | `mana-costs-priority`, `zones`, `turn-structure` | 46 | 46 | 0 | `oracle_parser`, `card_program_costs`, `card_program_lowering`, `mechanic_contracts` |

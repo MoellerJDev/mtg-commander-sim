@@ -385,6 +385,9 @@ class CardProgramV2Tests(unittest.TestCase):
                 "continuous.anthem.power_toughness.v1": [
                     "continuous.power_toughness.fixed_anthem"
                 ],
+                "replacement.counter.quantity.v1": [
+                    "counter.placement.quantity_replacement"
+                ],
                 "replacement.token.additional.v1": [
                     "token.creation.additional_replacement"
                 ],
