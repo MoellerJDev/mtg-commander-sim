@@ -14,6 +14,7 @@ _STABLE_ID = re.compile(r"^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$")
 class RuntimeComponentHandler(Protocol):
     handler_id: str
     schema_version: int
+    family: str
     event: str
     rule_references: tuple[str, ...]
     capability_dependencies: tuple[str, ...]
@@ -50,6 +51,31 @@ class RuntimeComponentRegistry(Generic[ContextT, IntentT]):
         if handler.handler_id in self._handlers:
             raise SemanticNodeError(
                 f"Duplicate runtime handler ID {handler.handler_id!r}"
+            )
+        if _STABLE_ID.fullmatch(str(handler.family)) is None:
+            raise SemanticNodeError(
+                f"Runtime handler {handler.handler_id} has an invalid family"
+            )
+        if type(handler.schema_version) is not int or handler.schema_version < 1:
+            raise SemanticNodeError(
+                f"Runtime handler {handler.handler_id} has an invalid schema version"
+            )
+        if not str(handler.event).strip():
+            raise SemanticNodeError(
+                f"Runtime handler {handler.handler_id} requires an event"
+            )
+        if not handler.rule_references or len(handler.rule_references) != len(
+            set(handler.rule_references)
+        ):
+            raise SemanticNodeError(
+                f"Runtime handler {handler.handler_id} has invalid rule references"
+            )
+        dependencies = tuple(handler.capability_dependencies)
+        if len(dependencies) != len(set(dependencies)) or any(
+            _STABLE_ID.fullmatch(value) is None for value in dependencies
+        ):
+            raise SemanticNodeError(
+                f"Runtime handler {handler.handler_id} has invalid capability dependencies"
             )
         self._handlers[handler.handler_id] = handler
 
@@ -96,6 +122,7 @@ class RuntimeComponentRegistry(Generic[ContextT, IntentT]):
             {
                 "handler_id": handler.handler_id,
                 "schema_version": handler.schema_version,
+                "family": handler.family,
                 "event": handler.event,
                 "rule_references": list(handler.rule_references),
                 "capability_dependencies": list(

@@ -10,6 +10,8 @@ from ..rules.capabilities import load_default_capability_registry
 from ..semantic_runtime import (
     default_semantic_handler_registry,
     describe_runtime_handler,
+    runtime_component_inventory,
+    runtime_component_registry_fingerprint,
 )
 from ..semantics import SemanticRegistry
 from ..util import stable_json
@@ -24,6 +26,8 @@ CARD_PROGRAM_OPERATIONS = {
     "diff",
     "overrides",
     "coverage",
+    "trust-closure",
+    "runtime-components",
 }
 
 
@@ -149,6 +153,17 @@ def explain_card_program(program: CardProgram) -> dict[str, Any]:
         "semantic_hash": program.semantic_hash,
         "compiler_version": program.compiler_version,
         "trusted": program.trust_closure["trusted"],
+        "trust_basis": program.trust_closure["trust_basis"],
+        "strict_capability_ready": program.trust_closure[
+            "strict_capability_ready"
+        ],
+        "closure_layers": program.trust_closure["closure_layers"],
+        "ambient_interaction_surfaces": program.trust_closure[
+            "ambient_interaction_surfaces"
+        ],
+        "compatibility_provenance": program.trust_closure[
+            "compatibility_provenance"
+        ],
         "trust_blockers": program.trust_closure["blockers"],
         "faces": [face.to_dict() for face in program.faces],
         "abilities": abilities,
@@ -179,6 +194,10 @@ def audit_card_program(program: CardProgram) -> dict[str, Any]:
         "residual_count": len(program.residuals),
         "capability_dependencies": list(program.capability_dependencies),
         "trust_closure": program.trust_closure,
+        "trust_basis": program.trust_closure["trust_basis"],
+        "strict_capability_ready": program.trust_closure[
+            "strict_capability_ready"
+        ],
         "source_fingerprints_match": not source_blockers,
         "source_fingerprint_blockers": source_blockers,
         "runtime_handler_mapping": {
@@ -327,6 +346,7 @@ def card_program_coverage(
     limit: int | None,
 ) -> dict[str, Any]:
     statuses: Counter[str] = Counter()
+    trust_bases: Counter[str] = Counter()
     ability_count = 0
     residual_count = 0
     failures = []
@@ -351,6 +371,7 @@ def card_program_coverage(
             continue
         ability_count += len(program.abilities)
         residual_count += len(program.residuals)
+        trust_bases[program.trust_closure["trust_basis"]] += 1
         if program.trust_closure["trusted"]:
             statuses["trusted"] += 1
         elif program.residuals:
@@ -368,12 +389,45 @@ def card_program_coverage(
         "ability_programs": ability_count,
         "material_residuals": residual_count,
         "status_counts": dict(sorted(statuses.items())),
+        "trust_basis_counts": dict(sorted(trust_bases.items())),
         "failures": failures,
         "current_snapshot_complete": (
             total > 0
             and statuses.get("trusted", 0) == total
             and not residual_count
             and not failures
+        ),
+    }
+
+
+def runtime_component_status(profile: str) -> dict[str, Any]:
+    capabilities = load_default_capability_registry()
+    semantic_registry = default_semantic_handler_registry()
+
+    def bind(row: Mapping[str, Any]) -> dict[str, Any]:
+        closure = capabilities.closure(
+            row["capability_dependencies"], profile=profile
+        )
+        return {**dict(row), "capability_closure": closure.to_dict()}
+
+    components = [bind(row) for row in runtime_component_inventory()]
+    semantic_handlers = [
+        bind(row) for row in semantic_registry.inventory()
+    ]
+    return {
+        "schema_version": 1,
+        "profile": profile,
+        "capability_registry_fingerprint": capabilities.fingerprint,
+        "capability_evidence_fingerprint": capabilities.evidence_fingerprint,
+        "semantic_handler_registry_fingerprint": semantic_registry.fingerprint,
+        "runtime_component_registry_fingerprint": (
+            runtime_component_registry_fingerprint()
+        ),
+        "semantic_handlers": semantic_handlers,
+        "runtime_components": components,
+        "strict_capability_ready": all(
+            row["capability_closure"]["trusted"]
+            for row in [*semantic_handlers, *components]
         ),
     }
 
@@ -394,6 +448,8 @@ def execute_card_operation(
     registry = SemanticRegistry()
     if operation == "overrides":
         value = semantic_overrides(registry)
+    elif operation == "runtime-components":
+        value = runtime_component_status(profile)
     else:
         with CardDatabase(db_path) as db:
             if operation == "coverage":
@@ -416,6 +472,14 @@ def execute_card_operation(
                     value = explain_card_program(program)
                 elif operation == "audit":
                     value = audit_card_program(program)
+                elif operation == "trust-closure":
+                    value = {
+                        "schema_version": program.schema_version,
+                        "oracle_id": program.oracle_id,
+                        "card_name": program.card_name,
+                        "program_fingerprint": program.fingerprint,
+                        "trust_closure": program.trust_closure,
+                    }
                 else:
                     if against is None:
                         raise ValueError("card diff requires --against")

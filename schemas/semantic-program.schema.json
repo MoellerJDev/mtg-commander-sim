@@ -70,6 +70,7 @@
         "trusted",
         "blockers",
         "registry_fingerprint",
+        "evidence_fingerprint",
         "fingerprint"
       ],
       "properties": {
@@ -79,6 +80,7 @@
         "trusted": {"type": "boolean"},
         "blockers": {"$ref": "#/$defs/strings"},
         "registry_fingerprint": {"$ref": "#/$defs/sha256"},
+        "evidence_fingerprint": {"$ref": "#/$defs/sha256"},
         "fingerprint": {"$ref": "#/$defs/sha256"}
       }
     }

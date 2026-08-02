@@ -17,6 +17,7 @@ from .profiles import (
     deck_list_fingerprint,
     deck_source_fingerprint,
 )
+from .rules.capabilities import load_default_capability_registry
 from .record import (
     authoritative_state_hash,
     capability_id,
@@ -25,6 +26,7 @@ from .record import (
     utc_now,
     write_record,
 )
+from .record_trust import semantic_execution_provenance_row
 from .report import write_review_artifacts
 from .semantics import SemanticRegistry
 
@@ -644,10 +646,7 @@ class CommanderSession:
         step = self.state.step
         cursor = self.cursors.get(principal)
         before_event_sequence = self.state.event_sequence
-        before_stack_semantics = {
-            item.ref: item.semantic_key
-            for item in self.state.stack
-        }
+        before_stack_items = {item.ref: item for item in self.state.stack}
         before_hash = authoritative_state_hash(self.state)
         before_shuffles = {
             seat: int(player.stats.get("shuffle_count", 0))
@@ -669,39 +668,22 @@ class CommanderSession:
             for seat, player in self.state.players.items()
         }
         programs_used: list[dict[str, Any]] = []
+        capability_registry = load_default_capability_registry()
         for event in self.state.events:
             if event.event_id <= before_event_sequence or event.code != "stack.resolve":
                 continue
             stack_ref = str(event.details.get("stack") or "")
-            semantic_key = before_stack_semantics.get(stack_ref)
-            if not semantic_key:
+            stack_item = before_stack_items.get(stack_ref)
+            if stack_item is None or not stack_item.semantic_key:
                 continue
-            program = self.engine.semantics.get(semantic_key)
-            card_program = (
-                self.engine.semantics.card_program_for_oracle(
-                    program.oracle_id
-                )
-                if program is not None and program.oracle_id
-                else None
-            )
             programs_used.append(
-                {
-                    "key": semantic_key,
-                    "oracle_id": (
-                        program.oracle_id if program is not None else None
-                    ),
-                    "version": (
-                        program.version
-                        if program is not None
-                        else 1 if semantic_key.startswith("builtin:") else None
-                    ),
-                    "builtin": semantic_key.startswith("builtin:"),
-                    "card_program_fingerprint": (
-                        card_program.fingerprint
-                        if card_program is not None
-                        else None
-                    ),
-                }
+                semantic_execution_provenance_row(
+                    self.engine,
+                    stack_item.semantic_key,
+                    capability_registry=capability_registry,
+                    profile=self.state.config.review_profile,
+                    stack_item=stack_item,
+                )
             )
         card_programs_used = (
             self.engine.semantics.card_program_fingerprints_for_keys(
@@ -895,7 +877,7 @@ class CommanderSession:
             )
             plan_stop = (
                 tuple(item.ref for item in self.state.stack)
-                != tuple(before_stack_semantics)
+                != tuple(before_stack_items)
                 and not expected_continuation
                 or any(
                     event.code == "card.draw.private"

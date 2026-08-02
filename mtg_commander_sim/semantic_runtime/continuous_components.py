@@ -59,6 +59,7 @@ class ContinuousEffectSourceContext:
 class ContinuousEffectComponentHandler(Protocol):
     handler_id: str
     schema_version: int
+    family: str
     event: str
     rule_references: tuple[str, ...]
     capability_dependencies: tuple[str, ...]
@@ -78,6 +79,7 @@ class ContinuousEffectComponentHandler(Protocol):
 class FixedPowerToughnessAnthemHandler:
     handler_id: str = _FIXED_ANTHEM_HANDLER_ID
     schema_version: int = 1
+    family: str = "continuous.fixed_power_toughness_anthem"
     event: str = "characteristics.evaluate"
     rule_references: tuple[str, ...] = (
         "604.1",

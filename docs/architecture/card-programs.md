@@ -12,8 +12,8 @@ maintenance: "hand-maintained"
 `CardProgram` schema version 2 is the canonical deterministic card artifact.
 It groups every executable ability for one Oracle ID with card and face
 identity, Oracle/rulings hashes, source spans, compiler and semantic hashes,
-residuals, provenance, exact capability dependencies, trust closure, and one
-artifact fingerprint.
+residuals, provenance, exact capability dependencies, an explicit trust basis,
+applicable closure layers, and one artifact fingerprint.
 
 Each stable ability ID projects the runtime ability into explicit fields for
 active zones, timing permissions, costs, modes, targets, choices, effect
@@ -37,15 +37,21 @@ fail closed.
 
 ## Trust boundary
 
-- Reviewed abilities are executable as trusted only when their source hashes,
-  tests, canonical card membership, and any capability closure match.
+- `capability_closed`, `legacy_reviewed`, `mixed`, `provisional`, `unresolved`,
+  and `non_rules_governed` are distinct bases. A reviewed pack is never silently
+  promoted to capability-closed.
+- Intrinsic, format, match, and dynamic closure are computed separately. The
+  currently incomplete format-capability inventory blocks capability-only
+  strict matches without blocking the explicit reviewed compatibility mode.
 - Compiler output remains provisional when material residuals or dependencies
   are unresolved.
 - Broad mechanic aggregate status neither grants nor revokes a smaller exact
   closure; unmigrated nodes keep the conservative broad-contract gate.
-- New Game Record v3 manifests pin every CardProgram fingerprint. Commands pin
-  the card programs actually used. Replay validates both when present and
-  remains compatible with older v3 records.
+- New Game Record v3 manifests pin every CardProgram fingerprint and trust
+  closure plus capability-evidence, semantic-handler, and runtime-component
+  fingerprints. Commands pin the programs and compact runtime bindings actually
+  used. Replay validates these when present and remains compatible with older
+  v3 records.
 - Runtime accepts registered operations only. Oracle prose is not parsed
   during a state transition.
 
@@ -73,6 +79,10 @@ python simctl.py card diff "Mishra, Eminent One" \
   --db data/scryfall-current.sqlite3
 python simctl.py card overrides --db data/scryfall-current.sqlite3
 python simctl.py card coverage --limit 100 --db data/scryfall-current.sqlite3
+python simctl.py card trust-closure "Lightning Bolt" --profile commander_duel \
+  --db data/scryfall-current.sqlite3
+python simctl.py card runtime-components --profile commander_review \
+  --db data/scryfall-current.sqlite3
 ```
 
 `card explain` reports faces, abilities, typed nodes, source spans,
@@ -87,5 +97,7 @@ from the frozen runtime registry and is not a second serialized authority.
 See [ADR 0005](../adr/0005-card-program-v2.md), the
 [semantic-node guide](../extension/semantic-node.md), the
 [typed-handler boundary](semantic-handlers.md), the
+[trust-closure boundary](trust-closure.md), the
+[runtime-component boundary](runtime-components.md), the
 [override guide](../extension/card-override.md), and generated
 [compiler status](../COMPILER_COVERAGE_STATUS.md).

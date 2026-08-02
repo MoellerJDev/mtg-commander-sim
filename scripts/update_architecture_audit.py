@@ -42,6 +42,12 @@ CAPABILITY_REGISTRY = (
     ROOT / "mtg_commander_sim" / "rules" / "capability-registry.json"
 )
 CARD_PROGRAM_SCHEMA = ROOT / "schemas" / "card-program-v2.schema.json"
+CAPABILITY_EVIDENCE = (
+    ROOT / "mtg_commander_sim" / "rules" / "capability-evidence.json"
+)
+CONTINUOUS_PERFORMANCE_BASELINE = (
+    ROOT / "platform" / "continuous-effect-performance-baseline.json"
+)
 
 PYTHON_SUFFIXES = {".py"}
 WEB_SUFFIXES = {".ts", ".tsx", ".css"}
@@ -255,7 +261,9 @@ def _function_records(
     return tuple(sorted(records, key=lambda item: (item["line"], item["symbol"])))
 
 
-def _resolved_imports(tree: ast.Module, module: str) -> tuple[str, ...]:
+def _resolved_imports(
+    tree: ast.Module, module: str, *, is_package: bool = False
+) -> tuple[str, ...]:
     imports: set[str] = set()
     current = module.split(".")
     for node in ast.walk(tree):
@@ -263,7 +271,9 @@ def _resolved_imports(tree: ast.Module, module: str) -> tuple[str, ...]:
             imports.update(alias.name for alias in node.names)
         elif isinstance(node, ast.ImportFrom):
             if node.level:
-                prefix = current[: -node.level]
+                package = current if is_package else current[:-1]
+                trim = node.level - 1
+                prefix = package[: -trim] if trim else package
                 if node.module:
                     imports.add(".".join([*prefix, node.module]))
                 else:
@@ -306,6 +316,14 @@ def _state_write_records(
     parameter_modules = set(source["scope"]["state_parameter_modules"])
     records: dict[tuple[int, int, str, str], dict[str, Any]] = {}
 
+    def state_path(target: ast.AST) -> str:
+        chain = _attribute_chain(target)
+        if chain[:2] == ["self", "state"]:
+            chain = chain[2:]
+        elif chain[:1] == ["state"]:
+            chain = chain[1:]
+        return ".".join(chain) or "<state-root>"
+
     def add(node: ast.AST, kind: str, target: ast.AST) -> None:
         if not _is_state_reference(target, relative, owner_modules, parameter_modules):
             return
@@ -318,6 +336,7 @@ def _state_write_records(
             "column": node.col_offset,
             "symbol": _nearest_function(node, parents),
             "kind": kind,
+            "state_path": state_path(target),
             "expression": expression,
         }
 
@@ -425,7 +444,11 @@ def _analyze_python(path: Path, source: Mapping[str, Any]) -> SourceAnalysis:
         tree=tree,
         logical_lines=logical,
         functions=_function_records(tree, logical, relative, parents),
-        imports=_resolved_imports(tree, _module_name(relative)),
+        imports=_resolved_imports(
+            tree,
+            _module_name(relative),
+            is_package=relative.endswith("/__init__.py"),
+        ),
         string_literals=strings,
         state_writes=_state_write_records(tree, lines, relative, source, parents),
         semantic_branches=_semantic_branch_records(tree, lines, relative, parents),
@@ -444,6 +467,25 @@ def analyze_production() -> tuple[
         if path.suffix == ".py"
     }
     return source, paths, analyses
+
+
+def card_specificity_scope(
+    analyses: Mapping[str, SourceAnalysis],
+    source: Mapping[str, Any],
+) -> list[str]:
+    """Return every generic production Python module, default-deny."""
+
+    exemptions = tuple(
+        str(value)
+        for value in source["scope"].get(
+            "card_specificity_exempt_prefixes", []
+        )
+    )
+    return sorted(
+        relative
+        for relative in analyses
+        if not any(relative.startswith(prefix) for prefix in exemptions)
+    )
 
 
 def _production_metrics(
@@ -726,7 +768,7 @@ def _refresh_card_baseline(
     if not database.is_file():
         raise ValueError(f"Card database does not exist: {database}")
     names, metadata = _card_names(database)
-    scoped_files = set(source["scope"]["core_card_specificity_files"])
+    scoped_files = set(card_specificity_scope(analyses, source))
     matches: list[dict[str, Any]] = []
     for relative in sorted(scoped_files):
         if relative not in analyses:
@@ -786,7 +828,7 @@ def _validate_card_baseline(
 
     observed = [
         literal
-        for relative in source["scope"]["core_card_specificity_files"]
+        for relative in card_specificity_scope(analyses, source)
         for literal in analyses[relative].string_literals
         if printed_name_digest(str(literal["value"])) in digest_index
     ]
@@ -957,12 +999,32 @@ def _compiler_metrics(
     commander = _load_json(ROOT / "coverage" / "oracle-coverage-commander.json")
     mechanics = _load_json(ROOT / "coverage" / "mechanics-coverage.json")
     capabilities = _load_json(CAPABILITY_REGISTRY)
+    capability_evidence = _load_json(CAPABILITY_EVIDENCE)
     card_program_schema = _load_json(CARD_PROGRAM_SCHEMA)
+    from mtg_commander_sim.semantics import SemanticRegistry
+
+    semantic_card_programs = SemanticRegistry().card_programs()
+    trust_basis_counts = Counter(
+        str(program.trust_closure["trust_basis"])
+        for program in semantic_card_programs
+    )
     capability_rows = {
         str(row["id"]): row for row in capabilities["capabilities"]
     }
     capability_statuses = Counter(
         str(row["status"]) for row in capability_rows.values()
+    )
+    dependency_statuses = Counter(
+        str(row["dependency_fail_closed_status"])
+        for row in capability_rows.values()
+    )
+    implementation_mutation_statuses = Counter(
+        str(row["implementation_mutation_status"])
+        for row in capability_rows.values()
+    )
+    evidence_classes = Counter(
+        str(row["evidence_class"])
+        for row in capability_evidence["declarations"]
     )
     aggregate_rows = []
     for aggregate in capabilities["aggregates"]:
@@ -1030,6 +1092,12 @@ def _compiler_metrics(
             "model": "mtg_commander_sim/card_programs/model.py",
             "adapter": "mtg_commander_sim/card_programs/adapters.py",
             "validator": "mtg_commander_sim/card_programs/validation.py",
+            "semantic_registry_program_count": len(semantic_card_programs),
+            "trust_basis_counts": dict(sorted(trust_basis_counts.items())),
+            "strict_capability_ready_count": sum(
+                program.trust_closure["strict_capability_ready"] is True
+                for program in semantic_card_programs
+            ),
         },
         "compiler_version": oracle.get("compiler_version"),
         "compiler_module": "mtg_commander_sim/oracle_ir.py",
@@ -1076,6 +1144,25 @@ def _compiler_metrics(
             "fingerprint": capability_fingerprint,
             "total": len(capability_rows),
             "status_counts": dict(sorted(capability_statuses.items())),
+            "dependency_fail_closed_status_counts": dict(
+                sorted(dependency_statuses.items())
+            ),
+            "implementation_mutation_status_counts": dict(
+                sorted(implementation_mutation_statuses.items())
+            ),
+            "evidence": {
+                "fingerprint": capability_evidence["fingerprint"],
+                "registry_fingerprint": capability_evidence[
+                    "registry_fingerprint"
+                ],
+                "declaration_source_fingerprint": capability_evidence[
+                    "declaration_source_fingerprint"
+                ],
+                "declaration_count": len(
+                    capability_evidence["declarations"]
+                ),
+                "class_counts": dict(sorted(evidence_classes.items())),
+            },
             "profiles": capabilities["profiles"],
             "aggregates": aggregate_rows,
         },
@@ -1190,6 +1277,8 @@ def _test_metrics() -> dict[str, Any]:
     mutation_tools = [
         tool for tool in ("mutmut", "cosmic-ray", "mutpy") if tool in requirements + pyproject
     ]
+    capability_evidence = _load_json(CAPABILITY_EVIDENCE)
+    performance = _load_json(CONTINUOUS_PERFORMANCE_BASELINE)
     return {
         "python": {
             "discovered_total": discovered,
@@ -1214,11 +1303,31 @@ def _test_metrics() -> dict[str, Any]:
         },
         "mutation_testing": {
             "configured_tools": mutation_tools,
+            "focused_executable_suite": (
+                ROOT / "tests" / "test_capability_implementation_mutations.py"
+            ).is_file(),
+            "capability_mutation_declarations": sum(
+                row["evidence_class"] == "mutation"
+                for row in capability_evidence["declarations"]
+            ),
             "mutation_score": None,
         },
         "performance_benchmarks": {
-            "dedicated_suite": False,
-            "baseline": None,
+            "dedicated_suite": (
+                ROOT / "tests" / "test_continuous_effect_performance.py"
+            ).is_file(),
+            "check_script": "scripts/benchmark_continuous_effects.py",
+            "baseline": CONTINUOUS_PERFORMANCE_BASELINE.relative_to(
+                ROOT
+            ).as_posix(),
+            "schema_version": performance["schema_version"],
+            "source_sha256": performance["source_sha256"],
+            "latency_policy": performance["latency_policy"],
+            "latency_budget_enforced": False,
+            "scenario_count": len(performance["scenarios"]),
+            "scenario_names": [
+                row["name"] for row in performance["scenarios"]
+            ],
         },
     }
 
@@ -1493,7 +1602,14 @@ def render_architecture_status(report: Mapping[str, Any]) -> str:
             f"- Dedicated property suite: "
             f"{str(tests['property_and_fuzz']['dedicated_property_suite']).lower()}",
             f"- Mutation score: {tests['mutation_testing']['mutation_score']}",
-            f"- Performance baseline: {tests['performance_benchmarks']['baseline']}",
+            f"- Focused executable mutation suite: "
+            f"{str(tests['mutation_testing']['focused_executable_suite']).lower()}",
+            f"- Capability mutation declarations: "
+            f"{tests['mutation_testing']['capability_mutation_declarations']}",
+            f"- Performance baseline: "
+            f"`{tests['performance_benchmarks']['baseline']}` "
+            f"({tests['performance_benchmarks']['scenario_count']} scenarios; "
+            "latency observational)",
             "",
             "## Documentation drift",
             "",
@@ -1556,6 +1672,11 @@ def render_compiler_status(report: Mapping[str, Any]) -> str:
             f"- Model: `{card_program['model']}`",
             f"- Generated/reviewed adapter: `{card_program['adapter']}`",
             f"- Runtime validator: `{card_program['validator']}`",
+            f"- Canonical reviewed registry CardPrograms: "
+            f"{card_program['semantic_registry_program_count']}",
+            f"- Intrinsic strict-capability-ready CardPrograms: "
+            f"{card_program['strict_capability_ready_count']}",
+            f"- Trust bases: `{json.dumps(card_program['trust_basis_counts'], sort_keys=True)}`",
             "",
             "## Stages",
             "",
@@ -1577,11 +1698,19 @@ def render_compiler_status(report: Mapping[str, Any]) -> str:
             f"`{capabilities['schema_version']}/{capabilities['registry_version']}`",
             f"- Pinned rules effective date: `{capabilities['effective_date']}`",
             f"- Registry fingerprint: `{capabilities['fingerprint']}`",
+            f"- Evidence fingerprint: "
+            f"`{capabilities['evidence']['fingerprint']}`",
+            f"- Explicit evidence declarations: "
+            f"{capabilities['evidence']['declaration_count']}",
             f"- Capability records: {capabilities['total']}",
             f"- Trusted records: "
             f"{capabilities['status_counts'].get('trusted', 0)}",
             f"- Blocked records: "
             f"{capabilities['status_counts'].get('blocked', 0)}",
+            f"- Dependency fail-closed statuses: "
+            f"`{json.dumps(capabilities['dependency_fail_closed_status_counts'], sort_keys=True)}`",
+            f"- Implementation mutation statuses: "
+            f"`{json.dumps(capabilities['implementation_mutation_status_counts'], sort_keys=True)}`",
             "",
             "| Broad aggregate | Capability records | Trusted | Blocked members |",
             "|---|---:|---:|---|",

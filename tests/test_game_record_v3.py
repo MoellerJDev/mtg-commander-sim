@@ -6,6 +6,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import jsonschema
+
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim.record import (
     event_for_trace,
@@ -88,10 +90,54 @@ class GameRecordV3Tests(unittest.TestCase):
             )
             manifest_path = record_dir / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest_schema = json.loads(
+                (
+                    Path(__file__).resolve().parents[1]
+                    / "schemas"
+                    / "game-record-v3-manifest.schema.json"
+                ).read_text(encoding="utf-8")
+            )
+            jsonschema.Draft202012Validator(manifest_schema).validate(manifest)
             self.assertEqual(2, manifest["card_programs"]["schema_version"])
             self.assertEqual(
                 session.engine.semantics.card_program_fingerprints(),
                 manifest["card_programs"]["fingerprints"],
+            )
+            self.assertEqual(
+                set(manifest["card_programs"]["fingerprints"]),
+                set(manifest["card_programs"]["trust"]),
+            )
+            self.assertEqual(
+                64,
+                len(
+                    manifest["runtime_trust"][
+                        "capability_evidence_fingerprint"
+                    ]
+                ),
+            )
+            self.assertEqual(
+                2,
+                len(
+                    manifest["runtime_trust"][
+                        "runtime_component_inventory"
+                    ]
+                ),
+            )
+            self.assertEqual(
+                3,
+                len(
+                    manifest["runtime_trust"][
+                        "semantic_handler_inventory"
+                    ]
+                ),
+            )
+            self.assertEqual(
+                64,
+                len(
+                    manifest["runtime_trust"][
+                        "semantic_handler_registry_fingerprint"
+                    ]
+                ),
             )
             command = json.loads(
                 (record_dir / "commands.jsonl").read_text(encoding="utf-8")
@@ -106,6 +152,34 @@ class GameRecordV3Tests(unittest.TestCase):
             fingerprint_key = next(
                 iter(manifest["card_programs"]["fingerprints"])
             )
+            original_runtime_fingerprint = manifest["runtime_trust"][
+                "runtime_component_registry_fingerprint"
+            ]
+            manifest["runtime_trust"][
+                "runtime_component_registry_fingerprint"
+            ] = "0" * 64
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(
+                ValueError, "Runtime trust provenance mismatch"
+            ):
+                replay_record(record_dir, self.db, verify=True)
+            manifest["runtime_trust"][
+                "runtime_component_registry_fingerprint"
+            ] = original_runtime_fingerprint
+            original_basis = manifest["card_programs"]["trust"][
+                fingerprint_key
+            ]["trust_basis"]
+            manifest["card_programs"]["trust"][fingerprint_key][
+                "trust_basis"
+            ] = "provisional"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            with self.assertRaisesRegex(
+                ValueError, "CardProgram trust provenance mismatch"
+            ):
+                replay_record(record_dir, self.db, verify=True)
+            manifest["card_programs"]["trust"][fingerprint_key][
+                "trust_basis"
+            ] = original_basis
             manifest["card_programs"]["fingerprints"][fingerprint_key] = (
                 "0" * 64
             )

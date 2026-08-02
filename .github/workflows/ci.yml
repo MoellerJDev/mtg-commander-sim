@@ -38,6 +38,12 @@ jobs:
         run: python -m compileall -q mtg_commander_sim tests scripts simctl.py
       - name: Test
         run: python -m unittest discover -s tests -p "test_*.py" -v
+      - name: Verify generated capability evidence
+        run: python scripts/update_capability_evidence.py --check
+      - name: Verify module classifications
+        run: python scripts/update_module_classifications.py --check
+      - name: Verify continuous-effect work budget
+        run: python scripts/benchmark_continuous_effects.py --check
       - name: Verify generated platform status
         run: python scripts/update_platform_status.py --check
       - name: Verify pinned rules corpus

@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "source_sha256": "6203e2e13a693c5d829ddeb95ed9bd135703769be0b9bf02726e23dd5fa73a57",
+  "latency_policy": "Latency is recorded for observation only. CI gates deterministic work counters, semantic assertions, and source freshness.",
+  "scenarios": [
+    {
+      "name": "empty_battlefield",
+      "expected_metrics": {
+        "collection_calls": 1,
+        "battlefield_objects_inspected": 0,
+        "card_program_lookups": 0,
+        "descriptors_inspected": 0,
+        "effects_produced": 0
+      },
+      "maximum_metrics": {
+        "collection_calls": 1,
+        "battlefield_objects_inspected": 0,
+        "card_program_lookups": 0,
+        "descriptors_inspected": 0,
+        "effects_produced": 0
+      },
+      "effect_count_per_query": 0,
+      "semantic_assertions": {
+        "linear_object_scans": true,
+        "one_lookup_per_inspected_object": true
+      },
+      "recorded_latency_ms": 7.397
+    },
+    {
+      "name": "four_players_ten_permanents",
+      "expected_metrics": {
+        "collection_calls": 1,
+        "battlefield_objects_inspected": 40,
+        "card_program_lookups": 40,
+        "descriptors_inspected": 40,
+        "effects_produced": 40
+      },
+      "maximum_metrics": {
+        "collection_calls": 1,
+        "battlefield_objects_inspected": 40,
+        "card_program_lookups": 40,
+        "descriptors_inspected": 40,
+        "effects_produced": 40
+      },
+      "effect_count_per_query": 40,
+      "semantic_assertions": {
+        "linear_object_scans": true,
+        "one_lookup_per_inspected_object": true
+      },
+      "recorded_latency_ms": 0.491
+    },
+    {
+      "name": "multiple_component_sources",
+      "expected_metrics": {
+        "collection_calls": 1,
+        "battlefield_objects_inspected": 40,
+        "card_program_lookups": 40,
+        "descriptors_inspected": 80,
+        "effects_produced": 80
+      },
+      "maximum_metrics": {
+        "collection_calls": 1,
+        "battlefield_objects_inspected": 40,
+        "card_program_lookups": 40,
+        "descriptors_inspected": 80,
+        "effects_produced": 80
+      },
+      "effect_count_per_query": 80,
+      "semantic_assertions": {
+        "linear_object_scans": true,
+        "one_lookup_per_inspected_object": true
+      },
+      "recorded_latency_ms": 0.733
+    },
+    {
+      "name": "repeated_characteristic_queries",
+      "expected_metrics": {
+        "collection_calls": 25,
+        "battlefield_objects_inspected": 1000,
+        "card_program_lookups": 1000,
+        "descriptors_inspected": 2000,
+        "effects_produced": 2000
+      },
+      "maximum_metrics": {
+        "collection_calls": 25,
+        "battlefield_objects_inspected": 1000,
+        "card_program_lookups": 1000,
+        "descriptors_inspected": 2000,
+        "effects_produced": 2000
+      },
+      "effect_count_per_query": 80,
+      "semantic_assertions": {
+        "linear_object_scans": true,
+        "one_lookup_per_inspected_object": true
+      },
+      "recorded_latency_ms": 20.947
+    },
+    {
+      "name": "earlier_layer_subtype_change",
+      "expected_metrics": {},
+      "maximum_metrics": {},
+      "effect_count_per_query": 2,
+      "semantic_assertions": {
+        "ordered_type_before_anthem": true,
+        "anthem_applied": true
+      },
+      "recorded_latency_ms": 0.106
+    }
+  ]
+}

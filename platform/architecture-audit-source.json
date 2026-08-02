@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "7cc9ea1702c67519b14d2f177d82dcc8fab5458f",
+    "baseline_main_commit": "b1ecdc0f3446a37ffe31bfca1237a079691e6b22",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-01",
-    "phase": "phase_0_post_pr58_reconciliation",
-    "scope_note": "This is the measured post-PR-58 reconciliation baseline. It is not a completeness or correctness claim, and absent trust, mutation, closure, or performance evidence remains absent rather than inferred."
+    "phase": "phase_1_runtime_trust_hardening",
+    "scope_note": "This Phase 1 audit adds explicit capability evidence, trust/binding provenance, deterministic component performance measurement, and default-deny structural governance. It is not a rules- or Oracle-completeness claim."
   },
   "ci": {
     "workflow": "CI",
-    "run_id": 30723562495,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30723562495",
+    "run_id": 30725523797,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30725523797",
     "status": "pass",
     "python_versions": [
       "3.11",
@@ -48,6 +48,9 @@
       "mtg_commander_sim/replacement_effects.py",
       "mtg_commander_sim/continuous_effects.py",
       "mtg_commander_sim/state_based_actions.py"
+    ],
+    "card_specificity_exempt_prefixes": [
+      "mtg_commander_sim/card_overrides/"
     ]
   },
   "thresholds": {
@@ -210,7 +213,8 @@
       "id": "record_and_replay",
       "status": "dedicated_module",
       "owners": [
-        "mtg_commander_sim/record.py"
+        "mtg_commander_sim/record.py",
+        "mtg_commander_sim/record_trust.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -229,7 +233,8 @@
       "owners": [
         "mtg_commander_sim/card_programs",
         "mtg_commander_sim/semantics.py",
-        "mtg_commander_sim/record.py"
+        "mtg_commander_sim/record.py",
+        "mtg_commander_sim/record_trust.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -354,17 +359,22 @@
     "docs/architecture/rules-kernel.md",
     "docs/architecture/card-programs.md",
     "docs/architecture/compiler.md",
+    "docs/architecture/semantic-handlers.md",
+    "docs/architecture/runtime-components.md",
     "docs/architecture/server-runtime.md",
     "docs/architecture/replay.md",
     "docs/architecture/visibility.md",
     "docs/architecture/dependency-rules.md",
+    "docs/architecture/trust-closure.md",
     "docs/extension/card-override.md",
     "docs/extension/mechanic-capability.md",
     "docs/extension/semantic-node.md",
+    "docs/extension/runtime-component.md",
     "docs/testing/strategy.md",
     "docs/testing/interaction-coverage.md",
     "docs/testing/replay.md",
     "docs/testing/privacy.md",
+    "docs/testing/mutation.md",
     "docs/operations/local-app.md",
     "docs/operations/hosted.md",
     "docs/LEGAL_CONTENT_BOUNDARY.md",

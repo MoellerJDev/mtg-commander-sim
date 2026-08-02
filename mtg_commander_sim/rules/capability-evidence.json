@@ -1,0 +1,1132 @@
+{
+  "schema_version": 1,
+  "registry_fingerprint": "2d74fcff2127577c4432191ab1bd4d2a29a63f8f21d7dd54aba5f10e29e4aba2",
+  "declaration_source_fingerprint": "a393b08486f02e8367e00ac28b8bf4be920dfcb20cb58370a4f848b1b3e9643e",
+  "declarations": [
+    {
+      "capability_id": "continuous.power_toughness.fixed_anthem",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_continuous_effect_components.ContinuousEffectComponentTests.test_layer_four_subtype_change_enables_layer_seven_anthem",
+      "official_rule_ids": [
+        "604.1",
+        "611.3a",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed battlefield static ability that gives same-controller permanents with declared subtypes a fixed power/toughness modifier in layer 7c."
+    },
+    {
+      "capability_id": "continuous.power_toughness.fixed_anthem",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_continuous_effect_components.ContinuousEffectComponentTests.test_multiple_anthem_components_stack_and_respect_control",
+      "official_rule_ids": [
+        "604.1",
+        "611.3a",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed battlefield static ability that gives same-controller permanents with declared subtypes a fixed power/toughness modifier in layer 7c."
+    },
+    {
+      "capability_id": "continuous.power_toughness.fixed_anthem",
+      "evidence_class": "negative",
+      "test_id": "tests.test_continuous_effect_components.ContinuousEffectComponentTests.test_anthem_component_rejects_malformed_descriptors",
+      "official_rule_ids": [
+        "604.1",
+        "611.3a",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed battlefield static ability that gives same-controller permanents with declared subtypes a fixed power/toughness modifier in layer 7c."
+    },
+    {
+      "capability_id": "continuous.power_toughness.fixed_anthem",
+      "evidence_class": "positive",
+      "test_id": "tests.test_continuous_effect_components.ContinuousEffectComponentTests.test_registered_anthem_component_replaces_name_dispatch",
+      "official_rule_ids": [
+        "604.1",
+        "611.3a",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed battlefield static ability that gives same-controller permanents with declared subtypes a fixed power/toughness modifier in layer 7c."
+    },
+    {
+      "capability_id": "continuous.power_toughness.fixed_anthem",
+      "evidence_class": "replay",
+      "test_id": "tests.test_continuous_effect_components.ContinuousEffectComponentTests.test_anthem_component_replays_exactly",
+      "official_rule_ids": [
+        "604.1",
+        "611.3a",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed battlefield static ability that gives same-controller permanents with declared subtypes a fixed power/toughness modifier in layer 7c."
+    },
+    {
+      "capability_id": "damage.amount.positive",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack",
+      "official_rule_ids": [
+        "120.1",
+        "120.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Accept a positive integer damage amount and suppress zero while rejecting negative damage."
+    },
+    {
+      "capability_id": "damage.amount.positive",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_damage_amount_guard_mutant_is_killed",
+      "official_rule_ids": [
+        "120.1",
+        "120.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Accept a positive integer damage amount and suppress zero while rejecting negative damage."
+    },
+    {
+      "capability_id": "damage.amount.positive",
+      "evidence_class": "negative",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_negative_damage_fails_closed",
+      "official_rule_ids": [
+        "120.1",
+        "120.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Accept a positive integer damage amount and suppress zero while rejecting negative damage."
+    },
+    {
+      "capability_id": "damage.amount.positive",
+      "evidence_class": "negative",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_zero_damage_creates_no_results_or_damage_event",
+      "official_rule_ids": [
+        "120.1",
+        "120.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Accept a positive integer damage amount and suppress zero while rejecting negative damage."
+    },
+    {
+      "capability_id": "damage.amount.positive",
+      "evidence_class": "positive",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_results_do_not_destroy_before_state_actions",
+      "official_rule_ids": [
+        "120.1",
+        "120.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Accept a positive integer damage amount and suppress zero while rejecting negative damage."
+    },
+    {
+      "capability_id": "damage.amount.positive",
+      "evidence_class": "replay",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_and_state_action_replay_exactly",
+      "official_rule_ids": [
+        "120.1",
+        "120.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Accept a positive integer damage amount and suppress zero while rejecting negative damage."
+    },
+    {
+      "capability_id": "damage.prevention.order",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing",
+      "official_rule_ids": [
+        "120.4",
+        "615",
+        "616"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply prevention effects in the required damage-event ordering."
+    },
+    {
+      "capability_id": "damage.prevention.order",
+      "evidence_class": "negative",
+      "test_id": "tests.test_rules_primitives.PreventionEffectTests.test_negative_damage_amount_fails_closed_in_prevention",
+      "official_rule_ids": [
+        "120.4",
+        "615",
+        "616"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply prevention effects in the required damage-event ordering."
+    },
+    {
+      "capability_id": "damage.prevention.order",
+      "evidence_class": "positive",
+      "test_id": "tests.test_rules_primitives.PreventionEffectTests.test_prevention_applies_only_to_matching_damage_events",
+      "official_rule_ids": [
+        "120.4",
+        "615",
+        "616"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply prevention effects in the required damage-event ordering."
+    },
+    {
+      "capability_id": "damage.prevention.order",
+      "evidence_class": "positive",
+      "test_id": "tests.test_rules_primitives.ReplacementOrderingTests.test_prevention_never_prevents_more_than_remaining_damage",
+      "official_rule_ids": [
+        "120.4",
+        "615",
+        "616"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply prevention effects in the required damage-event ordering."
+    },
+    {
+      "capability_id": "damage.replacement.order",
+      "evidence_class": "positive",
+      "test_id": "tests.test_rules_primitives.PreventionEffectTests.test_prevention_produces_a_modified_damage_event",
+      "official_rule_ids": [
+        "120.4",
+        "616"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Order and apply all applicable damage replacement effects before results."
+    },
+    {
+      "capability_id": "damage.result.battle_defense",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_battle_creature_applies_both_results",
+      "official_rule_ids": [
+        "120.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Remove defense counters from a battle dealt represented positive damage."
+    },
+    {
+      "capability_id": "damage.result.battle_defense",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_damage_result_dispatch_mutant_is_killed",
+      "official_rule_ids": [
+        "120.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Remove defense counters from a battle dealt represented positive damage."
+    },
+    {
+      "capability_id": "damage.result.battle_defense",
+      "evidence_class": "negative",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_rejects_nondamageable_permanent",
+      "official_rule_ids": [
+        "120.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Remove defense counters from a battle dealt represented positive damage."
+    },
+    {
+      "capability_id": "damage.result.battle_defense",
+      "evidence_class": "positive",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_removes_defense_instead_of_marking_damage",
+      "official_rule_ids": [
+        "120.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Remove defense counters from a battle dealt represented positive damage."
+    },
+    {
+      "capability_id": "damage.result.battle_defense",
+      "evidence_class": "replay",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_and_state_action_replay_exactly",
+      "official_rule_ids": [
+        "120.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Remove defense counters from a battle dealt represented positive damage."
+    },
+    {
+      "capability_id": "damage.result.creature_mark",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_marked_damage_survives_type_loss_until_cleanup",
+      "official_rule_ids": [
+        "120.3e"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Mark represented positive damage on a creature without destroying it before state-based actions."
+    },
+    {
+      "capability_id": "damage.result.creature_mark",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_damage_result_dispatch_mutant_is_killed",
+      "official_rule_ids": [
+        "120.3e"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Mark represented positive damage on a creature without destroying it before state-based actions."
+    },
+    {
+      "capability_id": "damage.result.creature_mark",
+      "evidence_class": "negative",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_rejects_nondamageable_permanent",
+      "official_rule_ids": [
+        "120.3e"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Mark represented positive damage on a creature without destroying it before state-based actions."
+    },
+    {
+      "capability_id": "damage.result.creature_mark",
+      "evidence_class": "positive",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_results_do_not_destroy_before_state_actions",
+      "official_rule_ids": [
+        "120.3e"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Mark represented positive damage on a creature without destroying it before state-based actions."
+    },
+    {
+      "capability_id": "damage.result.creature_mark",
+      "evidence_class": "replay",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_and_state_action_replay_exactly",
+      "official_rule_ids": [
+        "120.3e"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Mark represented positive damage on a creature without destroying it before state-based actions."
+    },
+    {
+      "capability_id": "damage.result.lifelink",
+      "evidence_class": "positive",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_lifelink_counts_only_damage_not_prevented_by_protection",
+      "official_rule_ids": [
+        "120.3g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Gain life for a lifelink source's final dealt damage across every recipient kind."
+    },
+    {
+      "capability_id": "damage.result.multitype_permanent",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_battle_creature_applies_both_results",
+      "official_rule_ids": [
+        "120.3c",
+        "120.3d",
+        "120.3e"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply every applicable base damage result to a permanent with multiple damageable card types."
+    },
+    {
+      "capability_id": "damage.result.multitype_permanent",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_damage_result_dispatch_mutant_is_killed",
+      "official_rule_ids": [
+        "120.3c",
+        "120.3d",
+        "120.3e"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply every applicable base damage result to a permanent with multiple damageable card types."
+    },
+    {
+      "capability_id": "damage.result.multitype_permanent",
+      "evidence_class": "negative",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_rejects_nondamageable_permanent",
+      "official_rule_ids": [
+        "120.3c",
+        "120.3d",
+        "120.3e"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply every applicable base damage result to a permanent with multiple damageable card types."
+    },
+    {
+      "capability_id": "damage.result.multitype_permanent",
+      "evidence_class": "positive",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result",
+      "official_rule_ids": [
+        "120.3c",
+        "120.3d",
+        "120.3e"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply every applicable base damage result to a permanent with multiple damageable card types."
+    },
+    {
+      "capability_id": "damage.result.multitype_permanent",
+      "evidence_class": "replay",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_and_state_action_replay_exactly",
+      "official_rule_ids": [
+        "120.3c",
+        "120.3d",
+        "120.3e"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply every applicable base damage result to a permanent with multiple damageable card types."
+    },
+    {
+      "capability_id": "damage.result.planeswalker_loyalty",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_damage_rules.CombatDamageRuleTests.test_lethal_planeswalker_combat_damage_applies_state_action",
+      "official_rule_ids": [
+        "120.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Remove loyalty counters from a planeswalker dealt represented positive damage."
+    },
+    {
+      "capability_id": "damage.result.planeswalker_loyalty",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_damage_result_dispatch_mutant_is_killed",
+      "official_rule_ids": [
+        "120.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Remove loyalty counters from a planeswalker dealt represented positive damage."
+    },
+    {
+      "capability_id": "damage.result.planeswalker_loyalty",
+      "evidence_class": "negative",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_rejects_nondamageable_permanent",
+      "official_rule_ids": [
+        "120.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Remove loyalty counters from a planeswalker dealt represented positive damage."
+    },
+    {
+      "capability_id": "damage.result.planeswalker_loyalty",
+      "evidence_class": "positive",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_planeswalker_damage_removes_loyalty_counters",
+      "official_rule_ids": [
+        "120.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Remove loyalty counters from a planeswalker dealt represented positive damage."
+    },
+    {
+      "capability_id": "damage.result.planeswalker_loyalty",
+      "evidence_class": "replay",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_and_state_action_replay_exactly",
+      "official_rule_ids": [
+        "120.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Remove loyalty counters from a planeswalker dealt represented positive damage."
+    },
+    {
+      "capability_id": "damage.result.player_life",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_lifelink_counts_only_damage_not_prevented_by_protection",
+      "official_rule_ids": [
+        "120.3a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply represented positive damage to a player as that much life loss."
+    },
+    {
+      "capability_id": "damage.result.player_life",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_exact_deck_triggers.ExactDeckTriggerFamilyTests.test_reckless_fireweaver_damages_each_opponent",
+      "official_rule_ids": [
+        "120.3a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply represented positive damage to a player as that much life loss."
+    },
+    {
+      "capability_id": "damage.result.player_life",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_damage_result_dispatch_mutant_is_killed",
+      "official_rule_ids": [
+        "120.3a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply represented positive damage to a player as that much life loss."
+    },
+    {
+      "capability_id": "damage.result.player_life",
+      "evidence_class": "negative",
+      "test_id": "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack",
+      "official_rule_ids": [
+        "120.3a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply represented positive damage to a player as that much life loss."
+    },
+    {
+      "capability_id": "damage.result.player_life",
+      "evidence_class": "positive",
+      "test_id": "tests.test_browser_gameplay_regressions.BrowserGameplayRegressionTests.test_sunscorched_desert_prompts_for_target_and_deals_damage",
+      "official_rule_ids": [
+        "120.3a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply represented positive damage to a player as that much life loss."
+    },
+    {
+      "capability_id": "damage.result.player_life",
+      "evidence_class": "replay",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_and_state_action_replay_exactly",
+      "official_rule_ids": [
+        "120.3a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply represented positive damage to a player as that much life loss."
+    },
+    {
+      "capability_id": "damage.trigger.noncombat",
+      "evidence_class": "negative",
+      "test_id": "tests.test_monarch_rules.MonarchRuleTests.test_nonqualifying_damage_does_not_create_a_transfer_trigger",
+      "official_rule_ids": [
+        "120.4",
+        "603"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Emit normalized noncombat damage events after final damage results for trigger discovery."
+    },
+    {
+      "capability_id": "damage.trigger.noncombat",
+      "evidence_class": "positive",
+      "test_id": "tests.test_exact_deck_triggers.ExactDeckTriggerFamilyTests.test_reckless_fireweaver_damages_each_opponent",
+      "official_rule_ids": [
+        "120.4",
+        "603"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Emit normalized noncombat damage events after final damage results for trigger discovery."
+    },
+    {
+      "capability_id": "target.public.player_or_damageable_permanent",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_exact_mishra_closure.ExactMishraClosureTests.test_stasis_coffin_protection_blocks_targeting_and_damage",
+      "official_rule_ids": [
+        "115.1",
+        "115.2",
+        "115.4"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Select one public player, creature, planeswalker, or battle for an any-target damage instruction."
+    },
+    {
+      "capability_id": "target.public.player_or_damageable_permanent",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_browser_gameplay_regressions.BrowserGameplayRegressionTests.test_sunscorched_desert_prompts_for_target_and_deals_damage",
+      "official_rule_ids": [
+        "115.1",
+        "115.2",
+        "115.4"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Select one public player, creature, planeswalker, or battle for an any-target damage instruction."
+    },
+    {
+      "capability_id": "target.public.player_or_damageable_permanent",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_target_validation_mutant_is_killed",
+      "official_rule_ids": [
+        "115.1",
+        "115.2",
+        "115.4"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Select one public player, creature, planeswalker, or battle for an any-target damage instruction."
+    },
+    {
+      "capability_id": "target.public.player_or_damageable_permanent",
+      "evidence_class": "negative",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_rejects_nondamageable_permanent",
+      "official_rule_ids": [
+        "115.1",
+        "115.2",
+        "115.4"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Select one public player, creature, planeswalker, or battle for an any-target damage instruction."
+    },
+    {
+      "capability_id": "target.public.player_or_damageable_permanent",
+      "evidence_class": "positive",
+      "test_id": "tests.test_browser_gameplay_regressions.BrowserGameplayRegressionTests.test_sunscorched_desert_prompts_for_target_and_deals_damage",
+      "official_rule_ids": [
+        "115.1",
+        "115.2",
+        "115.4"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Select one public player, creature, planeswalker, or battle for an any-target damage instruction."
+    },
+    {
+      "capability_id": "target.public.player_or_damageable_permanent",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_targeting_v070.ExactTargetingTests.test_hidden_zones_are_rejected_by_target_schema",
+      "official_rule_ids": [
+        "115.1",
+        "115.2",
+        "115.4"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Select one public player, creature, planeswalker, or battle for an any-target damage instruction."
+    },
+    {
+      "capability_id": "target.public.player_or_damageable_permanent",
+      "evidence_class": "replay",
+      "test_id": "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_and_state_action_replay_exactly",
+      "official_rule_ids": [
+        "115.1",
+        "115.2",
+        "115.4"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Select one public player, creature, planeswalker, or battle for an any-target damage instruction."
+    },
+    {
+      "capability_id": "target.revalidate_resolution",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_targeting_v070.ExactTargetingTests.test_modes_reb_and_pyroblast_use_actual_target_rules",
+      "official_rule_ids": [
+        "115.1",
+        "608.2b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Revalidate a selected public target's logical object and target restrictions immediately before resolution."
+    },
+    {
+      "capability_id": "target.revalidate_resolution",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_target_validation_mutant_is_killed",
+      "official_rule_ids": [
+        "115.1",
+        "608.2b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Revalidate a selected public target's logical object and target restrictions immediately before resolution."
+    },
+    {
+      "capability_id": "target.revalidate_resolution",
+      "evidence_class": "negative",
+      "test_id": "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_target_that_leaves_and_returns_is_a_new_illegal_object",
+      "official_rule_ids": [
+        "115.1",
+        "608.2b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Revalidate a selected public target's logical object and target restrictions immediately before resolution."
+    },
+    {
+      "capability_id": "target.revalidate_resolution",
+      "evidence_class": "negative",
+      "test_id": "tests.test_targeting_v070.ExactTargetingTests.test_all_targets_illegal_counters_by_rules",
+      "official_rule_ids": [
+        "115.1",
+        "608.2b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Revalidate a selected public target's logical object and target restrictions immediately before resolution."
+    },
+    {
+      "capability_id": "target.revalidate_resolution",
+      "evidence_class": "positive",
+      "test_id": "tests.test_targeting_v070.ExactTargetingTests.test_count_distinct_and_partial_resolution",
+      "official_rule_ids": [
+        "115.1",
+        "608.2b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Revalidate a selected public target's logical object and target restrictions immediately before resolution."
+    },
+    {
+      "capability_id": "target.revalidate_resolution",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_targeting_v070.ExactTargetingTests.test_hidden_zones_are_rejected_by_target_schema",
+      "official_rule_ids": [
+        "115.1",
+        "608.2b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Revalidate a selected public target's logical object and target restrictions immediately before resolution."
+    },
+    {
+      "capability_id": "target.revalidate_resolution",
+      "evidence_class": "replay",
+      "test_id": "tests.test_exact_mishra_closure.ExactMishraClosureTests.test_deflecting_swat_free_cost_and_exact_retarget",
+      "official_rule_ids": [
+        "115.1",
+        "608.2b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Revalidate a selected public target's logical object and target restrictions immediately before resolution."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_multiple_additional_token_components_share_one_creation_timestamp",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_source_created_by_event_does_not_replace_its_own_creation",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "negative",
+      "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_additional_token_component_rejects_malformed_or_nonmatching_events",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "positive",
+      "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_registered_additional_token_components_replace_without_name_dispatch",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "replay",
+      "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_additional_token_component_replays_exactly",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "variant.monarch.designate",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_monarch_rules.MonarchRuleTests.test_creature_combat_damage_transfers_only_on_trigger_resolution",
+      "official_rule_ids": [
+        "725.1",
+        "725.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Designate one active player as monarch through the canonical unique public designation path."
+    },
+    {
+      "capability_id": "variant.monarch.designate",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_monarch_rules.MonarchRuleTests.test_designation_is_public_serialized_and_unique",
+      "official_rule_ids": [
+        "725.1",
+        "725.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Designate one active player as monarch through the canonical unique public designation path."
+    },
+    {
+      "capability_id": "variant.monarch.designate",
+      "evidence_class": "negative",
+      "test_id": "tests.test_monarch_rules.MonarchRuleTests.test_nonqualifying_damage_does_not_create_a_transfer_trigger",
+      "official_rule_ids": [
+        "725.1",
+        "725.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Designate one active player as monarch through the canonical unique public designation path."
+    },
+    {
+      "capability_id": "variant.monarch.designate",
+      "evidence_class": "positive",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_monarch_handler_uses_canonical_engine_mutation_path",
+      "official_rule_ids": [
+        "725.1",
+        "725.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Designate one active player as monarch through the canonical unique public designation path."
+    },
+    {
+      "capability_id": "variant.monarch.designate",
+      "evidence_class": "replay",
+      "test_id": "tests.test_monarch_rules.MonarchRuleTests.test_player_state_declaration_predicates_and_exact_replay",
+      "official_rule_ids": [
+        "725.1",
+        "725.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Designate one active player as monarch through the canonical unique public designation path."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_uses_apnap_order_and_exact_engine_path",
+      "official_rule_ids": [
+        "121.1",
+        "121.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "negative",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_registered_node_validation_fails_before_mutation",
+      "official_rule_ids": [
+        "121.1",
+        "121.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "positive",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_handler_lowers_typed_intent_through_read_only_context",
+      "official_rule_ids": [
+        "121.1",
+        "121.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "replay",
+      "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_migrated_semantic_effect_replays_exactly",
+      "official_rule_ids": [
+        "121.1",
+        "121.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
+    }
+  ],
+  "fingerprint": "790af7e70c17d52b099937d30b531a7df006abc3a235fe915f117667b3da0879"
+}

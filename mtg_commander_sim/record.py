@@ -12,6 +12,14 @@ from typing import Any, Iterable, Mapping, Sequence
 from .carddb import CardDatabase
 from .engine import CommanderEngine
 from .model import Event, GameState
+from .record_trust import (
+    card_program_trust_provenance,
+    implicit_semantic_execution_provenance,
+    rebase_command_semantics_provenance,
+    runtime_trust_provenance,
+    validate_manifest_runtime_provenance,
+    validate_programs_used_provenance,
+)
 from .semantics import SemanticRegistry
 from .util import stable_json
 from .version import __version__
@@ -110,30 +118,6 @@ def semantics_fingerprint(registry: SemanticRegistry) -> str:
         if registry.get(key) is not None
     }
     return _canonical_hash({"schema_version": 1, "programs": programs})
-
-
-def _validate_card_program_fingerprints(
-    recorded: Any,
-    semantics: SemanticRegistry,
-    *,
-    context: str,
-) -> None:
-    if recorded is None:
-        return
-    if not isinstance(recorded, Mapping):
-        raise ValueError(f"{context} CardProgram fingerprints are malformed")
-    normalized = {str(key): str(value) for key, value in recorded.items()}
-    if normalized != semantics.card_program_fingerprints():
-        raise ValueError(f"CardProgram fingerprint mismatch in {context}")
-
-
-def _manifest_card_program_fingerprints(manifest: Mapping[str, Any]) -> Any:
-    section = manifest.get("card_programs")
-    if section is None:
-        return None
-    if not isinstance(section, Mapping):
-        raise ValueError("Record manifest CardProgram section is malformed")
-    return section.get("fingerprints")
 
 
 def database_fingerprint(card_db: CardDatabase) -> dict[str, Any]:
@@ -795,7 +779,9 @@ def build_manifest(
         "card_programs": {
             "schema_version": 2,
             "fingerprints": semantics.card_program_fingerprints(),
+            "trust": card_program_trust_provenance(semantics),
         },
+        "runtime_trust": runtime_trust_provenance(),
         "scryfall": database_fingerprint(card_db),
         "created_at": created_at,
         "started_at": created_at,
@@ -1013,11 +999,7 @@ def replay_record(
         )
     if manifest.get("semantics_fingerprint") != semantics_fingerprint(semantics):
         raise ValueError("Semantic registry fingerprint does not match the record")
-    _validate_card_program_fingerprints(
-        _manifest_card_program_fingerprints(manifest),
-        semantics,
-        context="record manifest",
-    )
+    validate_manifest_runtime_provenance(manifest, semantics)
     initial = read_initial_checkpoint(directory / "initial-checkpoint.json.gz")
     mode = str(manifest.get("replay", {}).get("mode") or "command_replay")
     if mode == "legacy_snapshot":
@@ -1042,6 +1024,11 @@ def replay_record(
         _read_jsonl(directory / "commands.jsonl"),
         semantics,
         verify=verify,
+        capability_profile=str(
+            manifest.get("format", {}).get("review_profile")
+            or "commander_review"
+        ),
+        require_runtime_provenance=manifest.get("runtime_trust") is not None,
     )
     actual = authoritative_state_hash(engine.state)
     expected = str(manifest["final_state_hash"])
@@ -1065,6 +1052,8 @@ def _apply_replay_commands(
     semantics: SemanticRegistry,
     *,
     verify: bool,
+    capability_profile: str,
+    require_runtime_provenance: bool,
 ) -> int:
     applied = 0
     current_registry = semantics_fingerprint(semantics)
@@ -1102,6 +1091,17 @@ def _apply_replay_commands(
                     f"CardProgram fingerprint mismatch at command "
                     f"{command.get('sequence')}"
                 )
+        if verify:
+            validate_programs_used_provenance(
+                command_semantics.get("programs_used", []),
+                semantics,
+                profile=capability_profile,
+                require_runtime_provenance=require_runtime_provenance,
+                sequence=command.get("sequence"),
+                implicit_provenance=lambda key: (
+                    implicit_semantic_execution_provenance(engine, key)
+                ),
+            )
         before = authoritative_state_hash(engine.state)
         if verify and before != command.get("before_state_hash"):
             raise ValueError(
@@ -1163,11 +1163,7 @@ def verify_record_suffix(
         semantics
     ):
         raise ValueError("Semantic registry fingerprint does not match record")
-    _validate_card_program_fingerprints(
-        _manifest_card_program_fingerprints(manifest),
-        semantics,
-        context="record manifest",
-    )
+    validate_manifest_runtime_provenance(manifest, semantics)
 
     commands = list(_read_jsonl(directory / "commands.jsonl"))
     if baseline_commands < 0 or baseline_commands > len(commands):
@@ -1198,6 +1194,11 @@ def verify_record_suffix(
         suffix_commands,
         semantics,
         verify=True,
+        capability_profile=str(
+            manifest.get("format", {}).get("review_profile")
+            or "commander_review"
+        ),
+        require_runtime_provenance=manifest.get("runtime_trust") is not None,
     )
     actual = authoritative_state_hash(engine.state)
     expected = str(manifest["final_state_hash"])
@@ -1249,23 +1250,16 @@ def verify_record_suffix(
 def _rebase_command_semantics(
     directory: Path,
     registry: SemanticRegistry,
+    *,
+    capability_profile: str,
 ) -> None:
     fingerprint = semantics_fingerprint(registry)
-    rows = _read_jsonl(directory / "commands.jsonl")
-    for row in rows:
-        row["semantics_fingerprint"] = fingerprint
-        semantics = dict(row.get("semantics") or {})
-        semantics["registry_hash"] = fingerprint
-        semantic_keys = [
-            str(value.get("key"))
-            for value in semantics.get("programs_used", [])
-            if isinstance(value, Mapping) and value.get("key")
-        ]
-        semantics["card_program_schema_version"] = 2
-        semantics["card_programs_used"] = (
-            registry.card_program_fingerprints_for_keys(semantic_keys)
-        )
-        row["semantics"] = semantics
+    rows = rebase_command_semantics_provenance(
+        _read_jsonl(directory / "commands.jsonl"),
+        registry,
+        registry_fingerprint=fingerprint,
+        capability_profile=capability_profile,
+    )
     _atomic_jsonl(directory / "commands.jsonl", rows)
 
 
@@ -1366,6 +1360,7 @@ def refresh_record(
                 _rebase_command_semantics(
                     directory,
                     session.engine.semantics,
+                    capability_profile=session.state.config.review_profile,
                 )
                 replay_result = replay_record(
                     directory,

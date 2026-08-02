@@ -203,7 +203,14 @@
         "capability_reachable",
         "profiles",
         "registry_fingerprints",
+        "evidence_fingerprints",
         "legacy_ability_ids",
+        "capability_closed_ability_ids",
+        "ambient_interaction_surfaces",
+        "compatibility_provenance",
+        "trust_basis",
+        "strict_capability_ready",
+        "closure_layers",
         "blockers",
         "trusted",
         "fingerprint"
@@ -213,10 +220,93 @@
         "capability_reachable": {"$ref": "#/$defs/strings"},
         "profiles": {"$ref": "#/$defs/strings"},
         "registry_fingerprints": {"$ref": "#/$defs/strings"},
+        "evidence_fingerprints": {"$ref": "#/$defs/strings"},
         "legacy_ability_ids": {"$ref": "#/$defs/strings"},
+        "capability_closed_ability_ids": {"$ref": "#/$defs/strings"},
+        "ambient_interaction_surfaces": {"$ref": "#/$defs/strings"},
+        "compatibility_provenance": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/compatibility_provenance"}
+        },
+        "trust_basis": {
+          "enum": [
+            "capability_closed",
+            "legacy_reviewed",
+            "mixed",
+            "provisional",
+            "unresolved",
+            "non_rules_governed"
+          ]
+        },
+        "strict_capability_ready": {"type": "boolean"},
+        "closure_layers": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["intrinsic", "format", "match", "dynamic"],
+          "properties": {
+            "intrinsic": {"$ref": "#/$defs/closure_layer"},
+            "format": {"$ref": "#/$defs/closure_layer"},
+            "match": {"$ref": "#/$defs/closure_layer"},
+            "dynamic": {"$ref": "#/$defs/closure_layer"}
+          }
+        },
         "blockers": {"$ref": "#/$defs/strings"},
         "trusted": {"type": "boolean"},
         "fingerprint": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "closure_layer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "status",
+        "direct",
+        "reachable",
+        "profiles",
+        "registry_fingerprints",
+        "evidence_fingerprints",
+        "blockers",
+        "trusted",
+        "fingerprint"
+      ],
+      "properties": {
+        "kind": {"enum": ["intrinsic", "format", "match", "dynamic"]},
+        "status": {"enum": ["resolved", "blocked", "declared_empty", "unbound"]},
+        "direct": {"$ref": "#/$defs/strings"},
+        "reachable": {"$ref": "#/$defs/strings"},
+        "profiles": {"$ref": "#/$defs/strings"},
+        "registry_fingerprints": {"$ref": "#/$defs/strings"},
+        "evidence_fingerprints": {"$ref": "#/$defs/strings"},
+        "blockers": {"$ref": "#/$defs/strings"},
+        "trusted": {"type": "boolean"},
+        "fingerprint": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "compatibility_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ability_id",
+        "semantic_key",
+        "source_oracle_hash",
+        "source_rulings_hash",
+        "handler_ids",
+        "component_ids",
+        "tests",
+        "replay_provenance",
+        "removal_condition"
+      ],
+      "properties": {
+        "ability_id": {"type": "string", "minLength": 1},
+        "semantic_key": {"type": "string", "minLength": 1},
+        "source_oracle_hash": {"$ref": "#/$defs/sha256"},
+        "source_rulings_hash": {"$ref": "#/$defs/sha256"},
+        "handler_ids": {"$ref": "#/$defs/strings"},
+        "component_ids": {"$ref": "#/$defs/strings"},
+        "tests": {"$ref": "#/$defs/strings"},
+        "replay_provenance": {"type": "object"},
+        "removal_condition": {"type": "string", "minLength": 1}
       }
     }
   }

@@ -30,9 +30,11 @@ represented by the game, active seats, and APNAP order. They do not receive
 hands, libraries, card objects, mutable state, projections, or record data.
 The architecture validator rejects imports that would cross this boundary.
 
-Each handler declares a stable ID, schema version, one operation, and bounded
-capability dependencies. Registration rejects duplicate ownership and unknown
-capability IDs. Malformed input for a registered operation is a rules error;
+Each handler declares a stable ID, schema version, exact family, operation,
+rule references, and bounded capability dependencies. Registration rejects
+duplicate ownership and unknown capability IDs. Strict runtime binding records
+the semantic-handler registry fingerprint and recomputes its capability
+closure. Malformed input for a registered operation is a rules error;
 it never falls back to permissive string dispatch.
 
 The executor is intentionally small. Direct effect application sends
@@ -89,4 +91,5 @@ still gates execution. Current records pin the descriptor directly.
 
 Do not use this boundary to widen Oracle coverage or conceal unresolved cost,
 target, replacement, prevention, visibility, or interaction semantics. See
-[ADR 0006](../adr/0006-typed-semantic-handler-boundary.md).
+[ADR 0006](../adr/0006-typed-semantic-handler-boundary.md) and the separate
+[runtime-component architecture](runtime-components.md).

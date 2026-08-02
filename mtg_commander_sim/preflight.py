@@ -9,6 +9,8 @@ from typing import Any
 
 from .abilities import parse_activated_abilities
 from .carddb import CardDatabase, CardRecord
+from .card_programs.binding import bind_card_program_runtime
+from .card_programs.trust import compute_match_trust_closure
 from .deck import DeckDefinition, DeckLoader
 from .mana import ManaPlanError, extract_mana_modes, parsed_cost
 from .oracle_ir import (
@@ -23,7 +25,10 @@ from .profiles import (
 from .semantics import SemanticRegistry
 from .util import mana_cost_to_vector, stable_json
 
-PREFLIGHT_SCHEMA_VERSION = 2
+from .rules.capabilities import load_default_capability_registry
+
+
+PREFLIGHT_SCHEMA_VERSION = 3
 
 _BUILTIN_STATIC_KEYWORDS = {
     # These keywords are consumed authoritatively by timing, attack, target,
@@ -721,8 +726,10 @@ def semantic_preflight(
     registry: SemanticRegistry | None = None,
     cache_dir: str | Path | None = None,
     force_refresh: bool = False,
+    capability_profile: str = "commander_review",
 ) -> dict[str, Any]:
     registry = registry or SemanticRegistry()
+    capability_registry = load_default_capability_registry()
     deck = (
         deck_or_source
         if isinstance(deck_or_source, DeckDefinition)
@@ -739,16 +746,41 @@ def semantic_preflight(
             if entry.board in {"mainboard", "commander"}
         ),
         trust_level="provisional",
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
     )
     cards = []
+    card_programs: dict[str, Any] = {}
     for entry in deck.entries:
         if entry.board not in {"mainboard", "commander"}:
             continue
+        record = db.lookup(entry.name)
         row = card_semantic_status(
-            db.lookup(entry.name),
+            record,
             registry,
             db=db,
         )
+        program = registry.card_program_for_oracle(record.oracle_id)
+        if program is not None:
+            card_programs[record.oracle_id] = program
+            binding = bind_card_program_runtime(
+                program,
+                capability_registry=capability_registry,
+                profile=capability_profile,
+            )
+            row["card_program_fingerprint"] = program.fingerprint
+            row["card_program_trust_basis"] = program.trust_closure[
+                "trust_basis"
+            ]
+            row["card_program_strict_capability_ready"] = binding[
+                "strict_capability_ready"
+            ]
+            row["card_program_runtime_binding"] = binding
+        else:
+            row["card_program_fingerprint"] = None
+            row["card_program_trust_basis"] = "unresolved"
+            row["card_program_strict_capability_ready"] = False
+            row["card_program_runtime_binding"] = None
         row["quantity"] = entry.quantity
         cards.append(row)
     quantities = Counter()
@@ -792,6 +824,40 @@ def semantic_preflight(
             "covered_by_existing_trusted_runtime"
         ]
     ]
+    match_trust_closure = compute_match_trust_closure(
+        card_programs.values(),
+        registry=capability_registry,
+        profile=capability_profile,
+    )
+    missing_card_programs = sorted(
+        row["name"]
+        for row in cards
+        if row["card_program_fingerprint"] is None
+    )
+    strict_binding_blockers = list(match_trust_closure["blockers"])
+    strict_binding_blockers.extend(
+        f"card_program:missing:{name}" for name in missing_card_programs
+    )
+    for row in cards:
+        binding = row["card_program_runtime_binding"]
+        if binding is None:
+            continue
+        strict_binding_blockers.extend(
+            f"card:{row['name']}:{blocker}"
+            for blocker in binding["blockers"]
+        )
+    strict_binding_blockers = sorted(set(strict_binding_blockers))
+    compatibility_ready = (
+        not unresolved_cards
+        and not partial_cards
+        and not drifted_cards
+        and not ignored_without_reason and match_trust_closure["compatible_ready"]
+        and all(
+            row["card_program_runtime_binding"]["compatible_ready"]
+            for row in cards
+            if row["card_program_runtime_binding"] is not None
+        )
+    )
     return {
         "schema_version": PREFLIGHT_SCHEMA_VERSION,
         "deck": deck.name,
@@ -800,6 +866,11 @@ def semantic_preflight(
         "deck_fingerprint": deck_list_fingerprint(deck),
         "deck_list_fingerprint": deck_list_fingerprint(deck),
         "deck_source_fingerprint": deck_source_fingerprint(deck),
+        "capability_profile": capability_profile,
+        "capability_registry_fingerprint": capability_registry.fingerprint,
+        "capability_evidence_fingerprint": (
+            capability_registry.evidence_fingerprint
+        ),
         "card_data_metadata": db.metadata(),
         "total_cards": deck.total_cards(),
         "fully_playable_cards": quantities["fully_playable"],
@@ -816,10 +887,17 @@ def semantic_preflight(
         and not partial_cards
         and not drifted_cards
         and not ignored_without_reason,
-        "trusted_only_ready": not unresolved_cards
-        and not partial_cards
-        and not drifted_cards
-        and not ignored_without_reason,
+        "trusted_only_ready": (
+            not unresolved_cards
+            and not partial_cards
+            and not drifted_cards
+            and not ignored_without_reason
+            and not strict_binding_blockers
+            and match_trust_closure["strict_capability_ready"]
+        ),
+        "compatibility_ready": compatibility_ready,
+        "strict_binding_blockers": strict_binding_blockers,
+        "match_trust_closure": match_trust_closure,
         "source_hash_drift_cards": sorted(set(drifted_cards)),
         "intentionally_ignored_without_reason": sorted(
             set(ignored_without_reason)

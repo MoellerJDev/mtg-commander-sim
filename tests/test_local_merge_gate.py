@@ -50,6 +50,9 @@ class LocalMergeGateTests(unittest.TestCase):
         by_name = {step.name: step.command for step in steps}
         self.assertEqual(
             {
+                "generated_capability_evidence_freshness",
+                "module_classification_freshness",
+                "continuous_effect_work_budget",
                 "generated_platform_freshness",
                 "compile",
                 "build_test_database",
@@ -99,6 +102,30 @@ class LocalMergeGateTests(unittest.TestCase):
                 test_module,
                 by_name["projection_and_privacy"],
             )
+        self.assertEqual(
+            (
+                "python-under-test",
+                "scripts/update_capability_evidence.py",
+                "--check",
+            ),
+            by_name["generated_capability_evidence_freshness"],
+        )
+        self.assertEqual(
+            (
+                "python-under-test",
+                "scripts/update_module_classifications.py",
+                "--check",
+            ),
+            by_name["module_classification_freshness"],
+        )
+        self.assertEqual(
+            (
+                "python-under-test",
+                "scripts/benchmark_continuous_effects.py",
+                "--check",
+            ),
+            by_name["continuous_effect_work_budget"],
+        )
         self.assertEqual(
             (
                 "python-under-test",

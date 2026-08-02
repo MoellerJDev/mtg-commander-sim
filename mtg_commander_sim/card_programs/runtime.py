@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, TYPE_CHECKING, Callable, Mapping, Protocol, Sequence
 
 from ..continuous_effects import ContinuousEffect
@@ -19,16 +20,40 @@ class ContinuousRuntimeState(Protocol):
     cards: Mapping[str, Any]
 
 
+@dataclass(slots=True)
+class ContinuousEffectCollectionMetrics:
+    collection_calls: int = 0
+    battlefield_objects_inspected: int = 0
+    card_program_lookups: int = 0
+    descriptors_inspected: int = 0
+    effects_produced: int = 0
+
+    def to_dict(self) -> dict[str, int]:
+        return {
+            "collection_calls": self.collection_calls,
+            "battlefield_objects_inspected": self.battlefield_objects_inspected,
+            "card_program_lookups": self.card_program_lookups,
+            "descriptors_inspected": self.descriptors_inspected,
+            "effects_produced": self.effects_produced,
+        }
+
+
 def collect_card_program_continuous_effects(
     state: ContinuousRuntimeState,
     semantics: "SemanticRegistry",
     program_is_trusted: Callable[["SemanticProgram"], bool],
+    *,
+    metrics: ContinuousEffectCollectionMetrics | None = None,
 ) -> tuple[ContinuousEffect, ...]:
     registry = default_continuous_effect_component_registry()
+    if metrics is not None:
+        metrics.collection_calls += 1
     effects: list[ContinuousEffect] = []
     for seat in state.turn_order:
         player = state.players[seat]
         for object_id in list(player.zones["battlefield"]):
+            if metrics is not None:
+                metrics.battlefield_objects_inspected += 1
             source = state.cards[object_id]
             if source.controller != seat or source.phased_out:
                 continue
@@ -37,12 +62,16 @@ def collect_card_program_continuous_effects(
                 active_zone="battlefield",
                 event="characteristics.evaluate",
             )
+            if metrics is not None:
+                metrics.card_program_lookups += 1
             for program in programs:
                 if not program_is_trusted(program):
                     continue
                 for descriptor_index, descriptor in enumerate(
                     program.handlers
                 ):
+                    if metrics is not None:
+                        metrics.descriptors_inspected += 1
                     context = ContinuousEffectSourceContext(
                         source_object_id=source.object_id,
                         source_ref=source.ref,
@@ -54,7 +83,10 @@ def collect_card_program_continuous_effects(
                             f"{program.key}:{descriptor_index}"
                         ),
                     )
-                    effects.extend(registry.lower(descriptor, context))
+                    lowered = registry.lower(descriptor, context)
+                    effects.extend(lowered)
+                    if metrics is not None:
+                        metrics.effects_produced += len(lowered)
     return tuple(
         sorted(
             effects,

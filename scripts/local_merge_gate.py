@@ -76,6 +76,30 @@ def build_steps(
     wheel_output = output / "dist"
     return [
         GateStep(
+            "generated_capability_evidence_freshness",
+            (
+                python,
+                "scripts/update_capability_evidence.py",
+                "--check",
+            ),
+        ),
+        GateStep(
+            "module_classification_freshness",
+            (
+                python,
+                "scripts/update_module_classifications.py",
+                "--check",
+            ),
+        ),
+        GateStep(
+            "continuous_effect_work_budget",
+            (
+                python,
+                "scripts/benchmark_continuous_effects.py",
+                "--check",
+            ),
+        ),
+        GateStep(
             "generated_platform_freshness",
             (
                 python,

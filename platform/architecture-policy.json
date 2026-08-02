@@ -1,7 +1,9 @@
 {
   "schema_version": 1,
-  "policy_version": "architecture-guards-v1",
+  "policy_version": "architecture-guards-v2",
   "baseline": "platform/architecture-guard-baseline.json",
+  "module_classifications": "platform/module-classifications.json",
+  "exception_registry": "platform/architecture-exceptions.json",
   "card_name_hash_index": "platform/card-name-hash-index.json",
   "printed_name_allowances": "platform/card-specificity-baseline.json",
   "protected_rules_modules": [
@@ -81,19 +83,14 @@
     },
     "model_definition": "mtg_commander_sim/model.py"
   },
-  "specificity_scope": [
-    "mtg_commander_sim/abilities.py",
-    "mtg_commander_sim/continuous_effects.py",
-    "mtg_commander_sim/engine.py",
-    "mtg_commander_sim/oracle_ir.py",
-    "mtg_commander_sim/replacement_effects.py",
-    "mtg_commander_sim/semantics.py",
-    "mtg_commander_sim/state_based_actions.py"
+  "specificity_scope": "all_generic_production_python",
+  "specificity_exempt_prefixes": [
+    "mtg_commander_sim/card_overrides/"
   ],
   "review_thresholds": {
     "module_logical_lines": 1500,
     "function_logical_lines": 150,
-    "engine_net_logical_growth": 300
+    "engine_net_logical_growth": 0
   },
   "baseline_update_policy": {
     "requires_adr": true,

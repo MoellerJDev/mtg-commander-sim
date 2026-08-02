@@ -71,7 +71,10 @@
         "privacy_tests",
         "replay_tests",
         "required_evidence",
-        "mutation_status",
+        "dependency_fail_closed_status",
+        "dependency_fail_closed_rationale",
+        "implementation_mutation_status",
+        "implementation_mutation_rationale",
         "blockers",
         "status"
       ],
@@ -116,14 +119,24 @@
             ]
           }
         },
-        "mutation_status": {
+        "dependency_fail_closed_status": {
           "enum": [
             "not_run",
-            "dependency_mutation_tested",
+            "passed",
+            "failed",
+            "not_applicable"
+          ]
+        },
+        "dependency_fail_closed_rationale": {"type": "string"},
+        "implementation_mutation_status": {
+          "enum": [
+            "not_run",
+            "killed",
             "survived",
             "not_applicable"
           ]
         },
+        "implementation_mutation_rationale": {"type": "string"},
         "blockers": {"$ref": "#/$defs/strings"},
         "status": {
           "enum": [

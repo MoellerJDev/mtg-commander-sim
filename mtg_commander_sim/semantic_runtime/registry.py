@@ -45,6 +45,16 @@ class SemanticHandlerRegistry:
             raise SemanticHandlerRegistryError(
                 f"Handler {handler_id} has an invalid schema version"
             )
+        if _STABLE_ID.fullmatch(str(handler.family)) is None:
+            raise SemanticHandlerRegistryError(
+                f"Handler {handler_id} has an invalid family"
+            )
+        if not handler.rule_references or len(handler.rule_references) != len(
+            set(handler.rule_references)
+        ):
+            raise SemanticHandlerRegistryError(
+                f"Handler {handler_id} has invalid rule references"
+            )
         dependencies = tuple(handler.capability_dependencies)
         if len(dependencies) != len(set(dependencies)) or any(
             _STABLE_ID.fullmatch(value) is None for value in dependencies
@@ -86,6 +96,8 @@ class SemanticHandlerRegistry:
             "operation": handler.operation,
             "handler_id": handler.handler_id,
             "schema_version": handler.schema_version,
+            "family": handler.family,
+            "rule_references": list(handler.rule_references),
             "capability_dependencies": list(
                 handler.capability_dependencies
             ),
