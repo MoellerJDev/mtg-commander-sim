@@ -286,8 +286,8 @@
     {
       "mechanic_id": "cr-616-interaction-of-replacement-and-or-prevention-effects",
       "path": "mechanics/contracts/replacement-ordering.json",
-      "sha256": "3ae06ee98b14c0c16c722d2821816f66eb0a9d3bf1708d39d7decadbb4a2fdfe",
-      "version": 2
+      "sha256": "223ac514c869e1a8e326e3432eae5f90e7e887e4010039fb6f22bbaba2351dc7",
+      "version": 3
     },
     {
       "mechanic_id": "cr-608-resolving-spells-and-abilities",
@@ -340,8 +340,8 @@
     {
       "mechanic_id": "cr-614-replacement-effects",
       "path": "mechanics/contracts/unconditional-enters-tapped.json",
-      "sha256": "f39dcc95dc6251ece41b008908ef5f0d72acd3817837a13fe7e6e90ed2ffbbba",
-      "version": 2
+      "sha256": "45899d24ee8f2a00028a8ecbe878198fea75c39024dfd66a4c9e8b1733acbc16",
+      "version": 3
     },
     {
       "mechanic_id": "cr-502-untap-step",
@@ -7557,19 +7557,21 @@
     {
       "category": "spells_abilities_effects",
       "contract_path": "mechanics/contracts/unconditional-enters-tapped.json",
-      "contract_sha256": "f39dcc95dc6251ece41b008908ef5f0d72acd3817837a13fe7e6e90ed2ffbbba",
-      "contract_version": 2,
+      "contract_sha256": "45899d24ee8f2a00028a8ecbe878198fea75c39024dfd66a4c9e8b1733acbc16",
+      "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "CommanderEngine._unconditionally_enters_tapped and CommanderEngine.move_card",
-      "implementation_version": "replacement-effects-v2",
+      "implementation_component": "replacement_effects event substrate, token_creation mutation owner, semantic_runtime token and zone handlers, and CommanderEngine compatibility adapters",
+      "implementation_version": "replacement-effects-v3",
       "kind": "rules_section",
       "known_blockers": [
         "conditional entry replacements remain in dedicated handlers or require arbitration",
-        "generic affected-player replacement ordering is not wired into every move",
+        "generic affected-subject ordering is not wired into every replaceable event producer",
+        "counter-placement replacement producers are not yet integrated",
+        "entry reservation scope is not yet connected to general as-enters choices",
         "copy-token entry text is not yet evaluated through move_card",
         "skip, regeneration, redirection, linked exile, and can't-event grammar are not generic",
-        "draw and graveyard replacements remain dedicated engine paths"
+        "draw replacement paths remain dedicated and commander-zone movement is not yet on the shared boundary"
       ],
       "mechanic_id": "cr-614-replacement-effects",
       "official_name": "Replacement Effects",
@@ -7584,7 +7586,18 @@
         "test_self_replacement_must_be_chosen_before_other_effects",
         "test_zero_damage_creates_no_results_or_damage_event",
         "test_life_from_the_loam_returns_lands_and_dredge_replaces_draw",
-        "test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free"
+        "test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free",
+        "test_zone_replacement_descriptor_rejects_unknown_destinations",
+        "test_registered_additional_token_components_replace_without_name_dispatch",
+        "test_additional_token_does_not_inherit_original_entry_modifiers",
+        "test_resolution_suspends_for_seat_scoped_replacement_order",
+        "test_additional_token_component_replays_exactly",
+        "test_competing_zone_replacements_suspend_resume_and_replay_exactly",
+        "test_simultaneous_replacement_uses_the_sources_pre_move_controller",
+        "test_stack_object_controller_chooses_zone_replacement_order",
+        "test_replacement_created_token_and_counter_events_remain_replaceable",
+        "test_entering_objects_and_reserved_objects_cannot_change_zones",
+        "test_library_top_ignores_cards_entering_from_library"
       ],
       "trust_level": "untrusted"
     },
@@ -7623,17 +7636,18 @@
     {
       "category": "spells_abilities_effects",
       "contract_path": "mechanics/contracts/replacement-ordering.json",
-      "contract_sha256": "3ae06ee98b14c0c16c722d2821816f66eb0a9d3bf1708d39d7decadbb4a2fdfe",
-      "contract_version": 2,
+      "contract_sha256": "223ac514c869e1a8e326e3432eae5f90e7e887e4010039fb6f22bbaba2351dc7",
+      "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "replacement_effects.replacement_choice and replacement_effects.apply_replacement",
-      "implementation_version": "replacement-ordering-v2",
+      "implementation_component": "replacement_effects event trees and batches plus replacement_decisions suspension",
+      "implementation_version": "replacement-ordering-v3",
       "kind": "rules_section",
       "known_blockers": [
-        "generic replacement choice packets are not yet wired into all engine event producers",
-        "nested event ordering and simultaneous APNAP choice collection are not integrated",
-        "legacy Dauthi and draw replacement paths are not yet expressed entirely through the generic registry"
+        "generic replacement choice packets are wired only into represented token-creation and semantic zone-change producers",
+        "multiple simultaneous events for the same affected chooser do not expose an explicit event-order choice when order could matter",
+        "entry reservation scopes are not yet consumed by general as-enters choice transactions",
+        "draw, damage, counter placement, commander movement, and other replacement producers remain outside the universal event boundary"
       ],
       "mechanic_id": "cr-616-interaction-of-replacement-and-or-prevention-effects",
       "official_name": "Interaction of Replacement and/or Prevention Effects",
@@ -7651,6 +7665,21 @@
         "test_each_effect_applies_at_most_once_to_one_event",
         "test_applicability_is_recomputed_after_each_replacement",
         "test_nested_event_operation_fails_closed",
+        "test_nested_event_rejects_nonobject_children",
+        "test_containing_event_is_replaced_before_nested_event",
+        "test_nested_event_operation_creates_replayable_child",
+        "test_replacement_created_token_and_counter_events_remain_replaceable",
+        "test_simultaneous_choices_are_collected_in_apnap_order",
+        "test_batch_round_trip_and_path_checked_replay_are_exact",
+        "test_choice_payload_does_not_expose_authoritative_event_payload",
+        "test_duplicate_effect_ids_fail_closed",
+        "test_entering_objects_and_reserved_objects_cannot_change_zones",
+        "test_library_top_ignores_cards_entering_from_library",
+        "test_three_thousand_permuted_transitions_are_deterministic",
+        "test_replacement_nested_order_mutant_is_killed",
+        "test_resolution_suspends_for_seat_scoped_replacement_order",
+        "test_competing_zone_replacements_suspend_resume_and_replay_exactly",
+        "test_stack_object_controller_chooses_zone_replacement_order",
         "test_optional_decline_is_recorded_and_not_offered_again",
         "test_mandatory_replacement_cannot_be_declined",
         "test_prevention_never_prevents_more_than_remaining_damage"

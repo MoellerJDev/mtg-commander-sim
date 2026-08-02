@@ -4,9 +4,10 @@ import unittest
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim import replacement_effects
+from mtg_commander_sim import tap_state
 from mtg_commander_sim.damage import DamageEvent
 from mtg_commander_sim.engine import CommanderEngine
-from mtg_commander_sim import tap_state
 from mtg_commander_sim.targets import PUBLIC_TARGET_ZONES, TargetGroup
 
 
@@ -226,3 +227,63 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_aggregate_untap()
+
+    def test_replacement_nested_order_mutant_is_killed(self):
+        child = replacement_effects.ReplaceableEvent(
+            event_id="counter:child",
+            kind="counter.add",
+            affected_player="A",
+            payload={"amount": 1},
+        )
+        root = replacement_effects.ReplaceableEvent(
+            event_id="token:root",
+            kind="token.create",
+            affected_player="A",
+            payload={"quantity": 1},
+            children=(child,),
+        )
+        effects = (
+            replacement_effects.ReplacementEffect(
+                effect_id="outer",
+                source_id="outer-source",
+                event_kind="token.create",
+                replacement_class=replacement_effects.ReplacementClass.OTHER,
+                operations=(
+                    {"op": "multiply", "field": "quantity", "factor": 2},
+                ),
+            ),
+            replacement_effects.ReplacementEffect(
+                effect_id="inner",
+                source_id="inner-source",
+                event_kind="counter.add",
+                replacement_class=replacement_effects.ReplacementClass.OTHER,
+                operations=(
+                    {"op": "multiply", "field": "amount", "factor": 2},
+                ),
+            ),
+        )
+
+        def assert_containing_event_first() -> None:
+            pending = replacement_effects.replacement_tree_choice(
+                root, effects
+            )
+            self.assertEqual((), pending.path)
+            self.assertEqual(("outer",), pending.choice.options)
+
+        assert_containing_event_first()
+
+        def child_first_mutant(event, available_effects):
+            choice = replacement_effects.replacement_choice(
+                event.children[0], available_effects
+            )
+            return replacement_effects.ReplacementTreeChoice(
+                path=(0,), choice=choice
+            )
+
+        with patch.object(
+            replacement_effects,
+            "replacement_tree_choice",
+            child_first_mutant,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_containing_event_first()

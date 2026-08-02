@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 6,
+  "registry_version": 7,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -43,6 +43,12 @@
       "mechanic_id": "cr-111-tokens",
       "capabilities": [
         "token.creation.additional_replacement"
+      ]
+    },
+    {
+      "mechanic_id": "cr-614-replacement-effects",
+      "capabilities": [
+        "zone.change.destination_replacement"
       ]
     },
     {
@@ -123,23 +129,50 @@
       "applicability": {
         "summary": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller.",
         "inputs": ["source controller", "token event controller", "created token card types", "fixed additional token definition"],
-        "outputs": ["typed additional-token intent", "shared creation timestamp", "ordinary token enter events"],
-        "exclusions": ["optional replacements", "noncommutative replacement ordering", "replacement rediscovery", "effects that change or double the original token quantity", "effects whose output depends on mutable state"]
+        "outputs": ["transformed token specification event", "exact replacement journal", "shared creation timestamp", "ordinary token enter events"],
+        "exclusions": ["optional runtime descriptors", "effects that change or double the original token quantity", "effects whose output depends on mutable state", "replacement-created counter placement"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.semantic_runtime.token_replacements.AdditionalTokenReplacementHandler", "CommanderEngine.create_token"],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.token_replacements.AdditionalTokenReplacementHandler", "mtg_commander_sim.semantic_runtime.token_replacements.resolve_token_creation_replacements", "mtg_commander_sim.token_creation.create_tokens", "CommanderEngine.create_token"],
       "positive_tests": ["test_registered_additional_token_components_replace_without_name_dispatch"],
       "negative_tests": ["test_additional_token_component_rejects_malformed_or_nonmatching_events"],
-      "interaction_tests": ["test_multiple_additional_token_components_share_one_creation_timestamp", "test_source_created_by_event_does_not_replace_its_own_creation"],
+      "interaction_tests": ["test_multiple_additional_token_components_share_one_creation_timestamp", "test_additional_token_does_not_inherit_original_entry_modifiers", "test_source_created_by_event_does_not_replace_its_own_creation", "test_resolution_suspends_for_seat_scoped_replacement_order"],
       "multiplayer_tests": [],
-      "privacy_tests": [],
+      "privacy_tests": ["test_resolution_suspends_for_seat_scoped_replacement_order"],
       "replay_tests": ["test_additional_token_component_replays_exactly"],
-      "required_evidence": ["positive", "negative", "interaction", "replay"],
+      "required_evidence": ["positive", "negative", "interaction", "privacy", "replay"],
       "dependency_fail_closed_status": "not_applicable",
       "dependency_fail_closed_rationale": "This capability has no capability dependencies.",
       "implementation_mutation_status": "not_run",
       "implementation_mutation_rationale": "",
-      "blockers": ["General affected-player replacement ordering and replacement rediscovery remain outside this bounded component."],
+      "blockers": ["The descriptor remains a fixed additional-token family; optional descriptors, variable multipliers, and mutable-state outputs are not compiled."],
+      "status": "tested"
+    },
+    {
+      "id": "zone.change.destination_replacement",
+      "version": 1,
+      "official_rules": ["400.6", "614.1", "614.1a", "614.5", "616.1", "616.1f", "616.2"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Replace a represented card's proposed zone destination through the affected-object ordering boundary before committing the move.",
+        "inputs": ["source controller", "affected card owner/controller", "origin", "proposed destination", "reviewed replacement destination and counter intents"],
+        "outputs": ["transformed destination", "ordered applied-effect journal", "post-move counter intents", "public replacement event"],
+        "exclusions": ["optional zone descriptors", "entry-zone choices", "commander command-zone replacement", "unregistered destination predicates", "replacement processing for emitted counter intents"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.zone_replacements.ZoneDestinationReplacementHandler", "mtg_commander_sim.replacement_effects", "CommanderEngine.move_card"],
+      "positive_tests": ["test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free"],
+      "negative_tests": ["test_dauthi_does_not_replace_tokens_or_its_controllers_cards", "test_zone_replacement_descriptor_rejects_unknown_destinations"],
+      "interaction_tests": ["test_graveyard_replacement_is_decided_before_the_move", "test_competing_zone_replacements_suspend_resume_and_replay_exactly", "test_simultaneous_replacement_uses_the_sources_pre_move_controller", "test_stack_object_controller_chooses_zone_replacement_order", "test_complete_legacy_registry_uses_pinned_zone_compatibility"],
+      "multiplayer_tests": [],
+      "privacy_tests": ["test_competing_zone_replacements_suspend_resume_and_replay_exactly"],
+      "replay_tests": ["test_dauthi_replacement_replays_without_oracle_id_dispatch", "test_competing_zone_replacements_suspend_resume_and_replay_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "privacy", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This bounded descriptor has no capability dependencies beyond the shared replacement subsystem.",
+      "implementation_mutation_status": "not_run",
+      "implementation_mutation_rationale": "",
+      "blockers": ["Only reviewed card-destination descriptors are compiled; optional, commander, entry, and counter-replacement interactions remain outside this bounded capability."],
       "status": "tested"
     },
     {

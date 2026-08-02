@@ -1,13 +1,27 @@
 from __future__ import annotations
 
 import json
+import inspect
+import tempfile
 import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim.engine import StateInvariantError
 from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.record import authoritative_state_hash
+from mtg_commander_sim.replacement_effects import ReplacementChoiceRequired
+from mtg_commander_sim.record import (
+    authoritative_state_hash,
+    checkpoint_envelope,
+    replay_record,
+)
+from mtg_commander_sim.semantics import SemanticProgram, SemanticRegistry
+from mtg_commander_sim.projection import StateProjector
+from mtg_commander_sim.semantic_runtime import SemanticNodeError
+from mtg_commander_sim.semantic_runtime.zone_replacements import (
+    ZoneDestinationReplacementHandler,
+    collect_zone_change_replacement_effects,
+)
 
 
 class GraveyardRuleTests(unittest.TestCase):
@@ -366,6 +380,335 @@ class GraveyardRuleTests(unittest.TestCase):
             log=False,
         )
         self.assertEqual("graveyard", token.zone)
+
+    def test_dauthi_does_not_replace_tokens_or_its_controllers_cards(self):
+        session = self.make_session(40407)
+        engine = session.engine
+        voidwalker = self.card(engine, "B", "Dauthi Voidwalker")
+        engine.move_card(
+            voidwalker.object_id,
+            "battlefield",
+            controller="B",
+            log=False,
+        )
+        own_card = self.card(engine, "B", "Sol Ring")
+        engine.move_card(own_card.object_id, "graveyard", log=False)
+        token_ref = engine.create_token(
+            "A",
+            name="Dauthi token witness",
+            characteristics={"type_line": "Token Creature"},
+        )[0]
+        token = next(
+            card
+            for card in engine.state.cards.values()
+            if card.ref == token_ref
+        )
+        engine.move_card(token.object_id, "graveyard", log=False)
+
+        self.assertEqual("graveyard", own_card.zone)
+        self.assertEqual("graveyard", token.zone)
+        self.assertNotIn("void", own_card.counters)
+        self.assertNotIn("void", token.counters)
+
+    def test_zone_replacement_descriptor_rejects_unknown_destinations(self):
+        handler = ZoneDestinationReplacementHandler()
+        descriptor = {
+            "handler_id": handler.handler_id,
+            "schema_version": handler.schema_version,
+            "event": handler.event,
+            "condition": {
+                "destination": "graveyard",
+                "object_kind": "card",
+                "owner_relation": "opponent",
+            },
+            "destination": "sideboard",
+            "counters": {},
+        }
+
+        with self.assertRaisesRegex(SemanticNodeError, "supported game zones"):
+            handler.validate(descriptor)
+
+    def test_stack_object_controller_chooses_zone_replacement_order(self):
+        session = self.make_session(404071)
+        engine = session.engine
+        voidwalker = self.card(engine, "B", "Dauthi Voidwalker")
+        engine.move_card(
+            voidwalker.object_id,
+            "battlefield",
+            controller="B",
+            log=False,
+        )
+        engine.create_token(
+            "B",
+            name="",
+            copy_of=voidwalker.ref,
+            reason="stack-controller replacement witness",
+        )
+        victim = self.card(engine, "A", "Goblin Engineer")
+        engine.move_card(victim.object_id, "hand", log=False)
+        engine._remove_from_zone(victim)
+        engine._reset_zone_change(victim, "stack")
+        victim.zone = "stack"
+        victim.controller = "B"
+
+        with self.assertRaises(ReplacementChoiceRequired) as required:
+            engine.move_card(victim.object_id, "graveyard", log=False)
+
+        self.assertEqual("B", required.exception.pending.choice.chooser)
+        self.assertEqual("stack", victim.zone)
+        self.assertEqual("B", victim.controller)
+
+    def test_simultaneous_replacement_uses_the_sources_pre_move_controller(self):
+        session = self.make_session(40410)
+        engine = session.engine
+        voidwalker = self.card(engine, "B", "Dauthi Voidwalker")
+        engine.move_card(
+            voidwalker.object_id,
+            "battlefield",
+            controller="B",
+            log=False,
+        )
+        engine.change_control(
+            voidwalker.object_id,
+            "A",
+            reason="simultaneous replacement LKI witness",
+        )
+        victim = self.card(engine, "B", "Sol Ring")
+
+        engine._move_cards_simultaneously(
+            [
+                (voidwalker.object_id, "graveyard"),
+                (victim.object_id, "graveyard"),
+            ],
+            reason="simultaneous replacement LKI witness",
+            log=False,
+        )
+
+        self.assertEqual("exile", voidwalker.zone)
+        self.assertEqual("exile", victim.zone)
+        self.assertEqual(1, voidwalker.counters["void"])
+        self.assertEqual(1, victim.counters["void"])
+
+    def test_dauthi_replacement_replays_without_oracle_id_dispatch(self):
+        session = self.make_session(40408)
+        engine = session.engine
+        voidwalker = self.card(engine, "B", "Dauthi Voidwalker")
+        engine.move_card(
+            voidwalker.object_id,
+            "battlefield",
+            controller="B",
+            log=False,
+        )
+        voidwalker.printed_name = "Renamed zone replacement source"
+        victim = self.card(engine, "A", "Goblin Engineer")
+        program = SemanticProgram(
+            key="test:dauthi-zone-replacement-replay",
+            label="Move a card to its owner's graveyard",
+            effects=[
+                {
+                    "op": "move",
+                    "card": victim.ref,
+                    "destination": "graveyard",
+                }
+            ],
+            trust_level="provisional",
+        )
+        engine.semantics.put(program)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="dauthi-zone-replacement-replay",
+                ref="S-dauthi-zone-replacement-replay",
+                kind="triggered_ability",
+                controller="A",
+                label=program.label,
+                semantic_key=program.key,
+                visibility=["A", "B"],
+            )
+        )
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine._grant_priority("A")
+        engine._issue_priority("A")
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        for principal in ("pilot:A", "pilot:B"):
+            result = session.act(principal, {"action_id": "pass"})
+            self.assertTrue(result.ok, result.summary)
+
+        self.assertEqual("exile", victim.zone)
+        self.assertEqual(1, victim.counters["void"])
+        replacement_event = next(
+            event
+            for event in engine.state.events
+            if event.code == "replacement.apply"
+        )
+        self.assertEqual(voidwalker.ref, replacement_event.details["source"])
+        self.assertNotIn(
+            "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786",
+            inspect.getsource(collect_zone_change_replacement_effects),
+        )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "dauthi-replacement-record"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+        self.assertTrue(replay["ok"], replay)
+        self.assertEqual(2, replay["commands"])
+
+    def test_complete_legacy_registry_uses_pinned_zone_compatibility(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            semantics_path = Path(temporary) / "semantics.json"
+            semantics_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 3,
+                        "include_builtin_packs": False,
+                        "programs": {},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            registry = SemanticRegistry(semantics_path)
+
+        oracle_id = "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786"
+        self.assertEqual([], registry.programs_for_oracle(oracle_id))
+        programs = registry.runtime_handler_programs_for_oracle(
+            oracle_id,
+            active_zone="battlefield",
+            event="zone.change",
+        )
+        self.assertEqual(
+            [f"{oracle_id}:replacement:graveyard-to-exile"],
+            [program.key for program in programs],
+        )
+        self.assertTrue(
+            registry.is_runtime_handler_compatibility_program(programs[0])
+        )
+
+        session = self.make_session(40411)
+        engine = session.engine
+        engine.semantics = registry
+        engine._semantic_trust_cache.clear()
+        voidwalker = self.card(engine, "B", "Dauthi Voidwalker")
+        engine.move_card(
+            voidwalker.object_id,
+            "battlefield",
+            controller="B",
+            log=False,
+        )
+        victim = self.card(engine, "A", "Goblin Engineer")
+        engine.move_card(victim.object_id, "graveyard", log=False)
+
+        self.assertEqual("exile", victim.zone)
+        self.assertEqual(1, victim.counters["void"])
+
+    def test_competing_zone_replacements_suspend_resume_and_replay_exactly(
+        self,
+    ):
+        session = self.make_session(40409)
+        engine = session.engine
+        voidwalker = self.card(engine, "B", "Dauthi Voidwalker")
+        engine.move_card(
+            voidwalker.object_id,
+            "battlefield",
+            controller="B",
+            log=False,
+        )
+        copied_source_ref = engine.create_token(
+            "B",
+            name="",
+            copy_of=voidwalker.ref,
+            reason="competing zone replacement source",
+        )[0]
+        victim = self.card(engine, "A", "Goblin Engineer")
+        engine.move_card(victim.object_id, "hand", log=False)
+        program = SemanticProgram(
+            key="test:competing-zone-replacement-replay",
+            label="Move a card to its owner's graveyard",
+            effects=[
+                {
+                    "op": "move",
+                    "card": victim.ref,
+                    "destination": "graveyard",
+                }
+            ],
+            trust_level="provisional",
+        )
+        engine.semantics.put(program)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="competing-zone-replacement-replay",
+                ref="S-competing-zone-replacement-replay",
+                kind="triggered_ability",
+                controller="A",
+                label=program.label,
+                semantic_key=program.key,
+                visibility=["A", "B"],
+            )
+        )
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine._grant_priority("A")
+        engine._issue_priority("A")
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        for principal in ("pilot:A", "pilot:B"):
+            result = session.act(principal, {"action_id": "pass"})
+            self.assertTrue(result.ok, result.summary)
+
+        decision = engine.state.pending_decision
+        self.assertIsNotNone(decision)
+        self.assertEqual("replacement.order", decision.kind)
+        self.assertEqual(["A"], decision.actors)
+        projector = StateProjector(self.db, engine.state)
+        projected_a = projector._decision("pilot:A")
+        projected_b = projector._decision("pilot:B")
+        self.assertIsNotNone(projected_a)
+        self.assertIsNone(projected_b)
+        self.assertNotIn("replacement_batch", json.dumps(projected_a))
+        self.assertNotIn("replacement_effects", json.dumps(projected_a))
+        options = projected_a["ctx"]["options"]
+        self.assertEqual(2, len(options))
+        selected = options[0]["id"]
+
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "replacement": selected,
+            },
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("exile", victim.zone)
+        self.assertEqual(1, victim.counters["void"])
+        self.assertNotIn(
+            victim.object_id,
+            engine.state.players["A"].zones["graveyard"],
+        )
+        replacement_event = next(
+            event
+            for event in reversed(engine.state.events)
+            if event.code == "replacement.apply"
+            and event.details.get("object") == victim.ref
+        )
+        self.assertIn(
+            replacement_event.details["source"],
+            {voidwalker.ref, copied_source_ref},
+        )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "replacement-choice-record"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+        self.assertTrue(replay["ok"], replay)
+        self.assertEqual(3, replay["commands"])
 
     def test_simultaneous_same_owner_order_is_still_caller_determined(self):
         session = self.make_session(40406)

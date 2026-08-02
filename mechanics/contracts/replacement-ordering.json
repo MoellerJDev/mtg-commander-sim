@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "cr-616-interaction-of-replacement-and-or-prevention-effects",
   "official_name": "Interaction of Replacement and/or Prevention Effects",
   "effective_date": "2026-06-19",
@@ -15,13 +15,13 @@
     "objects": ["affected object or affected player"],
     "events": ["typed replaceable events"],
     "state_reads": ["applicability conditions", "already applied effects", "affected player or object controller"],
-    "state_writes": ["a transformed event payload and an applied-effect journal"],
+    "state_writes": ["an immutable transformed event tree, entry reservation scope, and exact applied-effect journal"],
     "costs": [],
     "timing": ["before the original event occurs", "repeat until no effect applies"],
     "targets": [],
-    "choices": ["affected player or object controller chooses among the current priority class"],
-    "hidden_information": ["choice packets may expose only legally known replacement options"],
-    "apnap": ["simultaneous affected-player choices are collected in APNAP order"],
+    "choices": ["affected player or object controller chooses among the current priority class", "containing-event choices precede contained-event choices"],
+    "hidden_information": ["choice packets expose visible option labels and IDs but never authoritative batch IDs, event paths, payloads, or prior journals"],
+    "apnap": ["simultaneous choices for different affected players are traversed in APNAP order"],
     "layers": ["as-enters copy/control effects interact with continuous-effect layer 1 or 2 after the event"],
     "replacement_effects": ["self replacement", "enters control", "enters copy", "enters back face", "other"],
     "copy": ["enters-copy replacements have priority before other replacements"],
@@ -29,7 +29,7 @@
     "zone_change": ["destination replacements transform the same zone-change event"],
     "source_leaves": ["applicability is rechecked after every chosen replacement"]
   },
-  "variants": ["optional replacement", "prevention shield", "nested event", "newly applicable effect"],
+  "variants": ["optional replacement", "prevention shield", "nested event", "simultaneous event batch", "entry-zone reservation", "newly applicable effect"],
   "witness_cards": [],
   "rulings": [],
   "test_ids": [
@@ -43,18 +43,34 @@
     "test_each_effect_applies_at_most_once_to_one_event",
     "test_applicability_is_recomputed_after_each_replacement",
     "test_nested_event_operation_fails_closed",
+    "test_nested_event_rejects_nonobject_children",
+    "test_containing_event_is_replaced_before_nested_event",
+    "test_nested_event_operation_creates_replayable_child",
+    "test_replacement_created_token_and_counter_events_remain_replaceable",
+    "test_simultaneous_choices_are_collected_in_apnap_order",
+    "test_batch_round_trip_and_path_checked_replay_are_exact",
+    "test_choice_payload_does_not_expose_authoritative_event_payload",
+    "test_duplicate_effect_ids_fail_closed",
+    "test_entering_objects_and_reserved_objects_cannot_change_zones",
+    "test_library_top_ignores_cards_entering_from_library",
+    "test_three_thousand_permuted_transitions_are_deterministic",
+    "test_replacement_nested_order_mutant_is_killed",
+    "test_resolution_suspends_for_seat_scoped_replacement_order",
+    "test_competing_zone_replacements_suspend_resume_and_replay_exactly",
+    "test_stack_object_controller_chooses_zone_replacement_order",
     "test_optional_decline_is_recorded_and_not_offered_again",
     "test_mandatory_replacement_cannot_be_declined",
     "test_prevention_never_prevents_more_than_remaining_damage"
   ],
   "implementation": {
-    "component": "replacement_effects.replacement_choice and replacement_effects.apply_replacement",
-    "version": "replacement-ordering-v2"
+    "component": "replacement_effects event trees and batches plus replacement_decisions suspension",
+    "version": "replacement-ordering-v3"
   },
   "known_blockers": [
-    "generic replacement choice packets are not yet wired into all engine event producers",
-    "nested event ordering and simultaneous APNAP choice collection are not integrated",
-    "legacy Dauthi and draw replacement paths are not yet expressed entirely through the generic registry"
+    "generic replacement choice packets are wired only into represented token-creation and semantic zone-change producers",
+    "multiple simultaneous events for the same affected chooser do not expose an explicit event-order choice when order could matter",
+    "entry reservation scopes are not yet consumed by general as-enters choice transactions",
+    "draw, damage, counter placement, commander movement, and other replacement producers remain outside the universal event boundary"
   ],
-  "review_status": "draft"
+  "review_status": "reviewed"
 }

@@ -48,16 +48,16 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/6`
+- Registry schema/version: `1/7`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `c025a3fcfccaa2c7870e02887ae9666dd0056d449942d23b36ac6ec47bf83c97`
-- Evidence fingerprint: `3202e1f32cba18d6c5b631a25a02b220e833d37334849c82c5f88018f8b66c8d`
-- Explicit evidence declarations: 94
-- Capability records: 22
+- Registry fingerprint: `e2e3e8ddeff69cb66f8a4c97e55104d59c530f85e828e1ab738767c790e7953d`
+- Evidence fingerprint: `58bd8c8174a1f6c4530bd7edc5b2de751df510872214484d6f4b07f10f28b751`
+- Explicit evidence declarations: 108
+- Capability records: 23
 - Trusted records: 8
 - Blocked records: 7
-- Dependency fail-closed statuses: `{"not_applicable": 9, "not_run": 6, "passed": 7}`
-- Implementation mutation statuses: `{"killed": 11, "not_run": 11}`
+- Dependency fail-closed statuses: `{"not_applicable": 10, "not_run": 6, "passed": 7}`
+- Implementation mutation statuses: `{"killed": 11, "not_run": 12}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
@@ -65,6 +65,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 | `cr-120-damage` | 13 | false | `damage.combat.excess`, `damage.prevention.order`, `damage.replacement.order`, `damage.result.infect`, `damage.result.lifelink`, `damage.result.wither`, `damage.trigger.noncombat` |
 | `cr-725-the-monarch` | 1 | false | `variant.monarch.designate` |
 | `cr-111-tokens` | 1 | false | `token.creation.additional_replacement` |
+| `cr-614-replacement-effects` | 1 | false | `zone.change.destination_replacement` |
 | `cr-613-continuous-effects` | 1 | false | `continuous.power_toughness.fixed_anthem` |
 | `tap-and-untap` | 3 | false | `permanent.tap.effect`, `permanent.untap.all_creatures`, `permanent.untap.effect` |
 
@@ -92,8 +93,8 @@ This generated report describes only the pinned Oracle corpus and current compil
 ## Semantic packs and implicit overrides
 
 - Pack files: 12
-- Program entries: 258
-- Unique program keys: 246
+- Program entries: 259
+- Unique program keys: 247
 - Duplicate keys resolved by pack order: 12
 - Unique Oracle IDs represented: 137
 - Card-specific operation names: 15

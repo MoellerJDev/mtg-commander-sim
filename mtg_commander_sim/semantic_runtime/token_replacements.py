@@ -2,8 +2,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Any, Mapping, Protocol
+from typing import Any, Mapping, Protocol, Sequence
 
+from ..replacement_effects import (
+    ReplaceableEvent,
+    ReplacementBatchChoice,
+    ReplacementClass,
+    ReplacementEffect,
+    ReplacementEventBatch,
+    ReplacementSelection,
+    advance_replacement_batch,
+)
 from ..rules.capabilities import load_default_capability_registry
 from .component_registry import (
     RuntimeComponentRegistry,
@@ -98,6 +107,7 @@ class TokenCreationReplacementContext:
     source_controller: str
     event_controller: str
     created_types: tuple[str, ...]
+    component_id: str = ""
 
     def __post_init__(self) -> None:
         if not self.source_ref:
@@ -110,12 +120,81 @@ class TokenCreationReplacementContext:
             raise SemanticNodeError("Created token types must be unique")
 
 
+def _token_card_types(type_line: str) -> tuple[str, ...]:
+    left = type_line.split("—", 1)[0].strip().casefold()
+    return tuple(
+        sorted(
+            {
+                value
+                for value in left.split()
+                if value and value != "token"
+            }
+        )
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class AdditionalTokenIntent:
     handler_id: str
     source_ref: str
     quantity: int
     token: TokenDefinition
+
+
+@dataclass(frozen=True, slots=True)
+class TokenCreationReplacementResolution:
+    batch: ReplacementEventBatch
+    event: ReplaceableEvent
+    effects: tuple[ReplacementEffect, ...]
+    journal: tuple[ReplacementSelection, ...]
+    pending: ReplacementBatchChoice | None
+
+    @property
+    def tokens(self) -> tuple[Mapping[str, Any], ...]:
+        return tuple(
+            token
+            for token in self.event.payload.get("tokens", ())
+            if isinstance(token, Mapping)
+        )
+
+
+def resolve_token_creation_replacements(
+    *,
+    event_id: str,
+    controller: str,
+    tokens: Sequence[Mapping[str, Any]],
+    created_types: Sequence[str],
+    effects: Sequence[ReplacementEffect],
+    apnap_order: Sequence[str],
+    selections: Sequence[str | None] = (),
+) -> TokenCreationReplacementResolution:
+    event = ReplaceableEvent(
+        event_id=event_id,
+        kind="token.create",
+        affected_player=controller,
+        payload={
+            "event_controller": controller,
+            "created_types": sorted(set(created_types)),
+            "tokens": [dict(token) for token in tokens],
+        },
+    )
+    progress = advance_replacement_batch(
+        ReplacementEventBatch(
+            batch_id=f"replacement:{event_id}",
+            events=(event,),
+            apnap_order=tuple(apnap_order),
+        ),
+        tuple(effects),
+        selections=tuple(selections),
+    )
+    resolved_event = progress.batch.events[0]
+    return TokenCreationReplacementResolution(
+        batch=progress.batch,
+        event=resolved_event,
+        effects=tuple(effects),
+        journal=progress.batch.journal,
+        pending=progress.pending,
+    )
 
 
 class TokenCreationReplacementHandler(Protocol):
@@ -135,6 +214,12 @@ class TokenCreationReplacementHandler(Protocol):
         descriptor: Mapping[str, Any],
         context: TokenCreationReplacementContext,
     ) -> tuple[AdditionalTokenIntent, ...]: ...
+
+    def replacement_effect(
+        self,
+        descriptor: Mapping[str, Any],
+        context: TokenCreationReplacementContext,
+    ) -> ReplacementEffect: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -241,6 +326,61 @@ class AdditionalTokenReplacementHandler:
             ),
         )
 
+    def replacement_effect(
+        self,
+        descriptor: Mapping[str, Any],
+        context: TokenCreationReplacementContext,
+    ) -> ReplacementEffect:
+        """Compile one source descriptor into the shared CR 614/616 event form."""
+
+        node = self.validate(descriptor)
+        component_id = context.component_id or (
+            f"{node.token.name.casefold()}:{node.quantity}"
+        )
+        token_types = _token_card_types(node.token.type_line)
+        return ReplacementEffect(
+            effect_id=(
+                f"{self.handler_id}:{context.source_ref}:{component_id}"
+            ),
+            source_id=context.source_ref,
+            event_kind=self.event,
+            replacement_class=ReplacementClass.OTHER,
+            conditions={
+                "event_controller": {"eq": context.source_controller},
+                "created_types": {
+                    "contains_all": list(node.created_types_all)
+                },
+            },
+            operations=(
+                {
+                    "op": "append",
+                    "field": "tokens",
+                    "values": [
+                        {
+                            "name": node.token.name,
+                            "quantity": node.quantity,
+                            "characteristics": node.token.characteristics(),
+                            "replacement_component": {
+                                "handler_id": self.handler_id,
+                                "source": context.source_ref,
+                                "quantity": node.quantity,
+                            },
+                        }
+                    ],
+                },
+                {
+                    "op": "union",
+                    "field": "created_types",
+                    "values": list(token_types),
+                },
+            ),
+            label=(
+                f"{context.source_ref}: create {node.quantity} additional "
+                f"{node.token.name} token"
+                + ("s" if node.quantity != 1 else "")
+            ),
+        )
+
 
 class TokenCreationReplacementRegistry(
     RuntimeComponentRegistry[
@@ -248,7 +388,19 @@ class TokenCreationReplacementRegistry(
         AdditionalTokenIntent,
     ]
 ):
-    pass
+    def replacement_effect(
+        self,
+        descriptor: Mapping[str, Any],
+        context: TokenCreationReplacementContext,
+    ) -> ReplacementEffect:
+        handler = self._handler(descriptor)
+        compiler = getattr(handler, "replacement_effect", None)
+        if compiler is None:
+            raise SemanticNodeError(
+                f"Runtime handler {handler.handler_id} cannot compile a "
+                "replacement effect"
+            )
+        return compiler(descriptor, context)
 
 
 @lru_cache(maxsize=1)

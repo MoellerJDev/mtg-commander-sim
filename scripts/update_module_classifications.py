@@ -86,6 +86,7 @@ def _layer(relative: str) -> str:
         "mtg_commander_sim/mana.py",
         "mtg_commander_sim/mechanic_contracts.py",
         "mtg_commander_sim/permissions.py",
+        "mtg_commander_sim/replacement_decisions.py",
         "mtg_commander_sim/replacement_effects.py",
         "mtg_commander_sim/rule_conformance.py",
         "mtg_commander_sim/rules_corpus.py",
@@ -94,6 +95,7 @@ def _layer(relative: str) -> str:
         "mtg_commander_sim/state_based_actions.py",
         "mtg_commander_sim/tap_state.py",
         "mtg_commander_sim/targets.py",
+        "mtg_commander_sim/token_creation.py",
     }:
         return "rules"
     return "application"
@@ -112,6 +114,10 @@ def _owner(relative: str, layer: str) -> str:
         return "rules_capabilities"
     if relative == "mtg_commander_sim/tap_state.py":
         return "tap_state_effects"
+    if relative == "mtg_commander_sim/token_creation.py":
+        return "token_creation"
+    if relative == "mtg_commander_sim/replacement_decisions.py":
+        return "replacement_effects"
     if relative == "mtg_commander_sim/rules_scheduler.py":
         return "rules_governance"
     if relative in {
@@ -185,6 +191,8 @@ def build_classifications() -> dict[str, Any]:
                             "card_programs/",
                             "semantic_runtime/",
                             "tap_state.py",
+                            "token_creation.py",
+                            "replacement_decisions.py",
                         )
                     )
                     or relative in {

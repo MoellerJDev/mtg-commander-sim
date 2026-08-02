@@ -2,7 +2,7 @@
 title: "Consolidated architecture reference"
 status: "current"
 authoritative_source: "implemented runtime and focused architecture documents"
-verified: "3bb415ef898e3c013eaf78007c4169cc530111f5"
+verified: "2026-08-02"
 audience: "maintainers and integration contributors"
 maintenance: "hand-maintained"
 ---
@@ -148,11 +148,14 @@ tested and explicitly blocked on broader replacement, prohibition, and layer
 closure; the inventory is not a complete tap/untap rules claim.
 
 Versioned CardProgram runtime component descriptors represent static
-participation in later events without printed-name dispatch in the engine.
-Registered families lower reviewed fixed additional-token replacements to
-typed intents and fixed subtype anthems to layer-7c continuous effects. Their
-scope remains deliberately narrower than general CR 616 replacement ordering
-or complete CR 613 dependency evaluation.
+participation in later events without printed-name or Oracle-ID dispatch in the
+engine. Registered families contribute reviewed fixed additional-token and
+zone-destination replacement effects to immutable nested event trees, while a
+fixed subtype anthem contributes layer-7c continuous effects. A focused token-
+creation owner commits final token batches, and replacement choices suspend as
+seat-scoped replayable continuations. Their scope remains deliberately narrower
+than universal CR 614/616 participation or complete CR 613 dependency
+evaluation.
 
 CardProgram trust is now separated into `capability_closed`,
 `legacy_reviewed`, `mixed`, `provisional`, `unresolved`, and
@@ -907,9 +910,18 @@ The new rules primitives sit below both generated and hand-authored semantics:
   view; applicability is checked against the characteristics produced by
   earlier layers. The first reviewed component is a fixed subtype anthem in
   layer 7c, not a claim of general continuous-effect compilation.
-- `replacement_effects.py` orders CR 616 replacement/prevention priority
-  classes, affected-player choices, optional declines, and repeated
-  applicability for typed events.
+- `replacement_effects.py` represents immutable nested replaceable-event trees,
+  affected objects, priority classes, APNAP traversal, optional declines,
+  repeated applicability, containing-event-before-contained-event ordering,
+  entry replacement scope, and exact selection journals. The companion
+  `replacement_decisions.py` suspends competing choices to the affected seat
+  and resumes the same semantic instruction without exposing authoritative
+  batches in projections.
+- `token_creation.py` is the focused authoritative token mutation owner. It
+  discovers trusted runtime components, resolves and rediscovers represented
+  replacements, commits one timestamped token batch, and then dispatches enter
+  events. The zone-destination runtime component uses the same event substrate
+  before mutation and preserves one source snapshot for simultaneous moves.
 - `state_based_actions.py` evaluates the deterministic permanent subset of CR
   704 plus token and represented spell/card-copy cessation from one immutable
   snapshot. The engine applies the resulting batch, captures last-known
@@ -936,8 +948,10 @@ The new rules primitives sit below both generated and hand-authored semantics:
   implying generic emblem or casual-variant coverage.
 
 All of these contracts remain partial. Legacy static abilities have not all moved
-into the layer evaluator, not every zone/draw/damage/enters producer routes
-through the replacement engine, and the state-action evaluator does not yet
+into the layer evaluator, counter intents from represented zone replacements
+do not yet pass through a universal counter-placement event, not every zone/
+draw/damage/enters producer routes through the replacement engine, and the
+state-action evaluator does not yet
 cover Sagas, dungeons, Roles, speed, maximum-counter wording outside the
 reviewed self-restriction family, or complete simultaneous loss replacement.
 Battle support still lacks complete replacement ordering for the defeated

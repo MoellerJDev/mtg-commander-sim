@@ -898,6 +898,47 @@
       }
     },
     {
+      "key": "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786:replacement:graveyard-to-exile",
+      "label": "Dauthi Voidwalker graveyard replacement",
+      "oracle_id": "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786",
+      "ability_id": "replacement:graveyard-to-exile",
+      "active_zone": "battlefield",
+      "event": "zone.change",
+      "effects": [],
+      "handlers": [
+        {
+          "handler_id": "replacement.zone.destination.v1",
+          "schema_version": 1,
+          "event": "zone.change",
+          "condition": {
+            "destination": "graveyard",
+            "object_kind": "card",
+            "owner_relation": "opponent"
+          },
+          "destination": "exile",
+          "counters": {
+            "void": 1
+          }
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": [
+        "replacement_effect",
+        "zone_permission"
+      ],
+      "tests": [
+        "test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free",
+        "test_dauthi_replacement_replays_without_oracle_id_dispatch",
+        "test_complete_legacy_registry_uses_pinned_zone_compatibility"
+      ],
+      "provenance": {
+        "source_oracle_hash": "4b06872ea50b96e3ccb086b7d3ea8ef704e79f8c5b2204ebf40039c2082d5e26",
+        "source_rulings_hash": "eabf6f80038038b896b32569979c3490c6cc9cde492a2bb7d8113b8ef70920a2",
+        "authored_by": "replacement-choice-nested-events",
+        "review_status": "reviewed"
+      }
+    },
+    {
       "key": "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786:ability:ab3",
       "label": "Dauthi Voidwalker play permission",
       "oracle_id": "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786",

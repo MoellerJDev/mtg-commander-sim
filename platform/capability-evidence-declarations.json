@@ -1239,7 +1239,47 @@
     {
       "capability_id": "token.creation.additional_replacement",
       "evidence_class": "interaction",
+      "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_additional_token_does_not_inherit_original_entry_modifiers",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "interaction",
       "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_multiple_additional_token_components_share_one_creation_timestamp",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_resolution_suspends_for_seat_scoped_replacement_order",
       "official_rule_ids": [
         "111.2",
         "614.1",
@@ -1300,6 +1340,26 @@
       "capability_id": "token.creation.additional_replacement",
       "evidence_class": "positive",
       "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_registered_additional_token_components_replace_without_name_dispatch",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_resolution_suspends_for_seat_scoped_replacement_order",
       "official_rule_ids": [
         "111.2",
         "614.1",
@@ -1410,6 +1470,226 @@
         "commander_review"
       ],
       "applicability_note": "Designate one active player as monarch through the canonical unique public designation path."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_competing_zone_replacements_suspend_resume_and_replay_exactly",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replace a represented card's proposed zone destination through the affected-object ordering boundary before committing the move."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_complete_legacy_registry_uses_pinned_zone_compatibility",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replace a represented card's proposed zone destination through the affected-object ordering boundary before committing the move."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_graveyard_replacement_is_decided_before_the_move",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replace a represented card's proposed zone destination through the affected-object ordering boundary before committing the move."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_simultaneous_replacement_uses_the_sources_pre_move_controller",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replace a represented card's proposed zone destination through the affected-object ordering boundary before committing the move."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_stack_object_controller_chooses_zone_replacement_order",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replace a represented card's proposed zone destination through the affected-object ordering boundary before committing the move."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "negative",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_dauthi_does_not_replace_tokens_or_its_controllers_cards",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replace a represented card's proposed zone destination through the affected-object ordering boundary before committing the move."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "negative",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_zone_replacement_descriptor_rejects_unknown_destinations",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replace a represented card's proposed zone destination through the affected-object ordering boundary before committing the move."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "positive",
+      "test_id": "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replace a represented card's proposed zone destination through the affected-object ordering boundary before committing the move."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_competing_zone_replacements_suspend_resume_and_replay_exactly",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replace a represented card's proposed zone destination through the affected-object ordering boundary before committing the move."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "replay",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_competing_zone_replacements_suspend_resume_and_replay_exactly",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replace a represented card's proposed zone destination through the affected-object ordering boundary before committing the move."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "replay",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_dauthi_replacement_replays_without_oracle_id_dispatch",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replace a represented card's proposed zone destination through the affected-object ordering boundary before committing the move."
     },
     {
       "capability_id": "zone.draw.library_to_hand",

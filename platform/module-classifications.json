@@ -622,6 +622,20 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/replacement_decisions.py",
+      "layer": "rules",
+      "owning_subsystem": "replacement_effects",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "read_only",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/replacement_effects.py",
       "layer": "rules",
       "owning_subsystem": "legacy_rules",
@@ -963,6 +977,21 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/semantic_runtime/zone_replacements.py",
+      "layer": "semantics",
+      "owning_subsystem": "semantic_runtime",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "read_only",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/semantics.py",
       "layer": "semantics",
       "owning_subsystem": "legacy_semantics",
@@ -1064,6 +1093,20 @@
       "card_specificity_policy": "generic_no_growth",
       "visibility_sensitivity": "authoritative_internal",
       "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/token_creation.py",
+      "layer": "rules",
+      "owning_subsystem": "token_creation",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "mutable_owner",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
     },
     {
       "file": "mtg_commander_sim/util.py",
@@ -1192,5 +1235,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "ae8d84c0a3fcd2af13d098fe4c3f20ea7d619e1be98ffbbe659b7b4e434efecb"
+  "fingerprint": "73e626ad3aaea319cebbe16b935de5c4679b6f603b50e547334751a24b5cb0da"
 }

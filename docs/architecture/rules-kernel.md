@@ -2,7 +2,7 @@
 title: "Rules kernel"
 status: "current"
 authoritative_source: "mtg_commander_sim engine and rules modules"
-verified: "1eb40f99b7269870c7e419aa75ea3e997e7aff0e"
+verified: "2026-08-02"
 audience: "rules and engine contributors"
 maintenance: "hand-maintained"
 ---
@@ -22,8 +22,8 @@ pilot.
 `GameState` owns players, cards, zones, stack, turn/combat state, pending
 decisions, events, yields, and fidelity telemetry. During migration,
 `CommanderEngine` remains the declared general mutation owner, while
-`tap_state.py` is the first focused effect mutation owner extracted behind a
-typed host protocol. Capability lifecycle and replay hydration have narrowly
+`tap_state.py` and `token_creation.py` are focused effect mutation owners
+extracted behind typed host protocols. Capability lifecycle and replay hydration have narrowly
 declared compatibility ownership. All other rules helpers return values or
 operate through an approved mutation boundary. Typed semantic handlers receive
 an immutable rules query and emit intents; they cannot import the engine or
@@ -52,11 +52,16 @@ Reusable mechanics belong in focused rules modules and typed semantic
 operations. The current tap-state owner commits only the represented single
 permanent and all-effective-creature operations; it preserves stun replacement
 and phased-out behavior without claiming the complete replacement or layer
-systems.
+systems. The token owner runs represented token events through immutable
+nested replacement trees before committing one timestamped batch and
+dispatching enter events. `replacement_decisions.py` persists competing
+affected-seat choices as ordinary Game Record v3 continuations, and represented
+zone-destination changes use the same exact selection journal before mutation.
 Triggers consume normalized events; replacements transform represented events
-before final mutation; state-based actions run to a fixed point. New rules
-work must identify event/replacement participation and use capability IDs from
-the versioned registry once that registry is introduced.
+before final mutation; state-based actions run to a fixed point. Universal
+counter, draw, damage, prevention, entry, and prohibition participation remains
+blocked. New rules work must identify event/replacement participation and use
+capability IDs from the versioned registry.
 
 ## Visibility and replay
 

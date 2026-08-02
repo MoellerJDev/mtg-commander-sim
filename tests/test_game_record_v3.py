@@ -116,7 +116,7 @@ class GameRecordV3Tests(unittest.TestCase):
                 ),
             )
             self.assertEqual(
-                2,
+                3,
                 len(
                     manifest["runtime_trust"][
                         "runtime_component_inventory"

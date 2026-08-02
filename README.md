@@ -2,7 +2,7 @@
 title: "MTG Commander Sim"
 status: "current"
 authoritative_source: "implemented package, server/browser runtime, and generated status reports"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-02"
 audience: "users and contributors"
 maintenance: "hand-maintained"
 ---
@@ -777,15 +777,18 @@ intents retain the existing replacement-aware draw sequence. All other
 operations remain explicitly on the measured legacy path. This is an
 architecture milestone, not a broader rules-completeness claim.
 
-The first runtime-component migration moved bounded card-specific core debt
-into versioned CardProgram runtime components. The first two bounded families
-represent mandatory fixed additional-token replacements and same-controller
-fixed subtype anthems as reviewed data and typed outputs. Stridehangar
-Automaton and Worldwalker Helm no longer select token or anthem behavior
-through printed-name engine branches.
-The anthem is a layer-7c modifier whose subtype applicability is evaluated
-after earlier layers. General replacement ordering, layer dependencies, and
-state-derived modifiers remain explicitly unsupported.
+The runtime-component migration moves bounded card-specific core debt into
+versioned CardProgram data. Reviewed fixed additional-token replacements now
+participate in an immutable nested replacement-event tree with affected-seat
+choice, APNAP traversal, rediscovery, containing-event-first ordering, and an
+exact replay journal. A focused token-creation owner commits the final batch.
+A reviewed zone-destination component uses the same boundary; Dauthi
+Voidwalker is source-pinned semantic data rather than an Oracle-ID engine
+branch. The fixed subtype anthem remains a layer-7c modifier whose applicability
+is evaluated after earlier layers. These are bounded witnesses: optional and
+quantity-changing token descriptors, universal counter/draw/damage/entry
+replacement participation, CR 614/616 prevention and prohibition closure,
+layer dependencies, and state-derived modifiers remain unsupported.
 
 Runtime trust and governance are now explicit. Capability registry v5 consumes
 a generated evidence index whose fully qualified tests, rules, profiles, and
@@ -798,9 +801,9 @@ dependencies and exact registry/evidence fingerprints.
 
 The complete Commander format-capability inventory is not yet present, so
 capability-only strict match readiness fails closed while reviewed declared-pool
-compatibility remains available. The next architecture work is selected from
-measured debt after this hardening slice; broad rules or Oracle expansion does
-not bypass this boundary.
+compatibility remains available. The dependency scheduler is integrated and
+the next selected rules batch is the universal counter-placement replacement
+boundary. Broad rules or Oracle expansion does not bypass this boundary.
 
 This is still not a completeness declaration. Current exact, partial,
 unresolved, and material-residual figures are generated in

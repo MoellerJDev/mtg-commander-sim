@@ -7,7 +7,13 @@ import unittest
 
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
+from mtg_commander_sim.projection import StateProjector
+from mtg_commander_sim.record import (
+    authoritative_state_hash,
+    checkpoint_envelope,
+    replay_record,
+)
+from mtg_commander_sim.replacement_effects import ReplacementChoiceRequired
 from mtg_commander_sim.semantic_runtime import (
     AdditionalTokenReplacementHandler,
     SemanticNodeError,
@@ -159,12 +165,24 @@ class TokenCreationReplacementTests(unittest.TestCase):
             source = self.card(engine, name)
             engine.move_card(source.object_id, "battlefield", controller="A")
 
+        with self.assertRaises(ReplacementChoiceRequired) as required:
+            engine.create_token(
+                "A",
+                name="Treasure",
+                quantity=2,
+                characteristics={"type_line": "Token Artifact — Treasure"},
+                reason="simultaneous replacement characterization",
+            )
+        pending = required.exception.pending
+        self.assertEqual("A", pending.choice.chooser)
+        self.assertEqual(2, len(pending.choice.options))
         created = engine.create_token(
             "A",
             name="Treasure",
             quantity=2,
             characteristics={"type_line": "Token Artifact — Treasure"},
             reason="simultaneous replacement characterization",
+            replacement_selections=(pending.choice.options[0],),
         )
         cards = [engine._resolve_object("A", ref) for ref in created]
 
@@ -177,6 +195,34 @@ class TokenCreationReplacementTests(unittest.TestCase):
             },
         )
         self.assertEqual(1, len({card.zone_timestamp for card in cards}))
+        event = next(
+            event
+            for event in reversed(engine.state.events)
+            if event.code == "token.create"
+        )
+        self.assertEqual(2, len(event.details["replacement_order"]))
+
+    def test_additional_token_does_not_inherit_original_entry_modifiers(self):
+        session = self.session(12505021)
+        engine = session.engine
+        helm = self.card(engine, "Worldwalker Helm")
+        engine.move_card(helm.object_id, "battlefield", controller="A")
+
+        created = engine.create_token(
+            "A",
+            name="Treasure",
+            tapped=True,
+            characteristics={"type_line": "Token Artifact — Treasure"},
+            temporary_keywords=("Haste",),
+            reason="replacement token modifier isolation",
+        )
+        resolved = [engine._resolve_object("A", ref) for ref in created]
+        cards = {card.printed_name: card for card in resolved}
+
+        self.assertTrue(cards["Treasure"].tapped)
+        self.assertIn("Haste", cards["Treasure"].temporary_keywords)
+        self.assertFalse(cards["Map"].tapped)
+        self.assertNotIn("Haste", cards["Map"].temporary_keywords)
 
     def test_source_created_by_event_does_not_replace_its_own_creation(self):
         session = self.session(1250505)
@@ -203,11 +249,121 @@ class TokenCreationReplacementTests(unittest.TestCase):
             },
         )
 
+    def test_unnamed_copy_token_keeps_the_copied_objects_name(self):
+        session = self.session(12505051)
+        engine = session.engine
+        original = self.card(engine, "Stridehangar Automaton")
+        engine.move_card(original.object_id, "battlefield", controller="A")
+
+        created = engine.create_token(
+            "A",
+            name="",
+            copy_of=original.ref,
+            reason="copy-name regression",
+        )
+
+        copy_token = engine._resolve_object("A", created[0])
+        self.assertEqual("Stridehangar Automaton", copy_token.printed_name)
+        self.assertEqual(
+            "Stridehangar Automaton",
+            engine.display_name(copy_token.object_id),
+        )
+
+    def test_resolution_suspends_for_seat_scoped_replacement_order(self):
+        session = self.session(1250506)
+        engine = session.engine
+        for name in ("Stridehangar Automaton", "Worldwalker Helm"):
+            source = self.card(engine, name)
+            engine.move_card(source.object_id, "battlefield", controller="A")
+        program = SemanticProgram(
+            key="test:replacement-order-token-effect",
+            label="Create an artifact token with competing replacements",
+            effects=[
+                {
+                    "op": "create_token",
+                    "controller": "A",
+                    "name": "Treasure",
+                    "characteristics": {
+                        "type_line": "Token Artifact — Treasure"
+                    },
+                }
+            ],
+            trust_level="provisional",
+        )
+        engine.semantics.put(program)
+        item = StackItem(
+            stack_id="replacement-order-token-effect",
+            ref="S-replacement-order-token-effect",
+            kind="triggered_ability",
+            controller="A",
+            label=program.label,
+            semantic_key=program.key,
+            visibility=["A", "B"],
+        )
+        engine.state.stack.append(item)
+
+        engine._continue_resolution(
+            stack_ref=item.ref,
+            effects=[dict(value) for value in program.effects],
+            destination=None,
+            note="",
+        )
+
+        decision = engine.state.pending_decision
+        self.assertIsNotNone(decision)
+        self.assertEqual("replacement.order", decision.kind)
+        self.assertEqual(["A"], decision.actors)
+        projector = StateProjector(self.db, engine.state)
+        projected_a = projector._decision("pilot:A")
+        projected_b = projector._decision("pilot:B")
+        self.assertIsNone(projected_b)
+        self.assertEqual(2, len(projected_a["ctx"]["options"]))
+        self.assertNotIn("replacement_batch", json.dumps(projected_a))
+        self.assertNotIn("replacement_effects", json.dumps(projected_a))
+        self.assertEqual(
+            {"chooser", "prompt", "options", "legal_actions"},
+            set(projected_a["ctx"]),
+        )
+        selected = projected_a["ctx"]["options"][0]["id"]
+        capability = engine.permissions.capability_for("pilot:A")
+        before_rejection = authoritative_state_hash(engine.state)
+        rejected = engine.try_submit(
+            token=capability.token,
+            principal="pilot:A",
+            action="choose",
+            payload={"replacement": "unknown-replacement"},
+        )
+        self.assertFalse(rejected.ok)
+        self.assertEqual(
+            before_rejection, authoritative_state_hash(engine.state)
+        )
+        capability = engine.permissions.capability_for("pilot:A")
+        result = engine.submit(
+            token=capability.token,
+            principal="pilot:A",
+            action="choose",
+            payload={"replacement": selected},
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(
+            {"Treasure", "Thopter", "Map"},
+            {
+                card.printed_name
+                for card in engine.state.cards.values()
+                if card.is_token and card.zone == "battlefield"
+            },
+        )
+        self.assertFalse(
+            any(candidate.ref == item.ref for candidate in engine.state.stack)
+        )
+
     def test_additional_token_component_replays_exactly(self):
         session = self.session(1250503)
         engine = session.engine
-        automaton = self.card(engine, "Stridehangar Automaton")
-        engine.move_card(automaton.object_id, "battlefield", controller="A")
+        for name in ("Stridehangar Automaton", "Worldwalker Helm"):
+            source = self.card(engine, name)
+            engine.move_card(source.object_id, "battlefield", controller="A")
         program = SemanticProgram(
             key="test:artifact-token-effect",
             label="Create an artifact token",
@@ -248,7 +404,20 @@ class TokenCreationReplacementTests(unittest.TestCase):
             result = session.act(principal, {"action_id": "pass"})
             self.assertTrue(result.ok, result.summary)
         self.assertEqual(
-            {"Treasure", "Thopter"},
+            "replacement.order", engine.state.pending_decision.kind
+        )
+        projected = StateProjector(self.db, engine.state)._decision("pilot:A")
+        selected = projected["ctx"]["options"][0]["id"]
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "choices": {"replacement": selected},
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(
+            {"Treasure", "Thopter", "Map"},
             {
                 card.printed_name
                 for card in engine.state.cards.values()
@@ -261,7 +430,7 @@ class TokenCreationReplacementTests(unittest.TestCase):
             session.save(record_dir)
             replay = replay_record(record_dir, self.db, verify=True)
         self.assertTrue(replay["ok"], replay)
-        self.assertEqual(2, replay["commands"])
+        self.assertEqual(3, replay["commands"])
 
     def test_complete_legacy_registry_uses_pinned_compatibility_component(self):
         with tempfile.TemporaryDirectory() as temporary:

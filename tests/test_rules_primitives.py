@@ -577,7 +577,7 @@ class ReplacementOrderingTests(unittest.TestCase):
         self.assertEqual("library", final.payload["destination"])
         self.assertIsNone(replacement_choice(final, effects))
 
-    def test_nested_event_operation_fails_closed(self):
+    def test_malformed_nested_event_operation_fails_closed(self):
         nested = ReplacementEffect(
             effect_id="nested",
             source_id="source:nested",
@@ -598,7 +598,7 @@ class ReplacementOrderingTests(unittest.TestCase):
 
         with self.assertRaisesRegex(
             ReplacementEffectError,
-            "Unsupported replacement operation",
+            "unknown field",
         ):
             apply_replacement(choice, [nested], "nested")
 

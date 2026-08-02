@@ -96,13 +96,19 @@ from .model import (
     YieldPolicy,
 )
 from .permissions import AuthorizedCommand, CapabilityManager, PermissionDenied
+from .replacement_decisions import (
+    apply_effect_with_replacement_choice,
+    complete_replacement_order_choice,
+)
 from .semantics import SemanticProgram, SemanticRegistry
 from .semantic_runtime import (
     SemanticNodeError,
-    TokenCreationReplacementContext,
     default_semantic_interpreter,
-    default_token_creation_replacement_registry,
     execute_intent_plan,
+    log_applied_zone_replacements,
+    normalized_zone_replacement_counters,
+    PreparedZoneChange,
+    prepare_zone_change_replacement,
     prepare_draw_resolution,
 )
 from .state_based_actions import (
@@ -118,6 +124,7 @@ from .targets import (
     mode_effects,
     target_plan,
 )
+from .token_creation import TokenCreationError, create_tokens
 from .util import (
     mana_cost_to_vector,
     normalize_mana_bundle,
@@ -1668,45 +1675,6 @@ class CommanderEngine:
         if destination != "battlefield":
             card.controller = card.owner
 
-    def _compiled_graveyard_replacement(
-        self,
-        card: CardInstance,
-        destination: str,
-        *,
-        sources: Sequence[CardInstance] | None = None,
-        source_zones: Mapping[str, str] | None = None,
-    ) -> tuple[str, str | None]:
-        """Apply the exact Dauthi Voidwalker graveyard replacement.
-
-        Replacement effects are determined before the move.  Callers that move
-        several objects simultaneously pass the shared pre-move source/zone
-        snapshot so the outcome cannot depend on iteration order.
-        """
-
-        if destination != "graveyard" or not card.is_card_object:
-            return destination, None
-        candidates = (
-            list(sources)
-            if sources is not None
-            else self._semantic_event_sources(zones={"battlefield"})
-        )
-        for source in candidates:
-            active_zone = (
-                source_zones.get(source.object_id, source.zone)
-                if source_zones is not None
-                else source.zone
-            )
-            if (
-                active_zone == "battlefield"
-                and not source.phased_out
-                and source.oracle_id
-                == "f1c2dbe2-fbe0-4058-bdf1-91d1b1832786"
-                and source.controller in self.active_seats
-                and source.controller != card.owner
-            ):
-                return "exile", source.ref
-        return destination, None
-
     def _unconditionally_enters_tapped(
         self,
         card: CardInstance,
@@ -1983,6 +1951,8 @@ class CommanderEngine:
         semantic_events: bool = False,
         replacement_sources: Sequence[CardInstance] | None = None,
         replacement_source_zones: Mapping[str, str] | None = None,
+        replacement_selections: Sequence[str | None] = (),
+        prepared_replacement: PreparedZoneChange | None = None,
     ) -> CardInstance:
         if destination not in {"library", "hand", "battlefield", "graveyard", "exile", "command", "outside"}:
             raise GameRuleError(f"Unsupported destination {destination}")
@@ -2097,14 +2067,17 @@ class CommanderEngine:
                     changed_players=[card.owner],
                 )
             return card
-        destination, replacement_source = (
-            self._compiled_graveyard_replacement(
-                card,
-                destination,
-                sources=replacement_sources,
-                source_zones=replacement_source_zones,
-            )
+        prepared_replacement = prepare_zone_change_replacement(
+            self,
+            card,
+            destination,
+            sources=replacement_sources,
+            source_zones=replacement_source_zones,
+            selections=tuple(replacement_selections),
+            prepared=prepared_replacement,
+            error_type=GameRuleError,
         )
+        destination = prepared_replacement.destination
         origin_controller = card.controller
         origin_logical_object_id = card.logical_object_id
         origin_attachments = [
@@ -2235,8 +2208,13 @@ class CommanderEngine:
                             known.update(self.seats)
                     card.known_to = sorted(known)
                     card.revealed_to = sorted(set(reveal_to or []))
-        if replacement_source is not None and card.zone == "exile":
-            card.counters["void"] = 1
+        for counter_name, counter_amount in normalized_zone_replacement_counters(
+            prepared_replacement,
+            error_type=StateInvariantError,
+        ):
+            card.counters[counter_name] = (
+                int(card.counters.get(counter_name, 0)) + counter_amount
+            )
         identity_became_hidden = (
             card.zone in HIDDEN_ZONES
             and not origin_identity_public
@@ -2289,24 +2267,13 @@ class CommanderEngine:
                 changed_objects=[object_id],
                 changed_players=[card.owner, card.controller],
             )
-        if replacement_source is not None:
-            self._log(
-                None,
-                "replacement.apply",
-                (
-                    f"{replacement_source} exiled {card.ref} with a void "
-                    "counter instead of putting it into a graveyard."
-                ),
-                {
-                    "source": replacement_source,
-                    "object": card.ref,
-                    "replaced_destination": requested_destination,
-                    "destination": card.zone,
-                    "counter": "void",
-                },
-                importance=2,
-                changed_objects=[object_id],
-            )
+        log_applied_zone_replacements(
+            self,
+            prepared_replacement,
+            card,
+            requested_destination=requested_destination,
+            error_type=StateInvariantError,
+        )
         if semantic_events:
             self._dispatch_zone_change_events(
                 card,
@@ -2684,6 +2651,17 @@ class CommanderEngine:
 
         sources = self._semantic_event_sources()
         source_zones = {source.object_id: source.zone for source in sources}
+        prepared_replacements = {
+            object_id: prepare_zone_change_replacement(
+                self,
+                self.state.cards[object_id],
+                destination,
+                sources=sources,
+                source_zones=source_zones,
+                error_type=GameRuleError,
+            )
+            for object_id, destination in changes
+        }
         snapshots: list[
             tuple[
                 CardInstance,
@@ -2698,12 +2676,6 @@ class CommanderEngine:
         ] = []
         for object_id, destination in changes:
             card = self.state.cards[object_id]
-            actual_destination, _ = self._compiled_graveyard_replacement(
-                card,
-                destination,
-                sources=sources,
-                source_zones=source_zones,
-            )
             snapshots.append(
                 (
                     card,
@@ -2721,7 +2693,7 @@ class CommanderEngine:
                         if card.attached_to in self.state.cards
                         else None
                     ),
-                    actual_destination,
+                    destination,
                 )
             )
         # CR 704.8 last-known information comes from the state before any
@@ -2738,6 +2710,7 @@ class CommanderEngine:
                 semantic_events=False,
                 replacement_sources=sources,
                 replacement_source_zones=source_zones,
+                prepared_replacement=prepared_replacements[object_id],
             )
         trigger_batch: list[StackItem] = []
         for (
@@ -2748,12 +2721,12 @@ class CommanderEngine:
             origin_data,
             origin_attachments,
             origin_attached_to,
-            destination,
+            _requested_destination,
         ) in snapshots:
             self._dispatch_zone_change_events(
                 card,
                 origin=origin,
-                destination=destination,
+                destination=card.zone,
                 origin_controller=origin_controller,
                 origin_logical_object_id=origin_logical_object_id,
                 origin_data=origin_data,
@@ -3209,6 +3182,12 @@ class CommanderEngine:
             self._complete_siege_defeated_choice(decision)
         elif kind == "choice.apnap":
             self._complete_apnap_choice(decision)
+        elif kind == "replacement.order":
+            complete_replacement_order_choice(
+                self,
+                decision,
+                error_type=GameRuleError,
+            )
         elif kind == "trigger.order":
             self._complete_trigger_order(decision)
         elif kind == "arbiter.resolve":
@@ -13357,8 +13336,8 @@ class CommanderEngine:
                     instruction_pointer=instruction_pointer + index,
                 )
                 return
-            self.apply_effect(effect, actor=item.controller, as_cost=False)
-            if item not in self.state.stack:
+            replacement_frame = (effects[index + 1 :], destination, note, instruction_pointer + index)
+            if not apply_effect_with_replacement_choice(self, item, effect, replacement_frame):
                 return
             index += 1
         # Remove the resolving object from stack only when all player choices
@@ -17279,7 +17258,7 @@ class CommanderEngine:
         )
 
     # ------------------------------------------------------------------
-    # APNAP delegated choices during resolution
+    # Replacement/prevention ordering during resolution
     # ------------------------------------------------------------------
     def _choice_options(self, seat: str, effect: Mapping[str, Any]) -> list[str]:
         zone = str(effect.get("zone") or "battlefield")
@@ -21727,6 +21706,9 @@ class CommanderEngine:
                 ),
                 reason=reason,
                 semantic_events=True,
+                replacement_selections=tuple(
+                    effect.get("_replacement_selections") or ()
+                ),
             )
         if op == "move_if_in_zone":
             expected_zone = str(effect.get("from") or "")
@@ -21798,6 +21780,9 @@ class CommanderEngine:
                 ),
                 reason=reason,
                 semantic_events=True,
+                replacement_selections=tuple(
+                    effect.get("_replacement_selections") or ()
+                ),
             )
         if op == "animate_dead_prepare":
             aura = self._resolve_object(
@@ -22986,16 +22971,25 @@ class CommanderEngine:
                 expires_turn_sequence=effect.get("expires_turn_sequence"),
             ).ref
         if op == "create_token":
+            copy_source = effect.get("copy_of")
+            token_name = (
+                str(effect["name"])
+                if "name" in effect
+                else ("" if copy_source else "Token")
+            )
             return self.create_token(
                 str(effect.get("controller") or actor),
-                name=str(effect.get("name") or "Token"),
+                name=token_name,
                 quantity=int(effect.get("quantity", 1)),
                 tapped=bool(effect.get("tapped", False)),
                 attacking=effect.get("attacking"),
-                copy_of=effect.get("copy_of"),
+                copy_of=copy_source,
                 characteristics=dict(effect.get("characteristics") or {}),
                 temporary_keywords=list(effect.get("temporary_keywords") or []),
                 reason=reason,
+                replacement_selections=tuple(
+                    effect.get("_replacement_selections") or ()
+                ),
             )
         if op == "create_token_if_no_controlled_subtype":
             controller = str(effect.get("controller") or actor)
@@ -23538,58 +23532,6 @@ class CommanderEngine:
             return None
         raise GameRuleError(f"Unsupported effect operation {op!r}")
 
-    def _create_replacement_token_instance(
-        self,
-        controller: str,
-        *,
-        name: str,
-        characteristics: Mapping[str, Any],
-        zone_timestamp: int | None = None,
-    ) -> str:
-        """Create one token object without dispatching its enter events."""
-
-        ref = self._next_ref("T")
-        object_id = self._stable_runtime_id("token-object", ref)
-        card = CardInstance(
-            object_id=object_id,
-            ref=ref,
-            oracle_id=(
-                f"custom-token:"
-                f"{self._stable_runtime_id('token-oracle', ref)}"
-            ),
-            printed_name=name,
-            owner=controller,
-            controller=controller,
-            zone="battlefield",
-            is_token=True,
-            zone_timestamp=(
-                int(zone_timestamp)
-                if zone_timestamp is not None
-                else self._next_zone_timestamp()
-            ),
-            annotations={
-                "token_characteristics": copy.deepcopy(
-                    dict(characteristics)
-                )
-            },
-            acquired_control_turn_count=self.state.players[
-                controller
-            ].turns_begun,
-            entered_battlefield_turn_sequence=self.state.turn_sequence,
-            known_to=list(self.seats),
-            revealed_to=list(self.seats),
-        )
-        self.state.cards[object_id] = card
-        self.state.players[controller].zones["battlefield"].append(
-            object_id
-        )
-        self._initialize_intrinsic_entry_counters(card)
-        self._refresh_world_supertype_timestamp(
-            card,
-            gained_at=card.zone_timestamp,
-        )
-        return object_id
-
     def create_emblem(
         self,
         owner: str,
@@ -23674,220 +23616,25 @@ class CommanderEngine:
         characteristics: Mapping[str, Any] | None = None,
         temporary_keywords: Sequence[str] = (),
         reason: str = "token effect",
+        replacement_selections: Sequence[str | None] = (),
     ) -> list[str]:
-        self._require_seat(controller, in_game=True)
-        if copy_of:
-            copied_source = self._resolve_object(
+        try:
+            return create_tokens(
+                self,
                 controller,
-                str(copy_of),
-                zones={"battlefield"},
-            )
-            created_types, _, _ = self._type_parts(
-                str(
-                    self._effective_card_data(copied_source).get(
-                        "type_line"
-                    )
-                    or ""
-                )
-            )
-        else:
-            type_line = str(
-                dict(characteristics or {}).get("type_line") or ""
-            )
-            if not type_line:
-                try:
-                    type_line = self.card_db.lookup(name).type_line
-                except KeyError:
-                    type_line = ""
-            created_types, _, _ = self._type_parts(type_line)
-        token_creation_event = quantity > 0
-        replacement_sources = (
-            [
-                self.state.cards[object_id]
-                for object_id in list(
-                    self.state.players[controller].zones["battlefield"]
-                )
-                if self.state.cards[object_id].controller == controller
-                and not self.state.cards[object_id].phased_out
-            ]
-            if token_creation_event
-            else []
-        )
-        created: list[str] = []
-        creation_timestamp = (
-            self._next_zone_timestamp() if quantity > 0 else None
-        )
-        for _ in range(quantity):
-            if copy_of:
-                original = self._resolve_object(controller, str(copy_of), zones={"battlefield"})
-                oracle_id = original.oracle_id
-                printed_name = name or self.display_name(original.object_id)
-                annotations = copy.deepcopy(original.annotations)
-                annotations["copied_from"] = original.object_id
-                overrides = dict(annotations.get("copy_overrides") or {})
-                if name:
-                    overrides["name"] = name
-                overrides.update(dict(characteristics or {}))
-                annotations["copy_overrides"] = overrides
-            else:
-                ref = self._next_ref("T")
-                try:
-                    record = self.card_db.lookup(name)
-                    oracle_id = record.oracle_id
-                    printed_name = record.name
-                except KeyError:
-                    oracle_id = f"custom-token:{self._stable_runtime_id('token-oracle', ref)}"
-                    printed_name = name
-                annotations = {"token_characteristics": dict(characteristics or {})}
-                if characteristics:
-                    annotations["copy_overrides"] = copy.deepcopy(
-                        dict(characteristics)
-                    )
-            if copy_of:
-                ref = self._next_ref("T")
-            object_id = self._stable_runtime_id("token-object", ref)
-            card = CardInstance(
-                object_id=object_id,
-                ref=ref,
-                oracle_id=oracle_id,
-                printed_name=printed_name,
-                owner=controller,
-                controller=controller,
-                zone="battlefield",
-                is_token=True,
-                zone_timestamp=int(creation_timestamp or 0),
+                name=name,
+                quantity=quantity,
                 tapped=tapped,
-                temporary_keywords=list(temporary_keywords),
-                annotations=annotations,
-                acquired_control_turn_count=self.state.players[controller].turns_begun,
-                entered_battlefield_turn_sequence=self.state.turn_sequence,
-                known_to=list(self.seats),
-                revealed_to=list(self.seats),
                 attacking=attacking,
                 battle_protector=battle_protector,
+                copy_of=copy_of,
+                characteristics=characteristics,
+                temporary_keywords=temporary_keywords,
+                reason=reason,
+                replacement_selections=replacement_selections,
             )
-            self.state.cards[object_id] = card
-            self.state.players[controller].zones["battlefield"].append(object_id)
-            self._initialize_intrinsic_entry_counters(card)
-            self._refresh_world_supertype_timestamp(
-                card,
-                gained_at=card.zone_timestamp,
-            )
-            if attacking:
-                self.state.combat.attackers[object_id] = attacking
-                target_details = self._attack_target_details(
-                    controller, attacking
-                )
-                if target_details is not None:
-                    self.state.combat.attack_target_context[object_id] = (
-                        target_details
-                    )
-            created.append(object_id)
-        applied_replacements: list[dict[str, Any]] = []
-        if token_creation_event:
-            replacement_registry = (
-                default_token_creation_replacement_registry()
-            )
-            for source in replacement_sources:
-                context = TokenCreationReplacementContext(
-                    source_ref=source.ref,
-                    source_controller=source.controller,
-                    event_controller=controller,
-                    created_types=tuple(sorted(created_types)),
-                )
-                programs = self.semantics.runtime_handler_programs_for_oracle(
-                    source.oracle_id,
-                    active_zone="battlefield",
-                    event="token.create",
-                )
-                for program in programs:
-                    if not self.semantic_program_is_current_trusted(program):
-                        continue
-                    for descriptor in program.handlers:
-                        for intent in replacement_registry.lower(
-                            descriptor, context
-                        ):
-                            for _ in range(intent.quantity):
-                                created.append(
-                                    self._create_replacement_token_instance(
-                                        controller,
-                                        name=intent.token.name,
-                                        zone_timestamp=creation_timestamp,
-                                        characteristics=(
-                                            intent.token.characteristics()
-                                        ),
-                                    )
-                                )
-                            applied_replacements.append(
-                                {
-                                    "handler_id": intent.handler_id,
-                                    "source": intent.source_ref,
-                                    "quantity": intent.quantity,
-                                }
-                            )
-        tracker = self.state.players[controller].stats.setdefault(
-            "tokens_created_by_turn", {}
-        )
-        turn_key = str(self.state.turn_sequence)
-        tracker[turn_key] = int(tracker.get(turn_key, 0)) + len(created)
-        self._log(
-            controller,
-            "token.create",
-            f"{controller} created {len(created)} token(s).",
-            {
-                "objects": [
-                    self.state.cards[oid].ref for oid in created
-                ],
-                "base_name": name,
-                "base_quantity": quantity,
-                "replacement_count": len(created) - quantity,
-                "replacement_components": applied_replacements,
-                "reason": reason,
-            },
-            importance=1,
-            changed_objects=created,
-            changed_players=[controller],
-        )
-        trigger_batch: list[StackItem] = []
-        for object_id in created:
-            card = self.state.cards[object_id]
-            data = self._effective_card_data(card)
-            types, _, _ = self._type_parts(
-                str(data.get("type_line") or "")
-            )
-            context = {
-                "card": card.ref,
-                "controller": controller,
-                "owner": controller,
-                "from": "outside",
-                "to": "battlefield",
-                "types": sorted(types),
-                "mana_value": float(
-                    data.get("mana_value", 0) or 0
-                ),
-                "token": True,
-                "tapped": card.tapped,
-                "reason": reason,
-            }
-            self._dispatch_semantic_event(
-                "token.created",
-                context,
-                trigger_batch=trigger_batch,
-            )
-            self._dispatch_semantic_event(
-                "permanent.enter",
-                context,
-                trigger_batch=trigger_batch,
-            )
-            for card_type in ("artifact", "creature", "land", "enchantment"):
-                if card_type in types:
-                    self._dispatch_semantic_event(
-                        f"{card_type}.enter",
-                        context,
-                        trigger_batch=trigger_batch,
-                    )
-        self._enqueue_semantic_trigger_batch(trigger_batch)
-        return [self.state.cards[oid].ref for oid in created]
+        except TokenCreationError as exc:
+            raise GameRuleError(str(exc)) from exc
 
     def change_control(self, object_id: str, new_controller: str, *, reason: str = "") -> None:
         self._require_seat(new_controller, in_game=True)
