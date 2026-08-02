@@ -119,11 +119,14 @@ class MechanicContractTests(unittest.TestCase):
                 "first-strike",
                 "flying",
                 "goad",
+                "infect",
                 "lifelink",
                 "menace",
                 "protection",
                 "tap-and-untap",
+                "toxic",
                 "trample",
+                "wither",
             },
             {contract["mechanic_id"] for contract in contracts},
         )
@@ -407,6 +410,38 @@ class OracleIRTests(unittest.TestCase):
         elf = compile_oracle_card(self.db.lookup("Llanowar Elves"))
         self.assertEqual("partial", elf.status)
         self.assertEqual("mana_ability", elf.faces[0].nodes[0].kind)
+
+    def test_damage_result_keywords_compile_as_generic_mechanics(self):
+        base = self.db.lookup("Flying Men")
+        for keyword, oracle_text in (
+            ("infect", "Infect"),
+            ("wither", "Wither"),
+            ("lifelink", "Lifelink"),
+            ("toxic", "Toxic 2"),
+        ):
+            with self.subTest(keyword=keyword):
+                ir = compile_oracle_card(
+                    replace(
+                        base,
+                        oracle_text=oracle_text,
+                        keywords=(keyword.title(),),
+                    )
+                )
+                self.assertEqual(
+                    (keyword,), ir.faces[0].nodes[0].mechanics
+                )
+                self.assertEqual(
+                    "dependency_contract", ir.material_residuals[0].kind
+                )
+                trusted = compile_oracle_card(
+                    replace(
+                        base,
+                        oracle_text=oracle_text,
+                        keywords=(keyword.title(),),
+                    ),
+                    trusted_mechanics={keyword},
+                )
+                self.assertFalse(trusted.material_residuals)
 
     def test_trusted_dependency_set_promotes_only_the_matching_template(self):
         bolt = compile_oracle_card(

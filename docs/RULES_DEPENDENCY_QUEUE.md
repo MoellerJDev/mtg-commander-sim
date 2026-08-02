@@ -14,30 +14,30 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,089
-- Reviewed behavioral blockers: 365
+- Queued rules: 3,082
+- Reviewed behavioral blockers: 358
 - Behavioral classification/review required: 2,724
-- Passing behavioral rules: 106
+- Passing behavioral rules: 113
 - Subsystems: 21
-- Queue fingerprint: `8a1fd96f726593d838fd131be00ec53d24ab0a4c885c7a364a81938a082da1e5`
+- Queue fingerprint: `8a39ab60b174f86ebf524b5397ef789e764b5641dfc9325516ec527e56a33f57`
 
 ## Selected next batch
 
-- Batch: `damage-replacement-prevention-events`
-- Subsystem: `damage`
-- Rules: `120.4`, `120.4b`
-- Target capabilities: `damage.replacement.static_quantity`, `damage.prevention.static_fixed`
-- Rationale: The replacement event tree and counter-placement transaction establish precommit affected-subject ordering. This batch routes every represented damage producer through one typed transaction and adds source-pinned static quantity replacement, fixed prevention, protection prevention, final event dispatch, and exact replay without claiming persistent shields or result replacement.
+- Batch: `battle-defense-characteristic`
+- Subsystem: `characteristics`
+- Rules: `210.1`
+- Target capabilities: none registered yet
+- Rationale: CR 210.1 is the first dependency-ready reviewed rule after the damage-result batch. Treat its printed-defense characteristic and intrinsic enters-with-defense event as one foundational Battle entry subsystem, rather than widening immediately into the downstream CR 310 casting, protector, combat, and defeated-trigger families.
 
 Exit criteria:
 
-- Route combat, semantic single-target, each-opponent, and mana-result damage through one typed precommit transaction.
-- Discover trusted source-pinned static quantity replacement, fixed prevention, and represented protection without printed-name engine dispatch.
-- Suspend affected-subject choices through principal-scoped packets and preserve exact replay without exposing authoritative event payloads.
-- Dispatch one normalized final damage event only after represented results and fail before mutation on unsupported infect, wither, toxic, or resumability semantics.
-- Promote only the narrow source-pinned capabilities whose positive, negative, interaction, privacy, replay, property, and implementation-mutation witnesses pass.
-- Run complete pinned Oracle and Commander-legal card censuses and report exact deltas.
-- Preserve Game Record v3, principal projection, zero suppressed meaningful windows, and fail-closed unsupported damage semantics.
+- Represent printed defense as a typed effective characteristic across ordinary, copied, transformed, face-down, and off-battlefield card states without printed-name dispatch.
+- Prepare the intrinsic enters-with-defense counter placement before battlefield mutation and route it through the shared replacement-event and counter-placement ordering boundaries.
+- Let the affected player make every material replacement or as-enters choice through a seat-scoped replayable continuation before the permanent enters.
+- Fail closed for missing, malformed, dynamic, or semantically unresolved defense values and for entry paths that cannot suspend safely.
+- Preserve exact copy/new-object identity, zone-change replacement ordering, multiplayer APNAP behavior, privacy, and command replay.
+- Compile and preflight the complete pinned Battle census, report exact generic-exact and blocked deltas, and retain downstream CR 310 blockers honestly.
+- Extract intrinsic defense-entry ownership from CommanderEngine into a bounded characteristic/entry module without widening the central engine.
 
 ## Dependency schedule
 
@@ -50,7 +50,7 @@ Exit criteria:
 | 5 | `card-types` | `characteristics`, `objects-permanents-tokens` | 168 | 13 | 155 | `oracle_normalization`, `card_program_typing`, `mechanic_contracts` |
 | 6 | `zones` | `objects-permanents-tokens`, `card-types` | 39 | 39 | 0 | `card_program_zone_permissions`, `mechanic_contracts` |
 | 7 | `resources` | `mana-costs-priority`, `zones` | 82 | 3 | 79 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
-| 8 | `damage` | `characteristics`, `objects-permanents-tokens`, `resources` | 18 | 18 | 0 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
+| 8 | `damage` | `characteristics`, `objects-permanents-tokens`, `resources` | 11 | 11 | 0 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 9 | `turn-structure` | `mana-costs-priority`, `zones`, `resources` | 26 | 26 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 10 | `casting-activation` | `mana-costs-priority`, `zones`, `turn-structure` | 46 | 46 | 0 | `oracle_parser`, `card_program_costs`, `card_program_lowering`, `mechanic_contracts` |
 | 11 | `triggered-static-linked` | `objects-permanents-tokens`, `turn-structure`, `casting-activation` | 71 | 71 | 0 | `oracle_parser`, `event_binding`, `card_program_lowering`, `mechanic_contracts` |

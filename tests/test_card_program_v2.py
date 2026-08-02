@@ -394,6 +394,12 @@ class CardProgramV2Tests(unittest.TestCase):
                 "replacement.damage.quantity.v1": [
                     "damage.replacement.static_quantity"
                 ],
+                "replacement.damage.result.life_floor.v1": [
+                    "damage.result.replacement_order"
+                ],
+                "replacement.life.gain.multiplier.v1": [
+                    "life.gain.replacement.static_multiplier"
+                ],
                 "replacement.token.additional.v1": [
                     "token.creation.additional_replacement"
                 ],

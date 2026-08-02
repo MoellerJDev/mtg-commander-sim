@@ -16,7 +16,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 - Compiler: `oracle-ir-v12`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
-- Compiler module: 1,828 physical / 1,759 logical lines
+- Compiler module: 1,830 physical / 1,761 logical lines
 
 ## Canonical CardProgram
 
@@ -27,9 +27,9 @@ This generated report describes only the pinned Oracle corpus and current compil
 - Model: `mtg_commander_sim/card_programs/model.py`
 - Generated/reviewed adapter: `mtg_commander_sim/card_programs/adapters.py`
 - Runtime validator: `mtg_commander_sim/card_programs/validation.py`
-- Canonical reviewed registry CardPrograms: 141
+- Canonical reviewed registry CardPrograms: 143
 - Intrinsic strict-capability-ready CardPrograms: 0
-- Trust bases: `{"legacy_reviewed": 141}`
+- Trust bases: `{"legacy_reviewed": 143}`
 
 ## Stages
 
@@ -48,21 +48,21 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/8`
+- Registry schema/version: `1/9`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `5636f0ae3861e0a632da40d07b552623acef1dadd0e52b8133074817d1dfd4ea`
-- Evidence fingerprint: `a1915340c8e19d75e2a6926367d2bc8438a3709e8621a7b3a529be596412c2fb`
-- Explicit evidence declarations: 131
-- Capability records: 26
-- Trusted records: 10
-- Blocked records: 7
-- Dependency fail-closed statuses: `{"not_applicable": 11, "not_run": 6, "passed": 9}`
-- Implementation mutation statuses: `{"killed": 14, "not_run": 12}`
+- Registry fingerprint: `a6e6ebd5829f0fe651e7dc92fb5766139b7512a94b46f1b3cebda82f1a98666a`
+- Evidence fingerprint: `eae850177f1f2c5c9054ba36db9e8c832ab0b9b7660bfbb7faca249796bfa013`
+- Explicit evidence declarations: 176
+- Capability records: 29
+- Trusted records: 16
+- Blocked records: 4
+- Dependency fail-closed statuses: `{"not_applicable": 11, "not_run": 3, "passed": 15}`
+- Implementation mutation statuses: `{"killed": 20, "not_run": 9}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
 | `cr-121-drawing-a-card` | 1 | false | `zone.draw.library_to_hand` |
-| `cr-120-damage` | 15 | false | `damage.combat.excess`, `damage.prevention.order`, `damage.replacement.order`, `damage.result.infect`, `damage.result.lifelink`, `damage.result.wither`, `damage.trigger.noncombat` |
+| `cr-120-damage` | 18 | false | `damage.combat.excess`, `damage.prevention.order`, `damage.replacement.order`, `damage.trigger.noncombat` |
 | `cr-725-the-monarch` | 1 | false | `variant.monarch.designate` |
 | `cr-111-tokens` | 1 | false | `token.creation.additional_replacement` |
 | `cr-614-replacement-effects` | 1 | false | `zone.change.destination_replacement` |
@@ -73,16 +73,16 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,484 | 2,959 | 16,092 | 19,433 | 69,890 | false |
-| Commander legal | 31,623 | 338 | 14,663 | 16,622 | 61,213 | false |
+| Full Oracle | 38,484 | 2,959 | 16,119 | 19,406 | 69,890 | false |
+| Commander legal | 31,623 | 338 | 14,684 | 16,601 | 61,213 | false |
 
 ## Full-corpus residual kinds
 
 | Kind | Count |
 |---|---:|
-| `dependency_contract` | 19,769 |
+| `dependency_contract` | 19,817 |
 | `trigger` | 15,247 |
-| `static_ability` | 12,150 |
+| `static_ability` | 12,102 |
 | `spell_effect` | 11,392 |
 | `effect` | 7,350 |
 | `cost` | 2,009 |
@@ -92,11 +92,11 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Semantic packs and implicit overrides
 
-- Pack files: 14
-- Program entries: 263
-- Unique program keys: 251
+- Pack files: 15
+- Program entries: 265
+- Unique program keys: 253
 - Duplicate keys resolved by pack order: 12
-- Unique Oracle IDs represented: 141
+- Unique Oracle IDs represented: 143
 - Card-specific operation names: 15
 - Typed card-override boundary present: true
 - Explicit typed overrides: 0

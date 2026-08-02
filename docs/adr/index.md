@@ -27,3 +27,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0010 — replayable replacement-event trees and token mutation ownership](0010-replacement-event-tree-and-token-owner.md)
 - [ADR 0011 — counter-placement event and mutation ownership](0011-counter-placement-event-and-mutation-owner.md)
 - [ADR 0012 — damage transaction and static prevention ownership](0012-damage-transaction-and-static-prevention.md)
+- [ADR 0013 — typed damage-result event ownership](0013-damage-result-event-ownership.md)

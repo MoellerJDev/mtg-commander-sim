@@ -407,6 +407,36 @@ class ReplacementBatchTests(unittest.TestCase):
             [selection.effect_id for selection in progress.batch.journal],
         )
 
+    def test_prefix_resolution_reports_only_explicit_choices_consumed(self):
+        events = (self.event("A"), self.event("B"))
+        alternatives = (
+            *self.effects,
+            effect(
+                "replace-A-alternative",
+                "damage",
+                {"op": "add", "field": "amount", "amount": 1},
+                conditions={"affected_player": "A"},
+            ),
+        )
+
+        progress = advance_replacement_batch(
+            ReplacementEventBatch(
+                batch_id="damage:phase-prefix",
+                events=events,
+                apnap_order=("A", "B", "C", "D"),
+            ),
+            alternatives,
+            selections=("replace-A", "later-phase-choice"),
+            require_all_selections=False,
+        )
+
+        self.assertIsNone(progress.pending)
+        self.assertEqual(1, progress.consumed_selections)
+        self.assertEqual(
+            ["replace-A", "replace-A-alternative", "replace-B"],
+            [selection.effect_id for selection in progress.batch.journal],
+        )
+
     def test_batch_round_trip_and_path_checked_replay_are_exact(self):
         initial = ReplacementEventBatch(
             batch_id="damage:replay",

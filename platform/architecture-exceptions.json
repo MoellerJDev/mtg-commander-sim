@@ -19,6 +19,25 @@
         "tests.test_architecture_guards.ArchitectureGuardTests.test_current_repository_passes_every_architecture_guard",
         "tests.test_architecture_governance.ArchitectureGovernanceTests.test_exception_is_bound_to_exact_allowance_fingerprint"
       ]
+    },
+    {
+      "exception_id": "ARCH-EXC-0002",
+      "adr": "docs/adr/0013-damage-result-event-ownership.md",
+      "artifact": "platform/architecture-guard-baseline.json",
+      "allowance_fingerprint": "48d8147b49ea695c12ad92c282f5155d389c87669da0ffd721f66287532363e2",
+      "exact_allowance": "Only the structural write identities, engine methods, size ceilings, specificity literals, Oracle-ID literals, effect operations, and legacy helpers serialized in the fingerprinted post-damage-result baseline.",
+      "rationale": "The typed damage-result owner removes mutation responsibility from the damage coordinator while generic rule words that coincide with card names require reviewed specificity allowances. The refreshed ratchet records the smaller responsibility boundary without permitting new oversized functions or card-specific dispatch.",
+      "owner": "rules architecture maintainers",
+      "maximum_scope": "Existing identities and recorded logical-line ceilings only; removals are allowed and additions or growth are forbidden.",
+      "removal_condition": "Remove the exception when every serialized grandfathered allowance has been migrated to a reviewed owner or deleted.",
+      "target_milestone": "incremental post-CR-120 debt migrations",
+      "replay_implications": "No replay behavior beyond the reviewed typed damage-result transaction is authorized; later migrations must preserve exact command replay and state hashes where behavior is unchanged.",
+      "privacy_implications": "No hidden-information expansion is authorized; damage-result choices remain affected-principal scoped.",
+      "security_implications": "No capability, arbiter, transport, or state-mutation authority beyond the dedicated damage-result owner is added by this exception.",
+      "tests": [
+        "tests.test_architecture_guards.ArchitectureGuardTests.test_current_repository_passes_every_architecture_guard",
+        "tests.test_architecture_governance.ArchitectureGovernanceTests.test_exception_is_bound_to_exact_allowance_fingerprint"
+      ]
     }
   ]
 }

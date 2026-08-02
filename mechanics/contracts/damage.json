@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 3,
+  "contract_version": 4,
   "mechanic_id": "cr-120-damage",
   "official_name": "Damage",
   "effective_date": "2026-06-19",
@@ -62,6 +62,8 @@
       "combat damage assignment",
       "represented spell or ability damage",
       "damage-result processing",
+      "immutable simultaneous damage-result event trees",
+      "containing-result replacement before contained result replacement",
       "typed final combat source-recipient result",
       "normalized combat damage.dealt trigger event",
       "zero damage is suppressed before a damage event exists",
@@ -69,6 +71,7 @@
     ],
     "state_reads": [
       "source and recipient characteristics",
+      "effective infect, wither, lifelink, and fixed toxic source traits",
       "recipient life",
       "marked damage",
       "loyalty counters",
@@ -79,7 +82,10 @@
       "creature marked damage",
       "planeswalker loyalty-counter removal",
       "battle defense-counter removal",
-      "deathtouch damage marker"
+      "deathtouch damage marker",
+      "player poison counters",
+      "creature -1/-1 counters",
+      "source-controller life gain"
     ],
     "costs": [],
     "timing": [
@@ -94,7 +100,8 @@
       "departed combat sources and departed permanent recipients deal no combat damage"
     ],
     "choices": [
-      "complex combat assignment remains a player choice"
+      "complex combat assignment remains a player choice",
+      "affected players or permanent controllers order competing represented damage and result replacements"
     ],
     "hidden_information": [
       "damage recipients and results are public"
@@ -107,7 +114,8 @@
       "derived recipient card types and source colors or keywords are read before applying represented results"
     ],
     "replacement_effects": [
-      "complete CR 120.4 damage-event replacement and prevention sequencing remains blocked"
+      "represented fixed damage quantity, fixed prevention, life-gain multiplication, and whole-result life-floor replacements occur before atomic commit",
+      "persistent and divisible shields, redirection, and uncompiled damage-result families remain blocked"
     ],
     "copy": [
       "copied card types and keywords participate through derived characteristics"
@@ -127,7 +135,11 @@
     "damage to a planeswalker",
     "damage to a battle",
     "damage to a permanent with multiple applicable card types",
-    "combat source leaves before damage"
+    "combat source leaves before damage",
+    "infect and wither counter results",
+    "lifelink across several recipients",
+    "fixed and cumulative toxic values",
+    "four-player APNAP result ordering"
   ],
   "witness_cards": [
     {
@@ -158,17 +170,25 @@
     "test_battle_damage_and_state_action_replay_exactly",
     "test_discretionary_assignments_are_collected_in_apnap_order_and_replay",
     "test_damage_and_resulting_death_triggers_share_one_order_batch",
-    "test_lifelink_counts_only_damage_not_prevented_by_protection"
+    "test_lifelink_counts_only_damage_not_prevented_by_protection",
+    "test_infect_player_damage_is_poison_not_life_loss",
+    "test_infect_and_wither_use_minus_counters_only_on_creatures",
+    "test_lifelink_gains_final_damage_across_multiple_recipients",
+    "test_toxic_is_additional_only_for_creature_combat_damage_to_player",
+    "test_prevented_infect_and_toxic_create_no_counter_results",
+    "test_four_player_keyword_results_keep_source_attribution",
+    "test_damage_result_replacement_choice_is_private_and_replays",
+    "test_keyword_damage_results_replay_from_combat_assignment"
   ],
   "implementation": {
-    "component": "DamageEvent plus CommanderEngine._apply_damage_results_to_permanent and CommanderEngine._apply_combat_assignments",
-    "version": "damage-results-v4"
+    "component": "mtg_commander_sim.damage coordinator plus mtg_commander_sim.damage_results prepare/plan/commit owner",
+    "version": "damage-results-v5"
   },
   "known_blockers": [
-    "the complete CR 120.4 damage-event pipeline, excess damage, replacement, and prevention ordering are not implemented",
-    "infect, wither, lifelink, toxic, and all source-result combinations are not implemented generically",
-    "noncombat damage-trigger generation and the universal CR 120.4 event order are not complete",
-    "infect, wither, toxic, regeneration, and damage-source selection remain incomplete"
+    "excess-damage redirection, greatest-excess selection, persistent and divisible prevention shields, and uncompiled damage/result replacement families remain incomplete",
+    "explicit replacement choices during mana-result damage are not resumable",
+    "unrepresented source last-known information, dynamic toxic values, continuous ability grants, regeneration, and complete damage-source selection remain incomplete",
+    "noncombat per-source trigger subsets and universal CR 120.4 event coverage are not complete"
   ],
   "review_status": "reviewed"
 }

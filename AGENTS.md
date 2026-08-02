@@ -93,13 +93,18 @@ rewrite.
   for represented effect-generated permanent counters and fixed integral
   quantity-replacement descriptors. Entry counters, player counters, costs,
   rule actions, and continuation-sensitive legacy producers remain blocked.
-- The active bounded slice is
-  `rules/damage-replacement-prevention-events`. It routes represented combat,
-  semantic, and mana-result damage through one typed proposal/prepare/commit
-  owner and adds fixed quantity-replacement and fixed prevention components.
-  Keep persistent shields, redirection, non-damage transformations,
-  damage-result replacement, infect/wither/toxic outcomes, and resumable
-  replacement choices during mana payment explicitly blocked.
+- The active bounded slice is `rules/damage-result-events`. It delegates final
+  dealt components to immutable affected-subject CR 120.3 result trees, resolves
+  represented containing and contained replacements, and commits one validated
+  mutation plan. Generic represented Infect, Wither, Lifelink, and fixed Toxic
+  outcomes plus fixed life-gain multiplication and a whole-result life floor
+  are in scope. Keep persistent shields, redirection, non-damage
+  transformations, dynamic Toxic, unrepresented source LKI/ability grants,
+  remaining result-replacement families, and resumable replacement choices
+  during mana payment explicitly blocked.
+- The generated post-merge queue selects the dependency-ready CR 210.1 Battle
+  defense-characteristic/entry batch. Do not implement it on the damage-result
+  branch; begin it only after this branch is certified and merged.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic

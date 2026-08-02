@@ -1,14 +1,24 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 from typing import Any, Literal, Mapping, Protocol, Sequence
 
+from .damage_results import (
+    commit_damage_result_plan,
+    DamageResultError,
+    DamageResultRecord,
+    plan_damage_result_commit,
+    prepare_damage_results,
+    PreparedDamageResults,
+)
 from .replacement_effects import (
     AffectedObject,
     ReplaceableEvent,
     ReplacementChoiceRequired,
     ReplacementClass,
     ReplacementEffect,
+    ReplacementEffectError,
     ReplacementEventBatch,
     ReplacementSelection,
     advance_replacement_batch,
@@ -117,6 +127,7 @@ class DamageSourceSnapshot:
     colors: tuple[str, ...] = ()
     keywords: tuple[str, ...] = ()
     is_commander: bool = False
+    toxic_value: int | None = 0
 
     def __post_init__(self) -> None:
         if not all(
@@ -130,6 +141,12 @@ class DamageSourceSnapshot:
         ):
             raise DamageError(
                 "Damage sources require stable identity and controller facts"
+            )
+        if self.toxic_value is not None and (
+            type(self.toxic_value) is not int or self.toxic_value < 0
+        ):
+            raise DamageError(
+                "A known total toxic value must be a nonnegative integer"
             )
 
 
@@ -222,6 +239,7 @@ class DamageProposal:
             "source_colors": list(self.source.colors),
             "source_keywords": list(self.source.keywords),
             "source_is_commander": self.source.is_commander,
+            "source_toxic_value": self.source.toxic_value,
             "target": self.recipient.ref,
             "target_kind": self.recipient.kind,
             "target_object_id": self.recipient.object_id,
@@ -290,6 +308,7 @@ class DamageEvent:
     first_strike_step: bool = False
     unpreventable: bool = False
     applied_effects: tuple[str, ...] = ()
+    source_toxic_value: int | None = 0
 
     def __post_init__(self) -> None:
         if self.target_kind not in {"player", "permanent"}:
@@ -307,6 +326,13 @@ class DamageEvent:
         if len(self.applied_effects) != len(set(self.applied_effects)):
             raise ValueError(
                 "A damage event cannot apply one replacement effect twice"
+            )
+        if self.source_toxic_value is not None and (
+            type(self.source_toxic_value) is not int
+            or self.source_toxic_value < 0
+        ):
+            raise ValueError(
+                "A known total toxic value must be a nonnegative integer"
             )
 
     @property
@@ -330,6 +356,7 @@ class DamageEvent:
             "source_colors": list(self.source_colors),
             "source_keywords": list(self.source_keywords),
             "source_is_commander": self.source_is_commander,
+            "source_toxic_value": self.source_toxic_value,
             "target": self.target,
             "target_kind": self.target_kind,
             "target_object_id": self.target_object_id,
@@ -353,6 +380,9 @@ class PreparedDamageBatch:
     events: tuple[ReplaceableEvent, ...]
     effects: tuple[ReplacementEffect, ...]
     journal: tuple[ReplacementSelection, ...]
+    result_events: tuple[ReplaceableEvent, ...] = ()
+    result_effects: tuple[ReplacementEffect, ...] = ()
+    result_journal: tuple[ReplacementSelection, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -368,10 +398,57 @@ class DamageBatchResult:
     changed_objects: tuple[str, ...]
     changed_players: tuple[str, ...]
     lifelink_gains: tuple[DamageLifeGain, ...]
+    result_events: tuple[DamageResultRecord, ...] = ()
 
     @property
     def dealt_amount(self) -> int:
         return sum(event.dealt_amount for event in self.events)
+
+
+_TOXIC_ABILITY = re.compile(r"^toxic\s+(?P<value>[0-9]+)$", re.IGNORECASE)
+
+
+def _total_toxic_value(
+    data: Mapping[str, Any],
+    *,
+    temporary_keywords: Sequence[Any] = (),
+) -> int | None:
+    """Return a represented source's total CR 702.164 toxic value.
+
+    Scryfall's keyword array deliberately omits the numeric parameter. Printed
+    values therefore come from complete ability-list segments in effective
+    Oracle text, while temporary granted abilities must retain their value in
+    the keyword string. Incidental references such as "a token with toxic 1"
+    are never treated as abilities of the source.
+    """
+
+    normalized = set(_normalized_keywords(data.get("keywords", ())))
+    values: list[int] = []
+    for line in str(data.get("oracle_text") or "").splitlines():
+        material = line.split(" (", 1)[0].strip().rstrip(".")
+        for part in material.split(","):
+            match = _TOXIC_ABILITY.fullmatch(part.strip())
+            if match is not None:
+                values.append(int(match.group("value")))
+    for keyword in normalized:
+        match = _TOXIC_ABILITY.fullmatch(keyword)
+        if match is not None:
+            values.append(int(match.group("value")))
+    unresolved_temporary = False
+    for value in temporary_keywords:
+        keyword = " ".join(str(value).casefold().split())
+        if keyword == "toxic":
+            unresolved_temporary = True
+    has_toxic = (
+        "toxic" in normalized
+        or any(value.startswith("toxic ") for value in normalized)
+        or bool(values)
+    )
+    if not has_toxic:
+        return 0
+    if unresolved_temporary or not values:
+        return None
+    return sum(values)
 
 
 def source_snapshot(
@@ -408,6 +485,13 @@ def source_snapshot(
     card_types, subtypes, _supertypes = host._type_parts(
         str(data.get("type_line") or "")
     )
+    keywords = _normalized_keywords(data.get("keywords", ()))
+    toxic_value = _total_toxic_value(
+        data,
+        temporary_keywords=getattr(source, "temporary_keywords", ()),
+    )
+    if toxic_value != 0 and "toxic" not in keywords:
+        keywords = tuple(sorted({*keywords, "toxic"}))
     return DamageSourceSnapshot(
         ref=source.ref,
         object_id=source.object_id,
@@ -423,8 +507,9 @@ def source_snapshot(
         colors=tuple(
             sorted(str(value).upper() for value in data.get("colors", ()))
         ),
-        keywords=_normalized_keywords(data.get("keywords", ())),
+        keywords=keywords,
         is_commander=bool(source.is_commander),
+        toxic_value=toxic_value,
     )
 
 
@@ -547,7 +632,7 @@ def prepare_damage_batch(
     sources: Sequence[Any] | None = None,
     source_zones: Mapping[str, str] | None = None,
 ) -> PreparedDamageBatch:
-    """Resolve one simultaneous CR 120.4b batch before any state mutation."""
+    """Resolve CR 120.4b damage and CR 120.4c results before mutation."""
 
     nonzero = tuple(proposal for proposal in proposals if proposal.amount > 0)
     if not nonzero:
@@ -562,6 +647,12 @@ def prepare_damage_batch(
     from .semantic_runtime.damage_replacements import (
         collect_damage_replacement_effects,
     )
+    from .semantic_runtime.damage_results import (
+        collect_damage_result_replacement_effects,
+    )
+    from .semantic_runtime.counter_replacements import (
+        collect_counter_placement_replacement_effects,
+    )
 
     effects = (
         *collect_damage_replacement_effects(
@@ -572,35 +663,75 @@ def prepare_damage_batch(
         *_protection_prevention_effects(host, nonzero),
     )
     events = tuple(proposal.event() for proposal in nonzero)
-    if not effects:
-        if selections:
-            raise DamageError(
-                "Replacement selections were supplied without an applicable "
-                "damage replacement"
-            )
-        return PreparedDamageBatch(events=events, effects=(), journal=())
-    progress = advance_replacement_batch(
-        ReplacementEventBatch(
-            batch_id=(
-                f"replacement:damage:{host.state.revision}:"
-                f"{host.state.event_sequence + 1}"
+    if effects:
+        damage_progress = advance_replacement_batch(
+            ReplacementEventBatch(
+                batch_id=(
+                    f"replacement:damage:{host.state.revision}:"
+                    f"{host.state.event_sequence + 1}"
+                ),
+                events=events,
+                apnap_order=tuple(host.apnap_order()),
             ),
-            events=events,
-            apnap_order=tuple(host.apnap_order()),
+            effects,
+            selections=selections,
+            require_all_selections=False,
+        )
+        if damage_progress.pending is not None:
+            raise ReplacementChoiceRequired(
+                batch=damage_progress.batch,
+                effects=effects,
+                pending=damage_progress.pending,
+            )
+        events = damage_progress.batch.events
+        damage_journal = damage_progress.batch.journal
+        consumed = damage_progress.consumed_selections
+    else:
+        damage_journal = ()
+        consumed = 0
+
+    result_effects = (
+        *collect_damage_result_replacement_effects(
+            host,
+            sources=sources,
+            source_zones=source_zones,
         ),
-        effects,
-        selections=selections,
+        *collect_counter_placement_replacement_effects(
+            host,
+            sources=sources,
+            source_zones=source_zones,
+        ),
     )
-    if progress.pending is not None:
+    try:
+        result_progress = prepare_damage_results(
+            host,
+            events,
+            effects=result_effects,
+            selections=tuple(selections[consumed:]),
+        )
+    except (DamageResultError, ReplacementEffectError) as exc:
+        raise DamageError(str(exc)) from exc
+    if result_progress.pending is not None:
         raise ReplacementChoiceRequired(
-            batch=progress.batch,
-            effects=effects,
-            pending=progress.pending,
+            batch=ReplacementEventBatch(
+                batch_id=(
+                    f"replacement:damage.results:{host.state.revision}:"
+                    f"{host.state.event_sequence + 1}"
+                ),
+                events=result_progress.events,
+                apnap_order=tuple(host.apnap_order()),
+                journal=result_progress.journal,
+            ),
+            effects=result_effects,
+            pending=result_progress.pending,
         )
     return PreparedDamageBatch(
-        events=progress.batch.events,
+        events=events,
         effects=tuple(effects),
-        journal=progress.batch.journal,
+        journal=tuple(damage_journal),
+        result_events=result_progress.events,
+        result_effects=tuple(result_effects),
+        result_journal=result_progress.journal,
     )
 
 
@@ -627,13 +758,6 @@ def _permanent_result_plan(
     if not damageable:
         raise DamageError(
             f"Damage cannot be dealt to {card.ref}; it is not damageable"
-        )
-    source_keywords = set(event.payload.get("source_keywords") or ())
-    if "creature" in card_types and source_keywords.intersection(
-        {"infect", "wither"}
-    ):
-        raise DamageError(
-            "Infect and wither creature-damage results are not yet represented"
         )
     if amount < 0:
         raise DamageError("Resolved damage cannot be negative")
@@ -666,12 +790,6 @@ def apply_damage_results_to_permanent(
             "creature, or planeswalker"
         )
     keywords = set(_normalized_keywords(source_keywords))
-    if "creature" in card_types and keywords.intersection(
-        {"infect", "wither"}
-    ):
-        raise DamageError(
-            "Infect and wither creature-damage results are not yet represented"
-        )
     result: dict[str, Any] = {
         "amount": damage,
         "types": sorted(damageable_types),
@@ -679,9 +797,15 @@ def apply_damage_results_to_permanent(
     if damage == 0:
         return result
     if "creature" in card_types:
-        card.marked_damage += damage
         card.deathtouch_damage = card.deathtouch_damage or deathtouch
-        result["marked_damage"] = damage
+        if keywords.intersection({"infect", "wither"}):
+            card.counters["-1/-1"] = (
+                int(card.counters.get("-1/-1", 0)) + damage
+            )
+            result["minus_one_counters"] = damage
+        else:
+            card.marked_damage += damage
+            result["marked_damage"] = damage
     for card_type, counter_name, result_name in (
         ("planeswalker", "loyalty", "loyalty_removed"),
         ("battle", "defense", "defense_removed"),
@@ -769,6 +893,11 @@ def _final_event(
         first_strike_step=bool(payload.get("first_strike_step")),
         unpreventable=bool(payload.get("unpreventable")),
         applied_effects=event.applied_effects,
+        source_toxic_value=(
+            int(payload["source_toxic_value"])
+            if payload.get("source_toxic_value") is not None
+            else None
+        ),
     )
 
 
@@ -805,6 +934,63 @@ def _log_replacement_journal(
         )
 
 
+def _validate_damage_replacement_journal(
+    prepared: PreparedDamageBatch,
+) -> None:
+    effects = {effect.effect_id for effect in prepared.effects}
+    events = {event.event_id for event in prepared.events}
+    for selection in prepared.journal:
+        selected_id = str(selection.effect_id or "")
+        if selected_id.startswith("decline:"):
+            continue
+        if selected_id not in effects or selection.event_id not in events:
+            raise DamageError(
+                "Damage replacement journal does not match its snapshot"
+            )
+
+
+def _validate_result_replacement_journal(
+    prepared: PreparedDamageBatch,
+) -> None:
+    effects = {effect.effect_id: effect for effect in prepared.result_effects}
+    events = {event.event_id: event for event in prepared.result_events}
+    for selection in prepared.result_journal:
+        selected_id = str(selection.effect_id or "")
+        if selected_id.startswith("decline:"):
+            continue
+        if selected_id not in effects or selection.event_id not in events:
+            raise DamageError(
+                "Damage-result replacement journal does not match its snapshot"
+            )
+
+
+def _log_result_replacement_journal(
+    host: DamageHost,
+    prepared: PreparedDamageBatch,
+) -> None:
+    effects = {effect.effect_id: effect for effect in prepared.result_effects}
+    events = {event.event_id: event for event in prepared.result_events}
+    for selection in prepared.result_journal:
+        selected_id = str(selection.effect_id or "")
+        if selected_id.startswith("decline:"):
+            continue
+        effect = effects[selected_id]
+        event = events[selection.event_id]
+        host._log(
+            None,
+            "replacement.apply",
+            f"{effect.source_id} modified a damage-result event.",
+            {
+                "source": effect.source_id,
+                "effect_id": effect.effect_id,
+                "result_subject": event.payload.get("subject"),
+                "result_subject_kind": event.payload.get("subject_kind"),
+                "event_path": list(selection.path),
+            },
+            importance=2,
+        )
+
+
 def commit_prepared_damage_batch(
     host: DamageHost,
     prepared: PreparedDamageBatch,
@@ -813,102 +999,111 @@ def commit_prepared_damage_batch(
 ) -> DamageBatchResult:
     """Atomically validate and commit a choice-complete damage batch."""
 
-    plans: list[tuple[ReplaceableEvent, int, int, int, Any | None]] = []
+    final_events: list[DamageEvent] = []
     for event in prepared.events:
         proposed, amount, prevented = _event_result(event)
         target_kind = str(event.payload.get("target_kind") or "")
         target = str(event.payload.get("target") or "")
-        source_keywords = set(event.payload.get("source_keywords") or ())
         if target_kind == "player":
             if target not in host.active_seats:
                 raise DamageError("Damage recipient is no longer in the game")
-            if "infect" in source_keywords:
-                raise DamageError(
-                    "Infect player-damage results are not yet represented"
-                )
-            if (
-                bool(event.payload.get("combat"))
-                and "toxic" in source_keywords
-            ):
-                raise DamageError(
-                    "Toxic combat-damage results are not yet represented"
-                )
-            plans.append((event, proposed, amount, prevented, None))
-            continue
-        if target_kind != "permanent":
-            raise DamageError("Resolved damage event lost its recipient")
-        card, _damageable = _permanent_result_plan(host, event, amount)
-        plans.append((event, proposed, amount, prevented, card))
-
-    changed_objects: list[str] = []
-    changed_players: list[str] = []
-    final_events: list[DamageEvent] = []
-    lifelink: dict[tuple[str, str], int] = {}
-    for event, proposed, amount, prevented, card in plans:
-        payload = event.payload
-        target = str(payload.get("target") or "")
-        if card is None:
-            host.state.players[target].life -= amount
-            if amount:
-                changed_players.append(target)
-            if (
-                amount
-                and bool(payload.get("combat"))
-                and bool(payload.get("source_is_commander"))
-            ):
-                commander_key = str(payload.get("source_object_id") or "")
-                # Existing records key commander damage by Oracle ID. The
-                # source object remains authoritative and resolves that ID.
-                source_card = host.state.cards.get(commander_key)
-                if source_card is not None:
-                    commander_key = source_card.oracle_id
-                received = host.state.players[target].commander_damage_received
-                received[commander_key] = received.get(commander_key, 0) + amount
+        elif target_kind == "permanent":
+            _permanent_result_plan(host, event, amount)
         else:
-            apply_damage_results_to_permanent(
-                host,
-                card,
-                amount,
-                deathtouch=bool(payload.get("deathtouch")) and amount > 0,
-                source_keywords=tuple(payload.get("source_keywords") or ()),
+            raise DamageError("Resolved damage event lost its recipient")
+        final_events.append(
+            _final_event(
+                event,
+                proposed=proposed,
+                dealt=amount,
+                prevented=prevented,
             )
-            if amount:
-                changed_objects.append(card.object_id)
-        final = _final_event(
-            event,
-            proposed=proposed,
-            dealt=amount,
-            prevented=prevented,
         )
-        final_events.append(final)
-        if amount and "lifelink" in final.source_keywords:
-            key = (final.source_controller, final.source)
-            lifelink[key] = lifelink.get(key, 0) + amount
-        if amount and final.target_kind == "player":
-            host._record_turn_history(
-                "player_damaged",
-                actor=final.source_controller,
-                object_incarnation=final.source_logical_object_id,
-                target=final.target,
-                target_kind="player",
-                amount=amount,
-            )
 
-    gains: list[DamageLifeGain] = []
-    for (player, source), amount in sorted(lifelink.items()):
-        if player not in host.active_seats:
+    has_results = any(
+        int(event.payload.get("amount", 0)) > 0 or event.children
+        for event in prepared.events
+    )
+    if has_results and not prepared.result_events:
+        raise DamageError("Prepared damage is missing its result event batch")
+    try:
+        result_plan = plan_damage_result_commit(
+            host,
+            PreparedDamageResults(
+                events=prepared.result_events,
+                effects=prepared.result_effects,
+                journal=prepared.result_journal,
+            ),
+        )
+    except (DamageResultError, ReplacementEffectError) as exc:
+        raise DamageError(str(exc)) from exc
+
+    _validate_damage_replacement_journal(prepared)
+    _validate_result_replacement_journal(prepared)
+
+    commander_updates: list[tuple[str, str, int]] = []
+    history_events: list[DamageEvent] = []
+    for final in final_events:
+        if final.dealt_amount and final.target_kind == "player":
+            history_events.append(final)
+        if not (
+            final.dealt_amount
+            and final.target_kind == "player"
+            and final.combat
+            and final.source_is_commander
+        ):
             continue
-        host.state.players[player].life += amount
-        changed_players.append(player)
-        gains.append(DamageLifeGain(player=player, source=source, amount=amount))
+        commander_key = final.source_object_id
+        source_card = host.state.cards.get(commander_key)
+        if source_card is not None:
+            commander_key = source_card.oracle_id
+        if not commander_key:
+            raise DamageError("Commander damage lost its source identity")
+        commander_updates.append(
+            (final.target, commander_key, final.dealt_amount)
+        )
+
+    committed = commit_damage_result_plan(host, result_plan)
+    changed_players = list(committed.changed_players)
+    changed_objects = list(committed.changed_objects)
+    for target, commander_key, amount in commander_updates:
+        received = host.state.players[target].commander_damage_received
+        received[commander_key] = received.get(commander_key, 0) + amount
+        changed_players.append(target)
+    for final in history_events:
+        host._record_turn_history(
+            "player_damaged",
+            actor=final.source_controller,
+            object_incarnation=final.source_logical_object_id,
+            target=final.target,
+            target_kind="player",
+            amount=final.dealt_amount,
+        )
+
+    gains = [
+        DamageLifeGain(
+            player=str(record.player),
+            source=str(record.source),
+            amount=record.amount,
+        )
+        for record in committed.records
+        if record.kind == "life.change"
+        and record.direction == "gain"
+        and record.cause == "lifelink"
+        and record.amount > 0
+        and record.player is not None
+        and record.source is not None
+    ]
 
     if log_replacements:
         _log_replacement_journal(host, prepared)
+        _log_result_replacement_journal(host, prepared)
     return DamageBatchResult(
         events=tuple(final_events),
         changed_objects=tuple(dict.fromkeys(changed_objects)),
         changed_players=tuple(dict.fromkeys(changed_players)),
         lifelink_gains=tuple(gains),
+        result_events=committed.records,
     )
 
 

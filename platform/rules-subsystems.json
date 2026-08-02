@@ -335,25 +335,21 @@
     }
   ],
   "selected_batch": {
-    "batch_id": "damage-replacement-prevention-events",
-    "subsystem_id": "damage",
+    "batch_id": "battle-defense-characteristic",
+    "subsystem_id": "characteristics",
     "rule_ids": [
-      "120.4",
-      "120.4b"
+      "210.1"
     ],
-    "target_capability_ids": [
-      "damage.replacement.static_quantity",
-      "damage.prevention.static_fixed"
-    ],
-    "rationale": "The replacement event tree and counter-placement transaction establish precommit affected-subject ordering. This batch routes every represented damage producer through one typed transaction and adds source-pinned static quantity replacement, fixed prevention, protection prevention, final event dispatch, and exact replay without claiming persistent shields or result replacement.",
+    "target_capability_ids": [],
+    "rationale": "CR 210.1 is the first dependency-ready reviewed rule after the damage-result batch. Treat its printed-defense characteristic and intrinsic enters-with-defense event as one foundational Battle entry subsystem, rather than widening immediately into the downstream CR 310 casting, protector, combat, and defeated-trigger families.",
     "exit_criteria": [
-      "Route combat, semantic single-target, each-opponent, and mana-result damage through one typed precommit transaction.",
-      "Discover trusted source-pinned static quantity replacement, fixed prevention, and represented protection without printed-name engine dispatch.",
-      "Suspend affected-subject choices through principal-scoped packets and preserve exact replay without exposing authoritative event payloads.",
-      "Dispatch one normalized final damage event only after represented results and fail before mutation on unsupported infect, wither, toxic, or resumability semantics.",
-      "Promote only the narrow source-pinned capabilities whose positive, negative, interaction, privacy, replay, property, and implementation-mutation witnesses pass.",
-      "Run complete pinned Oracle and Commander-legal card censuses and report exact deltas.",
-      "Preserve Game Record v3, principal projection, zero suppressed meaningful windows, and fail-closed unsupported damage semantics."
+      "Represent printed defense as a typed effective characteristic across ordinary, copied, transformed, face-down, and off-battlefield card states without printed-name dispatch.",
+      "Prepare the intrinsic enters-with-defense counter placement before battlefield mutation and route it through the shared replacement-event and counter-placement ordering boundaries.",
+      "Let the affected player make every material replacement or as-enters choice through a seat-scoped replayable continuation before the permanent enters.",
+      "Fail closed for missing, malformed, dynamic, or semantically unresolved defense values and for entry paths that cannot suspend safely.",
+      "Preserve exact copy/new-object identity, zone-change replacement ordering, multiplayer APNAP behavior, privacy, and command replay.",
+      "Compile and preflight the complete pinned Battle census, report exact generic-exact and blocked deltas, and retain downstream CR 310 blockers honestly.",
+      "Extract intrinsic defense-entry ownership from CommanderEngine into a bounded characteristic/entry module without widening the central engine."
     ]
   }
 }
