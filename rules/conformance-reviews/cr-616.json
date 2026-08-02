@@ -35,14 +35,19 @@
         "replacement_effects.ReplaceableEvent",
         "replacement_effects.ReplacementEventBatch",
         "replacement_effects.next_batch_replacement_choice",
-        "replacement_decisions.issue_replacement_order_choice"
+        "replacement_decisions.issue_replacement_order_choice",
+        "counter_placement.prepare_counter_placements"
       ],
       "executable_test_ids": [
         "tests.test_replacement_event_tree.ReplacementAffectedSubjectTests.test_affected_object_controller_chooses_before_owner",
         "tests.test_replacement_event_tree.ReplacementBatchTests.test_simultaneous_choices_are_collected_in_apnap_order",
         "tests.test_replacement_event_tree.ReplacementBatchTests.test_choice_payload_does_not_expose_authoritative_event_payload",
         "tests.test_graveyard_rules.GraveyardRuleTests.test_stack_object_controller_chooses_zone_replacement_order",
-        "tests.test_graveyard_rules.GraveyardRuleTests.test_competing_zone_replacements_suspend_resume_and_replay_exactly"
+        "tests.test_graveyard_rules.GraveyardRuleTests.test_competing_zone_replacements_suspend_resume_and_replay_exactly",
+        "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacements_apply_in_affected_players_chosen_order",
+        "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_simultaneous_counter_choices_follow_apnap",
+        "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacement_choice_is_seat_scoped",
+        "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacement_choice_replays_exactly"
       ],
       "required_scenarios": [
         "positive",
@@ -59,13 +64,13 @@
         "replay"
       ],
       "blockers": [
-        "generic engine choice packets are wired only into represented token-creation and semantic zone-change producers",
+        "generic engine choice packets are wired only into represented token-creation, semantic zone-change, and effect-generated permanent-counter producers",
         "multiple simultaneous events affecting the same chooser do not yet expose an explicit event-order choice when that order could matter"
       ],
       "notes": [
         "Affected-player and affected-object facts are captured before mutation, and simultaneous different-seat choices traverse APNAP order.",
         "Seat packets expose only visible option labels and IDs; authoritative batch IDs, event paths, payloads, and prior journals remain in the continuation.",
-        "The represented engine producers suspend and replay exact choices, but universal producer coverage remains incomplete."
+        "The represented engine producers suspend and replay exact choices, including competing quantity replacements for effect-generated permanent counters, but universal producer coverage remains incomplete."
       ]
     },
     {
@@ -206,11 +211,14 @@
       "implementation_components": [
         "replacement_effects.ReplaceableEvent.applied_effects",
         "replacement_effects.replacement_choice",
-        "replacement_effects.resolve_replacements"
+        "replacement_effects.resolve_replacements",
+        "replacement_effects.advance_replacement_batch"
       ],
       "executable_test_ids": [
         "tests.test_rules_primitives.ReplacementOrderingTests.test_each_effect_applies_at_most_once_to_one_event",
-        "tests.test_rules_primitives.ReplacementOrderingTests.test_applicability_is_recomputed_after_each_replacement"
+        "tests.test_rules_primitives.ReplacementOrderingTests.test_applicability_is_recomputed_after_each_replacement",
+        "tests.test_replacement_event_tree.ReplacementBatchTests.test_forced_singletons_do_not_consume_later_explicit_selection",
+        "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacements_apply_in_affected_players_chosen_order"
       ],
       "required_scenarios": [
         "positive",
@@ -225,7 +233,7 @@
       "blockers": [],
       "notes": [
         "The resolver repeats from current applicability until no effect remains and journals each used or declined effect so it cannot apply twice to the same event.",
-        "An explicit ordered selection sequence makes the modified event exactly replayable."
+        "An explicit ordered selection sequence makes the modified event exactly replayable, and forced mandatory singletons do not consume later supplied player selections."
       ]
     },
     {

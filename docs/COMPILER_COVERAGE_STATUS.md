@@ -27,9 +27,9 @@ This generated report describes only the pinned Oracle corpus and current compil
 - Model: `mtg_commander_sim/card_programs/model.py`
 - Generated/reviewed adapter: `mtg_commander_sim/card_programs/adapters.py`
 - Runtime validator: `mtg_commander_sim/card_programs/validation.py`
-- Canonical reviewed registry CardPrograms: 137
+- Canonical reviewed registry CardPrograms: 139
 - Intrinsic strict-capability-ready CardPrograms: 0
-- Trust bases: `{"legacy_reviewed": 137}`
+- Trust bases: `{"legacy_reviewed": 139}`
 
 ## Stages
 
@@ -50,14 +50,14 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 - Registry schema/version: `1/7`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `e2e3e8ddeff69cb66f8a4c97e55104d59c530f85e828e1ab738767c790e7953d`
-- Evidence fingerprint: `58bd8c8174a1f6c4530bd7edc5b2de751df510872214484d6f4b07f10f28b751`
-- Explicit evidence declarations: 108
-- Capability records: 23
+- Registry fingerprint: `03fa520169c684618de0edac41d9aaf1623271fd71916e88556f87f25b01f725`
+- Evidence fingerprint: `b9f7ae483aa24c212fa2ef1169691a4abb45045376a0a134fcdbc528e090aae8`
+- Explicit evidence declarations: 119
+- Capability records: 24
 - Trusted records: 8
 - Blocked records: 7
-- Dependency fail-closed statuses: `{"not_applicable": 10, "not_run": 6, "passed": 7}`
-- Implementation mutation statuses: `{"killed": 11, "not_run": 12}`
+- Dependency fail-closed statuses: `{"not_applicable": 11, "not_run": 6, "passed": 7}`
+- Implementation mutation statuses: `{"killed": 12, "not_run": 12}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
@@ -92,11 +92,11 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Semantic packs and implicit overrides
 
-- Pack files: 12
-- Program entries: 259
-- Unique program keys: 247
+- Pack files: 13
+- Program entries: 261
+- Unique program keys: 249
 - Duplicate keys resolved by pack order: 12
-- Unique Oracle IDs represented: 137
+- Unique Oracle IDs represented: 139
 - Card-specific operation names: 15
 - Typed card-override boundary present: true
 - Explicit typed overrides: 0

@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "cr-122-counters",
   "official_name": "Counters",
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
-  "rule_references": ["122", "122.1", "122.2"],
+  "rule_references": ["122", "122.1", "122.2", "122.6", "122.6a", "614.1", "614.16", "616.1", "616.1f", "616.1g"],
   "glossary_references": [],
   "dependencies": ["cr-110-permanents", "cr-611-continuous-effects"],
   "coverage_status": "partial",
@@ -13,33 +13,55 @@
   "behavior": {
     "zones": ["battlefield"],
     "objects": ["source or targeted permanent"],
-    "events": ["put one named counter on a permanent"],
-    "state_reads": ["current object identity and target legality"],
-    "state_writes": ["counter quantity"],
+    "events": ["put a positive fixed quantity of named counters on one or more battlefield permanents", "nested counter placement created by a represented replacement"],
+    "state_reads": ["current object identity and target legality", "placing player", "affected permanent controller", "active reviewed runtime counter-replacement sources"],
+    "state_writes": ["counter quantity after every applicable replacement choice has resolved"],
     "costs": [],
     "timing": ["during semantic effect resolution"],
     "targets": ["target is revalidated on resolution"],
-    "choices": [],
-    "hidden_information": [],
-    "apnap": [],
+    "choices": ["affected permanent controller chooses among competing represented quantity replacements"],
+    "hidden_information": ["seat packet exposes only visible replacement labels and IDs, not event payload, object ID, or replacement journal"],
+    "apnap": ["simultaneous placements requiring choices are collected in APNAP order"],
     "layers": ["power/toughness counters apply in layer 7c"],
-    "replacement_effects": ["counter replacement and prevention effects are not generic"],
+    "replacement_effects": ["reviewed fixed integral multiplication and addition apply to effect-generated permanent-counter placements", "a containing event is exhausted before its nested counter event"],
     "copy": ["counters are not copiable values"],
     "control_change": ["counters remain on the object"],
     "zone_change": ["zone changes clear counters from the new object"],
     "source_leaves": ["targeted effects can resolve if their source leaves"]
   },
-  "variants": ["one counter on this permanent", "one counter on target permanent"],
-  "witness_cards": [],
+  "variants": ["one counter on this permanent", "one counter on target permanent", "fixed additional counters", "fixed integral counter multiplication", "replacement-created nested counter placement"],
+  "witness_cards": [
+    {
+      "name": "Doubling Season",
+      "oracle_id": "01546b7d-a233-4176-8843-d732074dc5b6"
+    },
+    {
+      "name": "Doc Samson, Super Psychiatrist",
+      "oracle_id": "699610c9-c991-4faf-b712-d015ef0799ad"
+    }
+  ],
   "rulings": [],
-  "test_ids": ["test_self_pump_and_basic_token_creation_lower_generically"],
+  "test_ids": [
+    "test_self_pump_and_basic_token_creation_lower_generically",
+    "test_counter_quantity_component_rejects_malformed_and_nonmatching_events",
+    "test_counter_quantity_component_changes_effect_generated_placement",
+    "test_counter_replacements_apply_in_affected_players_chosen_order",
+    "test_simultaneous_counter_choices_follow_apnap",
+    "test_non_effect_and_inactive_source_do_not_replace_placement",
+    "test_zone_replacement_counter_is_a_nested_precommit_event",
+    "test_counter_replacement_choice_is_seat_scoped",
+    "test_counter_replacement_choice_replays_exactly",
+    "test_counter_replacement_property_1000_deterministic_transitions",
+    "test_counter_quantity_replacement_mutant_is_killed"
+  ],
   "implementation": {
-    "component": "oracle_ir._effect_template and CommanderEngine.apply_effect",
-    "version": "basic-counter-template-v1"
+    "component": "counter_placement mutation owner plus semantic_runtime.counter_replacements and represented semantic producers",
+    "version": "counter-placement-transaction-v2"
   },
   "known_blockers": [
     "variable and distributed counter instructions remain residual",
-    "counter replacement, doubling, and prevention effects are not integrated",
+    "explore, cumulative upkeep, fabricate, proliferate, intrinsic entry counters, loyalty costs, rule actions, and player counters are not yet migrated to the shared transaction",
+    "fractional, halving, dynamic-quantity, movement, removal, prevention, and full enters-with-counter replacement families remain unsupported",
     "counter type rules beyond existing power/toughness and loyalty consumers are incomplete"
   ],
   "review_status": "draft"

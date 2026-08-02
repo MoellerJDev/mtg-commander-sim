@@ -25,3 +25,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0008 — runtime trust and default-deny architecture governance](0008-runtime-trust-and-governance-hardening.md)
 - [ADR 0009 — typed tap-state effects and focused mutation ownership](0009-typed-tap-state-mutation-owner.md)
 - [ADR 0010 — replayable replacement-event trees and token mutation ownership](0010-replacement-event-tree-and-token-owner.md)
+- [ADR 0011 — counter-placement event and mutation ownership](0011-counter-placement-event-and-mutation-owner.md)

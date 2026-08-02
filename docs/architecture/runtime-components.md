@@ -35,13 +35,23 @@ The family does not claim optional descriptors, quantity doubling, or state-
 derived token definitions.
 
 `replacement.zone.destination.v1` supports a reviewed source-stamped zone-
-destination replacement and fixed counter intents. It uses the controller of
+destination replacement and typed nested counter events. It uses the controller of
 an object on the battlefield or stack and the owner otherwise, prepares
 simultaneous changes against the same pre-move source snapshot, and suspends
 competing choices to the affected seat. Dauthi Voidwalker's reviewed behavior
 is the current source-pinned witness; the engine no longer selects it by
-Oracle ID. Its counter intent is not yet routed through a universal counter-
-placement replacement boundary, so broad CR 614/616 remains blocked.
+Oracle ID. The containing zone event is exhausted before its counter child,
+and all choices finish before the move commits.
+
+`replacement.counter.quantity.v1` supports fixed integral multiplication and
+addition for effect-generated counters placed on battlefield permanents. It
+can restrict placing-player relation, affected permanent controller, counter
+name, and effective type. Competing effects are chosen by the affected
+permanent's controller; simultaneous events traverse APNAP order. Doubling
+Season and Doc Samson, Super Psychiatrist are the source-pinned witnesses.
+Player counters, costs, dynamic quantities, halving, movement, removal,
+prevention, full entry ordering, and continuation-sensitive legacy producers
+remain outside the component.
 
 `continuous.anthem.power_toughness.v1` supports a fixed same-controller subtype
 anthem in layer 7c. The source must be represented, on the battlefield, and not
@@ -68,12 +78,17 @@ component, timestamp, characteristic, and ruleset changes.
 `token_creation.py` is the focused authoritative mutation owner for token
 commit and enter-event dispatch. `replacement_effects.py` and
 `replacement_decisions.py` own immutable event trees and replayable choice
-continuations; runtime components remain pure participants.
+continuations. `counter_placement.py` owns pre-mutation preparation and final
+commit for represented permanent-counter events; runtime components remain
+pure participants.
 
 Primary tests are `test_replacement_event_tree.py`,
 `test_token_creation_replacements.py`, `test_graveyard_rules.py`,
+`test_counter_placement_replacements.py`,
 `test_continuous_effect_components.py`, `test_card_program_trust.py`, and
 `test_continuous_effect_performance.py`. See the
 [extension guide](../extension/runtime-component.md) and
 [ADR 0007](../adr/0007-cardprogram-runtime-components.md) plus
-[ADR 0010](../adr/0010-replacement-event-tree-and-token-owner.md).
+[ADR 0010](../adr/0010-replacement-event-tree-and-token-owner.md),
+[ADR 0011](../adr/0011-counter-placement-event-and-mutation-owner.md), and the
+[counter-placement architecture](counter-placement.md).

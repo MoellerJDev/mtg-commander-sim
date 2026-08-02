@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 import unittest
 from unittest.mock import patch
 
@@ -8,6 +9,12 @@ from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
 from mtg_commander_sim.damage import DamageEvent
 from mtg_commander_sim.engine import CommanderEngine
+from mtg_commander_sim.semantic_runtime.counter_replacements import (
+    CounterPlacementEventSpec,
+    CounterQuantityReplacementHandler,
+    CounterReplacementSourceContext,
+    resolve_counter_placement_replacements,
+)
 from mtg_commander_sim.targets import PUBLIC_TARGET_ZONES, TargetGroup
 
 
@@ -287,3 +294,71 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_containing_event_first()
+
+    def test_counter_quantity_replacement_mutant_is_killed(self):
+        descriptor = {
+            "handler_id": "replacement.counter.quantity.v1",
+            "schema_version": 1,
+            "event": "counter.place",
+            "condition": {
+                "placing_player_relation": "any",
+                "target_controller_relation": "source_controller",
+                "counter_names": [],
+                "target_types_all": [],
+                "effect_generated": True,
+            },
+            "modification": {"multiplier": 2, "additional": 0},
+        }
+        context = CounterReplacementSourceContext(
+            source_ref="doubling",
+            source_controller="A",
+        )
+        event = CounterPlacementEventSpec(
+            event_id="counter-mutation",
+            object_id="target",
+            owner="A",
+            controller="A",
+            target_zone="battlefield",
+            target_types=("creature",),
+            placing_player="A",
+            counter_name="+1/+1",
+            amount=2,
+            source_ref=None,
+            effect_generated=True,
+        ).event()
+
+        def assert_quantity_replaced() -> None:
+            effect = CounterQuantityReplacementHandler().replacement_effect(
+                descriptor,
+                context,
+            )
+            resolution = resolve_counter_placement_replacements(
+                batch_id="counter-mutation-batch",
+                events=(event,),
+                effects=(effect,),
+                apnap_order=("A",),
+            )
+            self.assertEqual(
+                4,
+                resolution.batch.events[0].payload["amount"],
+            )
+
+        assert_quantity_replaced()
+        original = CounterQuantityReplacementHandler.replacement_effect
+
+        def identity_quantity_mutant(handler, mapping, source_context):
+            effect = original(handler, mapping, source_context)
+            return replace(
+                effect,
+                operations=(
+                    {"op": "multiply", "field": "amount", "factor": 1},
+                ),
+            )
+
+        with patch.object(
+            CounterQuantityReplacementHandler,
+            "replacement_effect",
+            identity_quantity_mutant,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_quantity_replaced()

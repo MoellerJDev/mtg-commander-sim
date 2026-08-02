@@ -79,6 +79,7 @@ def _layer(relative: str) -> str:
         "mtg_commander_sim/combat.py",
         "mtg_commander_sim/combat_constraints.py",
         "mtg_commander_sim/continuous_effects.py",
+        "mtg_commander_sim/counter_placement.py",
         "mtg_commander_sim/damage.py",
         "mtg_commander_sim/declaration_costs.py",
         "mtg_commander_sim/declaration_restrictions.py",
@@ -114,6 +115,8 @@ def _owner(relative: str, layer: str) -> str:
         return "rules_capabilities"
     if relative == "mtg_commander_sim/tap_state.py":
         return "tap_state_effects"
+    if relative == "mtg_commander_sim/counter_placement.py":
+        return "counter_placement"
     if relative == "mtg_commander_sim/token_creation.py":
         return "token_creation"
     if relative == "mtg_commander_sim/replacement_decisions.py":
@@ -190,6 +193,7 @@ def build_classifications() -> dict[str, Any]:
                             "semantics.py",
                             "card_programs/",
                             "semantic_runtime/",
+                            "counter_placement.py",
                             "tap_state.py",
                             "token_creation.py",
                             "replacement_decisions.py",

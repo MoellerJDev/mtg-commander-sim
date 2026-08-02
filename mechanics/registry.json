@@ -16,8 +16,8 @@
     {
       "mechanic_id": "cr-122-counters",
       "path": "mechanics/contracts/basic-counters.json",
-      "sha256": "dccd844fce35de233cf7b59244beea52cf17ece39ae6f6106b2ba8ed56065f1d",
-      "version": 1
+      "sha256": "14a3582a371ba2d7f1ca575590844ff8270c5302a9b7aa55859af64f67eb0386",
+      "version": 2
     },
     {
       "mechanic_id": "cr-111-tokens",
@@ -286,8 +286,8 @@
     {
       "mechanic_id": "cr-616-interaction-of-replacement-and-or-prevention-effects",
       "path": "mechanics/contracts/replacement-ordering.json",
-      "sha256": "223ac514c869e1a8e326e3432eae5f90e7e887e4010039fb6f22bbaba2351dc7",
-      "version": 3
+      "sha256": "ee8536902af4d67e5a94242ca51ff50b06462588cec331200548d802ef16e95a",
+      "version": 4
     },
     {
       "mechanic_id": "cr-608-resolving-spells-and-abilities",
@@ -5604,16 +5604,17 @@
     {
       "category": "game_concepts",
       "contract_path": "mechanics/contracts/basic-counters.json",
-      "contract_sha256": "dccd844fce35de233cf7b59244beea52cf17ece39ae6f6106b2ba8ed56065f1d",
-      "contract_version": 1,
+      "contract_sha256": "14a3582a371ba2d7f1ca575590844ff8270c5302a9b7aa55859af64f67eb0386",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "oracle_ir._effect_template and CommanderEngine.apply_effect",
-      "implementation_version": "basic-counter-template-v1",
+      "implementation_component": "counter_placement mutation owner plus semantic_runtime.counter_replacements and represented semantic producers",
+      "implementation_version": "counter-placement-transaction-v2",
       "kind": "rules_section",
       "known_blockers": [
         "variable and distributed counter instructions remain residual",
-        "counter replacement, doubling, and prevention effects are not integrated",
+        "explore, cumulative upkeep, fabricate, proliferate, intrinsic entry counters, loyalty costs, rule actions, and player counters are not yet migrated to the shared transaction",
+        "fractional, halving, dynamic-quantity, movement, removal, prevention, and full enters-with-counter replacement families remain unsupported",
         "counter type rules beyond existing power/toughness and loyalty consumers are incomplete"
       ],
       "mechanic_id": "cr-122-counters",
@@ -5622,7 +5623,17 @@
         "122"
       ],
       "test_ids": [
-        "test_self_pump_and_basic_token_creation_lower_generically"
+        "test_self_pump_and_basic_token_creation_lower_generically",
+        "test_counter_quantity_component_rejects_malformed_and_nonmatching_events",
+        "test_counter_quantity_component_changes_effect_generated_placement",
+        "test_counter_replacements_apply_in_affected_players_chosen_order",
+        "test_simultaneous_counter_choices_follow_apnap",
+        "test_non_effect_and_inactive_source_do_not_replace_placement",
+        "test_zone_replacement_counter_is_a_nested_precommit_event",
+        "test_counter_replacement_choice_is_seat_scoped",
+        "test_counter_replacement_choice_replays_exactly",
+        "test_counter_replacement_property_1000_deterministic_transitions",
+        "test_counter_quantity_replacement_mutant_is_killed"
       ],
       "trust_level": "untrusted"
     },
@@ -7636,18 +7647,18 @@
     {
       "category": "spells_abilities_effects",
       "contract_path": "mechanics/contracts/replacement-ordering.json",
-      "contract_sha256": "223ac514c869e1a8e326e3432eae5f90e7e887e4010039fb6f22bbaba2351dc7",
-      "contract_version": 3,
+      "contract_sha256": "ee8536902af4d67e5a94242ca51ff50b06462588cec331200548d802ef16e95a",
+      "contract_version": 4,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "replacement_effects event trees and batches plus replacement_decisions suspension",
-      "implementation_version": "replacement-ordering-v3",
+      "implementation_component": "replacement_effects event trees and batches plus replacement_decisions suspension and the counter_placement transaction owner",
+      "implementation_version": "replacement-ordering-v4",
       "kind": "rules_section",
       "known_blockers": [
-        "generic replacement choice packets are wired only into represented token-creation and semantic zone-change producers",
+        "generic replacement choice packets are wired only into represented token-creation, semantic zone-change, and effect-generated permanent-counter producers",
         "multiple simultaneous events for the same affected chooser do not expose an explicit event-order choice when order could matter",
         "entry reservation scopes are not yet consumed by general as-enters choice transactions",
-        "draw, damage, counter placement, commander movement, and other replacement producers remain outside the universal event boundary"
+        "draw, damage, remaining counter-placement producers, commander movement, and other replacement producers remain outside the universal event boundary"
       ],
       "mechanic_id": "cr-616-interaction-of-replacement-and-or-prevention-effects",
       "official_name": "Interaction of Replacement and/or Prevention Effects",
@@ -7672,6 +7683,12 @@
         "test_simultaneous_choices_are_collected_in_apnap_order",
         "test_batch_round_trip_and_path_checked_replay_are_exact",
         "test_choice_payload_does_not_expose_authoritative_event_payload",
+        "test_forced_singletons_do_not_consume_later_explicit_selection",
+        "test_counter_replacements_apply_in_affected_players_chosen_order",
+        "test_simultaneous_counter_choices_follow_apnap",
+        "test_zone_replacement_counter_is_a_nested_precommit_event",
+        "test_counter_replacement_choice_is_seat_scoped",
+        "test_counter_replacement_choice_replays_exactly",
         "test_duplicate_effect_ids_fail_closed",
         "test_entering_objects_and_reserved_objects_cannot_change_zones",
         "test_library_top_ignores_cards_entering_from_library",

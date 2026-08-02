@@ -45,6 +45,12 @@ from .continuous_effects import (
     Layer,
     evaluate_continuous_effects,
 )
+from .counter_placement import (
+    commit_counter_events_from_resolution,
+    CounterPlacementError,
+    place_counters_on_controlled_subtype,
+    place_counters_on_refs,
+)
 from .combat_constraints import (
     DeclarationConstraintError,
     DeclarationProblem,
@@ -106,7 +112,6 @@ from .semantic_runtime import (
     default_semantic_interpreter,
     execute_intent_plan,
     log_applied_zone_replacements,
-    normalized_zone_replacement_counters,
     PreparedZoneChange,
     prepare_zone_change_replacement,
     prepare_draw_resolution,
@@ -2208,13 +2213,6 @@ class CommanderEngine:
                             known.update(self.seats)
                     card.known_to = sorted(known)
                     card.revealed_to = sorted(set(reveal_to or []))
-        for counter_name, counter_amount in normalized_zone_replacement_counters(
-            prepared_replacement,
-            error_type=StateInvariantError,
-        ):
-            card.counters[counter_name] = (
-                int(card.counters.get(counter_name, 0)) + counter_amount
-            )
         identity_became_hidden = (
             card.zone in HIDDEN_ZONES
             and not origin_identity_public
@@ -2274,6 +2272,7 @@ class CommanderEngine:
             requested_destination=requested_destination,
             error_type=StateInvariantError,
         )
+        commit_counter_events_from_resolution(self, prepared_replacement, reason=reason, log=log, error_type=StateInvariantError)
         if semantic_events:
             self._dispatch_zone_change_events(
                 card,
@@ -21542,37 +21541,26 @@ class CommanderEngine:
             amount = int(effect.get("amount", 1))
             if not counter or amount < 0:
                 raise GameRuleError("Counter effect requires a name and nonnegative amount")
-            changed: list[str] = []
-            for value in effect.get("cards") or []:
-                card = self._resolve_object(
-                    actor,
-                    str(value),
-                    zones={"battlefield"},
+            try:
+                results = place_counters_on_refs(
+                    self,
+                    actor=actor,
+                    object_refs=tuple(
+                        str(value) for value in effect.get("cards") or ()
+                    ),
+                    counter_name=counter,
+                    amount=amount,
+                    selections=tuple(
+                        effect.get("_replacement_selections") or ()
+                    ),
+                    reason=reason,
+                    source_ref=str(effect.get("source") or "") or None,
                 )
-                card.counters[counter] = (
-                    int(card.counters.get(counter, 0)) + amount
-                )
-                changed.append(card.object_id)
-            if changed:
-                self._log(
-                    actor,
-                    "counter.add",
-                    f"Added {amount} {counter} counter(s) to {len(changed)} permanent(s).",
-                    {
-                        "counter": counter,
-                        "amount": amount,
-                        "objects": [
-                            self.state.cards[object_id].ref
-                            for object_id in changed
-                        ],
-                        "reason": reason,
-                    },
-                    importance=2,
-                    changed_objects=changed,
-                )
+            except CounterPlacementError as exc:
+                raise GameRuleError(str(exc)) from exc
             return [
-                self.state.cards[object_id].ref
-                for object_id in changed
+                self.state.cards[result.object_id].ref
+                for result in results
             ]
         if op == "mana":
             seat = str(effect.get("player") or actor)
@@ -23392,6 +23380,23 @@ class CommanderEngine:
             card = self._resolve_object(actor, str(effect["card"]), zones={"battlefield"})
             name = str(effect.get("counter") or "+1/+1")
             delta = int(effect.get("delta", 1))
+            if delta > 0:
+                try:
+                    results = place_counters_on_refs(
+                        self,
+                        actor=actor,
+                        object_refs=(card.ref,),
+                        counter_name=name,
+                        amount=delta,
+                        selections=tuple(
+                            effect.get("_replacement_selections") or ()
+                        ),
+                        reason=reason,
+                        source_ref=str(effect.get("source") or "") or None,
+                    )
+                except CounterPlacementError as exc:
+                    raise GameRuleError(str(exc)) from exc
+                return results[0].after
             before, after = self._change_permanent_counter(
                 card,
                 name,
@@ -23418,51 +23423,25 @@ class CommanderEngine:
             subtype = str(effect.get("subtype") or "").casefold()
             counter_name = str(effect.get("counter") or "+1/+1")
             amount = int(effect.get("amount", 1))
-            changed: list[str] = []
-            for object_id in self.state.players[seat].zones[
-                "battlefield"
-            ]:
-                card = self.state.cards[object_id]
-                if (
-                    card.controller != seat
-                    or card.phased_out
-                    or subtype
-                    not in self._type_parts(
-                        str(
-                            self._effective_card_data(card).get(
-                                "type_line"
-                            )
-                            or ""
-                        )
-                    )[1]
-                ):
-                    continue
-                card.counters[counter_name] = (
-                    int(card.counters.get(counter_name, 0)) + amount
-                )
-                changed.append(card.object_id)
-            if changed:
-                self._log(
-                    actor,
-                    "counter.add",
-                    (
-                        f"Added {amount} {counter_name} counter(s) to "
-                        f"{len(changed)} {subtype} permanent(s)."
+            try:
+                results = place_counters_on_controlled_subtype(
+                    self,
+                    actor=actor,
+                    controller=seat,
+                    subtype=subtype,
+                    counter_name=counter_name,
+                    amount=amount,
+                    selections=tuple(
+                        effect.get("_replacement_selections") or ()
                     ),
-                    {
-                        "objects": [
-                            self.state.cards[object_id].ref
-                            for object_id in changed
-                        ],
-                        "counter": counter_name,
-                        "subtype": subtype,
-                        "amount": amount,
-                    },
-                    importance=2,
-                    changed_objects=changed,
+                    reason=reason,
+                    source_ref=str(effect.get("source") or "") or None,
                 )
+            except CounterPlacementError as exc:
+                raise GameRuleError(str(exc)) from exc
             return [
-                self.state.cards[object_id].ref for object_id in changed
+                self.state.cards[result.object_id].ref
+                for result in results
             ]
         if op == "look_top":
             seat = str(effect.get("player") or actor)

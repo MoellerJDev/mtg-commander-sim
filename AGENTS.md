@@ -91,12 +91,15 @@ rewrite.
   every reviewed blocked behavioral rule and every unclassified nonpassing
   rule exactly once. Select subsystem batches from that queue; do not resume
   numerical rule traversal.
-- The active bounded slice is `rules/replacement-choice-nested-events`. It
-  extracts immutable nested replacement-event trees, seat-scoped replayable
-  replacement ordering, and focused token/zone mutation boundaries. CR 616.1g
-  may be promoted only for the represented containing-before-contained event
-  behavior; broader CR 614/616 remains blocked. The next selected scheduler
-  batch is the universal counter-placement replacement boundary.
+- Certified `main` includes immutable nested replacement-event trees,
+  seat-scoped replayable replacement ordering, and focused token/zone mutation
+  boundaries. CR 616.1g is promoted only for represented containing-before-
+  contained behavior; broader CR 614/616 remains blocked.
+- The active bounded slice is `rules/counter-placement-replacement-events`.
+  It adds a focused prepare/commit owner for represented effect-generated
+  permanent counters and fixed integral quantity-replacement descriptors.
+  Keep entry counters, player counters, costs, rule actions, and continuation-
+  sensitive legacy producers explicitly blocked until their own safe migration.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic

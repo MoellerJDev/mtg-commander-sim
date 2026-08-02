@@ -87,6 +87,215 @@
       "applicability_note": "Apply a reviewed battlefield static ability that gives same-controller permanents with declared subtypes a fixed power/toughness modifier in layer 7c."
     },
     {
+      "capability_id": "counter.placement.quantity_replacement",
+      "evidence_class": "fuzz",
+      "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacement_property_1000_deterministic_transitions",
+      "official_rule_ids": [
+        "122.1",
+        "122.6",
+        "614.1",
+        "614.16",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+    },
+    {
+      "capability_id": "counter.placement.quantity_replacement",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacements_apply_in_affected_players_chosen_order",
+      "official_rule_ids": [
+        "122.1",
+        "122.6",
+        "614.1",
+        "614.16",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+    },
+    {
+      "capability_id": "counter.placement.quantity_replacement",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_zone_replacement_counter_is_a_nested_precommit_event",
+      "official_rule_ids": [
+        "122.1",
+        "122.6",
+        "614.1",
+        "614.16",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+    },
+    {
+      "capability_id": "counter.placement.quantity_replacement",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_simultaneous_counter_choices_follow_apnap",
+      "official_rule_ids": [
+        "122.1",
+        "122.6",
+        "614.1",
+        "614.16",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+    },
+    {
+      "capability_id": "counter.placement.quantity_replacement",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_counter_quantity_replacement_mutant_is_killed",
+      "official_rule_ids": [
+        "122.1",
+        "122.6",
+        "614.1",
+        "614.16",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+    },
+    {
+      "capability_id": "counter.placement.quantity_replacement",
+      "evidence_class": "negative",
+      "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_quantity_component_rejects_malformed_and_nonmatching_events",
+      "official_rule_ids": [
+        "122.1",
+        "122.6",
+        "614.1",
+        "614.16",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+    },
+    {
+      "capability_id": "counter.placement.quantity_replacement",
+      "evidence_class": "positive",
+      "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_quantity_component_changes_effect_generated_placement",
+      "official_rule_ids": [
+        "122.1",
+        "122.6",
+        "614.1",
+        "614.16",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+    },
+    {
+      "capability_id": "counter.placement.quantity_replacement",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacement_choice_is_seat_scoped",
+      "official_rule_ids": [
+        "122.1",
+        "122.6",
+        "614.1",
+        "614.16",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+    },
+    {
+      "capability_id": "counter.placement.quantity_replacement",
+      "evidence_class": "property",
+      "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacement_property_1000_deterministic_transitions",
+      "official_rule_ids": [
+        "122.1",
+        "122.6",
+        "614.1",
+        "614.16",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+    },
+    {
+      "capability_id": "counter.placement.quantity_replacement",
+      "evidence_class": "replay",
+      "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacement_choice_replays_exactly",
+      "official_rule_ids": [
+        "122.1",
+        "122.6",
+        "614.1",
+        "614.16",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+    },
+    {
+      "capability_id": "counter.placement.quantity_replacement",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_replacements_apply_in_affected_players_chosen_order",
+      "official_rule_ids": [
+        "122.1",
+        "122.6",
+        "614.1",
+        "614.16",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve represented effect-generated fixed integral counter placements on permanents through affected-object replacement ordering before the authoritative counter mutation."
+    },
+    {
       "capability_id": "damage.amount.positive",
       "evidence_class": "interaction",
       "test_id": "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack",

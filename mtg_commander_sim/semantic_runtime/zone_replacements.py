@@ -18,6 +18,9 @@ from ..replacement_effects import (
 from ..rules.capabilities import load_default_capability_registry
 from .component_registry import RuntimeComponentRegistry, exact_fields
 from .context import SemanticNodeError
+from .counter_replacements import (
+    collect_counter_placement_replacement_effects,
+)
 
 
 _DESTINATION_HANDLER_ID = "replacement.zone.destination.v1"
@@ -55,6 +58,12 @@ class ZoneReplacementHost(Protocol):
 
     def apnap_order(self, *, start: str | None = None) -> list[str]: ...
 
+    def _effective_card_data(self, card: Any) -> Mapping[str, Any]: ...
+
+    def _type_parts(
+        self, type_line: str
+    ) -> tuple[set[str], set[str], set[str]]: ...
+
     def _log(
         self,
         actor: str | None,
@@ -84,9 +93,11 @@ class ZoneDestinationReplacementNode:
 class ZoneChangeReplacementContext:
     source_ref: str
     source_controller: str
+    object_id: str
     object_ref: str
     object_owner: str
     object_controller: str | None
+    object_types: tuple[str, ...]
     origin: str
     destination: str
     is_card_object: bool
@@ -97,6 +108,7 @@ class ZoneChangeReplacementContext:
             (
                 self.source_ref,
                 self.source_controller,
+                self.object_id,
                 self.object_ref,
                 self.object_owner,
                 self.origin,
@@ -129,12 +141,17 @@ class ZoneChangeReplacementResolution:
         return str(self.event.payload["destination"])
 
     @property
-    def counter_intents(self) -> tuple[Mapping[str, Any], ...]:
-        return tuple(
-            value
-            for value in self.event.payload.get("counter_intents", ())
-            if isinstance(value, Mapping)
-        )
+    def counter_events(self) -> tuple[ReplaceableEvent, ...]:
+        events: list[ReplaceableEvent] = []
+
+        def visit(event: ReplaceableEvent) -> None:
+            if event.kind == "counter.place":
+                events.append(event)
+            for child in event.children:
+                visit(child)
+
+        visit(self.event)
+        return tuple(events)
 
 
 @dataclass(frozen=True, slots=True)
@@ -142,8 +159,9 @@ class PreparedZoneChange:
     object_id: str
     requested_destination: str
     destination: str
+    event: ReplaceableEvent | None = None
     effects: tuple[ReplacementEffect, ...] = ()
-    counter_intents: tuple[Mapping[str, Any], ...] = ()
+    counter_events: tuple[ReplaceableEvent, ...] = ()
     journal: tuple[ReplacementSelection, ...] = ()
 
 
@@ -268,14 +286,6 @@ class ZoneDestinationReplacementHandler:
     ) -> ReplacementEffect:
         node = self.validate(descriptor)
         component_id = context.component_id or node.replacement_destination
-        counter_intents = [
-            {
-                "name": name,
-                "amount": amount,
-                "source": context.source_ref,
-            }
-            for name, amount in node.counters
-        ]
         operations: list[Mapping[str, Any]] = [
             {
                 "op": "set",
@@ -283,12 +293,44 @@ class ZoneDestinationReplacementHandler:
                 "value": node.replacement_destination,
             }
         ]
-        if counter_intents:
+        target_controller = (
+            context.object_controller
+            if node.replacement_destination == "battlefield"
+            else None
+        )
+        target_kind = (
+            "permanent"
+            if node.replacement_destination == "battlefield"
+            else "card"
+        )
+        for index, (name, amount) in enumerate(node.counters):
             operations.append(
                 {
-                    "op": "append",
-                    "field": "counter_intents",
-                    "values": counter_intents,
+                    "op": "nested_event",
+                    "event": {
+                        "event_id": (
+                            f"zone.counter:{context.object_ref}:"
+                            f"{context.source_ref}:{index}"
+                        ),
+                        "kind": "counter.place",
+                        "affected_object": {
+                            "object_id": context.object_id,
+                            "owner": context.object_owner,
+                            "controller": target_controller,
+                        },
+                        "payload": {
+                            "placing_player": context.source_controller,
+                            "target_controller": target_controller,
+                            "target_zone": node.replacement_destination,
+                            "target_kind": target_kind,
+                            "target_types": list(context.object_types),
+                            "counter_name": name,
+                            "amount": amount,
+                            "requested_amount": amount,
+                            "source": context.source_ref,
+                            "effect_generated": True,
+                        },
+                    },
                 }
             )
         return ReplacementEffect(
@@ -388,12 +430,27 @@ def collect_zone_change_replacement_effects(
                         ZoneChangeReplacementContext(
                             source_ref=source.ref,
                             source_controller=source.controller,
+                            object_id=card.object_id,
                             object_ref=card.ref,
                             object_owner=card.owner,
                             object_controller=(
                                 card.controller
                                 if card.zone in {"battlefield", "stack"}
                                 else None
+                            ),
+                            object_types=tuple(
+                                sorted(
+                                    set().union(
+                                        *host._type_parts(
+                                            str(
+                                                host._effective_card_data(
+                                                    card
+                                                ).get("type_line")
+                                                or ""
+                                            )
+                                        )
+                                    )
+                                )
                             ),
                             origin=card.zone,
                             destination=destination,
@@ -402,6 +459,13 @@ def collect_zone_change_replacement_effects(
                         ),
                     )
                 )
+    effects.extend(
+        collect_counter_placement_replacement_effects(
+            host,
+            sources=candidates,
+            source_zones=source_zones,
+        )
+    )
     return tuple(effects)
 
 
@@ -478,8 +542,9 @@ def prepare_zone_change_replacement(
         object_id=card.object_id,
         requested_destination=destination,
         destination=resolution.destination,
+        event=resolution.event,
         effects=effects,
-        counter_intents=resolution.counter_intents,
+        counter_events=resolution.counter_events,
         journal=resolution.journal,
     )
 
@@ -506,6 +571,8 @@ def log_applied_zone_replacements(
             raise error_type(
                 "Applied zone replacement is absent from its source snapshot"
             )
+        if replacement.event_kind != "zone.change":
+            continue
         host._log(
             None,
             "replacement.apply",
@@ -521,35 +588,19 @@ def log_applied_zone_replacements(
                 "destination": card.zone,
                 _COUNTERS_FIELD: [
                     {
-                        "name": str(value.get("name") or ""),
-                        "amount": int(value.get("amount", 0)),
+                        "name": str(
+                            event.payload.get("counter_name") or ""
+                        ),
+                        "amount": int(event.payload.get("amount", 0)),
                     }
-                    for value in prepared.counter_intents
-                    if value.get("source") == replacement.source_id
+                    for event in prepared.counter_events
+                    if event.payload.get("source")
+                    == replacement.source_id
                 ],
             },
             importance=2,
             changed_objects=[card.object_id],
         )
-
-
-def normalized_zone_replacement_counters(
-    prepared: PreparedZoneChange,
-    *,
-    error_type: type[Exception],
-) -> tuple[tuple[str, int], ...]:
-    """Validate counter intents before the authoritative zone commit."""
-
-    normalized: list[tuple[str, int]] = []
-    for intent in prepared.counter_intents:
-        name = " ".join(str(intent.get("name") or "").casefold().split())
-        amount = int(intent.get("amount", 0))
-        if not name or amount < 1:
-            raise error_type(
-                "Compiled zone replacement produced an invalid counter"
-            )
-        normalized.append((name, amount))
-    return tuple(normalized)
 
 
 def resolve_zone_change_replacements(
@@ -579,7 +630,6 @@ def resolve_zone_change_replacements(
             "destination": destination,
             "object_kind": "card" if is_card_object else "noncard",
             "owner": owner,
-            "counter_intents": [],
         },
     )
     progress = advance_replacement_batch(

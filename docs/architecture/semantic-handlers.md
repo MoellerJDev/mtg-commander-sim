@@ -87,12 +87,18 @@ additional Thopter and Map replacements without claiming optional descriptors,
 quantity doubling, or state-derived token definitions.
 
 `replacement.zone.destination.v1` contributes a reviewed destination rewrite
-plus fixed counter intents. It uses the object's controller on the battlefield
+plus typed nested counter events. It uses the object's controller on the battlefield
 or stack and owner elsewhere, and simultaneous moves discover against one pre-
 mutation snapshot. Dauthi Voidwalker is supplied by source-pinned semantic data
-rather than an Oracle-ID engine branch. Counter intents still await the next
-universal counter-placement replacement boundary, so broad CR 614/616 is not
-closed.
+rather than an Oracle-ID engine branch. The parent zone event is exhausted
+before its counter child, and all replacement choices occur before commit.
+
+`replacement.counter.quantity.v1` contributes immutable fixed multiplication
+or addition effects for represented effect-generated counters on battlefield
+permanents. `counter_placement.py` owns the rollback-safe prepare/commit
+transaction, affected-controller choice, and APNAP batch. Runtime components
+never mutate counters. Remaining entry, cost, rule-action, player-counter, and
+continuation-sensitive producers keep broad CR 122/614/616 blocked.
 
 `continuous.anthem.power_toughness.v1` emits one source-stamped layer-7c
 effect for a fixed same-controller subtype anthem. Active sources are collected
@@ -123,5 +129,6 @@ Do not use this boundary to widen Oracle coverage or conceal unresolved cost,
 target, replacement, prevention, visibility, or interaction semantics. See
 [ADR 0006](../adr/0006-typed-semantic-handler-boundary.md),
 [ADR 0009](../adr/0009-typed-tap-state-mutation-owner.md),
-[ADR 0010](../adr/0010-replacement-event-tree-and-token-owner.md), and the separate
+[ADR 0010](../adr/0010-replacement-event-tree-and-token-owner.md),
+[ADR 0011](../adr/0011-counter-placement-event-and-mutation-owner.md), and the separate
 [runtime-component architecture](runtime-components.md).
