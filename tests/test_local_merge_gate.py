@@ -51,6 +51,7 @@ class LocalMergeGateTests(unittest.TestCase):
         self.assertEqual(
             {
                 "generated_capability_evidence_freshness",
+                "generated_rules_scheduler_freshness",
                 "module_classification_freshness",
                 "continuous_effect_work_budget",
                 "generated_platform_freshness",
@@ -109,6 +110,14 @@ class LocalMergeGateTests(unittest.TestCase):
                 "--check",
             ),
             by_name["generated_capability_evidence_freshness"],
+        )
+        self.assertEqual(
+            (
+                "python-under-test",
+                "scripts/update_rules_scheduler.py",
+                "--check",
+            ),
+            by_name["generated_rules_scheduler_freshness"],
         )
         self.assertEqual(
             (
