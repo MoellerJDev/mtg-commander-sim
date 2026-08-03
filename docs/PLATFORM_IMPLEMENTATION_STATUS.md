@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "99f68b779e2024a7447eeb6f21392f08523a08b9"
+verified: "6d0f1013ac49f51c906922fcdf478e4323db85f9"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,8 +15,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Current commit: certified Python 3.12 main through PR 74 merge 99f68b7; Oracle IR v18 fixed independent prevention/life sequencing follow-up is locally focused-tested and exact-head certification is pending
-- Active phase: `prevention_immediate_life_sequencing`
+- Current commit: certified Python 3.12 main through PR 75 merge 6d0f101; exact-head run 30834139920 passed Ubuntu, Windows, and headless Chromium; the two-slot sharded CI throughput phase is in development
+- Active phase: `pipelined_ci_throughput`
 - Package version: `0.8.0`
 
 Historical integration chronology belongs in `CHANGELOG.md`; this current report intentionally does not reproduce a pull-request ledger.
@@ -76,11 +76,11 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4501
+- Tests discovered: 4524
 - Python matrix: Python 3.12 on Ubuntu and Windows
-- Baseline CI: [30827880407](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30827880407) — `pass`
+- Baseline CI: [30834139920](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30834139920) — `pass`
 - Compile: `pass`
-- Deterministic tests: `certified_main_through_pr74_pass_full_gate; focused_prevention_immediate_sequence_compiler_runtime_cardprogram_replay_privacy_life_replacement_and_mutation_shards_pass; exact_head_full_gate_pending`
+- Deterministic tests: `certified_main_through_pr75_exact_head_public_ubuntu_windows_and_browser_pass; focused_prevention_immediate_sequence_compiler_runtime_cardprogram_replay_privacy_life_replacement_and_mutation_shards_pass`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
 - Four-player protocol demo: `pass`
 - Repository/history/security audit: `pass`
@@ -107,7 +107,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Certify and merge the fixed independent prevention/life sequencing correction, then return to fresh main and select the next dependency-ready rules family from the regenerated queue.
+Certify the sharded two-slot CI throughput pipeline, protect main with the stable PR / Certification context, then resume the next dependency-ready rules family from fresh main while nightly assurance owns expensive breadth.
 
 ## Regeneration
 

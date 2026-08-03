@@ -214,7 +214,7 @@ Mainboard:
 49 Forest
 `;
 
-test("four shared-cookie browser tabs retain isolated seats through mulligans and reconnect", async ({ browser }) => {
+test("@smoke four shared-cookie browser tabs retain isolated seats through mulligans and reconnect", async ({ browser }) => {
   const contexts: BrowserContext[] = [];
   const pages: Page[] = [];
   try {

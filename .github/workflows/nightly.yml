@@ -1,0 +1,196 @@
+name: Nightly assurance
+
+on:
+  schedule:
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-assurance
+  cancel-in-progress: false
+
+jobs:
+  full-python:
+    name: Nightly / Full Python / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    env:
+      MTG_CARD_DB: data/test-ci.sqlite3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+          cache: pip
+      - name: Install and prepare
+        run: python -m pip install -e . -r requirements-dev.txt
+      - name: Build compact database
+        run: >-
+          python scripts/build_test_database.py build
+          --fixture tests/fixtures/scryfall-exact-lists.json
+          --fixture tests/fixtures/browser-lifecycle-cards.json
+          --fixture tests/fixtures/damage-result-cards.json
+          --output data/test-ci.sqlite3
+      - name: Run complete deterministic suite
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+
+  browser:
+    name: Nightly / Full browser
+    runs-on: ubuntu-latest
+    env:
+      MTG_CARD_DB: data/test-ci.sqlite3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('web/package-lock.json') }}
+      - name: Install and prepare
+        run: |
+          python -m pip install -e . -r requirements-dev.txt
+          npm ci --prefix web
+          python scripts/build_test_database.py build \
+            --fixture tests/fixtures/scryfall-exact-lists.json \
+            --fixture tests/fixtures/browser-lifecycle-cards.json \
+            --fixture tests/fixtures/damage-result-cards.json \
+            --output data/test-ci.sqlite3
+      - name: Install headless Chromium
+        working-directory: web
+        run: npx playwright install --with-deps chromium
+      - name: Run all isolated headless journeys
+        run: npm run e2e --prefix web
+
+  properties:
+    name: Nightly / Property / ${{ matrix.module }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - test_counter_placement_replacements
+          - test_damage_replacement_model
+          - test_damage_result_events
+    env:
+      MTG_CARD_DB: data/test-ci.sqlite3
+      MTG_PROPERTY_TRANSITIONS: "33334"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+          cache: pip
+      - name: Install and prepare
+        run: |
+          python -m pip install -e . -r requirements-dev.txt
+          python scripts/build_test_database.py build \
+            --fixture tests/fixtures/scryfall-exact-lists.json \
+            --fixture tests/fixtures/browser-lifecycle-cards.json \
+            --fixture tests/fixtures/damage-result-cards.json \
+            --output data/test-ci.sqlite3
+      - name: Run deterministic property budget
+        run: python scripts/test_shards.py run-modules "${{ matrix.module }}"
+
+  mutation-and-soak:
+    name: Nightly / Mutation and soak
+    runs-on: ubuntu-latest
+    env:
+      MTG_CARD_DB: data/test-ci.sqlite3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+          cache: pip
+      - name: Install and prepare
+        run: |
+          python -m pip install -e . -r requirements-dev.txt
+          python scripts/build_test_database.py build \
+            --fixture tests/fixtures/scryfall-exact-lists.json \
+            --fixture tests/fixtures/browser-lifecycle-cards.json \
+            --fixture tests/fixtures/damage-result-cards.json \
+            --output data/test-ci.sqlite3
+      - name: Run focused mutations, full game, persistence, and performance
+        run: |
+          python scripts/test_shards.py run-modules \
+            test_capability_implementation_mutations \
+            test_deterministic_full_game \
+            test_server_persistence
+          python scripts/benchmark_continuous_effects.py --check
+          python scripts/validate_repository.py
+
+  corpus:
+    name: Nightly / Current Oracle census
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+          cache: pip
+      - name: Install package
+        run: python -m pip install -e . -r requirements-dev.txt
+      - name: Build current Scryfall database and run complete censuses
+        run: |
+          mkdir -p local/nightly
+          python scripts/bootstrap_data.py \
+            --refresh-from-scryfall \
+            --output data/scryfall-nightly.sqlite3 \
+            --download-dir local/nightly/bulk \
+            --force
+          python simctl.py oracle coverage --db data/scryfall-nightly.sqlite3 \
+            --profile commander_review --output local/nightly/oracle-full.json
+          python simctl.py oracle coverage --db data/scryfall-nightly.sqlite3 \
+            --profile commander_review --commander-legal-only \
+            --output local/nightly/oracle-commander.json
+          python simctl.py card coverage --db data/scryfall-nightly.sqlite3 \
+            --profile commander_review --output local/nightly/card-full.json
+          python simctl.py card coverage --db data/scryfall-nightly.sqlite3 \
+            --profile commander_review --commander-legal-only \
+            --output local/nightly/card-commander.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nightly-corpus-${{ github.run_id }}
+          path: local/nightly/*.json
+          retention-days: 14
+
+  security:
+    name: Nightly / Dependency and security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Audit Python and browser dependencies
+        run: |
+          python -m pip install -e . -r requirements-dev.txt pip-audit
+          python -m pip_audit
+          npm ci --prefix web
+          npm audit --prefix web --audit-level=high

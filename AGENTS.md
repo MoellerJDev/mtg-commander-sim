@@ -79,14 +79,15 @@ rewrite.
   damage results, durable prevention/redirection state, and focused token,
   zone, counter, life, and damage mutation owners. Generated reports, rather
   than branch chronology, are the source of current counts.
-- Certified main through PR 74 includes the bounded
+- Merged main through PR 75 includes the bounded
   `rules/damage-prevention-continuations-and-aftermath` slice: typed dynamic,
   divided, and per-object shields; seat-scoped source selection with
   physical/LKI pinning; transactional prevention-dependent life/counter
   aftermath; same-chooser ordering; mana-payment continuation; and the narrow
-  damage-modifier and life runtime families. The current focused correction
-  preserves fixed independent post-prevention instructions as ordered siblings
-  and routes immediate life through the canonical replacement-capable owner.
+  damage-modifier and life runtime families. The generic Oracle IR v18
+  correction preserves fixed independent post-prevention instructions as
+  ordered siblings and routes immediate life through the canonical
+  replacement-capable owner.
 - Keep complete CR 609.7a source categories, permanent-spell continuity,
   broader source-property predicates, general replacement-capable life gain,
   life-gain prevention, remaining prevention-aftermath wording,
@@ -94,9 +95,12 @@ rewrite.
   non-damage transformations, unresolved dynamic Toxic values, and broader CR
   614/615/616 closure explicitly blocked until their complete dependencies and
   evidence exist.
-- After this slice is certified and merged, regenerate the dependency queue
-  from fresh `main` and select the next coherent rules family. Do not resume
-  numerical rule traversal or open a status-only follow-up.
+- The current infrastructure phase establishes a two-slot development pipeline,
+  deterministic change-impact quick gates, balanced PR shards, a stable
+  certification context, compact `main` smoke, and deep nightly assurance.
+  Once that phase is certified, regenerate the dependency queue from fresh
+  `main` and select the next coherent rules family. Do not resume numerical
+  rule traversal or open a status-only follow-up.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic
@@ -109,60 +113,45 @@ generated presentations are `docs/ARCHITECTURE_DEBT_STATUS.md` and
 `docs/COMPILER_COVERAGE_STATUS.md`. Hand-maintained documents must link to those
 figures rather than copying them.
 
-## Before committing
+## Development and certification workflow
 
-Use only the ignored project-local CPython 3.12 environment. Do not rely on a
-global `python` alias.
+Use only the ignored worktree-local CPython 3.12 environment. Do not rely on a
+global `python` alias. Keep one branch in GitHub certification while developing
+the next independent branch in a second worktree; never mix changes between
+the two slots. The complete commands, recovery procedure, and shard ownership
+live in [the CI pipeline guide](docs/development/ci-pipeline.md).
 
-```powershell
-$python = ".\.venv\Scripts\python.exe"
-& $python scripts/validate_python_runtime.py
-& $python -m compileall -q mtg_commander_sim tests scripts simctl.py
-& $python scripts/build_test_database.py build `
-  --fixture tests/fixtures/scryfall-exact-lists.json `
-  --fixture tests/fixtures/browser-lifecycle-cards.json `
-  --output data/test-ci.sqlite3
-# Set MTG_CARD_DB=data/test-ci.sqlite3 for the remaining commands.
-& $python -m unittest discover -s tests -p 'test_*.py' -v
-& $python scripts/update_capability_evidence.py --check
-& $python scripts/update_rules_scheduler.py --check
-& $python scripts/update_module_classifications.py --check
-& $python scripts/benchmark_continuous_effects.py --check
-& $python scripts/demo_four_player_protocol.py --db data/test-ci.sqlite3 --out demo
-& $python scripts/update_platform_status.py --check
-& $python scripts/update_architecture_audit.py --check
-& $python scripts/validate_architecture.py --check
-& $python scripts/validate_documentation.py --check
-& $python scripts/validate_repository.py
-& $python simctl.py rules verify --root .
-& $python -m build --wheel
-& $python scripts/verify_wheel.py
-npm ci --prefix web
-npm run generate:types --prefix web
-npm run typecheck --prefix web
-npm run build --prefix web
-npm run e2e --prefix web
-```
-
-Set `MTG_CARD_DB` when the database is outside `data/`.
-Never stage `run/`, a SQLite database, a raw deck cache, a capability-bearing
-packet, or a live Game Record. Regression records must be generated in a
-temporary directory from sanitized recipes.
-
-## Before merging
-
-Run the reusable gate from a clean, committed branch:
+During development, run the new tests and adjacent impacted modules. Before
+committing an ordinary change, run the deterministic quick gate:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/local_merge_gate.py `
-  --expected-branch <branch> `
-  --expected-sha <full-sha>
+.\.venv\Scripts\python.exe scripts/quick_gate.py
 ```
 
-It orchestrates the commands above plus the focused opportunity, replay,
-privacy, deterministic four-player, protocol-demo, dependency, and clean-exit
-checks. Its logs and summary stay under ignored
-`local/merge-gates/<full-sha>/`.
+The quick gate classifies committed and working-tree paths, builds the compact
+offline database when needed, compiles Python, runs affected test modules or
+functional shards, and invokes relevant generated, architecture, rules,
+repository, package, or browser-build checks. Inspect its plan with
+`--dry-run`. It never starts a visible browser and does not run browser E2E
+locally.
+
+The public pull-request workflow is the normal certification authority. It
+runs ten balanced Linux functional shards plus generated/architecture,
+package, Windows-compatibility, and isolated headless-browser jobs. Every
+required dependency feeds the stable `PR / Certification` result; protect
+`main` with that exact context. Do not enable auto-merge until the protection
+is confirmed, because GitHub otherwise treats the merge as immediately
+eligible.
+
+`scripts/local_merge_gate.py` remains available for releases and unusually
+high-risk persistence, replay, privacy, or packaging changes. It is not the
+default iteration gate for every rules PR. Complete Windows, browser, property,
+mutation, security, and current-corpus depth also runs on the nightly workflow.
+
+Set `MTG_CARD_DB` when the database is outside `data/`. Never stage `run/`, a
+SQLite database, a raw deck cache, a capability-bearing packet, or a live Game
+Record. Regression records must be generated in a temporary directory from
+sanitized recipes.
 
 ## Architecture tests required
 

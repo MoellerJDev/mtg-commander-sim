@@ -1,24 +1,57 @@
-name: CI
+name: PR
 
 on:
-  push:
-    branches: ["main"]
   pull_request:
+  workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
 
+concurrency:
+  group: pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
-    name: Python 3.12 / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+  plan:
+    name: PR / Plan
+    runs-on: ubuntu-latest
+    outputs:
+      browser_full: ${{ steps.impact.outputs.browser_full }}
+      windows_full: ${{ steps.impact.outputs.windows_full }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+      - id: impact
+        name: Classify exact changed-file impact
+        run: python scripts/ci_plan.py
+
+  python:
+    name: PR / Python / ${{ matrix.shard }}
+    needs: plan
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      max-parallel: 10
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        shard:
+          - core-domain
+          - rules-events-replacements
+          - casting-costs-mana
+          - targets-choices-continuations
+          - triggers-turns-exact-decks
+          - state-actions-damage
+          - combat-declarations
+          - multiplayer-commander
+          - compiler-cardprogram
+          - server-replay-privacy
     env:
       MTG_CARD_DB: data/test-ci.sqlite3
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -26,9 +59,7 @@ jobs:
           python-version: "3.12"
           architecture: x64
           cache: pip
-      - name: Validate Python runtime policy
-        run: python scripts/validate_python_runtime.py
-      - name: Install package and development checks
+      - name: Install package and test dependencies
         run: python -m pip install -e . -r requirements-dev.txt
       - name: Build compact offline card database
         run: >-
@@ -37,35 +68,58 @@ jobs:
           --fixture tests/fixtures/browser-lifecycle-cards.json
           --fixture tests/fixtures/damage-result-cards.json
           --output data/test-ci.sqlite3
-      - name: Compile
-        run: python -m compileall -q mtg_commander_sim tests scripts simctl.py
-      - name: Test
-        run: python -m unittest discover -s tests -p "test_*.py" -v
-      - name: Verify generated capability evidence
-        run: python scripts/update_capability_evidence.py --check
-      - name: Verify generated rules scheduler
-        run: python scripts/update_rules_scheduler.py --check
-      - name: Verify module classifications
-        run: python scripts/update_module_classifications.py --check
-      - name: Verify continuous-effect work budget
-        run: python scripts/benchmark_continuous_effects.py --check
-      - name: Verify generated platform status
-        run: python scripts/update_platform_status.py --check
-      - name: Verify pinned rules corpus
-        run: python simctl.py rules verify --root .
-      - name: Validate repository and history policy
-        run: python scripts/validate_repository.py
-      - name: Build wheel
-        run: python -m build --wheel
-      - name: Verify clean wheel installation and CLI
-        run: python scripts/verify_wheel.py
+      - name: Run functional shard
+        run: python scripts/test_shards.py run "${{ matrix.shard }}"
 
-  web:
-    name: Browser / Chromium
+  generated:
+    name: PR / Generated and architecture
+    needs: plan
     runs-on: ubuntu-latest
     env:
       MTG_CARD_DB: data/test-ci.sqlite3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+          cache: pip
+      - name: Install package and validation dependencies
+        run: python -m pip install -e . -r requirements-dev.txt
+      - name: Build compact offline card database
+        run: >-
+          python scripts/build_test_database.py build
+          --fixture tests/fixtures/scryfall-exact-lists.json
+          --fixture tests/fixtures/browser-lifecycle-cards.json
+          --fixture tests/fixtures/damage-result-cards.json
+          --output data/test-ci.sqlite3
+      - name: Validate Python runtime and compile
+        run: |
+          python scripts/validate_python_runtime.py
+          python -m compileall -q mtg_commander_sim server tests scripts simctl.py
+      - name: Run generated conformance and governance tests
+        run: python scripts/test_shards.py run generated-validation
+      - name: Verify generated outputs
+        run: |
+          python scripts/update_capability_evidence.py --check
+          python scripts/update_rules_scheduler.py --check
+          python scripts/update_module_classifications.py --check
+          python scripts/benchmark_continuous_effects.py --check
+          python scripts/update_platform_status.py --check
+          python scripts/update_architecture_audit.py --check
+      - name: Verify rules, architecture, documentation, and repository policy
+        run: |
+          python simctl.py rules verify --root .
+          python scripts/validate_architecture.py --check
+          python scripts/validate_documentation.py --check
+          python scripts/validate_repository.py
 
+  package:
+    name: PR / Package
+    needs: plan
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -73,13 +127,71 @@ jobs:
           python-version: "3.12"
           architecture: x64
           cache: pip
-      - name: Validate Python runtime policy
-        run: python scripts/validate_python_runtime.py
+      - name: Install build tooling
+        run: python -m pip install -e . -r requirements-dev.txt
+      - name: Build wheel
+        run: python -m build --wheel
+      - name: Verify clean wheel installation and CLI
+        run: python scripts/verify_wheel.py
+
+  windows:
+    name: PR / Windows compatibility
+    needs: plan
+    runs-on: windows-latest
+    env:
+      MTG_CARD_DB: data/test-ci.sqlite3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+          cache: pip
+      - name: Install package and test dependencies
+        run: python -m pip install -e . -r requirements-dev.txt
+      - name: Validate runtime and build compact card database
+        shell: pwsh
+        run: |
+          python scripts/validate_python_runtime.py
+          python scripts/build_test_database.py build `
+            --fixture tests/fixtures/scryfall-exact-lists.json `
+            --fixture tests/fixtures/browser-lifecycle-cards.json `
+            --fixture tests/fixtures/damage-result-cards.json `
+            --output data/test-ci.sqlite3
+      - name: Run focused Windows compatibility suite
+        if: needs.plan.outputs.windows_full != 'true'
+        run: python scripts/test_shards.py run windows-compat
+      - name: Run complete Windows suite for platform-sensitive changes
+        if: needs.plan.outputs.windows_full == 'true'
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+      - name: Build and verify Windows wheel
+        shell: pwsh
+        run: |
+          python -m build --wheel
+          python scripts/verify_wheel.py
+
+  browser:
+    name: PR / Browser
+    needs: plan
+    runs-on: ubuntu-latest
+    env:
+      MTG_CARD_DB: data/test-ci.sqlite3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+          cache: pip
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: npm
           cache-dependency-path: web/package-lock.json
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('web/package-lock.json') }}
       - name: Install server and browser dependencies
         run: |
           python -m pip install -e . -r requirements-dev.txt
@@ -91,14 +203,54 @@ jobs:
           --fixture tests/fixtures/browser-lifecycle-cards.json
           --fixture tests/fixtures/damage-result-cards.json
           --output data/test-ci.sqlite3
-      - name: Verify generated protocol types
+      - name: Verify generated protocol types and production build
         run: |
           npm run generate:types --prefix web
           git diff --exit-code -- web/src/generated
-      - name: Typecheck and build browser
-        run: npm run build --prefix web
-      - name: Install Chromium
+          npm run build --prefix web
+      - name: Install headless Chromium
         working-directory: web
         run: npx playwright install --with-deps chromium
-      - name: Four-context browser test
+      - name: Run compact four-context smoke
+        if: needs.plan.outputs.browser_full != 'true'
+        run: npm run e2e:smoke --prefix web
+      - name: Run complete browser journeys for affected changes
+        if: needs.plan.outputs.browser_full == 'true'
         run: npm run e2e --prefix web
+
+  certification:
+    name: PR / Certification
+    if: always()
+    needs: [plan, python, generated, package, windows, browser]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require every PR gate
+        env:
+          CI_NEEDS_JSON: ${{ toJSON(needs) }}
+        run: python scripts/verify_ci_needs.py
+
+  metrics:
+    name: PR / Metrics
+    if: always()
+    needs: [plan, python, generated, package, windows, browser, certification]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch observed run timings
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p local
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" > local/ci-run.json
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs?per_page=100" > local/ci-jobs.json
+          python scripts/ci_metrics.py \
+            --run-json local/ci-run.json \
+            --jobs-json local/ci-jobs.json \
+            --output local/ci-metrics.json \
+            --summary "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ci-metrics-${{ github.run_id }}
+          path: local/ci-metrics.json
+          retention-days: 14

@@ -64,8 +64,39 @@ class PythonRuntimeTests(unittest.TestCase):
             sum("classifier is missing" in item for item in failures),
         )
 
-    def test_current_workflows_pin_two_os_jobs_and_browser_to_x64_312(self):
+    def test_current_workflows_pin_every_setup_to_x64_312(self):
         self.assertEqual([], workflow_policy_failures())
+
+    def test_workflow_policy_accepts_variable_job_counts_and_fails_missing_pin(self):
+        setup = (
+            "steps:\n"
+            "  - uses: actions/setup-python@v5\n"
+            "    with:\n"
+            "      python-version: '3.12'\n"
+            "      architecture: x64\n"
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            workflows = root / ".github" / "workflows"
+            workflows.mkdir(parents=True)
+            for name in (
+                "ci.yml",
+                "live-integration.yml",
+                "main-smoke.yml",
+                "nightly.yml",
+            ):
+                (workflows / name).write_text(setup, encoding="utf-8")
+            (workflows / "ci.yml").write_text(setup * 7, encoding="utf-8")
+            self.assertEqual([], workflow_policy_failures(root))
+
+            (workflows / "nightly.yml").write_text(
+                setup.replace("      architecture: x64\n", ""),
+                encoding="utf-8",
+            )
+            failures = workflow_policy_failures(root)
+
+        self.assertEqual(1, len(failures))
+        self.assertIn("nightly.yml must configure x64", failures[0])
 
     def test_wheel_requirement_accepts_canonicalized_order_only(self):
         self.assertTrue(_requires_python_matches("<3.13,>=3.12"))

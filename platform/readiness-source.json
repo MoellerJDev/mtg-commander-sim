@@ -6,11 +6,11 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "prevention_immediate_life_sequencing",
-    "branch": "fix/prevention-immediate-life-sequencing",
-    "commit_reference": "certified Python 3.12 main through PR 74 merge 99f68b7; Oracle IR v18 fixed independent prevention/life sequencing follow-up is locally focused-tested and exact-head certification is pending",
+    "active_phase": "pipelined_ci_throughput",
+    "branch": "chore/pipelined-ci-throughput",
+    "commit_reference": "certified Python 3.12 main through PR 75 merge 6d0f101; exact-head run 30834139920 passed Ubuntu, Windows, and headless Chromium; the two-slot sharded CI throughput phase is in development",
     "branch_ancestry": {
-      "focused_branch_base": "99f68b779e2024a7447eeb6f21392f08523a08b9",
+      "focused_branch_base": "6d0f1013ac49f51c906922fcdf478e4323db85f9",
       "focused_branch_unique_commits_over_main": 0
     },
     "pull_requests": [
@@ -531,6 +531,13 @@
         "number": 74,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/74"
+      },
+      {
+        "base": "main",
+        "head": "fix/prevention-immediate-life-sequencing",
+        "number": 75,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/75"
       }
     ],
     "tags": [
@@ -669,16 +676,16 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "99f68b779e2024a7447eeb6f21392f08523a08b9",
+    "baseline_commit": "6d0f1013ac49f51c906922fcdf478e4323db85f9",
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30827880407,
+      "run_id": 30834139920,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30827880407"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30834139920"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr74_pass_full_gate; focused_prevention_immediate_sequence_compiler_runtime_cardprogram_replay_privacy_life_replacement_and_mutation_shards_pass; exact_head_full_gate_pending",
+      "deterministic_tests": "certified_main_through_pr75_exact_head_public_ubuntu_windows_and_browser_pass; focused_prevention_immediate_sequence_compiler_runtime_cardprogram_replay_privacy_life_replacement_and_mutation_shards_pass",
       "focused_rules_tests": "pass_fixed_independent_life_sibling_no_damage_later_damage_zero_prevented_static_multiplier_all_targets_illegal_source_choice_save_load_replay_privacy_and_killed_mutants",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
@@ -710,5 +717,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Certify and merge the fixed independent prevention/life sequencing correction, then return to fresh main and select the next dependency-ready rules family from the regenerated queue."
+  "next_task": "Certify the sharded two-slot CI throughput pipeline, protect main with the stable PR / Certification context, then resume the next dependency-ready rules family from fresh main while nightly assurance owns expensive breadth."
 }

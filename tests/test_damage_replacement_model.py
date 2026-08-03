@@ -9,6 +9,7 @@ import unittest
 from mtg_commander_sim import replacement_effects
 
 from common import ROOT, keep_all, make_session
+from property_budget import property_transitions
 from scripts.build_test_database import build_fixture_database
 from mtg_commander_sim.carddb import CardDatabase
 from mtg_commander_sim.damage import (
@@ -300,7 +301,7 @@ class DamageReplacementModelTests(DamageReplacementPipelineBase):
         quantity = DamageQuantityReplacementHandler()
         prevention = FixedDamagePreventionHandler()
         randomizer = random.Random(120461599)
-        for index in range(1_000):
+        for index in range(property_transitions()):
             amount = randomizer.randint(1, 20)
             multiplier = randomizer.randint(2, 4)
             prevented = randomizer.randint(1, 8)

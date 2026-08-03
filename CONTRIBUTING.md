@@ -2,7 +2,7 @@
 title: "Contributing"
 status: "current"
 authoritative_source: "repository merge, test, and review policy"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-02"
 audience: "contributors"
 maintenance: "hand-maintained"
 ---
@@ -31,21 +31,26 @@ npm run typecheck --prefix web
 npm run build --prefix web
 ```
 
-Set `MTG_CARD_DB=data/test-ci.sqlite3`, then run the commands in `AGENTS.md`.
-Documentation changes must keep [`docs/index.md`](docs/index.md) complete and
-pass `.\.venv\Scripts\python.exe scripts/validate_documentation.py --check`.
-Put current metrics in
-machine-readable sources and generated reports rather than prose.
-Before merging a clean committed branch, run:
+Set `MTG_CARD_DB=data/test-ci.sqlite3` for focused tests that use card data.
+Before commit, inspect and run the deterministic quick gate:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/local_merge_gate.py `
-  --expected-branch <branch> `
-  --expected-sha <full-sha>
+.\.venv\Scripts\python.exe scripts/quick_gate.py --dry-run
+.\.venv\Scripts\python.exe scripts/quick_gate.py
 ```
 
-The ignored exact-SHA summary is written below `local/merge-gates/`; do not
-commit its logs or database.
+Documentation changes must keep [`docs/index.md`](docs/index.md) complete and
+pass `.\.venv\Scripts\python.exe scripts/validate_documentation.py --check`.
+Put current metrics in machine-readable sources and generated reports rather
+than prose.
+
+Public pull-request CI is the ordinary exact-head merge authority. Require the
+stable `PR / Certification` context, which depends on all Linux shards,
+generated and architecture checks, packaging, Windows compatibility, and the
+isolated headless browser job. Use the full `scripts/local_merge_gate.py` only
+for releases and unusually high-risk persistence, replay, privacy, or packaging
+changes. See the [CI pipeline guide](docs/development/ci-pipeline.md) for the
+two-slot workflow, shard ownership, nightly depth, and recovery commands.
 
 ## Change boundaries
 
@@ -54,8 +59,9 @@ commit its logs or database.
   ADR policies; reviewed exceptions require the documented decision path.
 - Keep FastAPI/Uvicorn/HTTP/WebSocket imports out of `mtg_commander_sim`; the
   `server` adapter may depend inward on the transport-neutral package.
-- Run the four-context Playwright test for room, authentication, WebSocket,
-  reconnect, projection, or browser decision changes.
+- Let CI run the isolated four-context headless Playwright test for room,
+  authentication, WebSocket, reconnect, projection, or browser decision
+  changes. Never open or navigate a visible browser during automated work.
 - Add deterministic tests for rules, target, permission, or protocol changes.
 - Fail closed when semantics are unresolved.
 - Preserve Game Record v3 and exact command replay.
