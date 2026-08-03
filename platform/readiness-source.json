@@ -6,11 +6,11 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "prevention_damage_aftermath_results",
-    "branch": "rules/prevention-aftermath-results-and-triggers",
+    "active_phase": null,
+    "branch": null,
     "branch_ancestry": {
-      "focused_branch_base": "707a2ea3fda4c574840ac984e8de8ad509af079f",
-      "focused_branch_unique_commits_over_main": 1
+      "focused_branch_base": "3b4d1b6b6113fcaf367ff62b8b73cb4fc51f67d3",
+      "focused_branch_unique_commits_over_main": 0
     },
     "pull_requests": [
       {
@@ -544,6 +544,13 @@
         "number": 76,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/76"
+      },
+      {
+        "base": "main",
+        "head": "rules/prevention-aftermath-results-and-triggers",
+        "number": 77,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/77"
       }
     ],
     "tags": [
@@ -558,9 +565,9 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "7e54962d9c1f3b8da9fde6465506243394db24b2",
-    "certified_head_sha": "707a2ea3fda4c574840ac984e8de8ad509af079f",
-    "generation_timestamp": "2026-08-03T19:03:00Z"
+    "feature_head_sha": "16f042c293ffadaa870b1103948fe6de2ca44101",
+    "certified_head_sha": "16f042c293ffadaa870b1103948fe6de2ca44101",
+    "generation_timestamp": "2026-08-03T19:56:00Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -651,8 +658,8 @@
     {
       "id": "damage_prevention_continuations_and_aftermath",
       "name": "Damage-prevention continuations and aftermath",
-      "status": "certified_main_plus_local_damage_aftermath",
-      "evidence": "Certified main through PR 76 includes typed dynamic/divided/per-object shields, seat-scoped public source choice, exact-incarnation continuity, replacement-capable CR 615.5 life/permanent-counter aftermath, immediate independent life sequencing, same-chooser ordering, and mana-payment continuation. The active Oracle IR v19 branch adds an immutable pinned damage source/value boundary and typed source-controller damage aftermath that recursively prepares through ordinary replacement/prevention against projected modifier state, preserves LKI, rejects mandatory cycles before mutation, and replays exactly. Generic lowering recognizes Deflecting Palm without a name/Oracle-ID branch. The August 2 census moves Commander exact/trusted/capability-closed to 417/417/415. CR 615.13 triggered prevention results, explicit-target or mixed aftermath, life-gain prevention, face-down source characteristics, and wider source predicates remain blocked."
+      "status": "integrated_on_certified_main",
+      "evidence": "Certified main through PR 77 includes typed dynamic/divided/per-object shields, seat-scoped public source choice, exact-incarnation continuity, replacement-capable CR 615.5 life/permanent-counter/source-controller-damage aftermath, immediate independent life sequencing, same-chooser ordering, and mana-payment continuation. Source-controller damage recursively prepares through ordinary replacement/prevention against projected modifier state, preserves immutable source LKI, rejects mandatory cycles before mutation, and replays exactly. Generic Oracle IR v19 lowering recognizes Deflecting Palm without a name/Oracle-ID branch. The August 2 census is Commander exact/trusted/capability-closed 417/417/415. CR 615.13 triggered prevention results, explicit-target or mixed aftermath, life-gain prevention, face-down source characteristics, and wider source predicates remain blocked."
     },
     {
       "id": "rules_snapshot",
@@ -689,13 +696,13 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30836890898,
+      "run_id": 30846670803,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30836890898"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30846670803"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr76_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass; focused_typed_prevention_damage_aftermath_model_creation_runtime_cardprogram_replay_capability_and_mutation_shards_pass",
+      "deterministic_tests": "certified_main_through_pr77_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass; post_merge_main_smoke_integration_behavior_passed_before_provenance_history_validation",
       "focused_rules_tests": "pass_source_lki_projected_shield_consumption_nested_prevention_unpreventable_zero_cycle_rollback_four_player_replay_compiler_cardprogram_capability_and_killed_quantity_mutant",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
@@ -727,5 +734,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Certify and merge the typed CR 615.5 source-controller damage-aftermath batch, then implement CR 615.13 prevention-trigger stack ownership and generic lowering as the next dependency-ready rules family."
+  "next_task": "Consolidate life-change replacement ownership and chosen-source predicates, then implement CR 615.13 prevention-trigger stack ownership and generic lowering as the next dependency-ready rules family."
 }

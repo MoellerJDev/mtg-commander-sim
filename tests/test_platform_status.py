@@ -106,6 +106,7 @@ class PlatformStatusTests(unittest.TestCase):
             _validate_provenance(source)
 
         source["integration"].pop("description")
+        source["integration"]["active_phase"] = "fixture_active_phase"
         with mock.patch(
             "scripts.update_platform_status._git_is_ancestor",
             return_value=True,
