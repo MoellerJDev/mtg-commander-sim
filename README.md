@@ -822,13 +822,23 @@ physical commander designations—not Oracle IDs—own Commander-damage ledgers.
 The replacement model is split into deep-immutable model, applicability, typed
 operation, ordering, and strict replay modules. Generic compilation now covers
 those four keywords plus a closed family of static double-damage and fixed-
-prevention wording. Oracle IR v15 also lowers closed fixed finite-shield
-wording and static redirection to a current damageable source. Durable shield
-and redirection state lives outside `CommanderEngine`, simultaneous finite
-allocation is seat-scoped and replayable, unpreventable damage does not consume
-a shield, and positive prevention dispatches one aggregate event per effect.
-Bounded handlers cover fixed life-gain multiplication and a whole-result life
-floor. Dynamic/divided shields, prevention aftermath effects, partial or
+prevention wording. Oracle IR v16 also lowers closed finite-shield wording,
+dynamic resolved quantities, exact divided allocations, independent per-object
+shields, represented immediately-after life/counter results, and static
+redirection to a current damageable source. Durable modifier creation and life
+effects now have focused runtime owners outside `CommanderEngine`; the effect
+runtime has six closed operation families. Simultaneous finite allocation is
+seat-scoped and replayable, same-chooser event order is explicit,
+unpreventable damage does not consume a shield, and positive prevention
+dispatches one aggregate event per effect. Public battlefield, stack, and
+face-up command-zone sources can be chosen through a seat-scoped continuation
+whose physical identity and LKI are pinned. Replacement choices discovered
+during mana payment roll the payment back and resume the exact cast or
+activation after the choice. Bounded handlers cover fixed life-gain
+multiplication, a whole-result life floor, and transactional CR 615.5
+life/permanent-counter aftermath. Complete CR 609.7a source categories and
+permanent-spell continuity, broader source-property predicates, general
+replacement-capable life gain, remaining aftermath wording, partial or
 attached redirection, non-damage transformations, unresolved dynamic Toxic
 values, remaining result-replacement families, universal draw/entry
 replacement participation, broad CR 614/615/616 closure, layer dependencies,

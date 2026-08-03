@@ -17,8 +17,8 @@ from mtg_commander_sim.damage import (
     DamageRecipientSnapshot,
     prepare_damage_batch,
 )
+from mtg_commander_sim.mana_mode_effects import apply_mana_mode_effects
 from mtg_commander_sim.deck import DeckLoader
-from mtg_commander_sim.engine import GameRuleError
 from mtg_commander_sim.model import CardInstance, StackItem
 from mtg_commander_sim.projection import StateProjector
 from mtg_commander_sim.record import (
@@ -177,7 +177,7 @@ class DamageReplacementIntegrationTests(DamageReplacementPipelineBase):
         )
 
 
-    def test_mana_ability_damage_uses_transaction_or_fails_before_damage(self):
+    def test_mana_ability_damage_choice_resumes_exact_activation(self):
         session = self.session(120461510)
         engine = session.engine
         self.add_permanent(
@@ -194,7 +194,8 @@ class DamageReplacementIntegrationTests(DamageReplacementPipelineBase):
         )
         life_before = engine.state.players["B"].life
 
-        engine._apply_mana_mode_side_effects(
+        apply_mana_mode_effects(
+            engine,
             "B",
             ({"op": "damage_self", "amount": 1},),
             source=source,
@@ -207,6 +208,7 @@ class DamageReplacementIntegrationTests(DamageReplacementPipelineBase):
             name="Furnace of Rath",
             ref="a-furnace-two",
         )
+        life_before_choice = engine.state.players["B"].life
         engine.state.active_player = "B"
         engine.state.phase = "precombat_main"
         engine.state.step = "main"
@@ -220,22 +222,63 @@ class DamageReplacementIntegrationTests(DamageReplacementPipelineBase):
             for candidate in engine._activated_abilities(source)
             if "Add {B}" in candidate.effect_text
         )
-        before_rejected_choice = authoritative_state_hash(engine.state)
-        with self.assertRaisesRegex(GameRuleError, "not yet resumable"):
-            with engine.transaction():
-                engine._activate(
-                    "B",
-                    {
-                        "source": source.ref,
-                        "ability": ability.ability_id,
-                        "mana_output": {"B": 1},
-                    },
-                )
-        self.assertEqual(
-            before_rejected_choice, authoritative_state_hash(engine.state)
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine._grant_priority("B")
+        engine._issue_priority("B")
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        legal = engine.state.pending_decision.payload_by_actor["B"]["legal"]
+        activate = next(
+            action
+            for action in legal["actions"]
+            if action.get("source") == source.ref
+            and action.get("ability") == ability.ability_id
         )
+        stack_before_choice = tuple(item.ref for item in engine.state.stack)
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": activate["id"],
+                "choices": {"mana_output": {"B": 1}},
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("replacement.order", engine.state.pending_decision.kind)
         self.assertFalse(engine.state.cards[source.object_id].tapped)
         self.assertEqual(0, engine.state.players["B"].mana_pool["B"])
+        self.assertEqual(life_before_choice, engine.state.players["B"].life)
+        self.assertEqual(
+            stack_before_choice, tuple(item.ref for item in engine.state.stack)
+        )
+
+        projected = StateProjector(self.db, engine.state)._decision("pilot:B")
+        self.assertIsNotNone(projected)
+        self.assertIsNone(
+            StateProjector(self.db, engine.state)._decision("pilot:A")
+        )
+        selected = projected["ctx"]["options"][0]["id"]
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "choices": {"replacement": selected},
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertTrue(engine.state.cards[source.object_id].tapped)
+        self.assertEqual(1, engine.state.players["B"].mana_pool["B"])
+        self.assertEqual(life_before_choice - 4, engine.state.players["B"].life)
+        expected_hash = authoritative_state_hash(engine.state)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "mana-damage-replacement-record"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+        self.assertTrue(replay["ok"], replay)
+        self.assertEqual(expected_hash, replay["final_state_hash"])
 
 
     def test_validation_failure_is_atomic_before_any_damage_result(self):

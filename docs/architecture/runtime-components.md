@@ -67,10 +67,15 @@ validates cross-event remaining amounts, cleanup expiration, simultaneous
 allocation, commit-time state fingerprints, and unpreventable nonconsumption.
 `replacement.damage.redirect-to-source.v1` lowers a current damageable
 battlefield source to typed `RedirectDamage`; a complete recipient snapshot is
-substituted before the replacement loop is rediscovered. Dynamic/divided
-shield creation, prevention aftermath effects, finite partial or attached
-redirection, non-damage transformations, and replacement choices during mana
-payment remain outside these components.
+substituted before the replacement loop is rediscovered. Dynamic/divided and
+independent per-object shield creation is owned by the focused
+`damage-modifiers.v1` effect family. It also pins ordinary public chosen sources
+and represented CR 615.5 life/permanent-counter aftermath. Same-chooser event
+order and replacement choices during mana payment use strict replayable
+continuations. Complete CR 609.7a source categories, permanent-spell
+continuity, broader source predicates, general life-gain replacement, remaining
+aftermath forms, finite partial or attached redirection, and non-damage
+transformations remain outside these components.
 
 `continuous.anthem.power_toughness.v1` supports a fixed same-controller subtype
 anthem in layer 7c. The source must be represented, on the battlefield, and not
@@ -104,8 +109,12 @@ commit for represented permanent-counter events. `damage.py` coordinates
 represented damage snapshots, quantity replacement/prevention, and normalized
 final events; `damage_results.py` owns result-event materialization, commit
 planning, and atomic CR 120.3 result mutation. `damage_prevention.py` owns
-durable shield/redirection state and its mutation-only commit plan. Runtime
-components remain pure participants.
+durable shield/redirection state and its mutation-only commit plan;
+`damage_prevention_creation.py` and `damage_prevention_aftermath.py` own the
+corresponding typed creation and result transactions. The six closed effect
+runtime families now include `damage-modifiers.v1` for shield/redirection
+creation and `life-effects.v1` for typed life changes. Runtime components remain
+pure participants.
 
 Primary tests are `test_replacement_event_tree.py`,
 `test_token_creation_replacements.py`, `test_graveyard_rules.py`,
@@ -114,6 +123,9 @@ Primary tests are `test_replacement_event_tree.py`,
 `test_damage_replacement_multiplayer.py`,
 `test_damage_replacement_integration.py`,
 `test_damage_prevention_shields.py`, `test_damage_redirection.py`,
+`test_damage_prevention_creation.py`, `test_damage_prevention_aftermath.py`,
+`test_replacement_event_ordering.py`, `test_life_effect_runtime.py`,
+`test_mana_mode_effects.py`,
 `test_replacement_model_hardening.py`,
 `test_damage_result_events.py`,
 `test_continuous_effect_components.py`, `test_card_program_trust.py`, and

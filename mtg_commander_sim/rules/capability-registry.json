@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 11,
+  "registry_version": 12,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -189,20 +189,20 @@
     },
     {
       "id": "counter.placement.quantity_replacement",
-      "version": 1,
+      "version": 2,
       "official_rules": ["122.1", "122.6", "614.1", "614.16", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability": {
-        "summary": "Resolve represented effect-generated counter placements through affected-object ordering before committing the counters.",
-        "inputs": ["placing player", "affected card or permanent", "counter kind and positive amount", "fixed multiply/add runtime components"],
-        "outputs": ["resolved counter amount", "exact replacement journal", "principal-scoped competing choice", "authoritative counter mutation"],
-        "exclusions": ["player counters", "fractional or halving replacements", "counter movement", "counter removal", "cost and rule-generated placements", "complete enters-with-counter ordering", "uncompiled dynamic quantities"]
+        "summary": "Resolve represented effect-generated permanent counter placements, including prevention aftermath, through affected-object ordering and a typed precommit plan before committing counters.",
+        "inputs": ["placing player", "affected card or permanent", "resolved positive integral counter amount", "fixed multiply/add runtime components"],
+        "outputs": ["resolved counter amount", "exact replacement journal", "principal-scoped competing choice", "validated typed counter commit plan", "authoritative counter mutation"],
+        "exclusions": ["player counters", "fractional or halving replacements", "counter movement", "counter removal", "cost and rule-generated placements", "complete enters-with-counter ordering"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.semantic_runtime.counter_replacements.CounterQuantityReplacementHandler", "mtg_commander_sim.counter_placement.prepare_counter_placements", "mtg_commander_sim.counter_placement.commit_prepared_counter_placements", "CommanderEngine.apply_effect"],
-      "positive_tests": ["test_counter_quantity_component_changes_effect_generated_placement"],
-      "negative_tests": ["test_counter_quantity_component_rejects_malformed_and_nonmatching_events"],
-      "interaction_tests": ["test_counter_replacements_apply_in_affected_players_chosen_order", "test_zone_replacement_counter_is_a_nested_precommit_event"],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.counter_replacements.CounterQuantityReplacementHandler", "mtg_commander_sim.counter_placement.prepare_counter_placements", "mtg_commander_sim.counter_placement.plan_prepared_counter_placement_commit", "mtg_commander_sim.counter_placement.commit_counter_placement_plan", "mtg_commander_sim.damage_prevention_aftermath.prepare_prevention_aftermath"],
+      "positive_tests": ["test_counter_quantity_component_changes_effect_generated_placement", "test_counter_aftermath_reuses_counter_replacement_pipeline"],
+      "negative_tests": ["test_counter_quantity_component_rejects_malformed_and_nonmatching_events", "test_stale_counter_aftermath_fails_before_life_or_damage_mutation"],
+      "interaction_tests": ["test_counter_replacements_apply_in_affected_players_chosen_order", "test_zone_replacement_counter_is_a_nested_precommit_event", "test_counter_aftermath_reuses_counter_replacement_pipeline"],
       "multiplayer_tests": ["test_simultaneous_counter_choices_follow_apnap"],
       "privacy_tests": ["test_counter_replacement_choice_is_seat_scoped"],
       "replay_tests": ["test_counter_replacement_choice_replays_exactly"],
@@ -211,8 +211,8 @@
       "dependency_fail_closed_rationale": "This bounded counter producer has no capability dependencies beyond the shared replacement event substrate.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_counter_quantity_replacement_mutant_is_killed replaces the quantity transform with an identity operation and the behavioral assertion rejects the survivor.",
-      "blockers": ["The current descriptor covers fixed integral multiply/add quantities on permanents only; broader counter producers and grammar remain outside this capability."],
-      "status": "tested"
+      "blockers": [],
+      "status": "trusted"
     },
     {
       "id": "continuous.basic_land_type.add_all_lands",
@@ -621,23 +621,23 @@
     },
     {
       "id": "damage.prevention.persistent_amount",
-      "version": 1,
-      "official_rules": ["609.7b", "615.1", "615.2", "615.3", "615.4", "615.6", "615.7", "615.8", "615.9", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "version": 2,
+      "official_rules": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability": {
-        "summary": "Create and consume finite or next-instance prevention shields through a choice-complete typed damage batch, including exact simultaneous allocation and unpreventable-damage preservation.",
-        "inputs": ["typed current damage subject", "positive fixed shield amount or next-instance mode", "damage batch after quantity replacement"],
-        "outputs": ["immutable prevention application journal", "validated shield commit plan", "one prevention-applied event per effect and batch"],
-        "exclusions": ["dynamic X quantities", "divided shields created across several targets", "combat-only filters", "prevention aftermath effects", "source-choice candidate generation", "replacement choices during mana payment"]
+        "summary": "Create and consume finite or next-instance prevention shields through a choice-complete typed damage batch, including resolved X, independent or divided subjects, source-choice LKI, transactional aftermath, simultaneous event order, and resumable mana-payment choices.",
+        "inputs": ["typed current damage subject or validated subject set", "positive resolved shield amount or next-instance mode", "optional pinned chosen source", "typed prevention aftermath", "damage batch after quantity replacement"],
+        "outputs": ["immutable prevention application journal", "validated shield and aftermath commit plans", "one prevention-applied event per effect and batch", "strict replay-pinned continuation when a choice is required"],
+        "exclusions": ["combat-only prevention filters", "damage-dealing or redirection aftermath", "divided casting declarations whose targets and division were not represented during announcement"]
       },
       "dependencies": ["damage.amount.positive", "damage.prevention.static_fixed"],
-      "implementation_components": ["mtg_commander_sim.damage_prevention.DamagePreventionShield", "mtg_commander_sim.replacement.operations.PreventUsingShield", "mtg_commander_sim.replacement.ordering.advance_replacement_batch", "mtg_commander_sim.damage.prepare_damage_batch", "mtg_commander_sim.damage.commit_prepared_damage_batch", "mtg_commander_sim.compiler.prevention_templates.fixed_prevention_effect_template"],
-      "positive_tests": ["test_amount_shield_is_prepared_without_mutation_then_consumed", "test_until_end_of_turn_shields_expire_at_the_cleanup_boundary", "test_fixed_prevention_shields_compile_without_card_names"],
-      "negative_tests": ["test_unpreventable_damage_does_not_consume_shield", "test_changed_modifier_value_fails_before_damage_mutation", "test_dynamic_or_compound_prevention_text_remains_unresolved"],
-      "interaction_tests": ["test_chosen_source_identity_and_property_mismatch_preserve_shield", "test_prevention_dispatches_one_aggregate_event_per_effect"],
-      "multiplayer_tests": ["test_simultaneous_sources_require_and_replay_exact_allocation"],
-      "privacy_tests": ["test_combat_allocation_is_seat_scoped_and_command_replays"],
-      "replay_tests": ["test_combat_allocation_is_seat_scoped_and_command_replays"],
+      "implementation_components": ["mtg_commander_sim.damage_modifier_state.DamagePreventionShield", "mtg_commander_sim.damage_prevention_creation.plan_prevention_shield_creation", "mtg_commander_sim.damage_prevention_aftermath.prepare_prevention_aftermath", "mtg_commander_sim.semantic_choices.damage_prevention.ChooseDamageSourceHandler", "mtg_commander_sim.replacement.operations.PreventUsingShield", "mtg_commander_sim.replacement.ordering.advance_replacement_batch", "mtg_commander_sim.mana_payment_continuations.execute_mana_choice_capable_priority_action", "mtg_commander_sim.damage.prepare_damage_batch", "mtg_commander_sim.damage.commit_prepared_damage_batch", "mtg_commander_sim.compiler.prevention_templates.fixed_prevention_effect_template"],
+      "positive_tests": ["test_amount_shield_is_prepared_without_mutation_then_consumed", "test_until_end_of_turn_shields_expire_at_the_cleanup_boundary", "test_dynamic_amount_and_divided_allocations_create_independent_shields", "test_one_amount_is_applied_independently_to_each_selected_object", "test_each_untargeted_creature_uses_its_own_prevention_shield", "test_dynamic_and_aftermath_prevention_compile_generically"],
+      "negative_tests": ["test_unpreventable_damage_does_not_consume_shield", "test_changed_modifier_value_fails_before_damage_mutation", "test_divided_and_combat_only_prevention_remain_unresolved", "test_event_order_selection_fails_closed_for_unknown_event"],
+      "interaction_tests": ["test_chosen_source_identity_and_property_mismatch_preserve_shield", "test_prevention_dispatches_one_aggregate_event_per_effect", "test_life_aftermath_uses_one_aggregate_prevented_amount", "test_counter_aftermath_reuses_counter_replacement_pipeline", "test_mana_ability_damage_choice_resumes_exact_activation"],
+      "multiplayer_tests": ["test_simultaneous_sources_require_and_replay_exact_allocation", "test_chooser_selects_which_simultaneous_event_uses_next_instance_shield"],
+      "privacy_tests": ["test_combat_allocation_is_seat_scoped_and_command_replays", "test_damage_source_choice_is_seat_scoped_pinned_and_replays", "test_combat_event_order_is_seat_scoped_and_replays_exactly"],
+      "replay_tests": ["test_combat_allocation_is_seat_scoped_and_command_replays", "test_damage_source_choice_is_seat_scoped_pinned_and_replays", "test_combat_event_order_is_seat_scoped_and_replays_exactly", "test_mana_ability_damage_choice_resumes_exact_activation", "test_prevention_aftermath_replays_from_exact_commands"],
       "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
       "dependency_fail_closed_status": "passed",
       "dependency_fail_closed_rationale": "",

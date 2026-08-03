@@ -737,6 +737,20 @@ class ReplacementBatchChoice:
     tree_choice: ReplacementTreeChoice
     prior_public_choices: tuple[ReplacementSelection, ...]
     prevention_allocations: tuple["PreventionAllocationChoice", ...] = ()
+    event_order_options: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        options = tuple(self.event_order_options)
+        if options and (
+            len(options) < 2
+            or len(options) != len(set(options))
+            or self.event_id not in options
+            or any(not value for value in options)
+        ):
+            raise ReplacementEffectError(
+                "Replacement event-order options must be unique and include the current event"
+            )
+        object.__setattr__(self, "event_order_options", options)
 
     @property
     def choice(self) -> ReplacementChoice:

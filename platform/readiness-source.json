@@ -573,13 +573,19 @@
       "id": "damage_prevention_shields_and_redirection",
       "name": "Durable damage prevention and static redirection",
       "status": "integrated_on_certified_main",
-      "evidence": "Certified main includes typed finite and next-instance shield state, cleanup expiration, exact simultaneous allocation, unpreventable nonconsumption, aggregate prevention dispatch, immutable commit fingerprints, and typed full-recipient redirection with destination departure and rediscovery. Generic Oracle IR v15 lowers fixed shield and static redirection wording without card-name dispatch. On the pinned current snapshot, Commander-legal exact Oracle and trusted CardPrograms each rose from 406 to 410, adding Shieldmate's Blessing, Hold at Bay, Mending Hands, and Palisade Giant. Browser regressions keep an active player's empty-stack main phase manual under auto-pass, keep the hand in a fixed resizable bottom dock, and verify projected Urborg/Citadel black mana plus named Cauldron Familiar and The Sackville-Bagginses cast actions."
+      "evidence": "Certified main includes typed finite and next-instance shield state, cleanup expiration, exact simultaneous allocation, unpreventable nonconsumption, aggregate prevention dispatch, immutable commit fingerprints, and typed full-recipient redirection with destination departure and rediscovery. Generic lowering covers fixed shield and static redirection wording without card-name dispatch. Browser regressions keep an active player's empty-stack main phase manual under auto-pass, keep the hand in a fixed resizable bottom dock, and verify projected Urborg/Citadel black mana plus named Cauldron Familiar and The Sackville-Bagginses cast actions."
     },
     {
       "id": "casting_activation_proposals",
       "name": "Typed casting, activation, and action offers",
+      "status": "integrated_on_certified_main",
+      "evidence": "Certified main through PR 72 uses immutable canonical casting and activation proposals for both legal-action advertisement and execution, pins offers to state revisions and proposal fingerprints, rejects stale source/cost/target/payability facts before mutation, and preserves strategic yield signatures across freshness-only revision changes. Dedicated query and commit packages plus the shared action catalog reduce CommanderEngine from 17,197 to 14,788 logical lines, reduce the configured direct-write heuristic from 159 to 144, and reduce oversized functions from 46 to 40. Generic Crew, Craft, granted activated-ability, and static cast-cost descriptors replace represented card-shaped engine branches while Game Record v3 compatibility remains explicit."
+    },
+    {
+      "id": "damage_prevention_continuations_and_aftermath",
+      "name": "Damage-prevention continuations and aftermath",
       "status": "implementation_complete_certification_pending",
-      "evidence": "The focused branch uses immutable canonical casting and activation proposals for both legal-action advertisement and execution, pins offers to state revisions and proposal fingerprints, rejects stale source/cost/target/payability facts before mutation, and preserves strategic yield signatures across freshness-only revision changes. Dedicated query and commit packages plus the shared action catalog reduce CommanderEngine from 17,197 to 14,788 logical lines, reduce the configured direct-write heuristic from 159 to 144, and reduce oversized functions from 46 to 40. Generic Crew, Craft, granted activated-ability, and static cast-cost descriptors replace represented card-shaped engine branches while Game Record v3 compatibility remains explicit."
+      "evidence": "The focused rules branch adds typed dynamic, divided, and independent per-object shield creation; seat-scoped public source choice with physical identity and LKI; transactional CR 615.5 life and permanent-counter aftermath; same-chooser simultaneous-event order; and exact rollback/resume for replacement choices discovered during mana payment. Damage-modifier creation and general life effects now have focused runtime owners. Oracle IR v16 adds Test of Faith and Temper, raising Commander-legal generic-exact Oracle objects and trusted CardPrograms from 410 to 412 while reducing Commander Oracle and CardProgram material residuals to 60,761 and 60,758. Complete CR 609.7a categories, permanent-spell continuity, general life-gain replacement, and remaining aftermath forms remain blocked."
     },
     {
       "id": "rules_snapshot",
@@ -605,8 +611,8 @@
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
-    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_eight_bounded_runtime_components_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_and_player_counter_mutation_ports",
-    "capability_evidence": "implemented_registry_v10_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status",
+    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_ten_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_and_player_counter_mutation_ports",
+    "capability_evidence": "implemented_registry_v11_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status",
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "hidden_information": "implemented_projected_protocol",
@@ -614,17 +620,17 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "6ccb1e26bf5f7f2c33784f8d09481050b338525e",
+    "baseline_commit": "f39730fd6dab90af9667748e3d7d0e15fc713f8b",
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30788334496,
+      "run_id": 30798001802,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30788334496"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30798001802"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_pass_full_gate; focused_casting_activation_action_catalog_and_affected_rules_shards_pass; exact_head_full_gate_pending",
-      "focused_rules_tests": "pass_immutable_offer_models_cast_and_activation_advertisement_execution_equivalence_stale_revision_source_and_payability_rollback_generic_crew_craft_granted_ability_static_cost_mana_plan_seed_20260730_replay_and_projection",
+      "deterministic_tests": "certified_main_pass_full_gate; focused_prevention_replacement_compiler_and_runtime_shards_pass; exact_head_full_gate_pending",
+      "focused_rules_tests": "pass_dynamic_divided_per_object_shields_source_choice_lki_prevention_aftermath_same_chooser_order_mana_payment_continuation_life_runtime_replay_privacy_property_and_mutation",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
@@ -640,10 +646,10 @@
     "replay": "pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner",
     "privacy": "pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner",
       "semantic_preflight": "reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory",
-      "card_program_census": "full_38485_trusted_810_capability_closed_808_residual_35426_failed_2249; commander_legal_31623_trusted_410_capability_closed_408_residual_31212_failed_1; focused_damage_prevention_commander_trusted_delta_plus_4; focused_damage_prevention_commander_oracle_exact_delta_plus_4; commander_material_residual_60765"
+      "card_program_census": "full_38485_trusted_812_capability_closed_810_residual_35424_failed_2249_material_residual_69372; commander_legal_31623_trusted_412_capability_closed_410_residual_31210_failed_1_material_residual_60758; commander_oracle_exact_412_partial_14676_unresolved_16535_material_residual_60761; focused_prevention_aftermath_exact_and_trusted_delta_plus_2"
   },
   "blockers": [
-    "damage replacement/prevention now includes typed finite and next-instance shields, simultaneous allocation, unpreventable nonconsumption, aggregate prevention dispatch, and static full-recipient redirection; dynamic/divided creation, generic source-choice candidates, prevention aftermath, partial/attached redirection, non-damage transformations, remaining result-replacement families, excess selection, and replacement choices during mana payment remain unimplemented",
+    "damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, ordinary public source choice, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, transactional life/permanent-counter aftermath, resumable mana-payment choices, and static full-recipient redirection; complete CR 609.7a source categories and permanent-spell continuity, general replacement-capable aftermath life gain, remaining aftermath forms, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented",
     "typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, universal replacement participation beyond represented stun and runtime-component events, and complete effective-characteristic closure",
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
@@ -655,5 +661,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Certify and merge the typed casting/activation proposal consolidation, then begin the generated damage-prevention continuations and aftermath batch from fresh certified main."
+  "next_task": "Certify and merge the damage-prevention continuations and aftermath batch, then regenerate the dependency queue from fresh main and select the next coherent rules family."
 }

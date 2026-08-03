@@ -123,6 +123,10 @@ class DamageReplacementPipelineBase(unittest.TestCase):
                     / "tests"
                     / "fixtures"
                     / "damage-replacement-cards.json",
+                    ROOT
+                    / "tests"
+                    / "fixtures"
+                    / "counter-replacement-cards.json",
                 ],
                 database,
             )

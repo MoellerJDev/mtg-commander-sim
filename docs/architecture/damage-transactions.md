@@ -1,7 +1,7 @@
 ---
 title: "Damage transaction"
 status: "current"
-authoritative_source: "mtg_commander_sim/damage.py, mtg_commander_sim/damage_prevention.py, mtg_commander_sim/damage_results.py, replacement/, semantic_runtime/damage_replacements.py, semantic_runtime/damage_results.py, ADR 0012, and ADR 0013"
+authoritative_source: "mtg_commander_sim/damage.py, damage_prevention.py, damage_prevention_creation.py, damage_prevention_aftermath.py, damage_results.py, mana_payment_continuations.py, replacement/, semantic_runtime/damage_replacements.py, semantic_runtime/damage_results.py, ADR 0012, and ADR 0013"
 verified: "2026-08-02"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
@@ -16,7 +16,7 @@ and authoritative result mutation. Combat, semantic single-target damage,
 semantic each-opponent damage, and damage produced by represented mana
 abilities use the same transaction.
 
-The transaction has five explicit stages:
+The transaction has six explicit stages:
 
 1. Snapshot the source and recipient identities and relevant characteristics.
 2. Build immutable positive `damage` events and discover active trusted
@@ -27,10 +27,12 @@ The transaction has five explicit stages:
    defense, lifelink, toxic, and nested replacement result beneath immutable
    affected-player or affected-permanent `damage.results` roots. Resolve the
    containing event before its contained result events.
-5. Validate every result and object incarnation, build a mutation-only plan,
-   commit the complete result batch atomically, then
-   publish one final `DamageEvent` for each positive proposal. Fully prevented
-   events remain in the audit result but do not dispatch `damage.dealt`.
+5. Validate every result and object incarnation, build mutation-only result,
+   modifier, life-aftermath, and counter-aftermath plans, and commit the complete
+   batch atomically.
+6. Publish one final `DamageEvent` for each positive proposal and one aggregate
+   prevention-aftermath event per applied shield instruction. Fully prevented
+   damage remains in the audit result but does not dispatch `damage.dealt`.
 
 Zero assignments create no event. Infect and wither create poison or -1/-1
 counter results instead of the ordinary result; lifelink creates one life-gain
@@ -69,6 +71,21 @@ insufficient shield, the affected seat supplies one exact allocation through
 the ordinary replacement continuation. The journal and commit plan are both
 replay-pinned. Until-end-of-turn values expire at cleanup.
 
+`damage_prevention_creation.py` resolves dynamic quantities before commit,
+validates exact divided allocations, creates one independently consumable
+shield per selected object, and pins an optional chosen source to physical
+identity plus current characteristics/LKI. The seat-scoped source choice offers
+only legally known objects on the battlefield, stack, or face-up command zone.
+It does not yet cover every object category and continuity exception in CR
+609.7a.
+
+`damage_prevention_aftermath.py` aggregates the amount actually prevented by
+each applied shield across a simultaneous batch. Represented life gain uses the
+typed life owner, and represented permanent counters use the canonical counter-
+placement pipeline, including applicable quantity replacements. Every plan is
+validated before either result mutates. General life-gain replacement and other
+CR 615.5 aftermath forms remain blocked.
+
 `replacement.damage.redirect-to-source.v1` is the current trusted static
 redirection component. It replaces the complete recipient snapshot, not just
 a display ref, and replacement applicability/affected-subject ordering is then
@@ -95,28 +112,27 @@ The trusted capabilities are deliberately narrow:
 - `damage.result.replacement_order`
 - `life.gain.replacement.static_multiplier`
 
-They exclude dynamic shield quantities, shield creation divided across several
-targets, combat-only filters, prevention aftermath effects, generic
-source-choice candidate generation, finite partial redirection, attached or
-equipped destinations, replacement with a non-damage event, dynamic toxic
-values, unrepresented continuous ability grants, uncompiled
-life/counter/result replacement families, and a replacement choice arising
-inside an in-progress mana payment.
+They exclude complete CR 609.7a candidate categories and permanent-spell
+continuity, broader source-characteristic predicates, combat-only filters,
+general replacement-capable life gain, aftermath forms beyond represented life
+and permanent counters, finite partial redirection, attached or equipped
+destinations, replacement with a non-damage event, dynamic toxic values,
+unrepresented continuous ability grants, and uncompiled result-replacement
+families.
 The broad `damage.replacement.order` and `damage.prevention.order` capabilities
 remain blocked.
 
 ## Corpus result
 
 The complete pinned census binds Infect, Wither, Lifelink, and fixed Toxic
-nodes to trusted fine-grained result capabilities. Oracle IR v15 also recognizes
+nodes to trusted fine-grained result capabilities. Oracle IR v16 recognizes
 closed whole-line grammar for static double damage, fixed static prevention,
-finite shield creation, and static redirection to a damageable source. In this
-batch, Commander-legal exact Oracle objects and trusted CardPrograms both rise
-from 406 to 410; unresolved objects fall from 16,586 to 16,540 and material
-residuals fall from 60,790 to 60,765. The newly exact cards are Shieldmate's
-Blessing, Hold at Bay, Mending Hands, and Palisade Giant. The generated
-[compiler coverage report](../COMPILER_COVERAGE_STATUS.md) is authoritative;
-these gains do not imply complete damage, prevention, or Oracle coverage.
+finite and divided shield creation, represented life/counter aftermath, and
+static redirection to a damageable source. This batch adds Test of Faith and
+Temper to the Commander-legal generic-exact and capability-closed sets. The
+generated [compiler coverage report](../COMPILER_COVERAGE_STATUS.md) is the
+authority for totals and residual deltas; these gains do not imply complete
+damage, prevention, or Oracle coverage.
 
 ## Choice, privacy, and replay
 
@@ -125,23 +141,24 @@ competing applicable effects. A seat packet contains only public option labels
 and stable IDs. The immutable event payload, object IDs, effect set, and prior
 journal remain in the authoritative continuation.
 
-Combat and semantic continuations persist the exact ordered selections and any
-finite-shield allocation in Game Record v3. Replay rebuilds the transaction,
-validates the chooser, event IDs, available amount, and current option set, and
-must reach the same final state hash. Checkpoints also serialize durable shield
-and redirection state. A mana-result damage event with a real replacement
-choice currently fails before damage because the enclosing mana-payment
-continuation cannot yet resume safely.
+Combat and semantic continuations persist the exact ordered selections, same-
+chooser simultaneous-event order, and any finite-shield allocation in Game
+Record v3. Replay rebuilds the transaction, validates the chooser, event IDs,
+available amount, and current option set, and must reach the same final state
+hash. Checkpoints also serialize durable shield, aftermath, and redirection
+state. A replacement choice discovered while a mana ability is paying for a
+cast or activation rolls the partial payment back, persists a strict payment
+frame, and resumes the exact original action after the seat chooses.
 
 ## Remaining boundaries
 
-The remaining damage/prevention work must add dynamic and divided shield
-creation, prevention aftermath effects, broader source-choice grammar, partial
-and attached-destination redirection, non-damage transformations, remaining
-result-replacement families, excess-damage selection, complete dynamic
-characteristic closure, and resumable choices during mana payment. Broader
-Oracle lowering must compile those families into typed descriptors before
-their capabilities can be promoted.
+The remaining damage/prevention work must complete CR 609.7a source categories
+and permanent-spell continuity, broaden source-characteristic grammar, route
+aftermath life gain through general life replacement, add remaining aftermath
+forms, partial and attached-destination redirection, non-damage transformations,
+remaining result-replacement families, excess-damage selection, and complete
+dynamic characteristic closure. Broader Oracle lowering must compile those
+families into typed descriptors before their capabilities can be promoted.
 
 Primary assurance is split across `test_damage_replacement_model.py`,
 `test_damage_replacement_multiplayer.py`, and
@@ -151,5 +168,7 @@ Primary assurance is split across `test_damage_replacement_model.py`,
 action, combat, monarch, mana, and turn-history modules, and focused mutants in
 `test_capability_implementation_mutations.py` and the focused CR 120.3/120.4c
 witnesses in `test_damage_result_events.py`. Durable prevention and redirection
-coverage lives in `test_damage_prevention_shields.py` and
+coverage lives in `test_damage_prevention_shields.py`,
+`test_damage_prevention_creation.py`, `test_damage_prevention_aftermath.py`,
+`test_replacement_event_ordering.py`, `test_mana_mode_effects.py`, and
 `test_damage_redirection.py`.

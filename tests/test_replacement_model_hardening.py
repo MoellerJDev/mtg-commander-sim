@@ -431,6 +431,34 @@ class ReplacementContinuationTests(unittest.TestCase):
             "replacement_effects": [replacement.to_dict()],
         }
 
+    @classmethod
+    def mana_continuation(cls) -> dict:
+        value = cls.continuation()
+        value.pop("combat_assignments")
+        value.pop("replacement_selections")
+        value.update(
+            {
+                "replacement_resume_kind": "mana_payment",
+                "priority_seat": "A",
+                "priority_action": "activate",
+                "priority_response": {
+                    "source": "A01",
+                    "ability": "ab1",
+                    "_mana_payment_id": "D-mana-payment",
+                },
+                "priority_frame": {
+                    "active_player": "A",
+                    "phase": "precombat_main",
+                    "step": "main",
+                    "turn_sequence": 2,
+                    "priority_player": "A",
+                    "priority_epoch": 7,
+                    "stack_refs": [],
+                },
+            }
+        )
+        return value
+
     def test_continuation_rejects_malformed_entries_and_unknown_fields(self):
         value = self.continuation()
         restored = ReplacementContinuation.from_dict(value)
@@ -460,6 +488,56 @@ class ReplacementContinuationTests(unittest.TestCase):
         ):
             ReplacementContinuation.from_dict(malformed)
 
+    def test_mana_continuation_is_strict_deep_frozen_and_typed(self):
+        value = self.mana_continuation()
+        restored = ReplacementContinuation.from_dict(value)
+        value["priority_response"]["source"] = "tampered"
+        value["priority_frame"]["phase"] = "combat"
+        self.assertEqual("A01", restored.thaw_priority_response()["source"])
+        self.assertEqual(
+            "precombat_main", restored.thaw_priority_frame()["phase"]
+        )
+
+        for label, mutate, message in (
+            (
+                "unknown frame field",
+                lambda row: row["priority_frame"].update({"future": True}),
+                "unknown future",
+            ),
+            (
+                "boolean sequence",
+                lambda row: row["priority_frame"].update(
+                    {"turn_sequence": True}
+                ),
+                "frame values",
+            ),
+            (
+                "lost payment identity",
+                lambda row: row["priority_response"].pop(
+                    "_mana_payment_id"
+                ),
+                "stable payment identity",
+            ),
+            (
+                "wrong priority principal",
+                lambda row: row["priority_frame"].update(
+                    {"priority_player": "B"}
+                ),
+                "frame values",
+            ),
+            (
+                "malformed activation",
+                lambda row: row["priority_response"].pop("ability"),
+                "activation response",
+            ),
+        ):
+            with self.subTest(label=label):
+                malformed = self.mana_continuation()
+                mutate(malformed)
+                with self.assertRaisesRegex(
+                    ReplacementEffectError, message
+                ):
+                    ReplacementContinuation.from_dict(malformed)
 
 if __name__ == "__main__":
     unittest.main()

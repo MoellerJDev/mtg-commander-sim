@@ -80,6 +80,28 @@
         "tests.test_casting_activation_proposal_equivalence.CastingActivationProposalEquivalenceTests.test_changed_cast_payability_rejects_stale_offer_without_mutation",
         "tests.test_casting_activation_proposal_equivalence.CastingActivationProposalEquivalenceTests.test_source_leaving_invalidates_activation_offer_without_mutation"
       ]
+    },
+    {
+      "exception_id": "ARCH-EXC-0005",
+      "adr": "docs/adr/0017-prevention-continuations-and-aftermath.md",
+      "artifact": "platform/architecture-guard-baseline.json",
+      "allowance_fingerprint": "69303e88597a7b2c6c6ed3331f979d2b73467ff715bf0edd698b26fecdf4abc8",
+      "exact_allowance": "Only the reduced structural write identities, engine methods, size ceilings, specificity literals, Oracle-ID literals, effect operations, and legacy helpers serialized after prevention-continuation and aftermath extraction.",
+      "rationale": "Typed prevention creation, aftermath, event ordering, and mana-payment continuations reduce CommanderEngine, direct writes, semantic branches, and printed-name literals without adding an oversized function. The one added choose_damage_source operation is the reviewed seat-scoped universal entry point for CR 609.7a source selection.",
+      "owner": "rules architecture maintainers",
+      "maximum_scope": "Existing serialized residual allowances plus the reviewed choose_damage_source operation; removals are allowed and additions or growth are forbidden.",
+      "removal_condition": "Remove the exception when every serialized grandfathered allowance has migrated to a reviewed owner; retain source selection only while it remains the narrow generic operation described by ADR 0017.",
+      "target_milestone": "incremental damage, replacement, prevention, and rules-family closure",
+      "replay_implications": "Game Record v3 remains compatible; source choices, simultaneous-event order, aftermath, and mana-payment frames are canonical and exact-replay validated.",
+      "privacy_implications": "The source-choice operation projects only public legally known candidates to the fixed chooser and does not expand any other principal projection.",
+      "security_implications": "The reviewed operation can only continue into typed prevention creation and grants no callback, arbitrary mutation, hidden-zone access, or cross-seat authority.",
+      "tests": [
+        "tests.test_architecture_guards.ArchitectureGuardTests.test_current_repository_passes_every_architecture_guard",
+        "tests.test_architecture_governance.ArchitectureGovernanceTests.test_exception_is_bound_to_exact_allowance_fingerprint",
+        "tests.test_damage_prevention_creation.DamageSourceChoiceHandlerTests.test_source_choice_exposes_only_rule_legal_public_candidates",
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_prevention_aftermath_replays_from_exact_commands",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_mana_ability_damage_choice_resumes_exact_activation"
+      ]
     }
   ]
 }

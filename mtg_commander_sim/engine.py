@@ -81,7 +81,6 @@ from .declaration_restrictions import (
 from .damage import (
     apply_damage_results_to_permanent,
     combat_damage_proposals,
-    damage_proposal,
     DamageError,
     resolve_damage_batch,
 )
@@ -110,6 +109,9 @@ from .mana_undo import (
     ManaUndoError,
     priority_actions_with_mana_undo,
     undo_mana_activation,
+)
+from .mana_payment_continuations import (
+    execute_mana_choice_capable_priority_action,
 )
 from .model import (
     CardInstance,
@@ -4483,10 +4485,21 @@ class CommanderEngine(
             clear_mana_undo_stack(self.state.players[seat].stats)
             self._play_land(seat, response)
         elif action == "cast":
-            clear_mana_undo_stack(self.state.players[seat].stats)
-            self._cast(seat, response)
+            execute_mana_choice_capable_priority_action(
+                self,
+                seat=seat,
+                action=action,
+                response=response,
+                payment_id=decision.decision_id,
+            )
         elif action == "activate":
-            self._activate(seat, response)
+            execute_mana_choice_capable_priority_action(
+                self,
+                seat=seat,
+                action=action,
+                response=response,
+                payment_id=decision.decision_id,
+            )
         elif action == "undo_mana":
             try:
                 undo_mana_activation(self, seat, response)
@@ -5488,75 +5501,17 @@ class CommanderEngine(
         activations: Sequence[Mapping[str, Any]],
         *,
         spend_context: str | None = None,
+        payment_id: str | None = None,
+        replacement_selections_by_event: Mapping[str, Any] | None = None,
     ) -> None:
         complete_mana_plan_activations(
             self,
             seat,
             activations,
             spend_context=spend_context,
+            payment_id=payment_id,
+            replacement_selections_by_event=replacement_selections_by_event,
         )
-
-    def _apply_mana_mode_side_effects(
-        self,
-        seat: str,
-        effects: Iterable[Mapping[str, Any]],
-        *,
-        source: CardInstance | None = None,
-    ) -> None:
-        """Apply compiled effects coupled to one selected mana mode."""
-
-        for effect_index, effect in enumerate(effects):
-            if effect.get("op") == "damage_self":
-                amount = int(effect.get("amount", 1))
-                if amount < 0:
-                    raise GameRuleError("Damage cannot be negative")
-                if amount == 0:
-                    continue
-                try:
-                    proposal = damage_proposal(
-                        self,
-                        proposal_id=(
-                            f"damage.mana:{self.state.revision}:"
-                            f"{self.state.event_sequence + 1}:"
-                            f"{effect_index}"
-                        ),
-                        actor=seat,
-                        source_ref=(source.ref if source is not None else None),
-                        target=seat,
-                        amount=amount,
-                        combat=False,
-                        reason="mana ability damage",
-                    )
-                    resolve_damage_batch(self, (proposal,))
-                except ReplacementChoiceRequired as exc:
-                    raise GameRuleError(
-                        "Damage replacement choices during mana ability "
-                        "resolution are not yet resumable"
-                    ) from exc
-                except DamageError as exc:
-                    raise GameRuleError(str(exc)) from exc
-            elif effect.get("op") == "pay_life":
-                amount = int(effect.get("amount", 1))
-                if self.state.players[seat].life < amount:
-                    raise GameRuleError(
-                        "Cannot pay more life than the player has"
-                    )
-                self.state.players[seat].life -= amount
-            elif effect.get("op") == "sacrifice_source":
-                if (
-                    source is None
-                    or source.controller != seat
-                    or source.zone != "battlefield"
-                ):
-                    raise GameRuleError(
-                        "The mana source cannot be sacrificed"
-                    )
-                self.move_card(
-                    source.object_id,
-                    "graveyard",
-                    reason="mana ability cost",
-                    semantic_events=True,
-                )
 
     def _pay_for_cost(
         self,
@@ -5595,6 +5550,14 @@ class CommanderEngine(
                 seat,
                 activations,
                 spend_context=spend_context,
+                payment_id=str(response.get("_mana_payment_id") or "") or None,
+                replacement_selections_by_event=(
+                    response.get("_mana_replacement_selections")
+                    if isinstance(
+                        response.get("_mana_replacement_selections"), Mapping
+                    )
+                    else None
+                ),
             )
             payment = plan.payment
         else:
@@ -5603,6 +5566,14 @@ class CommanderEngine(
                 seat,
                 activations,
                 spend_context=spend_context,
+                payment_id=str(response.get("_mana_payment_id") or "") or None,
+                replacement_selections_by_event=(
+                    response.get("_mana_replacement_selections")
+                    if isinstance(
+                        response.get("_mana_replacement_selections"), Mapping
+                    )
+                    else None
+                ),
             )
             payment = normalize_mana_bundle(response.get("payment"))
         try:

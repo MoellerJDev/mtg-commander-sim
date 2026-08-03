@@ -957,8 +957,13 @@ The new rules primitives sit below both generated and hand-authored semantics:
   fixed prevention, life-gain multiplication, and whole-result life-floor
   components participate without state access. `damage_prevention.py` owns
   durable finite/next-instance shields, redirection state, simultaneous
-  allocation, cleanup expiration, and a mutation-only commit plan. Unresolved
-  replacement choices during mana payment still fail before mutation.
+  allocation, cleanup expiration, and a mutation-only commit plan.
+  `damage_prevention_creation.py` owns typed dynamic/divided and per-object
+  shield creation plus chosen-source LKI; `damage_prevention_aftermath.py`
+  prepares and atomically commits represented CR 615.5 life and permanent-
+  counter results. Replacement choices discovered during mana payment suspend
+  through a strict replay frame, roll back the partial payment, and resume the
+  same cast or activation.
 - `commander.py` owns initial physical commander designation and the separate
   21-combat-damage ledger key. Designations survive zone and control changes,
   are absent from ordinary copies, and retain explicit legacy Game Record v3
@@ -993,12 +998,16 @@ into the layer evaluator; entry counters, player counters, costs, rule actions,
 and continuation-sensitive legacy counter producers do not yet use the focused
 counter owner. Represented Infect, Wither, Lifelink, fixed Toxic, and bounded
 damage-result replacements now share the damage-result transaction. Persistent
-finite and next-instance prevention shields plus static redirection to a
-damageable source are inside the certified boundary. Dynamic/divided shield
-creation, prevention aftermath effects, partial or attached redirection,
-non-damage transformations, unresolved dynamic Toxic values, incomplete
-continuous characteristic closure, remaining result-replacement families, and
-replacement choices during mana payment remain outside it.
+finite and next-instance prevention shields, dynamic/divided and independent
+per-object creation, ordinary public source choice, transactional life/
+permanent-counter aftermath, same-chooser event ordering, resumable mana-
+payment replacement choices, and static redirection to a damageable source are
+inside the represented boundary. Complete CR 609.7a source categories,
+permanent-spell continuity, broader source-characteristic predicates, general
+replacement-capable life gain, remaining aftermath wording, partial or
+attached redirection, non-damage transformations, unresolved dynamic Toxic
+values, incomplete continuous-characteristic closure, and remaining result-
+replacement families remain outside it.
 Not every zone/draw/enters producer routes through the replacement engine, and
 the state-action evaluator does not yet
 cover Sagas, dungeons, Roles, speed, maximum-counter wording outside the

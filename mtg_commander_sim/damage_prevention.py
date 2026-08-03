@@ -225,6 +225,7 @@ def commit_damage_modifier_plan(
                     created_turn_sequence=shield.created_turn_sequence,
                     chosen_source=shield.chosen_source,
                     label=shield.label,
+                    aftermath=shield.aftermath,
                 )
             )
         else:

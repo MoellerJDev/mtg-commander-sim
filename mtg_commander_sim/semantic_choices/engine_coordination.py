@@ -371,10 +371,10 @@ class SemanticChoiceCoordinationMixin:
                 stack_ref=item.ref,
                 effects=[
                     *(
-                        dict(value)
+                        thaw_value(value)
                         for value in preparation.auto_continue.prepend_effects
                     ),
-                    *(dict(value) for value in remaining),
+                    *(thaw_value(value) for value in remaining),
                 ],
                 destination=destination,
                 note=note,
@@ -478,11 +478,11 @@ class SemanticChoiceCoordinationMixin:
         if item not in self.state.stack:
             return
         remaining = [
-            *(dict(value) for value in completion.prepend_effects),
-            *(dict(value) for value in continuation.remaining),
+            *(thaw_value(value) for value in completion.prepend_effects),
+            *(thaw_value(value) for value in continuation.remaining),
         ]
         if completion.repeat_effect is not None:
-            remaining.insert(0, dict(completion.repeat_effect))
+            remaining.insert(0, thaw_value(completion.repeat_effect))
         self._continue_resolution(
             stack_ref=continuation.stack_ref,
             effects=remaining,
@@ -530,4 +530,3 @@ class SemanticChoiceCoordinationMixin:
                 f"Unregistered semantic choice continuation {operation!r}"
             )
         self._complete_registered_semantic_choice(decision)
-

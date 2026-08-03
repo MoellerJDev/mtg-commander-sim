@@ -115,10 +115,28 @@ def next_batch_replacement_choice(
     effects: Iterable[ReplacementEffect],
 ) -> ReplacementBatchChoice | None:
     all_effects = canonical_effects(effects)
+    shield_effect_ids = {
+        effect.effect_id
+        for effect in all_effects
+        if any(
+            isinstance(operation, PreventUsingShield)
+            for operation in effect.operations
+        )
+    }
+    consumed_shields = {
+        selection.effect_id
+        for selection in batch.journal
+        if selection.effect_id in shield_effect_ids
+    }
+    available_effects = tuple(
+        effect
+        for effect in all_effects
+        if effect.effect_id not in consumed_shields
+    )
     order = {seat: index for index, seat in enumerate(batch.apnap_order)}
     candidates: list[tuple[int, str, int, ReplacementTreeChoice]] = []
     for event_index, event in enumerate(batch.events):
-        pending = replacement_tree_choice(event, all_effects)
+        pending = replacement_tree_choice(event, available_effects)
         if pending is None:
             continue
         chooser_index = order.get(pending.choice.chooser)
@@ -131,7 +149,7 @@ def next_batch_replacement_choice(
         )
     if not candidates:
         return None
-    _, event_id, event_index, pending = min(
+    chooser_index, event_id, event_index, pending = min(
         candidates,
         key=lambda value: (
             value[0],
@@ -140,15 +158,66 @@ def next_batch_replacement_choice(
             value[2],
         ),
     )
+    one_shot_ids = {
+        effect.effect_id
+        for effect in available_effects
+        if any(
+            isinstance(operation, PreventUsingShield)
+            and operation.remaining is None
+            and operation.consume_on_application
+            for operation in effect.operations
+        )
+    }
+    same_chooser = [
+        value for value in candidates if value[0] == chooser_index
+    ]
+    shared_one_shot = {
+        effect_id
+        for effect_id in one_shot_ids
+        if sum(
+            effect_id in candidate[3].choice.options
+            for candidate in same_chooser
+        )
+        > 1
+    }
+    event_order_options = tuple(
+        sorted(
+            candidate[1]
+            for candidate in same_chooser
+            if shared_one_shot.intersection(candidate[3].choice.options)
+        )
+    )
+    return _batch_choice_for_event(
+        batch,
+        all_effects=all_effects,
+        available_effects=available_effects,
+        event_index=event_index,
+        event_id=event_id,
+        pending=pending,
+        event_order_options=event_order_options,
+    )
+
+
+def _batch_choice_for_event(
+    batch: ReplacementEventBatch,
+    *,
+    all_effects: Sequence[ReplacementEffect],
+    available_effects: Sequence[ReplacementEffect],
+    event_index: int,
+    event_id: str,
+    pending: ReplacementTreeChoice,
+    event_order_options: tuple[str, ...],
+) -> ReplacementBatchChoice:
     base = ReplacementBatchChoice(
         batch_id=batch.batch_id,
         event_index=event_index,
         event_id=event_id,
         tree_choice=pending,
         prior_public_choices=batch.journal,
+        event_order_options=event_order_options,
     )
     allocations: list[PreventionAllocationChoice] = []
-    effects_by_id = {effect.effect_id: effect for effect in all_effects}
+    effects_by_id = {effect.effect_id: effect for effect in available_effects}
     for effect_id in pending.choice.options:
         effect = effects_by_id[effect_id]
         shield_operations = tuple(
@@ -164,8 +233,15 @@ def next_batch_replacement_choice(
             )
         operation = shield_operations[0]
         matching: list[tuple[str, int, bool]] = []
-        for candidate in batch.events:
-            candidate_choice = replacement_tree_choice(candidate, all_effects)
+        candidates = (
+            (batch.events[event_index],)
+            if operation.remaining is None
+            else batch.events
+        )
+        for candidate in candidates:
+            candidate_choice = replacement_tree_choice(
+                candidate, available_effects
+            )
             if (
                 candidate_choice is None
                 or candidate_choice.path
@@ -213,35 +289,47 @@ def next_batch_replacement_choice(
         tree_choice=base.tree_choice,
         prior_public_choices=base.prior_public_choices,
         prevention_allocations=tuple(allocations),
+        event_order_options=base.event_order_options,
     )
 
 
 def _selection_parts(
     selected: str | None | Mapping[str, Any],
-) -> tuple[str | None, Mapping[str, Any] | None]:
+) -> tuple[str | None, Mapping[str, Any] | None, str | None]:
     if selected is None or isinstance(selected, str):
-        return selected, None
+        return selected, None, None
     if not isinstance(selected, Mapping):
         raise ReplacementEffectError(
             "Replacement selections must be strings or typed objects"
         )
     actual = set(selected)
-    expected = {"effect_id", "allocation"}
-    if actual != expected:
+    allowed_shapes = (
+        {"effect_id", "allocation"},
+        {"effect_id", "event_id"},
+        {"effect_id", "allocation", "event_id"},
+    )
+    if actual not in allowed_shapes:
         raise ReplacementEffectError(
-            "Typed replacement selections require effect_id and allocation"
+            "Typed replacement selections require effect_id plus allocation or event_id"
         )
     effect_id = selected["effect_id"]
-    allocation = selected["allocation"]
+    allocation = selected.get("allocation")
+    event_id = selected.get("event_id")
     if not isinstance(effect_id, str) or not effect_id:
         raise ReplacementEffectError(
             "Typed replacement selections require a stable effect ID"
         )
-    if not isinstance(allocation, Mapping):
+    if allocation is not None and not isinstance(allocation, Mapping):
         raise ReplacementEffectError(
             "Typed replacement prevention allocation must be an object"
         )
-    return effect_id, allocation
+    if event_id is not None and (
+        not isinstance(event_id, str) or not event_id
+    ):
+        raise ReplacementEffectError(
+            "Typed replacement event identity must be a nonempty string"
+        )
+    return effect_id, allocation, event_id
 
 
 def _validated_allocation(
@@ -373,9 +461,67 @@ def apply_batch_replacement(
         raise ReplacementEffectError(
             "Replacement batch choice is stale or violates APNAP order"
         )
-    selected_value, supplied_allocation = _selection_parts(
+    selected_value, supplied_allocation, selected_event_id = _selection_parts(
         selected_effect_id
     )
+    if selected_event_id is not None:
+        if selected_event_id not in current.event_order_options:
+            raise ReplacementEffectError(
+                "Selected replacement event is not currently available"
+            )
+        selected_index = next(
+            (
+                index
+                for index, event in enumerate(batch.events)
+                if event.event_id == selected_event_id
+            ),
+            None,
+        )
+        if selected_index is None:
+            raise ReplacementEffectError(
+                "Selected replacement event no longer exists"
+            )
+        shield_effect_ids = {
+            effect.effect_id
+            for effect in all_effects
+            if any(
+                isinstance(operation, PreventUsingShield)
+                for operation in effect.operations
+            )
+        }
+        consumed = {
+            selection.effect_id
+            for selection in batch.journal
+            if selection.effect_id in shield_effect_ids
+        }
+        available_effects = tuple(
+            effect
+            for effect in all_effects
+            if effect.effect_id not in consumed
+        )
+        tree_choice = replacement_tree_choice(
+            batch.events[selected_index], available_effects
+        )
+        if (
+            tree_choice is None
+            or tree_choice.choice.chooser != current.choice.chooser
+        ):
+            raise ReplacementEffectError(
+                "Selected replacement event no longer requires this chooser"
+            )
+        pending = _batch_choice_for_event(
+            batch,
+            all_effects=all_effects,
+            available_effects=available_effects,
+            event_index=selected_index,
+            event_id=selected_event_id,
+            pending=tree_choice,
+            event_order_options=current.event_order_options,
+        )
+    elif current.event_order_options:
+        raise ReplacementEffectError(
+            "The affected player must choose the next simultaneous event"
+        )
     canonical_selection = canonical_replacement_selection(
         pending.choice, selected_value
     )
@@ -440,7 +586,10 @@ def resolve_replacement_batch(
                 "Replacement replay contains unused selections"
             )
         if (
-            selection.event_id != pending.event_id
+            (
+                selection.event_id != pending.event_id
+                and selection.event_id not in pending.event_order_options
+            )
             or selection.path != pending.path
             or selection.chooser != pending.choice.chooser
         ):
@@ -455,9 +604,21 @@ def resolve_replacement_batch(
                 {
                     "effect_id": selection.effect_id,
                     "allocation": thaw_value(selection.allocation),
+                    **(
+                        {"event_id": selection.event_id}
+                        if pending.event_order_options
+                        else {}
+                    ),
                 }
                 if selection.allocation is not None
-                else selection.effect_id
+                else (
+                    {
+                        "effect_id": selection.effect_id,
+                        "event_id": selection.event_id,
+                    }
+                    if pending.event_order_options
+                    else selection.effect_id
+                )
             ),
         )
     if next_batch_replacement_choice(current, all_effects) is not None:
@@ -488,6 +649,7 @@ def advance_replacement_batch(
             len(pending.choice.options) == 1
             and not pending.choice.optional_options
             and not allocation_required
+            and not pending.event_order_options
         ):
             selected: str | None | Mapping[str, Any] = (
                 pending.choice.options[0]
@@ -580,6 +742,11 @@ def replacement_choice_payload(
     choice_schema: dict[str, object] = {
         "replacement": {"legal_values": legal_values}
     }
+    if pending.event_order_options:
+        choice_schema["replacement_event"] = {
+            "legal_values": list(pending.event_order_options),
+            "label": "Choose the next simultaneous event",
+        }
     if allocation_event_ids:
         choice_schema["prevention_allocation"] = {
             "shape": "object_map",
@@ -592,6 +759,11 @@ def replacement_choice_payload(
         "chooser": pending.choice.chooser,
         "prompt": "Choose the next replacement or prevention effect.",
         "options": options,
+        **(
+            {"event_order_options": list(pending.event_order_options)}
+            if pending.event_order_options
+            else {}
+        ),
         **(
             {"prevention_allocations": allocation_by_effect}
             if allocation_by_effect

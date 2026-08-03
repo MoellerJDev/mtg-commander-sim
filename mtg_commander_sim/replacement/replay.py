@@ -14,6 +14,44 @@ from .model import (
 )
 
 
+_COMBAT_FIELDS = {
+    "replacement_resume_kind",
+    "combat_assignments",
+    "replacement_selections",
+    "replacement_batch",
+    "replacement_effects",
+}
+_SEMANTIC_FIELDS = {
+    "stack_ref",
+    "effect",
+    "remaining",
+    "destination",
+    "note",
+    "instruction_pointer",
+    "semantic_frame",
+    "replacement_batch",
+    "replacement_effects",
+}
+_MANA_FIELDS = {
+    "replacement_resume_kind",
+    "priority_seat",
+    "priority_action",
+    "priority_response",
+    "priority_frame",
+    "replacement_batch",
+    "replacement_effects",
+}
+_MANA_FRAME_FIELDS = {
+    "active_player",
+    "phase",
+    "step",
+    "turn_sequence",
+    "priority_player",
+    "priority_epoch",
+    "stack_refs",
+}
+
+
 @dataclass(frozen=True, slots=True)
 class ReplacementContinuation:
     """Strictly deserialized, replay-pinned replacement suspension data."""
@@ -30,6 +68,10 @@ class ReplacementContinuation:
     note: str = ""
     instruction_pointer: int = 0
     semantic_frame: FrozenMap | None = None
+    priority_seat: str = ""
+    priority_action: str = ""
+    priority_response: FrozenMap | None = None
+    priority_frame: FrozenMap | None = None
 
     @classmethod
     def from_dict(
@@ -39,141 +81,13 @@ class ReplacementContinuation:
             raise ReplacementEffectError(
                 "Replacement continuation must be an object"
             )
-        resume_kind = str(
-            value.get("replacement_resume_kind") or "semantic"
-        )
+        resume_kind = _validate_continuation_shape(value)
+        batch, effects = _decode_batch_and_effects(value)
         if resume_kind == "combat_damage":
-            exact_fields(
-                value,
-                {
-                    "replacement_resume_kind",
-                    "combat_assignments",
-                    "replacement_selections",
-                    "replacement_batch",
-                    "replacement_effects",
-                },
-                field_name="combat continuation",
-            )
-        elif resume_kind == "semantic":
-            exact_fields(
-                value,
-                {
-                    "stack_ref",
-                    "effect",
-                    "remaining",
-                    "destination",
-                    "note",
-                    "instruction_pointer",
-                    "semantic_frame",
-                    "replacement_batch",
-                    "replacement_effects",
-                },
-                field_name="semantic continuation",
-            )
-        else:
-            raise ReplacementEffectError(
-                "Unknown replacement continuation resume kind"
-            )
-        batch_value = value.get("replacement_batch")
-        if not isinstance(batch_value, Mapping):
-            raise ReplacementEffectError(
-                "Replacement continuation batch must be an object"
-            )
-        effects = tuple(
-            ReplacementEffect.from_dict(effect)
-            for effect in mapping_sequence(
-                value.get("replacement_effects"),
-                field_name="continuation effects",
-            )
-        )
-        if not effects:
-            raise ReplacementEffectError(
-                "Replacement continuation requires effects"
-            )
-        if resume_kind == "combat_damage":
-            selections = sequence(
-                value["replacement_selections"],
-                field_name="continuation selections",
-            )
-            parsed_selections: list[str | FrozenMap] = []
-            for item in selections:
-                if isinstance(item, str) and item:
-                    parsed_selections.append(item)
-                    continue
-                if isinstance(item, Mapping):
-                    exact_fields(
-                        item,
-                        {"effect_id", "allocation"},
-                        field_name="typed continuation selection",
-                    )
-                    if not isinstance(item["effect_id"], str) or not item[
-                        "effect_id"
-                    ] or not isinstance(item["allocation"], Mapping):
-                        raise ReplacementEffectError(
-                            "Typed continuation selection is malformed"
-                        )
-                    parsed_selections.append(FrozenMap(item))
-                    continue
-                raise ReplacementEffectError(
-                    "Replacement continuation selections must be canonical strings"
-                )
-            return cls(
-                batch=ReplacementEventBatch.from_dict(batch_value),
-                effects=effects,
-                resume_kind=resume_kind,
-                combat_assignments=tuple(
-                    FrozenMap(item)
-                    for item in mapping_sequence(
-                        value["combat_assignments"],
-                        field_name="combat assignments",
-                    )
-                ),
-                replacement_selections=tuple(parsed_selections),
-            )
-        effect = value["effect"]
-        semantic_frame = value["semantic_frame"]
-        if not isinstance(effect, Mapping) or not isinstance(
-            semantic_frame, Mapping
-        ):
-            raise ReplacementEffectError(
-                "Semantic replacement continuation mappings are malformed"
-            )
-        instruction_pointer = value["instruction_pointer"]
-        if type(instruction_pointer) is not int or instruction_pointer < 0:
-            raise ReplacementEffectError(
-                "Replacement continuation instruction pointer is invalid"
-            )
-        destination = value["destination"]
-        if destination is not None and not isinstance(destination, str):
-            raise ReplacementEffectError(
-                "Replacement continuation destination is malformed"
-            )
-        if not isinstance(value["note"], str):
-            raise ReplacementEffectError(
-                "Replacement continuation note is malformed"
-            )
-        stack_ref = value["stack_ref"]
-        if not isinstance(stack_ref, str) or not stack_ref:
-            raise ReplacementEffectError(
-                "Replacement continuation stack reference is required"
-            )
-        return cls(
-            batch=ReplacementEventBatch.from_dict(batch_value),
-            effects=effects,
-            resume_kind=resume_kind,
-            stack_ref=stack_ref,
-            effect=FrozenMap(effect),
-            remaining=tuple(
-                FrozenMap(item)
-                for item in mapping_sequence(
-                    value["remaining"], field_name="remaining effects"
-                )
-            ),
-            destination=destination,
-            note=value["note"],
-            instruction_pointer=instruction_pointer,
-            semantic_frame=FrozenMap(semantic_frame),
-        )
+            return _decode_combat_continuation(cls, value, batch, effects)
+        if resume_kind == "mana_payment":
+            return _decode_mana_continuation(cls, value, batch, effects)
+        return _decode_semantic_continuation(cls, value, batch, effects)
 
     def thaw_combat_assignments(self) -> list[dict[str, Any]]:
         return [thaw_value(value) for value in self.combat_assignments]
@@ -194,3 +108,274 @@ class ReplacementContinuation:
                 "Combat continuation has no semantic frame"
             )
         return thaw_value(self.semantic_frame)
+
+    def thaw_priority_response(self) -> dict[str, Any]:
+        if self.priority_response is None:
+            raise ReplacementEffectError(
+                "This continuation has no priority response"
+            )
+        return thaw_value(self.priority_response)
+
+    def thaw_priority_frame(self) -> dict[str, Any]:
+        if self.priority_frame is None:
+            raise ReplacementEffectError(
+                "This continuation has no priority frame"
+            )
+        return thaw_value(self.priority_frame)
+
+
+def _validate_continuation_shape(value: Mapping[str, Any]) -> str:
+    resume_kind = str(value.get("replacement_resume_kind") or "semantic")
+    shapes = {
+        "combat_damage": (_COMBAT_FIELDS, "combat continuation"),
+        "semantic": (_SEMANTIC_FIELDS, "semantic continuation"),
+        "mana_payment": (_MANA_FIELDS, "mana-payment continuation"),
+    }
+    shape = shapes.get(resume_kind)
+    if shape is None:
+        raise ReplacementEffectError(
+            "Unknown replacement continuation resume kind"
+        )
+    fields, field_name = shape
+    exact_fields(value, fields, field_name=field_name)
+    return resume_kind
+
+
+def _decode_batch_and_effects(
+    value: Mapping[str, Any],
+) -> tuple[ReplacementEventBatch, tuple[ReplacementEffect, ...]]:
+    batch_value = value.get("replacement_batch")
+    if not isinstance(batch_value, Mapping):
+        raise ReplacementEffectError(
+            "Replacement continuation batch must be an object"
+        )
+    batch = ReplacementEventBatch.from_dict(batch_value)
+    effects = tuple(
+        ReplacementEffect.from_dict(effect)
+        for effect in mapping_sequence(
+            value.get("replacement_effects"),
+            field_name="continuation effects",
+        )
+    )
+    if not effects:
+        raise ReplacementEffectError(
+            "Replacement continuation requires effects"
+        )
+    return batch, effects
+
+
+def _decode_typed_selection(item: Mapping[str, Any]) -> FrozenMap:
+    expected = {"effect_id"}
+    if "allocation" in item:
+        expected.add("allocation")
+    if "event_id" in item:
+        expected.add("event_id")
+    if expected == {"effect_id"}:
+        raise ReplacementEffectError(
+            "Typed continuation selection has no typed payload"
+        )
+    exact_fields(
+        item,
+        expected,
+        field_name="typed continuation selection",
+    )
+    if not isinstance(item["effect_id"], str) or not item["effect_id"]:
+        raise ReplacementEffectError(
+            "Typed continuation selection is malformed"
+        )
+    if "allocation" in item and not isinstance(item["allocation"], Mapping):
+        raise ReplacementEffectError(
+            "Typed continuation selection is malformed"
+        )
+    if "event_id" in item and (
+        not isinstance(item["event_id"], str) or not item["event_id"]
+    ):
+        raise ReplacementEffectError(
+            "Typed continuation event identity is malformed"
+        )
+    return FrozenMap(item)
+
+
+def _decode_combat_selections(
+    value: Mapping[str, Any],
+) -> tuple[str | FrozenMap, ...]:
+    parsed: list[str | FrozenMap] = []
+    for item in sequence(
+        value["replacement_selections"],
+        field_name="continuation selections",
+    ):
+        if isinstance(item, str) and item:
+            parsed.append(item)
+        elif isinstance(item, Mapping):
+            parsed.append(_decode_typed_selection(item))
+        else:
+            raise ReplacementEffectError(
+                "Replacement continuation selections must be canonical strings"
+            )
+    return tuple(parsed)
+
+
+def _decode_combat_continuation(
+    continuation_type: type[ReplacementContinuation],
+    value: Mapping[str, Any],
+    batch: ReplacementEventBatch,
+    effects: tuple[ReplacementEffect, ...],
+) -> ReplacementContinuation:
+    return continuation_type(
+        batch=batch,
+        effects=effects,
+        resume_kind="combat_damage",
+        combat_assignments=tuple(
+            FrozenMap(item)
+            for item in mapping_sequence(
+                value["combat_assignments"],
+                field_name="combat assignments",
+            )
+        ),
+        replacement_selections=_decode_combat_selections(value),
+    )
+
+
+def _validate_mana_frame(frame: Mapping[str, Any], seat: str) -> None:
+    exact_fields(frame, _MANA_FRAME_FIELDS, field_name="mana-payment frame")
+    stack_refs = frame["stack_refs"]
+    if not isinstance(stack_refs, (list, tuple)) or any(
+        not isinstance(item, str) or not item for item in stack_refs
+    ):
+        raise ReplacementEffectError(
+            "Mana-payment stack frame is malformed"
+        )
+    if len(stack_refs) != len(set(stack_refs)):
+        raise ReplacementEffectError(
+            "Mana-payment stack frame repeats an object"
+        )
+    if (
+        not isinstance(frame["active_player"], str)
+        or not frame["active_player"]
+        or not isinstance(frame["phase"], str)
+        or not frame["phase"]
+        or not isinstance(frame["step"], str)
+        or not frame["step"]
+        or type(frame["turn_sequence"]) is not int
+        or frame["turn_sequence"] < 0
+        or frame["priority_player"] != seat
+        or type(frame["priority_epoch"]) is not int
+        or frame["priority_epoch"] < 0
+    ):
+        raise ReplacementEffectError(
+            "Mana-payment continuation frame values are malformed"
+        )
+
+
+def _validate_priority_response(
+    action: str, response: Mapping[str, Any]
+) -> None:
+    payment_id = response.get("_mana_payment_id")
+    if not isinstance(payment_id, str) or not payment_id:
+        raise ReplacementEffectError(
+            "Mana-payment continuation requires a stable payment identity"
+        )
+    if action == "activate" and (
+        not isinstance(response.get("source"), str)
+        or not response.get("source")
+        or not isinstance(response.get("ability"), str)
+        or not response.get("ability")
+    ):
+        raise ReplacementEffectError(
+            "Mana-payment activation response is malformed"
+        )
+    if action == "cast" and (
+        not isinstance(response.get("card"), str) or not response.get("card")
+    ):
+        raise ReplacementEffectError(
+            "Mana-payment cast response is malformed"
+        )
+
+
+def _decode_mana_continuation(
+    continuation_type: type[ReplacementContinuation],
+    value: Mapping[str, Any],
+    batch: ReplacementEventBatch,
+    effects: tuple[ReplacementEffect, ...],
+) -> ReplacementContinuation:
+    seat = value["priority_seat"]
+    action = value["priority_action"]
+    response = value["priority_response"]
+    frame = value["priority_frame"]
+    if (
+        not isinstance(seat, str)
+        or not seat
+        or action not in {"cast", "activate"}
+        or not isinstance(response, Mapping)
+        or not isinstance(frame, Mapping)
+    ):
+        raise ReplacementEffectError(
+            "Mana-payment continuation fields are malformed"
+        )
+    if seat not in batch.apnap_order:
+        raise ReplacementEffectError(
+            "Mana-payment continuation seat is not in APNAP order"
+        )
+    _validate_mana_frame(frame, seat)
+    _validate_priority_response(action, response)
+    return continuation_type(
+        batch=batch,
+        effects=effects,
+        resume_kind="mana_payment",
+        priority_seat=seat,
+        priority_action=action,
+        priority_response=FrozenMap(response),
+        priority_frame=FrozenMap(frame),
+    )
+
+
+def _decode_semantic_continuation(
+    continuation_type: type[ReplacementContinuation],
+    value: Mapping[str, Any],
+    batch: ReplacementEventBatch,
+    effects: tuple[ReplacementEffect, ...],
+) -> ReplacementContinuation:
+    effect = value["effect"]
+    semantic_frame = value["semantic_frame"]
+    if not isinstance(effect, Mapping) or not isinstance(
+        semantic_frame, Mapping
+    ):
+        raise ReplacementEffectError(
+            "Semantic replacement continuation mappings are malformed"
+        )
+    instruction_pointer = value["instruction_pointer"]
+    if type(instruction_pointer) is not int or instruction_pointer < 0:
+        raise ReplacementEffectError(
+            "Replacement continuation instruction pointer is invalid"
+        )
+    destination = value["destination"]
+    if destination is not None and not isinstance(destination, str):
+        raise ReplacementEffectError(
+            "Replacement continuation destination is malformed"
+        )
+    if not isinstance(value["note"], str):
+        raise ReplacementEffectError(
+            "Replacement continuation note is malformed"
+        )
+    stack_ref = value["stack_ref"]
+    if not isinstance(stack_ref, str) or not stack_ref:
+        raise ReplacementEffectError(
+            "Replacement continuation stack reference is required"
+        )
+    return continuation_type(
+        batch=batch,
+        effects=effects,
+        resume_kind="semantic",
+        stack_ref=stack_ref,
+        effect=FrozenMap(effect),
+        remaining=tuple(
+            FrozenMap(item)
+            for item in mapping_sequence(
+                value["remaining"], field_name="remaining effects"
+            )
+        ),
+        destination=destination,
+        note=value["note"],
+        instruction_pointer=instruction_pointer,
+        semantic_frame=FrozenMap(semantic_frame),
+    )

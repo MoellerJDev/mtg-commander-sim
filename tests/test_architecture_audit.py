@@ -68,7 +68,7 @@ class ArchitectureAuditTests(unittest.TestCase):
             [], handlers["registered_operations_still_in_legacy_dispatch"]
         )
         self.assertEqual(0, handlers["legacy_apply_effect_branch_count"])
-        self.assertEqual(17, handlers["engine_string_dispatch_branch_count"])
+        self.assertEqual(14, handlers["engine_string_dispatch_branch_count"])
         self.assertEqual(10, handlers["registered_runtime_handler_count"])
         self.assertEqual(
             handlers["registered_runtime_handler_count"],

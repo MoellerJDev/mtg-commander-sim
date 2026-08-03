@@ -146,6 +146,72 @@ class SemanticChoiceCharacterizationTests(unittest.TestCase):
             replay = replay_record(record, self.db, verify=True)
             self.assertTrue(replay["ok"], replay)
 
+    def test_damage_source_choice_is_seat_scoped_pinned_and_replays(self):
+        session = self._session(68020)
+        engine = session.engine
+        chosen = self._card(engine, "B", "Zimone and Dina")
+        engine.move_card(
+            chosen.object_id,
+            "battlefield",
+            controller="B",
+            log=False,
+        )
+        _card, _item = self._begin_choice(
+            session,
+            {
+                "op": "choose_damage_source",
+                "prompt": "Choose the source whose damage will be prevented.",
+                "required_colors": [],
+                "required_types": [],
+                "shield": {
+                    "op": "create_damage_prevention_shield",
+                    "source": "fixture:healing-grace",
+                    "subject": "A",
+                    "mode": "amount",
+                    "amount": 3,
+                    "duration": "until_end_of_turn",
+                    "aftermath": [
+                        {
+                            "kind": "gain_life",
+                            "player": "A",
+                            "per_prevented": 0,
+                            "fixed_amount": 3,
+                        }
+                    ],
+                },
+            },
+        )
+        packet_a = session.packet("pilot:A", full=True)
+        packet_b = session.packet("pilot:B", full=True)
+        self.assertEqual("semantic.choice", packet_a["decision"]["kind"])
+        self.assertIsNone(packet_b["decision"])
+        offered = {
+            row["id"] for row in packet_a["decision"]["ctx"]["objects"]
+        }
+        self.assertIn(chosen.ref, offered)
+
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "source": chosen.ref,
+                "plan": "PROTECT_LIFE",
+                "reason": "Prevent damage from the selected public source.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(1, len(engine.state.damage_prevention_shields))
+        shield = engine.state.damage_prevention_shields[0]
+        self.assertEqual(chosen.object_id, shield.chosen_source.object_id)
+        self.assertEqual(chosen.logical_object_id, shield.chosen_source.logical_object_id)
+        self.assertEqual(1, shield.chosen_source.snapshot_version)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record = Path(temporary) / "damage-source-choice"
+            session.save(record)
+            replay = replay_record(record, self.db, verify=True)
+        self.assertTrue(replay["ok"], replay)
+
     def test_card_name_choice_rejects_malformed_response_without_mutation(self):
         session = self._session(68002)
         card, _item = self._begin_choice(

@@ -164,6 +164,63 @@ class CardProgramV2Tests(unittest.TestCase):
                 self.assertEqual("static", ability["kind"])
                 self.assertEqual([], ability["effect_nodes"])
 
+    def test_generic_prevention_programs_declare_closed_capabilities(self):
+        fixtures = (
+            (
+                replace(
+                    _bolt(),
+                    oracle_id="00000000-0000-4000-8000-000000006151",
+                    name="Generic X Prevention",
+                    mana_cost="{X}{W}",
+                    colors=("W",),
+                    color_identity=("W",),
+                    oracle_text=(
+                        "Prevent the next X damage that would be dealt to any "
+                        "target this turn."
+                    ),
+                ),
+                {"damage.prevention.persistent_amount"},
+                "$x",
+            ),
+            (
+                replace(
+                    _bolt(),
+                    oracle_id="00000000-0000-4000-8000-000000006152",
+                    name="Generic Counter Prevention",
+                    mana_cost="{1}{W}",
+                    colors=("W",),
+                    color_identity=("W",),
+                    oracle_text=(
+                        "Prevent the next 3 damage that would be dealt to target "
+                        "creature this turn. For each 1 damage prevented this way, "
+                        "put a +1/+1 counter on that creature."
+                    ),
+                ),
+                {
+                    "counter.placement.quantity_replacement",
+                    "damage.prevention.persistent_amount",
+                },
+                3,
+            ),
+        )
+        for record, expected_dependencies, expected_amount in fixtures:
+            with self.subTest(record.name):
+                program = compile_card_program(
+                    self.db,
+                    record,
+                    capability_registry=self.capabilities,
+                    capability_profile="commander_review",
+                    trust_level="trusted",
+                )
+                self.assertTrue(program.trust_closure["trusted"])
+                self.assertTrue(
+                    expected_dependencies.issubset(
+                        program.capability_dependencies
+                    )
+                )
+                effect = program.to_dict()["abilities"][0]["effect_nodes"][0]
+                self.assertEqual(expected_amount, effect["amount"])
+
     def test_tampered_projection_hash_and_closure_fail_closed(self):
         program = compile_card_program(
             self.db,

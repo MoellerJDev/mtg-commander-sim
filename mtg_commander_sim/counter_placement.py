@@ -4,10 +4,12 @@ from dataclasses import dataclass
 from typing import Any, Mapping, Protocol, Sequence
 
 from .counter_state import (
+    apply_counter_changes,
     CounterChange,
+    CounterStatePlan,
     CounterStateError,
-    commit_counter_changes,
     plan_counter_changes,
+    validate_counter_changes,
 )
 from .replacement_effects import (
     ReplaceableEvent,
@@ -116,6 +118,13 @@ class CounterPlacementResult:
     placed: int
     before: int
     after: int
+
+
+@dataclass(frozen=True, slots=True)
+class CounterPlacementCommitPlan:
+    prepared: PreparedCounterPlacements
+    rows: tuple[tuple[ReplaceableEvent, Any, str, int, int], ...]
+    state_plan: CounterStatePlan
 
 
 def _event_spec(
@@ -267,15 +276,16 @@ def _log_replacements(
         )
 
 
-def commit_prepared_counter_placements(
+def plan_prepared_counter_placement_commit(
     host: CounterPlacementHost,
     prepared: PreparedCounterPlacements,
-    *,
-    reason: str,
-    log: bool = True,
-) -> tuple[CounterPlacementResult, ...]:
-    """Commit a choice-complete batch without rediscovering effects."""
+) -> CounterPlacementCommitPlan:
+    """Validate a resolved placement batch and pin its mutation plan."""
 
+    if not isinstance(prepared, PreparedCounterPlacements):
+        raise CounterPlacementError(
+            "Counter placement commits require a typed prepared batch"
+        )
     validated: list[tuple[ReplaceableEvent, Any, str, int, int]] = []
     for event in prepared.events:
         affected = event.affected_object
@@ -297,7 +307,7 @@ def commit_prepared_counter_placements(
         validated.append((event, card, name, requested, amount))
 
     try:
-        counter_plan = plan_counter_changes(
+        state_plan = plan_counter_changes(
             host,
             tuple(
                 CounterChange(
@@ -316,13 +326,47 @@ def commit_prepared_counter_placements(
                 for event, card, name, _requested, amount in validated
             ),
         )
-        transitions = commit_counter_changes(host, counter_plan)
+    except CounterStateError as exc:
+        raise CounterPlacementError(str(exc)) from exc
+    return CounterPlacementCommitPlan(
+        prepared=prepared,
+        rows=tuple(validated),
+        state_plan=state_plan,
+    )
+
+
+def validate_counter_placement_commit(
+    host: CounterPlacementHost,
+    plan: CounterPlacementCommitPlan,
+) -> None:
+    if not isinstance(plan, CounterPlacementCommitPlan):
+        raise CounterPlacementError(
+            "Counter placement validation requires a typed commit plan"
+        )
+    try:
+        validate_counter_changes(host, plan.state_plan)
+    except CounterStateError as exc:
+        raise CounterPlacementError(str(exc)) from exc
+
+
+def commit_counter_placement_plan(
+    host: CounterPlacementHost,
+    plan: CounterPlacementCommitPlan,
+    *,
+    reason: str,
+    log: bool = True,
+) -> tuple[CounterPlacementResult, ...]:
+    """Apply a validated placement plan without rediscovering replacements."""
+
+    validate_counter_placement_commit(host, plan)
+    try:
+        transitions = apply_counter_changes(host, plan.state_plan)
     except CounterStateError as exc:
         raise CounterPlacementError(str(exc)) from exc
 
     results: list[CounterPlacementResult] = []
     for (event, card, name, requested, amount), transition in zip(
-        validated, transitions, strict=True
+        plan.rows, transitions, strict=True
     ):
         results.append(
             CounterPlacementResult(
@@ -353,8 +397,25 @@ def commit_prepared_counter_placements(
                 changed_objects=[card.object_id],
             )
     if log:
-        _log_replacements(host, prepared)
+        _log_replacements(host, plan.prepared)
     return tuple(results)
+
+
+def commit_prepared_counter_placements(
+    host: CounterPlacementHost,
+    prepared: PreparedCounterPlacements,
+    *,
+    reason: str,
+    log: bool = True,
+) -> tuple[CounterPlacementResult, ...]:
+    """Commit a choice-complete batch without rediscovering effects."""
+
+    return commit_counter_placement_plan(
+        host,
+        plan_prepared_counter_placement_commit(host, prepared),
+        reason=reason,
+        log=log,
+    )
 
 
 def place_counters(

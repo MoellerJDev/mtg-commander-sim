@@ -5,7 +5,9 @@ from typing import Any, Callable, Mapping
 
 from ..errors import GameRuleError
 from . import (
+    damage_modifiers,
     damage_life_and_turns,
+    life_effects,
     objects_stack_and_tokens,
     state_and_permissions,
     zones_and_attachments,
@@ -34,9 +36,19 @@ FAMILIES = (
         zones_and_attachments.apply_effect,
     ),
     EffectFamily(
+        "damage-modifiers.v1",
+        damage_modifiers.OPERATIONS,
+        damage_modifiers.apply_effect,
+    ),
+    EffectFamily(
         "damage-life-and-turns.v1",
         damage_life_and_turns.OPERATIONS,
         damage_life_and_turns.apply_effect,
+    ),
+    EffectFamily(
+        "life-effects.v1",
+        life_effects.OPERATIONS,
+        life_effects.apply_effect,
     ),
     EffectFamily(
         "objects-stack-and-tokens.v1",
@@ -50,7 +62,9 @@ _BY_OPERATION: dict[str, EffectFamily] = {}
 _FAMILY_MODULES = (
     state_and_permissions,
     zones_and_attachments,
+    damage_modifiers,
     damage_life_and_turns,
+    life_effects,
     objects_stack_and_tokens,
 )
 for family, module in zip(FAMILIES, _FAMILY_MODULES, strict=True):

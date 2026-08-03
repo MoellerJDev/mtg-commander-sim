@@ -5,17 +5,8 @@ from typing import Any, Mapping
 from ..damage import (
     DamageError,
     damage_proposal,
-    recipient_snapshot,
     resolve_damage_batch,
     source_snapshot,
-)
-from ..damage_prevention import (
-    ChosenDamageSource,
-    DamageModifierDuration,
-    DamagePreventionShield,
-    DamageRedirectionEffect,
-    DamageSubject,
-    PreventionMode,
 )
 from ..errors import GameRuleError
 from ..effect_contracts import effect_family_contract
@@ -195,283 +186,6 @@ def _apply_damage_each_opponent(
     return result.dealt_amount
 
 
-def _damage_subject(snapshot: Any) -> DamageSubject:
-    return DamageSubject(
-        ref=snapshot.ref,
-        kind=snapshot.kind,
-        controller=snapshot.controller,
-        object_id=snapshot.object_id,
-        logical_object_id=snapshot.logical_object_id,
-        owner=snapshot.owner,
-    )
-
-
-def _chosen_damage_source(
-    host: Any,
-    effect: Mapping[str, Any],
-    *,
-    actor: str,
-) -> ChosenDamageSource | None:
-    chosen_ref = effect.get("chosen_source")
-    if chosen_ref is None:
-        return None
-    snapshot = source_snapshot(host, str(chosen_ref), controller=actor)
-    if snapshot.object_id.startswith("unrepresented:"):
-        raise GameRuleError(
-            "A chosen damage source must have authoritative object identity"
-        )
-    return ChosenDamageSource(
-        ref=snapshot.ref,
-        object_id=snapshot.object_id,
-        required_colors=tuple(
-            str(value) for value in effect.get("source_colors") or ()
-        ),
-        required_types=tuple(
-            str(value) for value in effect.get("source_types") or ()
-        ),
-    )
-
-
-def _apply_create_damage_prevention_shield(
-    host: Any,
-    effect: Mapping[str, Any],
-    *,
-    actor: str,
-    operation: str,
-    reason: str,
-) -> str:
-    del operation
-    subject_ref = str(effect.get("subject") or actor)
-    try:
-        subject = (
-            DamageSubject(ref="*", kind="any", controller=actor)
-            if subject_ref == "*"
-            else _damage_subject(
-                recipient_snapshot(host, subject_ref, actor=actor)
-            )
-        )
-        mode = PreventionMode(str(effect.get("mode") or "amount"))
-        duration = DamageModifierDuration(
-            str(effect.get("duration") or "until_end_of_turn")
-        )
-        remaining = effect.get("amount") if mode == PreventionMode.AMOUNT else None
-        shield = DamagePreventionShield(
-            shield_id=host._next_ref("PS"),
-            source_id=str(effect.get("source") or reason),
-            controller=actor,
-            subject=subject,
-            mode=mode,
-            remaining=remaining,
-            duration=duration,
-            created_turn_sequence=host.state.turn_sequence,
-            chosen_source=_chosen_damage_source(host, effect, actor=actor),
-            label=str(effect.get("label") or reason),
-        )
-    except (DamageError, ValueError) as exc:
-        raise GameRuleError(str(exc)) from exc
-    if any(
-        existing.shield_id == shield.shield_id
-        for existing in host.state.damage_prevention_shields
-    ):
-        raise GameRuleError("Prevention shield identity collision")
-    host.state.damage_prevention_shields.append(shield)
-    host._log(
-        actor,
-        "damage.prevention.created",
-        f"{shield.source_id} created a damage-prevention shield.",
-        {
-            "shield_id": shield.shield_id,
-            "subject": shield.subject.ref,
-            "mode": shield.mode.value,
-            "remaining": shield.remaining,
-            "duration": shield.duration.value,
-            **dict(reason=reason),
-        },
-        importance=2,
-        changed_players=[subject.controller],
-        changed_objects=(
-            [subject.object_id] if subject.object_id is not None else []
-        ),
-    )
-    return shield.shield_id
-
-
-def _apply_create_damage_redirection(
-    host: Any,
-    effect: Mapping[str, Any],
-    *,
-    actor: str,
-    operation: str,
-    reason: str,
-) -> str:
-    del operation
-    try:
-        subject = _damage_subject(
-            recipient_snapshot(
-                host,
-                str(effect.get("subject") or actor),
-                actor=actor,
-            )
-        )
-        destination = _damage_subject(
-            recipient_snapshot(
-                host,
-                str(effect.get("destination") or ""),
-                actor=actor,
-            )
-        )
-        redirection = DamageRedirectionEffect(
-            redirection_id=host._next_ref("DR"),
-            source_id=str(effect.get("source") or reason),
-            controller=actor,
-            subject=subject,
-            destination=destination,
-            duration=DamageModifierDuration(
-                str(effect.get("duration") or "until_end_of_turn")
-            ),
-            created_turn_sequence=host.state.turn_sequence,
-            chosen_source=_chosen_damage_source(host, effect, actor=actor),
-            consume_on_application=bool(
-                effect.get("consume_on_application", True)
-            ),
-            label=str(effect.get("label") or reason),
-        )
-    except (DamageError, ValueError) as exc:
-        raise GameRuleError(str(exc)) from exc
-    host.state.damage_redirections.append(redirection)
-    host._log(
-        actor,
-        "damage.redirection.created",
-        f"{redirection.source_id} created a damage-redirection effect.",
-        {
-            "redirection_id": redirection.redirection_id,
-            "subject": redirection.subject.ref,
-            "destination": redirection.destination.ref,
-            "duration": redirection.duration.value,
-            **dict(reason=reason),
-        },
-        importance=2,
-        changed_players=[
-            redirection.subject.controller,
-            redirection.destination.controller,
-        ],
-        changed_objects=[
-            value
-            for value in (
-                redirection.subject.object_id,
-                redirection.destination.object_id,
-            )
-            if value is not None
-        ],
-    )
-    return redirection.redirection_id
-
-
-
-def _apply_life(
-    host: Any,
-    effect: Mapping[str, Any],
-    *,
-    actor: str,
-    operation: str,
-    reason: str,
-) -> Any:
-    op = operation
-    seat = str(effect.get("player") or actor)
-    delta = int(effect.get("delta", 0))
-    host.state.players[seat].life += delta
-    host._log(actor, "effect.life", f"{seat}'s life changed by {delta}.", {"player": seat, "delta": delta}, importance=1, changed_players=[seat])
-    return host.state.players[seat].life
-
-
-
-def _apply_lose_life(
-    host: Any,
-    effect: Mapping[str, Any],
-    *,
-    actor: str,
-    operation: str,
-    reason: str,
-) -> Any:
-    op = operation
-    seat = str(effect.get("player") or actor)
-    amount = max(0, int(effect.get("amount", 0)))
-    host.state.players[seat].life -= amount
-    host._log(
-        actor,
-        "effect.life",
-        f"{seat} lost {amount} life.",
-        {"player": seat, "delta": -amount},
-        importance=1,
-        changed_players=[seat],
-    )
-    return host.state.players[seat].life
-
-
-
-def _apply_lose_life_each_opponent(
-    host: Any,
-    effect: Mapping[str, Any],
-    *,
-    actor: str,
-    operation: str,
-    reason: str,
-) -> Any:
-    op = operation
-    amount = max(0, int(effect.get("amount", 0)))
-    opponents = [
-        seat
-        for seat in host.active_seats
-        if seat != actor
-    ]
-    for opponent in opponents:
-        host.state.players[opponent].life -= amount
-    host._log(
-        actor,
-        "effect.life",
-        f"Each opponent of {actor} lost {amount} life.",
-        {
-            "opponents": opponents,
-            "delta": -amount,
-            "reason": reason,
-        },
-        importance=2,
-        changed_players=opponents,
-    )
-    return amount
-
-
-
-def _apply_lose_life_equal_mana_value(
-    host: Any,
-    effect: Mapping[str, Any],
-    *,
-    actor: str,
-    operation: str,
-    reason: str,
-) -> Any:
-    op = operation
-    seat = str(effect.get("player") or actor)
-    card = host._resolve_object(actor, str(effect["card"]))
-    record = host.card_record(card)
-    amount = int(record.mana_value if record else 0)
-    host.state.players[seat].life -= amount
-    host._log(
-        actor,
-        "effect.life",
-        f"{seat} lost {amount} life.",
-        {
-            "player": seat,
-            "delta": -amount,
-            "card": card.ref,
-        },
-        importance=1,
-        changed_players=[seat],
-    )
-    return host.state.players[seat].life
-
-
-
 def _apply_energy(
     host: Any,
     effect: Mapping[str, Any],
@@ -486,68 +200,6 @@ def _apply_energy(
     host.state.players[seat].energy += delta
     host._log(actor, "effect.energy", f"{seat}'s energy changed by {delta}.", {"player": seat, "delta": delta}, importance=1, changed_players=[seat])
     return host.state.players[seat].energy
-
-
-
-def _apply_drain_opponent(
-    host: Any,
-    effect: Mapping[str, Any],
-    *,
-    actor: str,
-    operation: str,
-    reason: str,
-) -> Any:
-    op = operation
-    target = str(effect["target"])
-    amount = int(effect.get("amount", 1))
-    if target not in host.active_seats or target == actor:
-        raise GameRuleError("Drain effect requires an active opponent")
-    host.state.players[target].life -= amount
-    host.state.players[actor].life += amount
-    host._log(
-        actor,
-        "effect.life",
-        f"{target} lost {amount} life and {actor} gained {amount}.",
-        {"player": target, "delta": -amount, "gained_by": actor},
-        importance=2,
-        changed_players=[actor, target],
-    )
-    return amount
-
-
-
-def _apply_drain_each_opponent(
-    host: Any,
-    effect: Mapping[str, Any],
-    *,
-    actor: str,
-    operation: str,
-    reason: str,
-) -> Any:
-    op = operation
-    amount = int(effect.get("amount", 1))
-    opponents = [
-        seat
-        for seat in host.active_seats
-        if seat != actor
-    ]
-    for opponent in opponents:
-        host.state.players[opponent].life -= amount
-    host.state.players[actor].life += amount
-    host._log(
-        actor,
-        "effect.life",
-        f"Each opponent of {actor} lost {amount} life; "
-        f"{actor} gained {amount} life.",
-        {
-            "opponents": opponents,
-            "amount": amount,
-            "gained_by": actor,
-        },
-        importance=2,
-        changed_players=[actor, *opponents],
-    )
-    return amount
 
 
 
@@ -1062,8 +714,6 @@ HANDLERS = {
     'counter_or_destroy_blue': _apply_counter_or_destroy_blue,
     'counter_stack': _apply_counter_stack,
     'create_emblem': _apply_create_emblem,
-    'create_damage_prevention_shield': _apply_create_damage_prevention_shield,
-    'create_damage_redirection': _apply_create_damage_redirection,
     'create_treasure': _apply_create_treasure,
     'create_modified_token_copy': _apply_create_modified_token_copy,
     'create_token_copy_if_controlled_count': _apply_create_token_copy_if_controlled_count,
@@ -1071,16 +721,10 @@ HANDLERS = {
     'damage': _apply_damage,
     'damage_each_opponent': _apply_damage_each_opponent,
     'destroy_selected_and_reward_source': _apply_destroy_selected_and_reward_source,
-    'drain_each_opponent': _apply_drain_each_opponent,
-    'drain_opponent': _apply_drain_opponent,
     'end_turn': _apply_end_turn,
     'energy': _apply_energy,
     'extra_turn': _apply_extra_turn,
     'grant_ability_marker': _apply_grant_ability_marker,
-    'life': _apply_life,
-    'lose_life': _apply_lose_life,
-    'lose_life_each_opponent': _apply_lose_life_each_opponent,
-    'lose_life_equal_mana_value': _apply_lose_life_equal_mana_value,
     'protection_from_everything_until_next_turn': _apply_protection_from_everything_until_next_turn,
     'return_transformed': _apply_return_transformed,
     'sacrifice_if_present': _apply_sacrifice_if_present,
