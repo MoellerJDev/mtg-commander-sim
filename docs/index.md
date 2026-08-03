@@ -58,6 +58,7 @@ indexed here but excluded from documentation front-matter validation.
 - [ADR 0012 — damage transaction and static prevention owner](adr/0012-damage-transaction-and-static-prevention.md)
 - [ADR 0013 — typed damage-result event ownership](adr/0013-damage-result-event-ownership.md)
 - [ADR 0014 — typed semantic choice and effect ownership](adr/0014-typed-semantic-choice-and-effect-ownership.md)
+- [ADR 0015 — durable damage-modifier ownership](adr/0015-durable-damage-modifier-ownership.md)
 - [Legacy consolidated architecture reference](../ARCHITECTURE.md)
 - [Client integration boundary](../CLIENT_INTEGRATION.md)
 - [Game Record v3](../GAME_RECORD.md)

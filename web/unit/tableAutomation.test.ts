@@ -23,3 +23,41 @@ test("automatic passing stops for every meaningful action category", () => {
   }
   assert.equal(findSafeAutoPass([{ action: "concede" }]), null);
 });
+
+test("automatic passing never advances an active player's empty-stack main phase", () => {
+  const pass = { action: "pass", id: "pass:main" };
+  for (const phase of ["precombat_main", "postcombat_main"]) {
+    assert.equal(
+      findSafeAutoPass([pass], {
+        activePlayer: "A",
+        phase,
+        principalSeat: "A",
+        stackDepth: 0,
+      }),
+      null,
+      phase,
+    );
+  }
+});
+
+test("automatic passing still accelerates nonactive and stack response windows", () => {
+  const pass = { action: "pass", id: "pass:response" };
+  assert.equal(
+    findSafeAutoPass([pass], {
+      activePlayer: "A",
+      phase: "precombat_main",
+      principalSeat: "B",
+      stackDepth: 0,
+    }),
+    pass,
+  );
+  assert.equal(
+    findSafeAutoPass([pass], {
+      activePlayer: "A",
+      phase: "precombat_main",
+      principalSeat: "A",
+      stackDepth: 1,
+    }),
+    pass,
+  );
+});

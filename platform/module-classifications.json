@@ -427,6 +427,21 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/compiler/prevention_templates.py",
+      "layer": "semantics",
+      "owning_subsystem": "oracle_compiler",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/compiler/program_generation.py",
       "layer": "semantics",
       "owning_subsystem": "oracle_compiler",
@@ -500,6 +515,32 @@
     },
     {
       "file": "mtg_commander_sim/damage.py",
+      "layer": "rules",
+      "owning_subsystem": "damage",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "mutable_owner",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/damage_modifier_state.py",
+      "layer": "domain",
+      "owning_subsystem": "damage",
+      "allowed_dependency_layers": [
+        "domain"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/damage_prevention.py",
       "layer": "rules",
       "owning_subsystem": "damage",
       "allowed_dependency_layers": [
@@ -2044,5 +2085,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "2b0e4648a12738b609610b9ad1e4023cf14b7a2cdbb66f0d0206cc5b9b6ee86d"
+  "fingerprint": "bcc4cde90a25a19996d86ebc1507caf3ef5d19b701d02c8ad48d4cdbaca13f4c"
 }

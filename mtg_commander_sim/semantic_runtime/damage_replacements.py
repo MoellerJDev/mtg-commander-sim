@@ -5,6 +5,7 @@ from functools import lru_cache
 from typing import Any, Mapping, Protocol, Sequence
 
 from ..replacement_effects import (
+    RedirectDamage,
     ReplacementClass,
     ReplacementEffect,
 )
@@ -15,6 +16,7 @@ from .context import SemanticNodeError
 
 _QUANTITY_HANDLER_ID = "replacement.damage.quantity.v1"
 _FIXED_PREVENTION_HANDLER_ID = "prevention.damage.fixed.v1"
+_STATIC_REDIRECTION_HANDLER_ID = "replacement.damage.redirect-to-source.v1"
 _RELATIONS = {"any", "source_controller", "opponent"}
 _TARGET_KINDS = {"player", "permanent"}
 
@@ -54,10 +56,16 @@ class FixedDamagePreventionNode:
 
 
 @dataclass(frozen=True, slots=True)
+class StaticDamageRedirectionNode:
+    condition: DamageReplacementCondition
+
+
+@dataclass(frozen=True, slots=True)
 class DamageReplacementSourceContext:
     source_ref: str
     source_controller: str
     component_id: str = ""
+    source_destination: RedirectDamage | None = None
 
     def __post_init__(self) -> None:
         if not self.source_ref or not self.source_controller:
@@ -377,6 +385,87 @@ class FixedDamagePreventionHandler:
         return (self.replacement_effect(descriptor, context),)
 
 
+@dataclass(frozen=True, slots=True)
+class StaticDamageRedirectionHandler:
+    """Redirect matching damage to the current battlefield source.
+
+    This is a static replacement component, so it has no durable resource to
+    consume. It is collected only while the source is still a current,
+    damageable battlefield object.
+    """
+
+    handler_id: str = _STATIC_REDIRECTION_HANDLER_ID
+    schema_version: int = 1
+    family: str = "replacement.damage.redirection.static"
+    event: str = "damage"
+    rule_references: tuple[str, ...] = (
+        "614.1",
+        "614.9",
+        "616.1",
+        "616.1f",
+    )
+    capability_dependencies: tuple[str, ...] = (
+        "damage.redirection.static_to_source",
+    )
+
+    def validate(
+        self, descriptor: Mapping[str, Any]
+    ) -> StaticDamageRedirectionNode:
+        _validate_envelope(descriptor, handler_id=self.handler_id)
+        modification = descriptor["modification"]
+        if not isinstance(modification, Mapping):
+            raise SemanticNodeError(
+                "Static damage redirection modification must be an object"
+            )
+        exact_fields(
+            modification,
+            {"destination"},
+            field="static damage redirection modification",
+        )
+        if modification["destination"] != "source":
+            raise SemanticNodeError(
+                "Static damage redirection only supports its source"
+            )
+        return StaticDamageRedirectionNode(
+            condition=_condition(descriptor["condition"]),
+        )
+
+    def replacement_effect(
+        self,
+        descriptor: Mapping[str, Any],
+        context: DamageReplacementSourceContext,
+    ) -> ReplacementEffect:
+        node = self.validate(descriptor)
+        if context.source_destination is None:
+            raise SemanticNodeError(
+                "Static damage redirection requires a current damageable "
+                "source snapshot"
+            )
+        component_id = context.component_id or "source"
+        conditions = _event_conditions(node.condition, context)
+        # "You and other permanents you control" never replaces damage that
+        # was already headed for the redirection source itself.
+        conditions["target"] = {"not_in": [context.source_ref]}
+        return ReplacementEffect(
+            effect_id=(
+                f"{self.handler_id}:{context.source_ref}:{component_id}"
+            ),
+            source_id=context.source_ref,
+            event_kind=self.event,
+            replacement_class=ReplacementClass.OTHER,
+            conditions=conditions,
+            operations=(context.source_destination,),
+            label=f"{context.source_ref}: redirect damage to this source",
+        )
+
+    def lower(
+        self,
+        descriptor: Mapping[str, Any],
+        context: DamageReplacementSourceContext,
+    ) -> tuple[ReplacementEffect, ...]:
+        return (self.replacement_effect(descriptor, context),)
+
+
 class DamageReplacementRegistry(
     RuntimeComponentRegistry[
         DamageReplacementSourceContext,
@@ -404,6 +493,7 @@ def default_damage_replacement_registry() -> DamageReplacementRegistry:
         (
             DamageQuantityReplacementHandler(),
             FixedDamagePreventionHandler(),
+            StaticDamageRedirectionHandler(),
         )
     )
     registry.require_registered_capabilities(
@@ -448,6 +538,36 @@ def collect_damage_replacement_effects(
             if not host.semantic_program_is_current_trusted(program):
                 continue
             for descriptor_index, descriptor in enumerate(program.handlers):
+                source_destination = None
+                if (
+                    descriptor.get("handler_id")
+                    == _STATIC_REDIRECTION_HANDLER_ID
+                ):
+                    from ..damage import DamageError, recipient_snapshot
+
+                    try:
+                        destination = recipient_snapshot(
+                            host,
+                            source.ref,
+                            actor=source.controller,
+                        )
+                    except DamageError as exc:
+                        raise SemanticNodeError(
+                            "A static damage-redirection source is not "
+                            "currently damageable"
+                        ) from exc
+                    source_destination = RedirectDamage(
+                        target=destination.ref,
+                        target_kind=destination.kind,
+                        target_controller=destination.controller,
+                        target_object_id=destination.object_id,
+                        target_logical_object_id=(
+                            destination.logical_object_id
+                        ),
+                        target_owner=destination.owner,
+                        target_types=destination.types,
+                        target_subtypes=destination.subtypes,
+                    )
                 effects.append(
                     registry.replacement_effect(
                         descriptor,
@@ -455,6 +575,7 @@ def collect_damage_replacement_effects(
                             source_ref=source.ref,
                             source_controller=source.controller,
                             component_id=f"{program.key}:{descriptor_index}",
+                            source_destination=source_destination,
                         ),
                     )
                 )

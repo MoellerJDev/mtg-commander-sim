@@ -44,6 +44,8 @@ from .damage_replacements import (
     default_damage_replacement_registry,
     FixedDamagePreventionHandler,
     FixedDamagePreventionNode,
+    StaticDamageRedirectionHandler,
+    StaticDamageRedirectionNode,
 )
 from .damage_results import (
     collect_damage_result_replacement_effects,
@@ -209,6 +211,8 @@ __all__ = [
     "FixedPowerToughnessAnthemNode",
     "FixedDamagePreventionHandler",
     "FixedDamagePreventionNode",
+    "StaticDamageRedirectionHandler",
+    "StaticDamageRedirectionNode",
     "LifeGainMultiplierHandler",
     "LifeGainMultiplierNode",
     "IntentPlan",

@@ -7,7 +7,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "npm run test:protocol && tsc -b && vite build",
     "typecheck": "tsc -b --pretty false",
-    "test:protocol": "node --test --experimental-strip-types unit/protocol.test.ts unit/choices.test.ts unit/tableAutomation.test.ts unit/tablePreferences.test.ts",
+    "test:protocol": "node --test --experimental-strip-types unit/protocol.test.ts unit/choices.test.ts unit/tableAutomation.test.ts unit/tablePreferences.test.ts unit/tablePresentation.test.ts",
     "generate:types": "json2ts -i ../schemas/decision-packet.schema.json -o src/generated/decision-packet.ts && json2ts -i ../schemas/command-envelope.schema.json -o src/generated/command-envelope.ts",
     "e2e": "playwright test"
   },

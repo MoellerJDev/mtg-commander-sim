@@ -22,12 +22,14 @@ import {
 import type { CommandEnvelope, DecisionPacket, JsonValue, LegalAction } from "./generated/protocol";
 import { ingestPacket, type ProjectedView } from "./protocol";
 import { findSafeAutoPass } from "./tableAutomation";
+import { visibleActionLabel } from "./tablePresentation";
 import { AutomationControls, CommanderDamage, ManaHelp } from "./TableStatus";
 import {
   loadTablePreferences,
   saveTablePreferences,
   type TablePreferences,
 } from "./tablePreferences";
+import { useTableDockClearance } from "./useTableDockClearance";
 
 type Screen = "loading" | "setup" | "welcome" | "lobby" | "room" | "game";
 
@@ -1003,6 +1005,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   const [controlling, setControlling] = useState(false);
   const [pendingRetry, setPendingRetry] = useState<{ envelope: CommandEnvelope; label: string } | null>(null);
   const [dragRelease, setDragRelease] = useState(0);
+  const [bottomDockRef, shellStyle] = useTableDockClearance();
   const choiceDialogRef = useRef<HTMLFormElement | null>(null);
   const actionPickerRef = useRef<HTMLElement | null>(null);
   const zoneDialogRef = useRef<HTMLElement | null>(null);
@@ -1195,7 +1198,17 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
       || pendingRetry
       || autoPassDecisionRef.current === decision.id
     ) return;
-    const pass = findSafeAutoPass(decision.legal_actions);
+    const projectedState = asRecord(view?.state);
+    const projectedTurn = asRecord(projectedState.turn);
+    const principalSeat = view?.principal === "spectator"
+      ? ""
+      : view?.principal.split(":").at(-1) ?? "";
+    const pass = findSafeAutoPass(decision.legal_actions, {
+      activePlayer: String(projectedTurn.active ?? ""),
+      phase: String(projectedTurn.phase ?? ""),
+      principalSeat,
+      stackDepth: asList(projectedState.stack).length,
+    });
     if (!pass) return;
     autoPassDecisionRef.current = decision.id;
     void act(pass);
@@ -1206,6 +1219,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
     submitting,
     tablePreferences.autoPass,
     view?.decision?.id,
+    view?.viewRevision,
   ]);
 
   useEffect(() => {
@@ -1417,24 +1431,14 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   );
   const activeSeat = String(turn.active ?? "");
   const prioritySeat = String(turn.priority ?? "");
-  const visibleActionLabel = (action: LegalAction) => {
-    if (
-      action.action === "pass"
-      && activeSeat === ownSeat
-      && stack.length === 0
-    ) {
-      if (String(turn.phase ?? "") === "precombat_main") return "Continue to combat";
-      if (String(turn.phase ?? "") === "postcombat_main") return "End turn";
-    }
-    return action.label ?? action.kind ?? action.action;
-  };
+  const actionWindow = { activeSeat, ownSeat, phase: String(turn.phase ?? ""), stackDepth: stack.length };
   const selectedCardRef = String(asRecord(cardContext ?? undefined).id ?? "");
   const contextualActions = selectedCardRef ? actionsForCard(selectedCardRef) : [];
   const zonePlayer = zoneBrowser ? asRecord(players[zoneBrowser.seat]) : {};
   const zoneCards = zoneBrowser ? asList(zonePlayer[zoneBrowser.zone]) : [];
   const zoneName = zoneBrowser?.zone === "gy" ? "Graveyard" : "Exile";
   return (
-    <main className="game-shell" data-view-revision={view.viewRevision}>
+    <main className={`game-shell${isSpectator ? " spectator-table" : ""}`} data-view-revision={view.viewRevision} style={shellStyle}>
       {isSpectator && <div className="watch-mode-banner" data-testid="watch-mode"><strong>WATCH MODE</strong><span>Public table and game log · no player controls</span></div>}
       <a className="skip-link" href="#decision-tray">Skip to current actions</a>
       <header className="game-topbar">
@@ -1580,6 +1584,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
           </section>
         </aside>
       </div>
+      <div ref={bottomDockRef} className={`table-bottom-dock${isSpectator ? " spectator" : ""}`} data-testid="table-bottom-dock">
       {!isSpectator && <section className="hand-panel" data-testid="hand-panel" data-resizable="true">
         <header><div><span className="eyebrow">YOUR PRIVATE ZONE · SEAT {ownSeat}</span><h2>Your hand</h2></div><span className="zone-count">{hand.length} cards</span></header>
         {cardContext && (
@@ -1612,6 +1617,13 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
           <button type="button" disabled={submitting} onClick={() => void submitEnvelope(pendingRetry.envelope, pendingRetry.label)}>{submitting ? "Checking…" : "Retry exact command"}</button>
         </section>
       )}
+      {manualMana && (manaActions.length > 0 || manaUndoActions.length > 0) && (
+        <ManaHelp
+          actions={manaUndoActions}
+          disabled={submitting || Boolean(pendingRetry) || connection !== "LIVE" || lifecycle?.status !== "active"}
+          onSelect={chooseAction}
+        />
+      )}
       <section id="decision-tray" className="decision-panel" data-testid="decision-panel" aria-live="polite">
         {lifecycle?.status === "complete" ? (
           <div className="waiting-decision" data-testid="complete-decision"><span className="status-dot muted" /><div><strong>Game complete</strong><p>{lifecycle.draw ? "The game ended in a draw." : lifecycle.winner ? `Seat ${lifecycle.winner} won the game.` : "No further actions are available."}</p></div></div>
@@ -1636,20 +1648,14 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
               )}
               <div className="action-row">
                 {displayActions.map((action) => (
-                  <button className={`action-button ${actionTone(action)}`} key={action.id} data-testid={`action-${action.id}`} disabled={submitting || Boolean(pendingRetry) || connection !== "LIVE" || lifecycle?.status !== "active"} onClick={() => chooseAction(action)}>{action.action === "cast" && !manualMana ? `Auto-mana · ${action.label ?? "Cast"}` : visibleActionLabel(action)}</button>
+                  <button className={`action-button ${actionTone(action)}`} key={action.id} data-testid={`action-${action.id}`} disabled={submitting || Boolean(pendingRetry) || connection !== "LIVE" || lifecycle?.status !== "active"} onClick={() => chooseAction(action)}>{action.action === "cast" && !manualMana ? `Auto-mana · ${action.label ?? "Cast"}` : visibleActionLabel(action, actionWindow)}</button>
                 ))}
               </div>
             </div>
           </>
         ) : <div className="waiting-decision"><span className="status-dot muted" /><div><strong>Waiting for the table</strong><p>Waiting for another player’s decision.</p></div></div>}
       </section>
-      {manualMana && (manaActions.length > 0 || manaUndoActions.length > 0) && (
-        <ManaHelp
-          actions={manaUndoActions}
-          disabled={submitting || Boolean(pendingRetry) || connection !== "LIVE" || lifecycle?.status !== "active"}
-          onSelect={chooseAction}
-        />
-      )}
+      </div>
       {inspectionTarget && (
         <button type="button" className="mobile-inspector-trigger" onClick={() => setExpandedInspector(true)}>
           View {cardName(inspectionTarget)}

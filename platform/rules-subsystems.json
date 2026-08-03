@@ -335,39 +335,30 @@
     }
   ],
   "selected_batch": {
-    "batch_id": "damage-prevention-shields-and-redirection",
+    "batch_id": "damage-prevention-continuations-and-aftermath",
     "subsystem_id": "replacement-prevention",
     "rule_ids": [
-      "614.9",
       "615.1",
       "615.2",
-      "615.3",
-      "615.4",
       "615.5",
-      "615.7",
-      "615.8",
       "615.9",
       "615.11",
-      "615.12",
-      "615.13",
       "616.1"
     ],
     "target_capability_ids": [
-      "damage.prevention.static_fixed",
-      "damage.replacement.static_quantity",
-      "replacement.order.choice"
+      "damage.prevention.persistent_amount",
+      "damage.prevention.order",
+      "damage.result.replacement_order"
     ],
-    "rationale": "The typed immutable replacement tree and canonical damage-result boundary are now integrated. The next dependency-ready family is persistent damage prevention and redirection: it closes shield lifetime and consumption, source/LKI selection, simultaneous allocation, unpreventable interaction, and replayable affected-player ordering before widening into unrelated Battle rules.",
+    "rationale": "Durable finite and next-instance shields, exact simultaneous allocation, unpreventable nonconsumption, aggregate prevention dispatch, and static full-recipient redirection are now certified. The remaining dependency-ready prevention family is choice-complete shield creation and continuation: generic chosen-source selection and predicates, dynamic/divided and per-object creation, prevention aftermath, and replacement choices that suspend mana payment without mutation.",
     "exit_criteria": [
-      "Represent persistent, next-instance, chosen-source, and divisible prevention shields with typed immutable state, explicit duration, remaining amount, and deterministic consumption.",
-      "Route every represented damage producer, including mana-result damage, through resumable affected-player replacement and prevention choices before mutation.",
-      "Implement typed damage redirection with source, destination, departed-player, target-legality, and recursively replaced redirected-damage handling.",
-      "Apply damage-can't-be-prevented without consuming a shield while preserving applicable nonprevention replacement effects.",
-      "Snapshot or derive chosen-source characteristics with exact last-known-information behavior when the source leaves.",
-      "Collect simultaneous divisible allocations and replacement order in APNAP order through seat-scoped replayable continuations.",
-      "Dispatch represented additional prevention results and prevention-applied events exactly once at the correct post-prevention boundary.",
-      "Widen generic Oracle/CardProgram lowering for the closed shield and redirection wording family, measure Commander-card gains, and leave unsupported dynamic grammar fail-closed.",
-      "Extract shield registry, consumption, and redirection ownership from CommanderEngine into bounded typed modules with independent rollback, replay, privacy, property, and mutation tests."
+      "Create chosen-source shields from a seat-scoped legal candidate set and snapshot every supported source characteristic with exact last-known-information behavior.",
+      "Represent dynamic quantities, divided prevention, and one independent shield per applicable object through typed validated creation choices.",
+      "Suspend and resume mana payment when represented replacement or prevention ordering requires a player choice, with exact rollback and command replay.",
+      "Dispatch represented prevention aftermath as immediately-after typed events, including targets, nested replacement participation, triggers, and simultaneous grouping.",
+      "Complete explicit ordering for simultaneous events affecting the same chooser when event order can change the result.",
+      "Widen generic Oracle/CardProgram lowering for the completed source-choice, divided-shield, and aftermath wording families and measure Commander-card gains.",
+      "Extract the continuation and aftermath responsibilities behind bounded typed interfaces without adding card-name branches or direct GameState mutation to CommanderEngine."
     ]
   }
 }

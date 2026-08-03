@@ -2,7 +2,21 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from ..damage import DamageError, damage_proposal, resolve_damage_batch
+from ..damage import (
+    DamageError,
+    damage_proposal,
+    recipient_snapshot,
+    resolve_damage_batch,
+    source_snapshot,
+)
+from ..damage_prevention import (
+    ChosenDamageSource,
+    DamageModifierDuration,
+    DamagePreventionShield,
+    DamageRedirectionEffect,
+    DamageSubject,
+    PreventionMode,
+)
 from ..errors import GameRuleError
 from ..effect_contracts import effect_family_contract
 from ..semantic_runtime.intents import PlaceCountersIntent
@@ -27,11 +41,22 @@ def _apply_damage(
     if amount == 0:
         return 0
     try:
+        replacement_event_ids = list(
+            effect.get("_replacement_event_ids") or ()
+        )
+        if replacement_event_ids and len(replacement_event_ids) != 1:
+            raise GameRuleError(
+                "Damage replacement event identity count is stale"
+            )
         proposal = damage_proposal(
             host,
             proposal_id=(
-                f"damage.effect:{host.state.revision}:"
-                f"{host.state.event_sequence + 1}:0"
+                str(replacement_event_ids[0])
+                if replacement_event_ids
+                else (
+                    f"damage.effect:{host.state.revision}:"
+                    f"{host.state.event_sequence + 1}:0"
+                )
             ),
             actor=actor,
             source_ref=(
@@ -106,12 +131,25 @@ def _apply_damage_each_opponent(
         if seat != actor
     ]
     try:
+        replacement_event_ids = list(
+            effect.get("_replacement_event_ids") or ()
+        )
+        if replacement_event_ids and len(replacement_event_ids) != len(
+            opponents
+        ):
+            raise GameRuleError(
+                "Damage replacement event identity count is stale"
+            )
         proposals = tuple(
             damage_proposal(
                 host,
                 proposal_id=(
-                    f"damage.effect:{host.state.revision}:"
-                    f"{host.state.event_sequence + 1}:{index}"
+                    str(replacement_event_ids[index])
+                    if replacement_event_ids
+                    else (
+                        f"damage.effect:{host.state.revision}:"
+                        f"{host.state.event_sequence + 1}:{index}"
+                    )
                 ),
                 actor=actor,
                 source_ref=(
@@ -155,6 +193,178 @@ def _apply_damage_each_opponent(
         changed_players=result.changed_players,
     )
     return result.dealt_amount
+
+
+def _damage_subject(snapshot: Any) -> DamageSubject:
+    return DamageSubject(
+        ref=snapshot.ref,
+        kind=snapshot.kind,
+        controller=snapshot.controller,
+        object_id=snapshot.object_id,
+        logical_object_id=snapshot.logical_object_id,
+        owner=snapshot.owner,
+    )
+
+
+def _chosen_damage_source(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+) -> ChosenDamageSource | None:
+    chosen_ref = effect.get("chosen_source")
+    if chosen_ref is None:
+        return None
+    snapshot = source_snapshot(host, str(chosen_ref), controller=actor)
+    if snapshot.object_id.startswith("unrepresented:"):
+        raise GameRuleError(
+            "A chosen damage source must have authoritative object identity"
+        )
+    return ChosenDamageSource(
+        ref=snapshot.ref,
+        object_id=snapshot.object_id,
+        required_colors=tuple(
+            str(value) for value in effect.get("source_colors") or ()
+        ),
+        required_types=tuple(
+            str(value) for value in effect.get("source_types") or ()
+        ),
+    )
+
+
+def _apply_create_damage_prevention_shield(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> str:
+    del operation
+    subject_ref = str(effect.get("subject") or actor)
+    try:
+        subject = (
+            DamageSubject(ref="*", kind="any", controller=actor)
+            if subject_ref == "*"
+            else _damage_subject(
+                recipient_snapshot(host, subject_ref, actor=actor)
+            )
+        )
+        mode = PreventionMode(str(effect.get("mode") or "amount"))
+        duration = DamageModifierDuration(
+            str(effect.get("duration") or "until_end_of_turn")
+        )
+        remaining = effect.get("amount") if mode == PreventionMode.AMOUNT else None
+        shield = DamagePreventionShield(
+            shield_id=host._next_ref("PS"),
+            source_id=str(effect.get("source") or reason),
+            controller=actor,
+            subject=subject,
+            mode=mode,
+            remaining=remaining,
+            duration=duration,
+            created_turn_sequence=host.state.turn_sequence,
+            chosen_source=_chosen_damage_source(host, effect, actor=actor),
+            label=str(effect.get("label") or reason),
+        )
+    except (DamageError, ValueError) as exc:
+        raise GameRuleError(str(exc)) from exc
+    if any(
+        existing.shield_id == shield.shield_id
+        for existing in host.state.damage_prevention_shields
+    ):
+        raise GameRuleError("Prevention shield identity collision")
+    host.state.damage_prevention_shields.append(shield)
+    host._log(
+        actor,
+        "damage.prevention.created",
+        f"{shield.source_id} created a damage-prevention shield.",
+        {
+            "shield_id": shield.shield_id,
+            "subject": shield.subject.ref,
+            "mode": shield.mode.value,
+            "remaining": shield.remaining,
+            "duration": shield.duration.value,
+            **dict(reason=reason),
+        },
+        importance=2,
+        changed_players=[subject.controller],
+        changed_objects=(
+            [subject.object_id] if subject.object_id is not None else []
+        ),
+    )
+    return shield.shield_id
+
+
+def _apply_create_damage_redirection(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+) -> str:
+    del operation
+    try:
+        subject = _damage_subject(
+            recipient_snapshot(
+                host,
+                str(effect.get("subject") or actor),
+                actor=actor,
+            )
+        )
+        destination = _damage_subject(
+            recipient_snapshot(
+                host,
+                str(effect.get("destination") or ""),
+                actor=actor,
+            )
+        )
+        redirection = DamageRedirectionEffect(
+            redirection_id=host._next_ref("DR"),
+            source_id=str(effect.get("source") or reason),
+            controller=actor,
+            subject=subject,
+            destination=destination,
+            duration=DamageModifierDuration(
+                str(effect.get("duration") or "until_end_of_turn")
+            ),
+            created_turn_sequence=host.state.turn_sequence,
+            chosen_source=_chosen_damage_source(host, effect, actor=actor),
+            consume_on_application=bool(
+                effect.get("consume_on_application", True)
+            ),
+            label=str(effect.get("label") or reason),
+        )
+    except (DamageError, ValueError) as exc:
+        raise GameRuleError(str(exc)) from exc
+    host.state.damage_redirections.append(redirection)
+    host._log(
+        actor,
+        "damage.redirection.created",
+        f"{redirection.source_id} created a damage-redirection effect.",
+        {
+            "redirection_id": redirection.redirection_id,
+            "subject": redirection.subject.ref,
+            "destination": redirection.destination.ref,
+            "duration": redirection.duration.value,
+            **dict(reason=reason),
+        },
+        importance=2,
+        changed_players=[
+            redirection.subject.controller,
+            redirection.destination.controller,
+        ],
+        changed_objects=[
+            value
+            for value in (
+                redirection.subject.object_id,
+                redirection.destination.object_id,
+            )
+            if value is not None
+        ],
+    )
+    return redirection.redirection_id
 
 
 
@@ -852,6 +1062,8 @@ HANDLERS = {
     'counter_or_destroy_blue': _apply_counter_or_destroy_blue,
     'counter_stack': _apply_counter_stack,
     'create_emblem': _apply_create_emblem,
+    'create_damage_prevention_shield': _apply_create_damage_prevention_shield,
+    'create_damage_redirection': _apply_create_damage_redirection,
     'create_treasure': _apply_create_treasure,
     'create_modified_token_copy': _apply_create_modified_token_copy,
     'create_token_copy_if_controlled_count': _apply_create_token_copy_if_controlled_count,

@@ -6,6 +6,8 @@ import random
 import tempfile
 import unittest
 
+from mtg_commander_sim import replacement_effects
+
 from common import ROOT, keep_all, make_session
 from scripts.build_test_database import build_fixture_database
 from mtg_commander_sim.carddb import CardDatabase
@@ -34,6 +36,7 @@ from mtg_commander_sim.semantic_runtime import (
     DamageQuantityReplacementHandler,
     DamageReplacementSourceContext,
     FixedDamagePreventionHandler,
+    StaticDamageRedirectionHandler,
     SemanticNodeError,
     default_damage_replacement_registry,
 )
@@ -73,6 +76,37 @@ class DamageReplacementModelTests(DamageReplacementPipelineBase):
             tuple(operation.to_dict() for operation in fixed.operations),
         )
 
+        redirect = StaticDamageRedirectionHandler()
+        destination = replacement_effects.RedirectDamage(
+            target="C1",
+            target_kind="permanent",
+            target_controller="B",
+            target_object_id="source-object",
+            target_logical_object_id="source-incarnation",
+            target_owner="B",
+            target_types=("creature",),
+        )
+        redirected = redirect.replacement_effect(
+            {
+                "handler_id": redirect.handler_id,
+                "schema_version": 1,
+                "event": "damage",
+                "condition": damage_condition(
+                    target_controller_relation="source_controller",
+                    target_kinds=["player"],
+                ),
+                "modification": {"destination": "source"},
+            },
+            DamageReplacementSourceContext(
+                source_ref="C1",
+                source_controller="B",
+                source_destination=destination,
+            ),
+        )
+        self.assertEqual(
+            destination.to_dict(), redirected.operations[0].to_dict()
+        )
+
         with self.assertRaisesRegex(SemanticNodeError, "positive integer"):
             quantity.validate(quantity_descriptor(multiplier=0))
         with self.assertRaisesRegex(SemanticNodeError, "positive integer"):
@@ -91,6 +125,7 @@ class DamageReplacementModelTests(DamageReplacementPipelineBase):
             [
                 "prevention.damage.fixed.v1",
                 "replacement.damage.quantity.v1",
+                "replacement.damage.redirect-to-source.v1",
             ],
             sorted(item["handler_id"] for item in inventory),
         )

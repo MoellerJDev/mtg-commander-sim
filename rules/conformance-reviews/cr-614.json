@@ -218,15 +218,15 @@
       "rule_id": "614.9",
       "rule_text_sha256": "ea7645c243004206a0de8e0fb7939ca47966a8cde6e101cbd804e4a34305ff59",
       "classification": "behavioral",
-      "status": "blocked",
-      "assertion_kind": "unsupported_fail_closed",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
       "reviewed": true,
-      "implementation_components": ["replacement_effects.apply_replacement"],
-      "executable_test_ids": ["tests.test_rules_primitives.ReplacementOrderingTests.test_uncompiled_replacement_families_fail_closed"],
+      "implementation_components": ["replacement.operations.RedirectDamage", "damage_prevention.DamageRedirectionEffect", "semantic_runtime.damage_replacements.StaticDamageRedirectionHandler", "damage.prepare_damage_batch", "damage.commit_prepared_damage_batch"],
+      "executable_test_ids": ["tests.test_damage_redirection.DamageRedirectionTests.test_redirection_replaces_complete_recipient_and_is_consumed", "tests.test_damage_redirection.DamageRedirectionTests.test_departed_destination_makes_redirection_do_nothing", "tests.test_damage_redirection.DamageRedirectionTests.test_static_redirection_uses_complete_recipient_snapshot", "tests.test_damage_redirection.DamageRedirectionTests.test_static_redirection_stops_when_source_leaves", "tests.test_damage_redirection.DamageRedirectionTests.test_static_redirection_redirects_simultaneous_multiplayer_damage", "tests.test_damage_redirection.DamageRedirectionTests.test_static_redirection_command_replays_exactly"],
       "required_scenarios": ["positive", "negative", "interaction", "multiplayer"],
-      "covered_scenarios": ["negative"],
-      "blockers": ["damage redirection has no typed source/destination legality and departed-player evaluation", "redirected damage is not routed through the full damage pipeline"],
-      "notes": ["A redirection operation is rejected rather than treated as an ordinary field rewrite."]
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer"],
+      "blockers": [],
+      "notes": ["Typed redirection replaces the complete recipient snapshot, recomputes affected-subject ordering, participates in the ordinary damage replacement loop, and does nothing without consumption when its destination is no longer damageable."]
     },
     {
       "rule_id": "614.10",

@@ -59,10 +59,18 @@ loyalty, commander-damage, or trigger mutation. They support fixed integral
 quantity changes or fixed positive prevention with declarative source,
 recipient, controller, characteristic, and combat predicates. Competing
 effects use the affected player or damaged permanent controller and traverse
-simultaneous four-player events in APNAP order. Persistent shields,
-redirection, allocation, non-damage transformations, result replacement,
-infect/wither/toxic outcomes, and replacement choices during mana payment are
-outside these components.
+simultaneous four-player events in APNAP order.
+
+Durable finite and next-instance shields lower to typed
+`PreventUsingShield` operations owned by `damage_prevention.py`. The owner
+validates cross-event remaining amounts, cleanup expiration, simultaneous
+allocation, commit-time state fingerprints, and unpreventable nonconsumption.
+`replacement.damage.redirect-to-source.v1` lowers a current damageable
+battlefield source to typed `RedirectDamage`; a complete recipient snapshot is
+substituted before the replacement loop is rediscovered. Dynamic/divided
+shield creation, prevention aftermath effects, finite partial or attached
+redirection, non-damage transformations, and replacement choices during mana
+payment remain outside these components.
 
 `continuous.anthem.power_toughness.v1` supports a fixed same-controller subtype
 anthem in layer 7c. The source must be represented, on the battlefield, and not
@@ -95,8 +103,9 @@ continuations. `counter_placement.py` owns pre-mutation preparation and final
 commit for represented permanent-counter events. `damage.py` coordinates
 represented damage snapshots, quantity replacement/prevention, and normalized
 final events; `damage_results.py` owns result-event materialization, commit
-planning, and atomic CR 120.3 result mutation. Runtime components remain pure
-participants.
+planning, and atomic CR 120.3 result mutation. `damage_prevention.py` owns
+durable shield/redirection state and its mutation-only commit plan. Runtime
+components remain pure participants.
 
 Primary tests are `test_replacement_event_tree.py`,
 `test_token_creation_replacements.py`, `test_graveyard_rules.py`,
@@ -104,6 +113,7 @@ Primary tests are `test_replacement_event_tree.py`,
 `test_damage_replacement_model.py`,
 `test_damage_replacement_multiplayer.py`,
 `test_damage_replacement_integration.py`,
+`test_damage_prevention_shields.py`, `test_damage_redirection.py`,
 `test_replacement_model_hardening.py`,
 `test_damage_result_events.py`,
 `test_continuous_effect_components.py`, `test_card_program_trust.py`, and

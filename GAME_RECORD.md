@@ -176,13 +176,27 @@ are additive checkpoint details, not a Game Record v3 redesign.
 Competing represented replacement effects use an ordinary additive
 `replacement.order` decision continuation. The authoritative continuation
 stores the immutable event batch, candidate effects, exact event path, and
-prior selection journal; the chooser projection contains only its current
+prior selection journal. A finite prevention shield shared by simultaneous
+damage events also stores the affected seat's exact allocation map and the
+shield amount available when that choice was created. Replay validates the
+event IDs, allocation total, available amount, and current option set before
+resuming; malformed or stale allocations fail closed. The chooser projection contains only its current
 event label and legal effect/decline options. A response is accepted only when
 the event, path, affected seat, and choice reconstruct the same pending
 decision, after which the original semantic instruction resumes with the exact
 selection journal. Neither another seat's choice data nor raw authoritative
 replacement payloads enter the projected packet. This is an additive v3
 continuation, not a record redesign.
+
+`GameState.damage_prevention_shields` and
+`GameState.damage_redirections` are additive v3 checkpoint fields. They store
+typed, versioned, canonically serialized durable damage modifiers, including
+their stable IDs, subjects, source snapshots, durations, remaining amounts,
+and used state. Those values participate in state hashes and exact command
+replay. Seat projections expose only the ordinary public effects and legal
+choices derived from them; they do not expose raw replacement descriptors or
+another seat's pending allocation. Historical v3 checkpoints that omit the
+fields load them as empty collections and retain their historical hash shape.
 
 Fresh native records use `manifest.replay.mode = "command_replay"`. The
 separate `legacy_snapshot` mode is reserved for migrated records whose accepted

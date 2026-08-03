@@ -38,6 +38,27 @@
         "tests.test_architecture_guards.ArchitectureGuardTests.test_current_repository_passes_every_architecture_guard",
         "tests.test_architecture_governance.ArchitectureGovernanceTests.test_exception_is_bound_to_exact_allowance_fingerprint"
       ]
+    },
+    {
+      "exception_id": "ARCH-EXC-0003",
+      "adr": "docs/adr/0015-durable-damage-modifier-ownership.md",
+      "artifact": "platform/architecture-guard-baseline.json",
+      "allowance_fingerprint": "967b2eb3671bf2838a2bcf292632a0b4c86fa0d46a15fb514619dd290725072f",
+      "exact_allowance": "Only the reduced structural write identities, engine methods, size ceilings, specificity literals, Oracle-ID literals, effect operations, and legacy helpers serialized after durable damage-modifier extraction.",
+      "rationale": "Durable prevention and redirection move combat proposal construction and twenty GameState-write identities out of CommanderEngine. The two added universal operations lower validated descriptors into typed modifier state and are the reviewed entry points for this rules family.",
+      "owner": "rules architecture maintainers",
+      "maximum_scope": "Existing identities and recorded logical-line ceilings plus the reviewed create_damage_prevention_shield and create_damage_redirection operations; removals are allowed and additions or growth are forbidden.",
+      "removal_condition": "Remove the exception when every serialized grandfathered allowance has been migrated to a reviewed owner or deleted.",
+      "target_milestone": "incremental damage, replacement, and prevention closure",
+      "replay_implications": "Game Record v3 remains compatible; modifier state is additive, choices are canonical, and prepared commits reject stale fingerprints before mutation.",
+      "privacy_implications": "No hidden-information expansion is authorized; modifier choices and damage projections remain principal scoped.",
+      "security_implications": "The reviewed operations accept closed typed data only and grant no callback, arbitrary mutation, or raw GameState authority.",
+      "tests": [
+        "tests.test_architecture_guards.ArchitectureGuardTests.test_current_repository_passes_every_architecture_guard",
+        "tests.test_architecture_governance.ArchitectureGovernanceTests.test_exception_is_bound_to_exact_allowance_fingerprint",
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_amount_shield_is_prepared_without_mutation_then_consumed",
+        "tests.test_damage_redirection.DamageRedirectionTests.test_static_redirection_command_replays_exactly"
+      ]
     }
   ]
 }

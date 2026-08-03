@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "6c09dab765e615610f697a7a850bb6502093f0a0",
+    "baseline_main_commit": "7d45ca8ffd4aa6ec611b0f0f1220025c6ecc3cab",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-02",
-    "phase": "damage_results_and_replacement_hardening",
-    "scope_note": "Certified main through PR 67 includes typed damage-result events. The current focused branch adds stable physical Commander-damage identity, deep immutable and strictly replayed replacement trees, a closed typed replacement-operation vocabulary, canonical life/counter result owners, enforced minimum capability evidence, and generic damage-keyword plus static quantity/prevention compilation."
+    "phase": "damage_prevention_shields_and_redirection",
+    "scope_note": "Certified main through PR 68 includes stable physical Commander-damage identity, immutable strictly replayed replacement trees, typed replacement operations, canonical life/counter damage results, and generic damage keyword/static compilation. The current focused branch adds typed durable prevention and redirection ownership, exact simultaneous allocation, cleanup expiration, aggregate prevention events, Oracle IR v15 shield/redirection lowering, and focused browser priority/mana regressions."
   },
   "ci": {
     "workflow": "CI",
-    "run_id": 30753764851,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30753764851",
+    "run_id": 30770356732,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30770356732",
     "status": "pass",
     "python_versions": [
       "3.11",

@@ -288,6 +288,23 @@ class BasicLandTypeManaTests(unittest.TestCase):
         )
         hints = engine._priority_action_hints("A")
         self.assertIn(familiar.ref, hints["cast"])
+        packet = session.packet("pilot:A", full=True)
+        projected_cast = next(
+            action
+            for action in packet["decision"]["legal_actions"]
+            if action.get("action") == "cast"
+            and action.get("card") == familiar.ref
+        )
+        self.assertIn("Cauldron Familiar", projected_cast["label"])
+        projected_black = next(
+            action
+            for action in packet["decision"]["legal_actions"]
+            if action.get("action") == "activate"
+            and action.get("source") == citadel.ref
+            and action.get("ability") == "intrinsic_swamp"
+        )
+        self.assertTrue(projected_black["mana_ability"])
+        self.assertIn("Add {B}", projected_black["label"])
 
     def test_additive_basic_land_type_preserves_existing_types_text_and_mana(self):
         descriptor = basic_land_type_addition_handler(
@@ -381,6 +398,14 @@ class BasicLandTypeManaTests(unittest.TestCase):
         )
         hints = engine._priority_action_hints("A")
         self.assertIn(commander.ref, hints["cast"])
+        packet = session.packet("pilot:A", full=True)
+        projected_cast = next(
+            action
+            for action in packet["decision"]["legal_actions"]
+            if action.get("action") == "cast"
+            and action.get("card") == commander.ref
+        )
+        self.assertIn("The Sackville-Bagginses", projected_cast["label"])
         result = session.act(
             "pilot:A",
             {

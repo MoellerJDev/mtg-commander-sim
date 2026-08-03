@@ -14,32 +14,30 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,057
-- Reviewed behavioral blockers: 358
+- Queued rules: 3,050
+- Reviewed behavioral blockers: 351
 - Behavioral classification/review required: 2,699
-- Passing behavioral rules: 130
+- Passing behavioral rules: 137
 - Subsystems: 21
-- Queue fingerprint: `533b79e06fd5c1bc061fc437a10efe8869959ce28dfb7683de670bcb2e39a4aa`
+- Queue fingerprint: `077599466f56661703fc83317fc739f1ba661537259441cf147af6ad864c80d6`
 
 ## Selected next batch
 
-- Batch: `damage-prevention-shields-and-redirection`
+- Batch: `damage-prevention-continuations-and-aftermath`
 - Subsystem: `replacement-prevention`
-- Rules: `614.9`, `615.1`, `615.2`, `615.3`, `615.4`, `615.5`, `615.7`, `615.8`, `615.9`, `615.11`, `615.12`, `615.13`, `616.1`
-- Target capabilities: `damage.prevention.static_fixed`, `damage.replacement.static_quantity`, `replacement.order.choice`
-- Rationale: The typed immutable replacement tree and canonical damage-result boundary are now integrated. The next dependency-ready family is persistent damage prevention and redirection: it closes shield lifetime and consumption, source/LKI selection, simultaneous allocation, unpreventable interaction, and replayable affected-player ordering before widening into unrelated Battle rules.
+- Rules: `615.1`, `615.2`, `615.5`, `615.9`, `615.11`, `616.1`
+- Target capabilities: `damage.prevention.persistent_amount`, `damage.prevention.order`, `damage.result.replacement_order`
+- Rationale: Durable finite and next-instance shields, exact simultaneous allocation, unpreventable nonconsumption, aggregate prevention dispatch, and static full-recipient redirection are now certified. The remaining dependency-ready prevention family is choice-complete shield creation and continuation: generic chosen-source selection and predicates, dynamic/divided and per-object creation, prevention aftermath, and replacement choices that suspend mana payment without mutation.
 
 Exit criteria:
 
-- Represent persistent, next-instance, chosen-source, and divisible prevention shields with typed immutable state, explicit duration, remaining amount, and deterministic consumption.
-- Route every represented damage producer, including mana-result damage, through resumable affected-player replacement and prevention choices before mutation.
-- Implement typed damage redirection with source, destination, departed-player, target-legality, and recursively replaced redirected-damage handling.
-- Apply damage-can't-be-prevented without consuming a shield while preserving applicable nonprevention replacement effects.
-- Snapshot or derive chosen-source characteristics with exact last-known-information behavior when the source leaves.
-- Collect simultaneous divisible allocations and replacement order in APNAP order through seat-scoped replayable continuations.
-- Dispatch represented additional prevention results and prevention-applied events exactly once at the correct post-prevention boundary.
-- Widen generic Oracle/CardProgram lowering for the closed shield and redirection wording family, measure Commander-card gains, and leave unsupported dynamic grammar fail-closed.
-- Extract shield registry, consumption, and redirection ownership from CommanderEngine into bounded typed modules with independent rollback, replay, privacy, property, and mutation tests.
+- Create chosen-source shields from a seat-scoped legal candidate set and snapshot every supported source characteristic with exact last-known-information behavior.
+- Represent dynamic quantities, divided prevention, and one independent shield per applicable object through typed validated creation choices.
+- Suspend and resume mana payment when represented replacement or prevention ordering requires a player choice, with exact rollback and command replay.
+- Dispatch represented prevention aftermath as immediately-after typed events, including targets, nested replacement participation, triggers, and simultaneous grouping.
+- Complete explicit ordering for simultaneous events affecting the same chooser when event order can change the result.
+- Widen generic Oracle/CardProgram lowering for the completed source-choice, divided-shield, and aftermath wording families and measure Commander-card gains.
+- Extract the continuation and aftermath responsibilities behind bounded typed interfaces without adding card-name branches or direct GameState mutation to CommanderEngine.
 
 ## Dependency schedule
 
@@ -58,7 +56,7 @@ Exit criteria:
 | 11 | `triggered-static-linked` | `objects-permanents-tokens`, `turn-structure`, `casting-activation` | 71 | 71 | 0 | `oracle_parser`, `event_binding`, `card_program_lowering`, `mechanic_contracts` |
 | 12 | `resolution-effects` | `zones`, `casting-activation`, `triggered-static-linked` | 42 | 28 | 14 | `oracle_parser`, `card_program_lowering`, `semantic_handlers` |
 | 13 | `continuous-effects` | `characteristics`, `objects-permanents-tokens`, `triggered-static-linked`, `resolution-effects` | 68 | 0 | 68 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
-| 14 | `replacement-prevention` | `resources`, `damage`, `resolution-effects`, `continuous-effects` | 41 | 41 | 0 | `oracle_parser`, `card_program_lowering`, `event_binding`, `mechanic_contracts` |
+| 14 | `replacement-prevention` | `resources`, `damage`, `resolution-effects`, `continuous-effects` | 34 | 34 | 0 | `oracle_parser`, `card_program_lowering`, `event_binding`, `mechanic_contracts` |
 | 15 | `combat` | `damage`, `turn-structure`, `continuous-effects` | 75 | 75 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 16 | `game-actions-state` | `zones`, `turn-structure`, `combat`, `resolution-effects`, `replacement-prevention` | 516 | 4 | 512 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 745 | 0 | 745 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |

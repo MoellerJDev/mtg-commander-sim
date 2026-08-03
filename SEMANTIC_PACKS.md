@@ -115,10 +115,13 @@ the same unstarted APNAP/controller-order batch before priority. Final dealt
 components become immutable affected-subject result trees; represented Infect,
 Wither, Lifelink, fixed Toxic, fixed life-gain multiplication, and a whole-
 result life floor resolve before one atomic commit. This is not a claim that
-arbitrary damage Oracle text is compiled: persistent prevention shields,
-redirection, unresolved dynamic Toxic values, incomplete continuous ability
-closure, remaining CR 120.4 result replacements, excess damage, and trigger-
-on-trigger placement remain explicit untrusted dependencies. Represented
+arbitrary damage Oracle text is compiled. Oracle IR v15 covers a closed family
+of fixed finite shields and static redirection to a current damageable source;
+durable consumption and simultaneous allocation use the canonical damage
+transaction. Dynamic/divided shields, prevention aftermath effects, partial or
+attached redirection, unresolved dynamic Toxic values, incomplete continuous
+ability closure, remaining CR 120.4 result replacements, excess damage, and
+trigger-on-trigger placement remain explicit untrusted dependencies. Represented
 source keyword facts are snapshotted and use last-known information if the
 source leaves before the damage result commits.
 
@@ -155,15 +158,17 @@ The current zone witness is Dauthi Voidwalker, loaded from reviewed semantic
 data with exact Oracle/rulings fingerprints. Historical complete snapshots that
 predate the descriptor may use the validated pinned compatibility component;
 current snapshots pin the descriptor directly. Effect-generated permanent
-counters use the shared counter-placement boundary. Damage uses fixed quantity
-and prevention descriptors before the result tree;
+counters use the shared counter-placement boundary. Damage uses fixed quantity,
+fixed prevention, durable finite-shield, and static redirection descriptors
+before the result tree;
 `replacement.life.gain.multiplier.v1` and
 `replacement.damage.result.life_floor.v1` participate within that result tree.
 Boon Reflection and Worship are source-pinned shape witnesses, not engine
 branches. This does not establish universal replacement/prevention coverage:
-optional, persistent, divisible, redirection, prohibition, draw, entry, and
-remaining life/counter/result families remain blocked unless a separately
-trusted component covers their exact shape.
+dynamic or multi-target shield creation, prevention aftermath effects, finite
+partial or attached redirection, prohibition, draw, entry, and remaining
+life/counter/result families remain blocked unless a separately trusted
+component covers their exact shape.
 
 ## Trust
 

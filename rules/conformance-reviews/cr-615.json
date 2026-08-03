@@ -58,11 +58,11 @@
         "multiplayer"
       ],
       "blockers": [
-        "only reviewed source-pinned fixed static prevention and represented protection are registered",
-        "generated persistent shields, redirection, division, and broad Oracle compilation remain incomplete"
+        "dynamic quantities, multi-target shield creation, prevention aftermath effects, and complete combat-only/source-choice grammar remain unimplemented",
+        "replacement choices arising during mana payment cannot yet resume their enclosing payment continuation"
       ],
       "notes": [
-        "All represented damage producers now use the typed registry, and reviewed fixed static and protection prevention modify the precommit event. Generated and stateful prevention families remain blocked."
+        "Represented damage uses one typed registry for static prevention, protection, persistent finite and next-instance shields, exact simultaneous allocation, and prevention-applied events. The broad rule remains blocked only for the listed prevention families and continuations."
       ]
     },
     {
@@ -107,53 +107,62 @@
       ],
       "covered_scenarios": [
         "positive",
-        "negative"
+        "negative",
+        "interaction"
       ],
       "blockers": [
-        "complete CR 609.7 source selection and last-known source-property evaluation are not implemented"
+        "generic source-choice candidate generation and the full source-characteristic predicate vocabulary are not implemented"
       ],
       "notes": [
-        "Represented source properties can constrain applicability, but source selection and historical source identity are incomplete."
+        "ChosenDamageSource rechecks stable physical identity and snapshotted color/type, including source LKI, but broader source-choice grammar remains fail-closed."
       ]
     },
     {
       "rule_id": "615.3",
       "rule_text_sha256": "2b5856a57d96d38f63d688bd84142225e25b6517d879f31d20d914da9657ff61",
       "classification": "behavioral",
-      "status": "blocked",
-      "assertion_kind": "unsupported_fail_closed",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
       "reviewed": true,
       "implementation_components": [
-        "replacement_effects.ReplacementEffect"
+        "damage_prevention.DamagePreventionShield",
+        "effect_runtime.damage_life_and_turns.create_damage_prevention_shield",
+        "damage_prevention.expire_end_of_turn_damage_modifiers"
       ],
       "executable_test_ids": [
-        "tests.test_rules_primitives.PreventionEffectTests.test_contract_traces_every_cr_615_rule"
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_amount_shield_is_prepared_without_mutation_then_consumed",
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_exhausted_amount_and_next_instance_shields_are_removed",
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_until_end_of_turn_shields_expire_at_the_cleanup_boundary",
+        "tests.test_oracle_ir.OracleIRTests.test_fixed_prevention_shields_compile_without_card_names"
       ],
       "required_scenarios": [
         "positive",
         "interaction"
       ],
-      "covered_scenarios": [],
-      "blockers": [
-        "generated prevention effects do not yet have authoritative duration, expiration, and used-up shield state",
-        "casting and activation paths do not generically register generated prevention effects"
+      "covered_scenarios": [
+        "positive",
+        "interaction"
       ],
+      "blockers": [],
       "notes": [
-        "The immutable primitive represents an already-existing effect only."
+        "Typed finite and next-instance shields carry authoritative duration and used-up state, generic resolved operations create them, and cleanup expires until-end-of-turn modifiers."
       ]
     },
     {
       "rule_id": "615.4",
       "rule_text_sha256": "500f4afe125e918f3127f0fbaadceade3e446c714778b7260ca82a72eb89d307",
       "classification": "behavioral",
-      "status": "blocked",
-      "assertion_kind": "unsupported_fail_closed",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
       "reviewed": true,
       "implementation_components": [
-        "replacement_effects.replacement_choice"
+        "damage.collect_damage_replacement_effects",
+        "damage_prevention.collect_damage_modifier_effects",
+        "damage_prevention.DamageModifierCommitPlan"
       ],
       "executable_test_ids": [
-        "tests.test_rules_primitives.PreventionEffectTests.test_prevention_applies_only_to_matching_damage_events"
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_shield_created_after_prepare_cannot_change_prepared_damage",
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_stale_modifier_plan_fails_before_damage_mutation"
       ],
       "required_scenarios": [
         "positive",
@@ -161,13 +170,13 @@
         "interaction"
       ],
       "covered_scenarios": [
-        "negative"
+        "positive",
+        "negative",
+        "interaction"
       ],
-      "blockers": [
-        "the active-effect registry does not yet record creation moments relative to proposed damage events"
-      ],
+      "blockers": [],
       "notes": [
-        "Callers supply the effects that already exist; the primitive cannot retroactively discover or install one."
+        "Damage preparation snapshots the modifier registry; a shield created after that boundary cannot retroactively alter the event or commit against the stale plan."
       ]
     },
     {
@@ -234,15 +243,21 @@
       "rule_id": "615.7",
       "rule_text_sha256": "36b167d808a7c85048f0d5a11ba9d040d8928c378f08a6cfc3e2f9da3e81ae71",
       "classification": "behavioral",
-      "status": "blocked",
-      "assertion_kind": "unsupported_fail_closed",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
       "reviewed": true,
       "implementation_components": [
-        "replacement_effects.apply_replacement"
+        "replacement.operations.PreventUsingShield",
+        "replacement.model.PreventionAllocationChoice",
+        "damage_prevention.plan_damage_modifier_commit",
+        "replacement_decisions.ReplacementContinuation"
       ],
       "executable_test_ids": [
         "tests.test_rules_primitives.ReplacementOrderingTests.test_prevention_never_prevents_more_than_remaining_damage",
-        "tests.test_rules_primitives.PreventionEffectTests.test_negative_prevention_amount_fails_closed"
+        "tests.test_rules_primitives.PreventionEffectTests.test_negative_prevention_amount_fails_closed",
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_amount_shield_is_prepared_without_mutation_then_consumed",
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_simultaneous_sources_require_and_replay_exact_allocation",
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_combat_allocation_is_seat_scoped_and_command_replays"
       ],
       "required_scenarios": [
         "positive",
@@ -251,41 +266,45 @@
         "multiplayer"
       ],
       "covered_scenarios": [
-        "negative"
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer"
       ],
-      "blockers": [
-        "remaining shield amounts are not persisted and consumed across separate damage events",
-        "allocation across simultaneous applicable sources is not collected from the affected player"
-      ],
+      "blockers": [],
       "notes": [
-        "A represented operation is bounded by current damage and rejects negative shield amounts, but it is not a stateful cross-event shield."
+        "Finite shield amounts persist across events, cannot prevent more than remains, and collect an exact seat-scoped allocation when simultaneous events compete for an insufficient amount."
       ]
     },
     {
       "rule_id": "615.8",
       "rule_text_sha256": "ccb7aa095faa005650449f3d6cd7947583dbfc859e50bfdf47b3b669c6d9c673",
       "classification": "behavioral",
-      "status": "blocked",
-      "assertion_kind": "unsupported_fail_closed",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
       "reviewed": true,
       "implementation_components": [
-        "replacement_effects.ReplacementEffect"
+        "damage_prevention.PreventionMode.NEXT_INSTANCE",
+        "damage_prevention.DamagePreventionShield",
+        "damage_prevention.plan_damage_modifier_commit"
       ],
       "executable_test_ids": [
-        "tests.test_rules_primitives.PreventionEffectTests.test_contract_traces_every_cr_615_rule"
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_exhausted_amount_and_next_instance_shields_are_removed",
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_next_instance_shield_survives_nonmatching_then_is_used"
       ],
       "required_scenarios": [
         "positive",
         "negative",
         "interaction"
       ],
-      "covered_scenarios": [],
-      "blockers": [
-        "next-instance source shields have no persistent used-up state across events",
-        "complete source identity and last-known source handling are not implemented"
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
       ],
+      "blockers": [],
       "notes": [
-        "A fresh immutable effect would incorrectly be applicable to a later event, so this rule remains blocked."
+        "A next-instance shield persists through nonmatching damage and is removed only after it prevents positive damage from its represented source predicate."
       ]
     },
     {
@@ -296,10 +315,13 @@
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
       "implementation_components": [
-        "replacement_effects._condition_matches"
+        "damage_prevention.ChosenDamageSource",
+        "damage.DamageSourceSnapshot",
+        "replacement.applicability.condition_matches"
       ],
       "executable_test_ids": [
-        "tests.test_rules_primitives.PreventionEffectTests.test_prevention_applies_only_to_matching_damage_events"
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_chosen_source_identity_and_property_mismatch_preserve_shield",
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_next_instance_shield_survives_nonmatching_then_is_used"
       ],
       "required_scenarios": [
         "positive",
@@ -308,14 +330,15 @@
       ],
       "covered_scenarios": [
         "positive",
-        "negative"
+        "negative",
+        "interaction"
       ],
       "blockers": [
-        "chosen-source shield creation and cross-event state are not represented",
-        "source properties are not generically derived or rechecked through CR 609.7b"
+        "generic source-choice candidate generation is not implemented",
+        "the chosen-source predicate vocabulary covers physical identity, color, and type but not every characteristic allowed by Oracle wording"
       ],
       "notes": [
-        "Supplied current source properties are re-evaluated by conditions, but the authoritative chosen-source lifecycle is absent."
+        "Represented chosen-source shields persist across nonmatching events and recheck physical identity plus snapshotted source color/type; broader source-choice grammar remains fail-closed."
       ]
     },
     {
@@ -383,16 +406,19 @@
       "rule_id": "615.12",
       "rule_text_sha256": "e01c96d8bd947d7840faf6585a32b3acd2157d93d001c3cfbda9fbf5f43b0588",
       "classification": "behavioral",
-      "status": "blocked",
-      "assertion_kind": "unsupported_fail_closed",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
       "reviewed": true,
       "implementation_components": [
         "replacement_effects.apply_replacement",
-        "damage.prepare_damage_batch"
+        "replacement.operations.PreventUsingShield",
+        "damage.prepare_damage_batch",
+        "damage_prevention.plan_damage_modifier_commit"
       ],
       "executable_test_ids": [
         "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing",
-        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_unpreventable_damage_applies_prevention_without_reducing_damage"
+        "tests.test_damage_replacement_model.DamageReplacementModelTests.test_unpreventable_damage_applies_prevention_without_reducing_damage",
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_unpreventable_damage_does_not_consume_shield"
       ],
       "required_scenarios": [
         "positive",
@@ -406,11 +432,9 @@
         "interaction",
         "replay"
       ],
-      "blockers": [
-        "persistent prevention shields are not represented, so nonconsumption of a shield amount cannot be enforced across later damage events"
-      ],
+      "blockers": [],
       "notes": [
-        "A represented unpreventable event applies the effect and its additional payload operations but leaves damage and prevented amount unchanged."
+        "An unpreventable event applies each prevention effect exactly once, prevents zero, and leaves every finite or next-instance shield available for a later preventable event."
       ]
     },
     {
@@ -449,15 +473,19 @@
       "rule_id": "615.13",
       "rule_text_sha256": "3de29fc5b99f9227f02e4ac2c11d0b59a3ac71cd348be665d417c2e34df594d2",
       "classification": "behavioral",
-      "status": "blocked",
-      "assertion_kind": "unsupported_fail_closed",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
       "reviewed": true,
       "implementation_components": [
-        "replacement_effects.apply_replacement"
+        "damage.PreventionAppliedEvent",
+        "damage._prevention_applied_events",
+        "damage.resolve_damage_batch",
+        "engine.CommanderEngine._dispatch_semantic_event"
       ],
       "executable_test_ids": [
         "tests.test_rules_primitives.PreventionEffectTests.test_prevention_produces_a_modified_damage_event",
-        "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing"
+        "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing",
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_prevention_dispatches_one_aggregate_event_per_effect"
       ],
       "required_scenarios": [
         "positive",
@@ -465,14 +493,13 @@
         "interaction"
       ],
       "covered_scenarios": [
-        "negative"
+        "positive",
+        "negative",
+        "interaction"
       ],
-      "blockers": [
-        "prevention-application events are not dispatched into the triggered-ability pipeline",
-        "simultaneous damage-event grouping for exactly one trigger per prevention application is not represented"
-      ],
+      "blockers": [],
       "notes": [
-        "The payload records the amount prevented, including zero, but no prevention trigger is emitted."
+        "Positive prevention by one effect is aggregated across one simultaneous damage batch and dispatches one typed damage.prevented event before final damage.dealt trigger discovery."
       ]
     }
   ]
