@@ -406,6 +406,118 @@ class OracleIRTests(unittest.TestCase):
             node.target_schema,
         )
 
+    def test_fixed_prevention_shields_compile_without_card_names(self):
+        base = self.db.lookup("Lightning Bolt")
+        for label, oracle_text, subject, amount in (
+            (
+                "any target",
+                "Prevent the next 3 damage that would be dealt to any target this turn.",
+                "$target.0",
+                3,
+            ),
+            (
+                "controller",
+                "Prevent the next 2 damage that would be dealt to you this turn.",
+                "$controller",
+                2,
+            ),
+            (
+                "self",
+                (
+                    "{T}: Prevent the next 1 damage that would be dealt to "
+                    "this creature this turn."
+                ),
+                "$source",
+                1,
+            ),
+        ):
+            with self.subTest(label=label):
+                record = replace(
+                    base,
+                    oracle_id=f"fixture-prevention-{label}",
+                    name="Fixture Prevention",
+                    oracle_text=oracle_text,
+                    type_line=(
+                        "Creature — Test" if label == "self" else "Instant"
+                    ),
+                )
+                node = compile_oracle_card(record).faces[0].nodes[0]
+                self.assertEqual(
+                    "damage-prevention-fixed-shield-v1"
+                    if label != "self"
+                    else "damage-prevention-fixed-shield-self-v1",
+                    node.template_id,
+                )
+                self.assertTrue(node.lowerable)
+                self.assertEqual(
+                    {
+                        "op": "create_damage_prevention_shield",
+                        "source": "$source",
+                        "subject": subject,
+                        "mode": "amount",
+                        "amount": amount,
+                        "duration": "until_end_of_turn",
+                    },
+                    node.effects[0],
+                )
+
+    def test_dynamic_or_compound_prevention_text_remains_unresolved(self):
+        base = self.db.lookup("Lightning Bolt")
+        for oracle_text in (
+            "Prevent the next X damage that would be dealt to any target this turn.",
+            (
+                "Prevent the next 3 damage that would be dealt to any target "
+                "this turn. You gain life equal to the damage prevented this way."
+            ),
+        ):
+            with self.subTest(oracle_text=oracle_text):
+                record = replace(
+                    base,
+                    oracle_id="fixture-unresolved-prevention",
+                    name="Fixture Prevention",
+                    oracle_text=oracle_text,
+                )
+                ir = compile_oracle_card(record)
+                self.assertIsNone(ir.faces[0].nodes[0].template_id)
+                self.assertFalse(ir.faces[0].nodes[0].lowerable)
+
+    def test_static_redirection_requires_a_damageable_source_type(self):
+        base = self.db.lookup("Grizzly Bears")
+        text = (
+            "All damage that would be dealt to you and other permanents "
+            "you control is dealt to this permanent instead."
+        )
+        creature = compile_oracle_card(
+            replace(
+                base,
+                oracle_id="fixture-damageable-redirection",
+                name="Fixture Redirection Creature",
+                oracle_text=text,
+                type_line="Creature — Test",
+            ),
+            capability_registry=load_default_capability_registry(),
+            capability_profile="commander_review",
+        )
+        self.assertEqual(
+            "damage-redirection-static-to-source-v1",
+            creature.faces[0].nodes[0].template_id,
+        )
+        self.assertEqual("exact", creature.status)
+
+        artifact = compile_oracle_card(
+            replace(
+                base,
+                oracle_id="fixture-nondamageable-redirection",
+                name="Fixture Redirection Artifact",
+                oracle_text=text,
+                type_line="Artifact",
+            ),
+            capability_registry=load_default_capability_registry(),
+            capability_profile="commander_review",
+        )
+        self.assertIsNone(artifact.faces[0].nodes[0].template_id)
+        self.assertFalse(artifact.faces[0].nodes[0].lowerable)
+
     def test_vanilla_keyword_and_mana_cards_compile_without_name_branches(self):
         self.assertEqual("exact", compile_oracle_card(
             self.db.lookup("Grizzly Bears")

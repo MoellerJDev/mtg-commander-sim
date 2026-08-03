@@ -22,7 +22,7 @@ class ReplacementContinuation:
     effects: tuple[ReplacementEffect, ...]
     resume_kind: str
     combat_assignments: tuple[FrozenMap, ...] = ()
-    replacement_selections: tuple[str, ...] = ()
+    replacement_selections: tuple[str | FrozenMap, ...] = ()
     stack_ref: str = ""
     effect: FrozenMap | None = None
     remaining: tuple[FrozenMap, ...] = ()
@@ -95,7 +95,25 @@ class ReplacementContinuation:
                 value["replacement_selections"],
                 field_name="continuation selections",
             )
-            if any(not isinstance(item, str) or not item for item in selections):
+            parsed_selections: list[str | FrozenMap] = []
+            for item in selections:
+                if isinstance(item, str) and item:
+                    parsed_selections.append(item)
+                    continue
+                if isinstance(item, Mapping):
+                    exact_fields(
+                        item,
+                        {"effect_id", "allocation"},
+                        field_name="typed continuation selection",
+                    )
+                    if not isinstance(item["effect_id"], str) or not item[
+                        "effect_id"
+                    ] or not isinstance(item["allocation"], Mapping):
+                        raise ReplacementEffectError(
+                            "Typed continuation selection is malformed"
+                        )
+                    parsed_selections.append(FrozenMap(item))
+                    continue
                 raise ReplacementEffectError(
                     "Replacement continuation selections must be canonical strings"
                 )
@@ -110,7 +128,7 @@ class ReplacementContinuation:
                         field_name="combat assignments",
                     )
                 ),
-                replacement_selections=tuple(selections),
+                replacement_selections=tuple(parsed_selections),
             )
         effect = value["effect"]
         semantic_frame = value["semantic_frame"]

@@ -14,6 +14,12 @@ from mtg_commander_sim.continuous_effects import (
 )
 from mtg_commander_sim import damage as damage_module
 from mtg_commander_sim.damage import DamageEvent
+from mtg_commander_sim.damage_prevention import (
+    DamageModifierDuration,
+    DamagePreventionShield,
+    DamageSubject,
+    PreventionMode,
+)
 from mtg_commander_sim.engine import CommanderEngine
 from mtg_commander_sim.semantic_runtime.counter_replacements import (
     CounterPlacementEventSpec,
@@ -29,6 +35,7 @@ from mtg_commander_sim.semantic_runtime.damage_replacements import (
     DamageQuantityReplacementHandler,
     DamageReplacementSourceContext,
     FixedDamagePreventionHandler,
+    StaticDamageRedirectionHandler,
 )
 from mtg_commander_sim.semantic_runtime.damage_results import (
     DamageResultLifeFloorHandler,
@@ -787,3 +794,143 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_prevent_then_double()
+
+    def test_persistent_prevention_commit_mutant_is_killed(self):
+        def assert_shield_is_consumed() -> None:
+            session = make_session(
+                self.db,
+                self.mishra,
+                self.zimone,
+                players=2,
+                seed=615_900,
+            )
+            keep_all(session)
+            engine = session.engine
+            source_ref = engine.create_token(
+                "A",
+                name="Damage Source",
+                characteristics={
+                    "type_line": "Token Creature — Test",
+                    "power": "1",
+                    "toughness": "1",
+                },
+            )[0]
+            engine.state.damage_prevention_shields.append(
+                DamagePreventionShield(
+                    shield_id="mutation-shield",
+                    source_id="mutation-effect",
+                    controller="B",
+                    subject=DamageSubject("B", "player", "B"),
+                    mode=PreventionMode.AMOUNT,
+                    remaining=3,
+                    duration=DamageModifierDuration.UNTIL_END_OF_TURN,
+                    created_turn_sequence=engine.state.turn_sequence,
+                )
+            )
+            proposal = damage_module.damage_proposal(
+                engine,
+                proposal_id="damage:prevention-mutation",
+                actor="A",
+                source_ref=source_ref,
+                target="B",
+                amount=2,
+                combat=False,
+                reason="prevention mutation witness",
+            )
+            prepared = damage_module.prepare_damage_batch(
+                engine, (proposal,)
+            )
+            damage_module.commit_prepared_damage_batch(engine, prepared)
+            self.assertEqual(
+                1, engine.state.damage_prevention_shields[0].remaining
+            )
+
+        assert_shield_is_consumed()
+        with patch.object(
+            damage_module,
+            "commit_damage_modifier_plan",
+            lambda _host, _plan: None,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_shield_is_consumed()
+
+    def test_static_redirection_mutant_is_killed(self):
+        descriptor = {
+            "handler_id": "replacement.damage.redirect-to-source.v1",
+            "schema_version": 1,
+            "event": "damage",
+            "condition": {
+                "source_controller_relation": "any",
+                "target_controller_relation": "source_controller",
+                "target_kinds": ["player"],
+                "source_types_all": [],
+                "target_types_all": [],
+                "combat": None,
+            },
+            "modification": {"destination": "source"},
+        }
+        destination = replacement_effects.RedirectDamage(
+            target="C1",
+            target_kind="permanent",
+            target_controller="B",
+            target_object_id="destination-object",
+            target_logical_object_id="destination-incarnation",
+            target_owner="B",
+            target_types=("creature",),
+        )
+        context = DamageReplacementSourceContext(
+            source_ref="C1",
+            source_controller="B",
+            source_destination=destination,
+        )
+        event = replacement_effects.ReplaceableEvent(
+            event_id="damage:redirection-mutation",
+            kind="damage",
+            affected_player="B",
+            payload={
+                "source_controller": "A",
+                "target": "B",
+                "target_kind": "player",
+                "target_controller": "B",
+                "amount": 2,
+                "prevented": 0,
+                "unpreventable": False,
+                "combat": False,
+            },
+        )
+
+        def assert_redirected() -> None:
+            effect = StaticDamageRedirectionHandler().replacement_effect(
+                descriptor, context
+            )
+            resolved = replacement_effects.resolve_replacements(
+                event, (effect,), selections=(effect.effect_id,)
+            )
+            self.assertEqual("C1", resolved.payload["target"])
+            self.assertEqual(
+                "destination-object", resolved.affected_object.object_id
+            )
+
+        assert_redirected()
+        original = StaticDamageRedirectionHandler.replacement_effect
+
+        def retain_recipient_mutant(handler, mapping, source_context):
+            effect = original(handler, mapping, source_context)
+            return replace(
+                effect,
+                operations=(
+                    replacement_effects.RedirectDamage(
+                        target="B",
+                        target_kind="player",
+                        target_controller="B",
+                    ),
+                ),
+            )
+
+        with patch.object(
+            StaticDamageRedirectionHandler,
+            "replacement_effect",
+            retain_recipient_mutant,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_redirected()

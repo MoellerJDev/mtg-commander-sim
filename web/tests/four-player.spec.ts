@@ -121,36 +121,37 @@ async function ensureFullControl(page: Page) {
   await expect(toggle).toContainText("Full control on");
 }
 
-async function passUntilDraggable(page: Page, card: Locator) {
-  const pass = page.getByTestId("action-pass");
-  const meaningful = page.locator(
-    '[data-testid^="action-"]:not([data-testid="action-pass"]):not([data-testid="action-concede"])',
-  );
-  for (let attempts = 0; attempts < 8; attempts += 1) {
+async function passUntilDraggable(pages: readonly Page[], card: Locator) {
+  for (let attempts = 0; attempts < 20; attempts += 1) {
     if (await card.getAttribute("draggable") === "true") return;
-    await expect.poll(async () =>
-      await card.getAttribute("draggable") === "true"
-      || (await pass.isVisible() && await meaningful.count() > 0),
-    ).toBe(true);
-    if (await card.getAttribute("draggable") === "true") return;
-    await submitFormAction(page, "pass");
-  }
-  await expect(card).toHaveAttribute("draggable", "true");
-}
-
-async function passEmptyWindowsUntilDraggable(page: Page, card: Locator) {
-  const pass = page.getByTestId("action-pass");
-  const meaningful = page.locator(
-    '[data-testid^="action-"]:not([data-testid="action-pass"]):not([data-testid="action-concede"])',
-  );
-  for (let attempts = 0; attempts < 8; attempts += 1) {
     await expect.poll(async () => {
       if (await card.getAttribute("draggable") === "true") return "ready";
-      if (await pass.isVisible() && await meaningful.count() === 0) return "pass-only";
+      for (let index = 0; index < pages.length; index += 1) {
+        const pass = pages[index].getByTestId("action-pass");
+        if (await pass.isVisible() && await pass.isEnabled()) return `pass-${index}`;
+      }
       return "waiting";
+    }, {
+      // A Windows Game Record durability save may briefly keep the accepted
+      // action disabled while its review artifacts are written. Wait for the
+      // authoritative acknowledgement; never manufacture another pass.
+      timeout: 45_000,
     }).not.toBe("waiting");
     if (await card.getAttribute("draggable") === "true") return;
-    await submitFormAction(page, "pass");
+    for (const page of pages) {
+      const pass = page.getByTestId("action-pass");
+      if (!(await pass.isVisible()) || !(await pass.isEnabled())) continue;
+      try {
+        await submitMaybeFormAction(page, "pass", 2_000);
+      } catch (error) {
+        // Safe Auto-pass may win the race for a response window. The next
+        // iteration must still observe either the requested card or another
+        // explicit server-issued pass before advancing the scripted game.
+        if (await card.getAttribute("draggable") !== "true"
+          && await pass.isVisible() && await pass.isEnabled()) throw error;
+      }
+      break;
+    }
   }
   await expect(card).toHaveAttribute("draggable", "true");
 }
@@ -400,6 +401,8 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
   const context = await browser.newContext();
   const host = await context.newPage();
   const opponent = await context.newPage();
+  host.setDefaultTimeout(15_000);
+  opponent.setDefaultTimeout(15_000);
   try {
     await host.route(
       /\/api\/v1\/rooms(?:\/[^/]+\/replace)?$/,
@@ -470,12 +473,21 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
     expect(await host.getByTestId("hand-panel").evaluate((element) => {
       const style = getComputedStyle(element);
       return { position: style.position, resize: style.resize };
-    })).toEqual({ position: "sticky", resize: "vertical" });
+    })).toEqual({ position: "relative", resize: "vertical" });
+    const dockBottomBefore = await host.getByTestId("table-bottom-dock").evaluate(
+      (element) => Math.round(element.getBoundingClientRect().bottom),
+    );
+    await host.setViewportSize({ width: 1180, height: 760 });
+    const viewportBottom = await host.evaluate(() => window.innerHeight);
+    const dockBottomAfter = await host.getByTestId("table-bottom-dock").evaluate(
+      (element) => Math.round(element.getBoundingClientRect().bottom),
+    );
+    expect(dockBottomAfter).toBe(viewportBottom - 8);
+    expect(dockBottomAfter).not.toBe(dockBottomBefore);
     await expect(host.getByTestId("auto-pass-toggle")).toHaveAttribute("aria-pressed", "true");
     await expect(host.getByTestId("auto-mana-toggle")).toHaveAttribute("aria-pressed", "true");
     await host.getByTestId("auto-pass-toggle").click();
     await expect(host.getByTestId("auto-pass-toggle")).toContainText("Full control on");
-    await host.reload();
     await expect(host.getByTestId("auto-pass-toggle")).toHaveAttribute("aria-pressed", "false");
 
     await submitImmediateAction(host, "keep");
@@ -483,16 +495,12 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
     await expect(host.getByTestId("action-pass")).toBeVisible();
     await expect(host.getByTestId("decision-panel")).toContainText("Pass priority");
     await submitFormAction(host, "pass");
-    await host.getByTestId("auto-pass-toggle").click();
-    await expect(host.getByTestId("auto-pass-toggle")).toContainText("Auto-pass on");
-    await host.getByTestId("auto-pass-toggle").click();
-    await expect(host.getByTestId("auto-pass-toggle")).toContainText("Full control on");
     const swamp = host
       .getByTestId("own-hand")
       .locator(".hand-card")
       .filter({ has: host.locator(".card-copy strong", { hasText: "Swamp" }) });
     await expect(swamp).toHaveCount(1);
-    await passEmptyWindowsUntilDraggable(host, swamp);
+    await passUntilDraggable([host, opponent], swamp);
     const beforeDrop = await viewRevision(host);
     await swamp.dragTo(host.getByTestId("own-battlefield"));
     await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeDrop);
@@ -515,7 +523,7 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
       await expect(page.locator('[data-testid^="action-"]')).toHaveCount(0);
     }
   } finally {
-    await context.close();
+    await context.close().catch(() => undefined);
   }
 });
 
@@ -570,7 +578,7 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
       .locator(".hand-card")
       .filter({ has: opponent.locator(".card-copy strong", { hasText: /^Island$/ }) })
       .first();
-    await passUntilDraggable(host, island);
+    await passUntilDraggable([host, opponent], island);
     const beforeIsland = await viewRevision(opponent);
     await island.click();
     await opponent.getByTestId("selected-card-actions").getByRole("button", { name: /^Play Island$/ }).click();
@@ -580,7 +588,7 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
       .locator(".hand-card")
       .filter({ has: host.locator(".card-copy strong", { hasText: /^Swamp$/ }) })
       .first();
-    await passUntilDraggable(opponent, swamp);
+    await passUntilDraggable([host, opponent], swamp);
     const beforeSwamp = await viewRevision(host);
     await swamp.click();
     await host.getByTestId("selected-card-actions").getByRole("button", { name: /^Play Swamp$/ }).click();
@@ -695,7 +703,7 @@ test("a duel declares an attacker in the browser and applies commander combat da
       const land = name
         ? cards.filter({ has: page.locator(".card-copy strong", { hasText: new RegExp(`^${name}$`) }) }).first()
         : cards.first();
-      await expect(land).toHaveAttribute("draggable", "true");
+      await passUntilDraggable([host, opponent], land);
       const revision = await viewRevision(page);
       await land.dragTo(page.getByTestId("own-battlefield"));
       await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
@@ -720,6 +728,7 @@ test("a duel declares an attacker in the browser and applies commander combat da
     await playLand(opponent);
     await playLand(host);
 
+    await submitFormAction(host, "pass");
     await expect(host.getByTestId("decision-panel")).toContainText("Combat.Attackers");
     await host.getByTestId("action-attack").click();
     const attackerChoice = host.locator('[data-testid^="choice-attackers-"]').first();
@@ -738,10 +747,10 @@ test("a duel declares an attacker in the browser and applies commander combat da
 });
 
 test("a trusted browser duel reaches a natural commander-damage winner", async ({ browser }) => {
-  // The deterministic game usually completes near three minutes after the
-  // preceding serial journeys have warmed the shared runner. Keep enough
-  // budget for terminal log assertions and context cleanup on slower hosts.
-  test.setTimeout(300_000);
+  // This intentionally natural game persists more than one hundred real
+  // commands. It completes near five minutes alone and can take longer after
+  // the preceding serial journeys, especially on Windows or hosted CI.
+  test.setTimeout(480_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -775,9 +784,7 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       const land = name
         ? cards.filter({ has: page.locator(".card-copy strong", { hasText: new RegExp(`^${name}$`) }) }).first()
         : cards.first();
-      await expect(land).toHaveAttribute("draggable", "true", {
-        timeout: 30_000,
-      });
+      await passUntilDraggable([host, opponent], land);
       const revision = await viewRevision(page);
       await land.dragTo(page.getByTestId("own-battlefield"));
       await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);

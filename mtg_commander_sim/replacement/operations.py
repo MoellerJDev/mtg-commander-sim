@@ -113,6 +113,112 @@ class PreventAmount:
 
 
 @dataclass(frozen=True, slots=True)
+class PreventUsingShield:
+    """Consume a durable prevention resource at a batch boundary.
+
+    The operation deliberately contains no mutable state. ``remaining`` is a
+    replay-pinned snapshot used to validate the eventual commit plan; the
+    authoritative shield is changed only after the complete damage batch has
+    validated.
+    """
+
+    shield_id: str
+    remaining: int | None
+    consume_on_application: bool = True
+    schema_version: int = OPERATION_SCHEMA_VERSION
+
+    def __post_init__(self) -> None:
+        shield_id = str(self.shield_id or "")
+        if not shield_id:
+            raise ReplacementOperationError(
+                "Shield prevention requires a stable shield ID"
+            )
+        if self.remaining is not None:
+            _integer(
+                self.remaining,
+                field="shield remaining amount",
+                minimum=1,
+            )
+        if type(self.consume_on_application) is not bool:
+            raise ReplacementOperationError(
+                "Shield consumption policy must be a boolean"
+            )
+        object.__setattr__(self, "shield_id", shield_id)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "op": "prevent_using_shield",
+            "shield_id": self.shield_id,
+            "remaining": self.remaining,
+            "consume_on_application": self.consume_on_application,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class RedirectDamage:
+    """Replace one damage recipient with a complete public snapshot."""
+
+    target: str
+    target_kind: str
+    target_controller: str
+    target_object_id: str | None = None
+    target_logical_object_id: str | None = None
+    target_owner: str | None = None
+    target_types: tuple[str, ...] = ()
+    target_subtypes: tuple[str, ...] = ()
+    schema_version: int = OPERATION_SCHEMA_VERSION
+
+    def __post_init__(self) -> None:
+        target = str(self.target or "")
+        target_kind = str(self.target_kind or "")
+        controller = str(self.target_controller or "")
+        if not target or not controller or target_kind not in {
+            "player",
+            "permanent",
+        }:
+            raise ReplacementOperationError(
+                "Damage redirection requires a player or permanent snapshot"
+            )
+        object_id = str(self.target_object_id or "") or None
+        logical_id = str(self.target_logical_object_id or "") or None
+        owner = str(self.target_owner or "") or None
+        if target_kind == "player":
+            if any(value is not None for value in (object_id, logical_id, owner)):
+                raise ReplacementOperationError(
+                    "A redirected player cannot carry object identity"
+                )
+        elif not all((object_id, logical_id, owner)):
+            raise ReplacementOperationError(
+                "A redirected permanent requires complete object identity"
+            )
+        types = tuple(sorted({str(value) for value in self.target_types if str(value)}))
+        subtypes = tuple(
+            sorted({str(value) for value in self.target_subtypes if str(value)})
+        )
+        object.__setattr__(self, "target", target)
+        object.__setattr__(self, "target_kind", target_kind)
+        object.__setattr__(self, "target_controller", controller)
+        object.__setattr__(self, "target_object_id", object_id)
+        object.__setattr__(self, "target_logical_object_id", logical_id)
+        object.__setattr__(self, "target_owner", owner)
+        object.__setattr__(self, "target_types", types)
+        object.__setattr__(self, "target_subtypes", subtypes)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "op": "redirect_damage",
+            "target": self.target,
+            "target_kind": self.target_kind,
+            "target_controller": self.target_controller,
+            "target_object_id": self.target_object_id,
+            "target_logical_object_id": self.target_logical_object_id,
+            "target_owner": self.target_owner,
+            "target_types": list(self.target_types),
+            "target_subtypes": list(self.target_subtypes),
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class AppendValues:
     field: str
     values: tuple[Any, ...]
@@ -232,6 +338,8 @@ ReplacementOperation: TypeAlias = (
     | AddAmount
     | MultiplyAmount
     | PreventAmount
+    | PreventUsingShield
+    | RedirectDamage
     | AppendValues
     | UnionValues
     | CreateNestedEvent
@@ -245,6 +353,8 @@ _TYPED_OPERATION_TYPES = (
     AddAmount,
     MultiplyAmount,
     PreventAmount,
+    PreventUsingShield,
+    RedirectDamage,
     AppendValues,
     UnionValues,
     CreateNestedEvent,
@@ -281,6 +391,74 @@ def operation_from_dict(value: Mapping[str, Any]) -> ReplacementOperation:
             _integer(value["amount"], field="prevent amount", minimum=0)
             if "amount" in value
             else None
+        )
+    if op == "prevent_using_shield":
+        _exact_fields(
+            value,
+            {"op", "shield_id", "remaining", "consume_on_application"},
+            operation=op,
+        )
+        remaining = value["remaining"]
+        if remaining is not None:
+            remaining = _integer(
+                remaining,
+                field="shield remaining amount",
+                minimum=1,
+            )
+        if type(value["consume_on_application"]) is not bool:
+            raise ReplacementOperationError(
+                "Shield consumption policy must be a boolean"
+            )
+        return PreventUsingShield(
+            shield_id=str(value["shield_id"] or ""),
+            remaining=remaining,
+            consume_on_application=value["consume_on_application"],
+        )
+    if op == "redirect_damage":
+        _exact_fields(
+            value,
+            {
+                "op",
+                "target",
+                "target_kind",
+                "target_controller",
+                "target_object_id",
+                "target_logical_object_id",
+                "target_owner",
+                "target_types",
+                "target_subtypes",
+            },
+            operation=op,
+        )
+        target_types = value["target_types"]
+        target_subtypes = value["target_subtypes"]
+        if not isinstance(target_types, (list, tuple)) or not isinstance(
+            target_subtypes, (list, tuple)
+        ):
+            raise ReplacementOperationError(
+                "Damage redirection type fields must be arrays"
+            )
+        return RedirectDamage(
+            target=str(value["target"] or ""),
+            target_kind=str(value["target_kind"] or ""),
+            target_controller=str(value["target_controller"] or ""),
+            target_object_id=(
+                str(value["target_object_id"])
+                if value["target_object_id"] is not None
+                else None
+            ),
+            target_logical_object_id=(
+                str(value["target_logical_object_id"])
+                if value["target_logical_object_id"] is not None
+                else None
+            ),
+            target_owner=(
+                str(value["target_owner"])
+                if value["target_owner"] is not None
+                else None
+            ),
+            target_types=tuple(str(item) for item in target_types),
+            target_subtypes=tuple(str(item) for item in target_subtypes),
         )
     if op in {"append", "union"}:
         _exact_fields(value, {"op", "field", "values"}, operation=op)

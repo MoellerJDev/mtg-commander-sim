@@ -6,6 +6,10 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 
+from .damage_modifier_state import (
+    DamagePreventionShield,
+    DamageRedirectionEffect,
+)
 from .util import normalize_mana_bundle, stable_json
 
 ZoneName = Literal[
@@ -543,6 +547,14 @@ class GameState:
     step: str = "mulligan"
     stack: list[StackItem] = field(default_factory=list)
     delayed_triggers: list[DelayedTrigger] = field(default_factory=list)
+    # Additive Game Record v3 state for durable CR 609.7/614.9/615 effects.
+    # Historical checkpoints omit both arrays and deserialize as empty.
+    damage_prevention_shields: list[DamagePreventionShield] = field(
+        default_factory=list
+    )
+    damage_redirections: list[DamageRedirectionEffect] = field(
+        default_factory=list
+    )
     # Authoritative CR 608.2i look-back facts. ``None`` is reserved for legacy
     # Game Record v3 checkpoints created before this additive feature existed.
     turn_history: TurnHistory | None = field(default_factory=TurnHistory)
@@ -606,6 +618,12 @@ class GameState:
             "step": self.step,
             "stack": [item.to_dict() for item in self.stack],
             "delayed_triggers": [trigger.to_dict() for trigger in self.delayed_triggers],
+            "damage_prevention_shields": [
+                shield.to_dict() for shield in self.damage_prevention_shields
+            ],
+            "damage_redirections": [
+                effect.to_dict() for effect in self.damage_redirections
+            ],
             **(
                 {"turn_history": self.turn_history.to_dict()}
                 if self.turn_history is not None
@@ -663,6 +681,14 @@ class GameState:
             step=str(data.get("step", "mulligan")),
             stack=[StackItem.from_dict(item) for item in data.get("stack", [])],
             delayed_triggers=[DelayedTrigger.from_dict(item) for item in data.get("delayed_triggers", [])],
+            damage_prevention_shields=[
+                DamagePreventionShield.from_dict(item)
+                for item in data.get("damage_prevention_shields", [])
+            ],
+            damage_redirections=[
+                DamageRedirectionEffect.from_dict(item)
+                for item in data.get("damage_redirections", [])
+            ],
             turn_history=(
                 TurnHistory.from_dict(data["turn_history"])
                 if isinstance(data.get("turn_history"), dict)

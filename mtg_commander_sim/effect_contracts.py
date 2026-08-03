@@ -74,6 +74,8 @@ EFFECT_FAMILY_CONTRACTS = (
                 "counter_or_destroy_blue",
                 "counter_stack",
                 "create_emblem",
+                "create_damage_prevention_shield",
+                "create_damage_redirection",
                 "create_modified_token_copy",
                 "create_token_copy_if_controlled_count",
                 "create_token_if_distinct_controlled_names",

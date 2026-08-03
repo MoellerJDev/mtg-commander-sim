@@ -84,11 +84,12 @@ from .declaration_restrictions import (
 )
 from .damage import (
     apply_damage_results_to_permanent,
+    combat_damage_proposals,
     damage_proposal,
     DamageError,
-    DamageProposal,
     resolve_damage_batch,
 )
+from .damage_prevention import expire_end_of_turn_damage_modifiers
 from .life_state import (
     LifeChange,
     LifeStateError,
@@ -1908,7 +1909,7 @@ class CommanderEngine(
         semantic_events: bool = False,
         replacement_sources: Sequence[CardInstance] | None = None,
         replacement_source_zones: Mapping[str, str] | None = None,
-        replacement_selections: Sequence[str | None] = (),
+        replacement_selections: Sequence[str | None | Mapping[str, Any]] = (),
         prepared_replacement: PreparedZoneChange | None = None,
     ) -> CardInstance:
         if destination not in {"library", "hand", "battlefield", "graveyard", "exile", "command", "outside"}:
@@ -4281,6 +4282,7 @@ class CommanderEngine(
                 None,
             )
             player.stats.pop("hexproof_from_colors_until_end", None)
+        expire_end_of_turn_damage_modifiers(self.state)
         self._clear_mana(reason="cleanup")
         self._log(active, "turn.cleanup", f"{active} completed cleanup.", importance=0)
         if active in self.state.players:
@@ -16708,7 +16710,8 @@ class CommanderEngine(
         self,
         assignments: Sequence[Mapping[str, Any]],
         *,
-        replacement_selections: Sequence[str | None] = (),
+        replacement_selections: Sequence[str | None | Mapping[str, Any]] = (),
+        replacement_event_ids: Sequence[str] = (),
     ) -> bool:
         """Deal one simultaneous combat-damage batch and stabilize it.
 
@@ -16717,86 +16720,13 @@ class CommanderEngine(
         priority grant.
         """
 
-        proposals: list[DamageProposal] = []
         declared = [dict(value) for value in assignments]
-        for index, assignment in enumerate(declared):
-            source_ref = str(assignment.get("source") or "")
-            source = next(
-                (
-                    card
-                    for card in self.state.cards.values()
-                    if card.ref == source_ref
-                ),
-                None,
-            )
-            if source is None:
-                raise GameRuleError(f"Unknown damage source {source_ref}")
-            amount = int(assignment.get("amount", 0))
-            if amount < 0:
-                raise GameRuleError("Damage cannot be negative")
-            if amount == 0:
-                # CR 120.8: zero produces no event or replacement window.
-                continue
-            target = str(assignment.get("target") or "")
-            if source.zone != "battlefield":
-                self._log(
-                    source.controller,
-                    "combat.damage.no_source",
-                    (
-                        f"{source.ref} assigned no combat damage because "
-                        "it was no longer on the battlefield."
-                    ),
-                    {
-                        "source": source.ref,
-                        "target": target,
-                        "amount": amount,
-                    },
-                    importance=1,
-                )
-                continue
-            if not self._combat_damage_target_exists(target):
-                self._log(
-                    source.controller,
-                    "combat.damage.no_target",
-                    (
-                        f"{source.ref} assigned no combat damage; {target} "
-                        "was no longer a legal damage recipient."
-                    ),
-                    {
-                        "source": source.ref,
-                        "target": target,
-                        "amount": amount,
-                    },
-                    importance=1,
-                )
-                continue
-            try:
-                proposals.append(
-                    damage_proposal(
-                        self,
-                        proposal_id=(
-                            f"damage.combat:{self.state.revision}:"
-                            f"{self.state.event_sequence + 1}:{index}"
-                        ),
-                        actor=source.controller,
-                        source_ref=source.ref,
-                        target=target,
-                        amount=amount,
-                        combat=True,
-                        reason="combat damage",
-                        deathtouch=(
-                            DEATHTOUCH in self._combat_keywords(source)
-                        ),
-                        damage_step=self.state.combat.damage_step_index + 1,
-                        first_strike_step=(
-                            self.state.combat.first_strike_step
-                        ),
-                    )
-                )
-            except DamageError as exc:
-                raise GameRuleError(str(exc)) from exc
-
         try:
+            proposals = combat_damage_proposals(
+                self,
+                declared,
+                replacement_event_ids=replacement_event_ids,
+            )
             result = resolve_damage_batch(
                 self,
                 proposals,

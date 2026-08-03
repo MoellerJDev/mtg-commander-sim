@@ -661,6 +661,22 @@ def capability_dependencies_for_node(
         ):
             dependencies.add("damage.result.multitype_permanent")
         dependencies.add("target.public.player_or_damageable_permanent")
+    if (
+        operations == {"create_damage_prevention_shield"}
+        and "cr-615-prevention-effects" in mechanics
+    ):
+        dependencies.add("damage.prevention.persistent_amount")
+        if target_schema is not None:
+            dependencies.add("target.revalidate_resolution")
+            if schema == {
+                "zones": ["player", "battlefield"],
+                "categories": ["player", "permanent"],
+                "predicate": "damageable",
+                "count": 1,
+            }:
+                dependencies.add(
+                    "target.public.player_or_damageable_permanent"
+                )
     return tuple(sorted(dependencies))
 
 
@@ -675,6 +691,10 @@ def capability_covered_mechanics(
     }
     if "target.public.player_or_damageable_permanent" in supplied:
         covered.add("cr-115-targets")
+    if "target.revalidate_resolution" in supplied:
+        covered.add("cr-115-targets")
+    if "damage.prevention.persistent_amount" in supplied:
+        covered.add("cr-615-prevention-effects")
     if "damage.amount.positive" in supplied and supplied.intersection(
         {"damage.result.player_life", "damage.result.multitype_permanent"}
     ):

@@ -15,7 +15,11 @@ class StaticRuntimeTemplate:
     dependency_reason: str
 
 
-def static_runtime_template(text: str) -> StaticRuntimeTemplate | None:
+def static_runtime_template(
+    text: str,
+    *,
+    source_damageable: bool | None = None,
+) -> StaticRuntimeTemplate | None:
     """Select one closed static runtime production for an Oracle line."""
 
     basic_land_type = basic_land_type_addition_handler(text)
@@ -31,6 +35,16 @@ def static_runtime_template(text: str) -> StaticRuntimeTemplate | None:
         )
     static_damage = static_damage_handler(text)
     if static_damage is None:
+        return None
+    if (
+        static_damage[1]["handler_id"]
+        == "replacement.damage.redirect-to-source.v1"
+        and source_damageable is False
+    ):
+        # Damage can be redirected only to an object that can receive damage.
+        # Keeping this type check at compilation prevents a future artifact or
+        # enchantment with superficially similar wording from being promoted
+        # to a trusted program that can only fail at runtime.
         return None
     return StaticRuntimeTemplate(
         compiled=static_damage,

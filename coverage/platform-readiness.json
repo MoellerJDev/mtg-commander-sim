@@ -1,6 +1,6 @@
 {
   "blockers": [
-    "damage replacement/prevention remains bounded to represented and closed generically compiled static quantity changes and fixed prevention plus typed result events; persistent/divisible shields, redirection, non-damage transformations, unresolved dynamic Toxic values, remaining result-replacement families, excess selection, and replacement choices during mana payment remain unimplemented",
+    "damage replacement/prevention now includes typed finite and next-instance shields, simultaneous allocation, unpreventable nonconsumption, aggregate prevention dispatch, and static full-recipient redirection; dynamic/divided creation, generic source-choice candidates, prevention aftermath, partial/attached redirection, non-damage transformations, remaining result-replacement families, excess selection, and replacement choices during mana payment remain unimplemented",
     "typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, universal replacement participation beyond represented stun and runtime-component events, and complete effective-characteristic closure",
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
@@ -18,8 +18,8 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "damage_results_and_replacement_hardening",
-    "commit_reference": "focused damage-result, physical Commander-identity, and replacement-hardening branch based on certified main 6c09dab765e615610f697a7a850bb6502093f0a0; exact-head certification pending",
+    "active_phase": "damage_prevention_shields_redirection_and_browser_mana_regressions",
+    "commit_reference": "focused durable prevention, typed redirection, generic Oracle lowering, and browser mana/priority regression branch based on certified main 7d45ca8; exact-head certification pending",
     "tags": [
       {
         "commit": "4dc3feb625f824b9062e162808fd74b07e97c404",
@@ -81,9 +81,15 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "The focused branch attributes Commander combat damage to stable physical commander designations across zone and control changes; preserves explicit historical Game Record v3 behavior; splits the replacement monolith into immutable model, applicability, typed operation, ordering, and strict replay owners; validates nested APNAP choosers; canonicalizes declines; routes represented life and counter damage results through typed precommit owners; enforces nonempty positive, negative, replay, and mutation trust evidence; and generically compiles Infect, Wither, Lifelink, fixed Toxic, closed double-damage wording, and closed fixed-prevention wording. Commander-legal exact Oracle support rises from 338 to 403 and trusted CardPrograms from 359 to 403 without adding card-name dispatch.",
+      "evidence": "Certified main through PR 68 attributes Commander combat damage to stable physical commander designations across zone and control changes; preserves explicit historical Game Record v3 behavior; splits the replacement monolith into immutable model, applicability, typed operation, ordering, and strict replay owners; validates nested APNAP choosers; canonicalizes declines; routes represented life and counter damage results through typed precommit owners; enforces nonempty positive, negative, replay, and mutation trust evidence; and generically compiles Infect, Wither, Lifelink, fixed Toxic, closed double-damage wording, and closed fixed-prevention wording.",
       "id": "damage_results_replacement_hardening",
       "name": "Damage-result, Commander identity, and replacement hardening",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "The focused branch adds typed finite and next-instance shield state, cleanup expiration, exact simultaneous allocation, unpreventable nonconsumption, aggregate prevention dispatch, immutable commit fingerprints, and typed full-recipient redirection with destination departure and rediscovery. Generic Oracle IR v15 lowers fixed shield and static redirection wording without card-name dispatch. On the pinned current snapshot, Commander-legal exact Oracle and trusted CardPrograms each rise from 406 to 410, adding Shieldmate's Blessing, Hold at Bay, Mending Hands, and Palisade Giant. Browser regressions keep an active player's empty-stack main phase manual under auto-pass, keep the hand in a fixed resizable bottom dock, and verify projected Urborg/Citadel black mana plus named Cauldron Familiar and The Sackville-Bagginses cast actions.",
+      "id": "damage_prevention_shields_and_redirection",
+      "name": "Durable damage prevention and static redirection",
       "status": "implementation_complete_certification_pending"
     },
     {
@@ -99,7 +105,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Certify and merge the damage-result, physical Commander-identity, and replacement-hardening branch, clean the branch, then begin the generated damage-prevention shields and redirection batch from fresh certified main.",
+  "next_task": "Certify and merge the durable damage-prevention, static-redirection, and browser mana/priority regression branch, then begin the generated damage-prevention continuations and aftermath batch from fresh certified main.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.11",
@@ -131,11 +137,11 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 60790,
+      "material_residuals": 60765,
       "status_counts": {
-        "exact": 406,
-        "partial": 14631,
-        "unresolved": 16586
+        "exact": 410,
+        "partial": 14673,
+        "unresolved": 16540
       },
       "total": 31623
     },
@@ -152,18 +158,18 @@
       "trusted": 0
     },
     "oracle": {
-      "material_residuals": 69413,
+      "material_residuals": 69388,
       "status_counts": {
-        "exact": 3046,
-        "partial": 16050,
-        "unresolved": 19389
+        "exact": 3050,
+        "partial": 16093,
+        "unresolved": 19342
       },
       "total": 38485
     },
     "rules": {
-      "blocked": 358,
+      "blocked": 351,
       "definition_only": 92,
-      "passing": 151,
+      "passing": 158,
       "total": 3300,
       "unreviewed": 2699
     },
@@ -190,29 +196,29 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4378,
+    "deterministic_cases_discovered": 4406,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
-    "web_files": 25
+    "web_files": 28
   },
   "validation": {
-    "baseline_commit": "6c09dab765e615610f697a7a850bb6502093f0a0",
-    "card_program_census": "full_38484_trusted_802_residual_35433_failed_2249; commander_legal_31623_trusted_403_residual_31219_failed_1; commander_trusted_delta_plus_44; commander_oracle_exact_delta_plus_65; commander_material_residual_delta_minus_420",
+    "baseline_commit": "7d45ca8ffd4aa6ec611b0f0f1220025c6ecc3cab",
+    "card_program_census": "full_38485_trusted_810_capability_closed_808_residual_35426_failed_2249; commander_legal_31623_trusted_410_capability_closed_408_residual_31212_failed_1; focused_damage_prevention_commander_trusted_delta_plus_4; focused_damage_prevention_commander_oracle_exact_delta_plus_4; commander_material_residual_60765",
     "ci": {
       "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
-      "run_id": 30753764851,
+      "run_id": 30770356732,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30753764851"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30770356732"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
-      "browser_reported_rules_regressions": "pass_trusted_only_modal_land_face_life_payment_immediate_land_etb_stabilization_sunscorched_desert_target_damage_stack_response_recordless_treasure_payment_orcish_bowmasters_permanent_trigger_amass_explicit_main_phase_attack_block_combat_damage_public_commander_damage_confirmed_concession_and_natural_terminal_result",
-      "browser_typecheck_and_production_build": "pass",
+      "browser_reported_rules_regressions": "pass_existing_modal_land_mana_tap_undo_public_tapped_commander_damage_and_casting_regressions_plus_active_main_phase_auto_pass_hold_and_fixed_resizable_hand_dock",
+      "browser_typecheck_and_production_build": "pass_typecheck_and_focused_headless_journey",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "pass_full_exact_commit_gate",
-      "focused_rules_tests": "pass_physical_commander_identity_nested_replacement_immutability_strict_replay_typed_operations_canonical_life_counter_damage_results_generic_keyword_static_damage_compilation_and_trust_evidence_mutations",
+      "deterministic_tests": "certified_main_pass_full_gate; focused_feature_worktree_165_deterministic_tests_pass",
+      "focused_rules_tests": "pass_durable_prevention_cleanup_allocation_unpreventable_aggregate_dispatch_static_redirection_replay_privacy_oracle_v15_capability_mutations_urborg_citadel_cauldron_familiar_agadeem_sackville_mana_undo_main_phase_and_turn_structure",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",

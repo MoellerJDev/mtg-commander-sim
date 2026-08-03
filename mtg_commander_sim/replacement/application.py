@@ -21,6 +21,8 @@ from .operations import (
     CreateNestedEvent,
     MultiplyAmount,
     PreventAmount,
+    PreventUsingShield,
+    RedirectDamage,
     ReserveZoneChange,
     SetField,
     UnionValues,
@@ -263,6 +265,14 @@ def _apply_operation(
         payload["amount"] = available - prevented
         payload["prevented"] = int(payload.get("prevented", 0)) + prevented
         return entry_scope
+    if isinstance(operation, PreventUsingShield):
+        raise ReplacementEffectError(
+            "Durable shield prevention requires a replacement batch boundary"
+        )
+    if isinstance(operation, RedirectDamage):
+        raise ReplacementEffectError(
+            "Damage redirection requires subject-aware replacement application"
+        )
     if isinstance(operation, (AppendValues, UnionValues)):
         _require_field(
             event, operation.field, _SEQUENCE_FIELDS, operation="sequence"
@@ -348,14 +358,66 @@ def apply_replacement(
     payload = thaw_value(choice.event.payload)
     children = list(choice.event.children)
     entry_scope = choice.event.entry_scope
+    affected_player = choice.event.affected_player
+    affected_object = choice.event.affected_object
     for operation in effect.operations:
+        if isinstance(operation, RedirectDamage):
+            if choice.event.kind != "damage":
+                raise ReplacementEffectError(
+                    "Damage redirection can apply only to a damage event"
+                )
+            payload.update(
+                {
+                    "target": operation.target,
+                    "target_kind": operation.target_kind,
+                    "target_object_id": operation.target_object_id,
+                    "target_logical_object_id": (
+                        operation.target_logical_object_id
+                    ),
+                    "target_controller": operation.target_controller,
+                    "target_owner": operation.target_owner,
+                    "target_types": list(operation.target_types),
+                    "target_subtypes": list(operation.target_subtypes),
+                    "target_characteristics": sorted(
+                        {*operation.target_types, *operation.target_subtypes}
+                    ),
+                }
+            )
+            if operation.target_kind == "player":
+                affected_player = operation.target
+                affected_object = None
+            else:
+                assert operation.target_object_id is not None
+                assert operation.target_owner is not None
+                affected_player = None
+                affected_object = AffectedObject(
+                    object_id=operation.target_object_id,
+                    owner=operation.target_owner,
+                    controller=operation.target_controller,
+                )
+            continue
+        prevented_before = int(payload.get("prevented", 0))
         entry_scope = _apply_operation(
             choice.event, payload, children, entry_scope, operation
         )
-    return choice.event.with_payload(
-        payload,
-        applied_effect=effect.effect_id,
-        children=children,
+        if isinstance(operation, PreventAmount):
+            prevented = int(payload.get("prevented", 0)) - prevented_before
+            by_effect = dict(payload.get("prevention_applied") or {})
+            by_effect[effect.effect_id] = (
+                int(by_effect.get(effect.effect_id, 0)) + prevented
+            )
+            payload["prevention_applied"] = by_effect
+    chooser_history = dict(payload.get("replacement_choosers") or {})
+    chooser_history[effect.effect_id] = choice.event.chooser
+    payload["replacement_choosers"] = chooser_history
+    return ReplaceableEvent(
+        event_id=choice.event.event_id,
+        kind=choice.event.kind,
+        affected_player=affected_player,
+        affected_object=affected_object,
+        payload=payload,
+        applied_effects=(*choice.event.applied_effects, effect.effect_id),
+        children=tuple(children),
         entry_scope=entry_scope,
     )
 

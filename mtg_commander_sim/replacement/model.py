@@ -528,6 +528,7 @@ class ReplacementSelection:
     path: tuple[int, ...]
     chooser: str
     effect_id: str
+    allocation: Mapping[str, int] | None = None
 
     def __post_init__(self) -> None:
         if not self.event_id or not self.chooser:
@@ -544,6 +545,29 @@ class ReplacementSelection:
             raise ReplacementEffectError(
                 "Replacement selection effect IDs must be canonical strings"
             )
+        if self.allocation is not None:
+            if not isinstance(self.allocation, Mapping):
+                raise ReplacementEffectError(
+                    "Replacement prevention allocation must be an object"
+                )
+            allocation: dict[str, int] = {}
+            for event_id, amount in self.allocation.items():
+                event_key = str(event_id or "")
+                if (
+                    not event_key
+                    or type(amount) is not int
+                    or amount < 0
+                ):
+                    raise ReplacementEffectError(
+                        "Replacement prevention allocations require event IDs "
+                        "and nonnegative integer amounts"
+                    )
+                allocation[event_key] = amount
+            if not allocation or not any(allocation.values()):
+                raise ReplacementEffectError(
+                    "Replacement prevention allocation must prevent damage"
+                )
+            object.__setattr__(self, "allocation", FrozenMap(allocation))
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -551,15 +575,19 @@ class ReplacementSelection:
             "path": list(self.path),
             "chooser": self.chooser,
             "effect_id": self.effect_id,
+            **(
+                {"allocation": thaw_value(self.allocation)}
+                if self.allocation is not None
+                else {}
+            ),
         }
 
     @classmethod
     def from_dict(cls, value: Mapping[str, Any]) -> "ReplacementSelection":
-        exact_fields(
-            value,
-            {"event_id", "path", "chooser", "effect_id"},
-            field_name="selection",
-        )
+        expected = {"event_id", "path", "chooser", "effect_id"}
+        if "allocation" in value:
+            expected.add("allocation")
+        exact_fields(value, expected, field_name="selection")
         if not isinstance(value["effect_id"], str):
             raise ReplacementEffectError(
                 "Replacement selection effect IDs must be canonical strings"
@@ -574,6 +602,9 @@ class ReplacementSelection:
             path=tuple(path_values),
             chooser=str(value["chooser"] or ""),
             effect_id=value["effect_id"],
+            allocation=(
+                value["allocation"] if "allocation" in value else None
+            ),
         )
 
 
@@ -650,11 +681,14 @@ class ReplacementEventBatch:
                     "Replacement journal event is absent from the batch"
                 )
             selected_event = event_at_path(root, selection.path)
-            if selected_event.chooser != selection.chooser:
+            applied_effect = selection.effect_id.removeprefix("decline:")
+            chooser_at_application = dict(
+                selected_event.payload.get("replacement_choosers") or {}
+            ).get(applied_effect, selected_event.chooser)
+            if chooser_at_application != selection.chooser:
                 raise ReplacementEffectError(
                     "Replacement journal chooser does not match its event path"
                 )
-            applied_effect = selection.effect_id.removeprefix("decline:")
             if applied_effect not in selected_event.applied_effects:
                 raise ReplacementEffectError(
                     "Replacement journal effect is not applied at its event path"
@@ -702,6 +736,7 @@ class ReplacementBatchChoice:
     event_id: str
     tree_choice: ReplacementTreeChoice
     prior_public_choices: tuple[ReplacementSelection, ...]
+    prevention_allocations: tuple["PreventionAllocationChoice", ...] = ()
 
     @property
     def choice(self) -> ReplacementChoice:
@@ -710,6 +745,55 @@ class ReplacementBatchChoice:
     @property
     def path(self) -> tuple[int, ...]:
         return self.tree_choice.path
+
+
+@dataclass(frozen=True, slots=True)
+class PreventionAllocationChoice:
+    effect_id: str
+    shield_id: str
+    available: int | None
+    events: tuple[tuple[str, int, bool], ...]
+    allocation_required: bool
+
+    def __post_init__(self) -> None:
+        if not self.effect_id or not self.shield_id or not self.events:
+            raise ReplacementEffectError(
+                "A prevention allocation choice requires stable IDs and events"
+            )
+        if self.available is not None and (
+            type(self.available) is not int or self.available < 1
+        ):
+            raise ReplacementEffectError(
+                "A prevention allocation requires a positive available amount"
+            )
+        event_ids = [event_id for event_id, _, _ in self.events]
+        if len(event_ids) != len(set(event_ids)) or any(
+            not event_id
+            or type(amount) is not int
+            or amount < 0
+            or type(unpreventable) is not bool
+            for event_id, amount, unpreventable in self.events
+        ):
+            raise ReplacementEffectError(
+                "A prevention allocation requires unique valid damage events"
+            )
+
+    @property
+    def automatic_allocation(self) -> dict[str, int] | None:
+        preventable = [
+            (event_id, amount)
+            for event_id, amount, unpreventable in self.events
+            if not unpreventable and amount > 0
+        ]
+        total = sum(amount for _, amount in preventable)
+        if total == 0:
+            return {}
+        if self.available is None or total <= self.available:
+            return dict(preventable)
+        if len(preventable) == 1:
+            event_id, amount = preventable[0]
+            return {event_id: min(amount, self.available)}
+        return None
 
 
 @dataclass(frozen=True, slots=True)

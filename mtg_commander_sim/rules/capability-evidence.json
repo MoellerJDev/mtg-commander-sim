@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "98a0fcf85c1405d31f13625f8bed606f4bdbc3b4d5989e3e238e1f3f555ecded",
-  "declaration_source_fingerprint": "92932f45e3f892c408250b6d459de5a78a796163d98c01ddc9c0d902627ab9fe",
+  "registry_fingerprint": "cbc43c79b3e61377a8d989c39d1e768e6ecd1571944cee53bbdab63873e67439",
+  "declaration_source_fingerprint": "20b1298eb6e2b95d336fee050deaf4ceed880ef8c87bf17ed497d838b014e8df",
   "declarations": [
     {
       "capability_id": "continuous.basic_land_type.add_all_lands",
@@ -472,6 +472,249 @@
       "applicability_note": "Apply prevention effects in the required damage-event ordering."
     },
     {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_chosen_source_identity_and_property_mismatch_preserve_shield",
+      "official_rule_ids": [
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_prevention_dispatches_one_aggregate_event_per_effect",
+      "official_rule_ids": [
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Dispatch one aggregate prevention-applied event for one effect across a simultaneous damage batch."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_simultaneous_sources_require_and_replay_exact_allocation",
+      "official_rule_ids": [
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_persistent_prevention_commit_mutant_is_killed",
+      "official_rule_ids": [
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "negative",
+      "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_unpreventable_damage_does_not_consume_shield",
+      "official_rule_ids": [
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_amount_shield_is_prepared_without_mutation_then_consumed",
+      "official_rule_ids": [
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_until_end_of_turn_shields_expire_at_the_cleanup_boundary",
+      "official_rule_ids": [
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Expire represented until-end-of-turn prevention state at the cleanup boundary."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_combat_allocation_is_seat_scoped_and_command_replays",
+      "official_rule_ids": [
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "replay",
+      "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_combat_allocation_is_seat_scoped_and_command_replays",
+      "official_rule_ids": [
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
+    },
+    {
       "capability_id": "damage.prevention.static_fixed",
       "evidence_class": "interaction",
       "test_id": "tests.test_damage_replacement_model.DamageReplacementModelTests.test_furnace_and_daunting_order_changes_final_damage",
@@ -680,6 +923,108 @@
         "commander_review"
       ],
       "applicability_note": "Apply trusted generic or reviewed fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+    },
+    {
+      "capability_id": "damage.redirection.static_to_source",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_redirection.DamageRedirectionTests.test_static_redirection_uses_complete_recipient_snapshot",
+      "official_rule_ids": [
+        "614.1",
+        "614.9",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Redirect matching damage to the current damageable battlefield source."
+    },
+    {
+      "capability_id": "damage.redirection.static_to_source",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_damage_redirection.DamageRedirectionTests.test_static_redirection_redirects_simultaneous_multiplayer_damage",
+      "official_rule_ids": [
+        "614.1",
+        "614.9",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Redirect matching damage to the current damageable battlefield source."
+    },
+    {
+      "capability_id": "damage.redirection.static_to_source",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_static_redirection_mutant_is_killed",
+      "official_rule_ids": [
+        "614.1",
+        "614.9",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Redirect matching damage to the current damageable battlefield source."
+    },
+    {
+      "capability_id": "damage.redirection.static_to_source",
+      "evidence_class": "negative",
+      "test_id": "tests.test_damage_redirection.DamageRedirectionTests.test_static_redirection_stops_when_source_leaves",
+      "official_rule_ids": [
+        "614.1",
+        "614.9",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Redirect matching damage to the current damageable battlefield source."
+    },
+    {
+      "capability_id": "damage.redirection.static_to_source",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_redirection.DamageRedirectionTests.test_static_redirection_compiles_and_runs_from_card_program",
+      "official_rule_ids": [
+        "614.1",
+        "614.9",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Redirect matching damage to the current damageable battlefield source."
+    },
+    {
+      "capability_id": "damage.redirection.static_to_source",
+      "evidence_class": "replay",
+      "test_id": "tests.test_damage_redirection.DamageRedirectionTests.test_static_redirection_command_replays_exactly",
+      "official_rule_ids": [
+        "614.1",
+        "614.9",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Redirect matching damage to the current damageable battlefield source."
     },
     {
       "capability_id": "damage.replacement.order",
@@ -3195,5 +3540,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "9d1adb96c436d99c941842acc3cfce530cb56b485782612cd02c7199bc8076c2"
+  "fingerprint": "ba7405e2f0a7099e19e7b7ec3b75bd16ed2a6158b71eea7533b1409a027027c7"
 }

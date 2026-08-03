@@ -14,6 +14,7 @@ from .compiler.corpus_reporting import (
     oracle_corpus_coverage,
 )
 from .compiler.keyword_templates import keyword_mechanics
+from .compiler.prevention_templates import fixed_prevention_effect_template
 from .compiler.runtime_templates import static_runtime_template
 from .declaration_costs import parse_declaration_cost_line
 from .declaration_restrictions import parse_declaration_restriction_line
@@ -28,7 +29,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v14"
+ORACLE_COMPILER_VERSION = "oracle-ir-v15"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 
 _NUMBER_WORDS = {
@@ -858,6 +859,20 @@ def _effect_template(
     return None, (), None, ()
 
 
+def _reviewed_effect_template(
+    text: str,
+    *,
+    card_name: str,
+) -> tuple[
+    str | None,
+    tuple[Mapping[str, Any], ...],
+    Mapping[str, Any] | None,
+    tuple[str, ...],
+]:
+    prevention = fixed_prevention_effect_template(text.strip())
+    return prevention or _effect_template(text, card_name=card_name)
+
+
 def _cost_dict(ability: ActivatedAbility) -> dict[str, Any]:
     return {
         "text": ability.cost_text,
@@ -1075,7 +1090,7 @@ def _compile_face(
         if abilities:
             ability = abilities[0]
             template, effects, target_schema, mechanics = (
-                _effect_template(
+                _reviewed_effect_template(
                     ability.effect_text,
                     card_name=face_name or record.name,
                 )
@@ -1179,7 +1194,7 @@ def _compile_face(
             event = "unresolved"
             if trigger:
                 template, effects, target_schema, mechanics = (
-                    _effect_template(
+                    _reviewed_effect_template(
                         trigger.group("body"),
                         card_name=face_name or record.name,
                     )
@@ -1480,7 +1495,13 @@ def _compile_face(
             )
             continue
 
-        runtime_template = static_runtime_template(material_line)
+        runtime_template = static_runtime_template(
+            material_line,
+            source_damageable=any(
+                card_type in type_line.casefold()
+                for card_type in ("battle", "creature", "planeswalker")
+            ),
+        )
         if runtime_template is not None:
             nodes.append(
                 _runtime_handler_node(
@@ -1528,7 +1549,7 @@ def _compile_face(
 
         ability_word = _ABILITY_WORD.match(line)
         body = ability_word.group("body") if ability_word else line
-        template, effects, target_schema, mechanics = _effect_template(
+        template, effects, target_schema, mechanics = _reviewed_effect_template(
             body,
             card_name=face_name or record.name,
         )

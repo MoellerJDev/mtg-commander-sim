@@ -175,14 +175,14 @@ generic compiler/runtime path covers exact equivalent wording for every basic
 land type.
 
 Browser games expose every priority capability to the owning tab. **Auto-pass**
-is on by default and submits an ordinary replayable pass command only when the
-current capability contains no meaningful nonmana action. It never skips a
-playable land, cast, target, combat declaration, or other player choice. Turn
-on **Full control** at any time to hold even an otherwise pass-only window until
-you press **Pass priority**; the preference is saved in this browser. With the
-stack empty, the ordinary pass action reads **Continue to combat** in precombat
-main and **End turn** in postcombat main, so a meaningful main-phase action is
-never erased by automation.
+is on by default and submits an ordinary replayable pass command only in a safe
+response window with no meaningful nonmana action. It never skips a playable
+land, cast, target, combat declaration, or other player choice, and it never
+advances the active player's empty-stack precombat or postcombat main phase.
+Those two turn boundaries always require **Continue to combat** or **End turn**,
+preventing two Auto-pass clients from silently cycling whole turns. Turn on
+**Full control** at any time to hold every otherwise pass-only priority window;
+the preference is saved in this browser.
 
 Commander combat damage is always displayed separately by source commander on
 every public player board, including an explicit zero before any is dealt.
@@ -813,14 +813,19 @@ physical commander designations—not Oracle IDs—own Commander-damage ledgers.
 The replacement model is split into deep-immutable model, applicability, typed
 operation, ordering, and strict replay modules. Generic compilation now covers
 those four keywords plus a closed family of static double-damage and fixed-
-prevention wording; bounded handlers cover fixed life-gain multiplication and
-a whole-result life floor. Persistent prevention shields, redirection,
-non-damage transformations, unresolved dynamic Toxic values, remaining result-
-replacement families, universal draw/entry replacement participation, broad
-CR 614/615/616 closure, layer dependencies, and state-derived modifiers remain
-unsupported.
+prevention wording. Oracle IR v15 also lowers closed fixed finite-shield
+wording and static redirection to a current damageable source. Durable shield
+and redirection state lives outside `CommanderEngine`, simultaneous finite
+allocation is seat-scoped and replayable, unpreventable damage does not consume
+a shield, and positive prevention dispatches one aggregate event per effect.
+Bounded handlers cover fixed life-gain multiplication and a whole-result life
+floor. Dynamic/divided shields, prevention aftermath effects, partial or
+attached redirection, non-damage transformations, unresolved dynamic Toxic
+values, remaining result-replacement families, universal draw/entry
+replacement participation, broad CR 614/615/616 closure, layer dependencies,
+and state-derived modifiers remain unsupported.
 
-Runtime trust and governance are now explicit. Capability registry v10 consumes
+Runtime trust and governance are now explicit. Capability registry v11 consumes
 a generated evidence index whose fully qualified tests, current rules,
 profiles, and evidence classes are validated in CI. Every trusted capability
 requires positive, negative, replay, and killed-mutation evidence regardless of
@@ -834,9 +839,8 @@ dependencies and exact registry/evidence fingerprints.
 The complete Commander format-capability inventory is not yet present, so
 capability-only strict match readiness fails closed while reviewed declared-pool
 compatibility remains available. The dependency scheduler is integrated; the
-damage-result/Commander/replacement hardening is the active branch, and the
-next dependency-ready batch is persistent damage-prevention shields and typed
-redirection.
+generated dependency queue, rather than a hand-written branch chronology,
+states the next reviewed batch.
 Broad rules or Oracle expansion does not bypass these typed boundaries.
 
 This is still not a completeness declaration. Current exact, partial,

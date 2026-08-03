@@ -52,6 +52,8 @@ VALID_EFFECT_OPERATIONS = {
     "create_modified_token_copy",
     "create_token_copy_if_controlled_count",
     "create_token_if_distinct_controlled_names",
+    "create_damage_prevention_shield",
+    "create_damage_redirection",
     "damage",
     "damage_each_opponent",
     "delayed_mana",

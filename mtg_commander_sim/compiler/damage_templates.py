@@ -21,6 +21,12 @@ _FIXED_DAMAGE_PREVENTION = re.compile(
     r"prevent (?P<amount>[1-9][0-9]*) of that damage\.?$",
     re.IGNORECASE,
 )
+_REDIRECT_TO_SOURCE = re.compile(
+    r"^All damage that would be dealt to you"
+    r"(?P<permanents> and other permanents you control)? is dealt to "
+    r"this (?:creature|permanent) instead\.?$",
+    re.IGNORECASE,
+)
 
 
 def _source_condition(phrase: str) -> tuple[str, list[str]] | None:
@@ -98,6 +104,29 @@ def static_damage_handler(
 
     ability_word = _ABILITY_WORD.match(text)
     normalized = ability_word.group("body") if ability_word else text
+    redirection = _REDIRECT_TO_SOURCE.fullmatch(normalized)
+    if redirection is not None:
+        target_kinds = ["player"]
+        if redirection.group("permanents"):
+            target_kinds.append("permanent")
+        return (
+            "damage-redirection-static-to-source-v1",
+            {
+                "handler_id": "replacement.damage.redirect-to-source.v1",
+                "schema_version": 1,
+                "event": "damage",
+                "condition": {
+                    "source_controller_relation": "any",
+                    "target_controller_relation": "source_controller",
+                    "target_kinds": target_kinds,
+                    "source_types_all": [],
+                    "target_types_all": [],
+                    "combat": None,
+                },
+                "modification": {"destination": "source"},
+            },
+            "damage.redirection.static_to_source",
+        )
     match = _DAMAGE_QUANTITY_REPLACEMENT.fullmatch(normalized)
     handler_id = "replacement.damage.quantity.v1"
     capability = "damage.replacement.static_quantity"

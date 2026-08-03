@@ -48,7 +48,10 @@ def _hash(value: Any) -> str:
 def _layer(relative: str) -> str:
     if relative.startswith("server/") or relative == "simctl.py":
         return "transport"
-    if relative == "mtg_commander_sim/model.py":
+    if relative in {
+        "mtg_commander_sim/damage_modifier_state.py",
+        "mtg_commander_sim/model.py",
+    }:
         return "domain"
     if relative in {
         "mtg_commander_sim/util.py",
@@ -92,6 +95,7 @@ def _layer(relative: str) -> str:
         "mtg_commander_sim/counter_placement.py",
         "mtg_commander_sim/counter_state.py",
         "mtg_commander_sim/damage.py",
+        "mtg_commander_sim/damage_prevention.py",
         "mtg_commander_sim/damage_results.py",
         "mtg_commander_sim/declaration_costs.py",
         "mtg_commander_sim/declaration_restrictions.py",
@@ -143,6 +147,8 @@ def _owner(relative: str, layer: str) -> str:
         return "replacement_effects"
     if relative == "mtg_commander_sim/commander.py":
         return "commander_variant"
+    if relative == "mtg_commander_sim/damage_modifier_state.py":
+        return "damage"
     if relative == "mtg_commander_sim/counter_state.py":
         return "counter_state"
     if relative == "mtg_commander_sim/life_state.py":
@@ -163,6 +169,7 @@ def _owner(relative: str, layer: str) -> str:
         return "counter_placement"
     if relative in {
         "mtg_commander_sim/damage.py",
+        "mtg_commander_sim/damage_prevention.py",
         "mtg_commander_sim/damage_results.py",
     }:
         return "damage"
@@ -251,6 +258,8 @@ def build_classifications() -> dict[str, Any]:
                             "counter_state.py",
                             "commander.py",
                             "damage.py",
+                            "damage_modifier_state.py",
+                            "damage_prevention.py",
                             "damage_results.py",
                             "life_state.py",
                             "mana_activation.py",

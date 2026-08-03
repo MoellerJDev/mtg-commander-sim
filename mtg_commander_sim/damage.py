@@ -19,6 +19,14 @@ from .damage_results import (
     PreparedDamageResults,
 )
 from .commander import CommanderIdentityError, commander_damage_key
+from .damage_prevention import (
+    collect_damage_modifier_effects,
+    commit_damage_modifier_plan,
+    DamageModifierCommitPlan,
+    DamageModifierError,
+    plan_damage_modifier_commit,
+    validate_damage_modifier_plan,
+)
 from .replacement_effects import (
     AffectedObject,
     ReplaceableEvent,
@@ -67,6 +75,10 @@ class DamageHost(Protocol):
     ) -> Any: ...
 
     def _protection_colors(self, card: Any) -> set[str]: ...
+
+    def _combat_damage_target_exists(self, target: str) -> bool: ...
+
+    def _combat_keywords(self, card: Any) -> set[str]: ...
 
     def _queue_siege_defeated_trigger(self, battle: Any) -> None: ...
 
@@ -406,6 +418,7 @@ class PreparedDamageBatch:
     result_events: tuple[ReplaceableEvent, ...] = ()
     result_effects: tuple[ReplacementEffect, ...] = ()
     result_journal: tuple[ReplacementSelection, ...] = ()
+    modifier_plan: DamageModifierCommitPlan = DamageModifierCommitPlan()
 
 
 @dataclass(frozen=True, slots=True)
@@ -416,12 +429,29 @@ class DamageLifeGain:
 
 
 @dataclass(frozen=True, slots=True)
+class PreventionAppliedEvent:
+    effect_id: str
+    source_id: str
+    prevented_amount: int
+    damage_event_ids: tuple[str, ...]
+
+    def semantic_context(self) -> dict[str, Any]:
+        return {
+            "effect_id": self.effect_id,
+            "source": self.source_id,
+            "prevented_amount": self.prevented_amount,
+            "damage_event_ids": list(self.damage_event_ids),
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class DamageBatchResult:
     events: tuple[DamageEvent, ...]
     changed_objects: tuple[str, ...]
     changed_players: tuple[str, ...]
     lifelink_gains: tuple[DamageLifeGain, ...]
     result_events: tuple[DamageResultRecord, ...] = ()
+    prevention_events: tuple[PreventionAppliedEvent, ...] = ()
 
     @property
     def dealt_amount(self) -> int:
@@ -603,6 +633,89 @@ def damage_proposal(
     )
 
 
+def combat_damage_proposals(
+    host: DamageHost,
+    assignments: Sequence[Mapping[str, Any]],
+    *,
+    replacement_event_ids: Sequence[str] = (),
+) -> tuple[DamageProposal, ...]:
+    """Materialize current combat assignments as immutable damage proposals."""
+
+    proposals: list[DamageProposal] = []
+    event_index = 0
+    for index, assignment in enumerate(assignments):
+        source_ref = str(assignment.get("source") or "")
+        source = next(
+            (
+                card
+                for card in host.state.cards.values()
+                if card.ref == source_ref
+            ),
+            None,
+        )
+        if source is None:
+            raise DamageError(f"Unknown damage source {source_ref}")
+        amount = int(assignment.get("amount", 0))
+        if amount < 0:
+            raise DamageError("Damage cannot be negative")
+        if amount == 0:
+            # CR 120.8: zero produces no event or replacement window.
+            continue
+        target = str(assignment.get("target") or "")
+        if source.zone != "battlefield":
+            host._log(
+                source.controller,
+                "combat.damage.no_source",
+                (
+                    f"{source.ref} assigned no combat damage because "
+                    "it was no longer on the battlefield."
+                ),
+                {"source": source.ref, "target": target, "amount": amount},
+                importance=1,
+            )
+            continue
+        if not host._combat_damage_target_exists(target):
+            host._log(
+                source.controller,
+                "combat.damage.no_target",
+                (
+                    f"{source.ref} assigned no combat damage; {target} "
+                    "was no longer a legal damage recipient."
+                ),
+                {"source": source.ref, "target": target, "amount": amount},
+                importance=1,
+            )
+            continue
+        if replacement_event_ids and event_index >= len(replacement_event_ids):
+            raise DamageError("Combat replacement event identity count is stale")
+        proposals.append(
+            damage_proposal(
+                host,
+                proposal_id=(
+                    str(replacement_event_ids[event_index])
+                    if replacement_event_ids
+                    else (
+                        f"damage.combat:{host.state.revision}:"
+                        f"{host.state.event_sequence + 1}:{index}"
+                    )
+                ),
+                actor=source.controller,
+                source_ref=source.ref,
+                target=target,
+                amount=amount,
+                combat=True,
+                reason="combat damage",
+                deathtouch="deathtouch" in host._combat_keywords(source),
+                damage_step=host.state.combat.damage_step_index + 1,
+                first_strike_step=host.state.combat.first_strike_step,
+            )
+        )
+        event_index += 1
+    if replacement_event_ids and event_index != len(replacement_event_ids):
+        raise DamageError("Combat replacement event identity count is stale")
+    return tuple(proposals)
+
+
 def _protection_prevention_effects(
     host: DamageHost,
     proposals: Sequence[DamageProposal],
@@ -653,7 +766,7 @@ def prepare_damage_batch(
     host: DamageHost,
     proposals: Sequence[DamageProposal],
     *,
-    selections: Sequence[str | None] = (),
+    selections: Sequence[str | None | Mapping[str, Any]] = (),
     sources: Sequence[Any] | None = None,
     source_zones: Mapping[str, str] | None = None,
 ) -> PreparedDamageBatch:
@@ -665,7 +778,20 @@ def prepare_damage_batch(
             raise DamageError(
                 "Replacement selections were supplied without damage"
             )
-        return PreparedDamageBatch(events=(), effects=(), journal=())
+        # An empty damage batch is still prepared and committed through the
+        # same atomic boundary. Pin the durable modifier state so commit can
+        # distinguish a legitimate zero-event batch from a stale/default
+        # PreparedDamageBatch assembled outside this function.
+        try:
+            modifier_plan = plan_damage_modifier_commit(host, ())
+        except DamageModifierError as exc:
+            raise DamageError(str(exc)) from exc
+        return PreparedDamageBatch(
+            events=(),
+            effects=(),
+            journal=(),
+            modifier_plan=modifier_plan,
+        )
 
     # Imported lazily to keep the immutable event model independent from the
     # CardProgram runtime registry that lowers ambient battlefield abilities.
@@ -685,6 +811,7 @@ def prepare_damage_batch(
             sources=sources,
             source_zones=source_zones,
         ),
+        *collect_damage_modifier_effects(host),
         *_protection_prevention_effects(host, nonzero),
     )
     events = tuple(proposal.event() for proposal in nonzero)
@@ -750,6 +877,10 @@ def prepare_damage_batch(
             effects=result_effects,
             pending=result_progress.pending,
         )
+    try:
+        modifier_plan = plan_damage_modifier_commit(host, events)
+    except DamageModifierError as exc:
+        raise DamageError(str(exc)) from exc
     return PreparedDamageBatch(
         events=events,
         effects=tuple(effects),
@@ -757,6 +888,7 @@ def prepare_damage_batch(
         result_events=result_progress.events,
         result_effects=tuple(result_effects),
         result_journal=result_progress.journal,
+        modifier_plan=modifier_plan,
     )
 
 
@@ -1055,6 +1187,39 @@ def _log_result_replacement_journal(
         )
 
 
+def _prevention_applied_events(
+    prepared: PreparedDamageBatch,
+) -> tuple[PreventionAppliedEvent, ...]:
+    sources = {effect.effect_id: effect.source_id for effect in prepared.effects}
+    amounts: dict[str, int] = {}
+    event_ids: dict[str, list[str]] = {}
+    for event in prepared.events:
+        by_effect = event.payload.get("prevention_applied") or {}
+        if not isinstance(by_effect, Mapping):
+            raise DamageError(
+                "Resolved damage prevention journal is malformed"
+            )
+        for effect_id, raw_amount in by_effect.items():
+            key = str(effect_id)
+            if key not in sources or type(raw_amount) is not int or raw_amount < 0:
+                raise DamageError(
+                    "Resolved damage prevention journal is stale"
+                )
+            if raw_amount == 0:
+                continue
+            amounts[key] = amounts.get(key, 0) + raw_amount
+            event_ids.setdefault(key, []).append(event.event_id)
+    return tuple(
+        PreventionAppliedEvent(
+            effect_id=effect_id,
+            source_id=sources[effect_id],
+            prevented_amount=amounts[effect_id],
+            damage_event_ids=tuple(sorted(event_ids[effect_id])),
+        )
+        for effect_id in sorted(amounts)
+    )
+
+
 def commit_prepared_damage_batch(
     host: DamageHost,
     prepared: PreparedDamageBatch,
@@ -1104,6 +1269,11 @@ def commit_prepared_damage_batch(
 
     _validate_damage_replacement_journal(prepared)
     _validate_result_replacement_journal(prepared)
+    try:
+        validate_damage_modifier_plan(host, prepared.modifier_plan)
+    except DamageModifierError as exc:
+        raise DamageError(str(exc)) from exc
+    prevention_events = _prevention_applied_events(prepared)
 
     commander_updates: list[tuple[str, str, int]] = []
     history_events: list[DamageEvent] = []
@@ -1135,6 +1305,10 @@ def commit_prepared_damage_batch(
         )
 
     committed = commit_damage_result_plan(host, result_plan)
+    try:
+        commit_damage_modifier_plan(host, prepared.modifier_plan)
+    except DamageModifierError as exc:
+        raise DamageError(str(exc)) from exc
     changed_players = list(committed.changed_players)
     changed_objects = list(committed.changed_objects)
     for target, commander_key, amount in commander_updates:
@@ -1175,6 +1349,7 @@ def commit_prepared_damage_batch(
         changed_players=tuple(dict.fromkeys(changed_players)),
         lifelink_gains=tuple(gains),
         result_events=committed.records,
+        prevention_events=prevention_events,
     )
 
 
@@ -1182,7 +1357,9 @@ def resolve_damage_batch(
     host: DamageHost,
     proposals: Sequence[DamageProposal],
     *,
-    replacement_selections: Sequence[str | None] = (),
+    replacement_selections: Sequence[
+        str | None | Mapping[str, Any]
+    ] = (),
 ) -> DamageBatchResult:
     """Resolve one typed damage batch through results and trigger discovery."""
 
@@ -1214,54 +1391,65 @@ def resolve_damage_batch(
         )
 
     trigger_batch: list[Any] = []
-    for event in result.events:
-        if not event.was_dealt:
-            continue
-        if (
-            host.state.monarch is not None
-            and event.target_kind == "player"
-            and event.target == host.state.monarch
-            and event.combat
-            and "creature" in event.source_types
-            and event.source_controller in host.active_seats
-        ):
-            old_monarch = str(host.state.monarch)
-            new_monarch = event.source_controller
-            trigger_batch.append(
-                host._monarch_trigger(
-                    controller=old_monarch,
-                    label=(
-                        "The monarch — "
-                        f"{new_monarch} becomes the monarch"
-                    ),
-                    effects=(
-                        {
-                            "op": "become_monarch",
-                            "player": new_monarch,
-                            "reason": (
-                                "a creature dealt combat damage to "
-                                "the monarch"
-                            ),
-                        },
-                    ),
-                    context={
-                        "event": "damage.dealt",
-                        "source": event.source,
-                        "damaged_player": event.target,
-                        "new_monarch": new_monarch,
-                        "monarch_at_trigger": old_monarch,
-                        "inherent_rule": "CR 725.2b",
-                    },
-                )
-            )
+    for prevention in result.prevention_events:
         host._dispatch_semantic_event(
-            "damage.dealt",
-            event.semantic_context(),
+            "damage.prevented",
+            prevention.semantic_context(),
             sources=trigger_sources,
             source_zones=trigger_source_zones,
             trigger_batch=trigger_batch,
         )
         if host._semantic_pause_annotation() is not None:
             break
+    if host._semantic_pause_annotation() is None:
+        for event in result.events:
+            if not event.was_dealt:
+                continue
+            if (
+                host.state.monarch is not None
+                and event.target_kind == "player"
+                and event.target == host.state.monarch
+                and event.combat
+                and "creature" in event.source_types
+                and event.source_controller in host.active_seats
+            ):
+                old_monarch = str(host.state.monarch)
+                new_monarch = event.source_controller
+                trigger_batch.append(
+                    host._monarch_trigger(
+                        controller=old_monarch,
+                        label=(
+                            "The monarch — "
+                            f"{new_monarch} becomes the monarch"
+                        ),
+                        effects=(
+                            {
+                                "op": "become_monarch",
+                                "player": new_monarch,
+                                "reason": (
+                                    "a creature dealt combat damage to "
+                                    "the monarch"
+                                ),
+                            },
+                        ),
+                        context={
+                            "event": "damage.dealt",
+                            "source": event.source,
+                            "damaged_player": event.target,
+                            "new_monarch": new_monarch,
+                            "monarch_at_trigger": old_monarch,
+                            "inherent_rule": "CR 725.2b",
+                        },
+                    )
+                )
+            host._dispatch_semantic_event(
+                "damage.dealt",
+                event.semantic_context(),
+                sources=trigger_sources,
+                source_zones=trigger_source_zones,
+                trigger_batch=trigger_batch,
+            )
+            if host._semantic_pause_annotation() is not None:
+                break
     host._enqueue_semantic_trigger_batch(trigger_batch)
     return result

@@ -94,8 +94,7 @@
       "required_scenarios": [
         "positive",
         "negative",
-        "interaction",
-        "replay"
+        "interaction"
       ],
       "covered_scenarios": [
         "positive"
@@ -308,13 +307,17 @@
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
       "implementation_components": [
-        "replacement_effects._condition_matches",
-        "replacement_effects.replacement_choice",
-        "replacement_effects.apply_replacement"
+        "damage_prevention.ChosenDamageSource",
+        "damage.DamageSourceSnapshot",
+        "replacement.applicability.condition_matches",
+        "damage_prevention.plan_damage_modifier_commit"
       ],
       "executable_test_ids": [
         "tests.test_rules_primitives.EffectRuleTests.test_source_property_mismatch_does_not_consume_shield",
-        "tests.test_rules_primitives.EffectRuleTests.test_unknown_source_predicate_fails_closed"
+        "tests.test_rules_primitives.EffectRuleTests.test_unknown_source_predicate_fails_closed",
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_chosen_source_identity_and_property_mismatch_preserve_shield",
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_next_instance_shield_survives_nonmatching_then_is_used",
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_unpreventable_damage_does_not_consume_shield"
       ],
       "required_scenarios": [
         "positive",
@@ -324,16 +327,17 @@
       ],
       "covered_scenarios": [
         "positive",
-        "negative"
+        "negative",
+        "interaction",
+        "replay"
       ],
       "blockers": [
-        "damage events do not universally derive current or last-known source properties from authoritative state",
-        "generated shields have no persistent active-effect identity, duration, or used-up state across engine events",
-        "the event producer cannot prove that zero prevented or replaced damage preserves every stateful shield"
+        "generic source-choice candidate generation is not implemented",
+        "chosen-source predicates do not yet cover every characteristic that Oracle text can require"
       ],
       "notes": [
-        "A mismatching supplied property does not apply or journal the effect, and a later matching event can use the same immutable primitive.",
-        "Unknown condition predicates now fail closed instead of accidentally matching."
+        "Represented damage derives a current or last-known source snapshot, persistent chosen-source shields use stable physical identity, and a mismatch or unpreventable event preserves that shield for a later matching event.",
+        "Unknown condition predicates still fail closed instead of accidentally matching."
       ]
     },
     {

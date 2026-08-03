@@ -761,14 +761,23 @@ activation order and floating the resulting server-validated bundles before a
 cast. Auto-mana remains the default and the local preference survives reload.
 Browser games ask the kernel not to erase empty priority capabilities. The
 seat tab's default Auto-pass policy submits the ordinary replayable pass command
-only when the projected action set has no meaningful nonmana action; Full
-control leaves every such capability pending for explicit approval. Neither
+only when the projected action set has no meaningful nonmana action and the
+window is not the active player's empty-stack precombat or postcombat main.
+Those two boundaries always require explicit turn advancement, preventing two
+Auto-pass clients from silently cycling whole turns. Full control leaves every
+other pass-only capability pending for explicit approval. Neither
 mode changes legal-action generation or authoritative yield/opportunity
 telemetry. Battlefield objects render their projected tapped flag as a
 90-degree orientation for every viewer and return upright when the next
 projection reports them untapped. Modal double-faced land plays carry a
 fixed selected face into land-entry derivation and projection, so the client
 cannot substitute the spell face or invent a life payment.
+
+The private hand and decision tray share one fixed bottom dock. The hand has a
+vertical resize affordance and grows upward, so inspector content and table
+reflow do not move its bottom edge. The dock remains a projection-only adapter:
+card clicks, drag-to-play, manual mana activation, and reversible pure tap-mana
+rollback all submit ordinary server-issued actions.
 
 Concession is an ordinary server-issued priority action, not a client-side
 state edit. Its choice form admits only the literal `true` confirmation and the
@@ -938,8 +947,10 @@ The new rules primitives sit below both generated and hand-authored semantics:
   affected-subject CR 120.3 result trees, result replacement preparation,
   mutation-only commit planning, and atomic result mutation. Fixed quantity,
   fixed prevention, life-gain multiplication, and whole-result life-floor
-  components participate without state access; unresolved choices during mana
-  payment fail before mutation.
+  components participate without state access. `damage_prevention.py` owns
+  durable finite/next-instance shields, redirection state, simultaneous
+  allocation, cleanup expiration, and a mutation-only commit plan. Unresolved
+  replacement choices during mana payment still fail before mutation.
 - `commander.py` owns initial physical commander designation and the separate
   21-combat-damage ledger key. Designations survive zone and control changes,
   are absent from ordinary copies, and retain explicit legacy Game Record v3
@@ -974,10 +985,12 @@ into the layer evaluator; entry counters, player counters, costs, rule actions,
 and continuation-sensitive legacy counter producers do not yet use the focused
 counter owner. Represented Infect, Wither, Lifelink, fixed Toxic, and bounded
 damage-result replacements now share the damage-result transaction. Persistent
-prevention shields, redirection, non-damage transformations, unresolved dynamic
-Toxic values, incomplete continuous characteristic closure, remaining result-
-replacement families, and replacement choices during mana payment remain
-outside its certified boundary.
+finite and next-instance prevention shields plus static redirection to a
+damageable source are inside the certified boundary. Dynamic/divided shield
+creation, prevention aftermath effects, partial or attached redirection,
+non-damage transformations, unresolved dynamic Toxic values, incomplete
+continuous characteristic closure, remaining result-replacement families, and
+replacement choices during mana payment remain outside it.
 Not every zone/draw/enters producer routes through the replacement engine, and
 the state-action evaluator does not yet
 cover Sagas, dungeons, Roles, speed, maximum-counter wording outside the

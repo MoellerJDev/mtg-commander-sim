@@ -62,11 +62,11 @@ class RulesSchedulerTests(unittest.TestCase):
             for subsystem in self.queue["subsystems"]
             for rule in subsystem["rules"]
         ]
-        self.assertEqual(3057, len(queued))
+        self.assertEqual(3050, len(queued))
         self.assertEqual(len(queued), len(set(queued)))
         self.assertEqual(expected, set(queued))
         self.assertEqual(
-            358,
+            351,
             self.queue["summary"]["reviewed_behavioral_blocked"],
         )
         self.assertEqual(
@@ -125,7 +125,7 @@ class RulesSchedulerTests(unittest.TestCase):
     def test_selected_batch_is_reviewed_blocked_and_cli_next_uses_it(self):
         selected = self.queue["selected_batch"]
         self.assertEqual(
-            "damage-prevention-shields-and-redirection",
+            "damage-prevention-continuations-and-aftermath",
             selected["batch_id"],
         )
         self.assertEqual(
@@ -133,18 +133,11 @@ class RulesSchedulerTests(unittest.TestCase):
         )
         self.assertEqual(
             {
-                "614.9",
                 "615.1",
                 "615.2",
-                "615.3",
-                "615.4",
                 "615.5",
-                "615.7",
-                "615.8",
                 "615.9",
                 "615.11",
-                "615.12",
-                "615.13",
                 "616.1",
             },
             set(selected["rule_ids"]),

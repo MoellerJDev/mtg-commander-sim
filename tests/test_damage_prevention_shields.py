@@ -1,0 +1,487 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import tempfile
+import unittest
+
+from damage_replacement_support import DamageReplacementPipelineBase
+from mtg_commander_sim.damage import (
+    DamageError,
+    commit_prepared_damage_batch,
+    prepare_damage_batch,
+    resolve_damage_batch,
+)
+from mtg_commander_sim.model import GameState
+from mtg_commander_sim.projection import StateProjector
+from mtg_commander_sim.record import checkpoint_envelope, replay_record
+from mtg_commander_sim.damage_prevention import (
+    ChosenDamageSource,
+    DamageModifierDuration,
+    DamagePreventionShield,
+    DamageSubject,
+    PreventionMode,
+    expire_end_of_turn_damage_modifiers,
+)
+from mtg_commander_sim.replacement_effects import (
+    ReplacementChoiceRequired,
+)
+from mtg_commander_sim.semantics import SemanticProgram
+
+
+class DamagePreventionShieldTests(DamageReplacementPipelineBase):
+    def shield(
+        self,
+        engine,
+        *,
+        shield_id: str = "fixture-shield",
+        subject: str = "B",
+        mode: PreventionMode = PreventionMode.AMOUNT,
+        remaining: int | None = 3,
+        chosen_source=None,
+    ) -> DamagePreventionShield:
+        value = DamagePreventionShield(
+            shield_id=shield_id,
+            source_id=f"effect:{shield_id}",
+            controller="B",
+            subject=DamageSubject(
+                ref=subject,
+                kind="player",
+                controller=subject,
+            ),
+            mode=mode,
+            remaining=remaining,
+            duration=DamageModifierDuration.UNTIL_END_OF_TURN,
+            created_turn_sequence=engine.state.turn_sequence,
+            chosen_source=chosen_source,
+            label="Fixture prevention shield",
+        )
+        engine.state.damage_prevention_shields.append(value)
+        return value
+
+    def test_amount_shield_is_prepared_without_mutation_then_consumed(self):
+        engine = self.session(615001).engine
+        source = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="a-source"
+        )
+        self.shield(engine, remaining=5)
+
+        prepared = prepare_damage_batch(
+            engine,
+            (self.proposal(engine, source=source, target="B", amount=3),),
+        )
+
+        self.assertEqual(0, prepared.events[0].payload["amount"])
+        self.assertEqual(3, prepared.events[0].payload["prevented"])
+        self.assertEqual(5, engine.state.damage_prevention_shields[0].remaining)
+        result = commit_prepared_damage_batch(engine, prepared)
+        self.assertEqual(40, engine.state.players["B"].life)
+        self.assertEqual(2, engine.state.damage_prevention_shields[0].remaining)
+        self.assertEqual(1, len(result.prevention_events))
+        self.assertEqual(3, result.prevention_events[0].prevented_amount)
+
+    def test_exhausted_amount_and_next_instance_shields_are_removed(self):
+        for index, (mode, remaining) in enumerate(
+            (
+                (PreventionMode.AMOUNT, 3),
+                (PreventionMode.NEXT_INSTANCE, None),
+            )
+        ):
+            with self.subTest(mode=mode):
+                engine = self.session(615010 + index).engine
+                source = self.add_permanent(
+                    engine,
+                    seat="A",
+                    name="Mishra, Eminent One",
+                    ref=f"a-source-{index}",
+                )
+                self.shield(engine, mode=mode, remaining=remaining)
+                prepared = prepare_damage_batch(
+                    engine,
+                    (
+                        self.proposal(
+                            engine,
+                            source=source,
+                            target="B",
+                            amount=3,
+                        ),
+                    ),
+                )
+                commit_prepared_damage_batch(engine, prepared)
+                self.assertEqual([], engine.state.damage_prevention_shields)
+
+    def test_until_end_of_turn_shields_expire_at_the_cleanup_boundary(self):
+        engine = self.session(615012).engine
+        shield = self.shield(engine, remaining=3)
+        removed = expire_end_of_turn_damage_modifiers(engine.state)
+        self.assertEqual((shield.shield_id,), removed)
+        self.assertEqual([], engine.state.damage_prevention_shields)
+
+    def test_unpreventable_damage_does_not_consume_shield(self):
+        engine = self.session(615020).engine
+        source = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="a-source"
+        )
+        shield = self.shield(engine, remaining=3)
+        prepared = prepare_damage_batch(
+            engine,
+            (
+                self.proposal(
+                    engine,
+                    source=source,
+                    target="B",
+                    amount=2,
+                    unpreventable=True,
+                ),
+            ),
+        )
+        self.assertIn(shield.effect_id, prepared.events[0].applied_effects)
+        self.assertEqual(0, prepared.events[0].payload["prevented"])
+        result = commit_prepared_damage_batch(engine, prepared)
+        self.assertEqual(38, engine.state.players["B"].life)
+        self.assertEqual(3, engine.state.damage_prevention_shields[0].remaining)
+        self.assertEqual((), result.prevention_events)
+
+    def test_chosen_source_identity_and_property_mismatch_preserve_shield(self):
+        engine = self.session(615030).engine
+        chosen = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="chosen"
+        )
+        other = self.add_permanent(
+            engine, seat="A", name="White Knight", ref="other"
+        )
+        self.shield(
+            engine,
+            remaining=3,
+            chosen_source=ChosenDamageSource(
+                ref=chosen.ref,
+                object_id=chosen.object_id,
+                required_colors=("U",),
+            ),
+        )
+
+        mismatch = prepare_damage_batch(
+            engine,
+            (self.proposal(engine, source=other, target="B", amount=2),),
+        )
+        commit_prepared_damage_batch(engine, mismatch)
+        self.assertEqual(38, engine.state.players["B"].life)
+        self.assertEqual(3, engine.state.damage_prevention_shields[0].remaining)
+
+        match = prepare_damage_batch(
+            engine,
+            (
+                self.proposal(
+                    engine,
+                    source=chosen,
+                    target="B",
+                    amount=2,
+                    event_id="damage:chosen",
+                ),
+            ),
+        )
+        commit_prepared_damage_batch(engine, match)
+        self.assertEqual(38, engine.state.players["B"].life)
+        self.assertEqual(1, engine.state.damage_prevention_shields[0].remaining)
+
+    def test_next_instance_shield_survives_nonmatching_then_is_used(self):
+        engine = self.session(615034).engine
+        chosen = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="chosen"
+        )
+        other = self.add_permanent(
+            engine, seat="A", name="White Knight", ref="other"
+        )
+        self.shield(
+            engine,
+            mode=PreventionMode.NEXT_INSTANCE,
+            remaining=None,
+            chosen_source=ChosenDamageSource(
+                ref=chosen.ref,
+                object_id=chosen.object_id,
+            ),
+        )
+        commit_prepared_damage_batch(
+            engine,
+            prepare_damage_batch(
+                engine,
+                (self.proposal(engine, source=other, target="B", amount=1),),
+            ),
+        )
+        self.assertEqual(39, engine.state.players["B"].life)
+        self.assertEqual(1, len(engine.state.damage_prevention_shields))
+
+        commit_prepared_damage_batch(
+            engine,
+            prepare_damage_batch(
+                engine,
+                (
+                    self.proposal(
+                        engine,
+                        source=chosen,
+                        target="B",
+                        amount=2,
+                        event_id="damage:chosen-next",
+                    ),
+                ),
+            ),
+        )
+        self.assertEqual(39, engine.state.players["B"].life)
+        self.assertEqual([], engine.state.damage_prevention_shields)
+
+    def test_prevention_dispatches_one_aggregate_event_per_effect(self):
+        engine = self.session(615035, players=4).engine
+        monitor_ref = engine.create_token(
+            "B",
+            name="Prevention Monitor",
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "power": "1",
+                "toughness": "1",
+            },
+        )[0]
+        monitor = engine._resolve_object(
+            "B", monitor_ref, zones={"battlefield"}
+        )
+        engine.semantics.put(
+            SemanticProgram(
+                key=f"{monitor.oracle_id}:test:damage-prevented",
+                label="Damage was prevented",
+                oracle_id=monitor.oracle_id,
+                ability_id="test:damage-prevented",
+                active_zone="battlefield",
+                event="damage.prevented",
+                effects=[],
+            )
+        )
+        source_a = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="a-source"
+        )
+        source_c = self.add_permanent(
+            engine, seat="C", name="Mishra, Eminent One", ref="c-source"
+        )
+        shield = self.shield(engine, remaining=10)
+
+        result = resolve_damage_batch(
+            engine,
+            (
+                self.proposal(
+                    engine,
+                    source=source_a,
+                    target="B",
+                    amount=2,
+                    event_id="damage:prevented:a",
+                ),
+                self.proposal(
+                    engine,
+                    source=source_c,
+                    target="B",
+                    amount=3,
+                    event_id="damage:prevented:c",
+                ),
+            ),
+        )
+        self.assertEqual(1, len(result.prevention_events))
+        self.assertEqual(5, result.prevention_events[0].prevented_amount)
+        trigger = next(
+            item
+            for batch in engine.state.pending_trigger_batches
+            for group in batch["groups"]
+            for item in group["items"]
+            if item["label"] == "Damage was prevented"
+        )
+        self.assertEqual(shield.effect_id, trigger["context"]["effect_id"])
+        self.assertEqual(5, trigger["context"]["prevented_amount"])
+        self.assertEqual(
+            ["damage:prevented:a", "damage:prevented:c"],
+            trigger["context"]["damage_event_ids"],
+        )
+
+    def test_simultaneous_sources_require_and_replay_exact_allocation(self):
+        engine = self.session(615040, players=4).engine
+        source_a = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="a-source"
+        )
+        source_c = self.add_permanent(
+            engine, seat="C", name="Mishra, Eminent One", ref="c-source"
+        )
+        shield = self.shield(engine, remaining=4)
+        proposals = (
+            self.proposal(
+                engine,
+                source=source_a,
+                target="B",
+                amount=3,
+                event_id="damage:source-a",
+            ),
+            self.proposal(
+                engine,
+                source=source_c,
+                target="B",
+                amount=3,
+                event_id="damage:source-c",
+            ),
+        )
+
+        with self.assertRaises(ReplacementChoiceRequired) as required:
+            prepare_damage_batch(engine, proposals)
+        pending = required.exception.pending
+        self.assertEqual("B", pending.choice.chooser)
+        allocation = pending.prevention_allocations[0]
+        self.assertTrue(allocation.allocation_required)
+        self.assertEqual(4, allocation.available)
+
+        selected = {
+            "effect_id": shield.effect_id,
+            "allocation": {
+                "damage:source-a": 1,
+                "damage:source-c": 3,
+            },
+        }
+        prepared = prepare_damage_batch(
+            engine,
+            proposals,
+            selections=(selected,),
+        )
+        self.assertEqual([2, 0], [event.payload["amount"] for event in prepared.events])
+        self.assertEqual(
+            selected["allocation"],
+            dict(prepared.journal[0].allocation),
+        )
+        commit_prepared_damage_batch(engine, prepared)
+        self.assertEqual(38, engine.state.players["B"].life)
+        self.assertEqual([], engine.state.damage_prevention_shields)
+
+    def test_shield_round_trip_is_canonical_and_strict(self):
+        engine = self.session(615050).engine
+        shield = self.shield(engine, remaining=3)
+        restored = DamagePreventionShield.from_dict(shield.to_dict())
+        self.assertEqual(shield, restored)
+        malformed = shield.to_dict()
+        malformed["unknown"] = True
+        with self.assertRaisesRegex(ValueError, "unknown"):
+            DamagePreventionShield.from_dict(malformed)
+
+        state = GameState.from_dict(engine.state.to_dict())
+        self.assertEqual(engine.state.to_dict(), state.to_dict())
+
+    def test_stale_modifier_plan_fails_before_damage_mutation(self):
+        engine = self.session(615051).engine
+        source = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="a-source"
+        )
+        self.shield(engine, remaining=3)
+        prepared = prepare_damage_batch(
+            engine,
+            (self.proposal(engine, source=source, target="B", amount=2),),
+        )
+        engine.state.damage_prevention_shields.clear()
+        before = engine.state.players["B"].life
+        with self.assertRaisesRegex(DamageError, "no longer matches"):
+            commit_prepared_damage_batch(engine, prepared)
+        self.assertEqual(before, engine.state.players["B"].life)
+
+    def test_shield_created_after_prepare_cannot_change_prepared_damage(self):
+        engine = self.session(615053).engine
+        source = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="a-source"
+        )
+        prepared = prepare_damage_batch(
+            engine,
+            (self.proposal(engine, source=source, target="B", amount=2),),
+        )
+        self.assertEqual(2, prepared.events[0].payload["amount"])
+        self.shield(engine, remaining=3)
+        before = engine.state.players["B"].life
+        with self.assertRaisesRegex(DamageError, "no longer matches"):
+            commit_prepared_damage_batch(engine, prepared)
+        self.assertEqual(before, engine.state.players["B"].life)
+
+    def test_changed_modifier_value_fails_before_damage_mutation(self):
+        engine = self.session(615052).engine
+        source = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="a-source"
+        )
+        shield = self.shield(engine, remaining=3)
+        prepared = prepare_damage_batch(
+            engine,
+            (self.proposal(engine, source=source, target="B", amount=2),),
+        )
+        engine.state.damage_prevention_shields[0] = DamagePreventionShield(
+            shield_id=shield.shield_id,
+            source_id=shield.source_id,
+            controller=shield.controller,
+            subject=shield.subject,
+            mode=shield.mode,
+            remaining=2,
+            duration=shield.duration,
+            created_turn_sequence=shield.created_turn_sequence,
+            chosen_source=shield.chosen_source,
+            label=shield.label,
+        )
+        before = engine.state.players["B"].life
+        with self.assertRaisesRegex(DamageError, "no longer matches"):
+            commit_prepared_damage_batch(engine, prepared)
+        self.assertEqual(before, engine.state.players["B"].life)
+
+    def test_combat_allocation_is_seat_scoped_and_command_replays(self):
+        session = self.session(615060, players=4)
+        engine = session.engine
+        source_a = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="a-source"
+        )
+        source_c = self.add_permanent(
+            engine, seat="C", name="Mishra, Eminent One", ref="c-source"
+        )
+        shield = self.shield(engine, remaining=4)
+        engine.state.active_player = "A"
+        engine.state.phase = "combat"
+        engine.state.step = "combat_damage"
+        assignments = [
+            {"source": source_a.ref, "target": "B", "amount": 3},
+            {"source": source_c.ref, "target": "B", "amount": 3},
+        ]
+        self.assertTrue(engine._apply_combat_assignments(assignments))
+        self.assertEqual("replacement.order", engine.state.pending_decision.kind)
+        projector = StateProjector(self.db, engine.state)
+        projected = projector._decision("pilot:B")
+        self.assertIsNotNone(projected)
+        self.assertIsNone(projector._decision("pilot:A"))
+        serialized = json.dumps(projected, sort_keys=True)
+        self.assertNotIn(source_a.object_id, serialized)
+        self.assertNotIn(source_c.object_id, serialized)
+        allocation_rows = projected["ctx"]["prevention_allocations"][
+            shield.effect_id
+        ]["events"]
+        event_ids = [row["event_id"] for row in allocation_rows]
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "choices": {
+                    "replacement": shield.effect_id,
+                    "prevention_allocation": {
+                        event_ids[0]: 1,
+                        event_ids[1]: 3,
+                    },
+                },
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(38, engine.state.players["B"].life)
+        expected = engine.state.to_dict()
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "prevention-allocation-replay"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+        self.assertTrue(replay["ok"], replay)
+        self.assertEqual(expected, engine.state.to_dict())
+
+
+if __name__ == "__main__":
+    unittest.main()

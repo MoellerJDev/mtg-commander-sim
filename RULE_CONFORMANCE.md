@@ -157,14 +157,19 @@ affected-object choices still lack engine-wide APNAP collection, and nested
 replaceable events fail closed until a typed event tree and replay path exist.
 CR 615 adds passing evidence for modified damage events, per-event static
 prevention, and applying a prevention effect exactly once to unpreventable
-damage. Negative prevention fails closed. Stateful shields, simultaneous
-source allocation, source selection and rechecks, and prevention-trigger
-dispatch remain explicitly blocked.
+damage. Negative prevention fails closed. Typed finite and next-instance
+shields now persist and expire, simultaneous insufficient amounts use an exact
+affected-seat allocation, unpreventable damage preserves the shield, and one
+aggregate prevention event is dispatched per effect and simultaneous batch.
+Dynamic/divided creation, prevention aftermath effects, complete source-choice
+grammar, and mana-payment continuations remain explicitly blocked.
 CR 614 adds passing evidence for one application per event, zero-damage event
 absence, and self-replacement priority. Draw, entry, and Dauthi graveyard
-replacements provide partial dedicated evidence, while skip, regeneration,
-redirection, prohibition, nested entry events, and broad linked replacements
-remain blocked and fail closed where invoked generically.
+replacements provide partial dedicated evidence. CR 614.9 now has typed full-
+recipient damage redirection, destination-departure behavior, rediscovery,
+multiplayer, and replay evidence. Skip, regeneration, prohibition, nested entry
+events, partial/attached redirection, and broad linked replacements remain
+blocked and fail closed where invoked generically.
 CR 609 and CR 608 pin the effect and resolution taxonomies, with narrow
 top-of-stack, ordinary permanent, and permanent-spell-copy behavior passing
 while incomplete targets, choices, LKI, APNAP, `as though`, Aura, mutate, and

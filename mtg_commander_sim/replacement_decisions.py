@@ -52,7 +52,10 @@ class ReplacementDecisionHost(Protocol):
         self,
         assignments: Sequence[Mapping[str, Any]],
         *,
-        replacement_selections: Sequence[str | None] = (),
+        replacement_selections: Sequence[
+            str | None | Mapping[str, Any]
+        ] = (),
+        replacement_event_ids: Sequence[str] = (),
     ) -> bool: ...
 
     def _grant_priority(self, seat: str | None) -> None: ...
@@ -108,14 +111,20 @@ def issue_combat_damage_replacement_choice(
     host: ReplacementDecisionHost,
     *,
     assignments: Sequence[Mapping[str, Any]],
-    selections: Sequence[str | None],
+    selections: Sequence[str | None | Mapping[str, Any]],
     required: ReplacementChoiceRequired,
 ) -> None:
     """Suspend simultaneous combat damage before any damage mutation."""
 
-    if any(not isinstance(value, str) or not value for value in selections):
+    if any(
+        not (
+            (isinstance(value, str) and bool(value))
+            or isinstance(value, Mapping)
+        )
+        for value in selections
+    ):
         raise ReplacementEffectError(
-            "Combat replacement selections must be canonical strings"
+            "Combat replacement selections must be canonical values"
         )
 
     pending = required.pending
@@ -205,12 +214,47 @@ def complete_replacement_order_choice(
         )
     if selected not in pending.choice.legal_selections:
         raise error_type("Selected replacement is not currently available")
+    allocation = response.get("prevention_allocation")
+    allocation_choice = next(
+        (
+            value
+            for value in pending.prevention_allocations
+            if value.effect_id == selected
+        ),
+        None,
+    )
+    if allocation_choice is None:
+        if allocation is not None:
+            raise error_type(
+                "This replacement does not accept a prevention allocation"
+            )
+        selection: str | Mapping[str, Any] = selected
+    else:
+        if allocation is None and allocation_choice.allocation_required:
+            raise error_type(
+                "The prevention amount must be divided among damage events"
+            )
+        if allocation is not None and not isinstance(allocation, Mapping):
+            raise error_type("Prevention allocation must be an object")
+        selection = (
+            {
+                "effect_id": selected,
+                "allocation": dict(allocation or {}),
+            }
+            if allocation is not None
+            else selected
+        )
     if restored.resume_kind == "combat_damage":
         waiting = host._apply_combat_assignments(
             restored.thaw_combat_assignments(),
             replacement_selections=[
                 *restored.replacement_selections,
-                selected,
+                selection,
+            ],
+            replacement_event_ids=[
+                event.event_id
+                for event in restored.batch.events
+                if event.kind == "damage"
             ],
         )
         if not waiting:
@@ -237,8 +281,15 @@ def complete_replacement_order_choice(
     current_effect = restored.thaw_effect()
     current_effect["_replacement_selections"] = [
         *list(current_effect.get("_replacement_selections") or []),
-        selected,
+        selection,
     ]
+    damage_event_ids = [
+        event.event_id
+        for event in restored.batch.events
+        if event.kind == "damage"
+    ]
+    if damage_event_ids:
+        current_effect["_replacement_event_ids"] = damage_event_ids
     host._continue_resolution(
         stack_ref=stack_ref,
         effects=[
