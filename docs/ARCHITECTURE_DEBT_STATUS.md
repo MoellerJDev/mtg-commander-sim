@@ -16,11 +16,11 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `cda213c987cb8c5aef94af74bc74146f29bba0fb`
 - Package: `0.8.0`
 - CI run: [30811998248](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30811998248) — `pass`
-- Production scope: 188 files, 89,783 physical lines, 82,664 logical lines
+- Production scope: 188 files, 89,782 physical lines, 82,663 logical lines
 
 ## Central engine debt
 
-- `engine.py`: 15,277 physical / 14,474 logical lines
+- `engine.py`: 15,276 physical / 14,473 logical lines
 - Methods: 28 public, 286 private, 1 dunder
 - Cross-subsystem responsibility groups: 7
 - Direct GameState-write heuristic: 136 locations
@@ -42,7 +42,7 @@ Baseline: `cda213c987cb8c5aef94af74bc74146f29bba0fb`. Guard: `python scripts/val
 
 | Dimension | Baseline | Current | Delta |
 |---|---:|---:|---:|
-| `engine_logical_lines` | 14,761 | 14,474 | -287 |
+| `engine_logical_lines` | 14,761 | 14,473 | -288 |
 | `direct_game_state_writes` | 143 | 136 | -7 |
 | `printed_name_literals` | 693 | 687 | -6 |
 | `oracle_id_literals` | 6 | 6 | +0 |
@@ -55,7 +55,7 @@ Baseline: `cda213c987cb8c5aef94af74bc74146f29bba0fb`. Guard: `python scripts/val
 
 | File | Language | Physical | Logical |
 |---|---:|---:|---:|
-| `mtg_commander_sim/engine.py` | python | 15,277 | 14,474 |
+| `mtg_commander_sim/engine.py` | python | 15,276 | 14,473 |
 | `web/src/App.tsx` | web | 1,886 | 1,825 |
 | `mtg_commander_sim/report.py` | python | 1,853 | 1,813 |
 | `mtg_commander_sim/oracle_ir.py` | python | 1,765 | 1,700 |
@@ -83,12 +83,12 @@ Baseline: `cda213c987cb8c5aef94af74bc74146f29bba0fb`. Guard: `python scripts/val
 | `_effect_template` | `mtg_commander_sim/oracle_ir.py:268` | 526 | 527 |
 | `build_parser` | `mtg_commander_sim/cli.py:406` | 369 | 393 |
 | `CommanderSession.act` | `mtg_commander_sim/session.py:537` | 362 | 366 |
-| `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1916` | 343 | 349 |
-| `CommanderEngine._stabilize` | `mtg_commander_sim/engine.py:14560` | 342 | 354 |
+| `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1915` | 343 | 349 |
+| `CommanderEngine._stabilize` | `mtg_commander_sim/engine.py:14559` | 342 | 354 |
 | `CommanderEngine._effective_card_data` | `mtg_commander_sim/engine.py:1097` | 327 | 331 |
-| `CommanderEngine._prepare_stack_resolution` | `mtg_commander_sim/engine.py:9263` | 315 | 318 |
+| `CommanderEngine._prepare_stack_resolution` | `mtg_commander_sim/engine.py:9262` | 315 | 318 |
 | `card_semantic_status` | `mtg_commander_sim/preflight.py:426` | 304 | 304 |
-| `CommanderEngine._enter_step` | `mtg_commander_sim/engine.py:3666` | 285 | 319 |
+| `CommanderEngine._enter_step` | `mtg_commander_sim/engine.py:3665` | 285 | 319 |
 | `CommanderEngine._apply_layered_characteristic_annotations` | `mtg_commander_sim/engine.py:798` | 279 | 298 |
 
 ## Engine responsibility spread
