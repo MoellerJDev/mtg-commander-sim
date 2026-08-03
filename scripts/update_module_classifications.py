@@ -102,8 +102,10 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/damage_results.py",
         "mtg_commander_sim/declaration_costs.py",
         "mtg_commander_sim/declaration_restrictions.py",
+        "mtg_commander_sim/delayed_triggers.py",
         "mtg_commander_sim/engine.py",
         "mtg_commander_sim/errors.py",
+        "mtg_commander_sim/life_change.py",
         "mtg_commander_sim/life_state.py",
         "mtg_commander_sim/mana.py",
         "mtg_commander_sim/mana_activation.py",
@@ -154,8 +156,13 @@ def _owner(relative: str, layer: str) -> str:
         return "damage"
     if relative == "mtg_commander_sim/counter_state.py":
         return "counter_state"
-    if relative == "mtg_commander_sim/life_state.py":
+    if relative in {
+        "mtg_commander_sim/life_change.py",
+        "mtg_commander_sim/life_state.py",
+    }:
         return "life_state"
+    if relative == "mtg_commander_sim/delayed_triggers.py":
+        return "delayed_triggers"
     if relative == "mtg_commander_sim/tap_state.py":
         return "tap_state_effects"
     if relative in {
@@ -269,6 +276,8 @@ def build_classifications() -> dict[str, Any]:
                             "damage_modifier_state.py",
                             "damage_prevention",
                             "damage_results.py",
+                            "delayed_triggers.py",
+                            "life_change.py",
                             "life_state.py",
                             "mana_activation.py",
                             "mana_mode_effects.py",

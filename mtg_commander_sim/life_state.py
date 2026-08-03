@@ -167,3 +167,21 @@ def commit_life_changes(
         if isinstance(exc, LifeStateError):
             raise
         raise _life_planner_error(exc) from exc
+
+
+def pay_life_cost(
+    host: LifeStateHost,
+    player: str,
+    amount: int,
+) -> LifeTransition:
+    """Pay a nonreplaceable life cost through the canonical state owner."""
+
+    if type(amount) is not int or amount < 0:
+        raise LifeStateError(
+            "Life payment amounts must be nonnegative integers"
+        )
+    if _current_life(host, player) < amount:
+        raise LifeStateError("Cannot pay more life than the player has")
+    plan = plan_life_changes(host, (LifeChange(player, -amount),))
+    transitions = commit_life_changes(host, plan)
+    return transitions[0]

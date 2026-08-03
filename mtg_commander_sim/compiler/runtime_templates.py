@@ -5,6 +5,7 @@ from typing import Any, Mapping
 
 from .continuous_templates import basic_land_type_addition_handler
 from .damage_templates import static_damage_handler
+from .life_templates import static_life_handler
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,6 +31,17 @@ def static_runtime_template(
             event="characteristics.evaluate",
             dependency_reason=(
                 "generic basic-land-type addition depends on an untrusted "
+                "rules capability"
+            ),
+        )
+    static_life = static_life_handler(text)
+    if static_life is not None:
+        return StaticRuntimeTemplate(
+            compiled=static_life,
+            kind="replacement_effect",
+            event="life.change",
+            dependency_reason=(
+                "generic life-gain replacement depends on an untrusted "
                 "rules capability"
             ),
         )

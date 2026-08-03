@@ -22,8 +22,10 @@
     "mtg_commander_sim/damage_results.py",
     "mtg_commander_sim/declaration_costs.py",
     "mtg_commander_sim/declaration_restrictions.py",
+    "mtg_commander_sim/delayed_triggers.py",
     "mtg_commander_sim/deck.py",
     "mtg_commander_sim/engine.py",
+    "mtg_commander_sim/life_change.py",
     "mtg_commander_sim/life_state.py",
     "mtg_commander_sim/mana.py",
     "mtg_commander_sim/mana_activation.py",
@@ -102,6 +104,7 @@
       "mtg_commander_sim/damage_prevention_creation.py": "typed prevention-shield creation validation and authoritative commit owner",
       "mtg_commander_sim/damage_results.py": "typed CR 120.3 result-event preparation, validation, and atomic mutation owner behind the damage coordinator",
       "mtg_commander_sim/counter_state.py": "canonical typed player and permanent counter mutation owner behind represented rules transactions",
+      "mtg_commander_sim/life_change.py": "replacement-capable typed life-event transaction owner behind represented rules transactions",
       "mtg_commander_sim/life_state.py": "canonical typed life-total mutation owner behind represented rules transactions",
       "mtg_commander_sim/tap_state.py": "typed tap-state effect mutation owner behind the semantic intent executor",
       "mtg_commander_sim/token_creation.py": "typed token-creation and replacement mutation owner behind CommanderEngine"

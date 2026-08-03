@@ -906,6 +906,42 @@ class EffectRuleTests(unittest.TestCase):
             changed.applied_effects,
         )
 
+    def test_any_of_source_property_matches_one_member_and_rejects_others(self):
+        event = ReplaceableEvent(
+            event_id="damage:black",
+            kind="damage",
+            affected_player="A",
+            payload={"amount": 3, "source_colors": ["B"]},
+        )
+        effect = ReplacementEffect(
+            effect_id="black-or-red-source-shield",
+            source_id="shield",
+            event_kind="damage",
+            replacement_class=ReplacementClass.OTHER,
+            conditions={
+                "source_colors": {
+                    "contains_any": ["B", "R"],
+                }
+            },
+            operations=({"op": "prevent", "amount": 1},),
+        )
+
+        self.assertEqual(
+            ("black-or-red-source-shield",),
+            replacement_choice(event, [effect]).options,
+        )
+        self.assertIsNone(
+            replacement_choice(
+                ReplaceableEvent(
+                    event_id="damage:blue",
+                    kind="damage",
+                    affected_player="A",
+                    payload={"amount": 3, "source_colors": ["U"]},
+                ),
+                [effect],
+            )
+        )
+
     def test_unknown_source_predicate_fails_closed(self):
         unsupported = ReplacementEffect(
             effect_id="unsupported-source-test",

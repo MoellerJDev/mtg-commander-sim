@@ -49,6 +49,7 @@ from .damage_replacements import (
 )
 from .damage_results import (
     collect_damage_result_replacement_effects,
+    collect_life_change_replacement_effects,
     DamageResultLifeFloorHandler,
     DamageResultLifeFloorNode,
     DamageResultReplacementRegistry,
@@ -273,6 +274,7 @@ __all__ = [
     "collect_counter_placement_replacement_effects",
     "collect_damage_replacement_effects",
     "collect_damage_result_replacement_effects",
+    "collect_life_change_replacement_effects",
     "log_applied_zone_replacements",
     "prepare_zone_change_replacement",
     "PreparedZoneChange",

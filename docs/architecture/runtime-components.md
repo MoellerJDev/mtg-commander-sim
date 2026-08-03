@@ -2,7 +2,7 @@
 title: "CardProgram runtime components"
 status: "current"
 authoritative_source: "mtg_commander_sim/semantic_runtime component registries and ADRs 0007/0010/0011/0012"
-verified: "2026-08-02"
+verified: "2026-08-03"
 audience: "rules, compiler, runtime, replay, and extension contributors"
 maintenance: "hand-maintained"
 ---
@@ -69,11 +69,14 @@ allocation, commit-time state fingerprints, and unpreventable nonconsumption.
 battlefield source to typed `RedirectDamage`; a complete recipient snapshot is
 substituted before the replacement loop is rediscovered. Dynamic/divided and
 independent per-object shield creation is owned by the focused
-`damage-modifiers.v1` effect family. It also pins ordinary public chosen sources
-and represented CR 615.5 life/permanent-counter aftermath. Same-chooser event
-order and replacement choices during mana payment use strict replayable
-continuations. Complete CR 609.7a source categories, permanent-spell
-continuity, broader source predicates, general life-gain replacement, remaining
+`damage-modifiers.v1` effect family. Chosen-source version 2 covers public CR
+609.7a candidates plus explicitly referred former-zone objects, exact
+incarnation matching, permanent-spell-to-permanent continuity, and closed
+color/type/subtype/supertype/keyword rechecks. Represented CR 615.5 life
+aftermath enters the replacement-capable `life.change` transaction; permanent-
+counter aftermath remains on the counter-placement transaction. Same-chooser
+event order and replacement choices during mana payment use strict replayable
+continuations. Arbitrary opaque references, wider source predicates, remaining
 aftermath forms, finite partial or attached redirection, and non-damage
 transformations remain outside these components.
 
@@ -111,7 +114,8 @@ final events; `damage_results.py` owns result-event materialization, commit
 planning, and atomic CR 120.3 result mutation. `damage_prevention.py` owns
 durable shield/redirection state and its mutation-only commit plan;
 `damage_prevention_creation.py` and `damage_prevention_aftermath.py` own the
-corresponding typed creation and result transactions. The six closed effect
+corresponding typed creation and result transactions; `life_change.py` owns the
+replacement-capable life-event boundary. The six closed effect
 runtime families now include `damage-modifiers.v1` for shield/redirection
 creation and `life-effects.v1` for typed life changes. Runtime components remain
 pure participants.
@@ -124,7 +128,7 @@ Primary tests are `test_replacement_event_tree.py`,
 `test_damage_replacement_integration.py`,
 `test_damage_prevention_shields.py`, `test_damage_redirection.py`,
 `test_damage_prevention_creation.py`, `test_damage_prevention_aftermath.py`,
-`test_replacement_event_ordering.py`, `test_life_effect_runtime.py`,
+`test_life_change.py`, `test_replacement_event_ordering.py`, `test_life_effect_runtime.py`,
 `test_mana_mode_effects.py`,
 `test_replacement_model_hardening.py`,
 `test_damage_result_events.py`,

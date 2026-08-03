@@ -7,6 +7,7 @@ from mtg_commander_sim.life_state import (
     LifeChange,
     LifeStateError,
     commit_life_changes,
+    pay_life_cost,
     plan_life_changes,
 )
 from mtg_commander_sim.model import PlayerState
@@ -68,6 +69,19 @@ class LifeStateTests(unittest.TestCase):
             LifeChange("A", 1.5)  # type: ignore[arg-type]
         with self.assertRaisesRegex(LifeStateError, "require a player"):
             LifeChange("", 1)
+
+    def test_life_payment_cannot_exceed_available_life(self):
+        host = self.host()
+        transition = pay_life_cost(host, "A", 20)
+        self.assertEqual(0, transition.after)
+
+        before = host.state.players["B"].life
+        with self.assertRaisesRegex(LifeStateError, "more life"):
+            pay_life_cost(host, "B", 41)
+        self.assertEqual(before, host.state.players["B"].life)
+
+        with self.assertRaisesRegex(LifeStateError, "nonnegative"):
+            pay_life_cost(host, "B", -1)
 
 
 if __name__ == "__main__":

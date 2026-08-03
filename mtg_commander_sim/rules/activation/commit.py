@@ -9,7 +9,7 @@ from ...counter_state import (
     commit_counter_changes,
     plan_counter_changes,
 )
-from ...life_state import LifeChange, commit_life_changes, plan_life_changes
+from ...life_state import LifeStateError, pay_life_cost
 from ...mana_activation import complete_mana_activation
 from ...mana_undo import clear_mana_undo_stack
 from ...model import StackItem, YieldPolicy
@@ -133,16 +133,14 @@ def _commit_resource_costs(
     ability: ActivatedAbility,
 ) -> None:
     if ability.life_payment:
-        plan = plan_life_changes(
-            host, [LifeChange(proposal.seat, -ability.life_payment)]
-        )
-        if plan.transitions[0].after < 0:
+        try:
+            pay_life_cost(host, proposal.seat, ability.life_payment)
+        except LifeStateError as exc:
             raise ActivationProposalError(
                 "Cannot pay more life than the player has",
                 status="unpayable",
                 reason="life_cost_unpayable",
-            )
-        commit_life_changes(host, plan)
+            ) from exc
     counter_changes = []
     if ability.energy_payment:
         counter_changes.append(

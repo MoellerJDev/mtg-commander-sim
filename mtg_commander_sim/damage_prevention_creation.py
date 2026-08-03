@@ -112,7 +112,11 @@ class PreventionShieldCreationRequest:
     subjects: tuple[PreventionSubjectAllocation, ...]
     chosen_source_ref: str | None = None
     required_source_colors: tuple[str, ...] = ()
+    allowed_source_colors: tuple[str, ...] = ()
     required_source_types: tuple[str, ...] = ()
+    required_source_subtypes: tuple[str, ...] = ()
+    required_source_supertypes: tuple[str, ...] = ()
+    required_source_keywords: tuple[str, ...] = ()
     label: str = ""
     aftermath: tuple[PreventionAftermathRequest, ...] = ()
 
@@ -163,6 +167,23 @@ class PreventionShieldCreationRequest:
                 )
             ),
         )
+        object.__setattr__(
+            self,
+            "allowed_source_colors",
+            tuple(
+                sorted(
+                    {
+                        str(value).upper()
+                        for value in self.allowed_source_colors
+                        if str(value)
+                    }
+                )
+            ),
+        )
+        if self.required_source_colors and self.allowed_source_colors:
+            raise DamagePreventionCreationError(
+                "Source colors cannot require both all and any modes"
+            )
         aftermath = tuple(self.aftermath)
         if any(
             not isinstance(
@@ -188,6 +209,24 @@ class PreventionShieldCreationRequest:
                 )
             ),
         )
+        for field_name in (
+            "required_source_subtypes",
+            "required_source_supertypes",
+            "required_source_keywords",
+        ):
+            object.__setattr__(
+                self,
+                field_name,
+                tuple(
+                    sorted(
+                        {
+                            str(value).casefold()
+                            for value in getattr(self, field_name)
+                            if str(value)
+                        }
+                    )
+                ),
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -216,7 +255,11 @@ def pin_chosen_damage_source(
     source_ref: str | None,
     controller: str,
     required_colors: Sequence[str] = (),
+    allowed_colors: Sequence[str] = (),
     required_types: Sequence[str] = (),
+    required_subtypes: Sequence[str] = (),
+    required_supertypes: Sequence[str] = (),
+    required_keywords: Sequence[str] = (),
 ) -> ChosenDamageSource | None:
     """Pin one legal source choice to physical identity and current LKI."""
 
@@ -226,10 +269,24 @@ def pin_chosen_damage_source(
     normalized_colors = tuple(
         sorted({str(value).upper() for value in required_colors if str(value)})
     )
+    normalized_allowed_colors = tuple(
+        sorted({str(value).upper() for value in allowed_colors if str(value)})
+    )
     normalized_types = tuple(
         sorted(
             {str(value).casefold() for value in required_types if str(value)}
         )
+    )
+    normalized_subtypes = tuple(
+        sorted({str(value).casefold() for value in required_subtypes if str(value)})
+    )
+    normalized_supertypes = tuple(
+        sorted(
+            {str(value).casefold() for value in required_supertypes if str(value)}
+        )
+    )
+    normalized_keywords = tuple(
+        sorted({str(value).casefold() for value in required_keywords if str(value)})
     )
     snapshot = source_snapshot(host, ref, controller=controller)
     if snapshot.object_id.startswith("unrepresented:"):
@@ -247,18 +304,42 @@ def pin_chosen_damage_source(
     )
     colors = tuple(str(value).upper() for value in data.get("colors", ()))
     keywords = tuple(str(value).casefold() for value in data.get("keywords", ()))
-    if not set(normalized_colors).issubset(colors) or not set(
-        normalized_types
-    ).issubset(types):
+    if (
+        not set(normalized_colors).issubset(colors)
+        or (
+            normalized_allowed_colors
+            and not set(normalized_allowed_colors).intersection(colors)
+        )
+        or not set(normalized_types).issubset(types)
+        or not set(normalized_subtypes).issubset(subtypes)
+        or not set(normalized_supertypes).issubset(supertypes)
+        or not set(normalized_keywords).issubset(keywords)
+    ):
         raise DamagePreventionCreationError(
             "The chosen damage source no longer has the required characteristics"
+        )
+    identity_keys = [snapshot.identity_key]
+    permanent_types = {
+        "artifact",
+        "battle",
+        "creature",
+        "enchantment",
+        "planeswalker",
+    }
+    if snapshot.zone == "stack" and permanent_types.intersection(types):
+        identity_keys.append(
+            f"{snapshot.logical_object_id}|battlefield"
         )
     return ChosenDamageSource(
         ref=snapshot.ref,
         object_id=snapshot.object_id,
         required_colors=normalized_colors,
+        allowed_colors=normalized_allowed_colors,
         required_types=normalized_types,
-        snapshot_version=1,
+        required_subtypes=normalized_subtypes,
+        required_supertypes=normalized_supertypes,
+        required_keywords=normalized_keywords,
+        snapshot_version=2,
         logical_object_id=snapshot.logical_object_id,
         oracle_id=snapshot.oracle_id,
         printed_name=str(card.printed_name),
@@ -270,6 +351,7 @@ def pin_chosen_damage_source(
         supertypes=tuple(supertypes),
         colors=colors,
         keywords=keywords,
+        identity_keys=tuple(identity_keys),
     )
 
 
@@ -305,7 +387,11 @@ def _shield_ids(
             "amounts": [allocation.amount for allocation in request.subjects],
             "chosen_source": request.chosen_source_ref,
             "source_colors": list(request.required_source_colors),
+            "source_colors_any": list(request.allowed_source_colors),
             "source_types": list(request.required_source_types),
+            "source_subtypes": list(request.required_source_subtypes),
+            "source_supertypes": list(request.required_source_supertypes),
+            "source_keywords": list(request.required_source_keywords),
             "aftermath": [
                 (
                     {
@@ -391,7 +477,11 @@ def plan_prevention_shield_creation(
             source_ref=request.chosen_source_ref,
             controller=request.controller,
             required_colors=request.required_source_colors,
+            allowed_colors=request.allowed_source_colors,
             required_types=request.required_source_types,
+            required_subtypes=request.required_source_subtypes,
+            required_supertypes=request.required_source_supertypes,
+            required_keywords=request.required_source_keywords,
         )
         ids = _shield_ids(host, request, subjects)
         shields = tuple(

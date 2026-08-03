@@ -365,6 +365,96 @@ class DamagePreventionShieldTests(DamageReplacementPipelineBase):
         state = GameState.from_dict(engine.state.to_dict())
         self.assertEqual(engine.state.to_dict(), state.to_dict())
 
+    def test_chosen_source_versions_preserve_historical_shapes(self):
+        legacy = ChosenDamageSource(
+            ref="legacy-source",
+            object_id="legacy-object",
+            required_colors=("R",),
+            required_types=("creature",),
+        )
+        self.assertEqual(
+            {
+                "ref": "legacy-source",
+                "object_id": "legacy-object",
+                "required_colors": ["R"],
+                "required_types": ["creature"],
+            },
+            legacy.to_dict(),
+        )
+        self.assertEqual(
+            legacy, ChosenDamageSource.from_dict(legacy.to_dict())
+        )
+
+        version_one = ChosenDamageSource(
+            ref="v1-source",
+            object_id="v1-object",
+            required_colors=("U",),
+            required_types=("instant",),
+            snapshot_version=1,
+            logical_object_id="v1-object@1",
+            oracle_id="oracle-v1",
+            printed_name="Version One Source",
+            controller="A",
+            owner="A",
+            zone="stack",
+            types=("instant",),
+            colors=("U",),
+        )
+        serialized = version_one.to_dict()
+        self.assertNotIn("identity_keys", serialized)
+        self.assertNotIn("allowed_colors", serialized)
+        self.assertEqual(
+            version_one, ChosenDamageSource.from_dict(serialized)
+        )
+
+        version_two = ChosenDamageSource(
+            ref="v2-source",
+            object_id="v2-object",
+            allowed_colors=("B", "R"),
+            required_types=("creature",),
+            required_subtypes=("wizard",),
+            required_supertypes=("legendary",),
+            required_keywords=("flying",),
+            snapshot_version=2,
+            logical_object_id="v2-object@1",
+            oracle_id="oracle-v2",
+            printed_name="Version Two Source",
+            controller="A",
+            owner="A",
+            zone="battlefield",
+            types=("creature",),
+            subtypes=("wizard",),
+            supertypes=("legendary",),
+            colors=("B",),
+            keywords=("flying",),
+            identity_keys=("v2-object@1|battlefield",),
+        )
+        self.assertEqual(
+            {"contains_any": ["B", "R"]},
+            version_two.event_conditions()["source_colors"],
+        )
+        self.assertEqual(
+            version_two,
+            ChosenDamageSource.from_dict(version_two.to_dict()),
+        )
+
+        malformed = version_two.to_dict()
+        malformed["unknown"] = True
+        with self.assertRaisesRegex(ValueError, "unknown"):
+            ChosenDamageSource.from_dict(malformed)
+
+        malformed_version = version_two.to_dict()
+        malformed_version["snapshot_version"] = "2"
+        with self.assertRaisesRegex(ValueError, "must be integers"):
+            ChosenDamageSource.from_dict(malformed_version)
+
+        tampered_identity = version_two.to_dict()
+        tampered_identity["identity_keys"] = [
+            "another-object@9|battlefield"
+        ]
+        with self.assertRaisesRegex(ValueError, "do not match"):
+            ChosenDamageSource.from_dict(tampered_identity)
+
     def test_stale_modifier_plan_fails_before_damage_mutation(self):
         engine = self.session(615051).engine
         source = self.add_permanent(

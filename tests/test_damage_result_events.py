@@ -14,6 +14,13 @@ from mtg_commander_sim.damage import (
     damage_proposal,
     prepare_damage_batch,
 )
+from mtg_commander_sim.damage_modifier_state import (
+    DamageModifierDuration,
+    DamagePreventionShield,
+    DamageSubject,
+    GainLifePreventionAftermath,
+    PreventionMode,
+)
 from mtg_commander_sim.damage_results import (
     PreparedDamageResults,
     commit_damage_result_plan,
@@ -22,6 +29,7 @@ from mtg_commander_sim.damage_results import (
 )
 from mtg_commander_sim.deck import DeckLoader
 from mtg_commander_sim.model import CardInstance, CombatState, StackItem
+from mtg_commander_sim.oracle_ir import register_generated_programs
 from mtg_commander_sim.projection import StateProjector
 from mtg_commander_sim.record import (
     authoritative_state_hash,
@@ -40,6 +48,7 @@ from mtg_commander_sim.semantic_runtime.damage_results import (
     collect_damage_result_replacement_effects,
 )
 from mtg_commander_sim.semantic_runtime.context import SemanticNodeError
+from mtg_commander_sim.rules.capabilities import load_default_capability_registry
 from mtg_commander_sim.semantics import SemanticProgram
 
 
@@ -114,6 +123,15 @@ class DamageResultEventTests(unittest.TestCase):
 
     def permanent(self, engine, seat: str, name: str, *, ref: str):
         record = self.db.lookup(name)
+        if name == "Boon Reflection":
+            register_generated_programs(
+                self.db,
+                engine.semantics,
+                (record,),
+                capability_registry=load_default_capability_registry(),
+                capability_profile="commander_review",
+                promote_exact_runtime_handlers=True,
+            )
         card = CardInstance(
             object_id=f"fixture:{ref}",
             ref=ref,
@@ -833,6 +851,48 @@ class DamageResultEventTests(unittest.TestCase):
         self.assertIn(
             "replacement.life.gain.multiplier.v1",
             prepared.result_journal[0].effect_id,
+        )
+
+    def test_boon_reflection_doubles_prevention_aftermath_life_gain(self):
+        engine = self.session(120_400_009).engine
+        self.permanent(engine, "B", "Boon Reflection", ref="b-boon")
+        source = self.token(engine, "A", "Damage Source")
+        engine.state.damage_prevention_shields.append(
+            DamagePreventionShield(
+                shield_id="reverse-damage-with-boon",
+                source_id="fixture:reverse-damage",
+                controller="B",
+                subject=DamageSubject(ref="B", kind="player", controller="B"),
+                mode=PreventionMode.AMOUNT,
+                remaining=2,
+                duration=DamageModifierDuration.UNTIL_END_OF_TURN,
+                created_turn_sequence=engine.state.turn_sequence,
+                aftermath=(
+                    GainLifePreventionAftermath(player="B", per_prevented=1),
+                ),
+            )
+        )
+
+        result = self.commit(
+            engine,
+            self.proposal(
+                engine,
+                source,
+                "B",
+                2,
+                event_id="damage:boon-prevention-aftermath",
+            ),
+        )
+
+        self.assertEqual(44, engine.state.players["B"].life)
+        self.assertEqual(4, result.aftermath_events[0].applied_amount)
+        self.assertTrue(
+            any(
+                event.code == "replacement.apply"
+                and "life.gain.multiplier"
+                in str(event.details.get("effect_id"))
+                for event in engine.state.events
+            )
         )
 
     def test_life_gain_multiplier_ignores_losses_and_rejects_bad_shape(self):

@@ -105,6 +105,11 @@ class SemanticChoiceQuery(
 
     def choice_candidate_refs(self) -> tuple[str, ...]: ...
 
+    def damage_source_candidate_refs(self) -> tuple[str, ...]: ...
+
+    @property
+    def damage_source_candidates_are_complete(self) -> bool: ...
+
     @property
     def turn_sequence(self) -> int: ...
 
@@ -127,6 +132,7 @@ class SnapshotSemanticChoiceQuery:
     validated_targets: FrozenMap = field(default_factory=FrozenMap)
     drawn_this_turn_by_seat: FrozenMap = field(default_factory=FrozenMap)
     materialized_choice_candidates: tuple[str, ...] = ()
+    materialized_damage_source_candidates: tuple[str, ...] | None = None
     current_turn_sequence: int = 0
 
     def __post_init__(self) -> None:
@@ -271,6 +277,13 @@ class SnapshotSemanticChoiceQuery:
 
     def choice_candidate_refs(self) -> tuple[str, ...]:
         return self.materialized_choice_candidates
+
+    def damage_source_candidate_refs(self) -> tuple[str, ...]:
+        return tuple(self.materialized_damage_source_candidates or ())
+
+    @property
+    def damage_source_candidates_are_complete(self) -> bool:
+        return self.materialized_damage_source_candidates is not None
 
     @property
     def turn_sequence(self) -> int:

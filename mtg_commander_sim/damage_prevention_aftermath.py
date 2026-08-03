@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Mapping, Protocol, Sequence
 
 from .counter_placement import (
@@ -17,13 +17,23 @@ from .damage_modifier_state import (
     GainLifePreventionAftermath,
     PlaceCountersPreventionAftermath,
 )
-from .life_state import (
-    commit_life_changes,
-    LifeChange,
-    LifeStateError,
-    plan_life_changes,
+from .life_change import (
+    commit_life_change_batch,
+    LifeChangeError,
+    LifeChangeRequest,
+    PreparedLifeChangeBatch,
+    prepare_life_change_batch,
+    replan_life_change_batch,
+    validate_life_change_batch,
 )
-from .replacement import ReplaceableEvent
+from .replacement import (
+    ReplaceableEvent,
+    ReplacementChoiceRequired,
+    ReplacementEventBatch,
+)
+from .semantic_runtime.damage_results import (
+    collect_life_change_replacement_effects,
+)
 
 
 class PreventionAftermathError(ValueError):
@@ -65,13 +75,14 @@ class PreparedAftermathInstruction:
     prevented_amount: int
     requested_amount: int
     damage_event_ids: tuple[str, ...]
+    life_event_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class PreparedPreventionAftermath:
     applications: tuple[PreventionApplication, ...] = ()
     instructions: tuple[PreparedAftermathInstruction, ...] = ()
-    life_changes: tuple[LifeChange, ...] = ()
+    life_batch: PreparedLifeChangeBatch | None = None
     counter_plan: CounterPlacementCommitPlan | None = None
     consumed_selections: int = 0
 
@@ -166,7 +177,7 @@ def prepare_prevention_aftermath(
         for shield in host.state.damage_prevention_shields
     }
     instructions: list[PreparedAftermathInstruction] = []
-    life_changes: list[LifeChange] = []
+    life_requests: list[LifeChangeRequest] = []
     counter_requests: list[CounterPlacementRequest] = []
     for application in applications:
         shield = shields.get(application.effect_id)
@@ -174,15 +185,29 @@ def prepare_prevention_aftermath(
             raise PreventionAftermathError(
                 "Prevention aftermath lost its durable shield"
             )
-        for aftermath in shield.aftermath:
+        for aftermath_index, aftermath in enumerate(shield.aftermath):
             amount = aftermath.amount(application.prevented_amount)
             if amount == 0:
                 continue
             if isinstance(aftermath, GainLifePreventionAftermath):
-                life_changes.append(LifeChange(aftermath.player, amount))
+                life_event_id = (
+                    "damage.prevention.aftermath:life:"
+                    f"{application.effect_id}:{aftermath_index}"
+                )
+                life_requests.append(
+                    LifeChangeRequest(
+                        event_id=life_event_id,
+                        player=aftermath.player,
+                        amount=amount,
+                        source=application.source_id,
+                        source_controller=shield.controller,
+                        cause="damage_prevention_aftermath",
+                    )
+                )
                 kind = "gain_life"
                 subject = aftermath.player
             elif isinstance(aftermath, PlaceCountersPreventionAftermath):
+                life_event_id = None
                 assert aftermath.subject.object_id is not None
                 counter_requests.append(
                     CounterPlacementRequest(
@@ -208,13 +233,47 @@ def prepare_prevention_aftermath(
                     prevented_amount=application.prevented_amount,
                     requested_amount=amount,
                     damage_event_ids=application.damage_event_ids,
+                    life_event_id=life_event_id,
                 )
             )
+    life_effects = collect_life_change_replacement_effects(
+        host,
+        sources=sources,
+        source_zones=source_zones,
+    )
+    try:
+        life_batch = prepare_life_change_batch(
+            host,
+            tuple(life_requests),
+            effects=life_effects,
+            selections=selections,
+            require_all_selections=False,
+            batch_id=(
+                f"replacement:damage.prevention.aftermath.life:"
+                f"{host.state.revision}:{host.state.event_sequence + 1}"
+            ),
+        )
+    except LifeChangeError as exc:
+        raise PreventionAftermathError(str(exc)) from exc
+    if life_batch.pending is not None:
+        raise ReplacementChoiceRequired(
+            batch=ReplacementEventBatch(
+                batch_id=life_batch.batch_id,
+                events=life_batch.events,
+                apnap_order=tuple(host.apnap_order()),
+                journal=life_batch.journal,
+            ),
+            effects=life_batch.effects,
+            pending=life_batch.pending,
+        )
+    counter_selections = tuple(
+        selections[life_batch.consumed_selections:]
+    )
     try:
         prepared_counters = prepare_counter_placements(
             host,
             tuple(counter_requests),
-            selections=selections,
+            selections=counter_selections,
             sources=sources,
             source_zones=source_zones,
         )
@@ -225,14 +284,14 @@ def prepare_prevention_aftermath(
         )
     except CounterPlacementError as exc:
         raise PreventionAftermathError(str(exc)) from exc
-    if selections and not counter_requests:
+    if counter_selections and not counter_requests:
         raise PreventionAftermathError(
             "Replacement selections were supplied without counter aftermath"
         )
     return PreparedPreventionAftermath(
         applications=applications,
         instructions=tuple(instructions),
-        life_changes=tuple(life_changes),
+        life_batch=life_batch,
         counter_plan=counter_plan,
         consumed_selections=len(selections),
     )
@@ -246,11 +305,11 @@ def validate_prevention_aftermath(
         raise PreventionAftermathError(
             "Prevention aftermath requires a typed prepared value"
         )
-    for change in prepared.life_changes:
-        if change.player not in host.state.active_seats():
-            raise PreventionAftermathError(
-                "Prevention aftermath player is no longer active"
-            )
+    if prepared.life_batch is not None:
+        try:
+            validate_life_change_batch(host, prepared.life_batch)
+        except LifeChangeError as exc:
+            raise PreventionAftermathError(str(exc)) from exc
     if prepared.counter_plan is not None:
         try:
             validate_counter_placement_commit(host, prepared.counter_plan)
@@ -264,6 +323,16 @@ def commit_prevention_aftermath(
 ) -> PreventionAftermathResult:
     """Commit CR 615.5 results immediately after the prevention batch."""
 
+    if prepared.life_batch is not None:
+        try:
+            prepared = replace(
+                prepared,
+                life_batch=replan_life_change_batch(
+                    host, prepared.life_batch
+                ),
+            )
+        except LifeChangeError as exc:
+            raise PreventionAftermathError(str(exc)) from exc
     validate_prevention_aftermath(host, prepared)
     counter_results = ()
     if prepared.counter_plan is not None:
@@ -276,16 +345,29 @@ def commit_prevention_aftermath(
         except CounterPlacementError as exc:
             raise PreventionAftermathError(str(exc)) from exc
     try:
-        life_transitions = commit_life_changes(
-            host, plan_life_changes(host, prepared.life_changes)
+        life_commit = (
+            commit_life_change_batch(host, prepared.life_batch)
+            if prepared.life_batch is not None
+            else None
         )
-    except LifeStateError as exc:
+    except LifeChangeError as exc:
         raise PreventionAftermathError(str(exc)) from exc
 
     counter_index = 0
+    life_records = {
+        record.event_id: record
+        for record in (() if life_commit is None else life_commit.records)
+    }
     events: list[PreventionAftermathEvent] = []
     for instruction in prepared.instructions:
         applied = instruction.requested_amount
+        if instruction.kind == "gain_life":
+            record = life_records.get(str(instruction.life_event_id or ""))
+            if record is None:
+                raise PreventionAftermathError(
+                    "Prevention life aftermath lost its resolved event"
+                )
+            applied = record.amount
         if instruction.kind == "place_counters":
             applied = counter_results[counter_index].placed
             counter_index += 1
@@ -304,9 +386,7 @@ def commit_prevention_aftermath(
         events=tuple(events),
         changed_players=tuple(
             sorted(
-                transition.player
-                for transition in life_transitions
-                if transition.before != transition.after
+                (() if life_commit is None else life_commit.changed_players)
             )
         ),
         changed_objects=tuple(

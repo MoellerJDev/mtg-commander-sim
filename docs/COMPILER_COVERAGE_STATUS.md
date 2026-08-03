@@ -2,7 +2,7 @@
 title: "Compiler coverage status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "f39730fd6dab90af9667748e3d7d0e15fc713f8b"
+verified: "cda213c987cb8c5aef94af74bc74146f29bba0fb"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -13,7 +13,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Current representation
 
-- Compiler: `oracle-ir-v16`
+- Compiler: `oracle-ir-v17`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
 - Compiler module: 1,781 physical / 1,713 logical lines
@@ -27,9 +27,9 @@ This generated report describes only the pinned Oracle corpus and current compil
 - Model: `mtg_commander_sim/card_programs/model.py`
 - Generated/reviewed adapter: `mtg_commander_sim/card_programs/adapters.py`
 - Runtime validator: `mtg_commander_sim/card_programs/validation.py`
-- Canonical reviewed registry CardPrograms: 143
+- Canonical reviewed registry CardPrograms: 142
 - Intrinsic strict-capability-ready CardPrograms: 0
-- Trust bases: `{"legacy_reviewed": 143}`
+- Trust bases: `{"legacy_reviewed": 142}`
 
 ## Stages
 
@@ -48,11 +48,11 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/12`
+- Registry schema/version: `1/13`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `3ed41585ededd2a66aaa72ba341ce5a9f6ba0624c7123f0e19a65115e5e08a9c`
-- Evidence fingerprint: `3ac1c6a252be1159623147c906e4074e7857035127815faf743dd41882b51a21`
-- Explicit evidence declarations: 211
+- Registry fingerprint: `3ab389e454d241c76dc416def39815a78a1f195cb4853fe833e4be3fd31d7ee3`
+- Evidence fingerprint: `93a8a57ef942874af37cf90b032ed04576fc4ca22fbf9cf37d1a3dff4f889b91`
+- Explicit evidence declarations: 220
 - Capability records: 33
 - Trusted records: 21
 - Blocked records: 4
@@ -74,30 +74,30 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,485 | 3,052 | 16,097 | 19,336 | 69,384 | false |
-| Commander legal | 31,623 | 412 | 14,676 | 16,535 | 60,761 | false |
+| Full Oracle | 38,485 | 3,055 | 16,114 | 19,316 | 69,374 | false |
+| Commander legal | 31,623 | 415 | 14,693 | 16,515 | 60,751 | false |
 
 ## Full-corpus residual kinds
 
 | Kind | Count |
 |---|---:|
-| `dependency_contract` | 19,419 |
+| `dependency_contract` | 19,445 |
 | `trigger` | 15,246 |
 | `static_ability` | 12,086 |
-| `spell_effect` | 11,375 |
-| `effect` | 7,291 |
+| `spell_effect` | 11,373 |
+| `effect` | 7,262 |
 | `cost` | 2,009 |
-| `replacement_effect` | 1,777 |
+| `replacement_effect` | 1,772 |
 | `declaration_restriction` | 170 |
 | `declaration_cost` | 11 |
 
 ## Semantic packs and implicit overrides
 
 - Pack files: 15
-- Program entries: 265
-- Unique program keys: 253
+- Program entries: 264
+- Unique program keys: 252
 - Duplicate keys resolved by pack order: 12
-- Unique Oracle IDs represented: 143
+- Unique Oracle IDs represented: 142
 - Card-specific operation names: 6
 - Typed card-override boundary present: true
 - Explicit typed overrides: 0

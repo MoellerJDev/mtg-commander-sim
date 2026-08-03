@@ -18,6 +18,17 @@ _SUBJECT_PATTERN = (
     r"any target|target creature(?: you control)?|"
     r"target artifact creature|target legendary creature|you"
 )
+_SOURCE_QUALIFIER_PATTERN = (
+    r"white|blue|black|red|green|black or red|artifact|land|creature|"
+    r"legendary"
+)
+_COLOR_CODES = {
+    "white": "W",
+    "blue": "U",
+    "black": "B",
+    "red": "R",
+    "green": "G",
+}
 
 
 def _target_schema(phrase: str) -> Mapping[str, Any] | None:
@@ -87,6 +98,141 @@ def _rules(
     )
 
 
+def _source_filters(qualifier: str | None) -> dict[str, list[str]]:
+    normalized = " ".join(str(qualifier or "").casefold().split())
+    if not normalized:
+        return {
+            "allowed_colors": [],
+            "required_types": [],
+            "required_subtypes": [],
+            "required_supertypes": [],
+            "required_keywords": [],
+        }
+    color_words = normalized.split(" or ")
+    if all(word in _COLOR_CODES for word in color_words):
+        return {
+            "allowed_colors": [_COLOR_CODES[word] for word in color_words],
+            "required_types": [],
+            "required_subtypes": [],
+            "required_supertypes": [],
+            "required_keywords": [],
+        }
+    return {
+        "allowed_colors": [],
+        "required_types": (
+            [normalized]
+            if normalized in {"artifact", "land", "creature"}
+            else []
+        ),
+        "required_subtypes": [],
+        "required_supertypes": (
+            ["legendary"] if normalized == "legendary" else []
+        ),
+        "required_keywords": [],
+    }
+
+
+def _chosen_source_effect(
+    *,
+    shield: Mapping[str, Any],
+    qualifier: str | None,
+) -> dict[str, Any]:
+    return {
+        "op": "choose_damage_source",
+        "prompt": "Choose the source whose damage will be prevented.",
+        "required_colors": [],
+        **_source_filters(qualifier),
+        "shield": dict(shield),
+    }
+
+
+def _chosen_source_next_instance(
+    normalized: str,
+) -> PreventionTemplate | None:
+    match = re.fullmatch(
+        rf"the next time an? (?:(?P<qualifier>{_SOURCE_QUALIFIER_PATTERN}) )?"
+        r"source of your choice would deal damage"
+        rf"(?: to (?P<subject>{_SUBJECT_PATTERN}))? this turn, prevent "
+        r"(?:that|the) damage\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    if not match:
+        return None
+    subject = str(match.group("subject") or "").casefold()
+    target_schema = _target_schema(subject) if subject else None
+    shield = {
+        "op": "create_damage_prevention_shield",
+        "source": "$source",
+        "subject": (
+            "$controller"
+            if subject == "you"
+            else ("$target.0" if subject else "*")
+        ),
+        "mode": "next_instance",
+        "duration": "until_end_of_turn",
+    }
+    return (
+        "damage-prevention-chosen-source-next-instance-v1",
+        (
+            _chosen_source_effect(
+                shield=shield,
+                qualifier=match.group("qualifier"),
+            ),
+        ),
+        target_schema,
+        _rules(target_schema),
+    )
+
+
+def _chosen_source_all_damage(
+    normalized: str,
+) -> PreventionTemplate | None:
+    dealt_to = re.fullmatch(
+        rf"prevent all damage that would be dealt to "
+        rf"(?P<subject>{_SUBJECT_PATTERN}) this turn by an? "
+        rf"(?:(?P<qualifier>{_SOURCE_QUALIFIER_PATTERN}) )?"
+        r"source of your choice\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    source_deals = re.fullmatch(
+        rf"prevent all damage an? "
+        rf"(?:(?P<qualifier>{_SOURCE_QUALIFIER_PATTERN}) )?"
+        r"source of your choice would deal"
+        rf"(?: to (?P<subject>{_SUBJECT_PATTERN}))? this turn\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    match = dealt_to or source_deals
+    if not match:
+        return None
+    subject = str(match.group("subject") or "").casefold()
+    target_schema = _target_schema(subject) if subject else None
+    shield = {
+        "op": "create_damage_prevention_shield",
+        "source": "$source",
+        "subject": (
+            "$controller"
+            if subject == "you"
+            else ("$target.0" if subject else "*")
+        ),
+        "mode": "all",
+        "duration": "until_end_of_turn",
+    }
+    return (
+        "damage-prevention-chosen-source-all-v1",
+        (
+            _chosen_source_effect(
+                shield=shield,
+                qualifier=match.group("qualifier"),
+            ),
+        ),
+        target_schema,
+        _rules(target_schema),
+    )
+
+
 def _chosen_source_fixed_life(normalized: str) -> PreventionTemplate | None:
     match = re.fullmatch(
         rf"prevent the next (?P<amount>\d+|x) damage that would be dealt to "
@@ -113,18 +259,43 @@ def _chosen_source_fixed_life(normalized: str) -> PreventionTemplate | None:
         return (
             "damage-prevention-chosen-source-fixed-life-v1",
             (
-                {
-                    "op": "choose_damage_source",
-                    "prompt": "Choose the source whose damage will be prevented.",
-                    "required_colors": [],
-                    "required_types": [],
-                    "shield": nested,
-                },
+                _chosen_source_effect(shield=nested, qualifier=None),
             ),
             target_schema,
             _rules(target_schema, "cr-119-life"),
         )
     return None
+
+
+def _chosen_source_fixed_amount(
+    normalized: str,
+) -> PreventionTemplate | None:
+    match = re.fullmatch(
+        rf"prevent the next (?P<amount>\d+|x) damage that would be dealt to "
+        rf"(?P<subject>{_SUBJECT_PATTERN}) this turn by an? "
+        rf"(?:(?P<qualifier>{_SOURCE_QUALIFIER_PATTERN}) )?"
+        r"source of your choice\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    if not match:
+        return None
+    subject = match.group("subject").casefold()
+    target_schema = _target_schema(subject)
+    return (
+        "damage-prevention-chosen-source-fixed-v1",
+        (
+            _chosen_source_effect(
+                shield=_shield(
+                    amount=_amount_value(match.group("amount")),
+                    subject=subject,
+                ),
+                qualifier=match.group("qualifier"),
+            ),
+        ),
+        target_schema,
+        _rules(target_schema),
+    )
 
 
 def _scaled_life_aftermath(normalized: str) -> PreventionTemplate | None:
@@ -312,6 +483,9 @@ def _source_shield(normalized: str) -> PreventionTemplate | None:
 
 _PREVENTION_PRODUCTIONS = (
     _chosen_source_fixed_life,
+    _chosen_source_fixed_amount,
+    _chosen_source_next_instance,
+    _chosen_source_all_damage,
     _scaled_life_aftermath,
     _counter_aftermath,
     _shared_color_creatures,

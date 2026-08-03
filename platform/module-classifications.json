@@ -427,6 +427,21 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/compiler/life_templates.py",
+      "layer": "semantics",
+      "owning_subsystem": "oracle_compiler",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/compiler/prevention_templates.py",
       "layer": "semantics",
       "owning_subsystem": "oracle_compiler",
@@ -640,6 +655,20 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/delayed_triggers.py",
+      "layer": "rules",
+      "owning_subsystem": "delayed_triggers",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/effect_contracts.py",
       "layer": "semantics",
       "owning_subsystem": "effect_runtime",
@@ -802,6 +831,20 @@
       "card_specificity_policy": "generic_no_growth",
       "visibility_sensitivity": "authoritative_internal",
       "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/life_change.py",
+      "layer": "rules",
+      "owning_subsystem": "life_state",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "mutable_owner",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
     },
     {
       "file": "mtg_commander_sim/life_state.py",
@@ -2394,5 +2437,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "048f9ec3ae4729199fa646415b053b5eaba1b881ce86664535f4162e61aeba4c"
+  "fingerprint": "46dda67e7c53e748c21202ca86dfc325a69a7f4966876e9548f8dd884a37bad8"
 }

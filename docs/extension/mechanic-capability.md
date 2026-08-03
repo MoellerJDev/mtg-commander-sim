@@ -2,14 +2,14 @@
 title: "Mechanic capability extension guide"
 status: "current"
 authoritative_source: "mtg_commander_sim/rules/capabilities.py, its packaged registry, and ADR 0004"
-verified: "2026-08-01"
+verified: "2026-08-03"
 audience: "rules, compiler, and architecture contributors"
 maintenance: "hand-maintained"
 ---
 
 # Mechanic capability extension guide
 
-Capability registry version 5 is the current incremental trust boundary beside the
+Capability registry version 13 is the current incremental trust boundary beside the
 legacy broad mechanic contracts. The initial migration covers the generated
 base-damage spell shape and its public target/base-result dependencies. It is
 not a claim that the broad damage family or all compiler nodes have migrated.

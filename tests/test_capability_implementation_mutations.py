@@ -13,6 +13,7 @@ from mtg_commander_sim.continuous_effects import (
     evaluate_continuous_effects,
 )
 from mtg_commander_sim import damage as damage_module
+from mtg_commander_sim import damage_prevention as damage_prevention_module
 from mtg_commander_sim.damage import DamageEvent
 from mtg_commander_sim.damage_prevention import (
     DamageModifierDuration,
@@ -21,6 +22,7 @@ from mtg_commander_sim.damage_prevention import (
     PreventionMode,
 )
 from mtg_commander_sim.damage_modifier_state import (
+    ChosenDamageSource,
     GainLifePreventionAftermath,
 )
 from mtg_commander_sim.engine import CommanderEngine
@@ -873,6 +875,92 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_shield_is_consumed()
+
+    def test_chosen_source_incarnation_mutants_are_killed(self):
+        chosen = ChosenDamageSource(
+            ref="C1",
+            object_id="physical-source",
+            snapshot_version=2,
+            logical_object_id="spell-incarnation",
+            oracle_id="source-oracle",
+            printed_name="Chosen Source",
+            controller="A",
+            owner="A",
+            zone="stack",
+            types=("creature",),
+            identity_keys=(
+                "spell-incarnation|stack",
+                "spell-incarnation|battlefield",
+            ),
+        )
+        shield = DamagePreventionShield(
+            shield_id="chosen-source-shield",
+            source_id="prevention-effect",
+            controller="B",
+            subject=DamageSubject("B", "player", "B"),
+            mode=PreventionMode.NEXT_INSTANCE,
+            remaining=None,
+            duration=DamageModifierDuration.UNTIL_END_OF_TURN,
+            created_turn_sequence=1,
+            chosen_source=chosen,
+        )
+
+        def damage_event(identity_key: str) -> replacement_effects.ReplaceableEvent:
+            return replacement_effects.ReplaceableEvent(
+                event_id=f"damage:{identity_key}",
+                kind="damage",
+                affected_player="B",
+                payload={
+                    "amount": 1,
+                    "target": "B",
+                    "target_kind": "player",
+                    "source_object_id": "physical-source",
+                    "source_identity_key": identity_key,
+                },
+            )
+
+        def assert_incarnation_boundary() -> None:
+            effect = damage_prevention_module._shield_replacement_effect(shield)
+            self.assertIsNotNone(
+                replacement_effects.replacement_choice(
+                    damage_event("spell-incarnation|battlefield"),
+                    (effect,),
+                )
+            )
+            self.assertIsNone(
+                replacement_effects.replacement_choice(
+                    damage_event("new-incarnation|battlefield"),
+                    (effect,),
+                )
+            )
+
+        assert_incarnation_boundary()
+
+        with patch.object(
+            ChosenDamageSource,
+            "event_conditions",
+            lambda value: {
+                "source_object_id": {"eq": value.object_id},
+            },
+        ):
+            with self.assertRaises(AssertionError):
+                assert_incarnation_boundary()
+
+        with patch.object(
+            ChosenDamageSource,
+            "event_conditions",
+            lambda value: {
+                "source_identity_key": {
+                    "eq": next(
+                        key
+                        for key in value.identity_keys
+                        if key.endswith("|stack")
+                    ),
+                },
+            },
+        ):
+            with self.assertRaises(AssertionError):
+                assert_incarnation_boundary()
 
     def test_static_redirection_mutant_is_killed(self):
         descriptor = {

@@ -535,6 +535,78 @@ class OracleIRTests(unittest.TestCase):
                         expected["selector"], effect["selector"]["kind"]
                     )
 
+    def test_chosen_source_prevention_filters_compile_generically(self):
+        base = self.db.lookup("Lightning Bolt")
+        cases = (
+            (
+                "damage-prevention-chosen-source-next-instance-v1",
+                (
+                    "The next time a black or red source of your choice would "
+                    "deal damage to you this turn, prevent that damage."
+                ),
+                "next_instance",
+                "$controller",
+                {"allowed_colors": ["B", "R"]},
+            ),
+            (
+                "damage-prevention-chosen-source-next-instance-v1",
+                (
+                    "The next time an artifact source of your choice would "
+                    "deal damage to you this turn, prevent that damage."
+                ),
+                "next_instance",
+                "$controller",
+                {"required_types": ["artifact"]},
+            ),
+            (
+                "damage-prevention-chosen-source-all-v1",
+                (
+                    "Prevent all damage a red source of your choice would deal "
+                    "this turn."
+                ),
+                "all",
+                "*",
+                {"allowed_colors": ["R"]},
+            ),
+            (
+                "damage-prevention-chosen-source-all-v1",
+                (
+                    "Prevent all damage that would be dealt to you this turn by "
+                    "a source of your choice."
+                ),
+                "all",
+                "$controller",
+                {},
+            ),
+            (
+                "damage-prevention-chosen-source-fixed-v1",
+                (
+                    "Prevent the next 3 damage that would be dealt to any target "
+                    "this turn by a legendary source of your choice."
+                ),
+                "amount",
+                "$target.0",
+                {"required_supertypes": ["legendary"]},
+            ),
+        )
+        for template_id, text, mode, subject, filters in cases:
+            with self.subTest(text=text):
+                node = compile_oracle_card(
+                    replace(
+                        base,
+                        oracle_id=f"fixture:{template_id}:{mode}:{subject}",
+                        name="Fixture chosen-source prevention",
+                        oracle_text=text,
+                    )
+                ).faces[0].nodes[0]
+                self.assertEqual(template_id, node.template_id)
+                choice = node.effects[0]
+                self.assertEqual("choose_damage_source", choice["op"])
+                for field, value in filters.items():
+                    self.assertEqual(value, choice[field])
+                self.assertEqual(mode, choice["shield"]["mode"])
+                self.assertEqual(subject, choice["shield"]["subject"])
+
     def test_divided_and_combat_only_prevention_remain_unresolved(self):
         base = self.db.lookup("Lightning Bolt")
         for oracle_text in (
@@ -718,6 +790,29 @@ class OracleIRTests(unittest.TestCase):
         )
         self.assertNotEqual("exact", unsupported.status)
         self.assertTrue(unsupported.material_residuals)
+
+    def test_static_life_gain_multiplier_lowers_generically(self):
+        capabilities = load_default_capability_registry()
+        ir = compile_oracle_card(
+            self.db.lookup("Boon Reflection"),
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+        node = ir.faces[0].nodes[0]
+
+        self.assertEqual("exact", ir.status)
+        self.assertEqual(
+            "life-gain-double-controller-static-v1", node.template_id
+        )
+        self.assertEqual("life.change", node.event)
+        self.assertEqual(
+            "replacement.life.gain.multiplier.v1",
+            node.handlers[0]["handler_id"],
+        )
+        self.assertEqual(
+            ("life.gain.replacement.static_multiplier",),
+            node.capability_dependencies,
+        )
 
     def test_exact_generic_damage_handler_is_trusted_and_active_in_session(self):
         deck_a = DeckDefinition(

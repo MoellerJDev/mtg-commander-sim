@@ -110,7 +110,7 @@ class DamagePreventionCreationTests(DamageReplacementPipelineBase):
             commit_prevention_shield_creation(engine, plan)
         self.assertEqual([], engine.state.damage_prevention_shields)
 
-    def test_chosen_source_snapshot_is_canonical_and_survives_zone_change(self):
+    def test_chosen_source_snapshot_is_canonical_and_does_not_follow_reentry(self):
         engine = self.session(615104).engine
         source = self.add_permanent(
             engine, seat="A", name="Mishra, Eminent One", ref="chosen-source"
@@ -129,16 +129,140 @@ class DamagePreventionCreationTests(DamageReplacementPipelineBase):
         )
         chosen = plan.shields[0].chosen_source
         self.assertIsNotNone(chosen)
-        self.assertEqual(1, chosen.snapshot_version)
+        self.assertEqual(2, chosen.snapshot_version)
         self.assertEqual(source.logical_object_id, chosen.logical_object_id)
         self.assertEqual("battlefield", chosen.zone)
         self.assertIn("creature", chosen.types)
 
         restored = type(chosen).from_dict(chosen.to_dict())
         self.assertEqual(chosen, restored)
-        source.zone = "graveyard"
         commit_prevention_shield_creation(engine, plan)
-        self.assertEqual(source.object_id, plan.shields[0].chosen_source.object_id)
+        engine.move_card(source.object_id, "graveyard", log=False)
+        engine.move_card(source.object_id, "battlefield", controller="A", log=False)
+
+        result = resolve_damage_batch(
+            engine,
+            (self.proposal(engine, source=source, target="B", amount=1),),
+        )
+        self.assertEqual(1, result.dealt_amount)
+        self.assertEqual(1, len(engine.state.damage_prevention_shields))
+
+    def test_chosen_permanent_spell_continues_to_the_permanent_it_becomes(self):
+        engine = self.session(615112).engine
+        source = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="source-spell"
+        )
+        engine._remove_from_zone(source)
+        engine._reset_zone_change(source, "stack")
+        source.zone = "stack"
+        plan = plan_prevention_shield_creation(
+            engine,
+            PreventionShieldCreationRequest(
+                source_id="fixture:permanent-spell",
+                controller="B",
+                mode=PreventionMode.NEXT_INSTANCE,
+                duration=DamageModifierDuration.UNTIL_END_OF_TURN,
+                subjects=(PreventionSubjectAllocation("B", None),),
+                chosen_source_ref=source.ref,
+                required_source_types=("creature",),
+            ),
+        )
+        chosen = plan.shields[0].chosen_source
+        self.assertEqual(
+            (
+                f"{source.logical_object_id}|battlefield",
+                f"{source.logical_object_id}|stack",
+            ),
+            chosen.identity_keys,
+        )
+        commit_prevention_shield_creation(engine, plan)
+        engine.move_card(source.object_id, "battlefield", controller="A", log=False)
+
+        result = resolve_damage_batch(
+            engine,
+            (self.proposal(engine, source=source, target="B", amount=1),),
+        )
+        self.assertEqual(0, result.dealt_amount)
+        self.assertFalse(engine.state.damage_prevention_shields)
+
+    def test_countered_chosen_permanent_spell_is_a_new_graveyard_object(self):
+        engine = self.session(615113).engine
+        source = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="countered-source"
+        )
+        engine._remove_from_zone(source)
+        engine._reset_zone_change(source, "stack")
+        source.zone = "stack"
+        plan = plan_prevention_shield_creation(
+            engine,
+            PreventionShieldCreationRequest(
+                source_id="fixture:countered-permanent-spell",
+                controller="B",
+                mode=PreventionMode.NEXT_INSTANCE,
+                duration=DamageModifierDuration.UNTIL_END_OF_TURN,
+                subjects=(PreventionSubjectAllocation("B", None),),
+                chosen_source_ref=source.ref,
+            ),
+        )
+        commit_prevention_shield_creation(engine, plan)
+        engine.move_card(source.object_id, "graveyard", log=False)
+
+        result = resolve_damage_batch(
+            engine,
+            (self.proposal(engine, source=source, target="B", amount=1),),
+        )
+
+        self.assertEqual(1, result.dealt_amount)
+        self.assertEqual(1, len(engine.state.damage_prevention_shields))
+
+    def test_incarnation_safe_source_filters_are_rechecked_when_damage_happens(self):
+        engine = self.session(615114).engine
+        source = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="filtered-source"
+        )
+        plan = plan_prevention_shield_creation(
+            engine,
+            PreventionShieldCreationRequest(
+                source_id="fixture:filtered-source",
+                controller="B",
+                mode=PreventionMode.NEXT_INSTANCE,
+                duration=DamageModifierDuration.UNTIL_END_OF_TURN,
+                subjects=(PreventionSubjectAllocation("B", None),),
+                chosen_source_ref=source.ref,
+                allowed_source_colors=("B", "R"),
+                required_source_types=("creature",),
+                required_source_subtypes=("artificer",),
+                required_source_supertypes=("legendary",),
+            ),
+        )
+        commit_prevention_shield_creation(engine, plan)
+
+        source.annotations["copy_overrides"] = {
+            "colors": ["G"],
+            "type_line": "Legendary Artifact Creature — Artificer",
+        }
+        mismatch = resolve_damage_batch(
+            engine,
+            (self.proposal(engine, source=source, target="B", amount=1),),
+        )
+        self.assertEqual(1, mismatch.dealt_amount)
+        self.assertEqual(1, len(engine.state.damage_prevention_shields))
+
+        source.annotations.pop("copy_overrides")
+        matching = resolve_damage_batch(
+            engine,
+            (
+                self.proposal(
+                    engine,
+                    source=source,
+                    target="B",
+                    amount=1,
+                    event_id="damage:filtered-source-match",
+                ),
+            ),
+        )
+        self.assertEqual(0, matching.dealt_amount)
+        self.assertFalse(engine.state.damage_prevention_shields)
 
     def test_runtime_division_requires_the_exact_resolved_total(self):
         engine = self.session(615105).engine
@@ -333,6 +457,102 @@ class DamageSourceChoiceHandlerTests(unittest.TestCase):
         self.assertNotIn("hidden", serialized)
         self.assertNotIn("grave-source", serialized)
 
+    def test_source_choice_exposes_only_explicitly_referred_public_zone_objects(self):
+        from mtg_commander_sim.object_query import ObjectQueryResult
+
+        rows = (
+            ObjectQueryResult(
+                "referred-grave-id",
+                "referred-grave-source",
+                "Referred card",
+                "A",
+                "A",
+                "graveyard",
+            ),
+            ObjectQueryResult(
+                "unrelated-grave-id",
+                "unrelated-grave-source",
+                "Unrelated card",
+                "A",
+                "A",
+                "graveyard",
+            ),
+            ObjectQueryResult(
+                "hidden-id",
+                "hidden-source",
+                "Hidden card",
+                "A",
+                "A",
+                "hand",
+                known_to_actor=False,
+            ),
+        )
+        query = SnapshotSemanticChoiceQuery(
+            seat_order=("A", "B"),
+            active_order=("A", "B"),
+            object_rows=rows,
+            materialized_damage_source_candidates=(
+                "referred-grave-source",
+                "hidden-source",
+            ),
+        )
+
+        prepared = ChooseDamageSourceHandler().prepare(
+            {
+                "op": "choose_damage_source",
+                "shield": {
+                    "op": "create_damage_prevention_shield",
+                    "source": "shield-spell",
+                    "subject": "B",
+                    "mode": "next_instance",
+                    "duration": "until_end_of_turn",
+                },
+            },
+            self._context(query),
+        )
+
+        self.assertEqual(
+            ("referred-grave-source",),
+            prepared.request.choice.legal_refs,
+        )
+
+    def test_materialized_empty_source_universe_does_not_use_legacy_fallback(self):
+        from mtg_commander_sim.object_query import ObjectQueryResult
+
+        query = SnapshotSemanticChoiceQuery(
+            seat_order=("A", "B"),
+            active_order=("A", "B"),
+            object_rows=(
+                ObjectQueryResult(
+                    "battlefield-id",
+                    "battlefield-source",
+                    "Unsupported face-down source",
+                    "A",
+                    "A",
+                    "battlefield",
+                ),
+            ),
+            materialized_damage_source_candidates=(),
+        )
+
+        with self.assertRaisesRegex(
+            SemanticChoiceError,
+            "No legally known damage source",
+        ):
+            ChooseDamageSourceHandler().prepare(
+                {
+                    "op": "choose_damage_source",
+                    "shield": {
+                        "op": "create_damage_prevention_shield",
+                        "source": "shield-spell",
+                        "subject": "B",
+                        "mode": "next_instance",
+                        "duration": "until_end_of_turn",
+                    },
+                },
+                self._context(query),
+            )
+
     def test_source_choice_revalidates_and_prepends_resolved_shield(self):
         from mtg_commander_sim.object_query import ObjectQueryResult
 
@@ -373,6 +593,72 @@ class DamageSourceChoiceHandlerTests(unittest.TestCase):
                 {"source": "not-legal"},
                 query,
             )
+
+    def test_source_choice_any_color_and_extended_characteristics_are_exact(self):
+        from mtg_commander_sim.object_query import ObjectQueryResult
+
+        matching = ObjectQueryResult(
+            "matching-id",
+            "matching-source",
+            "Matching source",
+            "A",
+            "A",
+            "battlefield",
+            types=("creature",),
+            subtypes=("wizard",),
+            supertypes=("legendary",),
+            colors=("B",),
+            keywords=("flying",),
+        )
+        wrong_color = ObjectQueryResult(
+            "wrong-color-id",
+            "wrong-color-source",
+            "Wrong color",
+            "A",
+            "A",
+            "battlefield",
+            types=("creature",),
+            subtypes=("wizard",),
+            supertypes=("legendary",),
+            colors=("G",),
+            keywords=("flying",),
+        )
+        query = SnapshotSemanticChoiceQuery(
+            seat_order=("A", "B"),
+            active_order=("A", "B"),
+            object_rows=(matching, wrong_color),
+        )
+        prepared = ChooseDamageSourceHandler().prepare(
+            {
+                "op": "choose_damage_source",
+                "allowed_colors": ["B", "R"],
+                "required_types": ["creature"],
+                "required_subtypes": ["wizard"],
+                "required_supertypes": ["legendary"],
+                "required_keywords": ["flying"],
+                "shield": {
+                    "op": "create_damage_prevention_shield",
+                    "source": "shield-spell",
+                    "subject": "B",
+                    "mode": "next_instance",
+                    "duration": "until_end_of_turn",
+                },
+            },
+            self._context(query),
+        )
+        self.assertEqual(
+            ("matching-source",), prepared.request.choice.legal_refs
+        )
+        completion = ChooseDamageSourceHandler().complete(
+            self._continuation(prepared.continuation_effect),
+            {"source": "matching-source"},
+            query,
+        )
+        effect = completion.prepend_effects[0]
+        self.assertEqual(("B", "R"), effect["source_colors_any"])
+        self.assertEqual(("wizard",), effect["source_subtypes"])
+        self.assertEqual(("legendary",), effect["source_supertypes"])
+        self.assertEqual(("flying",), effect["source_keywords"])
 
 
 if __name__ == "__main__":

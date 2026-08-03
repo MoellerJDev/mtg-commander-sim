@@ -1,8 +1,8 @@
 ---
 title: "Damage transaction"
 status: "current"
-authoritative_source: "mtg_commander_sim/damage.py, damage_prevention.py, damage_prevention_creation.py, damage_prevention_aftermath.py, damage_results.py, mana_payment_continuations.py, replacement/, semantic_runtime/damage_replacements.py, semantic_runtime/damage_results.py, ADR 0012, and ADR 0013"
-verified: "2026-08-02"
+authoritative_source: "mtg_commander_sim/damage.py, damage_prevention.py, damage_prevention_creation.py, damage_prevention_aftermath.py, damage_results.py, life_change.py, mana_payment_continuations.py, replacement/, semantic_runtime/damage_replacements.py, semantic_runtime/damage_results.py, ADR 0012, ADR 0013, and ADR 0017"
+verified: "2026-08-03"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
 ---
@@ -74,17 +74,28 @@ replay-pinned. Until-end-of-turn values expire at cleanup.
 `damage_prevention_creation.py` resolves dynamic quantities before commit,
 validates exact divided allocations, creates one independently consumable
 shield per selected object, and pins an optional chosen source to physical
-identity plus current characteristics/LKI. The seat-scoped source choice offers
-only legally known objects on the battlefield, stack, or face-up command zone.
-It does not yet cover every object category and continuity exception in CR
-609.7a.
+identity plus current characteristics/LKI. Version-2 source identity uses the
+logical incarnation and zone, with the CR 400.7a exception that a chosen
+permanent spell continues to the permanent that spell becomes. It neither
+follows a countered spell into a graveyard nor a physical card through a later
+incarnation. Historical version-0/version-1 checkpoint shapes retain their
+original replay semantics.
+
+The seat-scoped source choice offers public permanents, spells on the stack,
+face-up command-zone objects, and former-zone objects carried by explicit typed
+provenance from a stack object, waiting prevention/replacement value, or waiting
+delayed trigger. It never scans arbitrary semantic context or hidden objects.
+Closed property filters cover all/any colors and required types, subtypes,
+supertypes, or keywords, with a second check when damage would occur.
 
 `damage_prevention_aftermath.py` aggregates the amount actually prevented by
-each applied shield across a simultaneous batch. Represented life gain uses the
-typed life owner, and represented permanent counters use the canonical counter-
-placement pipeline, including applicable quantity replacements. Every plan is
-validated before either result mutates. General life-gain replacement and other
-CR 615.5 aftermath forms remain blocked.
+each applied shield across a simultaneous batch. Represented life gain becomes
+an immutable `life.change` replacement event, resolves current trusted life
+replacement components in APNAP order, replay-validates its journal, and commits
+through the canonical life owner. Represented permanent counters use the
+canonical counter-placement pipeline, including applicable quantity
+replacements. Every result plan is validated before the damage batch mutates.
+Other CR 615.5 aftermath forms remain blocked.
 
 `replacement.damage.redirect-to-source.v1` is the current trusted static
 redirection component. It replaces the complete recipient snapshot, not just
@@ -94,10 +105,12 @@ nothing. The component is collected only while its damageable battlefield
 source exists; complete copy-layer interaction remains outside this slice.
 
 `replacement.life.gain.multiplier.v1` contributes a fixed integral multiplier
-to a positive `life.change` result. `replacement.damage.result.life_floor.v1`
-caps the life-loss child of one complete `damage.results` root. Boon Reflection
-and Worship are source-pinned official-shape witnesses; the handlers are
-generic and source-hash invalidated.
+to a positive `life.change` result. Oracle IR emits this descriptor for the
+closed static life-doubling sentence, so Boon Reflection and Rhox Faithmender no
+longer require source-pinned programs. `replacement.damage.result.life_floor.v1`
+caps the life-loss child of one complete `damage.results` root; Worship remains
+a source-pinned official-shape witness. Both handlers are generic and source-
+hash invalidated.
 
 The trusted capabilities are deliberately narrow:
 
@@ -112,27 +125,30 @@ The trusted capabilities are deliberately narrow:
 - `damage.result.replacement_order`
 - `life.gain.replacement.static_multiplier`
 
-They exclude complete CR 609.7a candidate categories and permanent-spell
-continuity, broader source-characteristic predicates, combat-only filters,
-general replacement-capable life gain, aftermath forms beyond represented life
-and permanent counters, finite partial redirection, attached or equipped
-destinations, replacement with a non-damage event, dynamic toxic values,
-unrepresented continuous ability grants, and uncompiled result-replacement
-families.
+They exclude arbitrary opaque referred-object provenance, source-characteristic
+predicates beyond the closed color/type/subtype/supertype/keyword vocabulary,
+face-down source characteristics,
+combat-only filters, migration of every life producer to the replacement-
+capable transaction, aftermath forms beyond represented life and permanent
+counters, finite partial redirection, attached or equipped destinations,
+replacement with a non-damage event, dynamic toxic values, unrepresented
+continuous ability grants, and uncompiled result-replacement families.
 The broad `damage.replacement.order` and `damage.prevention.order` capabilities
 remain blocked.
 
 ## Corpus result
 
 The complete pinned census binds Infect, Wither, Lifelink, and fixed Toxic
-nodes to trusted fine-grained result capabilities. Oracle IR v16 recognizes
+nodes to trusted fine-grained result capabilities. Oracle IR v17 recognizes
 closed whole-line grammar for static double damage, fixed static prevention,
-finite and divided shield creation, represented life/counter aftermath, and
-static redirection to a damageable source. This batch adds Test of Faith and
-Temper to the Commander-legal generic-exact and capability-closed sets. The
-generated [compiler coverage report](../COMPILER_COVERAGE_STATUS.md) is the
-authority for totals and residual deltas; these gains do not imply complete
-damage, prevention, or Oracle coverage.
+finite and divided shield creation, chosen-source next-instance/all-damage
+families, represented life/counter aftermath, static life-gain doubling, and
+static redirection to a damageable source. This increment adds Boon Reflection,
+Rhox Faithmender, and Pay No Heed to the Commander-legal generic-exact and
+capability-closed sets. The generated
+[compiler coverage report](../COMPILER_COVERAGE_STATUS.md) is the authority for
+totals and residual deltas; these gains do not imply complete damage,
+prevention, or Oracle coverage.
 
 ## Choice, privacy, and replay
 
@@ -152,13 +168,14 @@ frame, and resumes the exact original action after the seat chooses.
 
 ## Remaining boundaries
 
-The remaining damage/prevention work must complete CR 609.7a source categories
-and permanent-spell continuity, broaden source-characteristic grammar, route
-aftermath life gain through general life replacement, add remaining aftermath
-forms, partial and attached-destination redirection, non-damage transformations,
-remaining result-replacement families, excess-damage selection, and complete
-dynamic characteristic closure. Broader Oracle lowering must compile those
-families into typed descriptors before their capabilities can be promoted.
+The remaining damage/prevention work must broaden explicit referred-object
+provenance and source-characteristic grammar, represent face-down source
+characteristics, migrate other effect-generated
+life producers to `life.change`, add remaining aftermath forms, partial and
+attached-destination redirection, non-damage transformations, remaining result-
+replacement families, excess-damage selection, and complete dynamic
+characteristic closure. Broader Oracle lowering must compile those families
+into typed descriptors before their capabilities can be promoted.
 
 Primary assurance is split across `test_damage_replacement_model.py`,
 `test_damage_replacement_multiplayer.py`, and
@@ -170,5 +187,6 @@ action, combat, monarch, mana, and turn-history modules, and focused mutants in
 witnesses in `test_damage_result_events.py`. Durable prevention and redirection
 coverage lives in `test_damage_prevention_shields.py`,
 `test_damage_prevention_creation.py`, `test_damage_prevention_aftermath.py`,
-`test_replacement_event_ordering.py`, `test_mana_mode_effects.py`, and
-`test_damage_redirection.py`.
+`test_life_change.py`, `test_semantic_choice_characterization.py`,
+`test_copy_objects.py`, `test_replacement_event_ordering.py`,
+`test_mana_mode_effects.py`, and `test_damage_redirection.py`.

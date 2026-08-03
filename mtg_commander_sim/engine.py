@@ -85,11 +85,9 @@ from .damage import (
     resolve_damage_batch,
 )
 from .damage_prevention import expire_end_of_turn_damage_modifiers
+from .delayed_triggers import materialize_delayed_trigger
 from .life_state import (
-    LifeChange,
-    LifeStateError,
-    commit_life_changes,
-    plan_life_changes,
+    pay_life_cost,
 )
 from .errors import GameRuleError, StateInvariantError
 from .deck import DeckDefinition
@@ -5017,6 +5015,7 @@ class CommanderEngine(
         condition: Mapping[str, Any],
         stack_template: Mapping[str, Any],
         source_object_id: str | None = None,
+        referred_object_ids: Sequence[str] = (),
         once: bool = True,
         expires_turn_sequence: int | None = None,
     ) -> DelayedTrigger:
@@ -5033,6 +5032,7 @@ class CommanderEngine(
             once=once,
             created_turn_sequence=self.state.turn_sequence,
             expires_turn_sequence=expires_turn_sequence,
+            referred_object_ids=list(referred_object_ids),
         )
         self.state.delayed_triggers.append(trigger)
         self._log(controller, "trigger.delayed.created", f"Created delayed trigger {trigger.ref}: {label}.", {"trigger": trigger.ref, "condition": dict(condition)}, importance=1)
@@ -5167,23 +5167,12 @@ class CommanderEngine(
         :meth:`_queue_delayed_trigger`, which appends the returned item
         immediately.
         """
-        template = trigger.stack_template
         ref = self._next_ref("S")
-        return StackItem(
-            stack_id=self._stable_runtime_id("stack", ref),
+        return materialize_delayed_trigger(
+            trigger,
             ref=ref,
-            kind="triggered_ability",
-            controller=trigger.controller,
-            label=str(template.get("label") or trigger.label),
-            source_object_id=trigger.source_object_id,
-            semantic_key=template.get("semantic_key"),
-            targets=list(template.get("targets") or []),
-            notes=str(template.get("note") or ""),
-            visibility=list(self.seats),
-            context={
-                **copy.deepcopy(dict(template.get("context") or {})),
-                "delayed_trigger_ref": trigger.ref,
-            },
+            stack_id=self._stable_runtime_id("stack", ref),
+            visibility=self.seats,
         )
 
     def _queue_delayed_trigger(self, trigger_id: str) -> None:
@@ -5841,7 +5830,7 @@ class CommanderEngine(
                 raise GameRuleError(
                     "This land play does not authorize an entry life payment"
                 )
-            player.life -= life_paid
+            pay_life_cost(self, seat, life_paid)
         card.annotations.pop("temporary_play_permission", None)
         self.move_card(
             card.object_id,
@@ -10023,6 +10012,9 @@ class CommanderEngine(
                         "default_destination"
                     ),
                     visibility=list(self.seats),
+                    referred_object_ids=list(
+                        template.get("referred_object_ids") or []
+                    ),
                     context={
                         "target_groups": grouped,
                         "target_snapshots": {
@@ -10264,6 +10256,7 @@ class CommanderEngine(
             notes=target.notes,
             default_destination=target.default_destination,
             visibility=list(self.seats),
+            referred_object_ids=list(target.referred_object_ids),
             context={
                 **copy.deepcopy(dict(target.context)),
                 "target_groups": {
@@ -10396,7 +10389,7 @@ class CommanderEngine(
                 {"pay_life": bool(item.context.get("pay_life"))},
             )
             if item.context.get("pay_life") and not tapped:
-                self.state.players[seat].life -= 2
+                pay_life_cost(self, seat, 2)
             self.move_card(
                 found.object_id,
                 "battlefield",
@@ -11351,7 +11344,7 @@ class CommanderEngine(
                     )
                     and not tapped
                 ):
-                    self.state.players[seat].life -= 2
+                    pay_life_cost(self, seat, 2)
             moved.append(
                 self.move_card(
                     card.object_id,

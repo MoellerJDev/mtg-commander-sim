@@ -415,3 +415,22 @@ def collect_damage_result_replacement_effects(
                         )
                     )
     return tuple(effects)
+
+
+def collect_life_change_replacement_effects(
+    host: DamageResultReplacementHost,
+    *,
+    sources: Sequence[Any] | None = None,
+    source_zones: Mapping[str, str] | None = None,
+) -> tuple[ReplacementEffect, ...]:
+    """Collect the life-change subset for non-damage life producers."""
+
+    return tuple(
+        effect
+        for effect in collect_damage_result_replacement_effects(
+            host,
+            sources=sources,
+            source_zones=source_zones,
+        )
+        if effect.event_kind == "life.change"
+    )
