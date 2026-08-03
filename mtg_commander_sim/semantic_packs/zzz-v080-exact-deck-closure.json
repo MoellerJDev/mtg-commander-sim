@@ -1710,6 +1710,11 @@
       "active_zone": "stack",
       "event": "resolve",
       "effects": [],
+      "cost_schema": {
+        "static_modifiers": [
+          {"spell_type": "artifact", "generic_reduction": 1}
+        ]
+      },
       "destination": "battlefield",
       "trust_level": "trusted",
       "coverage": ["spell_resolution", "static_ability", "cost_reduction"],
@@ -2782,7 +2787,7 @@
       "ability_id": "trigger:chapter-1",
       "active_zone": "battlefield",
       "event": "saga.chapter.1",
-      "effects": [{"op": "grant_ability_marker", "source": "$source", "marker": "urzas_saga_chapter_1"}],
+      "effects": [{"op": "grant_ability_marker", "source": "$source", "marker": "granted_activated_ability:saga_mana:{T}: Add {C}."}],
       "trust_level": "trusted",
       "coverage": ["static_ability", "saga_chapter", "lore_counter", "granted_mana_ability"],
       "tests": ["test_urzas_saga_chapters_construct_search_and_sacrifice"],
@@ -2800,7 +2805,7 @@
       "ability_id": "trigger:chapter-2",
       "active_zone": "battlefield",
       "event": "saga.chapter.2",
-      "effects": [{"op": "grant_ability_marker", "source": "$source", "marker": "urzas_saga_chapter_2"}],
+      "effects": [{"op": "grant_ability_marker", "source": "$source", "marker": "granted_activated_ability:saga_construct:{2}, {T}: Create a 0/0 colorless Construct artifact creature token."}],
       "trust_level": "trusted",
       "coverage": ["static_ability", "saga_chapter", "lore_counter", "granted_activated_ability"],
       "tests": ["test_urzas_saga_chapters_construct_search_and_sacrifice"],

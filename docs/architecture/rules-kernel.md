@@ -21,11 +21,13 @@ pilot.
 
 `GameState` owns players, cards, zones, stack, turn/combat state, pending
 decisions, events, yields, and fidelity telemetry. During migration,
-`CommanderEngine` remains the declared general mutation owner, while
-`tap_state.py` and `token_creation.py` are focused effect mutation owners
-extracted behind typed host protocols. Capability lifecycle and replay hydration have narrowly
-declared compatibility ownership. All other rules helpers return values or
-operate through an approved mutation boundary. Typed semantic handlers receive
+`CommanderEngine` remains the declared general mutation owner. Casting and
+activation use read-only immutable proposal builders followed by declared
+typed commit owners; `mana_activation.py`, `tap_state.py`, and
+`token_creation.py` own focused transactions behind typed host protocols.
+Capability lifecycle and replay hydration have narrowly declared compatibility
+ownership. All other rules helpers return values or operate through an
+approved mutation boundary. Typed semantic handlers receive
 an immutable rules query and emit intents; they cannot import the engine or
 state model. The intent executor calls existing canonical engine methods or
 the focused tap-state port.
@@ -45,6 +47,20 @@ HTTP, WebSockets, server persistence, AI providers, or browser code. A rejected
 command is transactional. Legal alternatives are currently payable, hidden
 information is projected separately, and state stabilization precedes the next
 priority decision.
+
+## Casting, activation, and action offers
+
+`rules/action_catalog.py` composes executable offers from the same pure casting
+and activation queries used during command validation. Each offer contains a
+canonical proposal fingerprint and an expiry revision. Execution accepts the
+offer only while its source, cost, target, timing, and payability facts remain
+equivalent, then commits through `rules/casting/commit.py` or
+`rules/activation/commit.py`. Stale offers fail before mutation.
+
+`abilities.py` generically lowers represented colon abilities, Crew, and the
+supported Craft reminder grammar. CardPrograms may grant an activated ability
+through a serialized descriptor; historical card-named markers are interpreted
+only by the Game Record v3 compatibility adapter.
 
 ## Extension and event participation
 

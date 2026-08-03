@@ -187,6 +187,42 @@ class DecisionOpportunityTests(unittest.TestCase):
             engine.state.players["A"].yield_policy.mode,
         )
 
+    def test_offer_revision_metadata_does_not_invalidate_unchanged_yield(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            seed=304,
+            auto_pass_empty=True,
+        )
+        keep_all(session)
+        engine = session.engine
+        top = self._card(engine, "A", "Sensei's Divining Top")
+        engine.move_card(
+            top.object_id, "battlefield", controller="A", log=False
+        )
+        engine.state.players["A"].mana_pool["U"] = 1
+        engine.permissions.invalidate_current()
+        engine.state.active_player = "B"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        self._reset_priority(engine, "A")
+        engine._set_yield("A", "until_public_change")
+        before = engine.state.players["A"].yield_policy.action_signature
+
+        engine.state.revision += 1
+        hints = engine._priority_action_hints("A")
+        after = engine.meaningful_action_signature("A", hints)
+        allowed, reason = engine._can_auto_pass(
+            "A",
+            action_signature=after,
+            meaningful=engine._signature_has_actions("A", hints),
+        )
+
+        self.assertEqual(before, after)
+        self.assertTrue(allowed)
+        self.assertIsNone(reason)
+
     def test_yield_invalidation_survives_standard_trace_reload(self):
         session = make_session(
             self.db,

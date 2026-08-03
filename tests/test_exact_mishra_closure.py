@@ -1564,7 +1564,15 @@ class ExactMishraClosureTests(unittest.TestCase):
         )
         self.assertFalse(engine._stabilize())
         self.resolve_top(engine)
-        self.assertTrue(saga.annotations["urzas_saga_chapter_1"])
+        self.assertTrue(
+            any(
+                marker.startswith(
+                    "granted_activated_ability:saga_mana:"
+                )
+                and active
+                for marker, active in saga.annotations.items()
+            )
+        )
         self.assertIn(
             "saga_mana",
             {
@@ -1576,7 +1584,15 @@ class ExactMishraClosureTests(unittest.TestCase):
         engine._add_saga_lore(saga, reason="test chapter II")
         self.assertFalse(engine._stabilize())
         self.resolve_top(engine)
-        self.assertTrue(saga.annotations["urzas_saga_chapter_2"])
+        self.assertTrue(
+            any(
+                marker.startswith(
+                    "granted_activated_ability:saga_construct:"
+                )
+                and active
+                for marker, active in saga.annotations.items()
+            )
+        )
         saga.tapped = False
         self.prepare_main(engine)
         engine.state.players["A"].mana_pool["C"] = 2

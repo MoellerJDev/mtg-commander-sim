@@ -331,6 +331,13 @@ rows, and honest provider metadata. A 100/100 exact-list preflight is necessary
 but not sufficient for matchup evidence; the terminal, replay, pilot,
 fidelity, format, and sample-size gates still apply.
 
+Casting and activation alternatives additionally carry a canonical proposal
+fingerprint and expiry revision. These are ordinary legal-alternative facts,
+not capability secrets or persisted hidden reasoning. Command replay submits
+the recorded action and verifies the same authoritative source, cost, target,
+timing, and payability proposal; a stale proposal fails before mutation. Game
+Record v3 itself is unchanged.
+
 The target-action audit additionally records actions prevented before
 exposure, incorrectly advertised actions, no-target/mode-target removals,
 candidate generation, rejected target submissions, targets becoming illegal,

@@ -6,11 +6,11 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "damage_prevention_shields_redirection_and_browser_mana_regressions",
-    "branch": "rules/damage-prevention-and-redirection",
-    "commit_reference": "focused durable prevention, typed redirection, generic Oracle lowering, and browser mana/priority regression branch based on certified main 7d45ca8; exact-head certification pending",
+    "active_phase": "casting_activation_proposal_consolidation",
+    "branch": "refactor/casting-activation-proposals",
+    "commit_reference": "typed casting and activation proposals, shared executable action catalog, generic activated-ability lowering, and substantial CommanderEngine extraction based on certified Python 3.12 main 6ccb1e2; exact-head certification pending",
     "branch_ancestry": {
-      "focused_branch_base": "7d45ca8",
+      "focused_branch_base": "6ccb1e2",
       "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
@@ -572,8 +572,14 @@
     {
       "id": "damage_prevention_shields_and_redirection",
       "name": "Durable damage prevention and static redirection",
+      "status": "integrated_on_certified_main",
+      "evidence": "Certified main includes typed finite and next-instance shield state, cleanup expiration, exact simultaneous allocation, unpreventable nonconsumption, aggregate prevention dispatch, immutable commit fingerprints, and typed full-recipient redirection with destination departure and rediscovery. Generic Oracle IR v15 lowers fixed shield and static redirection wording without card-name dispatch. On the pinned current snapshot, Commander-legal exact Oracle and trusted CardPrograms each rose from 406 to 410, adding Shieldmate's Blessing, Hold at Bay, Mending Hands, and Palisade Giant. Browser regressions keep an active player's empty-stack main phase manual under auto-pass, keep the hand in a fixed resizable bottom dock, and verify projected Urborg/Citadel black mana plus named Cauldron Familiar and The Sackville-Bagginses cast actions."
+    },
+    {
+      "id": "casting_activation_proposals",
+      "name": "Typed casting, activation, and action offers",
       "status": "implementation_complete_certification_pending",
-      "evidence": "The focused branch adds typed finite and next-instance shield state, cleanup expiration, exact simultaneous allocation, unpreventable nonconsumption, aggregate prevention dispatch, immutable commit fingerprints, and typed full-recipient redirection with destination departure and rediscovery. Generic Oracle IR v15 lowers fixed shield and static redirection wording without card-name dispatch. On the pinned current snapshot, Commander-legal exact Oracle and trusted CardPrograms each rise from 406 to 410, adding Shieldmate's Blessing, Hold at Bay, Mending Hands, and Palisade Giant. Browser regressions keep an active player's empty-stack main phase manual under auto-pass, keep the hand in a fixed resizable bottom dock, and verify projected Urborg/Citadel black mana plus named Cauldron Familiar and The Sackville-Bagginses cast actions."
+      "evidence": "The focused branch uses immutable canonical casting and activation proposals for both legal-action advertisement and execution, pins offers to state revisions and proposal fingerprints, rejects stale source/cost/target/payability facts before mutation, and preserves strategic yield signatures across freshness-only revision changes. Dedicated query and commit packages plus the shared action catalog reduce CommanderEngine from 17,197 to 14,788 logical lines, reduce the configured direct-write heuristic from 159 to 144, and reduce oversized functions from 46 to 40. Generic Crew, Craft, granted activated-ability, and static cast-cost descriptors replace represented card-shaped engine branches while Game Record v3 compatibility remains explicit."
     },
     {
       "id": "rules_snapshot",
@@ -608,17 +614,17 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "7d45ca8ffd4aa6ec611b0f0f1220025c6ecc3cab",
+    "baseline_commit": "6ccb1e26bf5f7f2c33784f8d09481050b338525e",
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30770356732,
+      "run_id": 30788334496,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30770356732"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30788334496"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_pass_full_gate; focused_feature_worktree_165_deterministic_tests_pass",
-      "focused_rules_tests": "pass_durable_prevention_cleanup_allocation_unpreventable_aggregate_dispatch_static_redirection_replay_privacy_oracle_v15_capability_mutations_urborg_citadel_cauldron_familiar_agadeem_sackville_mana_undo_main_phase_and_turn_structure",
+      "deterministic_tests": "certified_main_pass_full_gate; focused_casting_activation_action_catalog_and_affected_rules_shards_pass; exact_head_full_gate_pending",
+      "focused_rules_tests": "pass_immutable_offer_models_cast_and_activation_advertisement_execution_equivalence_stale_revision_source_and_payability_rollback_generic_crew_craft_granted_ability_static_cost_mana_plan_seed_20260730_replay_and_projection",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
@@ -644,10 +650,10 @@
     "the continuous-effect baseline gates structural scan counts but records latency observationally; broader action, combat, copy, control-change, phasing, and invalidation performance scenarios remain incomplete",
     "a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence",
     "saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit",
-    "the authoritative engine remains a measured oversized legacy module with interleaved turn, mutation, casting, effect, and variant responsibilities; ratcheted guards prevent new debt while later phases extract it",
+    "the authoritative engine remains a measured oversized legacy module; casting and activation now use dedicated proposal and commit owners, while turn, effect, choice, and variant responsibilities still require incremental extraction",
     "future engine choice schemas and complete screen-reader audits remain incomplete",
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Certify and merge the durable damage-prevention, static-redirection, and browser mana/priority regression branch, then begin the generated damage-prevention continuations and aftermath batch from fresh certified main."
+  "next_task": "Certify and merge the typed casting/activation proposal consolidation, then begin the generated damage-prevention continuations and aftermath batch from fresh certified main."
 }

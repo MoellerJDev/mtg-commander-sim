@@ -228,6 +228,12 @@ relationships, source exclusion, and resolution-time conditions. Mandatory
 groups with insufficient candidates remove the cast or activation from the
 ordinary legal alternatives.
 
+Action advertisement and execution share immutable casting and activation
+proposal queries. A semantic program may contribute a validated static cast
+cost modifier or grant a serialized activated-ability descriptor; generic
+Oracle lowering handles the represented Crew and Craft keyword forms. The
+engine does not identify those abilities by printed name or Oracle ID.
+
 The interaction pack pins current local Oracle and rulings hashes and has
 deterministic positive and negative scenarios for:
 

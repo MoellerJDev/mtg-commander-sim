@@ -106,6 +106,8 @@
       ,"mtg_commander_sim/effect_runtime/zones_and_attachments.py": "registry-owned zone and attachment effect family"
       ,"mtg_commander_sim/effect_runtime/damage_life_and_turns.py": "registry-owned damage, life, and turn effect family"
       ,"mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py": "registry-owned object, stack, and token effect family"
+      ,"mtg_commander_sim/rules/casting/commit.py": "typed spell-casting transaction owner behind CommanderEngine"
+      ,"mtg_commander_sim/rules/activation/commit.py": "typed activated-ability transaction owner behind CommanderEngine"
     },
     "read_only_consumers": {
       "mtg_commander_sim/projection.py": "principal-scoped projection",
@@ -117,6 +119,12 @@
       ,"mtg_commander_sim/semantic_choices/engine_coordination.py": "actor-scoped immutable choice fact materialization and routing"
       ,"mtg_commander_sim/mana_undo.py": "read-only reversible mana-window validation with commits delegated to canonical owners"
       ,"mtg_commander_sim/object_query.py": "typed read-only object selection predicates"
+      ,"mtg_commander_sim/rules/action_catalog.py": "read-only executable action-offer catalog"
+      ,"mtg_commander_sim/rules/casting/costs.py": "read-only casting-cost proposal query"
+      ,"mtg_commander_sim/rules/casting/proposal.py": "read-only immutable casting proposal query"
+      ,"mtg_commander_sim/rules/activation/availability.py": "read-only activation payability query"
+      ,"mtg_commander_sim/rules/activation/proposal.py": "read-only immutable activation proposal query"
+      ,"mtg_commander_sim/rules/activation/query.py": "read-only activated-ability compiler query"
     },
     "model_definition": "mtg_commander_sim/model.py"
   },
