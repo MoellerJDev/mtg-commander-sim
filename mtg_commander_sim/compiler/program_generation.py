@@ -62,6 +62,10 @@ def _generated_coverage(*, kind: str, runtime_handler: bool) -> str:
     return "activated_ability"
 
 
+def _copy_mapping(value: Any) -> dict[str, Any] | None:
+    return dict(value) if value is not None else None
+
+
 def generated_programs(
     db: CardDatabase,
     record: CardRecord,
@@ -188,11 +192,8 @@ def generated_programs(
                         ),
                     },
                     tests=[f"oracle_template:{node.template_id}"],
-                    target_schema=(
-                        dict(node.target_schema)
-                        if node.target_schema is not None
-                        else None
-                    ),
+                    target_schema=_copy_mapping(node.target_schema),
+                    event_condition=_copy_mapping(node.event_condition),
                     coverage=[
                         "generated_oracle_ir",
                         _generated_coverage(

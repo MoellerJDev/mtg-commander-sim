@@ -160,7 +160,7 @@ class CardProgramV2Tests(unittest.TestCase):
             trust_level="trusted",
         )
 
-        self.assertEqual("oracle-ir-v20", current.compiler_version)
+        self.assertEqual("oracle-ir-v21", current.compiler_version)
         self.assertEqual(
             "capability_closed", current.trust_closure["trust_basis"]
         )
@@ -182,7 +182,7 @@ class CardProgramV2Tests(unittest.TestCase):
             capability_profile="commander_review",
             trust_level="trusted",
         )
-        self.assertEqual("oracle-ir-v20", current.compiler_version)
+        self.assertEqual("oracle-ir-v21", current.compiler_version)
         self.assertEqual("capability_closed", current.trust_closure["trust_basis"])
         self.assertEqual(
             ["choose_damage_source", "life"],
@@ -305,6 +305,56 @@ class CardProgramV2Tests(unittest.TestCase):
                 )
                 effect = program.to_dict()["abilities"][0]["effect_nodes"][0]
                 self.assertEqual(expected_amount, effect["amount"])
+
+    def test_prevention_triggers_use_narrow_apnap_capability_closure(self):
+        record = replace(
+            _bolt(),
+            oracle_id="00000000-0000-4000-8000-000000006153",
+            name="Fixture Prevention Guardian",
+            type_line="Creature — Human Soldier",
+            mana_cost="{3}{W}",
+            colors=("W",),
+            color_identity=("W",),
+            oracle_text=(
+                "When Fixture Prevention Guardian enters, prevent all damage "
+                "that would be dealt to you this turn.\n"
+                "Whenever damage that would be dealt to you is prevented, put "
+                "that many +1/+1 counters on Fixture Prevention Guardian."
+            ),
+        )
+
+        program = compile_card_program(
+            self.db,
+            record,
+            capability_registry=self.capabilities,
+            capability_profile="commander_review",
+            trust_level="trusted",
+        )
+
+        self.assertEqual(
+            {
+                "counter.placement.quantity_replacement",
+                "damage.prevention.persistent_amount",
+                "damage.prevention.triggered_results",
+                "trigger.placement.apnap",
+            },
+            set(program.capability_dependencies),
+        )
+        self.assertEqual(
+            "capability_closed",
+            program.trust_closure["trust_basis"],
+        )
+        self.assertTrue(program.trust_closure["trusted"])
+        triggered = next(
+            ability
+            for ability in program.to_dict()["abilities"]
+            if ability["timing_permissions"]["event"]
+            == "damage.prevented"
+        )
+        self.assertEqual(
+            ["$source.controller"],
+            triggered["triggers"][0]["condition"]["value"],
+        )
 
     def test_life_multiplier_no_longer_requires_a_card_specific_program(self):
         record = self.db.lookup("Boon Reflection")

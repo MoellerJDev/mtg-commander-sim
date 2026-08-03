@@ -479,6 +479,22 @@ class DamagePreventionShieldTests(DamageReplacementPipelineBase):
         with self.assertRaisesRegex(ValueError, "unknown unknown"):
             ChosenDamageSource.from_dict(malformed_v3)
 
+        malformed_v3_predicate = dict(version_three_dict)
+        malformed_v3_predicate["predicate"] = {
+            **version_three_dict["predicate"],
+            "known_to_actor": False,
+        }
+        with self.assertRaisesRegex(ValueError, "legally known"):
+            ChosenDamageSource.from_dict(malformed_v3_predicate)
+
+        malformed_v3_term = dict(version_three_dict)
+        malformed_v3_term["predicate"] = {
+            **version_three_dict["predicate"],
+            "types_all": [1],
+        }
+        with self.assertRaisesRegex(ValueError, "nonempty strings"):
+            ChosenDamageSource.from_dict(malformed_v3_term)
+
         malformed = version_two.to_dict()
         malformed["unknown"] = True
         with self.assertRaisesRegex(ValueError, "unknown"):

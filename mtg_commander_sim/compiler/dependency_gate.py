@@ -1,0 +1,82 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Iterable, Mapping, Sequence
+
+from ..rules.capabilities import (
+    CapabilityClosure,
+    CapabilityRegistry,
+    capability_covered_mechanics,
+    capability_dependencies_for_node,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class DependencyGate:
+    blockers: tuple[str, ...]
+    capabilities: tuple[str, ...] = ()
+    closure: CapabilityClosure | None = None
+
+
+def dependency_gate(
+    *,
+    mechanics: Iterable[str],
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    trusted_mechanics: frozenset[str],
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+) -> DependencyGate:
+    mechanic_ids = tuple(str(value).casefold() for value in mechanics)
+    capabilities = capability_dependencies_for_node(
+        effects=effects,
+        target_schema=target_schema,
+        mechanic_ids=mechanic_ids,
+    )
+    if capability_registry is not None and capabilities:
+        closure = capability_registry.closure(
+            capabilities,
+            profile=capability_profile,
+        )
+        covered = set(capability_covered_mechanics(capabilities))
+        unmapped = sorted(set(mechanic_ids) - trusted_mechanics - covered)
+        return DependencyGate(
+            blockers=(
+                *(f"capability:{blocker}" for blocker in closure.blockers),
+                *(f"mechanic:{mechanic}" for mechanic in unmapped),
+            ),
+            capabilities=capabilities,
+            closure=closure,
+        )
+    return DependencyGate(
+        blockers=tuple(
+            f"mechanic:{mechanic}"
+            for mechanic in sorted(set(mechanic_ids) - trusted_mechanics)
+        )
+    )
+
+
+def explicit_capability_gate(
+    capability: str,
+    *,
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+) -> DependencyGate:
+    if capability_registry is None:
+        return DependencyGate(
+            blockers=(f"capability:{capability}",),
+            capabilities=(capability,),
+        )
+    closure = capability_registry.closure(
+        (capability,), profile=capability_profile
+    )
+    return DependencyGate(
+        blockers=tuple(
+            f"capability:{blocker}" for blocker in closure.blockers
+        ),
+        capabilities=(capability,),
+        closure=closure,
+    )
+
+
+__all__ = ["DependencyGate", "dependency_gate", "explicit_capability_gate"]

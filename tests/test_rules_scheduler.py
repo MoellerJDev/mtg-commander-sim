@@ -125,20 +125,14 @@ class RulesSchedulerTests(unittest.TestCase):
     def test_selected_batch_is_reviewed_blocked_and_cli_next_uses_it(self):
         selected = self.queue["selected_batch"]
         self.assertEqual(
-            "damage-prevention-continuations-and-aftermath",
+            "canonical-life-and-simple-zone-triggers",
             selected["batch_id"],
         )
         self.assertEqual(
-            "replacement-prevention", selected["subsystem_id"]
+            "triggered-static-linked", selected["subsystem_id"]
         )
         self.assertEqual(
-            {
-                "615.1",
-                "615.2",
-                "615.5",
-                "615.9",
-                "616.1",
-            },
+            {"603.2"},
             set(selected["rule_ids"]),
         )
         self.assertTrue(

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -27,8 +28,17 @@ from mtg_commander_sim.damage_modifier_state import (
     DealDamagePreventionAftermath,
     GainLifePreventionAftermath,
 )
+from mtg_commander_sim.damage_source import DamageSourceSnapshot
+from mtg_commander_sim.prevention_triggers import (
+    DrawCardsPreventionTrigger,
+    PreventionTriggeredAbility,
+    PreventionTriggerOccurrence,
+)
 from mtg_commander_sim.engine import CommanderEngine
 from mtg_commander_sim import oracle_ir as oracle_ir_module
+from mtg_commander_sim import object_predicate as object_predicate_module
+from mtg_commander_sim import object_query as object_query_module
+from mtg_commander_sim.object_query import ObjectQueryError, ObjectQuerySpec
 from mtg_commander_sim.semantic_runtime.counter_replacements import (
     CounterPlacementEventSpec,
     CounterQuantityReplacementHandler,
@@ -113,6 +123,48 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 assert_hidden_target_rejected()
 
+    def test_object_query_string_coercion_mutant_is_killed(self):
+        def assert_malformed_term_rejected() -> None:
+            with self.assertRaises(ObjectQueryError):
+                ObjectQuerySpec(types_all=(1,))
+
+        assert_malformed_term_rejected()
+
+        def coercing_terms(values, *, field_name, upper=False):
+            del field_name
+            normalize = str.upper if upper else str.casefold
+            return tuple(sorted(normalize(str(value)) for value in values))
+
+        with patch.object(
+            object_predicate_module,
+            "_normalized_terms",
+            coercing_terms,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_malformed_term_rejected()
+
+    def test_chosen_source_predicate_validator_mutant_is_killed(self):
+        predicate = ObjectQuerySpec(
+            zones=("battlefield",),
+            known_to_actor=True,
+            token=True,
+        )
+
+        def assert_unsupported_predicate_rejected() -> None:
+            with self.assertRaises(ObjectQueryError):
+                object_query_module.validate_chosen_damage_source_predicate(
+                    predicate
+                )
+
+        assert_unsupported_predicate_rejected()
+        with patch.object(
+            object_query_module,
+            "validate_chosen_damage_source_predicate",
+            lambda value: value,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_unsupported_predicate_rejected()
+
     def test_prevention_immediate_sequence_mutants_are_killed(self):
         record = replace(
             self.db.lookup("Force of Vigor"),
@@ -143,8 +195,8 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         original = oracle_ir_module.fixed_prevention_effect_template
 
         def mutated(mutator):
-            def compile_template(text):
-                result = original(text)
+            def compile_template(text, **kwargs):
+                result = original(text, **kwargs)
                 if result is None:
                     return None
                 template_id, effects, targets, rules = result
@@ -980,6 +1032,90 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_shield_is_consumed()
+
+    def test_prevention_trigger_quantity_mutant_is_killed(self):
+        source = DamageSourceSnapshot(
+            ref="prevention-source",
+            object_id="prevention-source-object",
+            logical_object_id="prevention-source-incarnation",
+            controller="B",
+            owner="B",
+            zone="stack",
+            types=("instant",),
+        )
+        result = DrawCardsPreventionTrigger(
+            player="B",
+            per_prevented=1,
+        )
+        occurrence = PreventionTriggerOccurrence(
+            ability=PreventionTriggeredAbility(
+                controller="B",
+                source=source,
+                label="Damage prevented this way",
+                results=(result,),
+            ),
+            effect_id="prevention.shield:mutation",
+            prevented_amount=4,
+            damage_event_ids=("damage:mutation",),
+            prevented_source_controllers=("A",),
+        )
+
+        def assert_scaled_draw() -> None:
+            effects = occurrence.runtime_effects()
+            self.assertEqual(1, len(effects))
+            self.assertEqual(4, effects[0]["count"])
+
+        assert_scaled_draw()
+        with patch.object(
+            DrawCardsPreventionTrigger,
+            "amount",
+            lambda value, prevented: value.fixed_amount,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_scaled_draw()
+
+    def test_trigger_apnap_grouping_mutant_is_killed(self):
+        host = SimpleNamespace(
+            apnap_order=lambda: ("C", "D", "A", "B")
+        )
+        values = (
+            {"controller": "A", "ref": "trigger-a"},
+            {"controller": "C", "ref": "trigger-c"},
+            {"controller": "B", "ref": "trigger-b"},
+        )
+
+        def assert_apnap_grouping() -> None:
+            groups = CommanderEngine._semantic_trigger_groups(host, values)
+            self.assertEqual(
+                ["C", "A", "B"],
+                [group["controller"] for group in groups],
+            )
+
+        def alphabetical_grouping(_host, candidates):
+            return [
+                {
+                    "controller": controller,
+                    "items": [
+                        dict(value)
+                        for value in candidates
+                        if value["controller"] == controller
+                    ],
+                }
+                for controller in ("A", "B", "C", "D")
+                if any(
+                    value["controller"] == controller
+                    for value in candidates
+                )
+            ]
+
+        assert_apnap_grouping()
+        with patch.object(
+            CommanderEngine,
+            "_semantic_trigger_groups",
+            alphabetical_grouping,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_apnap_grouping()
 
     def test_chosen_source_incarnation_mutants_are_killed(self):
         chosen = ChosenDamageSource(

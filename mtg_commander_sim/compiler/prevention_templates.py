@@ -4,7 +4,10 @@ import re
 from typing import Any, Mapping
 
 from ..damage_source import REPRESENTED_DAMAGE_SOURCE_ZONES
-from ..object_query import ObjectQuerySpec
+from ..object_query import (
+    ObjectQuerySpec,
+    validate_chosen_damage_source_predicate,
+)
 
 
 PreventionTemplate = tuple[
@@ -12,6 +15,13 @@ PreventionTemplate = tuple[
     tuple[Mapping[str, Any], ...],
     Mapping[str, Any] | None,
     tuple[str, ...],
+]
+PreventionTriggerTemplate = tuple[
+    str,
+    tuple[Mapping[str, Any], ...],
+    Mapping[str, Any] | None,
+    tuple[str, ...],
+    Mapping[str, Any],
 ]
 
 
@@ -104,26 +114,34 @@ def _rules(
 def _source_predicate(qualifier: str | None) -> ObjectQuerySpec:
     normalized = " ".join(str(qualifier or "").casefold().split())
     if not normalized:
-        return ObjectQuerySpec(
-            zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
-            known_to_actor=True,
+        return validate_chosen_damage_source_predicate(
+            ObjectQuerySpec(
+                zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
+                known_to_actor=True,
+            )
         )
     color_words = normalized.split(" or ")
     if all(word in _COLOR_CODES for word in color_words):
-        return ObjectQuerySpec(
+        return validate_chosen_damage_source_predicate(
+            ObjectQuerySpec(
+                zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
+                colors_any=tuple(_COLOR_CODES[word] for word in color_words),
+                known_to_actor=True,
+            )
+        )
+    return validate_chosen_damage_source_predicate(
+        ObjectQuerySpec(
             zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
-            colors_any=tuple(_COLOR_CODES[word] for word in color_words),
+            types_all=(
+                (normalized,)
+                if normalized in {"artifact", "land", "creature"}
+                else ()
+            ),
+            supertypes_all=(
+                ("legendary",) if normalized == "legendary" else ()
+            ),
             known_to_actor=True,
         )
-    return ObjectQuerySpec(
-        zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
-        types_all=(
-            (normalized,)
-            if normalized in {"artifact", "land", "creature"}
-            else ()
-        ),
-        supertypes_all=(("legendary",) if normalized == "legendary" else ()),
-        known_to_actor=True,
     )
 
 
@@ -214,6 +232,62 @@ def _chosen_source_damage_aftermath(
         (_chosen_source_effect(shield=shield, qualifier=None),),
         None,
         _rules(None),
+    )
+
+
+def _chosen_source_triggered_damage_and_draw(
+    normalized: str,
+    *,
+    card_name: str | None = None,
+) -> PreventionTemplate | None:
+    match = re.fullmatch(
+        r"the next time a source of your choice would deal damage to you "
+        r"this turn, prevent that damage\. when damage is prevented this way, "
+        r"(?P<source>[a-z0-9'’, -]+) deals that much damage to that source's "
+        r"controller and you draw that many cards?\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    if not match:
+        return None
+    if card_name is not None and (
+        " ".join(match.group("source").casefold().split())
+        != " ".join(card_name.casefold().split())
+    ):
+        return None
+    shield = {
+        "op": "create_damage_prevention_shield",
+        "source": "$source",
+        "subject": "$controller",
+        "mode": "next_instance",
+        "duration": "until_end_of_turn",
+        "triggered_ability": {
+            "source": "$source",
+            "label": "When damage is prevented this way",
+            "target_schema": {},
+            "results": [
+                {
+                    "kind": "deal_damage",
+                    "source": "$source",
+                    "recipient_kind": "prevented_source_controller",
+                    "per_prevented": 1,
+                    "fixed_amount": 0,
+                },
+                {
+                    "kind": "draw_cards",
+                    "player": "$controller",
+                    "per_prevented": 1,
+                    "fixed_amount": 0,
+                    "private": True,
+                },
+            ],
+        },
+    }
+    return (
+        "damage-prevention-triggered-damage-draw-v1",
+        (_chosen_source_effect(shield=shield, qualifier=None),),
+        None,
+        _rules(None, "cr-120-damage", "cr-121-drawing-a-card"),
     )
 
 
@@ -459,6 +533,35 @@ def _ordinary_shield(normalized: str) -> PreventionTemplate | None:
     return None
 
 
+def _ordinary_all_damage(normalized: str) -> PreventionTemplate | None:
+    match = re.fullmatch(
+        rf"prevent all damage that would be dealt to "
+        rf"(?P<subject>{_SUBJECT_PATTERN}) this turn\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    if not match:
+        return None
+    subject = match.group("subject").casefold()
+    target_schema = _target_schema(subject)
+    return (
+        "damage-prevention-all-shield-v1",
+        (
+            {
+                "op": "create_damage_prevention_shield",
+                "source": "$source",
+                "subject": (
+                    "$controller" if subject == "you" else "$target.0"
+                ),
+                "mode": "all",
+                "duration": "until_end_of_turn",
+            },
+        ),
+        target_schema,
+        _rules(target_schema),
+    )
+
+
 def _self_shield(normalized: str) -> PreventionTemplate | None:
     match = re.fullmatch(
         r"prevent the next (?P<amount>\d+|x) damage that would be dealt to "
@@ -522,6 +625,7 @@ _PREVENTION_PRODUCTIONS = (
     _counter_aftermath,
     _shared_color_creatures,
     _ordinary_shield,
+    _ordinary_all_damage,
     _self_shield,
     _source_shield,
 )
@@ -529,12 +633,69 @@ _PREVENTION_PRODUCTIONS = (
 
 def fixed_prevention_effect_template(
     text: str,
+    *,
+    card_name: str | None = None,
 ) -> PreventionTemplate | None:
     """Lower one closed finite CR 615 sentence through ordered productions."""
 
     normalized = " ".join(text.strip().split())
+    triggered = _chosen_source_triggered_damage_and_draw(
+        normalized,
+        card_name=card_name,
+    )
+    if triggered is not None:
+        return triggered
     for production in _PREVENTION_PRODUCTIONS:
         result = production(normalized)
         if result is not None:
             return result
     return None
+
+
+def prevention_trigger_effect_template(
+    text: str,
+    *,
+    card_name: str | None = None,
+) -> PreventionTriggerTemplate | None:
+    """Lower closed CR 615.13 battlefield trigger wording."""
+
+    normalized = " ".join(text.strip().split())
+    source_reference = (
+        rf"(?:this (?:artifact|creature|enchantment|permanent)|"
+        rf"{re.escape(card_name)})"
+        if card_name
+        else r"this (?:artifact|creature|enchantment|permanent)"
+    )
+    match = re.fullmatch(
+        r"whenever damage that would be dealt to you is prevented, put that "
+        rf"many (?P<counter>\+\d+/\+\d+) counters? on {source_reference}\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    if match is None:
+        return None
+    return (
+        "damage-prevented-self-counter-trigger-v1",
+        (
+            {
+                "op": "counter",
+                "card": "$source",
+                "counter": match.group("counter"),
+                "delta": "$context.prevented_amount",
+                "source": "$source",
+            },
+        ),
+        None,
+        ("cr-615-prevention-effects", "cr-122-counters"),
+        {
+            "field": "affected_players",
+            "op": "contains_any",
+            "value": ["$source.controller"],
+        },
+    )
+
+
+__all__ = [
+    "fixed_prevention_effect_template",
+    "prevention_trigger_effect_template",
+]

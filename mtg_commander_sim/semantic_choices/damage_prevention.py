@@ -8,6 +8,7 @@ from ..object_query import (
     ObjectQueryError,
     ObjectQuerySpec,
     query_objects,
+    validate_chosen_damage_source_predicate,
 )
 from ..replacement.immutable import FrozenMap, thaw_value
 from .context import SemanticChoiceContext, SemanticChoiceQuery
@@ -56,17 +57,10 @@ def _source_predicate(effect: Mapping[str, Any]) -> ObjectQuerySpec:
             )
     except ObjectQueryError as exc:
         raise SemanticChoiceError(str(exc)) from exc
-    if predicate.known_to_actor is not True:
-        raise SemanticChoiceError(
-            "Chosen damage sources must be legally known to the chooser"
-        )
-    if not predicate.zones or not set(predicate.zones).issubset(
-        REPRESENTED_DAMAGE_SOURCE_ZONES
-    ):
-        raise SemanticChoiceError(
-            "Chosen damage sources require public represented zones"
-        )
-    return predicate
+    try:
+        return validate_chosen_damage_source_predicate(predicate)
+    except ObjectQueryError as exc:
+        raise SemanticChoiceError(str(exc)) from exc
 
 
 def _candidates(

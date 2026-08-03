@@ -318,7 +318,7 @@ update cannot inherit stale conformance. Missing or duplicate cases fail
 corpus verification.
 
 The Oracle compiler preserves source spans and emits typed ability, cost,
-target, trigger, replacement, and effect nodes. Oracle IR v12 lowers simple
+target, trigger, replacement, and effect nodes. Oracle IR v21 lowers simple
 self enters/dies/leaves triggers, unconditional enters-tapped text, fixed
 self/target effects, basic creature-token creation, and reviewed whole-line
 fixed-mana attack/block declaration costs, combat-declaration restrictions,
@@ -1002,9 +1002,17 @@ finite and next-instance prevention shields, dynamic/divided and independent
 per-object creation, ordinary public source choice, transactional life/
 permanent-counter aftermath, same-chooser event ordering, resumable mana-
 payment replacement choices, and static redirection to a damageable source are
-inside the represented boundary. Complete CR 609.7a source categories,
+inside the represented boundary. Closed CR 615.13 prevention-trigger results
+are immutable occurrences with frozen source/controller LKI, aggregate the
+exact amount prevented by one effect, join the ordinary APNAP trigger batch,
+choose represented targets at stack placement, and resolve through ordinary
+typed effects. `damage_transaction.py` is the narrow damage port used by
+trigger aftermath; `prevention_triggers.py` owns the model/lowering, and
+`trigger_targeting.py` owns target-at-placement without requiring a registry
+program for dynamic typed triggers. Complete CR 609.7a source categories,
 permanent-spell continuity, broader source-characteristic predicates, general
-replacement-capable life gain, remaining aftermath wording, partial or
+replacement-capable life gain, broader conditional trigger results, remaining
+immediate aftermath wording, partial or
 attached redirection, non-damage transformations, unresolved dynamic Toxic
 values, incomplete continuous-characteristic closure, and remaining result-
 replacement families remain outside it.

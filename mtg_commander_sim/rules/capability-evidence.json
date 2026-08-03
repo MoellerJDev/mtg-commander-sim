@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "4cfb6ceaf8e25e62995c93309b5c78051b554592b2da542c0fbde44a5f07aa2d",
-  "declaration_source_fingerprint": "f22a07acd236e7c0e1625ed4524761394799ad0a088ec4671977d4662758aa9d",
+  "registry_fingerprint": "280330679c40136a72e5601ec2302b555614ffad2abb81fbf482930ec7287869",
+  "declaration_source_fingerprint": "3f2e59f6a6f17ba3441491182d7b7dd84b3ee96e0176f7cc4659544aebb3cdb6",
   "declarations": [
     {
       "capability_id": "continuous.basic_land_type.add_all_lands",
@@ -1548,6 +1548,108 @@
         "commander_review"
       ],
       "applicability_note": "Apply trusted generic or reviewed fixed static prevention and represented protection prevention to each typed damage event in affected-subject order."
+    },
+    {
+      "capability_id": "damage.prevention.triggered_results",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_prevention_trigger_stack.PreventionTriggerStackTests.test_trigger_uses_source_lki_resolves_on_stack_and_replays",
+      "official_rule_ids": [
+        "603.3",
+        "603.3b",
+        "603.3d",
+        "615.13"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Use source last-known information and defer damage and draw results until the triggered ability resolves from the stack."
+    },
+    {
+      "capability_id": "damage.prevention.triggered_results",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_prevention_trigger_stack.PreventionTriggerStackTests.test_four_player_apnap_preserves_created_controller_after_control_change",
+      "official_rule_ids": [
+        "603.3",
+        "603.3b",
+        "603.3d",
+        "615.13"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Place prevention triggers controlled by several players in four-player APNAP order while preserving the controller of the created delayed ability across a later source control change."
+    },
+    {
+      "capability_id": "damage.prevention.triggered_results",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_prevention_trigger_quantity_mutant_is_killed",
+      "official_rule_ids": [
+        "603.3",
+        "603.3b",
+        "603.3d",
+        "615.13"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that discards the aggregate prevented amount when deriving a triggered result."
+    },
+    {
+      "capability_id": "damage.prevention.triggered_results",
+      "evidence_class": "negative",
+      "test_id": "tests.test_prevention_trigger_stack.PreventionTriggerStackTests.test_unpreventable_damage_creates_no_prevention_trigger",
+      "official_rule_ids": [
+        "603.3",
+        "603.3b",
+        "603.3d",
+        "615.13"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Do not trigger when a prevention effect applies to unpreventable damage but prevents zero damage."
+    },
+    {
+      "capability_id": "damage.prevention.triggered_results",
+      "evidence_class": "positive",
+      "test_id": "tests.test_prevention_trigger_stack.PreventionTriggerStackTests.test_runtime_lowers_trigger_descriptor_and_rejects_bad_shape_atomically",
+      "official_rule_ids": [
+        "603.3",
+        "603.3b",
+        "603.3d",
+        "615.13"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Lower a strict typed prevention-trigger descriptor onto a durable prevention effect without card-name logic."
+    },
+    {
+      "capability_id": "damage.prevention.triggered_results",
+      "evidence_class": "replay",
+      "test_id": "tests.test_prevention_trigger_stack.PreventionTriggerStackTests.test_trigger_uses_source_lki_resolves_on_stack_and_replays",
+      "official_rule_ids": [
+        "603.3",
+        "603.3b",
+        "603.3d",
+        "615.13"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the exact stack occurrence, source LKI, damage result, and draw count from accepted commands."
     },
     {
       "capability_id": "damage.redirection.static_to_source",
@@ -3899,6 +4001,159 @@
       "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
     },
     {
+      "capability_id": "trigger.placement.apnap",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch",
+      "official_rule_ids": [
+        "101.4",
+        "603.3",
+        "603.3b",
+        "603.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Merge already-detected represented triggers through state-based-action stabilization before APNAP/controller-order stack placement."
+    },
+    {
+      "capability_id": "trigger.placement.apnap",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_preflight_v080.NormalizedZoneEventTests.test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
+      "official_rule_ids": [
+        "101.4",
+        "603.3",
+        "603.3b",
+        "603.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Place represented triggers by active-player turn order and collect each controller's bottom-to-top order independently."
+    },
+    {
+      "capability_id": "trigger.placement.apnap",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_trigger_apnap_grouping_mutant_is_killed",
+      "official_rule_ids": [
+        "101.4",
+        "603.3",
+        "603.3b",
+        "603.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that substitutes alphabetical controller order for the active-player turn order."
+    },
+    {
+      "capability_id": "trigger.placement.apnap",
+      "evidence_class": "negative",
+      "test_id": "tests.test_trigger_targeting.TriggerTargetingTests.test_invalid_mandatory_trigger_is_removed_before_next_choice",
+      "official_rule_ids": [
+        "101.4",
+        "603.3",
+        "603.3b",
+        "603.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Remove a represented trigger whose mandatory public targets disappeared, then continue to the next waiting trigger."
+    },
+    {
+      "capability_id": "trigger.placement.apnap",
+      "evidence_class": "positive",
+      "test_id": "tests.test_trigger_targeting.TriggerTargetingTests.test_dynamic_trigger_without_registry_program_issues_seat_choice",
+      "official_rule_ids": [
+        "101.4",
+        "603.3",
+        "603.3b",
+        "603.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Obtain a represented mandatory target as a typed dynamic trigger is put on the stack without requiring a registry program."
+    },
+    {
+      "capability_id": "trigger.placement.apnap",
+      "evidence_class": "positive",
+      "test_id": "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_trigger_waits_for_stabilization_then_becomes_top_stack_object",
+      "official_rule_ids": [
+        "101.4",
+        "603.3",
+        "603.3b",
+        "603.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep a detected trigger waiting through stabilization and place it above the existing stack before granting priority."
+    },
+    {
+      "capability_id": "trigger.placement.apnap",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_prevention_trigger_stack.PreventionTriggerStackTests.test_targeted_prevention_trigger_chooses_target_when_put_on_stack",
+      "official_rule_ids": [
+        "101.4",
+        "603.3",
+        "603.3b",
+        "603.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Issue the mandatory target capability only to the trigger controller and exclude opposing private hand references from legal targets."
+    },
+    {
+      "capability_id": "trigger.placement.apnap",
+      "evidence_class": "replay",
+      "test_id": "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch",
+      "official_rule_ids": [
+        "101.4",
+        "603.3",
+        "603.3b",
+        "603.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay an explicit same-controller trigger ordering after damage and resulting state-based actions share one batch."
+    },
+    {
+      "capability_id": "trigger.placement.apnap",
+      "evidence_class": "replay",
+      "test_id": "tests.test_untap_step_rules.UntapStepRuleTests.test_untap_trigger_waits_for_upkeep_priority_and_replays",
+      "official_rule_ids": [
+        "101.4",
+        "603.3",
+        "603.3b",
+        "603.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay a waiting untap trigger that is put on the stack before upkeep priority."
+    },
+    {
       "capability_id": "variant.monarch.designate",
       "evidence_class": "interaction",
       "test_id": "tests.test_monarch_rules.MonarchRuleTests.test_creature_combat_damage_transfers_only_on_trigger_resolution",
@@ -4254,5 +4509,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "487bc64b9b926b746e83470e29c256bc014d9ea88a8f37069bd0d76f4f35e443"
+  "fingerprint": "7c60b89bc37bad2256c7b89babc8d0d390a80a12be1cdf3af62229339adda118"
 }

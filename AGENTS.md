@@ -79,20 +79,23 @@ rewrite.
   damage results, durable prevention/redirection state, and focused token,
   zone, counter, life, and damage mutation owners. Generated reports, rather
   than branch chronology, are the source of current counts.
-- Merged main through PR 76 includes the bounded
+- Merged main through PR 79 includes the bounded
   `rules/damage-prevention-continuations-and-aftermath` slice: typed dynamic,
   divided, and per-object shields; seat-scoped source selection with
   physical/LKI pinning; transactional prevention-dependent life/counter
   aftermath; same-chooser ordering; mana-payment continuation; and the narrow
-  damage-modifier and life runtime families. The generic Oracle IR v18
+  damage-modifier and life runtime families. The generic Oracle IR v20
   correction preserves fixed independent post-prevention instructions as
   ordered siblings and routes immediate life through the canonical
-  replacement-capable owner.
-- The active prevention-aftermath branch adds a typed immutable damage source
-  and proposal boundary plus source-controller damage aftermath that reenters
-  the canonical damage transaction. Keep CR 615.13 triggered prevention results,
-  explicit-target aftermath, mixed aftermath, and mandatory recursive loops
-  fail-closed until their separate stack/choice dependencies are implemented.
+  replacement-capable owner; one strict ObjectQuerySpec now owns represented
+  chosen-source validation from compiler through replay and damage-time recheck.
+- The active prevention-trigger branch represents closed CR 615.13 results as
+  immutable waiting trigger occurrences with exact prevented-amount aggregation,
+  source/controller LKI, ordinary APNAP stack placement, represented target
+  choice, and exact replay. Nested triggered damage reenters the canonical
+  transaction through a narrow typed port. Keep explicit-target or mixed
+  immediate aftermath, broader conditional trigger results, and unsupported
+  recursive loops fail-closed.
 - Keep complete CR 609.7a source categories, permanent-spell continuity,
   broader source-property predicates, general replacement-capable life gain,
   life-gain prevention, remaining prevention-aftermath wording,
@@ -103,9 +106,10 @@ rewrite.
 - The merged infrastructure phase establishes a two-slot development pipeline,
   deterministic change-impact quick gates, balanced PR shards, a stable
   certification context, compact `main` smoke, and deep nightly assurance.
-  The next coherent dependency-ready family is CR 615.13 prevention-trigger
-  stack ownership after the active CR 615.5 batch certifies. Do not resume
-  numerical rule traversal or open a status-only follow-up.
+  After the active CR 615.13 batch certifies, the corpus-ranked next family is
+  canonical fixed life results plus simple targetless enter/death trigger event
+  binding and lowering. Do not resume numerical rule traversal or open a
+  status-only follow-up.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic

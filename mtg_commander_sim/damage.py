@@ -18,6 +18,11 @@ from .damage_results import (
     prepare_damage_results,
     PreparedDamageResults,
 )
+from .damage_transaction import (
+    DamageTransactionPort,
+    DamageTransactionResult,
+    PreparedDamageTransaction,
+)
 from .damage_values import (
     DamageError,
     DamageProposal,
@@ -55,12 +60,23 @@ from .replacement_effects import (
     ReplacementSelection,
     advance_replacement_batch,
 )
+from .prevention_triggers import (
+    PreventionTriggeredAbility,
+    PreventionTriggerError,
+    PreventionTriggerOccurrence,
+    prevention_trigger_stack_item,
+)
 
 
 class DamageHost(Protocol):
     state: Any
     semantics: Any
     active_seats: list[str]
+    seats: list[str]
+
+    def _next_ref(self, prefix: str) -> str: ...
+
+    def _stable_runtime_id(self, kind: str, ref: str) -> str: ...
 
     def _semantic_event_sources(
         self, *, zones: set[str] | None = None
@@ -284,6 +300,10 @@ class PreventionAppliedEvent:
     source_id: str
     prevented_amount: int
     damage_event_ids: tuple[str, ...]
+    prevented_source_controllers: tuple[str, ...] = ()
+    affected_players: tuple[str, ...] = ()
+    affected_permanents: tuple[str, ...] = ()
+    triggered_ability: PreventionTriggeredAbility | None = None
 
     def semantic_context(self) -> dict[str, Any]:
         return {
@@ -291,7 +311,23 @@ class PreventionAppliedEvent:
             "source": self.source_id,
             "prevented_amount": self.prevented_amount,
             "damage_event_ids": list(self.damage_event_ids),
+            "prevented_source_controllers": list(
+                self.prevented_source_controllers
+            ),
+            "affected_players": list(self.affected_players),
+            "affected_permanents": list(self.affected_permanents),
         }
+
+    def trigger_occurrence(self) -> PreventionTriggerOccurrence | None:
+        if self.triggered_ability is None:
+            return None
+        return PreventionTriggerOccurrence(
+            ability=self.triggered_ability,
+            effect_id=self.effect_id,
+            prevented_amount=self.prevented_amount,
+            damage_event_ids=self.damage_event_ids,
+            prevented_source_controllers=self.prevented_source_controllers,
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -308,6 +344,51 @@ class DamageBatchResult:
     @property
     def dealt_amount(self) -> int:
         return sum(event.dealt_amount for event in self.events)
+
+
+@dataclass(frozen=True, slots=True)
+class _CanonicalDamageTransactionPort(DamageTransactionPort):
+    host: DamageHost
+
+    def recipient(
+        self,
+        ref: str,
+        *,
+        actor: str,
+    ) -> DamageRecipientSnapshot:
+        return recipient_snapshot(self.host, ref, actor=actor)
+
+    def prepare(
+        self,
+        proposals: Sequence[DamageProposal],
+        *,
+        selections: Sequence[str | None | Mapping[str, object]],
+        sources: Sequence[object] | None,
+        source_zones: Mapping[str, str] | None,
+        modifier_snapshot: DamageModifierSnapshot,
+        aftermath_depth: int,
+        aftermath_effect_chain: tuple[str, ...],
+    ) -> PreparedDamageTransaction:
+        return prepare_damage_batch(
+            self.host,
+            proposals,
+            selections=selections,
+            sources=sources,
+            source_zones=source_zones,
+            modifier_snapshot=modifier_snapshot,
+            aftermath_depth=aftermath_depth,
+            aftermath_effect_chain=aftermath_effect_chain,
+        )
+
+    def commit(
+        self,
+        prepared: PreparedDamageTransaction,
+    ) -> DamageTransactionResult:
+        if not isinstance(prepared, PreparedDamageBatch):
+            raise DamageError(
+                "Nested damage lost its canonical prepared value"
+            )
+        return commit_prepared_damage_batch(self.host, prepared)
 
 
 _TOXIC_ABILITY = re.compile(r"^toxic\s+(?P<value>[0-9]+)$", re.IGNORECASE)
@@ -485,10 +566,19 @@ def damage_proposal(
     deathtouch: bool = False,
     damage_step: int | None = None,
     first_strike_step: bool = False,
+    source_override: DamageSourceSnapshot | None = None,
 ) -> DamageProposal:
+    if source_override is not None and not isinstance(
+        source_override, DamageSourceSnapshot
+    ):
+        raise DamageError("Damage source overrides must be typed LKI snapshots")
     return DamageProposal(
         proposal_id=proposal_id,
-        source=source_snapshot(host, source_ref, controller=actor),
+        source=(
+            source_override
+            if source_override is not None
+            else source_snapshot(host, source_ref, controller=actor)
+        ),
         recipient=recipient_snapshot(host, target, actor=actor),
         amount=amount,
         combat=combat,
@@ -764,6 +854,7 @@ def prepare_damage_batch(
         aftermath = prepare_prevention_aftermath(
             host,
             events,
+            damage_port=_CanonicalDamageTransactionPort(host),
             selections=tuple(selections[aftermath_selection_offset:]),
             sources=sources,
             source_zones=source_zones,
@@ -1090,11 +1181,20 @@ def _log_result_replacement_journal(
 
 
 def _prevention_applied_events(
+    host: DamageHost,
     prepared: PreparedDamageBatch,
 ) -> tuple[PreventionAppliedEvent, ...]:
     sources = {effect.effect_id: effect.source_id for effect in prepared.effects}
+    shield_triggers = {
+        shield.effect_id: shield.triggered_ability
+        for shield in host.state.damage_prevention_shields
+        if shield.triggered_ability is not None
+    }
     amounts: dict[str, int] = {}
     event_ids: dict[str, list[str]] = {}
+    source_controllers: dict[str, set[str]] = {}
+    affected_players: dict[str, set[str]] = {}
+    affected_permanents: dict[str, set[str]] = {}
     for event in prepared.events:
         by_effect = event.payload.get("prevention_applied") or {}
         if not isinstance(by_effect, Mapping):
@@ -1111,15 +1211,51 @@ def _prevention_applied_events(
                 continue
             amounts[key] = amounts.get(key, 0) + raw_amount
             event_ids.setdefault(key, []).append(event.event_id)
-    return tuple(
+            controller = str(event.payload.get("source_controller") or "")
+            if not controller:
+                raise DamageError(
+                    "Resolved damage prevention lost source-controller LKI"
+                )
+            source_controllers.setdefault(key, set()).add(controller)
+            target = str(event.payload.get("target") or "")
+            target_kind = str(event.payload.get("target_kind") or "")
+            if not target or target_kind not in {"player", "permanent"}:
+                raise DamageError(
+                    "Resolved damage prevention lost affected-subject identity"
+                )
+            destination = (
+                affected_players
+                if target_kind == "player"
+                else affected_permanents
+            )
+            destination.setdefault(key, set()).add(target)
+    result = tuple(
         PreventionAppliedEvent(
             effect_id=effect_id,
             source_id=sources[effect_id],
             prevented_amount=amounts[effect_id],
             damage_event_ids=tuple(sorted(event_ids[effect_id])),
+            prevented_source_controllers=tuple(
+                sorted(source_controllers[effect_id])
+            ),
+            affected_players=tuple(
+                sorted(affected_players.get(effect_id, set()))
+            ),
+            affected_permanents=tuple(
+                sorted(affected_permanents.get(effect_id, set()))
+            ),
+            triggered_ability=shield_triggers.get(effect_id),
         )
         for effect_id in sorted(amounts)
     )
+    try:
+        for event in result:
+            occurrence = event.trigger_occurrence()
+            if occurrence is not None:
+                occurrence.runtime_effects()
+    except PreventionTriggerError as exc:
+        raise DamageError(str(exc)) from exc
+    return result
 
 
 def commit_prepared_damage_batch(
@@ -1179,7 +1315,7 @@ def commit_prepared_damage_batch(
         validate_prevention_aftermath(host, prepared.aftermath)
     except PreventionAftermathError as exc:
         raise DamageError(str(exc)) from exc
-    prevention_events = _prevention_applied_events(prepared)
+    prevention_events = _prevention_applied_events(host, prepared)
 
     commander_updates: list[tuple[str, str, int]] = []
     history_events: list[DamageEvent] = []
@@ -1216,7 +1352,11 @@ def commit_prepared_damage_batch(
     except DamageModifierError as exc:
         raise DamageError(str(exc)) from exc
     try:
-        aftermath = commit_prevention_aftermath(host, prepared.aftermath)
+        aftermath = commit_prevention_aftermath(
+            host,
+            prepared.aftermath,
+            damage_port=_CanonicalDamageTransactionPort(host),
+        )
     except PreventionAftermathError as exc:
         raise DamageError(str(exc)) from exc
     changed_players = list(committed.changed_players)
@@ -1290,6 +1430,17 @@ def _collect_damage_result_triggers(
         )
 
     for prevention in result.prevention_events:
+        occurrence = prevention.trigger_occurrence()
+        if occurrence is not None:
+            ref = host._next_ref("S")
+            trigger_batch.append(
+                prevention_trigger_stack_item(
+                    occurrence,
+                    ref=ref,
+                    stack_id=host._stable_runtime_id("stack", ref),
+                    visibility=host.seats,
+                )
+            )
         host._dispatch_semantic_event(
             "damage.prevented",
             prevention.semantic_context(),

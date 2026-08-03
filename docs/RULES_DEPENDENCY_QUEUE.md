@@ -19,24 +19,24 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 - Behavioral classification/review required: 2,699
 - Passing behavioral rules: 138
 - Subsystems: 21
-- Queue fingerprint: `37468ebcdf291d16168182f9316386094c649985a516e44fc5510678b1dd990d`
+- Queue fingerprint: `aeb38663e50886618ce8cbe04d620c764d1465ba39d4e53f6eab1c2124c6150e`
 
 ## Selected next batch
 
-- Batch: `damage-prevention-continuations-and-aftermath`
-- Subsystem: `replacement-prevention`
-- Rules: `615.1`, `615.2`, `615.5`, `615.9`, `616.1`
-- Target capabilities: `damage.prevention.persistent_amount`, `damage.prevention.order`, `damage.result.replacement_order`
-- Rationale: Typed dynamic/divided and per-object shields, the represented face-up CR 609.7a candidate universe, incarnation-safe permanent-spell continuity, closed source-property rechecks, replacement-capable life/permanent-counter/source-controller-damage aftermath, same-chooser event ordering, and resumable mana-payment choices are represented. Nested damage reenters the canonical transaction against projected modifier state, and Deflecting Palm compiles generically. Face-down source characteristics, explicit-target aftermath, mixed aftermath, and CR 615.13 prevention-trigger stack ownership remain fail-closed. The next dependency-ready boundary is the triggered prevention-result family.
+- Batch: `canonical-life-and-simple-zone-triggers`
+- Subsystem: `triggered-static-linked`
+- Rules: `603.2`
+- Target capabilities: `trigger.event.normalized_zone_change`, `life.change.effect`, `zone.draw.library_to_hand`
+- Rationale: The pinned Commander-legal residual census makes trigger wording the largest high-frequency executable family: simple enters-the-battlefield life-gain and draw triggers alone account for 180 repeated normalized instructions. The existing stack-placement/APNAP boundary is trusted, while normalized event production, generic life-change ownership, and draw dependency closure still prevent broad CardProgram promotion. This batch therefore joins one reusable zone-change trigger detector to canonical result transactions before expanding into target, modal, reflexive, or state-trigger grammar.
 
 Exit criteria:
 
-- Represent prevention-dependent triggered results as typed waiting abilities that create stack objects rather than immediate CR 615.5 aftermath.
-- Match each trigger to the exact prevention effect application and aggregate simultaneous prevented events according to CR 615.13.
-- Place simultaneous prevention triggers through the existing APNAP/controller-order batch with exact save/load and replay.
-- Lower a closed generic triggered prevention-result wording family without card-name or Oracle-ID dispatch.
-- Fail before mutation or stack placement when a trigger effect, target, quantity, source identity, or continuation is stale.
-- Measure generic CardProgram gains and retain explicit residuals for target-dependent, mixed, or otherwise unsupported aftermath wording.
+- Produce typed normalized battlefield-enter and battlefield-leave/death occurrences from the canonical zone-change commit, including simultaneous objects and last-known source facts.
+- Detect one represented trigger occurrence per matching event and place it through the existing ordinary APNAP/controller-order stack boundary.
+- Route fixed life gain and loss through one replacement-capable life-change capability, and either certify or explicitly retain the draw capability blocker.
+- Lower closed targetless self-enter and self-dies fixed life/draw wording without printed-name or Oracle-ID dispatch.
+- Cover source departure, control change, multiplayer simultaneous entry/death, rollback, projection privacy, save/load, and exact replay.
+- Measure Commander-legal exact and capability-closed gains; keep targeted, modal, intervening-if, reflexive, state, and visibility-dependent trigger families residual.
 
 ## Dependency schedule
 
