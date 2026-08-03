@@ -79,7 +79,7 @@ rewrite.
   damage results, durable prevention/redirection state, and focused token,
   zone, counter, life, and damage mutation owners. Generated reports, rather
   than branch chronology, are the source of current counts.
-- Merged main through PR 75 includes the bounded
+- Merged main through PR 76 includes the bounded
   `rules/damage-prevention-continuations-and-aftermath` slice: typed dynamic,
   divided, and per-object shields; seat-scoped source selection with
   physical/LKI pinning; transactional prevention-dependent life/counter
@@ -88,6 +88,11 @@ rewrite.
   correction preserves fixed independent post-prevention instructions as
   ordered siblings and routes immediate life through the canonical
   replacement-capable owner.
+- The active prevention-aftermath branch adds a typed immutable damage source
+  and proposal boundary plus source-controller damage aftermath that reenters
+  the canonical damage transaction. Keep CR 615.13 triggered prevention results,
+  explicit-target aftermath, mixed aftermath, and mandatory recursive loops
+  fail-closed until their separate stack/choice dependencies are implemented.
 - Keep complete CR 609.7a source categories, permanent-spell continuity,
   broader source-property predicates, general replacement-capable life gain,
   life-gain prevention, remaining prevention-aftermath wording,
@@ -95,12 +100,12 @@ rewrite.
   non-damage transformations, unresolved dynamic Toxic values, and broader CR
   614/615/616 closure explicitly blocked until their complete dependencies and
   evidence exist.
-- The current infrastructure phase establishes a two-slot development pipeline,
+- The merged infrastructure phase establishes a two-slot development pipeline,
   deterministic change-impact quick gates, balanced PR shards, a stable
   certification context, compact `main` smoke, and deep nightly assurance.
-  Once that phase is certified, regenerate the dependency queue from fresh
-  `main` and select the next coherent rules family. Do not resume numerical
-  rule traversal or open a status-only follow-up.
+  The next coherent dependency-ready family is CR 615.13 prevention-trigger
+  stack ownership after the active CR 615.5 batch certifies. Do not resume
+  numerical rule traversal or open a status-only follow-up.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic

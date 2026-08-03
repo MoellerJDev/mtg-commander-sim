@@ -32,7 +32,7 @@ server, provider, and pilot success never promote rules fidelity by themselves.
 
 - A pinned Comprehensive Rules corpus, Oracle snapshot, and rulings snapshot
   support deterministic inventories and reproducible source references.
-- Oracle IR v12 provides source-spanned partial compilation and material
+- Oracle IR v19 provides source-spanned partial compilation and material
   residuals. Generated and reviewed abilities aggregate into deterministic
   CardProgram V2 artifacts with source, capability, trust, and replay
   fingerprints. Compilation remains partial and interleaved.
@@ -49,7 +49,9 @@ server, provider, and pilot success never promote rules fidelity by themselves.
   represented damage commits. Versioned runtime components represent fixed
   token additions, counter and damage quantity changes, fixed damage
   prevention, a fixed subtype anthem, and a reviewed zone-destination
-  replacement without printed-name or Oracle-ID engine dispatch.
+  replacement without printed-name or Oracle-ID engine dispatch. Represented
+  CR 615.5 life, permanent-counter, and source-controller-damage aftermath use
+  typed precommit owners; nested damage reuses the canonical damage transaction.
   Most other orchestration and mutation remains centralized in
   `CommanderEngine`.
 - Reviewed semantic packs close selected card and interaction slices through
@@ -106,11 +108,12 @@ expansion resumes.
 
 The scheduler conservatively queues every reviewed blocked behavioral rule and
 every unclassified nonpassing rule. The integrated event-tree and counter-
-placement batches establish replayable replacement ordering and a focused
-counter mutation owner. The active damage batch adds one typed transaction for
-represented combat, semantic, and mana-result producers plus fixed quantity
-replacement and prevention. Only CR 120.4d is promoted for the evidenced final
-damage event; broad CR 614/615/616 behavior remains blocked.
+placement batches establish replayable replacement ordering and focused
+counter, life, and damage mutation owners. The active prevention batch adds a
+closed CR 615.5 source-controller damage result with source LKI, projected
+modifier state, recursive replacement/prevention, cycle rejection, exact
+replay, and generic Oracle/CardProgram lowering. CR 615.13 prevention-trigger
+stack ownership and broad CR 614/615/616 behavior remain blocked.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,

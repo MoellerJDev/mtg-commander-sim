@@ -200,13 +200,23 @@
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
       "implementation_components": [
+        "damage_source.DamageSourceSnapshot",
+        "damage_values.DamageProposal",
         "damage_prevention_aftermath.prepare_prevention_aftermath",
         "damage_prevention_aftermath.commit_prevention_aftermath",
+        "damage_prevention_aftermath._prepare_damage_aftermath",
         "counter_placement.prepare_counter_placements",
-        "life_state.commit_life_changes",
+        "life_change.commit_life_change_batch",
+        "damage.prepare_damage_batch",
         "damage.resolve_damage_batch"
       ],
       "executable_test_ids": [
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_damage_aftermath_uses_lki_and_projected_consumed_shield",
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_other_prevention_applies_to_aftermath_damage",
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_unpreventable_damage_does_not_create_scaled_damage_aftermath",
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_recursive_all_damage_aftermath_fails_before_mutation",
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_damage_aftermath_is_separate_in_a_four_player_batch",
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_damage_aftermath_replays_from_exact_commands",
         "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_life_aftermath_uses_one_aggregate_prevented_amount",
         "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_counter_aftermath_reuses_counter_replacement_pipeline",
         "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_fixed_additional_effect_happens_when_damage_cannot_be_prevented",
@@ -224,13 +234,14 @@
         "replay"
       ],
       "blockers": [
-        "the closed prevention-aftermath vocabulary currently covers life gain and permanent counter placement, not every additional effect allowed by Oracle wording",
-        "life-gain aftermath does not yet participate in the general life-gain replacement transaction",
-        "generic damage-dealing, target-selection, and arbitrary nested aftermath wording remains fail-closed"
+        "the closed prevention-aftermath vocabulary covers life gain, permanent counter placement, and source-controller damage, not every additional effect allowed by Oracle wording",
+        "explicit-target damage aftermath, mixed damage and non-damage aftermath, and arbitrary nested aftermath wording remain fail-closed",
+        "triggered prevention results use the distinct CR 615.13 stack boundary and are not claimed by immediate CR 615.5 aftermath"
       ],
       "notes": [
         "Represented aftermath is aggregated once per applied shield across simultaneous damage, committed immediately after prevention, dispatched as a typed semantic event, and replayed exactly.",
-        "Permanent counter aftermath reuses the canonical counter replacement pipeline; stale plans fail before damage, life, or counter mutation."
+        "Permanent counter and life aftermath reuse their canonical replacement pipelines; stale plans fail before damage, life, or counter mutation.",
+        "Typed source-controller damage aftermath pins source LKI, prepares recursively against projected modifier state, applies ordinary replacement/prevention to the nested event, and rejects mandatory cycles before mutation."
       ]
     },
     {

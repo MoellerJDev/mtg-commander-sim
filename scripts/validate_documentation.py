@@ -16,6 +16,7 @@ HEADING = re.compile(r"^#{1,6}\s+(.+?)\s*#*\s*$", re.MULTILINE)
 FENCE = re.compile(r"```.*?```|~~~.*?~~~", re.DOTALL)
 ADR_FILE = re.compile(r"^(\d{4})-[a-z0-9-]+\.md$")
 COMMIT = re.compile(r"^[0-9a-f]{7,40}$")
+SOURCE_TREE_FINGERPRINT = re.compile(r"^[0-9a-f]{64}$")
 TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}(?:[T ][0-9:.+\-Z]+)?$")
 
 
@@ -68,7 +69,11 @@ def discover_documents(root: Path, policy: dict) -> list[Path]:
 
 def _verified_value_valid(metadata: dict[str, str]) -> bool:
     value = metadata.get("verified", "")
-    return bool(COMMIT.fullmatch(value) or TIMESTAMP.fullmatch(value))
+    return bool(
+        COMMIT.fullmatch(value)
+        or SOURCE_TREE_FINGERPRINT.fullmatch(value)
+        or TIMESTAMP.fullmatch(value)
+    )
 
 
 def metadata_failures(
@@ -97,7 +102,10 @@ def metadata_failures(
                 f"{relative}: status {metadata['status']!r} requires {expected!r} maintenance"
             )
         if not _verified_value_valid(metadata):
-            failures.append(f"{relative}: verified must be a commit or timestamp")
+            failures.append(
+                f"{relative}: verified must be a commit, source-tree fingerprint, "
+                "or timestamp"
+            )
     return failures
 
 

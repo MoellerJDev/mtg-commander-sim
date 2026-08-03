@@ -16,7 +16,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `cda213c987cb8c5aef94af74bc74146f29bba0fb`
 - Package: `0.8.0`
 - CI run: [30811998248](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30811998248) — `pass`
-- Production scope: 178 files, 86,222 physical lines, 79,446 logical lines
+- Production scope: 180 files, 87,018 physical lines, 80,190 logical lines
 
 ## Central engine debt
 
@@ -29,7 +29,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Registered typed runtime components: 10
 - Remaining legacy `apply_effect` branches: 0
 - Registered operations still intercepted by engine string dispatch: 0
-- Exact printed-name literals in configured core files: 691 (101 conditional)
+- Exact printed-name literals in configured core files: 689 (101 conditional)
 - Oracle-ID literals in Python production code: 6
 - Card-named helpers: 1
 - Modules above the 1,500-logical-line review threshold: 6
@@ -44,7 +44,7 @@ Baseline: `cda213c987cb8c5aef94af74bc74146f29bba0fb`. Guard: `python scripts/val
 |---|---:|---:|---:|
 | `engine_logical_lines` | 14,761 | 14,754 | -7 |
 | `direct_game_state_writes` | 143 | 141 | -2 |
-| `printed_name_literals` | 693 | 691 | -2 |
+| `printed_name_literals` | 693 | 689 | -4 |
 | `oracle_id_literals` | 6 | 6 | +0 |
 | `legacy_card_specific_operations` | 6 | 6 | +0 |
 | `card_named_helpers` | 1 | 1 | +0 |
@@ -62,8 +62,8 @@ Baseline: `cda213c987cb8c5aef94af74bc74146f29bba0fb`. Guard: `python scripts/val
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
 | `mtg_commander_sim/record.py` | python | 1,706 | 1,605 |
 | `mtg_commander_sim/rules_corpus.py` | python | 1,561 | 1,464 |
-| `mtg_commander_sim/damage.py` | python | 1,550 | 1,412 |
 | `mtg_commander_sim/cli.py` | python | 1,408 | 1,350 |
+| `mtg_commander_sim/damage.py` | python | 1,425 | 1,301 |
 | `mtg_commander_sim/damage_results.py` | python | 1,308 | 1,202 |
 | `server/app.py` | python | 1,305 | 1,171 |
 | `mtg_commander_sim/codex_cli.py` | python | 1,214 | 1,154 |
@@ -114,15 +114,15 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,524
-- Conventional Python cases: 1,224
+- Python discovered: 4,541
+- Conventional Python cases: 1,241
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 7
 - Browser unit cases: 18
 - Dedicated property suite: false
 - Mutation score: None
 - Focused executable mutation suite: true
-- Capability mutation declarations: 26
+- Capability mutation declarations: 27
 - Performance baseline: `platform/continuous-effect-performance-baseline.json` (5 scenarios; latency observational)
 
 ## Documentation drift

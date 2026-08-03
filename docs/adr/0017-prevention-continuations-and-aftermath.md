@@ -40,11 +40,15 @@ required card types, subtypes, supertypes, or keywords. They are checked when
 the source is chosen and rechecked against the damage-source snapshot when
 damage would occur. Unknown predicates fail closed.
 
-`damage_prevention_aftermath.py` prepares represented life and permanent-counter
-results. Life results enter the immutable `life.change` replacement tree before
+`damage_prevention_aftermath.py` prepares represented life, permanent-counter,
+and source-controller damage results. Life results enter the immutable
+`life.change` replacement tree before
 mutation and then commit through `life_change.py` plus the canonical life-state
 owner. Permanent counters continue through the canonical counter-placement
-owner. This makes represented CR 615.5 life aftermath replacement-capable while
+owner. Source-controller damage pins a `DamageSourceSnapshot`, derives the
+recipient from the prevented event, and prepares a nested `DamageProposal`
+against projected modifier state before any outer mutation. This makes
+represented CR 615.5 life and damage aftermath replacement-capable while
 keeping all result plans validated before the damage batch mutates state.
 
 Independent later sentences are not aftermath. Oracle IR v18 lowers a reviewed
@@ -97,8 +101,9 @@ and the canonical replacement journal.
   independently consumable.
 - Same-chooser simultaneous replacement ordering is explicit rather than an
   incidental event-list order.
-- Represented prevention aftermath validates every life/counter result before
-  mutation and can participate in life-gain or permanent-counter replacement.
+- Represented prevention aftermath validates every life/counter/damage result
+  before mutation. Nested damage reuses the canonical replacement, prevention,
+  result, final-event, and replay paths.
 - A source-choice pause preserves every later sibling instruction; fixed
   independent life is neither delayed until shield use nor repeated by it.
 - Mana payments with replacement choices roll back completely and resume the
@@ -108,6 +113,10 @@ and the canonical replacement journal.
   sequence without card-name dispatch. The compiler/CardProgram fingerprint
   changes, while a historical v17 artifact retains its pinned historical
   shape and distinct fingerprint.
+- Oracle IR v19 and template
+  `damage-prevention-source-controller-aftermath-v1` lower the closed
+  source-controller-damage family without card-name dispatch. The trusted
+  capability is `damage.prevention.aftermath.damage`.
 
 ## Remaining boundary
 
@@ -117,7 +126,8 @@ references and face-down source characteristics remain blocked. Source
 predicates beyond the closed color/type/
 subtype/supertype/keyword vocabulary, life-gain prevention such as `can't gain
 life`, non-effect-runtime life producers, aftermath forms beyond represented
-life and permanent counters,
+life, permanent counters, and source-controller damage, CR 615.13 triggered
+prevention results,
 partial/attached redirection, and non-damage transformations remain blocked.
 
 ## Removal condition

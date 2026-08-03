@@ -74,13 +74,17 @@ independent per-object shield creation is owned by the focused
 incarnation matching, permanent-spell-to-permanent continuity, and closed
 color/type/subtype/supertype/keyword rechecks. Represented CR 615.5 life
 aftermath enters the replacement-capable `life.change` transaction; permanent-
-counter aftermath remains on the counter-placement transaction. Same-chooser
+counter aftermath remains on the counter-placement transaction. Typed source-
+controller damage aftermath pins immutable source LKI and recursively prepares
+through the canonical damage transaction against projected modifier state.
+Same-chooser
 event order and replacement choices during mana payment use strict replayable
 continuations. A fixed independent life sentence after a prevention sentence
 is an ordered sibling, not aftermath: source choice creates the shield, then
 the sibling enters `life.change` immediately and exactly once. Arbitrary opaque
-references, wider source predicates, life-gain prevention, remaining
-aftermath forms, finite partial or attached redirection, and non-damage
+references, wider source predicates, life-gain prevention, CR 615.13 triggered
+prevention results, explicit-target or mixed aftermath forms, finite partial or
+attached redirection, and non-damage
 transformations remain outside these components.
 
 `continuous.anthem.power_toughness.v1` supports a fixed same-controller subtype
@@ -112,8 +116,9 @@ operations, applicability, ordering, and strict replay;
 `replacement_decisions.py` owns replayable choice
 continuations. `counter_placement.py` owns pre-mutation preparation and final
 commit for represented permanent-counter events. `damage.py` coordinates
-represented damage snapshots, quantity replacement/prevention, and normalized
-final events; `damage_results.py` owns result-event materialization, commit
+represented damage batches, while `damage_source.py` owns immutable source LKI
+and `damage_values.py` owns recipient/proposal values. `damage_results.py` owns
+result-event materialization, commit
 planning, and atomic CR 120.3 result mutation. `damage_prevention.py` owns
 durable shield/redirection state and its mutation-only commit plan;
 `damage_prevention_creation.py` and `damage_prevention_aftermath.py` own the

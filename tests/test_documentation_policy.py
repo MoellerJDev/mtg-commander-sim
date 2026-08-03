@@ -63,6 +63,11 @@ class DocumentationPolicyTests(unittest.TestCase):
                 [], MODULE.stale_claim_failures(root, [path], policy)
             )
 
+    def test_source_tree_fingerprint_is_valid_verification_provenance(self) -> None:
+        metadata = {"verified": "a" * 64}
+        self.assertTrue(MODULE._verified_value_valid(metadata))
+        self.assertFalse(MODULE._verified_value_valid({"verified": "a" * 63}))
+
     def test_current_pull_request_history_is_rejected(self) -> None:
         policy = MODULE.load_policy()
         with tempfile.TemporaryDirectory() as raw:

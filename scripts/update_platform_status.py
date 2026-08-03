@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 import json
 from pathlib import Path
+import re
+import subprocess
 import sys
 import tomllib
 import unittest
@@ -14,6 +17,11 @@ SOURCE = ROOT / "platform" / "readiness-source.json"
 JSON_OUTPUT = ROOT / "coverage" / "platform-readiness.json"
 MARKDOWN_OUTPUT = ROOT / "coverage" / "platform-readiness.md"
 STATUS_OUTPUT = ROOT / "docs" / "PLATFORM_IMPLEMENTATION_STATUS.md"
+TRACKED_OUTPUTS = frozenset(
+    path.relative_to(ROOT).as_posix()
+    for path in (JSON_OUTPUT, MARKDOWN_OUTPUT, STATUS_OUTPUT)
+)
+SOURCE_TREE_FINGERPRINT_ALGORITHM = "tracked-source-tree-sha256-v2"
 
 
 def _load_json(path: Path) -> dict:
@@ -21,6 +29,112 @@ def _load_json(path: Path) -> dict:
     if not isinstance(value, dict):
         raise ValueError(f"{path} must contain a JSON object")
     return value
+
+
+def _git(*args: str) -> str:
+    completed = subprocess.run(
+        ["git", *args],
+        cwd=ROOT,
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    return completed.stdout.decode("utf-8", errors="strict").strip()
+
+
+def _current_runtime_git_sha() -> str:
+    return _git("rev-parse", "HEAD")
+
+
+def _git_is_ancestor(ancestor: str, descendant: str) -> bool:
+    completed = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+        cwd=ROOT,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+    )
+    return completed.returncode == 0
+
+
+def _tracked_source_tree_hash() -> str:
+    """Fingerprint the evaluated tracked tree without self-referential outputs."""
+
+    completed = subprocess.run(
+        ["git", "ls-files", "-z"],
+        cwd=ROOT,
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    relative_paths = sorted(
+        path.decode("utf-8", errors="strict")
+        for path in completed.stdout.split(b"\0")
+        if path
+    )
+    digest = hashlib.sha256()
+    digest.update((SOURCE_TREE_FINGERPRINT_ALGORITHM + "\0").encode("ascii"))
+    for relative in relative_paths:
+        path = ROOT / relative
+        if _is_generated_report(relative, path):
+            continue
+        path_bytes = relative.encode("utf-8")
+        content = path.read_bytes()
+        digest.update(len(path_bytes).to_bytes(8, "big"))
+        digest.update(path_bytes)
+        digest.update(len(content).to_bytes(8, "big"))
+        digest.update(content)
+    return digest.hexdigest()
+
+
+def _is_generated_report(relative: str, path: Path) -> bool:
+    if relative in TRACKED_OUTPUTS or relative.startswith("coverage/"):
+        return True
+    if relative == "platform/card-name-hash-index.json":
+        return True
+    if path.suffix.lower() != ".md":
+        return False
+    try:
+        prefix = path.read_text(encoding="utf-8")[:512]
+    except UnicodeDecodeError:
+        return False
+    return bool(re.search(r"(?m)^status:\s*[\"']?generated[\"']?\s*$", prefix))
+
+
+def _validate_provenance(source: dict) -> None:
+    provenance = source.get("provenance")
+    if not isinstance(provenance, dict):
+        raise ValueError("platform readiness source requires provenance")
+    required = {
+        "feature_head_sha",
+        "certified_head_sha",
+        "generation_timestamp",
+    }
+    missing = sorted(required.difference(provenance))
+    if missing:
+        raise ValueError("platform readiness provenance is missing: " + ", ".join(missing))
+    for key in ("feature_head_sha", "certified_head_sha"):
+        value = provenance[key]
+        if not isinstance(value, str) or len(value) != 40:
+            raise ValueError(f"{key} must be a full Git commit SHA")
+        _git("cat-file", "-e", f"{value}^{{commit}}")
+    if "baseline_commit" in source.get("validation", {}):
+        raise ValueError(
+            "baseline_commit cannot identify evaluated behavior; use provenance"
+        )
+    if "commit_reference" in source.get("integration", {}):
+        raise ValueError(
+            "commit_reference duplicates structured provenance and is not allowed"
+        )
+    serialized = json.dumps(source, sort_keys=True).lower()
+    if "certification pending" in serialized:
+        raise ValueError("a certified head cannot be described as certification pending")
+    active_phase = source.get("integration", {}).get("active_phase")
+    if active_phase and _git_is_ancestor(
+        provenance["feature_head_sha"], "origin/main"
+    ):
+        raise ValueError(
+            "active phase feature_head_sha is already merged into origin/main"
+        )
 
 
 def _project_metadata() -> dict:
@@ -107,8 +221,9 @@ def _rules_metrics() -> dict:
 
 def build_report() -> dict:
     source = _load_json(SOURCE)
-    if source.get("schema_version") != 1:
+    if source.get("schema_version") != 2:
         raise ValueError("Unsupported platform readiness source schema")
+    _validate_provenance(source)
     report = copy.deepcopy(source)
     for ephemeral in ("branch", "branch_ancestry", "pull_requests"):
         report["integration"].pop(ephemeral, None)
@@ -116,6 +231,13 @@ def build_report() -> dict:
         "generator": "scripts/update_platform_status.py",
         "source": "platform/readiness-source.json",
         "stale_check": "python scripts/update_platform_status.py --check",
+        "evaluated_source_tree_hash": _tracked_source_tree_hash(),
+        "source_tree_fingerprint_algorithm": SOURCE_TREE_FINGERPRINT_ALGORITHM,
+        "current_runtime_git_sha": _current_runtime_git_sha(),
+        "current_runtime_git_sha_persistence": (
+            "runtime-only; tracked reports store null because a commit cannot "
+            "contain its own SHA"
+        ),
     }
     project = _project_metadata()
     report["package"] = {
@@ -146,12 +268,14 @@ def _value(value: object) -> str:
 
 
 def render_readiness(report: dict) -> str:
+    provenance = report["provenance"]
+    generated = report["generated"]
     lines = [
         "---",
         'title: "Platform readiness"',
         'status: "generated"',
         'authoritative_source: "platform/readiness-source.json"',
-        f'verified: "{report["validation"]["baseline_commit"]}"',
+        f'verified: "{generated["evaluated_source_tree_hash"]}"',
         'audience: "maintainers, operators, and contributors"',
         'maintenance: "generated"',
         "---",
@@ -164,6 +288,9 @@ def render_readiness(report: dict) -> str:
         "| Dimension | Current value |",
         "|---|---|",
         f"| Package | `{report['package']['version']}` |",
+        f"| Evaluated source tree | `{generated['evaluated_source_tree_hash']}` |",
+        f"| Feature checkpoint | `{provenance['feature_head_sha']}` |",
+        f"| Certified head | `{provenance['certified_head_sha']}` |",
         f"| Active phase | `{report['integration']['active_phase']}` |",
         f"| Deterministic tests discovered | {report['tests']['deterministic_cases_discovered']} |",
         f"| Authoritative kernel | `{report['platform']['authoritative_kernel']}` |",
@@ -204,6 +331,8 @@ def render_readiness(report: dict) -> str:
 
 def render_status(report: dict) -> str:
     integration = report["integration"]
+    provenance = report["provenance"]
+    generated = report["generated"]
     validation = report["validation"]
     rules = report["rules_coverage"]
     lines = [
@@ -211,7 +340,7 @@ def render_status(report: dict) -> str:
         'title: "Platform implementation status"',
         'status: "generated"',
         'authoritative_source: "platform/readiness-source.json"',
-        f'verified: "{validation["baseline_commit"]}"',
+        f'verified: "{generated["evaluated_source_tree_hash"]}"',
         'audience: "maintainers, operators, and contributors"',
         'maintenance: "generated"',
         "---",
@@ -227,7 +356,13 @@ def render_status(report: dict) -> str:
         f"- Repository: {report['repository']['visibility']} "
         f"`{report['repository']['name']}`",
         f"- Default branch: `{report['repository']['default_branch']}`",
-        f"- Current commit: {integration['commit_reference']}",
+        f"- Evaluated source tree: `{generated['evaluated_source_tree_hash']}` "
+        f"(`{generated['source_tree_fingerprint_algorithm']}`)",
+        f"- Feature checkpoint: `{provenance['feature_head_sha']}`",
+        f"- Last certified head: `{provenance['certified_head_sha']}`",
+        f"- Generation timestamp: `{provenance['generation_timestamp']}`",
+        "- Runtime Git SHA: resolved dynamically and intentionally not persisted "
+        "in this tracked report",
         f"- Active phase: `{integration['active_phase']}`",
         f"- Package version: `{report['package']['version']}`",
         "",
@@ -326,7 +461,9 @@ def render_status(report: dict) -> str:
 
 
 def _serialize_json(report: dict) -> str:
-    return json.dumps(report, indent=2, sort_keys=True) + "\n"
+    persisted = copy.deepcopy(report)
+    persisted["generated"]["current_runtime_git_sha"] = None
+    return json.dumps(persisted, indent=2, sort_keys=True) + "\n"
 
 
 def _outputs(report: dict) -> dict[Path, str]:
