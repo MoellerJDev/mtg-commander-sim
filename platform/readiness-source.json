@@ -10,7 +10,7 @@
     "branch": "rules/generic-trigger-foundation",
     "branch_ancestry": {
       "focused_branch_base": "3d9facdac71a60120441e0b13c242850d70c408f",
-      "focused_branch_unique_commits_over_main": 2
+      "focused_branch_unique_commits_over_main": 3
     },
     "pull_requests": [
       {

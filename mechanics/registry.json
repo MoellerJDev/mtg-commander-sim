@@ -208,7 +208,7 @@
     {
       "mechanic_id": "cr-603-handling-triggered-abilities",
       "path": "mechanics/contracts/handling-triggered-abilities.json",
-      "sha256": "e90481862c991ff6697f28a7ddd370d2076b08b3e4c24766011a4f7bead8b2c6",
+      "sha256": "3653f08b9223552561ba07e6a70e4c9726bf967a8b81fab3f1131db71cb7d8b5",
       "version": 3
     },
     {
@@ -7299,19 +7299,19 @@
     {
       "category": "spells_abilities_effects",
       "contract_path": "mechanics/contracts/handling-triggered-abilities.json",
-      "contract_sha256": "e90481862c991ff6697f28a7ddd370d2076b08b3e4c24766011a4f7bead8b2c6",
+      "contract_sha256": "3653f08b9223552561ba07e6a70e4c9726bf967a8b81fab3f1131db71cb7d8b5",
       "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "oracle_ir trigger lowering plus CommanderEngine semantic-event, mergeable trigger-batch, stabilization, and delayed-trigger paths",
-      "implementation_version": "trigger-handling-foundation-v3",
+      "implementation_component": "oracle_ir trigger lowering plus the typed trigger_batches occurrence/APNAP/placement owner, trigger_targeting, and narrow CommanderEngine discovery/stabilization coordination",
+      "implementation_version": "trigger-handling-foundation-v4",
       "kind": "rules_section",
       "known_blockers": [
         "the Oracle compiler recognizes selected whole-text trigger templates rather than the complete trigger grammar",
         "the second CR 603.3b placement part for abilities that trigger from other abilities triggering is not represented",
         "generic modal trigger legality, all target and division choices, and illegal-trigger removal remain incomplete",
         "multi-occurrence, becomes, visibility, once-per-turn instruction, state, player-loss, linked-mid-sentence, and reflexive trigger families are incomplete",
-        "delayed-trigger creation provenance and simultaneous-event selection are not universally typed",
+        "delayed-trigger creation provenance and simultaneous-event selection are not universally typed even though detected occurrences now share one typed placement path",
         "entry and leaves look-back evaluation does not yet use the complete continuous-effect and LKI exception matrix",
         "Aura paired-object zone-change lookup and hidden-zone finding are incomplete",
         "generated trigger effects remain provisional until every effect dependency is trusted"
@@ -7331,6 +7331,11 @@
         "test_padeem_hexproof_and_intervening_upkeep_condition",
         "test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
         "test_delayed_trigger_queues_at_matching_step",
+        "test_semantic_and_delayed_occurrences_share_one_apnap_batch",
+        "test_same_controller_uses_one_order_continuation_for_all_sources",
+        "test_malformed_checkpoint_batch_fails_without_mutating_live_state",
+        "test_historical_semantic_batch_continuation_is_explicitly_compatible",
+        "test_historical_delayed_order_validates_tree_before_stack_mutation",
         "test_daretti_ruling_does_not_follow_a_reentered_card",
         "test_unconditional_entry_tapped_is_engine_derived",
         "test_damage_and_resulting_death_triggers_share_one_order_batch"
