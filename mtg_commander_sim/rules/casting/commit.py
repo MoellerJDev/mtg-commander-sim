@@ -8,6 +8,7 @@ from typing import Any, Protocol
 from ...life_state import LifeStateError, pay_life_cost
 from ...model import StackItem, YieldPolicy
 from ...tap_state import set_permanent_tapped
+from ...trigger_processing import enqueue_trigger_batch
 from ..action_proposals import CastProposal, thaw_json
 from .model import CastProposalError
 
@@ -68,8 +69,6 @@ class CastCommitHost(Protocol):
     def _record_turn_history(self, kind: str, **kwargs: Any) -> None: ...
 
     def _dispatch_semantic_event(self, event: str, context: Mapping[str, Any], **kwargs: Any) -> None: ...
-
-    def _enqueue_semantic_trigger_batch(self, items: Sequence[Any]) -> None: ...
 
     def _queue_ward_triggers_for_targets(self, item: Any) -> Any: ...
 
@@ -484,7 +483,7 @@ def _dispatch_cast_events(
         host._dispatch_semantic_event(
             "artifact.cast", context, trigger_batch=trigger_batch
         )
-    host._enqueue_semantic_trigger_batch(trigger_batch)
+    enqueue_trigger_batch(host, trigger_batch)
 
 
 def commit_cast(

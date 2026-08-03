@@ -754,6 +754,19 @@ active player receives priority. This is the combat portion of the damage
 pipeline; noncombat damage and universal CR 120.4 replacement/prevention/result
 ordering remain explicit dependencies.
 
+`mtg_commander_sim.trigger_batches` owns the persisted CR 603.3 placement
+boundary. Static-source semantic triggers, delayed triggers, and typed dynamic
+triggers become one immutable ordinary occurrence before APNAP grouping. The
+versioned batch deep-freezes stack payloads, merges occurrences only until
+placement starts, pins the exact same-controller order set, and serializes
+canonically through Game Record v3. The engine retains narrow event discovery,
+stabilization, permission issuance, and logging coordination; it no longer has
+a delayed-only trigger-order executor. Historical unversioned batches and the
+two former continuation shapes have explicit read/resume compatibility, but new
+games write only `trigger_batch_id`. Complete event grammar, delayed creation
+provenance, state/reflexive triggers, and the special second CR 603.3b part
+remain blocked.
+
 Card-centric interaction remains a protocol adapter, not a second rules
 engine. The kernel supplies card refs, face-specific labels, current costs,
 exact legal mana modes, per-face visible definitions, and public-zone contents.

@@ -79,7 +79,7 @@ rewrite.
   damage results, durable prevention/redirection state, and focused token,
   zone, counter, life, and damage mutation owners. Generated reports, rather
   than branch chronology, are the source of current counts.
-- Merged main through PR 79 includes the bounded
+- Merged main through PR 80 includes the bounded
   `rules/damage-prevention-continuations-and-aftermath` slice: typed dynamic,
   divided, and per-object shields; seat-scoped source selection with
   physical/LKI pinning; transactional prevention-dependent life/counter
@@ -89,13 +89,19 @@ rewrite.
   ordered siblings and routes immediate life through the canonical
   replacement-capable owner; one strict ObjectQuerySpec now owns represented
   chosen-source validation from compiler through replay and damage-time recheck.
-- The active prevention-trigger branch represents closed CR 615.13 results as
+- Certified main also represents closed CR 615.13 results as
   immutable waiting trigger occurrences with exact prevented-amount aggregation,
   source/controller LKI, ordinary APNAP stack placement, represented target
   choice, and exact replay. Nested triggered damage reenters the canonical
   transaction through a narrow typed port. Keep explicit-target or mixed
   immediate aftermath, broader conditional trigger results, and unsupported
   recursive loops fail-closed.
+- The active trigger-foundation branch replaces the delayed-only and
+  semantic-only CR 603.3 ordering executors with one immutable versioned
+  occurrence/APNAP/placement owner. Preserve explicit historical Game Record
+  v3 batch and continuation compatibility, and do not broaden this into a claim
+  of complete trigger event grammar, state/reflexive triggers, or delayed
+  creation provenance.
 - Keep complete CR 609.7a source categories, permanent-spell continuity,
   broader source-property predicates, general replacement-capable life gain,
   life-gain prevention, remaining prevention-aftermath wording,
@@ -106,10 +112,10 @@ rewrite.
 - The merged infrastructure phase establishes a two-slot development pipeline,
   deterministic change-impact quick gates, balanced PR shards, a stable
   certification context, compact `main` smoke, and deep nightly assurance.
-  After the active CR 615.13 batch certifies, the corpus-ranked next family is
-  canonical fixed life results plus simple targetless enter/death trigger event
-  binding and lowering. Do not resume numerical rule traversal or open a
-  status-only follow-up.
+  After the generic trigger placement foundation certifies, the corpus-ranked
+  next family is canonical fixed life results plus simple targetless
+  enter/death trigger event binding and lowering. Do not resume numerical rule
+  traversal or open a status-only follow-up.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic

@@ -46,6 +46,8 @@
     "mtg_commander_sim/state_planner.py",
     "mtg_commander_sim/targets.py",
     "mtg_commander_sim/token_creation.py",
+    "mtg_commander_sim/trigger_batches.py",
+    "mtg_commander_sim/trigger_processing.py",
     "mtg_commander_sim/object_query.py"
   ],
   "protected_future_prefixes": [
@@ -131,7 +133,8 @@
       "mtg_commander_sim/life_change.py": "replacement-capable typed life-event transaction owner behind represented rules transactions",
       "mtg_commander_sim/life_state.py": "canonical typed life-total mutation owner behind represented rules transactions",
       "mtg_commander_sim/tap_state.py": "typed tap-state effect mutation owner behind the semantic intent executor",
-      "mtg_commander_sim/token_creation.py": "typed token-creation and replacement mutation owner behind CommanderEngine"
+      "mtg_commander_sim/token_creation.py": "typed token-creation and replacement mutation owner behind CommanderEngine",
+      "mtg_commander_sim/trigger_processing.py": "typed CR 603.3 occurrence batching, APNAP placement, stack commit, and historical continuation owner behind CommanderEngine"
       ,"mtg_commander_sim/mana_activation.py": "activated mana ability and reversible activation transaction owner"
       ,"mtg_commander_sim/semantic_choices/intent_host.py": "typed semantic-choice intent application behind the immutable choice registry"
       ,"mtg_commander_sim/effect_runtime/state_and_permissions.py": "registry-owned state and permission effect family"

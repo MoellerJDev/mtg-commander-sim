@@ -6,11 +6,11 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "prevention_trigger_stack_ownership",
-    "branch": null,
+    "active_phase": "generic_trigger_foundation",
+    "branch": "rules/generic-trigger-foundation",
     "branch_ancestry": {
-      "focused_branch_base": "ac1b79563beaad10a113a6f2b4b01ae74dc473bd",
-      "focused_branch_unique_commits_over_main": 0
+      "focused_branch_base": "3d9facdac71a60120441e0b13c242850d70c408f",
+      "focused_branch_unique_commits_over_main": 3
     },
     "pull_requests": [
       {
@@ -565,6 +565,13 @@
         "number": 79,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/79"
+      },
+      {
+        "base": "main",
+        "head": "rules/prevention-trigger-stack-ownership",
+        "number": 80,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/80"
       }
     ],
     "tags": [
@@ -579,9 +586,9 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "dbe8beb455d186590d66790fe835841fc6c829e7",
-    "certified_head_sha": "04530f31564db480ec228fb0789934b2759bc8a8",
-    "generation_timestamp": "2026-08-03T22:23:02Z"
+    "feature_head_sha": "3362d0765d7b1d1bf57abd3c038b9c7e1b85a390",
+    "certified_head_sha": "3362d0765d7b1d1bf57abd3c038b9c7e1b85a390",
+    "generation_timestamp": "2026-08-03T23:24:02Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -678,8 +685,14 @@
     {
       "id": "prevention_trigger_stack_ownership",
       "name": "Prevention-trigger stack ownership",
+      "status": "integrated_on_certified_main",
+      "evidence": "Certified main through PR 80 implements CR 615.13 as immutable source-LKI trigger occurrences that aggregate exact simultaneous prevented amounts, join the ordinary APNAP/controller-order trigger batch, choose represented targets at stack placement, and resolve through ordinary typed effects. Nested triggered damage reenters the canonical damage transaction through a narrow typed port; no lazy damage/aftermath import cycle remains. Strict ObjectQuerySpec construction and one closed chosen-source validator protect compiler, live choice, persistence, and damage-time rechecks. Oracle IR v21 generically recognizes closed triggered prevention draw/damage/counter wording plus all-damage shields. Positive, negative, malformed-input, rollback, multiplayer, control-change, privacy, save/load, replay, and killed-mutation tests passed exact-head public CI. The certified census improves Commander exact 417 to 419, trusted CardPrograms 417 to 419, capability-closed CardPrograms 415 to 417, and material Oracle residuals 60748 to 60742."
+    },
+    {
+      "id": "generic_trigger_foundation",
+      "name": "Unified ordinary trigger occurrence and placement foundation",
       "status": "implemented_in_active_source_tree_pending_certification",
-      "evidence": "The active source tree implements CR 615.13 as immutable source-LKI trigger occurrences that aggregate exact simultaneous prevented amounts, join the ordinary APNAP/controller-order trigger batch, choose represented targets at stack placement, and resolve through ordinary typed effects. Nested triggered damage reenters the canonical damage transaction through a narrow typed port; no lazy damage/aftermath import cycle remains. Strict ObjectQuerySpec construction and one closed chosen-source validator now protect compiler, live choice, persistence, and damage-time rechecks. Oracle IR v21 generically recognizes closed triggered prevention draw/damage/counter wording plus all-damage shields. Focused positive, negative, malformed-input, rollback, multiplayer, control-change, privacy, save/load, replay, and killed-mutation tests pass. The active census improves Commander exact 417 to 419, trusted CardPrograms 417 to 419, capability-closed CardPrograms 415 to 417, and material Oracle residuals 60748 to 60742."
+      "evidence": "The active source tree replaces separate semantic and delayed executors with one immutable, versioned ordinary-trigger occurrence, APNAP batch, controller-order placement, and stack sink. Static-source semantic, delayed, and already-typed dynamic prevention triggers converge before batching; a started batch is sealed and later occurrences form a new batch. Strict construction, checkpoint loading, continuation validation, rollback, inactive-controller handling, four-player APNAP placement, same-controller ordering, save/load, and explicit historical Game Record v3 semantic and delayed continuation compatibility are covered. The engine imports a narrow trigger-processing facade and sheds the duplicate delayed-only executor. The 3,901-test quick gate had no behavioral failure; its four generated/index freshness failures were reconciled without rerunning the complete local suite. Complete CR 603 grammar, intervening-if, state triggers, reflexive triggers, and all special placement rules remain unclaimed."
     },
     {
       "id": "rules_snapshot",
@@ -716,14 +729,14 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30852331025,
+      "run_id": 30859494835,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30852331025"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30859494835"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr79_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; active_source_focused_prevention_trigger_object_query_aftermath_oracle_cardprogram_architecture_capability_and_status_shards_pass",
-      "focused_rules_tests": "pass_cr615_13_aggregate_trigger_occurrence_stack_apnap_target_at_placement_control_change_source_lki_nested_damage_object_predicate_strictness_serialization_replay_rollback_and_implementation_mutations",
+      "deterministic_tests": "certified_main_through_pr80_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; active_source_3901_test_quick_gate_behavior_pass_with_generated_index_drift_reconciled_and_focused_trigger_architecture_capability_status_checks",
+      "focused_rules_tests": "pass_unified_ordinary_trigger_occurrence_immutable_versioned_batch_apnap_controller_order_semantic_delayed_dynamic_convergence_strict_checkpoint_continuation_rollback_multiplayer_save_load_historical_v3_compatibility_and_implementation_mutations",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
@@ -754,5 +767,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "After certifying the active CR 615.13 source tree, implement the corpus-ranked canonical-life-and-simple-zone-triggers batch: normalized enter/death occurrences, generic fixed life results, and closed targetless life/draw trigger lowering through the existing APNAP stack boundary."
+  "next_task": "After certifying the active unified trigger foundation, implement the corpus-ranked canonical-life-and-simple-zone-triggers batch: normalized enter/death occurrences, generic fixed life results, and closed targetless life/draw trigger lowering through the typed APNAP stack boundary."
 }

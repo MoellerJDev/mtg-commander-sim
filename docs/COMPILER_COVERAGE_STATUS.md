@@ -50,9 +50,9 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 - Registry schema/version: `1/17`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `280330679c40136a72e5601ec2302b555614ffad2abb81fbf482930ec7287869`
-- Evidence fingerprint: `7c60b89bc37bad2256c7b89babc8d0d390a80a12be1cdf3af62229339adda118`
-- Explicit evidence declarations: 251
+- Registry fingerprint: `4f30391709325a5ce7439f87a657f2afdba1327e8303dae8771492538a8152bc`
+- Evidence fingerprint: `f57ba77d3fdcfe309bde30081fd4538f80407c0474af20ed03254a592ecbd936`
+- Explicit evidence declarations: 254
 - Capability records: 36
 - Trusted records: 24
 - Blocked records: 4

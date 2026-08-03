@@ -55,6 +55,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/object_predicate.py",
         "mtg_commander_sim/prevention_triggers.py",
         "mtg_commander_sim/replacement/immutable.py",
+        "mtg_commander_sim/trigger_batches.py",
     }:
         return "domain"
     if relative in {
@@ -130,6 +131,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/targets.py",
         "mtg_commander_sim/token_creation.py",
         "mtg_commander_sim/trigger_targeting.py",
+        "mtg_commander_sim/trigger_processing.py",
         "mtg_commander_sim/object_query.py",
     }:
         return "rules"
@@ -175,6 +177,12 @@ def _owner(relative: str, layer: str) -> str:
         return "life_state"
     if relative == "mtg_commander_sim/delayed_triggers.py":
         return "delayed_triggers"
+    if relative in {
+        "mtg_commander_sim/trigger_batches.py",
+        "mtg_commander_sim/trigger_processing.py",
+        "mtg_commander_sim/trigger_targeting.py",
+    }:
+        return "trigger_processing"
     if relative == "mtg_commander_sim/tap_state.py":
         return "tap_state_effects"
     if relative in {
@@ -202,7 +210,6 @@ def _owner(relative: str, layer: str) -> str:
         "mtg_commander_sim/damage_transaction.py",
         "mtg_commander_sim/damage_values.py",
         "mtg_commander_sim/damage_results.py",
-        "mtg_commander_sim/trigger_targeting.py",
     }:
         return "damage"
     if relative == "mtg_commander_sim/token_creation.py":
