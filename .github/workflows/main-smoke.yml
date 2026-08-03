@@ -1,0 +1,55 @@
+name: Main smoke
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: main-smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Main / Integration smoke
+    runs-on: ubuntu-latest
+    env:
+      MTG_CARD_DB: data/test-ci.sqlite3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install dependencies
+        run: |
+          python -m pip install -e . -r requirements-dev.txt
+          npm ci --prefix web
+      - name: Build compact database
+        run: >-
+          python scripts/build_test_database.py build
+          --fixture tests/fixtures/scryfall-exact-lists.json
+          --fixture tests/fixtures/browser-lifecycle-cards.json
+          --fixture tests/fixtures/damage-result-cards.json
+          --output data/test-ci.sqlite3
+      - name: Run deterministic replay and server smoke
+        run: python scripts/test_shards.py run main-smoke
+      - name: Verify generated integration state and rules
+        run: |
+          python scripts/update_platform_status.py --check
+          python scripts/update_architecture_audit.py --check
+          python simctl.py rules verify --root .
+      - name: Verify wheel metadata and browser production build
+        run: |
+          python -m build --wheel
+          python scripts/verify_wheel.py
+          npm run build --prefix web

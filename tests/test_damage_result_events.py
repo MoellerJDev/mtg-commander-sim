@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 from common import ROOT, keep_all, make_session
+from property_budget import property_transitions
 from scripts.build_test_database import build_fixture_database
 from mtg_commander_sim.carddb import CardDatabase
 from mtg_commander_sim.damage import (
@@ -1319,7 +1320,7 @@ class DamageResultEventTests(unittest.TestCase):
 
     def test_damage_results_property_1000_deterministic_transitions(self):
         engine = self.session(120_400_005).engine
-        for index in range(1_000):
+        for index in range(property_transitions()):
             amount = index % 7 + 1
             infect = index % 2 == 0
             lifelink = index % 3 == 0

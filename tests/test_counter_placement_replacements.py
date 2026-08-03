@@ -7,6 +7,7 @@ import tempfile
 import unittest
 
 from common import ROOT, keep_all, make_session
+from property_budget import property_transitions
 from scripts.build_test_database import build_fixture_database
 from mtg_commander_sim.carddb import CardDatabase
 from mtg_commander_sim.counter_placement import (
@@ -695,7 +696,7 @@ class CounterPlacementReplacementTests(unittest.TestCase):
     def test_counter_replacement_property_1000_deterministic_transitions(self):
         handler = CounterQuantityReplacementHandler()
         randomizer = random.Random(12261416)
-        for index in range(1_000):
+        for index in range(property_transitions()):
             amount = randomizer.randint(1, 20)
             multiplier = randomizer.randint(2, 4)
             additional = randomizer.randint(1, 4)

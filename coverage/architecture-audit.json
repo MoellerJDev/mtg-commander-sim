@@ -8225,11 +8225,11 @@
         "file": "docs/testing/strategy.md",
         "metadata": {
           "audience": "all contributors",
-          "authoritative_source": "tests, local merge gate, and CI workflow",
+          "authoritative_source": "tests, quick gate, sharded PR certification, and nightly assurance",
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Testing strategy",
-          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+          "verified": "2026-08-02"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -8355,7 +8355,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "99f68b779e2024a7447eeb6f21392f08523a08b9"
+          "verified": "6d0f1013ac49f51c906922fcdf478e4323db85f9"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -8411,7 +8411,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Integration handoff",
-          "verified": "2026-08-01"
+          "verified": "2026-08-02"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -8793,18 +8793,18 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1201,
-      "discovered_total": 4501,
+      "conventional_ast_cases": 1224,
+      "discovered_total": 4524,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
-        "compiler_named": 25,
+        "compiler_named": 26,
         "fuzz_named": 1,
         "privacy_or_projection_named": 14,
         "replay_named": 74,
-        "server_named": 16
+        "server_named": 18
       },
       "reconciles": true,
-      "test_files": 131
+      "test_files": 136
     }
   }
 }

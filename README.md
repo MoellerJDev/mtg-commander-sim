@@ -206,8 +206,8 @@ $env:MTG_CARD_DB = "data/test-ci.sqlite3"
 ```
 
 The repository deliberately does not contain a full Scryfall export or SQLite
-database. CI builds a small database from the committed public exact-list
-fixture:
+database. CI and the local quick gate build a small database from committed
+public fixtures:
 
 ```bash
 python scripts/build_test_database.py build \
@@ -227,7 +227,24 @@ only for deterministic combat/lifecycle
 testing; they are not a substitute for the complete Oracle corpus or matchup
 evidence.
 
-For an exact-commit merge candidate, use the reusable gate after committing all
+For normal development, run the deterministic change-impact quick gate. Use
+`--dry-run` to inspect the selected tests and checks without executing them:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/quick_gate.py --dry-run
+.\.venv\Scripts\python.exe scripts/quick_gate.py
+```
+
+Pull-request CI is the ordinary exact-head certification authority. It runs
+balanced Linux shards, generated and architecture validation, packaging,
+Windows compatibility, and an isolated headless browser check, then reports a
+single stable `PR / Certification` result. Full cross-platform, browser,
+property, mutation, corpus, and security assurance runs nightly. See the
+[CI pipeline guide](docs/development/ci-pipeline.md) for shard ownership,
+two-slot worktrees, branch protection, and recovery.
+
+For releases or unusually high-risk persistence, replay, privacy, or packaging
+changes, the reusable full local gate remains available after committing all
 intended changes:
 
 ```powershell
@@ -1199,7 +1216,8 @@ container isolation when filesystem-level isolation must also be proven.
 - `schemas/` — versioned client-facing JSON schemas
 - `scripts/` — data bootstrap and protocol smoke/benchmark tools
 - `tests/` — multiplayer, permission, rules, and token-efficiency regression tests
-- `.github/workflows/` — offline merge-gating CI and manual live integration
+- `.github/workflows/` — sharded PR certification, compact `main` smoke, and
+  deep nightly assurance
 - `REPOSITORY_HYGIENE.md` — tracked-artifact and history policy
 - `SECURITY.md` — private vulnerability reporting and hidden-information scope
 

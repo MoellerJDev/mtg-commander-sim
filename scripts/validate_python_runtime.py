@@ -58,26 +58,36 @@ def project_policy_failures(root: Path = ROOT) -> list[str]:
 
 def workflow_policy_failures(root: Path = ROOT) -> list[str]:
     failures: list[str] = []
-    expected = {
-        root / ".github" / "workflows" / "ci.yml": 2,
-        root / ".github" / "workflows" / "live-integration.yml": 1,
+    workflow_root = root / ".github" / "workflows"
+    required = {
+        "ci.yml",
+        "live-integration.yml",
+        "main-smoke.yml",
+        "nightly.yml",
     }
-    for path, expected_count in expected.items():
+    available = {path.name for path in workflow_root.glob("*.yml")}
+    for missing in sorted(required - available):
+        failures.append(f".github/workflows/{missing} is missing")
+    for path in sorted(workflow_root.glob("*.yml")):
         relative = path.relative_to(root).as_posix()
-        if not path.is_file():
-            failures.append(f"{relative} is missing")
-            continue
         text = path.read_text(encoding="utf-8")
+        setup_count = len(re.findall(r"uses:\s*actions/setup-python@", text))
+        if setup_count == 0:
+            continue
         versions = re.findall(r"python-version:\s*[\"']?([0-9.]+)", text)
-        if versions != [SUPPORTED_PYTHON_TEXT] * expected_count:
+        if len(versions) != setup_count or any(
+            version != SUPPORTED_PYTHON_TEXT for version in versions
+        ):
             failures.append(
-                f"{relative} must configure only {SUPPORTED_PYTHON_TEXT}; "
-                f"found {versions!r}"
+                f"{relative} must configure exactly {SUPPORTED_PYTHON_TEXT} "
+                f"for all {setup_count} Python setups; found {versions!r}"
             )
         architectures = re.findall(r"architecture:\s*[\"']?([A-Za-z0-9_-]+)", text)
-        if architectures != ["x64"] * expected_count:
+        if len(architectures) != setup_count or any(
+            architecture != "x64" for architecture in architectures
+        ):
             failures.append(
-                f"{relative} must configure x64 for every Python setup; "
+                f"{relative} must configure x64 for all {setup_count} Python setups; "
                 f"found {architectures!r}"
             )
         if "matrix.python-version" in text:

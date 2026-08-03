@@ -18,8 +18,8 @@
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "prevention_immediate_life_sequencing",
-    "commit_reference": "certified Python 3.12 main through PR 74 merge 99f68b7; Oracle IR v18 fixed independent prevention/life sequencing follow-up is locally focused-tested and exact-head certification is pending",
+    "active_phase": "pipelined_ci_throughput",
+    "commit_reference": "certified Python 3.12 main through PR 75 merge 6d0f101; exact-head run 30834139920 passed Ubuntu, Windows, and headless Chromium; the two-slot sharded CI throughput phase is in development",
     "tags": [
       {
         "commit": "4dc3feb625f824b9062e162808fd74b07e97c404",
@@ -117,7 +117,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Certify and merge the fixed independent prevention/life sequencing correction, then return to fresh main and select the next dependency-ready rules family from the regenerated queue.",
+  "next_task": "Certify the sharded two-slot CI throughput pipeline, protect main with the stable PR / Certification context, then resume the next dependency-ready rules family from fresh main while nightly assurance owns expensive breadth.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.12,<3.13",
@@ -208,20 +208,20 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4501,
+    "deterministic_cases_discovered": 4524,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
     "web_files": 28
   },
   "validation": {
-    "baseline_commit": "99f68b779e2024a7447eeb6f21392f08523a08b9",
+    "baseline_commit": "6d0f1013ac49f51c906922fcdf478e4323db85f9",
     "card_program_census": "full_38485_trusted_816_capability_closed_814_residual_35420_failed_2249_material_residual_69360; commander_legal_31623_trusted_416_capability_closed_414_residual_31206_failed_1_material_residual_60746; full_oracle_exact_3056_partial_16113_unresolved_19316_material_residual_69372; commander_oracle_exact_416_partial_14692_unresolved_16515_material_residual_60749; fixed_independent_prevention_life_delta_exact_plus_1_trusted_plus_1_capability_closed_plus_1_residual_minus_1_material_residual_minus_2",
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30827880407,
+      "run_id": 30834139920,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30827880407"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30834139920"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -229,7 +229,7 @@
       "browser_typecheck_and_production_build": "pass_typecheck_and_focused_headless_journey",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "certified_main_through_pr74_pass_full_gate; focused_prevention_immediate_sequence_compiler_runtime_cardprogram_replay_privacy_life_replacement_and_mutation_shards_pass; exact_head_full_gate_pending",
+      "deterministic_tests": "certified_main_through_pr75_exact_head_public_ubuntu_windows_and_browser_pass; focused_prevention_immediate_sequence_compiler_runtime_cardprogram_replay_privacy_life_replacement_and_mutation_shards_pass",
       "focused_rules_tests": "pass_fixed_independent_life_sibling_no_damage_later_damage_zero_prevented_static_multiplier_all_targets_illegal_source_choice_save_load_replay_privacy_and_killed_mutants",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",

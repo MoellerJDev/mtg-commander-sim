@@ -79,6 +79,7 @@ indexed here but excluded from documentation front-matter validation.
 ## Testing and assurance
 
 - [Testing strategy](testing/strategy.md)
+- [CI pipeline and two-slot workflow](development/ci-pipeline.md)
 - [Interaction coverage](testing/interaction-coverage.md)
 - [Replay testing](testing/replay.md)
 - [Privacy testing](testing/privacy.md)
