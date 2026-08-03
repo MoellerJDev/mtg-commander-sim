@@ -8,6 +8,7 @@ from mtg_commander_sim.life_change import (
     LifeChangeError,
     LifeChangeRequest,
     prepare_life_change_batch,
+    summarize_life_change_batch,
 )
 from mtg_commander_sim.replacement import (
     AddAmount,
@@ -173,6 +174,50 @@ class LifeChangeTransactionTests(DamageReplacementPipelineBase):
             )
 
         self.assertEqual(before, engine.state.players["B"].life)
+
+    def test_life_summary_separates_requested_and_replacement_adjusted_results(self):
+        engine = self.session(119_100_006, players=4).engine
+        prepared = prepare_life_change_batch(
+            engine,
+            (
+                LifeChangeRequest("life:summary:B", "B", -2),
+                LifeChangeRequest("life:summary:C", "C", -2),
+                LifeChangeRequest("life:summary:A", "A", 2),
+            ),
+            effects=(
+                ReplacementEffect(
+                    effect_id="prevent-b-loss",
+                    source_id="source:prevent-b-loss",
+                    event_kind="life.change",
+                    replacement_class=ReplacementClass.OTHER,
+                    conditions={
+                        "affected_player": {"eq": "B"},
+                        "direction": {"eq": "loss"},
+                    },
+                    operations=(MultiplyAmount(field="amount", factor=0),),
+                ),
+                ReplacementEffect(
+                    effect_id="double-a-gain",
+                    source_id="source:double-a-gain",
+                    event_kind="life.change",
+                    replacement_class=ReplacementClass.OTHER,
+                    conditions={
+                        "affected_player": {"eq": "A"},
+                        "direction": {"eq": "gain"},
+                    },
+                    operations=(MultiplyAmount(field="amount", factor=2),),
+                ),
+            ),
+        )
+
+        summary = summarize_life_change_batch(prepared)
+
+        self.assertEqual(-2, summary.for_player("B").requested_delta)
+        self.assertEqual(0, summary.for_player("B").delta)
+        self.assertEqual(-2, summary.for_player("C").delta)
+        self.assertEqual(4, summary.for_player("A").delta)
+        self.assertEqual(("A", "C"), summary.changed_players)
+        self.assertEqual(0, summary.to_dict()["life_players"][0]["delta"])
 
 
 if __name__ == "__main__":

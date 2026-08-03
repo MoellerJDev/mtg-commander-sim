@@ -1,7 +1,7 @@
 ---
 title: "Damage transaction"
 status: "current"
-authoritative_source: "mtg_commander_sim/damage.py, damage_prevention.py, damage_prevention_creation.py, damage_prevention_aftermath.py, damage_results.py, life_change.py, mana_payment_continuations.py, replacement/, semantic_runtime/damage_replacements.py, semantic_runtime/damage_results.py, ADR 0012, ADR 0013, and ADR 0017"
+authoritative_source: "mtg_commander_sim/damage.py, damage_prevention.py, damage_prevention_creation.py, damage_prevention_aftermath.py, damage_results.py, life_change.py, life_state.py, object_predicate.py, object_query.py, mana_payment_continuations.py, replacement/, semantic_runtime/damage_replacements.py, semantic_runtime/damage_results.py, semantic_runtime/life_replacements.py, ADR 0012, ADR 0013, and ADR 0017"
 verified: "2026-08-03"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
@@ -74,19 +74,23 @@ replay-pinned. Until-end-of-turn values expire at cleanup.
 `damage_prevention_creation.py` resolves dynamic quantities before commit,
 validates exact divided allocations, creates one independently consumable
 shield per selected object, and pins an optional chosen source to physical
-identity plus current characteristics/LKI. Version-2 source identity uses the
+identity plus current characteristics/LKI. Version-3 source identity uses the
 logical incarnation and zone, with the CR 400.7a exception that a chosen
 permanent spell continues to the permanent that spell becomes. It neither
 follows a countered spell into a graveyard nor a physical card through a later
-incarnation. Historical version-0/version-1 checkpoint shapes retain their
-original replay semantics.
+incarnation. Its strict `ObjectQuerySpec` serialization replaces the former
+parallel source-filter fields. Historical version-0 through version-2
+checkpoint shapes retain their original replay semantics.
 
 The seat-scoped source choice offers public permanents, spells on the stack,
 face-up command-zone objects, and former-zone objects carried by explicit typed
 provenance from a stack object, waiting prevention/replacement value, or waiting
 delayed trigger. It never scans arbitrary semantic context or hidden objects.
-Closed property filters cover all/any colors and required types, subtypes,
-supertypes, or keywords, with a second check when damage would occur.
+The compiler, choice continuation, and damage-time recheck share the canonical
+object predicate for all/any colors and required effective types, subtypes,
+supertypes, or keywords. CR 609.7 source identity, public/LKI provenance,
+exact incarnation, and permanent-spell continuity remain source-specific
+checks rather than target-legality rules.
 
 `damage_prevention_aftermath.py` aggregates the amount actually prevented by
 each applied shield across a simultaneous batch. Represented life gain becomes
@@ -121,7 +125,12 @@ nothing. The component is collected only while its damageable battlefield
 source exists; complete copy-layer interaction remains outside this slice.
 
 `replacement.life.gain.multiplier.v1` contributes a fixed integral multiplier
-to a positive `life.change` result. Oracle IR emits this descriptor for the
+to a positive `life.change` result. The focused
+`semantic_runtime/life_replacements.py` registry owns its lowering and source
+discovery; damage results only compose nested life events and ordinary life
+effects no longer depend on the damage-result registry. `life_change.py` owns
+event preparation, APNAP choices, replay, and commit through the mutation-only
+`life_state.py` boundary. Oracle IR emits this descriptor for the
 closed static life-doubling sentence, so Boon Reflection and Rhox Faithmender no
 longer require source-pinned programs. `replacement.damage.result.life_floor.v1`
 caps the life-loss child of one complete `damage.results` root; Worship remains
@@ -157,7 +166,7 @@ remain blocked.
 ## Corpus result
 
 The complete pinned census binds Infect, Wither, Lifelink, and fixed Toxic
-nodes to trusted fine-grained result capabilities. Oracle IR v19 recognizes
+nodes to trusted fine-grained result capabilities. Oracle IR v20 recognizes
 closed whole-line grammar for static double damage, fixed static prevention,
 finite and divided shield creation, chosen-source next-instance/all-damage
 families, represented life/counter aftermath, static life-gain doubling, and

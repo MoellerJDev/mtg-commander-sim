@@ -13,6 +13,7 @@ from mtg_commander_sim.damage import (
     resolve_damage_batch,
 )
 from mtg_commander_sim.model import GameState
+from mtg_commander_sim.object_query import ObjectQuerySpec
 from mtg_commander_sim.projection import StateProjector
 from mtg_commander_sim.record import checkpoint_envelope, replay_record
 from mtg_commander_sim.damage_prevention import (
@@ -437,6 +438,46 @@ class DamagePreventionShieldTests(DamageReplacementPipelineBase):
             version_two,
             ChosenDamageSource.from_dict(version_two.to_dict()),
         )
+
+        version_three = ChosenDamageSource(
+            ref="v3-source",
+            object_id="v3-object",
+            predicate=ObjectQuerySpec(
+                zones=("battlefield", "stack"),
+                types_all=("creature",),
+                colors_all=("U",),
+                colors_any=("R",),
+                known_to_actor=True,
+            ),
+            snapshot_version=3,
+            logical_object_id="v3-object@1",
+            oracle_id="oracle-v3",
+            printed_name="Version Three Source",
+            controller="A",
+            owner="A",
+            zone="battlefield",
+            types=("creature",),
+            colors=("R", "U"),
+            identity_keys=("v3-object@1|battlefield",),
+        )
+        version_three_dict = version_three.to_dict()
+        self.assertIn("predicate", version_three_dict)
+        self.assertNotIn("required_colors", version_three_dict)
+        self.assertEqual(
+            {
+                "contains_all": ["U"],
+                "contains_any": ["R"],
+            },
+            version_three.event_conditions()["source_colors"],
+        )
+        self.assertEqual(
+            version_three,
+            ChosenDamageSource.from_dict(version_three_dict),
+        )
+        malformed_v3 = dict(version_three_dict)
+        malformed_v3["unknown"] = True
+        with self.assertRaisesRegex(ValueError, "unknown unknown"):
+            ChosenDamageSource.from_dict(malformed_v3)
 
         malformed = version_two.to_dict()
         malformed["unknown"] = True

@@ -35,7 +35,7 @@ from .replacement import (
     ReplacementChoiceRequired,
     ReplacementEventBatch,
 )
-from .semantic_runtime.damage_results import (
+from .semantic_runtime.life_replacements import (
     collect_life_change_replacement_effects,
 )
 

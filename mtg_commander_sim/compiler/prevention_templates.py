@@ -3,6 +3,9 @@ from __future__ import annotations
 import re
 from typing import Any, Mapping
 
+from ..damage_source import REPRESENTED_DAMAGE_SOURCE_ZONES
+from ..object_query import ObjectQuerySpec
+
 
 PreventionTemplate = tuple[
     str,
@@ -98,38 +101,30 @@ def _rules(
     )
 
 
-def _source_filters(qualifier: str | None) -> dict[str, list[str]]:
+def _source_predicate(qualifier: str | None) -> ObjectQuerySpec:
     normalized = " ".join(str(qualifier or "").casefold().split())
     if not normalized:
-        return {
-            "allowed_colors": [],
-            "required_types": [],
-            "required_subtypes": [],
-            "required_supertypes": [],
-            "required_keywords": [],
-        }
+        return ObjectQuerySpec(
+            zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
+            known_to_actor=True,
+        )
     color_words = normalized.split(" or ")
     if all(word in _COLOR_CODES for word in color_words):
-        return {
-            "allowed_colors": [_COLOR_CODES[word] for word in color_words],
-            "required_types": [],
-            "required_subtypes": [],
-            "required_supertypes": [],
-            "required_keywords": [],
-        }
-    return {
-        "allowed_colors": [],
-        "required_types": (
-            [normalized]
+        return ObjectQuerySpec(
+            zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
+            colors_any=tuple(_COLOR_CODES[word] for word in color_words),
+            known_to_actor=True,
+        )
+    return ObjectQuerySpec(
+        zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
+        types_all=(
+            (normalized,)
             if normalized in {"artifact", "land", "creature"}
-            else []
+            else ()
         ),
-        "required_subtypes": [],
-        "required_supertypes": (
-            ["legendary"] if normalized == "legendary" else []
-        ),
-        "required_keywords": [],
-    }
+        supertypes_all=(("legendary",) if normalized == "legendary" else ()),
+        known_to_actor=True,
+    )
 
 
 def _chosen_source_effect(
@@ -140,8 +135,7 @@ def _chosen_source_effect(
     return {
         "op": "choose_damage_source",
         "prompt": "Choose the source whose damage will be prevented.",
-        "required_colors": [],
-        **_source_filters(qualifier),
+        "source_predicate": _source_predicate(qualifier).to_dict(),
         "shield": dict(shield),
     }
 

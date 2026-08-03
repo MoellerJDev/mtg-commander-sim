@@ -16,7 +16,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `cda213c987cb8c5aef94af74bc74146f29bba0fb`
 - Package: `0.8.0`
 - CI run: [30811998248](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30811998248) — `pass`
-- Production scope: 180 files, 87,018 physical lines, 80,190 logical lines
+- Production scope: 182 files, 87,518 physical lines, 80,613 logical lines
 
 ## Central engine debt
 
@@ -67,9 +67,9 @@ Baseline: `cda213c987cb8c5aef94af74bc74146f29bba0fb`. Guard: `python scripts/val
 | `mtg_commander_sim/damage_results.py` | python | 1,308 | 1,202 |
 | `server/app.py` | python | 1,305 | 1,171 |
 | `mtg_commander_sim/codex_cli.py` | python | 1,214 | 1,154 |
+| `mtg_commander_sim/damage_modifier_state.py` | python | 1,204 | 1,123 |
 | `mtg_commander_sim/session.py` | python | 1,146 | 1,103 |
 | `mtg_commander_sim/arena.py` | python | 1,106 | 1,033 |
-| `mtg_commander_sim/effect_runtime/zones_and_attachments.py` | python | 1,045 | 982 |
 
 ## Largest functions and methods
 
@@ -114,8 +114,8 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,543
-- Conventional Python cases: 1,243
+- Python discovered: 4,548
+- Conventional Python cases: 1,248
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 7
 - Browser unit cases: 18

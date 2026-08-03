@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Protocol, Sequence
+from typing import Mapping, Protocol, Sequence
 
 from .state_planner import (
     apply_state_plan,
@@ -15,8 +15,18 @@ class LifeStateError(ValueError):
     """A typed life-total change cannot be planned or committed exactly."""
 
 
+class LifePlayerState(Protocol):
+    life: int
+
+
+class LifeStateView(Protocol):
+    players: Mapping[str, LifePlayerState]
+
+    def active_seats(self) -> Sequence[str]: ...
+
+
 class LifeStateHost(Protocol):
-    state: Any
+    state: LifeStateView
 
 
 @dataclass(frozen=True, slots=True)

@@ -4,22 +4,28 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Mapping, Protocol, Sequence
 
-from ..replacement_effects import (
-    ReplacementClass,
-    ReplacementEffect,
-)
+from ..replacement_effects import ReplacementClass, ReplacementEffect
 from ..rules.capabilities import load_default_capability_registry
 from .component_registry import RuntimeComponentRegistry, exact_fields
 from .context import SemanticNodeError
-from .life_replacements import collect_life_change_replacement_effects
 
 
-_LIFE_FLOOR_HANDLER_ID = "replacement.damage.result.life_floor.v1"
+_LIFE_GAIN_HANDLER_ID = "replacement.life.gain.multiplier.v1"
 _RELATIONS = {"any", "source_controller", "opponent"}
 
 
-class DamageResultReplacementHost(Protocol):
-    semantics: Any
+class LifeReplacementSemantics(Protocol):
+    def runtime_handler_programs_for_oracle(
+        self,
+        oracle_id: str,
+        *,
+        active_zone: str,
+        event: str,
+    ) -> Sequence[Any]: ...
+
+
+class LifeReplacementHost(Protocol):
+    semantics: LifeReplacementSemantics
     active_seats: list[str]
 
     def _semantic_event_sources(
@@ -30,7 +36,7 @@ class DamageResultReplacementHost(Protocol):
 
 
 @dataclass(frozen=True, slots=True)
-class DamageResultReplacementSourceContext:
+class LifeReplacementSourceContext:
     source_ref: str
     source_controller: str
     component_id: str = ""
@@ -38,15 +44,14 @@ class DamageResultReplacementSourceContext:
     def __post_init__(self) -> None:
         if not self.source_ref or not self.source_controller:
             raise SemanticNodeError(
-                "Damage-result replacements require a source and controller"
+                "Life replacements require a source and controller"
             )
 
 
 @dataclass(frozen=True, slots=True)
-class DamageResultLifeFloorNode:
+class LifeGainMultiplierNode:
     affected_player_relation: str
-    requires_controlled_creature: bool
-    minimum_life: int
+    multiplier: int
 
 
 def _relation_condition(
@@ -70,25 +75,26 @@ def _relation(value: Any, *, field: str) -> str:
 
 
 @dataclass(frozen=True, slots=True)
-class DamageResultLifeFloorHandler:
-    handler_id: str = _LIFE_FLOOR_HANDLER_ID
+class LifeGainMultiplierHandler:
+    handler_id: str = _LIFE_GAIN_HANDLER_ID
     schema_version: int = 1
-    family: str = "replacement.damage.result.life_floor"
-    event: str = "damage.results"
+    family: str = "replacement.life.gain.multiplier"
+    event: str = "life.change"
     rule_references: tuple[str, ...] = (
-        "120.4c",
+        "119.3",
+        "119.10",
         "614.1",
         "616.1",
         "616.1f",
         "616.1g",
     )
     capability_dependencies: tuple[str, ...] = (
-        "damage.result.replacement_order",
+        "life.gain.replacement.static_multiplier",
     )
 
     def validate(
         self, descriptor: Mapping[str, Any]
-    ) -> DamageResultLifeFloorNode:
+    ) -> LifeGainMultiplierNode:
         exact_fields(
             descriptor,
             {
@@ -115,53 +121,45 @@ class DamageResultLifeFloorHandler:
         condition = descriptor["condition"]
         if not isinstance(condition, Mapping):
             raise SemanticNodeError(
-                "Damage-result life-floor condition must be an object"
+                "Life-gain replacement condition must be an object"
             )
         exact_fields(
             condition,
-            {
-                "affected_player_relation",
-                "requires_controlled_creature",
-            },
-            field="damage-result life-floor condition",
+            {"affected_player_relation"},
+            field="life-gain replacement condition",
         )
-        requires_creature = condition["requires_controlled_creature"]
-        if type(requires_creature) is not bool:
-            raise SemanticNodeError(
-                "requires_controlled_creature must be a boolean"
-            )
         modification = descriptor["modification"]
         if not isinstance(modification, Mapping):
             raise SemanticNodeError(
-                "Damage-result life-floor modification must be an object"
+                "Life-gain replacement modification must be an object"
             )
         exact_fields(
             modification,
-            {"minimum_life"},
-            field="damage-result life-floor modification",
+            {"multiplier"},
+            field="life-gain replacement modification",
         )
-        minimum = modification["minimum_life"]
-        if type(minimum) is not int:
-            raise SemanticNodeError("minimum_life must be an integer")
-        return DamageResultLifeFloorNode(
+        multiplier = modification["multiplier"]
+        if type(multiplier) is not int or multiplier < 2:
+            raise SemanticNodeError(
+                "Life-gain multiplier must be an integer of at least 2"
+            )
+        return LifeGainMultiplierNode(
             affected_player_relation=_relation(
                 condition["affected_player_relation"],
                 field="condition.affected_player_relation",
             ),
-            requires_controlled_creature=requires_creature,
-            minimum_life=minimum,
+            multiplier=multiplier,
         )
 
     def replacement_effect(
         self,
         descriptor: Mapping[str, Any],
-        context: DamageResultReplacementSourceContext,
+        context: LifeReplacementSourceContext,
     ) -> ReplacementEffect:
         node = self.validate(descriptor)
         conditions: dict[str, Any] = {
-            "subject_kind": {"eq": "player"},
-            "life_loss_amount": {"not_in": [0]},
-            "life_after_without_replacement": {"lt": node.minimum_life},
+            "direction": {"eq": "gain"},
+            "amount": {"not_in": [0]},
         }
         affected = _relation_condition(
             node.affected_player_relation,
@@ -169,9 +167,7 @@ class DamageResultLifeFloorHandler:
         )
         if affected is not None:
             conditions["affected_player"] = affected
-        if node.requires_controlled_creature:
-            conditions["controls_creature"] = {"eq": True}
-        component_id = context.component_id or str(node.minimum_life)
+        component_id = context.component_id or str(node.multiplier)
         return ReplacementEffect(
             effect_id=(
                 f"{self.handler_id}:{context.source_ref}:{component_id}"
@@ -182,34 +178,32 @@ class DamageResultLifeFloorHandler:
             conditions=conditions,
             operations=(
                 {
-                    "op": "cap_result_life_loss",
-                    "minimum": node.minimum_life,
+                    "op": "multiply",
+                    "field": "amount",
+                    "factor": node.multiplier,
                 },
             ),
-            label=(
-                f"{context.source_ref}: damage cannot reduce life below "
-                f"{node.minimum_life}"
-            ),
+            label=f"{context.source_ref}: multiply life gained",
         )
 
     def lower(
         self,
         descriptor: Mapping[str, Any],
-        context: DamageResultReplacementSourceContext,
+        context: LifeReplacementSourceContext,
     ) -> tuple[ReplacementEffect, ...]:
         return (self.replacement_effect(descriptor, context),)
 
 
-class DamageResultReplacementRegistry(
+class LifeReplacementRegistry(
     RuntimeComponentRegistry[
-        DamageResultReplacementSourceContext,
+        LifeReplacementSourceContext,
         ReplacementEffect,
     ]
 ):
     def replacement_effect(
         self,
         descriptor: Mapping[str, Any],
-        context: DamageResultReplacementSourceContext,
+        context: LifeReplacementSourceContext,
     ) -> ReplacementEffect:
         handler = self._handler(descriptor)
         compiler = getattr(handler, "replacement_effect", None)
@@ -222,38 +216,29 @@ class DamageResultReplacementRegistry(
 
 
 @lru_cache(maxsize=1)
-def default_damage_result_replacement_registry(
-) -> DamageResultReplacementRegistry:
-    registry = DamageResultReplacementRegistry(
-        (DamageResultLifeFloorHandler(),)
-    )
+def default_life_replacement_registry() -> LifeReplacementRegistry:
+    registry = LifeReplacementRegistry((LifeGainMultiplierHandler(),))
     registry.require_registered_capabilities(
         load_default_capability_registry()
     )
     return registry.freeze()
 
 
-def collect_damage_result_replacement_effects(
-    host: DamageResultReplacementHost,
+def collect_life_change_replacement_effects(
+    host: LifeReplacementHost,
     *,
     sources: Sequence[Any] | None = None,
     source_zones: Mapping[str, str] | None = None,
 ) -> tuple[ReplacementEffect, ...]:
-    """Compile trusted result replacements from one pre-mutation snapshot."""
+    """Compile trusted life-change replacements from one source snapshot."""
 
     candidates = (
         list(sources)
         if sources is not None
         else host._semantic_event_sources(zones={"battlefield"})
     )
-    registry = default_damage_result_replacement_registry()
-    effects: list[ReplacementEffect] = list(
-        collect_life_change_replacement_effects(
-            host,
-            sources=candidates,
-            source_zones=source_zones,
-        )
-    )
+    registry = default_life_replacement_registry()
+    effects: list[ReplacementEffect] = []
     for source in candidates:
         active_zone = (
             source_zones.get(source.object_id, source.zone)
@@ -269,7 +254,7 @@ def collect_damage_result_replacement_effects(
         programs = host.semantics.runtime_handler_programs_for_oracle(
             source.oracle_id,
             active_zone="battlefield",
-            event="damage.results",
+            event="life.change",
         )
         for program in programs:
             if not host.semantic_program_is_current_trusted(program):
@@ -278,7 +263,7 @@ def collect_damage_result_replacement_effects(
                 effects.append(
                     registry.replacement_effect(
                         descriptor,
-                        DamageResultReplacementSourceContext(
+                        LifeReplacementSourceContext(
                             source_ref=source.ref,
                             source_controller=source.controller,
                             component_id=f"{program.key}:{descriptor_index}",
@@ -286,3 +271,14 @@ def collect_damage_result_replacement_effects(
                     )
                 )
     return tuple(effects)
+
+
+__all__ = [
+    "collect_life_change_replacement_effects",
+    "default_life_replacement_registry",
+    "LifeGainMultiplierHandler",
+    "LifeGainMultiplierNode",
+    "LifeReplacementHost",
+    "LifeReplacementRegistry",
+    "LifeReplacementSourceContext",
+]

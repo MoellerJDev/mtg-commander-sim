@@ -2,9 +2,15 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 import unittest
+from unittest import mock
 
 from mtg_commander_sim.effect_runtime import life_effects
 from mtg_commander_sim.errors import GameRuleError
+from mtg_commander_sim.replacement import (
+    MultiplyAmount,
+    ReplacementClass,
+    ReplacementEffect,
+)
 
 
 class _State:
@@ -96,6 +102,51 @@ class LifeEffectRuntimeTests(unittest.TestCase):
             self.apply(host, {"op": "lose_life_each_opponent", "amount": 2})
 
         self.assertEqual(40, host.state.players["B"].life)
+
+    def test_drain_log_reports_final_replacement_adjusted_values(self):
+        host = _Host()
+        effects = (
+            ReplacementEffect(
+                effect_id="zero-b-loss",
+                source_id="source:zero-b-loss",
+                event_kind="life.change",
+                replacement_class=ReplacementClass.OTHER,
+                conditions={
+                    "affected_player": {"eq": "B"},
+                    "direction": {"eq": "loss"},
+                },
+                operations=(MultiplyAmount(field="amount", factor=0),),
+            ),
+            ReplacementEffect(
+                effect_id="double-a-gain",
+                source_id="source:double-a-gain",
+                event_kind="life.change",
+                replacement_class=ReplacementClass.OTHER,
+                conditions={
+                    "affected_player": {"eq": "A"},
+                    "direction": {"eq": "gain"},
+                },
+                operations=(MultiplyAmount(field="amount", factor=2),),
+            ),
+        )
+
+        with mock.patch.object(
+            life_effects,
+            "collect_life_change_replacement_effects",
+            return_value=effects,
+        ):
+            self.apply(host, {"op": "drain_each_opponent", "amount": 1})
+
+        self.assertEqual((42, 40, 39), self._life(host))
+        args, kwargs = host.logs[-1]
+        self.assertEqual(
+            "B lost 0 life; C lost 1 life; A gained 2 life.",
+            args[2],
+        )
+        details = args[3]
+        self.assertEqual(2, details["gained_amount"])
+        self.assertEqual({"B": 0, "C": -1, "A": 2}, details["deltas"])
+        self.assertEqual(["A", "C"], list(kwargs["changed_players"]))
 
     def test_family_rejects_an_operation_it_does_not_own(self):
         host = _Host()

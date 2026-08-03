@@ -3,6 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
+from ..damage_source import REPRESENTED_DAMAGE_SOURCE_ZONES
+from ..object_query import (
+    ObjectQueryError,
+    ObjectQuerySpec,
+    query_objects,
+)
 from ..replacement.immutable import FrozenMap, thaw_value
 from .context import SemanticChoiceContext, SemanticChoiceQuery
 from .model import (
@@ -15,45 +21,60 @@ from .model import (
 )
 
 
-_EXILE_ZONE = "".join(("ex", "ile"))
-_PUBLIC_SOURCE_ZONES = (
-    "battlefield",
-    "command",
-    _EXILE_ZONE,
-    "graveyard",
-    "stack",
+_LEGACY_FILTER_FIELDS = frozenset(
+    {
+        "required_colors",
+        "allowed_colors",
+        "required_types",
+        "required_subtypes",
+        "required_supertypes",
+        "required_keywords",
+    }
 )
 
 
-def _normalized(value: Any, *, upper: bool = False) -> tuple[str, ...]:
-    if not isinstance(value, (list, tuple)):
-        raise SemanticChoiceError("Chosen-source filters must be arrays")
-    normalizer = str.upper if upper else str.casefold
-    result = tuple(sorted({normalizer(str(item)) for item in value if str(item)}))
-    if len(result) != len(value):
+def _source_predicate(effect: Mapping[str, Any]) -> ObjectQuerySpec:
+    raw = effect.get("source_predicate")
+    legacy_present = _LEGACY_FILTER_FIELDS.intersection(effect)
+    if raw is not None and legacy_present:
         raise SemanticChoiceError(
-            "Chosen-source filters require unique nonempty values"
+            "Chosen-source predicates cannot mix canonical and legacy filters"
         )
-    return result
+    try:
+        if raw is not None:
+            predicate = ObjectQuerySpec.from_dict(thaw_value(raw))
+        else:
+            predicate = ObjectQuerySpec(
+                zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
+                colors_all=effect.get("required_colors", ()),
+                colors_any=effect.get("allowed_colors", ()),
+                types_all=effect.get("required_types", ()),
+                subtypes_all=effect.get("required_subtypes", ()),
+                supertypes_all=effect.get("required_supertypes", ()),
+                keywords_all=effect.get("required_keywords", ()),
+                known_to_actor=True,
+            )
+    except ObjectQueryError as exc:
+        raise SemanticChoiceError(str(exc)) from exc
+    if predicate.known_to_actor is not True:
+        raise SemanticChoiceError(
+            "Chosen damage sources must be legally known to the chooser"
+        )
+    if not predicate.zones or not set(predicate.zones).issubset(
+        REPRESENTED_DAMAGE_SOURCE_ZONES
+    ):
+        raise SemanticChoiceError(
+            "Chosen damage sources require public represented zones"
+        )
+    return predicate
 
 
 def _candidates(
     query: SemanticChoiceQuery,
     *,
-    required_colors: tuple[str, ...],
-    allowed_colors: tuple[str, ...],
-    required_types: tuple[str, ...],
-    required_subtypes: tuple[str, ...],
-    required_supertypes: tuple[str, ...],
-    required_keywords: tuple[str, ...],
+    predicate: ObjectQuerySpec,
 ) -> tuple[Any, ...]:
-    colors = set(required_colors)
-    any_colors = set(allowed_colors)
-    types = set(required_types)
-    subtypes = set(required_subtypes)
-    supertypes = set(required_supertypes)
-    keywords = set(required_keywords)
-    rows = query.objects(zones=_PUBLIC_SOURCE_ZONES)
+    rows = query_objects(query.objects(zones=predicate.zones), predicate)
     legal_refs = frozenset(query.damage_source_candidate_refs())
     if not query.damage_source_candidates_are_complete:
         # Compatibility for manually constructed/query-v1 snapshots. Live
@@ -68,14 +89,7 @@ def _candidates(
             (
                 row
                 for row in rows
-                if row.known_to_actor
-                and row.ref in legal_refs
-                and colors.issubset(row.colors)
-                and (not any_colors or any_colors.intersection(row.colors))
-                and types.issubset(row.types)
-                and subtypes.issubset(row.subtypes)
-                and supertypes.issubset(row.supertypes)
-                and keywords.issubset(row.keywords)
+                if row.ref in legal_refs
             ),
             key=lambda row: row.ref,
         )
@@ -93,12 +107,7 @@ class ChooseDamageSourceHandler:
     )
     continuation_fields: tuple[str, ...] = (
         "shield",
-        "required_colors",
-        "allowed_colors",
-        "required_types",
-        "required_subtypes",
-        "required_supertypes",
-        "required_keywords",
+        "source_predicate",
         "_legal_refs",
     )
     private_data: tuple[str, ...] = ()
@@ -128,45 +137,26 @@ class ChooseDamageSourceHandler:
             raise SemanticChoiceError(
                 "A chosen source must continue into a prevention shield"
             )
-        required_colors = _normalized(
-            effect.get("required_colors", ()), upper=True
-        )
-        allowed_colors = _normalized(
-            effect.get("allowed_colors", ()), upper=True
-        )
-        if required_colors and allowed_colors:
-            raise SemanticChoiceError(
-                "Damage-source colors cannot require both all and any modes"
-            )
-        required_types = _normalized(effect.get("required_types", ()))
-        required_subtypes = _normalized(effect.get("required_subtypes", ()))
-        required_supertypes = _normalized(
-            effect.get("required_supertypes", ())
-        )
-        required_keywords = _normalized(effect.get("required_keywords", ()))
+        predicate = _source_predicate(effect)
         candidates = _candidates(
             context.query,
-            required_colors=required_colors,
-            allowed_colors=allowed_colors,
-            required_types=required_types,
-            required_subtypes=required_subtypes,
-            required_supertypes=required_supertypes,
-            required_keywords=required_keywords,
+            predicate=predicate,
         )
         if not candidates:
             raise SemanticChoiceError(
                 "No legally known damage source is available to choose"
             )
         legal_refs = tuple(row.ref for row in candidates)
+        canonical_effect = {
+            key: thaw_value(value)
+            for key, value in effect.items()
+            if key not in _LEGACY_FILTER_FIELDS
+            and key != "source_predicate"
+        }
         continuation = FrozenMap(
             {
-                **dict(effect),
-                "required_colors": list(required_colors),
-                "allowed_colors": list(allowed_colors),
-                "required_types": list(required_types),
-                "required_subtypes": list(required_subtypes),
-                "required_supertypes": list(required_supertypes),
-                "required_keywords": list(required_keywords),
+                **canonical_effect,
+                "source_predicate": predicate.to_dict(),
                 "_legal_refs": list(legal_refs),
             }
         )
@@ -176,17 +166,10 @@ class ChooseDamageSourceHandler:
                 choice=ObjectChoice(
                     field_name="source",
                     legal_refs=legal_refs,
-                    zones=_PUBLIC_SOURCE_ZONES,
+                    zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
                     visibility="public",
                     predicates=FrozenMap(
-                        {
-                            "colors_all": list(required_colors),
-                            "colors_any": list(allowed_colors),
-                            "types_all": list(required_types),
-                            "subtypes_all": list(required_subtypes),
-                            "supertypes_all": list(required_supertypes),
-                            "keywords_all": list(required_keywords),
-                        }
+                        predicate.to_dict()
                     ),
                 ),
                 public_context=FrozenMap(
@@ -222,36 +205,12 @@ class ChooseDamageSourceHandler:
             raise SemanticChoiceError(
                 "The selected damage source was not offered to this seat"
             )
-        required_colors = _normalized(
-            thaw_value(continuation.effect.get("required_colors", ())),
-            upper=True,
-        )
-        required_types = _normalized(
-            thaw_value(continuation.effect.get("required_types", ()))
-        )
-        allowed_colors = _normalized(
-            thaw_value(continuation.effect.get("allowed_colors", ())),
-            upper=True,
-        )
-        required_subtypes = _normalized(
-            thaw_value(continuation.effect.get("required_subtypes", ()))
-        )
-        required_supertypes = _normalized(
-            thaw_value(continuation.effect.get("required_supertypes", ()))
-        )
-        required_keywords = _normalized(
-            thaw_value(continuation.effect.get("required_keywords", ()))
-        )
+        predicate = _source_predicate(continuation.effect)
         current = {
             row.ref: row
             for row in _candidates(
                 query,
-                required_colors=required_colors,
-                allowed_colors=allowed_colors,
-                required_types=required_types,
-                required_subtypes=required_subtypes,
-                required_supertypes=required_supertypes,
-                required_keywords=required_keywords,
+                predicate=predicate,
             )
         }
         if selected not in current:
@@ -269,12 +228,7 @@ class ChooseDamageSourceHandler:
                     {
                         **thaw_value(shield),
                         "chosen_source": selected,
-                        "source_colors": list(required_colors),
-                        "source_colors_any": list(allowed_colors),
-                        "source_types": list(required_types),
-                        "source_subtypes": list(required_subtypes),
-                        "source_supertypes": list(required_supertypes),
-                        "source_keywords": list(required_keywords),
+                        "source_predicate": predicate.to_dict(),
                     }
                 ),
             )

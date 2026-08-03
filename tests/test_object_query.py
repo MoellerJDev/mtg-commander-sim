@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 
 from mtg_commander_sim.object_query import (
+    ObjectQueryError,
     ObjectQueryResult,
     ObjectQuerySpec,
     query_objects,
@@ -82,3 +83,58 @@ class ObjectQueryTests(unittest.TestCase):
         result = query_objects(original, ObjectQuerySpec(types_all=("land",)))
         original.clear()
         self.assertEqual(("C1",), tuple(row.ref for row in result))
+
+    def test_color_all_any_and_known_visibility_are_distinct(self):
+        rows = (
+            ObjectQueryResult(
+                "both", "BOTH", "Both", "A", "A", "battlefield",
+                colors=("U", "R"),
+            ),
+            ObjectQueryResult(
+                "red", "RED", "Red", "A", "A", "battlefield",
+                colors=("R",),
+            ),
+            ObjectQueryResult(
+                "hidden", "HIDDEN", "Hidden", "A", "A", "graveyard",
+                colors=("U", "R"), known_to_actor=False,
+            ),
+        )
+        self.assertEqual(
+            ("BOTH",),
+            tuple(
+                row.ref
+                for row in query_objects(
+                    rows,
+                    ObjectQuerySpec(
+                        colors_all=("R", "U"), known_to_actor=True
+                    ),
+                )
+            ),
+        )
+        self.assertEqual(
+            ("BOTH", "RED"),
+            tuple(
+                row.ref
+                for row in query_objects(
+                    rows,
+                    ObjectQuerySpec(colors_any=("R",), known_to_actor=True),
+                )
+            ),
+        )
+
+    def test_query_serialization_is_strict_and_canonical(self):
+        spec = ObjectQuerySpec(
+            zones=("GRAVEYARD", "battlefield"),
+            types_all=("Creature",),
+            colors_all=("u",),
+            colors_any=("R",),
+            known_to_actor=True,
+        )
+        serialized = spec.to_dict()
+        self.assertEqual(spec, ObjectQuerySpec.from_dict(serialized))
+        self.assertEqual(["battlefield", "graveyard"], serialized["zones"])
+        self.assertEqual(["U"], serialized["colors_all"])
+        malformed = dict(serialized)
+        malformed["surprise"] = True
+        with self.assertRaisesRegex(ObjectQueryError, "unknown surprise"):
+            ObjectQuerySpec.from_dict(malformed)

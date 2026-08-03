@@ -20,12 +20,50 @@ from ..damage_prevention_creation import (
     pin_chosen_damage_source,
     plan_prevention_shield_creation,
 )
+from ..damage_source import REPRESENTED_DAMAGE_SOURCE_ZONES
 from ..effect_contracts import effect_family_contract
 from ..errors import GameRuleError
+from ..object_query import ObjectQueryError, ObjectQuerySpec
 
 
 OPERATIONS = effect_family_contract("damage-modifiers.v1").operations
 _REASON_FIELD = "".join(("rea", "son"))
+_LEGACY_SOURCE_PREDICATE_FIELDS = frozenset(
+    {
+        "source_colors",
+        "source_colors_any",
+        "source_types",
+        "source_subtypes",
+        "source_supertypes",
+        "source_keywords",
+    }
+)
+
+
+def _source_predicate(effect: Mapping[str, Any]) -> ObjectQuerySpec:
+    raw = effect.get("source_predicate")
+    legacy = _LEGACY_SOURCE_PREDICATE_FIELDS.intersection(effect)
+    if raw is not None and legacy:
+        raise GameRuleError(
+            "Damage modifiers cannot mix canonical and legacy source predicates"
+        )
+    try:
+        if raw is not None:
+            return ObjectQuerySpec.from_dict(raw)
+        if not legacy:
+            return ObjectQuerySpec()
+        return ObjectQuerySpec(
+            zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
+            colors_all=tuple(effect.get("source_colors") or ()),
+            colors_any=tuple(effect.get("source_colors_any") or ()),
+            types_all=tuple(effect.get("source_types") or ()),
+            subtypes_all=tuple(effect.get("source_subtypes") or ()),
+            supertypes_all=tuple(effect.get("source_supertypes") or ()),
+            keywords_all=tuple(effect.get("source_keywords") or ()),
+            known_to_actor=True,
+        )
+    except ObjectQueryError as exc:
+        raise GameRuleError(str(exc)) from exc
 
 
 def _damage_subject(snapshot: Any) -> DamageSubject:
@@ -248,24 +286,7 @@ def _apply_create_damage_prevention_shield(
                 if effect.get("chosen_source") is not None
                 else None
             ),
-            required_source_colors=tuple(
-                str(value) for value in effect.get("source_colors") or ()
-            ),
-            allowed_source_colors=tuple(
-                str(value) for value in effect.get("source_colors_any") or ()
-            ),
-            required_source_types=tuple(
-                str(value) for value in effect.get("source_types") or ()
-            ),
-            required_source_subtypes=tuple(
-                str(value) for value in effect.get("source_subtypes") or ()
-            ),
-            required_source_supertypes=tuple(
-                str(value) for value in effect.get("source_supertypes") or ()
-            ),
-            required_source_keywords=tuple(
-                str(value) for value in effect.get("source_keywords") or ()
-            ),
+            source_predicate=_source_predicate(effect),
             label=str(effect.get("label") or reason),
             aftermath=_prevention_aftermath_requests(effect, actor=actor),
         )
@@ -343,14 +364,7 @@ def _apply_create_damage_redirection(
                     else None
                 ),
                 controller=actor,
-                required_colors=tuple(effect.get("source_colors") or ()),
-                allowed_colors=tuple(effect.get("source_colors_any") or ()),
-                required_types=tuple(effect.get("source_types") or ()),
-                required_subtypes=tuple(effect.get("source_subtypes") or ()),
-                required_supertypes=tuple(
-                    effect.get("source_supertypes") or ()
-                ),
-                required_keywords=tuple(effect.get("source_keywords") or ()),
+                predicate=_source_predicate(effect),
             ),
             consume_on_application=consume,
             label=str(effect.get("label") or reason),

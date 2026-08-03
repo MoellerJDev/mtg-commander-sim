@@ -928,7 +928,7 @@
         "exclusions": ["dynamic multipliers", "life-gain prevention", "life-total exchange and setting"]
       },
       "dependencies": ["damage.result.replacement_order"],
-      "implementation_components": ["mtg_commander_sim.semantic_runtime.damage_results.LifeGainMultiplierHandler", "mtg_commander_sim.life_change.prepare_life_change_batch", "mtg_commander_sim.life_change.commit_life_change_batch", "mtg_commander_sim.effect_runtime.life_effects._commit", "mtg_commander_sim.compiler.life_templates.static_life_handler"],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.life_replacements.LifeGainMultiplierHandler", "mtg_commander_sim.life_change.prepare_life_change_batch", "mtg_commander_sim.life_change.commit_life_change_batch", "mtg_commander_sim.effect_runtime.life_effects._commit", "mtg_commander_sim.compiler.life_templates.static_life_handler"],
       "positive_tests": ["test_boon_reflection_doubles_lifelink_result", "test_boon_reflection_doubles_prevention_aftermath_life_gain", "test_immediate_life_gain_uses_static_replacement_once", "test_life_gain_replacement_uses_typed_precommit_plan", "test_static_life_gain_multiplier_lowers_generically"],
       "negative_tests": ["test_life_gain_multiplier_ignores_losses_and_rejects_bad_shape", "test_stale_life_plan_rolls_back_without_additional_mutation"],
       "interaction_tests": ["test_worship_and_boon_follow_containing_event_order", "test_life_replacement_choice_and_replay_are_canonical", "test_immediate_life_gain_uses_static_replacement_once"],

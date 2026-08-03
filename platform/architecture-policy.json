@@ -90,6 +90,30 @@
         "mtg_commander_sim.record",
         "mtg_commander_sim.projection"
       ]
+    },
+    {
+      "path_prefix": "mtg_commander_sim/life_change.py",
+      "import_prefixes": [
+        "mtg_commander_sim.semantic_runtime.damage_results"
+      ]
+    },
+    {
+      "path_prefix": "mtg_commander_sim/life_state.py",
+      "import_prefixes": [
+        "mtg_commander_sim.semantic_runtime.damage_results"
+      ]
+    },
+    {
+      "path_prefix": "mtg_commander_sim/effect_runtime/life_effects.py",
+      "import_prefixes": [
+        "mtg_commander_sim.semantic_runtime.damage_results"
+      ]
+    },
+    {
+      "path_prefix": "mtg_commander_sim/semantic_runtime/life_replacements.py",
+      "import_prefixes": [
+        "mtg_commander_sim.semantic_runtime.damage_results"
+      ]
     }
   ],
   "game_state_access": {

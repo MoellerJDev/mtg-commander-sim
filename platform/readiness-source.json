@@ -9,7 +9,7 @@
     "active_phase": null,
     "branch": null,
     "branch_ancestry": {
-      "focused_branch_base": "3b4d1b6b6113fcaf367ff62b8b73cb4fc51f67d3",
+      "focused_branch_base": "ac1b79563beaad10a113a6f2b4b01ae74dc473bd",
       "focused_branch_unique_commits_over_main": 0
     },
     "pull_requests": [
@@ -551,6 +551,13 @@
         "number": 77,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/77"
+      },
+      {
+        "base": "main",
+        "head": "fix/main-smoke-provenance-history",
+        "number": 78,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/78"
       }
     ],
     "tags": [
@@ -565,9 +572,9 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "16f042c293ffadaa870b1103948fe6de2ca44101",
-    "certified_head_sha": "16f042c293ffadaa870b1103948fe6de2ca44101",
-    "generation_timestamp": "2026-08-03T19:56:00Z"
+    "feature_head_sha": "dbe8beb455d186590d66790fe835841fc6c829e7",
+    "certified_head_sha": "68ad8b221d3b41ddaf09365fd34d2718c0a73a37",
+    "generation_timestamp": "2026-08-03T20:50:37Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -658,8 +665,8 @@
     {
       "id": "damage_prevention_continuations_and_aftermath",
       "name": "Damage-prevention continuations and aftermath",
-      "status": "integrated_on_certified_main",
-      "evidence": "Certified main through PR 77 includes typed dynamic/divided/per-object shields, seat-scoped public source choice, exact-incarnation continuity, replacement-capable CR 615.5 life/permanent-counter/source-controller-damage aftermath, immediate independent life sequencing, same-chooser ordering, and mana-payment continuation. Source-controller damage recursively prepares through ordinary replacement/prevention against projected modifier state, preserves immutable source LKI, rejects mandatory cycles before mutation, and replays exactly. Generic Oracle IR v19 lowering recognizes Deflecting Palm without a name/Oracle-ID branch. The August 2 census is Commander exact/trusted/capability-closed 417/417/415. CR 615.13 triggered prevention results, explicit-target or mixed aftermath, life-gain prevention, face-down source characteristics, and wider source predicates remain blocked."
+      "status": "implemented_at_feature_head",
+      "evidence": "Certified main through PR 77 includes typed source-controller CR 615.5 damage aftermath, immutable damage source/value boundaries, projected modifier preparation, cycle rejection, exact replay, and generic Deflecting Palm lowering. The Oracle IR v20 feature head moves ordinary life replacement discovery into one focused registry, keeps life_state mutation-only, reports final replacement-adjusted life batches, and replaces parallel chosen-source filters with one strict ObjectQuerySpec shared by compiler, choice, snapshot, and damage-time recheck. Historical chosen-source snapshot versions 0 through 2 remain replay-compatible. The August 2 census remains Commander exact/trusted/capability-closed 417/417/415; this ownership consolidation does not inflate card support. CR 615.13 triggered prevention results, explicit-target or mixed aftermath, life-gain prevention, face-down source characteristics, and wider source predicates remain blocked."
     },
     {
       "id": "rules_snapshot",
@@ -696,14 +703,14 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30846670803,
+      "run_id": 30850517667,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30846670803"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30850517667"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr77_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass; post_merge_main_smoke_integration_behavior_passed_before_provenance_history_validation",
-      "focused_rules_tests": "pass_source_lki_projected_shield_consumption_nested_prevention_unpreventable_zero_cycle_rollback_four_player_replay_compiler_cardprogram_capability_and_killed_quantity_mutant",
+      "deterministic_tests": "certified_main_through_pr78_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; focused_life_change_damage_result_object_predicate_chosen_source_copy_oracle_cardprogram_architecture_and_capability_shards_pass",
+      "focused_rules_tests": "pass_final_life_batch_results_registry_ownership_source_predicate_serialization_effective_characteristics_historical_source_snapshots_lki_replay_and_architecture_dependency_guards",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
@@ -719,7 +726,7 @@
     "replay": "pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner",
     "privacy": "pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner",
       "semantic_preflight": "reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory",
-      "card_program_census": "full_38485_trusted_817_capability_closed_815_residual_35419_failed_2249_material_residual_69359; commander_legal_31623_trusted_417_capability_closed_415_residual_31205_failed_1_material_residual_60745; full_oracle_exact_3057_partial_16113_unresolved_19315_material_residual_69371; commander_oracle_exact_417_partial_14692_unresolved_16514_material_residual_60748; source_controller_damage_aftermath_delta_exact_plus_1_trusted_plus_1_capability_closed_plus_1_residual_minus_1_material_residual_minus_1"
+      "card_program_census": "oracle_ir_v20_full_38485_trusted_817_capability_closed_815_residual_35419_failed_2249_material_residual_69359; commander_legal_31623_trusted_417_capability_closed_415_residual_31205_failed_1_material_residual_60745; full_oracle_exact_3057_partial_16113_unresolved_19315_material_residual_69371; commander_oracle_exact_417_partial_14692_unresolved_16514_material_residual_60748; life_and_source_ownership_delta_zero_by_design"
   },
   "blockers": [
     "damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter/source-controller-damage aftermath, immediate independent life siblings, resumable mana-payment choices, and static full-recipient redirection; CR 615.13 prevention-trigger stack ownership, explicit-target or mixed aftermath, arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented",
@@ -734,5 +741,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Consolidate life-change replacement ownership and chosen-source predicates, then implement CR 615.13 prevention-trigger stack ownership and generic lowering as the next dependency-ready rules family."
+  "next_task": "Implement CR 615.13 prevention-trigger stack ownership and generic lowering as the next dependency-ready rules family after the life-change ownership feature head is integrated."
 }

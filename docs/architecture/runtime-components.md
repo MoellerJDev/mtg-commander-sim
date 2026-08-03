@@ -69,10 +69,12 @@ allocation, commit-time state fingerprints, and unpreventable nonconsumption.
 battlefield source to typed `RedirectDamage`; a complete recipient snapshot is
 substituted before the replacement loop is rediscovered. Dynamic/divided and
 independent per-object shield creation is owned by the focused
-`damage-modifiers.v1` effect family. Chosen-source version 2 covers public CR
+`damage-modifiers.v1` effect family. Chosen-source version 3 covers public CR
 609.7a candidates plus explicitly referred former-zone objects, exact
-incarnation matching, permanent-spell-to-permanent continuity, and closed
-color/type/subtype/supertype/keyword rechecks. Represented CR 615.5 life
+incarnation matching, permanent-spell-to-permanent continuity, and one strict
+serialized `ObjectQuerySpec` for effective color/type/subtype/supertype/keyword
+rechecks. Historical version-0 through version-2 source snapshots remain
+replay-compatible. Represented CR 615.5 life
 aftermath enters the replacement-capable `life.change` transaction; permanent-
 counter aftermath remains on the counter-placement transaction. Typed source-
 controller damage aftermath pins immutable source LKI and recursively prepares
@@ -122,8 +124,11 @@ result-event materialization, commit
 planning, and atomic CR 120.3 result mutation. `damage_prevention.py` owns
 durable shield/redirection state and its mutation-only commit plan;
 `damage_prevention_creation.py` and `damage_prevention_aftermath.py` own the
-corresponding typed creation and result transactions; `life_change.py` owns the
-replacement-capable life-event boundary. The six closed effect
+corresponding typed creation and result transactions. `life_change.py` owns
+replacement-capable life-event preparation, APNAP selection, replay, and commit
+through the mutation-only `life_state.py` owner;
+`semantic_runtime/life_replacements.py` owns the one `life.change` component
+registry and source discovery. The six closed effect
 runtime families now include `damage-modifiers.v1` for shield/redirection
 creation and `life-effects.v2` for replacement-capable typed effect life
 changes. Runtime components remain pure participants.
