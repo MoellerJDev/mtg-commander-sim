@@ -42352,28 +42352,37 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "there is no authoritative candidate generator for every permitted damage-source category",
-        "source choice is not captured at effect creation with zone-change continuity",
+        "specifically referred objects outside the ordinary public battlefield, stack, and face-up command-zone candidate set are not represented",
         "permanent-spell to resolved-permanent identity continuity is not represented for source shields",
-        "last-known objects and command-zone choices are not integrated with the effect registry"
+        "the candidate registry does not yet include every waiting replacement, prevention, or delayed-trigger reference allowed by this rule"
       ],
       "case_id": "cr-609.7a",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "hidden_information",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "609.7"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_rules_primitives.EffectRuleTests.test_contract_traces_every_cr_609_rule"
+        "tests.test_damage_prevention_creation.DamageSourceChoiceHandlerTests.test_source_choice_exposes_only_rule_legal_public_candidates",
+        "tests.test_damage_prevention_creation.DamageSourceChoiceHandlerTests.test_source_choice_revalidates_and_prepends_resolved_shield",
+        "tests.test_semantic_choice_characterization.SemanticChoiceCharacterizationTests.test_damage_source_choice_is_seat_scoped_pinned_and_replays"
       ],
       "implementation_components": [
         "mechanics/contracts/effects.json",
-        "replacement_effects.ReplacementEffect"
+        "semantic_choices.damage_prevention.ChooseDamageSourceHandler",
+        "damage_prevention_creation.pin_chosen_damage_source",
+        "damage_modifier_state.ChosenDamageSource"
       ],
       "notes": [
-        "The primitive consumes already-supplied source properties and does not pretend to implement legal source selection."
+        "The source is chosen through a seat-scoped legal candidate set when the prevention effect is created, revalidated before completion, and pinned to stable physical identity with an exact replayable LKI snapshot.",
+        "The full candidate categories and permanent-spell continuity listed by CR 609.7a remain fail-closed."
       ],
       "required_scenarios": [
         "positive",
@@ -42396,7 +42405,6 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "generic source-choice candidate generation is not implemented",
         "chosen-source predicates do not yet cover every characteristic that Oracle text can require"
       ],
       "case_id": "cr-609.7b",
@@ -42417,16 +42425,18 @@
         "tests.test_rules_primitives.EffectRuleTests.test_unknown_source_predicate_fails_closed",
         "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_chosen_source_identity_and_property_mismatch_preserve_shield",
         "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_next_instance_shield_survives_nonmatching_then_is_used",
-        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_unpreventable_damage_does_not_consume_shield"
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_unpreventable_damage_does_not_consume_shield",
+        "tests.test_semantic_choice_characterization.SemanticChoiceCharacterizationTests.test_damage_source_choice_is_seat_scoped_pinned_and_replays"
       ],
       "implementation_components": [
         "damage_prevention.ChosenDamageSource",
         "damage.DamageSourceSnapshot",
         "replacement.applicability.condition_matches",
-        "damage_prevention.plan_damage_modifier_commit"
+        "damage_prevention.plan_damage_modifier_commit",
+        "damage_prevention_creation.pin_chosen_damage_source"
       ],
       "notes": [
-        "Represented damage derives a current or last-known source snapshot, persistent chosen-source shields use stable physical identity, and a mismatch or unpreventable event preserves that shield for a later matching event.",
+        "Represented damage derives a current or last-known source snapshot, a seat-scoped choice creates a persistent stable-identity shield, and a color/type mismatch or unpreventable event preserves that shield for a later matching event.",
         "Unknown condition predicates still fail closed instead of accidentally matching."
       ],
       "required_scenarios": [
@@ -46378,8 +46388,8 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "dynamic quantities, multi-target shield creation, prevention aftermath effects, and complete combat-only/source-choice grammar remain unimplemented",
-        "replacement choices arising during mana payment cannot yet resume their enclosing payment continuation"
+        "complete combat-only filters and the full CR 609.7 source-choice vocabulary remain unimplemented",
+        "the closed immediately-after vocabulary does not yet cover every additional effect allowed by Oracle wording"
       ],
       "case_id": "cr-615.1",
       "case_version": 1,
@@ -46399,17 +46409,24 @@
         "tests.test_rules_primitives.PreventionEffectTests.test_prevention_produces_a_modified_damage_event",
         "tests.test_damage_replacement_model.DamageReplacementModelTests.test_static_prevention_applies_to_each_simultaneous_event",
         "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_fixed_prevention_applies_per_controller",
-        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_protection_prevents_player_and_colored_permanent_damage"
+        "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_protection_prevents_player_and_colored_permanent_damage",
+        "tests.test_damage_prevention_creation.DamagePreventionCreationTests.test_dynamic_amount_and_divided_allocations_create_independent_shields",
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_life_aftermath_uses_one_aggregate_prevented_amount",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_mana_ability_damage_choice_resumes_exact_activation"
       ],
       "implementation_components": [
         "replacement_effects.ReplacementEffect",
         "replacement_effects.replacement_choice",
         "replacement_effects.apply_replacement",
         "damage.prepare_damage_batch",
-        "semantic_runtime.damage_replacements.FixedDamagePreventionHandler"
+        "semantic_runtime.damage_replacements.FixedDamagePreventionHandler",
+        "damage_prevention_creation.plan_prevention_shield_creation",
+        "damage_prevention_aftermath.prepare_prevention_aftermath",
+        "mana_payment_continuations.execute_mana_choice_capable_priority_action"
       ],
       "notes": [
-        "Represented damage uses one typed registry for static prevention, protection, persistent finite and next-instance shields, exact simultaneous allocation, and prevention-applied events. The broad rule remains blocked only for the listed prevention families and continuations."
+        "Represented damage uses one typed registry for static prevention, protection, persistent finite and next-instance shields, dynamic and divided creation, exact simultaneous allocation, source choices, and immediately-after events.",
+        "Replacement choices discovered during represented mana payment roll back and resume the exact original activation or cast; the broad rule remains blocked only for the listed prevention grammar families."
       ],
       "required_scenarios": [
         "positive",
@@ -46464,7 +46481,8 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "generic source-choice candidate generation and the full source-characteristic predicate vocabulary are not implemented"
+        "CR 609.7a choices for specifically referred former-zone objects and permanent-spell identity continuity are not yet represented",
+        "the supported source-characteristic filter vocabulary is currently color and card type"
       ],
       "case_id": "cr-615.2",
       "case_version": 1,
@@ -46479,14 +46497,19 @@
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_rules_primitives.PreventionEffectTests.test_prevention_applies_only_to_matching_damage_events"
+        "tests.test_rules_primitives.PreventionEffectTests.test_prevention_applies_only_to_matching_damage_events",
+        "tests.test_damage_prevention_creation.DamageSourceChoiceHandlerTests.test_source_choice_exposes_only_rule_legal_public_candidates",
+        "tests.test_semantic_choice_characterization.SemanticChoiceCharacterizationTests.test_damage_source_choice_is_seat_scoped_pinned_and_replays"
       ],
       "implementation_components": [
         "replacement_effects._condition_matches",
-        "replacement_effects.replacement_choice"
+        "replacement_effects.replacement_choice",
+        "semantic_choices.damage_prevention.ChooseDamageSourceHandler",
+        "damage_prevention_creation.pin_chosen_damage_source"
       ],
       "notes": [
-        "ChosenDamageSource rechecks stable physical identity and snapshotted color/type, including source LKI, but broader source-choice grammar remains fail-closed."
+        "A seat-scoped handler offers legally known battlefield, stack, and face-up command-zone candidates, revalidates the choice, and pins physical identity plus current source LKI.",
+        "Unsupported CR 609.7a candidate categories and broader property grammar remain fail-closed."
       ],
       "required_scenarios": [
         "positive",
@@ -46593,14 +46616,16 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "additional effects are represented only as payload operations, not queued engine events with immediately-after timing",
-        "additional-effect target, trigger, and nested replacement interactions are not integrated"
+        "the closed prevention-aftermath vocabulary currently covers life gain and permanent counter placement, not every additional effect allowed by Oracle wording",
+        "life-gain aftermath does not yet participate in the general life-gain replacement transaction",
+        "generic damage-dealing, target-selection, and arbitrary nested aftermath wording remains fail-closed"
       ],
       "case_id": "cr-615.5",
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
         "positive",
+        "interaction",
         "replay"
       ],
       "dependency_rule_ids": [
@@ -46608,13 +46633,22 @@
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing"
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_life_aftermath_uses_one_aggregate_prevented_amount",
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_counter_aftermath_reuses_counter_replacement_pipeline",
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_fixed_aftermath_happens_when_damage_cannot_be_prevented",
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_stale_counter_aftermath_fails_before_life_or_damage_mutation",
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_prevention_aftermath_replays_from_exact_commands"
       ],
       "implementation_components": [
-        "replacement_effects.apply_replacement"
+        "damage_prevention_aftermath.prepare_prevention_aftermath",
+        "damage_prevention_aftermath.commit_prevention_aftermath",
+        "counter_placement.prepare_counter_placements",
+        "life_state.commit_life_changes",
+        "damage.resolve_damage_batch"
       ],
       "notes": [
-        "Operation ordering preserves prevention before a following payload modification, including when zero damage is prevented."
+        "Represented aftermath is aggregated once per applied shield across simultaneous damage, committed immediately after prevention, dispatched as a typed semantic event, and replayed exactly.",
+        "Permanent counter aftermath reuses the canonical counter replacement pipeline; stale plans fail before damage, life, or counter mutation."
       ],
       "required_scenarios": [
         "positive",
@@ -46769,8 +46803,7 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "generic source-choice candidate generation is not implemented",
-        "the chosen-source predicate vocabulary covers physical identity, color, and type but not every characteristic allowed by Oracle wording"
+        "the chosen-source predicate vocabulary covers physical identity, color, and card type but not every characteristic allowed by Oracle wording"
       ],
       "case_id": "cr-615.9",
       "case_version": 1,
@@ -46786,15 +46819,18 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [
         "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_chosen_source_identity_and_property_mismatch_preserve_shield",
-        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_next_instance_shield_survives_nonmatching_then_is_used"
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_next_instance_shield_survives_nonmatching_then_is_used",
+        "tests.test_semantic_choice_characterization.SemanticChoiceCharacterizationTests.test_damage_source_choice_is_seat_scoped_pinned_and_replays"
       ],
       "implementation_components": [
         "damage_prevention.ChosenDamageSource",
         "damage.DamageSourceSnapshot",
-        "replacement.applicability.condition_matches"
+        "replacement.applicability.condition_matches",
+        "semantic_choices.damage_prevention.ChooseDamageSourceHandler",
+        "damage_prevention_creation.pin_chosen_damage_source"
       ],
       "notes": [
-        "Represented chosen-source shields persist across nonmatching events and recheck physical identity plus snapshotted source color/type; broader source-choice grammar remains fail-closed."
+        "Represented chosen-source shields are created from a seat-scoped choice, persist across nonmatching events, and recheck physical identity plus damage-time source color/type and LKI; broader source-property grammar remains fail-closed."
       ],
       "required_scenarios": [
         "positive",
@@ -46860,26 +46896,32 @@
       "status": "passing"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "one independent prevention shield per untargeted applicable creature is not created or persisted"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-615.11",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "615"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_rules_primitives.PreventionEffectTests.test_contract_traces_every_cr_615_rule"
+        "tests.test_damage_prevention_creation.DamagePreventionCreationTests.test_one_amount_is_applied_independently_to_each_selected_object",
+        "tests.test_damage_prevention_creation.DamagePreventionCreationTests.test_runtime_shared_color_selector_creates_one_shield_per_creature",
+        "tests.test_damage_prevention_creation.DamagePreventionCreationTests.test_each_untargeted_creature_uses_its_own_prevention_shield"
       ],
       "implementation_components": [
-        "replacement_effects.ReplacementEffect"
+        "damage_prevention_creation.PreventionShieldCreationRequest",
+        "damage_prevention_creation.plan_prevention_shield_creation",
+        "effect_runtime.damage_modifiers.create_damage_prevention_shield"
       ],
       "notes": [
-        "The primitive has no multi-object shield expansion operation."
+        "A resolved typed subject set creates one durable shield per applicable untargeted creature; each shield has a distinct identity and is consumed independently."
       ],
       "required_scenarios": [
         "positive",
@@ -46895,7 +46937,7 @@
         "end_line": 3164,
         "start_line": 3162
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
       "assertion_kind": "executable_engine",
@@ -47066,8 +47108,7 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "generic engine choice packets are wired only into represented token-creation, semantic zone-change, effect-generated permanent-counter, and ordinary combat/semantic damage producers",
-        "multiple simultaneous events affecting the same chooser do not yet expose an explicit event-order choice when that order could matter"
+        "generic engine choice packets are wired only into represented token-creation, semantic zone-change, effect-generated permanent-counter, ordinary combat/semantic damage, and mana-payment damage producers"
       ],
       "case_id": "cr-616.1",
       "case_version": 1,
@@ -47096,7 +47137,10 @@
         "tests.test_damage_replacement_model.DamageReplacementModelTests.test_furnace_and_daunting_order_changes_final_damage",
         "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_damage_replacement_choices_follow_apnap",
         "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
-        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly"
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly",
+        "tests.test_replacement_event_ordering.ReplacementEventOrderingTests.test_chooser_selects_which_simultaneous_event_uses_next_instance_shield",
+        "tests.test_replacement_event_ordering.ReplacementEventOrderingTests.test_combat_event_order_is_seat_scoped_and_replays_exactly",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_mana_ability_damage_choice_resumes_exact_activation"
       ],
       "implementation_components": [
         "replacement_effects.ReplaceableEvent",
@@ -47105,12 +47149,15 @@
         "replacement_decisions.issue_replacement_order_choice",
         "counter_placement.prepare_counter_placements",
         "damage.prepare_damage_batch",
-        "replacement_decisions.issue_combat_damage_replacement_choice"
+        "replacement_decisions.issue_combat_damage_replacement_choice",
+        "replacement.ordering.next_batch_replacement_choice",
+        "mana_payment_continuations.execute_mana_choice_capable_priority_action"
       ],
       "notes": [
         "Affected-player and affected-object facts are captured before mutation, and simultaneous different-seat choices traverse APNAP order.",
         "Seat packets expose only visible option labels and IDs; authoritative batch IDs, event paths, payloads, and prior journals remain in the continuation.",
-        "The represented engine producers suspend and replay exact choices, including competing quantity replacements and prevention for ordinary damage, but universal producer coverage remains incomplete."
+        "The chooser can explicitly order simultaneous same-chooser events when a finite or next-instance effect makes event order material.",
+        "The represented engine producers suspend and replay exact choices, including replacement choices discovered during mana payment, but universal producer coverage remains incomplete."
       ],
       "required_scenarios": [
         "positive",

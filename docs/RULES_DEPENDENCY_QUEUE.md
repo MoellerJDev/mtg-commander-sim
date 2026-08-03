@@ -14,30 +14,29 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,050
-- Reviewed behavioral blockers: 351
+- Queued rules: 3,049
+- Reviewed behavioral blockers: 350
 - Behavioral classification/review required: 2,699
-- Passing behavioral rules: 137
+- Passing behavioral rules: 138
 - Subsystems: 21
-- Queue fingerprint: `077599466f56661703fc83317fc739f1ba661537259441cf147af6ad864c80d6`
+- Queue fingerprint: `b3de29609431e90a0eeaed65bbf2c24dd9f7213285ff27d2c7a4b244ab8892e4`
 
 ## Selected next batch
 
 - Batch: `damage-prevention-continuations-and-aftermath`
 - Subsystem: `replacement-prevention`
-- Rules: `615.1`, `615.2`, `615.5`, `615.9`, `615.11`, `616.1`
+- Rules: `615.1`, `615.2`, `615.5`, `615.9`, `616.1`
 - Target capabilities: `damage.prevention.persistent_amount`, `damage.prevention.order`, `damage.result.replacement_order`
-- Rationale: Durable finite and next-instance shields, exact simultaneous allocation, unpreventable nonconsumption, aggregate prevention dispatch, and static full-recipient redirection are now certified. The remaining dependency-ready prevention family is choice-complete shield creation and continuation: generic chosen-source selection and predicates, dynamic/divided and per-object creation, prevention aftermath, and replacement choices that suspend mana payment without mutation.
+- Rationale: Typed dynamic/divided and per-object shield creation, ordinary public source choice, immediately-after life/counter results, same-chooser event ordering, and resumable mana-payment choices are now represented. The remaining dependency-ready prevention boundary is complete CR 609.7a source categories and permanent-spell continuity, broader source-characteristic filters, canonical life-gain replacement for aftermath, and the remaining closed aftermath wording families.
 
 Exit criteria:
 
-- Create chosen-source shields from a seat-scoped legal candidate set and snapshot every supported source characteristic with exact last-known-information behavior.
-- Represent dynamic quantities, divided prevention, and one independent shield per applicable object through typed validated creation choices.
-- Suspend and resume mana payment when represented replacement or prevention ordering requires a player choice, with exact rollback and command replay.
-- Dispatch represented prevention aftermath as immediately-after typed events, including targets, nested replacement participation, triggers, and simultaneous grouping.
-- Complete explicit ordering for simultaneous events affecting the same chooser when event order can change the result.
-- Widen generic Oracle/CardProgram lowering for the completed source-choice, divided-shield, and aftermath wording families and measure Commander-card gains.
-- Extract the continuation and aftermath responsibilities behind bounded typed interfaces without adding card-name branches or direct GameState mutation to CommanderEngine.
+- Represent every CR 609.7a source candidate category, including specifically referred former-zone objects and permanent-spell to permanent identity continuity.
+- Expand chosen-source characteristic rechecking beyond color and card type without admitting unknown predicates.
+- Route prevention life-gain aftermath through the canonical replacement-capable life event boundary.
+- Add closed generic aftermath operations for remaining common Oracle wording, including represented damage-dealing and target-dependent forms.
+- Retain exact rollback, seat projection, same-chooser event ordering, and command replay across every added producer.
+- Measure generic CardProgram gains from the completed residual wording families.
 
 ## Dependency schedule
 
@@ -56,7 +55,7 @@ Exit criteria:
 | 11 | `triggered-static-linked` | `objects-permanents-tokens`, `turn-structure`, `casting-activation` | 71 | 71 | 0 | `oracle_parser`, `event_binding`, `card_program_lowering`, `mechanic_contracts` |
 | 12 | `resolution-effects` | `zones`, `casting-activation`, `triggered-static-linked` | 42 | 28 | 14 | `oracle_parser`, `card_program_lowering`, `semantic_handlers` |
 | 13 | `continuous-effects` | `characteristics`, `objects-permanents-tokens`, `triggered-static-linked`, `resolution-effects` | 68 | 0 | 68 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
-| 14 | `replacement-prevention` | `resources`, `damage`, `resolution-effects`, `continuous-effects` | 34 | 34 | 0 | `oracle_parser`, `card_program_lowering`, `event_binding`, `mechanic_contracts` |
+| 14 | `replacement-prevention` | `resources`, `damage`, `resolution-effects`, `continuous-effects` | 33 | 33 | 0 | `oracle_parser`, `card_program_lowering`, `event_binding`, `mechanic_contracts` |
 | 15 | `combat` | `damage`, `turn-structure`, `continuous-effects` | 75 | 75 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 16 | `game-actions-state` | `zones`, `turn-structure`, `combat`, `resolution-effects`, `replacement-prevention` | 516 | 4 | 512 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 745 | 0 | 745 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
