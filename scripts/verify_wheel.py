@@ -6,9 +6,38 @@ import subprocess
 import sys
 import tempfile
 import venv
+import zipfile
+
+from mtg_commander_sim.python_runtime import REQUIRES_PYTHON, require_supported_python
+from packaging.specifiers import InvalidSpecifier, SpecifierSet
+
+
+def _wheel_requires_python(wheel: Path) -> str | None:
+    with zipfile.ZipFile(wheel) as archive:
+        metadata_paths = [
+            name for name in archive.namelist() if name.endswith(".dist-info/METADATA")
+        ]
+        if len(metadata_paths) != 1:
+            raise ValueError(
+                f"Expected one wheel METADATA file, found {len(metadata_paths)}"
+            )
+        for line in archive.read(metadata_paths[0]).decode("utf-8").splitlines():
+            if line.startswith("Requires-Python: "):
+                return line.removeprefix("Requires-Python: ")
+    return None
+
+
+def _requires_python_matches(observed: str | None) -> bool:
+    if observed is None:
+        return False
+    try:
+        return SpecifierSet(observed) == SpecifierSet(REQUIRES_PYTHON)
+    except InvalidSpecifier:
+        return False
 
 
 def main() -> int:
+    require_supported_python()
     parser = argparse.ArgumentParser()
     parser.add_argument("--dist", type=Path, default=Path("dist"))
     args = parser.parse_args()
@@ -16,6 +45,12 @@ def main() -> int:
     if len(wheels) != 1:
         raise SystemExit(f"Expected exactly one project wheel, found {len(wheels)}")
     wheel = wheels[0].resolve()
+    observed_requirement = _wheel_requires_python(wheel)
+    if not _requires_python_matches(observed_requirement):
+        raise SystemExit(
+            f"Wheel Requires-Python must be {REQUIRES_PYTHON!r}; "
+            f"found {observed_requirement!r}"
+        )
     with tempfile.TemporaryDirectory() as temporary:
         environment = Path(temporary) / "wheel-venv"
         venv.EnvBuilder(with_pip=True, clear=True).create(environment)

@@ -1956,7 +1956,7 @@
         },
         {
           "fan_in": 2,
-          "fan_out": 23,
+          "fan_out": 24,
           "module": "mtg_commander_sim"
         },
         {
@@ -2025,11 +2025,11 @@
           "module": "mtg_commander_sim.card_programs.commands"
         }
       ],
-      "internal_edges": 479,
+      "internal_edges": 481,
       "modules": [
         {
           "fan_in": 2,
-          "fan_out": 23,
+          "fan_out": 24,
           "module": "mtg_commander_sim"
         },
         {
@@ -2351,6 +2351,11 @@
           "fan_in": 4,
           "fan_out": 0,
           "module": "mtg_commander_sim.protocol"
+        },
+        {
+          "fan_in": 2,
+          "fan_out": 0,
+          "module": "mtg_commander_sim.python_runtime"
         },
         {
           "fan_in": 7,
@@ -2704,7 +2709,7 @@
         },
         {
           "fan_in": 0,
-          "fan_out": 0,
+          "fan_out": 1,
           "module": "server.__main__"
         },
         {
@@ -2820,7 +2825,7 @@
       "structural_identity": "file, nearest symbol, literal value, conditional use"
     },
     "production": {
-      "file_count": 153,
+      "file_count": 154,
       "largest_functions_and_methods": [
         {
           "end_line": 1653,
@@ -2845,10 +2850,10 @@
           "visibility": "public"
         },
         {
-          "end_line": 1304,
+          "end_line": 1305,
           "file": "server/app.py",
           "kind": "function",
-          "line": 536,
+          "line": 537,
           "logical_lines": 724,
           "name": "create_app",
           "physical_lines": 769,
@@ -3153,7 +3158,7 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 74107,
+      "logical_lines": 74141,
       "methods": {
         "dunder": 123,
         "private": 461,
@@ -3236,7 +3241,7 @@
           "functions_and_methods": 60,
           "language": "python",
           "logical_lines": 1171,
-          "physical_lines": 1304
+          "physical_lines": 1305
         },
         {
           "file": "mtg_commander_sim/codex_cli.py",
@@ -3785,18 +3790,18 @@
           "physical_lines": 204
         },
         {
+          "file": "mtg_commander_sim/__init__.py",
+          "functions_and_methods": 0,
+          "language": "python",
+          "logical_lines": 193,
+          "physical_lines": 197
+        },
+        {
           "file": "mtg_commander_sim/semantic_choices/ordering.py",
           "functions_and_methods": 2,
           "language": "python",
           "logical_lines": 193,
           "physical_lines": 201
-        },
-        {
-          "file": "mtg_commander_sim/__init__.py",
-          "functions_and_methods": 0,
-          "language": "python",
-          "logical_lines": 191,
-          "physical_lines": 193
         },
         {
           "file": "mtg_commander_sim/replacement/replay.py",
@@ -3977,8 +3982,8 @@
           "file": "server/__main__.py",
           "functions_and_methods": 3,
           "language": "python",
-          "logical_lines": 88,
-          "physical_lines": 100
+          "logical_lines": 90,
+          "physical_lines": 104
         },
         {
           "file": "mtg_commander_sim/effect_runtime/registry.py",
@@ -4098,6 +4103,13 @@
           "language": "web",
           "logical_lines": 33,
           "physical_lines": 38
+        },
+        {
+          "file": "mtg_commander_sim/python_runtime.py",
+          "functions_and_methods": 2,
+          "language": "python",
+          "logical_lines": 30,
+          "physical_lines": 42
         },
         {
           "file": "mtg_commander_sim/compiler/continuous_templates.py",
@@ -4258,10 +4270,10 @@
           "visibility": "public"
         },
         {
-          "end_line": 1304,
+          "end_line": 1305,
           "file": "server/app.py",
           "kind": "function",
-          "line": 536,
+          "line": 537,
           "logical_lines": 724,
           "name": "create_app",
           "physical_lines": 769,
@@ -4787,8 +4799,8 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 80084,
-      "python_file_count": 140,
+      "physical_lines": 80135,
+      "python_file_count": 141,
       "review_thresholds": {
         "function_logical_lines_review": 150,
         "module_logical_lines_review": 1500
@@ -4805,7 +4817,7 @@
           "web/src"
         ]
       },
-      "top_level_functions": 741,
+      "top_level_functions": 743,
       "web_file_count": 13
     },
     "semantic_handlers": {
@@ -7781,7 +7793,7 @@
         "current_status": "partial_dataclass_ir",
         "evidence": {
           "OracleCardIR": [
-            "mtg_commander_sim/__init__.py:32",
+            "mtg_commander_sim/__init__.py:36",
             "mtg_commander_sim/oracle_ir.py:166"
           ],
           "OracleFaceIR": [
@@ -7806,7 +7818,7 @@
             "mtg_commander_sim/oracle_ir.py:1038"
           ],
           "compile_card_program": [
-            "mtg_commander_sim/__init__.py:5",
+            "mtg_commander_sim/__init__.py:9",
             "mtg_commander_sim/card_programs/__init__.py:9",
             "mtg_commander_sim/card_programs/adapters.py:92",
             "mtg_commander_sim/card_programs/commands.py:21"
@@ -7861,7 +7873,7 @@
             "mtg_commander_sim/oracle_ir.py:894"
           ],
           "oracle_corpus_coverage": [
-            "mtg_commander_sim/__init__.py:32",
+            "mtg_commander_sim/__init__.py:36",
             "mtg_commander_sim/compiler/corpus_reporting.py:22",
             "mtg_commander_sim/oracle_ir.py:11"
           ]
@@ -7877,7 +7889,7 @@
         "current_status": "card_program_v2_schema_roundtrip_source_trust_and_fingerprint_validation",
         "evidence": {
           "CardProgram": [
-            "mtg_commander_sim/__init__.py:5",
+            "mtg_commander_sim/__init__.py:9",
             "mtg_commander_sim/card_programs/__init__.py:3",
             "mtg_commander_sim/card_programs/adapters.py:17",
             "mtg_commander_sim/card_programs/commands.py:22",
@@ -7911,11 +7923,10 @@
       "local_observed": {
         "node": "24.18.0",
         "npm": "11.16.0",
-        "python": "3.11.9"
+        "python": "3.12.10"
       },
       "node_version": "24",
       "python_versions": [
-        "3.11",
         "3.12"
       ],
       "run_id": 30770356732,
@@ -7926,7 +7937,7 @@
     "default_branch": "main",
     "package_version": "0.8.0",
     "repository": "MoellerJDev/mtg-commander-sim",
-    "requires_python": ">=3.11"
+    "requires_python": ">=3.12,<3.13"
   },
   "documentation": {
     "documents": [
@@ -8740,18 +8751,18 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1106,
-      "discovered_total": 4406,
+      "conventional_ast_cases": 1113,
+      "discovered_total": 4413,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 25,
         "fuzz_named": 1,
         "privacy_or_projection_named": 14,
         "replay_named": 69,
-        "server_named": 15
+        "server_named": 16
       },
       "reconciles": true,
-      "test_files": 120
+      "test_files": 121
     }
   }
 }

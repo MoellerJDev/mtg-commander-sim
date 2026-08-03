@@ -13,8 +13,12 @@ import sys
 import time
 from typing import Sequence
 
-
 ROOT = Path(__file__).resolve().parents[1]
+root_text = str(ROOT)
+if root_text not in sys.path:
+    sys.path.insert(0, root_text)
+
+from scripts.validate_python_runtime import require_supported_python
 DEFAULT_FOCUSED_TESTS = (
     "tests.test_seed_20260730_regression",
     "tests.test_decision_opportunities",
@@ -75,6 +79,10 @@ def build_steps(
     protocol_output = output / "protocol-demo"
     wheel_output = output / "dist"
     return [
+        GateStep(
+            "python_runtime_policy",
+            (python, "scripts/validate_python_runtime.py"),
+        ),
         GateStep(
             "generated_capability_evidence_freshness",
             (
@@ -399,6 +407,7 @@ def _assert_clean(label: str) -> None:
 
 
 def main() -> int:
+    require_supported_python()
     parser = argparse.ArgumentParser(
         description=(
             "Run the complete reproducible merge gate against the exact "

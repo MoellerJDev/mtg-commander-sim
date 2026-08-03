@@ -15,29 +15,31 @@ security-sensitive reproductions in issues or pull requests.
 
 ## Development setup
 
-Use Python 3.11 or 3.12. Install the editable package and development tools:
+Use CPython 3.12.x exactly. Python 3.11 and 3.13+ are unsupported. On Windows,
+run `scripts/bootstrap_windows.ps1`, or use the exact project interpreter:
 
-```bash
-python -m venv .venv
-python -m pip install -e . -r requirements-dev.txt
-python scripts/build_test_database.py build \
-  --fixture tests/fixtures/scryfall-exact-lists.json \
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e . -r requirements-dev.txt
+.\.venv\Scripts\python.exe scripts\validate_python_runtime.py
+.\.venv\Scripts\python.exe scripts\build_test_database.py build `
+  --fixture tests/fixtures/scryfall-exact-lists.json `
   --output data/test-ci.sqlite3
-cd web
-npm ci
-npm run generate:types
-npm run typecheck
-npm run build
+npm ci --prefix web
+npm run generate:types --prefix web
+npm run typecheck --prefix web
+npm run build --prefix web
 ```
 
 Set `MTG_CARD_DB=data/test-ci.sqlite3`, then run the commands in `AGENTS.md`.
 Documentation changes must keep [`docs/index.md`](docs/index.md) complete and
-pass `python scripts/validate_documentation.py --check`. Put current metrics in
+pass `.\.venv\Scripts\python.exe scripts/validate_documentation.py --check`.
+Put current metrics in
 machine-readable sources and generated reports rather than prose.
 Before merging a clean committed branch, run:
 
 ```powershell
-py -3.11 scripts/local_merge_gate.py `
+.\.venv\Scripts\python.exe scripts/local_merge_gate.py `
   --expected-branch <branch> `
   --expected-sha <full-sha>
 ```

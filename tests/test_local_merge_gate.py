@@ -58,6 +58,7 @@ class LocalMergeGateTests(unittest.TestCase):
         self.assertEqual(
             {
                 "generated_capability_evidence_freshness",
+                "python_runtime_policy",
                 "generated_rules_scheduler_freshness",
                 "module_classification_freshness",
                 "continuous_effect_work_budget",
@@ -85,6 +86,10 @@ class LocalMergeGateTests(unittest.TestCase):
             set(by_name),
         )
         self.assertIn("discover", by_name["full_deterministic_suite"])
+        self.assertEqual(
+            ("python-under-test", "scripts/validate_python_runtime.py"),
+            by_name["python_runtime_policy"],
+        )
         self.assertIn(
             "tests/fixtures/scryfall-exact-lists.json",
             by_name["build_test_database"],

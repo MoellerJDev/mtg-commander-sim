@@ -968,6 +968,18 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/python_runtime.py",
+      "layer": "domain",
+      "owning_subsystem": "legacy_domain",
+      "allowed_dependency_layers": [
+        "domain"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/record.py",
       "layer": "application",
       "owning_subsystem": "game_record",
@@ -2085,5 +2097,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "bcc4cde90a25a19996d86ebc1507caf3ef5d19b701d02c8ad48d4cdbaca13f4c"
+  "fingerprint": "69e0349029ebe0fad752a2bc4f2572aa609eadadd560572e6dc49710c1b00d3f"
 }

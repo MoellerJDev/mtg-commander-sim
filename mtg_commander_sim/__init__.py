@@ -1,5 +1,9 @@
 """Deterministic, server-authoritative multiplayer Commander kernel."""
 
+from .python_runtime import require_supported_python
+
+require_supported_python()
+
 from .version import __version__
 from .carddb import CardDatabase, CardRecord, Ruling
 from .card_programs import (

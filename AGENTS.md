@@ -19,8 +19,9 @@ maintenance: "hand-maintained"
 - Starting a listener such as `127.0.0.1:18080` is test infrastructure only.
   It must not launch or navigate a browser. Probe HTTP endpoints with a CLI
   client and run UI checks in an isolated headless Playwright browser.
-- Agent-driven server checks must use `python -m server --no-open`; never run a
-  bare `python -m server`, pass `--open`, invoke `webbrowser`, use an OS
+- Agent-driven server checks must use
+  `.\.venv\Scripts\python.exe -m server --no-open`; never run a bare server
+  command, pass `--open`, invoke `webbrowser`, use an OS
   browser-launch command, or use a browser-control tool unless the user has
   explicitly requested an interactive/manual browser session.
 - Keep Vite `open: false` and HTML reporters configured with `open: "never"`.
@@ -120,33 +121,37 @@ figures rather than copying them.
 
 ## Before committing
 
-```bash
-python -m compileall -q mtg_commander_sim tests scripts simctl.py
-python scripts/build_test_database.py build \
-  --fixture tests/fixtures/scryfall-exact-lists.json \
-  --fixture tests/fixtures/browser-lifecycle-cards.json \
+Use only the ignored project-local CPython 3.12 environment. Do not rely on a
+global `python` alias.
+
+```powershell
+$python = ".\.venv\Scripts\python.exe"
+& $python scripts/validate_python_runtime.py
+& $python -m compileall -q mtg_commander_sim tests scripts simctl.py
+& $python scripts/build_test_database.py build `
+  --fixture tests/fixtures/scryfall-exact-lists.json `
+  --fixture tests/fixtures/browser-lifecycle-cards.json `
   --output data/test-ci.sqlite3
 # Set MTG_CARD_DB=data/test-ci.sqlite3 for the remaining commands.
-python -m unittest discover -s tests -p 'test_*.py' -v
-python scripts/update_capability_evidence.py --check
-python scripts/update_rules_scheduler.py --check
-python scripts/update_module_classifications.py --check
-python scripts/benchmark_continuous_effects.py --check
-python scripts/demo_four_player_protocol.py --db data/test-ci.sqlite3 --out demo
-python scripts/update_platform_status.py --check
-python scripts/update_architecture_audit.py --check
-python scripts/validate_architecture.py --check
-python scripts/validate_documentation.py --check
-python scripts/validate_repository.py
-python simctl.py rules verify --root .
-python -m build --wheel
-python scripts/verify_wheel.py
-cd web
-npm ci
-npm run generate:types
-npm run typecheck
-npm run build
-npm run e2e
+& $python -m unittest discover -s tests -p 'test_*.py' -v
+& $python scripts/update_capability_evidence.py --check
+& $python scripts/update_rules_scheduler.py --check
+& $python scripts/update_module_classifications.py --check
+& $python scripts/benchmark_continuous_effects.py --check
+& $python scripts/demo_four_player_protocol.py --db data/test-ci.sqlite3 --out demo
+& $python scripts/update_platform_status.py --check
+& $python scripts/update_architecture_audit.py --check
+& $python scripts/validate_architecture.py --check
+& $python scripts/validate_documentation.py --check
+& $python scripts/validate_repository.py
+& $python simctl.py rules verify --root .
+& $python -m build --wheel
+& $python scripts/verify_wheel.py
+npm ci --prefix web
+npm run generate:types --prefix web
+npm run typecheck --prefix web
+npm run build --prefix web
+npm run e2e --prefix web
 ```
 
 Set `MTG_CARD_DB` when the database is outside `data/`.
@@ -158,9 +163,9 @@ temporary directory from sanitized recipes.
 
 Run the reusable gate from a clean, committed branch:
 
-```bash
-python scripts/local_merge_gate.py \
-  --expected-branch <branch> \
+```powershell
+.\.venv\Scripts\python.exe scripts/local_merge_gate.py `
+  --expected-branch <branch> `
   --expected-sha <full-sha>
 ```
 

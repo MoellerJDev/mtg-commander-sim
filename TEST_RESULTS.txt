@@ -1,4 +1,8 @@
-# MTG Commander Sim 0.8.0 — current integrated verification
+# MTG Commander Sim 0.8.0 — historical integrated verification snapshot
+
+Status: historical. This file preserves the 2026-07-31 verification evidence;
+use docs/PLATFORM_IMPLEMENTATION_STATUS.md and the generated coverage reports
+for current runtime, test, architecture, and rules status.
 
 Date: 2026-07-31
 Feature candidate: the commit containing this report

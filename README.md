@@ -74,14 +74,20 @@ workflow, security boundary, and remaining UI/operations limits.
 
 ## Quick start
 
-Install Python 3.11+ and Node.js 22+, then run:
+Install 64-bit CPython 3.12.x and Node.js 22+. Python 3.11 and 3.13+
+are intentionally unsupported for this development line. On Windows, the
+bootstrap script validates `py.exe`, explains the safe per-user `winget`
+command if 3.12 is missing, creates `.venv`, and installs the project:
 
 ```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -e . -r requirements-dev.txt
-python -m server
+.\scripts\bootstrap_windows.ps1
+.\.venv\Scripts\python.exe -m server
 ```
+
+The equivalent manual setup is `py -3.12 -m venv .venv`, followed by
+`.\.venv\Scripts\python.exe -m pip install -e . -r requirements-dev.txt`.
+Use the project interpreter directly for later commands; activation is
+optional and must not hide which Python version is running.
 
 That is the entire local application startup. The server installs browser
 packages on the first run, rebuilds the browser when its sources change, and
@@ -196,7 +202,7 @@ For offline development with an existing database:
 
 ```powershell
 $env:MTG_CARD_DB = "data/test-ci.sqlite3"
-python -m server --offline
+.\.venv\Scripts\python.exe -m server --offline
 ```
 
 The repository deliberately does not contain a full Scryfall export or SQLite
@@ -225,7 +231,7 @@ For an exact-commit merge candidate, use the reusable gate after committing all
 intended changes:
 
 ```powershell
-py -3.11 scripts/local_merge_gate.py `
+.\.venv\Scripts\python.exe scripts/local_merge_gate.py `
   --expected-branch <branch> `
   --expected-sha <full-sha>
 ```

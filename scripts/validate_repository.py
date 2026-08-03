@@ -8,6 +8,11 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+root_text = str(ROOT)
+if root_text not in sys.path:
+    sys.path.insert(0, root_text)
+
+from scripts.validate_python_runtime import validate as validate_python_runtime
 
 FORBIDDEN_TRACKED = (
     re.compile(r"^(?:run|runs|local|scratch|tmp)/", re.IGNORECASE),
@@ -180,6 +185,7 @@ def validate_documentation_policy() -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.parse_args()
+    runtime = validate_python_runtime(ROOT)
     schemas = validate_schemas()
     validate_public_fixture()
     validate_generated_platform_status()
@@ -191,6 +197,7 @@ def main() -> int:
         json.dumps(
             {
                 "ok": True,
+                "python_runtime": runtime,
                 "schemas_checked": schemas,
                 "tracked_files_checked": tracked,
                 "tracked_bytes_scanned": scanned_bytes,

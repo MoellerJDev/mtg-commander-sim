@@ -14,11 +14,15 @@ maintenance: "hand-maintained"
 From the repository root in PowerShell:
 
 ```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -e . -r requirements-dev.txt
-python -m server
+.\scripts\bootstrap_windows.ps1
+.\.venv\Scripts\python.exe -m server
 ```
+
+The application requires CPython 3.12.x exactly. The bootstrap script never
+changes global `PATH`, removes another Python, elevates itself, or opens a
+browser. If 3.12 is missing it prints a safe per-user `winget` command and
+stops. Manual setup uses `py -3.12 -m venv .venv` and the resulting
+`.\.venv\Scripts\python.exe` for every project command.
 
 The one process installs/builds the browser when needed, checks the Scryfall
 bulk manifest, creates or activates the local card/rulings SQLite snapshot,
@@ -33,10 +37,10 @@ the active SQLite file open and delay pending-snapshot activation.
 ## Useful modes
 
 ```powershell
-python -m server --open
-python -m server --offline
+.\.venv\Scripts\python.exe -m server --open
+.\.venv\Scripts\python.exe -m server --offline
 $env:MTG_CARD_DB = "data/test-ci.sqlite3"
-python -m server --offline
+.\.venv\Scripts\python.exe -m server --offline
 ```
 
 `--open` opts into automatic browser launch. The legacy `--no-open` flag is
