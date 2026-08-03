@@ -7,10 +7,12 @@ from typing import Any, Mapping, Protocol, Sequence
 from .damage import DamageError, recipient_snapshot, source_snapshot
 from .damage_modifier_state import (
     ChosenDamageSource,
+    DamageAftermathRecipient,
     DamageModifierDuration,
     DamageModifierError,
     DamagePreventionShield,
     DamageSubject,
+    DealDamagePreventionAftermath,
     GainLifePreventionAftermath,
     PlaceCountersPreventionAftermath,
     PreventionMode,
@@ -98,8 +100,49 @@ class PlaceCountersAftermathRequest:
             )
 
 
+@dataclass(frozen=True, slots=True)
+class DealDamageAftermathRequest:
+    source_ref: str
+    per_prevented: int = 0
+    fixed_amount: int = 0
+    recipient_ref: str | None = None
+    recipient_kind: str = "fixed"
+
+    def __post_init__(self) -> None:
+        if not str(self.source_ref or ""):
+            raise DamagePreventionCreationError(
+                "Prevention damage aftermath requires a source"
+            )
+        if self.recipient_kind == "fixed":
+            if not str(self.recipient_ref or ""):
+                raise DamagePreventionCreationError(
+                    "Fixed prevention damage requires a recipient"
+                )
+        elif self.recipient_kind == "prevented_source_controller":
+            if self.recipient_ref is not None:
+                raise DamagePreventionCreationError(
+                    "A prevented-source controller recipient cannot be fixed"
+                )
+        else:
+            raise DamagePreventionCreationError(
+                "Prevention damage recipient kind is unsupported"
+            )
+        if (
+            type(self.per_prevented) is not int
+            or self.per_prevented < 0
+            or type(self.fixed_amount) is not int
+            or self.fixed_amount < 0
+            or not (self.per_prevented or self.fixed_amount)
+        ):
+            raise DamagePreventionCreationError(
+                "Prevention damage requires a positive fixed or scaled amount"
+            )
+
+
 PreventionAftermathRequest = (
-    GainLifeAftermathRequest | PlaceCountersAftermathRequest
+    GainLifeAftermathRequest
+    | PlaceCountersAftermathRequest
+    | DealDamageAftermathRequest
 )
 
 
@@ -188,7 +231,11 @@ class PreventionShieldCreationRequest:
         if any(
             not isinstance(
                 value,
-                (GainLifeAftermathRequest, PlaceCountersAftermathRequest),
+                (
+                    GainLifeAftermathRequest,
+                    PlaceCountersAftermathRequest,
+                    DealDamageAftermathRequest,
+                ),
             )
             for value in aftermath
         ):
@@ -402,6 +449,15 @@ def _shield_ids(
                     }
                     if isinstance(value, GainLifeAftermathRequest)
                     else {
+                        "kind": "deal_damage",
+                        "source": value.source_ref,
+                        "recipient": value.recipient_ref,
+                        "recipient_kind": value.recipient_kind,
+                        "per_prevented": value.per_prevented,
+                        "fixed_amount": value.fixed_amount,
+                    }
+                    if isinstance(value, DealDamageAftermathRequest)
+                    else {
                         "kind": "place_counters",
                         "subject": value.subject_ref,
                         "counter_name": value.counter_name,
@@ -426,15 +482,52 @@ def _aftermath_for_subject(
     host: DamagePreventionCreationHost,
     request: PreventionShieldCreationRequest,
     subject: DamageSubject,
-) -> tuple[GainLifePreventionAftermath | PlaceCountersPreventionAftermath, ...]:
+) -> tuple[
+    GainLifePreventionAftermath
+    | PlaceCountersPreventionAftermath
+    | DealDamagePreventionAftermath,
+    ...,
+]:
     result: list[
-        GainLifePreventionAftermath | PlaceCountersPreventionAftermath
+        GainLifePreventionAftermath
+        | PlaceCountersPreventionAftermath
+        | DealDamagePreventionAftermath
     ] = []
     for value in request.aftermath:
         if isinstance(value, GainLifeAftermathRequest):
             result.append(
                 GainLifePreventionAftermath(
                     player=value.player,
+                    per_prevented=value.per_prevented,
+                    fixed_amount=value.fixed_amount,
+                )
+            )
+            continue
+        if isinstance(value, DealDamageAftermathRequest):
+            try:
+                source = source_snapshot(
+                    host,
+                    value.source_ref,
+                    controller=request.controller,
+                )
+            except DamageError as exc:
+                raise DamagePreventionCreationError(str(exc)) from exc
+            recipient = DamageAftermathRecipient(
+                kind=value.recipient_kind,
+                subject=(
+                    _damage_subject(
+                        host,
+                        str(value.recipient_ref),
+                        request.controller,
+                    )
+                    if value.recipient_ref is not None
+                    else None
+                ),
+            )
+            result.append(
+                DealDamagePreventionAftermath(
+                    source=source,
+                    recipient=recipient,
                     per_prevented=value.per_prevented,
                     fixed_amount=value.fixed_amount,
                 )

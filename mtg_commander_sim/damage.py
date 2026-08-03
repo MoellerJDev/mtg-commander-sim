@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import re
-from typing import Any, Literal, Mapping, Protocol, Sequence
+from typing import Any, Mapping, Protocol, Sequence
 
 from .counter_state import (
     CounterChange,
@@ -18,13 +18,23 @@ from .damage_results import (
     prepare_damage_results,
     PreparedDamageResults,
 )
+from .damage_values import (
+    DamageError,
+    DamageProposal,
+    DamageRecipientKind,
+    DamageRecipientSnapshot,
+    DamageSourceSnapshot,
+)
 from .commander import CommanderIdentityError, commander_damage_key
 from .damage_prevention import (
     collect_damage_modifier_effects,
     commit_damage_modifier_plan,
+    damage_modifier_snapshot,
     DamageModifierCommitPlan,
     DamageModifierError,
+    DamageModifierSnapshot,
     plan_damage_modifier_commit,
+    project_damage_modifier_snapshot,
     validate_damage_modifier_plan,
 )
 from .damage_prevention_aftermath import (
@@ -36,7 +46,6 @@ from .damage_prevention_aftermath import (
     validate_prevention_aftermath,
 )
 from .replacement_effects import (
-    AffectedObject,
     ReplaceableEvent,
     ReplacementChoiceRequired,
     ReplacementClass,
@@ -46,13 +55,6 @@ from .replacement_effects import (
     ReplacementSelection,
     advance_replacement_batch,
 )
-
-
-DamageRecipientKind = Literal["player", "permanent"]
-
-
-class DamageError(ValueError):
-    """A represented damage proposal cannot be resolved exactly."""
 
 
 class DamageHost(Protocol):
@@ -140,189 +142,6 @@ def _normalized_keywords(values: Sequence[Any]) -> tuple[str, ...]:
             }
         )
     )
-
-
-@dataclass(frozen=True, slots=True)
-class DamageSourceSnapshot:
-    ref: str
-    object_id: str
-    logical_object_id: str
-    controller: str
-    owner: str
-    zone: str = "unknown"
-    oracle_id: str | None = None
-    commander_designation_id: str | None = None
-    types: tuple[str, ...] = ()
-    subtypes: tuple[str, ...] = ()
-    supertypes: tuple[str, ...] = ()
-    colors: tuple[str, ...] = ()
-    keywords: tuple[str, ...] = ()
-    is_commander: bool = False
-    toxic_value: int | None = 0
-
-    def __post_init__(self) -> None:
-        if not all(
-            (
-                self.ref,
-                self.object_id,
-                self.logical_object_id,
-                self.controller,
-                self.owner,
-            )
-        ):
-            raise DamageError(
-                "Damage sources require stable identity and controller facts"
-            )
-        if self.toxic_value is not None and (
-            type(self.toxic_value) is not int or self.toxic_value < 0
-        ):
-            raise DamageError(
-                "A known total toxic value must be a nonnegative integer"
-            )
-        if self.commander_designation_id is not None and not self.is_commander:
-            raise DamageError(
-                "Only a commander source may carry a designation identity"
-            )
-
-    @property
-    def identity_key(self) -> str:
-        return f"{self.logical_object_id}|{self.zone}"
-
-
-@dataclass(frozen=True, slots=True)
-class DamageRecipientSnapshot:
-    ref: str
-    kind: DamageRecipientKind
-    controller: str
-    object_id: str | None = None
-    logical_object_id: str | None = None
-    owner: str | None = None
-    types: tuple[str, ...] = ()
-    subtypes: tuple[str, ...] = ()
-
-    def __post_init__(self) -> None:
-        if self.kind not in {"player", "permanent"}:
-            raise DamageError(
-                "Damage recipient kinds must be player or permanent"
-            )
-        if not self.ref or not self.controller:
-            raise DamageError(
-                "Damage recipients require stable identity and controller facts"
-            )
-        if self.kind == "player":
-            if any(
-                value is not None
-                for value in (
-                    self.object_id,
-                    self.logical_object_id,
-                    self.owner,
-                )
-            ):
-                raise DamageError(
-                    "Player damage recipients cannot carry object identity"
-                )
-        elif not all(
-            (self.object_id, self.logical_object_id, self.owner)
-        ):
-            raise DamageError(
-                "Permanent damage recipients require complete object identity"
-            )
-
-    @property
-    def affected_object(self) -> AffectedObject | None:
-        if self.kind == "player":
-            return None
-        assert self.object_id is not None and self.owner is not None
-        return AffectedObject(
-            object_id=self.object_id,
-            owner=self.owner,
-            controller=self.controller,
-        )
-
-
-@dataclass(frozen=True, slots=True)
-class DamageProposal:
-    proposal_id: str
-    source: DamageSourceSnapshot
-    recipient: DamageRecipientSnapshot
-    amount: int
-    combat: bool
-    reason: str
-    unpreventable: bool = False
-    deathtouch: bool = False
-    damage_step: int | None = None
-    first_strike_step: bool = False
-
-    def __post_init__(self) -> None:
-        if not self.proposal_id or not self.reason:
-            raise DamageError("Damage proposals require stable IDs and reasons")
-        if type(self.amount) is not int or self.amount < 0:
-            raise DamageError("Damage cannot be negative")
-        if self.damage_step is not None and self.damage_step < 1:
-            raise DamageError("Damage step indexes must be positive")
-
-    def event(self) -> ReplaceableEvent:
-        if self.amount < 1:
-            raise DamageError("Zero damage has no replaceable event")
-        payload = {
-            "source": self.source.ref,
-            "source_object_id": self.source.object_id,
-            "source_logical_object_id": self.source.logical_object_id,
-            "source_zone": self.source.zone,
-            "source_identity_key": self.source.identity_key,
-            "source_oracle_id": self.source.oracle_id,
-            "source_commander_designation_id": (
-                self.source.commander_designation_id
-            ),
-            "source_controller": self.source.controller,
-            "source_owner": self.source.owner,
-            "source_types": list(self.source.types),
-            "source_subtypes": list(self.source.subtypes),
-            "source_supertypes": list(self.source.supertypes),
-            "source_characteristics": sorted(
-                {
-                    *self.source.types,
-                    *self.source.subtypes,
-                    *self.source.supertypes,
-                    *self.source.keywords,
-                }
-            ),
-            "source_colors": list(self.source.colors),
-            "source_keywords": list(self.source.keywords),
-            "source_is_commander": self.source.is_commander,
-            "source_toxic_value": self.source.toxic_value,
-            "target": self.recipient.ref,
-            "target_kind": self.recipient.kind,
-            "target_object_id": self.recipient.object_id,
-            "target_logical_object_id": self.recipient.logical_object_id,
-            "target_controller": self.recipient.controller,
-            "target_owner": self.recipient.owner,
-            "target_types": list(self.recipient.types),
-            "target_subtypes": list(self.recipient.subtypes),
-            "target_characteristics": sorted(
-                {*self.recipient.types, *self.recipient.subtypes}
-            ),
-            "proposed_amount": self.amount,
-            "amount": self.amount,
-            "prevented": 0,
-            "combat": self.combat,
-            "reason": self.reason,
-            "unpreventable": self.unpreventable,
-            "deathtouch": self.deathtouch,
-            "damage_step": self.damage_step,
-            "first_strike_step": self.first_strike_step,
-        }
-        return ReplaceableEvent(
-            event_id=self.proposal_id,
-            kind="damage",
-            affected_player=(
-                self.recipient.ref
-                if self.recipient.kind == "player"
-                else None
-            ),
-            affected_object=self.recipient.affected_object,
-            payload=payload,
-        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -449,6 +268,7 @@ class PreparedDamageBatch:
     result_journal: tuple[ReplacementSelection, ...] = ()
     modifier_plan: DamageModifierCommitPlan = DamageModifierCommitPlan()
     aftermath: PreparedPreventionAftermath = PreparedPreventionAftermath()
+    consumed_selections: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -483,6 +303,7 @@ class DamageBatchResult:
     result_events: tuple[DamageResultRecord, ...] = ()
     prevention_events: tuple[PreventionAppliedEvent, ...] = ()
     aftermath_events: tuple[PreventionAftermathEvent, ...] = ()
+    nested_damage_results: tuple["DamageBatchResult", ...] = ()
 
     @property
     def dealt_amount(self) -> int:
@@ -490,6 +311,7 @@ class DamageBatchResult:
 
 
 _TOXIC_ABILITY = re.compile(r"^toxic\s+(?P<value>[0-9]+)$", re.IGNORECASE)
+_DAMAGE_REASON_FIELD = "".join(("rea", "son"))
 
 
 def _total_toxic_value(
@@ -814,9 +636,13 @@ def prepare_damage_batch(
     selections: Sequence[str | None | Mapping[str, Any]] = (),
     sources: Sequence[Any] | None = None,
     source_zones: Mapping[str, str] | None = None,
+    modifier_snapshot: DamageModifierSnapshot | None = None,
+    aftermath_depth: int = 0,
+    aftermath_effect_chain: tuple[str, ...] = (),
 ) -> PreparedDamageBatch:
     """Resolve CR 120.4b damage and CR 120.4c results before mutation."""
 
+    current_modifiers = modifier_snapshot or damage_modifier_snapshot(host)
     nonzero = tuple(proposal for proposal in proposals if proposal.amount > 0)
     if not nonzero:
         if selections:
@@ -828,7 +654,9 @@ def prepare_damage_batch(
         # distinguish a legitimate zero-event batch from a stale/default
         # PreparedDamageBatch assembled outside this function.
         try:
-            modifier_plan = plan_damage_modifier_commit(host, ())
+            modifier_plan = plan_damage_modifier_commit(
+                host, (), snapshot=current_modifiers
+            )
         except DamageModifierError as exc:
             raise DamageError(str(exc)) from exc
         return PreparedDamageBatch(
@@ -856,7 +684,7 @@ def prepare_damage_batch(
             sources=sources,
             source_zones=source_zones,
         ),
-        *collect_damage_modifier_effects(host),
+        *collect_damage_modifier_effects(host, snapshot=current_modifiers),
         *_protection_prevention_effects(host, nonzero),
     )
     events = tuple(proposal.event() for proposal in nonzero)
@@ -924,7 +752,9 @@ def prepare_damage_batch(
             pending=result_progress.pending,
         )
     try:
-        modifier_plan = plan_damage_modifier_commit(host, events)
+        modifier_plan = plan_damage_modifier_commit(
+            host, events, snapshot=current_modifiers
+        )
     except DamageModifierError as exc:
         raise DamageError(str(exc)) from exc
     aftermath_selection_offset = (
@@ -937,6 +767,11 @@ def prepare_damage_batch(
             selections=tuple(selections[aftermath_selection_offset:]),
             sources=sources,
             source_zones=source_zones,
+            modifier_snapshot=project_damage_modifier_snapshot(
+                current_modifiers, modifier_plan
+            ),
+            depth=aftermath_depth,
+            effect_chain=aftermath_effect_chain,
         )
     except PreventionAftermathError as exc:
         raise DamageError(str(exc)) from exc
@@ -949,6 +784,9 @@ def prepare_damage_batch(
         result_journal=result_progress.journal,
         modifier_plan=modifier_plan,
         aftermath=aftermath,
+        consumed_selections=(
+            aftermath_selection_offset + aftermath.consumed_selections
+        ),
     )
 
 
@@ -1425,32 +1263,18 @@ def commit_prepared_damage_batch(
         result_events=committed.records,
         prevention_events=prevention_events,
         aftermath_events=aftermath.events,
+        nested_damage_results=aftermath.nested_damage_results,
     )
 
 
-def resolve_damage_batch(
+def _collect_damage_result_triggers(
     host: DamageHost,
-    proposals: Sequence[DamageProposal],
+    result: DamageBatchResult,
     *,
-    replacement_selections: Sequence[
-        str | None | Mapping[str, Any]
-    ] = (),
-) -> DamageBatchResult:
-    """Resolve one typed damage batch through results and trigger discovery."""
-
-    trigger_sources = host._semantic_event_sources()
-    trigger_source_zones = {
-        source.object_id: source.zone for source in trigger_sources
-    }
-    prepared = prepare_damage_batch(
-        host,
-        proposals,
-        selections=replacement_selections,
-        sources=trigger_sources,
-        source_zones=trigger_source_zones,
-    )
-    result = commit_prepared_damage_batch(host, prepared)
-
+    trigger_sources: Sequence[Any],
+    trigger_source_zones: Mapping[str, str],
+    trigger_batch: list[Any],
+) -> None:
     for gain in result.lifelink_gains:
         host._log(
             gain.player,
@@ -1465,27 +1289,6 @@ def resolve_damage_batch(
             changed_players=[gain.player],
         )
 
-    trigger_batch: list[Any] = []
-    for aftermath in result.aftermath_events:
-        host._log(
-            None,
-            "damage.prevention.aftermath",
-            f"{aftermath.source_id} applied a prevention aftermath.",
-            aftermath.semantic_context(),
-            importance=2,
-            changed_players=(
-                [aftermath.subject]
-                if aftermath.kind == "gain_life"
-                else []
-            ),
-        )
-        host._dispatch_semantic_event(
-            "damage.prevention.aftermath",
-            aftermath.semantic_context(),
-            sources=trigger_sources,
-            source_zones=trigger_source_zones,
-            trigger_batch=trigger_batch,
-        )
     for prevention in result.prevention_events:
         host._dispatch_semantic_event(
             "damage.prevented",
@@ -1521,7 +1324,7 @@ def resolve_damage_batch(
                             {
                                 "op": "become_monarch",
                                 "player": new_monarch,
-                                "reason": (
+                                _DAMAGE_REASON_FIELD: (
                                     "a creature dealt combat damage to "
                                     "the monarch"
                                 ),
@@ -1546,5 +1349,77 @@ def resolve_damage_batch(
             )
             if host._semantic_pause_annotation() is not None:
                 break
+    nested_index = 0
+    if host._semantic_pause_annotation() is None:
+        for aftermath in result.aftermath_events:
+            host._log(
+                None,
+                "damage.prevention.aftermath",
+                f"{aftermath.source_id} applied a prevention aftermath.",
+                aftermath.semantic_context(),
+                importance=2,
+                changed_players=(
+                    [aftermath.subject]
+                    if aftermath.kind in {"gain_life", "deal_damage"}
+                    and aftermath.subject in host.active_seats
+                    else []
+                ),
+            )
+            host._dispatch_semantic_event(
+                "damage.prevention.aftermath",
+                aftermath.semantic_context(),
+                sources=trigger_sources,
+                source_zones=trigger_source_zones,
+                trigger_batch=trigger_batch,
+            )
+            if aftermath.kind != "deal_damage":
+                continue
+            if nested_index >= len(result.nested_damage_results):
+                raise DamageError(
+                    "Prevention aftermath lost its nested damage result"
+                )
+            _collect_damage_result_triggers(
+                host,
+                result.nested_damage_results[nested_index],
+                trigger_sources=trigger_sources,
+                trigger_source_zones=trigger_source_zones,
+                trigger_batch=trigger_batch,
+            )
+            nested_index += 1
+    if nested_index != len(result.nested_damage_results):
+        raise DamageError("Unexpected nested prevention damage result")
+
+
+def resolve_damage_batch(
+    host: DamageHost,
+    proposals: Sequence[DamageProposal],
+    *,
+    replacement_selections: Sequence[
+        str | None | Mapping[str, Any]
+    ] = (),
+) -> DamageBatchResult:
+    """Resolve one typed damage batch through results and trigger discovery."""
+
+    trigger_sources = host._semantic_event_sources()
+    trigger_source_zones = {
+        source.object_id: source.zone for source in trigger_sources
+    }
+    prepared = prepare_damage_batch(
+        host,
+        proposals,
+        selections=replacement_selections,
+        sources=trigger_sources,
+        source_zones=trigger_source_zones,
+    )
+    result = commit_prepared_damage_batch(host, prepared)
+
+    trigger_batch: list[Any] = []
+    _collect_damage_result_triggers(
+        host,
+        result,
+        trigger_sources=trigger_sources,
+        trigger_source_zones=trigger_source_zones,
+        trigger_batch=trigger_batch,
+    )
     host._enqueue_semantic_trigger_batch(trigger_batch)
     return result

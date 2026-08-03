@@ -27,6 +27,23 @@ class DamageModifierHost(Protocol):
     active_seats: Sequence[str]
 
 
+@dataclass(frozen=True, slots=True)
+class DamageModifierSnapshot:
+    """Immutable durable-modifier view used to prepare sequential damage."""
+
+    shields: tuple[DamagePreventionShield, ...]
+    redirections: tuple[DamageRedirectionEffect, ...]
+
+
+def damage_modifier_snapshot(
+    host: DamageModifierHost,
+) -> DamageModifierSnapshot:
+    return DamageModifierSnapshot(
+        shields=tuple(host.state.damage_prevention_shields),
+        redirections=tuple(host.state.damage_redirections),
+    )
+
+
 def _shield_replacement_effect(
     shield: DamagePreventionShield,
 ) -> ReplacementEffect:
@@ -101,16 +118,19 @@ def _subject_is_current(host: DamageModifierHost, subject: DamageSubject) -> boo
 
 def collect_damage_modifier_effects(
     host: DamageModifierHost,
+    *,
+    snapshot: DamageModifierSnapshot | None = None,
 ) -> tuple[ReplacementEffect, ...]:
     """Lower current durable modifiers without exposing mutable GameState."""
 
     from .damage import DamageError, recipient_snapshot
 
+    current = snapshot or damage_modifier_snapshot(host)
     effects: list[ReplacementEffect] = []
-    for shield in host.state.damage_prevention_shields:
+    for shield in current.shields:
         if _subject_is_current(host, shield.subject):
             effects.append(_shield_replacement_effect(shield))
-    for redirection in host.state.damage_redirections:
+    for redirection in current.redirections:
         if not _subject_is_current(host, redirection.subject) or not _subject_is_current(
             host, redirection.destination
         ):
@@ -139,16 +159,14 @@ class DamageModifierCommitPlan:
     remove_redirections: tuple[str, ...] = ()
 
 
-def _modifier_state_fingerprint(host: DamageModifierHost) -> str:
+def _modifier_state_fingerprint(snapshot: DamageModifierSnapshot) -> str:
     return stable_json(
         {
             "shields": [
-                shield.to_dict()
-                for shield in host.state.damage_prevention_shields
+                shield.to_dict() for shield in snapshot.shields
             ],
             "redirections": [
-                effect.to_dict()
-                for effect in host.state.damage_redirections
+                effect.to_dict() for effect in snapshot.redirections
             ],
         }
     )
@@ -157,7 +175,10 @@ def _modifier_state_fingerprint(host: DamageModifierHost) -> str:
 def plan_damage_modifier_commit(
     host: DamageModifierHost,
     events: Iterable[Any],
+    *,
+    snapshot: DamageModifierSnapshot | None = None,
 ) -> DamageModifierCommitPlan:
+    current = snapshot or damage_modifier_snapshot(host)
     by_effect: dict[str, int] = {}
     applied: set[str] = set()
     for event in events:
@@ -171,7 +192,7 @@ def plan_damage_modifier_commit(
 
     remaining: list[tuple[str, int]] = []
     remove_shields: list[str] = []
-    for shield in host.state.damage_prevention_shields:
+    for shield in current.shields:
         prevented = by_effect.get(shield.effect_id, 0)
         if prevented <= 0:
             continue
@@ -191,11 +212,11 @@ def plan_damage_modifier_commit(
 
     remove_redirections = [
         effect.redirection_id
-        for effect in host.state.damage_redirections
+        for effect in current.redirections
         if effect.consume_on_application and effect.effect_id in applied
     ]
     return DamageModifierCommitPlan(
-        state_fingerprint=_modifier_state_fingerprint(host),
+        state_fingerprint=_modifier_state_fingerprint(current),
         shield_remaining=tuple(sorted(remaining)),
         remove_shields=tuple(sorted(set(remove_shields))),
         remove_redirections=tuple(sorted(set(remove_redirections))),
@@ -244,7 +265,8 @@ def validate_damage_modifier_plan(
 ) -> None:
     if (
         not plan.state_fingerprint
-        or plan.state_fingerprint != _modifier_state_fingerprint(host)
+        or plan.state_fingerprint
+        != _modifier_state_fingerprint(damage_modifier_snapshot(host))
     ):
         raise DamageModifierError(
             "Prepared damage modifier state no longer matches GameState"
@@ -277,6 +299,52 @@ def validate_damage_modifier_plan(
         raise DamageModifierError(
             "Prepared redirection state no longer matches GameState"
         )
+
+
+def project_damage_modifier_snapshot(
+    snapshot: DamageModifierSnapshot,
+    plan: DamageModifierCommitPlan,
+) -> DamageModifierSnapshot:
+    """Return the exact post-commit view without mutating authoritative state."""
+
+    if plan.state_fingerprint != _modifier_state_fingerprint(snapshot):
+        raise DamageModifierError(
+            "Prepared damage modifier state does not match its projection base"
+        )
+    remaining = dict(plan.shield_remaining)
+    removed_shields = set(plan.remove_shields)
+    shields: list[DamagePreventionShield] = []
+    for shield in snapshot.shields:
+        if shield.shield_id in removed_shields:
+            continue
+        after = remaining.get(shield.shield_id)
+        if after is None:
+            shields.append(shield)
+            continue
+        shields.append(
+            DamagePreventionShield(
+                shield_id=shield.shield_id,
+                source_id=shield.source_id,
+                controller=shield.controller,
+                subject=shield.subject,
+                mode=shield.mode,
+                remaining=after,
+                duration=shield.duration,
+                created_turn_sequence=shield.created_turn_sequence,
+                chosen_source=shield.chosen_source,
+                label=shield.label,
+                aftermath=shield.aftermath,
+            )
+        )
+    removed_redirections = set(plan.remove_redirections)
+    return DamageModifierSnapshot(
+        shields=tuple(shields),
+        redirections=tuple(
+            effect
+            for effect in snapshot.redirections
+            if effect.redirection_id not in removed_redirections
+        ),
+    )
 
 
 def expire_end_of_turn_damage_modifiers(state: Any) -> tuple[str, ...]:

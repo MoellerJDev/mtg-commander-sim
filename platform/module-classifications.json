@@ -611,6 +611,32 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/damage_source.py",
+      "layer": "domain",
+      "owning_subsystem": "damage",
+      "allowed_dependency_layers": [
+        "domain"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/damage_values.py",
+      "layer": "rules",
+      "owning_subsystem": "damage",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/deck.py",
       "layer": "adapter",
       "owning_subsystem": "legacy_adapter",
@@ -2437,5 +2463,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "46dda67e7c53e748c21202ca86dfc325a69a7f4966876e9548f8dd884a37bad8"
+  "fingerprint": "83cd77361cf03c36e0b04f16fa835e69b380a88f37c815102d8192d62a75df1e"
 }

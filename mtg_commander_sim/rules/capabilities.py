@@ -647,6 +647,20 @@ def capability_dependencies_for_node(
         return found
 
     all_operations = nested_operations(effects)
+
+    def contains_aftermath_kind(value: Any, kind: str) -> bool:
+        if isinstance(value, Mapping):
+            if value.get("kind") == kind:
+                return True
+            return any(
+                contains_aftermath_kind(child, kind)
+                for child in value.values()
+            )
+        if isinstance(value, (list, tuple)):
+            return any(
+                contains_aftermath_kind(child, kind) for child in value
+            )
+        return False
     dependencies: set[str] = set()
     if not effects and target_schema is None:
         for mechanic in mechanics:
@@ -694,6 +708,8 @@ def capability_dependencies_for_node(
                 )
         if "cr-122-counters" in mechanics:
             dependencies.add("counter.placement.quantity_replacement")
+        if contains_aftermath_kind(effects, "deal_damage"):
+            dependencies.add("damage.prevention.aftermath.damage")
     return tuple(sorted(dependencies))
 
 

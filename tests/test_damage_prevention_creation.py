@@ -5,10 +5,12 @@ import unittest
 from damage_replacement_support import DamageReplacementPipelineBase
 from mtg_commander_sim.damage import resolve_damage_batch
 from mtg_commander_sim.damage_modifier_state import (
+    DamagePreventionShield,
     DamageModifierDuration,
     PreventionMode,
 )
 from mtg_commander_sim.damage_prevention_creation import (
+    DealDamageAftermathRequest,
     PreventionShieldCreationRequest,
     PreventionSubjectAllocation,
     commit_prevention_shield_creation,
@@ -31,6 +33,50 @@ from mtg_commander_sim.replacement.immutable import FrozenMap
 
 
 class DamagePreventionCreationTests(DamageReplacementPipelineBase):
+    def test_damage_aftermath_pins_source_lki_and_round_trips(self):
+        engine = self.session(615115).engine
+        prevention_source = self.add_permanent(
+            engine, seat="B", name="Goblin Engineer", ref="palm"
+        )
+        plan = plan_prevention_shield_creation(
+            engine,
+            PreventionShieldCreationRequest(
+                source_id=prevention_source.ref,
+                controller="B",
+                mode=PreventionMode.NEXT_INSTANCE,
+                duration=DamageModifierDuration.UNTIL_END_OF_TURN,
+                subjects=(PreventionSubjectAllocation("B", None),),
+                aftermath=(
+                    DealDamageAftermathRequest(
+                        source_ref=prevention_source.ref,
+                        recipient_kind="prevented_source_controller",
+                        per_prevented=1,
+                    ),
+                ),
+            ),
+        )
+
+        aftermath = plan.shields[0].aftermath[0]
+        self.assertEqual("battlefield", aftermath.source.zone)
+        self.assertEqual(
+            prevention_source.logical_object_id,
+            aftermath.source.logical_object_id,
+        )
+        self.assertEqual(
+            plan.shields[0],
+            DamagePreventionShield.from_dict(plan.shields[0].to_dict()),
+        )
+
+        isolated_payload = aftermath.source.to_dict()
+        isolated = type(aftermath.source).from_dict(isolated_payload)
+        isolated_payload["types"].append("mutated")
+        self.assertNotIn("mutated", isolated.types)
+
+        malformed = plan.shields[0].to_dict()
+        malformed["aftermath"][0]["source"]["unknown"] = True
+        with self.assertRaisesRegex(ValueError, "fields"):
+            DamagePreventionShield.from_dict(malformed)
+
     def test_dynamic_amount_and_divided_allocations_create_independent_shields(self):
         engine = self.session(615101).engine
         first = self.add_permanent(
@@ -290,6 +336,51 @@ class DamagePreventionCreationTests(DamageReplacementPipelineBase):
             [1, 3],
             [shield.remaining for shield in engine.state.damage_prevention_shields],
         )
+
+    def test_runtime_lowers_typed_damage_aftermath_without_card_name_logic(self):
+        engine = self.session(615116).engine
+        original_source = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="original"
+        )
+        prevention_source = self.add_permanent(
+            engine, seat="B", name="Goblin Engineer", ref="palm"
+        )
+        engine.apply_effect(
+            {
+                "op": "create_damage_prevention_shield",
+                "source": prevention_source.ref,
+                "subject": "B",
+                "mode": "next_instance",
+                "duration": "until_end_of_turn",
+                "aftermath": [
+                    {
+                        "kind": "deal_damage",
+                        "source": prevention_source.ref,
+                        "recipient": None,
+                        "recipient_kind": "prevented_source_controller",
+                        "per_prevented": 1,
+                        "fixed_amount": 0,
+                    }
+                ],
+            },
+            actor="B",
+        )
+
+        result = resolve_damage_batch(
+            engine,
+            (
+                self.proposal(
+                    engine,
+                    source=original_source,
+                    target="B",
+                    amount=3,
+                ),
+            ),
+        )
+
+        self.assertEqual(40, engine.state.players["B"].life)
+        self.assertEqual(37, engine.state.players["A"].life)
+        self.assertEqual(3, result.nested_damage_results[0].dealt_amount)
 
     def test_runtime_shared_color_selector_creates_one_shield_per_creature(self):
         engine = self.session(615106).engine

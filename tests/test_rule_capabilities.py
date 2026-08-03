@@ -246,6 +246,24 @@ class CapabilityRegistryTests(unittest.TestCase):
             ),
         )
 
+    def test_damage_aftermath_shape_requires_its_narrow_capability(self):
+        dependencies = capability_dependencies_for_node(
+            effects=[
+                {
+                    "op": "choose_damage_source",
+                    "shield": {
+                        "op": "create_damage_prevention_shield",
+                        "aftermath": [{"kind": "deal_damage"}],
+                    },
+                }
+            ],
+            target_schema=None,
+            mechanic_ids=["cr-615-prevention-effects"],
+        )
+
+        self.assertIn("damage.prevention.persistent_amount", dependencies)
+        self.assertIn("damage.prevention.aftermath.damage", dependencies)
+
 
 class GeneratedCapabilityTrustTests(unittest.TestCase):
     @classmethod
@@ -359,6 +377,32 @@ class GeneratedCapabilityTrustTests(unittest.TestCase):
                 capability_registry=mutated,
                 capability_profile="commander_duel",
             )
+
+    def test_damage_aftermath_dependency_fails_closed(self):
+        value = _registry_value()
+        aftermath = next(
+            row
+            for row in value["capabilities"]
+            if row["id"] == "damage.prevention.aftermath.damage"
+        )
+        aftermath["status"] = "blocked"
+        aftermath["blockers"] = ["test mutation"]
+        mutated = CapabilityRegistry(value)
+
+        ir = compile_oracle_card(
+            self.db.lookup("Deflecting Palm"),
+            capability_registry=mutated,
+            capability_profile="commander_review",
+        )
+
+        self.assertNotEqual("exact", ir.status)
+        self.assertTrue(
+            any(
+                "damage.prevention.aftermath.damage" in blocker
+                for residual in ir.material_residuals
+                for blocker in residual.blockers
+            )
+        )
 
     def test_unrecognized_text_remains_residual_with_capability_registry(self):
         record = _lightning_bolt_record()

@@ -185,6 +185,44 @@ def _chosen_source_next_instance(
     )
 
 
+def _chosen_source_damage_aftermath(
+    normalized: str,
+) -> PreventionTemplate | None:
+    match = re.fullmatch(
+        r"the next time a source of your choice would deal damage to you "
+        r"this turn, prevent that damage\. if damage is prevented this way, "
+        r"(?P<source>[a-z0-9'’, -]+) deals that much damage to that source's "
+        r"controller\.?",
+        normalized,
+        re.IGNORECASE,
+    )
+    if not match:
+        return None
+    shield = {
+        "op": "create_damage_prevention_shield",
+        "source": "$source",
+        "subject": "$controller",
+        "mode": "next_instance",
+        "duration": "until_end_of_turn",
+        "aftermath": [
+            {
+                "kind": "deal_damage",
+                "source": "$source",
+                "recipient": None,
+                "recipient_kind": "prevented_source_controller",
+                "per_prevented": 1,
+                "fixed_amount": 0,
+            }
+        ],
+    }
+    return (
+        "damage-prevention-source-controller-aftermath-v1",
+        (_chosen_source_effect(shield=shield, qualifier=None),),
+        None,
+        _rules(None),
+    )
+
+
 def _chosen_source_all_damage(
     normalized: str,
 ) -> PreventionTemplate | None:
@@ -483,6 +521,7 @@ def _source_shield(normalized: str) -> PreventionTemplate | None:
 _PREVENTION_PRODUCTIONS = (
     _chosen_source_fixed_life,
     _chosen_source_fixed_amount,
+    _chosen_source_damage_aftermath,
     _chosen_source_next_instance,
     _chosen_source_all_damage,
     _scaled_life_aftermath,

@@ -10,6 +10,7 @@ from ..damage_modifier_state import (
     PreventionMode,
 )
 from ..damage_prevention_creation import (
+    DealDamageAftermathRequest,
     DamagePreventionCreationError,
     GainLifeAftermathRequest,
     PlaceCountersAftermathRequest,
@@ -140,12 +141,21 @@ def _prevention_aftermath_requests(
     effect: Mapping[str, Any],
     *,
     actor: str,
-) -> tuple[GainLifeAftermathRequest | PlaceCountersAftermathRequest, ...]:
+) -> tuple[
+    GainLifeAftermathRequest
+    | PlaceCountersAftermathRequest
+    | DealDamageAftermathRequest,
+    ...,
+]:
     raw = effect.get("aftermath")
     if raw is None:
         return ()
     values = raw if isinstance(raw, (list, tuple)) else (raw,)
-    result: list[GainLifeAftermathRequest | PlaceCountersAftermathRequest] = []
+    result: list[
+        GainLifeAftermathRequest
+        | PlaceCountersAftermathRequest
+        | DealDamageAftermathRequest
+    ] = []
     for value in values:
         if not isinstance(value, Mapping):
             raise GameRuleError("Prevention aftermath entries must be objects")
@@ -179,6 +189,27 @@ def _prevention_aftermath_requests(
                     ),
                     counter_name=str(value["counter_name"]),
                     placing_player=str(value.get("placing_player") or actor),
+                    per_prevented=value["per_prevented"],
+                    fixed_amount=value["fixed_amount"],
+                )
+            )
+            continue
+        if kind == "deal_damage":
+            expected = common | {
+                "source",
+                "recipient",
+                "recipient_kind",
+            }
+            if set(value) != expected:
+                raise GameRuleError("Prevention damage aftermath is malformed")
+            recipient = value["recipient"]
+            result.append(
+                DealDamageAftermathRequest(
+                    source_ref=str(value["source"]),
+                    recipient_ref=(
+                        str(recipient) if recipient is not None else None
+                    ),
+                    recipient_kind=str(value["recipient_kind"]),
                     per_prevented=value["per_prevented"],
                     fixed_amount=value["fixed_amount"],
                 )

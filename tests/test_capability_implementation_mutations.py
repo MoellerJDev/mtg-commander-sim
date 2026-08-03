@@ -23,6 +23,8 @@ from mtg_commander_sim.damage_prevention import (
 )
 from mtg_commander_sim.damage_modifier_state import (
     ChosenDamageSource,
+    DamageAftermathRecipient,
+    DealDamagePreventionAftermath,
     GainLifePreventionAftermath,
 )
 from mtg_commander_sim.engine import CommanderEngine
@@ -796,6 +798,33 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_scaled_aftermath()
+
+    def test_prevention_damage_aftermath_quantity_mutant_is_killed(self):
+        aftermath = DealDamagePreventionAftermath(
+            source=damage_module.DamageSourceSnapshot(
+                ref="palm",
+                object_id="palm-object",
+                logical_object_id="palm-incarnation",
+                controller="A",
+                owner="A",
+            ),
+            recipient=DamageAftermathRecipient(
+                kind="prevented_source_controller"
+            ),
+            per_prevented=1,
+        )
+
+        def assert_scaled_damage() -> None:
+            self.assertEqual(3, aftermath.amount(3))
+
+        assert_scaled_damage()
+        with patch.object(
+            DealDamagePreventionAftermath,
+            "amount",
+            lambda value, _prevented: value.fixed_amount,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_scaled_damage()
 
     def test_damage_replacement_prevention_mutants_are_killed(self):
         condition = {

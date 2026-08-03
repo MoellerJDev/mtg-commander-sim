@@ -49,6 +49,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
     if relative.startswith("server/") or relative == "simctl.py":
         return "transport"
     if relative in {
+        "mtg_commander_sim/damage_source.py",
         "mtg_commander_sim/damage_modifier_state.py",
         "mtg_commander_sim/model.py",
     }:
@@ -99,6 +100,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/counter_state.py",
         "mtg_commander_sim/damage.py",
         "mtg_commander_sim/damage_prevention.py",
+        "mtg_commander_sim/damage_values.py",
         "mtg_commander_sim/damage_results.py",
         "mtg_commander_sim/declaration_costs.py",
         "mtg_commander_sim/declaration_restrictions.py",
@@ -152,7 +154,10 @@ def _owner(relative: str, layer: str) -> str:
         return "replacement_effects"
     if relative == "mtg_commander_sim/commander.py":
         return "commander_variant"
-    if relative == "mtg_commander_sim/damage_modifier_state.py":
+    if relative in {
+        "mtg_commander_sim/damage_modifier_state.py",
+        "mtg_commander_sim/damage_source.py",
+    }:
         return "damage"
     if relative == "mtg_commander_sim/counter_state.py":
         return "counter_state"
@@ -184,6 +189,7 @@ def _owner(relative: str, layer: str) -> str:
         "mtg_commander_sim/damage_prevention.py",
         "mtg_commander_sim/damage_prevention_aftermath.py",
         "mtg_commander_sim/damage_prevention_creation.py",
+        "mtg_commander_sim/damage_values.py",
         "mtg_commander_sim/damage_results.py",
     }:
         return "damage"

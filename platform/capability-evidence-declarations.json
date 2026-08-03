@@ -377,6 +377,204 @@
       "applicability_note": "Accept a positive integer damage amount and suppress zero while rejecting negative damage."
     },
     {
+      "capability_id": "damage.prevention.aftermath.damage",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_other_prevention_applies_to_aftermath_damage",
+      "official_rule_ids": [
+        "120.1",
+        "120.2",
+        "120.3a",
+        "120.4",
+        "609.7",
+        "615.5",
+        "615.12",
+        "615.12a",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply another current prevention effect to the newly created aftermath damage transaction."
+    },
+    {
+      "capability_id": "damage.prevention.aftermath.damage",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_damage_aftermath_is_separate_in_a_four_player_batch",
+      "official_rule_ids": [
+        "120.1",
+        "120.2",
+        "120.3a",
+        "120.4",
+        "609.7",
+        "615.5",
+        "615.12",
+        "615.12a",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep an immediate prevention result separate from unrelated simultaneous four-player damage."
+    },
+    {
+      "capability_id": "damage.prevention.aftermath.damage",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_prevention_damage_aftermath_quantity_mutant_is_killed",
+      "official_rule_ids": [
+        "120.1",
+        "120.2",
+        "120.3a",
+        "120.4",
+        "609.7",
+        "615.5",
+        "615.12",
+        "615.12a",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that discards the prevented quantity when deriving immediate aftermath damage."
+    },
+    {
+      "capability_id": "damage.prevention.aftermath.damage",
+      "evidence_class": "negative",
+      "test_id": "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_recursive_all_damage_aftermath_fails_before_mutation",
+      "official_rule_ids": [
+        "120.1",
+        "120.2",
+        "120.3a",
+        "120.4",
+        "609.7",
+        "615.5",
+        "615.12",
+        "615.12a",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject a recursive prevention-aftermath cycle before authoritative state mutation."
+    },
+    {
+      "capability_id": "damage.prevention.aftermath.damage",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_damage_aftermath_uses_lki_and_projected_consumed_shield",
+      "official_rule_ids": [
+        "120.1",
+        "120.2",
+        "120.3a",
+        "120.4",
+        "609.7",
+        "615.5",
+        "615.12",
+        "615.12a",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Deal aggregate prevented damage to the prevented source's controller from pinned source facts through the projected post-consumption modifier state."
+    },
+    {
+      "capability_id": "damage.prevention.aftermath.damage",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_prevention_creation.DamagePreventionCreationTests.test_runtime_lowers_typed_damage_aftermath_without_card_name_logic",
+      "official_rule_ids": [
+        "120.1",
+        "120.2",
+        "120.3a",
+        "120.4",
+        "609.7",
+        "615.5",
+        "615.12",
+        "615.12a",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Lower a generic typed runtime descriptor without printed-name or Oracle-ID logic."
+    },
+    {
+      "capability_id": "damage.prevention.aftermath.damage",
+      "evidence_class": "positive",
+      "test_id": "tests.test_oracle_ir.OracleIRTests.test_source_controller_damage_aftermath_compiles_generically",
+      "official_rule_ids": [
+        "120.1",
+        "120.2",
+        "120.3a",
+        "120.4",
+        "609.7",
+        "615.5",
+        "615.12",
+        "615.12a",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Compile the reusable immediate source-controller damage wording family through the trusted typed capability."
+    },
+    {
+      "capability_id": "damage.prevention.aftermath.damage",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_semantic_choice_characterization.SemanticChoiceCharacterizationTests.test_damage_source_choice_is_seat_scoped_pinned_and_replays",
+      "official_rule_ids": [
+        "120.1",
+        "120.2",
+        "120.3a",
+        "120.4",
+        "609.7",
+        "615.5",
+        "615.12",
+        "615.12a",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Expose the source choice only to the prevention effect controller and replay the pinned public source exactly."
+    },
+    {
+      "capability_id": "damage.prevention.aftermath.damage",
+      "evidence_class": "replay",
+      "test_id": "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_damage_aftermath_replays_from_exact_commands",
+      "official_rule_ids": [
+        "120.1",
+        "120.2",
+        "120.3a",
+        "120.4",
+        "609.7",
+        "615.5",
+        "615.12",
+        "615.12a",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Serialize the pinned source and nested damage result through an exact Game Record v3 command replay."
+    },
+    {
       "capability_id": "damage.prevention.order",
       "evidence_class": "interaction",
       "test_id": "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing",
