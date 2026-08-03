@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 14,
+  "registry_version": 15,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -643,6 +643,33 @@
       "dependency_fail_closed_rationale": "",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "damage.prevention.aftermath.damage",
+      "version": 1,
+      "official_rules": ["120.1", "120.2", "120.3a", "120.4", "609.7", "615.5", "615.12", "615.12a", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "After a represented prevention shield is applied, deal its aggregate prevented quantity from a source snapshot pinned at shield creation to the prevented source's controller through a new typed damage transaction.",
+        "inputs": ["choice-complete typed prevention application", "pinned aftermath damage source", "exactly one prevented-source controller", "projected post-consumption modifier state"],
+        "outputs": ["nested typed damage transaction", "canonical aftermath and damage events", "replay-stable last-known source facts"],
+        "exclusions": ["explicit-target damage aftermath", "conditional source-characteristic branches", "triggered rather than immediate prevention results", "mixed damage and non-damage aftermath on one shield", "mandatory loops beyond the fail-closed cycle boundary"]
+      },
+      "dependencies": ["damage.amount.positive", "damage.prevention.persistent_amount", "damage.result.player_life"],
+      "implementation_components": ["mtg_commander_sim.damage_modifier_state.DealDamagePreventionAftermath", "mtg_commander_sim.damage_prevention.project_damage_modifier_snapshot", "mtg_commander_sim.damage_prevention_aftermath.prepare_prevention_aftermath", "mtg_commander_sim.damage_prevention_aftermath.commit_prevention_aftermath", "mtg_commander_sim.compiler.prevention_templates.fixed_prevention_effect_template"],
+      "positive_tests": ["test_damage_aftermath_uses_lki_and_projected_consumed_shield", "test_runtime_lowers_typed_damage_aftermath_without_card_name_logic", "test_source_controller_damage_aftermath_compiles_generically"],
+      "negative_tests": ["test_unpreventable_damage_does_not_create_scaled_damage_aftermath", "test_recursive_all_damage_aftermath_fails_before_mutation"],
+      "interaction_tests": ["test_other_prevention_applies_to_aftermath_damage"],
+      "multiplayer_tests": ["test_damage_aftermath_is_separate_in_a_four_player_batch"],
+      "privacy_tests": ["test_damage_source_choice_is_seat_scoped_pinned_and_replays"],
+      "replay_tests": ["test_damage_aftermath_replays_from_exact_commands"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The generic compiler requires this capability in addition to the trusted persistent-shield and player-damage dependencies; removing or blocking any dependency leaves the CardProgram partial.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_prevention_damage_aftermath_quantity_mutant_is_killed replaces the prevented-quantity calculation with the fixed term and the behavioral assertion rejects the survivor.",
       "blockers": [],
       "status": "trusted"
     },

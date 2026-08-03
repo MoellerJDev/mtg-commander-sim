@@ -28,8 +28,8 @@ The transaction has six explicit stages:
    affected-player or affected-permanent `damage.results` roots. Resolve the
    containing event before its contained result events.
 5. Validate every result and object incarnation, build mutation-only result,
-   modifier, life-aftermath, and counter-aftermath plans, and commit the complete
-   batch atomically.
+   modifier, life-aftermath, counter-aftermath, and nested damage-aftermath
+   plans, and commit the complete batch atomically.
 6. Publish one final `DamageEvent` for each positive proposal and one aggregate
    prevention-aftermath event per applied shield instruction. Fully prevented
    damage remains in the audit result but does not dispatch `damage.dealt`.
@@ -95,7 +95,14 @@ replacement components in APNAP order, replay-validates its journal, and commits
 through the canonical life owner. Represented permanent counters use the
 canonical counter-placement pipeline, including applicable quantity
 replacements. Every result plan is validated before the damage batch mutates.
-Other CR 615.5 aftermath forms remain blocked.
+Represented source-controller damage uses the shield's immutable source LKI,
+derives the prevented source's controller from the event batch, and prepares a
+nested `DamageProposal` against the projected post-consumption modifier state.
+Ordinary replacement, prevention, result, trigger, and replay behavior therefore
+applies to the nested damage. Mandatory recursive cycles, explicit-target
+aftermath, mixed damage/non-damage aftermath, and other CR 615.5 forms remain
+blocked before mutation. CR 615.13 triggered results are a separate stack
+boundary and are not executed as immediate aftermath.
 
 An independent sentence after a prevention instruction is different. The
 reviewed fixed sequence creates its shield through the seat-scoped source
@@ -126,6 +133,7 @@ The trusted capabilities are deliberately narrow:
 - `damage.replacement.static_quantity`
 - `damage.prevention.static_fixed`
 - `damage.prevention.persistent_amount`
+- `damage.prevention.aftermath.damage`
 - `damage.redirection.static_to_source`
 - `damage.result.infect`
 - `damage.result.wither`
@@ -138,8 +146,9 @@ They exclude arbitrary opaque referred-object provenance, source-characteristic
 predicates beyond the closed color/type/subtype/supertype/keyword vocabulary,
 face-down source characteristics,
 combat-only filters, life-gain prevention, non-effect-runtime life producers,
-aftermath forms beyond represented life and permanent
-counters, finite partial redirection, attached or equipped destinations,
+aftermath forms beyond represented life, permanent counters, and source-
+controller damage, CR 615.13 prevention-triggered abilities, finite partial
+redirection, attached or equipped destinations,
 replacement with a non-damage event, dynamic toxic values, unrepresented
 continuous ability grants, and uncompiled result-replacement families.
 The broad `damage.replacement.order` and `damage.prevention.order` capabilities
@@ -148,14 +157,16 @@ remain blocked.
 ## Corpus result
 
 The complete pinned census binds Infect, Wither, Lifelink, and fixed Toxic
-nodes to trusted fine-grained result capabilities. Oracle IR v18 recognizes
+nodes to trusted fine-grained result capabilities. Oracle IR v19 recognizes
 closed whole-line grammar for static double damage, fixed static prevention,
 finite and divided shield creation, chosen-source next-instance/all-damage
 families, represented life/counter aftermath, static life-gain doubling, and
 static redirection to a damageable source. The corrected fixed independent
 life sequence matches one Oracle object in the pinned corpus: Healing Grace.
 It moves from partial/residual to exact/capability-closed without changing its
-rules meaning into CR 615.5 aftermath. The generated
+rules meaning into CR 615.5 aftermath. The closed source-controller damage
+production additionally moves Deflecting Palm to exact/capability-closed; it
+does not promote the neighboring triggered New Way Forward wording. The generated
 [compiler coverage report](../COMPILER_COVERAGE_STATUS.md) is the authority for
 totals and residual deltas; these gains do not imply complete damage,
 prevention, or Oracle coverage.
@@ -171,8 +182,9 @@ Combat and semantic continuations persist the exact ordered selections, same-
 chooser simultaneous-event order, and any finite-shield allocation in Game
 Record v3. Replay rebuilds the transaction, validates the chooser, event IDs,
 available amount, and current option set, and must reach the same final state
-hash. Checkpoints also serialize durable shield, aftermath, and redirection
-state. A replacement choice discovered while a mana ability is paying for a
+hash. Nested damage aftermath journals its own replacement selections and
+recursively emits final normalized events. Checkpoints also serialize durable
+shield, aftermath, and redirection state. A replacement choice discovered while a mana ability is paying for a
 cast or activation rolls the partial payment back, persists a strict payment
 frame, and resumes the exact original action after the seat chooses.
 
@@ -181,7 +193,8 @@ frame, and resumes the exact original action after the seat chooses.
 The remaining damage/prevention work must broaden explicit referred-object
 provenance and source-characteristic grammar, represent face-down source
 characteristics, migrate non-effect-runtime life producers to `life.change`,
-add life-gain prevention and remaining aftermath forms, partial and
+add life-gain prevention, CR 615.13 prevention-trigger stack ownership,
+explicit-target and mixed aftermath forms, partial and
 attached-destination redirection, non-damage transformations, remaining result-
 replacement families, excess-damage selection, and complete dynamic
 characteristic closure. Broader Oracle lowering must compile those families

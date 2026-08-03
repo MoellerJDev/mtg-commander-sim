@@ -535,6 +535,36 @@ class OracleIRTests(unittest.TestCase):
                         expected["selector"], effect["selector"]["kind"]
                     )
 
+    def test_source_controller_damage_aftermath_compiles_generically(self):
+        record = self.db.lookup("Deflecting Palm")
+
+        ir = compile_oracle_card(
+            record,
+            capability_registry=load_default_capability_registry(),
+            capability_profile="commander_review",
+        )
+
+        self.assertEqual("exact", ir.status)
+        node = ir.faces[0].nodes[0]
+        self.assertEqual(
+            "damage-prevention-source-controller-aftermath-v1",
+            node.template_id,
+        )
+        self.assertTrue(node.lowerable)
+        choice = node.effects[0]
+        self.assertEqual("choose_damage_source", choice["op"])
+        self.assertEqual(
+            {
+                "kind": "deal_damage",
+                "source": "$source",
+                "recipient": None,
+                "recipient_kind": "prevented_source_controller",
+                "per_prevented": 1,
+                "fixed_amount": 0,
+            },
+            choice["shield"]["aftermath"][0],
+        )
+
     def test_fixed_post_prevention_life_is_a_sequential_instruction(self):
         base = self.db.lookup("Lightning Bolt")
         oracle_text = (

@@ -211,6 +211,25 @@
       "layout": "normal",
       "released_at": "2024-02-09",
       "legalities": {"commander": "legal", "duel": "legal"}
+    },
+    {
+      "oracle_id": "dc5dffc8-fac5-4956-bac4-1ad2cc16f6be",
+      "name": "Deflecting Palm",
+      "mana_cost": "{R}{W}",
+      "cmc": 2.0,
+      "type_line": "Instant",
+      "oracle_text": "The next time a source of your choice would deal damage to you this turn, prevent that damage. If damage is prevented this way, Deflecting Palm deals that much damage to that source's controller.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "defense": null,
+      "colors": ["R", "W"],
+      "color_identity": ["R", "W"],
+      "keywords": [],
+      "produced_mana": [],
+      "layout": "normal",
+      "released_at": "2024-02-09",
+      "legalities": {"commander": "legal", "duel": "legal"}
     }
   ],
   "rulings": [
@@ -243,6 +262,18 @@
       "published_at": "2004-10-04",
       "source": "wotc",
       "comment": "It reduces your life total to 1, not the damage to 1."
+    },
+    {
+      "oracle_id": "dc5dffc8-fac5-4956-bac4-1ad2cc16f6be",
+      "published_at": "2014-09-20",
+      "source": "wotc",
+      "comment": "Deflecting Palm doesn't target any permanent or player. You choose a source of damage as Deflecting Palm resolves."
+    },
+    {
+      "oracle_id": "dc5dffc8-fac5-4956-bac4-1ad2cc16f6be",
+      "published_at": "2014-09-20",
+      "source": "wotc",
+      "comment": "If multiple prevention and/or replacement effects are trying to apply to the same damage, the player who would be dealt damage chooses the order in which to apply them."
     }
   ]
 }

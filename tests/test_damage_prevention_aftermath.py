@@ -10,11 +10,14 @@ from mtg_commander_sim.damage import (
     commit_prepared_damage_batch,
     prepare_damage_batch,
     resolve_damage_batch,
+    source_snapshot,
 )
 from mtg_commander_sim.damage_modifier_state import (
+    DamageAftermathRecipient,
     DamageModifierDuration,
     DamagePreventionShield,
     DamageSubject,
+    DealDamagePreventionAftermath,
     GainLifePreventionAftermath,
     PlaceCountersPreventionAftermath,
     PreventionMode,
@@ -33,6 +36,314 @@ from mtg_commander_sim.semantics import SemanticProgram
 
 
 class DamagePreventionAftermathTests(DamageReplacementPipelineBase):
+    def _damage_aftermath_shield(
+        self,
+        engine,
+        *,
+        prevention_source,
+        subject: DamageSubject,
+        mode: PreventionMode = PreventionMode.NEXT_INSTANCE,
+    ) -> DamagePreventionShield:
+        return DamagePreventionShield(
+            shield_id="damage-aftermath",
+            source_id=prevention_source.ref,
+            controller=prevention_source.controller,
+            subject=subject,
+            mode=mode,
+            remaining=None,
+            duration=DamageModifierDuration.UNTIL_END_OF_TURN,
+            created_turn_sequence=engine.state.turn_sequence,
+            aftermath=(
+                DealDamagePreventionAftermath(
+                    source=source_snapshot(
+                        engine,
+                        prevention_source.ref,
+                        controller=prevention_source.controller,
+                    ),
+                    recipient=DamageAftermathRecipient(
+                        kind="prevented_source_controller"
+                    ),
+                    per_prevented=1,
+                ),
+            ),
+        )
+
+    def test_damage_aftermath_uses_lki_and_projected_consumed_shield(self):
+        engine = self.session(615206).engine
+        original_source = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="original"
+        )
+        prevention_source = self.add_permanent(
+            engine, seat="B", name="Goblin Engineer", ref="palm"
+        )
+        shield = self._damage_aftermath_shield(
+            engine,
+            prevention_source=prevention_source,
+            subject=DamageSubject(ref="*", kind="any", controller="B"),
+        )
+        engine.state.damage_prevention_shields.append(shield)
+        engine.move_card(prevention_source.object_id, "graveyard", log=False)
+
+        result = resolve_damage_batch(
+            engine,
+            (
+                self.proposal(
+                    engine,
+                    source=original_source,
+                    target="B",
+                    amount=4,
+                ),
+            ),
+        )
+
+        self.assertEqual(40, engine.state.players["B"].life)
+        self.assertEqual(36, engine.state.players["A"].life)
+        self.assertFalse(engine.state.damage_prevention_shields)
+        self.assertEqual(1, len(result.nested_damage_results))
+        nested = result.nested_damage_results[0]
+        self.assertEqual(4, nested.dealt_amount)
+        self.assertEqual("palm", nested.events[0].source)
+        self.assertEqual("battlefield", nested.events[0].source_zone)
+        self.assertEqual("deal_damage", result.aftermath_events[0].kind)
+
+    def test_other_prevention_applies_to_aftermath_damage(self):
+        engine = self.session(615207).engine
+        original_source = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="original"
+        )
+        prevention_source = self.add_permanent(
+            engine, seat="B", name="Goblin Engineer", ref="palm"
+        )
+        engine.state.damage_prevention_shields.extend(
+            (
+                self._damage_aftermath_shield(
+                    engine,
+                    prevention_source=prevention_source,
+                    subject=DamageSubject(
+                        ref="B", kind="player", controller="B"
+                    ),
+                ),
+                DamagePreventionShield(
+                    shield_id="nested-shield",
+                    source_id="fixture:nested-shield",
+                    controller="A",
+                    subject=DamageSubject(
+                        ref="A", kind="player", controller="A"
+                    ),
+                    mode=PreventionMode.AMOUNT,
+                    remaining=2,
+                    duration=DamageModifierDuration.UNTIL_END_OF_TURN,
+                    created_turn_sequence=engine.state.turn_sequence,
+                ),
+            )
+        )
+
+        result = resolve_damage_batch(
+            engine,
+            (
+                self.proposal(
+                    engine,
+                    source=original_source,
+                    target="B",
+                    amount=4,
+                ),
+            ),
+        )
+
+        self.assertEqual(38, engine.state.players["A"].life)
+        self.assertEqual(2, result.nested_damage_results[0].dealt_amount)
+        self.assertFalse(engine.state.damage_prevention_shields)
+
+    def test_unpreventable_damage_does_not_create_scaled_damage_aftermath(self):
+        engine = self.session(615208).engine
+        original_source = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="original"
+        )
+        prevention_source = self.add_permanent(
+            engine, seat="B", name="Goblin Engineer", ref="palm"
+        )
+        engine.state.damage_prevention_shields.append(
+            self._damage_aftermath_shield(
+                engine,
+                prevention_source=prevention_source,
+                subject=DamageSubject(
+                    ref="B", kind="player", controller="B"
+                ),
+            )
+        )
+
+        result = resolve_damage_batch(
+            engine,
+            (
+                self.proposal(
+                    engine,
+                    source=original_source,
+                    target="B",
+                    amount=4,
+                    unpreventable=True,
+                ),
+            ),
+        )
+
+        self.assertEqual(36, engine.state.players["B"].life)
+        self.assertEqual(40, engine.state.players["A"].life)
+        self.assertEqual((), result.nested_damage_results)
+        self.assertEqual(1, len(engine.state.damage_prevention_shields))
+
+    def test_recursive_all_damage_aftermath_fails_before_mutation(self):
+        engine = self.session(615209).engine
+        original_source = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="original"
+        )
+        prevention_source = self.add_permanent(
+            engine, seat="B", name="Goblin Engineer", ref="loop"
+        )
+        engine.state.damage_prevention_shields.append(
+            self._damage_aftermath_shield(
+                engine,
+                prevention_source=prevention_source,
+                subject=DamageSubject(ref="*", kind="any", controller="B"),
+                mode=PreventionMode.ALL,
+            )
+        )
+        before = {
+            seat: engine.state.players[seat].life for seat in ("A", "B")
+        }
+
+        with self.assertRaisesRegex(ValueError, "cycle"):
+            prepare_damage_batch(
+                engine,
+                (
+                    self.proposal(
+                        engine,
+                        source=original_source,
+                        target="B",
+                        amount=4,
+                    ),
+                ),
+            )
+
+        self.assertEqual(
+            before,
+            {seat: engine.state.players[seat].life for seat in ("A", "B")},
+        )
+        self.assertEqual(1, len(engine.state.damage_prevention_shields))
+
+    def test_damage_aftermath_is_separate_in_a_four_player_batch(self):
+        engine = self.session(615210, players=4).engine
+        source_a = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="source-a"
+        )
+        source_c = self.add_permanent(
+            engine, seat="C", name="Mishra, Eminent One", ref="source-c"
+        )
+        prevention_source = self.add_permanent(
+            engine, seat="B", name="Goblin Engineer", ref="palm"
+        )
+        engine.state.damage_prevention_shields.append(
+            self._damage_aftermath_shield(
+                engine,
+                prevention_source=prevention_source,
+                subject=DamageSubject(
+                    ref="B", kind="player", controller="B"
+                ),
+            )
+        )
+
+        result = resolve_damage_batch(
+            engine,
+            (
+                self.proposal(
+                    engine,
+                    source=source_a,
+                    target="B",
+                    amount=3,
+                    event_id="damage:four:a-b",
+                ),
+                self.proposal(
+                    engine,
+                    source=source_c,
+                    target="D",
+                    amount=2,
+                    event_id="damage:four:c-d",
+                ),
+            ),
+        )
+
+        self.assertEqual(37, engine.state.players["A"].life)
+        self.assertEqual(40, engine.state.players["B"].life)
+        self.assertEqual(38, engine.state.players["D"].life)
+        self.assertEqual(2, len(result.events))
+        self.assertEqual(3, result.nested_damage_results[0].dealt_amount)
+
+    def test_damage_aftermath_replays_from_exact_commands(self):
+        session = self.session(615513)
+        engine = session.engine
+        original_source = self.add_permanent(
+            engine, seat="A", name="Mishra, Eminent One", ref="original"
+        )
+        prevention_source = self.add_permanent(
+            engine, seat="B", name="Goblin Engineer", ref="palm"
+        )
+        engine.state.damage_prevention_shields.append(
+            self._damage_aftermath_shield(
+                engine,
+                prevention_source=prevention_source,
+                subject=DamageSubject(
+                    ref="B", kind="player", controller="B"
+                ),
+            )
+        )
+        program = SemanticProgram(
+            key="test:prevention-damage-aftermath-replay",
+            label="Replay prevention damage aftermath",
+            effects=[
+                {
+                    "op": "damage",
+                    "source": "$source",
+                    "target": "B",
+                    "amount": 2,
+                }
+            ],
+            trust_level="provisional",
+        )
+        engine.semantics.put(program)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="prevention-damage-aftermath-replay",
+                ref="S-prevention-damage-aftermath-replay",
+                kind="triggered_ability",
+                controller="A",
+                label=program.label,
+                source_object_id=original_source.object_id,
+                semantic_key=program.key,
+                visibility=["A", "B"],
+            )
+        )
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine._grant_priority("A")
+        engine._issue_priority("A")
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        for principal in ("pilot:A", "pilot:B"):
+            response = session.act(principal, {"action_id": "pass"})
+            self.assertTrue(response.ok, response.summary)
+        self.assertEqual(38, engine.state.players["A"].life)
+        self.assertEqual(40, engine.state.players["B"].life)
+        expected_hash = authoritative_state_hash(engine.state)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "prevention-damage-record"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+        self.assertTrue(replay["ok"], replay)
+        self.assertEqual(2, replay["commands"])
+        self.assertEqual(expected_hash, replay["final_state_hash"])
+
     def test_life_aftermath_uses_one_aggregate_prevented_amount(self):
         engine = self.session(615201, players=4).engine
         source_a = self.add_permanent(

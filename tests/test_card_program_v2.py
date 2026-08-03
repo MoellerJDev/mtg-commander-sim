@@ -151,6 +151,29 @@ class CardProgramV2Tests(unittest.TestCase):
         restored = CardProgram.from_dict(first.to_dict())
         self.assertEqual(first.to_dict(), restored.to_dict())
 
+    def test_damage_aftermath_card_program_is_capability_closed(self):
+        current = compile_card_program(
+            self.db,
+            self.db.lookup("Deflecting Palm"),
+            capability_registry=self.capabilities,
+            capability_profile="commander_review",
+            trust_level="trusted",
+        )
+
+        self.assertEqual("oracle-ir-v19", current.compiler_version)
+        self.assertEqual(
+            "capability_closed", current.trust_closure["trust_basis"]
+        )
+        self.assertIn(
+            "damage.prevention.aftermath.damage",
+            current.capability_dependencies,
+        )
+        choice = current.abilities[0].effects[0]
+        self.assertEqual("choose_damage_source", choice["op"])
+        self.assertEqual(
+            "deal_damage", choice["shield"]["aftermath"][0]["kind"]
+        )
+
     def test_corrected_prevention_sequence_has_new_pinned_fingerprint(self):
         current = compile_card_program(
             self.db,
@@ -159,7 +182,7 @@ class CardProgramV2Tests(unittest.TestCase):
             capability_profile="commander_review",
             trust_level="trusted",
         )
-        self.assertEqual("oracle-ir-v18", current.compiler_version)
+        self.assertEqual("oracle-ir-v19", current.compiler_version)
         self.assertEqual("capability_closed", current.trust_closure["trust_basis"])
         self.assertEqual(
             ["choose_damage_source", "life"],

@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Mapping, TypeAlias
 
+from .damage_source import DamageError, DamageSourceSnapshot
+
 
 class DamageModifierError(ValueError):
     """A durable prevention or redirection value is malformed or stale."""
@@ -578,8 +580,106 @@ class PlaceCountersPreventionAftermath:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class DamageAftermathRecipient:
+    """Closed recipient vocabulary for a CR 615.5 damage result."""
+
+    kind: str
+    subject: DamageSubject | None = None
+
+    def __post_init__(self) -> None:
+        if self.kind == "fixed":
+            if not isinstance(self.subject, DamageSubject) or self.subject.kind == "any":
+                raise DamageModifierError(
+                    "A fixed prevention-damage recipient requires a player or permanent"
+                )
+            return
+        if self.kind == "prevented_source_controller" and self.subject is None:
+            return
+        raise DamageModifierError(
+            "Prevention-damage recipient kind is unsupported or malformed"
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        result: dict[str, Any] = {"kind": self.kind}
+        if self.subject is not None:
+            result["subject"] = self.subject.to_dict()
+        return result
+
+    @classmethod
+    def from_dict(cls, value: Mapping[str, Any]) -> "DamageAftermathRecipient":
+        if not isinstance(value, Mapping):
+            raise DamageModifierError(
+                "Prevention-damage recipient must be an object"
+            )
+        kind = value.get("kind")
+        expected = {"kind", "subject"} if kind == "fixed" else {"kind"}
+        _exact_fields(value, expected, label="Prevention-damage recipient")
+        raw_subject = value.get("subject")
+        if raw_subject is not None and not isinstance(raw_subject, Mapping):
+            raise DamageModifierError(
+                "Prevention-damage recipient subject must be an object"
+            )
+        return cls(
+            kind=str(kind or ""),
+            subject=(
+                DamageSubject.from_dict(raw_subject)
+                if isinstance(raw_subject, Mapping)
+                else None
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class DealDamagePreventionAftermath:
+    """Typed CR 615.5 damage instruction pinned at shield creation."""
+
+    source: DamageSourceSnapshot
+    recipient: DamageAftermathRecipient
+    per_prevented: int = 0
+    fixed_amount: int = 0
+    schema_version: int = 1
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.source, DamageSourceSnapshot) or not isinstance(
+            self.recipient, DamageAftermathRecipient
+        ):
+            raise DamageModifierError(
+                "Prevention damage aftermath requires typed source and recipient"
+            )
+        if self.schema_version != 1:
+            raise DamageModifierError(
+                "Unsupported prevention aftermath schema version"
+            )
+        if (
+            type(self.per_prevented) is not int
+            or self.per_prevented < 0
+            or type(self.fixed_amount) is not int
+            or self.fixed_amount < 0
+            or not (self.per_prevented or self.fixed_amount)
+        ):
+            raise DamageModifierError(
+                "Prevention damage requires a positive fixed or scaled amount"
+            )
+
+    def amount(self, prevented: int) -> int:
+        return self.fixed_amount + self.per_prevented * prevented
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "kind": "deal_damage",
+            "schema_version": self.schema_version,
+            "source": self.source.to_dict(),
+            "recipient": self.recipient.to_dict(),
+            "per_prevented": self.per_prevented,
+            "fixed_amount": self.fixed_amount,
+        }
+
+
 PreventionAftermath: TypeAlias = (
-    GainLifePreventionAftermath | PlaceCountersPreventionAftermath
+    GainLifePreventionAftermath
+    | PlaceCountersPreventionAftermath
+    | DealDamagePreventionAftermath
 )
 
 
@@ -630,6 +730,36 @@ def prevention_aftermath_from_dict(
             subject=DamageSubject.from_dict(subject),
             counter_name=str(value["counter_name"] or ""),
             placing_player=str(value["placing_player"] or ""),
+            per_prevented=value["per_prevented"],
+            fixed_amount=value["fixed_amount"],
+            schema_version=value["schema_version"],
+        )
+    if kind == "deal_damage":
+        _exact_fields(
+            value,
+            {
+                "kind",
+                "schema_version",
+                "source",
+                "recipient",
+                "per_prevented",
+                "fixed_amount",
+            },
+            label="Prevention damage aftermath",
+        )
+        source = value["source"]
+        recipient = value["recipient"]
+        if not isinstance(source, Mapping) or not isinstance(recipient, Mapping):
+            raise DamageModifierError(
+                "Prevention damage aftermath source or recipient is malformed"
+            )
+        try:
+            source_snapshot = DamageSourceSnapshot.from_dict(dict(source))
+        except DamageError as exc:
+            raise DamageModifierError(str(exc)) from exc
+        return DealDamagePreventionAftermath(
+            source=source_snapshot,
+            recipient=DamageAftermathRecipient.from_dict(recipient),
             per_prevented=value["per_prevented"],
             fixed_amount=value["fixed_amount"],
             schema_version=value["schema_version"],
@@ -690,7 +820,11 @@ class DamagePreventionShield:
         if any(
             not isinstance(
                 value,
-                (GainLifePreventionAftermath, PlaceCountersPreventionAftermath),
+                (
+                    GainLifePreventionAftermath,
+                    PlaceCountersPreventionAftermath,
+                    DealDamagePreventionAftermath,
+                ),
             )
             for value in aftermath
         ):

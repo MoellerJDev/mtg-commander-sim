@@ -19,7 +19,7 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 - Behavioral classification/review required: 2,699
 - Passing behavioral rules: 138
 - Subsystems: 21
-- Queue fingerprint: `3e766cf84c5d0dfe784fedca2216ad03b875ae051c7e843be6dc4b8f3a40d697`
+- Queue fingerprint: `05b79080e7a6bf8da4944e7673e6405a8311aa876a017863cb81f046e69ba52b`
 
 ## Selected next batch
 
@@ -27,16 +27,16 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 - Subsystem: `replacement-prevention`
 - Rules: `615.1`, `615.2`, `615.5`, `615.9`, `616.1`
 - Target capabilities: `damage.prevention.persistent_amount`, `damage.prevention.order`, `damage.result.replacement_order`
-- Rationale: Typed dynamic/divided and per-object shields, the represented face-up CR 609.7a candidate universe, incarnation-safe permanent-spell continuity, closed source-property rechecks, replacement-capable life aftermath, permanent-counter aftermath, same-chooser event ordering, and resumable mana-payment choices are represented. Face-down source characteristics remain fail-closed. The next dependency-ready prevention boundary is closed damage-dealing and target-dependent aftermath wording plus the nested transaction and trigger behavior those results require.
+- Rationale: Typed dynamic/divided and per-object shields, the represented face-up CR 609.7a candidate universe, incarnation-safe permanent-spell continuity, closed source-property rechecks, replacement-capable life/permanent-counter/source-controller-damage aftermath, same-chooser event ordering, and resumable mana-payment choices are represented. Nested damage reenters the canonical transaction against projected modifier state, and Deflecting Palm compiles generically. Face-down source characteristics, explicit-target aftermath, mixed aftermath, and CR 615.13 prevention-trigger stack ownership remain fail-closed. The next dependency-ready boundary is the triggered prevention-result family.
 
 Exit criteria:
 
-- Add closed generic aftermath operations for remaining common Oracle wording, including represented damage-dealing and target-dependent forms.
-- Route damage-dealing aftermath back through the typed damage transaction without admitting recursive mutation or duplicate prevention application.
-- Discover and enqueue triggers created by each represented aftermath result at the correct post-prevention boundary.
-- Fail before mutation when an aftermath target, quantity, replacement choice, or nested transaction becomes stale.
-- Retain exact rollback, seat projection, same-chooser event ordering, and command replay across every added producer.
-- Measure generic CardProgram gains from the completed residual wording families.
+- Represent prevention-dependent triggered results as typed waiting abilities that create stack objects rather than immediate CR 615.5 aftermath.
+- Match each trigger to the exact prevention effect application and aggregate simultaneous prevented events according to CR 615.13.
+- Place simultaneous prevention triggers through the existing APNAP/controller-order batch with exact save/load and replay.
+- Lower a closed generic triggered prevention-result wording family without card-name or Oracle-ID dispatch.
+- Fail before mutation or stack placement when a trigger effect, target, quantity, source identity, or continuation is stale.
+- Measure generic CardProgram gains and retain explicit residuals for target-dependent, mixed, or otherwise unsupported aftermath wording.
 
 ## Dependency schedule
 

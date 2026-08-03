@@ -13,9 +13,13 @@ from .counter_placement import (
     validate_counter_placement_commit,
 )
 from .damage_modifier_state import (
-    DamagePreventionShield,
+    DealDamagePreventionAftermath,
     GainLifePreventionAftermath,
     PlaceCountersPreventionAftermath,
+)
+from .damage_prevention import (
+    DamageModifierSnapshot,
+    project_damage_modifier_snapshot,
 )
 from .life_change import (
     commit_life_change_batch,
@@ -64,6 +68,7 @@ class PreventionApplication:
     source_id: str
     prevented_amount: int
     damage_event_ids: tuple[str, ...]
+    damage_source_controllers: tuple[str, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -76,6 +81,7 @@ class PreparedAftermathInstruction:
     requested_amount: int
     damage_event_ids: tuple[str, ...]
     life_event_id: str | None = None
+    nested_damage: Any | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -114,6 +120,19 @@ class PreventionAftermathResult:
     events: tuple[PreventionAftermathEvent, ...] = ()
     changed_players: tuple[str, ...] = ()
     changed_objects: tuple[str, ...] = ()
+    nested_damage_results: tuple[Any, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class _AftermathRequests:
+    applications: tuple[PreventionApplication, ...]
+    instructions: tuple[PreparedAftermathInstruction, ...]
+    life: tuple[LifeChangeRequest, ...]
+    counters: tuple[CounterPlacementRequest, ...]
+    damage: tuple[
+        tuple[PreventionApplication, int, DealDamagePreventionAftermath, int],
+        ...,
+    ]
 
 
 def prevention_applications(
@@ -129,6 +148,7 @@ def prevention_applications(
     }
     amounts: dict[str, int] = {}
     event_ids: dict[str, list[str]] = {}
+    source_controllers: dict[str, set[str]] = {}
     applied: set[str] = set()
     for event in events:
         by_effect = event.payload.get("prevention_applied") or {}
@@ -140,6 +160,13 @@ def prevention_applications(
             if effect_id in shields:
                 applied.add(effect_id)
                 event_ids.setdefault(effect_id, []).append(event.event_id)
+                controller = str(
+                    event.payload.get("source_controller") or ""
+                )
+                if controller:
+                    source_controllers.setdefault(effect_id, set()).add(
+                        controller
+                    )
         for raw_id, raw_amount in by_effect.items():
             effect_id = str(raw_id)
             if effect_id not in shields:
@@ -158,43 +185,46 @@ def prevention_applications(
             source_id=shields[effect_id].source_id,
             prevented_amount=amounts.get(effect_id, 0),
             damage_event_ids=tuple(sorted(set(event_ids.get(effect_id, ())))),
+            damage_source_controllers=tuple(
+                sorted(source_controllers.get(effect_id, ()))
+            ),
         )
         for effect_id in sorted(applied)
     )
 
 
-def prepare_prevention_aftermath(
+def _aftermath_requests(
     host: PreventionAftermathHost,
     events: Sequence[ReplaceableEvent],
-    *,
-    selections: Sequence[str | None] = (),
-    sources: Sequence[Any] | None = None,
-    source_zones: Mapping[str, str] | None = None,
-) -> PreparedPreventionAftermath:
+) -> _AftermathRequests:
     applications = prevention_applications(host, events)
-    shields: dict[str, DamagePreventionShield] = {
+    shields = {
         shield.effect_id: shield
         for shield in host.state.damage_prevention_shields
     }
     instructions: list[PreparedAftermathInstruction] = []
-    life_requests: list[LifeChangeRequest] = []
-    counter_requests: list[CounterPlacementRequest] = []
+    life: list[LifeChangeRequest] = []
+    counters: list[CounterPlacementRequest] = []
+    damage: list[
+        tuple[PreventionApplication, int, DealDamagePreventionAftermath, int]
+    ] = []
     for application in applications:
         shield = shields.get(application.effect_id)
         if shield is None:
             raise PreventionAftermathError(
                 "Prevention aftermath lost its durable shield"
             )
-        for aftermath_index, aftermath in enumerate(shield.aftermath):
+        for index, aftermath in enumerate(shield.aftermath):
             amount = aftermath.amount(application.prevented_amount)
             if amount == 0:
                 continue
+            life_event_id: str | None = None
             if isinstance(aftermath, GainLifePreventionAftermath):
                 life_event_id = (
                     "damage.prevention.aftermath:life:"
-                    f"{application.effect_id}:{aftermath_index}"
+                    f"{application.effect_id}:{index}"
                 )
-                life_requests.append(
+                life.append(
                     LifeChangeRequest(
                         event_id=life_event_id,
                         player=aftermath.player,
@@ -204,12 +234,10 @@ def prepare_prevention_aftermath(
                         cause="damage_prevention_aftermath",
                     )
                 )
-                kind = "gain_life"
-                subject = aftermath.player
+                kind, subject = "gain_life", aftermath.player
             elif isinstance(aftermath, PlaceCountersPreventionAftermath):
-                life_event_id = None
                 assert aftermath.subject.object_id is not None
-                counter_requests.append(
+                counters.append(
                     CounterPlacementRequest(
                         object_id=aftermath.subject.object_id,
                         counter_name=aftermath.counter_name,
@@ -218,8 +246,10 @@ def prepare_prevention_aftermath(
                         source_ref=application.source_id,
                     )
                 )
-                kind = "place_counters"
-                subject = aftermath.subject.ref
+                kind, subject = "place_counters", aftermath.subject.ref
+            elif isinstance(aftermath, DealDamagePreventionAftermath):
+                damage.append((application, index, aftermath, amount))
+                continue
             else:  # pragma: no cover - shield validation closes this union.
                 raise PreventionAftermathError(
                     "Unsupported prevention aftermath operation"
@@ -236,6 +266,164 @@ def prepare_prevention_aftermath(
                     life_event_id=life_event_id,
                 )
             )
+    if damage and (life or counters):
+        raise PreventionAftermathError(
+            "Mixed damage and non-damage prevention aftermath is not yet exact"
+        )
+    return _AftermathRequests(
+        applications=applications,
+        instructions=tuple(instructions),
+        life=tuple(life),
+        counters=tuple(counters),
+        damage=tuple(damage),
+    )
+
+
+def _prepare_damage_aftermath(
+    host: PreventionAftermathHost,
+    values: Sequence[
+        tuple[PreventionApplication, int, DealDamagePreventionAftermath, int]
+    ],
+    *,
+    selections: Sequence[str | None],
+    sources: Sequence[Any] | None,
+    source_zones: Mapping[str, str] | None,
+    modifier_snapshot: DamageModifierSnapshot | None,
+    depth: int,
+    effect_chain: tuple[str, ...],
+) -> tuple[tuple[PreparedAftermathInstruction, ...], int]:
+    if not values:
+        return (), 0
+    if modifier_snapshot is None:
+        raise PreventionAftermathError(
+            "Damage prevention aftermath requires projected modifier state"
+        )
+    # Imported lazily because the damage transaction owns orchestration while
+    # this module owns the typed CR 615.5 instruction/result family.
+    from .damage import prepare_damage_batch, recipient_snapshot
+    from .damage_values import DamageProposal
+
+    instructions: list[PreparedAftermathInstruction] = []
+    consumed = 0
+    remaining = tuple(selections)
+    projected = modifier_snapshot
+    for application, aftermath_index, aftermath, amount in values:
+        if application.effect_id in effect_chain or depth >= 16:
+            raise PreventionAftermathError(
+                "Prevention aftermath damage cycle is not representable"
+            )
+        if aftermath.recipient.kind == "prevented_source_controller":
+            if len(application.damage_source_controllers) != 1:
+                raise PreventionAftermathError(
+                    "Prevention aftermath lost the prevented source controller"
+                )
+            recipient_ref = application.damage_source_controllers[0]
+        else:
+            assert aftermath.recipient.subject is not None
+            recipient_ref = aftermath.recipient.subject.ref
+        try:
+            recipient = recipient_snapshot(
+                host,
+                recipient_ref,
+                actor=aftermath.source.controller,
+            )
+        except ValueError as exc:
+            raise PreventionAftermathError(str(exc)) from exc
+        fixed = aftermath.recipient.subject
+        if fixed is not None and fixed.kind == "permanent" and (
+            recipient.object_id != fixed.object_id
+            or recipient.logical_object_id != fixed.logical_object_id
+        ):
+            raise PreventionAftermathError(
+                "Prevention aftermath target changed object identity"
+            )
+        try:
+            nested = prepare_damage_batch(
+                host,
+                (
+                    DamageProposal(
+                        proposal_id=(
+                            "damage.prevention.aftermath:damage:"
+                            f"{application.effect_id}:{aftermath_index}"
+                        ),
+                        source=aftermath.source,
+                        recipient=recipient,
+                        amount=amount,
+                        combat=False,
+                        reason="damage_prevention_aftermath",
+                    ),
+                ),
+                selections=remaining,
+                sources=sources,
+                source_zones=source_zones,
+                modifier_snapshot=projected,
+                aftermath_depth=depth + 1,
+                aftermath_effect_chain=(
+                    *effect_chain,
+                    application.effect_id,
+                ),
+            )
+        except ValueError as exc:
+            raise PreventionAftermathError(str(exc)) from exc
+        consumed += nested.consumed_selections
+        remaining = remaining[nested.consumed_selections:]
+        instructions.append(
+            PreparedAftermathInstruction(
+                effect_id=application.effect_id,
+                source_id=application.source_id,
+                kind="deal_damage",
+                subject=recipient.ref,
+                prevented_amount=application.prevented_amount,
+                requested_amount=amount,
+                damage_event_ids=application.damage_event_ids,
+                nested_damage=nested,
+            )
+        )
+        projected = project_damage_modifier_snapshot(
+            projected, nested.modifier_plan
+        )
+    if remaining:
+        raise PreventionAftermathError(
+            "Replacement selections were supplied without aftermath damage"
+        )
+    return tuple(instructions), consumed
+
+
+def prepare_prevention_aftermath(
+    host: PreventionAftermathHost,
+    events: Sequence[ReplaceableEvent],
+    *,
+    selections: Sequence[str | None] = (),
+    sources: Sequence[Any] | None = None,
+    source_zones: Mapping[str, str] | None = None,
+    modifier_snapshot: DamageModifierSnapshot | None = None,
+    depth: int = 0,
+    effect_chain: tuple[str, ...] = (),
+) -> PreparedPreventionAftermath:
+    if depth < 0 or depth > 16:
+        raise PreventionAftermathError(
+            "Prevention aftermath damage nesting exceeds its supported bound"
+        )
+    requests = _aftermath_requests(host, events)
+    instructions = list(requests.instructions)
+    if requests.damage:
+        nested, nested_consumed = _prepare_damage_aftermath(
+            host,
+            requests.damage,
+            selections=selections,
+            sources=sources,
+            source_zones=source_zones,
+            modifier_snapshot=modifier_snapshot,
+            depth=depth,
+            effect_chain=effect_chain,
+        )
+        instructions.extend(nested)
+        return PreparedPreventionAftermath(
+            applications=requests.applications,
+            instructions=tuple(instructions),
+            consumed_selections=nested_consumed,
+        )
+
     life_effects = collect_life_change_replacement_effects(
         host,
         sources=sources,
@@ -244,7 +432,7 @@ def prepare_prevention_aftermath(
     try:
         life_batch = prepare_life_change_batch(
             host,
-            tuple(life_requests),
+            requests.life,
             effects=life_effects,
             selections=selections,
             require_all_selections=False,
@@ -272,7 +460,7 @@ def prepare_prevention_aftermath(
     try:
         prepared_counters = prepare_counter_placements(
             host,
-            tuple(counter_requests),
+            requests.counters,
             selections=counter_selections,
             sources=sources,
             source_zones=source_zones,
@@ -284,12 +472,12 @@ def prepare_prevention_aftermath(
         )
     except CounterPlacementError as exc:
         raise PreventionAftermathError(str(exc)) from exc
-    if counter_selections and not counter_requests:
+    if counter_selections and not requests.counters:
         raise PreventionAftermathError(
             "Replacement selections were supplied without counter aftermath"
         )
     return PreparedPreventionAftermath(
-        applications=applications,
+        applications=requests.applications,
         instructions=tuple(instructions),
         life_batch=life_batch,
         counter_plan=counter_plan,
@@ -315,6 +503,11 @@ def validate_prevention_aftermath(
             validate_counter_placement_commit(host, prepared.counter_plan)
         except CounterPlacementError as exc:
             raise PreventionAftermathError(str(exc)) from exc
+    for instruction in prepared.instructions:
+        if instruction.kind == "deal_damage" and instruction.nested_damage is None:
+            raise PreventionAftermathError(
+                "Prepared prevention damage aftermath lost its transaction"
+            )
 
 
 def commit_prevention_aftermath(
@@ -359,6 +552,9 @@ def commit_prevention_aftermath(
         for record in (() if life_commit is None else life_commit.records)
     }
     events: list[PreventionAftermathEvent] = []
+    nested_damage_results: list[Any] = []
+    nested_changed_players: list[str] = []
+    nested_changed_objects: list[str] = []
     for instruction in prepared.instructions:
         applied = instruction.requested_amount
         if instruction.kind == "gain_life":
@@ -371,6 +567,19 @@ def commit_prevention_aftermath(
         if instruction.kind == "place_counters":
             applied = counter_results[counter_index].placed
             counter_index += 1
+        if instruction.kind == "deal_damage":
+            from .damage import commit_prepared_damage_batch
+
+            try:
+                nested_result = commit_prepared_damage_batch(
+                    host, instruction.nested_damage
+                )
+            except ValueError as exc:
+                raise PreventionAftermathError(str(exc)) from exc
+            nested_damage_results.append(nested_result)
+            nested_changed_players.extend(nested_result.changed_players)
+            nested_changed_objects.extend(nested_result.changed_objects)
+            applied = nested_result.dealt_amount
         events.append(
             PreventionAftermathEvent(
                 effect_id=instruction.effect_id,
@@ -387,11 +596,17 @@ def commit_prevention_aftermath(
         changed_players=tuple(
             sorted(
                 (() if life_commit is None else life_commit.changed_players)
+                + tuple(nested_changed_players)
             )
         ),
         changed_objects=tuple(
-            sorted({result.object_id for result in counter_results})
+            sorted(
+                {result.object_id for result in counter_results}.union(
+                    nested_changed_objects
+                )
+            )
         ),
+        nested_damage_results=tuple(nested_damage_results),
     )
 
 

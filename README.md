@@ -839,12 +839,15 @@ physical commander designations—not Oracle IDs—own Commander-damage ledgers.
 The replacement model is split into deep-immutable model, applicability, typed
 operation, ordering, and strict replay modules. Generic compilation now covers
 those four keywords plus a closed family of static double-damage and fixed-
-prevention wording. Oracle IR v18 also lowers closed finite-shield wording,
+prevention wording. Oracle IR v19 also lowers closed finite-shield wording,
 dynamic resolved quantities, exact divided allocations, independent per-object
 shields, chosen-source next-instance/all-damage effects, represented
-prevention-dependent life/counter aftermath, ordered fixed independent life
-instructions, static life-gain doubling, and static redirection to a current
-damageable source. A required source choice preserves later sibling
+prevention-dependent life/counter/source-controller-damage aftermath, ordered
+fixed independent life instructions, static life-gain doubling, and static
+redirection to a current damageable source. The damage-aftermath source is an
+immutable LKI snapshot, and its nested proposal reenters ordinary replacement,
+prevention, damage-result, trigger-discovery, and replay paths. A required source
+choice preserves later sibling
 instructions in written order: it creates the shield, then an independent
 `You gain N life` instruction runs immediately even if the shield is never
 used. Only explicit wording such as `damage prevented this way` enters the CR
@@ -864,20 +867,21 @@ closed color/type/subtype/supertype/keyword vocabulary. Replacement choices
 discovered during mana payment roll the payment back and resume the exact cast or
 activation after the choice. Bounded handlers cover fixed life-gain
 multiplication, a whole-result life floor, and transactional CR 615.5
-life/permanent-counter aftermath. Represented aftermath life gain now enters a
+life/permanent-counter/source-controller-damage aftermath. Represented aftermath life gain now enters a
 canonical replacement-capable `life.change` transaction; `life-effects.v2`
 routes its complete closed operation inventory through the same precommit
 boundary with source, cause, requested/final amount, replacement journal, and
 replay identity. Arbitrary opaque
 referred-object provenance, face-down sources, broader source-property
 predicates, life-gain prevention (including `can't gain life`), other
-non-effect-runtime life producers, remaining aftermath wording, partial or
+non-effect-runtime life producers, CR 615.13 prevention-trigger stack ownership,
+explicit-target or mixed aftermath wording, partial or
 attached redirection, non-damage transformations, unresolved dynamic Toxic
 values, remaining result-replacement families, universal draw/entry
 replacement participation, broad CR 614/615/616 closure, layer dependencies,
 and state-derived modifiers remain unsupported.
 
-Runtime trust and governance are now explicit. Capability registry v14 consumes
+Runtime trust and governance are now explicit. Capability registry v15 consumes
 a generated evidence index whose fully qualified tests, current rules,
 profiles, and evidence classes are validated in CI. Every trusted capability
 requires positive, negative, replay, and killed-mutation evidence regardless of

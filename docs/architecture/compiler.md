@@ -50,9 +50,13 @@ flowchart LR
   continuation. A later sentence becomes prevention aftermath only when its
   supported grammar explicitly depends on damage `prevented this way`; mere
   adjacency never implies that dependency.
-- Oracle IR v18 changes the fixed chosen-source/prevention/life production to
+- Oracle IR v18 changed the fixed chosen-source/prevention/life production to
   template v2. Independent draw or conditional aftermath wording that is not
   yet supported remains a material residual rather than being misclassified.
+- Oracle IR v19 adds the closed generic source-controller damage-aftermath
+  production. Only explicit prevention-dependent wording lowers into the typed
+  CR 615.5 result; CR 615.13 `When damage is prevented this way` wording remains
+  residual until its triggered stack object is represented.
 
 ## Extension points
 

@@ -47,8 +47,8 @@
         },
         "printed_name_literals": {
           "baseline": 693,
-          "current": 691,
-          "delta": -2
+          "current": 689,
+          "delta": -4
         }
       },
       "guard": "python scripts/validate_architecture.py --check",
@@ -1752,6 +1752,11 @@
         },
         {
           "fan_in": 13,
+          "fan_out": 1,
+          "module": "mtg_commander_sim.replacement_effects"
+        },
+        {
+          "fan_in": 13,
           "fan_out": 2,
           "module": "mtg_commander_sim.semantic_choices.context"
         },
@@ -1759,11 +1764,6 @@
           "fan_in": 13,
           "fan_out": 1,
           "module": "mtg_commander_sim.semantic_choices.model"
-        },
-        {
-          "fan_in": 12,
-          "fan_out": 1,
-          "module": "mtg_commander_sim.replacement_effects"
         },
         {
           "fan_in": 10,
@@ -1777,8 +1777,8 @@
         },
         {
           "fan_in": 8,
-          "fan_out": 1,
-          "module": "mtg_commander_sim.life_state"
+          "fan_out": 10,
+          "module": "mtg_commander_sim.damage"
         }
       ],
       "highest_fan_out": [
@@ -1828,19 +1828,24 @@
           "module": "mtg_commander_sim.semantic_choices.defaults"
         },
         {
+          "fan_in": 8,
+          "fan_out": 10,
+          "module": "mtg_commander_sim.damage"
+        },
+        {
           "fan_in": 1,
           "fan_out": 10,
           "module": "mtg_commander_sim.semantic_choices.engine_coordination"
         },
         {
-          "fan_in": 7,
-          "fan_out": 9,
-          "module": "mtg_commander_sim.damage"
-        },
-        {
           "fan_in": 1,
           "fan_out": 9,
           "module": "mtg_commander_sim.rules.activation.commit"
+        },
+        {
+          "fan_in": 1,
+          "fan_out": 8,
+          "module": "mtg_commander_sim.damage_prevention_aftermath"
         },
         {
           "fan_in": 1,
@@ -1851,14 +1856,9 @@
           "fan_in": 1,
           "fan_out": 8,
           "module": "mtg_commander_sim.semantic_runtime.components"
-        },
-        {
-          "fan_in": 4,
-          "fan_out": 7,
-          "module": "mtg_commander_sim.card_programs"
         }
       ],
-      "internal_edges": 573,
+      "internal_edges": 580,
       "modules": [
         {
           "fan_in": 2,
@@ -2036,23 +2036,23 @@
           "module": "mtg_commander_sim.counter_state"
         },
         {
-          "fan_in": 7,
-          "fan_out": 9,
+          "fan_in": 8,
+          "fan_out": 10,
           "module": "mtg_commander_sim.damage"
         },
         {
           "fan_in": 5,
-          "fan_out": 0,
+          "fan_out": 1,
           "module": "mtg_commander_sim.damage_modifier_state"
         },
         {
-          "fan_in": 2,
+          "fan_in": 3,
           "fan_out": 4,
           "module": "mtg_commander_sim.damage_prevention"
         },
         {
           "fan_in": 1,
-          "fan_out": 5,
+          "fan_out": 8,
           "module": "mtg_commander_sim.damage_prevention_aftermath"
         },
         {
@@ -2064,6 +2064,16 @@
           "fan_in": 1,
           "fan_out": 3,
           "module": "mtg_commander_sim.damage_results"
+        },
+        {
+          "fan_in": 2,
+          "fan_out": 0,
+          "module": "mtg_commander_sim.damage_source"
+        },
+        {
+          "fan_in": 2,
+          "fan_out": 2,
+          "module": "mtg_commander_sim.damage_values"
         },
         {
           "fan_in": 7,
@@ -2301,7 +2311,7 @@
           "module": "mtg_commander_sim.replacement_decisions"
         },
         {
-          "fan_in": 12,
+          "fan_in": 13,
           "fan_out": 1,
           "module": "mtg_commander_sim.replacement_effects"
         },
@@ -2760,15 +2770,15 @@
         "oracle_source_sha256": "47be914ae0e54bbf63b285c065b4eb823a5f42927dcff6a404c0023ca870fba0",
         "scryfall_oracle_updated_at": "2026-08-02T09:02:31.886+00:00"
       },
-      "entry_count": 691,
+      "entry_count": 689,
       "limitations": "Exact full printed-name literals only. Card-named helpers and semantic operations are separately reviewed in architecture-audit-source.json.",
       "new_unreviewed_literals": [],
       "no_unreviewed_growth": true,
-      "removed_baseline_occurrences": 2,
+      "removed_baseline_occurrences": 4,
       "structural_identity": "file, nearest symbol, literal value, conditional use"
     },
     "production": {
-      "file_count": 178,
+      "file_count": 180,
       "largest_functions_and_methods": [
         {
           "end_line": 1653,
@@ -3101,12 +3111,12 @@
           "visibility": "private"
         }
       ],
-      "logical_lines": 79446,
+      "logical_lines": 80190,
       "methods": {
-        "dunder": 146,
+        "dunder": 149,
         "private": 577,
-        "public": 734,
-        "total": 1457
+        "public": 740,
+        "total": 1466
       },
       "modules": [
         {
@@ -3159,18 +3169,18 @@
           "physical_lines": 1561
         },
         {
-          "file": "mtg_commander_sim/damage.py",
-          "functions_and_methods": 46,
-          "language": "python",
-          "logical_lines": 1412,
-          "physical_lines": 1550
-        },
-        {
           "file": "mtg_commander_sim/cli.py",
           "functions_and_methods": 9,
           "language": "python",
           "logical_lines": 1350,
           "physical_lines": 1408
+        },
+        {
+          "file": "mtg_commander_sim/damage.py",
+          "functions_and_methods": 41,
+          "language": "python",
+          "logical_lines": 1301,
+          "physical_lines": 1425
         },
         {
           "file": "mtg_commander_sim/damage_results.py",
@@ -3215,18 +3225,18 @@
           "physical_lines": 1045
         },
         {
+          "file": "mtg_commander_sim/damage_modifier_state.py",
+          "functions_and_methods": 34,
+          "language": "python",
+          "logical_lines": 965,
+          "physical_lines": 1037
+        },
+        {
           "file": "mtg_commander_sim/preflight.py",
           "functions_and_methods": 15,
           "language": "python",
           "logical_lines": 878,
           "physical_lines": 945
-        },
-        {
-          "file": "mtg_commander_sim/damage_modifier_state.py",
-          "functions_and_methods": 28,
-          "language": "python",
-          "logical_lines": 844,
-          "physical_lines": 903
         },
         {
           "file": "mtg_commander_sim/semantic_choices/intent_host.py",
@@ -3279,10 +3289,10 @@
         },
         {
           "file": "mtg_commander_sim/rules/capabilities.py",
-          "functions_and_methods": 25,
+          "functions_and_methods": 26,
           "language": "python",
-          "logical_lines": 661,
-          "physical_lines": 726
+          "logical_lines": 676,
+          "physical_lines": 742
         },
         {
           "file": "mtg_commander_sim/model.py",
@@ -3311,6 +3321,13 @@
           "language": "python",
           "logical_lines": 624,
           "physical_lines": 678
+        },
+        {
+          "file": "mtg_commander_sim/damage_prevention_creation.py",
+          "functions_and_methods": 15,
+          "language": "python",
+          "logical_lines": 615,
+          "physical_lines": 663
         },
         {
           "file": "mtg_commander_sim/pilot.py",
@@ -3362,6 +3379,13 @@
           "physical_lines": 615
         },
         {
+          "file": "mtg_commander_sim/damage_prevention_aftermath.py",
+          "functions_and_methods": 12,
+          "language": "python",
+          "logical_lines": 576,
+          "physical_lines": 622
+        },
+        {
           "file": "mtg_commander_sim/rule_conformance.py",
           "functions_and_methods": 9,
           "language": "python",
@@ -3390,13 +3414,6 @@
           "physical_lines": 576
         },
         {
-          "file": "mtg_commander_sim/damage_prevention_creation.py",
-          "functions_and_methods": 14,
-          "language": "python",
-          "logical_lines": 525,
-          "physical_lines": 570
-        },
-        {
           "file": "mtg_commander_sim/choice_forms.py",
           "functions_and_methods": 13,
           "language": "python",
@@ -3423,6 +3440,13 @@
           "language": "python",
           "logical_lines": 510,
           "physical_lines": 573
+        },
+        {
+          "file": "mtg_commander_sim/compiler/prevention_templates.py",
+          "functions_and_methods": 18,
+          "language": "python",
+          "logical_lines": 502,
+          "physical_lines": 546
         },
         {
           "file": "mtg_commander_sim/rules/casting/commit.py",
@@ -3472,13 +3496,6 @@
           "language": "python",
           "logical_lines": 471,
           "physical_lines": 501
-        },
-        {
-          "file": "mtg_commander_sim/compiler/prevention_templates.py",
-          "functions_and_methods": 17,
-          "language": "python",
-          "logical_lines": 465,
-          "physical_lines": 507
         },
         {
           "file": "mtg_commander_sim/replacement/operations.py",
@@ -3544,6 +3561,13 @@
           "physical_lines": 437
         },
         {
+          "file": "mtg_commander_sim/effect_runtime/damage_modifiers.py",
+          "functions_and_methods": 7,
+          "language": "python",
+          "logical_lines": 390,
+          "physical_lines": 415
+        },
+        {
           "file": "mtg_commander_sim/replacement_decisions.py",
           "functions_and_methods": 17,
           "language": "python",
@@ -3563,13 +3587,6 @@
           "language": "python",
           "logical_lines": 376,
           "physical_lines": 414
-        },
-        {
-          "file": "mtg_commander_sim/damage_prevention_aftermath.py",
-          "functions_and_methods": 10,
-          "language": "python",
-          "logical_lines": 372,
-          "physical_lines": 407
         },
         {
           "file": "mtg_commander_sim/mana_activation.py",
@@ -3600,11 +3617,11 @@
           "physical_lines": 418
         },
         {
-          "file": "mtg_commander_sim/effect_runtime/damage_modifiers.py",
-          "functions_and_methods": 7,
+          "file": "mtg_commander_sim/damage_prevention.py",
+          "functions_and_methods": 11,
           "language": "python",
-          "logical_lines": 359,
-          "physical_lines": 384
+          "logical_lines": 353,
+          "physical_lines": 392
         },
         {
           "file": "mtg_commander_sim/replacement/replay.py",
@@ -3710,13 +3727,6 @@
           "language": "python",
           "logical_lines": 295,
           "physical_lines": 340
-        },
-        {
-          "file": "mtg_commander_sim/damage_prevention.py",
-          "functions_and_methods": 9,
-          "language": "python",
-          "logical_lines": 293,
-          "physical_lines": 324
         },
         {
           "file": "mtg_commander_sim/rules/action_catalog.py",
@@ -3908,6 +3918,13 @@
           "physical_lines": 185
         },
         {
+          "file": "mtg_commander_sim/damage_values.py",
+          "functions_and_methods": 4,
+          "language": "python",
+          "logical_lines": 153,
+          "physical_lines": 167
+        },
+        {
           "file": "mtg_commander_sim/rules/casting/model.py",
           "functions_and_methods": 5,
           "language": "python",
@@ -3920,6 +3937,13 @@
           "language": "python",
           "logical_lines": 146,
           "physical_lines": 184
+        },
+        {
+          "file": "mtg_commander_sim/damage_source.py",
+          "functions_and_methods": 5,
+          "language": "python",
+          "logical_lines": 144,
+          "physical_lines": 158
         },
         {
           "file": "mtg_commander_sim/semantic_runtime/tap_state_handlers.py",
@@ -4844,8 +4868,8 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 86222,
-      "python_file_count": 165,
+      "physical_lines": 87018,
+      "python_file_count": 167,
       "review_thresholds": {
         "function_logical_lines_review": 150,
         "module_logical_lines_review": 1500
@@ -4862,7 +4886,7 @@
           "web/src"
         ]
       },
-      "top_level_functions": 906,
+      "top_level_functions": 914,
       "web_file_count": 13
     },
     "semantic_handlers": {
@@ -7569,8 +7593,8 @@
     "card_program_v2_present": true,
     "commander_legal_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.013155,
-      "material_residuals": 60749,
+      "exact_fraction": 0.013187,
+      "material_residuals": 60748,
       "residual_kinds": {
         "cost": 1779,
         "declaration_cost": 10,
@@ -7578,7 +7602,7 @@
         "dependency_contract": 17873,
         "effect": 6578,
         "replacement_effect": 1538,
-        "spell_effect": 9211,
+        "spell_effect": 9210,
         "static_ability": 10584,
         "trigger": 13023
       },
@@ -7592,23 +7616,23 @@
         "scryfall_rulings_updated_at": "2026-08-02T09:00:36.367+00:00"
       },
       "status_counts": {
-        "exact": 416,
+        "exact": 417,
         "partial": 14692,
-        "unresolved": 16515
+        "unresolved": 16514
       },
-      "template_count": 155,
+      "template_count": 156,
       "total_faces": 32431,
       "total_oracle_ids": 31623
     },
     "compiler_module": "mtg_commander_sim/oracle_ir.py",
     "compiler_module_logical_lines": 1713,
     "compiler_module_physical_lines": 1781,
-    "compiler_version": "oracle-ir-v18",
+    "compiler_version": "oracle-ir-v19",
     "current_ir": "OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index",
     "full_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.079408,
-      "material_residuals": 69372,
+      "exact_fraction": 0.079434,
+      "material_residuals": 69371,
       "residual_kinds": {
         "cost": 2009,
         "declaration_cost": 11,
@@ -7616,7 +7640,7 @@
         "dependency_contract": 19443,
         "effect": 7262,
         "replacement_effect": 1772,
-        "spell_effect": 11373,
+        "spell_effect": 11372,
         "static_ability": 12086,
         "trigger": 15246
       },
@@ -7630,11 +7654,11 @@
         "scryfall_rulings_updated_at": "2026-08-02T09:00:36.367+00:00"
       },
       "status_counts": {
-        "exact": 3056,
+        "exact": 3057,
         "partial": 16113,
-        "unresolved": 19316
+        "unresolved": 19315
       },
-      "template_count": 155,
+      "template_count": 156,
       "total_faces": 41702,
       "total_oracle_ids": 38485
     },
@@ -7721,28 +7745,28 @@
       "dependency_fail_closed_status_counts": {
         "not_applicable": 12,
         "not_run": 3,
-        "passed": 18
+        "passed": 19
       },
       "effective_date": "2026-06-19",
       "evidence": {
         "class_counts": {
-          "interaction": 45,
-          "multiplayer": 18,
-          "mutation": 26,
-          "negative": 40,
-          "positive": 49,
-          "privacy": 13,
-          "replay": 33,
+          "interaction": 46,
+          "multiplayer": 19,
+          "mutation": 27,
+          "negative": 41,
+          "positive": 52,
+          "privacy": 14,
+          "replay": 34,
           "rollback": 3
         },
-        "declaration_count": 227,
-        "declaration_source_fingerprint": "5800da1d7c3373c50f42b810348786c1cc287dfaabc45914764b31ab12d59bd5",
-        "fingerprint": "a5c84b35dc71c65ce3d490449636fc4e93b6e3ad7b1bc446c2558b02b0fad765",
-        "registry_fingerprint": "d60c420ae8d5d1c3a59928daaac4ac923198ceb39ec879fdd7c087aacea780dd"
+        "declaration_count": 236,
+        "declaration_source_fingerprint": "f22a07acd236e7c0e1625ed4524761394799ad0a088ec4671977d4662758aa9d",
+        "fingerprint": "b30ac3f9f2083319d5687f19c9f4db7facae608cb1726f9be00c1e6d578b3f02",
+        "registry_fingerprint": "cbe9b106fd3c1c8424de1121cb061640e19546c5ac53ffc0db62a98ebf64945d"
       },
-      "fingerprint": "d60c420ae8d5d1c3a59928daaac4ac923198ceb39ec879fdd7c087aacea780dd",
+      "fingerprint": "cbe9b106fd3c1c8424de1121cb061640e19546c5ac53ffc0db62a98ebf64945d",
       "implementation_mutation_status_counts": {
-        "killed": 24,
+        "killed": 25,
         "not_run": 9
       },
       "profiles": [
@@ -7750,15 +7774,15 @@
         "commander_duel",
         "commander_review"
       ],
-      "registry_version": 14,
+      "registry_version": 15,
       "schema_version": 1,
       "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
       "status_counts": {
         "blocked": 4,
         "tested": 8,
-        "trusted": 21
+        "trusted": 22
       },
-      "total": 33
+      "total": 34
     },
     "stages": [
       {
@@ -8355,7 +8379,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "6d0f1013ac49f51c906922fcdf478e4323db85f9"
+          "verified": "a5bc489a39f4c2ea0b24424d550dbb95ecb6790a0cc17403efa8e27c1549f02e"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -8765,7 +8789,7 @@
       "playwright_e2e_journeys": 7
     },
     "mutation_testing": {
-      "capability_mutation_declarations": 26,
+      "capability_mutation_declarations": 27,
       "configured_tools": [],
       "focused_executable_suite": true,
       "mutation_score": null
@@ -8793,14 +8817,14 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1224,
-      "discovered_total": 4524,
+      "conventional_ast_cases": 1242,
+      "discovered_total": 4542,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 26,
         "fuzz_named": 1,
         "privacy_or_projection_named": 14,
-        "replay_named": 74,
+        "replay_named": 75,
         "server_named": 18
       },
       "reconciles": true,
