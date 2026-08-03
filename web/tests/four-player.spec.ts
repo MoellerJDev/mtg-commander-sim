@@ -121,6 +121,13 @@ async function ensureFullControl(page: Page) {
   await expect(toggle).toContainText("Full control on");
 }
 
+async function actionIsReady(action: Locator): Promise<boolean> {
+  // Priority can advance between the visibility and enabled checks. A vanished
+  // capability is a normal projection transition, not a test failure.
+  if (!(await action.isVisible())) return false;
+  return action.isEnabled({ timeout: 250 }).catch(() => false);
+}
+
 async function passUntilDraggable(pages: readonly Page[], card: Locator) {
   for (let attempts = 0; attempts < 20; attempts += 1) {
     if (await card.getAttribute("draggable") === "true") return;
@@ -128,7 +135,7 @@ async function passUntilDraggable(pages: readonly Page[], card: Locator) {
       if (await card.getAttribute("draggable") === "true") return "ready";
       for (let index = 0; index < pages.length; index += 1) {
         const pass = pages[index].getByTestId("action-pass");
-        if (await pass.isVisible() && await pass.isEnabled()) return `pass-${index}`;
+        if (await actionIsReady(pass)) return `pass-${index}`;
       }
       return "waiting";
     }, {
@@ -140,7 +147,7 @@ async function passUntilDraggable(pages: readonly Page[], card: Locator) {
     if (await card.getAttribute("draggable") === "true") return;
     for (const page of pages) {
       const pass = page.getByTestId("action-pass");
-      if (!(await pass.isVisible()) || !(await pass.isEnabled())) continue;
+      if (!(await actionIsReady(pass))) continue;
       try {
         await submitMaybeFormAction(page, "pass", 2_000);
       } catch (error) {
@@ -148,7 +155,7 @@ async function passUntilDraggable(pages: readonly Page[], card: Locator) {
         // iteration must still observe either the requested card or another
         // explicit server-issued pass before advancing the scripted game.
         if (await card.getAttribute("draggable") !== "true"
-          && await pass.isVisible() && await pass.isEnabled()) throw error;
+          && await actionIsReady(pass)) throw error;
       }
       break;
     }
