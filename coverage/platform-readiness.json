@@ -15,10 +15,10 @@
   "generated": {
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "817ca11a41d542243b7a6e96bdec68d503e55db1e63ed295b2575f29d3086aaf",
+    "evaluated_source_tree_hash": "a5bc489a39f4c2ea0b24424d550dbb95ecb6790a0cc17403efa8e27c1549f02e",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
-    "source_tree_fingerprint_algorithm": "tracked-source-tree-sha256-v2",
+    "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
@@ -216,7 +216,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4541,
+    "deterministic_cases_discovered": 4542,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,

@@ -21,7 +21,7 @@ TRACKED_OUTPUTS = frozenset(
     path.relative_to(ROOT).as_posix()
     for path in (JSON_OUTPUT, MARKDOWN_OUTPUT, STATUS_OUTPUT)
 )
-SOURCE_TREE_FINGERPRINT_ALGORITHM = "tracked-source-tree-sha256-v2"
+SOURCE_TREE_FINGERPRINT_ALGORITHM = "tracked-git-clean-blobs-sha256-v3"
 
 
 def _load_json(path: Path) -> dict:
@@ -57,7 +57,12 @@ def _git_is_ancestor(ancestor: str, descendant: str) -> bool:
 
 
 def _tracked_source_tree_hash() -> str:
-    """Fingerprint the evaluated tracked tree without self-referential outputs."""
+    """Fingerprint canonical tracked blobs without self-referential outputs.
+
+    Git's clean filters define the repository content being evaluated.  Hashing
+    raw working-tree bytes made the same tree differ between LF CI checkouts and
+    CRLF Windows checkouts.
+    """
 
     completed = subprocess.run(
         ["git", "ls-files", "-z"],
@@ -71,19 +76,43 @@ def _tracked_source_tree_hash() -> str:
         for path in completed.stdout.split(b"\0")
         if path
     )
+    included_paths = [
+        relative
+        for relative in relative_paths
+        if not _is_generated_report(relative, ROOT / relative)
+    ]
+    blob_oids = _canonical_tracked_blob_oids(included_paths)
     digest = hashlib.sha256()
     digest.update((SOURCE_TREE_FINGERPRINT_ALGORITHM + "\0").encode("ascii"))
-    for relative in relative_paths:
-        path = ROOT / relative
-        if _is_generated_report(relative, path):
-            continue
+    for relative, blob_oid in zip(included_paths, blob_oids, strict=True):
         path_bytes = relative.encode("utf-8")
-        content = path.read_bytes()
+        blob_bytes = blob_oid.encode("ascii")
         digest.update(len(path_bytes).to_bytes(8, "big"))
         digest.update(path_bytes)
-        digest.update(len(content).to_bytes(8, "big"))
-        digest.update(content)
+        digest.update(len(blob_bytes).to_bytes(8, "big"))
+        digest.update(blob_bytes)
     return digest.hexdigest()
+
+
+def _canonical_tracked_blob_oids(relative_paths: list[str]) -> list[str]:
+    """Return Git-clean blob identities for current tracked working-tree files."""
+
+    if any("\n" in path or "\r" in path for path in relative_paths):
+        raise ValueError("tracked source paths containing newlines are unsupported")
+    if not relative_paths:
+        return []
+    completed = subprocess.run(
+        ["git", "hash-object", "--filters", "--stdin-paths"],
+        cwd=ROOT,
+        check=True,
+        input=("\n".join(relative_paths) + "\n").encode("utf-8"),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    blob_oids = completed.stdout.decode("ascii", errors="strict").splitlines()
+    if len(blob_oids) != len(relative_paths):
+        raise RuntimeError("git hash-object returned an incomplete tracked blob set")
+    return blob_oids
 
 
 def _is_generated_report(relative: str, path: Path) -> bool:

@@ -8,6 +8,7 @@ from unittest import mock
 
 from scripts.update_platform_status import (
     ROOT,
+    _canonical_tracked_blob_oids,
     _is_generated_report,
     _serialize_json,
     _validate_provenance,
@@ -64,6 +65,17 @@ class PlatformStatusTests(unittest.TestCase):
         )
         self.assertFalse(
             _is_generated_report("README.md", ROOT / "README.md")
+        )
+
+    def test_source_tree_fingerprint_uses_git_clean_blobs(self):
+        expected = subprocess.check_output(
+            ["git", "rev-parse", "HEAD:.gitattributes"],
+            cwd=ROOT,
+            text=True,
+        ).strip()
+        self.assertEqual(
+            _canonical_tracked_blob_oids([".gitattributes"]),
+            [expected],
         )
 
     def test_provenance_rejects_old_or_duplicated_commit_coordinates(self):
