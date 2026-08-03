@@ -1,15 +1,18 @@
 from __future__ import annotations
 
-from typing import Any, Mapping, Sequence
+from typing import Any, Mapping, Protocol, Sequence
 
 from ..effect_contracts import effect_family_contract
 from ..errors import GameRuleError
 from ..life_change import (
     commit_life_change_batch,
+    LifeBatchResult,
     LifeChangeError,
+    LifeChangeHost,
     LifeChangeRequest,
     PreparedLifeChangeBatch,
     prepare_life_change_batch,
+    summarize_life_change_batch,
 )
 from ..life_state import (
     LifeChange,
@@ -18,8 +21,9 @@ from ..replacement import (
     ReplacementChoiceRequired,
     ReplacementEventBatch,
 )
-from ..semantic_runtime.damage_results import (
+from ..semantic_runtime.life_replacements import (
     collect_life_change_replacement_effects,
+    LifeReplacementHost,
 )
 
 
@@ -28,8 +32,26 @@ _LIFE_OPERATION = "".join(("li", "fe"))
 _REASON_FIELD = "".join(("rea", "son"))
 
 
+class LifeEffectObject(Protocol):
+    ref: str
+
+
+class LifeEffectCardRecord(Protocol):
+    mana_value: int
+
+
+class LifeEffectHost(LifeChangeHost, LifeReplacementHost, Protocol):
+    active_seats: list[str]
+
+    def _resolve_object(self, actor: str, ref: str) -> LifeEffectObject: ...
+
+    def card_record(
+        self, card: LifeEffectObject
+    ) -> LifeEffectCardRecord | None: ...
+
+
 def _commit(
-    host: Any,
+    host: LifeEffectHost,
     changes: Sequence[LifeChange],
     *,
     effect: Mapping[str, Any],
@@ -91,41 +113,23 @@ def _commit(
     return prepared
 
 
-def _resolved_delta(
-    prepared: PreparedLifeChangeBatch,
-    player: str,
-) -> int:
-    return sum(
-        record.delta
-        for record in prepared.records
-        if record.player == player
+def _result(prepared: PreparedLifeChangeBatch) -> LifeBatchResult:
+    try:
+        return summarize_life_change_batch(prepared)
+    except LifeChangeError as exc:
+        raise GameRuleError(str(exc)) from exc
+
+
+def _loss_summary(result: LifeBatchResult, players: Sequence[str]) -> str:
+    return "; ".join(
+        f"{player} lost {result.for_player(player).resolved_loss} "
+        f"{_LIFE_OPERATION}"
+        for player in players
     )
 
 
-def _audit_details(prepared: PreparedLifeChangeBatch) -> dict[str, Any]:
-    return {
-        "life_batch": prepared.batch_id,
-        "life_events": [
-            {
-                "event_id": record.event_id,
-                "player": record.player,
-                "direction": record.direction,
-                "requested_amount": record.requested_amount,
-                "amount": record.amount,
-                "source": record.source,
-                "source_controller": record.source_controller,
-                "cause": record.cause,
-            }
-            for record in prepared.records
-        ],
-        "replacement_journal": [
-            selection.to_dict() for selection in prepared.journal
-        ],
-    }
-
-
 def _apply_life(
-    host: Any,
+    host: LifeEffectHost,
     effect: Mapping[str, Any],
     *,
     actor: str,
@@ -141,27 +145,28 @@ def _apply_life(
         actor=actor,
         reason=reason,
     )
-    resolved_delta = _resolved_delta(prepared, seat)
+    result = _result(prepared)
+    player_result = result.for_player(seat)
     host._log(
         actor,
         "effect.life",
-        f"{seat}'s life changed by {resolved_delta}.",
+        f"{seat}'s life changed by {player_result.delta}.",
         {
             "player": seat,
             "requested_delta": delta,
-            "delta": resolved_delta,
+            "delta": player_result.delta,
             "source": effect.get("source"),
             "cause": effect.get("cause") or reason,
-            **_audit_details(prepared),
+            **result.to_dict(),
         },
         importance=1,
-        changed_players=[seat],
+        changed_players=list(result.changed_players),
     )
     return host.state.players[seat].life
 
 
 def _apply_lose_life(
-    host: Any,
+    host: LifeEffectHost,
     effect: Mapping[str, Any],
     *,
     actor: str,
@@ -177,25 +182,26 @@ def _apply_lose_life(
         actor=actor,
         reason=reason,
     )
-    resolved_delta = _resolved_delta(prepared, seat)
+    result = _result(prepared)
+    player_result = result.for_player(seat)
     host._log(
         actor,
         "effect.life",
-        f"{seat} lost {-resolved_delta} life.",
+        f"{seat} lost {player_result.resolved_loss} life.",
         {
             "player": seat,
             "requested_delta": -amount,
-            "delta": resolved_delta,
-            **_audit_details(prepared),
+            "delta": player_result.delta,
+            **result.to_dict(),
         },
         importance=1,
-        changed_players=[seat],
+        changed_players=list(result.changed_players),
     )
     return host.state.players[seat].life
 
 
 def _apply_lose_life_each_opponent(
-    host: Any,
+    host: LifeEffectHost,
     effect: Mapping[str, Any],
     *,
     actor: str,
@@ -211,24 +217,29 @@ def _apply_lose_life_each_opponent(
         actor=actor,
         reason=reason,
     )
+    result = _result(prepared)
     host._log(
         actor,
         "effect.life",
-        f"Each opponent of {actor} lost {amount} life.",
+        _loss_summary(result, opponents) + ".",
         {
             "opponents": list(opponents),
-            "delta": -amount,
+            "requested_amount": amount,
+            "deltas": {
+                opponent: result.for_player(opponent).delta
+                for opponent in opponents
+            },
             _REASON_FIELD: reason,
-            **_audit_details(prepared),
+            **result.to_dict(),
         },
         importance=2,
-        changed_players=list(opponents),
+        changed_players=list(result.changed_players),
     )
     return amount
 
 
 def _apply_lose_life_equal_mana_value(
-    host: Any,
+    host: LifeEffectHost,
     effect: Mapping[str, Any],
     *,
     actor: str,
@@ -246,26 +257,27 @@ def _apply_lose_life_equal_mana_value(
         actor=actor,
         reason=reason,
     )
-    resolved_delta = _resolved_delta(prepared, seat)
+    result = _result(prepared)
+    player_result = result.for_player(seat)
     host._log(
         actor,
         "effect.life",
-        f"{seat} lost {-resolved_delta} life.",
+        f"{seat} lost {player_result.resolved_loss} life.",
         {
             "player": seat,
             "requested_delta": -amount,
-            "delta": resolved_delta,
+            "delta": player_result.delta,
             "card": card.ref,
-            **_audit_details(prepared),
+            **result.to_dict(),
         },
         importance=1,
-        changed_players=[seat],
+        changed_players=list(result.changed_players),
     )
     return host.state.players[seat].life
 
 
 def _apply_drain_opponent(
-    host: Any,
+    host: LifeEffectHost,
     effect: Mapping[str, Any],
     *,
     actor: str,
@@ -283,24 +295,30 @@ def _apply_drain_opponent(
         actor=actor,
         reason=reason,
     )
+    result = _result(prepared)
+    target_result = result.for_player(target)
+    actor_result = result.for_player(actor)
     host._log(
         actor,
         "effect.life",
-        f"{target} lost {amount} life and {actor} gained {amount} life.",
+        f"{target} lost {target_result.resolved_loss} life and {actor} "
+        f"gained {actor_result.resolved_gain} life.",
         {
             "player": target,
-            "delta": -amount,
+            "requested_amount": amount,
+            "delta": target_result.delta,
             "gained_by": actor,
-            **_audit_details(prepared),
+            "gained_amount": actor_result.resolved_gain,
+            **result.to_dict(),
         },
         importance=2,
-        changed_players=[actor, target],
+        changed_players=list(result.changed_players),
     )
     return amount
 
 
 def _apply_drain_each_opponent(
-    host: Any,
+    host: LifeEffectHost,
     effect: Mapping[str, Any],
     *,
     actor: str,
@@ -319,18 +337,25 @@ def _apply_drain_each_opponent(
         actor=actor,
         reason=reason,
     )
+    result = _result(prepared)
+    actor_result = result.for_player(actor)
+    losses = _loss_summary(result, opponents)
     host._log(
         actor,
         "effect.life",
-        f"Each opponent of {actor} lost {amount} life; {actor} gained {amount} life.",
+        f"{losses}; {actor} gained {actor_result.resolved_gain} life.",
         {
             "opponents": list(opponents),
-            "amount": amount,
+            "requested_amount": amount,
             "gained_by": actor,
-            **_audit_details(prepared),
+            "gained_amount": actor_result.resolved_gain,
+            "deltas": {
+                player.player: player.delta for player in result.players
+            },
+            **result.to_dict(),
         },
         importance=2,
-        changed_players=[actor, *opponents],
+        changed_players=list(result.changed_players),
     )
     return amount
 
@@ -346,7 +371,7 @@ HANDLERS = {
 
 
 def apply_effect(
-    host: Any,
+    host: LifeEffectHost,
     effect: Mapping[str, Any],
     *,
     actor: str,

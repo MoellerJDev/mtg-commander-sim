@@ -17,6 +17,7 @@ from mtg_commander_sim.damage_prevention_creation import (
     plan_prevention_shield_creation,
 )
 from mtg_commander_sim.errors import GameRuleError
+from mtg_commander_sim.object_query import ObjectQuerySpec
 from mtg_commander_sim.semantic_choices.context import (
     SemanticChoiceContext,
     SnapshotSemanticChoiceQuery,
@@ -170,12 +171,12 @@ class DamagePreventionCreationTests(DamageReplacementPipelineBase):
                 duration=DamageModifierDuration.UNTIL_END_OF_TURN,
                 subjects=(PreventionSubjectAllocation("B", None),),
                 chosen_source_ref=source.ref,
-                required_source_types=("creature",),
+                source_predicate=ObjectQuerySpec(types_all=("creature",)),
             ),
         )
         chosen = plan.shields[0].chosen_source
         self.assertIsNotNone(chosen)
-        self.assertEqual(2, chosen.snapshot_version)
+        self.assertEqual(3, chosen.snapshot_version)
         self.assertEqual(source.logical_object_id, chosen.logical_object_id)
         self.assertEqual("battlefield", chosen.zone)
         self.assertIn("creature", chosen.types)
@@ -210,7 +211,7 @@ class DamagePreventionCreationTests(DamageReplacementPipelineBase):
                 duration=DamageModifierDuration.UNTIL_END_OF_TURN,
                 subjects=(PreventionSubjectAllocation("B", None),),
                 chosen_source_ref=source.ref,
-                required_source_types=("creature",),
+                source_predicate=ObjectQuerySpec(types_all=("creature",)),
             ),
         )
         chosen = plan.shields[0].chosen_source
@@ -275,10 +276,12 @@ class DamagePreventionCreationTests(DamageReplacementPipelineBase):
                 duration=DamageModifierDuration.UNTIL_END_OF_TURN,
                 subjects=(PreventionSubjectAllocation("B", None),),
                 chosen_source_ref=source.ref,
-                allowed_source_colors=("B", "R"),
-                required_source_types=("creature",),
-                required_source_subtypes=("artificer",),
-                required_source_supertypes=("legendary",),
+                source_predicate=ObjectQuerySpec(
+                    colors_any=("B", "R"),
+                    types_all=("creature",),
+                    subtypes_all=("artificer",),
+                    supertypes_all=("legendary",),
+                ),
             ),
         )
         commit_prevention_shield_creation(engine, plan)
@@ -514,11 +517,26 @@ class DamageSourceChoiceHandlerTests(unittest.TestCase):
         from mtg_commander_sim.object_query import ObjectQueryResult
 
         rows = (
-            ObjectQueryResult("battlefield-id", "battlefield-source", "Source", "A", "A", "battlefield"),
+            ObjectQueryResult(
+                "battlefield-id",
+                "battlefield-source",
+                "Source",
+                "A",
+                "A",
+                "battlefield",
+            ),
             ObjectQueryResult("stack-id", "stack-source", "Spell", "A", "A", "stack"),
             ObjectQueryResult("command-id", "command-source", "Commander", "A", "A", "command"),
             ObjectQueryResult("grave-id", "grave-source", "Old card", "A", "A", "graveyard"),
-            ObjectQueryResult("hidden-id", "hidden-source", "Hidden", "A", "A", "hand", known_to_actor=False),
+            ObjectQueryResult(
+                "hidden-id",
+                "hidden-source",
+                "Hidden",
+                "A",
+                "A",
+                "hand",
+                known_to_actor=False,
+            ),
         )
         query = SnapshotSemanticChoiceQuery(
             seat_order=("A", "B"),
@@ -676,7 +694,10 @@ class DamageSourceChoiceHandlerTests(unittest.TestCase):
             query,
         )
         self.assertEqual("chosen-source", completion.prepend_effects[0]["chosen_source"])
-        self.assertEqual(("U",), completion.prepend_effects[0]["source_colors"])
+        predicate = ObjectQuerySpec.from_dict(
+            completion.prepend_effects[0]["source_predicate"]
+        )
+        self.assertEqual(("U",), predicate.colors_all)
 
         with self.assertRaises(SemanticChoiceError):
             handler.complete(
@@ -746,10 +767,11 @@ class DamageSourceChoiceHandlerTests(unittest.TestCase):
             query,
         )
         effect = completion.prepend_effects[0]
-        self.assertEqual(("B", "R"), effect["source_colors_any"])
-        self.assertEqual(("wizard",), effect["source_subtypes"])
-        self.assertEqual(("legendary",), effect["source_supertypes"])
-        self.assertEqual(("flying",), effect["source_keywords"])
+        predicate = ObjectQuerySpec.from_dict(effect["source_predicate"])
+        self.assertEqual(("B", "R"), predicate.colors_any)
+        self.assertEqual(("wizard",), predicate.subtypes_all)
+        self.assertEqual(("legendary",), predicate.supertypes_all)
+        self.assertEqual(("flying",), predicate.keywords_all)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Any, Mapping, TypeAlias
 
 from .damage_source import DamageError, DamageSourceSnapshot
+from .object_predicate import ObjectQueryError, ObjectQuerySpec
 
 
 class DamageModifierError(ValueError):
@@ -151,19 +152,13 @@ _CHOSEN_SOURCE_IDENTITY_FIELDS = (
     "owner",
     "zone",
 )
-_CHOSEN_SOURCE_EXTENDED_FIELDS = (
-    "required_subtypes",
-    "required_supertypes",
-    "required_keywords",
-    "allowed_colors",
-)
 _PERMANENT_SPELL_TYPES = frozenset(
     {"artifact", "battle", "creature", "enchantment", "planeswalker"}
 )
 
 
 def _normalize_chosen_source(source: ChosenDamageSource) -> None:
-    for field_name in ("required_colors", "allowed_colors", "colors"):
+    for field_name in ("colors",):
         object.__setattr__(
             source,
             field_name,
@@ -178,10 +173,6 @@ def _normalize_chosen_source(source: ChosenDamageSource) -> None:
             ),
         )
     for field_name in (
-        "required_types",
-        "required_subtypes",
-        "required_supertypes",
-        "required_keywords",
         "types",
         "subtypes",
         "supertypes",
@@ -232,7 +223,7 @@ def _expected_chosen_source_identity_keys(
 
 def _validate_chosen_source(source: ChosenDamageSource) -> None:
     version = source.snapshot_version
-    if type(version) is not int or version not in {0, 1, 2}:
+    if type(version) is not int or version not in {0, 1, 2, 3}:
         raise DamageModifierError(
             "A chosen damage source has an unsupported snapshot version"
         )
@@ -264,46 +255,50 @@ def _validate_chosen_source(source: ChosenDamageSource) -> None:
         raise DamageModifierError(
             "A versioned chosen source requires a complete identity snapshot"
         )
-    if version == 2 and not source.identity_keys:
+    if version in {2, 3} and not source.identity_keys:
         raise DamageModifierError(
             "An incarnation-safe chosen source requires identity keys"
         )
-    if version == 2 and set(source.identity_keys) != (
+    if version in {2, 3} and set(source.identity_keys) != (
         _expected_chosen_source_identity_keys(source)
     ):
         raise DamageModifierError(
             "Chosen source identity keys do not match its snapshot"
         )
-    if version != 2 and source.identity_keys:
+    if version not in {2, 3} and source.identity_keys:
         raise DamageModifierError(
             "Only incarnation-safe chosen sources carry identity keys"
         )
-    if version != 2 and any(
-        getattr(source, field_name)
-        for field_name in _CHOSEN_SOURCE_EXTENDED_FIELDS
+    if version not in {2, 3} and any(
+        (
+            source.predicate.subtypes_all,
+            source.predicate.supertypes_all,
+            source.predicate.keywords_all,
+            source.predicate.colors_any,
+        )
     ):
         raise DamageModifierError(
             "Only incarnation-safe chosen sources carry extended filters"
         )
-    if source.required_colors and source.allowed_colors:
+    if source.predicate.excluded_types or any(
+        value is not None
+        for value in (source.predicate.token, source.predicate.tapped)
+    ):
         raise DamageModifierError(
-            "Chosen source colors cannot require both all and any modes"
+            "Chosen source predicate uses unsupported changing characteristics"
         )
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, init=False)
 class ChosenDamageSource:
     ref: str
     object_id: str
-    required_colors: tuple[str, ...] = ()
-    allowed_colors: tuple[str, ...] = ()
-    required_types: tuple[str, ...] = ()
-    required_subtypes: tuple[str, ...] = ()
-    required_supertypes: tuple[str, ...] = ()
-    required_keywords: tuple[str, ...] = ()
+    predicate: ObjectQuerySpec
     # Version zero is the additive Game Record v3 compatibility shape used by
     # historical checkpoints. Version one is the first complete LKI snapshot;
     # version two adds exact incarnation/permanent-spell continuity keys.
+    # Version three stores one canonical ObjectQuerySpec instead of parallel
+    # characteristic-filter fields.
     snapshot_version: int = 0
     logical_object_id: str | None = None
     oracle_id: str | None = None
@@ -318,6 +313,76 @@ class ChosenDamageSource:
     keywords: tuple[str, ...] = ()
     identity_keys: tuple[str, ...] = ()
 
+    def __init__(
+        self,
+        ref: str,
+        object_id: str,
+        required_colors: tuple[str, ...] = (),
+        allowed_colors: tuple[str, ...] = (),
+        required_types: tuple[str, ...] = (),
+        required_subtypes: tuple[str, ...] = (),
+        required_supertypes: tuple[str, ...] = (),
+        required_keywords: tuple[str, ...] = (),
+        snapshot_version: int = 0,
+        logical_object_id: str | None = None,
+        oracle_id: str | None = None,
+        printed_name: str | None = None,
+        controller: str | None = None,
+        owner: str | None = None,
+        zone: str | None = None,
+        types: tuple[str, ...] = (),
+        subtypes: tuple[str, ...] = (),
+        supertypes: tuple[str, ...] = (),
+        colors: tuple[str, ...] = (),
+        keywords: tuple[str, ...] = (),
+        identity_keys: tuple[str, ...] = (),
+        *,
+        predicate: ObjectQuerySpec | None = None,
+    ) -> None:
+        legacy_filters = (
+            required_colors,
+            allowed_colors,
+            required_types,
+            required_subtypes,
+            required_supertypes,
+            required_keywords,
+        )
+        if predicate is not None and any(legacy_filters):
+            raise DamageModifierError(
+                "Chosen sources cannot mix canonical and legacy predicates"
+            )
+        try:
+            canonical = predicate or ObjectQuerySpec(
+                colors_all=required_colors,
+                colors_any=allowed_colors,
+                types_all=required_types,
+                subtypes_all=required_subtypes,
+                supertypes_all=required_supertypes,
+                keywords_all=required_keywords,
+            )
+        except ObjectQueryError as exc:
+            raise DamageModifierError(str(exc)) from exc
+        for field_name, value in (
+            ("ref", ref),
+            ("object_id", object_id),
+            ("predicate", canonical),
+            ("snapshot_version", snapshot_version),
+            ("logical_object_id", logical_object_id),
+            ("oracle_id", oracle_id),
+            ("printed_name", printed_name),
+            ("controller", controller),
+            ("owner", owner),
+            ("zone", zone),
+            ("types", tuple(types)),
+            ("subtypes", tuple(subtypes)),
+            ("supertypes", tuple(supertypes)),
+            ("colors", tuple(colors)),
+            ("keywords", tuple(keywords)),
+            ("identity_keys", tuple(identity_keys)),
+        ):
+            object.__setattr__(self, field_name, value)
+        self.__post_init__()
+
     def __post_init__(self) -> None:
         ref = str(self.ref or "")
         object_id = str(self.object_id or "")
@@ -327,23 +392,50 @@ class ChosenDamageSource:
             )
         object.__setattr__(self, "ref", ref)
         object.__setattr__(self, "object_id", object_id)
+        if not isinstance(self.predicate, ObjectQuerySpec):
+            raise DamageModifierError(
+                "A chosen damage source requires a typed predicate"
+            )
         _normalize_chosen_source(self)
         _validate_chosen_source(self)
+
+    @property
+    def required_colors(self) -> tuple[str, ...]:
+        return self.predicate.colors_all
+
+    @property
+    def allowed_colors(self) -> tuple[str, ...]:
+        return self.predicate.colors_any
+
+    @property
+    def required_types(self) -> tuple[str, ...]:
+        return self.predicate.types_all
+
+    @property
+    def required_subtypes(self) -> tuple[str, ...]:
+        return self.predicate.subtypes_all
+
+    @property
+    def required_supertypes(self) -> tuple[str, ...]:
+        return self.predicate.supertypes_all
+
+    @property
+    def required_keywords(self) -> tuple[str, ...]:
+        return self.predicate.keywords_all
 
     def event_conditions(self) -> dict[str, Any]:
         result: dict[str, Any] = (
             {"source_identity_key": {"in": list(self.identity_keys)}}
-            if self.snapshot_version == 2
+            if self.snapshot_version in {2, 3}
             else {"source_object_id": {"eq": self.object_id}}
         )
+        color_conditions: dict[str, Any] = {}
         if self.required_colors:
-            result["source_colors"] = {
-                "contains_all": list(self.required_colors)
-            }
+            color_conditions["contains_all"] = list(self.required_colors)
         if self.allowed_colors:
-            result["source_colors"] = {
-                "contains_any": list(self.allowed_colors)
-            }
+            color_conditions["contains_any"] = list(self.allowed_colors)
+        if color_conditions:
+            result["source_colors"] = color_conditions
         if self.required_types:
             result["source_types"] = {
                 "contains_all": list(self.required_types)
@@ -360,9 +452,34 @@ class ChosenDamageSource:
             result["source_keywords"] = {
                 "contains_all": list(self.required_keywords)
             }
+        if self.predicate.controller is not None:
+            result["source_controller"] = {
+                "eq": self.predicate.controller
+            }
+        if self.predicate.owner is not None:
+            result["source_owner"] = {"eq": self.predicate.owner}
         return result
 
     def to_dict(self) -> dict[str, Any]:
+        if self.snapshot_version == 3:
+            return {
+                "ref": self.ref,
+                "object_id": self.object_id,
+                "predicate": self.predicate.to_dict(),
+                "snapshot_version": self.snapshot_version,
+                "logical_object_id": self.logical_object_id,
+                "oracle_id": self.oracle_id,
+                "printed_name": self.printed_name,
+                "controller": self.controller,
+                "owner": self.owner,
+                "zone": self.zone,
+                "types": list(self.types),
+                "subtypes": list(self.subtypes),
+                "supertypes": list(self.supertypes),
+                "colors": list(self.colors),
+                "keywords": list(self.keywords),
+                "identity_keys": list(self.identity_keys),
+            }
         result = {
             "ref": self.ref,
             "object_id": self.object_id,
@@ -426,6 +543,24 @@ class ChosenDamageSource:
             "allowed_colors",
             "identity_keys",
         }
+        canonical = {
+            "ref",
+            "object_id",
+            "predicate",
+            "snapshot_version",
+            "logical_object_id",
+            "oracle_id",
+            "printed_name",
+            "controller",
+            "owner",
+            "zone",
+            "types",
+            "subtypes",
+            "supertypes",
+            "colors",
+            "keywords",
+            "identity_keys",
+        }
         raw_snapshot_version = value.get("snapshot_version", 0)
         if type(raw_snapshot_version) is not int:
             raise DamageModifierError(
@@ -435,12 +570,44 @@ class ChosenDamageSource:
         _exact_fields(
             value,
             (
-                incarnation_safe
+                canonical
+                if snapshot_version == 3
+                else incarnation_safe
                 if snapshot_version == 2
                 else (versioned if "snapshot_version" in value else legacy)
             ),
             label="Chosen damage source",
         )
+        if snapshot_version == 3:
+            raw_predicate = value["predicate"]
+            try:
+                predicate = ObjectQuerySpec.from_dict(raw_predicate)
+            except ObjectQueryError as exc:
+                raise DamageModifierError(str(exc)) from exc
+            return cls(
+                ref=str(value["ref"] or ""),
+                object_id=str(value["object_id"] or ""),
+                predicate=predicate,
+                snapshot_version=snapshot_version,
+                logical_object_id=value.get("logical_object_id"),
+                oracle_id=value.get("oracle_id"),
+                printed_name=value.get("printed_name"),
+                controller=value.get("controller"),
+                owner=value.get("owner"),
+                zone=value.get("zone"),
+                types=_strings(value.get("types", ()), label="Source snapshot types"),
+                subtypes=_strings(value.get("subtypes", ()), label="Source snapshot subtypes"),
+                supertypes=_strings(
+                    value.get("supertypes", ()),
+                    label="Source snapshot supertypes",
+                ),
+                colors=_strings(value.get("colors", ()), label="Source snapshot colors"),
+                keywords=_strings(value.get("keywords", ()), label="Source snapshot keywords"),
+                identity_keys=_strings(
+                    value.get("identity_keys", ()),
+                    label="Source identity keys",
+                ),
+            )
         return cls(
             ref=str(value["ref"] or ""),
             object_id=str(value["object_id"] or ""),

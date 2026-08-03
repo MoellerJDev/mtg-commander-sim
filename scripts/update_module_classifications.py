@@ -52,6 +52,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/damage_source.py",
         "mtg_commander_sim/damage_modifier_state.py",
         "mtg_commander_sim/model.py",
+        "mtg_commander_sim/object_predicate.py",
     }:
         return "domain"
     if relative in {
@@ -178,7 +179,10 @@ def _owner(relative: str, layer: str) -> str:
         "mtg_commander_sim/mana_undo.py",
     }:
         return "mana_rules"
-    if relative == "mtg_commander_sim/object_query.py":
+    if relative in {
+        "mtg_commander_sim/object_predicate.py",
+        "mtg_commander_sim/object_query.py",
+    }:
         return "object_query"
     if relative == "mtg_commander_sim/state_planner.py":
         return "state_change_planning"
@@ -289,6 +293,7 @@ def build_classifications() -> dict[str, Any]:
                             "mana_mode_effects.py",
                             "mana_payment_continuations.py",
                             "mana_undo.py",
+                            "object_predicate.py",
                             "object_query.py",
                             "replacement/",
                             "state_planner.py",

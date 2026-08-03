@@ -516,7 +516,7 @@ def _event_description(engine: CommanderEngine, event: Event) -> str:
             f"({details.get('reason') or 'effect'})."
         )
     if event.code == "effect.life":
-        return f"{details.get('player')} changed life by {details.get('delta')}."
+        return event.summary
     if event.code == "effect.energy":
         return f"{details.get('player')} changed energy by {details.get('delta')}."
     if event.code == "turn.extra.scheduled":

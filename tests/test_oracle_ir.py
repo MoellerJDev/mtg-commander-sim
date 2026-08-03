@@ -662,7 +662,7 @@ class OracleIRTests(unittest.TestCase):
                 ),
                 "next_instance",
                 "$controller",
-                {"allowed_colors": ["B", "R"]},
+                {"colors_any": ["B", "R"]},
             ),
             (
                 "damage-prevention-chosen-source-next-instance-v1",
@@ -672,7 +672,7 @@ class OracleIRTests(unittest.TestCase):
                 ),
                 "next_instance",
                 "$controller",
-                {"required_types": ["artifact"]},
+                {"types_all": ["artifact"]},
             ),
             (
                 "damage-prevention-chosen-source-all-v1",
@@ -682,7 +682,7 @@ class OracleIRTests(unittest.TestCase):
                 ),
                 "all",
                 "*",
-                {"allowed_colors": ["R"]},
+                {"colors_any": ["R"]},
             ),
             (
                 "damage-prevention-chosen-source-all-v1",
@@ -702,7 +702,7 @@ class OracleIRTests(unittest.TestCase):
                 ),
                 "amount",
                 "$target.0",
-                {"required_supertypes": ["legendary"]},
+                {"supertypes_all": ["legendary"]},
             ),
         )
         for template_id, text, mode, subject, filters in cases:
@@ -719,7 +719,9 @@ class OracleIRTests(unittest.TestCase):
                 choice = node.effects[0]
                 self.assertEqual("choose_damage_source", choice["op"])
                 for field, value in filters.items():
-                    self.assertEqual(value, choice[field])
+                    self.assertEqual(
+                        value, choice["source_predicate"][field]
+                    )
                 self.assertEqual(mode, choice["shield"]["mode"])
                 self.assertEqual(subject, choice["shield"]["subject"])
 

@@ -10,6 +10,7 @@ from .counter_replacements import (
 )
 from .damage_replacements import default_damage_replacement_registry
 from .damage_results import default_damage_result_replacement_registry
+from .life_replacements import default_life_replacement_registry
 from .continuous_components import (
     default_continuous_effect_component_registry,
 )
@@ -25,6 +26,7 @@ def runtime_component_registries() -> tuple[Any, ...]:
         default_counter_placement_replacement_registry(),
         default_damage_replacement_registry(),
         default_damage_result_replacement_registry(),
+        default_life_replacement_registry(),
         default_token_creation_replacement_registry(),
         default_zone_change_replacement_registry(),
     )

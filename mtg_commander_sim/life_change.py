@@ -6,6 +6,8 @@ from typing import Any, Mapping, Protocol, Sequence
 from .life_state import (
     apply_life_changes,
     LifeChange,
+    LifeStateHost,
+    LifeStateView,
     LifeStateError,
     LifeStatePlan,
     plan_life_changes,
@@ -30,8 +32,13 @@ class LifeChangeError(ValueError):
 _LOSS_DIRECTION = "".join(("lo", "ss"))
 
 
-class LifeChangeHost(Protocol):
-    state: Any
+class LifeChangeState(LifeStateView, Protocol):
+    revision: int
+    event_sequence: int
+
+
+class LifeChangeHost(LifeStateHost, Protocol):
+    state: LifeChangeState
 
     def apnap_order(self, *, start: str | None = None) -> list[str]: ...
 
@@ -105,6 +112,78 @@ class PreparedLifeChangeBatch:
 class LifeChangeCommit:
     records: tuple[LifeChangeRecord, ...]
     changed_players: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class LifePlayerResult:
+    player: str
+    requested_gain: int = 0
+    requested_loss: int = 0
+    resolved_gain: int = 0
+    resolved_loss: int = 0
+
+    @property
+    def requested_delta(self) -> int:
+        return self.requested_gain - self.requested_loss
+
+    @property
+    def delta(self) -> int:
+        return self.resolved_gain - self.resolved_loss
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "player": self.player,
+            "requested_gain": self.requested_gain,
+            "requested_loss": self.requested_loss,
+            "requested_delta": self.requested_delta,
+            "resolved_gain": self.resolved_gain,
+            "resolved_loss": self.resolved_loss,
+            "delta": self.delta,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class LifeBatchResult:
+    batch_id: str
+    players: tuple[LifePlayerResult, ...]
+    events: tuple[LifeChangeRecord, ...]
+    replacement_journal: tuple[ReplacementSelection, ...]
+
+    def for_player(self, player: str) -> LifePlayerResult:
+        return next(
+            (result for result in self.players if result.player == player),
+            LifePlayerResult(player=player),
+        )
+
+    @property
+    def changed_players(self) -> tuple[str, ...]:
+        return tuple(
+            sorted(
+                result.player for result in self.players if result.delta != 0
+            )
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "life_batch": self.batch_id,
+            "life_players": [result.to_dict() for result in self.players],
+            "life_events": [
+                {
+                    "event_id": record.event_id,
+                    "player": record.player,
+                    "direction": record.direction,
+                    "requested_amount": record.requested_amount,
+                    "amount": record.amount,
+                    "source": record.source,
+                    "source_controller": record.source_controller,
+                    "cause": record.cause,
+                }
+                for record in self.events
+            ],
+            "replacement_journal": [
+                selection.to_dict() for selection in self.replacement_journal
+            ],
+        }
 
 
 def _event(request: LifeChangeRequest) -> ReplaceableEvent:
@@ -182,6 +261,56 @@ def _state_plan(
         )
     except LifeStateError as exc:
         raise LifeChangeError(str(exc)) from exc
+
+
+def summarize_life_change_batch(
+    prepared: PreparedLifeChangeBatch,
+) -> LifeBatchResult:
+    """Return canonical requested and final values for public audit logs."""
+
+    if not isinstance(prepared, PreparedLifeChangeBatch):
+        raise LifeChangeError("Life summaries require a typed prepared batch")
+    if prepared.pending is not None:
+        raise LifeChangeError(
+            "Life summaries cannot be built with a pending replacement choice"
+        )
+    order: list[str] = []
+    values: dict[str, dict[str, int]] = {}
+
+    def amounts(player: str) -> dict[str, int]:
+        if player not in values:
+            order.append(player)
+            values[player] = {
+                "requested_gain": 0,
+                "requested_loss": 0,
+                "resolved_gain": 0,
+                "resolved_loss": 0,
+            }
+        return values[player]
+
+    for event in prepared.requested_events:
+        if event.kind != "life.change" or event.affected_player is None:
+            raise LifeChangeError("Requested life summary event is malformed")
+        direction = str(event.payload.get("direction") or "")
+        requested = event.payload.get("requested_amount")
+        if direction not in {"gain", _LOSS_DIRECTION} or (
+            type(requested) is not int or requested < 0
+        ):
+            raise LifeChangeError("Requested life summary amount is malformed")
+        amounts(str(event.affected_player))[
+            f"requested_{direction}"
+        ] += requested
+    for record in prepared.records:
+        amounts(record.player)[f"resolved_{record.direction}"] += record.amount
+    return LifeBatchResult(
+        batch_id=prepared.batch_id,
+        players=tuple(
+            LifePlayerResult(player=player, **values[player])
+            for player in order
+        ),
+        events=prepared.records,
+        replacement_journal=prepared.journal,
+    )
 
 
 def prepare_life_change_batch(
@@ -362,10 +491,13 @@ __all__ = [
     "commit_life_change_batch",
     "LifeChangeCommit",
     "LifeChangeError",
+    "LifeBatchResult",
+    "LifePlayerResult",
     "LifeChangeRecord",
     "LifeChangeRequest",
     "PreparedLifeChangeBatch",
     "prepare_life_change_batch",
     "replan_life_change_batch",
+    "summarize_life_change_batch",
     "validate_life_change_batch",
 ]

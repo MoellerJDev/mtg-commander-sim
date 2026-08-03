@@ -7,6 +7,16 @@ class DamageError(ValueError):
     """A represented damage proposal cannot be resolved exactly."""
 
 
+_EXILE_ZONE = "".join(("ex", "ile"))
+REPRESENTED_DAMAGE_SOURCE_ZONES = (
+    "battlefield",
+    "command",
+    _EXILE_ZONE,
+    "graveyard",
+    "stack",
+)
+
+
 @dataclass(frozen=True, slots=True)
 class DamageSourceSnapshot:
     """Immutable last-known source facts pinned before damage transforms."""

@@ -45,8 +45,11 @@ from mtg_commander_sim.replacement_effects import (
 )
 from mtg_commander_sim.semantic_runtime.damage_results import (
     DamageResultReplacementSourceContext,
-    LifeGainMultiplierHandler,
     collect_damage_result_replacement_effects,
+)
+from mtg_commander_sim.semantic_runtime.life_replacements import (
+    LifeGainMultiplierHandler,
+    LifeReplacementSourceContext,
 )
 from mtg_commander_sim.semantic_runtime.context import SemanticNodeError
 from mtg_commander_sim.rules.capabilities import load_default_capability_registry
@@ -909,7 +912,7 @@ class DamageResultEventTests(unittest.TestCase):
         }
         effect = handler.replacement_effect(
             descriptor,
-            DamageResultReplacementSourceContext(
+            LifeReplacementSourceContext(
                 source_ref="boon-negative-witness",
                 source_controller="A",
             ),
@@ -931,7 +934,7 @@ class DamageResultEventTests(unittest.TestCase):
         with self.assertRaisesRegex(SemanticNodeError, "at least 2"):
             handler.replacement_effect(
                 malformed,
-                DamageResultReplacementSourceContext(
+                LifeReplacementSourceContext(
                     source_ref="boon-negative-witness",
                     source_controller="A",
                 ),

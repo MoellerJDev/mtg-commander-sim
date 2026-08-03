@@ -48,7 +48,10 @@ from mtg_commander_sim.semantic_runtime.damage_replacements import (
 from mtg_commander_sim.semantic_runtime.damage_results import (
     DamageResultLifeFloorHandler,
     DamageResultReplacementSourceContext,
+)
+from mtg_commander_sim.semantic_runtime.life_replacements import (
     LifeGainMultiplierHandler,
+    LifeReplacementSourceContext,
 )
 from mtg_commander_sim.targets import PUBLIC_TARGET_ZONES, TargetGroup
 
@@ -471,7 +474,7 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
             },
             "modification": {"minimum_life": 1},
         }
-        context = DamageResultReplacementSourceContext(
+        context = LifeReplacementSourceContext(
             source_ref="result-replacement-mutation-source",
             source_controller="A",
         )

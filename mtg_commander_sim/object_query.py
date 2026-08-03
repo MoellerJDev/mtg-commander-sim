@@ -3,24 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Iterable, Mapping
 
+from .object_predicate import ObjectQueryError, ObjectQuerySpec
 from .replacement.immutable import FrozenMap
-
-
-@dataclass(frozen=True, slots=True)
-class ObjectQuerySpec:
-    zones: tuple[str, ...] = ()
-    owner: str | None = None
-    controller: str | None = None
-    types_all: tuple[str, ...] = ()
-    excluded_types: tuple[str, ...] = ()
-    subtypes_all: tuple[str, ...] = ()
-    supertypes_all: tuple[str, ...] = ()
-    colors_any: tuple[str, ...] = ()
-    keywords_all: tuple[str, ...] = ()
-    token: bool | None = None
-    tapped: bool | None = None
-    include_phased_out: bool = False
-    exclude_ref: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -99,11 +83,16 @@ def object_matches_query(
         and types.isdisjoint(spec.excluded_types)
         and set(spec.subtypes_all).issubset(row.subtypes)
         and set(spec.supertypes_all).issubset(row.supertypes)
+        and set(spec.colors_all).issubset(row.colors)
         and (not spec.colors_any or not set(spec.colors_any).isdisjoint(row.colors))
         and set(spec.keywords_all).issubset(row.keywords)
         and (spec.token is None or row.token is spec.token)
         and (spec.tapped is None or row.tapped is spec.tapped)
         and (spec.include_phased_out or not row.phased_out)
+        and (
+            spec.known_to_actor is None
+            or row.known_to_actor is spec.known_to_actor
+        )
         and (spec.exclude_ref is None or row.ref != spec.exclude_ref)
     )
 
