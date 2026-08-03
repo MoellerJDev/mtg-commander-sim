@@ -47,6 +47,14 @@ owner. Permanent counters continue through the canonical counter-placement
 owner. This makes represented CR 615.5 life aftermath replacement-capable while
 keeping all result plans validated before the damage batch mutates state.
 
+Independent later sentences are not aftermath. Oracle IR v18 lowers a reviewed
+fixed `Prevent ... . You gain N life.` form as two top-level instructions. The
+source-choice continuation creates the shield, then resumes the sibling life
+instruction in written order. That life change happens during the successful
+spell resolution whether or not future damage occurs. Only an explicit
+dependency such as `damage prevented this way` lowers into the CR 615.5
+aftermath value.
+
 The generic `choose_damage_source` semantic operation is a reviewed universal
 choice. It exposes the CR 609.7a universe: public permanents, spells on the
 stack, face-up command-zone objects, and public former-zone objects explicitly
@@ -64,9 +72,12 @@ identity. A resumed action discards only the expired offer revision and
 fingerprint, then rebuilds the same canonical cast or activation proposal from
 current authoritative facts.
 
-The effect runtime separates `damage-modifiers.v1` and `life-effects.v1` from
+The effect runtime separates `damage-modifiers.v1` and `life-effects.v2` from
 the former broad damage/life/turn family. Each family has a closed operation
-inventory and delegates final mutation to its declared typed owner.
+inventory and delegates final mutation to its declared typed owner. Version 2
+routes general effect life changes through `life.change` before mutation and
+records stable event IDs, source/controller/cause, requested/final amounts,
+and the canonical replacement journal.
 
 ## Alternatives
 
@@ -88,10 +99,15 @@ inventory and delegates final mutation to its declared typed owner.
   incidental event-list order.
 - Represented prevention aftermath validates every life/counter result before
   mutation and can participate in life-gain or permanent-counter replacement.
+- A source-choice pause preserves every later sibling instruction; fixed
+  independent life is neither delayed until shield use nor repeated by it.
 - Mana payments with replacement choices roll back completely and resume the
   original action without adding a CommanderEngine method.
-- Oracle IR v17 lowers closed chosen-source families and the static life-gain
-  doubling family without card-name dispatch.
+- Oracle IR v18 and template
+  `damage-prevention-chosen-source-fixed-life-v2` lower the corrected ordered
+  sequence without card-name dispatch. The compiler/CardProgram fingerprint
+  changes, while a historical v17 artifact retains its pinned historical
+  shape and distinct fingerprint.
 
 ## Remaining boundary
 
@@ -99,8 +115,9 @@ This decision does not claim complete CR 609.7, 615, or 616. Explicit typed
 provenance is required for referred former-zone objects; arbitrary opaque
 references and face-down source characteristics remain blocked. Source
 predicates beyond the closed color/type/
-subtype/supertype/keyword vocabulary, migration of every life producer to
-`life.change`, aftermath forms beyond represented life and permanent counters,
+subtype/supertype/keyword vocabulary, life-gain prevention such as `can't gain
+life`, non-effect-runtime life producers, aftermath forms beyond represented
+life and permanent counters,
 partial/attached redirection, and non-damage transformations remain blocked.
 
 ## Removal condition

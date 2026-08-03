@@ -87,6 +87,21 @@ def _keyword_card(keyword: str, oracle_text: str, suffix: int) -> CardRecord:
     )
 
 
+def _prevention_life_card() -> CardRecord:
+    return replace(
+        _bolt(),
+        oracle_id="00000000-0000-4000-8000-000000061505",
+        name="Generic Prevention Life Fixture",
+        mana_cost="{W}",
+        oracle_text=(
+            "Prevent the next 3 damage that would be dealt to any target "
+            "this turn by a source of your choice. You gain 3 life."
+        ),
+        colors=("W",),
+        color_identity=("W",),
+    )
+
+
 class CardProgramV2Tests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -135,6 +150,52 @@ class CardProgramV2Tests(unittest.TestCase):
         jsonschema.Draft202012Validator(self.schema).validate(first.to_dict())
         restored = CardProgram.from_dict(first.to_dict())
         self.assertEqual(first.to_dict(), restored.to_dict())
+
+    def test_corrected_prevention_sequence_has_new_pinned_fingerprint(self):
+        current = compile_card_program(
+            self.db,
+            _prevention_life_card(),
+            capability_registry=self.capabilities,
+            capability_profile="commander_review",
+            trust_level="trusted",
+        )
+        self.assertEqual("oracle-ir-v18", current.compiler_version)
+        self.assertEqual("capability_closed", current.trust_closure["trust_basis"])
+        self.assertEqual(
+            ["choose_damage_source", "life"],
+            [effect["op"] for effect in current.abilities[0].effects],
+        )
+
+        current_choice = dict(current.abilities[0].effects[0])
+        historical_shield = dict(current_choice["shield"])
+        historical_shield["aftermath"] = [
+            {
+                "kind": "gain_life",
+                "player": "$controller",
+                "per_prevented": 0,
+                "fixed_amount": 3,
+            }
+        ]
+        current_choice["shield"] = historical_shield
+        historical_ability = replace(
+            current.abilities[0],
+            effects=[current_choice],
+        )
+        historical = CardProgram.create(
+            compiler_version="oracle-ir-v17",
+            oracle_id=current.oracle_id,
+            card_name=current.card_name,
+            faces=current.faces,
+            oracle_source_hash=current.oracle_source_hash,
+            rulings_source_hash=current.rulings_source_hash,
+            abilities=(historical_ability,),
+            residuals=current.residuals,
+            provenance=current.provenance,
+        )
+
+        self.assertNotEqual(current.fingerprint, historical.fingerprint)
+        restored = CardProgram.from_dict(historical.to_dict())
+        self.assertEqual(historical.to_dict(), restored.to_dict())
 
     def test_keyword_programs_declare_exact_damage_result_capabilities(self):
         for index, (keyword, oracle_text) in enumerate(

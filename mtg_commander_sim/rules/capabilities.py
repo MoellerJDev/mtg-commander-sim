@@ -712,6 +712,11 @@ def capability_covered_mechanics(
         covered.add("cr-115-targets")
     if "damage.prevention.persistent_amount" in supplied:
         covered.add("cr-615-prevention-effects")
+        # Capability v4 owns the ordered fixed life sibling emitted by the
+        # reviewed prevention sequence, including its typed life-change
+        # precommit boundary. This is deliberately narrower than claiming the
+        # complete CR 119 family or life-gain-prevention grammar.
+        covered.add("cr-119-life")
     if "counter.placement.quantity_replacement" in supplied:
         covered.add("cr-122-counters")
     if "damage.amount.positive" in supplied and supplied.intersection(

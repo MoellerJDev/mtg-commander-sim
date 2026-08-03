@@ -92,9 +92,17 @@ EFFECT_FAMILY_CONTRACTS = (
         ),
     ),
     EffectFamilyContract(
-        family_id="life-effects.v1",
+        family_id="life-effects.v2",
         semantic_family="effect.life",
-        rule_references=("119.1", "119.2", "119.3", "119.4"),
+        rule_references=(
+            "119.1",
+            "119.2",
+            "119.3",
+            "119.4",
+            "608.2c",
+            "614.1",
+            "616.1",
+        ),
         operations=frozenset(
             {
                 "drain_each_opponent",

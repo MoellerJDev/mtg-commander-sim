@@ -16,7 +16,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `cda213c987cb8c5aef94af74bc74146f29bba0fb`
 - Package: `0.8.0`
 - CI run: [30811998248](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30811998248) — `pass`
-- Production scope: 178 files, 86,051 physical lines, 79,283 logical lines
+- Production scope: 178 files, 86,222 physical lines, 79,446 logical lines
 
 ## Central engine debt
 
@@ -114,15 +114,15 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,490
-- Conventional Python cases: 1,190
+- Python discovered: 4,501
+- Conventional Python cases: 1,201
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 7
 - Browser unit cases: 18
 - Dedicated property suite: false
 - Mutation score: None
 - Focused executable mutation suite: true
-- Capability mutation declarations: 25
+- Capability mutation declarations: 26
 - Performance baseline: `platform/continuous-effect-performance-baseline.json` (5 scenarios; latency observational)
 
 ## Documentation drift

@@ -26,6 +26,7 @@ from mtg_commander_sim.damage_modifier_state import (
     GainLifePreventionAftermath,
 )
 from mtg_commander_sim.engine import CommanderEngine
+from mtg_commander_sim import oracle_ir as oracle_ir_module
 from mtg_commander_sim.semantic_runtime.counter_replacements import (
     CounterPlacementEventSpec,
     CounterQuantityReplacementHandler,
@@ -106,6 +107,78 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_hidden_target_rejected()
+
+    def test_prevention_immediate_sequence_mutants_are_killed(self):
+        record = replace(
+            self.db.lookup("Force of Vigor"),
+            oracle_id="fixture:prevention-immediate-mutation",
+            name="Fixture Prevention Immediate Mutation",
+            oracle_text=(
+                "Prevent the next 3 damage that would be dealt to any target "
+                "this turn by a source of your choice. You gain 3 life."
+            ),
+        )
+
+        def assert_sequence() -> None:
+            node = oracle_ir_module.compile_oracle_card(
+                record
+            ).faces[0].nodes[0]
+            self.assertEqual(
+                "damage-prevention-chosen-source-fixed-life-v2",
+                node.template_id,
+            )
+            self.assertEqual(2, len(node.effects))
+            source_choice, life_gain = node.effects
+            self.assertEqual("choose_damage_source", source_choice["op"])
+            self.assertNotIn("aftermath", source_choice["shield"])
+            self.assertEqual("life", life_gain["op"])
+            self.assertEqual(3, life_gain["delta"])
+
+        assert_sequence()
+        original = oracle_ir_module.fixed_prevention_effect_template
+
+        def mutated(mutator):
+            def compile_template(text):
+                result = original(text)
+                if result is None:
+                    return None
+                template_id, effects, targets, rules = result
+                return template_id, mutator(effects), targets, rules
+
+            return compile_template
+
+        def remove_life(effects):
+            return effects[:1]
+
+        def move_life_to_aftermath(effects):
+            choice = dict(effects[0])
+            shield = dict(choice["shield"])
+            shield["aftermath"] = [
+                {
+                    "kind": "gain_life",
+                    "player": "$controller",
+                    "per_prevented": 0,
+                    "fixed_amount": 3,
+                }
+            ]
+            choice["shield"] = shield
+            return (choice,)
+
+        mutants = (
+            remove_life,
+            move_life_to_aftermath,
+            lambda effects: (*effects, effects[1]),
+            lambda effects: tuple(reversed(effects)),
+        )
+        for mutant in mutants:
+            with self.subTest(mutant=mutant.__name__):
+                with patch.object(
+                    oracle_ir_module,
+                    "fixed_prevention_effect_template",
+                    mutated(mutant),
+                ):
+                    with self.assertRaises(AssertionError):
+                        assert_sequence()
 
     def test_basic_land_type_intrinsic_mana_mutant_is_killed(self):
         descriptor = {

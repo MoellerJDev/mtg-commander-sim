@@ -1,7 +1,7 @@
 ---
 title: "Mutation testing policy"
 status: "current"
-authoritative_source: "capability registry v13, capability evidence declarations, and executable mutation tests"
+authoritative_source: "capability registry v14, capability evidence declarations, and executable mutation tests"
 verified: "2026-08-03"
 audience: "rules, security, replay, and trust contributors"
 maintenance: "hand-maintained"
@@ -10,7 +10,7 @@ maintenance: "hand-maintained"
 # Mutation testing policy
 
 Dependency fail-closed testing and implementation mutation testing are
-different evidence. Capability registry v13 records them separately.
+different evidence. Capability registry v14 records them separately.
 
 `dependency_fail_closed_status` proves that a missing, blocked, cyclic, or
 profile-incompatible dependency prevents trust. It is `not_applicable` only for

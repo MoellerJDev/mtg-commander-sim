@@ -209,7 +209,7 @@
       "executable_test_ids": [
         "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_life_aftermath_uses_one_aggregate_prevented_amount",
         "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_counter_aftermath_reuses_counter_replacement_pipeline",
-        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_fixed_aftermath_happens_when_damage_cannot_be_prevented",
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_fixed_additional_effect_happens_when_damage_cannot_be_prevented",
         "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_stale_counter_aftermath_fails_before_life_or_damage_mutation",
         "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_prevention_aftermath_replays_from_exact_commands"
       ],

@@ -126,6 +126,10 @@ class DamageReplacementPipelineBase(unittest.TestCase):
                     ROOT
                     / "tests"
                     / "fixtures"
+                    / "prevention-immediate-cards.json",
+                    ROOT
+                    / "tests"
+                    / "fixtures"
                     / "counter-replacement-cards.json",
                 ],
                 database,
