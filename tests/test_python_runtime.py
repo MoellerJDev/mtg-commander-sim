@@ -67,6 +67,18 @@ class PythonRuntimeTests(unittest.TestCase):
     def test_current_workflows_pin_every_setup_to_x64_312(self):
         self.assertEqual([], workflow_policy_failures())
 
+    def test_main_smoke_fetches_certified_provenance_history(self):
+        workflow = (
+            Path(__file__).resolve().parents[1]
+            / ".github"
+            / "workflows"
+            / "main-smoke.yml"
+        ).read_text(encoding="utf-8")
+        checkout = workflow.split("actions/checkout@v4", 1)[1].split(
+            "actions/setup-python@v5", 1
+        )[0]
+        self.assertIn("fetch-depth: 0", checkout)
+
     def test_workflow_policy_accepts_variable_job_counts_and_fails_missing_pin(self):
         setup = (
             "steps:\n"
