@@ -10,8 +10,12 @@ import webbrowser
 
 import uvicorn
 
+from mtg_commander_sim.python_runtime import require_supported_python
+
 
 ROOT = Path(__file__).resolve().parents[1]
+
+require_supported_python()
 
 
 def _browser_needs_build(web_root: Path) -> bool:

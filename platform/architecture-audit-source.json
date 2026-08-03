@@ -13,12 +13,11 @@
     "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30770356732",
     "status": "pass",
     "python_versions": [
-      "3.11",
       "3.12"
     ],
     "node_version": "24",
     "local_observed": {
-      "python": "3.11.9",
+      "python": "3.12.10",
       "node": "24.18.0",
       "npm": "11.16.0"
     }

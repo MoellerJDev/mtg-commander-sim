@@ -23,9 +23,9 @@ def _load_json(path: Path) -> dict:
     return value
 
 
-def _package_version() -> str:
+def _project_metadata() -> dict:
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
-    return str(project["project"]["version"])
+    return project["project"]
 
 
 def _test_count() -> int:
@@ -117,10 +117,11 @@ def build_report() -> dict:
         "source": "platform/readiness-source.json",
         "stale_check": "python scripts/update_platform_status.py --check",
     }
+    project = _project_metadata()
     report["package"] = {
         "name": "mtg-commander-sim",
-        "version": _package_version(),
-        "python": ">=3.11",
+        "version": str(project["version"]),
+        "python": str(project["requires-python"]),
     }
     report["tests"] = {
         "deterministic_cases_discovered": _test_count(),

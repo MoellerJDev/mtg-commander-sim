@@ -295,7 +295,8 @@ class ProjectionHub:
         # No await occurs between the version check and event registration, so
         # notify() cannot race past this waiter on the event loop. Event waits
         # also cancel cleanly when a WebSocket disconnects; Condition.wait()
-        # under wait_for() could fail while reacquiring its lock on Python 3.11.
+        # under wait_for() could fail while reacquiring its lock on affected
+        # runtimes.
         if self.version(game_id) <= after:
             await asyncio.wait_for(event.wait(), timeout=timeout)
         return self.version(game_id)

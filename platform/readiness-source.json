@@ -610,7 +610,7 @@
   "validation": {
     "baseline_commit": "7d45ca8ffd4aa6ec611b0f0f1220025c6ecc3cab",
     "ci": {
-      "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
+      "matrix": "Python 3.12 on Ubuntu and Windows",
       "run_id": 30770356732,
       "status": "pass",
       "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30770356732"

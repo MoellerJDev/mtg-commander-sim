@@ -19,12 +19,17 @@ coverage, production-scale operations, or complete accessibility.
 
 ## Run locally — one command
 
-After installing the Python project, start everything with:
+The application requires CPython 3.12.x exactly. Bootstrap and start everything
+with:
 
 ```powershell
-python -m pip install -e . -r requirements-dev.txt
-python -m server
+.\scripts\bootstrap_windows.ps1
+.\.venv\Scripts\python.exe -m server
 ```
+
+For manual setup, run `py -3.12 -m venv .venv`, then install with
+`.\.venv\Scripts\python.exe -m pip install -e . -r requirements-dev.txt`.
+The bootstrap and normal server command do not open or focus a browser.
 
 The launcher installs `web/` dependencies if needed, performs a production
 browser build when sources are newer than `web/dist`, starts the API and
@@ -225,7 +230,8 @@ with comma-separated `MTG_ALLOWED_ORIGINS`, and production cookie security with
 `MTG_CARD_UPDATE_SECONDS` control the managed local paths and update behavior;
 `MTG_CARD_SNAPSHOT_DIR` overrides retained record-pinned databases.
 
-The browser served by `python -m server` is automatically accepted as the exact
+The browser served by `.\.venv\Scripts\python.exe -m server` is automatically
+accepted as the exact
 same origin (normally `http://127.0.0.1:8000`) for WebSocket upgrades.
 `MTG_ALLOWED_ORIGINS` is for additional origins such as a separate development
 frontend; it does not need to repeat the server's own origin.

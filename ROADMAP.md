@@ -30,7 +30,7 @@ The generated current ledger is
   preserving ancestry-proven intermediate work; pull-request chronology is
   retained in the changelog rather than this target plan
 - [x] verify the combined source tree under the complete local gate and public
-  Python 3.11/3.12 Ubuntu/Windows GitHub matrix
+  Ubuntu/Windows GitHub matrix; the current runtime policy is Python 3.12 only
 
 The immediate product milestone combines the former phases 1–3 into one
 authoritative server/browser vertical slice. It must prove strict commands,

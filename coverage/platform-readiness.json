@@ -108,7 +108,7 @@
   "next_task": "Certify and merge the durable damage-prevention, static-redirection, and browser mana/priority regression branch, then begin the generated damage-prevention continuations and aftermath batch from fresh certified main.",
   "package": {
     "name": "mtg-commander-sim",
-    "python": ">=3.11",
+    "python": ">=3.12,<3.13",
     "version": "0.8.0"
   },
   "platform": {
@@ -196,7 +196,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4406,
+    "deterministic_cases_discovered": 4413,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
@@ -206,7 +206,7 @@
     "baseline_commit": "7d45ca8ffd4aa6ec611b0f0f1220025c6ecc3cab",
     "card_program_census": "full_38485_trusted_810_capability_closed_808_residual_35426_failed_2249; commander_legal_31623_trusted_410_capability_closed_408_residual_31212_failed_1; focused_damage_prevention_commander_trusted_delta_plus_4; focused_damage_prevention_commander_oracle_exact_delta_plus_4; commander_material_residual_60765",
     "ci": {
-      "matrix": "Python 3.11 and 3.12 on Ubuntu and Windows",
+      "matrix": "Python 3.12 on Ubuntu and Windows",
       "run_id": 30770356732,
       "status": "pass",
       "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30770356732"
