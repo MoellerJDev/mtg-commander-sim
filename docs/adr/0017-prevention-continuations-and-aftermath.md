@@ -26,25 +26,30 @@ and a single precommit boundary.
 `damage_prevention_creation.py` owns typed shield creation. It validates resolved
 dynamic amounts, exact divided allocations, independent per-object shields,
 and optional chosen-source physical identity plus LKI before committing durable
-state. New chosen sources use the version-2 identity shape: the current logical
+state. New chosen sources use the version-3 identity shape: the current logical
 incarnation and zone are pinned, and a chosen permanent spell additionally pins
 the same logical incarnation on the battlefield for CR 400.7a/609.7a
 continuity. This includes a permanent-spell copy, which is offered by its public
 stack identity while its underlying copy-object identity remains authoritative.
 A later incarnation with the same physical card ID does not match.
-Historical version-0 and version-1 checkpoint shapes retain their original
-meaning during Game Record v3 replay.
+The same snapshot stores one strict canonical `ObjectQuerySpec` instead of
+parallel source-filter fields. Historical version-0 through version-2
+checkpoint shapes retain their original meaning during Game Record v3 replay.
 
-Chosen-source property filters are closed typed sets: all/any colors and
-required card types, subtypes, supertypes, or keywords. They are checked when
-the source is chosen and rechecked against the damage-source snapshot when
-damage would occur. Unknown predicates fail closed.
+Chosen-source property filters use the shared object predicate: all/any colors
+and required effective card types, subtypes, supertypes, or keywords. The
+compiler, choice continuation, and damage-source snapshot recheck share its
+strict serialization and evaluator. CR 609.7 identity, visibility, and LKI
+provenance remain source-specific. Unknown predicates fail closed.
 
 `damage_prevention_aftermath.py` prepares represented life, permanent-counter,
 and source-controller damage results. Life results enter the immutable
 `life.change` replacement tree before
-mutation and then commit through `life_change.py` plus the canonical life-state
-owner. Permanent counters continue through the canonical counter-placement
+mutation and then commit through `life_change.py` plus the mutation-only
+`life_state.py` owner. The focused `semantic_runtime/life_replacements.py`
+registry supplies ordinary `life.change` replacement effects; life handlers no
+longer depend on the damage-result registry. Permanent counters continue
+through the canonical counter-placement
 owner. Source-controller damage pins a `DamageSourceSnapshot`, derives the
 recipient from the prevented event, and prepares a nested `DamageProposal`
 against projected modifier state before any outer mutation. This makes
@@ -117,6 +122,8 @@ and the canonical replacement journal.
   `damage-prevention-source-controller-aftermath-v1` lower the closed
   source-controller-damage family without card-name dispatch. The trusted
   capability is `damage.prevention.aftermath.damage`.
+- Oracle IR v20 replaces the parallel chosen-source qualifier fields with the
+  strict shared object predicate while preserving historical snapshot replay.
 
 ## Remaining boundary
 

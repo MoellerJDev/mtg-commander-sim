@@ -203,8 +203,12 @@ class SemanticChoiceCharacterizationTests(unittest.TestCase):
         self.assertEqual(1, len(engine.state.damage_prevention_shields))
         shield = engine.state.damage_prevention_shields[0]
         self.assertEqual(chosen.object_id, shield.chosen_source.object_id)
-        self.assertEqual(chosen.logical_object_id, shield.chosen_source.logical_object_id)
-        self.assertEqual(2, shield.chosen_source.snapshot_version)
+        self.assertEqual(
+            chosen.logical_object_id,
+            shield.chosen_source.logical_object_id,
+        )
+        self.assertEqual(3, shield.chosen_source.snapshot_version)
+        self.assertTrue(shield.chosen_source.predicate.known_to_actor)
 
         with tempfile.TemporaryDirectory() as temporary:
             record = Path(temporary) / "damage-source-choice"

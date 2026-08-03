@@ -839,7 +839,7 @@ physical commander designations—not Oracle IDs—own Commander-damage ledgers.
 The replacement model is split into deep-immutable model, applicability, typed
 operation, ordering, and strict replay modules. Generic compilation now covers
 those four keywords plus a closed family of static double-damage and fixed-
-prevention wording. Oracle IR v19 also lowers closed finite-shield wording,
+prevention wording. Oracle IR v20 also lowers closed finite-shield wording,
 dynamic resolved quantities, exact divided allocations, independent per-object
 shields, chosen-source next-instance/all-damage effects, represented
 prevention-dependent life/counter/source-controller-damage aftermath, ordered
@@ -860,18 +860,22 @@ dispatches one aggregate event per effect. Public permanents, stack spells,
 face-up command-zone objects, and explicitly referred public former-zone
 objects can be chosen through a seat-scoped continuation when their public
 characteristics are represented; face-down source characteristics fail closed.
-Version-2 source
-identity follows a permanent spell only to the permanent it becomes, never a
-later incarnation of the same card; source properties are rechecked through a
-closed color/type/subtype/supertype/keyword vocabulary. Replacement choices
+Version-3 source identity follows a permanent spell only to the permanent it
+becomes, never a later incarnation of the same card; its strict serialized
+`ObjectQuerySpec` rechecks effective colors, types, subtypes, supertypes, and
+keywords through the shared object-predicate evaluator. Historical version-0
+through version-2 checkpoints retain their original shapes. Replacement choices
 discovered during mana payment roll the payment back and resume the exact cast or
 activation after the choice. Bounded handlers cover fixed life-gain
 multiplication, a whole-result life floor, and transactional CR 615.5
 life/permanent-counter/source-controller-damage aftermath. Represented aftermath life gain now enters a
-canonical replacement-capable `life.change` transaction; `life-effects.v2`
+canonical replacement-capable `life.change` transaction; the focused
+`semantic_runtime/life_replacements.py` registry discovers ordinary life
+replacement effects while `life_state.py` remains the mutation-only owner.
+`life-effects.v2`
 routes its complete closed operation inventory through the same precommit
-boundary with source, cause, requested/final amount, replacement journal, and
-replay identity. Arbitrary opaque
+boundary and reports requested amount, final per-player delta, replacement
+journal, and replay identity from one typed batch summary. Arbitrary opaque
 referred-object provenance, face-down sources, broader source-property
 predicates, life-gain prevention (including `can't gain life`), other
 non-effect-runtime life producers, CR 615.13 prevention-trigger stack ownership,
@@ -1213,6 +1217,12 @@ container isolation when filesystem-level isolation must also be proven.
   materialization and explicit referred-object provenance preservation
 - `mtg_commander_sim/life_change.py` — immutable replacement-capable life-event
   preparation, replay validation, and canonical life-state commit
+- `mtg_commander_sim/life_state.py` — stale-state validation and mutation-only
+  final life-value commit, including explicitly nonreplaceable costs
+- `mtg_commander_sim/semantic_runtime/life_replacements.py` — bounded
+  `life.change` runtime components and source discovery
+- `mtg_commander_sim/object_predicate.py` / `object_query.py` — canonical
+  serializable object predicates and their immutable rules-fact evaluator
 - `mtg_commander_sim/record.py` — Game Record v3 hashing, journals, migration, inspection, and replay
 - `mtg_commander_sim/report.py` — derived review and fidelity classification
 - `mtg_commander_sim/carddb.py` — local Oracle/rulings database

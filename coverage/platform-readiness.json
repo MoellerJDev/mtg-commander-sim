@@ -15,7 +15,7 @@
   "generated": {
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "b73ca5da9f9e4067bca42eb8df02001ef8fa432363b682769bcba03c31452344",
+    "evaluated_source_tree_hash": "9cf0d5625c5ad8f31367a5ae5831e70fbf369bfa672060eacf5558f14fb8fca8",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -102,10 +102,10 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "Certified main through PR 77 includes typed dynamic/divided/per-object shields, seat-scoped public source choice, exact-incarnation continuity, replacement-capable CR 615.5 life/permanent-counter/source-controller-damage aftermath, immediate independent life sequencing, same-chooser ordering, and mana-payment continuation. Source-controller damage recursively prepares through ordinary replacement/prevention against projected modifier state, preserves immutable source LKI, rejects mandatory cycles before mutation, and replays exactly. Generic Oracle IR v19 lowering recognizes Deflecting Palm without a name/Oracle-ID branch. The August 2 census is Commander exact/trusted/capability-closed 417/417/415. CR 615.13 triggered prevention results, explicit-target or mixed aftermath, life-gain prevention, face-down source characteristics, and wider source predicates remain blocked.",
+      "evidence": "Certified main through PR 77 includes typed source-controller CR 615.5 damage aftermath, immutable damage source/value boundaries, projected modifier preparation, cycle rejection, exact replay, and generic Deflecting Palm lowering. The Oracle IR v20 feature head moves ordinary life replacement discovery into one focused registry, keeps life_state mutation-only, reports final replacement-adjusted life batches, and replaces parallel chosen-source filters with one strict ObjectQuerySpec shared by compiler, choice, snapshot, and damage-time recheck. Historical chosen-source snapshot versions 0 through 2 remain replay-compatible. The August 2 census remains Commander exact/trusted/capability-closed 417/417/415; this ownership consolidation does not inflate card support. CR 615.13 triggered prevention results, explicit-target or mixed aftermath, life-gain prevention, face-down source characteristics, and wider source predicates remain blocked.",
       "id": "damage_prevention_continuations_and_aftermath",
       "name": "Damage-prevention continuations and aftermath",
-      "status": "integrated_on_certified_main"
+      "status": "implemented_at_feature_head"
     },
     {
       "evidence": "The versioned 2026-06-19 corpus and reviewed CR 400-408, CR 500-514, focused CR 725, and focused CR 508-509/608 current-turn history slices are represented. Broader rules and Oracle completeness remain explicitly unclaimed.",
@@ -120,7 +120,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Consolidate life-change replacement ownership and chosen-source predicates, then implement CR 615.13 prevention-trigger stack ownership and generic lowering as the next dependency-ready rules family.",
+  "next_task": "Implement CR 615.13 prevention-trigger stack ownership and generic lowering as the next dependency-ready rules family after the life-change ownership feature head is integrated.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.12,<3.13",
@@ -146,9 +146,9 @@
     "transport_neutral_service": "implemented_strict_protocol_3"
   },
   "provenance": {
-    "certified_head_sha": "16f042c293ffadaa870b1103948fe6de2ca44101",
-    "feature_head_sha": "16f042c293ffadaa870b1103948fe6de2ca44101",
-    "generation_timestamp": "2026-08-03T19:56:00Z"
+    "certified_head_sha": "68ad8b221d3b41ddaf09365fd34d2718c0a73a37",
+    "feature_head_sha": "dbe8beb455d186590d66790fe835841fc6c829e7",
+    "generation_timestamp": "2026-08-03T20:50:37Z"
   },
   "repository": {
     "default_branch": "main",
@@ -216,19 +216,19 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4543,
+    "deterministic_cases_discovered": 4548,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
     "web_files": 28
   },
   "validation": {
-    "card_program_census": "full_38485_trusted_817_capability_closed_815_residual_35419_failed_2249_material_residual_69359; commander_legal_31623_trusted_417_capability_closed_415_residual_31205_failed_1_material_residual_60745; full_oracle_exact_3057_partial_16113_unresolved_19315_material_residual_69371; commander_oracle_exact_417_partial_14692_unresolved_16514_material_residual_60748; source_controller_damage_aftermath_delta_exact_plus_1_trusted_plus_1_capability_closed_plus_1_residual_minus_1_material_residual_minus_1",
+    "card_program_census": "oracle_ir_v20_full_38485_trusted_817_capability_closed_815_residual_35419_failed_2249_material_residual_69359; commander_legal_31623_trusted_417_capability_closed_415_residual_31205_failed_1_material_residual_60745; full_oracle_exact_3057_partial_16113_unresolved_19315_material_residual_69371; commander_oracle_exact_417_partial_14692_unresolved_16514_material_residual_60748; life_and_source_ownership_delta_zero_by_design",
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30846670803,
+      "run_id": 30850517667,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30846670803"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30850517667"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -236,8 +236,8 @@
       "browser_typecheck_and_production_build": "pass_typecheck_and_focused_headless_journey",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "certified_main_through_pr77_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass; post_merge_main_smoke_integration_behavior_passed_before_provenance_history_validation",
-      "focused_rules_tests": "pass_source_lki_projected_shield_consumption_nested_prevention_unpreventable_zero_cycle_rollback_four_player_replay_compiler_cardprogram_capability_and_killed_quantity_mutant",
+      "deterministic_tests": "certified_main_through_pr78_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; focused_life_change_damage_result_object_predicate_chosen_source_copy_oracle_cardprogram_architecture_and_capability_shards_pass",
+      "focused_rules_tests": "pass_final_life_batch_results_registry_ownership_source_predicate_serialization_effective_characteristics_historical_source_snapshots_lki_replay_and_architecture_dependency_guards",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",

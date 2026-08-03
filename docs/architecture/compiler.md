@@ -2,7 +2,7 @@
 title: "Oracle compiler"
 status: "current"
 authoritative_source: "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler/program_generation.py, mtg_commander_sim/card_programs, the capability registry, and pinned coverage artifacts"
-verified: "2026-08-01"
+verified: "2026-08-03"
 audience: "compiler and rules contributors"
 maintenance: "hand-maintained"
 ---
@@ -57,6 +57,11 @@ flowchart LR
   production. Only explicit prevention-dependent wording lowers into the typed
   CR 615.5 result; CR 615.13 `When damage is prevented this way` wording remains
   residual until its triggered stack object is represented.
+- Oracle IR v20 replaces parallel chosen-source qualifier fields with a strict
+  canonical `ObjectQuerySpec`. The compiler, seat-scoped source choice, durable
+  source snapshot, and damage-time characteristic recheck therefore share one
+  serialized predicate meaning while retaining source-specific CR 609.7
+  identity and provenance rules.
 
 ## Extension points
 
