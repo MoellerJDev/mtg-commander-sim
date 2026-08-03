@@ -7,6 +7,15 @@ const serverData = path.resolve("..", "local", `playwright-${process.pid}`);
 // reconnect to Playwright's disposable server while the suite is running.
 const serverPort = Number(process.env.MTG_E2E_SERVER_PORT ?? "18080");
 const webPort = Number(process.env.MTG_E2E_WEB_PORT ?? "15173");
+const pythonExecutable =
+  process.env.MTG_PYTHON_EXECUTABLE ??
+  (process.platform === "win32"
+    ? path.resolve("..", ".venv", "Scripts", "python.exe")
+    : "python");
+if (pythonExecutable.includes('"')) {
+  throw new Error("MTG_PYTHON_EXECUTABLE cannot contain a double quote");
+}
+const pythonCommand = `"${pythonExecutable}"`;
 
 export default defineConfig({
   testDir: "./tests",
@@ -33,7 +42,7 @@ export default defineConfig({
       // The normal launcher opens the system browser for manual play. Tests
       // use Playwright's isolated headless browser and must suppress that side
       // effect explicitly.
-      command: `python -m server --host 127.0.0.1 --port ${serverPort} --no-open --no-build-browser`,
+      command: `${pythonCommand} -m server --host 127.0.0.1 --port ${serverPort} --no-open --no-build-browser`,
       cwd: "..",
       url: `http://127.0.0.1:${serverPort}/api/v1/health`,
       reuseExistingServer: false,

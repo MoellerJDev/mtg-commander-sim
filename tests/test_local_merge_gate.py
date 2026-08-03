@@ -5,6 +5,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+import sys
 
 from mtg_commander_sim import CardDatabase
 from scripts.build_test_database import build_fixture_database
@@ -218,6 +219,10 @@ class LocalMergeGateTests(unittest.TestCase):
         self.assertEqual(
             str(database),
             environment["MTG_CARD_DB"],
+        )
+        self.assertEqual(
+            str(Path(sys.executable).resolve()),
+            environment["MTG_PYTHON_EXECUTABLE"],
         )
         self.assertIn(
             str(Path(__file__).resolve().parent),

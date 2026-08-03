@@ -304,6 +304,7 @@ def _write_summary(path: Path, summary: dict) -> None:
 def gate_environment(database: Path) -> dict[str, str]:
     environment = os.environ.copy()
     environment["MTG_CARD_DB"] = str(database)
+    environment["MTG_PYTHON_EXECUTABLE"] = str(Path(sys.executable).resolve())
     test_path = str(ROOT / "tests")
     existing_python_path = environment.get("PYTHONPATH")
     environment["PYTHONPATH"] = (
