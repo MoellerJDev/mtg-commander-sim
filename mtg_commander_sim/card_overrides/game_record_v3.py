@@ -120,3 +120,25 @@ def normalize_game_record_v3_effect(effect: Mapping[str, Any]) -> dict[str, Any]
             }
         )
     return value
+
+
+def historical_granted_activated_ability_descriptors(
+    annotations: Mapping[str, Any],
+) -> tuple[str, ...]:
+    """Adapt replay-pinned named markers without leaking them into rules code."""
+
+    descriptors = []
+    if annotations.get("urzas_saga_chapter_1"):
+        descriptors.append("saga_mana:{T}: Add {C}.")
+    if annotations.get("urzas_saga_chapter_2"):
+        descriptors.append(
+            "saga_construct:{2}, {T}: Create a 0/0 colorless Construct "
+            "artifact creature token."
+        )
+    return tuple(descriptors)
+
+
+__all__ = [
+    "historical_granted_activated_ability_descriptors",
+    "normalize_game_record_v3_effect",
+]

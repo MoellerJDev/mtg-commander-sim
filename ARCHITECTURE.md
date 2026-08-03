@@ -41,6 +41,14 @@ and caches only the card images requested by submitted decks and visible
 projections. This remains a single-node development deployment, not complete
 future-schema/accessibility coverage or a multi-process production deployment.
 
+Casting and activation are no longer independently advertised and executed by
+large engine methods. The rules layer builds immutable revision-pinned
+proposals, projects their fingerprints as seat-scoped action offers, and
+revalidates the same source, cost, target, timing, and payability facts before
+typed commit owners mutate state. `CommanderEngine` retains narrow
+compatibility facades while those subsystems, the shared action catalog, and
+the mana-activation transaction own their focused responsibilities.
+
 This describes the implemented boundary, not the target internal structure.
 `CommanderEngine` currently combines too many rules and mutation
 responsibilities and exceeds the repository's review thresholds by a wide

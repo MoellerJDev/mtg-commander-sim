@@ -392,8 +392,10 @@ generated documentation fixtures with bearer capabilities redacted. See
   controller-at-trigger-time, intervening-condition, and delayed-object-
   incarnation invariants; complete trigger grammar, two-part APNAP ordering,
   state/reflexive triggers, and the look-back exception matrix remain blocked
-- source-reviewed CR 601 casting with executable mana-ability payment-window
-  ordering, transactional rollback and cast-trigger witnesses; complete
+- source-reviewed CR 601 casting with immutable revision-pinned proposals,
+  shared advertisement/execution cost and target queries, executable
+  mana-ability payment-window ordering, transactional rollback and cast-trigger
+  witnesses; complete
   announcement ordering, choice/cost grammar, proposal-dependent permissions,
   and opponent-made casting choices remain blocked
 - source-reviewed CR 600 section taxonomy linked to its dependent CR 601-609
@@ -554,8 +556,9 @@ generated documentation fixtures with bearer capabilities redacted. See
   ordinary no-priority advancement, and repeat-cleanup handling after an
   exceptional priority window; universal turn-duration expiration and complete
   state-action/trigger/APNAP interactions remain blocked
-- source-reviewed CR 602 activation handling with corrected untap-symbol
-  summoning sickness and object-scoped once-per-turn restrictions; full cost
+- source-reviewed CR 602 activation handling with immutable source/cost/target
+  proposals, corrected untap-symbol summoning sickness, generic Crew and Craft
+  lowering, and object-scoped once-per-turn restrictions; full cost
   grammar, activation transactions, opponent choices, and acquired-ability
   provenance remain blocked
 - trust-aware semantic preflight for files and live Moxfield URLs
@@ -1137,6 +1140,14 @@ container isolation when filesystem-level isolation must also be proven.
   registries, immutable rules queries, typed intents, and canonical execution
 - `mtg_commander_sim/mana.py` — conservative mana source parsing/planning
 - `mtg_commander_sim/abilities.py` — explicit Oracle ability/cost extraction and zone authorization
+- `mtg_commander_sim/rules/action_proposals.py` — immutable canonical action
+  offers and proposal fingerprints
+- `mtg_commander_sim/rules/action_catalog.py` — principal-scoped executable
+  land, cast, and activation offer composition
+- `mtg_commander_sim/rules/casting/` — casting cost/proposal queries and typed
+  commit ownership
+- `mtg_commander_sim/rules/activation/` — activated-ability query,
+  availability, proposal, resolution, and commit ownership
 - `mtg_commander_sim/session.py` — deterministic session façade
 - `mtg_commander_sim/service.py` — transport-neutral application boundary
 - `mtg_commander_sim/pilot.py` — optional automation-client orchestration and metrics

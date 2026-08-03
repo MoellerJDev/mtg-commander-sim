@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "7d45ca8ffd4aa6ec611b0f0f1220025c6ecc3cab",
+    "baseline_main_commit": "6ccb1e26bf5f7f2c33784f8d09481050b338525e",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-02",
-    "phase": "damage_prevention_shields_and_redirection",
-    "scope_note": "Certified main through PR 68 includes stable physical Commander-damage identity, immutable strictly replayed replacement trees, typed replacement operations, canonical life/counter damage results, and generic damage keyword/static compilation. The current focused branch adds typed durable prevention and redirection ownership, exact simultaneous allocation, cleanup expiration, aggregate prevention events, Oracle IR v15 shield/redirection lowering, and focused browser priority/mana regressions."
+    "phase": "casting_activation_proposal_consolidation",
+    "scope_note": "Certified main through the Python 3.12 migration. The current focused branch consolidates casting, activation, and legal-action advertisement through immutable revision-pinned proposals; establishes typed read-only query and commit owners; generically lowers Crew, Craft, granted activated abilities, and static cast-cost modifiers; and reduces CommanderEngine, direct writes, printed-name literals, and oversized functions without widening semantic-operation dispatch."
   },
   "ci": {
     "workflow": "CI",
-    "run_id": 30770356732,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30770356732",
+    "run_id": 30788334496,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30788334496",
     "status": "pass",
     "python_versions": [
       "3.12"
@@ -47,6 +47,8 @@
       ,"mtg_commander_sim/effect_runtime/zones_and_attachments.py"
       ,"mtg_commander_sim/effect_runtime/damage_life_and_turns.py"
       ,"mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py"
+      ,"mtg_commander_sim/rules/casting/commit.py"
+      ,"mtg_commander_sim/rules/activation/commit.py"
     ],
     "state_parameter_modules": [
       "mtg_commander_sim/record.py",
@@ -135,13 +137,17 @@
     },
     {
       "id": "casting_activation_and_costs",
-      "status": "split_with_engine_as_orchestrator_and_executor",
+      "status": "typed_proposal_query_and_commit_subsystems_with_engine_facades",
       "owners": [
         "mtg_commander_sim/engine.py",
         "mtg_commander_sim/abilities.py",
-        "mtg_commander_sim/mana.py"
+        "mtg_commander_sim/mana.py",
+        "mtg_commander_sim/mana_activation.py",
+        "mtg_commander_sim/rules/action_catalog.py",
+        "mtg_commander_sim/rules/casting",
+        "mtg_commander_sim/rules/activation"
       ],
-      "missing_dedicated_owner": true
+      "missing_dedicated_owner": false
     },
     {
       "id": "semantic_effect_execution",

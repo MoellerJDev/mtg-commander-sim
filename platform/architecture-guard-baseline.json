@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "7d45ca8ffd4aa6ec611b0f0f1220025c6ecc3cab",
+  "baseline_commit": "6ccb1e26bf5f7f2c33784f8d09481050b338525e",
   "card_named_helpers": [
     {
       "file": "mtg_commander_sim/engine.py",
@@ -13,48 +13,6 @@
       "kind": "assignment",
       "state_path": "<state-root>",
       "symbol": "__init__"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "assignment",
-      "state_path": "players.yield_policy",
-      "symbol": "_activate"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "assignment",
-      "state_path": "priority_passes",
-      "symbol": "_activate"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "assignment",
-      "state_path": "priority_player",
-      "symbol": "_activate"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "augmented_assignment",
-      "state_path": "players.energy",
-      "symbol": "_activate"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "augmented_assignment",
-      "state_path": "players.life",
-      "symbol": "_activate"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "mutating_call:append",
-      "state_path": "stack",
-      "symbol": "_activate"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "augmented_assignment",
-      "state_path": "players.mana_pool",
-      "symbol": "_activate_mana_plan"
     },
     {
       "file": "mtg_commander_sim/engine.py",
@@ -181,42 +139,6 @@
       "kind": "assignment",
       "state_path": "players.yield_policy",
       "symbol": "_can_auto_pass"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "assignment",
-      "state_path": "players.yield_policy",
-      "symbol": "_cast"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "assignment",
-      "state_path": "priority_passes",
-      "symbol": "_cast"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "assignment",
-      "state_path": "priority_player",
-      "symbol": "_cast"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "augmented_assignment",
-      "state_path": "players.life",
-      "symbol": "_cast"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "mutating_call:append",
-      "state_path": "stack",
-      "symbol": "_cast"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "mutating_call:pop",
-      "state_path": "players.stats",
-      "symbol": "_cast"
     },
     {
       "file": "mtg_commander_sim/engine.py",
@@ -892,12 +814,12 @@
     }
   ],
   "direct_game_state_writes_by_file": {
-    "mtg_commander_sim/engine.py": 140,
+    "mtg_commander_sim/engine.py": 125,
     "mtg_commander_sim/permissions.py": 8,
     "mtg_commander_sim/record.py": 11
   },
   "engine": {
-    "logical_lines": 17197,
+    "logical_lines": 14788,
     "methods": [
       {
         "kind": "method",
@@ -912,11 +834,6 @@
       {
         "kind": "method",
         "name": "_ability_choice_payable",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
-        "name": "_ability_hints",
         "visibility": "private"
       },
       {
@@ -1161,11 +1078,6 @@
       },
       {
         "kind": "method",
-        "name": "_card_cast_requirements",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
         "name": "_cast",
         "visibility": "private"
       },
@@ -1187,11 +1099,6 @@
       {
         "kind": "method",
         "name": "_choice_options",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
-        "name": "_classified_ability_hints",
         "visibility": "private"
       },
       {
@@ -1732,11 +1639,6 @@
       {
         "kind": "method",
         "name": "_loyalty_cost_modifier_present",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
-        "name": "_mana_ability_hints",
         "visibility": "private"
       },
       {
@@ -2525,12 +2427,12 @@
         "visibility": "public"
       }
     ],
-    "physical_lines": 18042
+    "physical_lines": 15603
   },
   "exception_binding": {
-    "adr": "docs/adr/0015-durable-damage-modifier-ownership.md",
-    "allowance_fingerprint": "967b2eb3671bf2838a2bcf292632a0b4c86fa0d46a15fb514619dd290725072f",
-    "exception_id": "ARCH-EXC-0003"
+    "adr": "docs/adr/0016-typed-casting-activation-proposals.md",
+    "allowance_fingerprint": "bcb711f9e590575446d327c96196bcc9c7e46ac7eaa066853fa4c95995782fa5",
+    "exception_id": "ARCH-EXC-0004"
   },
   "legacy_card_specific_operations": [
     "daretti_exchange",
@@ -2542,19 +2444,10 @@
   ],
   "oracle_id_literals": [
     {
-      "column": 30,
-      "file": "mtg_commander_sim/engine.py",
-      "in_condition": true,
-      "line": 6816,
-      "oracle_id": "883a4180-9ede-4249-a4b8-3a29c998fb63",
-      "symbol": "_activated_abilities",
-      "value": "883a4180-9ede-4249-a4b8-3a29c998fb63"
-    },
-    {
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 6979,
+      "line": 6099,
       "oracle_id": "dae4815e-9025-4993-ab46-52a3f1a7219e",
       "symbol": "_semantic_key_for_ability",
       "value": "dae4815e-9025-4993-ab46-52a3f1a7219e:granted:damage"
@@ -2607,11 +2500,6 @@
   ],
   "oversized_functions_and_methods": [
     {
-      "file": "mtg_commander_sim/abilities.py",
-      "logical_lines": 212,
-      "symbol": "parse_activated_abilities"
-    },
-    {
       "file": "mtg_commander_sim/card_programs/trust.py",
       "logical_lines": 153,
       "symbol": "build_program_trust_closure"
@@ -2658,16 +2546,6 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 339,
-      "symbol": "CommanderEngine._activate"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 162,
-      "symbol": "CommanderEngine._activate_mana_plan"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
       "logical_lines": 279,
       "symbol": "CommanderEngine._apply_layered_characteristic_annotations"
     },
@@ -2675,16 +2553,6 @@
       "file": "mtg_commander_sim/engine.py",
       "logical_lines": 193,
       "symbol": "CommanderEngine._begin_siege_defeated_resolution"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 622,
-      "symbol": "CommanderEngine._cast"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 418,
-      "symbol": "CommanderEngine._cast_cost_options"
     },
     {
       "file": "mtg_commander_sim/engine.py",
@@ -2728,13 +2596,8 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 333,
+      "logical_lines": 315,
       "symbol": "CommanderEngine._prepare_stack_resolution"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 577,
-      "symbol": "CommanderEngine._priority_action_hints"
     },
     {
       "file": "mtg_commander_sim/engine.py",
@@ -2844,7 +2707,7 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 17197
+      "logical_lines": 14788
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
@@ -2982,6 +2845,6 @@
   ],
   "schema_version": 2,
   "source_fingerprints": {
-    "printed_name_allowances_sha256": "faf2034d4d3a17fb3d8b19cd3f0fa6a65a34884da0a7d612bb6a6c6d238b53c2"
+    "printed_name_allowances_sha256": "808157056f7a703da9ae7fb80205e27ea76510a2a5fbeda0920eeda4302d4451"
   }
 }

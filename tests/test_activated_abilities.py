@@ -370,6 +370,41 @@ class ActivatedAbilityAndCostTests(unittest.TestCase):
 
         self.assertEqual((), abilities)
 
+    def test_crew_keyword_compiles_without_a_card_name_override(self):
+        abilities = parse_activated_abilities(
+            card_name="Example Vehicle",
+            oracle_text="Crew 3",
+            keywords=("Crew",),
+        )
+
+        self.assertEqual(1, len(abilities))
+        self.assertEqual("crew", abilities[0].ability_id)
+        self.assertEqual(3, abilities[0].crew_threshold)
+        self.assertTrue(abilities[0].compiled_cost)
+
+    def test_craft_reminder_compiles_both_generic_cost_choices(self):
+        abilities = parse_activated_abilities(
+            card_name="Example Relic",
+            oracle_text=(
+                "Craft with creature {4}{B} ({4}{B}, Exile this artifact, "
+                "Exile a creature you control or a creature card from your "
+                "graveyard: Return this card transformed under its owner's "
+                "control. Craft only as a sorcery.)"
+            ),
+            keywords=("Craft",),
+        )
+
+        self.assertEqual(
+            {"craft_battlefield", "craft_graveyard"},
+            {ability.ability_id for ability in abilities},
+        )
+        self.assertEqual(
+            {"battlefield", "graveyard"},
+            {ability.choices[0].zone for ability in abilities},
+        )
+        self.assertTrue(all(ability.compiled_cost for ability in abilities))
+        self.assertTrue(all(ability.sorcery_speed for ability in abilities))
+
     def test_quoted_granted_ability_is_not_source_activated_ability(self):
         abilities = parse_activated_abilities(
             card_name="Insidious Roots",
