@@ -76,6 +76,7 @@
       "test_exact_deck_triggers",
       "test_exact_mishra_closure",
       "test_exact_zimone_closure",
+      "test_trigger_batches",
       "test_triggered_abilities",
       "test_turn_history_rules",
       "test_turn_structure_rules",

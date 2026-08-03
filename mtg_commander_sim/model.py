@@ -10,6 +10,7 @@ from .damage_modifier_state import (
     DamagePreventionShield,
     DamageRedirectionEffect,
 )
+from .trigger_batches import PendingTriggerBatch, TriggerBatchError
 from .util import normalize_mana_bundle, stable_json
 
 ZoneName = Literal[
@@ -593,7 +594,7 @@ class GameState:
     turn_history: TurnHistory | None = field(default_factory=TurnHistory)
     # CR 725 designation. ``None`` means no player has become the monarch.
     monarch: str | None = None
-    pending_trigger_batches: list[dict[str, Any]] = field(
+    pending_trigger_batches: list[PendingTriggerBatch] = field(
         default_factory=list
     )
     combat: CombatState = field(default_factory=CombatState)
@@ -663,9 +664,9 @@ class GameState:
                 else {}
             ),
             "monarch": self.monarch,
-            "pending_trigger_batches": copy.deepcopy(
-                self.pending_trigger_batches
-            ),
+            "pending_trigger_batches": [
+                batch.to_dict() for batch in self.pending_trigger_batches
+            ],
             "combat": self.combat.to_dict(),
             "events": [event.to_dict() for event in self.events],
             "annotations": copy.deepcopy(self.annotations),
@@ -728,7 +729,7 @@ class GameState:
                 else None
             ),
             monarch=data.get("monarch"),
-            pending_trigger_batches=copy.deepcopy(
+            pending_trigger_batches=cls._pending_trigger_batches_from_dict(
                 data.get("pending_trigger_batches", [])
             ),
             combat=CombatState.from_dict(data.get("combat", {})),
@@ -750,6 +751,16 @@ class GameState:
             mulligan_round=int(data.get("mulligan_round", 0)),
             ref_counters=dict(data.get("ref_counters", {})),
         )
+
+    @staticmethod
+    def _pending_trigger_batches_from_dict(
+        data: Any,
+    ) -> list[PendingTriggerBatch]:
+        if not isinstance(data, list):
+            raise TriggerBatchError(
+                "pending_trigger_batches must be an array"
+            )
+        return [PendingTriggerBatch.from_dict(batch) for batch in data]
 
     def save(self, path: str | Path) -> None:
         path = Path(path)

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "280330679c40136a72e5601ec2302b555614ffad2abb81fbf482930ec7287869",
-  "declaration_source_fingerprint": "3f2e59f6a6f17ba3441491182d7b7dd84b3ee96e0176f7cc4659544aebb3cdb6",
+  "registry_fingerprint": "4f30391709325a5ce7439f87a657f2afdba1327e8303dae8771492538a8152bc",
+  "declaration_source_fingerprint": "d5222b593ce3bdac951527dbdedc89810a25fbe68cb72b9ac9f340a2be7d3804",
   "declarations": [
     {
       "capability_id": "continuous.basic_land_type.add_all_lands",
@@ -4019,6 +4019,23 @@
     },
     {
       "capability_id": "trigger.placement.apnap",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_trigger_batches.UnifiedTriggerBatchIntegrationTests.test_semantic_and_delayed_occurrences_share_one_apnap_batch",
+      "official_rule_ids": [
+        "101.4",
+        "603.3",
+        "603.3b",
+        "603.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Converge already-detected static-source and delayed trigger occurrences into one immutable APNAP batch and ordinary stack placement path."
+    },
+    {
+      "capability_id": "trigger.placement.apnap",
       "evidence_class": "multiplayer",
       "test_id": "tests.test_preflight_v080.NormalizedZoneEventTests.test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
       "official_rule_ids": [
@@ -4054,6 +4071,23 @@
     {
       "capability_id": "trigger.placement.apnap",
       "evidence_class": "negative",
+      "test_id": "tests.test_trigger_batches.UnifiedTriggerBatchIntegrationTests.test_malformed_checkpoint_batch_fails_without_mutating_live_state",
+      "official_rule_ids": [
+        "101.4",
+        "603.3",
+        "603.3b",
+        "603.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed nested trigger-batch checkpoint data before it can alter the live game state."
+    },
+    {
+      "capability_id": "trigger.placement.apnap",
+      "evidence_class": "negative",
       "test_id": "tests.test_trigger_targeting.TriggerTargetingTests.test_invalid_mandatory_trigger_is_removed_before_next_choice",
       "official_rule_ids": [
         "101.4",
@@ -4067,6 +4101,23 @@
         "commander_review"
       ],
       "applicability_note": "Remove a represented trigger whose mandatory public targets disappeared, then continue to the next waiting trigger."
+    },
+    {
+      "capability_id": "trigger.placement.apnap",
+      "evidence_class": "positive",
+      "test_id": "tests.test_trigger_batches.UnifiedTriggerBatchIntegrationTests.test_same_controller_uses_one_order_continuation_for_all_sources",
+      "official_rule_ids": [
+        "101.4",
+        "603.3",
+        "603.3b",
+        "603.3d"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Use one same-controller bottom-to-top ordering capability and one versioned continuation for delayed and static-source trigger occurrences."
     },
     {
       "capability_id": "trigger.placement.apnap",
@@ -4509,5 +4560,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "7c60b89bc37bad2256c7b89babc8d0d390a80a12be1cdf3af62229339adda118"
+  "fingerprint": "f57ba77d3fdcfe309bde30081fd4538f80407c0474af20ed03254a592ecbd936"
 }

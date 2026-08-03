@@ -22,6 +22,7 @@ from mtg_commander_sim.prevention_triggers import (
     PreventionTriggerError,
     prevention_trigger_result_from_dict,
 )
+from mtg_commander_sim.trigger_processing import begin_pending_trigger_batch
 from mtg_commander_sim.record import (
     authoritative_state_hash,
     checkpoint_envelope,
@@ -381,7 +382,7 @@ class PreventionTriggerStackTests(DamageReplacementPipelineBase):
         self.assertEqual("B", waiting[0]["controller"])
         self.assertEqual(monitor_b.object_id, waiting[0]["source_object_id"])
         self.assertNotEqual(monitor_c.object_id, waiting[0]["source_object_id"])
-        self.assertFalse(engine._begin_pending_semantic_trigger_batch())
+        self.assertFalse(begin_pending_trigger_batch(engine))
         self.assertEqual(1, len(engine.state.stack))
         engine._prepare_stack_resolution()
         self.assertEqual(3, monitor_b.counters["+1/+1"])
@@ -447,7 +448,7 @@ class PreventionTriggerStackTests(DamageReplacementPipelineBase):
                 ),
             ),
         )
-        self.assertFalse(engine._begin_pending_semantic_trigger_batch())
+        self.assertFalse(begin_pending_trigger_batch(engine))
         self.assertTrue(engine._begin_pending_trigger_target_selection())
         self.assertEqual("semantic.target", engine.state.pending_decision.kind)
         hidden_ref = engine.state.cards[
@@ -595,7 +596,7 @@ class PreventionTriggerStackTests(DamageReplacementPipelineBase):
                 created_turn_sequence=engine.state.turn_sequence,
             )
         )
-        self.assertFalse(engine._begin_pending_semantic_trigger_batch())
+        self.assertFalse(begin_pending_trigger_batch(engine))
         self.assertEqual(1, len(engine.state.stack))
         item = engine.state.stack[-1]
         self.assertEqual(

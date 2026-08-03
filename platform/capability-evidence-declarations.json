@@ -3317,6 +3317,14 @@
     },
     {
       "capability_id": "trigger.placement.apnap",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_trigger_batches.UnifiedTriggerBatchIntegrationTests.test_semantic_and_delayed_occurrences_share_one_apnap_batch",
+      "official_rule_ids": ["101.4", "603.3", "603.3b", "603.3d"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Converge already-detected static-source and delayed trigger occurrences into one immutable APNAP batch and ordinary stack placement path."
+    },
+    {
+      "capability_id": "trigger.placement.apnap",
       "evidence_class": "multiplayer",
       "test_id": "tests.test_preflight_v080.NormalizedZoneEventTests.test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
       "official_rule_ids": ["101.4", "603.3", "603.3b", "603.3d"],
@@ -3334,10 +3342,26 @@
     {
       "capability_id": "trigger.placement.apnap",
       "evidence_class": "negative",
+      "test_id": "tests.test_trigger_batches.UnifiedTriggerBatchIntegrationTests.test_malformed_checkpoint_batch_fails_without_mutating_live_state",
+      "official_rule_ids": ["101.4", "603.3", "603.3b", "603.3d"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject malformed nested trigger-batch checkpoint data before it can alter the live game state."
+    },
+    {
+      "capability_id": "trigger.placement.apnap",
+      "evidence_class": "negative",
       "test_id": "tests.test_trigger_targeting.TriggerTargetingTests.test_invalid_mandatory_trigger_is_removed_before_next_choice",
       "official_rule_ids": ["101.4", "603.3", "603.3b", "603.3d"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Remove a represented trigger whose mandatory public targets disappeared, then continue to the next waiting trigger."
+    },
+    {
+      "capability_id": "trigger.placement.apnap",
+      "evidence_class": "positive",
+      "test_id": "tests.test_trigger_batches.UnifiedTriggerBatchIntegrationTests.test_same_controller_uses_one_order_continuation_for_all_sources",
+      "official_rule_ids": ["101.4", "603.3", "603.3b", "603.3d"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Use one same-controller bottom-to-top ordering capability and one versioned continuation for delayed and static-source trigger occurrences."
     },
     {
       "capability_id": "trigger.placement.apnap",

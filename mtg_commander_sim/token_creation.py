@@ -10,6 +10,7 @@ from .semantic_runtime import (
     default_token_creation_replacement_registry,
     resolve_token_creation_replacements,
 )
+from .trigger_processing import enqueue_trigger_batch
 
 
 class TokenCreationError(ValueError):
@@ -80,10 +81,6 @@ class TokenCreationHost(Protocol):
         *,
         trigger_batch: list[Any],
     ) -> Any: ...
-
-    def _enqueue_semantic_trigger_batch(
-        self, trigger_batch: Sequence[Any]
-    ) -> None: ...
 
 
 _ATTACKING_FIELD = "attack" + "ing"
@@ -446,7 +443,7 @@ def _record_and_dispatch_token_creation(
                     context,
                     trigger_batch=trigger_batch,
                 )
-    host._enqueue_semantic_trigger_batch(trigger_batch)
+    enqueue_trigger_batch(host, trigger_batch)
 
 
 def create_tokens(

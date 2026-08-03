@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -9,6 +8,7 @@ from common import keep_all, load_assets, make_session
 from mtg_commander_sim import damage_results as damage_results_module
 from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
+from mtg_commander_sim import trigger_batches as trigger_batches_module
 from mtg_commander_sim.continuous_effects import (
     CharacteristicState,
     evaluate_continuous_effects,
@@ -1075,43 +1075,53 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
                 assert_scaled_draw()
 
     def test_trigger_apnap_grouping_mutant_is_killed(self):
-        host = SimpleNamespace(
-            apnap_order=lambda: ("C", "D", "A", "B")
+        original_grouping = (
+            trigger_batches_module.group_pending_trigger_items
         )
         values = (
-            {"controller": "A", "ref": "trigger-a"},
-            {"controller": "C", "ref": "trigger-c"},
-            {"controller": "B", "ref": "trigger-b"},
+            {
+                "stack_id": "stack-a",
+                "controller": "A",
+                "ref": "trigger-a",
+                "kind": "triggered_ability",
+                "label": "Trigger A",
+            },
+            {
+                "stack_id": "stack-c",
+                "controller": "C",
+                "ref": "trigger-c",
+                "kind": "triggered_ability",
+                "label": "Trigger C",
+            },
+            {
+                "stack_id": "stack-b",
+                "controller": "B",
+                "ref": "trigger-b",
+                "kind": "triggered_ability",
+                "label": "Trigger B",
+            },
         )
 
         def assert_apnap_grouping() -> None:
-            groups = CommanderEngine._semantic_trigger_groups(host, values)
+            groups = trigger_batches_module.group_pending_trigger_items(
+                values,
+                apnap_order=("C", "D", "A", "B"),
+            )
             self.assertEqual(
                 ["C", "A", "B"],
-                [group["controller"] for group in groups],
+                [group.controller for group in groups],
             )
 
-        def alphabetical_grouping(_host, candidates):
-            return [
-                {
-                    "controller": controller,
-                    "items": [
-                        dict(value)
-                        for value in candidates
-                        if value["controller"] == controller
-                    ],
-                }
-                for controller in ("A", "B", "C", "D")
-                if any(
-                    value["controller"] == controller
-                    for value in candidates
-                )
-            ]
+        def alphabetical_grouping(candidates, *, apnap_order):
+            return original_grouping(
+                candidates,
+                apnap_order=tuple(sorted(apnap_order)),
+            )
 
         assert_apnap_grouping()
         with patch.object(
-            CommanderEngine,
-            "_semantic_trigger_groups",
+            trigger_batches_module,
+            "group_pending_trigger_items",
             alphabetical_grouping,
         ):
             with self.assertRaises(AssertionError):

@@ -87,6 +87,13 @@ from .damage import (
 from .damage_prevention import expire_end_of_turn_damage_modifiers
 from .delayed_triggers import materialize_delayed_trigger
 from .trigger_targeting import begin_pending_trigger_target_selection
+from .trigger_processing import (
+    begin_pending_trigger_batch,
+    collect_trigger_items,
+    complete_trigger_order,
+    enqueue_trigger_batch,
+    start_delayed_trigger_batch,
+)
 from .life_state import (
     pay_life_cost,
 )
@@ -1843,8 +1850,7 @@ class CommanderEngine(
         ):
             return
         ref = self._next_ref("S")
-        self._enqueue_semantic_trigger_batch(
-            [
+        enqueue_trigger_batch(self, [
                 StackItem(
                     stack_id=self._stable_runtime_id("stack", ref),
                     ref=ref,
@@ -2514,7 +2520,7 @@ class CommanderEngine(
             )
         if event_destination != "battlefield" or origin == "battlefield":
             if owns_trigger_batch:
-                self._enqueue_semantic_trigger_batch(event_triggers)
+                enqueue_trigger_batch(self, event_triggers)
             return
         entered_data = self._effective_card_data(card)
         entered_types, entered_subtypes, _ = self._type_parts(
@@ -2549,7 +2555,7 @@ class CommanderEngine(
                 reason="Saga entered",
             )
         if owns_trigger_batch:
-            self._enqueue_semantic_trigger_batch(event_triggers)
+            enqueue_trigger_batch(self, event_triggers)
 
     def _add_saga_lore(
         self,
@@ -2604,7 +2610,7 @@ class CommanderEngine(
                 trigger_batch=trigger_batch,
                 reason="precombat main phase began",
             )
-        self._enqueue_semantic_trigger_batch(trigger_batch)
+        enqueue_trigger_batch(self, trigger_batch)
 
     def _move_cards_simultaneously(
         self,
@@ -2703,7 +2709,7 @@ class CommanderEngine(
                 reason=reason,
                 trigger_batch=trigger_batch,
             )
-        self._enqueue_semantic_trigger_batch(trigger_batch)
+        enqueue_trigger_batch(self, trigger_batch)
         return [card for card, *_ in snapshots]
 
     def shuffle_library(self, seat: str, *, reason: str = "shuffle") -> None:
@@ -3054,22 +3060,14 @@ class CommanderEngine(
             "step": self.state.step,
             "player": active,
         }
-        trigger_batch: list[StackItem] = []
-        self._dispatch_semantic_event(
+        trigger_batch = collect_trigger_items(
+            self,
             "step.begin",
             context,
-            trigger_batch=trigger_batch,
         )
         if self._semantic_pause_annotation() is not None:
             return
-        trigger_batch.extend(
-            self._delayed_trigger_stack_item(trigger)
-            for trigger in self._matching_delayed_triggers(
-                "step.begin",
-                context,
-            )
-        )
-        self._enqueue_semantic_trigger_batch(trigger_batch)
+        enqueue_trigger_batch(self, trigger_batch)
         if self._stabilize():
             return
         self._grant_priority(active)
@@ -3719,23 +3717,15 @@ class CommanderEngine(
             # call stack while the engine synchronously crosses the boundary;
             # no unserialized game state exists at a command/checkpoint
             # boundary.
-            waiting_triggers: list[StackItem] = []
             untap_context = {
                 "phase": phase,
                 "step": step,
                 "player": active,
             }
-            self._dispatch_semantic_event(
+            waiting_triggers = collect_trigger_items(
+                self,
                 "step.begin",
                 untap_context,
-                trigger_batch=waiting_triggers,
-            )
-            waiting_triggers.extend(
-                self._delayed_trigger_stack_item(trigger)
-                for trigger in self._matching_delayed_triggers(
-                    "step.begin",
-                    untap_context,
-                )
             )
             untapped_object_ids: list[str] = []
             if self.state.config.auto_untap:
@@ -3834,17 +3824,11 @@ class CommanderEngine(
                     "step": step,
                     "reason": "untap step",
                 }
-                self._dispatch_semantic_event(
+                waiting_triggers = collect_trigger_items(
+                    self,
                     "permanent.untap",
                     event_context,
-                    trigger_batch=waiting_triggers,
-                )
-                waiting_triggers.extend(
-                    self._delayed_trigger_stack_item(trigger)
-                    for trigger in self._matching_delayed_triggers(
-                        "permanent.untap",
-                        event_context,
-                    )
+                    held_triggers=waiting_triggers,
                 )
             self._advance_step(held_triggers=waiting_triggers)
             return
@@ -3857,10 +3841,12 @@ class CommanderEngine(
             # 514.1-2 happen before those waiting triggers are put on the
             # stack and before the exceptional priority window.  Enqueue
             # represented semantic triggers now without stabilizing them.
-            self._dispatch_semantic_event(
+            cleanup_triggers = collect_trigger_items(
+                self,
                 "step.begin",
                 {"phase": phase, "step": step, "player": active},
             )
+            enqueue_trigger_batch(self, cleanup_triggers)
             hand = self.state.players[active].zones["hand"]
             excess = (
                 len(hand)
@@ -3901,18 +3887,10 @@ class CommanderEngine(
                 "step": step,
                 "player": active,
             }
-            waiting_triggers: list[StackItem] = []
-            self._dispatch_semantic_event(
+            waiting_triggers = collect_trigger_items(
+                self,
                 "step.begin",
                 context,
-                trigger_batch=waiting_triggers,
-            )
-            waiting_triggers.extend(
-                self._delayed_trigger_stack_item(trigger)
-                for trigger in self._matching_delayed_triggers(
-                    "step.begin",
-                    context,
-                )
             )
             if step == "end_step" and self.state.monarch == active:
                 monarch = str(self.state.monarch)
@@ -3939,7 +3917,7 @@ class CommanderEngine(
                         },
                     )
                 )
-            self._enqueue_semantic_trigger_batch(waiting_triggers)
+            enqueue_trigger_batch(self, waiting_triggers)
             self._grant_priority(active)
             return
 
@@ -3954,20 +3932,13 @@ class CommanderEngine(
                 "step": step,
                 "player": active,
             }
-            waiting_triggers = list(held_triggers)
-            self._dispatch_semantic_event(
+            waiting_triggers = collect_trigger_items(
+                self,
                 "step.begin",
                 context,
-                trigger_batch=waiting_triggers,
+                held_triggers=held_triggers,
             )
-            waiting_triggers.extend(
-                self._delayed_trigger_stack_item(trigger)
-                for trigger in self._matching_delayed_triggers(
-                    "step.begin",
-                    context,
-                )
-            )
-            self._enqueue_semantic_trigger_batch(waiting_triggers)
+            enqueue_trigger_batch(self, waiting_triggers)
             self._grant_priority(active)
             return
 
@@ -3990,17 +3961,15 @@ class CommanderEngine(
             self._complete_draw_step_entry(active)
             return
 
-        delayed = self._matching_delayed_triggers(
+        context = {"phase": phase, "step": step, "player": active}
+        waiting_triggers = collect_trigger_items(
+            self,
             "step.begin",
-            {
-                "phase": phase,
-                "step": step,
-                "player": active,
-            },
+            context,
         )
-        if delayed:
-            self._start_trigger_batch(delayed, after="grant_priority")
+        if self._semantic_pause_annotation() is not None:
             return
+        enqueue_trigger_batch(self, waiting_triggers)
 
         if step == "declare_attackers":
             self._issue_attackers()
@@ -4011,10 +3980,6 @@ class CommanderEngine(
         if step == "combat_damage":
             self._begin_combat_damage()
             return
-        self._dispatch_semantic_event(
-            "step.begin",
-            {"phase": phase, "step": step, "player": active},
-        )
         self._grant_priority(active)
 
     def _advance_step(
@@ -5071,90 +5036,47 @@ class CommanderEngine(
         return matches
 
     def _start_trigger_batch(self, triggers: Sequence[DelayedTrigger], *, after: str) -> None:
-        apnap = self.apnap_order()
-        groups: list[dict[str, Any]] = []
-        for controller in apnap:
-            ids = [trigger.trigger_id for trigger in triggers if trigger.controller == controller]
-            if ids:
-                groups.append({"controller": controller, "trigger_ids": ids})
-        self._process_trigger_groups(groups, after=after)
+        start_delayed_trigger_batch(self, triggers, after=after)
 
-    def _process_trigger_groups(self, groups: list[dict[str, Any]], *, after: str) -> None:
-        while groups:
-            group = groups.pop(0)
-            controller = group["controller"]
-            ids = list(group["trigger_ids"])
-            if len(ids) > 1:
-                triggers = [next(t for t in self.state.delayed_triggers if t.trigger_id == trigger_id) for trigger_id in ids]
-                self.permissions.issue(
-                    kind="trigger.order",
-                    role="pilot",
-                    actors=[controller],
-                    allowed_actions=["order"],
-                    payload_by_actor={
-                        controller: {
-                            "triggers": [{"id": t.ref, "label": t.label} for t in triggers],
-                            "instruction": "Order bottom-to-top on the stack.",
-                        }
-                    },
-                    continuation={"groups": groups, "after": after, "trigger_ids": ids},
-                )
-                return
-            self._queue_delayed_trigger(ids[0])
-        if after == "grant_priority":
-            self._grant_priority(self.state.active_player)
+    def _process_trigger_groups(
+        self,
+        controller: str,
+        options: Sequence[tuple[str, str]],
+        continuation: Mapping[str, Any],
+    ) -> None:
+        """Issue the one seat-scoped trigger-order capability.
+
+        The historical method name preserves architecture and Game Record v3
+        compatibility; typed grouping and continuation validation live in the
+        trigger-processing subsystem.
+        """
+
+        self.permissions.issue(
+            kind="trigger.order",
+            role="pilot",
+            actors=[controller],
+            allowed_actions=["order"],
+            payload_by_actor={
+                controller: {
+                    "triggers": [
+                        {"id": ref, "label": label}
+                        for ref, label in options
+                    ],
+                    "instruction": "Order bottom-to-top on the stack.",
+                }
+            },
+            continuation=dict(continuation),
+        )
 
     def _complete_trigger_order(self, decision: Any) -> None:
         controller = decision.actors[0]
         values = list(decision.responses[controller].get("triggers") or decision.responses[controller].get("order") or [])
-        semantic_batch_id = decision.continuation.get(
-            "semantic_trigger_batch_id"
+        complete_trigger_order(
+            self,
+            controller=controller,
+            values=values,
+            continuation=decision.continuation,
         )
-        if semantic_batch_id:
-            batch = next(
-                (
-                    value
-                    for value in self.state.pending_trigger_batches
-                    if value.get("batch_id") == semantic_batch_id
-                ),
-                None,
-            )
-            if batch is None or not batch.get("groups"):
-                raise GameRuleError(
-                    "Semantic trigger batch is no longer pending"
-                )
-            group = batch["groups"][0]
-            if group.get("controller") != controller:
-                raise GameRuleError(
-                    "Only the trigger controller may order this group"
-                )
-            items = list(group.get("items") or [])
-            by_ref = {
-                str(item["ref"]): item
-                for item in items
-            }
-            refs = [str(value) for value in values]
-            if sorted(refs) != sorted(by_ref):
-                raise GameRuleError(
-                    "Trigger order must contain every listed trigger "
-                    "exactly once"
-                )
-            self._place_semantic_trigger_items(
-                [by_ref[ref] for ref in refs]
-            )
-            batch["groups"] = list(batch["groups"])[1:]
-            if self._begin_pending_semantic_trigger_batch():
-                return
-            self._grant_priority(self.state.active_player)
-            return
-        ids = list(decision.continuation["trigger_ids"])
-        by_ref = {trigger.ref: trigger.trigger_id for trigger in self.state.delayed_triggers if trigger.trigger_id in ids}
-        resolved = [by_ref.get(str(value), str(value)) for value in values]
-        if sorted(resolved) != sorted(ids):
-            raise GameRuleError("Trigger order must contain every listed trigger exactly once")
-        for trigger_id in resolved:
-            self._queue_delayed_trigger(trigger_id)
-        self._process_trigger_groups(list(decision.continuation.get("groups", [])), after=str(decision.continuation.get("after") or "grant_priority"))
 
     def _delayed_trigger_stack_item(
         self,
@@ -5162,11 +5084,9 @@ class CommanderEngine(
     ) -> StackItem:
         """Materialize a delayed ability without choosing its stack order.
 
-        Step boundaries that combine delayed and permanent-based triggers need
-        one common ``StackItem`` representation before APNAP/controller
-        ordering.  Legacy delayed-only paths still call
-        :meth:`_queue_delayed_trigger`, which appends the returned item
-        immediately.
+        Every delayed ability becomes the same ordinary ``StackItem``
+        representation used by static-source and prevention-result triggers
+        before the single APNAP/controller ordering boundary.
         """
         ref = self._next_ref("S")
         return materialize_delayed_trigger(
@@ -5175,12 +5095,6 @@ class CommanderEngine(
             stack_id=self._stable_runtime_id("stack", ref),
             visibility=self.seats,
         )
-
-    def _queue_delayed_trigger(self, trigger_id: str) -> None:
-        trigger = next(t for t in self.state.delayed_triggers if t.trigger_id == trigger_id)
-        item = self._delayed_trigger_stack_item(trigger)
-        self.state.stack.append(item)
-        self._log(trigger.controller, "stack.trigger", f"Queued {item.ref}: {item.label}.", {"stack": item.ref, "trigger": trigger.ref}, importance=2)
 
     # ------------------------------------------------------------------
     # Mana, land plays, spells, and abilities
@@ -7863,167 +7777,8 @@ class CommanderEngine(
         if trigger_batch is not None:
             trigger_batch.extend(triggered)
         elif triggered:
-            self._enqueue_semantic_trigger_batch(triggered)
+            enqueue_trigger_batch(self, triggered)
         return [item.ref for item in triggered]
-
-    def _enqueue_semantic_trigger_batch(
-        self,
-        items: Sequence[StackItem],
-    ) -> None:
-        if not items:
-            return
-
-        serialized = [
-            item.to_dict()
-            for item in items
-            if item.controller in self.active_seats
-        ]
-        if not serialized:
-            return
-
-        # CR 603.3b groups every represented ability that triggered since the
-        # previous priority window.  Event producers may discover those
-        # abilities at different times (damage first, then deaths caused by
-        # state-based actions), so merge them until stack placement starts.
-        # A started batch is sealed: abilities triggered during its placement
-        # belong to the rule's later repeat pass.
-        if self.state.pending_trigger_batches:
-            pending = self.state.pending_trigger_batches[-1]
-            same_priority_window = int(
-                pending.get("priority_epoch", self.state.priority_epoch)
-            ) == int(self.state.priority_epoch)
-            if (
-                not pending.get("placement_started", False)
-                and same_priority_window
-            ):
-                existing = [
-                    dict(value)
-                    for group in pending.get("groups", [])
-                    for value in group.get("items", [])
-                ]
-                pending["apnap_order"] = self.apnap_order()
-                pending["groups"] = self._semantic_trigger_groups(
-                    [*existing, *serialized]
-                )
-                return
-
-        groups = self._semantic_trigger_groups(serialized)
-        if not groups:
-            return
-        batch_ref = self._next_ref("TB")
-        self.state.pending_trigger_batches.append(
-            {
-                "batch_id": self._stable_runtime_id(
-                    "trigger-batch",
-                    batch_ref,
-                ),
-                "ref": batch_ref,
-                "apnap_order": self.apnap_order(),
-                "groups": groups,
-                "turn_sequence": self.state.turn_sequence,
-                "priority_epoch": self.state.priority_epoch,
-                "placement_started": False,
-            }
-        )
-
-    def _semantic_trigger_groups(
-        self,
-        values: Sequence[Mapping[str, Any]],
-    ) -> list[dict[str, Any]]:
-        groups: list[dict[str, Any]] = []
-        for controller in self.apnap_order():
-            controlled = [
-                copy.deepcopy(dict(value))
-                for value in values
-                if str(value.get("controller") or "") == controller
-            ]
-            if controlled:
-                groups.append(
-                    {
-                        "controller": controller,
-                        "items": controlled,
-                    }
-                )
-        return groups
-
-    def _place_semantic_trigger_items(
-        self,
-        values: Sequence[Mapping[str, Any]],
-    ) -> None:
-        for value in values:
-            item = StackItem.from_dict(copy.deepcopy(dict(value)))
-            self.state.stack.append(item)
-            source = (
-                self.state.cards.get(item.source_object_id)
-                if item.source_object_id
-                else None
-            )
-            self._log(
-                item.controller,
-                "stack.trigger",
-                f"Queued {item.ref}: {item.label}.",
-                {
-                    "stack": item.ref,
-                    "source": source.ref if source else None,
-                    "semantic_program": item.semantic_key,
-                    "event": item.context.get("event"),
-                },
-                importance=2,
-                changed_objects=(
-                    [source.object_id] if source is not None else []
-                ),
-            )
-
-    def _begin_pending_semantic_trigger_batch(self) -> bool:
-        while self.state.pending_trigger_batches:
-            batch = self.state.pending_trigger_batches[0]
-            if not batch.get("placement_started", False):
-                waiting = [
-                    dict(value)
-                    for group in batch.get("groups", [])
-                    for value in group.get("items", [])
-                ]
-                batch["apnap_order"] = self.apnap_order()
-                batch["groups"] = self._semantic_trigger_groups(waiting)
-                batch["placement_started"] = True
-            groups = list(batch.get("groups") or [])
-            if not groups:
-                self.state.pending_trigger_batches.pop(0)
-                continue
-            group = groups[0]
-            controller = str(group["controller"])
-            items = list(group.get("items") or [])
-            if len(items) > 1:
-                self.permissions.issue(
-                    kind="trigger.order",
-                    role="pilot",
-                    actors=[controller],
-                    allowed_actions=["order"],
-                    payload_by_actor={
-                        controller: {
-                            "triggers": [
-                                {
-                                    "id": str(item["ref"]),
-                                    "label": str(item["label"]),
-                                }
-                                for item in items
-                            ],
-                            "instruction": (
-                                "Order bottom-to-top on the stack."
-                            ),
-                        }
-                    },
-                    continuation={
-                        "semantic_trigger_batch_id": batch["batch_id"],
-                        "trigger_refs": [
-                            str(item["ref"]) for item in items
-                        ],
-                    },
-                )
-                return True
-            self._place_semantic_trigger_items(items)
-            batch["groups"] = groups[1:]
-        return False
 
     def _semantic_target_options(
         self,
@@ -13407,7 +13162,7 @@ class CommanderEngine(
                     },
                 )
             )
-        self._enqueue_semantic_trigger_batch(attack_triggers)
+        enqueue_trigger_batch(self, attack_triggers)
         self._grant_priority(active)
 
     def _attacked_defending_players(self) -> list[str]:
@@ -15149,7 +14904,7 @@ class CommanderEngine(
                     continuation={"object_ids": ids},
                 )
                 return True
-            if self._begin_pending_semantic_trigger_batch():
+            if begin_pending_trigger_batch(self):
                 return True
             if self._begin_pending_trigger_target_selection():
                 return True

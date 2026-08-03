@@ -405,10 +405,12 @@ generated documentation fixtures with bearer capabilities redacted. See
 - source-reviewed CR 604 static-ability scope with source-leaves and
   moved-attachment witnesses; generic CDA, attachment, stack, zone-permission,
   and current-information/LKI handling remain blocked
-- source-reviewed CR 603 trigger handling with executable pending-to-stack,
-  controller-at-trigger-time, intervening-condition, and delayed-object-
-  incarnation invariants; complete trigger grammar, two-part APNAP ordering,
-  state/reflexive triggers, and the look-back exception matrix remain blocked
+- source-reviewed CR 603 trigger handling with immutable versioned pending
+  batches, one ordinary occurrence/ordering/placement path for represented
+  static-source, delayed, and typed dynamic triggers, controller-at-trigger-
+  time, intervening-condition, and delayed-object-incarnation invariants;
+  complete trigger grammar, the special second CR 603.3b part, state/reflexive
+  triggers, and the look-back exception matrix remain blocked
 - source-reviewed CR 601 casting with immutable revision-pinned proposals,
   shared advertisement/execution cost and target queries, executable
   mana-ability payment-window ordering, transactional rollback and cast-trigger
@@ -1224,6 +1226,9 @@ container isolation when filesystem-level isolation must also be proven.
   replacement preparation, commit planning, and atomic result mutation
 - `mtg_commander_sim/delayed_triggers.py` — typed delayed-trigger stack
   materialization and explicit referred-object provenance preservation
+- `mtg_commander_sim/trigger_batches.py` — immutable versioned CR 603.3
+  occurrence groups, APNAP batching, order validation, and Game Record v3
+  compatibility
 - `mtg_commander_sim/life_change.py` — immutable replacement-capable life-event
   preparation, replay validation, and canonical life-state commit
 - `mtg_commander_sim/life_state.py` — stale-state validation and mutation-only

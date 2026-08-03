@@ -66,6 +66,7 @@ from .prevention_triggers import (
     PreventionTriggerOccurrence,
     prevention_trigger_stack_item,
 )
+from .trigger_processing import enqueue_trigger_batch
 
 
 class DamageHost(Protocol):
@@ -115,10 +116,6 @@ class DamageHost(Protocol):
         event: str,
         context: Mapping[str, Any],
         **kwargs: Any,
-    ) -> None: ...
-
-    def _enqueue_semantic_trigger_batch(
-        self, trigger_batch: Sequence[Any]
     ) -> None: ...
 
     def _semantic_pause_annotation(self) -> Mapping[str, Any] | None: ...
@@ -1572,5 +1569,5 @@ def resolve_damage_batch(
         trigger_source_zones=trigger_source_zones,
         trigger_batch=trigger_batch,
     )
-    host._enqueue_semantic_trigger_batch(trigger_batch)
+    enqueue_trigger_batch(host, trigger_batch)
     return result
