@@ -32,7 +32,7 @@ server, provider, and pilot success never promote rules fidelity by themselves.
 
 - A pinned Comprehensive Rules corpus, Oracle snapshot, and rulings snapshot
   support deterministic inventories and reproducible source references.
-- Oracle IR v19 provides source-spanned partial compilation and material
+- Oracle IR v21 provides source-spanned partial compilation and material
   residuals. Generated and reviewed abilities aggregate into deterministic
   CardProgram V2 artifacts with source, capability, trust, and replay
   fingerprints. Compilation remains partial and interleaved.
@@ -52,6 +52,9 @@ server, provider, and pilot success never promote rules fidelity by themselves.
   replacement without printed-name or Oracle-ID engine dispatch. Represented
   CR 615.5 life, permanent-counter, and source-controller-damage aftermath use
   typed precommit owners; nested damage reuses the canonical damage transaction.
+  Closed CR 615.13 prevention-result triggers use immutable source-LKI
+  occurrences, ordinary APNAP stack placement, represented target-at-placement,
+  and the normal effect pipeline rather than immediate aftermath.
   Most other orchestration and mutation remains centralized in
   `CommanderEngine`.
 - Reviewed semantic packs close selected card and interaction slices through
@@ -109,11 +112,14 @@ expansion resumes.
 The scheduler conservatively queues every reviewed blocked behavioral rule and
 every unclassified nonpassing rule. The integrated event-tree and counter-
 placement batches establish replayable replacement ordering and focused
-counter, life, and damage mutation owners. The active prevention batch adds a
-closed CR 615.5 source-controller damage result with source LKI, projected
-modifier state, recursive replacement/prevention, cycle rejection, exact
-replay, and generic Oracle/CardProgram lowering. CR 615.13 prevention-trigger
-stack ownership and broad CR 614/615/616 behavior remain blocked.
+counter, life, and damage mutation owners. The active prevention batch adds
+closed CR 615.13 triggered draw, damage, and counter results with source LKI,
+exact simultaneous prevented-amount aggregation, ordinary APNAP/controller
+ordering, target-at-placement, recursive canonical damage, exact replay, and
+generic Oracle/CardProgram lowering. Broader conditional trigger results,
+explicit-target or mixed immediate aftermath, and broad CR 614/615/616 behavior
+remain blocked. The scheduler now selects the corpus-ranked targetless
+enter/death trigger family and canonical life result boundary next.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,

@@ -5,7 +5,15 @@ from enum import Enum
 from typing import Any, Mapping, TypeAlias
 
 from .damage_source import DamageError, DamageSourceSnapshot
-from .object_predicate import ObjectQueryError, ObjectQuerySpec
+from .object_predicate import (
+    ObjectQueryError,
+    ObjectQuerySpec,
+    validate_chosen_damage_source_predicate,
+)
+from .prevention_triggers import (
+    PreventionTriggeredAbility,
+    PreventionTriggerError,
+)
 
 
 class DamageModifierError(ValueError):
@@ -280,7 +288,12 @@ def _validate_chosen_source(source: ChosenDamageSource) -> None:
         raise DamageModifierError(
             "Only incarnation-safe chosen sources carry extended filters"
         )
-    if source.predicate.excluded_types or any(
+    if version == 3:
+        try:
+            validate_chosen_damage_source_predicate(source.predicate)
+        except ObjectQueryError as exc:
+            raise DamageModifierError(str(exc)) from exc
+    elif source.predicate.excluded_types or any(
         value is not None
         for value in (source.predicate.token, source.predicate.tapped)
     ):
@@ -947,6 +960,7 @@ class DamagePreventionShield:
     chosen_source: ChosenDamageSource | None = None
     label: str = ""
     aftermath: tuple[PreventionAftermath, ...] = ()
+    triggered_ability: PreventionTriggeredAbility | None = None
 
     def __post_init__(self) -> None:
         if not all((self.shield_id, self.source_id, self.controller)):
@@ -999,6 +1013,12 @@ class DamagePreventionShield:
                 "A prevention shield aftermath must use typed values"
             )
         object.__setattr__(self, "aftermath", aftermath)
+        if self.triggered_ability is not None and not isinstance(
+            self.triggered_ability, PreventionTriggeredAbility
+        ):
+            raise DamageModifierError(
+                "A prevention shield triggered ability must be typed"
+            )
 
     @property
     def effect_id(self) -> str:
@@ -1023,6 +1043,8 @@ class DamagePreventionShield:
         }
         if self.aftermath:
             result["aftermath"] = [value.to_dict() for value in self.aftermath]
+        if self.triggered_ability is not None:
+            result["triggered_ability"] = self.triggered_ability.to_dict()
         return result
 
     @classmethod
@@ -1041,11 +1063,12 @@ class DamagePreventionShield:
             "chosen_source",
             "label",
         }
-        _exact_fields(
-            value,
-            expected | ({"aftermath"} if "aftermath" in value else set()),
-            label="Prevention shield",
-        )
+        optional = {
+            field
+            for field in ("aftermath", "triggered_ability")
+            if field in value
+        }
+        _exact_fields(value, expected | optional, label="Prevention shield")
         subject = value["subject"]
         chosen = value["chosen_source"]
         if not isinstance(subject, Mapping) or (
@@ -1061,6 +1084,19 @@ class DamagePreventionShield:
             raise DamageModifierError(
                 "Prevention shield mode or duration is unsupported"
             ) from exc
+        raw_trigger = value.get("triggered_ability")
+        if raw_trigger is not None and not isinstance(raw_trigger, Mapping):
+            raise DamageModifierError(
+                "Prevention shield triggered ability is malformed"
+            )
+        try:
+            triggered_ability = (
+                PreventionTriggeredAbility.from_dict(raw_trigger)
+                if isinstance(raw_trigger, Mapping)
+                else None
+            )
+        except PreventionTriggerError as exc:
+            raise DamageModifierError(str(exc)) from exc
         return cls(
             shield_id=str(value["shield_id"] or ""),
             source_id=str(value["source_id"] or ""),
@@ -1080,6 +1116,7 @@ class DamagePreventionShield:
                 prevention_aftermath_from_dict(item)
                 for item in value.get("aftermath", ())
             ),
+            triggered_ability=triggered_ability,
         )
 
 

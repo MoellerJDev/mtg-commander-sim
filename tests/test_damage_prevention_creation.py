@@ -17,6 +17,7 @@ from mtg_commander_sim.damage_prevention_creation import (
     plan_prevention_shield_creation,
 )
 from mtg_commander_sim.errors import GameRuleError
+from mtg_commander_sim.damage_source import REPRESENTED_DAMAGE_SOURCE_ZONES
 from mtg_commander_sim.object_query import ObjectQuerySpec
 from mtg_commander_sim.semantic_choices.context import (
     SemanticChoiceContext,
@@ -171,7 +172,11 @@ class DamagePreventionCreationTests(DamageReplacementPipelineBase):
                 duration=DamageModifierDuration.UNTIL_END_OF_TURN,
                 subjects=(PreventionSubjectAllocation("B", None),),
                 chosen_source_ref=source.ref,
-                source_predicate=ObjectQuerySpec(types_all=("creature",)),
+                source_predicate=ObjectQuerySpec(
+                    zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
+                    types_all=("creature",),
+                    known_to_actor=True,
+                ),
             ),
         )
         chosen = plan.shields[0].chosen_source
@@ -211,7 +216,11 @@ class DamagePreventionCreationTests(DamageReplacementPipelineBase):
                 duration=DamageModifierDuration.UNTIL_END_OF_TURN,
                 subjects=(PreventionSubjectAllocation("B", None),),
                 chosen_source_ref=source.ref,
-                source_predicate=ObjectQuerySpec(types_all=("creature",)),
+                source_predicate=ObjectQuerySpec(
+                    zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
+                    types_all=("creature",),
+                    known_to_actor=True,
+                ),
             ),
         )
         chosen = plan.shields[0].chosen_source
@@ -249,6 +258,10 @@ class DamagePreventionCreationTests(DamageReplacementPipelineBase):
                 duration=DamageModifierDuration.UNTIL_END_OF_TURN,
                 subjects=(PreventionSubjectAllocation("B", None),),
                 chosen_source_ref=source.ref,
+                source_predicate=ObjectQuerySpec(
+                    zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
+                    known_to_actor=True,
+                ),
             ),
         )
         commit_prevention_shield_creation(engine, plan)
@@ -277,10 +290,12 @@ class DamagePreventionCreationTests(DamageReplacementPipelineBase):
                 subjects=(PreventionSubjectAllocation("B", None),),
                 chosen_source_ref=source.ref,
                 source_predicate=ObjectQuerySpec(
+                    zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
                     colors_any=("B", "R"),
                     types_all=("creature",),
                     subtypes_all=("artificer",),
                     supertypes_all=("legendary",),
+                    known_to_actor=True,
                 ),
             ),
         )
@@ -772,6 +787,45 @@ class DamageSourceChoiceHandlerTests(unittest.TestCase):
         self.assertEqual(("wizard",), predicate.subtypes_all)
         self.assertEqual(("legendary",), predicate.supertypes_all)
         self.assertEqual(("flying",), predicate.keywords_all)
+
+    def test_source_choice_rejects_predicates_outside_the_closed_boundary(self):
+        base = ObjectQuerySpec(
+            zones=("battlefield",),
+            known_to_actor=True,
+        ).to_dict()
+        malformed = (
+            {**base, "zones": []},
+            {**base, "zones": ["library"]},
+            {**base, "known_to_actor": False},
+            {**base, "include_phased_out": True},
+            {**base, "excluded_types": ["land"]},
+            {**base, "token": True},
+            {**base, "tapped": False},
+            {**base, "exclude_ref": "C1"},
+        )
+        for predicate in malformed:
+            with self.subTest(predicate=predicate), self.assertRaises(
+                SemanticChoiceError
+            ):
+                ChooseDamageSourceHandler().prepare(
+                    {
+                        "op": "choose_damage_source",
+                        "source_predicate": predicate,
+                        "shield": {
+                            "op": "create_damage_prevention_shield",
+                            "source": "shield-spell",
+                            "subject": "B",
+                            "mode": "next_instance",
+                            "duration": "until_end_of_turn",
+                        },
+                    },
+                    self._context(
+                        SnapshotSemanticChoiceQuery(
+                            seat_order=("A", "B"),
+                            active_order=("A", "B"),
+                        )
+                    ),
+                )
 
 
 if __name__ == "__main__":

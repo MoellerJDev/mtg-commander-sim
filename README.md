@@ -378,7 +378,7 @@ generated documentation fixtures with bearer capabilities redacted. See
   fail-closed material residuals
 - automatic deck-time generic compilation into provisional, arbiter-gated
   semantic programs
-- Oracle IR v12 simple self-trigger, unconditional-entry, counter, pump, basic
+- Oracle IR v21 simple self-trigger, unconditional-entry, counter, pump, basic
   creature-token, fixed-mana combat-declaration cost, and exact combat-
   declaration restriction/evasion/battlefield-condition/composition and
   source-controller target-scope templates with reviewed-handler precedence,
@@ -839,7 +839,7 @@ physical commander designations—not Oracle IDs—own Commander-damage ledgers.
 The replacement model is split into deep-immutable model, applicability, typed
 operation, ordering, and strict replay modules. Generic compilation now covers
 those four keywords plus a closed family of static double-damage and fixed-
-prevention wording. Oracle IR v20 also lowers closed finite-shield wording,
+prevention wording. Oracle IR v21 also lowers closed finite-shield wording,
 dynamic resolved quantities, exact divided allocations, independent per-object
 shields, chosen-source next-instance/all-damage effects, represented
 prevention-dependent life/counter/source-controller-damage aftermath, ordered
@@ -875,17 +875,26 @@ replacement effects while `life_state.py` remains the mutation-only owner.
 `life-effects.v2`
 routes its complete closed operation inventory through the same precommit
 boundary and reports requested amount, final per-player delta, replacement
-journal, and replay identity from one typed batch summary. Arbitrary opaque
+journal, and replay identity from one typed batch summary. Closed CR 615.13
+prevention results are immutable waiting trigger occurrences rather than
+immediate aftermath: they aggregate the exact amount prevented by one effect,
+freeze source/controller last-known information, join the ordinary APNAP trigger
+batch, choose represented targets at stack placement, and resolve through the
+normal stack/effect pipeline. Triggered damage reenters the canonical damage
+transaction through a narrow typed port, so replacement, prevention, result,
+trigger-discovery, rollback, and replay behavior are not duplicated. The
+compiler recognizes closed triggered draw, damage, and counter results plus
+all-damage shields generically. Arbitrary opaque
 referred-object provenance, face-down sources, broader source-property
 predicates, life-gain prevention (including `can't gain life`), other
-non-effect-runtime life producers, CR 615.13 prevention-trigger stack ownership,
-explicit-target or mixed aftermath wording, partial or
+non-effect-runtime life producers, explicit-target or mixed immediate aftermath
+wording, broader conditional prevention-trigger results, partial or
 attached redirection, non-damage transformations, unresolved dynamic Toxic
 values, remaining result-replacement families, universal draw/entry
 replacement participation, broad CR 614/615/616 closure, layer dependencies,
 and state-derived modifiers remain unsupported.
 
-Runtime trust and governance are now explicit. Capability registry v15 consumes
+Runtime trust and governance are now explicit. Capability registry v17 consumes
 a generated evidence index whose fully qualified tests, current rules,
 profiles, and evidence classes are validated in CI. Every trusted capability
 requires positive, negative, replay, and killed-mutation evidence regardless of

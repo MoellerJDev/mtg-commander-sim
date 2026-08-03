@@ -46,6 +46,11 @@ def _current_runtime_git_sha() -> str:
     return _git("rev-parse", "HEAD")
 
 
+def _current_merged_main_sha(source: dict) -> str:
+    default_branch = str(source["repository"]["default_branch"])
+    return _git("rev-parse", f"origin/{default_branch}")
+
+
 def _git_is_ancestor(ancestor: str, descendant: str) -> bool:
     completed = subprocess.run(
         ["git", "merge-base", "--is-ancestor", ancestor, descendant],
@@ -157,13 +162,33 @@ def _validate_provenance(source: dict) -> None:
     serialized = json.dumps(source, sort_keys=True).lower()
     if "certification pending" in serialized:
         raise ValueError("a certified head cannot be described as certification pending")
-    active_phase = source.get("integration", {}).get("active_phase")
-    if active_phase and _git_is_ancestor(
-        provenance["feature_head_sha"], "origin/main"
+    if not _git_is_ancestor(
+        provenance["feature_head_sha"], provenance["certified_head_sha"]
     ):
         raise ValueError(
-            "active phase feature_head_sha is already merged into origin/main"
+            "certified_head_sha must contain feature_head_sha"
         )
+    active_phase = source.get("integration", {}).get("active_phase")
+    if active_phase is not None and (
+        not isinstance(active_phase, str) or not active_phase.strip()
+    ):
+        raise ValueError("active_phase must be a nonempty string or null")
+    merged_main_ref = (
+        f"origin/{source['repository']['default_branch']}"
+    )
+    if _git_is_ancestor(
+        provenance["certified_head_sha"], merged_main_ref
+    ):
+        stale = [
+            str(row.get("id") or "")
+            for row in source.get("milestones", ())
+            if row.get("status") == "implemented_at_feature_head"
+        ]
+        if stale:
+            raise ValueError(
+                "merged certified milestones cannot remain at feature head: "
+                + ", ".join(stale)
+            )
 
 
 def _project_metadata() -> dict:
@@ -263,6 +288,7 @@ def build_report() -> dict:
         "evaluated_source_tree_hash": _tracked_source_tree_hash(),
         "source_tree_fingerprint_algorithm": SOURCE_TREE_FINGERPRINT_ALGORITHM,
         "current_runtime_git_sha": _current_runtime_git_sha(),
+        "current_merged_main_git_sha": _current_merged_main_sha(source),
         "current_runtime_git_sha_persistence": (
             "runtime-only; tracked reports store null because a commit cannot "
             "contain its own SHA"
@@ -318,9 +344,10 @@ def render_readiness(report: dict) -> str:
         "|---|---|",
         f"| Package | `{report['package']['version']}` |",
         f"| Evaluated source tree | `{generated['evaluated_source_tree_hash']}` |",
-        f"| Feature checkpoint | `{provenance['feature_head_sha']}` |",
-        f"| Certified head | `{provenance['certified_head_sha']}` |",
-        f"| Active phase | `{report['integration']['active_phase']}` |",
+        f"| Feature head | `{provenance['feature_head_sha']}` |",
+        f"| Certified exact head | `{provenance['certified_head_sha']}` |",
+        "| Current merged main at runtime | resolved dynamically; not persisted |",
+        f"| Active future phase | `{report['integration']['active_phase']}` |",
         f"| Deterministic tests discovered | {report['tests']['deterministic_cases_discovered']} |",
         f"| Authoritative kernel | `{report['platform']['authoritative_kernel']}` |",
         f"| Server runtime | `{report['platform']['http_websocket_server']}` |",
@@ -387,12 +414,14 @@ def render_status(report: dict) -> str:
         f"- Default branch: `{report['repository']['default_branch']}`",
         f"- Evaluated source tree: `{generated['evaluated_source_tree_hash']}` "
         f"(`{generated['source_tree_fingerprint_algorithm']}`)",
-        f"- Feature checkpoint: `{provenance['feature_head_sha']}`",
-        f"- Last certified head: `{provenance['certified_head_sha']}`",
+        f"- Feature head: `{provenance['feature_head_sha']}`",
+        f"- Certified exact head: `{provenance['certified_head_sha']}`",
         f"- Generation timestamp: `{provenance['generation_timestamp']}`",
         "- Runtime Git SHA: resolved dynamically and intentionally not persisted "
         "in this tracked report",
-        f"- Active phase: `{integration['active_phase']}`",
+        "- Current merged main: resolved dynamically and intentionally not "
+        "persisted in this tracked report",
+        f"- Active future phase: `{integration['active_phase']}`",
         f"- Package version: `{report['package']['version']}`",
         "",
         "Historical integration chronology belongs in `CHANGELOG.md`; this "
@@ -492,6 +521,7 @@ def render_status(report: dict) -> str:
 def _serialize_json(report: dict) -> str:
     persisted = copy.deepcopy(report)
     persisted["generated"]["current_runtime_git_sha"] = None
+    persisted["generated"]["current_merged_main_git_sha"] = None
     return json.dumps(persisted, indent=2, sort_keys=True) + "\n"
 
 

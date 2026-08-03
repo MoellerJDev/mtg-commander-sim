@@ -86,6 +86,7 @@ from .damage import (
 )
 from .damage_prevention import expire_end_of_turn_damage_modifiers
 from .delayed_triggers import materialize_delayed_trigger
+from .trigger_targeting import begin_pending_trigger_target_selection
 from .life_state import (
     pay_life_cost,
 )
@@ -8939,58 +8940,11 @@ class CommanderEngine(
         return item.ref
 
     def _begin_pending_trigger_target_selection(self) -> bool:
-        for item in self.state.stack:
-            if not item.context.get("trigger_target_selection_pending"):
-                continue
-            program = self.semantics.get(item.semantic_key)
-            target_schema = self._stack_target_schema(item, program)
-            if program is None or not target_schema:
-                item.context.pop("trigger_target_selection_pending", None)
-                continue
-            public_schema = self._public_target_schema(
-                item.controller,
-                target_schema,
-                source_ref=self._stack_source_ref(item),
-            )
-            if public_schema is None:
-                self.state.stack.remove(item)
-                self._log(
-                    item.controller,
-                    "stack.trigger.removed",
-                    (
-                        f"Removed {item.ref}: {item.label}; its mandatory "
-                        "targets could not be chosen."
-                    ),
-                    {"stack": item.ref, "reason": "no_legal_targets"},
-                    importance=2,
-                )
-                return self._begin_pending_trigger_target_selection()
-            self.permissions.issue(
-                kind="semantic.target",
-                role="pilot",
-                actors=[item.controller],
-                allowed_actions=["choose"],
-                payload_by_actor={
-                    item.controller: {
-                        "stack": item.ref,
-                        "prompt": f"Choose legal targets for {program.label}.",
-                        "target_schema": public_schema,
-                        "legal_actions": [
-                            {
-                                "id": "choose",
-                                "action": "choose",
-                                "target_schema": public_schema,
-                            }
-                        ],
-                    }
-                },
-                continuation={
-                    "stack_ref": item.ref,
-                    "trigger_creation": True,
-                },
-            )
-            return True
-        return False
+        return begin_pending_trigger_target_selection(
+            self,
+            decision_role="pilot",
+            log_reason_field="reason",
+        )
 
     def _program_can_auto_resolve(self, item: StackItem) -> bool:
         if is_builtin_activation_semantic(item.semantic_key) or item.semantic_key in {

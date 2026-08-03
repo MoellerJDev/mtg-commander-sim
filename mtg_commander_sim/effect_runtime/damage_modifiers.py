@@ -11,11 +11,15 @@ from ..damage_modifier_state import (
 )
 from ..damage_prevention_creation import (
     DealDamageAftermathRequest,
+    DealDamageTriggerRequest,
     DamagePreventionCreationError,
+    DrawCardsTriggerRequest,
     GainLifeAftermathRequest,
     PlaceCountersAftermathRequest,
+    PlaceCountersTriggerRequest,
     PreventionShieldCreationRequest,
     PreventionSubjectAllocation,
+    PreventionTriggeredAbilityRequest,
     commit_prevention_shield_creation,
     pin_chosen_damage_source,
     plan_prevention_shield_creation,
@@ -257,6 +261,97 @@ def _prevention_aftermath_requests(
     return tuple(result)
 
 
+def _prevention_trigger_request(
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+) -> PreventionTriggeredAbilityRequest | None:
+    raw = effect.get("triggered_ability")
+    if raw is None:
+        return None
+    if not isinstance(raw, Mapping) or set(raw) != {
+        "source",
+        "label",
+        "results",
+        "target_schema",
+    }:
+        raise GameRuleError("Prevention triggered ability is malformed")
+    raw_results = raw["results"]
+    target_schema = raw["target_schema"]
+    if (
+        not isinstance(raw_results, (list, tuple))
+        or not raw_results
+        or not isinstance(target_schema, Mapping)
+    ):
+        raise GameRuleError(
+            "Prevention triggered-ability results or target schema are malformed"
+        )
+    results = []
+    common = {"kind", "per_prevented", "fixed_amount"}
+    for value in raw_results:
+        if not isinstance(value, Mapping):
+            raise GameRuleError(
+                "Prevention triggered-ability results must be objects"
+            )
+        kind = value.get("kind")
+        if kind == "draw_cards":
+            if set(value) != common | {"player", "private"}:
+                raise GameRuleError(
+                    "Prevention triggered-ability draw is malformed"
+                )
+            results.append(
+                DrawCardsTriggerRequest(
+                    player=str(value["player"]),
+                    per_prevented=value["per_prevented"],
+                    fixed_amount=value["fixed_amount"],
+                    private=value["private"],
+                )
+            )
+            continue
+        if kind == "deal_damage":
+            if set(value) != common | {"source", "recipient_kind"}:
+                raise GameRuleError(
+                    "Prevention triggered-ability damage is malformed"
+                )
+            results.append(
+                DealDamageTriggerRequest(
+                    source_ref=str(value["source"]),
+                    recipient_kind=str(value["recipient_kind"]),
+                    per_prevented=value["per_prevented"],
+                    fixed_amount=value["fixed_amount"],
+                )
+            )
+            continue
+        if kind == "place_counters":
+            if set(value) != common | {
+                "subject",
+                "counter_name",
+                "placing_player",
+            }:
+                raise GameRuleError(
+                    "Prevention triggered-ability counter result is malformed"
+                )
+            results.append(
+                PlaceCountersTriggerRequest(
+                    subject_ref=str(value["subject"]),
+                    counter_name=str(value["counter_name"]),
+                    placing_player=str(value.get("placing_player") or actor),
+                    per_prevented=value["per_prevented"],
+                    fixed_amount=value["fixed_amount"],
+                )
+            )
+            continue
+        raise GameRuleError(
+            "The prevention triggered-ability result kind is unsupported"
+        )
+    return PreventionTriggeredAbilityRequest(
+        source_ref=str(raw["source"]),
+        label=str(raw["label"]),
+        results=tuple(results),
+        target_schema=target_schema,
+    )
+
+
 def _apply_create_damage_prevention_shield(
     host: Any,
     effect: Mapping[str, Any],
@@ -289,6 +384,9 @@ def _apply_create_damage_prevention_shield(
             source_predicate=_source_predicate(effect),
             label=str(effect.get("label") or reason),
             aftermath=_prevention_aftermath_requests(effect, actor=actor),
+            triggered_ability=_prevention_trigger_request(
+                effect, actor=actor
+            ),
         )
         plan = plan_prevention_shield_creation(host, request)
         shields = commit_prevention_shield_creation(host, plan)

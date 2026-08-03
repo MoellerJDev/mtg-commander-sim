@@ -30,6 +30,7 @@
       "test_life_change",
       "test_life_effect_runtime",
       "test_prevention_immediate_sequencing",
+      "test_prevention_trigger_stack",
       "test_replacement_event_ordering",
       "test_replacement_event_tree",
       "test_replacement_model_hardening",
@@ -62,7 +63,8 @@
       "test_semantic_choice_model",
       "test_semantic_handlers",
       "test_semantic_searches",
-      "test_targeting_v070"
+      "test_targeting_v070",
+      "test_trigger_targeting"
     ],
     "triggers-turns-exact-decks": [
       "test_beginning_phase_rules",

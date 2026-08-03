@@ -13,23 +13,25 @@ from .compiler.corpus_reporting import (
     explain_oracle_ir,
     oracle_corpus_coverage,
 )
+from .compiler.dependency_gate import (
+    dependency_gate as _dependency_gate,
+    explicit_capability_gate as _explicit_capability_gate,
+)
 from .compiler.keyword_templates import keyword_mechanics
-from .compiler.prevention_templates import fixed_prevention_effect_template
+from .compiler.prevention_templates import (
+    fixed_prevention_effect_template,
+    prevention_trigger_effect_template,
+)
 from .compiler.runtime_templates import static_runtime_template
 from .declaration_costs import parse_declaration_cost_line
 from .declaration_restrictions import parse_declaration_restriction_line
-from .rules.capabilities import (
-    CapabilityClosure,
-    CapabilityRegistry,
-    capability_covered_mechanics,
-    capability_dependencies_for_node,
-)
+from .rules.capabilities import CapabilityRegistry
 from .semantics import SemanticProgram, SemanticRegistry
 from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v20"
+ORACLE_COMPILER_VERSION = "oracle-ir-v21"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 
 _NUMBER_WORDS = {
@@ -96,6 +98,7 @@ class OracleNode:
     effects: tuple[Mapping[str, Any], ...] = ()
     handlers: tuple[Mapping[str, Any], ...] = ()
     target_schema: Mapping[str, Any] | None = None
+    event_condition: Mapping[str, Any] | None = None
     mechanics: tuple[str, ...] = ()
     residual_ids: tuple[str, ...] = ()
     capability_dependencies: tuple[str, ...] = ()
@@ -120,6 +123,11 @@ class OracleNode:
             "target_schema": (
                 dict(self.target_schema)
                 if self.target_schema is not None
+                else None
+            ),
+            "event_condition": (
+                dict(self.event_condition)
+                if self.event_condition is not None
                 else None
             ),
             "mechanics": list(self.mechanics),
@@ -213,79 +221,6 @@ def _number(value: str) -> int:
         int(normalized)
         if normalized.isdigit()
         else _NUMBER_WORDS[normalized]
-    )
-
-
-@dataclass(frozen=True, slots=True)
-class _DependencyGate:
-    blockers: tuple[str, ...]
-    capabilities: tuple[str, ...] = ()
-    closure: CapabilityClosure | None = None
-
-
-def _dependency_gate(
-    *,
-    mechanics: Iterable[str],
-    effects: Sequence[Mapping[str, Any]],
-    target_schema: Mapping[str, Any] | None,
-    trusted_mechanics: frozenset[str],
-    capability_registry: CapabilityRegistry | None,
-    capability_profile: str,
-) -> _DependencyGate:
-    mechanic_ids = tuple(str(value).casefold() for value in mechanics)
-    capabilities = capability_dependencies_for_node(
-        effects=effects,
-        target_schema=target_schema,
-        mechanic_ids=mechanic_ids,
-    )
-    if capability_registry is not None and capabilities:
-        closure = capability_registry.closure(
-            capabilities,
-            profile=capability_profile,
-        )
-        covered = set(capability_covered_mechanics(capabilities))
-        unmapped = sorted(
-            set(mechanic_ids) - trusted_mechanics - covered
-        )
-        return _DependencyGate(
-            blockers=(
-                *(
-                    f"capability:{blocker}"
-                    for blocker in closure.blockers
-                ),
-                *(f"mechanic:{mechanic}" for mechanic in unmapped),
-            ),
-            capabilities=capabilities,
-            closure=closure,
-        )
-    return _DependencyGate(
-        blockers=tuple(
-            f"mechanic:{mechanic}"
-            for mechanic in sorted(set(mechanic_ids) - trusted_mechanics)
-        )
-    )
-
-
-def _explicit_capability_gate(
-    capability: str,
-    *,
-    capability_registry: CapabilityRegistry | None,
-    capability_profile: str,
-) -> _DependencyGate:
-    if capability_registry is None:
-        return _DependencyGate(
-            blockers=(f"capability:{capability}",),
-            capabilities=(capability,),
-        )
-    closure = capability_registry.closure(
-        (capability,), profile=capability_profile
-    )
-    return _DependencyGate(
-        blockers=tuple(
-            f"capability:{blocker}" for blocker in closure.blockers
-        ),
-        capabilities=(capability,),
-        closure=closure,
     )
 
 
@@ -869,7 +804,10 @@ def _reviewed_effect_template(
     Mapping[str, Any] | None,
     tuple[str, ...],
 ]:
-    prevention = fixed_prevention_effect_template(text.strip())
+    prevention = fixed_prevention_effect_template(
+        text.strip(),
+        card_name=card_name,
+    )
     return prevention or _effect_template(text, card_name=card_name)
 
 
@@ -1035,6 +973,134 @@ def _runtime_handler_node(
     )
 
 
+def _trigger_node(
+    *,
+    node_id: str,
+    line: str,
+    span: SourceSpan,
+    card_name: str,
+    trusted_mechanics: frozenset[str],
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+    residuals: list[OracleResidual],
+) -> OracleNode | None:
+    """Compile one closed ordinary or CR 615.13 triggered ability."""
+
+    if not _TRIGGER_PREFIX.match(line):
+        return None
+    source_name = re.escape(card_name)
+    trigger = re.fullmatch(
+        rf"(?:when|whenever) "
+        rf"(?P<subject>this (?:artifact|aura|card|creature|"
+        rf"enchantment|equipment|land|permanent)|{source_name}) "
+        rf"(?P<event>enters|dies|leaves the battlefield), "
+        rf"(?P<body>.+)",
+        line,
+        re.IGNORECASE,
+    )
+    prevention_trigger = prevention_trigger_effect_template(
+        line,
+        card_name=card_name,
+    )
+    template = None
+    effects: tuple[Mapping[str, Any], ...] = ()
+    target_schema = None
+    mechanics: tuple[str, ...] = ()
+    event_condition: Mapping[str, Any] | None = None
+    event = "unresolved"
+    recognized = False
+    if prevention_trigger is not None:
+        (
+            template,
+            effects,
+            target_schema,
+            mechanics,
+            event_condition,
+        ) = prevention_trigger
+        event = "damage.prevented"
+        recognized = True
+    elif trigger:
+        template, effects, target_schema, mechanics = (
+            _reviewed_effect_template(
+                trigger.group("body"),
+                card_name=card_name,
+            )
+        )
+        event = {
+            "enters": "permanent.enter.self",
+            "dies": "creature.dies.self",
+            "leaves the battlefield": "permanent.leave.self",
+        }[trigger.group("event").casefold()]
+        recognized = True
+    dependencies = ("cr-603-handling-triggered-abilities", *mechanics)
+    gate = _dependency_gate(
+        mechanics=dependencies,
+        effects=effects,
+        target_schema=target_schema,
+        trusted_mechanics=trusted_mechanics,
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
+    )
+    if recognized and template is not None:
+        residual_ids = (
+            (
+                _residual(
+                    residuals,
+                    kind="dependency_contract",
+                    text=line,
+                    span=span,
+                    reason=(
+                        "lowerable trigger depends on untrusted mechanic contracts"
+                    ),
+                    blockers=gate.blockers,
+                ),
+            )
+            if gate.blockers
+            else ()
+        )
+    else:
+        residual_ids = (
+            _residual(
+                residuals,
+                kind="trigger",
+                text=line,
+                span=span,
+                reason=(
+                    "trigger effect has no exact generic template"
+                    if recognized
+                    else "trigger condition/event binding is not exact"
+                ),
+                blockers=(
+                    "normalized event binding",
+                    "intervening-if and reflexive-trigger grammar",
+                ),
+            ),
+        )
+    closure = gate.closure
+    return OracleNode(
+        node_id=node_id,
+        kind="triggered_ability",
+        text=line,
+        span=span,
+        active_zone="battlefield",
+        event=event,
+        lowerable=recognized and template is not None,
+        exact=recognized and template is not None and not gate.blockers,
+        template_id=template,
+        effects=effects,
+        target_schema=target_schema,
+        event_condition=event_condition,
+        mechanics=dependencies,
+        residual_ids=residual_ids,
+        capability_dependencies=gate.capabilities,
+        capability_closure=closure.reachable if closure is not None else (),
+        capability_profile=closure.profile if closure is not None else None,
+        capability_fingerprint=(
+            closure.fingerprint if closure is not None else None
+        ),
+    )
+
+
 def _compile_face(
     record: CardRecord,
     *,
@@ -1176,100 +1242,18 @@ def _compile_face(
             )
             continue
 
-        if _TRIGGER_PREFIX.match(line):
-            source_name = re.escape(face_name or record.name)
-            trigger = re.fullmatch(
-                rf"(?:when|whenever) "
-                rf"(?P<subject>this (?:artifact|aura|card|creature|"
-                rf"enchantment|equipment|land|permanent)|{source_name}) "
-                rf"(?P<event>enters|dies|leaves the battlefield), "
-                rf"(?P<body>.+)",
-                line,
-                re.IGNORECASE,
-            )
-            template = None
-            effects: tuple[Mapping[str, Any], ...] = ()
-            target_schema = None
-            mechanics: tuple[str, ...] = ()
-            event = "unresolved"
-            if trigger:
-                template, effects, target_schema, mechanics = (
-                    _reviewed_effect_template(
-                        trigger.group("body"),
-                        card_name=face_name or record.name,
-                    )
-                )
-                event = {
-                    "enters": "permanent.enter.self",
-                    "dies": "creature.dies.self",
-                    "leaves the battlefield": "permanent.leave.self",
-                }[trigger.group("event").casefold()]
-            dependencies = (
-                "cr-603-handling-triggered-abilities",
-                *mechanics,
-            )
-            missing = sorted(set(dependencies) - trusted_mechanics)
-            residual_ids: tuple[str, ...]
-            if trigger is not None and template is not None:
-                residual_ids = (
-                    (
-                        _residual(
-                            residuals,
-                            kind="dependency_contract",
-                            text=line,
-                            span=span,
-                            reason=(
-                                "lowerable trigger depends on untrusted "
-                                "mechanic contracts"
-                            ),
-                            blockers=tuple(
-                                f"mechanic:{mechanic}"
-                                for mechanic in missing
-                            ),
-                        ),
-                    )
-                    if missing
-                    else ()
-                )
-            else:
-                residual_ids = (
-                    _residual(
-                        residuals,
-                        kind="trigger",
-                        text=line,
-                        span=span,
-                        reason=(
-                            "trigger effect has no exact generic template"
-                            if trigger is not None
-                            else "trigger condition/event binding is not exact"
-                        ),
-                        blockers=(
-                            "normalized event binding",
-                            "intervening-if and reflexive-trigger grammar",
-                        ),
-                    ),
-                )
-            nodes.append(
-                OracleNode(
-                    node_id=node_id,
-                    kind="triggered_ability",
-                    text=line,
-                    span=span,
-                    active_zone="battlefield",
-                    event=event,
-                    lowerable=trigger is not None and template is not None,
-                    exact=(
-                        trigger is not None
-                        and template is not None
-                        and not missing
-                    ),
-                    template_id=template,
-                    effects=effects,
-                    target_schema=target_schema,
-                    mechanics=dependencies,
-                    residual_ids=residual_ids,
-                )
-            )
+        trigger_node = _trigger_node(
+            node_id=node_id,
+            line=line,
+            span=span,
+            card_name=face_name or record.name,
+            trusted_mechanics=trusted_mechanics,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+            residuals=residuals,
+        )
+        if trigger_node is not None:
+            nodes.append(trigger_node)
             continue
 
         enters_tapped = re.fullmatch(

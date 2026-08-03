@@ -565,6 +565,105 @@ class OracleIRTests(unittest.TestCase):
             choice["shield"]["aftermath"][0],
         )
 
+    def test_prevention_triggered_damage_and_draw_compile_as_a_stack_trigger(self):
+        base = self.db.lookup("Lightning Bolt")
+        record = replace(
+            base,
+            oracle_id="fixture:new-way-forward",
+            name="New Way Forward",
+            oracle_text=(
+                "The next time a source of your choice would deal damage to "
+                "you this turn, prevent that damage. When damage is prevented "
+                "this way, New Way Forward deals that much damage to that "
+                "source's controller and you draw that many cards."
+            ),
+        )
+
+        node = compile_oracle_card(record).faces[0].nodes[0]
+
+        self.assertEqual(
+            "damage-prevention-triggered-damage-draw-v1",
+            node.template_id,
+        )
+        self.assertTrue(node.lowerable)
+        trigger = node.effects[0]["shield"]["triggered_ability"]
+        self.assertEqual({}, trigger["target_schema"])
+        self.assertEqual(
+            ["deal_damage", "draw_cards"],
+            [result["kind"] for result in trigger["results"]],
+        )
+        self.assertNotIn("aftermath", node.effects[0]["shield"])
+
+        wrong_source = compile_oracle_card(
+            replace(
+                record,
+                oracle_id="fixture:new-way-forward-wrong-source",
+                oracle_text=record.oracle_text.replace(
+                    "New Way Forward deals",
+                    "Another Card deals",
+                ),
+            )
+        )
+        self.assertNotEqual(
+            "damage-prevention-triggered-damage-draw-v1",
+            wrong_source.faces[0].nodes[0].template_id,
+        )
+        self.assertTrue(wrong_source.faces[0].residuals)
+
+    def test_general_prevention_trigger_binds_affected_player_and_amount(self):
+        base = self.db.lookup("Grizzly Bears")
+        record = replace(
+            base,
+            oracle_id="fixture:selfless-squire-prevention",
+            name="Fixture Selfless Squire",
+            type_line="Creature — Human Soldier",
+            oracle_text=(
+                "When Fixture Selfless Squire enters, prevent all damage that would be "
+                "dealt to you this turn.\n"
+                "Whenever damage that would be dealt to you is prevented, put "
+                "that many +1/+1 counters on Fixture Selfless Squire."
+            ),
+        )
+
+        ir = compile_oracle_card(record)
+        entry, prevention = ir.faces[0].nodes
+
+        self.assertEqual("damage-prevention-all-shield-v1", entry.template_id)
+        self.assertEqual("all", entry.effects[0]["mode"])
+        self.assertEqual(
+            "damage-prevented-self-counter-trigger-v1",
+            prevention.template_id,
+        )
+        self.assertEqual("damage.prevented", prevention.event)
+        self.assertEqual(
+            {
+                "field": "affected_players",
+                "op": "contains_any",
+                "value": ["$source.controller"],
+            },
+            prevention.event_condition,
+        )
+        self.assertEqual(
+            "$context.prevented_amount",
+            prevention.effects[0]["delta"],
+        )
+        programs = generated_programs(
+            self.db,
+            record,
+            trusted_mechanics={
+                "cr-603-handling-triggered-abilities",
+                "cr-615-prevention-effects",
+                "cr-122-counters",
+            },
+        )
+        prevention_program = next(
+            value for value in programs if value.event == "damage.prevented"
+        )
+        self.assertEqual(
+            prevention.event_condition,
+            prevention_program.event_condition,
+        )
+
     def test_fixed_post_prevention_life_is_a_sequential_instruction(self):
         base = self.db.lookup("Lightning Bolt")
         oracle_text = (

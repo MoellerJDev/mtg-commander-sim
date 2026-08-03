@@ -8,6 +8,7 @@ from ..damage import (
     resolve_damage_batch,
     source_snapshot,
 )
+from ..damage_source import DamageSourceSnapshot
 from ..errors import GameRuleError
 from ..effect_contracts import effect_family_contract
 from ..semantic_runtime.intents import PlaceCountersIntent
@@ -32,6 +33,25 @@ def _apply_damage(
     if amount == 0:
         return 0
     try:
+        raw_source_snapshot = effect.get("source_snapshot")
+        if raw_source_snapshot is not None and not isinstance(
+            raw_source_snapshot, Mapping
+        ):
+            raise GameRuleError("Damage source LKI is malformed")
+        pinned_source = (
+            DamageSourceSnapshot.from_dict(dict(raw_source_snapshot))
+            if isinstance(raw_source_snapshot, Mapping)
+            else None
+        )
+        effect_source = (
+            str(effect["source"])
+            if effect.get("source") is not None
+            else None
+        )
+        if pinned_source is not None and effect_source != pinned_source.ref:
+            raise GameRuleError(
+                "Damage source LKI does not match the represented source"
+            )
         replacement_event_ids = list(
             effect.get("_replacement_event_ids") or ()
         )
@@ -44,23 +64,23 @@ def _apply_damage(
             proposal_id=(
                 str(replacement_event_ids[0])
                 if replacement_event_ids
-                else (
-                    f"damage.effect:{host.state.revision}:"
-                    f"{host.state.event_sequence + 1}:0"
+                else str(
+                    effect.get("damage_event_id")
+                    or (
+                        f"damage.effect:{host.state.revision}:"
+                        f"{host.state.event_sequence + 1}:0"
+                    )
                 )
             ),
             actor=actor,
-            source_ref=(
-                str(effect["source"])
-                if effect.get("source") is not None
-                else None
-            ),
+            source_ref=effect_source,
             target=target,
             amount=amount,
             combat=False,
             reason=reason,
             unpreventable=bool(effect.get("unpreventable", False)),
             deathtouch=bool(effect.get("deathtouch", False)),
+            source_override=pinned_source,
         )
         result = resolve_damage_batch(
             host,

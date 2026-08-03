@@ -18,10 +18,20 @@ from .damage_modifier_state import (
     PreventionMode,
 )
 from .object_query import (
+    ObjectQueryError,
     object_matches_query,
     object_query_result,
     ObjectQuerySpec,
+    validate_chosen_damage_source_predicate,
 )
+from .prevention_triggers import (
+    DealDamagePreventionTrigger,
+    DrawCardsPreventionTrigger,
+    PlaceCountersPreventionTrigger,
+    PreventionTriggeredAbility,
+    PreventionTriggerError,
+)
+from .replacement.immutable import FrozenMap, thaw_value
 from .util import stable_json
 
 
@@ -152,6 +162,121 @@ PreventionAftermathRequest = (
 
 
 @dataclass(frozen=True, slots=True)
+class DrawCardsTriggerRequest:
+    player: str
+    per_prevented: int = 0
+    fixed_amount: int = 0
+    private: bool = True
+
+    def __post_init__(self) -> None:
+        try:
+            DrawCardsPreventionTrigger(
+                player=self.player,
+                per_prevented=self.per_prevented,
+                fixed_amount=self.fixed_amount,
+                private=self.private,
+            )
+        except PreventionTriggerError as exc:
+            raise DamagePreventionCreationError(str(exc)) from exc
+
+
+@dataclass(frozen=True, slots=True)
+class DealDamageTriggerRequest:
+    source_ref: str
+    recipient_kind: str
+    per_prevented: int = 0
+    fixed_amount: int = 0
+
+    def __post_init__(self) -> None:
+        if not self.source_ref or self.recipient_kind not in {
+            "prevented_source_controller",
+            "selected_target",
+        }:
+            raise DamagePreventionCreationError(
+                "Prevention-trigger damage requires a source and supported recipient"
+            )
+        if (
+            type(self.per_prevented) is not int
+            or self.per_prevented < 0
+            or type(self.fixed_amount) is not int
+            or self.fixed_amount < 0
+            or not (self.per_prevented or self.fixed_amount)
+        ):
+            raise DamagePreventionCreationError(
+                "Prevention-trigger damage requires a positive fixed or scaled amount"
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class PlaceCountersTriggerRequest:
+    subject_ref: str
+    counter_name: str
+    placing_player: str
+    per_prevented: int = 0
+    fixed_amount: int = 0
+
+    def __post_init__(self) -> None:
+        try:
+            PlaceCountersPreventionTrigger(
+                subject_ref=self.subject_ref,
+                counter_name=self.counter_name,
+                placing_player=self.placing_player,
+                per_prevented=self.per_prevented,
+                fixed_amount=self.fixed_amount,
+            )
+        except PreventionTriggerError as exc:
+            raise DamagePreventionCreationError(str(exc)) from exc
+
+
+PreventionTriggerResultRequest = (
+    DrawCardsTriggerRequest
+    | DealDamageTriggerRequest
+    | PlaceCountersTriggerRequest
+)
+
+
+@dataclass(frozen=True, slots=True)
+class PreventionTriggeredAbilityRequest:
+    source_ref: str
+    label: str
+    results: tuple[PreventionTriggerResultRequest, ...]
+    target_schema: FrozenMap = FrozenMap()
+
+    def __post_init__(self) -> None:
+        values = tuple(self.results)
+        if not self.source_ref or not self.label or not values:
+            raise DamagePreventionCreationError(
+                "Prevention-trigger creation requires source, label, and results"
+            )
+        if any(
+            not isinstance(
+                value,
+                (
+                    DrawCardsTriggerRequest,
+                    DealDamageTriggerRequest,
+                    PlaceCountersTriggerRequest,
+                ),
+            )
+            for value in values
+        ):
+            raise DamagePreventionCreationError(
+                "Prevention-trigger creation results must be typed"
+            )
+        object.__setattr__(self, "results", values)
+        if not isinstance(self.target_schema, FrozenMap):
+            object.__setattr__(self, "target_schema", FrozenMap(self.target_schema))
+        needs_target = any(
+            isinstance(value, DealDamageTriggerRequest)
+            and value.recipient_kind == "selected_target"
+            for value in values
+        )
+        if needs_target != bool(self.target_schema):
+            raise DamagePreventionCreationError(
+                "Targeted prevention-trigger creation requires exactly one target schema"
+            )
+
+
+@dataclass(frozen=True, slots=True)
 class PreventionShieldCreationRequest:
     source_id: str
     controller: str
@@ -162,6 +287,7 @@ class PreventionShieldCreationRequest:
     source_predicate: ObjectQuerySpec = ObjectQuerySpec()
     label: str = ""
     aftermath: tuple[PreventionAftermathRequest, ...] = ()
+    triggered_ability: PreventionTriggeredAbilityRequest | None = None
 
     def __post_init__(self) -> None:
         if not str(self.source_id or "") or not str(self.controller or ""):
@@ -217,6 +343,12 @@ class PreventionShieldCreationRequest:
                 "Prevention aftermath requests must be typed"
             )
         object.__setattr__(self, "aftermath", aftermath)
+        if self.triggered_ability is not None and not isinstance(
+            self.triggered_ability, PreventionTriggeredAbilityRequest
+        ):
+            raise DamagePreventionCreationError(
+                "Prevention triggered-ability request must be typed"
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -255,6 +387,10 @@ def pin_chosen_damage_source(
         raise DamagePreventionCreationError(
             "Chosen damage sources require a typed predicate"
         )
+    try:
+        validate_chosen_damage_source_predicate(predicate)
+    except ObjectQueryError as exc:
+        raise DamagePreventionCreationError(str(exc)) from exc
     snapshot = source_snapshot(host, ref, controller=controller)
     if snapshot.object_id.startswith("unrepresented:"):
         raise DamagePreventionCreationError(
@@ -373,6 +509,46 @@ def _shield_ids(
                 )
                 for value in request.aftermath
             ],
+            "triggered_ability": (
+                {
+                    "source": request.triggered_ability.source_ref,
+                    "label": request.triggered_ability.label,
+                    "target_schema": thaw_value(
+                        request.triggered_ability.target_schema
+                    ),
+                    "results": [
+                        (
+                            {
+                                "kind": "draw_cards",
+                                "player": value.player,
+                                "per_prevented": value.per_prevented,
+                                "fixed_amount": value.fixed_amount,
+                                "private": value.private,
+                            }
+                            if isinstance(value, DrawCardsTriggerRequest)
+                            else {
+                                "kind": "deal_damage",
+                                "source": value.source_ref,
+                                "recipient_kind": value.recipient_kind,
+                                "per_prevented": value.per_prevented,
+                                "fixed_amount": value.fixed_amount,
+                            }
+                            if isinstance(value, DealDamageTriggerRequest)
+                            else {
+                                "kind": "place_counters",
+                                "subject": value.subject_ref,
+                                "counter_name": value.counter_name,
+                                "placing_player": value.placing_player,
+                                "per_prevented": value.per_prevented,
+                                "fixed_amount": value.fixed_amount,
+                            }
+                        )
+                        for value in request.triggered_ability.results
+                    ],
+                }
+                if request.triggered_ability is not None
+                else None
+            ),
             "existing": [
                 shield.shield_id
                 for shield in host.state.damage_prevention_shields
@@ -455,6 +631,64 @@ def _aftermath_for_subject(
     return tuple(result)
 
 
+def _triggered_ability(
+    host: DamagePreventionCreationHost,
+    request: PreventionShieldCreationRequest,
+) -> PreventionTriggeredAbility | None:
+    value = request.triggered_ability
+    if value is None:
+        return None
+    try:
+        ability_source = source_snapshot(
+            host,
+            value.source_ref,
+            controller=request.controller,
+        )
+        results = []
+        for result in value.results:
+            if isinstance(result, DrawCardsTriggerRequest):
+                results.append(
+                    DrawCardsPreventionTrigger(
+                        player=result.player,
+                        per_prevented=result.per_prevented,
+                        fixed_amount=result.fixed_amount,
+                        private=result.private,
+                    )
+                )
+            elif isinstance(result, DealDamageTriggerRequest):
+                results.append(
+                    DealDamagePreventionTrigger(
+                        source=source_snapshot(
+                            host,
+                            result.source_ref,
+                            controller=request.controller,
+                        ),
+                        recipient_kind=result.recipient_kind,
+                        per_prevented=result.per_prevented,
+                        fixed_amount=result.fixed_amount,
+                    )
+                )
+            else:
+                results.append(
+                    PlaceCountersPreventionTrigger(
+                        subject_ref=result.subject_ref,
+                        counter_name=result.counter_name,
+                        placing_player=result.placing_player,
+                        per_prevented=result.per_prevented,
+                        fixed_amount=result.fixed_amount,
+                    )
+                )
+        return PreventionTriggeredAbility(
+            controller=request.controller,
+            source=ability_source,
+            label=value.label,
+            results=tuple(results),
+            target_schema=value.target_schema,
+        )
+    except (DamageError, PreventionTriggerError) as exc:
+        raise DamagePreventionCreationError(str(exc)) from exc
+
+
 def plan_prevention_shield_creation(
     host: DamagePreventionCreationHost,
     request: PreventionShieldCreationRequest,
@@ -477,6 +711,7 @@ def plan_prevention_shield_creation(
             predicate=request.source_predicate,
         )
         ids = _shield_ids(host, request, subjects)
+        triggered_ability = _triggered_ability(host, request)
         shields = tuple(
             DamagePreventionShield(
                 shield_id=shield_id,
@@ -490,6 +725,7 @@ def plan_prevention_shield_creation(
                 chosen_source=chosen,
                 label=request.label,
                 aftermath=_aftermath_for_subject(host, request, subject),
+                triggered_ability=triggered_ability,
             )
             for shield_id, subject, allocation in zip(
                 ids, subjects, request.subjects, strict=True
@@ -552,10 +788,14 @@ def commit_prevention_shield_creation(
 __all__ = [
     "DamagePreventionCreationError",
     "DamagePreventionCreationPlan",
+    "DealDamageTriggerRequest",
+    "DrawCardsTriggerRequest",
     "GainLifeAftermathRequest",
+    "PlaceCountersTriggerRequest",
     "PlaceCountersAftermathRequest",
     "PreventionShieldCreationRequest",
     "PreventionSubjectAllocation",
+    "PreventionTriggeredAbilityRequest",
     "commit_prevention_shield_creation",
     "plan_prevention_shield_creation",
     "pin_chosen_damage_source",

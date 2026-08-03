@@ -53,6 +53,8 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/damage_modifier_state.py",
         "mtg_commander_sim/model.py",
         "mtg_commander_sim/object_predicate.py",
+        "mtg_commander_sim/prevention_triggers.py",
+        "mtg_commander_sim/replacement/immutable.py",
     }:
         return "domain"
     if relative in {
@@ -101,6 +103,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/counter_state.py",
         "mtg_commander_sim/damage.py",
         "mtg_commander_sim/damage_prevention.py",
+        "mtg_commander_sim/damage_transaction.py",
         "mtg_commander_sim/damage_values.py",
         "mtg_commander_sim/damage_results.py",
         "mtg_commander_sim/declaration_costs.py",
@@ -126,6 +129,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/tap_state.py",
         "mtg_commander_sim/targets.py",
         "mtg_commander_sim/token_creation.py",
+        "mtg_commander_sim/trigger_targeting.py",
         "mtg_commander_sim/object_query.py",
     }:
         return "rules"
@@ -158,6 +162,8 @@ def _owner(relative: str, layer: str) -> str:
     if relative in {
         "mtg_commander_sim/damage_modifier_state.py",
         "mtg_commander_sim/damage_source.py",
+        "mtg_commander_sim/prevention_triggers.py",
+        "mtg_commander_sim/replacement/immutable.py",
     }:
         return "damage"
     if relative == "mtg_commander_sim/counter_state.py":
@@ -193,8 +199,10 @@ def _owner(relative: str, layer: str) -> str:
         "mtg_commander_sim/damage_prevention.py",
         "mtg_commander_sim/damage_prevention_aftermath.py",
         "mtg_commander_sim/damage_prevention_creation.py",
+        "mtg_commander_sim/damage_transaction.py",
         "mtg_commander_sim/damage_values.py",
         "mtg_commander_sim/damage_results.py",
+        "mtg_commander_sim/trigger_targeting.py",
     }:
         return "damage"
     if relative == "mtg_commander_sim/token_creation.py":
@@ -285,6 +293,7 @@ def build_classifications() -> dict[str, Any]:
                             "damage.py",
                             "damage_modifier_state.py",
                             "damage_prevention",
+                            "damage_transaction.py",
                             "damage_results.py",
                             "delayed_triggers.py",
                             "life_change.py",
@@ -300,6 +309,8 @@ def build_classifications() -> dict[str, Any]:
                             "tap_state.py",
                             "token_creation.py",
                             "replacement_decisions.py",
+                            "prevention_triggers.py",
+                            "trigger_targeting.py",
                         )
                     )
                     or relative in {

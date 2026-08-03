@@ -47056,30 +47056,47 @@
       "covered_scenarios": [
         "positive",
         "negative",
-        "interaction"
+        "interaction",
+        "multiplayer",
+        "replay"
       ],
       "dependency_rule_ids": [
         "615"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_rules_primitives.PreventionEffectTests.test_prevention_produces_a_modified_damage_event",
-        "tests.test_rules_primitives.PreventionEffectTests.test_unpreventable_damage_applies_effect_once_without_preventing",
-        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_prevention_dispatches_one_aggregate_event_per_effect"
+        "tests.test_prevention_trigger_stack.PreventionTriggerStackTests.test_one_trigger_is_created_per_effect_for_simultaneous_damage",
+        "tests.test_prevention_trigger_stack.PreventionTriggerStackTests.test_four_player_apnap_preserves_created_controller_after_control_change",
+        "tests.test_prevention_trigger_stack.PreventionTriggerStackTests.test_unpreventable_damage_creates_no_prevention_trigger",
+        "tests.test_prevention_trigger_stack.PreventionTriggerStackTests.test_general_prevention_trigger_uses_affected_player_condition",
+        "tests.test_prevention_trigger_stack.PreventionTriggerStackTests.test_targeted_prevention_trigger_chooses_target_when_put_on_stack",
+        "tests.test_prevention_trigger_stack.PreventionTriggerStackTests.test_trigger_uses_source_lki_resolves_on_stack_and_replays",
+        "tests.test_oracle_ir.OracleIRTests.test_prevention_triggered_damage_and_draw_compile_as_a_stack_trigger",
+        "tests.test_oracle_ir.OracleIRTests.test_general_prevention_trigger_binds_affected_player_and_amount"
       ],
       "implementation_components": [
         "damage.PreventionAppliedEvent",
         "damage._prevention_applied_events",
-        "damage.resolve_damage_batch",
-        "engine.CommanderEngine._dispatch_semantic_event"
+        "damage._collect_damage_result_triggers",
+        "prevention_triggers.PreventionTriggeredAbility",
+        "prevention_triggers.PreventionTriggerOccurrence",
+        "prevention_triggers.prevention_trigger_stack_item",
+        "trigger_targeting.begin_pending_trigger_target_selection",
+        "engine.CommanderEngine._dispatch_semantic_event",
+        "engine.CommanderEngine._enqueue_semantic_trigger_batch",
+        "compiler.prevention_templates.prevention_trigger_effect_template"
       ],
       "notes": [
-        "Positive prevention by one effect is aggregated across one simultaneous damage batch and dispatches one typed damage.prevented event before final damage.dealt trigger discovery."
+        "Each applied prevention effect that prevents a positive amount across one simultaneous damage batch creates one typed trigger occurrence; effects that prevent zero damage do not trigger.",
+        "Attached and battlefield prevention triggers join the ordinary APNAP/controller-order batch, choose mandatory targets as they enter the stack, preserve source LKI, and replay exactly.",
+        "Generic Oracle lowering covers a closed delayed damage-and-draw family and an affected-player counter-trigger family without printed-name dispatch."
       ],
       "required_scenarios": [
         "positive",
         "negative",
-        "interaction"
+        "interaction",
+        "multiplayer",
+        "replay"
       ],
       "reviewed": true,
       "rule_id": "615.13",

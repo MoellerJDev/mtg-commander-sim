@@ -21,6 +21,12 @@ from .damage_prevention import (
     DamageModifierSnapshot,
     project_damage_modifier_snapshot,
 )
+from .damage_transaction import (
+    DamageTransactionPort,
+    DamageTransactionResult,
+    PreparedDamageTransaction,
+)
+from .damage_values import DamageProposal
 from .life_change import (
     commit_life_change_batch,
     LifeChangeError,
@@ -81,7 +87,7 @@ class PreparedAftermathInstruction:
     requested_amount: int
     damage_event_ids: tuple[str, ...]
     life_event_id: str | None = None
-    nested_damage: Any | None = None
+    nested_damage: PreparedDamageTransaction | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -120,7 +126,7 @@ class PreventionAftermathResult:
     events: tuple[PreventionAftermathEvent, ...] = ()
     changed_players: tuple[str, ...] = ()
     changed_objects: tuple[str, ...] = ()
-    nested_damage_results: tuple[Any, ...] = ()
+    nested_damage_results: tuple[DamageTransactionResult, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -281,12 +287,13 @@ def _aftermath_requests(
 
 def _prepare_damage_aftermath(
     host: PreventionAftermathHost,
+    damage_port: DamageTransactionPort,
     values: Sequence[
         tuple[PreventionApplication, int, DealDamagePreventionAftermath, int]
     ],
     *,
     selections: Sequence[str | None],
-    sources: Sequence[Any] | None,
+    sources: Sequence[object] | None,
     source_zones: Mapping[str, str] | None,
     modifier_snapshot: DamageModifierSnapshot | None,
     depth: int,
@@ -298,11 +305,6 @@ def _prepare_damage_aftermath(
         raise PreventionAftermathError(
             "Damage prevention aftermath requires projected modifier state"
         )
-    # Imported lazily because the damage transaction owns orchestration while
-    # this module owns the typed CR 615.5 instruction/result family.
-    from .damage import prepare_damage_batch, recipient_snapshot
-    from .damage_values import DamageProposal
-
     instructions: list[PreparedAftermathInstruction] = []
     consumed = 0
     remaining = tuple(selections)
@@ -322,8 +324,7 @@ def _prepare_damage_aftermath(
             assert aftermath.recipient.subject is not None
             recipient_ref = aftermath.recipient.subject.ref
         try:
-            recipient = recipient_snapshot(
-                host,
+            recipient = damage_port.recipient(
                 recipient_ref,
                 actor=aftermath.source.controller,
             )
@@ -338,8 +339,7 @@ def _prepare_damage_aftermath(
                 "Prevention aftermath target changed object identity"
             )
         try:
-            nested = prepare_damage_batch(
-                host,
+            nested = damage_port.prepare(
                 (
                     DamageProposal(
                         proposal_id=(
@@ -393,8 +393,9 @@ def prepare_prevention_aftermath(
     host: PreventionAftermathHost,
     events: Sequence[ReplaceableEvent],
     *,
+    damage_port: DamageTransactionPort,
     selections: Sequence[str | None] = (),
-    sources: Sequence[Any] | None = None,
+    sources: Sequence[object] | None = None,
     source_zones: Mapping[str, str] | None = None,
     modifier_snapshot: DamageModifierSnapshot | None = None,
     depth: int = 0,
@@ -409,6 +410,7 @@ def prepare_prevention_aftermath(
     if requests.damage:
         nested, nested_consumed = _prepare_damage_aftermath(
             host,
+            damage_port,
             requests.damage,
             selections=selections,
             sources=sources,
@@ -513,6 +515,8 @@ def validate_prevention_aftermath(
 def commit_prevention_aftermath(
     host: PreventionAftermathHost,
     prepared: PreparedPreventionAftermath,
+    *,
+    damage_port: DamageTransactionPort,
 ) -> PreventionAftermathResult:
     """Commit CR 615.5 results immediately after the prevention batch."""
 
@@ -552,7 +556,7 @@ def commit_prevention_aftermath(
         for record in (() if life_commit is None else life_commit.records)
     }
     events: list[PreventionAftermathEvent] = []
-    nested_damage_results: list[Any] = []
+    nested_damage_results: list[DamageTransactionResult] = []
     nested_changed_players: list[str] = []
     nested_changed_objects: list[str] = []
     for instruction in prepared.instructions:
@@ -568,12 +572,9 @@ def commit_prevention_aftermath(
             applied = counter_results[counter_index].placed
             counter_index += 1
         if instruction.kind == "deal_damage":
-            from .damage import commit_prepared_damage_batch
-
             try:
-                nested_result = commit_prepared_damage_batch(
-                    host, instruction.nested_damage
-                )
+                assert instruction.nested_damage is not None
+                nested_result = damage_port.commit(instruction.nested_damage)
             except ValueError as exc:
                 raise PreventionAftermathError(str(exc)) from exc
             nested_damage_results.append(nested_result)

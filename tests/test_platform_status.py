@@ -40,8 +40,17 @@ class PlatformStatusTests(unittest.TestCase):
                 ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
             ).strip(),
         )
+        self.assertEqual(
+            report["generated"]["current_merged_main_git_sha"],
+            subprocess.check_output(
+                ["git", "rev-parse", "origin/main"], cwd=ROOT, text=True
+            ).strip(),
+        )
         persisted = json.loads(_serialize_json(report))
         self.assertIsNone(persisted["generated"]["current_runtime_git_sha"])
+        self.assertIsNone(
+            persisted["generated"]["current_merged_main_git_sha"]
+        )
         readiness = render_readiness(report)
         status = render_status(report)
         self.assertTrue(readiness.startswith("---\n"))
@@ -95,7 +104,7 @@ class PlatformStatusTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "commit_reference"):
             _validate_provenance(source)
 
-    def test_provenance_rejects_pending_or_already_merged_phase(self):
+    def test_provenance_rejects_pending_or_stale_merged_feature_status(self):
         source = json.loads(
             (ROOT / "platform" / "readiness-source.json").read_text(
                 encoding="utf-8"
@@ -106,13 +115,28 @@ class PlatformStatusTests(unittest.TestCase):
             _validate_provenance(source)
 
         source["integration"].pop("description")
-        source["integration"]["active_phase"] = "fixture_active_phase"
+        source["milestones"][0]["status"] = "implemented_at_feature_head"
         with mock.patch(
             "scripts.update_platform_status._git_is_ancestor",
             return_value=True,
         ):
-            with self.assertRaisesRegex(ValueError, "already merged"):
+            with self.assertRaisesRegex(
+                ValueError, "cannot remain at feature head"
+            ):
                 _validate_provenance(source)
+
+    def test_active_future_phase_is_independent_of_merged_feature_head(self):
+        source = json.loads(
+            (ROOT / "platform" / "readiness-source.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        source["integration"]["active_phase"] = "next_rules_family"
+        with mock.patch(
+            "scripts.update_platform_status._git_is_ancestor",
+            return_value=True,
+        ):
+            _validate_provenance(source)
 
     def test_generated_platform_status_is_current(self):
         result = subprocess.run(

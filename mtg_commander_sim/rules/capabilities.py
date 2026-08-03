@@ -661,12 +661,26 @@ def capability_dependencies_for_node(
                 contains_aftermath_kind(child, kind) for child in value
             )
         return False
+
+    def contains_key(value: Any, key: str) -> bool:
+        if isinstance(value, Mapping):
+            return key in value or any(
+                contains_key(child, key) for child in value.values()
+            )
+        if isinstance(value, (list, tuple)):
+            return any(contains_key(child, key) for child in value)
+        return False
     dependencies: set[str] = set()
     if not effects and target_schema is None:
         for mechanic in mechanics:
             dependencies.update(
                 MECHANIC_CAPABILITY_DEPENDENCIES.get(mechanic, ())
             )
+    if (
+        "cr-603-handling-triggered-abilities" in mechanics
+        and bool(effects)
+    ):
+        dependencies.add("trigger.placement.apnap")
     schema = dict(target_schema or {})
     reviewed_damage_shape = (
         mechanics == {"cr-120-damage", "cr-115-targets"}
@@ -710,6 +724,21 @@ def capability_dependencies_for_node(
             dependencies.add("counter.placement.quantity_replacement")
         if contains_aftermath_kind(effects, "deal_damage"):
             dependencies.add("damage.prevention.aftermath.damage")
+    prevention_triggered = contains_key(effects, "triggered_ability") or (
+        "cr-615-prevention-effects" in mechanics
+        and "cr-603-handling-triggered-abilities" in mechanics
+        and bool(all_operations.intersection({"counter", "damage", "draw"}))
+    )
+    if prevention_triggered:
+        dependencies.add("damage.prevention.triggered_results")
+        if contains_aftermath_kind(effects, "draw_cards") or "draw" in all_operations:
+            dependencies.add("zone.draw.library_to_hand")
+        if contains_aftermath_kind(effects, "deal_damage") or "damage" in all_operations:
+            dependencies.update(
+                {"damage.amount.positive", "damage.result.player_life"}
+            )
+        if contains_aftermath_kind(effects, "place_counters") or "counter" in all_operations:
+            dependencies.add("counter.placement.quantity_replacement")
     return tuple(sorted(dependencies))
 
 
@@ -733,6 +762,10 @@ def capability_covered_mechanics(
         # precommit boundary. This is deliberately narrower than claiming the
         # complete CR 119 family or life-gain-prevention grammar.
         covered.add("cr-119-life")
+    if "trigger.placement.apnap" in supplied:
+        covered.add("cr-603-handling-triggered-abilities")
+    if "damage.prevention.triggered_results" in supplied:
+        covered.add("cr-615-prevention-effects")
     if "counter.placement.quantity_replacement" in supplied:
         covered.add("cr-122-counters")
     if "damage.amount.positive" in supplied and supplied.intersection(

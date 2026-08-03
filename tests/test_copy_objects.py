@@ -16,6 +16,7 @@ from mtg_commander_sim.damage_prevention_creation import (
     PreventionShieldCreationRequest,
     PreventionSubjectAllocation,
 )
+from mtg_commander_sim.damage_source import REPRESENTED_DAMAGE_SOURCE_ZONES
 from mtg_commander_sim.model import GameState, StackItem
 from mtg_commander_sim.object_query import ObjectQuerySpec
 from mtg_commander_sim.record import (
@@ -328,7 +329,11 @@ class CopyObjectLifecycleTests(unittest.TestCase):
                 duration=DamageModifierDuration.UNTIL_END_OF_TURN,
                 subjects=(PreventionSubjectAllocation("B", None),),
                 chosen_source_ref=copied.ref,
-                source_predicate=ObjectQuerySpec(types_all=("artifact",)),
+                source_predicate=ObjectQuerySpec(
+                    zones=REPRESENTED_DAMAGE_SOURCE_ZONES,
+                    types_all=("artifact",),
+                    known_to_actor=True,
+                ),
             ),
         )
         commit_prevention_shield_creation(engine, plan)

@@ -247,6 +247,7 @@ def commit_damage_modifier_plan(
                     chosen_source=shield.chosen_source,
                     label=shield.label,
                     aftermath=shield.aftermath,
+                    triggered_ability=shield.triggered_ability,
                 )
             )
         else:
@@ -334,6 +335,7 @@ def project_damage_modifier_snapshot(
                 chosen_source=shield.chosen_source,
                 label=shield.label,
                 aftermath=shield.aftermath,
+                triggered_ability=shield.triggered_ability,
             )
         )
     removed_redirections = set(plan.remove_redirections)

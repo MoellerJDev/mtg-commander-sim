@@ -3,7 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Iterable, Mapping
 
-from .object_predicate import ObjectQueryError, ObjectQuerySpec
+from .object_predicate import (
+    ObjectQueryError,
+    ObjectQuerySpec,
+    validate_chosen_damage_source_predicate,
+)
 from .replacement.immutable import FrozenMap
 
 
@@ -104,3 +108,14 @@ def query_objects(
     """Filter immutable rules facts without applying target legality."""
 
     return tuple(row for row in rows if object_matches_query(row, spec))
+
+
+__all__ = [
+    "ObjectQueryError",
+    "ObjectQueryResult",
+    "ObjectQuerySpec",
+    "object_matches_query",
+    "object_query_result",
+    "query_objects",
+    "validate_chosen_damage_source_predicate",
+]

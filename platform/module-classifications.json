@@ -412,6 +412,21 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/compiler/dependency_gate.py",
+      "layer": "semantics",
+      "owning_subsystem": "oracle_compiler",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/compiler/keyword_templates.py",
       "layer": "semantics",
       "owning_subsystem": "oracle_compiler",
@@ -621,6 +636,20 @@
       "card_specificity_policy": "generic_no_growth",
       "visibility_sensitivity": "authoritative_internal",
       "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/damage_transaction.py",
+      "layer": "rules",
+      "owning_subsystem": "damage",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
     },
     {
       "file": "mtg_commander_sim/damage_values.py",
@@ -1087,6 +1116,18 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/prevention_triggers.py",
+      "layer": "domain",
+      "owning_subsystem": "damage",
+      "allowed_dependency_layers": [
+        "domain"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/profiles.py",
       "layer": "adapter",
       "owning_subsystem": "legacy_adapter",
@@ -1254,12 +1295,10 @@
     },
     {
       "file": "mtg_commander_sim/replacement/immutable.py",
-      "layer": "rules",
+      "layer": "domain",
       "owning_subsystem": "replacement_effects",
       "allowed_dependency_layers": [
-        "domain",
-        "rules",
-        "semantics"
+        "domain"
       ],
       "game_state_access": "none",
       "card_specificity_policy": "generic_no_growth",
@@ -2364,6 +2403,20 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/trigger_targeting.py",
+      "layer": "rules",
+      "owning_subsystem": "damage",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/util.py",
       "layer": "domain",
       "owning_subsystem": "legacy_domain",
@@ -2490,5 +2543,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "5435ada326220c885994d7a28a7081288da8539e70c266ef8ffbf6019e5ea162"
+  "fingerprint": "c306247d290031fc40dd8164aa6596a8a30c2fd23601cc2c10507e2c18418952"
 }

@@ -138,3 +138,38 @@ class ObjectQueryTests(unittest.TestCase):
         malformed["surprise"] = True
         with self.assertRaisesRegex(ObjectQueryError, "unknown surprise"):
             ObjectQuerySpec.from_dict(malformed)
+
+    def test_term_lists_reject_nonstrings_empty_values_and_case_duplicates(self):
+        malformed_values = (
+            (1,),
+            (True,),
+            ({"type": "creature"},),
+            ("",),
+            ("Creature", "creature"),
+        )
+        for values in malformed_values:
+            with self.subTest(values=values), self.assertRaises(
+                ObjectQueryError
+            ):
+                ObjectQuerySpec(types_all=values)
+
+        serialized = ObjectQuerySpec().to_dict()
+        for values in malformed_values:
+            malformed = dict(serialized)
+            malformed["keywords_all"] = list(values)
+            with self.subTest(persisted=values), self.assertRaises(
+                ObjectQueryError
+            ):
+                ObjectQuerySpec.from_dict(malformed)
+
+    def test_identity_fields_reject_coercion_and_empty_values(self):
+        for field_name in ("owner", "controller", "exclude_ref"):
+            for value in (1, True, {"seat": "A"}, ""):
+                with self.subTest(
+                    field=field_name, value=value
+                ), self.assertRaises(ObjectQueryError):
+                    ObjectQuerySpec(**{field_name: value})
+
+        canonical = ObjectQuerySpec(owner="A", controller="B")
+        self.assertEqual("A", canonical.owner)
+        self.assertEqual("B", canonical.controller)

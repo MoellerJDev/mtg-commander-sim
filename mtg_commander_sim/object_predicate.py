@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Iterable, Mapping
 
+from .damage_source import REPRESENTED_DAMAGE_SOURCE_ZONES
+
 
 class ObjectQueryError(ValueError):
     """A generic object predicate is malformed or noncanonical."""
@@ -33,10 +35,17 @@ def _normalized_terms(
     if not isinstance(values, (list, tuple)):
         raise ObjectQueryError(f"Object query {field_name} must be an array")
     normalize = str.upper if upper else str.casefold
-    result = tuple(sorted({normalize(str(value)) for value in values if str(value)}))
-    if len(result) != len(values):
+    normalized: list[str] = []
+    for value in values:
+        if type(value) is not str or not value:
+            raise ObjectQueryError(
+                f"Object query {field_name} requires nonempty strings"
+            )
+        normalized.append(normalize(value))
+    result = tuple(sorted(normalized))
+    if len(set(result)) != len(result):
         raise ObjectQueryError(
-            f"Object query {field_name} requires unique nonempty strings"
+            f"Object query {field_name} requires unique normalized strings"
         )
     return result
 
@@ -88,12 +97,10 @@ class ObjectQuerySpec:
         for field_name in ("owner", "controller", "exclude_ref"):
             value = getattr(self, field_name)
             if value is not None:
-                value = str(value)
-                if not value:
+                if type(value) is not str or not value:
                     raise ObjectQueryError(
-                        f"Object query {field_name} cannot be empty"
+                        f"Object query {field_name} must be a nonempty string or null"
                     )
-                object.__setattr__(self, field_name, value)
         for field_name in ("token", "tapped", "known_to_actor"):
             value = getattr(self, field_name)
             if value is not None and type(value) is not bool:
@@ -157,3 +164,41 @@ class ObjectQuerySpec:
             known_to_actor=value["known_to_actor"],
             exclude_ref=value["exclude_ref"],
         )
+
+
+def validate_chosen_damage_source_predicate(
+    spec: ObjectQuerySpec,
+) -> ObjectQuerySpec:
+    """Validate the closed public CR 609.7 chosen-source predicate family."""
+
+    if not isinstance(spec, ObjectQuerySpec):
+        raise ObjectQueryError(
+            "Chosen damage sources require a typed object predicate"
+        )
+    if not spec.zones or not set(spec.zones).issubset(
+        REPRESENTED_DAMAGE_SOURCE_ZONES
+    ):
+        raise ObjectQueryError(
+            "Chosen damage sources require nonempty represented public zones"
+        )
+    if spec.known_to_actor is not True:
+        raise ObjectQueryError(
+            "Chosen damage sources must be legally known to the chooser"
+        )
+    if spec.include_phased_out:
+        raise ObjectQueryError(
+            "Chosen damage sources cannot include phased-out objects"
+        )
+    if spec.excluded_types:
+        raise ObjectQueryError(
+            "Chosen damage sources do not support excluded card types"
+        )
+    if spec.token is not None or spec.tapped is not None:
+        raise ObjectQueryError(
+            "Chosen damage sources do not support token or tapped predicates"
+        )
+    if spec.exclude_ref is not None:
+        raise ObjectQueryError(
+            "Chosen damage sources do not support unrelated exclusions"
+        )
+    return spec
