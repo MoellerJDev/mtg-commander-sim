@@ -52,6 +52,10 @@ fail closed.
   fingerprints. Commands pin the programs and compact runtime bindings actually
   used. Replay validates these when present and remains compatible with older
   v3 records.
+- A compiler semantic correction changes both compiler version and artifact
+  fingerprint. Historical v3 snapshots deserialize their pinned CardProgram
+  rather than being silently recompiled as current output; a mismatched
+  manifest or command fingerprint fails explicitly.
 - Runtime accepts registered operations only. Oracle prose is not parsed
   during a state transition.
 

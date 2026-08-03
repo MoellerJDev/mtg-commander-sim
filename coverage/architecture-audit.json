@@ -1858,7 +1858,7 @@
           "module": "mtg_commander_sim.card_programs"
         }
       ],
-      "internal_edges": 570,
+      "internal_edges": 573,
       "modules": [
         {
           "fan_in": 2,
@@ -2107,7 +2107,7 @@
         },
         {
           "fan_in": 1,
-          "fan_out": 3,
+          "fan_out": 6,
           "module": "mtg_commander_sim.effect_runtime.life_effects"
         },
         {
@@ -2141,7 +2141,7 @@
           "module": "mtg_commander_sim.errors"
         },
         {
-          "fan_in": 1,
+          "fan_in": 2,
           "fan_out": 2,
           "module": "mtg_commander_sim.life_change"
         },
@@ -2256,7 +2256,7 @@
           "module": "mtg_commander_sim.record_trust"
         },
         {
-          "fan_in": 4,
+          "fan_in": 5,
           "fan_out": 7,
           "module": "mtg_commander_sim.replacement"
         },
@@ -2541,7 +2541,7 @@
           "module": "mtg_commander_sim.semantic_runtime.damage_replacements"
         },
         {
-          "fan_in": 4,
+          "fan_in": 5,
           "fan_out": 4,
           "module": "mtg_commander_sim.semantic_runtime.damage_results"
         },
@@ -3101,7 +3101,7 @@
           "visibility": "private"
         }
       ],
-      "logical_lines": 79283,
+      "logical_lines": 79446,
       "methods": {
         "dunder": 146,
         "private": 577,
@@ -3281,8 +3281,8 @@
           "file": "mtg_commander_sim/rules/capabilities.py",
           "functions_and_methods": 25,
           "language": "python",
-          "logical_lines": 660,
-          "physical_lines": 721
+          "logical_lines": 661,
+          "physical_lines": 726
         },
         {
           "file": "mtg_commander_sim/model.py",
@@ -3477,8 +3477,8 @@
           "file": "mtg_commander_sim/compiler/prevention_templates.py",
           "functions_and_methods": 17,
           "language": "python",
-          "logical_lines": 466,
-          "physical_lines": 508
+          "logical_lines": 465,
+          "physical_lines": 507
         },
         {
           "file": "mtg_commander_sim/replacement/operations.py",
@@ -3619,6 +3619,13 @@
           "language": "python",
           "logical_lines": 343,
           "physical_lines": 380
+        },
+        {
+          "file": "mtg_commander_sim/effect_runtime/life_effects.py",
+          "functions_and_methods": 10,
+          "language": "python",
+          "logical_lines": 340,
+          "physical_lines": 368
         },
         {
           "file": "mtg_commander_sim/mechanic_contracts.py",
@@ -3859,13 +3866,6 @@
           "physical_lines": 201
         },
         {
-          "file": "mtg_commander_sim/effect_runtime/life_effects.py",
-          "functions_and_methods": 8,
-          "language": "python",
-          "logical_lines": 185,
-          "physical_lines": 209
-        },
-        {
           "file": "mtg_commander_sim/permissions.py",
           "functions_and_methods": 11,
           "language": "python",
@@ -3894,18 +3894,18 @@
           "physical_lines": 173
         },
         {
+          "file": "mtg_commander_sim/effect_contracts.py",
+          "functions_and_methods": 2,
+          "language": "python",
+          "logical_lines": 161,
+          "physical_lines": 171
+        },
+        {
           "file": "mtg_commander_sim/semantic_runtime/component_registry.py",
           "functions_and_methods": 14,
           "language": "python",
           "logical_lines": 160,
           "physical_lines": 185
-        },
-        {
-          "file": "mtg_commander_sim/effect_contracts.py",
-          "functions_and_methods": 2,
-          "language": "python",
-          "logical_lines": 153,
-          "physical_lines": 163
         },
         {
           "file": "mtg_commander_sim/rules/casting/model.py",
@@ -4844,7 +4844,7 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 86051,
+      "physical_lines": 86222,
       "python_file_count": 165,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -4862,7 +4862,7 @@
           "web/src"
         ]
       },
-      "top_level_functions": 904,
+      "top_level_functions": 906,
       "web_file_count": 13
     },
     "semantic_handlers": {
@@ -5288,7 +5288,10 @@
             "119.1",
             "119.2",
             "119.3",
-            "119.4"
+            "119.4",
+            "608.2c",
+            "614.1",
+            "616.1"
           ],
           "schema_version": 1
         },
@@ -5301,7 +5304,10 @@
             "119.1",
             "119.2",
             "119.3",
-            "119.4"
+            "119.4",
+            "608.2c",
+            "614.1",
+            "616.1"
           ],
           "schema_version": 1
         },
@@ -5485,7 +5491,10 @@
             "119.1",
             "119.2",
             "119.3",
-            "119.4"
+            "119.4",
+            "608.2c",
+            "614.1",
+            "616.1"
           ],
           "schema_version": 1
         },
@@ -5510,7 +5519,10 @@
             "119.1",
             "119.2",
             "119.3",
-            "119.4"
+            "119.4",
+            "608.2c",
+            "614.1",
+            "616.1"
           ],
           "schema_version": 1
         },
@@ -5523,7 +5535,10 @@
             "119.1",
             "119.2",
             "119.3",
-            "119.4"
+            "119.4",
+            "608.2c",
+            "614.1",
+            "616.1"
           ],
           "schema_version": 1
         },
@@ -5536,7 +5551,10 @@
             "119.1",
             "119.2",
             "119.3",
-            "119.4"
+            "119.4",
+            "608.2c",
+            "614.1",
+            "616.1"
           ],
           "schema_version": 1
         },
@@ -5916,7 +5934,7 @@
       ],
       "registered_operations_still_in_legacy_dispatch": [],
       "registered_runtime_handler_count": 10,
-      "registry_fingerprint": "8e2e3756f2d5ea57e601660dbe23337a985b8f47267a0d54e93136de64113c3e",
+      "registry_fingerprint": "e4d5da96f52f6ee4e641508144c941d96bde45033b3faa3825b46c9d8ea5a992",
       "runtime_handlers": [
         {
           "capability_dependencies": [
@@ -7551,13 +7569,13 @@
     "card_program_v2_present": true,
     "commander_legal_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.013123,
-      "material_residuals": 60751,
+      "exact_fraction": 0.013155,
+      "material_residuals": 60749,
       "residual_kinds": {
         "cost": 1779,
         "declaration_cost": 10,
         "declaration_restriction": 153,
-        "dependency_contract": 17875,
+        "dependency_contract": 17873,
         "effect": 6578,
         "replacement_effect": 1538,
         "spell_effect": 9211,
@@ -7574,8 +7592,8 @@
         "scryfall_rulings_updated_at": "2026-08-02T09:00:36.367+00:00"
       },
       "status_counts": {
-        "exact": 415,
-        "partial": 14693,
+        "exact": 416,
+        "partial": 14692,
         "unresolved": 16515
       },
       "template_count": 155,
@@ -7585,17 +7603,17 @@
     "compiler_module": "mtg_commander_sim/oracle_ir.py",
     "compiler_module_logical_lines": 1713,
     "compiler_module_physical_lines": 1781,
-    "compiler_version": "oracle-ir-v17",
+    "compiler_version": "oracle-ir-v18",
     "current_ir": "OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index",
     "full_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.079382,
-      "material_residuals": 69374,
+      "exact_fraction": 0.079408,
+      "material_residuals": 69372,
       "residual_kinds": {
         "cost": 2009,
         "declaration_cost": 11,
         "declaration_restriction": 170,
-        "dependency_contract": 19445,
+        "dependency_contract": 19443,
         "effect": 7262,
         "replacement_effect": 1772,
         "spell_effect": 11373,
@@ -7612,8 +7630,8 @@
         "scryfall_rulings_updated_at": "2026-08-02T09:00:36.367+00:00"
       },
       "status_counts": {
-        "exact": 3055,
-        "partial": 16114,
+        "exact": 3056,
+        "partial": 16113,
         "unresolved": 19316
       },
       "template_count": 155,
@@ -7708,21 +7726,21 @@
       "effective_date": "2026-06-19",
       "evidence": {
         "class_counts": {
-          "interaction": 44,
+          "interaction": 45,
           "multiplayer": 18,
-          "mutation": 25,
-          "negative": 39,
-          "positive": 47,
-          "privacy": 12,
-          "replay": 32,
+          "mutation": 26,
+          "negative": 40,
+          "positive": 49,
+          "privacy": 13,
+          "replay": 33,
           "rollback": 3
         },
-        "declaration_count": 220,
-        "declaration_source_fingerprint": "e89a7c1f6cd80a4865a1913cadd5e751201ecd3be7783b3cadbfef7c35f12fc9",
-        "fingerprint": "93a8a57ef942874af37cf90b032ed04576fc4ca22fbf9cf37d1a3dff4f889b91",
-        "registry_fingerprint": "3ab389e454d241c76dc416def39815a78a1f195cb4853fe833e4be3fd31d7ee3"
+        "declaration_count": 227,
+        "declaration_source_fingerprint": "5800da1d7c3373c50f42b810348786c1cc287dfaabc45914764b31ab12d59bd5",
+        "fingerprint": "a5c84b35dc71c65ce3d490449636fc4e93b6e3ad7b1bc446c2558b02b0fad765",
+        "registry_fingerprint": "d60c420ae8d5d1c3a59928daaac4ac923198ceb39ec879fdd7c087aacea780dd"
       },
-      "fingerprint": "3ab389e454d241c76dc416def39815a78a1f195cb4853fe833e4be3fd31d7ee3",
+      "fingerprint": "d60c420ae8d5d1c3a59928daaac4ac923198ceb39ec879fdd7c087aacea780dd",
       "implementation_mutation_status_counts": {
         "killed": 24,
         "not_run": 9
@@ -7732,7 +7750,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "registry_version": 13,
+      "registry_version": 14,
       "schema_version": 1,
       "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
       "status_counts": {
@@ -8137,7 +8155,7 @@
         "file": "docs/architecture/trust-closure.md",
         "metadata": {
           "audience": "rules, compiler, runtime, replay, and room-policy contributors",
-          "authoritative_source": "mtg_commander_sim/card_programs/trust.py, binding.py, preflight.py, and capability registry v13",
+          "authoritative_source": "mtg_commander_sim/card_programs/trust.py, binding.py, preflight.py, and capability registry v14",
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "CardProgram trust and applicable closure",
@@ -8263,7 +8281,7 @@
         "file": "docs/testing/mutation.md",
         "metadata": {
           "audience": "rules, security, replay, and trust contributors",
-          "authoritative_source": "capability registry v13, capability evidence declarations, and executable mutation tests",
+          "authoritative_source": "capability registry v14, capability evidence declarations, and executable mutation tests",
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Mutation testing policy",
@@ -8337,7 +8355,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "cda213c987cb8c5aef94af74bc74146f29bba0fb"
+          "verified": "99f68b779e2024a7447eeb6f21392f08523a08b9"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -8747,7 +8765,7 @@
       "playwright_e2e_journeys": 7
     },
     "mutation_testing": {
-      "capability_mutation_declarations": 25,
+      "capability_mutation_declarations": 26,
       "configured_tools": [],
       "focused_executable_suite": true,
       "mutation_score": null
@@ -8775,18 +8793,18 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1190,
-      "discovered_total": 4490,
+      "conventional_ast_cases": 1201,
+      "discovered_total": 4501,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 25,
         "fuzz_named": 1,
         "privacy_or_projection_named": 14,
-        "replay_named": 73,
+        "replay_named": 74,
         "server_named": 16
       },
       "reconciles": true,
-      "test_files": 130
+      "test_files": 131
     }
   }
 }

@@ -124,7 +124,8 @@
       "executable_test_ids": [
         "tests.test_targeting_v070.ExactTargetingTests.test_all_targets_illegal_counters_by_rules",
         "tests.test_targeting_v070.ExactTargetingTests.test_count_distinct_and_partial_resolution",
-        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_target_that_leaves_and_returns_is_a_new_illegal_object"
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_target_that_leaves_and_returns_is_a_new_illegal_object",
+        "tests.test_prevention_immediate_sequencing.PreventionImmediateSequencingTests.test_all_targets_illegal_stops_before_choice_shield_and_life"
       ],
       "required_scenarios": [
         "positive",
@@ -161,7 +162,9 @@
         "CommanderEngine.apply_effect"
       ],
       "executable_test_ids": [
-        "tests.test_resolution_rules.ResolutionRuleTests.test_resolution_continues_after_underlying_card_moves"
+        "tests.test_resolution_rules.ResolutionRuleTests.test_resolution_continues_after_underlying_card_moves",
+        "tests.test_oracle_ir.OracleIRTests.test_fixed_post_prevention_life_is_a_sequential_instruction",
+        "tests.test_prevention_immediate_sequencing.PreventionImmediateSequencingTests.test_source_choice_resume_replays_sibling_life_once_and_stays_private"
       ],
       "required_scenarios": [
         "positive",
@@ -170,7 +173,9 @@
         "replay"
       ],
       "covered_scenarios": [
-        "positive"
+        "positive",
+        "interaction",
+        "replay"
       ],
       "blockers": [
         "semantic programs do not preserve a universally parsed instruction dependency graph for later text modifying earlier text",
@@ -178,7 +183,8 @@
         "the compiler cannot prove complete whole-text English semantics"
       ],
       "notes": [
-        "Represented effect operations run in array order, but that is not sufficient for the whole-text and replacement requirements of CR 608.2c."
+        "Represented effect operations run in array order, and the reviewed chosen-source prevention template now resumes its independent life instruction exactly once after a serialized source choice.",
+        "That bounded sequence does not satisfy the whole-text and replacement requirements of CR 608.2c for arbitrary Oracle text."
       ]
     },
     {

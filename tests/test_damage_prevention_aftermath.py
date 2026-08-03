@@ -133,7 +133,7 @@ class DamagePreventionAftermathTests(DamageReplacementPipelineBase):
         self.assertEqual(4, result.aftermath_events[0].applied_amount)
         self.assertEqual("place_counters", result.aftermath_events[0].kind)
 
-    def test_fixed_aftermath_happens_when_damage_cannot_be_prevented(self):
+    def test_fixed_additional_effect_happens_when_damage_cannot_be_prevented(self):
         engine = self.session(615203).engine
         source = self.add_permanent(
             engine, seat="A", name="Mishra, Eminent One", ref="source"
@@ -141,8 +141,8 @@ class DamagePreventionAftermathTests(DamageReplacementPipelineBase):
         engine.state.players["B"].life = 30
         engine.state.damage_prevention_shields.append(
             DamagePreventionShield(
-                shield_id="healing-grace",
-                source_id="fixture:healing-grace",
+                shield_id="fixed-additional-effect",
+                source_id="fixture:fixed-additional-effect",
                 controller="B",
                 subject=DamageSubject(ref="B", kind="player", controller="B"),
                 mode=PreventionMode.NEXT_INSTANCE,

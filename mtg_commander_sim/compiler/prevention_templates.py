@@ -244,22 +244,21 @@ def _chosen_source_fixed_life(normalized: str) -> PreventionTemplate | None:
     if match:
         subject = match.group("subject").casefold()
         target_schema = _target_schema(subject)
-        nested = _shield(
+        shield = _shield(
             amount=_amount_value(match.group("amount")),
             subject=subject,
-            aftermath=[
-                {
-                    "kind": "gain_life",
-                    "player": "$controller",
-                    "per_prevented": 0,
-                    "fixed_amount": int(match.group(_LIFE_CAPTURE)),
-                }
-            ],
         )
         return (
-            "damage-prevention-chosen-source-fixed-life-v1",
+            "damage-prevention-chosen-source-fixed-life-v2",
             (
-                _chosen_source_effect(shield=nested, qualifier=None),
+                _chosen_source_effect(shield=shield, qualifier=None),
+                {
+                    "op": _LIFE_CAPTURE,
+                    "player": "$controller",
+                    "delta": int(match.group(_LIFE_CAPTURE)),
+                    "source": "$source",
+                    "cause": "spell_resolution",
+                },
             ),
             target_schema,
             _rules(target_schema, "cr-119-life"),

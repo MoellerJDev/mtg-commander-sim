@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "3ab389e454d241c76dc416def39815a78a1f195cb4853fe833e4be3fd31d7ee3",
-  "declaration_source_fingerprint": "e89a7c1f6cd80a4865a1913cadd5e751201ecd3be7783b3cadbfef7c35f12fc9",
+  "registry_fingerprint": "d60c420ae8d5d1c3a59928daaac4ac923198ceb39ec879fdd7c087aacea780dd",
+  "declaration_source_fingerprint": "5800da1d7c3373c50f42b810348786c1cc287dfaabc45914764b31ab12d59bd5",
   "declarations": [
     {
       "capability_id": "continuous.basic_land_type.add_all_lands",
@@ -585,6 +585,37 @@
     },
     {
       "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_prevention_immediate_sequencing.PreventionImmediateSequencingTests.test_immediate_life_gain_uses_static_replacement_once",
+      "official_rule_ids": [
+        "609.7",
+        "609.7a",
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.5",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.11",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resume an immediate sibling life instruction after source choice and apply its replacement exactly once."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "multiplayer",
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_simultaneous_sources_require_and_replay_exact_allocation",
       "official_rule_ids": [
@@ -678,6 +709,37 @@
     },
     {
       "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_prevention_immediate_sequence_mutants_are_killed",
+      "official_rule_ids": [
+        "609.7",
+        "609.7a",
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.5",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.11",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill removed, aftermath-nested, duplicated, and reordered independent life-instruction compiler mutants."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "negative",
       "test_id": "tests.test_damage_prevention_creation.DamagePreventionCreationTests.test_countered_chosen_permanent_spell_is_a_new_graveyard_object",
       "official_rule_ids": [
@@ -737,6 +799,37 @@
         "commander_review"
       ],
       "applicability_note": "Create and consume finite, next-instance, or all-damage prevention shields through a typed damage batch."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "negative",
+      "test_id": "tests.test_prevention_immediate_sequencing.PreventionImmediateSequencingTests.test_all_targets_illegal_stops_before_choice_shield_and_life",
+      "official_rule_ids": [
+        "609.7",
+        "609.7a",
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.5",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.11",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Stop the entire represented spell before source choice, shield creation, or life gain when every target is illegal."
     },
     {
       "capability_id": "damage.prevention.persistent_amount",
@@ -833,6 +926,37 @@
     },
     {
       "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "positive",
+      "test_id": "tests.test_prevention_immediate_sequencing.PreventionImmediateSequencingTests.test_life_is_gained_immediately_and_unused_shield_remains",
+      "official_rule_ids": [
+        "609.7",
+        "609.7a",
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.5",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.11",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve a fixed independent life sentence immediately after shield creation without treating it as prevention aftermath."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "privacy",
       "test_id": "tests.test_copy_objects.CopyObjectLifecycleTests.test_chosen_permanent_spell_copy_uses_public_stack_identity",
       "official_rule_ids": [
@@ -896,6 +1020,37 @@
     {
       "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "privacy",
+      "test_id": "tests.test_prevention_immediate_sequencing.PreventionImmediateSequencingTests.test_source_choice_resume_replays_sibling_life_once_and_stays_private",
+      "official_rule_ids": [
+        "609.7",
+        "609.7a",
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.5",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.11",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep source candidates seat-scoped while retaining the ordered sibling life instruction."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "privacy",
       "test_id": "tests.test_semantic_choice_characterization.SemanticChoiceCharacterizationTests.test_damage_source_provenance_includes_typed_stack_and_delayed_refs",
       "official_rule_ids": [
         "609.7",
@@ -954,6 +1109,37 @@
         "commander_review"
       ],
       "applicability_note": "Create and consume finite, next-instance, or all-damage prevention shields through a typed damage batch."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "replay",
+      "test_id": "tests.test_prevention_immediate_sequencing.PreventionImmediateSequencingTests.test_source_choice_resume_replays_sibling_life_once_and_stays_private",
+      "official_rule_ids": [
+        "609.7",
+        "609.7a",
+        "609.7b",
+        "615.1",
+        "615.2",
+        "615.3",
+        "615.4",
+        "615.5",
+        "615.6",
+        "615.7",
+        "615.8",
+        "615.9",
+        "615.11",
+        "615.12",
+        "615.12a",
+        "615.13",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Save, restore, and replay a source-choice continuation with one later immediate life instruction."
     },
     {
       "capability_id": "damage.prevention.static_fixed",
@@ -2751,6 +2937,27 @@
     },
     {
       "capability_id": "life.gain.replacement.static_multiplier",
+      "evidence_class": "positive",
+      "test_id": "tests.test_prevention_immediate_sequencing.PreventionImmediateSequencingTests.test_immediate_life_gain_uses_static_replacement_once",
+      "official_rule_ids": [
+        "119.3",
+        "119.10",
+        "120.4c",
+        "614.1",
+        "615.5",
+        "616.1",
+        "616.1f",
+        "616.1g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a fixed static multiplier exactly once to an immediate ordered spell-resolution life instruction."
+    },
+    {
+      "capability_id": "life.gain.replacement.static_multiplier",
       "evidence_class": "replay",
       "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_damage_result_replacement_choice_is_private_and_replays",
       "official_rule_ids": [
@@ -3849,5 +4056,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "93a8a57ef942874af37cf90b032ed04576fc4ca22fbf9cf37d1a3dff4f889b91"
+  "fingerprint": "a5c84b35dc71c65ce3d490449636fc4e93b6e3ad7b1bc446c2558b02b0fad765"
 }

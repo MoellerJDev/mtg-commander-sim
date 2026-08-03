@@ -79,18 +79,18 @@ rewrite.
   damage results, durable prevention/redirection state, and focused token,
   zone, counter, life, and damage mutation owners. Generated reports, rather
   than branch chronology, are the source of current counts.
-- The active bounded slice is
-  `rules/damage-prevention-continuations-and-aftermath`. It adds typed dynamic,
-  divided, and per-object shield creation; seat-scoped public source selection
-  with physical/LKI pinning; transactional immediately-after life and
-  permanent-counter results; same-chooser simultaneous-event ordering; and
-  exact rollback and continuation for replacement choices discovered during
-  mana payment. It also extracts damage-modifier creation and general effect
-  life changes into narrow runtime families and widens generic Oracle/
-  CardProgram lowering.
+- Certified main through PR 74 includes the bounded
+  `rules/damage-prevention-continuations-and-aftermath` slice: typed dynamic,
+  divided, and per-object shields; seat-scoped source selection with
+  physical/LKI pinning; transactional prevention-dependent life/counter
+  aftermath; same-chooser ordering; mana-payment continuation; and the narrow
+  damage-modifier and life runtime families. The current focused correction
+  preserves fixed independent post-prevention instructions as ordered siblings
+  and routes immediate life through the canonical replacement-capable owner.
 - Keep complete CR 609.7a source categories, permanent-spell continuity,
   broader source-property predicates, general replacement-capable life gain,
-  remaining prevention-aftermath wording, partial/attached redirection,
+  life-gain prevention, remaining prevention-aftermath wording,
+  partial/attached redirection,
   non-damage transformations, unresolved dynamic Toxic values, and broader CR
   614/615/616 closure explicitly blocked until their complete dependencies and
   evidence exist.

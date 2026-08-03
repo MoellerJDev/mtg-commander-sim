@@ -45,6 +45,14 @@ flowchart LR
 - Reviewed semantic-pack abilities and generated abilities enter the same
   CardProgram schema. A same-key reviewed ability wins; conflicting source or
   face identity fails closed.
+- Multi-sentence resolution templates preserve written instruction order.
+  Choice-bearing instructions retain later siblings in their replayable
+  continuation. A later sentence becomes prevention aftermath only when its
+  supported grammar explicitly depends on damage `prevented this way`; mere
+  adjacency never implies that dependency.
+- Oracle IR v18 changes the fixed chosen-source/prevention/life production to
+  template v2. Independent draw or conditional aftermath wording that is not
+  yet supported remains a material residual rather than being misclassified.
 
 ## Extension points
 

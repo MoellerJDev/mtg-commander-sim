@@ -41062,7 +41062,8 @@
       "executable_test_ids": [
         "tests.test_targeting_v070.ExactTargetingTests.test_all_targets_illegal_counters_by_rules",
         "tests.test_targeting_v070.ExactTargetingTests.test_count_distinct_and_partial_resolution",
-        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_target_that_leaves_and_returns_is_a_new_illegal_object"
+        "tests.test_object_identity.ObjectIdentityAndTokenLifecycleTests.test_target_that_leaves_and_returns_is_a_new_illegal_object",
+        "tests.test_prevention_immediate_sequencing.PreventionImmediateSequencingTests.test_all_targets_illegal_stops_before_choice_shield_and_life"
       ],
       "implementation_components": [
         "CommanderEngine._revalidate_resolution_targets",
@@ -41102,21 +41103,26 @@
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
-        "positive"
+        "positive",
+        "interaction",
+        "replay"
       ],
       "dependency_rule_ids": [
         "608.2"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_resolution_rules.ResolutionRuleTests.test_resolution_continues_after_underlying_card_moves"
+        "tests.test_resolution_rules.ResolutionRuleTests.test_resolution_continues_after_underlying_card_moves",
+        "tests.test_oracle_ir.OracleIRTests.test_fixed_post_prevention_life_is_a_sequential_instruction",
+        "tests.test_prevention_immediate_sequencing.PreventionImmediateSequencingTests.test_source_choice_resume_replays_sibling_life_once_and_stays_private"
       ],
       "implementation_components": [
         "CommanderEngine._continue_resolution",
         "CommanderEngine.apply_effect"
       ],
       "notes": [
-        "Represented effect operations run in array order, but that is not sufficient for the whole-text and replacement requirements of CR 608.2c."
+        "Represented effect operations run in array order, and the reviewed chosen-source prevention template now resumes its independent life instruction exactly once after a serialized source choice.",
+        "That bounded sequence does not satisfy the whole-text and replacement requirements of CR 608.2c for arbitrary Oracle text."
       ],
       "required_scenarios": [
         "positive",
@@ -46635,7 +46641,7 @@
       "executable_test_ids": [
         "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_life_aftermath_uses_one_aggregate_prevented_amount",
         "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_counter_aftermath_reuses_counter_replacement_pipeline",
-        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_fixed_aftermath_happens_when_damage_cannot_be_prevented",
+        "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_fixed_additional_effect_happens_when_damage_cannot_be_prevented",
         "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_stale_counter_aftermath_fails_before_life_or_damage_mutation",
         "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_prevention_aftermath_replays_from_exact_commands"
       ],

@@ -6,12 +6,12 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "prevention_source_continuity_and_life_aftermath",
-    "branch": "rules/prevention-source-continuity-and-life-aftermath",
-    "commit_reference": "incarnation-safe CR 609.7 chosen sources, replacement-capable CR 615.5 life aftermath, and generic Oracle IR v17 lowering based on certified Python 3.12 main cda213c; exact-head certification pending",
+    "active_phase": "prevention_immediate_life_sequencing",
+    "branch": "fix/prevention-immediate-life-sequencing",
+    "commit_reference": "certified Python 3.12 main through PR 74 merge 99f68b7; Oracle IR v18 fixed independent prevention/life sequencing follow-up is locally focused-tested and exact-head certification is pending",
     "branch_ancestry": {
-      "focused_branch_base": "cda213c",
-      "focused_branch_unique_commits_over_main": 1
+      "focused_branch_base": "99f68b779e2024a7447eeb6f21392f08523a08b9",
+      "focused_branch_unique_commits_over_main": 0
     },
     "pull_requests": [
       {
@@ -482,6 +482,55 @@
         "number": 67,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/67"
+      },
+      {
+        "base": "main",
+        "head": "rules/damage-results-and-replacement-hardening",
+        "number": 68,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/68"
+      },
+      {
+        "base": "main",
+        "head": "rules/damage-prevention-and-redirection",
+        "number": 69,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/69"
+      },
+      {
+        "base": "main",
+        "head": "fix/browser-pass-race",
+        "number": 70,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/70"
+      },
+      {
+        "base": "main",
+        "head": "chore/python-312-runtime",
+        "number": 71,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/71"
+      },
+      {
+        "base": "main",
+        "head": "refactor/casting-activation-proposals",
+        "number": 72,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/72"
+      },
+      {
+        "base": "main",
+        "head": "rules/damage-prevention-continuations-and-aftermath",
+        "number": 73,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/73"
+      },
+      {
+        "base": "main",
+        "head": "rules/prevention-source-continuity-and-life-aftermath",
+        "number": 74,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/74"
       }
     ],
     "tags": [
@@ -504,14 +553,14 @@
     "oracle": {
       "scope": "full_and_commander_legal_oracle_snapshots_plus_exact_list_fixture",
       "status": "pinned_partial_corpus_coverage",
-      "updated_at": "2026-07-31T21:03:00.228+00:00",
-      "sha256": "34d43820bb1b85be99267367969396c81a0bc387061dbd00882d1e78a5e84aa9"
+      "updated_at": "2026-08-02T09:02:31.886+00:00",
+      "sha256": "47be914ae0e54bbf63b285c065b4eb823a5f42927dcff6a404c0023ca870fba0"
     },
     "rulings": {
       "scope": "full_rulings_snapshot_plus_exact_list_fixture",
       "status": "pinned_partial_corpus_coverage",
-      "updated_at": "2026-07-31T21:00:39.181+00:00",
-      "sha256": "edabb33f1354d577f4a337c182f1093519b3499e71cec304f7474e7b362c0537"
+      "updated_at": "2026-08-02T09:00:36.367+00:00",
+      "sha256": "6e0f7b8e73981df2da7d91329c1904e68a33c0269ec655d29484379beb3b725e"
     }
   },
   "milestones": [
@@ -584,8 +633,8 @@
     {
       "id": "damage_prevention_continuations_and_aftermath",
       "name": "Damage-prevention continuations and aftermath",
-      "status": "implementation_complete_certification_pending",
-      "evidence": "Certified main through PR 73 adds typed dynamic, divided, and independent per-object shield creation; seat-scoped public source choice; transactional represented CR 615.5 life/permanent-counter aftermath; same-chooser event ordering; and exact rollback/resume for mana-payment replacement choices. The focused increment adds explicit referred-object provenance, exact-incarnation source identity, permanent-spell-to-permanent continuity, closed source-property rechecks, and a canonical replacement-capable life.change transaction. Oracle IR v17 adds generic chosen-source and static life-doubling families, raising Commander-legal generic-exact Oracle objects and trusted CardPrograms from 412 to 415 and capability-closed CardPrograms from 410 to 413. Arbitrary opaque provenance, face-down source characteristics, migration of all life producers, and remaining aftermath forms stay blocked."
+      "status": "certified_main_followup_in_progress",
+      "evidence": "Certified main through PR 74 includes typed dynamic/divided/per-object shields, seat-scoped public source choice, explicit referred-object provenance, exact-incarnation and permanent-spell continuity, closed property rechecks, replacement-capable CR 615.5 life/permanent-counter aftermath, same-chooser order, and mana-payment continuation. The focused Oracle IR v18 correction lowers fixed independent post-prevention life as an ordered sibling, not aftermath; source-choice save/load resumes it once, all-targets-illegal stops both instructions, and life-effects.v2 uses canonical life.change replacement. The August 2 census moves the sole matching Oracle object, Healing Grace, from partial/residual to exact/capability-closed: Commander exact/trusted/capability-closed are 416/416/414. Life-gain prevention, face-down source characteristics, broader source predicates, non-effect-runtime life producers, and remaining aftermath forms stay blocked."
     },
     {
       "id": "rules_snapshot",
@@ -612,7 +661,7 @@
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
     "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_ten_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_and_player_counter_mutation_ports",
-    "capability_evidence": "implemented_registry_v13_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status",
+    "capability_evidence": "implemented_registry_v14_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status",
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "hidden_information": "implemented_projected_protocol",
@@ -620,17 +669,17 @@
     "ai_dependency": "none_for_core_tests_or_runtime"
   },
   "validation": {
-    "baseline_commit": "cda213c987cb8c5aef94af74bc74146f29bba0fb",
+    "baseline_commit": "99f68b779e2024a7447eeb6f21392f08523a08b9",
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30811998248,
+      "run_id": 30827880407,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30811998248"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30827880407"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_pass_full_gate; focused_prevention_replacement_compiler_and_runtime_shards_pass; exact_head_full_gate_pending",
-      "focused_rules_tests": "pass_incarnation_safe_source_choice_permanent_spell_continuity_typed_provenance_property_rechecks_replacement_capable_life_aftermath_replay_privacy_property_and_mutation",
+      "deterministic_tests": "certified_main_through_pr74_pass_full_gate; focused_prevention_immediate_sequence_compiler_runtime_cardprogram_replay_privacy_life_replacement_and_mutation_shards_pass; exact_head_full_gate_pending",
+      "focused_rules_tests": "pass_fixed_independent_life_sibling_no_damage_later_damage_zero_prevented_static_multiplier_all_targets_illegal_source_choice_save_load_replay_privacy_and_killed_mutants",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
@@ -646,10 +695,10 @@
     "replay": "pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner",
     "privacy": "pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner",
       "semantic_preflight": "reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory",
-      "card_program_census": "full_38485_trusted_815_capability_closed_813_residual_35421_failed_2249_material_residual_69362; commander_legal_31623_trusted_415_capability_closed_413_residual_31207_failed_1_material_residual_60748; commander_oracle_exact_415_partial_14693_unresolved_16515_material_residual_60751; focused_source_continuity_life_aftermath_exact_and_trusted_delta_plus_3"
+      "card_program_census": "full_38485_trusted_816_capability_closed_814_residual_35420_failed_2249_material_residual_69360; commander_legal_31623_trusted_416_capability_closed_414_residual_31206_failed_1_material_residual_60746; full_oracle_exact_3056_partial_16113_unresolved_19316_material_residual_69372; commander_oracle_exact_416_partial_14692_unresolved_16515_material_residual_60749; fixed_independent_prevention_life_delta_exact_plus_1_trusted_plus_1_capability_closed_plus_1_residual_minus_1_material_residual_minus_2"
   },
   "blockers": [
-    "damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter aftermath, resumable mana-payment choices, and static full-recipient redirection; arbitrary opaque provenance, face-down source characteristics, wider property predicates, migration of all life producers, remaining aftermath forms, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented",
+    "damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter aftermath, immediate independent life siblings, resumable mana-payment choices, and static full-recipient redirection; arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, remaining aftermath forms, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented",
     "typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, universal replacement participation beyond represented stun and runtime-component events, and complete effective-characteristic closure",
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
@@ -661,5 +710,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Certify and merge the damage-prevention continuations and aftermath batch, then regenerate the dependency queue from fresh main and select the next coherent rules family."
+  "next_task": "Certify and merge the fixed independent prevention/life sequencing correction, then return to fresh main and select the next dependency-ready rules family from the regenerated queue."
 }

@@ -1,7 +1,7 @@
 ---
 title: "CardProgram trust and applicable closure"
 status: "current"
-authoritative_source: "mtg_commander_sim/card_programs/trust.py, binding.py, preflight.py, and capability registry v13"
+authoritative_source: "mtg_commander_sim/card_programs/trust.py, binding.py, preflight.py, and capability registry v14"
 verified: "2026-08-03"
 audience: "rules, compiler, runtime, replay, and room-policy contributors"
 maintenance: "hand-maintained"

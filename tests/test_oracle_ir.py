@@ -487,7 +487,7 @@ class OracleIRTests(unittest.TestCase):
                 {"amount": "$x", "aftermath_kind": "place_counters"},
             ),
             (
-                "damage-prevention-chosen-source-fixed-life-v1",
+                "damage-prevention-chosen-source-fixed-life-v2",
                 (
                     "Prevent the next 3 damage that would be dealt to any target this "
                     "turn by a source of your choice. You gain 3 life."
@@ -534,6 +534,92 @@ class OracleIRTests(unittest.TestCase):
                     self.assertEqual(
                         expected["selector"], effect["selector"]["kind"]
                     )
+
+    def test_fixed_post_prevention_life_is_a_sequential_instruction(self):
+        base = self.db.lookup("Lightning Bolt")
+        oracle_text = (
+            "Prevent the next 3 damage that would be dealt to any target "
+            "this turn by a source of your choice. You gain 3 life."
+        )
+
+        ir = compile_oracle_card(
+            replace(
+                base,
+                oracle_id="fixture:fixed-independent-prevention-life",
+                name="Fixture Prevention Sequence",
+                oracle_text=oracle_text,
+            ),
+            capability_registry=load_default_capability_registry(),
+            capability_profile="commander_review",
+        )
+        node = ir.faces[0].nodes[0]
+
+        self.assertEqual("exact", ir.status)
+        self.assertEqual(
+            "damage-prevention-chosen-source-fixed-life-v2",
+            node.template_id,
+        )
+        self.assertEqual(2, len(node.effects))
+        source_choice, life_gain = node.effects
+        self.assertEqual("choose_damage_source", source_choice["op"])
+        self.assertNotIn("aftermath", source_choice["shield"])
+        self.assertEqual(
+            {
+                "op": "life",
+                "player": "$controller",
+                "delta": 3,
+                "source": "$source",
+                "cause": "spell_resolution",
+            },
+            life_gain,
+        )
+
+    def test_only_explicit_prevention_dependency_lowers_as_aftermath(self):
+        base = self.db.lookup("Lightning Bolt")
+        scaled = compile_oracle_card(
+            replace(
+                base,
+                oracle_id="fixture:scaled-prevention-life",
+                name="Fixture Scaled Prevention",
+                oracle_text=(
+                    "Prevent the next 3 damage that would be dealt to any target "
+                    "this turn. You gain life equal to the damage prevented this way."
+                ),
+            )
+        ).faces[0].nodes[0]
+        independent_draw = compile_oracle_card(
+            replace(
+                base,
+                oracle_id="fixture:independent-post-prevention-draw",
+                name="Fixture Prevention Draw",
+                oracle_text=(
+                    "Prevent the next 3 damage that would be dealt to any target "
+                    "this turn. Draw a card."
+                ),
+            )
+        )
+        conditional_draw = compile_oracle_card(
+            replace(
+                base,
+                oracle_id="fixture:conditional-prevention-draw",
+                name="Fixture Conditional Prevention Draw",
+                oracle_text=(
+                    "Prevent the next 3 damage that would be dealt to any target "
+                    "this turn. If damage is prevented this way, draw a card."
+                ),
+            )
+        )
+
+        self.assertEqual(
+            "gain_life", scaled.effects[0]["aftermath"][0]["kind"]
+        )
+        self.assertNotEqual("exact", independent_draw.status)
+        self.assertNotEqual("exact", conditional_draw.status)
+        for ir in (independent_draw, conditional_draw):
+            for face in ir.faces:
+                for node in face.nodes:
+                    for effect in node.effects:
+                        self.assertNotIn("aftermath", effect)
 
     def test_chosen_source_prevention_filters_compile_generically(self):
         base = self.db.lookup("Lightning Bolt")

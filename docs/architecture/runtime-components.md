@@ -76,7 +76,10 @@ color/type/subtype/supertype/keyword rechecks. Represented CR 615.5 life
 aftermath enters the replacement-capable `life.change` transaction; permanent-
 counter aftermath remains on the counter-placement transaction. Same-chooser
 event order and replacement choices during mana payment use strict replayable
-continuations. Arbitrary opaque references, wider source predicates, remaining
+continuations. A fixed independent life sentence after a prevention sentence
+is an ordered sibling, not aftermath: source choice creates the shield, then
+the sibling enters `life.change` immediately and exactly once. Arbitrary opaque
+references, wider source predicates, life-gain prevention, remaining
 aftermath forms, finite partial or attached redirection, and non-damage
 transformations remain outside these components.
 
@@ -117,8 +120,8 @@ durable shield/redirection state and its mutation-only commit plan;
 corresponding typed creation and result transactions; `life_change.py` owns the
 replacement-capable life-event boundary. The six closed effect
 runtime families now include `damage-modifiers.v1` for shield/redirection
-creation and `life-effects.v1` for typed life changes. Runtime components remain
-pure participants.
+creation and `life-effects.v2` for replacement-capable typed effect life
+changes. Runtime components remain pure participants.
 
 Primary tests are `test_replacement_event_tree.py`,
 `test_token_creation_replacements.py`, `test_graveyard_rules.py`,

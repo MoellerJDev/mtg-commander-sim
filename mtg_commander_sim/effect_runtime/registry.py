@@ -46,7 +46,7 @@ FAMILIES = (
         damage_life_and_turns.apply_effect,
     ),
     EffectFamily(
-        "life-effects.v1",
+        "life-effects.v2",
         life_effects.OPERATIONS,
         life_effects.apply_effect,
     ),

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "fixture_kind": "public_prevention_immediate_card_data",
+  "source": "Scryfall Oracle subset for prevention sequencing tests",
+  "cards": [
+    {
+      "oracle_id": "b86d3142-568a-4eea-b1ae-5fcfc1453533",
+      "name": "Boon Reflection",
+      "mana_cost": "{4}{W}",
+      "cmc": 5.0,
+      "type_line": "Enchantment",
+      "oracle_text": "If you would gain life, you gain twice that much life instead.",
+      "power": null,
+      "toughness": null,
+      "loyalty": null,
+      "defense": null,
+      "colors": ["W"],
+      "color_identity": ["W"],
+      "keywords": [],
+      "produced_mana": [],
+      "layout": "normal",
+      "released_at": "2020-08-07",
+      "legalities": {"commander": "legal", "duel": "legal"}
+    }
+  ],
+  "rulings": []
+}

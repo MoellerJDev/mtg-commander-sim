@@ -10,6 +10,8 @@ from mtg_commander_sim.errors import GameRuleError
 class _State:
     def __init__(self, seats: tuple[str, ...]) -> None:
         self._seats = seats
+        self.revision = 0
+        self.event_sequence = 0
         self.players = {
             seat: SimpleNamespace(life=40)
             for seat in seats
@@ -28,6 +30,19 @@ class _Host:
 
     def _log(self, *args, **kwargs) -> None:
         self.logs.append((args, kwargs))
+
+    def apnap_order(self, *, start: str | None = None) -> list[str]:
+        seats = list(self.active_seats)
+        if start is None or start not in seats:
+            return seats
+        index = seats.index(start)
+        return [*seats[index:], *seats[:index]]
+
+    def _semantic_event_sources(self, *, zones=None) -> list[object]:
+        return []
+
+    def semantic_program_is_current_trusted(self, program: object) -> bool:
+        return False
 
 
 class LifeEffectRuntimeTests(unittest.TestCase):

@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "cda213c987cb8c5aef94af74bc74146f29bba0fb"
+verified: "99f68b779e2024a7447eeb6f21392f08523a08b9"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,8 +15,8 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Current commit: incarnation-safe CR 609.7 chosen sources, replacement-capable CR 615.5 life aftermath, and generic Oracle IR v17 lowering based on certified Python 3.12 main cda213c; exact-head certification pending
-- Active phase: `prevention_source_continuity_and_life_aftermath`
+- Current commit: certified Python 3.12 main through PR 74 merge 99f68b7; Oracle IR v18 fixed independent prevention/life sequencing follow-up is locally focused-tested and exact-head certification is pending
+- Active phase: `prevention_immediate_life_sequencing`
 - Package version: `0.8.0`
 
 Historical integration chronology belongs in `CHANGELOG.md`; this current report intentionally does not reproduce a pull-request ledger.
@@ -24,15 +24,15 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 ## Pinned snapshots and coverage
 
 - Comprehensive Rules: pinned_corpus_on_main
-- Oracle: pinned_partial_corpus_coverage (2026-07-31T21:03:00.228+00:00)
-- Rulings: pinned_partial_corpus_coverage (2026-07-31T21:00:39.181+00:00)
+- Oracle: pinned_partial_corpus_coverage (2026-08-02T09:02:31.886+00:00)
+- Rulings: pinned_partial_corpus_coverage (2026-08-02T09:00:36.367+00:00)
 - Rules manifest present on this branch: yes
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
 - Rules cases: blocked=350, definition_only=92, passing=159, total=3300, unreviewed=2699
 - Mechanics: status_counts={'partial': 61, 'tested': 1, 'unclassified': 363}, total=425, trusted=0
-- Oracle coverage: material_residuals=69374, status_counts={'exact': 3055, 'partial': 16114, 'unresolved': 19316}, total=38485
-- Commander-legal Oracle coverage: material_residuals=60751, status_counts={'exact': 415, 'partial': 14693, 'unresolved': 16515}, total=31623
+- Oracle coverage: material_residuals=69372, status_counts={'exact': 3056, 'partial': 16113, 'unresolved': 19316}, total=38485
+- Commander-legal Oracle coverage: material_residuals=60749, status_counts={'exact': 416, 'partial': 14692, 'unresolved': 16515}, total=31623
 - Current rules/Oracle snapshot complete: no
 
 ## Platform milestone status
@@ -50,7 +50,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 | Damage-result, Commander identity, and replacement hardening | `integrated_on_certified_main` | Certified main through PR 68 attributes Commander combat damage to stable physical commander designations across zone and control changes; preserves explicit historical Game Record v3 behavior; splits the replacement monolith into immutable model, applicability, typed operation, ordering, and strict replay owners; validates nested APNAP choosers; canonicalizes declines; routes represented life and counter damage results through typed precommit owners; enforces nonempty positive, negative, replay, and mutation trust evidence; and generically compiles Infect, Wither, Lifelink, fixed Toxic, closed double-damage wording, and closed fixed-prevention wording. |
 | Durable damage prevention and static redirection | `integrated_on_certified_main` | Certified main includes typed finite and next-instance shield state, cleanup expiration, exact simultaneous allocation, unpreventable nonconsumption, aggregate prevention dispatch, immutable commit fingerprints, and typed full-recipient redirection with destination departure and rediscovery. Generic lowering covers fixed shield and static redirection wording without card-name dispatch. Browser regressions keep an active player's empty-stack main phase manual under auto-pass, keep the hand in a fixed resizable bottom dock, and verify projected Urborg/Citadel black mana plus named Cauldron Familiar and The Sackville-Bagginses cast actions. |
 | Typed casting, activation, and action offers | `integrated_on_certified_main` | Certified main through PR 72 uses immutable canonical casting and activation proposals for both legal-action advertisement and execution, pins offers to state revisions and proposal fingerprints, rejects stale source/cost/target/payability facts before mutation, and preserves strategic yield signatures across freshness-only revision changes. Dedicated query and commit packages plus the shared action catalog reduce CommanderEngine from 17,197 to 14,788 logical lines, reduce the configured direct-write heuristic from 159 to 144, and reduce oversized functions from 46 to 40. Generic Crew, Craft, granted activated-ability, and static cast-cost descriptors replace represented card-shaped engine branches while Game Record v3 compatibility remains explicit. |
-| Damage-prevention continuations and aftermath | `implementation_complete_certification_pending` | Certified main through PR 73 adds typed dynamic, divided, and independent per-object shield creation; seat-scoped public source choice; transactional represented CR 615.5 life/permanent-counter aftermath; same-chooser event ordering; and exact rollback/resume for mana-payment replacement choices. The focused increment adds explicit referred-object provenance, exact-incarnation source identity, permanent-spell-to-permanent continuity, closed source-property rechecks, and a canonical replacement-capable life.change transaction. Oracle IR v17 adds generic chosen-source and static life-doubling families, raising Commander-legal generic-exact Oracle objects and trusted CardPrograms from 412 to 415 and capability-closed CardPrograms from 410 to 413. Arbitrary opaque provenance, face-down source characteristics, migration of all life producers, and remaining aftermath forms stay blocked. |
+| Damage-prevention continuations and aftermath | `certified_main_followup_in_progress` | Certified main through PR 74 includes typed dynamic/divided/per-object shields, seat-scoped public source choice, explicit referred-object provenance, exact-incarnation and permanent-spell continuity, closed property rechecks, replacement-capable CR 615.5 life/permanent-counter aftermath, same-chooser order, and mana-payment continuation. The focused Oracle IR v18 correction lowers fixed independent post-prevention life as an ordered sibling, not aftermath; source-choice save/load resumes it once, all-targets-illegal stops both instructions, and life-effects.v2 uses canonical life.change replacement. The August 2 census moves the sole matching Oracle object, Healing Grace, from partial/residual to exact/capability-closed: Commander exact/trusted/capability-closed are 416/416/414. Life-gain prevention, face-down source characteristics, broader source predicates, non-effect-runtime life producers, and remaining aftermath forms stay blocked. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408, CR 500-514, focused CR 725, and focused CR 508-509/608 current-turn history slices are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -67,7 +67,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - `replay`: `implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance`
 - `card_programs`: `implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning`
 - `semantic_handlers`: `implemented_six_registered_read_only_typed_intent_handlers_plus_ten_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_and_player_counter_mutation_ports`
-- `capability_evidence`: `implemented_registry_v13_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status`
+- `capability_evidence`: `implemented_registry_v14_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status`
 - `architecture_governance`: `implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions`
 - `continuous_effect_performance`: `implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency`
 - `hidden_information`: `implemented_projected_protocol`
@@ -76,11 +76,11 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4490
+- Tests discovered: 4501
 - Python matrix: Python 3.12 on Ubuntu and Windows
-- Baseline CI: [30811998248](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30811998248) — `pass`
+- Baseline CI: [30827880407](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30827880407) — `pass`
 - Compile: `pass`
-- Deterministic tests: `certified_main_pass_full_gate; focused_prevention_replacement_compiler_and_runtime_shards_pass; exact_head_full_gate_pending`
+- Deterministic tests: `certified_main_through_pr74_pass_full_gate; focused_prevention_immediate_sequence_compiler_runtime_cardprogram_replay_privacy_life_replacement_and_mutation_shards_pass; exact_head_full_gate_pending`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
 - Four-player protocol demo: `pass`
 - Repository/history/security audit: `pass`
@@ -93,7 +93,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Current blockers
 
-- damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter aftermath, resumable mana-payment choices, and static full-recipient redirection; arbitrary opaque provenance, face-down source characteristics, wider property predicates, migration of all life producers, remaining aftermath forms, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented
+- damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter aftermath, immediate independent life siblings, resumable mana-payment choices, and static full-recipient redirection; arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, remaining aftermath forms, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented
 - typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, universal replacement participation beyond represented stun and runtime-component events, and complete effective-characteristic closure
 - traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed
 - most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted
@@ -107,7 +107,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Certify and merge the damage-prevention continuations and aftermath batch, then regenerate the dependency queue from fresh main and select the next coherent rules family.
+Certify and merge the fixed independent prevention/life sequencing correction, then return to fresh main and select the next dependency-ready rules family from the regenerated queue.
 
 ## Regeneration
 

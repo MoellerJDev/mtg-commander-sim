@@ -97,6 +97,15 @@ canonical counter-placement pipeline, including applicable quantity
 replacements. Every result plan is validated before the damage batch mutates.
 Other CR 615.5 aftermath forms remain blocked.
 
+An independent sentence after a prevention instruction is different. The
+reviewed fixed sequence creates its shield through the seat-scoped source
+choice and then resumes a sibling `life` instruction immediately. It gains
+life once during successful resolution even when the shield remains unused;
+later shield consumption does not run that instruction again. An all-targets-
+illegal spell stops before either instruction. `life-effects.v2` sends the
+immediate result through the same replacement-capable `life.change` owner and
+persists stable event/batch identity and the canonical replacement journal.
+
 `replacement.damage.redirect-to-source.v1` is the current trusted static
 redirection component. It replaces the complete recipient snapshot, not just
 a display ref, and replacement applicability/affected-subject ordering is then
@@ -128,8 +137,8 @@ The trusted capabilities are deliberately narrow:
 They exclude arbitrary opaque referred-object provenance, source-characteristic
 predicates beyond the closed color/type/subtype/supertype/keyword vocabulary,
 face-down source characteristics,
-combat-only filters, migration of every life producer to the replacement-
-capable transaction, aftermath forms beyond represented life and permanent
+combat-only filters, life-gain prevention, non-effect-runtime life producers,
+aftermath forms beyond represented life and permanent
 counters, finite partial redirection, attached or equipped destinations,
 replacement with a non-damage event, dynamic toxic values, unrepresented
 continuous ability grants, and uncompiled result-replacement families.
@@ -139,13 +148,14 @@ remain blocked.
 ## Corpus result
 
 The complete pinned census binds Infect, Wither, Lifelink, and fixed Toxic
-nodes to trusted fine-grained result capabilities. Oracle IR v17 recognizes
+nodes to trusted fine-grained result capabilities. Oracle IR v18 recognizes
 closed whole-line grammar for static double damage, fixed static prevention,
 finite and divided shield creation, chosen-source next-instance/all-damage
 families, represented life/counter aftermath, static life-gain doubling, and
-static redirection to a damageable source. This increment adds Boon Reflection,
-Rhox Faithmender, and Pay No Heed to the Commander-legal generic-exact and
-capability-closed sets. The generated
+static redirection to a damageable source. The corrected fixed independent
+life sequence matches one Oracle object in the pinned corpus: Healing Grace.
+It moves from partial/residual to exact/capability-closed without changing its
+rules meaning into CR 615.5 aftermath. The generated
 [compiler coverage report](../COMPILER_COVERAGE_STATUS.md) is the authority for
 totals and residual deltas; these gains do not imply complete damage,
 prevention, or Oracle coverage.
@@ -170,8 +180,8 @@ frame, and resumes the exact original action after the seat chooses.
 
 The remaining damage/prevention work must broaden explicit referred-object
 provenance and source-characteristic grammar, represent face-down source
-characteristics, migrate other effect-generated
-life producers to `life.change`, add remaining aftermath forms, partial and
+characteristics, migrate non-effect-runtime life producers to `life.change`,
+add life-gain prevention and remaining aftermath forms, partial and
 attached-destination redirection, non-damage transformations, remaining result-
 replacement families, excess-damage selection, and complete dynamic
 characteristic closure. Broader Oracle lowering must compile those families
@@ -187,6 +197,7 @@ action, combat, monarch, mana, and turn-history modules, and focused mutants in
 witnesses in `test_damage_result_events.py`. Durable prevention and redirection
 coverage lives in `test_damage_prevention_shields.py`,
 `test_damage_prevention_creation.py`, `test_damage_prevention_aftermath.py`,
-`test_life_change.py`, `test_semantic_choice_characterization.py`,
+`test_prevention_immediate_sequencing.py`, `test_life_change.py`,
+`test_semantic_choice_characterization.py`,
 `test_copy_objects.py`, `test_replacement_event_ordering.py`,
 `test_mana_mode_effects.py`, and `test_damage_redirection.py`.
