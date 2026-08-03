@@ -119,18 +119,26 @@
     "test_source_property_mismatch_does_not_consume_shield",
     "test_unknown_source_predicate_fails_closed",
     "test_prevention_never_prevents_more_than_remaining_damage",
-    "test_static_prevention_applies_separately_to_each_event"
+    "test_static_prevention_applies_separately_to_each_event",
+    "test_chosen_permanent_spell_continues_to_the_permanent_it_becomes",
+    "test_chosen_permanent_spell_copy_uses_public_stack_identity",
+    "test_countered_chosen_permanent_spell_is_a_new_graveyard_object",
+    "test_damage_source_provenance_includes_typed_stack_and_delayed_refs",
+    "test_damage_source_choice_fails_closed_for_face_down_identity",
+    "test_incarnation_safe_source_filters_are_rechecked_when_damage_happens"
   ],
   "implementation": {
-    "component": "CommanderEngine._apply_effect and replacement_effects",
-    "version": "effects-foundation-v1"
+    "component": "semantic_choices, damage_prevention_creation, damage_modifier_state, damage, and replacement/",
+    "version": "effects-foundation-v2"
   },
   "known_blockers": [
     "there is no universal typed effect executor covering every instruction and zone",
     "as-though permissions and actual mana-spend provenance are not modeled generically",
     "tie resolution is not a required typed semantic-program field",
-    "damage-source choices and properties are not derived from authoritative object state for every producer",
-    "stateful shields and static effects are not registered from generic Oracle semantics"
+    "arbitrary opaque referred-object provenance is not admitted without a typed producer",
+    "face-down source characteristics are not yet represented by the source-choice transaction",
+    "damage-source predicates beyond the closed color, type, subtype, supertype, and keyword vocabulary remain unmodeled",
+    "many effect families are not registered from generic Oracle semantics"
   ],
   "review_status": "draft"
 }

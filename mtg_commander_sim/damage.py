@@ -149,10 +149,12 @@ class DamageSourceSnapshot:
     logical_object_id: str
     controller: str
     owner: str
+    zone: str = "unknown"
     oracle_id: str | None = None
     commander_designation_id: str | None = None
     types: tuple[str, ...] = ()
     subtypes: tuple[str, ...] = ()
+    supertypes: tuple[str, ...] = ()
     colors: tuple[str, ...] = ()
     keywords: tuple[str, ...] = ()
     is_commander: bool = False
@@ -181,6 +183,10 @@ class DamageSourceSnapshot:
             raise DamageError(
                 "Only a commander source may carry a designation identity"
             )
+
+    @property
+    def identity_key(self) -> str:
+        return f"{self.logical_object_id}|{self.zone}"
 
 
 @dataclass(frozen=True, slots=True)
@@ -262,6 +268,8 @@ class DamageProposal:
             "source": self.source.ref,
             "source_object_id": self.source.object_id,
             "source_logical_object_id": self.source.logical_object_id,
+            "source_zone": self.source.zone,
+            "source_identity_key": self.source.identity_key,
             "source_oracle_id": self.source.oracle_id,
             "source_commander_designation_id": (
                 self.source.commander_designation_id
@@ -270,8 +278,14 @@ class DamageProposal:
             "source_owner": self.source.owner,
             "source_types": list(self.source.types),
             "source_subtypes": list(self.source.subtypes),
+            "source_supertypes": list(self.source.supertypes),
             "source_characteristics": sorted(
-                {*self.source.types, *self.source.subtypes}
+                {
+                    *self.source.types,
+                    *self.source.subtypes,
+                    *self.source.supertypes,
+                    *self.source.keywords,
+                }
             ),
             "source_colors": list(self.source.colors),
             "source_keywords": list(self.source.keywords),
@@ -348,6 +362,8 @@ class DamageEvent:
     unpreventable: bool = False
     applied_effects: tuple[str, ...] = ()
     source_toxic_value: int | None = 0
+    source_zone: str = "unknown"
+    source_supertypes: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.target_kind not in {"player", "permanent"}:
@@ -388,6 +404,10 @@ class DamageEvent:
             "source": self.source,
             "source_object_id": self.source_object_id,
             "source_logical_object_id": self.source_logical_object_id,
+            "source_zone": self.source_zone,
+            "source_identity_key": (
+                f"{self.source_logical_object_id}|{self.source_zone}"
+            ),
             "source_oracle_id": self.source_oracle_id,
             "source_commander_designation_id": (
                 self.source_commander_designation_id
@@ -396,6 +416,7 @@ class DamageEvent:
             "source_owner": self.source_owner,
             "source_types": list(self.source_types),
             "source_subtypes": list(self.source_subtypes),
+            "source_supertypes": list(self.source_supertypes),
             "source_colors": list(self.source_colors),
             "source_keywords": list(self.source_keywords),
             "source_is_commander": self.source_is_commander,
@@ -531,6 +552,17 @@ def source_snapshot(
         None,
     )
     if source is None:
+        stack_item = next(
+            (
+                item
+                for item in host.state.stack
+                if item.ref == source_ref and item.card_object_id
+            ),
+            None,
+        )
+        if stack_item is not None:
+            source = host.state.cards.get(stack_item.card_object_id)
+    if source is None:
         # Direct low-level effect calls and legacy checkpoints may not carry a
         # card handle. Keep their deterministic identity while withholding all
         # source characteristics; ordinary compiled damage always supplies the
@@ -543,9 +575,10 @@ def source_snapshot(
             logical_object_id=f"unrepresented:{ref}",
             controller=controller,
             owner=controller,
+            zone="unknown",
         )
     data = host._effective_card_data(source)
-    card_types, subtypes, _supertypes = host._type_parts(
+    card_types, subtypes, supertypes = host._type_parts(
         str(data.get("type_line") or "")
     )
     keywords = _normalized_keywords(data.get("keywords", ()))
@@ -565,10 +598,12 @@ def source_snapshot(
             else controller
         ),
         owner=source.owner,
+        zone=source.zone,
         oracle_id=source.oracle_id,
         commander_designation_id=source.commander_designation_id,
         types=tuple(sorted(card_types)),
         subtypes=tuple(sorted(subtypes)),
+        supertypes=tuple(sorted(supertypes)),
         colors=tuple(
             sorted(str(value).upper() for value in data.get("colors", ()))
         ),
@@ -1061,6 +1096,7 @@ def _final_event(
         source_logical_object_id=str(
             payload.get("source_logical_object_id") or ""
         ),
+        source_zone=str(payload.get("source_zone") or "unknown"),
         source_oracle_id=(
             str(payload["source_oracle_id"])
             if payload.get("source_oracle_id") is not None
@@ -1076,6 +1112,9 @@ def _final_event(
         source_types=tuple(str(value) for value in payload.get("source_types", ())),
         source_subtypes=tuple(
             str(value) for value in payload.get("source_subtypes", ())
+        ),
+        source_supertypes=tuple(
+            str(value) for value in payload.get("source_supertypes", ())
         ),
         source_colors=tuple(
             str(value) for value in payload.get("source_colors", ())

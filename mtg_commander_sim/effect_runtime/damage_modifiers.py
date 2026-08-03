@@ -220,8 +220,20 @@ def _apply_create_damage_prevention_shield(
             required_source_colors=tuple(
                 str(value) for value in effect.get("source_colors") or ()
             ),
+            allowed_source_colors=tuple(
+                str(value) for value in effect.get("source_colors_any") or ()
+            ),
             required_source_types=tuple(
                 str(value) for value in effect.get("source_types") or ()
+            ),
+            required_source_subtypes=tuple(
+                str(value) for value in effect.get("source_subtypes") or ()
+            ),
+            required_source_supertypes=tuple(
+                str(value) for value in effect.get("source_supertypes") or ()
+            ),
+            required_source_keywords=tuple(
+                str(value) for value in effect.get("source_keywords") or ()
             ),
             label=str(effect.get("label") or reason),
             aftermath=_prevention_aftermath_requests(effect, actor=actor),
@@ -301,7 +313,13 @@ def _apply_create_damage_redirection(
                 ),
                 controller=actor,
                 required_colors=tuple(effect.get("source_colors") or ()),
+                allowed_colors=tuple(effect.get("source_colors_any") or ()),
                 required_types=tuple(effect.get("source_types") or ()),
+                required_subtypes=tuple(effect.get("source_subtypes") or ()),
+                required_supertypes=tuple(
+                    effect.get("source_supertypes") or ()
+                ),
+                required_keywords=tuple(effect.get("source_keywords") or ()),
             ),
             consume_on_application=consume,
             label=str(effect.get("label") or reason),

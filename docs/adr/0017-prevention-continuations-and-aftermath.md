@@ -26,15 +26,36 @@ and a single precommit boundary.
 `damage_prevention_creation.py` owns typed shield creation. It validates resolved
 dynamic amounts, exact divided allocations, independent per-object shields,
 and optional chosen-source physical identity plus LKI before committing durable
-state. `damage_prevention_aftermath.py` prepares represented life and permanent-
-counter results and delegates mutation to the canonical life and counter owners.
+state. New chosen sources use the version-2 identity shape: the current logical
+incarnation and zone are pinned, and a chosen permanent spell additionally pins
+the same logical incarnation on the battlefield for CR 400.7a/609.7a
+continuity. This includes a permanent-spell copy, which is offered by its public
+stack identity while its underlying copy-object identity remains authoritative.
+A later incarnation with the same physical card ID does not match.
+Historical version-0 and version-1 checkpoint shapes retain their original
+meaning during Game Record v3 replay.
+
+Chosen-source property filters are closed typed sets: all/any colors and
+required card types, subtypes, supertypes, or keywords. They are checked when
+the source is chosen and rechecked against the damage-source snapshot when
+damage would occur. Unknown predicates fail closed.
+
+`damage_prevention_aftermath.py` prepares represented life and permanent-counter
+results. Life results enter the immutable `life.change` replacement tree before
+mutation and then commit through `life_change.py` plus the canonical life-state
+owner. Permanent counters continue through the canonical counter-placement
+owner. This makes represented CR 615.5 life aftermath replacement-capable while
+keeping all result plans validated before the damage batch mutates state.
 
 The generic `choose_damage_source` semantic operation is a reviewed universal
-choice. It exposes only legally known public battlefield, stack, and face-up
-command-zone candidates to the affected seat, pins the accepted physical object
-and characteristics, and can continue only into the typed prevention-creation
-owner. It grants no arbitrary callback, state mutation, hidden-zone access, or
-cross-seat projection authority.
+choice. It exposes the CR 609.7a universe: public permanents, spells on the
+stack, face-up command-zone objects, and public former-zone objects explicitly
+referred to by a stack object, waiting typed prevention/replacement value, or
+waiting delayed trigger. Typed `referred_object_ids` metadata carries that
+provenance; arbitrary semantic context is never searched. The handler pins the
+accepted physical object and characteristics and can continue only into the
+typed prevention-creation owner. It grants no arbitrary callback, state
+mutation, hidden-zone access, or cross-seat projection authority.
 
 `mana_payment_continuations.py` owns the rollback, suspension, and resumption of
 a cast or activation when damage from a mana ability requires a replacement
@@ -66,18 +87,21 @@ inventory and delegates final mutation to its declared typed owner.
 - Same-chooser simultaneous replacement ordering is explicit rather than an
   incidental event-list order.
 - Represented prevention aftermath validates every life/counter result before
-  mutation and can participate in permanent-counter replacement.
+  mutation and can participate in life-gain or permanent-counter replacement.
 - Mana payments with replacement choices roll back completely and resume the
   original action without adding a CommanderEngine method.
-- Oracle IR v16 can lower the represented generic wording while unimplemented
-  source categories and aftermath forms remain material residuals.
+- Oracle IR v17 lowers closed chosen-source families and the static life-gain
+  doubling family without card-name dispatch.
 
 ## Remaining boundary
 
-This decision does not claim complete CR 609.7a, 615, or 616. Referred former-
-zone objects, permanent-spell continuity, broader source-property predicates,
-general replacement-capable life gain, other aftermath forms, partial/attached
-redirection, and non-damage transformations remain blocked.
+This decision does not claim complete CR 609.7, 615, or 616. Explicit typed
+provenance is required for referred former-zone objects; arbitrary opaque
+references and face-down source characteristics remain blocked. Source
+predicates beyond the closed color/type/
+subtype/supertype/keyword vocabulary, migration of every life producer to
+`life.change`, aftermath forms beyond represented life and permanent counters,
+partial/attached redirection, and non-damage transformations remain blocked.
 
 ## Removal condition
 

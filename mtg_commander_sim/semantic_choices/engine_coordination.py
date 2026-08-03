@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any, Mapping, Sequence
 
 from ..errors import GameRuleError
@@ -39,21 +40,33 @@ class SemanticChoiceCoordinationMixin:
             types, subtypes, supertypes = self._type_parts(
                 str(effective.get("type_line") or "")
             )
-            rows.append(
-                object_query_result(
-                    card,
-                    effective,
-                    type_parts=(types, subtypes, supertypes),
-                    known_to_actor=(
-                        actor in card.known_to or card.zone in public_zones
-                    ),
-                    attached_to_ref=(
-                        self.state.cards[card.attached_to].ref
-                        if card.attached_to in self.state.cards
-                        else None
-                    ),
-                )
+            row = object_query_result(
+                card,
+                effective,
+                type_parts=(types, subtypes, supertypes),
+                known_to_actor=(
+                    actor in card.known_to or card.zone in public_zones
+                ),
+                attached_to_ref=(
+                    self.state.cards[card.attached_to].ref
+                    if card.attached_to in self.state.cards
+                    else None
+                ),
             )
+            if card.zone == "stack":
+                item = next(
+                    (
+                        value
+                        for value in self.state.stack
+                        if value.card_object_id == card.object_id
+                    ),
+                    None,
+                )
+                if item is not None:
+                    # The stack object is public; its underlying card/copy
+                    # identity is authoritative implementation data.
+                    row = replace(row, ref=item.ref)
+            rows.append(row)
         return tuple(rows)
 
     def _semantic_choice_stack_rows(self) -> tuple[ChoiceStackView, ...]:
@@ -69,6 +82,71 @@ class SemanticChoiceCoordinationMixin:
             )
             for item in self.state.stack
         )
+
+    def _semantic_choice_damage_source_candidates(
+        self,
+        actor: str,
+        object_rows: tuple[ChoiceObjectView, ...],
+    ) -> tuple[str, ...]:
+        """Materialize the legally known CR 609.7a source universe.
+
+        Ordinary permanents, spells, and face-up command-zone objects are
+        always candidates. Objects outside those zones are included only when
+        a public stack object, waiting typed prevention/replacement effect, or
+        delayed trigger refers to their physical object.
+        """
+
+        by_id = {row.object_id: row for row in object_rows}
+        by_ref = {row.ref: row for row in object_rows}
+        refs = {
+            row.ref
+            for row in object_rows
+            if row.known_to_actor
+            and row.zone in {"battlefield", "command", "stack"}
+            and not self.state.cards[row.object_id].face_down
+        }
+
+        def add_object_id(object_id: str | None) -> None:
+            row = by_id.get(str(object_id or ""))
+            if (
+                row is not None
+                and row.known_to_actor
+                and not self.state.cards[row.object_id].face_down
+            ):
+                refs.add(row.ref)
+
+        def add_ref(ref: Any) -> None:
+            row = by_ref.get(str(ref or ""))
+            if (
+                row is not None
+                and row.known_to_actor
+                and not self.state.cards[row.object_id].face_down
+            ):
+                refs.add(row.ref)
+
+        for item in self.state.stack:
+            add_object_id(item.card_object_id)
+            add_object_id(item.source_object_id)
+            for object_id in item.referred_object_ids:
+                add_object_id(object_id)
+            for target in item.targets:
+                if isinstance(target, str):
+                    add_ref(target)
+        for trigger in self.state.delayed_triggers:
+            if trigger.active:
+                add_object_id(trigger.source_object_id)
+                for object_id in trigger.referred_object_ids:
+                    add_object_id(object_id)
+        for shield in self.state.damage_prevention_shields:
+            add_object_id(shield.subject.object_id)
+            if shield.chosen_source is not None:
+                add_object_id(shield.chosen_source.object_id)
+        for redirection in self.state.damage_redirections:
+            add_object_id(redirection.subject.object_id)
+            add_object_id(redirection.destination.object_id)
+            if redirection.chosen_source is not None:
+                add_object_id(redirection.chosen_source.object_id)
+        return tuple(sorted(refs))
 
     def _semantic_choice_candidates(
         self,
@@ -305,6 +383,11 @@ class SemanticChoiceCoordinationMixin:
             },
             materialized_choice_candidates=self._semantic_choice_candidates(
                 actor, choice_effect, source_ref
+            ),
+            materialized_damage_source_candidates=(
+                self._semantic_choice_damage_source_candidates(
+                    actor, object_rows
+                )
             ),
             current_turn_sequence=self.state.turn_sequence,
         )

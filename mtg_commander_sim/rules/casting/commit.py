@@ -5,7 +5,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol
 
-from ...life_state import LifeChange, commit_life_changes, plan_life_changes
+from ...life_state import LifeStateError, pay_life_cost
 from ...model import StackItem, YieldPolicy
 from ...tap_state import set_permanent_tapped
 from ..action_proposals import CastProposal, thaw_json
@@ -153,14 +153,14 @@ def _pay_life_additional_cost(
     selected_option: Mapping[str, Any],
 ) -> None:
     amount = int(response.get("x", 0))
-    if amount > host.state.players[proposal.seat].life:
+    try:
+        pay_life_cost(host, proposal.seat, amount)
+    except LifeStateError as exc:
         raise CastProposalError(
             "The selected life payment is no longer payable",
             status="unpayable",
             reason="life_cost_unpayable",
-        )
-    plan = plan_life_changes(host, [LifeChange(proposal.seat, -amount)])
-    commit_life_changes(host, plan)
+        ) from exc
     host._log(
         proposal.seat,
         "cost.life",
@@ -373,6 +373,9 @@ def _queue_storm(host: CastCommitHost, proposal: CastProposal, item: StackItem, 
                 "modes": copy.deepcopy(item.modes),
                 "x_value": item.x_value,
                 "default_destination": item.default_destination,
+                "referred_object_ids": copy.deepcopy(
+                    item.referred_object_ids
+                ),
                 "target_groups": copy.deepcopy(target_groups),
                 "target_snapshots": copy.deepcopy(target_snapshots),
                 "target_schema": copy.deepcopy(

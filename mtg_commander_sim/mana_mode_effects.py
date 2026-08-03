@@ -5,12 +5,7 @@ from typing import Any, Callable, Mapping, Protocol, Sequence, TypeAlias
 
 from .damage import damage_proposal, DamageError, resolve_damage_batch
 from .errors import GameRuleError
-from .life_state import (
-    commit_life_changes,
-    LifeChange,
-    LifeStateError,
-    plan_life_changes,
-)
+from .life_state import LifeStateError, pay_life_cost
 
 
 class ManaModeEffectHost(Protocol):
@@ -197,13 +192,8 @@ def _apply_life_payment(
     *,
     seat: str,
 ) -> None:
-    if host.state.players[seat].life < effect.amount:
-        raise GameRuleError("Cannot pay more life than the player has")
     try:
-        commit_life_changes(
-            host,
-            plan_life_changes(host, (LifeChange(seat, -effect.amount),)),
-        )
+        pay_life_cost(host, seat, effect.amount)
     except LifeStateError as exc:
         raise GameRuleError(str(exc)) from exc
 

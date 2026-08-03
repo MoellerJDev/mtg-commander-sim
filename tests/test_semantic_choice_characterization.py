@@ -7,7 +7,7 @@ from pathlib import Path
 
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim.engine import CommanderEngine
-from mtg_commander_sim.model import StackItem
+from mtg_commander_sim.model import DelayedTrigger, StackItem
 from mtg_commander_sim.record import checkpoint_envelope, replay_record
 from mtg_commander_sim.semantics import SemanticProgram
 
@@ -204,13 +204,148 @@ class SemanticChoiceCharacterizationTests(unittest.TestCase):
         shield = engine.state.damage_prevention_shields[0]
         self.assertEqual(chosen.object_id, shield.chosen_source.object_id)
         self.assertEqual(chosen.logical_object_id, shield.chosen_source.logical_object_id)
-        self.assertEqual(1, shield.chosen_source.snapshot_version)
+        self.assertEqual(2, shield.chosen_source.snapshot_version)
 
         with tempfile.TemporaryDirectory() as temporary:
             record = Path(temporary) / "damage-source-choice"
             session.save(record)
             replay = replay_record(record, self.db, verify=True)
         self.assertTrue(replay["ok"], replay)
+
+    def test_damage_source_provenance_includes_typed_stack_and_delayed_refs(self):
+        session = self._session(68021)
+        engine = session.engine
+        stack_referred = self._card(engine, "A", "Sensei's Divining Top")
+        delayed_referred = self._card(engine, "A", "Strionic Resonator")
+        unrelated = self._card(engine, "A", "Lightning Greaves")
+        hidden = next(
+            engine.state.cards[object_id]
+            for object_id in engine.state.players["B"].zones["hand"]
+            if "A" not in engine.state.cards[object_id].known_to
+        )
+        for card in (stack_referred, delayed_referred, unrelated):
+            engine.move_card(card.object_id, "graveyard", log=False)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="typed-referred-stack",
+                ref="S-typed-referred-stack",
+                kind="triggered_ability",
+                controller="A",
+                label="Refers to a public graveyard object",
+                visibility=list(engine.seats),
+                referred_object_ids=[stack_referred.object_id, hidden.object_id],
+            )
+        )
+        engine.schedule_delayed_trigger(
+            controller="B",
+            label="Waiting referred-object trigger",
+            event_kind="step.begin",
+            condition={"phase": "ending", "step": "end_step"},
+            stack_template={"label": "Waiting referred-object trigger"},
+            referred_object_ids=(delayed_referred.object_id,),
+        )
+
+        query = engine._semantic_choice_query("A")
+
+        self.assertIn(
+            stack_referred.ref, query.damage_source_candidate_refs()
+        )
+        self.assertIn(
+            delayed_referred.ref, query.damage_source_candidate_refs()
+        )
+        self.assertNotIn(unrelated.ref, query.damage_source_candidate_refs())
+        self.assertNotIn(hidden.ref, query.damage_source_candidate_refs())
+
+    def test_damage_source_choice_fails_closed_for_face_down_identity(self):
+        session = self._session(68022)
+        engine = session.engine
+        referred = self._card(engine, "B", "Zimone and Dina")
+        engine.move_card(referred.object_id, "exile", log=False)
+        referred.face_down = True
+        referred.known_to = ["B"]
+        engine.state.stack.append(
+            StackItem(
+                stack_id="face-down-referred-stack",
+                ref="S-face-down-referred-stack",
+                kind="triggered_ability",
+                controller="B",
+                label="Refers to a face-down object",
+                visibility=list(engine.seats),
+                referred_object_ids=[referred.object_id],
+            )
+        )
+
+        query = engine._semantic_choice_query("A")
+
+        self.assertNotIn(
+            referred.ref, query.damage_source_candidate_refs()
+        )
+        self.assertNotIn(
+            referred.printed_name,
+            str(query.damage_source_candidate_refs()),
+        )
+
+    def test_empty_referred_object_metadata_preserves_historical_shape(self):
+        item = StackItem(
+            stack_id="historical-stack",
+            ref="S-historical-stack",
+            kind="triggered_ability",
+            controller="A",
+            label="Historical stack shape",
+        )
+        self.assertNotIn("referred_object_ids", item.to_dict())
+        self.assertEqual(item.to_dict(), StackItem.from_dict(item.to_dict()).to_dict())
+
+        delayed = DelayedTrigger(
+            trigger_id="historical-delayed",
+            ref="DT-historical",
+            controller="A",
+            label="Historical delayed shape",
+            source_object_id=None,
+            event_kind="step.begin",
+            condition={},
+            stack_template={},
+        )
+        self.assertNotIn("referred_object_ids", delayed.to_dict())
+
+    def test_referred_object_metadata_round_trips_when_present(self):
+        item = StackItem(
+            stack_id="referred-stack",
+            ref="S-referred",
+            kind="triggered_ability",
+            controller="A",
+            label="Referred stack object",
+            referred_object_ids=["object:one", "object:one", "object:two"],
+        )
+        delayed = DelayedTrigger(
+            trigger_id="referred-delayed",
+            ref="DT-referred",
+            controller="A",
+            label="Referred delayed object",
+            source_object_id=None,
+            event_kind="step.begin",
+            condition={},
+            stack_template={},
+            referred_object_ids=["object:two", "object:one"],
+        )
+
+        self.assertEqual(
+            ["object:one", "object:two"],
+            StackItem.from_dict(item.to_dict()).referred_object_ids,
+        )
+        self.assertEqual(
+            ["object:two", "object:one"],
+            DelayedTrigger.from_dict(delayed.to_dict()).referred_object_ids,
+        )
+        malformed_item = item.to_dict()
+        malformed_item["referred_object_ids"] = "object:one"
+        with self.assertRaisesRegex(ValueError, "nonempty strings"):
+            StackItem.from_dict(malformed_item)
+
+        malformed_delayed = delayed.to_dict()
+        malformed_delayed["referred_object_ids"] = [1]
+        with self.assertRaisesRegex(ValueError, "nonempty strings"):
+            DelayedTrigger.from_dict(malformed_delayed)
 
     def test_card_name_choice_rejects_malformed_response_without_mutation(self):
         session = self._session(68002)

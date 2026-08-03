@@ -443,10 +443,18 @@
     {
       "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "interaction",
+      "test_id": "tests.test_damage_prevention_creation.DamagePreventionCreationTests.test_incarnation_safe_source_filters_are_rechecked_when_damage_happens",
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Recheck exact any-color, type, subtype, and supertype source properties when damage would occur."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "interaction",
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_chosen_source_identity_and_property_mismatch_preserve_shield",
       "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
+      "applicability_note": "Create and consume finite, next-instance, or all-damage prevention shields through a typed damage batch."
     },
     {
       "capability_id": "damage.prevention.persistent_amount",
@@ -462,7 +470,15 @@
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_simultaneous_sources_require_and_replay_exact_allocation",
       "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
+      "applicability_note": "Create and consume finite, next-instance, or all-damage prevention shields through a typed damage batch."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_chosen_source_incarnation_mutants_are_killed",
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill object-ID reuse and missing permanent-spell continuity mutants at the chosen-source identity boundary."
     },
     {
       "capability_id": "damage.prevention.persistent_amount",
@@ -470,7 +486,15 @@
       "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_persistent_prevention_commit_mutant_is_killed",
       "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
+      "applicability_note": "Create and consume finite, next-instance, or all-damage prevention shields through a typed damage batch."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "negative",
+      "test_id": "tests.test_damage_prevention_creation.DamagePreventionCreationTests.test_countered_chosen_permanent_spell_is_a_new_graveyard_object",
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Do not follow a chosen permanent spell through a countered stack-to-graveyard zone change."
     },
     {
       "capability_id": "damage.prevention.persistent_amount",
@@ -478,7 +502,15 @@
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_unpreventable_damage_does_not_consume_shield",
       "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
+      "applicability_note": "Create and consume finite, next-instance, or all-damage prevention shields through a typed damage batch."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_prevention_creation.DamagePreventionCreationTests.test_chosen_permanent_spell_continues_to_the_permanent_it_becomes",
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Pin the chosen source to its incarnation while preserving CR 400.7a permanent-spell continuity."
     },
     {
       "capability_id": "damage.prevention.persistent_amount",
@@ -486,7 +518,7 @@
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_amount_shield_is_prepared_without_mutation_then_consumed",
       "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
+      "applicability_note": "Create and consume finite, next-instance, or all-damage prevention shields through a typed damage batch."
     },
     {
       "capability_id": "damage.prevention.persistent_amount",
@@ -499,10 +531,26 @@
     {
       "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "privacy",
+      "test_id": "tests.test_copy_objects.CopyObjectLifecycleTests.test_chosen_permanent_spell_copy_uses_public_stack_identity",
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Expose a copied permanent spell by its public stack identity while keeping its authoritative copy-object identity private."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "privacy",
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_combat_allocation_is_seat_scoped_and_command_replays",
       "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
+      "applicability_note": "Create and consume finite, next-instance, or all-damage prevention shields through a typed damage batch."
+    },
+    {
+      "capability_id": "damage.prevention.persistent_amount",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_semantic_choice_characterization.SemanticChoiceCharacterizationTests.test_damage_source_provenance_includes_typed_stack_and_delayed_refs",
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Expose explicitly referred public objects while excluding hidden and unrelated former-zone objects."
     },
     {
       "capability_id": "damage.prevention.persistent_amount",
@@ -510,7 +558,7 @@
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_combat_allocation_is_seat_scoped_and_command_replays",
       "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
+      "applicability_note": "Create and consume finite, next-instance, or all-damage prevention shields through a typed damage batch."
     },
     {
       "capability_id": "damage.prevention.static_fixed",
@@ -2114,6 +2162,7 @@
         "119.10",
         "120.4c",
         "614.1",
+        "615.5",
         "616.1",
         "616.1f",
         "616.1g"
@@ -2123,7 +2172,23 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply a trusted source-pinned fixed integral multiplier to a positive life-gain result event."
+      "applicability_note": "Apply a trusted generically compiled fixed integral multiplier to a canonical positive life-gain event."
+    },
+    {
+      "capability_id": "life.gain.replacement.static_multiplier",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_life_change.LifeChangeTransactionTests.test_life_replacement_choice_and_replay_are_canonical",
+      "official_rule_ids": ["119.3", "119.10", "120.4c", "614.1", "615.5", "616.1", "616.1f", "616.1g"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Resolve and replay several applicable life-gain replacements before typed mutation."
+    },
+    {
+      "capability_id": "life.gain.replacement.static_multiplier",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_life_change.LifeChangeTransactionTests.test_simultaneous_four_player_life_gain_uses_one_typed_batch",
+      "official_rule_ids": ["119.3", "119.10", "120.4c", "614.1", "615.5", "616.1", "616.1f", "616.1g"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Apply a shared life-gain replacement across one simultaneous four-player typed batch."
     },
     {
       "capability_id": "life.gain.replacement.static_multiplier",
@@ -2134,6 +2199,7 @@
         "119.10",
         "120.4c",
         "614.1",
+        "615.5",
         "616.1",
         "616.1f",
         "616.1g"
@@ -2143,7 +2209,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply a trusted source-pinned fixed integral multiplier to a positive life-gain result event."
+      "applicability_note": "Apply a trusted generically compiled fixed integral multiplier to a canonical positive life-gain event."
     },
     {
       "capability_id": "life.gain.replacement.static_multiplier",
@@ -2154,6 +2220,7 @@
         "119.10",
         "120.4c",
         "614.1",
+        "615.5",
         "616.1",
         "616.1f",
         "616.1g"
@@ -2163,7 +2230,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply a trusted source-pinned fixed integral multiplier to a positive life-gain result event."
+      "applicability_note": "Apply a trusted generically compiled fixed integral multiplier to a canonical positive life-gain event."
     },
     {
       "capability_id": "life.gain.replacement.static_multiplier",
@@ -2174,6 +2241,7 @@
         "119.10",
         "120.4c",
         "614.1",
+        "615.5",
         "616.1",
         "616.1f",
         "616.1g"
@@ -2183,7 +2251,15 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply a trusted source-pinned fixed integral multiplier to a positive life-gain result event."
+      "applicability_note": "Apply a trusted generically compiled fixed integral multiplier to a canonical positive life-gain event."
+    },
+    {
+      "capability_id": "life.gain.replacement.static_multiplier",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_boon_reflection_doubles_prevention_aftermath_life_gain",
+      "official_rule_ids": ["119.3", "119.10", "120.4c", "614.1", "615.5", "616.1", "616.1f", "616.1g"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Route CR 615.5 life aftermath through the canonical replacement-capable life event."
     },
     {
       "capability_id": "life.gain.replacement.static_multiplier",
@@ -2194,6 +2270,7 @@
         "119.10",
         "120.4c",
         "614.1",
+        "615.5",
         "616.1",
         "616.1f",
         "616.1g"
@@ -2203,7 +2280,7 @@
         "commander_duel",
         "commander_review"
       ],
-      "applicability_note": "Apply a trusted source-pinned fixed integral multiplier to a positive life-gain result event."
+      "applicability_note": "Apply a trusted generically compiled fixed integral multiplier to a canonical positive life-gain event."
     },
     {
       "capability_id": "permanent.tap.effect",

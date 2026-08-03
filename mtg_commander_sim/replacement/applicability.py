@@ -48,6 +48,7 @@ def condition_matches(
                 "eq",
                 "contains",
                 "contains_all",
+                "contains_any",
                 "lt",
                 "lte",
                 "gt",
@@ -74,6 +75,10 @@ def condition_matches(
             if "contains_all" in expected and not set(
                 expected["contains_all"]
             ).issubset(set(actual or ())):
+                return False
+            if "contains_any" in expected and not set(
+                expected["contains_any"]
+            ).intersection(set(actual or ())):
                 return False
             for predicate, comparison in (
                 ("lt", lambda left, right: left < right),

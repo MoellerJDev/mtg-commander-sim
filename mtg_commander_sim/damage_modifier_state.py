@@ -141,16 +141,167 @@ class DamageSubject:
             owner=(str(value["owner"]) if value["owner"] is not None else None),
         )
 
+_CHOSEN_SOURCE_IDENTITY_FIELDS = (
+    "logical_object_id",
+    "oracle_id",
+    "printed_name",
+    "controller",
+    "owner",
+    "zone",
+)
+_CHOSEN_SOURCE_EXTENDED_FIELDS = (
+    "required_subtypes",
+    "required_supertypes",
+    "required_keywords",
+    "allowed_colors",
+)
+_PERMANENT_SPELL_TYPES = frozenset(
+    {"artifact", "battle", "creature", "enchantment", "planeswalker"}
+)
+
+
+def _normalize_chosen_source(source: ChosenDamageSource) -> None:
+    for field_name in ("required_colors", "allowed_colors", "colors"):
+        object.__setattr__(
+            source,
+            field_name,
+            tuple(
+                sorted(
+                    {
+                        str(value).upper()
+                        for value in getattr(source, field_name)
+                        if str(value)
+                    }
+                )
+            ),
+        )
+    for field_name in (
+        "required_types",
+        "required_subtypes",
+        "required_supertypes",
+        "required_keywords",
+        "types",
+        "subtypes",
+        "supertypes",
+        "keywords",
+    ):
+        object.__setattr__(
+            source,
+            field_name,
+            tuple(
+                sorted(
+                    {
+                        str(value).casefold()
+                        for value in getattr(source, field_name)
+                        if str(value)
+                    }
+                )
+            ),
+        )
+    for field_name in _CHOSEN_SOURCE_IDENTITY_FIELDS:
+        raw = getattr(source, field_name)
+        value = str(raw) if raw is not None else None
+        if value == "":
+            raise DamageModifierError(
+                "Chosen source snapshot strings cannot be empty"
+            )
+        object.__setattr__(source, field_name, value)
+    object.__setattr__(
+        source,
+        "identity_keys",
+        tuple(
+            sorted(
+                {str(value) for value in source.identity_keys if str(value)}
+            )
+        ),
+    )
+
+
+def _expected_chosen_source_identity_keys(
+    source: ChosenDamageSource,
+) -> set[str]:
+    expected = {f"{source.logical_object_id}|{source.zone}"}
+    if source.zone == "stack" and set(source.types).intersection(
+        _PERMANENT_SPELL_TYPES
+    ):
+        expected.add(f"{source.logical_object_id}|battlefield")
+    return expected
+
+
+def _validate_chosen_source(source: ChosenDamageSource) -> None:
+    version = source.snapshot_version
+    if type(version) is not int or version not in {0, 1, 2}:
+        raise DamageModifierError(
+            "A chosen damage source has an unsupported snapshot version"
+        )
+    snapshot_values = (
+        source.required_subtypes,
+        source.required_supertypes,
+        source.required_keywords,
+        source.allowed_colors,
+        source.types,
+        source.subtypes,
+        source.supertypes,
+        source.colors,
+        source.keywords,
+    )
+    if version == 0 and (
+        any(
+            getattr(source, field_name) is not None
+            for field_name in _CHOSEN_SOURCE_IDENTITY_FIELDS
+        )
+        or any(snapshot_values)
+    ):
+        raise DamageModifierError(
+            "Legacy chosen sources cannot carry versioned snapshot facts"
+        )
+    if version and not all(
+        getattr(source, field_name)
+        for field_name in _CHOSEN_SOURCE_IDENTITY_FIELDS
+    ):
+        raise DamageModifierError(
+            "A versioned chosen source requires a complete identity snapshot"
+        )
+    if version == 2 and not source.identity_keys:
+        raise DamageModifierError(
+            "An incarnation-safe chosen source requires identity keys"
+        )
+    if version == 2 and set(source.identity_keys) != (
+        _expected_chosen_source_identity_keys(source)
+    ):
+        raise DamageModifierError(
+            "Chosen source identity keys do not match its snapshot"
+        )
+    if version != 2 and source.identity_keys:
+        raise DamageModifierError(
+            "Only incarnation-safe chosen sources carry identity keys"
+        )
+    if version != 2 and any(
+        getattr(source, field_name)
+        for field_name in _CHOSEN_SOURCE_EXTENDED_FIELDS
+    ):
+        raise DamageModifierError(
+            "Only incarnation-safe chosen sources carry extended filters"
+        )
+    if source.required_colors and source.allowed_colors:
+        raise DamageModifierError(
+            "Chosen source colors cannot require both all and any modes"
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class ChosenDamageSource:
     ref: str
     object_id: str
     required_colors: tuple[str, ...] = ()
+    allowed_colors: tuple[str, ...] = ()
     required_types: tuple[str, ...] = ()
+    required_subtypes: tuple[str, ...] = ()
+    required_supertypes: tuple[str, ...] = ()
+    required_keywords: tuple[str, ...] = ()
     # Version zero is the additive Game Record v3 compatibility shape used by
-    # historical checkpoints.  New source choices pin the complete supported
-    # CR 615.1 snapshot at effect creation with version one.
+    # historical checkpoints. Version one is the first complete LKI snapshot;
+    # version two adds exact incarnation/permanent-spell continuity keys.
     snapshot_version: int = 0
     logical_object_id: str | None = None
     oracle_id: str | None = None
@@ -163,6 +314,7 @@ class ChosenDamageSource:
     supertypes: tuple[str, ...] = ()
     colors: tuple[str, ...] = ()
     keywords: tuple[str, ...] = ()
+    identity_keys: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         ref = str(self.ref or "")
@@ -173,97 +325,38 @@ class ChosenDamageSource:
             )
         object.__setattr__(self, "ref", ref)
         object.__setattr__(self, "object_id", object_id)
-        object.__setattr__(
-            self,
-            "required_colors",
-            tuple(sorted({str(value).upper() for value in self.required_colors})),
-        )
-        object.__setattr__(
-            self,
-            "required_types",
-            tuple(sorted({str(value).casefold() for value in self.required_types})),
-        )
-        if self.snapshot_version not in {0, 1}:
-            raise DamageModifierError(
-                "A chosen damage source has an unsupported snapshot version"
-            )
-        optional_strings = (
-            "logical_object_id",
-            "oracle_id",
-            "printed_name",
-            "controller",
-            "owner",
-            "zone",
-        )
-        for field_name in optional_strings:
-            raw = getattr(self, field_name)
-            value = str(raw) if raw is not None else None
-            if value == "":
-                raise DamageModifierError(
-                    "Chosen source snapshot strings cannot be empty"
-                )
-            object.__setattr__(self, field_name, value)
-        for field_name in ("types", "subtypes", "supertypes", "keywords"):
-            object.__setattr__(
-                self,
-                field_name,
-                tuple(
-                    sorted(
-                        {
-                            str(value).casefold()
-                            for value in getattr(self, field_name)
-                            if str(value)
-                        }
-                    )
-                ),
-            )
-        object.__setattr__(
-            self,
-            "colors",
-            tuple(sorted({str(value).upper() for value in self.colors if str(value)})),
-        )
-        if self.snapshot_version == 0:
-            if any(
-                getattr(self, field_name) is not None
-                for field_name in optional_strings
-            ) or any(
-                getattr(self, field_name)
-                for field_name in (
-                    "types",
-                    "subtypes",
-                    "supertypes",
-                    "colors",
-                    "keywords",
-                )
-            ):
-                raise DamageModifierError(
-                    "Legacy chosen sources cannot carry versioned snapshot facts"
-                )
-        elif not all(
-            (
-                self.logical_object_id,
-                self.oracle_id,
-                self.printed_name,
-                self.controller,
-                self.owner,
-                self.zone,
-            )
-        ):
-            raise DamageModifierError(
-                "A versioned chosen source requires a complete identity snapshot"
-            )
+        _normalize_chosen_source(self)
+        _validate_chosen_source(self)
 
     def event_conditions(self) -> dict[str, Any]:
-        result: dict[str, Any] = {
-            "source_object_id": {"eq": self.object_id}
-        }
+        result: dict[str, Any] = (
+            {"source_identity_key": {"in": list(self.identity_keys)}}
+            if self.snapshot_version == 2
+            else {"source_object_id": {"eq": self.object_id}}
+        )
         if self.required_colors:
             result["source_colors"] = {
                 "contains_all": list(self.required_colors)
             }
+        if self.allowed_colors:
+            result["source_colors"] = {
+                "contains_any": list(self.allowed_colors)
+            }
         if self.required_types:
             result["source_types"] = {
                 "contains_all": list(self.required_types)
+            }
+        if self.required_subtypes:
+            result["source_subtypes"] = {
+                "contains_all": list(self.required_subtypes)
+            }
+        if self.required_supertypes:
+            result["source_supertypes"] = {
+                "contains_all": list(self.required_supertypes)
+            }
+        if self.required_keywords:
+            result["source_keywords"] = {
+                "contains_all": list(self.required_keywords)
             }
         return result
 
@@ -274,6 +367,15 @@ class ChosenDamageSource:
             "required_colors": list(self.required_colors),
             "required_types": list(self.required_types),
         }
+        if self.snapshot_version == 2:
+            result.update(
+                {
+                    "required_subtypes": list(self.required_subtypes),
+                    "required_supertypes": list(self.required_supertypes),
+                    "required_keywords": list(self.required_keywords),
+                    "allowed_colors": list(self.allowed_colors),
+                }
+            )
         if self.snapshot_version:
             result.update(
                 {
@@ -289,6 +391,11 @@ class ChosenDamageSource:
                     "supertypes": list(self.supertypes),
                     "colors": list(self.colors),
                     "keywords": list(self.keywords),
+                    **(
+                        {"identity_keys": list(self.identity_keys)}
+                        if self.snapshot_version == 2
+                        else {}
+                    ),
                 }
             )
         return result
@@ -310,9 +417,26 @@ class ChosenDamageSource:
             "colors",
             "keywords",
         }
+        incarnation_safe = versioned | {
+            "required_subtypes",
+            "required_supertypes",
+            "required_keywords",
+            "allowed_colors",
+            "identity_keys",
+        }
+        raw_snapshot_version = value.get("snapshot_version", 0)
+        if type(raw_snapshot_version) is not int:
+            raise DamageModifierError(
+                "Chosen source snapshot versions must be integers"
+            )
+        snapshot_version = raw_snapshot_version
         _exact_fields(
             value,
-            versioned if "snapshot_version" in value else legacy,
+            (
+                incarnation_safe
+                if snapshot_version == 2
+                else (versioned if "snapshot_version" in value else legacy)
+            ),
             label="Chosen damage source",
         )
         return cls(
@@ -321,10 +445,25 @@ class ChosenDamageSource:
             required_colors=_strings(
                 value["required_colors"], label="Required source colors"
             ),
+            allowed_colors=_strings(
+                value.get("allowed_colors", ()), label="Allowed source colors"
+            ),
             required_types=_strings(
                 value["required_types"], label="Required source types"
             ),
-            snapshot_version=int(value.get("snapshot_version", 0)),
+            required_subtypes=_strings(
+                value.get("required_subtypes", ()),
+                label="Required source subtypes",
+            ),
+            required_supertypes=_strings(
+                value.get("required_supertypes", ()),
+                label="Required source supertypes",
+            ),
+            required_keywords=_strings(
+                value.get("required_keywords", ()),
+                label="Required source keywords",
+            ),
+            snapshot_version=snapshot_version,
             logical_object_id=value.get("logical_object_id"),
             oracle_id=value.get("oracle_id"),
             printed_name=value.get("printed_name"),
@@ -341,6 +480,9 @@ class ChosenDamageSource:
             colors=_strings(value.get("colors", ()), label="Source snapshot colors"),
             keywords=_strings(
                 value.get("keywords", ()), label="Source snapshot keywords"
+            ),
+            identity_keys=_strings(
+                value.get("identity_keys", ()), label="Source identity keys"
             ),
         )
 

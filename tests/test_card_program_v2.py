@@ -26,6 +26,7 @@ from mtg_commander_sim.card_programs.adapters import (
 )
 from mtg_commander_sim.carddb import CardDatabase, CardRecord
 from mtg_commander_sim.cli import main as cli_main
+from mtg_commander_sim.oracle_ir import register_generated_programs
 from mtg_commander_sim.rules.capabilities import (
     load_default_capability_registry,
 )
@@ -220,6 +221,30 @@ class CardProgramV2Tests(unittest.TestCase):
                 )
                 effect = program.to_dict()["abilities"][0]["effect_nodes"][0]
                 self.assertEqual(expected_amount, effect["amount"])
+
+    def test_life_multiplier_no_longer_requires_a_card_specific_program(self):
+        record = self.db.lookup("Boon Reflection")
+        registry = SemanticRegistry()
+        self.assertEqual([], registry.programs_for_oracle(record.oracle_id))
+
+        program = compile_card_program(
+            self.db,
+            record,
+            semantic_registry=registry,
+            capability_registry=self.capabilities,
+            capability_profile="commander_review",
+            trust_level="trusted",
+        )
+
+        self.assertEqual(
+            ("life.gain.replacement.static_multiplier",),
+            program.capability_dependencies,
+        )
+        self.assertEqual(
+            "capability_closed", program.trust_closure["trust_basis"]
+        )
+        self.assertTrue(program.trust_closure["trusted"])
+        self.assertEqual([], program.trust_closure["compatibility_provenance"])
 
     def test_tampered_projection_hash_and_closure_fail_closed(self):
         program = compile_card_program(
@@ -478,9 +503,18 @@ class CardProgramV2Tests(unittest.TestCase):
             )
         )
 
+        runtime_registry = SemanticRegistry()
+        register_generated_programs(
+            self.db,
+            runtime_registry,
+            (self.db.lookup("Boon Reflection"),),
+            capability_registry=self.capabilities,
+            capability_profile="commander_review",
+            promote_exact_runtime_handlers=True,
+        )
         runtime_programs = [
             card_program
-            for card_program in SemanticRegistry().card_programs()
+            for card_program in runtime_registry.card_programs()
             if any(ability.handlers for ability in card_program.abilities)
         ]
         event_handlers = [

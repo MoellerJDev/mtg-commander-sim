@@ -324,9 +324,27 @@ class StackItem:
     default_destination: str | None = None
     visibility: list[str] = field(default_factory=list)
     context: dict[str, Any] = field(default_factory=dict)
+    # Public physical objects explicitly referred to by this stack object for
+    # CR 609.7a source choices. This is deliberately separate from arbitrary
+    # semantic context so private implementation data is never searched.
+    referred_object_ids: list[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        values = self.referred_object_ids
+        if not isinstance(values, (list, tuple)) or any(
+            type(value) is not str or not value for value in values
+        ):
+            raise ValueError(
+                "Stack referred-object IDs must be nonempty strings"
+            )
+        self.referred_object_ids = list(dict.fromkeys(values))
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        if not self.referred_object_ids:
+            # Preserve historical Game Record v3 checkpoint payloads.
+            payload.pop("referred_object_ids")
+        return payload
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "StackItem":
@@ -364,9 +382,24 @@ class DelayedTrigger:
     created_turn_sequence: int = 0
     expires_turn_sequence: int | None = None
     active: bool = True
+    # Objects explicitly referred to by the waiting delayed triggered ability.
+    referred_object_ids: list[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        values = self.referred_object_ids
+        if not isinstance(values, (list, tuple)) or any(
+            type(value) is not str or not value for value in values
+        ):
+            raise ValueError(
+                "Delayed-trigger referred-object IDs must be nonempty strings"
+            )
+        self.referred_object_ids = list(dict.fromkeys(values))
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        if not self.referred_object_ids:
+            payload.pop("referred_object_ids")
+        return payload
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "DelayedTrigger":

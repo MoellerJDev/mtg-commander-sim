@@ -822,29 +822,37 @@ physical commander designations—not Oracle IDs—own Commander-damage ledgers.
 The replacement model is split into deep-immutable model, applicability, typed
 operation, ordering, and strict replay modules. Generic compilation now covers
 those four keywords plus a closed family of static double-damage and fixed-
-prevention wording. Oracle IR v16 also lowers closed finite-shield wording,
+prevention wording. Oracle IR v17 also lowers closed finite-shield wording,
 dynamic resolved quantities, exact divided allocations, independent per-object
-shields, represented immediately-after life/counter results, and static
+shields, chosen-source next-instance/all-damage effects, represented
+immediately-after life/counter results, static life-gain doubling, and static
 redirection to a current damageable source. Durable modifier creation and life
 effects now have focused runtime owners outside `CommanderEngine`; the effect
 runtime has six closed operation families. Simultaneous finite allocation is
 seat-scoped and replayable, same-chooser event order is explicit,
 unpreventable damage does not consume a shield, and positive prevention
-dispatches one aggregate event per effect. Public battlefield, stack, and
-face-up command-zone sources can be chosen through a seat-scoped continuation
-whose physical identity and LKI are pinned. Replacement choices discovered
-during mana payment roll the payment back and resume the exact cast or
+dispatches one aggregate event per effect. Public permanents, stack spells,
+face-up command-zone objects, and explicitly referred public former-zone
+objects can be chosen through a seat-scoped continuation when their public
+characteristics are represented; face-down source characteristics fail closed.
+Version-2 source
+identity follows a permanent spell only to the permanent it becomes, never a
+later incarnation of the same card; source properties are rechecked through a
+closed color/type/subtype/supertype/keyword vocabulary. Replacement choices
+discovered during mana payment roll the payment back and resume the exact cast or
 activation after the choice. Bounded handlers cover fixed life-gain
 multiplication, a whole-result life floor, and transactional CR 615.5
-life/permanent-counter aftermath. Complete CR 609.7a source categories and
-permanent-spell continuity, broader source-property predicates, general
-replacement-capable life gain, remaining aftermath wording, partial or
+life/permanent-counter aftermath. Represented aftermath life gain now enters a
+canonical replacement-capable `life.change` transaction. Arbitrary opaque
+referred-object provenance, face-down sources, broader source-property
+predicates, migration of
+all life producers, remaining aftermath wording, partial or
 attached redirection, non-damage transformations, unresolved dynamic Toxic
 values, remaining result-replacement families, universal draw/entry
 replacement participation, broad CR 614/615/616 closure, layer dependencies,
 and state-derived modifiers remain unsupported.
 
-Runtime trust and governance are now explicit. Capability registry v11 consumes
+Runtime trust and governance are now explicit. Capability registry v13 consumes
 a generated evidence index whose fully qualified tests, current rules,
 profiles, and evidence classes are validated in CI. Every trusted capability
 requires positive, negative, replay, and killed-mutation evidence regardless of
@@ -1172,6 +1180,10 @@ container isolation when filesystem-level isolation must also be proven.
   quantity replacement/prevention coordinator and final-event publisher
 - `mtg_commander_sim/damage_results.py` — immutable CR 120.3 result trees,
   replacement preparation, commit planning, and atomic result mutation
+- `mtg_commander_sim/delayed_triggers.py` — typed delayed-trigger stack
+  materialization and explicit referred-object provenance preservation
+- `mtg_commander_sim/life_change.py` — immutable replacement-capable life-event
+  preparation, replay validation, and canonical life-state commit
 - `mtg_commander_sim/record.py` — Game Record v3 hashing, journals, migration, inspection, and replay
 - `mtg_commander_sim/report.py` — derived review and fidelity classification
 - `mtg_commander_sim/carddb.py` — local Oracle/rulings database

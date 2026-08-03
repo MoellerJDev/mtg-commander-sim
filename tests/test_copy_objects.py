@@ -5,6 +5,17 @@ import tempfile
 import unittest
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim.damage import damage_proposal, resolve_damage_batch
+from mtg_commander_sim.damage_modifier_state import (
+    DamageModifierDuration,
+    PreventionMode,
+)
+from mtg_commander_sim.damage_prevention_creation import (
+    commit_prevention_shield_creation,
+    plan_prevention_shield_creation,
+    PreventionShieldCreationRequest,
+    PreventionSubjectAllocation,
+)
 from mtg_commander_sim.model import GameState, StackItem
 from mtg_commander_sim.record import (
     checkpoint_envelope,
@@ -126,6 +137,21 @@ class CopyObjectLifecycleTests(unittest.TestCase):
                 if item.ref == copied.ref
             ),
         )
+
+    def test_spell_copy_preserves_explicit_referred_object_provenance(self):
+        engine = self.make_session(70712).engine
+        original = self.put_spell_on_stack(
+            engine,
+            "A",
+            "Chaos Warp",
+            ref="S-copy-referred-source",
+        )
+        referred = self.card(engine, "B", "Sol Ring")
+        original.referred_object_ids = [referred.object_id]
+
+        copied = self.copy_spell(engine, original)
+
+        self.assertEqual([referred.object_id], copied.referred_object_ids)
 
     def test_countered_spell_copy_reaches_graveyard_then_ceases(self):
         engine = self.make_session(70702).engine
@@ -275,6 +301,56 @@ class CopyObjectLifecycleTests(unittest.TestCase):
                 for event in engine.state.events
             ),
         )
+
+    def test_chosen_permanent_spell_copy_uses_public_stack_identity(self):
+        engine = self.make_session(70713).engine
+        original = self.put_spell_on_stack(
+            engine,
+            "A",
+            "Sol Ring",
+            ref="S-chosen-permanent-copy-source",
+        )
+        copied = self.copy_spell(engine, original)
+        copy_object = engine.state.cards[copied.card_object_id]
+
+        query = engine._semantic_choice_query("B")
+        self.assertIn(copied.ref, query.damage_source_candidate_refs())
+        self.assertNotIn(
+            copy_object.ref, query.damage_source_candidate_refs()
+        )
+        plan = plan_prevention_shield_creation(
+            engine,
+            PreventionShieldCreationRequest(
+                source_id="fixture:chosen-copy",
+                controller="B",
+                mode=PreventionMode.NEXT_INSTANCE,
+                duration=DamageModifierDuration.UNTIL_END_OF_TURN,
+                subjects=(PreventionSubjectAllocation("B", None),),
+                chosen_source_ref=copied.ref,
+                required_source_types=("artifact",),
+            ),
+        )
+        commit_prevention_shield_creation(engine, plan)
+
+        engine._begin_resolve_item(copied, [], "battlefield")
+        result = resolve_damage_batch(
+            engine,
+            (
+                damage_proposal(
+                    engine,
+                    proposal_id="damage:chosen-permanent-copy",
+                    actor="A",
+                    source_ref=copy_object.ref,
+                    target="B",
+                    amount=1,
+                    combat=False,
+                    reason="chosen permanent spell copy continuity",
+                ),
+            ),
+        )
+
+        self.assertEqual(0, result.dealt_amount)
+        self.assertFalse(engine.state.damage_prevention_shields)
 
     def test_spell_copy_is_a_spell_target_not_an_ability(self):
         engine = self.make_session(70706).engine

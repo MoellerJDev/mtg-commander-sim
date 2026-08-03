@@ -19,7 +19,7 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 - Behavioral classification/review required: 2,699
 - Passing behavioral rules: 138
 - Subsystems: 21
-- Queue fingerprint: `b3de29609431e90a0eeaed65bbf2c24dd9f7213285ff27d2c7a4b244ab8892e4`
+- Queue fingerprint: `432019295dff0f360101f903724e9c07b0cf5a34d495245de8696406296d54cb`
 
 ## Selected next batch
 
@@ -27,14 +27,14 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 - Subsystem: `replacement-prevention`
 - Rules: `615.1`, `615.2`, `615.5`, `615.9`, `616.1`
 - Target capabilities: `damage.prevention.persistent_amount`, `damage.prevention.order`, `damage.result.replacement_order`
-- Rationale: Typed dynamic/divided and per-object shield creation, ordinary public source choice, immediately-after life/counter results, same-chooser event ordering, and resumable mana-payment choices are now represented. The remaining dependency-ready prevention boundary is complete CR 609.7a source categories and permanent-spell continuity, broader source-characteristic filters, canonical life-gain replacement for aftermath, and the remaining closed aftermath wording families.
+- Rationale: Typed dynamic/divided and per-object shields, the represented face-up CR 609.7a candidate universe, incarnation-safe permanent-spell continuity, closed source-property rechecks, replacement-capable life aftermath, permanent-counter aftermath, same-chooser event ordering, and resumable mana-payment choices are represented. Face-down source characteristics remain fail-closed. The next dependency-ready prevention boundary is closed damage-dealing and target-dependent aftermath wording plus the nested transaction and trigger behavior those results require.
 
 Exit criteria:
 
-- Represent every CR 609.7a source candidate category, including specifically referred former-zone objects and permanent-spell to permanent identity continuity.
-- Expand chosen-source characteristic rechecking beyond color and card type without admitting unknown predicates.
-- Route prevention life-gain aftermath through the canonical replacement-capable life event boundary.
 - Add closed generic aftermath operations for remaining common Oracle wording, including represented damage-dealing and target-dependent forms.
+- Route damage-dealing aftermath back through the typed damage transaction without admitting recursive mutation or duplicate prevention application.
+- Discover and enqueue triggers created by each represented aftermath result at the correct post-prevention boundary.
+- Fail before mutation when an aftermath target, quantity, replacement choice, or nested transaction becomes stale.
 - Retain exact rollback, seat projection, same-chooser event ordering, and command replay across every added producer.
 - Measure generic CardProgram gains from the completed residual wording families.
 
