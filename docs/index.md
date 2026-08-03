@@ -60,6 +60,7 @@ indexed here but excluded from documentation front-matter validation.
 - [ADR 0014 — typed semantic choice and effect ownership](adr/0014-typed-semantic-choice-and-effect-ownership.md)
 - [ADR 0015 — durable damage-modifier ownership](adr/0015-durable-damage-modifier-ownership.md)
 - [ADR 0016 — typed casting and activation proposals](adr/0016-typed-casting-activation-proposals.md)
+- [ADR 0017 — prevention continuations and aftermath ownership](adr/0017-prevention-continuations-and-aftermath.md)
 - [Legacy consolidated architecture reference](../ARCHITECTURE.md)
 - [Client integration boundary](../CLIENT_INTEGRATION.md)
 - [Game Record v3](../GAME_RECORD.md)

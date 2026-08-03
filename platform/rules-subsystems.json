@@ -342,7 +342,6 @@
       "615.2",
       "615.5",
       "615.9",
-      "615.11",
       "616.1"
     ],
     "target_capability_ids": [
@@ -350,15 +349,14 @@
       "damage.prevention.order",
       "damage.result.replacement_order"
     ],
-    "rationale": "Durable finite and next-instance shields, exact simultaneous allocation, unpreventable nonconsumption, aggregate prevention dispatch, and static full-recipient redirection are now certified. The remaining dependency-ready prevention family is choice-complete shield creation and continuation: generic chosen-source selection and predicates, dynamic/divided and per-object creation, prevention aftermath, and replacement choices that suspend mana payment without mutation.",
+    "rationale": "Typed dynamic/divided and per-object shield creation, ordinary public source choice, immediately-after life/counter results, same-chooser event ordering, and resumable mana-payment choices are now represented. The remaining dependency-ready prevention boundary is complete CR 609.7a source categories and permanent-spell continuity, broader source-characteristic filters, canonical life-gain replacement for aftermath, and the remaining closed aftermath wording families.",
     "exit_criteria": [
-      "Create chosen-source shields from a seat-scoped legal candidate set and snapshot every supported source characteristic with exact last-known-information behavior.",
-      "Represent dynamic quantities, divided prevention, and one independent shield per applicable object through typed validated creation choices.",
-      "Suspend and resume mana payment when represented replacement or prevention ordering requires a player choice, with exact rollback and command replay.",
-      "Dispatch represented prevention aftermath as immediately-after typed events, including targets, nested replacement participation, triggers, and simultaneous grouping.",
-      "Complete explicit ordering for simultaneous events affecting the same chooser when event order can change the result.",
-      "Widen generic Oracle/CardProgram lowering for the completed source-choice, divided-shield, and aftermath wording families and measure Commander-card gains.",
-      "Extract the continuation and aftermath responsibilities behind bounded typed interfaces without adding card-name branches or direct GameState mutation to CommanderEngine."
+      "Represent every CR 609.7a source candidate category, including specifically referred former-zone objects and permanent-spell to permanent identity continuity.",
+      "Expand chosen-source characteristic rechecking beyond color and card type without admitting unknown predicates.",
+      "Route prevention life-gain aftermath through the canonical replacement-capable life event boundary.",
+      "Add closed generic aftermath operations for remaining common Oracle wording, including represented damage-dealing and target-dependent forms.",
+      "Retain exact rollback, seat projection, same-chooser event ordering, and command replay across every added producer.",
+      "Measure generic CardProgram gains from the completed residual wording families."
     ]
   }
 }

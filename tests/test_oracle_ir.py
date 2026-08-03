@@ -461,25 +461,98 @@ class OracleIRTests(unittest.TestCase):
                     node.effects[0],
                 )
 
-    def test_dynamic_or_compound_prevention_text_remains_unresolved(self):
+    def test_dynamic_and_aftermath_prevention_compile_generically(self):
         base = self.db.lookup("Lightning Bolt")
-        for oracle_text in (
-            "Prevent the next X damage that would be dealt to any target this turn.",
+        for template_id, oracle_text, expected in (
             (
-                "Prevent the next 3 damage that would be dealt to any target "
-                "this turn. You gain life equal to the damage prevented this way."
+                "damage-prevention-fixed-shield-v1",
+                "Prevent the next X damage that would be dealt to any target this turn.",
+                {"amount": "$x"},
+            ),
+            (
+                "damage-prevention-life-aftermath-v1",
+                (
+                    "Prevent the next 3 damage that would be dealt to any target "
+                    "this turn. You gain life equal to the damage prevented this way."
+                ),
+                {"aftermath_kind": "gain_life", "per_prevented": 1},
+            ),
+            (
+                "damage-prevention-counter-aftermath-v1",
+                (
+                    "Prevent the next X damage that would be dealt to target creature "
+                    "this turn. For each 1 damage prevented this way, put a +1/+1 "
+                    "counter on that creature."
+                ),
+                {"amount": "$x", "aftermath_kind": "place_counters"},
+            ),
+            (
+                "damage-prevention-chosen-source-fixed-life-v1",
+                (
+                    "Prevent the next 3 damage that would be dealt to any target this "
+                    "turn by a source of your choice. You gain 3 life."
+                ),
+                {"choice_op": "choose_damage_source"},
+            ),
+            (
+                "damage-prevention-shared-color-creatures-v1",
+                (
+                    "Prevent the next 1 damage that would be dealt to target creature "
+                    "and each other creature that shares a color with it this turn."
+                ),
+                {"selector": "shares_color_with"},
             ),
         ):
             with self.subTest(oracle_text=oracle_text):
                 record = replace(
                     base,
-                    oracle_id="fixture-unresolved-prevention",
+                    oracle_id=f"fixture-{template_id}",
                     name="Fixture Prevention",
                     oracle_text=oracle_text,
                 )
                 ir = compile_oracle_card(record)
-                self.assertIsNone(ir.faces[0].nodes[0].template_id)
-                self.assertFalse(ir.faces[0].nodes[0].lowerable)
+                node = ir.faces[0].nodes[0]
+                self.assertEqual(template_id, node.template_id)
+                self.assertTrue(node.lowerable)
+                effect = node.effects[0]
+                if "amount" in expected:
+                    self.assertEqual(expected["amount"], effect["amount"])
+                if "choice_op" in expected:
+                    self.assertEqual(expected["choice_op"], effect["op"])
+                    effect = effect["shield"]
+                if "aftermath_kind" in expected:
+                    self.assertEqual(
+                        expected["aftermath_kind"],
+                        effect["aftermath"][0]["kind"],
+                    )
+                if "per_prevented" in expected:
+                    self.assertEqual(
+                        expected["per_prevented"],
+                        effect["aftermath"][0]["per_prevented"],
+                    )
+                if "selector" in expected:
+                    self.assertEqual(
+                        expected["selector"], effect["selector"]["kind"]
+                    )
+
+    def test_divided_and_combat_only_prevention_remain_unresolved(self):
+        base = self.db.lookup("Lightning Bolt")
+        for oracle_text in (
+            (
+                "Prevent the next 4 damage that would be dealt this turn to any "
+                "number of targets, divided as you choose."
+            ),
+            "Prevent the next 1 combat damage that would be dealt to you this turn.",
+        ):
+            record = replace(
+                base,
+                oracle_id="fixture-unresolved-prevention",
+                name="Fixture Prevention",
+                oracle_text=oracle_text,
+            )
+            ir = compile_oracle_card(record)
+            self.assertIsNone(ir.faces[0].nodes[0].template_id)
+            self.assertFalse(ir.faces[0].nodes[0].lowerable)
 
     def test_static_redirection_requires_a_damageable_source_type(self):
         base = self.db.lookup("Grizzly Bears")

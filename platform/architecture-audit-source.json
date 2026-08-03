@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "6ccb1e26bf5f7f2c33784f8d09481050b338525e",
+    "baseline_main_commit": "f39730fd6dab90af9667748e3d7d0e15fc713f8b",
     "baseline_worktree_clean": true,
-    "verified_at": "2026-08-02",
-    "phase": "casting_activation_proposal_consolidation",
-    "scope_note": "Certified main through the Python 3.12 migration. The current focused branch consolidates casting, activation, and legal-action advertisement through immutable revision-pinned proposals; establishes typed read-only query and commit owners; generically lowers Crew, Craft, granted activated abilities, and static cast-cost modifiers; and reduces CommanderEngine, direct writes, printed-name literals, and oversized functions without widening semantic-operation dispatch."
+    "verified_at": "2026-08-03",
+    "phase": "damage_prevention_continuations_and_aftermath",
+    "scope_note": "Certified main includes the Python 3.12 migration and shared casting/activation proposal architecture. The current focused branch adds typed prevention creation, source-choice LKI, aftermath transactions, same-chooser event ordering, and resumable mana-payment replacement choices; splits damage-modifier and life-effect ownership; widens generic prevention lowering; and reduces CommanderEngine and direct writes without printed-name or Oracle-ID growth."
   },
   "ci": {
     "workflow": "CI",
@@ -37,6 +37,7 @@
       "mtg_commander_sim/counter_placement.py",
       "mtg_commander_sim/counter_state.py",
       "mtg_commander_sim/damage.py",
+      "mtg_commander_sim/damage_prevention_creation.py",
       "mtg_commander_sim/damage_results.py",
       "mtg_commander_sim/life_state.py",
       "mtg_commander_sim/tap_state.py",
@@ -46,6 +47,7 @@
       ,"mtg_commander_sim/effect_runtime/state_and_permissions.py"
       ,"mtg_commander_sim/effect_runtime/zones_and_attachments.py"
       ,"mtg_commander_sim/effect_runtime/damage_life_and_turns.py"
+      ,"mtg_commander_sim/effect_runtime/damage_modifiers.py"
       ,"mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py"
       ,"mtg_commander_sim/rules/casting/commit.py"
       ,"mtg_commander_sim/rules/activation/commit.py"

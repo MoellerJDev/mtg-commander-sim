@@ -66,16 +66,14 @@ EFFECT_FAMILY_CONTRACTS = (
     ),
     EffectFamilyContract(
         family_id="damage-life-and-turns.v1",
-        semantic_family="effect.damage-life-turn",
-        rule_references=("120.3", "119.4", "500.7"),
+        semantic_family="effect.damage-turn",
+        rule_references=("120.3", "500.7"),
         operations=frozenset(
             {
                 "control_next_turn",
                 "counter_or_destroy_blue",
                 "counter_stack",
                 "create_emblem",
-                "create_damage_prevention_shield",
-                "create_damage_redirection",
                 "create_modified_token_copy",
                 "create_token_copy_if_controlled_count",
                 "create_token_if_distinct_controlled_names",
@@ -83,19 +81,39 @@ EFFECT_FAMILY_CONTRACTS = (
                 "damage",
                 "damage_each_opponent",
                 "destroy_selected_and_reward_source",
-                "drain_each_opponent",
-                "drain_opponent",
                 "end_turn",
                 "energy",
                 "extra_turn",
                 "grant_ability_marker",
+                "protection_from_everything_until_next_turn",
+                "return_transformed",
+                "sacrifice_if_present",
+            }
+        ),
+    ),
+    EffectFamilyContract(
+        family_id="life-effects.v1",
+        semantic_family="effect.life",
+        rule_references=("119.1", "119.2", "119.3", "119.4"),
+        operations=frozenset(
+            {
+                "drain_each_opponent",
+                "drain_opponent",
                 "life",
                 "lose_life",
                 "lose_life_each_opponent",
                 "lose_life_equal_mana_value",
-                "protection_from_everything_until_next_turn",
-                "return_transformed",
-                "sacrifice_if_present",
+            }
+        ),
+    ),
+    EffectFamilyContract(
+        family_id="damage-modifiers.v1",
+        semantic_family="effect.damage-modifier",
+        rule_references=("609.7", "615.1", "615.5", "615.9"),
+        operations=frozenset(
+            {
+                "create_damage_prevention_shield",
+                "create_damage_redirection",
             }
         ),
     ),

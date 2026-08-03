@@ -13,6 +13,10 @@ from .replacement_effects import (
     replacement_choice_payload,
 )
 from .semantic_runtime import IntentPlan, execute_intent_plan
+from .replacement.immutable import thaw_value
+from .mana_payment_continuations import (
+    resume_mana_choice_capable_priority_action,
+)
 
 
 _PILOT_ROLE = "pi" + "lot"
@@ -61,7 +65,6 @@ class ReplacementDecisionHost(Protocol):
     def _grant_priority(self, seat: str | None) -> None: ...
 
     def _semantic_pause_annotation(self) -> Mapping[str, Any] | None: ...
-
 
 def issue_replacement_order_choice(
     host: ReplacementDecisionHost,
@@ -151,6 +154,40 @@ def issue_combat_damage_replacement_choice(
     )
 
 
+def _mana_damage_event_id(batch: ReplacementEventBatch) -> str:
+    origins: set[str] = set()
+    for event in batch.events:
+        if event.kind == "damage":
+            origins.add(event.event_id)
+        raw = event.payload.get("damage_event_ids")
+        if isinstance(raw, (list, tuple)):
+            origins.update(str(value) for value in raw if str(value))
+    if len(origins) != 1:
+        raise ReplacementEffectError(
+            "Mana-payment replacement continuation lost its damage event"
+        )
+    return next(iter(origins))
+
+
+def _validate_mana_payment_frame(
+    host: ReplacementDecisionHost,
+    frame: Mapping[str, Any],
+) -> None:
+    current = {
+        "active_player": host.state.active_player,
+        "phase": host.state.phase,
+        "step": host.state.step,
+        "turn_sequence": host.state.turn_sequence,
+        "priority_player": host.state.priority_player,
+        "priority_epoch": host.state.priority_epoch,
+        "stack_refs": [item.ref for item in host.state.stack],
+    }
+    if dict(frame) != current:
+        raise ReplacementEffectError(
+            "Mana-payment continuation state changed before resume"
+        )
+
+
 def apply_effect_with_replacement_choice(
     host: ReplacementDecisionHost,
     item: Any,
@@ -187,33 +224,30 @@ def apply_effect_with_replacement_choice(
     )
 
 
-def complete_replacement_order_choice(
-    host: ReplacementDecisionHost,
-    decision: Any,
+def _replacement_selection(
+    response: Mapping[str, Any],
+    pending: Any,
     *,
     error_type: type[Exception],
-) -> None:
-    """Validate and append one exact replacement choice before resuming."""
-
-    seat = decision.actors[0]
-    response = decision.responses[seat]
+) -> str | Mapping[str, Any]:
     selected = response.get("replacement")
     if not isinstance(selected, str) or not selected:
         raise error_type("A replacement effect selection is required")
-    continuation = decision.continuation
-    try:
-        restored = ReplacementContinuation.from_dict(continuation)
-    except ReplacementEffectError as exc:
-        raise error_type(str(exc)) from exc
-    batch = restored.batch
-    effects = restored.effects
-    pending = next_batch_replacement_choice(batch, effects)
-    if pending is None or pending.choice.chooser != seat:
-        raise error_type(
-            "Replacement continuation no longer requires this chooser"
-        )
     if selected not in pending.choice.legal_selections:
         raise error_type("Selected replacement is not currently available")
+    selected_event = response.get("replacement_event")
+    if pending.event_order_options:
+        if (
+            not isinstance(selected_event, str)
+            or selected_event not in pending.event_order_options
+        ):
+            raise error_type(
+                "A currently available simultaneous event must be selected"
+            )
+    elif selected_event is not None:
+        raise error_type(
+            "This replacement choice does not accept an event selection"
+        )
     allocation = response.get("prevention_allocation")
     allocation_choice = next(
         (
@@ -228,39 +262,93 @@ def complete_replacement_order_choice(
             raise error_type(
                 "This replacement does not accept a prevention allocation"
             )
-        selection: str | Mapping[str, Any] = selected
-    else:
-        if allocation is None and allocation_choice.allocation_required:
-            raise error_type(
-                "The prevention amount must be divided among damage events"
-            )
-        if allocation is not None and not isinstance(allocation, Mapping):
-            raise error_type("Prevention allocation must be an object")
-        selection = (
-            {
-                "effect_id": selected,
-                "allocation": dict(allocation or {}),
-            }
-            if allocation is not None
+        return (
+            {"effect_id": selected, "event_id": selected_event}
+            if selected_event is not None
             else selected
         )
-    if restored.resume_kind == "combat_damage":
-        waiting = host._apply_combat_assignments(
-            restored.thaw_combat_assignments(),
-            replacement_selections=[
-                *restored.replacement_selections,
-                selection,
-            ],
-            replacement_event_ids=[
-                event.event_id
-                for event in restored.batch.events
-                if event.kind == "damage"
-            ],
+    if allocation is None and allocation_choice.allocation_required:
+        raise error_type(
+            "The prevention amount must be divided among damage events"
         )
-        if not waiting:
-            host._grant_priority(host.state.active_player)
-        return
+    if allocation is not None and not isinstance(allocation, Mapping):
+        raise error_type("Prevention allocation must be an object")
+    if allocation is not None:
+        return {
+            "effect_id": selected,
+            "allocation": dict(allocation),
+            **(
+                {"event_id": selected_event}
+                if selected_event is not None
+                else {}
+            ),
+        }
+    return (
+        {"effect_id": selected, "event_id": selected_event}
+        if selected_event is not None
+        else selected
+    )
 
+
+def _resume_combat_replacement(
+    host: ReplacementDecisionHost,
+    restored: ReplacementContinuation,
+    selection: str | Mapping[str, Any],
+) -> None:
+    waiting = host._apply_combat_assignments(
+        restored.thaw_combat_assignments(),
+        replacement_selections=[
+            *restored.replacement_selections,
+            selection,
+        ],
+        replacement_event_ids=[
+            event.event_id
+            for event in restored.batch.events
+            if event.kind == "damage"
+        ],
+    )
+    if not waiting:
+        host._grant_priority(host.state.active_player)
+
+
+def _resume_mana_replacement(
+    host: ReplacementDecisionHost,
+    restored: ReplacementContinuation,
+    selection: str | Mapping[str, Any],
+    *,
+    error_type: type[Exception],
+) -> None:
+    try:
+        _validate_mana_payment_frame(host, restored.thaw_priority_frame())
+        response = restored.thaw_priority_response()
+        event_id = _mana_damage_event_id(restored.batch)
+    except ReplacementEffectError as exc:
+        raise error_type(str(exc)) from exc
+    raw_journal = response.get("_mana_replacement_selections") or {}
+    if not isinstance(raw_journal, Mapping):
+        raise error_type("Mana-payment replacement journal is malformed")
+    journal: dict[str, list[Any]] = {}
+    for key, values in raw_journal.items():
+        if not isinstance(key, str) or not isinstance(values, (list, tuple)):
+            raise error_type("Mana-payment replacement journal is malformed")
+        journal[key] = [thaw_value(value) for value in values]
+    journal.setdefault(event_id, []).append(selection)
+    response["_mana_replacement_selections"] = journal
+    resume_mana_choice_capable_priority_action(
+        host,
+        seat=restored.priority_seat,
+        action=restored.priority_action,
+        response=response,
+    )
+
+
+def _resume_semantic_replacement(
+    host: ReplacementDecisionHost,
+    restored: ReplacementContinuation,
+    selection: str | Mapping[str, Any],
+    *,
+    error_type: type[Exception],
+) -> None:
     stack_ref = restored.stack_ref
     item = next(
         (
@@ -274,10 +362,7 @@ def complete_replacement_order_choice(
         raise error_type(
             "Replacement continuation stack object no longer exists"
         )
-    host._validate_semantic_frame(
-        restored.thaw_semantic_frame(),
-        item,
-    )
+    host._validate_semantic_frame(restored.thaw_semantic_frame(), item)
     current_effect = restored.thaw_effect()
     current_effect["_replacement_selections"] = [
         *list(current_effect.get("_replacement_selections") or []),
@@ -292,11 +377,46 @@ def complete_replacement_order_choice(
         current_effect["_replacement_event_ids"] = damage_event_ids
     host._continue_resolution(
         stack_ref=stack_ref,
-        effects=[
-            current_effect,
-            *restored.thaw_remaining(),
-        ],
+        effects=[current_effect, *restored.thaw_remaining()],
         destination=restored.destination,
         note=restored.note,
         instruction_pointer=restored.instruction_pointer,
+    )
+
+
+def complete_replacement_order_choice(
+    host: ReplacementDecisionHost,
+    decision: Any,
+    *,
+    error_type: type[Exception],
+) -> None:
+    """Validate and append one exact replacement choice before resuming."""
+
+    seat = decision.actors[0]
+    response = decision.responses[seat]
+    continuation = decision.continuation
+    try:
+        restored = ReplacementContinuation.from_dict(continuation)
+    except ReplacementEffectError as exc:
+        raise error_type(str(exc)) from exc
+    batch = restored.batch
+    effects = restored.effects
+    pending = next_batch_replacement_choice(batch, effects)
+    if pending is None or pending.choice.chooser != seat:
+        raise error_type(
+            "Replacement continuation no longer requires this chooser"
+        )
+    selection = _replacement_selection(
+        response, pending, error_type=error_type
+    )
+    if restored.resume_kind == "combat_damage":
+        _resume_combat_replacement(host, restored, selection)
+        return
+    if restored.resume_kind == "mana_payment":
+        _resume_mana_replacement(
+            host, restored, selection, error_type=error_type
+        )
+        return
+    _resume_semantic_replacement(
+        host, restored, selection, error_type=error_type
     )

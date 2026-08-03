@@ -35,6 +35,7 @@ VALID_EFFECT_OPERATIONS = {
     "choose_objects",
     "choose_option",
     "choose_cards_apnap",
+    "choose_damage_source",
     "choose_mana",
     "copy_all_tokens",
     "copy_stack_item",

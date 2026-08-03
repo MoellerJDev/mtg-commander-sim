@@ -193,6 +193,25 @@
     },
     {
       "capability_id": "counter.placement.quantity_replacement",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_counter_quantity_replacement_mutant_is_killed",
+      "official_rule_ids": [
+        "122.1",
+        "122.6",
+        "614.1",
+        "614.16",
+        "616.1",
+        "616.1f"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject an identity mutation in the represented permanent counter-quantity replacement path."
+    },
+    {
+      "capability_id": "counter.placement.quantity_replacement",
       "evidence_class": "negative",
       "test_id": "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_quantity_component_rejects_malformed_and_nonmatching_events",
       "official_rule_ids": [
@@ -425,7 +444,7 @@
       "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "interaction",
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_chosen_source_identity_and_property_mismatch_preserve_shield",
-      "official_rule_ids": ["609.7b", "615.1", "615.2", "615.3", "615.4", "615.6", "615.7", "615.8", "615.9", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
     },
@@ -433,7 +452,7 @@
       "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "interaction",
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_prevention_dispatches_one_aggregate_event_per_effect",
-      "official_rule_ids": ["609.7b", "615.1", "615.2", "615.3", "615.4", "615.6", "615.7", "615.8", "615.9", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Dispatch one aggregate prevention-applied event for one effect across a simultaneous damage batch."
     },
@@ -441,7 +460,7 @@
       "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "multiplayer",
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_simultaneous_sources_require_and_replay_exact_allocation",
-      "official_rule_ids": ["609.7b", "615.1", "615.2", "615.3", "615.4", "615.6", "615.7", "615.8", "615.9", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
     },
@@ -449,7 +468,7 @@
       "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "mutation",
       "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_persistent_prevention_commit_mutant_is_killed",
-      "official_rule_ids": ["609.7b", "615.1", "615.2", "615.3", "615.4", "615.6", "615.7", "615.8", "615.9", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
     },
@@ -457,7 +476,7 @@
       "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "negative",
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_unpreventable_damage_does_not_consume_shield",
-      "official_rule_ids": ["609.7b", "615.1", "615.2", "615.3", "615.4", "615.6", "615.7", "615.8", "615.9", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
     },
@@ -465,7 +484,7 @@
       "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "positive",
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_amount_shield_is_prepared_without_mutation_then_consumed",
-      "official_rule_ids": ["609.7b", "615.1", "615.2", "615.3", "615.4", "615.6", "615.7", "615.8", "615.9", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
     },
@@ -473,7 +492,7 @@
       "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "positive",
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_until_end_of_turn_shields_expire_at_the_cleanup_boundary",
-      "official_rule_ids": ["609.7b", "615.1", "615.2", "615.3", "615.4", "615.6", "615.7", "615.8", "615.9", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Expire represented until-end-of-turn prevention state at the cleanup boundary."
     },
@@ -481,7 +500,7 @@
       "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "privacy",
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_combat_allocation_is_seat_scoped_and_command_replays",
-      "official_rule_ids": ["609.7b", "615.1", "615.2", "615.3", "615.4", "615.6", "615.7", "615.8", "615.9", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
     },
@@ -489,7 +508,7 @@
       "capability_id": "damage.prevention.persistent_amount",
       "evidence_class": "replay",
       "test_id": "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_combat_allocation_is_seat_scoped_and_command_replays",
-      "official_rule_ids": ["609.7b", "615.1", "615.2", "615.3", "615.4", "615.6", "615.7", "615.8", "615.9", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
+      "official_rule_ids": ["609.7", "609.7a", "609.7b", "615.1", "615.2", "615.3", "615.4", "615.5", "615.6", "615.7", "615.8", "615.9", "615.11", "615.12", "615.12a", "615.13", "616.1", "616.1f"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Create and consume finite or next-instance prevention shields through a typed damage batch."
     },

@@ -20,6 +20,9 @@ from mtg_commander_sim.damage_prevention import (
     DamageSubject,
     PreventionMode,
 )
+from mtg_commander_sim.damage_modifier_state import (
+    GainLifePreventionAftermath,
+)
 from mtg_commander_sim.engine import CommanderEngine
 from mtg_commander_sim.semantic_runtime.counter_replacements import (
     CounterPlacementEventSpec,
@@ -701,6 +704,23 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_quantity_replaced()
+
+    def test_prevention_aftermath_quantity_mutant_is_killed(self):
+        aftermath = GainLifePreventionAftermath(
+            player="A", per_prevented=2, fixed_amount=1
+        )
+
+        def assert_scaled_aftermath() -> None:
+            self.assertEqual(7, aftermath.amount(3))
+
+        assert_scaled_aftermath()
+        with patch.object(
+            GainLifePreventionAftermath,
+            "amount",
+            lambda value, _prevented: value.fixed_amount,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_scaled_aftermath()
 
     def test_damage_replacement_prevention_mutants_are_killed(self):
         condition = {

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Mapping
+from typing import Any, Mapping, TypeAlias
 
 
 class DamageModifierError(ValueError):
@@ -148,6 +148,21 @@ class ChosenDamageSource:
     object_id: str
     required_colors: tuple[str, ...] = ()
     required_types: tuple[str, ...] = ()
+    # Version zero is the additive Game Record v3 compatibility shape used by
+    # historical checkpoints.  New source choices pin the complete supported
+    # CR 615.1 snapshot at effect creation with version one.
+    snapshot_version: int = 0
+    logical_object_id: str | None = None
+    oracle_id: str | None = None
+    printed_name: str | None = None
+    controller: str | None = None
+    owner: str | None = None
+    zone: str | None = None
+    types: tuple[str, ...] = ()
+    subtypes: tuple[str, ...] = ()
+    supertypes: tuple[str, ...] = ()
+    colors: tuple[str, ...] = ()
+    keywords: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         ref = str(self.ref or "")
@@ -168,6 +183,75 @@ class ChosenDamageSource:
             "required_types",
             tuple(sorted({str(value).casefold() for value in self.required_types})),
         )
+        if self.snapshot_version not in {0, 1}:
+            raise DamageModifierError(
+                "A chosen damage source has an unsupported snapshot version"
+            )
+        optional_strings = (
+            "logical_object_id",
+            "oracle_id",
+            "printed_name",
+            "controller",
+            "owner",
+            "zone",
+        )
+        for field_name in optional_strings:
+            raw = getattr(self, field_name)
+            value = str(raw) if raw is not None else None
+            if value == "":
+                raise DamageModifierError(
+                    "Chosen source snapshot strings cannot be empty"
+                )
+            object.__setattr__(self, field_name, value)
+        for field_name in ("types", "subtypes", "supertypes", "keywords"):
+            object.__setattr__(
+                self,
+                field_name,
+                tuple(
+                    sorted(
+                        {
+                            str(value).casefold()
+                            for value in getattr(self, field_name)
+                            if str(value)
+                        }
+                    )
+                ),
+            )
+        object.__setattr__(
+            self,
+            "colors",
+            tuple(sorted({str(value).upper() for value in self.colors if str(value)})),
+        )
+        if self.snapshot_version == 0:
+            if any(
+                getattr(self, field_name) is not None
+                for field_name in optional_strings
+            ) or any(
+                getattr(self, field_name)
+                for field_name in (
+                    "types",
+                    "subtypes",
+                    "supertypes",
+                    "colors",
+                    "keywords",
+                )
+            ):
+                raise DamageModifierError(
+                    "Legacy chosen sources cannot carry versioned snapshot facts"
+                )
+        elif not all(
+            (
+                self.logical_object_id,
+                self.oracle_id,
+                self.printed_name,
+                self.controller,
+                self.owner,
+                self.zone,
+            )
+        ):
+            raise DamageModifierError(
+                "A versioned chosen source requires a complete identity snapshot"
+            )
 
     def event_conditions(self) -> dict[str, Any]:
         result: dict[str, Any] = {
@@ -184,18 +268,51 @@ class ChosenDamageSource:
         return result
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        result = {
             "ref": self.ref,
             "object_id": self.object_id,
             "required_colors": list(self.required_colors),
             "required_types": list(self.required_types),
         }
+        if self.snapshot_version:
+            result.update(
+                {
+                    "snapshot_version": self.snapshot_version,
+                    "logical_object_id": self.logical_object_id,
+                    "oracle_id": self.oracle_id,
+                    "printed_name": self.printed_name,
+                    "controller": self.controller,
+                    "owner": self.owner,
+                    "zone": self.zone,
+                    "types": list(self.types),
+                    "subtypes": list(self.subtypes),
+                    "supertypes": list(self.supertypes),
+                    "colors": list(self.colors),
+                    "keywords": list(self.keywords),
+                }
+            )
+        return result
 
     @classmethod
     def from_dict(cls, value: Mapping[str, Any]) -> "ChosenDamageSource":
+        legacy = {"ref", "object_id", "required_colors", "required_types"}
+        versioned = legacy | {
+            "snapshot_version",
+            "logical_object_id",
+            "oracle_id",
+            "printed_name",
+            "controller",
+            "owner",
+            "zone",
+            "types",
+            "subtypes",
+            "supertypes",
+            "colors",
+            "keywords",
+        }
         _exact_fields(
             value,
-            {"ref", "object_id", "required_colors", "required_types"},
+            versioned if "snapshot_version" in value else legacy,
             label="Chosen damage source",
         )
         return cls(
@@ -207,7 +324,175 @@ class ChosenDamageSource:
             required_types=_strings(
                 value["required_types"], label="Required source types"
             ),
+            snapshot_version=int(value.get("snapshot_version", 0)),
+            logical_object_id=value.get("logical_object_id"),
+            oracle_id=value.get("oracle_id"),
+            printed_name=value.get("printed_name"),
+            controller=value.get("controller"),
+            owner=value.get("owner"),
+            zone=value.get("zone"),
+            types=_strings(value.get("types", ()), label="Source snapshot types"),
+            subtypes=_strings(
+                value.get("subtypes", ()), label="Source snapshot subtypes"
+            ),
+            supertypes=_strings(
+                value.get("supertypes", ()), label="Source snapshot supertypes"
+            ),
+            colors=_strings(value.get("colors", ()), label="Source snapshot colors"),
+            keywords=_strings(
+                value.get("keywords", ()), label="Source snapshot keywords"
+            ),
         )
+
+
+@dataclass(frozen=True, slots=True)
+class GainLifePreventionAftermath:
+    player: str
+    per_prevented: int = 0
+    fixed_amount: int = 0
+    schema_version: int = 1
+
+    def __post_init__(self) -> None:
+        if not str(self.player or ""):
+            raise DamageModifierError("Prevention life gain requires a player")
+        if self.schema_version != 1:
+            raise DamageModifierError(
+                "Unsupported prevention aftermath schema version"
+            )
+        if (
+            type(self.per_prevented) is not int
+            or self.per_prevented < 0
+            or type(self.fixed_amount) is not int
+            or self.fixed_amount < 0
+            or not (self.per_prevented or self.fixed_amount)
+        ):
+            raise DamageModifierError(
+                "Prevention life gain requires a positive fixed or scaled amount"
+            )
+
+    def amount(self, prevented: int) -> int:
+        return self.fixed_amount + self.per_prevented * prevented
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "kind": "gain_life",
+            "schema_version": self.schema_version,
+            "player": self.player,
+            "per_prevented": self.per_prevented,
+            "fixed_amount": self.fixed_amount,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class PlaceCountersPreventionAftermath:
+    subject: DamageSubject
+    counter_name: str
+    placing_player: str
+    per_prevented: int = 0
+    fixed_amount: int = 0
+    schema_version: int = 1
+
+    def __post_init__(self) -> None:
+        if (
+            not isinstance(self.subject, DamageSubject)
+            or self.subject.kind != "permanent"
+        ):
+            raise DamageModifierError(
+                "Prevention counter aftermath requires a permanent"
+            )
+        counter = " ".join(str(self.counter_name).casefold().split())
+        if not counter or not str(self.placing_player or ""):
+            raise DamageModifierError(
+                "Prevention counter aftermath requires counter and player"
+            )
+        object.__setattr__(self, "counter_name", counter)
+        if self.schema_version != 1:
+            raise DamageModifierError(
+                "Unsupported prevention aftermath schema version"
+            )
+        if (
+            type(self.per_prevented) is not int
+            or self.per_prevented < 0
+            or type(self.fixed_amount) is not int
+            or self.fixed_amount < 0
+            or not (self.per_prevented or self.fixed_amount)
+        ):
+            raise DamageModifierError(
+                "Prevention counter aftermath requires a positive fixed or scaled amount"
+            )
+
+    def amount(self, prevented: int) -> int:
+        return self.fixed_amount + self.per_prevented * prevented
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "kind": "place_counters",
+            "schema_version": self.schema_version,
+            "subject": self.subject.to_dict(),
+            "counter_name": self.counter_name,
+            "placing_player": self.placing_player,
+            "per_prevented": self.per_prevented,
+            "fixed_amount": self.fixed_amount,
+        }
+
+
+PreventionAftermath: TypeAlias = (
+    GainLifePreventionAftermath | PlaceCountersPreventionAftermath
+)
+
+
+def prevention_aftermath_from_dict(
+    value: Mapping[str, Any],
+) -> PreventionAftermath:
+    if not isinstance(value, Mapping):
+        raise DamageModifierError("Prevention aftermath must be an object")
+    kind = value.get("kind")
+    if kind == "gain_life":
+        _exact_fields(
+            value,
+            {
+                "kind",
+                "schema_version",
+                "player",
+                "per_prevented",
+                "fixed_amount",
+            },
+            label="Prevention life aftermath",
+        )
+        return GainLifePreventionAftermath(
+            player=str(value["player"] or ""),
+            per_prevented=value["per_prevented"],
+            fixed_amount=value["fixed_amount"],
+            schema_version=value["schema_version"],
+        )
+    if kind == "place_counters":
+        _exact_fields(
+            value,
+            {
+                "kind",
+                "schema_version",
+                "subject",
+                "counter_name",
+                "placing_player",
+                "per_prevented",
+                "fixed_amount",
+            },
+            label="Prevention counter aftermath",
+        )
+        subject = value["subject"]
+        if not isinstance(subject, Mapping):
+            raise DamageModifierError(
+                "Prevention counter aftermath subject must be an object"
+            )
+        return PlaceCountersPreventionAftermath(
+            subject=DamageSubject.from_dict(subject),
+            counter_name=str(value["counter_name"] or ""),
+            placing_player=str(value["placing_player"] or ""),
+            per_prevented=value["per_prevented"],
+            fixed_amount=value["fixed_amount"],
+            schema_version=value["schema_version"],
+        )
+    raise DamageModifierError("Unknown prevention aftermath kind")
 
 
 @dataclass(frozen=True, slots=True)
@@ -222,6 +507,7 @@ class DamagePreventionShield:
     created_turn_sequence: int
     chosen_source: ChosenDamageSource | None = None
     label: str = ""
+    aftermath: tuple[PreventionAftermath, ...] = ()
 
     def __post_init__(self) -> None:
         if not all((self.shield_id, self.source_id, self.controller)):
@@ -258,13 +544,25 @@ class DamagePreventionShield:
             raise DamageModifierError(
                 "A prevention shield chosen source must be typed"
             )
+        aftermath = tuple(self.aftermath)
+        if any(
+            not isinstance(
+                value,
+                (GainLifePreventionAftermath, PlaceCountersPreventionAftermath),
+            )
+            for value in aftermath
+        ):
+            raise DamageModifierError(
+                "A prevention shield aftermath must use typed values"
+            )
+        object.__setattr__(self, "aftermath", aftermath)
 
     @property
     def effect_id(self) -> str:
         return f"prevention.shield:{self.shield_id}"
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        result = {
             "shield_id": self.shield_id,
             "source_id": self.source_id,
             "controller": self.controller,
@@ -280,25 +578,29 @@ class DamagePreventionShield:
             ),
             "label": self.label,
         }
+        if self.aftermath:
+            result["aftermath"] = [value.to_dict() for value in self.aftermath]
+        return result
 
     @classmethod
     def from_dict(
         cls, value: Mapping[str, Any]
     ) -> "DamagePreventionShield":
+        expected = {
+            "shield_id",
+            "source_id",
+            "controller",
+            "subject",
+            "mode",
+            "remaining",
+            "duration",
+            "created_turn_sequence",
+            "chosen_source",
+            "label",
+        }
         _exact_fields(
             value,
-            {
-                "shield_id",
-                "source_id",
-                "controller",
-                "subject",
-                "mode",
-                "remaining",
-                "duration",
-                "created_turn_sequence",
-                "chosen_source",
-                "label",
-            },
+            expected | ({"aftermath"} if "aftermath" in value else set()),
             label="Prevention shield",
         )
         subject = value["subject"]
@@ -331,6 +633,10 @@ class DamagePreventionShield:
                 else None
             ),
             label=str(value["label"] or ""),
+            aftermath=tuple(
+                prevention_aftermath_from_dict(item)
+                for item in value.get("aftermath", ())
+            ),
         )
 
 

@@ -17,6 +17,8 @@
     "mtg_commander_sim/counter_state.py",
     "mtg_commander_sim/damage.py",
     "mtg_commander_sim/damage_prevention.py",
+    "mtg_commander_sim/damage_prevention_aftermath.py",
+    "mtg_commander_sim/damage_prevention_creation.py",
     "mtg_commander_sim/damage_results.py",
     "mtg_commander_sim/declaration_costs.py",
     "mtg_commander_sim/declaration_restrictions.py",
@@ -25,6 +27,8 @@
     "mtg_commander_sim/life_state.py",
     "mtg_commander_sim/mana.py",
     "mtg_commander_sim/mana_activation.py",
+    "mtg_commander_sim/mana_mode_effects.py",
+    "mtg_commander_sim/mana_payment_continuations.py",
     "mtg_commander_sim/mana_undo.py",
     "mtg_commander_sim/mechanic_contracts.py",
     "mtg_commander_sim/model.py",
@@ -95,6 +99,7 @@
       "mtg_commander_sim/counter_placement.py": "typed effect-generated counter-placement replacement and mutation owner behind CommanderEngine",
       "mtg_commander_sim/damage.py": "typed damage proposal, quantity replacement, prevention, and final-event coordinator behind CommanderEngine",
       "mtg_commander_sim/damage_prevention.py": "durable typed prevention-shield and damage-redirection state owner behind the damage transaction",
+      "mtg_commander_sim/damage_prevention_creation.py": "typed prevention-shield creation validation and authoritative commit owner",
       "mtg_commander_sim/damage_results.py": "typed CR 120.3 result-event preparation, validation, and atomic mutation owner behind the damage coordinator",
       "mtg_commander_sim/counter_state.py": "canonical typed player and permanent counter mutation owner behind represented rules transactions",
       "mtg_commander_sim/life_state.py": "canonical typed life-total mutation owner behind represented rules transactions",
@@ -104,7 +109,8 @@
       ,"mtg_commander_sim/semantic_choices/intent_host.py": "typed semantic-choice intent application behind the immutable choice registry"
       ,"mtg_commander_sim/effect_runtime/state_and_permissions.py": "registry-owned state and permission effect family"
       ,"mtg_commander_sim/effect_runtime/zones_and_attachments.py": "registry-owned zone and attachment effect family"
-      ,"mtg_commander_sim/effect_runtime/damage_life_and_turns.py": "registry-owned damage, life, and turn effect family"
+      ,"mtg_commander_sim/effect_runtime/damage_life_and_turns.py": "registry-owned damage and turn effect family"
+      ,"mtg_commander_sim/effect_runtime/damage_modifiers.py": "registry-owned prevention-shield and redirection creation family"
       ,"mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py": "registry-owned object, stack, and token effect family"
       ,"mtg_commander_sim/rules/casting/commit.py": "typed spell-casting transaction owner behind CommanderEngine"
       ,"mtg_commander_sim/rules/activation/commit.py": "typed activated-ability transaction owner behind CommanderEngine"
@@ -119,6 +125,10 @@
       ,"mtg_commander_sim/semantic_choices/engine_coordination.py": "actor-scoped immutable choice fact materialization and routing"
       ,"mtg_commander_sim/mana_undo.py": "read-only reversible mana-window validation with commits delegated to canonical owners"
       ,"mtg_commander_sim/object_query.py": "typed read-only object selection predicates"
+      ,"mtg_commander_sim/damage_prevention_aftermath.py": "typed prevention-aftermath planner delegating mutation to canonical life and counter owners"
+      ,"mtg_commander_sim/mana_mode_effects.py": "typed mana-mode side-effect coordinator delegating to canonical damage, life, and zone owners"
+      ,"mtg_commander_sim/mana_payment_continuations.py": "atomic mana-payment suspension coordinator"
+      ,"mtg_commander_sim/effect_runtime/life_effects.py": "registry-owned life-effect planner delegating mutation to the canonical life owner"
       ,"mtg_commander_sim/rules/action_catalog.py": "read-only executable action-offer catalog"
       ,"mtg_commander_sim/rules/casting/costs.py": "read-only casting-cost proposal query"
       ,"mtg_commander_sim/rules/casting/proposal.py": "read-only immutable casting proposal query"

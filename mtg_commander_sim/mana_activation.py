@@ -10,6 +10,7 @@ from .mana_undo import (
     push_mana_undo,
     ReversibleManaActivation,
 )
+from .mana_mode_effects import apply_mana_mode_effects
 from .util import normalize_mana_bundle
 from .tap_state import set_permanent_tapped
 
@@ -28,14 +29,6 @@ class ManaActivationHost(Protocol):
     def _mana_modes_for_ability(
         self, seat: str, source: Any, ability: ActivatedAbility
     ) -> tuple[ManaMode, ...]: ...
-
-    def _apply_mana_mode_side_effects(
-        self,
-        seat: str,
-        effects: Sequence[Mapping[str, Any]],
-        *,
-        source: Any,
-    ) -> None: ...
 
     def _compiled_mana_restriction(self, restriction: str) -> str | None: ...
 
@@ -103,8 +96,19 @@ def complete_mana_activation(
         None,
     )
     if selected_mode is not None:
-        host._apply_mana_mode_side_effects(
-            seat, selected_mode.side_effects, source=source
+        apply_mana_mode_effects(
+            host,
+            seat,
+            selected_mode.side_effects,
+            source=source,
+            payment_id=str(response.get("_mana_payment_id") or "") or None,
+            replacement_selections_by_event=(
+                response.get("_mana_replacement_selections")
+                if isinstance(
+                    response.get("_mana_replacement_selections"), Mapping
+                )
+                else None
+            ),
         )
     restriction = host._compiled_mana_restriction(ability.effect_text)
     if restriction:
@@ -289,6 +293,9 @@ def _commit_plan_mode(
     mode: ManaMode,
     bundle: Mapping[str, int],
     restriction: str | None,
+    *,
+    payment_id: str | None,
+    replacement_selections_by_event: Mapping[str, Any] | None,
 ) -> None:
     cost_effects = tuple(
         effect for effect in mode.side_effects
@@ -306,12 +313,26 @@ def _commit_plan_mode(
         reason="mana ability cost",
         log=False,
     )
-    host._apply_mana_mode_side_effects(seat, cost_effects, source=card)
+    apply_mana_mode_effects(
+        host,
+        seat,
+        cost_effects,
+        source=card,
+        payment_id=payment_id,
+        replacement_selections_by_event=replacement_selections_by_event,
+    )
     for color, amount in bundle.items():
         host.state.players[seat].mana_pool[color] += amount
     if restriction:
         host._add_restricted_mana(seat, restriction, bundle)
-    host._apply_mana_mode_side_effects(seat, result_effects, source=card)
+    apply_mana_mode_effects(
+        host,
+        seat,
+        result_effects,
+        source=card,
+        payment_id=payment_id,
+        replacement_selections_by_event=replacement_selections_by_event,
+    )
     public_bundle = {key: value for key, value in bundle.items() if value}
     host._log(
         seat,
@@ -330,6 +351,8 @@ def complete_mana_plan_activations(
     activations: Sequence[Mapping[str, Any]],
     *,
     spend_context: str | None = None,
+    payment_id: str | None = None,
+    replacement_selections_by_event: Mapping[str, Any] | None = None,
 ) -> None:
     """Validate and commit an authoritative derived mana-payment plan."""
 
@@ -361,7 +384,16 @@ def complete_mana_plan_activations(
             allow_conditional=bool(activation.get("allow_conditional")),
             spend_context=spend_context,
         )
-        _commit_plan_mode(host, seat, card, mode, bundle, restriction)
+        _commit_plan_mode(
+            host,
+            seat,
+            card,
+            mode,
+            bundle,
+            restriction,
+            payment_id=payment_id,
+            replacement_selections_by_event=replacement_selections_by_event,
+        )
 
 
 __all__ = [

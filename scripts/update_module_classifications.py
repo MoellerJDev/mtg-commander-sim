@@ -45,7 +45,7 @@ def _hash(value: Any) -> str:
     return hashlib.sha256(stable_json(value).encode("utf-8")).hexdigest()
 
 
-def _layer(relative: str) -> str:
+def _layer(relative: str, protected_rules_modules: set[str]) -> str:
     if relative.startswith("server/") or relative == "simctl.py":
         return "transport"
     if relative in {
@@ -81,6 +81,8 @@ def _layer(relative: str) -> str:
         "mtg_commander_sim/profiles.py",
     }:
         return "adapter"
+    if relative in protected_rules_modules:
+        return "rules"
     if relative.startswith(
         (
             "mtg_commander_sim/replacement/",
@@ -159,6 +161,8 @@ def _owner(relative: str, layer: str) -> str:
     if relative in {
         "mtg_commander_sim/mana.py",
         "mtg_commander_sim/mana_activation.py",
+        "mtg_commander_sim/mana_mode_effects.py",
+        "mtg_commander_sim/mana_payment_continuations.py",
         "mtg_commander_sim/mana_undo.py",
     }:
         return "mana_rules"
@@ -171,6 +175,8 @@ def _owner(relative: str, layer: str) -> str:
     if relative in {
         "mtg_commander_sim/damage.py",
         "mtg_commander_sim/damage_prevention.py",
+        "mtg_commander_sim/damage_prevention_aftermath.py",
+        "mtg_commander_sim/damage_prevention_creation.py",
         "mtg_commander_sim/damage_results.py",
     }:
         return "damage"
@@ -193,11 +199,12 @@ def build_classifications() -> dict[str, Any]:
     policy = json.loads(POLICY.read_text(encoding="utf-8"))
     mutable = set(policy["game_state_access"]["mutable_owners"])
     readers = set(policy["game_state_access"]["read_only_consumers"])
+    protected_rules_modules = set(policy["protected_rules_modules"])
     model = policy["game_state_access"]["model_definition"]
     exemptions = tuple(source["scope"]["card_specificity_exempt_prefixes"])
     modules = []
     for relative in sorted(analyses):
-        layer = _layer(relative)
+        layer = _layer(relative, protected_rules_modules)
         allowed_dependencies = list(ALLOWED_DEPENDENCIES[layer])
         if relative in {
             "mtg_commander_sim/commander.py",
@@ -260,10 +267,12 @@ def build_classifications() -> dict[str, Any]:
                             "commander.py",
                             "damage.py",
                             "damage_modifier_state.py",
-                            "damage_prevention.py",
+                            "damage_prevention",
                             "damage_results.py",
                             "life_state.py",
                             "mana_activation.py",
+                            "mana_mode_effects.py",
+                            "mana_payment_continuations.py",
                             "mana_undo.py",
                             "object_query.py",
                             "replacement/",

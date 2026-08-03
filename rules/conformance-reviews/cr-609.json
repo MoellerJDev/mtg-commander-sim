@@ -276,10 +276,14 @@
       "reviewed": true,
       "implementation_components": [
         "mechanics/contracts/effects.json",
-        "replacement_effects.ReplacementEffect"
+        "semantic_choices.damage_prevention.ChooseDamageSourceHandler",
+        "damage_prevention_creation.pin_chosen_damage_source",
+        "damage_modifier_state.ChosenDamageSource"
       ],
       "executable_test_ids": [
-        "tests.test_rules_primitives.EffectRuleTests.test_contract_traces_every_cr_609_rule"
+        "tests.test_damage_prevention_creation.DamageSourceChoiceHandlerTests.test_source_choice_exposes_only_rule_legal_public_candidates",
+        "tests.test_damage_prevention_creation.DamageSourceChoiceHandlerTests.test_source_choice_revalidates_and_prepends_resolved_shield",
+        "tests.test_semantic_choice_characterization.SemanticChoiceCharacterizationTests.test_damage_source_choice_is_seat_scoped_pinned_and_replays"
       ],
       "required_scenarios": [
         "positive",
@@ -288,15 +292,20 @@
         "hidden_information",
         "replay"
       ],
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "hidden_information",
+        "replay"
+      ],
       "blockers": [
-        "there is no authoritative candidate generator for every permitted damage-source category",
-        "source choice is not captured at effect creation with zone-change continuity",
+        "specifically referred objects outside the ordinary public battlefield, stack, and face-up command-zone candidate set are not represented",
         "permanent-spell to resolved-permanent identity continuity is not represented for source shields",
-        "last-known objects and command-zone choices are not integrated with the effect registry"
+        "the candidate registry does not yet include every waiting replacement, prevention, or delayed-trigger reference allowed by this rule"
       ],
       "notes": [
-        "The primitive consumes already-supplied source properties and does not pretend to implement legal source selection."
+        "The source is chosen through a seat-scoped legal candidate set when the prevention effect is created, revalidated before completion, and pinned to stable physical identity with an exact replayable LKI snapshot.",
+        "The full candidate categories and permanent-spell continuity listed by CR 609.7a remain fail-closed."
       ]
     },
     {
@@ -310,14 +319,16 @@
         "damage_prevention.ChosenDamageSource",
         "damage.DamageSourceSnapshot",
         "replacement.applicability.condition_matches",
-        "damage_prevention.plan_damage_modifier_commit"
+        "damage_prevention.plan_damage_modifier_commit",
+        "damage_prevention_creation.pin_chosen_damage_source"
       ],
       "executable_test_ids": [
         "tests.test_rules_primitives.EffectRuleTests.test_source_property_mismatch_does_not_consume_shield",
         "tests.test_rules_primitives.EffectRuleTests.test_unknown_source_predicate_fails_closed",
         "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_chosen_source_identity_and_property_mismatch_preserve_shield",
         "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_next_instance_shield_survives_nonmatching_then_is_used",
-        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_unpreventable_damage_does_not_consume_shield"
+        "tests.test_damage_prevention_shields.DamagePreventionShieldTests.test_unpreventable_damage_does_not_consume_shield",
+        "tests.test_semantic_choice_characterization.SemanticChoiceCharacterizationTests.test_damage_source_choice_is_seat_scoped_pinned_and_replays"
       ],
       "required_scenarios": [
         "positive",
@@ -332,11 +343,10 @@
         "replay"
       ],
       "blockers": [
-        "generic source-choice candidate generation is not implemented",
         "chosen-source predicates do not yet cover every characteristic that Oracle text can require"
       ],
       "notes": [
-        "Represented damage derives a current or last-known source snapshot, persistent chosen-source shields use stable physical identity, and a mismatch or unpreventable event preserves that shield for a later matching event.",
+        "Represented damage derives a current or last-known source snapshot, a seat-scoped choice creates a persistent stable-identity shield, and a color/type mismatch or unpreventable event preserves that shield for a later matching event.",
         "Unknown condition predicates still fail closed instead of accidentally matching."
       ]
     },

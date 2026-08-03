@@ -31,3 +31,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0014 — typed semantic choice and effect ownership](0014-typed-semantic-choice-and-effect-ownership.md)
 - [ADR 0015 — durable damage-modifier ownership](0015-durable-damage-modifier-ownership.md)
 - [ADR 0016 — typed casting and activation proposals](0016-typed-casting-activation-proposals.md)
+- [ADR 0017 — prevention continuations and aftermath ownership](0017-prevention-continuations-and-aftermath.md)

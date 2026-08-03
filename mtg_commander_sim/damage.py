@@ -27,6 +27,14 @@ from .damage_prevention import (
     plan_damage_modifier_commit,
     validate_damage_modifier_plan,
 )
+from .damage_prevention_aftermath import (
+    commit_prevention_aftermath,
+    PreparedPreventionAftermath,
+    prepare_prevention_aftermath,
+    PreventionAftermathError,
+    PreventionAftermathEvent,
+    validate_prevention_aftermath,
+)
 from .replacement_effects import (
     AffectedObject,
     ReplaceableEvent,
@@ -419,6 +427,7 @@ class PreparedDamageBatch:
     result_effects: tuple[ReplacementEffect, ...] = ()
     result_journal: tuple[ReplacementSelection, ...] = ()
     modifier_plan: DamageModifierCommitPlan = DamageModifierCommitPlan()
+    aftermath: PreparedPreventionAftermath = PreparedPreventionAftermath()
 
 
 @dataclass(frozen=True, slots=True)
@@ -452,6 +461,7 @@ class DamageBatchResult:
     lifelink_gains: tuple[DamageLifeGain, ...]
     result_events: tuple[DamageResultRecord, ...] = ()
     prevention_events: tuple[PreventionAppliedEvent, ...] = ()
+    aftermath_events: tuple[PreventionAftermathEvent, ...] = ()
 
     @property
     def dealt_amount(self) -> int:
@@ -860,6 +870,7 @@ def prepare_damage_batch(
             events,
             effects=result_effects,
             selections=tuple(selections[consumed:]),
+            require_all_selections=False,
         )
     except (DamageResultError, ReplacementEffectError) as exc:
         raise DamageError(str(exc)) from exc
@@ -881,6 +892,19 @@ def prepare_damage_batch(
         modifier_plan = plan_damage_modifier_commit(host, events)
     except DamageModifierError as exc:
         raise DamageError(str(exc)) from exc
+    aftermath_selection_offset = (
+        consumed + result_progress.consumed_selections
+    )
+    try:
+        aftermath = prepare_prevention_aftermath(
+            host,
+            events,
+            selections=tuple(selections[aftermath_selection_offset:]),
+            sources=sources,
+            source_zones=source_zones,
+        )
+    except PreventionAftermathError as exc:
+        raise DamageError(str(exc)) from exc
     return PreparedDamageBatch(
         events=events,
         effects=tuple(effects),
@@ -889,6 +913,7 @@ def prepare_damage_batch(
         result_effects=tuple(result_effects),
         result_journal=result_progress.journal,
         modifier_plan=modifier_plan,
+        aftermath=aftermath,
     )
 
 
@@ -1273,6 +1298,10 @@ def commit_prepared_damage_batch(
         validate_damage_modifier_plan(host, prepared.modifier_plan)
     except DamageModifierError as exc:
         raise DamageError(str(exc)) from exc
+    try:
+        validate_prevention_aftermath(host, prepared.aftermath)
+    except PreventionAftermathError as exc:
+        raise DamageError(str(exc)) from exc
     prevention_events = _prevention_applied_events(prepared)
 
     commander_updates: list[tuple[str, str, int]] = []
@@ -1309,8 +1338,14 @@ def commit_prepared_damage_batch(
         commit_damage_modifier_plan(host, prepared.modifier_plan)
     except DamageModifierError as exc:
         raise DamageError(str(exc)) from exc
+    try:
+        aftermath = commit_prevention_aftermath(host, prepared.aftermath)
+    except PreventionAftermathError as exc:
+        raise DamageError(str(exc)) from exc
     changed_players = list(committed.changed_players)
     changed_objects = list(committed.changed_objects)
+    changed_players.extend(aftermath.changed_players)
+    changed_objects.extend(aftermath.changed_objects)
     for target, commander_key, amount in commander_updates:
         received = host.state.players[target].commander_damage_received
         received[commander_key] = received.get(commander_key, 0) + amount
@@ -1350,6 +1385,7 @@ def commit_prepared_damage_batch(
         lifelink_gains=tuple(gains),
         result_events=committed.records,
         prevention_events=prevention_events,
+        aftermath_events=aftermath.events,
     )
 
 
@@ -1391,6 +1427,26 @@ def resolve_damage_batch(
         )
 
     trigger_batch: list[Any] = []
+    for aftermath in result.aftermath_events:
+        host._log(
+            None,
+            "damage.prevention.aftermath",
+            f"{aftermath.source_id} applied a prevention aftermath.",
+            aftermath.semantic_context(),
+            importance=2,
+            changed_players=(
+                [aftermath.subject]
+                if aftermath.kind == "gain_life"
+                else []
+            ),
+        )
+        host._dispatch_semantic_event(
+            "damage.prevention.aftermath",
+            aftermath.semantic_context(),
+            sources=trigger_sources,
+            source_zones=trigger_source_zones,
+            trigger_batch=trigger_batch,
+        )
     for prevention in result.prevention_events:
         host._dispatch_semantic_event(
             "damage.prevented",

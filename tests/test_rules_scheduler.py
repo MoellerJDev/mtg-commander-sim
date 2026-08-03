@@ -62,11 +62,11 @@ class RulesSchedulerTests(unittest.TestCase):
             for subsystem in self.queue["subsystems"]
             for rule in subsystem["rules"]
         ]
-        self.assertEqual(3050, len(queued))
+        self.assertEqual(3049, len(queued))
         self.assertEqual(len(queued), len(set(queued)))
         self.assertEqual(expected, set(queued))
         self.assertEqual(
-            351,
+            350,
             self.queue["summary"]["reviewed_behavioral_blocked"],
         )
         self.assertEqual(
@@ -137,7 +137,6 @@ class RulesSchedulerTests(unittest.TestCase):
                 "615.2",
                 "615.5",
                 "615.9",
-                "615.11",
                 "616.1",
             },
             set(selected["rule_ids"]),

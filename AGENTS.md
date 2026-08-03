@@ -69,44 +69,34 @@ to domain-owned rules modules. Follow the ordered phases recorded in the active
 project objective; do not use a feature request as permission for a big-bang
 rewrite.
 
-- Phase 1 runtime trust/default-deny governance is integrated on certified
-  `main`. Its explicit evidence, trust/closure, component
-  binding, performance, and architecture ratchets are current policy.
-- Certified `main` integrates the typed `tap`, `untap`, and
-  `untap_all_creatures`
-  migration through a dedicated semantic family and the classified
-  `tap_state.py` mutation port, with a negative engine delta and exact
-  rollback/replay/mutation evidence.
-- Keep those capabilities tested and blocked until complete tap/untap
-  prohibitions, universal replacement participation, and effective-characteristic
-  closure are represented. Do not widen this slice into broad Oracle grammar,
-  a new card family, or numerical Comprehensive Rules traversal.
-- Certified `main` integrates the dependency-ordered behavioral-rules
-  scheduler. Its generated queue must conservatively cover
-  every reviewed blocked behavioral rule and every unclassified nonpassing
-  rule exactly once. Select subsystem batches from that queue; do not resume
-  numerical rule traversal.
-- Certified `main` includes immutable nested replacement-event trees,
-  seat-scoped replayable replacement ordering, and focused token/zone mutation
-  boundaries. CR 616.1g is promoted only for represented containing-before-
-  contained behavior; broader CR 614/616 remains blocked.
-- Certified `main` includes the focused counter-placement prepare/commit owner
-  for represented effect-generated permanent counters and fixed integral
-  quantity-replacement descriptors. Entry counters, player counters, costs,
-  rule actions, and continuation-sensitive legacy producers remain blocked.
+- Certified `main` is CPython 3.12-only and integrates shared immutable casting
+  and activation proposal builders. Action advertisement and command execution
+  must continue to rebuild the same legality/cost proposal; do not return
+  casting, activation, or payment legality to `CommanderEngine`.
+- Certified `main` includes default-deny runtime trust, the dependency-ordered
+  behavioral-rules scheduler, immutable nested replacement trees, typed
+  replacement operations, physical commander designation identity, canonical
+  damage results, durable prevention/redirection state, and focused token,
+  zone, counter, life, and damage mutation owners. Generated reports, rather
+  than branch chronology, are the source of current counts.
 - The active bounded slice is
-  `rules/damage-results-and-replacement-hardening`. It gives designated physical
-  commanders stable identities, deep-freezes and strictly replays nested
-  replacement trees, lowers runtime descriptors to a closed typed operation
-  vocabulary, routes represented life and counters through typed precommit
-  owners, and generically compiles the implemented damage-result keywords plus
-  closed static quantity/prevention wording. Keep persistent shields,
-  redirection, non-damage transformations, unresolved dynamic Toxic values,
-  remaining result-replacement families, and resumable replacement choices
-  during mana payment explicitly blocked.
-- The generated post-merge queue selects the dependency-ready damage-prevention
-  shields and redirection family. Begin it only after this branch is certified,
-  merged, and cleaned up from fresh `main`.
+  `rules/damage-prevention-continuations-and-aftermath`. It adds typed dynamic,
+  divided, and per-object shield creation; seat-scoped public source selection
+  with physical/LKI pinning; transactional immediately-after life and
+  permanent-counter results; same-chooser simultaneous-event ordering; and
+  exact rollback and continuation for replacement choices discovered during
+  mana payment. It also extracts damage-modifier creation and general effect
+  life changes into narrow runtime families and widens generic Oracle/
+  CardProgram lowering.
+- Keep complete CR 609.7a source categories, permanent-spell continuity,
+  broader source-property predicates, general replacement-capable life gain,
+  remaining prevention-aftermath wording, partial/attached redirection,
+  non-damage transformations, unresolved dynamic Toxic values, and broader CR
+  614/615/616 closure explicitly blocked until their complete dependencies and
+  evidence exist.
+- After this slice is certified and merged, regenerate the dependency queue
+  from fresh `main` and select the next coherent rules family. Do not resume
+  numerical rule traversal or open a status-only follow-up.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic

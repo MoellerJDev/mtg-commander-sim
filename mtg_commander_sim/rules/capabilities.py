@@ -632,6 +632,21 @@ def capability_dependencies_for_node(
 
     mechanics = {str(value).casefold() for value in mechanic_ids}
     operations = {str(effect.get("op") or "") for effect in effects}
+
+    def nested_operations(value: Any) -> set[str]:
+        found: set[str] = set()
+        if isinstance(value, Mapping):
+            operation = value.get("op")
+            if isinstance(operation, str) and operation:
+                found.add(operation)
+            for child in value.values():
+                found.update(nested_operations(child))
+        elif isinstance(value, (list, tuple)):
+            for child in value:
+                found.update(nested_operations(child))
+        return found
+
+    all_operations = nested_operations(effects)
     dependencies: set[str] = set()
     if not effects and target_schema is None:
         for mechanic in mechanics:
@@ -662,7 +677,7 @@ def capability_dependencies_for_node(
             dependencies.add("damage.result.multitype_permanent")
         dependencies.add("target.public.player_or_damageable_permanent")
     if (
-        operations == {"create_damage_prevention_shield"}
+        "create_damage_prevention_shield" in all_operations
         and "cr-615-prevention-effects" in mechanics
     ):
         dependencies.add("damage.prevention.persistent_amount")
@@ -677,6 +692,8 @@ def capability_dependencies_for_node(
                 dependencies.add(
                     "target.public.player_or_damageable_permanent"
                 )
+        if "cr-122-counters" in mechanics:
+            dependencies.add("counter.placement.quantity_replacement")
     return tuple(sorted(dependencies))
 
 
@@ -695,6 +712,8 @@ def capability_covered_mechanics(
         covered.add("cr-115-targets")
     if "damage.prevention.persistent_amount" in supplied:
         covered.add("cr-615-prevention-effects")
+    if "counter.placement.quantity_replacement" in supplied:
+        covered.add("cr-122-counters")
     if "damage.amount.positive" in supplied and supplied.intersection(
         {"damage.result.player_life", "damage.result.multitype_permanent"}
     ):

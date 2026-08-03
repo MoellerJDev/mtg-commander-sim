@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "6ccb1e26bf5f7f2c33784f8d09481050b338525e",
+  "baseline_commit": "f39730fd6dab90af9667748e3d7d0e15fc713f8b",
   "card_named_helpers": [
     {
       "file": "mtg_commander_sim/engine.py",
@@ -37,12 +37,6 @@
       "kind": "mutating_call:extend",
       "state_path": "combat.damage_assignments",
       "symbol": "_apply_combat_assignments"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "augmented_assignment",
-      "state_path": "players.life",
-      "symbol": "_apply_mana_mode_side_effects"
     },
     {
       "file": "mtg_commander_sim/engine.py",
@@ -814,12 +808,12 @@
     }
   ],
   "direct_game_state_writes_by_file": {
-    "mtg_commander_sim/engine.py": 125,
+    "mtg_commander_sim/engine.py": 124,
     "mtg_commander_sim/permissions.py": 8,
     "mtg_commander_sim/record.py": 11
   },
   "engine": {
-    "logical_lines": 14788,
+    "logical_lines": 14761,
     "methods": [
       {
         "kind": "method",
@@ -919,11 +913,6 @@
       {
         "kind": "method",
         "name": "_apply_layered_characteristic_annotations",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
-        "name": "_apply_mana_mode_side_effects",
         "visibility": "private"
       },
       {
@@ -2427,12 +2416,12 @@
         "visibility": "public"
       }
     ],
-    "physical_lines": 15603
+    "physical_lines": 15574
   },
   "exception_binding": {
-    "adr": "docs/adr/0016-typed-casting-activation-proposals.md",
-    "allowance_fingerprint": "bcb711f9e590575446d327c96196bcc9c7e46ac7eaa066853fa4c95995782fa5",
-    "exception_id": "ARCH-EXC-0004"
+    "adr": "docs/adr/0017-prevention-continuations-and-aftermath.md",
+    "allowance_fingerprint": "69303e88597a7b2c6c6ed3331f979d2b73467ff715bf0edd698b26fecdf4abc8",
+    "exception_id": "ARCH-EXC-0005"
   },
   "legacy_card_specific_operations": [
     "daretti_exchange",
@@ -2447,7 +2436,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 6099,
+      "line": 6070,
       "oracle_id": "dae4815e-9025-4993-ab46-52a3f1a7219e",
       "symbol": "_semantic_key_for_ability",
       "value": "dae4815e-9025-4993-ab46-52a3f1a7219e:granted:damage"
@@ -2707,7 +2696,7 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 14788
+      "logical_lines": 14761
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
@@ -2743,6 +2732,7 @@
     "choose_card_name",
     "choose_cards_apnap",
     "choose_creature_type",
+    "choose_damage_source",
     "choose_mana",
     "choose_modified_token_copy",
     "choose_objects",

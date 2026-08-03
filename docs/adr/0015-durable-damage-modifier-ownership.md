@@ -68,6 +68,8 @@ and prepared commits reject changed state before mutation.
 ## Removal condition
 
 The compatibility facade may disappear after all internal consumers import the
-decomposed replacement and damage owners directly. The capability remains
-partial until chosen-source selection, divided shields, prevention aftermath,
-and mana-payment continuations are implemented and certified.
+decomposed replacement and damage owners directly. ADR 0017 adds represented
+chosen-source selection, divided shields, prevention aftermath, and mana-
+payment continuations; the capability remains partial until complete CR 609.7a
+source continuity, general replacement-capable aftermath life gain, remaining
+aftermath forms, and broader prevention/redirection grammar are certified.

@@ -38,7 +38,9 @@
         "replacement_decisions.issue_replacement_order_choice",
         "counter_placement.prepare_counter_placements",
         "damage.prepare_damage_batch",
-        "replacement_decisions.issue_combat_damage_replacement_choice"
+        "replacement_decisions.issue_combat_damage_replacement_choice",
+        "replacement.ordering.next_batch_replacement_choice",
+        "mana_payment_continuations.execute_mana_choice_capable_priority_action"
       ],
       "executable_test_ids": [
         "tests.test_replacement_event_tree.ReplacementAffectedSubjectTests.test_affected_object_controller_chooses_before_owner",
@@ -53,7 +55,10 @@
         "tests.test_damage_replacement_model.DamageReplacementModelTests.test_furnace_and_daunting_order_changes_final_damage",
         "tests.test_damage_replacement_multiplayer.DamageReplacementMultiplayerTests.test_four_player_damage_replacement_choices_follow_apnap",
         "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_combat_replacement_choice_is_seat_scoped_and_precommit",
-        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly"
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly",
+        "tests.test_replacement_event_ordering.ReplacementEventOrderingTests.test_chooser_selects_which_simultaneous_event_uses_next_instance_shield",
+        "tests.test_replacement_event_ordering.ReplacementEventOrderingTests.test_combat_event_order_is_seat_scoped_and_replays_exactly",
+        "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_mana_ability_damage_choice_resumes_exact_activation"
       ],
       "required_scenarios": [
         "positive",
@@ -70,13 +75,13 @@
         "replay"
       ],
       "blockers": [
-        "generic engine choice packets are wired only into represented token-creation, semantic zone-change, effect-generated permanent-counter, and ordinary combat/semantic damage producers",
-        "multiple simultaneous events affecting the same chooser do not yet expose an explicit event-order choice when that order could matter"
+        "generic engine choice packets are wired only into represented token-creation, semantic zone-change, effect-generated permanent-counter, ordinary combat/semantic damage, and mana-payment damage producers"
       ],
       "notes": [
         "Affected-player and affected-object facts are captured before mutation, and simultaneous different-seat choices traverse APNAP order.",
         "Seat packets expose only visible option labels and IDs; authoritative batch IDs, event paths, payloads, and prior journals remain in the continuation.",
-        "The represented engine producers suspend and replay exact choices, including competing quantity replacements and prevention for ordinary damage, but universal producer coverage remains incomplete."
+        "The chooser can explicitly order simultaneous same-chooser events when a finite or next-instance effect makes event order material.",
+        "The represented engine producers suspend and replay exact choices, including replacement choices discovered during mana payment, but universal producer coverage remains incomplete."
       ]
     },
     {
