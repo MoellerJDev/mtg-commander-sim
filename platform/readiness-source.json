@@ -635,9 +635,9 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "d4264eb9897d2c3881b8f2cc76bcbaf5f45d679f",
-    "certified_head_sha": "d4264eb9897d2c3881b8f2cc76bcbaf5f45d679f",
-    "generation_timestamp": "2026-08-04T13:56:26Z"
+    "feature_head_sha": "1c7550233c5d2f74166f9fc0b67ed49d3d8705da",
+    "certified_head_sha": "1c7550233c5d2f74166f9fc0b67ed49d3d8705da",
+    "generation_timestamp": "2026-08-04T14:25:38Z"
   },
   "snapshots": {
     "comprehensive_rules": {
