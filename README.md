@@ -392,6 +392,11 @@ generated documentation fixtures with bearer capabilities redacted. See
   permission query rather than direct library-to-hand mutation; individual
   events and queued instructions are iteratively drained, including exact
   suspension/resume for legally large draw counts
+- Oracle IR v28 closed the fixed-anthem grammar over the pinned CR 205.3m
+  creature-subtype registry and made reviewed/generated handler equivalence
+  depend on the complete canonical object query and modifier. Unsupported
+  qualities remain material residuals; the corpus counts deliberately fall
+  when the earlier promotion was semantically false.
 - CR 613 layer/sublayer, timestamp, dependency, and cycle-audit primitives,
   now used for common copy/type/keyword annotations
 - CR 616 replacement/prevention priority and affected-player-choice

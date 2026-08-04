@@ -45,7 +45,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v27"
+ORACLE_COMPILER_VERSION = "oracle-ir-v28"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _DREDGE_MECHANIC = "dred" + "ge"
 

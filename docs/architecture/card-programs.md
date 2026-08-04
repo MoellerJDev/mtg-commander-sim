@@ -79,6 +79,12 @@ fail closed.
   `zone.draw.library_to_hand`. Capability closure therefore depends on the
   same replacement, privacy, replay, multiplayer, and killed-mutation evidence
   as the canonical draw owner rather than on syntax alone.
+- Oracle IR v28 makes runtime-handler equivalence a canonical semantic
+  comparison rather than a hand-selected field comparison. The full typed
+  object query and modifier must match before reviewed semantics can suppress
+  a generated handler. Its closed CR 205.3m subtype grammar intentionally
+  demotes prior false positives instead of preserving a misleading trust
+  count.
 
 ## Execution ownership
 

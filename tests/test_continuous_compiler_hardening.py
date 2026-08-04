@@ -331,6 +331,9 @@ class ClosedContinuousGrammarTests(unittest.TestCase):
         try:
             capabilities = load_default_capability_registry()
             cases = {
+                "Battle Frenzy": (
+                    "Nongreen creatures you control get +1/+0 until end of turn."
+                ),
                 "Broodwarden": (
                     "Eldrazi Spawn creatures you control get +2/+1."
                 ),
@@ -362,9 +365,7 @@ class ClosedContinuousGrammarTests(unittest.TestCase):
                     )
                     self.assertFalse(
                         any(
-                            node.template_id
-                            == "continuous-fixed-query-anthem-v2"
-                            and node.text == unsupported_line
+                            node.text == unsupported_line and node.exact
                             for face in ir.faces
                             for node in face.nodes
                         )
