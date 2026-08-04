@@ -332,6 +332,13 @@ class SemanticPrivateSearchTests(unittest.TestCase):
             "battlefield",
             controller="B",
         )
+        base_stats = {
+            creature.ref: (
+                engine._numeric_stat(creature.object_id, "power"),
+                engine._numeric_stat(creature.object_id, "toughness"),
+            )
+            for creature in (bloodghast, fodder)
+        }
         spell, _ = self._begin_spell(
             session,
             seat="B",
@@ -351,10 +358,19 @@ class SemanticPrivateSearchTests(unittest.TestCase):
         self.assertEqual("battlefield", bloodghast.zone)
         self.assertEqual("graveyard", spell.zone)
         for creature in (bloodghast, fodder):
-            until_end = creature.annotations["until_end_of_turn"]
-            self.assertEqual(10, until_end["power"])
-            self.assertEqual(10, until_end["toughness"])
-            self.assertIn("Haste", creature.temporary_keywords)
+            base_power, base_toughness = base_stats[creature.ref]
+            self.assertEqual(
+                base_power + 10,
+                engine._numeric_stat(creature.object_id, "power"),
+            )
+            self.assertEqual(
+                base_toughness + 10,
+                engine._numeric_stat(creature.object_id, "toughness"),
+            )
+            self.assertIn(
+                "Haste",
+                engine._effective_card_data(creature)["keywords"],
+            )
 
     def test_chord_reshape_and_whir_x_search_filters(self):
         scenarios = [

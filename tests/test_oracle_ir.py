@@ -526,6 +526,50 @@ class OracleIRTests(unittest.TestCase):
             stateful_ir.faces[0].nodes[0].template_id,
         )
 
+    def test_exact_generated_node_can_be_trusted_with_separate_reviewed_residual(self):
+        record = self.db.lookup("Stridehangar Automaton")
+        capabilities = load_default_capability_registry()
+        ir = compile_oracle_card(
+            record,
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+        self.assertEqual("partial", ir.status)
+        generated_node = ir.faces[0].nodes[0]
+        self.assertTrue(generated_node.exact)
+        self.assertEqual(
+            "continuous-fixed-query-anthem-v2",
+            generated_node.template_id,
+        )
+
+        programs = generated_programs(
+            self.db,
+            record,
+            trust_level="trusted",
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+        self.assertEqual(1, len(programs))
+        self.assertEqual("trusted", programs[0].trust_level)
+        self.assertFalse(programs[0].requires_arbiter)
+
+        reviewed_registry = SemanticRegistry()
+        generation = register_generated_programs(
+            self.db,
+            reviewed_registry,
+            (record,),
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+            promote_exact_runtime_handlers=True,
+        )
+        self.assertEqual(0, generation["programs_generated"])
+        self.assertEqual(1, generation["programs_skipped_existing"])
+        self.assertIsNone(
+            reviewed_registry.get(
+                f"{record.oracle_id}:static:front:n1"
+            )
+        )
+
     def test_dynamic_and_aftermath_prevention_compile_generically(self):
         base = self.db.lookup("Lightning Bolt")
         for template_id, oracle_text, expected in (

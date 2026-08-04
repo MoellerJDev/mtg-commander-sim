@@ -166,7 +166,10 @@ class ExactDeckInteractionFamilyTests(unittest.TestCase):
         self.assertTrue(result.ok, result.summary)
         self.assertEqual("graveyard", land.zone)
         self.resolve_top(engine)
-        self.assertIn("Shroud", creature.temporary_keywords)
+        self.assertIn(
+            "Shroud",
+            engine._effective_card_data(creature)["keywords"],
+        )
 
     def test_senseis_divining_top_reorders_and_draws_to_library(self):
         session = self.make_session(833)

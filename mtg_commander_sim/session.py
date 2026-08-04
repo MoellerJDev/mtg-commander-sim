@@ -1021,7 +1021,15 @@ class CommanderSession:
         semantics_path: str | Path | None = None,
     ) -> "CommanderSession":
         directory = Path(directory)
-        semantics = SemanticRegistry(semantics_path)
+        persisted_semantics = directory / "semantics.json"
+        semantics = SemanticRegistry(
+            semantics_path
+            or (
+                persisted_semantics
+                if persisted_semantics.exists()
+                else None
+            )
+        )
         if (directory / "manifest.json").exists():
             from .record import load_record_state, read_initial_checkpoint
 
