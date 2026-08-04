@@ -104,7 +104,12 @@ async function submitFormAction(page: Page, actionId: string, forceChoice = fals
   await submitOpenChoice(page, forceChoice);
 }
 
-async function submitMaybeFormAction(page: Page, actionId: string, clickTimeout = 15_000) {
+async function submitMaybeFormAction(
+  page: Page,
+  actionId: string,
+  clickTimeout = 15_000,
+  forceChoice = false,
+) {
   const revision = await viewRevision(page);
   const dialog = page.getByTestId("choice-dialog");
   await page.getByTestId(`action-${actionId}`).click({ timeout: clickTimeout });
@@ -112,7 +117,7 @@ async function submitMaybeFormAction(page: Page, actionId: string, clickTimeout 
     .poll(async () => (await dialog.isVisible()) || (await viewRevision(page)) > revision)
     .toBe(true);
   if (await dialog.isVisible()) {
-    await submitOpenChoice(page);
+    await submitOpenChoice(page, forceChoice);
   }
 }
 
@@ -979,8 +984,8 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       // late-game confirmations because Chromium can otherwise wait forever
       // for a perfectly stable synthetic click point while the fixed dock is
       // remeasured after more than one hundred persisted commands.
-      await submitFormAction(page, "pass", true);
-      await submitFormAction(page, "pass", true);
+      await submitMaybeFormAction(page, "pass", 15_000, true);
+      await submitMaybeFormAction(page, "pass", 15_000, true);
     }
 
     const requiredMana: Array<"Swamp" | "Forest"> = [

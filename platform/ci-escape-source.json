@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "observed_at": "2026-08-04T20:10:48Z",
+  "observed_at": "2026-08-04T21:53:07Z",
   "repository": "MoellerJDev/mtg-commander-sim",
   "escapes": [
     {
@@ -76,6 +76,18 @@
       "regressions": ["four-player.spec.ts"],
       "impact_edge_status": "not_applicable",
       "resolution": "The production auto-pass race was fixed and the public full-browser gate remains authoritative for headless journeys."
+    },
+    {
+      "id": "ci-20260804-06",
+      "run_id": 30952062448,
+      "head_sha": "816a9be3a03aecc0183bc3a5c74287d2958ef9ab",
+      "category": "flaky_test",
+      "deterministic": false,
+      "summary": "The natural-winner browser journey assumed a late pass always opened a form even though the same legal pass can complete as an immediate priority action.",
+      "failed_surfaces": ["browser-full"],
+      "regressions": ["four-player.spec.ts: natural commander-damage winner"],
+      "impact_edge_status": "not_applicable",
+      "resolution": "The journey now accepts either a form-backed choice or an authoritative immediate-action revision while preserving forced form submission when needed."
     }
   ],
   "recent_pull_requests": [

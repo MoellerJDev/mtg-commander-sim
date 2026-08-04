@@ -90,6 +90,22 @@
       "resolution": "The production auto-pass race was fixed and the public full-browser gate remains authoritative for headless journeys.",
       "run_id": 30940720886,
       "summary": "A selected-action modal raced auto-pass and two long browser journeys timed out."
+    },
+    {
+      "category": "flaky_test",
+      "deterministic": false,
+      "failed_surfaces": [
+        "browser-full"
+      ],
+      "head_sha": "816a9be3a03aecc0183bc3a5c74287d2958ef9ab",
+      "id": "ci-20260804-06",
+      "impact_edge_status": "not_applicable",
+      "regressions": [
+        "four-player.spec.ts: natural commander-damage winner"
+      ],
+      "resolution": "The journey now accepts either a form-backed choice or an authoritative immediate-action revision while preserving forced form submission when needed.",
+      "run_id": 30952062448,
+      "summary": "The natural-winner browser journey assumed a late pass always opened a form even though the same legal pass can complete as an immediate priority action."
     }
   ],
   "known_flaky_tests": [],
@@ -97,7 +113,7 @@
     "average_pushes_per_merged_pr": "GitHub retained workflow runs are not equivalent to pushes, so push counts remain null rather than estimated.",
     "slot_b_inactive_seconds": "GitHub Actions does not observe local worktree activity, so this value remains null rather than estimated."
   },
-  "observed_at": "2026-08-04T20:10:48Z",
+  "observed_at": "2026-08-04T21:53:07Z",
   "recent_pull_requests": [
     {
       "critical_path_seconds": 1488.0,
@@ -142,20 +158,21 @@
   ],
   "repository": "MoellerJDev/mtg-commander-sim",
   "schema_version": 1,
-  "source_fingerprint": "951e4eea930548d4ec4bacae3135af661b403a6b7f3882c8f2840652566ffdb5",
+  "source_fingerprint": "d0288d76a314ee9cce6316af30ddf1b93cc038a65434866da4cba98d98d4a4f0",
   "summary": {
     "average_critical_path_seconds": 840.5,
     "average_pushes_per_merged_pr": null,
     "average_slot_b_inactive_seconds": null,
     "category_counts": {
       "browser_integration": 1,
+      "flaky_test": 1,
       "generated_artifact_drift": 1,
       "missing_affected_test": 1,
       "source_correctness": 2
     },
     "current_missing_impact_edges": [],
     "deterministic_escape_count": 5,
-    "escape_count": 5,
+    "escape_count": 6,
     "exact_head_pass_rate": 1.0,
     "known_flaky_test_count": 0,
     "repeated_failure_categories": [
