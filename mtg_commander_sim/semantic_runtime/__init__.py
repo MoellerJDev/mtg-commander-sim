@@ -64,6 +64,15 @@ from .damage_results import (
     DamageResultReplacementSourceContext,
     default_damage_result_replacement_registry,
 )
+from .draw_replacements import (
+    collect_draw_replacement_effects,
+    default_draw_replacement_registry,
+    DREDGE_HANDLER_ID,
+    DredgeReplacementHandler,
+    DredgeReplacementNode,
+    DrawReplacementRegistry,
+    DrawReplacementSourceContext,
+)
 from .life_replacements import (
     collect_life_change_replacement_effects,
     default_life_replacement_registry,
@@ -225,6 +234,11 @@ __all__ = [
     "DamageResultLifeFloorNode",
     "DamageResultReplacementRegistry",
     "DamageResultReplacementSourceContext",
+    "DREDGE_HANDLER_ID",
+    "DredgeReplacementHandler",
+    "DredgeReplacementNode",
+    "DrawReplacementRegistry",
+    "DrawReplacementSourceContext",
     "FixedPowerToughnessAnthemHandler",
     "FixedPowerToughnessAnthemNode",
     "FixedQueryPowerToughnessAnthemHandler",
@@ -284,6 +298,7 @@ __all__ = [
     "default_counter_placement_replacement_registry",
     "default_damage_replacement_registry",
     "default_damage_result_replacement_registry",
+    "default_draw_replacement_registry",
     "default_life_replacement_registry",
     "default_semantic_handler_registry",
     "default_semantic_interpreter",
@@ -298,6 +313,7 @@ __all__ = [
     "collect_counter_placement_replacement_effects",
     "collect_damage_replacement_effects",
     "collect_damage_result_replacement_effects",
+    "collect_draw_replacement_effects",
     "collect_life_change_replacement_effects",
     "log_applied_zone_replacements",
     "prepare_zone_change_replacement",

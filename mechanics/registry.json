@@ -1,5 +1,5 @@
 {
-  "contract_count": 62,
+  "contract_count": 63,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -46,7 +46,7 @@
     {
       "mechanic_id": "cr-501-beginning-phase",
       "path": "mechanics/contracts/beginning-phase.json",
-      "sha256": "4f392afbbaf2cac9ee61aef9aa1e9a03ac692c42eed609a952d49dd8234292dd",
+      "sha256": "9b5763c947e84b4106ef49c8f16b4a283a78c48f7fb6499f6eff12b03095bd75",
       "version": 1
     },
     {
@@ -136,7 +136,13 @@
     {
       "mechanic_id": "cr-504-draw-step",
       "path": "mechanics/contracts/draw-step.json",
-      "sha256": "48c692a22bb7e6e6e3c79689318c4ff404466d5c1c71a52cbf0f5a4c7fbf6564",
+      "sha256": "7e3fcfb69ccc81e2be35c2a8b9f7267d9cf30d4d11be038df733600fbf3dae88",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cr-121-drawing-a-card",
+      "path": "mechanics/contracts/drawing-a-card.json",
+      "sha256": "52ef7dae74e987672fcf826901b4eb31d594d92f7564b7f45475e655085efa79",
       "version": 1
     },
     {
@@ -208,7 +214,7 @@
     {
       "mechanic_id": "cr-603-handling-triggered-abilities",
       "path": "mechanics/contracts/handling-triggered-abilities.json",
-      "sha256": "b9b95f2b2f7b40520633d4a61c5639a143af8bd066654f030b951ea2b50fe556",
+      "sha256": "7a32cbba88a369f965a170dc56110a0f76015af9fa3dd20cbc6e3958421d8428",
       "version": 4
     },
     {
@@ -5652,17 +5658,39 @@
     },
     {
       "category": "game_concepts",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/drawing-a-card.json",
+      "contract_sha256": "52ef7dae74e987672fcf826901b4eb31d594d92f7564b7f45475e655085efa79",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.drawing immutable model, transaction, continuation, and coordinator facade",
+      "implementation_version": "draw-transaction-v1",
       "kind": "rules_section",
+      "known_blockers": [
+        "draw-limit prohibitions and optional draw/cost legality are not compiled",
+        "shared-team turns are not supported",
+        "additional actions on a drawn card and result-generated draw ordering are incomplete",
+        "draws during casting or activation are not held face down",
+        "optional reveal-as-drawn choices are not implemented",
+        "the complete draw replacement and prevention Oracle grammar is not compiled"
+      ],
       "mechanic_id": "cr-121-drawing-a-card",
       "official_name": "Drawing a Card",
       "rule_references": [
         "121"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_contract_traces_every_cr_121_rule",
+        "test_ordinary_draw_commits_zone_history_and_events_once",
+        "test_instruction_count_is_replaced_before_individual_draws",
+        "test_draw_each_player_pauses_and_resumes_in_apnap_order_for_dredge",
+        "test_prevented_empty_draw_does_not_mark_empty_library_loss",
+        "test_empty_library_loss_is_checked_before_draw_step_priority",
+        "test_library_to_hand_move_is_not_a_draw",
+        "test_veil_conditional_draw_pauses_for_dredge_before_permissions",
+        "test_draw_replacement_choice_is_visible_only_to_affected_seat",
+        "test_first_turn_profile_modifier_and_exact_replay"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -6604,7 +6632,7 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/beginning-phase.json",
-      "contract_sha256": "4f392afbbaf2cac9ee61aef9aa1e9a03ac692c42eed609a952d49dd8234292dd",
+      "contract_sha256": "9b5763c947e84b4106ef49c8f16b4a283a78c48f7fb6499f6eff12b03095bd75",
       "contract_version": 1,
       "coverage_status": "partial",
       "dependencies": [],
@@ -6614,7 +6642,7 @@
       "known_blockers": [
         "complete untap behavior remains bounded by the partial CR 502 contract",
         "complete upkeep behavior remains bounded by the partial CR 503 contract",
-        "the CR 504 draw-step family has not been integrated into this dependency stack",
+        "the CR 504 draw step uses the canonical represented draw transaction, but complete skip/replacement and trigger grammar remains partial",
         "generic extra-phase, extra-step, and skipped-phase or skipped-step scheduling under CR 500.8-11 is not implemented",
         "complete replacement, trigger, state-action, APNAP, hidden-information, multiplayer, and replay interactions inside the component steps remain incomplete"
       ],
@@ -6703,11 +6731,11 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/draw-step.json",
-      "contract_sha256": "48c692a22bb7e6e6e3c79689318c4ff404466d5c1c71a52cbf0f5a4c7fbf6564",
+      "contract_sha256": "7e3fcfb69ccc81e2be35c2a8b9f7267d9cf30d4d11be038df733600fbf3dae88",
       "contract_version": 1,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "CommanderEngine draw, draw-replacement, draw-step trigger batching, state stabilization, priority, format-profile, and replay paths",
+      "implementation_component": "drawing coordinator and transaction plus CommanderEngine draw-step trigger batching, state stabilization, priority, format-profile, and replay facade",
       "implementation_version": "draw-step-v1",
       "kind": "rules_section",
       "known_blockers": [
@@ -7299,7 +7327,7 @@
     {
       "category": "spells_abilities_effects",
       "contract_path": "mechanics/contracts/handling-triggered-abilities.json",
-      "contract_sha256": "b9b95f2b2f7b40520633d4a61c5639a143af8bd066654f030b951ea2b50fe556",
+      "contract_sha256": "7a32cbba88a369f965a170dc56110a0f76015af9fa3dd20cbc6e3958421d8428",
       "contract_version": 4,
       "coverage_status": "partial",
       "dependencies": [],
@@ -7331,7 +7359,7 @@
         "test_derives_exact_enter_and_death_events",
         "test_source_that_leaves_still_observes_simultaneous_death",
         "test_private_library_to_hand_move_produces_no_public_trigger_event",
-        "test_generated_enters_trigger_reaches_arbiter_fail_closed",
+        "test_generated_enters_draw_trigger_resolves_without_arbiter",
         "test_self_dies_trigger_uses_last_known_controller",
         "test_padeem_hexproof_and_intervening_upkeep_condition",
         "test_simultaneous_semantic_triggers_use_apnap_and_owner_order",

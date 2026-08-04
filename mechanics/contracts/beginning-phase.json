@@ -123,7 +123,7 @@
   "known_blockers": [
     "complete untap behavior remains bounded by the partial CR 502 contract",
     "complete upkeep behavior remains bounded by the partial CR 503 contract",
-    "the CR 504 draw-step family has not been integrated into this dependency stack",
+    "the CR 504 draw step uses the canonical represented draw transaction, but complete skip/replacement and trigger grammar remains partial",
     "generic extra-phase, extra-step, and skipped-phase or skipped-step scheduling under CR 500.8-11 is not implemented",
     "complete replacement, trigger, state-action, APNAP, hidden-information, multiplayer, and replay interactions inside the component steps remain incomplete"
   ],

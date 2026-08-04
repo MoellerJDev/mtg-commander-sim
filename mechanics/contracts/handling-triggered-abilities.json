@@ -203,7 +203,7 @@
     "test_derives_exact_enter_and_death_events",
     "test_source_that_leaves_still_observes_simultaneous_death",
     "test_private_library_to_hand_move_produces_no_public_trigger_event",
-    "test_generated_enters_trigger_reaches_arbiter_fail_closed",
+    "test_generated_enters_draw_trigger_resolves_without_arbiter",
     "test_self_dies_trigger_uses_last_known_controller",
     "test_padeem_hexproof_and_intervening_upkeep_condition",
     "test_simultaneous_semantic_triggers_use_apnap_and_owner_order",

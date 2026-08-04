@@ -191,6 +191,17 @@ partial or attached redirection, prohibition, draw, entry, and remaining
 life/counter/result families remain blocked unless a separately trusted
 component covers their exact shape.
 
+`replacement.draw.dredge.v1` is the first generic draw-replacement runtime
+component. It is discovered only from a trusted graveyard CardProgram, pins
+the source's physical identity and zone-change counter, checks the current
+library threshold, and lowers to a typed `DredgeDraw` operation. Turn,
+resolution, conditional, optional-follow-up, and APNAP draw producers all use
+the same immutable draw coordinator and private affected-player continuation.
+The ordinary intent executor rejects draw intents that have not been routed
+through that owner. Per-turn draw limits, draw-as-cost legality, shared-team
+ordering, reveal-as-drawn, and uncompiled replacement wording remain
+fail-closed.
+
 Continuous runtime descriptors use the same trust and replay boundary. The
 fixed-query anthem component lowers a strict `ObjectQuerySpec` plus layer-7c
 power/toughness operations; it has no card-name knowledge and no mutable state

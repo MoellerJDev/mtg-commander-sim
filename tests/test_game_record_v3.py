@@ -116,7 +116,7 @@ class GameRecordV3Tests(unittest.TestCase):
                 ),
             )
             inventory = manifest["runtime_trust"]["runtime_component_inventory"]
-            self.assertEqual(12, len(inventory))
+            self.assertEqual(13, len(inventory))
             self.assertIn(
                 "continuous.basic_land_type.add_all_lands.v1",
                 {item["handler_id"] for item in inventory},
@@ -124,7 +124,7 @@ class GameRecordV3Tests(unittest.TestCase):
             semantic_inventory = manifest["runtime_trust"][
                 "semantic_handler_inventory"
             ]
-            self.assertEqual(83, len(semantic_inventory))
+            self.assertEqual(84, len(semantic_inventory))
             self.assertIn(
                 "effect.zone-attachment.reanimate_attached_creature_aura.v1",
                 {item["handler_id"] for item in semantic_inventory},

@@ -127,7 +127,7 @@
     "test_first_turn_profile_modifier_and_exact_replay"
   ],
   "implementation": {
-    "component": "CommanderEngine draw, draw-replacement, draw-step trigger batching, state stabilization, priority, format-profile, and replay paths",
+    "component": "drawing coordinator and transaction plus CommanderEngine draw-step trigger batching, state stabilization, priority, format-profile, and replay facade",
     "version": "draw-step-v1"
   },
   "known_blockers": [

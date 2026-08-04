@@ -2,7 +2,7 @@
 title: "Typed semantic handlers"
 status: "current"
 authoritative_source: "mtg_commander_sim/semantic_runtime and platform/architecture-policy.json"
-verified: "2026-08-02"
+verified: "2026-08-04"
 audience: "rules, compiler, and replay contributors"
 maintenance: "hand-maintained"
 ---
@@ -44,13 +44,15 @@ Draw and monarch lowering remains in `generic.py`. The permanent tap-state
 schema and lowering live in `tap_state_handlers.py`, which prevents a
 catch-all handler module from becoming another semantic monolith.
 
-The executor is intentionally small. Direct effect application sends
-`DrawCardsIntent` and `BecomeMonarchIntent` through
-`CommanderEngine.draw` and `CommanderEngine.become_monarch`. Ordinary
-CardProgram stack resolution also lowers registered nodes through this same
-handler registry. Draw intents then enter the engine's replacement-aware draw
-sequence so represented draw replacements and private draw continuations keep
-their existing behavior.
+The executor is intentionally small. It sends `BecomeMonarchIntent` through
+the existing canonical owner, but rejects every `DrawCardsIntent` unless the
+caller first converts it into a replacement-aware draw-resolution request.
+Turn entry, direct effect application, CardProgram stack resolution,
+conditional semantic choices, optional follow-up effects, and APNAP batches
+then converge on `mtg_commander_sim.drawing`. Its immutable model,
+continuation, coordinator, and commit modules apply represented replacements
+one draw at a time and preserve private choice and replay behavior without
+giving the handler mutable state.
 
 Tap-state intents use the focused `TapStateHost` port implemented by the
 authoritative engine and committed in `mtg_commander_sim/tap_state.py`. A

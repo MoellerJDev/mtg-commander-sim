@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "cda213c987cb8c5aef94af74bc74146f29bba0fb",
+  "baseline_commit": "e537d250850544003cbac2c3a00b9d8802de7d85",
   "card_named_helpers": [
     {
       "file": "mtg_commander_sim/engine.py",
@@ -61,18 +61,6 @@
       "kind": "assignment",
       "state_path": "combat.blockers_declared",
       "symbol": "_begin_blocker_decisions"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "mutating_call:pop",
-      "state_path": "pending_trigger_batches",
-      "symbol": "_begin_pending_semantic_trigger_batch"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "mutating_call:remove",
-      "state_path": "stack",
-      "symbol": "_begin_pending_trigger_target_selection"
     },
     {
       "file": "mtg_commander_sim/engine.py",
@@ -175,12 +163,6 @@
       "kind": "mutating_call:setdefault",
       "state_path": "combat.blockers",
       "symbol": "_complete_blockers"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "augmented_assignment",
-      "state_path": "players.life",
-      "symbol": "_complete_semantic_search"
     },
     {
       "file": "mtg_commander_sim/engine.py",
@@ -319,12 +301,6 @@
       "kind": "mutating_call:clear",
       "state_path": "stack",
       "symbol": "_end_turn_now"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "mutating_call:append",
-      "state_path": "pending_trigger_batches",
-      "symbol": "_enqueue_semantic_trigger_batch"
     },
     {
       "file": "mtg_commander_sim/engine.py",
@@ -496,12 +472,6 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "kind": "mutating_call:append",
-      "state_path": "stack",
-      "symbol": "_place_semantic_trigger_items"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
       "kind": "assignment",
       "state_path": "priority_passes",
       "symbol": "_play_land"
@@ -523,12 +493,6 @@
       "kind": "mutating_call:remove",
       "state_path": "stack",
       "symbol": "_prepare_storm_resolution"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "mutating_call:append",
-      "state_path": "stack",
-      "symbol": "_queue_delayed_trigger"
     },
     {
       "file": "mtg_commander_sim/engine.py",
@@ -571,18 +535,6 @@
       "kind": "mutating_call:pop",
       "state_path": "combat.attackers",
       "symbol": "_remove_object_from_combat"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "assignment",
-      "state_path": "cards.attached_to",
-      "symbol": "_reset_zone_change"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "augmented_assignment",
-      "state_path": "players.life",
-      "symbol": "_resolve_fetch_land"
     },
     {
       "file": "mtg_commander_sim/engine.py",
@@ -808,12 +760,12 @@
     }
   ],
   "direct_game_state_writes_by_file": {
-    "mtg_commander_sim/engine.py": 124,
+    "mtg_commander_sim/engine.py": 116,
     "mtg_commander_sim/permissions.py": 8,
     "mtg_commander_sim/record.py": 11
   },
   "engine": {
-    "logical_lines": 14761,
+    "logical_lines": 13308,
     "methods": [
       {
         "kind": "method",
@@ -1008,11 +960,6 @@
       {
         "kind": "method",
         "name": "_begin_draw_sequence",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
-        "name": "_begin_pending_semantic_trigger_batch",
         "visibility": "private"
       },
       {
@@ -1412,11 +1359,6 @@
       },
       {
         "kind": "method",
-        "name": "_dredge_candidates",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
         "name": "_effect_has_missing_target",
         "visibility": "private"
       },
@@ -1432,17 +1374,7 @@
       },
       {
         "kind": "method",
-        "name": "_enchant_target_schema",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
         "name": "_end_turn_now",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
-        "name": "_enqueue_semantic_trigger_batch",
         "visibility": "private"
       },
       {
@@ -1807,11 +1739,6 @@
       },
       {
         "kind": "method",
-        "name": "_place_semantic_trigger_items",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
         "name": "_planeswalker_for_attack_target",
         "visibility": "private"
       },
@@ -1863,11 +1790,6 @@
       {
         "kind": "method",
         "name": "_public_target_schema",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
-        "name": "_queue_delayed_trigger",
         "visibility": "private"
       },
       {
@@ -2053,11 +1975,6 @@
       {
         "kind": "method",
         "name": "_semantic_target_options",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
-        "name": "_semantic_trigger_groups",
         "visibility": "private"
       },
       {
@@ -2416,27 +2333,26 @@
         "visibility": "public"
       }
     ],
-    "physical_lines": 15574
+    "physical_lines": 14078
   },
   "exception_binding": {
-    "adr": "docs/adr/0017-prevention-continuations-and-aftermath.md",
-    "allowance_fingerprint": "69303e88597a7b2c6c6ed3331f979d2b73467ff715bf0edd698b26fecdf4abc8",
-    "exception_id": "ARCH-EXC-0005"
+    "adr": "docs/adr/0021-canonical-draw-transaction.md",
+    "allowance_fingerprint": "17422925bca1c4fc541554b603f649ef8ff9e2fa12a55aa8b6213712492f1339",
+    "exception_id": "ARCH-EXC-0006"
   },
   "legacy_card_specific_operations": [
     "daretti_exchange",
     "fomori_vault",
     "remora_tax",
     "springheart_landfall",
-    "sylvan_library_settle",
-    "veil_of_summer"
+    "sylvan_library_settle"
   ],
   "oracle_id_literals": [
     {
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 6070,
+      "line": 5264,
       "oracle_id": "dae4815e-9025-4993-ab46-52a3f1a7219e",
       "symbol": "_semantic_key_for_ability",
       "value": "dae4815e-9025-4993-ab46-52a3f1a7219e:granted:damage"
@@ -2535,11 +2451,6 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 279,
-      "symbol": "CommanderEngine._apply_layered_characteristic_annotations"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
       "logical_lines": 193,
       "symbol": "CommanderEngine._begin_siege_defeated_resolution"
     },
@@ -2565,33 +2476,23 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 203,
-      "symbol": "CommanderEngine._dispatch_semantic_event"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 226,
+      "logical_lines": 159,
       "symbol": "CommanderEngine._dispatch_zone_change_events"
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 327,
+      "logical_lines": 194,
       "symbol": "CommanderEngine._effective_card_data"
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 318,
+      "logical_lines": 285,
       "symbol": "CommanderEngine._enter_step"
     },
     {
       "file": "mtg_commander_sim/engine.py",
       "logical_lines": 315,
       "symbol": "CommanderEngine._prepare_stack_resolution"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 169,
-      "symbol": "CommanderEngine._semantic_event_condition_matches"
     },
     {
       "file": "mtg_commander_sim/engine.py",
@@ -2625,7 +2526,7 @@
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
-      "logical_lines": 609,
+      "logical_lines": 527,
       "symbol": "_compile_face"
     },
     {
@@ -2696,11 +2597,11 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 14761
+      "logical_lines": 13308
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
-      "logical_lines": 1713
+      "logical_lines": 1618
     },
     {
       "file": "mtg_commander_sim/record.py",
@@ -2772,6 +2673,7 @@
     "drain_opponent",
     "draw",
     "draw_each_player",
+    "draw_if_opponent_cast_colors_this_turn",
     "draw_optional_land",
     "end_turn",
     "energy",
@@ -2789,6 +2691,7 @@
     "grant_cast_permission",
     "grant_keyword_until_end_of_turn",
     "grant_play_without_mana_cost",
+    "grant_uncounterable_hexproof_from_colors_until_end",
     "life",
     "look_reorder_top",
     "look_top",

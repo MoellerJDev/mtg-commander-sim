@@ -21,6 +21,8 @@ from mtg_commander_sim.continuous_effects import (
 from mtg_commander_sim.continuous_effect_model import ContinuousObjectIdentity
 from mtg_commander_sim import damage as damage_module
 from mtg_commander_sim import damage_prevention as damage_prevention_module
+from mtg_commander_sim.drawing import transaction as draw_transaction_module
+from mtg_commander_sim.drawing import DrawEventRequest, prepare_draw_event
 from mtg_commander_sim.damage import DamageEvent
 from mtg_commander_sim.damage_prevention import (
     DamageModifierDuration,
@@ -500,6 +502,44 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         real_commit = life_effects.commit_life_change_batch
         self.assertEqual(44, resolved_life(real_commit))
         self.assertNotEqual(44, resolved_life(lambda *_args, **_kwargs: None))
+
+    def test_draw_commit_mutant_is_killed(self):
+        def assert_draw_commit() -> None:
+            session = make_session(
+                self.db,
+                self.mishra,
+                self.zimone,
+                players=2,
+                seed=121099,
+            )
+            keep_all(session)
+            engine = session.engine
+            player = engine.state.players["A"]
+            top = player.zones["library"][-1]
+            prepared = prepare_draw_event(
+                DrawEventRequest(
+                    event_id="draw:mutation",
+                    player="A",
+                    library_size=len(player.zones["library"]),
+                    reason="draw mutation",
+                ),
+                apnap_order=engine.apnap_order(),
+            )
+            result = draw_transaction_module.commit_prepared_draw(
+                engine, prepared
+            )
+            self.assertEqual((top,), result)
+            self.assertEqual("hand", engine.state.cards[top].zone)
+            self.assertEqual("draw mutation", player.draw_history[-1]["reason"])
+
+        assert_draw_commit()
+        with patch.object(
+            draw_transaction_module,
+            "_commit_ordinary_draw",
+            lambda *_args, **_kwargs: (),
+        ):
+            with self.assertRaises(AssertionError):
+                assert_draw_commit()
 
     def test_zone_trigger_detection_mutant_is_killed(self):
         value = ZoneChangeOccurrence(

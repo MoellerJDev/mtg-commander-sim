@@ -154,6 +154,7 @@
       ,"mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py": "registry-owned object, stack, and token effect family"
       ,"mtg_commander_sim/rules/casting/commit.py": "typed spell-casting transaction owner behind CommanderEngine"
       ,"mtg_commander_sim/rules/activation/commit.py": "typed activated-ability transaction owner behind CommanderEngine"
+      ,"mtg_commander_sim/drawing/transaction.py": "canonical replacement-aware draw mutation owner behind CommanderEngine"
     },
     "read_only_consumers": {
       "mtg_commander_sim/projection.py": "principal-scoped projection",
@@ -179,6 +180,8 @@
       ,"mtg_commander_sim/rules/activation/availability.py": "read-only activation payability query"
       ,"mtg_commander_sim/rules/activation/proposal.py": "read-only immutable activation proposal query"
       ,"mtg_commander_sim/rules/activation/query.py": "read-only activated-ability compiler query"
+      ,"mtg_commander_sim/drawing/coordinator.py": "replacement-aware draw orchestration delegating mutation to the canonical draw owner"
+      ,"mtg_commander_sim/semantic_runtime/draw_replacements.py": "read-only trusted draw-replacement discovery and lowering"
     },
     "model_definition": "mtg_commander_sim/model.py"
   },

@@ -103,6 +103,15 @@ from .damage import (
     resolve_damage_batch,
 )
 from .damage_prevention import expire_end_of_turn_damage_modifiers
+from .drawing import (
+    begin_draw_batch,
+    begin_draw_sequence,
+    commit_unreplaced_draws,
+    complete_draw_replacement,
+    DrawError,
+    QueuedDraw,
+    resume_after_draw,
+)
 from .delayed_triggers import materialize_delayed_trigger
 from .trigger_targeting import begin_pending_trigger_target_selection
 from .trigger_processing import (
@@ -219,6 +228,7 @@ from .semantic_runtime import (
     ProliferateIntent,
     default_semantic_interpreter,
     execute_intent_plan,
+    draw_resolution_batch,
     log_applied_zone_replacements,
     PreparedZoneChange,
     prepare_zone_change_replacement,
@@ -2260,126 +2270,25 @@ class CommanderEngine(
         self._log(seat, "library.shuffle", f"{seat} shuffled.", {"reason": reason, "count": count}, importance=0, changed_players=[seat])
 
     def draw(self, seat: str, count: int = 1, *, reason: str = "draw", private: bool = False) -> list[str]:
-        self._require_seat(seat)
-        player = self.state.players[seat]
-        drawn: list[str] = []
-        for _ in range(count):
-            if not player.zones["library"]:
-                player.attempted_empty_draw = True
-                break
-            object_id = player.zones["library"][-1]
-            card = self.move_card(
-                object_id,
-                "hand",
-                reason=reason,
-                log=False,
-            )
-            player.draw_history.append(
-                {"turn_sequence": self.state.turn_sequence, "card": card.printed_name, "object": card.ref, "reason": reason}
-            )
-            drawn.append(object_id)
-        if drawn:
-            draw_tracker = player.stats.setdefault("cards_drawn_by_turn", {})
-            turn_key = str(self.state.turn_sequence)
-            before_count = int(draw_tracker.get(turn_key, 0))
-            draw_tracker[turn_key] = before_count + len(drawn)
-            in_own_draw_step = bool(
-                self.state.active_player == seat
-                and (self.state.phase, self.state.step)
-                == ("beginning", "draw")
-            )
-            draw_step_tracker = player.stats.setdefault(
-                "cards_drawn_in_draw_step_by_turn", {}
-            )
-            before_draw_step_count = (
-                int(draw_step_tracker.get(turn_key, 0))
-                if in_own_draw_step
-                else 0
-            )
-            if in_own_draw_step:
-                draw_step_tracker[turn_key] = (
-                    before_draw_step_count + len(drawn)
-                )
-            self._log(
-                seat,
-                "card.draw",
-                f"{seat} drew {len(drawn)} card(s).",
-                {"count": len(drawn), "reason": reason},
-                changed_players=[seat],
-            )
-            self._log(
-                seat,
-                "card.draw.private",
-                f"{seat} drew {', '.join(self.state.cards[oid].printed_name for oid in drawn)}.",
-                {"objects": [self.state.cards[oid].ref for oid in drawn], "cards": [self.state.cards[oid].printed_name for oid in drawn], "reason": reason},
-                visibility=[seat, "analyst"],
-                importance=0 if private else 1,
-                changed_objects=drawn,
-                changed_players=[seat],
-            )
-            if before_count < 2 <= before_count + len(drawn):
-                self._dispatch_semantic_event(
-                    "card.second_draw",
-                    {
-                        "player": seat,
-                        "objects": [
-                            self.state.cards[object_id].ref
-                            for object_id in drawn
-                        ],
-                    },
-                )
-            for index, object_id in enumerate(drawn):
-                if in_own_draw_step and before_draw_step_count + index == 0:
-                    continue
-                self._dispatch_semantic_event(
-                    "card.draw_except_first_draw_step",
-                    {
-                        "player": seat,
-                        "object": self.state.cards[object_id].ref,
-                        "reason": reason,
-                        "in_own_draw_step": in_own_draw_step,
-                        "draw_step_ordinal": (
-                            before_draw_step_count + index + 1
-                            if in_own_draw_step
-                            else None
-                        ),
-                    },
-                )
-        return drawn
+        """Commit setup or explicitly unreplaced draws through CR 121 state.
 
-    def _dredge_candidates(self, seat: str) -> list[dict[str, Any]]:
-        candidates: list[dict[str, Any]] = []
-        library_size = len(self.state.players[seat].zones["library"])
-        for object_id in self.state.players[seat].zones["graveyard"]:
-            card = self.state.cards[object_id]
-            record = self.card_record(card)
-            if record is None:
-                continue
-            match = re.search(
-                r"\bDredge\s+(?P<count>\d+)\b",
-                record.oracle_text,
-                re.IGNORECASE,
-            )
-            if match is None:
-                continue
-            count = int(match.group("count"))
-            program = self.semantics.get(
-                f"{record.oracle_id}:replacement:dredge"
-            )
-            if (
-                count <= library_size
-                and program is not None
-                and self.semantic_program_is_current_trusted(program)
-                and "draw_replacement" in program.coverage
-            ):
-                candidates.append(
-                    {
-                        "id": card.ref,
-                        "name": card.printed_name,
-                        "mill": count,
-                    }
+        In-game instructions use ``_begin_draw_sequence`` so every individual
+        draw is offered to the replacement pipeline before this commit owner is
+        reached.  Opening hands and mulligan redraws are not game draws.
+        """
+
+        try:
+            return list(
+                commit_unreplaced_draws(
+                    self,
+                    seat,
+                    count,
+                    reason=reason,
+                    private=private,
                 )
-        return candidates
+            )
+        except DrawError as exc:
+            raise GameRuleError(str(exc)) from exc
 
     def _begin_draw_sequence(
         self,
@@ -2390,194 +2299,34 @@ class CommanderEngine(
         private: bool = False,
         continuation: Mapping[str, Any] | None = None,
     ) -> None:
-        """Perform draws one at a time, pausing for trusted replacements."""
+        """Resolve one draw instruction, then each draw independently."""
 
-        if count <= 0:
-            self._resume_after_draw(dict(continuation or {}))
-            return
-        candidates = self._dredge_candidates(seat)
-        if candidates:
-            self.permissions.issue(
-                kind="draw.replacement",
-                role="pilot",
-                actors=[seat],
-                allowed_actions=["choose"],
-                payload_by_actor={
-                    seat: {
-                        "reason": reason,
-                        "remaining_draws": count,
-                        "options": [
-                            {
-                                "id": "draw",
-                                "label": "Draw a card",
-                            },
-                            *[
-                                {
-                                    "id": candidate["id"],
-                                    "label": (
-                                        f"Dredge {candidate['mill']} — "
-                                        f"{candidate['name']}"
-                                    ),
-                                }
-                                for candidate in candidates
-                            ],
-                        ],
-                        "legal_actions": [
-                            {
-                                "id": "choose",
-                                "action": "choose",
-                                "choice_schema": {
-                                    "field": "choice",
-                                    "legal_values": [
-                                        "draw",
-                                        *[
-                                            candidate["id"]
-                                            for candidate in candidates
-                                        ],
-                                    ],
-                                },
-                            }
-                        ],
-                    }
-                },
-                continuation={
-                    "seat": seat,
-                    "remaining_draws": count,
-                    "reason": reason,
-                    "private": private,
-                    "candidates": candidates,
-                    "after": copy.deepcopy(dict(continuation or {})),
-                },
+        try:
+            begin_draw_sequence(
+                self,
+                seat,
+                count,
+                reason=reason,
+                private=private,
+                continuation=continuation,
             )
-            return
-        self.draw(seat, 1, reason=reason, private=private)
-        self._begin_draw_sequence(
-            seat,
-            count - 1,
-            reason=reason,
-            private=private,
-            continuation=continuation,
-        )
+        except DrawError as exc:
+            raise GameRuleError(str(exc)) from exc
 
     def _complete_draw_replacement(self, decision: Any) -> None:
-        seat = decision.actors[0]
-        response = decision.responses[seat]
-        continuation = dict(decision.continuation)
-        choice = str(
-            response.get("choice")
-            or response.get("card")
-            or response.get("option")
-            or ""
-        )
-        candidates = {
-            str(candidate["id"]): dict(candidate)
-            for candidate in continuation.get("candidates", [])
-        }
-        reason = str(continuation.get("reason") or "draw")
-        if choice == "draw":
-            self.draw(
-                seat,
-                1,
-                reason=reason,
-                private=bool(continuation.get("private", False)),
-            )
-        elif choice in candidates:
-            candidate = candidates[choice]
-            card = self._resolve_object(
-                seat,
-                choice,
-                zones={"graveyard"},
-                owned_only=True,
-            )
-            current = next(
-                (
-                    value
-                    for value in self._dredge_candidates(seat)
-                    if value["id"] == card.ref
-                ),
-                None,
-            )
-            if current is None or int(current["mill"]) != int(
-                candidate["mill"]
-            ):
-                raise GameRuleError(
-                    "The selected Dredge replacement is no longer available"
-                )
-            mill_count = int(candidate["mill"])
-            library = self.state.players[seat].zones["library"]
-            milled_ids = list(reversed(library[-mill_count:]))
-            self._move_cards_simultaneously(
-                [
-                    (object_id, "graveyard")
-                    for object_id in milled_ids
-                ],
-                reason=f"Dredge {mill_count}",
-                log=False,
-            )
-            self.move_card(
-                card.object_id,
-                "hand",
-                reason=f"Dredge {mill_count}",
-                semantic_events=True,
-            )
-            self._log(
-                seat,
-                "draw.replaced.dredge",
-                (
-                    f"{seat} replaced a draw by milling {mill_count} "
-                    f"and returning {card.ref}."
-                ),
-                {
-                    "player": seat,
-                    "card": card.ref,
-                    "mill": mill_count,
-                    "objects": [
-                        self.state.cards[object_id].ref
-                        for object_id in milled_ids
-                    ],
-                    "reason": reason,
-                },
-                visibility=[seat, "analyst"],
-                importance=2,
-                changed_objects=[card.object_id, *milled_ids],
-                changed_players=[seat],
-            )
-        else:
-            raise GameRuleError(
-                "Choose the normal draw or an available Dredge card"
-            )
-        self._begin_draw_sequence(
-            seat,
-            int(continuation.get("remaining_draws", 1)) - 1,
-            reason=reason,
-            private=bool(continuation.get("private", False)),
-            continuation=dict(continuation.get("after") or {}),
-        )
+        try:
+            complete_draw_replacement(self, decision)
+        except DrawError as exc:
+            raise GameRuleError(str(exc)) from exc
 
-    def _resume_after_draw(self, continuation: Mapping[str, Any]) -> None:
-        kind = str(continuation.get("kind") or "none")
-        if kind == "none":
-            return
-        if kind == "turn_draw":
-            self._complete_draw_step_entry(str(continuation["seat"]))
-            return
-        if kind == "semantic_resolution":
-            self._continue_resolution(
-                stack_ref=str(continuation["stack_ref"]),
-                effects=[
-                    dict(value)
-                    for value in continuation.get("effects", [])
-                ],
-                destination=continuation.get("destination"),
-                note=str(continuation.get("note") or ""),
-                instruction_pointer=int(
-                    continuation.get("instruction_pointer", 0)
-                ),
-            )
-            return
-        raise GameRuleError(
-            f"Unsupported post-draw continuation {kind!r}"
-        )
+    def _resume_after_draw(
+        self,
+        continuation: Mapping[str, Any],
+    ) -> None:
+        try:
+            resume_after_draw(self, continuation)
+        except DrawError as exc:
+            raise GameRuleError(str(exc)) from exc
 
     def _complete_draw_step_entry(self, active: str) -> None:
         """Put draw-step triggers on the stack only after the turn draw.
@@ -14138,6 +13887,45 @@ class CommanderEngine(
             raise GameRuleError(str(exc)) from exc
         if typed_plan is None:
             raise GameRuleError(f"Unsupported effect operation {op!r}")
+        draw_batch = draw_resolution_batch(typed_plan)
+        if draw_batch is not None:
+            before = {
+                seat: tuple(self.state.players[seat].zones["hand"])
+                for seat in {
+                    intent.player for intent in draw_batch.intents
+                }
+            }
+            try:
+                begin_draw_batch(
+                    self,
+                    tuple(
+                        QueuedDraw(
+                            player=intent.player,
+                            count=intent.count,
+                            reason=intent.reason,
+                            private=intent.private,
+                        )
+                        for intent in draw_batch.intents
+                    ),
+                )
+            except DrawError as exc:
+                raise GameRuleError(str(exc)) from exc
+            results = [
+                (
+                    intent.player,
+                    [
+                        object_id
+                        for object_id in self.state.players[
+                            intent.player
+                        ].zones["hand"]
+                        if object_id not in before[intent.player]
+                    ],
+                )
+                for intent in draw_batch.intents
+            ]
+            if typed_plan.result_shape == "by_player":
+                return dict(results)
+            return results[0][1] if results else []
         return execute_intent_plan(self, typed_plan)
 
     def create_emblem(

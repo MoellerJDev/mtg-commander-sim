@@ -78,6 +78,7 @@ class MechanicContractTests(unittest.TestCase):
                 "cr-616-interaction-of-replacement-and-or-prevention-effects",
                 "cr-111-tokens",
                 "cr-120-damage",
+                "cr-121-drawing-a-card",
                 "cr-122-counters",
                 "cr-210-defense",
                 "cr-310-battles",
@@ -1058,6 +1059,50 @@ class OracleIRTests(unittest.TestCase):
                 )
                 self.assertIsNotNone(node.capability_fingerprint)
 
+    def test_dredge_keyword_lowers_to_a_graveyard_draw_replacement(self):
+        record = self.db.lookup("Life from the Loam")
+        ir = compile_oracle_card(
+            record,
+            capability_registry=load_default_capability_registry(),
+            capability_profile="commander_review",
+        )
+        node = next(
+            node
+            for node in ir.faces[0].nodes
+            if node.template_id == "dredge-keyword-replacement-v1"
+        )
+
+        self.assertEqual(("dredge",), node.mechanics)
+        self.assertEqual("graveyard", node.active_zone)
+        self.assertEqual("draw", node.event)
+        self.assertEqual(
+            ("zone.draw.library_to_hand",), node.capability_dependencies
+        )
+        self.assertEqual(
+            {
+                "handler_id": "replacement.draw.dredge.v1",
+                "schema_version": 1,
+                "event": "draw",
+                "modification": {"mill_count": 3},
+            },
+            dict(node.handlers[0]),
+        )
+        programs = generated_programs(
+            self.db,
+            record,
+            capability_registry=load_default_capability_registry(),
+            capability_profile="commander_review",
+        )
+        program = next(
+            value
+            for value in programs
+            if value.handlers
+            and value.handlers[0]["handler_id"]
+            == "replacement.draw.dredge.v1"
+        )
+        self.assertEqual("graveyard", program.active_zone)
+        self.assertEqual("draw", program.event)
+
     def test_static_damage_replacement_wording_lowers_to_generic_handlers(self):
         capabilities = load_default_capability_registry()
         expectations = {
@@ -1299,7 +1344,7 @@ class OracleIRTests(unittest.TestCase):
             capability_profile="commander_review",
         )
         capability_node = capability_ir.faces[0].nodes[0]
-        self.assertNotEqual("exact", capability_ir.status)
+        self.assertEqual("exact", capability_ir.status)
         self.assertEqual(
             {
                 "trigger.event.normalized_zone_change",
@@ -1308,12 +1353,7 @@ class OracleIRTests(unittest.TestCase):
             },
             set(capability_node.capability_dependencies),
         )
-        self.assertTrue(
-            any(
-                "zone.draw.library_to_hand" in blocker
-                for blocker in capability_ir.material_residuals[0].blockers
-            )
-        )
+        self.assertEqual((), capability_ir.material_residuals)
         registry = SemanticRegistry(include_builtin_packs=False)
         generation = register_generated_programs(
             self.db,
@@ -1323,9 +1363,9 @@ class OracleIRTests(unittest.TestCase):
             capability_profile="commander_review",
             promote_exact_trigger_programs=True,
         )
-        self.assertEqual(0, generation["exact_programs_promoted"])
+        self.assertEqual(1, generation["exact_programs_promoted"])
         self.assertTrue(
-            all(program.trust_level == "provisional" for program in registry.programs())
+            all(program.trust_level == "trusted" for program in registry.programs())
         )
 
     def test_fixed_life_self_trigger_is_capability_closed_and_exact(self):
@@ -1646,7 +1686,7 @@ class OracleIRTests(unittest.TestCase):
             player.attempted_empty_draw = False
         return session
 
-    def test_generated_enters_trigger_reaches_arbiter_fail_closed(self):
+    def test_generated_enters_draw_trigger_resolves_without_arbiter(self):
         session = self._trigger_session()
         engine = session.engine
         visionary = next(
@@ -1654,6 +1694,12 @@ class OracleIRTests(unittest.TestCase):
             for card in engine.state.cards.values()
             if card.printed_name == "Elvish Visionary"
         )
+        draw_card = next(
+            card
+            for card in engine.state.cards.values()
+            if card.printed_name == "Moss Diamond"
+        )
+        engine.move_card(draw_card.object_id, "library", log=False)
         engine.move_card(
             visionary.object_id,
             "battlefield",
@@ -1668,10 +1714,17 @@ class OracleIRTests(unittest.TestCase):
             "permanent.enter",
             trigger.context["event"],
         )
+        hand_before = len(engine.state.players["A"].zones["hand"])
+        library_before = len(engine.state.players["A"].zones["library"])
         engine._prepare_stack_resolution()
+        self.assertIsNone(engine.state.pending_decision)
         self.assertEqual(
-            "arbiter.resolve",
-            engine.state.pending_decision.kind,
+            hand_before + 1,
+            len(engine.state.players["A"].zones["hand"]),
+        )
+        self.assertEqual(
+            library_before - 1,
+            len(engine.state.players["A"].zones["library"]),
         )
 
     def test_fixed_life_self_enter_trigger_replays_exactly(self):

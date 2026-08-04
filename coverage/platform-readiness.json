@@ -5,6 +5,7 @@
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
     "represented continuous effects distinguish locked resolution-created sets, live source-bound static membership, and exact relation-bound attached fixed characteristics; simple battlefield-object Auras now cast, revalidate, enter, attach, and fail closed generically, but player/graveyard/quality/subtype/compound/multiple Enchant grammar, Aura creatures, complete phasing, exotic Equip costs, dynamic attached values, player/rules/control-changing effects, broader durations, full dependencies/CDAs, and wider action/combat/copy invalidation remain incomplete; the structural benchmark still records latency observationally",
+    "represented draws now use one immutable replacement-aware transaction for turn, resolution, conditional, optional-follow-up, and APNAP producers, with generic Dredge and fixed draw CardPrograms; per-turn draw limits, optional-draw and draw-as-cost legality, shared-team turns, additional drawn-card actions, replacement-result ordering, casting-process face-down draws, reveal-as-drawn choices, and the broader replacement corpus remain incomplete",
     "a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence",
     "saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit",
     "the authoritative engine remains a measured oversized legacy module; casting and activation now use dedicated proposal and commit owners, while turn, effect, choice, and variant responsibilities still require incremental extraction",
@@ -16,14 +17,14 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "86244e9b764a848d40263dfa894cc743c2c1bf107e899cc5f12c1cff501a0cba",
+    "evaluated_source_tree_hash": "16342b7f01522046cf76f06802f60b845a031c4c57ad4692fa14b2e2ebaef473",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "attached_static_characteristics_and_fixed_equip",
+    "active_phase": "canonical_draw_transaction_replacement_and_trigger_closure",
     "tags": [
       {
         "commit": "4dc3feb625f824b9062e162808fd74b07e97c404",
@@ -139,13 +140,19 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "The active source tree adds immutable closed Enchant grammar for ordinary battlefield object types and you-control or opponent-controls relations; mandatory cast targets; resolution revalidation; reciprocal attachment on spell and nonspell entry; seat-scoped immutable entry continuations; live controller/protection legality; state-based graveyard movement; and CR 303.4g Aura-token preflight before authoritative identity allocation. Complex reviewed Auras retain source-pinned target contracts without card identity in the universal casting path. Oracle IR v25 declares attachment.aura.simple_object and promotes only cards whose other nodes are capability-closed. Focused positive, negative, rollback, multiplayer, privacy, exact replay, state-based-action, legacy Animate Dead compatibility, token-replacement, and killed-mutation tests pass. The Commander census improves exact and trusted CardPrograms from 590 to 661, capability-closed from 587 to 658, and material Oracle residuals from 59,076 to 57,982; representative newly exact cards include Sensory Deprivation, Unholy Strength, Holy Strength, Flight, and Weakness. Player, graveyard-card, compound, quality, subtype, Aura-creature, and complete phasing grammar remain fail-closed.",
+      "evidence": "Certified main through PR 85 adds immutable closed Enchant grammar for ordinary battlefield object types and you-control or opponent-controls relations; mandatory cast targets; resolution revalidation; reciprocal attachment on spell and nonspell entry; seat-scoped immutable entry continuations; live controller/protection legality; state-based graveyard movement; and CR 303.4g Aura-token preflight before authoritative identity allocation. Oracle IR v25 declares attachment.aura.simple_object and promotes only cards whose other nodes are capability-closed. Exact-head run 30892105590, merge commit 4bec8eb, and main-smoke run 30893570287 are green. The Commander census improved exact and trusted CardPrograms from 590 to 661, capability-closed from 587 to 658, and material Oracle residuals from 59,076 to 57,982; representative newly exact cards include Sensory Deprivation, Unholy Strength, Holy Strength, Flight, and Weakness. Player, graveyard-card, compound, quality, subtype, Aura-creature, and complete phasing grammar remain fail-closed.",
       "id": "simple_object_aura_targeting_and_entry",
       "name": "Simple-object Aura targeting, entry, and legality",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "The active source tree adds immutable draw instruction, event, result, continuation, and APNAP batch values; one narrow draw coordinator and mutation owner; strict typed prevention and Dredge replacement operations; private affected-player choices; empty-library result handling; and exact resumption of later draws or spell effects. Represented turn, resolving-effect, conditional, optional-follow-up, and table-wide producers use the same path, while ordinary intent execution fails closed on an unrouted draw. Oracle IR v26 lowers closed controller, target-player, target-opponent, each-player, and Dredge templates. Focused positive, negative, malformed-input, rollback, multiplayer, privacy, replay, historical-v3, and killed-mutation tests pass. The Commander census improves exact/trusted CardPrograms from 661 to 722, capability-closed from 658 to 719, partial from 14,698 to 14,644, unresolved from 16,264 to 16,257, and material Oracle residuals from 57,982 to 57,497. CommanderEngine falls from 13,525 to 13,308 logical lines and the printed-name heuristic from 678 to 661. Per-turn draw limits, optional-draw and draw-as-cost legality, shared-team turns, draw-result ordering, face-down casting-process draws, reveal-as-drawn choices, and broader replacement grammar remain fail-closed.",
+      "id": "canonical_draw_transaction_replacement_and_trigger_closure",
+      "name": "Canonical draw transaction, replacement, and fixed-program closure",
       "status": "implemented_in_active_source_tree_pending_certification"
     },
     {
-      "evidence": "The versioned 2026-06-19 corpus and reviewed CR 400-408, CR 500-514, focused CR 725, and focused CR 508-509/608 current-turn history slices are represented. Broader rules and Oracle completeness remain explicitly unclaimed.",
+      "evidence": "The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, and the reviewed partial CR 121 draw contract are represented. Broader rules and Oracle completeness remain explicitly unclaimed.",
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main"
@@ -157,7 +164,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Certify the simple-object Aura family, then implement the selected canonical draw transaction, replacement, and trigger closure batch for CR 121.1-121.3, extracting draw ownership from CommanderEngine and promoting fixed draw CardPrograms only after replacement, privacy, replay, multiplayer, and killed-mutation evidence pass.",
+  "next_task": "Certify the canonical draw transaction and fixed draw/Dredge compiler family, then implement the selected per-turn draw-limit prohibition and optional-draw legality boundary for CR 121.2a-121.3a, including partial mandatory multi-draw execution, choices made by another player, cost legality, replay, and generic fixed wording.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.12,<3.13",
@@ -168,7 +175,7 @@
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions",
     "authoritative_kernel": "implemented_partial",
     "browser_client": "implemented_card_inspector_public_zone_browser_resilient_card_scoped_click_drag_saved_manual_auto_mana_saved_auto_pass_full_control_tapped_orientation_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause",
-    "capability_evidence": "implemented_registry_v22_with_42_records_31_trusted_and_315_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
+    "capability_evidence": "implemented_registry_v24_with_42_records_32_trusted_and_318_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "durable_database": "implemented_sqlite_control_plane_plus_game_record_v3",
@@ -178,14 +185,14 @@
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "security": "guest_hash_csrf_origin_capability_and_projection_baseline",
-    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_twelve_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_player_counter_continuous_effect_attachment_and_aura_entry_owners",
+    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_thirteen_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_player_counter_continuous_effect_attachment_aura_entry_and_draw_owners",
     "single_writer_game_actor": "implemented_single_process",
     "transport_neutral_service": "implemented_strict_protocol_3"
   },
   "provenance": {
-    "certified_head_sha": "20e70bf42368f86baebf3d08bcfe286771ef5394",
-    "feature_head_sha": "20e70bf42368f86baebf3d08bcfe286771ef5394",
-    "generation_timestamp": "2026-08-04T04:15:47Z"
+    "certified_head_sha": "f45bfa8096371aa3498243f6916291b5cd7c4462",
+    "feature_head_sha": "f45bfa8096371aa3498243f6916291b5cd7c4462",
+    "generation_timestamp": "2026-08-04T09:30:12Z"
   },
   "repository": {
     "default_branch": "main",
@@ -194,11 +201,11 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 57982,
+      "material_residuals": 57497,
       "status_counts": {
-        "exact": 661,
-        "partial": 14698,
-        "unresolved": 16264
+        "exact": 722,
+        "partial": 14644,
+        "unresolved": 16257
       },
       "total": 31623
     },
@@ -207,28 +214,28 @@
     "manifest_present": true,
     "mechanics": {
       "status_counts": {
-        "partial": 61,
+        "partial": 62,
         "tested": 1,
-        "unclassified": 363
+        "unclassified": 362
       },
       "total": 425,
       "trusted": 0
     },
     "oracle": {
-      "material_residuals": 66413,
+      "material_residuals": 65909,
       "status_counts": {
-        "exact": 3320,
-        "partial": 16131,
-        "unresolved": 19034
+        "exact": 3381,
+        "partial": 16077,
+        "unresolved": 19027
       },
       "total": 38485
     },
     "rules": {
-      "blocked": 367,
-      "definition_only": 93,
-      "passing": 162,
+      "blocked": 376,
+      "definition_only": 95,
+      "passing": 169,
       "total": 3300,
-      "unreviewed": 2678
+      "unreviewed": 2660
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -253,19 +260,19 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4646,
+    "deterministic_cases_discovered": 4679,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
     "web_files": 28
   },
   "validation": {
-    "card_program_census": "oracle_ir_v25_full_38485_trusted_1080_capability_closed_1077_mixed_1_residual_35156_failed_2249_material_residual_66401; full_oracle_exact_3320_partial_16131_unresolved_19034_material_residual_66413; commander_legal_31623_trusted_661_capability_closed_658_mixed_1_residual_30961_failed_1_material_residual_57979; commander_oracle_exact_661_partial_14698_unresolved_16264_material_residual_57982; delta_from_pr84_full_exact_trusted_and_capability_closed_plus_73_material_oracle_residual_minus_1146_and_commander_exact_trusted_and_capability_closed_plus_71_material_oracle_residual_minus_1094; representative_new_exact_cards_include_sensory_deprivation_unholy_strength_holy_strength_flight_and_weakness; player_graveyard_quality_subtype_compound_multiple_enchant_aura_creature_and_complete_phasing_grammar_remain_residual",
+    "card_program_census": "oracle_ir_v26_full_38485_trusted_1141_capability_closed_1138_mixed_1_residual_35095_failed_2249_material_residual_65897; full_oracle_exact_3381_partial_16077_unresolved_19027_material_residual_65909; commander_legal_31623_trusted_722_capability_closed_719_mixed_1_residual_30900_failed_1_material_residual_57494; commander_oracle_exact_722_partial_14644_unresolved_16257_material_residual_57497; delta_from_pr85_full_and_commander_exact_trusted_and_capability_closed_plus_61_commander_partial_minus_54_unresolved_minus_7_material_oracle_residual_minus_485; representative_new_exact_cards_include_divination_concentrate_harmonize_counsel_of_the_soratami_and_jaces_ingenuity; dynamic_draw_counts_optional_draw_legality_draw_as_cost_shared_team_turns_reveal_as_drawn_and_broader_draw_replacement_grammar_remain_residual",
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30882797307,
+      "run_id": 30892105590,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30882797307"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -273,8 +280,8 @@
       "browser_typecheck_and_production_build": "pass_typecheck_and_focused_headless_journey",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "certified_main_through_pr84_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; active_source_focused_aura_cast_entry_token_state_action_compiler_replay_privacy_mutation_and_legacy_compatibility_checks_pass",
-      "focused_rules_tests": "pass_simple_aura_closed_grammar_mandatory_cast_target_resolution_revalidation_nonspell_entry_choice_no_legal_object_aura_token_preflight_live_control_protection_state_action_multiplayer_replay_privacy_rollback_and_implementation_mutation",
+      "deterministic_tests": "certified_main_through_pr85_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; active_source_focused_draw_model_transaction_continuation_producers_dredge_compiler_replay_privacy_mutation_and_legacy_v3_compatibility_checks_pass",
+      "focused_rules_tests": "pass_cr121_individual_and_count_instruction_events_ordinary_prevented_empty_and_dredge_results_turn_stack_conditional_optional_follow_up_apnap_private_choice_rollback_replay_and_implementation_mutation",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",

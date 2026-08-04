@@ -11,6 +11,22 @@ maintenance: "hand-maintained"
 
 ## Unreleased
 
+### Drawing-card rules family
+
+- Added an immutable CR 121 draw instruction/event transaction, private
+  replacement continuations, exact replay, empty-library attempt handling,
+  and APNAP multi-player draw batches. Represented turn, resolving-effect,
+  conditional, and optional-follow-up draws now share that owner.
+- Added strict typed draw-prevention and Dredge operations plus a generic
+  keyword-derived Dredge runtime component. Dredge checks its current library
+  threshold, pins the graveyard source incarnation, and completes before a
+  multiple-draw sequence or later spell instruction resumes.
+- Oracle IR v26 promotes closed fixed draw programs only through capability
+  closure. The Commander census moves exact/trusted programs from 661 to 722
+  and reduces material Oracle residuals from 57,982 to 57,497; draw limits,
+  draw-as-cost, shared-team ordering, reveal-as-drawn, and broader replacement
+  grammar remain explicit blockers.
+
 ### Combat rules family
 
 - Added one deterministic `DeclarationProblem` substrate for attacker and

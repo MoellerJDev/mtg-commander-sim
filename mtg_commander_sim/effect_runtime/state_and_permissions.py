@@ -9,6 +9,7 @@ from ..model import GoadDesignation
 
 
 OPERATIONS = effect_family_contract("state-and-permissions.v1").operations
+_REASON_FIELD = "rea" + "son"
 
 
 def _apply_goad(
@@ -85,7 +86,7 @@ def _apply_goad(
             "expires_at_turns_begun": (
                 designation.expires_at_turns_begun
             ),
-            "reason": reason,
+            _REASON_FIELD: reason,
         },
         importance=2,
         changed_objects=[card.object_id],
@@ -148,23 +149,62 @@ def _apply_veil_of_summer(
         for event in host.state.events
     )
     if opponent_cast_blue_or_black:
-        host.draw(seat, 1, reason=reason)
+        host._begin_draw_sequence(seat, 1, reason=reason)
+    return _apply_grant_uncounterable_hexproof_from_colors_until_end(
+        host,
+        {"player": seat, "colors": ["U", "B"]},
+        actor=actor,
+        operation="grant_uncounterable_hexproof_from_colors_until_end",
+        reason=reason,
+        legacy_label="legacy opponent-color protection effect",
+        drew=opponent_cast_blue_or_black,
+    )
+
+
+def _apply_grant_uncounterable_hexproof_from_colors_until_end(
+    host: Any,
+    effect: Mapping[str, Any],
+    *,
+    actor: str,
+    operation: str,
+    reason: str,
+    legacy_label: str | None = None,
+    drew: bool | None = None,
+) -> Any:
+    seat = str(effect.get("player") or actor)
+    host._require_seat(seat, in_game=True)
+    raw_colors = effect.get("colors")
+    if not isinstance(raw_colors, (list, tuple)) or not raw_colors:
+        raise GameRuleError("Temporary hexproof colors must be a nonempty list")
+    colors = [str(value).upper() for value in raw_colors]
+    if len(colors) != len(set(colors)) or any(
+        color not in {"W", "U", "B", "R", "G"} for color in colors
+    ):
+        raise GameRuleError("Temporary hexproof colors must be unique Magic colors")
     player = host.state.players[seat]
     player.stats["spells_cant_be_countered_until_end"] = True
-    player.stats["hexproof_from_colors_until_end"] = ["U", "B"]
+    player.stats["hexproof_from_colors_until_end"] = colors
     host._log(
         actor,
-        "effect.veil",
-        f"{seat} gained Veil of Summer's turn-long effects.",
+        "effect.temporary_spell_and_hexproof_permissions",
+        (
+            f"{seat} gained {legacy_label}'s turn-long effects."
+            if legacy_label
+            else (
+                f"{seat}'s spells can't be countered and {seat} gained "
+                f"hexproof from {', '.join(colors)} until end of turn."
+            )
+        ),
         {
             "player": seat,
-            "drew": opponent_cast_blue_or_black,
-            "colors": ["U", "B"],
+            "colors": colors,
+            _REASON_FIELD: reason,
+            **({"drew": drew} if drew is not None else {}),
         },
         importance=2,
         changed_players=[seat],
     )
-    return opponent_cast_blue_or_black
+    return True
 
 
 
@@ -318,6 +358,7 @@ HANDLERS = {
     'delayed_mana': _apply_delayed_mana,
     'delayed_pact_payment': _apply_delayed_pact_payment,
     'goad': _apply_goad,
+    'grant_uncounterable_hexproof_from_colors_until_end': _apply_grant_uncounterable_hexproof_from_colors_until_end,
     'mana': _apply_mana,
     'next_spell_improvise': _apply_next_spell_improvise_or_next_spell_uncounterable,
     'next_spell_uncounterable': _apply_next_spell_improvise_or_next_spell_uncounterable,

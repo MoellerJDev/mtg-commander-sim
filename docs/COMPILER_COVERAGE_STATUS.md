@@ -2,7 +2,7 @@
 title: "Compiler coverage status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "797a7157bec6f7509ab68d946aee1c3efac2b32c"
+verified: "4bec8eb29722a813d377d232b42c36e37640ed37"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -13,10 +13,10 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Current representation
 
-- Compiler: `oracle-ir-v25`
+- Compiler: `oracle-ir-v26`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
-- Compiler module: 1,774 physical / 1,711 logical lines
+- Compiler module: 1,666 physical / 1,618 logical lines
 
 ## Canonical CardProgram
 
@@ -48,20 +48,20 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/22`
+- Registry schema/version: `1/24`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `8ccb5cffcdcbe85d7c14b582349f954f55dcdbc1a2162db8f46059d093b3786e`
-- Evidence fingerprint: `8376f148940c9b7cef9e87e90d2d7990be630e019c75c0703a47b197c02d97cc`
-- Explicit evidence declarations: 315
+- Registry fingerprint: `3ac1203d161b3a484b88306290eddcda9d94082c4ce5398437185a95abf29dd6`
+- Evidence fingerprint: `2d174c7fe63e778dc82f7db41e11f8ffe9413a1d64402ea8971ddd49dcfb2dbd`
+- Explicit evidence declarations: 318
 - Capability records: 42
-- Trusted records: 31
+- Trusted records: 32
 - Blocked records: 4
 - Dependency fail-closed statuses: `{"not_applicable": 18, "not_run": 3, "passed": 21}`
-- Implementation mutation statuses: `{"killed": 34, "not_run": 8}`
+- Implementation mutation statuses: `{"killed": 35, "not_run": 7}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
-| `cr-121-drawing-a-card` | 1 | false | `zone.draw.library_to_hand` |
+| `cr-121-drawing-a-card` | 1 | true | none |
 | `cr-120-damage` | 18 | false | `damage.combat.excess`, `damage.prevention.order`, `damage.replacement.order`, `damage.trigger.noncombat` |
 | `cr-725-the-monarch` | 1 | false | `variant.monarch.designate` |
 | `cr-903-commander` | 1 | true | none |
@@ -74,20 +74,20 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,485 | 3,320 | 16,131 | 19,034 | 66,413 | false |
-| Commander legal | 31,623 | 661 | 14,698 | 16,264 | 57,982 | false |
+| Full Oracle | 38,485 | 3,381 | 16,077 | 19,027 | 65,909 | false |
+| Commander legal | 31,623 | 722 | 14,644 | 16,257 | 57,497 | false |
 
 ## Full-corpus residual kinds
 
 | Kind | Count |
 |---|---:|
-| `dependency_contract` | 17,578 |
+| `dependency_contract` | 17,088 |
 | `trigger` | 15,235 |
 | `spell_effect` | 11,318 |
 | `static_ability` | 11,109 |
 | `effect` | 7,211 |
 | `cost` | 2,009 |
-| `replacement_effect` | 1,772 |
+| `replacement_effect` | 1,758 |
 | `declaration_restriction` | 170 |
 | `declaration_cost` | 11 |
 
@@ -98,7 +98,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 - Unique program keys: 253
 - Duplicate keys resolved by pack order: 12
 - Unique Oracle IDs represented: 142
-- Card-specific operation names: 6
+- Card-specific operation names: 5
 - Typed card-override boundary present: true
 - Explicit typed overrides: 0
 

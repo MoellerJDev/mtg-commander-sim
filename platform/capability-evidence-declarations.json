@@ -4220,11 +4220,44 @@
     },
     {
       "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_draw_step_rules.DrawStepRuleTests.test_trusted_draw_replacement_finishes_before_priority",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2c",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve each represented draw through the immutable replacement pipeline before committing ordinary draw or Dredge results."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "multiplayer",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_uses_apnap_order_and_exact_engine_path",
       "official_rule_ids": [
         "121.1",
-        "121.2"
+        "121.2",
+        "121.2a",
+        "121.2c",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
       ],
       "supported_profiles": [
         "traditional",
@@ -4235,11 +4268,44 @@
     },
     {
       "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_draw_commit_mutant_is_killed",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2c",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill an ordinary-draw commit omission with authoritative zone and draw-history assertions."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "negative",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_registered_node_validation_fails_before_mutation",
       "official_rule_ids": [
         "121.1",
-        "121.2"
+        "121.2",
+        "121.2a",
+        "121.2c",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
       ],
       "supported_profiles": [
         "traditional",
@@ -4254,7 +4320,16 @@
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_handler_lowers_typed_intent_through_read_only_context",
       "official_rule_ids": [
         "121.1",
-        "121.2"
+        "121.2",
+        "121.2a",
+        "121.2c",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
       ],
       "supported_profiles": [
         "traditional",
@@ -4265,11 +4340,44 @@
     },
     {
       "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_draw_step_rules.DrawStepRuleTests.test_draw_replacement_choice_is_visible_only_to_affected_seat",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2c",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Deliver the affected player's draw-replacement choice without revealing graveyard replacement choices or drawn-card identity to another seat."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "replay",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_migrated_semantic_effect_replays_exactly",
       "official_rule_ids": [
         "121.1",
-        "121.2"
+        "121.2",
+        "121.2a",
+        "121.2c",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
       ],
       "supported_profiles": [
         "traditional",

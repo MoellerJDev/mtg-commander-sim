@@ -790,8 +790,10 @@ abilities to the ordinary batch. `trigger_discovery` owns read-only semantic
 matching and stack-occurrence construction behind a narrow protocol. It has no
 state mutation authority and no printed-card-name behavior. Oracle IR v22
 declares event detection, APNAP placement, and result capabilities separately,
-so fixed-life self triggers can be trusted without incorrectly promoting
-draw-to-hand behavior whose replacement boundary remains incomplete.
+so fixed-life self triggers and capability-closed fixed draw triggers can be
+trusted independently. Dynamic counts, optional-draw legality, unresolved
+replacement wording, or any unsupported sibling effect still keep the
+containing program provisional.
 
 Card-centric interaction remains a protocol adapter, not a second rules
 engine. The kernel supplies card refs, face-specific labels, current costs,
@@ -978,6 +980,11 @@ The new rules primitives sit below both generated and hand-authored semantics:
   `replacement_decisions.py` suspends competing choices to the affected seat
   and resumes the same semantic instruction without exposing authoritative
   batches in projections.
+- `drawing/` owns immutable CR 121 instruction, individual-event, result,
+  continuation, sequencing, and commit responsibilities for represented game
+  draws. Every routed producer applies trusted replacements one card at a time;
+  private choices, APNAP batches, empty-library attempts, and Dredge resume
+  exactly. See [`docs/architecture/drawing.md`](docs/architecture/drawing.md).
 - `token_creation.py` is the focused authoritative token mutation owner. It
   discovers trusted runtime components, resolves and rediscovers represented
   replacements, commits one timestamped token batch, and then dispatches enter
@@ -1057,7 +1064,13 @@ immediate aftermath wording, partial or
 attached redirection, non-damage transformations, unresolved dynamic Toxic
 values, incomplete continuous-characteristic closure, and remaining result-
 replacement families remain outside it.
-Not every zone/draw/enters producer routes through the replacement engine, and
+Represented turn, stack-resolution, conditional, optional-follow-up, and APNAP
+draw producers route through the immutable `drawing` instruction/event model,
+replacement continuation, and commit owner. Setup and mulligan redraws remain
+explicit enclosing-procedure operations rather than game draw events. Draw
+limits, draw-as-cost legality, shared-team ordering, reveal-as-drawn, and the
+complete replacement-result queue remain blocked. Not every zone/enters
+producer routes through the replacement engine, and
 the state-action evaluator does not yet
 cover Sagas, dungeons, Roles, speed, maximum-counter wording outside the
 reviewed self-restriction family, or complete simultaneous loss replacement.

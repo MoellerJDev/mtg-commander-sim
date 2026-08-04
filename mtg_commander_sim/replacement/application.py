@@ -19,8 +19,10 @@ from .operations import (
     AppendValues,
     CapResultLifeLoss,
     CreateNestedEvent,
+    DredgeDraw,
     MultiplyAmount,
     PreventAmount,
+    PreventDraw,
     PreventUsingShield,
     RedirectDamage,
     ReserveZoneChange,
@@ -39,6 +41,7 @@ _SET_FIELDS = {
     "counter.place": {"amount"},
     "counter.add": {"amount", "quantity"},
     "life.change": {"amount"},
+    "draw.instruction": {"count"},
     "damage.results": {"life_loss_amount", "life_after_without_replacement"},
     "effect": {"resolved"},
 }
@@ -48,6 +51,7 @@ _NUMERIC_FIELDS = {
     "counter.place": {"amount"},
     "counter.add": {"amount", "quantity"},
     "life.change": {"amount"},
+    "draw.instruction": {"count"},
 }
 _SEQUENCE_FIELDS = {
     "token.create": {"tokens", "created_types", "created_subtypes"},
@@ -314,6 +318,37 @@ def _apply_operation(
     if isinstance(operation, CapResultLifeLoss):
         _apply_result_life_floor(event, payload, children, operation)
         return entry_scope
+    if isinstance(operation, PreventDraw):
+        if event.kind != "draw" or payload.get("is_draw") is not True:
+            raise ReplacementEffectError(
+                "Draw prevention requires an unresolved draw event"
+            )
+        payload["is_draw"] = False
+        payload["result_kind"] = "prevented"
+        return entry_scope
+    if isinstance(operation, DredgeDraw):
+        if event.kind != "draw" or payload.get("is_draw") is not True:
+            raise ReplacementEffectError(
+                "Dredge requires an unresolved draw event"
+            )
+        library_size = payload.get("library_size")
+        if type(library_size) is not int or library_size < operation.mill_count:
+            raise ReplacementEffectError(
+                "Dredge requires enough cards in the affected library"
+            )
+        payload.update(
+            {
+                "is_draw": False,
+                "result_kind": _DREDGE_RESULT_KIND,
+                "dredge_source_ref": operation.source_ref,
+                "dredge_source_object_id": operation.source_object_id,
+                "dredge_source_zone_change_counter": (
+                    operation.source_zone_change_counter
+                ),
+                "dredge_mill_count": operation.mill_count,
+            }
+        )
+        return entry_scope
     raise ReplacementEffectError("Unknown typed replacement operation")
 
 
@@ -446,3 +481,5 @@ def resolve_replacements(
     raise ReplacementEffectError(
         "Replacement choice sequence contains unused choices"
     )
+
+_DREDGE_RESULT_KIND = "dred" + "ge"

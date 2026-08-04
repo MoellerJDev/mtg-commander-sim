@@ -538,7 +538,18 @@
       "ability_id": "spell:front",
       "active_zone": "stack",
       "event": "resolve",
-      "effects": [{"op": "veil_of_summer", "player": "$controller"}],
+      "effects": [
+        {
+          "op": "draw_if_opponent_cast_colors_this_turn",
+          "player": "$controller",
+          "colors": ["U", "B"]
+        },
+        {
+          "op": "grant_uncounterable_hexproof_from_colors_until_end",
+          "player": "$controller",
+          "colors": ["U", "B"]
+        }
+      ],
       "destination": "graveyard",
       "trust_level": "trusted",
       "coverage": ["spell_resolution", "conditional_draw", "cant_be_countered", "temporary_hexproof"],

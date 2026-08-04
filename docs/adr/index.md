@@ -35,3 +35,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0018 — unified triggered-ability batch ownership](0018-unified-trigger-batch-ownership.md)
 - [ADR 0019 — normalized zone-change trigger discovery](0019-normalized-zone-trigger-discovery.md)
 - [ADR 0020 — continuous-effect duration and applicability ownership](0020-continuous-effect-duration-and-applicability.md)
+- [ADR 0021 — canonical draw transaction and replacement ownership](0021-canonical-draw-transaction.md)

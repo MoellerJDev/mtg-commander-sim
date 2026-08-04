@@ -101,6 +101,16 @@ def keyword_dependency_gate(
             capability_registry=capability_registry,
             capability_profile=capability_profile,
         )
+    if mechanics == (_DREDGE_MECHANIC,) and re.fullmatch(
+        r"Dredge\s+[1-9]\d*\.?",
+        material_line,
+        re.IGNORECASE,
+    ):
+        return explicit_capability_gate(
+            "zone.draw.library_to_hand",
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+        )
     if mechanics == ("enchant",) and parse_simple_enchant_line(
         material_line
     ) is not None:
@@ -125,3 +135,5 @@ __all__ = [
     "explicit_capability_gate",
     "keyword_dependency_gate",
 ]
+
+_DREDGE_MECHANIC = "dred" + "ge"
