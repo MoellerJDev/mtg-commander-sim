@@ -2942,7 +2942,7 @@
       "structural_identity": "file, nearest symbol, literal value, conditional use"
     },
     "production": {
-      "file_count": 229,
+      "file_count": 230,
       "largest_functions_and_methods": [
         {
           "end_line": 1653,
@@ -3275,7 +3275,7 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 91711,
+      "logical_lines": 91719,
       "methods": {
         "dunder": 200,
         "private": 626,
@@ -3291,18 +3291,18 @@
           "physical_lines": 13982
         },
         {
-          "file": "web/src/App.tsx",
-          "functions_and_methods": null,
-          "language": "web",
-          "logical_lines": 1906,
-          "physical_lines": 1970
-        },
-        {
           "file": "mtg_commander_sim/report.py",
           "functions_and_methods": 16,
           "language": "python",
           "logical_lines": 1813,
           "physical_lines": 1853
+        },
+        {
+          "file": "web/src/App.tsx",
+          "functions_and_methods": null,
+          "language": "web",
+          "logical_lines": 1701,
+          "physical_lines": 1757
         },
         {
           "file": "mtg_commander_sim/declaration_restrictions.py",
@@ -4164,6 +4164,13 @@
           "language": "python",
           "logical_lines": 213,
           "physical_lines": 221
+        },
+        {
+          "file": "web/src/CardSurface.tsx",
+          "functions_and_methods": null,
+          "language": "web",
+          "logical_lines": 213,
+          "physical_lines": 223
         },
         {
           "file": "mtg_commander_sim/card_programs/binding.py",
@@ -5296,18 +5303,18 @@
           "physical_lines": 13982
         },
         {
-          "file": "web/src/App.tsx",
-          "functions_and_methods": null,
-          "language": "web",
-          "logical_lines": 1906,
-          "physical_lines": 1970
-        },
-        {
           "file": "mtg_commander_sim/report.py",
           "functions_and_methods": 16,
           "language": "python",
           "logical_lines": 1813,
           "physical_lines": 1853
+        },
+        {
+          "file": "web/src/App.tsx",
+          "functions_and_methods": null,
+          "language": "web",
+          "logical_lines": 1701,
+          "physical_lines": 1757
         },
         {
           "file": "mtg_commander_sim/declaration_restrictions.py",
@@ -5331,7 +5338,7 @@
           "physical_lines": 1577
         }
       ],
-      "physical_lines": 99943,
+      "physical_lines": 99953,
       "python_file_count": 214,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -5350,7 +5357,7 @@
         ]
       },
       "top_level_functions": 1123,
-      "web_file_count": 15
+      "web_file_count": 16
     },
     "semantic_handlers": {
       "engine_string_dispatch_branch_count": 3,
@@ -9263,7 +9270,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "87003dbeec824de5b6cf1d5f390f1c92964a50a915432e066a0fa92bb80391b4"
+          "verified": "7dedfbdf9e9698501635366f1d15722ee5b005f2708dd984c1583bf6a4721c31"
         },
         "metadata_complete": true,
         "missing_metadata": [],

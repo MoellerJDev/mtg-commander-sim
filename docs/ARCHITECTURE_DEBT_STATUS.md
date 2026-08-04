@@ -16,7 +16,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `b5e5caa77f0420759e4aad2088c14fe73e7bb1f9`
 - Package: `0.8.0`
 - CI run: [30892105590](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590) — `pass`
-- Production scope: 229 files, 99,943 physical lines, 91,711 logical lines
+- Production scope: 230 files, 99,953 physical lines, 91,719 logical lines
 
 ## Central engine debt
 
@@ -56,8 +56,8 @@ Baseline: `5029c62c98bdad72549625af9a7c3dde5e333ef9`. Guard: `python scripts/val
 | File | Language | Physical | Logical |
 |---|---:|---:|---:|
 | `mtg_commander_sim/engine.py` | python | 13,982 | 13,213 |
-| `web/src/App.tsx` | web | 1,970 | 1,906 |
 | `mtg_commander_sim/report.py` | python | 1,853 | 1,813 |
+| `web/src/App.tsx` | web | 1,757 | 1,701 |
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
 | `mtg_commander_sim/record.py` | python | 1,706 | 1,605 |
 | `mtg_commander_sim/oracle_ir.py` | python | 1,577 | 1,530 |

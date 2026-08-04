@@ -17,7 +17,7 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "87003dbeec824de5b6cf1d5f390f1c92964a50a915432e066a0fa92bb80391b4",
+    "evaluated_source_tree_hash": "7dedfbdf9e9698501635366f1d15722ee5b005f2708dd984c1583bf6a4721c31",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -282,7 +282,7 @@
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
-    "web_files": 30
+    "web_files": 31
   },
   "validation": {
     "card_program_census": "oracle_ir_v29_full_38485_trusted_1169_capability_closed_1166_legacy_reviewed_2_mixed_1_residual_35067_failed_2249_material_residual_65981; full_oracle_exact_3409_partial_16050_unresolved_19026_material_residual_65993; commander_legal_31623_trusted_747_capability_closed_744_legacy_reviewed_2_mixed_1_residual_30875_failed_1_material_residual_57567; commander_oracle_exact_747_partial_14620_unresolved_16256_material_residual_57570; delta_from_certified_pr88_commander_exact_trusted_and_capability_closed_plus_25_and_full_plus_28; representative_new_exact_cards_include_beloved_chaplain_ihsans_shade_valeron_outlander_yavimaya_barbarian_tel_jilad_chosen_shivan_zombie_and_unquestioned_authority; unsupported_protection_qualities_and_nonclosed_enchant_restrictions_are_now_explicit_material_residuals",
