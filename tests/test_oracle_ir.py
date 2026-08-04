@@ -11,7 +11,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from common import DB_PATH
+from common import DB_PATH, keep_all
 from mtg_commander_sim import (
     CardDatabase,
     CommanderSession,
@@ -30,6 +30,7 @@ from mtg_commander_sim.mechanic_contracts import (
     load_mechanic_contracts,
     validate_mechanic_contract,
 )
+from mtg_commander_sim.model import StackItem
 from mtg_commander_sim.oracle_ir import (
     ORACLE_COMPILER_VERSION,
     compile_oracle_card,
@@ -1102,6 +1103,168 @@ class OracleIRTests(unittest.TestCase):
         )
         self.assertEqual("graveyard", program.active_zone)
         self.assertEqual("draw", program.event)
+
+    def test_draw_restrictions_doubling_and_optional_draw_compile_generically(self):
+        capabilities = load_default_capability_registry()
+        expectations = {
+            "Spirit of the Labyrinth": (
+                "restriction.draw.maximum-per-turn.v1",
+                "draw.permission",
+                {"maximum_per_turn": 1},
+            ),
+            "Thought Reflection": (
+                "replacement.draw.instruction.multiply.v1",
+                "draw.instruction",
+                {"factor": 2},
+            ),
+        }
+        for name, expected in expectations.items():
+            with self.subTest(name=name):
+                ir = compile_oracle_card(
+                    self.db.lookup(name),
+                    capability_registry=capabilities,
+                    capability_profile="commander_review",
+                )
+                self.assertEqual("exact", ir.status)
+                node = next(value for value in ir.faces[0].nodes if value.handlers)
+                handler_id, event, payload = expected
+                self.assertEqual(event, node.event)
+                self.assertEqual(handler_id, node.handlers[0]["handler_id"])
+                field = (
+                    "restriction"
+                    if handler_id.startswith("restriction.")
+                    else "modification"
+                )
+                self.assertEqual(payload, node.handlers[0][field])
+                self.assertEqual(
+                    ("zone.draw.library_to_hand",),
+                    node.capability_dependencies,
+                )
+
+        for name in ("Oculus", "Surveilling Sprite", "Aven Fisher"):
+            with self.subTest(optional_draw=name):
+                ir = compile_oracle_card(
+                    self.db.lookup(name),
+                    capability_registry=capabilities,
+                    capability_profile="commander_review",
+                )
+                self.assertEqual(
+                    "exact" if name == "Oculus" else "partial",
+                    ir.status,
+                )
+                trigger = next(
+                    value
+                    for value in ir.faces[0].nodes
+                    if value.kind == "triggered_ability"
+                )
+                self.assertEqual("offer_draw", trigger.effects[0]["op"])
+
+    def test_generic_draw_prohibition_replays_exactly(self):
+        deck_a = DeckDefinition(
+            name="A",
+            commanders=["Zimone and Dina"],
+            entries=[
+                DeckEntry("Zimone and Dina", board="commander"),
+                DeckEntry("Spirit of the Labyrinth"),
+                DeckEntry("Island", quantity=10),
+            ],
+        )
+        deck_b = DeckDefinition(
+            name="B",
+            commanders=["Mishra, Eminent One"],
+            entries=[
+                DeckEntry("Mishra, Eminent One", board="commander"),
+                DeckEntry("Island", quantity=10),
+            ],
+        )
+        session = CommanderSession.create(
+            self.db,
+            {"A": deck_a, "B": deck_b},
+            first_player="A",
+            seed=121_302,
+            config=GameConfig(
+                seed=121_302,
+                auto_pass_empty_priority=False,
+            ),
+        )
+        keep_all(session)
+        engine = session.engine
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.priority_player = None
+        spirit = next(
+            card
+            for card in engine.state.cards.values()
+            if card.printed_name == "Spirit of the Labyrinth"
+        )
+        engine.move_card(spirit.object_id, "battlefield", controller="A")
+        generic = next(
+            program
+            for program in engine.semantics.programs_for_oracle(spirit.oracle_id)
+            if program.handlers
+        )
+        self.assertEqual("trusted", generic.trust_level)
+        self.assertEqual(
+            "restriction.draw.maximum-per-turn.v1",
+            generic.handlers[0]["handler_id"],
+        )
+        effect = SemanticProgram(
+            key="test:draw-two-under-spirit",
+            label="Draw two under Spirit",
+            effects=[
+                {
+                    "op": "draw",
+                    "player": "A",
+                    "count": 2,
+                    "private": True,
+                    "reason": "generic prohibition replay",
+                }
+            ],
+            trust_level="provisional",
+        )
+        engine.semantics.put(effect)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="draw-two-under-spirit",
+                ref="S-draw-two-under-spirit",
+                kind="triggered_ability",
+                controller="A",
+                label=effect.label,
+                semantic_key=effect.key,
+                visibility=["A", "B"],
+            )
+        )
+        engine.state.active_player = "A"
+        engine.state.started = True
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine._grant_priority("A")
+        engine._issue_priority("A")
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+        hand_before = len(engine.state.players["A"].zones["hand"])
+
+        for principal in ("pilot:A", "pilot:B"):
+            result = session.act(principal, {"action_id": "pass"})
+            self.assertTrue(result.ok, result.summary)
+
+        self.assertEqual(
+            hand_before + 1,
+            len(engine.state.players["A"].zones["hand"]),
+        )
+        self.assertEqual(
+            1,
+            sum(
+                event.code == "card.draw.prohibited"
+                for event in engine.state.events
+            ),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "generic-draw-prohibition"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+        self.assertTrue(replay["ok"], replay)
 
     def test_static_damage_replacement_wording_lowers_to_generic_handlers(self):
         capabilities = load_default_capability_registry()

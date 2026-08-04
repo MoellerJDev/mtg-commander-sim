@@ -53,6 +53,7 @@ from mtg_commander_sim.semantic_runtime.counter_replacements import (
     CounterReplacementSourceContext,
     resolve_counter_placement_replacements,
 )
+from mtg_commander_sim.semantic_runtime import draw_restrictions as draw_restriction_module
 from mtg_commander_sim.semantic_runtime.continuous_components import (
     AddBasicLandTypeHandler,
     ContinuousEffectSourceContext,
@@ -71,6 +72,7 @@ from mtg_commander_sim.semantic_runtime.damage_replacements import (
     FixedDamagePreventionHandler,
     StaticDamageRedirectionHandler,
 )
+from mtg_commander_sim.semantics import SemanticProgram
 from mtg_commander_sim.semantic_runtime.damage_results import (
     DamageResultLifeFloorHandler,
     DamageResultReplacementSourceContext,
@@ -540,6 +542,71 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_draw_commit()
+
+    def test_draw_restriction_mutant_is_killed(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=2,
+            seed=121100,
+        )
+        keep_all(session)
+        engine = session.engine
+        source = next(
+            card
+            for card in engine.state.cards.values()
+            if card.owner == "A" and card.printed_name == "Island"
+        )
+        engine.move_card(
+            source.object_id,
+            "battlefield",
+            controller="A",
+            log=False,
+            semantic_events=False,
+        )
+        engine.semantics.put(
+            SemanticProgram(
+                key="test:draw-restriction-mutation",
+                label="Draw restriction mutation",
+                oracle_id=source.oracle_id,
+                active_zone="battlefield",
+                event="draw.permission",
+                handlers=[
+                    {
+                        "handler_id": "restriction.draw.maximum-per-turn.v1",
+                        "schema_version": 1,
+                        "event": "draw.permission",
+                        "condition": {
+                            "affected_player_relation": "source_controller",
+                        },
+                        "restriction": {"maximum_per_turn": 0},
+                    }
+                ],
+                trust_level="provisional",
+            )
+        )
+
+        def assert_prohibition_collected() -> None:
+            permission = draw_restriction_module.current_draw_permission(
+                engine, "A"
+            )
+            self.assertEqual(0, permission.maximum_per_turn)
+            self.assertFalse(permission.allows_individual_draw())
+
+        with patch.object(
+            CommanderEngine,
+            "semantic_program_is_current_trusted",
+            return_value=True,
+        ):
+            assert_prohibition_collected()
+            with patch.object(
+                draw_restriction_module,
+                "collect_draw_restrictions",
+                lambda *_args, **_kwargs: (),
+            ):
+                with self.assertRaises(AssertionError):
+                    assert_prohibition_collected()
 
     def test_zone_trigger_detection_mutant_is_killed(self):
         value = ZoneChangeOccurrence(

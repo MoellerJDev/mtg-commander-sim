@@ -9,6 +9,10 @@ from .continuous_templates import (
     fixed_power_toughness_anthem_handler,
 )
 from .damage_templates import static_damage_handler
+from .draw_templates import (
+    static_draw_instruction_handler,
+    static_draw_restriction_handler,
+)
 from .life_templates import static_life_handler
 
 
@@ -24,8 +28,31 @@ def static_runtime_template(
     text: str,
     *,
     source_damageable: bool | None = None,
+    source_permanent: bool = True,
 ) -> StaticRuntimeTemplate | None:
     """Select one closed static runtime production for an Oracle line."""
+
+    if source_permanent:
+        draw_restriction = static_draw_restriction_handler(text)
+        if draw_restriction is not None:
+            return StaticRuntimeTemplate(
+                compiled=draw_restriction,
+                kind="static_ability",
+                event="draw.permission",
+                dependency_reason=(
+                    "generic draw restriction depends on an untrusted rules capability"
+                ),
+            )
+        draw_instruction = static_draw_instruction_handler(text)
+        if draw_instruction is not None:
+            return StaticRuntimeTemplate(
+                compiled=draw_instruction,
+                kind="replacement_effect",
+                event="draw.instruction",
+                dependency_reason=(
+                    "generic draw-count replacement depends on an untrusted rules capability"
+                ),
+            )
 
     attached_characteristics = attached_fixed_characteristics_handler(text)
     if attached_characteristics is not None:

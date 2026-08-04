@@ -139,7 +139,7 @@ class CardProgramTrustTests(unittest.TestCase):
     def test_global_handler_and_component_inventory_is_capability_bound(self):
         status = runtime_component_status("commander_review")
         self.assertEqual(84, len(status["semantic_handlers"]))
-        self.assertEqual(13, len(status["runtime_components"]))
+        self.assertEqual(15, len(status["runtime_components"]))
         self.assertEqual(
             {
                 "continuous.attached.fixed_characteristics",
@@ -152,9 +152,11 @@ class CardProgramTrustTests(unittest.TestCase):
                 "replacement.damage.redirection.static",
                 "replacement.damage.result.life_floor",
                 "replacement.draw.dredge",
+                "replacement.draw.instruction_quantity",
                 "replacement.fixed_additional_token",
                 "replacement.life.gain.multiplier",
                 "replacement.zone.destination",
+                "restriction.draw.maximum_per_turn",
             },
             {row["family"] for row in status["runtime_components"]},
         )

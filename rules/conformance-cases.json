@@ -13486,31 +13486,34 @@
       "status": "passing"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "runtime producers and affected-player ordering for the complete draw-count replacement corpus are not compiled"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-121.2a",
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
         "positive",
-        "negative"
+        "negative",
+        "interaction",
+        "replay"
       ],
       "dependency_rule_ids": [
         "121.2"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_draw_transaction_model.DrawTransactionModelTests.test_instruction_count_is_replaced_before_individual_draws"
+        "tests.test_draw_transaction_model.DrawTransactionModelTests.test_instruction_count_is_replaced_before_individual_draws",
+        "tests.test_draw_replacement_components.DrawInstructionReplacementIntegrationTests.test_two_draw_doublers_modify_instruction_before_individual_draws",
+        "tests.test_oracle_ir.OracleIRTests.test_draw_restrictions_doubling_and_optional_draw_compile_generically"
       ],
       "implementation_components": [
         "drawing.prepare_draw_instruction",
-        "replacement.SetField",
+        "drawing.coordinator._prepare_runtime_draw_instruction",
+        "semantic_runtime.DrawInstructionMultiplierHandler",
         "replacement.MultiplyAmount"
       ],
       "notes": [
-        "The typed instruction boundary exists and is tested before individual events; universal runtime production is intentionally not claimed."
+        "Every represented draw-count replacement resolves against the instruction before any individual draw event exists. Conditional and first-draw Oracle grammars remain outside the capability scope rather than changing this ordering."
       ],
       "required_scenarios": [
         "positive",
@@ -13527,25 +13530,39 @@
         "end_line": 1147,
         "start_line": 1146
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "per-turn draw-limit prohibitions and their choice and cost legality grammar are not implemented"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-121.2b",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "121.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
+      "executable_test_ids": [
+        "tests.test_draw_restrictions.DrawRestrictionModelTests.test_max_one_allows_partial_mandatory_draw_but_not_choice_or_cost",
+        "tests.test_draw_restrictions.DrawRestrictionIntegrationTests.test_mandatory_multi_draw_partially_occurs_under_maximum_one",
+        "tests.test_draw_restrictions.DrawRestrictionIntegrationTests.test_draw_prohibition_is_checked_before_dredge_replacements",
+        "tests.test_draw_restrictions.DrawRestrictionIntegrationTests.test_dredge_does_not_consume_maximum_one_draw_allowance",
+        "tests.test_oracle_ir.OracleIRTests.test_generic_draw_prohibition_replays_exactly"
+      ],
+      "implementation_components": [
+        "drawing.DrawPermission",
+        "drawing.require_payable_draw_cost",
+        "semantic_runtime.DrawMaximumHandler",
+        "drawing.begin_draw_sequence"
+      ],
       "notes": [
-        "No broad support is inferred from fixed draw-count validation."
+        "Mandatory instructions re-evaluate permission per draw, while optional multi-draws and the typed draw-cost boundary require the prospective drawer to complete the entire count. No current Oracle producer pays a draw-as-cost."
       ],
       "required_scenarios": [
         "positive",
@@ -13562,7 +13579,7 @@
         "end_line": 1149,
         "start_line": 1148
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
       "assertion_kind": "executable_engine",
@@ -13641,28 +13658,32 @@
       "status": "blocked"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "generic optional-draw feasibility under empty libraries and draw prohibitions is not implemented"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-121.3",
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
-        "positive"
+        "positive",
+        "negative",
+        "interaction"
       ],
       "dependency_rule_ids": [
         "121"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_semantic_choice_preparation_draw_uses_replacement_coordinator"
+        "tests.test_optional_draw_choices.OptionalDrawChoiceTests.test_empty_library_does_not_remove_optional_draw_choice",
+        "tests.test_optional_draw_choices.OptionalDrawChoiceTests.test_max_one_removes_optional_multi_draw_before_task_issue",
+        "tests.test_optional_draw_choices.OptionalDrawChoiceIntegrationTests.test_optional_draw_choice_is_seat_scoped_and_replays_exactly"
       ],
       "implementation_components": [
-        "semantic_choices.DrawOptionalLandChoiceHandler"
+        "drawing.DrawPermission",
+        "semantic_choices.OptionalDrawHandler",
+        "semantic_choices.engine_coordination._semantic_choice_query"
       ],
       "notes": [
-        "Represented optional follow-up effects do not establish the complete optional-draw legality rule."
+        "Empty library size is not a legality predicate; a live prohibition or insufficient remaining maximum removes the optional draw before a task is issued."
       ],
       "required_scenarios": [
         "positive",
@@ -13678,24 +13699,34 @@
         "end_line": 1155,
         "start_line": 1154
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "choices made by a player other than the prospective drawer are not modeled for draw-prohibition feasibility"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-121.3a",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "multiplayer"
+      ],
       "dependency_rule_ids": [
         "121.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_optional_draw_choices.OptionalDrawChoiceTests.test_other_chooser_uses_prospective_drawer_legality",
+        "tests.test_optional_draw_choices.OptionalDrawChoiceIntegrationTests.test_four_player_chooser_uses_prospective_drawer_legality"
+      ],
+      "implementation_components": [
+        "drawing.DrawPermission",
+        "semantic_choices.OptionalDrawHandler"
+      ],
+      "notes": [
+        "OptionalDrawHandler stores chooser and prospective drawer separately and queries only the drawer's live permission."
+      ],
       "required_scenarios": [
         "positive",
         "negative",
@@ -13710,7 +13741,7 @@
         "end_line": 1157,
         "start_line": 1156
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
       "assertion_kind": "executable_engine",

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "cr-121-drawing-a-card",
   "official_name": "Drawing a Card",
   "effective_date": "2026-06-19",
@@ -22,11 +22,13 @@
     "objects": ["top library card", "draw instruction", "individual draw event", "replacement source"],
     "events": [
       "draw-count instruction replacement", "one individual draw at a time",
-      "ordinary library-to-hand draw", "prevented draw", "Dredge replacement",
+      "live draw permission and prohibition", "ordinary library-to-hand draw",
+      "prevented or prohibited draw", "Dredge replacement",
       "empty-library draw attempt", "draw and second-draw trigger facts"
     ],
     "state_reads": [
-      "affected player", "library size and top object", "APNAP order",
+      "prospective drawer and chooser", "cards already drawn this turn",
+      "library size and top object", "APNAP order", "live trusted restriction sources",
       "trusted replacement sources", "replacement selections"
     ],
     "state_writes": [
@@ -34,7 +36,7 @@
       "Dredge mill and source return", "private and public draw events"
     ],
     "costs": [
-      "draws performed while casting or activating and complete draw-as-cost legality remain blocked"
+      "complete draw-as-cost feasibility is exposed, but no current Oracle producer pays such a cost"
     ],
     "timing": [
       "a multiple-card instruction is considered before its individual draws",
@@ -44,7 +46,8 @@
     "targets": ["a represented draw names one affected player"],
     "choices": [
       "the affected player privately chooses among applicable optional replacements",
-      "optional-draw feasibility under global draw prohibitions remains blocked"
+      "an optional multi-draw is offered only when the prospective drawer can complete every draw",
+      "an empty library does not by itself make an optional draw illegal"
     ],
     "hidden_information": [
       "ordinary drawn-card identity is owner-only plus analyst",
@@ -53,30 +56,36 @@
     "apnap": [
       "when several players draw, the active player completes all draws first, followed in turn order"
     ],
-    "layers": ["draw prohibitions and continuous skip effects are external dependencies"],
+    "layers": ["represented battlefield draw prohibitions re-evaluate source zone, phasing, and control; continuous skip-draw-step effects remain external"],
     "replacement_effects": [
       "typed count and individual-draw event models are distinct",
+      "unconditional controller draw doubling applies to the instruction before its individual draws",
       "represented prevention and Dredge apply even to an empty library",
-      "runtime count-modification producers and the complete replacement corpus remain incomplete"
+      "conditional and first-draw count modifiers and the complete replacement corpus remain incomplete"
     ],
     "copy": ["no copy operation is intrinsic to drawing"],
-    "control_change": ["the affected player, not a source controller, owns the draw choice"],
+    "control_change": ["the prospective drawer controls replacement choices while optional-draw choice ownership may differ; restriction relation uses the source's live controller"],
     "zone_change": [
       "ordinary draw moves exactly the current top library object to hand",
       "a non-draw library-to-hand move does not create draw history or draw events"
     ],
     "source_leaves": [
-      "Dredge pins physical source identity and zone-change counter through the private choice"
+      "Dredge pins physical source identity and zone-change counter through the private choice",
+      "a departed or phased-out battlefield restriction source stops applying before the next draw"
     ]
   },
   "variants": [
     "single and multiple draws", "several players drawing in APNAP order",
-    "empty-library ordinary and prevented draws", "Dredge",
+    "empty-library ordinary, prevented, prohibited, and optional draws", "Dredge",
+    "fixed no-draw and maximum-one restrictions", "unconditional draw doubling",
     "draw-step and resolving-effect producers", "conditional resolving-effect draw"
   ],
   "witness_cards": [
     {"name": "Life from the Loam", "oracle_id": "ac8fba34-512c-4f24-999a-ab72f1ce4acb"},
-    {"name": "Veil of Summer", "oracle_id": "002965be-a36f-4a09-9ce0-c6535bca1703"}
+    {"name": "Veil of Summer", "oracle_id": "002965be-a36f-4a09-9ce0-c6535bca1703"},
+    {"name": "Spirit of the Labyrinth", "oracle_id": "1463795b-ec0c-44d6-ae1a-55f78d9843ec"},
+    {"name": "Thought Reflection", "oracle_id": "692a6833-3014-42f6-b1ad-333bb3292c65"},
+    {"name": "Oculus", "oracle_id": "e793ede9-044a-44e9-bc9c-99b0034503eb"}
   ],
   "rulings": [],
   "test_ids": [
@@ -89,18 +98,25 @@
     "test_library_to_hand_move_is_not_a_draw",
     "test_veil_conditional_draw_pauses_for_dredge_before_permissions",
     "test_draw_replacement_choice_is_visible_only_to_affected_seat",
-    "test_first_turn_profile_modifier_and_exact_replay"
+    "test_first_turn_profile_modifier_and_exact_replay",
+    "test_mandatory_multi_draw_partially_occurs_under_maximum_one",
+    "test_draw_prohibition_is_checked_before_dredge_replacements",
+    "test_dredge_does_not_consume_maximum_one_draw_allowance",
+    "test_two_draw_doublers_modify_instruction_before_individual_draws",
+    "test_optional_draw_choice_is_seat_scoped_and_replays_exactly",
+    "test_generic_draw_prohibition_replays_exactly"
   ],
   "implementation": {
-    "component": "mtg_commander_sim.drawing immutable model, transaction, continuation, and coordinator facade",
-    "version": "draw-transaction-v1"
+    "component": "mtg_commander_sim.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement components, and optional-choice handler",
+    "version": "draw-transaction-v2"
   },
   "known_blockers": [
-    "draw-limit prohibitions and optional draw/cost legality are not compiled",
     "shared-team turns are not supported",
     "additional actions on a drawn card and result-generated draw ordering are incomplete",
     "draws during casting or activation are not held face down",
     "optional reveal-as-drawn choices are not implemented",
+    "conditional and first-draw count modifiers are not compiled",
+    "draw-as-cost feasibility has no current Oracle producer",
     "the complete draw replacement and prevention Oracle grammar is not compiled"
   ],
   "review_status": "reviewed"

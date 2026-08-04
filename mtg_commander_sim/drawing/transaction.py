@@ -242,6 +242,19 @@ def commit_prepared_draw(
             changed_players=[resolution.player],
         )
         return ()
+    if resolution.kind == "prohibited":
+        host._log(
+            resolution.player,
+            "card.draw.prohibited",
+            f"{resolution.player} could not draw a card.",
+            {
+                _REASON_FIELD: resolution.reason,
+                "prohibitions": list(resolution.prohibition_ids),
+            },
+            importance=1,
+            changed_players=[resolution.player],
+        )
+        return ()
     if resolution.kind == _DREDGE_KIND:
         return _commit_dredge(host, prepared)
     raise DrawError(f"Unsupported draw result {resolution.kind!r}")

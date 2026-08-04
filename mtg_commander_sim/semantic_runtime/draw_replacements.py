@@ -6,6 +6,7 @@ from typing import Any, Mapping, Protocol, Sequence
 
 from ..replacement import (
     DredgeDraw,
+    MultiplyAmount,
     ReplacementClass,
     ReplacementEffect,
 )
@@ -15,6 +16,9 @@ from .context import SemanticNodeError
 
 
 DREDGE_HANDLER_ID = "replacement.draw.dredge.v1"
+DRAW_INSTRUCTION_MULTIPLIER_HANDLER_ID = (
+    "replacement.draw.instruction.multiply.v1"
+)
 _DREDGE_LABEL = "Dred" + "ge "
 
 
@@ -53,6 +57,10 @@ class DrawReplacementHost(Protocol):
 
     def semantic_program_is_current_trusted(self, program: Any) -> bool: ...
 
+    def _semantic_event_sources(
+        self, *, zones: set[str] | None = None
+    ) -> list[Any]: ...
+
 
 @dataclass(frozen=True, slots=True)
 class DrawReplacementSourceContext:
@@ -79,6 +87,150 @@ class DrawReplacementSourceContext:
             raise SemanticNodeError(
                 "Dredge source zone-change counter must be nonnegative"
             )
+
+
+@dataclass(frozen=True, slots=True)
+class DrawInstructionReplacementSourceContext:
+    source_ref: str
+    source_object_id: str
+    source_zone_change_counter: int
+    source_controller: str
+    component_id: str = ""
+
+    def __post_init__(self) -> None:
+        for field_name, value in (
+            ("source_ref", self.source_ref),
+            ("source_object_id", self.source_object_id),
+            ("source_controller", self.source_controller),
+        ):
+            if type(value) is not str or not value:
+                raise SemanticNodeError(
+                    f"Draw instruction {field_name} must be a nonempty string"
+                )
+        if (
+            type(self.source_zone_change_counter) is not int
+            or self.source_zone_change_counter < 0
+        ):
+            raise SemanticNodeError(
+                "Draw instruction source zone-change counter must be nonnegative"
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class DrawInstructionMultiplierNode:
+    affected_player_relation: str
+    factor: int
+
+
+@dataclass(frozen=True, slots=True)
+class DrawInstructionMultiplierHandler:
+    """Closed CR 121.2a count replacement for controller draw doubling."""
+
+    handler_id: str = DRAW_INSTRUCTION_MULTIPLIER_HANDLER_ID
+    schema_version: int = 1
+    family: str = "replacement.draw.instruction_quantity"
+    event: str = "draw.instruction"
+    rule_references: tuple[str, ...] = (
+        "121.2",
+        "121.2a",
+        "616.1g",
+    )
+    capability_dependencies: tuple[str, ...] = (
+        "zone.draw.library_to_hand",
+    )
+
+    def validate(
+        self, descriptor: Mapping[str, Any]
+    ) -> DrawInstructionMultiplierNode:
+        exact_fields(
+            descriptor,
+            {
+                "handler_id",
+                "schema_version",
+                "event",
+                "condition",
+                "modification",
+            },
+            field="runtime handler",
+        )
+        if descriptor["handler_id"] != self.handler_id:
+            raise SemanticNodeError(
+                "Runtime handler ID does not match the draw replacement registry"
+            )
+        if descriptor["schema_version"] != self.schema_version:
+            raise SemanticNodeError(
+                f"Unsupported {self.handler_id} schema version"
+            )
+        if descriptor["event"] != self.event:
+            raise SemanticNodeError(
+                f"{self.handler_id} must handle {self.event}"
+            )
+        condition = descriptor["condition"]
+        if not isinstance(condition, Mapping):
+            raise SemanticNodeError(
+                "Draw instruction condition must be an object"
+            )
+        exact_fields(
+            condition,
+            {"affected_player_relation"},
+            field="draw instruction condition",
+        )
+        if condition["affected_player_relation"] != "source_controller":
+            raise SemanticNodeError(
+                "Represented draw instruction multiplication requires the source controller"
+            )
+        modification = descriptor["modification"]
+        if not isinstance(modification, Mapping):
+            raise SemanticNodeError(
+                "Draw instruction modification must be an object"
+            )
+        exact_fields(
+            modification,
+            {"factor"},
+            field="draw instruction modification",
+        )
+        factor = modification["factor"]
+        if type(factor) is not int or factor != 2:
+            raise SemanticNodeError(
+                "Represented draw instruction factor must be the integer 2"
+            )
+        return DrawInstructionMultiplierNode(
+            affected_player_relation="source_controller",
+            factor=factor,
+        )
+
+    def replacement_effect(
+        self,
+        descriptor: Mapping[str, Any],
+        context: DrawInstructionReplacementSourceContext,
+    ) -> ReplacementEffect:
+        node = self.validate(descriptor)
+        component_id = context.component_id or str(node.factor)
+        return ReplacementEffect(
+            effect_id=(
+                f"{self.handler_id}:{context.source_object_id}@"
+                f"{context.source_zone_change_counter}:{component_id}"
+            ),
+            source_id=(
+                f"{context.source_object_id}@"
+                f"{context.source_zone_change_counter}"
+            ),
+            event_kind=self.event,
+            replacement_class=ReplacementClass.OTHER,
+            conditions={
+                "affected_player": {"eq": context.source_controller},
+                "count": {"gt": 0},
+            },
+            operations=(MultiplyAmount(field="count", factor=node.factor),),
+            label=f"{context.source_ref}: draw twice that many cards",
+        )
+
+    def lower(
+        self,
+        descriptor: Mapping[str, Any],
+        context: DrawInstructionReplacementSourceContext,
+    ) -> tuple[ReplacementEffect, ...]:
+        return (self.replacement_effect(descriptor, context),)
 
 
 @dataclass(frozen=True, slots=True)
@@ -211,7 +363,12 @@ class DrawReplacementRegistry(
 
 @lru_cache(maxsize=1)
 def default_draw_replacement_registry() -> DrawReplacementRegistry:
-    registry = DrawReplacementRegistry((DredgeReplacementHandler(),))
+    registry = DrawReplacementRegistry(
+        (
+            DredgeReplacementHandler(),
+            DrawInstructionMultiplierHandler(),
+        )
+    )
     registry.require_registered_capabilities(
         load_default_capability_registry()
     )
@@ -263,9 +420,59 @@ def collect_draw_replacement_effects(
     return tuple(effects)
 
 
+def collect_draw_instruction_replacement_effects(
+    host: DrawReplacementHost,
+    player: str,
+) -> tuple[ReplacementEffect, ...]:
+    """Compile trusted battlefield replacements for a draw-count instruction."""
+
+    if type(player) is not str or player not in host.active_seats:
+        raise SemanticNodeError(
+            "Draw instruction replacements require one active affected player"
+        )
+    registry = default_draw_replacement_registry()
+    effects: list[ReplacementEffect] = []
+    for source in host._semantic_event_sources(zones={"battlefield"}):
+        if (
+            source.zone != "battlefield"
+            or source.phased_out
+            or source.controller != player
+        ):
+            continue
+        programs = host.semantics.runtime_handler_programs_for_oracle(
+            source.oracle_id,
+            active_zone="battlefield",
+            event="draw.instruction",
+        )
+        for program in programs:
+            if not host.semantic_program_is_current_trusted(program):
+                continue
+            for descriptor_index, descriptor in enumerate(program.handlers):
+                effects.append(
+                    registry.replacement_effect(
+                        descriptor,
+                        DrawInstructionReplacementSourceContext(
+                            source_ref=source.ref,
+                            source_object_id=source.object_id,
+                            source_zone_change_counter=(
+                                source.zone_change_counter
+                            ),
+                            source_controller=source.controller,
+                            component_id=f"{program.key}:{descriptor_index}",
+                        ),
+                    )
+                )
+    return tuple(sorted(effects, key=lambda value: value.effect_id))
+
+
 __all__ = [
+    "collect_draw_instruction_replacement_effects",
     "collect_draw_replacement_effects",
     "default_draw_replacement_registry",
+    "DRAW_INSTRUCTION_MULTIPLIER_HANDLER_ID",
+    "DrawInstructionMultiplierHandler",
+    "DrawInstructionMultiplierNode",
+    "DrawInstructionReplacementSourceContext",
     "DREDGE_HANDLER_ID",
     "DredgeReplacementHandler",
     "DredgeReplacementNode",

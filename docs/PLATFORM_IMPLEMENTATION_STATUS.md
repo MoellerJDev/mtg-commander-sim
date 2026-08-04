@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "16342b7f01522046cf76f06802f60b845a031c4c57ad4692fa14b2e2ebaef473"
+verified: "ddcef4abbc7680b841ae18283f4153d5e2e3ce7eb27a817e4257553a89fa10a4"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,7 +15,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `16342b7f01522046cf76f06802f60b845a031c4c57ad4692fa14b2e2ebaef473` (`tracked-git-clean-blobs-sha256-v3`)
+- Evaluated source tree: `ddcef4abbc7680b841ae18283f4153d5e2e3ce7eb27a817e4257553a89fa10a4` (`tracked-git-clean-blobs-sha256-v3`)
 - Feature head: `f45bfa8096371aa3498243f6916291b5cd7c4462`
 - Certified exact head: `f45bfa8096371aa3498243f6916291b5cd7c4462`
 - Generation timestamp: `2026-08-04T09:30:12Z`
@@ -34,7 +34,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Rules manifest present on this branch: yes
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
-- Rules cases: blocked=376, definition_only=95, passing=169, total=3300, unreviewed=2660
+- Rules cases: blocked=372, definition_only=95, passing=173, total=3300, unreviewed=2660
 - Mechanics: status_counts={'partial': 62, 'tested': 1, 'unclassified': 362}, total=425, trusted=0
 - Oracle coverage: material_residuals=65909, status_counts={'exact': 3381, 'partial': 16077, 'unresolved': 19027}, total=38485
 - Commander-legal Oracle coverage: material_residuals=57497, status_counts={'exact': 722, 'partial': 14644, 'unresolved': 16257}, total=31623
@@ -88,7 +88,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4679
+- Tests discovered: 4705
 - Python matrix: Python 3.12 on Ubuntu and Windows
 - Baseline CI: [30892105590](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590) — `pass`
 - Compile: `pass`

@@ -9,8 +9,10 @@ from ..replacement.immutable import thaw_value
 from ..semantic_runtime.context import SemanticNodeError
 from ..semantic_runtime.draw_replacements import (
     DrawReplacementHost,
+    collect_draw_instruction_replacement_effects,
     collect_draw_replacement_effects,
 )
+from ..semantic_runtime.draw_restrictions import current_draw_permission
 from .continuation import DrawDecisionContinuation, DrawResume
 from .model import (
     DrawError,
@@ -110,15 +112,18 @@ def begin_draw_sequence(
 
     host._require_seat(seat)
     resume = DrawResume.from_dict(dict(continuation or {"kind": "none"}))
-    instruction = prepare_draw_instruction(
-        DrawInstructionRequest(
-            event_id=draw_event_id(host, seat, "instruction"),
-            player=seat,
-            count=count,
-            reason=reason,
-            private=private,
-        ),
-        apnap_order=host.apnap_order(),
+    instruction_request = DrawInstructionRequest(
+        event_id=draw_event_id(host, seat, "instruction"),
+        player=seat,
+        count=count,
+        reason=reason,
+        private=private,
+    )
+    instruction_effects = _instruction_replacement_effects(host, seat)
+    instruction = _prepare_runtime_draw_instruction(
+        host,
+        instruction_request,
+        instruction_effects,
     )
     _continue_draw_sequence(
         host,
@@ -165,6 +170,61 @@ def _replacement_effects(
         raise DrawError(str(exc)) from exc
 
 
+def _instruction_replacement_effects(
+    host: DrawCoordinatorHost,
+    seat: str,
+) -> tuple[Any, ...]:
+    try:
+        return collect_draw_instruction_replacement_effects(host, seat)
+    except SemanticNodeError as exc:
+        raise DrawError(str(exc)) from exc
+
+
+def _prepare_runtime_draw_instruction(
+    host: DrawCoordinatorHost,
+    request: DrawInstructionRequest,
+    effects: tuple[Any, ...],
+) -> Any:
+    """Resolve the closed commutative draw-doubling family canonically."""
+
+    selections: list[str] = []
+    while True:
+        prepared = prepare_draw_instruction(
+            request,
+            apnap_order=host.apnap_order(),
+            effects=effects,
+            selections=selections,
+            require_all_selections=False,
+        )
+        pending = prepared.pending
+        if pending is None:
+            return prepared
+        by_id = {effect.effect_id: effect for effect in effects}
+        options = tuple(pending.choice.options)
+        if (
+            pending.choice.optional_options
+            or not options
+            or any(
+                effect_id not in by_id
+                or len(by_id[effect_id].operations) != 1
+                or by_id[effect_id].operations[0].to_dict()
+                != {"op": "multiply", "field": "count", "factor": 2}
+                for effect_id in options
+            )
+        ):
+            raise DrawError(
+                "A draw instruction requires an unsupported material replacement choice"
+            )
+        selections.append(sorted(options)[0])
+
+
+def _draw_permission(host: DrawCoordinatorHost, seat: str) -> Any:
+    try:
+        return current_draw_permission(host, seat)
+    except SemanticNodeError as exc:
+        raise DrawError(str(exc)) from exc
+
+
 def _continue_draw_sequence(
     host: DrawCoordinatorHost,
     seat: str,
@@ -184,6 +244,23 @@ def _continue_draw_sequence(
         reason=reason,
         private=private,
     )
+    permission = _draw_permission(host, seat)
+    if not permission.allows_individual_draw():
+        prepared = prepare_draw_event(
+            request,
+            apnap_order=host.apnap_order(),
+            prohibition_ids=permission.restriction_ids,
+        )
+        commit_prepared_draw(host, prepared)
+        _continue_draw_sequence(
+            host,
+            seat,
+            remaining - 1,
+            reason=reason,
+            private=private,
+            resume=resume,
+        )
+        return
     effects = _replacement_effects(host, seat)
     prepared = prepare_draw_event(
         request,

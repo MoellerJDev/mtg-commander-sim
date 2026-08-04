@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Mapping, Sequence
 
 from ..replacement import (
@@ -131,9 +131,15 @@ class DrawEventResolution:
     dredge_source_object_id: str | None = None
     dredge_source_zone_change_counter: int | None = None
     dredge_mill_count: int | None = None
+    prohibition_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
-        if self.kind not in {"draw", "prevented", _DREDGE_KIND}:
+        if self.kind not in {
+            "draw",
+            "prevented",
+            "prohibited",
+            _DREDGE_KIND,
+        }:
             raise DrawError(f"Unsupported draw result {self.kind!r}")
         _stable_string(self.player, field="Draw result player")
         _stable_string(self.reason, field="Draw result reason")
@@ -145,6 +151,29 @@ class DrawEventResolution:
             self.dredge_source_zone_change_counter,
             self.dredge_mill_count,
         )
+        if any(
+            type(value) is not str or not value
+            for value in self.prohibition_ids
+        ):
+            raise DrawError(
+                "Draw prohibition IDs must be nonempty strings"
+            )
+        if (
+            len(self.prohibition_ids) != len(set(self.prohibition_ids))
+            or tuple(sorted(self.prohibition_ids)) != self.prohibition_ids
+        ):
+            raise DrawError(
+                "Draw prohibition IDs must be unique and canonical"
+            )
+        if self.kind == "prohibited":
+            if not self.prohibition_ids:
+                raise DrawError(
+                    "A prohibited draw requires at least one prohibition"
+                )
+        elif self.prohibition_ids:
+            raise DrawError(
+                "Only a prohibited draw may carry prohibition IDs"
+            )
         if self.kind != _DREDGE_KIND:
             if any(value is not None for value in dredge_values):
                 raise DrawError(
@@ -180,6 +209,7 @@ class PreparedDrawEvent:
     resolution: DrawEventResolution | None
     pending: ReplacementBatchChoice | None = None
     consumed_selections: int = 0
+    prohibition_ids: tuple[str, ...] = ()
 
 
 def _batch(
@@ -225,6 +255,32 @@ def _draw_event(request: DrawEventRequest) -> ReplaceableEvent:
             "library_size": request.library_size,
             _REASON_FIELD: request.reason,
             "private": request.private,
+        },
+    )
+
+
+def _prohibited_draw_event(
+    requested: ReplaceableEvent,
+    prohibition_ids: Sequence[str],
+) -> ReplaceableEvent:
+    identifiers = tuple(prohibition_ids)
+    if any(type(value) is not str or not value for value in identifiers):
+        raise DrawError("Draw prohibition IDs must be nonempty strings")
+    if (
+        not identifiers
+        or len(identifiers) != len(set(identifiers))
+        or tuple(sorted(identifiers)) != identifiers
+    ):
+        raise DrawError(
+            "Draw prohibition IDs must be nonempty, unique, and canonical"
+        )
+    return replace(
+        requested,
+        payload={
+            **dict(requested.payload),
+            "is_draw": False,
+            "result_kind": "prohibited",
+            "prohibition_ids": list(identifiers),
         },
     )
 
@@ -304,8 +360,11 @@ def _draw_resolution(event: ReplaceableEvent) -> DrawEventResolution:
         raise DrawError("Resolved draw library size is malformed")
     if (kind == "draw") != (is_draw is True):
         raise DrawError("Resolved draw kind and draw flag disagree")
-    if kind in {"prevented", _DREDGE_KIND} and is_draw is not False:
+    if kind in {"prevented", "prohibited", _DREDGE_KIND} and is_draw is not False:
         raise DrawError("A replaced draw must clear its draw flag")
+    prohibition_ids = payload.get("prohibition_ids", ())
+    if not isinstance(prohibition_ids, (list, tuple)):
+        raise DrawError("Resolved draw prohibition IDs must be a list")
     return DrawEventResolution(
         kind=kind,
         player=player,
@@ -317,6 +376,7 @@ def _draw_resolution(event: ReplaceableEvent) -> DrawEventResolution:
             "dredge_source_zone_change_counter"
         ),
         dredge_mill_count=payload.get("dredge_mill_count"),
+        prohibition_ids=tuple(prohibition_ids),
     )
 
 
@@ -358,10 +418,27 @@ def prepare_draw_event(
     effects: Sequence[ReplacementEffect] = (),
     selections: Sequence[str | None | Mapping[str, Any]] = (),
     require_all_selections: bool = True,
+    prohibition_ids: Sequence[str] = (),
 ) -> PreparedDrawEvent:
     if not isinstance(request, DrawEventRequest):
         raise DrawError("Draw preparation requires a typed event request")
     requested = _draw_event(request)
+    if prohibition_ids:
+        if effects or selections:
+            raise DrawError(
+                "A prohibited draw cannot enter replacement ordering"
+            )
+        identifiers = tuple(prohibition_ids)
+        event = _prohibited_draw_event(requested, identifiers)
+        return PreparedDrawEvent(
+            request=request,
+            requested_event=requested,
+            event=event,
+            effects=(),
+            journal=(),
+            resolution=_draw_resolution(event),
+            prohibition_ids=identifiers,
+        )
     event, journal, pending, consumed = _advance(
         requested,
         effects=effects,
@@ -379,6 +456,7 @@ def prepare_draw_event(
         resolution=None if pending is not None else _draw_resolution(event),
         pending=pending,
         consumed_selections=consumed,
+        prohibition_ids=(),
     )
 
 
@@ -391,6 +469,22 @@ def validate_prepared_draw(
         raise DrawError("Draw validation requires a typed prepared event")
     if prepared.pending is not None or prepared.resolution is None:
         raise DrawError("A draw cannot commit with a pending replacement choice")
+    if prepared.prohibition_ids:
+        if prepared.effects or prepared.journal:
+            raise DrawError(
+                "A prohibited draw cannot carry replacement state"
+            )
+        if (
+            _prohibited_draw_event(
+                prepared.requested_event,
+                prepared.prohibition_ids,
+            )
+            != prepared.event
+        ):
+            raise DrawError("Draw prohibition state changed before commit")
+        if _draw_resolution(prepared.event) != prepared.resolution:
+            raise DrawError("Draw result changed before commit")
+        return
     try:
         replayed = resolve_replacement_batch(
             _batch(

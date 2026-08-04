@@ -24,6 +24,7 @@ class LocalMergeGateTests(unittest.TestCase):
             root / "tests" / "fixtures" / "scryfall-exact-lists.json",
             root / "tests" / "fixtures" / "browser-lifecycle-cards.json",
             root / "tests" / "fixtures" / "damage-result-cards.json",
+            root / "tests" / "fixtures" / "draw-rules-cards.json",
         ]
         with tempfile.TemporaryDirectory() as temporary:
             database = Path(temporary) / "test-ci.sqlite3"
@@ -101,6 +102,10 @@ class LocalMergeGateTests(unittest.TestCase):
         )
         self.assertIn(
             "tests/fixtures/damage-result-cards.json",
+            by_name["build_test_database"],
+        )
+        self.assertIn(
+            "tests/fixtures/draw-rules-cards.json",
             by_name["build_test_database"],
         )
         self.assertIn(

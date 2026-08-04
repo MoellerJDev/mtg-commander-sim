@@ -569,6 +569,36 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/compiler/draw_templates.py",
+      "layer": "semantics",
+      "owning_subsystem": "oracle_compiler",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/compiler/fixed_numbers.py",
+      "layer": "semantics",
+      "owning_subsystem": "oracle_compiler",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/compiler/ir_model.py",
       "layer": "semantics",
       "owning_subsystem": "oracle_compiler",
@@ -950,6 +980,20 @@
     },
     {
       "file": "mtg_commander_sim/drawing/model.py",
+      "layer": "rules",
+      "owning_subsystem": "drawing",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/drawing/restrictions.py",
       "layer": "rules",
       "owning_subsystem": "drawing",
       "allowed_dependency_layers": [
@@ -2135,6 +2179,21 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/semantic_choices/optional_draw.py",
+      "layer": "semantics",
+      "owning_subsystem": "semantic_choices",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/semantic_choices/ordering.py",
       "layer": "semantics",
       "owning_subsystem": "semantic_choices",
@@ -2385,6 +2444,21 @@
         "semantics"
       ],
       "game_state_access": "read_only",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/semantic_runtime/draw_restrictions.py",
+      "layer": "semantics",
+      "owning_subsystem": "semantic_runtime",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
       "card_specificity_policy": "generic_no_growth",
       "visibility_sensitivity": "authoritative_internal",
       "replay_participation": "authoritative"
@@ -2909,5 +2983,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "6215e9f32caba892987152bc9e5ad5972ff26e362da920942d5b1c1dad26e957"
+  "fingerprint": "fe91ae06aef1498277ea5fd86a71213bf9bbf137ee1c7d78166ffc10d390e668"
 }

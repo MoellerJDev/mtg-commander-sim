@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "3ac1203d161b3a484b88306290eddcda9d94082c4ce5398437185a95abf29dd6",
-  "declaration_source_fingerprint": "af6904ce2f8090a612cd38148889fec4b8f0cde5a503b77b8863329b2168f2e2",
+  "registry_fingerprint": "a2d6263220eb18f139230bdb2eda407d684ae3aba6318ccc186e1aa1c7e05120",
+  "declaration_source_fingerprint": "3913780105617bc0ac29c9c0a121d00adf15865aaae39921a3f9760ac72485d4",
   "declarations": [
     {
       "capability_id": "attachment.aura.simple_object",
@@ -5773,12 +5773,42 @@
     {
       "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "interaction",
+      "test_id": "tests.test_draw_restrictions.DrawRestrictionIntegrationTests.test_dredge_does_not_consume_maximum_one_draw_allowance",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "A replaced draw does not consume a maximum-one allowance, so a later individual draw in the instruction remains permitted."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "interaction",
       "test_id": "tests.test_draw_step_rules.DrawStepRuleTests.test_trusted_draw_replacement_finishes_before_priority",
       "official_rule_ids": [
         "121.1",
         "121.2",
         "121.2a",
+        "121.2b",
         "121.2c",
+        "121.3",
+        "121.3a",
         "121.4",
         "121.5",
         "121.6",
@@ -5797,12 +5827,42 @@
     {
       "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "multiplayer",
+      "test_id": "tests.test_optional_draw_choices.OptionalDrawChoiceIntegrationTests.test_four_player_chooser_uses_prospective_drawer_legality",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Evaluate optional-draw feasibility against the prospective drawer even when another active player owns the choice."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "multiplayer",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_uses_apnap_order_and_exact_engine_path",
       "official_rule_ids": [
         "121.1",
         "121.2",
         "121.2a",
+        "121.2b",
         "121.2c",
+        "121.3",
+        "121.3a",
         "121.4",
         "121.5",
         "121.6",
@@ -5826,7 +5886,10 @@
         "121.1",
         "121.2",
         "121.2a",
+        "121.2b",
         "121.2c",
+        "121.3",
+        "121.3a",
         "121.4",
         "121.5",
         "121.6",
@@ -5844,13 +5907,70 @@
     },
     {
       "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_draw_restriction_mutant_is_killed",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill removal of live draw-restriction collection with an authoritative prohibition result assertion."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "negative",
+      "test_id": "tests.test_draw_restrictions.DrawRestrictionIntegrationTests.test_draw_prohibition_is_checked_before_dredge_replacements",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject a prohibited individual draw before collecting or offering any replacement for that nonexistent draw event."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "negative",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_registered_node_validation_fails_before_mutation",
       "official_rule_ids": [
         "121.1",
         "121.2",
         "121.2a",
+        "121.2b",
         "121.2c",
+        "121.3",
+        "121.3a",
         "121.4",
         "121.5",
         "121.6",
@@ -5869,12 +5989,96 @@
     {
       "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "positive",
+      "test_id": "tests.test_draw_replacement_components.DrawInstructionReplacementIntegrationTests.test_two_draw_doublers_modify_instruction_before_individual_draws",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply represented unconditional draw-count replacements to the instruction before creating its individual draw events."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "positive",
+      "test_id": "tests.test_draw_restrictions.DrawRestrictionIntegrationTests.test_mandatory_multi_draw_partially_occurs_under_maximum_one",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Allow a mandatory multi-card instruction to perform every currently permitted individual draw and prohibit only the remainder."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "positive",
+      "test_id": "tests.test_draw_restrictions.DrawRestrictionModelTests.test_optional_empty_library_draw_remains_legal_without_a_prohibition",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep an optional draw legal when the library is empty unless an actual draw prohibition applies."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "positive",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_handler_lowers_typed_intent_through_read_only_context",
       "official_rule_ids": [
         "121.1",
         "121.2",
         "121.2a",
+        "121.2b",
         "121.2c",
+        "121.3",
+        "121.3a",
         "121.4",
         "121.5",
         "121.6",
@@ -5898,7 +6102,10 @@
         "121.1",
         "121.2",
         "121.2a",
+        "121.2b",
         "121.2c",
+        "121.3",
+        "121.3a",
         "121.4",
         "121.5",
         "121.6",
@@ -5916,13 +6123,97 @@
     },
     {
       "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_optional_draw_choices.OptionalDrawChoiceIntegrationTests.test_optional_draw_choice_is_seat_scoped_and_replays_exactly",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project an optional-draw decision only to its chooser while retaining private drawn-card identity."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "replay",
+      "test_id": "tests.test_optional_draw_choices.OptionalDrawChoiceIntegrationTests.test_optional_draw_choice_is_seat_scoped_and_replays_exactly",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the exact structured optional-draw choice and its canonical draw continuation."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "replay",
+      "test_id": "tests.test_oracle_ir.OracleIRTests.test_generic_draw_prohibition_replays_exactly",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay a generically compiled battlefield draw restriction and the exact permitted and prohibited individual results."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "replay",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_migrated_semantic_effect_replays_exactly",
       "official_rule_ids": [
         "121.1",
         "121.2",
         "121.2a",
+        "121.2b",
         "121.2c",
+        "121.3",
+        "121.3a",
         "121.4",
         "121.5",
         "121.6",
@@ -5939,5 +6230,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "2d174c7fe63e778dc82f7db41e11f8ffe9413a1d64402ea8971ddd49dcfb2dbd"
+  "fingerprint": "95218a88ee82dd7cd0dad1a3648f264cfda0de429b22a58a6a442b39422f27d2"
 }

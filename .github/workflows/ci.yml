@@ -67,6 +67,7 @@ jobs:
           --fixture tests/fixtures/scryfall-exact-lists.json
           --fixture tests/fixtures/browser-lifecycle-cards.json
           --fixture tests/fixtures/damage-result-cards.json
+          --fixture tests/fixtures/draw-rules-cards.json
           --output data/test-ci.sqlite3
       - name: Run functional shard
         run: python scripts/test_shards.py run "${{ matrix.shard }}"
@@ -94,6 +95,7 @@ jobs:
           --fixture tests/fixtures/scryfall-exact-lists.json
           --fixture tests/fixtures/browser-lifecycle-cards.json
           --fixture tests/fixtures/damage-result-cards.json
+          --fixture tests/fixtures/draw-rules-cards.json
           --output data/test-ci.sqlite3
       - name: Validate Python runtime and compile
         run: |
@@ -160,6 +162,7 @@ jobs:
             --fixture tests/fixtures/scryfall-exact-lists.json `
             --fixture tests/fixtures/browser-lifecycle-cards.json `
             --fixture tests/fixtures/damage-result-cards.json `
+            --fixture tests/fixtures/draw-rules-cards.json `
             --output data/test-ci.sqlite3
       - name: Run focused Windows compatibility suite
         if: needs.plan.outputs.windows_full != 'true'
@@ -205,6 +208,7 @@ jobs:
           --fixture tests/fixtures/scryfall-exact-lists.json
           --fixture tests/fixtures/browser-lifecycle-cards.json
           --fixture tests/fixtures/damage-result-cards.json
+          --fixture tests/fixtures/draw-rules-cards.json
           --output data/test-ci.sqlite3
       - name: Verify generated protocol types and production build
         run: |

@@ -107,21 +107,22 @@
       "exception_id": "ARCH-EXC-0006",
       "adr": "docs/adr/0021-canonical-draw-transaction.md",
       "artifact": "platform/architecture-guard-baseline.json",
-      "allowance_fingerprint": "17422925bca1c4fc541554b603f649ef8ff9e2fa12a55aa8b6213712492f1339",
-      "exact_allowance": "Only the reduced structural write identities, engine methods, size ceilings, specificity literals, Oracle-ID literals, effect operations, and legacy helpers serialized after canonical draw-transaction extraction.",
-      "rationale": "The focused draw model, coordinator, transaction, and compiler IR model remove draw sequencing and mutation responsibilities from CommanderEngine while adding the reviewed generic conditional-draw and temporary-protection operations. Engine size, direct writes, printed-name specificity, and Oracle IR size all decrease or remain ratcheted.",
+      "allowance_fingerprint": "cc239a1be1360786a5249ae281371778b76a74a1e1b16a522089f3cd0e4ec8a8",
+      "exact_allowance": "Only the reduced structural write identities, engine methods, size ceilings, specificity literals, Oracle-ID literals, effect operations, and legacy helpers serialized after canonical draw-transaction and draw-permission extraction.",
+      "rationale": "The focused draw model, coordinator, transaction, permission query, semantic-choice handler, and compiler templates remove draw sequencing and legality responsibilities from CommanderEngine while adding reviewed generic conditional-draw, optional-draw, and temporary-protection operations. Engine size, direct writes, printed-name specificity, and oversized Oracle IR functions all decrease or remain ratcheted.",
       "owner": "rules architecture maintainers",
-      "maximum_scope": "Existing serialized residual allowances plus the reviewed draw_if_opponent_cast_colors_this_turn and grant_uncounterable_hexproof_from_colors_until_end operations; removals are allowed and additions or growth are forbidden.",
-      "removal_condition": "Remove the exception when every serialized grandfathered allowance has migrated to a reviewed owner; retain the two generic operations only while they remain the narrow ordered-effect entries described by ADR 0021.",
+      "maximum_scope": "Existing serialized residual allowances plus the reviewed draw_if_opponent_cast_colors_this_turn, offer_draw, and grant_uncounterable_hexproof_from_colors_until_end operations; removals are allowed and additions or growth are forbidden.",
+      "removal_condition": "Remove the exception when every serialized grandfathered allowance has migrated to a reviewed owner; retain the three generic operations only while they remain the narrow ordered-effect and optional-choice entries described by ADR 0021.",
       "target_milestone": "incremental draw, replacement, choice, and ordinary-effect closure",
-      "replay_implications": "Game Record v3 remains compatible; draw instructions, individual replacement events, choices, and historical semantic programs deserialize and replay through explicit versioned paths.",
-      "privacy_implications": "Draw results and replacement choices remain affected-principal scoped; the reviewed operations reveal no hidden library, hand, or cross-seat information.",
-      "security_implications": "The reviewed operations accept closed descriptor data and grant no callback, arbitrary mutation, transport access, or raw capability authority.",
+      "replay_implications": "Game Record v3 remains compatible; draw instructions, prohibitions, individual replacement events, optional choices, and historical semantic programs deserialize and replay through explicit versioned paths.",
+      "privacy_implications": "Draw results and replacement choices remain affected-principal scoped; chooser and prospective drawer are distinct and the reviewed operations reveal no hidden library, hand, or cross-seat information.",
+      "security_implications": "The reviewed operations accept closed descriptor data, revalidate live draw permission, and grant no callback, arbitrary mutation, transport access, or raw capability authority.",
       "tests": [
         "tests.test_architecture_guards.ArchitectureGuardTests.test_current_repository_passes_every_architecture_guard",
         "tests.test_architecture_governance.ArchitectureGovernanceTests.test_exception_is_bound_to_exact_allowance_fingerprint",
         "tests.test_draw_transaction_model.DrawTransactionModelTests.test_dredge_replacement_replays_exactly",
-        "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_veil_ordered_draw_uses_replacement_coordinator"
+        "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_veil_ordered_draw_uses_replacement_coordinator",
+        "tests.test_optional_draw_choices.OptionalDrawChoiceIntegrationTests.test_optional_draw_choice_is_seat_scoped_and_replays_exactly"
       ]
     }
   ]

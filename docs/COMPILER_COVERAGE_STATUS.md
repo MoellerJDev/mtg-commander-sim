@@ -16,7 +16,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 - Compiler: `oracle-ir-v26`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
-- Compiler module: 1,666 physical / 1,618 logical lines
+- Compiler module: 1,589 physical / 1,541 logical lines
 
 ## Canonical CardProgram
 
@@ -48,11 +48,11 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/24`
+- Registry schema/version: `1/25`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `3ac1203d161b3a484b88306290eddcda9d94082c4ce5398437185a95abf29dd6`
-- Evidence fingerprint: `2d174c7fe63e778dc82f7db41e11f8ffe9413a1d64402ea8971ddd49dcfb2dbd`
-- Explicit evidence declarations: 318
+- Registry fingerprint: `a2d6263220eb18f139230bdb2eda407d684ae3aba6318ccc186e1aa1c7e05120`
+- Evidence fingerprint: `95218a88ee82dd7cd0dad1a3648f264cfda0de429b22a58a6a442b39422f27d2`
+- Explicit evidence declarations: 328
 - Capability records: 42
 - Trusted records: 32
 - Blocked records: 4
