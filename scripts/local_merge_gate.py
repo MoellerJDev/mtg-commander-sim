@@ -92,6 +92,14 @@ def build_steps(
             ),
         ),
         GateStep(
+            "generated_card_unlock_frontier_freshness",
+            (
+                python,
+                "scripts/update_card_unlock_frontier.py",
+                "--check",
+            ),
+        ),
+        GateStep(
             "generated_ci_escape_report_freshness",
             (
                 python,

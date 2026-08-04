@@ -38,6 +38,11 @@ LEGACY_EVIDENCE_FIELDS = {
     "replay": "replay_tests",
 }
 MUTATION_TESTS = {
+    "combat.attack.vigilance": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_combat_vigilance_mutant_is_killed"
+    ),
     "protection.typed.debt": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

@@ -60,6 +60,7 @@ class LocalMergeGateTests(unittest.TestCase):
         self.assertEqual(
             {
                 "generated_capability_evidence_freshness",
+                "generated_card_unlock_frontier_freshness",
                 "generated_ci_escape_report_freshness",
                 "python_runtime_policy",
                 "generated_rules_scheduler_freshness",
@@ -133,6 +134,14 @@ class LocalMergeGateTests(unittest.TestCase):
                 "--check",
             ),
             by_name["generated_capability_evidence_freshness"],
+        )
+        self.assertEqual(
+            (
+                "python-under-test",
+                "scripts/update_card_unlock_frontier.py",
+                "--check",
+            ),
+            by_name["generated_card_unlock_frontier_freshness"],
         )
         self.assertEqual(
             (

@@ -1,5 +1,5 @@
 {
-  "contract_count": 63,
+  "contract_count": 64,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -371,6 +371,12 @@
       "mechanic_id": "cr-503-upkeep-step",
       "path": "mechanics/contracts/upkeep-step.json",
       "sha256": "443acf9d3f7bc254c735c0df6637963796123604598f49eb6c62d9586ad19f2c",
+      "version": 1
+    },
+    {
+      "mechanic_id": "vigilance",
+      "path": "mechanics/contracts/vigilance.json",
+      "sha256": "015e44655510dbcc7b7e4b45e608faebd97feeb670c4c081c8fed96d6c33a807",
       "version": 1
     },
     {
@@ -3883,20 +3889,29 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/vigilance.json",
+      "contract_sha256": "015e44655510dbcc7b7e4b45e608faebd97feeb670c4c081c8fed96d6c33a807",
+      "contract_version": 1,
+      "coverage_status": "trusted",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.tap_state.tap_declared_attackers",
+      "implementation_version": "combat-vigilance-v1",
       "kind": "keyword_ability",
+      "known_blockers": [],
       "mechanic_id": "vigilance",
       "official_name": "Vigilance",
       "rule_references": [
         "702.20"
       ],
-      "test_ids": [],
-      "trust_level": "untrusted"
+      "test_ids": [
+        "test_attackers_tap_except_vigilance_then_active_player_gets_priority",
+        "test_vigilance_tap_owner_uses_current_effective_keywords",
+        "test_vigilance_tap_owner_fails_closed_before_batch_mutation",
+        "test_vigilance_is_defender_independent_in_four_player_combat"
+      ],
+      "trust_level": "trusted"
     },
     {
       "category": "additional_rules",
@@ -8715,18 +8730,18 @@
       "available": true,
       "database_schema_version": "2",
       "oracle_bulk": {
-        "download_uri": "https://data.scryfall.io/oracle-cards/oracle-cards-20260802090231.jsonl.gz",
-        "oracle_id_count": 38485,
-        "sha256": "47be914ae0e54bbf63b285c065b4eb823a5f42927dcff6a404c0023ca870fba0",
-        "source_filename": "oracle-cards-20260802090231.jsonl.gz",
-        "updated_at": "2026-08-02T09:02:31.886+00:00"
+        "download_uri": "https://data.scryfall.io/oracle-cards/oracle-cards-20260804090245.jsonl.gz",
+        "oracle_id_count": 38542,
+        "sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
+        "source_filename": "oracle-cards-20260804090245.jsonl.gz",
+        "updated_at": "2026-08-04T09:02:45.219+00:00"
       },
       "rulings_bulk": {
-        "download_uri": "https://data.scryfall.io/rulings/rulings-20260802090036.jsonl.gz",
+        "download_uri": "https://data.scryfall.io/rulings/rulings-20260804090038.jsonl.gz",
         "ruling_count": 77998,
-        "sha256": "6e0f7b8e73981df2da7d91329c1904e68a33c0269ec655d29484379beb3b725e",
-        "source_filename": "rulings-20260802090036.jsonl.gz",
-        "updated_at": "2026-08-02T09:00:36.367+00:00"
+        "sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098",
+        "source_filename": "rulings-20260804090038.jsonl.gz",
+        "updated_at": "2026-08-04T09:00:38.847+00:00"
       }
     },
     "comprehensive_rules": "indexed",
@@ -9912,5 +9927,5 @@
       "taxonomy_id": "cr-905-conspiracy-draft"
     }
   ],
-  "trusted_mechanic_count": 0
+  "trusted_mechanic_count": 1
 }

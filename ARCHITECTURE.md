@@ -146,6 +146,17 @@ semantic hash, and exact fingerprint. Runtime still consumes a derived
 Game Record v3 records pin CardProgram fingerprints without changing the record
 version.
 
+`compiler/unlock_frontier.py` is an offline analysis boundary over the pinned
+Oracle snapshot and the canonical CardProgram compiler. It emits complete
+per-card and per-ability classifications, minimum known blocker sets, and
+bounded blocker-family bundles under snapshot, capability-registry, and
+semantic-source fingerprints. The generated deterministic gzip JSON is
+deliberately not a runtime index and is never shipped to or loaded by the
+browser. CI verifies the pinned artifact directly, so normal checks do not
+rescan the SQLite corpus. Frontier
+scores guide reusable capability harvests but do not prove ambient interaction
+closure or full rules support.
+
 The frozen semantic-handler inventory currently owns draw, table-wide draw,
 monarch, single-permanent tap/untap, and all-creature untap. Tap-state handlers
 lower from immutable context into typed intents; `tap_state.py` is the focused

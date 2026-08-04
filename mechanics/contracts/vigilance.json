@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "vigilance",
+  "official_name": "Vigilance",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": ["508.1f", "702.20", "702.20a", "702.20b", "702.20c"],
+  "glossary_references": ["vigilance"],
+  "dependencies": [],
+  "coverage_status": "trusted",
+  "trust_level": "trusted",
+  "behavior": {
+    "zones": ["battlefield"],
+    "objects": ["creature declared as an attacker"],
+    "events": ["declare attackers turn-based action"],
+    "state_reads": ["current effective keyword state after represented continuous effects"],
+    "state_writes": ["ordinary declared attacker becomes tapped"],
+    "costs": [],
+    "timing": ["after declaration legality and requirements, before attack declaration costs are chosen and paid"],
+    "targets": [],
+    "choices": [],
+    "hidden_information": [],
+    "apnap": [],
+    "layers": ["current represented layer-6 keyword result is consumed rather than printed Oracle text"],
+    "replacement_effects": [],
+    "copy": ["a copy avoids tapping only when vigilance is present in its current effective keyword state"],
+    "control_change": ["the active player's legal declared attackers are evaluated independently of their attack defender"],
+    "zone_change": ["the declaration coordinator validates the battlefield object before this atomic result"],
+    "source_leaves": []
+  },
+  "variants": ["multiple instances are redundant", "different defenders in multiplayer combat do not change the result"],
+  "witness_cards": [
+    {
+      "name": "Standing Troops",
+      "oracle_id": "9e9d5242-424d-4f61-b625-806295dbb0c7"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_attackers_tap_except_vigilance_then_active_player_gets_priority",
+    "test_vigilance_tap_owner_uses_current_effective_keywords",
+    "test_vigilance_tap_owner_fails_closed_before_batch_mutation",
+    "test_vigilance_is_defender_independent_in_four_player_combat"
+  ],
+  "implementation": {
+    "component": "mtg_commander_sim.tap_state.tap_declared_attackers",
+    "version": "combat-vigilance-v1"
+  },
+  "known_blockers": [],
+  "review_status": "reviewed"
+}

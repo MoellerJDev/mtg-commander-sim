@@ -174,6 +174,39 @@ class CardProgramV2Tests(unittest.TestCase):
             "deal_damage", choice["shield"]["aftermath"][0]["kind"]
         )
 
+    def test_two_face_semantic_aliases_bind_to_exact_oracle_faces(self):
+        program = _compile_best_available(
+            self.db,
+            self.db.lookup("Tithing Blade"),
+            registry=SemanticRegistry(),
+            profile="commander_review",
+            capabilities=self.capabilities,
+        )
+        by_id = {
+            ability.ability_id: ability
+            for ability in program.abilities
+        }
+
+        self.assertEqual(
+            "Tithing Blade",
+            by_id["spell:front"].provenance["face_id"],
+        )
+        self.assertEqual(
+            "Tithing Blade",
+            by_id["trigger:front-enter"].provenance["face_id"],
+        )
+        self.assertEqual(
+            "Consuming Sepulcher",
+            by_id["trigger:back-upkeep"].provenance["face_id"],
+        )
+        self.assertEqual(
+            {
+                "Tithing Blade",
+                "Consuming Sepulcher",
+            },
+            {face.face_id for face in program.faces},
+        )
+
     def test_corrected_prevention_sequence_has_new_pinned_fingerprint(self):
         current = compile_card_program(
             self.db,
@@ -743,7 +776,7 @@ class CardProgramV2Tests(unittest.TestCase):
 
     def test_cli_does_not_downgrade_unexpected_compiler_errors(self):
         with patch(
-            "mtg_commander_sim.card_programs.commands.compile_card_program",
+            "mtg_commander_sim.card_programs.adapters.compile_card_program",
             side_effect=ValueError("broken CardProgram structure"),
         ) as compile_program:
             with self.assertRaisesRegex(ValueError, "broken CardProgram"):

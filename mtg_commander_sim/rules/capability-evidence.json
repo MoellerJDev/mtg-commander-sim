@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "b333497580e5c49cba62012d1c0318890cd137db3f821f2bf2a1246716dbe09b",
-  "declaration_source_fingerprint": "a00b0ad689b068e7b8518880882e7a3405c5b9dd4b92c3e7573eebf644a66e2b",
+  "registry_fingerprint": "cc9f8dc5e03e36b394feed0ecec7b7962ceadb52c65326fa76f1cda812c934cb",
+  "declaration_source_fingerprint": "afc0cadfb66cf5a686f7730b4ed9cf409f2e2a67e265ca7cec73a1faccf57ef9",
   "declarations": [
     {
       "capability_id": "attachment.aura.simple_object",
@@ -454,6 +454,132 @@
         "commander_review"
       ],
       "applicability_note": "Replay the attachment command and verify the exact relation result."
+    },
+    {
+      "capability_id": "combat.attack.vigilance",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_vigilance_tap_owner_uses_current_effective_keywords",
+      "official_rule_ids": [
+        "508.1f",
+        "702.20",
+        "702.20a",
+        "702.20b",
+        "702.20c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Consume current represented effective keywords and treat multiple vigilance instances as redundant."
+    },
+    {
+      "capability_id": "combat.attack.vigilance",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_vigilance_is_defender_independent_in_four_player_combat",
+      "official_rule_ids": [
+        "508.1f",
+        "702.20",
+        "702.20a",
+        "702.20b",
+        "702.20c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Leave vigilant attackers untapped independently across three defending-player declarations."
+    },
+    {
+      "capability_id": "combat.attack.vigilance",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_combat_vigilance_mutant_is_killed",
+      "official_rule_ids": [
+        "508.1f",
+        "702.20",
+        "702.20a",
+        "702.20b",
+        "702.20c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that ignores the current vigilance keyword during declaration tapping."
+    },
+    {
+      "capability_id": "combat.attack.vigilance",
+      "evidence_class": "negative",
+      "test_id": "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_vigilance_tap_owner_fails_closed_before_batch_mutation",
+      "official_rule_ids": [
+        "508.1f",
+        "702.20",
+        "702.20a",
+        "702.20b",
+        "702.20c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject a malformed attacker set before an earlier ordinary attacker is tapped."
+    },
+    {
+      "capability_id": "combat.attack.vigilance",
+      "evidence_class": "positive",
+      "test_id": "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_attackers_tap_except_vigilance_then_active_player_gets_priority",
+      "official_rule_ids": [
+        "508.1f",
+        "702.20",
+        "702.20a",
+        "702.20b",
+        "702.20c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Tap an ordinary attacker and leave a vigilant attacker untapped in the normal declaration transaction."
+    },
+    {
+      "capability_id": "combat.attack.vigilance",
+      "evidence_class": "positive",
+      "test_id": "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_vigilance_tap_owner_uses_current_effective_keywords",
+      "official_rule_ids": [
+        "508.1f",
+        "702.20",
+        "702.20a",
+        "702.20b",
+        "702.20c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply the complete tap set atomically using current represented effective keyword state."
+    },
+    {
+      "capability_id": "combat.attack.vigilance",
+      "evidence_class": "replay",
+      "test_id": "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_attackers_tap_except_vigilance_then_active_player_gets_priority",
+      "official_rule_ids": [
+        "508.1f",
+        "702.20",
+        "702.20a",
+        "702.20b",
+        "702.20c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the attack declaration and verify both tap outcomes exactly."
     },
     {
       "capability_id": "continuous.attached.fixed_characteristics",
@@ -6422,5 +6548,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "80f30c6a25101e4afaf209bc9aedd8529cb0eddeea873e31c522c4c2fc72bb46"
+  "fingerprint": "e0c2ab9f5054230f436d95bff1164da513be4b5bd6960d430e648f42fa61b65f"
 }

@@ -36,7 +36,7 @@
     {
       "id": "generated-coverage-sources",
       "patterns": ["coverage/**", "platform/readiness-source.json"],
-      "checks": ["architecture", "platform-status"]
+      "checks": ["architecture", "card-unlock-frontier", "platform-status"]
     },
     {
       "id": "capability-and-card-program-sources",
@@ -52,7 +52,7 @@
         "schemas/card-program-v2.schema.json",
         "schemas/rule-capability-registry.schema.json"
       ],
-      "checks": ["capability-evidence"]
+      "checks": ["capability-evidence", "card-unlock-frontier"]
     },
     {
       "id": "platform-and-workflow-sources",
@@ -75,7 +75,12 @@
         "mtg_commander_sim/mechanic_contracts.py"
       ],
       "test_suites": ["compiler-cardprogram"],
-      "checks": ["capability-evidence"]
+      "checks": ["capability-evidence", "card-unlock-frontier"]
+    },
+    {
+      "id": "card-unlock-frontier-generator",
+      "patterns": ["scripts/update_card_unlock_frontier.py"],
+      "checks": ["card-unlock-frontier"]
     },
     {
       "id": "rules-events-replacements-suite",

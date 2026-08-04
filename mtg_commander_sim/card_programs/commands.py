@@ -18,7 +18,9 @@ from ..semantic_runtime import (
 )
 from ..semantics import SemanticRegistry
 from ..util import stable_json
-from .adapters import compile_card_program
+from .adapters import (
+    compile_best_available_card_program,
+)
 from .model import CardProgram
 
 
@@ -77,27 +79,13 @@ def _compile_best_available(
     profile: str,
     capabilities: CapabilityRegistry | None = None,
 ) -> CardProgram:
-    capabilities = capabilities or load_default_capability_registry()
-    try:
-        return compile_card_program(
-            db,
-            record,
-            semantic_registry=registry,
-            capability_registry=capabilities,
-            capability_profile=profile,
-            trust_level="trusted",
-        )
-    except ValueError as exc:
-        if "cannot be promoted to trusted generated semantics" not in str(exc):
-            raise
-        return compile_card_program(
-            db,
-            record,
-            semantic_registry=registry,
-            capability_registry=capabilities,
-            capability_profile=profile,
-            trust_level="provisional",
-        )
+    return compile_best_available_card_program(
+        db,
+        record,
+        semantic_registry=registry,
+        capability_registry=capabilities,
+        capability_profile=profile,
+    )
 
 
 def explain_card_program(program: CardProgram) -> dict[str, Any]:

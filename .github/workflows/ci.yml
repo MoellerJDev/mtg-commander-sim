@@ -107,6 +107,7 @@ jobs:
       - name: Verify generated outputs
         run: |
           python scripts/update_capability_evidence.py --check
+          python scripts/update_card_unlock_frontier.py --check
           python scripts/update_ci_escape_report.py --check
           python scripts/update_rules_scheduler.py --check
           python scripts/update_module_classifications.py --check

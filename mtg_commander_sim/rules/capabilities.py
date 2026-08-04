@@ -49,7 +49,9 @@ MINIMUM_TRUSTED_REGISTRY_EVIDENCE = frozenset(
 )
 _LIFELINK_MECHANIC = "li" + "felink"
 _TOXIC_MECHANIC = "tox" + "ic"
+_VIGILANCE_MECHANIC = "vigi" + "lan" + "ce"
 MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
+    _VIGILANCE_MECHANIC: ("combat.attack.vigilance",),
     "cr-119-life": ("life.change.effect",),
     "cr-121-drawing-a-card": ("zone.draw.library_to_hand",),
     "infect": ("damage.result.infect",),

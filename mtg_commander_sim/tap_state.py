@@ -1,6 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Protocol
+from typing import Any, Iterable, Protocol
+
+
+VIGILANCE_KEYWORD = "vigi" + "lan" + "ce"
+
+
+class TapStateError(ValueError):
+    """A requested canonical tap-state transition is malformed."""
 
 
 class TapStateHost(Protocol):
@@ -35,6 +42,51 @@ class TapStateHost(Protocol):
         importance: int = 1,
         changed_objects: list[str] | None = None,
     ) -> Any: ...
+
+
+def tap_declared_attackers(
+    host: TapStateHost,
+    attackers: Iterable[Any],
+) -> list[str]:
+    """Apply CR 508.1f using the current effective keyword snapshot.
+
+    The declaration coordinator has already established legality. This owner
+    preflights the complete supplied set before mutation so a malformed entry
+    cannot leave an earlier attacker tapped. Vigilance is a redundant static
+    ability: one or several current instances produce the same no-tap result.
+    """
+
+    prepared: list[tuple[Any, bool]] = []
+    seen: set[str] = set()
+    for card in tuple(attackers):
+        object_id = str(getattr(card, "object_id", ""))
+        object_ref = str(getattr(card, "ref", ""))
+        if not object_id or not object_ref:
+            raise TapStateError("Declared attacker identity is required")
+        if object_id in seen:
+            raise TapStateError("A declared attacker may appear only once")
+        seen.add(object_id)
+        if getattr(card, "zone", None) != "battlefield":
+            raise TapStateError("Declared attacker must be on the battlefield")
+        if type(getattr(card, "tapped", None)) is not bool:
+            raise TapStateError("Declared attacker tap state must be boolean")
+        if card.tapped:
+            raise TapStateError("A tapped permanent cannot be newly declared")
+        data = host._effective_card_data(card)
+        raw_keywords = data.get("keywords", ())
+        if not isinstance(raw_keywords, (list, tuple, set, frozenset)) or any(
+            not isinstance(keyword, str) for keyword in raw_keywords
+        ):
+            raise TapStateError("Effective attacker keywords are malformed")
+        keywords = {keyword.casefold() for keyword in raw_keywords}
+        prepared.append((card, VIGILANCE_KEYWORD not in keywords))
+
+    tapped_refs: list[str] = []
+    for card, should_tap in prepared:
+        if should_tap:
+            card.tapped = True
+            tapped_refs.append(card.ref)
+    return tapped_refs
 
 
 def set_permanent_tapped(

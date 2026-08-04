@@ -137,6 +137,7 @@ class MechanicContractTests(unittest.TestCase):
                 "tap-and-untap",
                 "toxic",
                 "trample",
+                "vigilance",
                 "wither",
             },
             {contract["mechanic_id"] for contract in contracts},
@@ -1491,6 +1492,45 @@ class OracleIRTests(unittest.TestCase):
         self.assertEqual("trusted", programs[0].trust_level)
         self.assertIn("protection", programs[0].coverage)
         self.assertNotIn("flying", programs[0].coverage)
+
+    def test_vigilance_keyword_uses_the_bounded_combat_capability(self):
+        # Keep this grammar unit independent of the full Scryfall database.
+        # Wight is present in the compact CI fixture; narrowing its text leaves
+        # a single keyword declaration while retaining a normal CardRecord.
+        record = replace(
+            self.db.lookup("Wight of the Reliquary"),
+            oracle_text="Vigilance",
+            keywords=("Vigilance",),
+        )
+        capabilities = load_default_capability_registry()
+
+        ir = compile_oracle_card(
+            record,
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+
+        self.assertEqual("exact", ir.status)
+        self.assertEqual(0, len(ir.material_residuals))
+        node = ir.faces[0].nodes[0]
+        self.assertEqual(("vigilance",), node.mechanics)
+        self.assertEqual(
+            ("combat.attack.vigilance",),
+            node.capability_dependencies,
+        )
+        programs = generated_programs(
+            self.db,
+            record,
+            trust_level="trusted",
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+        self.assertEqual(1, len(programs))
+        self.assertEqual("trusted", programs[0].trust_level)
+        self.assertEqual(
+            ["combat.attack.vigilance"],
+            programs[0].capability_dependencies,
+        )
 
     def test_material_unknowns_fail_closed_with_specific_residuals(self):
         rest = compile_oracle_card(self.db.lookup("Rest in Peace"))

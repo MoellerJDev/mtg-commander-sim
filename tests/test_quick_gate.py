@@ -31,6 +31,11 @@ class QuickGatePlanTests(unittest.TestCase):
         self.assertIn("browser-build", names)
         self.assertFalse(any("e2e" in name for name in names))
 
+    def test_compiler_plan_checks_card_unlock_frontier(self):
+        plan = build_plan(("mtg_commander_sim/compiler/oracle_parser.py",))
+        names = [step.name for step in plan["steps"]]
+        self.assertIn("card-unlock-frontier", names)
+
 
 if __name__ == "__main__":
     unittest.main()
