@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "4f30391709325a5ce7439f87a657f2afdba1327e8303dae8771492538a8152bc",
-  "declaration_source_fingerprint": "d5222b593ce3bdac951527dbdedc89810a25fbe68cb72b9ac9f340a2be7d3804",
+  "registry_fingerprint": "a4700cfa9cd1eb9303ecda95f02437c5cabbe06b3aa03eead9b8394f5a9ae8d0",
+  "declaration_source_fingerprint": "f6a7e45fd67f8aabe4faba7abdd9c5a43ad2307c8d50b74397930acbc847611f",
   "declarations": [
     {
       "capability_id": "continuous.basic_land_type.add_all_lands",
@@ -3089,6 +3089,132 @@
       "applicability_note": "Attribute combat damage to the designated physical commander card across zone and control changes and apply the separate 21-damage state-based action ledger."
     },
     {
+      "capability_id": "life.change.effect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_life_effect_runtime.LifeEffectRuntimeTests.test_drain_log_reports_final_replacement_adjusted_values",
+      "official_rule_ids": [
+        "119.1",
+        "119.2",
+        "119.3",
+        "119.4",
+        "119.9"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals."
+    },
+    {
+      "capability_id": "life.change.effect",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_life_effect_runtime.LifeEffectRuntimeTests.test_table_wide_loss_and_drain_are_simultaneous_typed_batches",
+      "official_rule_ids": [
+        "119.1",
+        "119.2",
+        "119.3",
+        "119.4",
+        "119.9"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals."
+    },
+    {
+      "capability_id": "life.change.effect",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_life_effect_commit_mutant_is_killed",
+      "official_rule_ids": [
+        "119.1",
+        "119.2",
+        "119.3",
+        "119.4",
+        "119.9"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals."
+    },
+    {
+      "capability_id": "life.change.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_life_effect_runtime.LifeEffectRuntimeTests.test_invalid_batch_member_rolls_back_every_life_change",
+      "official_rule_ids": [
+        "119.1",
+        "119.2",
+        "119.3",
+        "119.4",
+        "119.9"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals."
+    },
+    {
+      "capability_id": "life.change.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_life_effect_runtime.LifeEffectRuntimeTests.test_life_and_loss_commit_through_the_typed_batch_owner",
+      "official_rule_ids": [
+        "119.1",
+        "119.2",
+        "119.3",
+        "119.4",
+        "119.9"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals."
+    },
+    {
+      "capability_id": "life.change.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_oracle_ir.OracleIRTests.test_fixed_life_self_enter_trigger_replays_exactly",
+      "official_rule_ids": [
+        "119.1",
+        "119.2",
+        "119.3",
+        "119.4",
+        "119.9"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals."
+    },
+    {
+      "capability_id": "life.change.effect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_oracle_ir.OracleIRTests.test_fixed_life_self_enter_trigger_replays_exactly",
+      "official_rule_ids": [
+        "119.1",
+        "119.2",
+        "119.3",
+        "119.4",
+        "119.9"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals."
+    },
+    {
       "capability_id": "life.gain.replacement.static_multiplier",
       "evidence_class": "interaction",
       "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_worship_and_boon_follow_containing_event_order",
@@ -4001,6 +4127,177 @@
       "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
     },
     {
+      "capability_id": "trigger.event.normalized_zone_change",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_oracle_ir.OracleIRTests.test_self_dies_trigger_uses_last_known_controller",
+      "official_rule_ids": [
+        "603.2",
+        "603.6",
+        "603.6a",
+        "603.6c",
+        "603.10",
+        "603.10a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
+    },
+    {
+      "capability_id": "trigger.event.normalized_zone_change",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_zone_trigger_events.ZoneTriggerIntegrationTests.test_source_that_leaves_still_observes_simultaneous_death",
+      "official_rule_ids": [
+        "603.2",
+        "603.6",
+        "603.6a",
+        "603.6c",
+        "603.10",
+        "603.10a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
+    },
+    {
+      "capability_id": "trigger.event.normalized_zone_change",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_preflight_v080.NormalizedZoneEventTests.test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
+      "official_rule_ids": [
+        "603.2",
+        "603.6",
+        "603.6a",
+        "603.6c",
+        "603.10",
+        "603.10a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
+    },
+    {
+      "capability_id": "trigger.event.normalized_zone_change",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_zone_trigger_detection_mutant_is_killed",
+      "official_rule_ids": [
+        "603.2",
+        "603.6",
+        "603.6a",
+        "603.6c",
+        "603.10",
+        "603.10a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
+    },
+    {
+      "capability_id": "trigger.event.normalized_zone_change",
+      "evidence_class": "negative",
+      "test_id": "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_occurrence_rejects_malformed_and_non_event_moves_are_empty",
+      "official_rule_ids": [
+        "603.2",
+        "603.6",
+        "603.6a",
+        "603.6c",
+        "603.10",
+        "603.10a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
+    },
+    {
+      "capability_id": "trigger.event.normalized_zone_change",
+      "evidence_class": "positive",
+      "test_id": "tests.test_preflight_v080.NormalizedZoneEventTests.test_self_dies_trigger_uses_last_known_battlefield_zone",
+      "official_rule_ids": [
+        "603.2",
+        "603.6",
+        "603.6a",
+        "603.6c",
+        "603.10",
+        "603.10a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
+    },
+    {
+      "capability_id": "trigger.event.normalized_zone_change",
+      "evidence_class": "positive",
+      "test_id": "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_derives_exact_enter_and_death_events",
+      "official_rule_ids": [
+        "603.2",
+        "603.6",
+        "603.6a",
+        "603.6c",
+        "603.10",
+        "603.10a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
+    },
+    {
+      "capability_id": "trigger.event.normalized_zone_change",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_private_library_to_hand_move_produces_no_public_trigger_event",
+      "official_rule_ids": [
+        "603.2",
+        "603.6",
+        "603.6a",
+        "603.6c",
+        "603.10",
+        "603.10a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Do not derive a public normalized trigger event for an ordinary private library-to-hand move; visibility-dependent hidden-zone trigger families remain excluded and fail closed."
+    },
+    {
+      "capability_id": "trigger.event.normalized_zone_change",
+      "evidence_class": "replay",
+      "test_id": "tests.test_oracle_ir.OracleIRTests.test_fixed_life_self_enter_trigger_replays_exactly",
+      "official_rule_ids": [
+        "603.2",
+        "603.6",
+        "603.6a",
+        "603.6c",
+        "603.10",
+        "603.10a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
+    },
+    {
       "capability_id": "trigger.placement.apnap",
       "evidence_class": "interaction",
       "test_id": "tests.test_combat_damage_rules.CombatDamageRuleTests.test_damage_and_resulting_death_triggers_share_one_order_batch",
@@ -4560,5 +4857,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "f57ba77d3fdcfe309bde30081fd4538f80407c0474af20ed03254a592ecbd936"
+  "fingerprint": "f9a02d9de03a8e5aa47f521f20f9892614a6f69ffd1ef1d9268679f9a3d93152"
 }

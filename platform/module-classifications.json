@@ -2415,6 +2415,20 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/trigger_discovery.py",
+      "layer": "rules",
+      "owning_subsystem": "legacy_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "mutable_owner",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/trigger_processing.py",
       "layer": "rules",
       "owning_subsystem": "trigger_processing",
@@ -2462,6 +2476,34 @@
         "domain"
       ],
       "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/zone_trigger_events.py",
+      "layer": "rules",
+      "owning_subsystem": "legacy_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "read_only",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/zone_trigger_processing.py",
+      "layer": "rules",
+      "owning_subsystem": "legacy_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "read_only",
       "card_specificity_policy": "generic_no_growth",
       "visibility_sensitivity": "authoritative_internal",
       "replay_participation": "none"
@@ -2569,5 +2611,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "4dbf4e2eb75eab3e2fad33526001401fd022b568f2201b238c82bc39133fc171"
+  "fingerprint": "bfc7e37d95c848521a74b8b32ba5e9531c08e8ec362ffbf02e51124cf6ae5328"
 }

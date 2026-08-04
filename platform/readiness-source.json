@@ -6,11 +6,11 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "generic_trigger_foundation",
-    "branch": "rules/generic-trigger-foundation",
+    "active_phase": "canonical_life_and_simple_zone_triggers",
+    "branch": "rules/canonical-life-and-zone-triggers",
     "branch_ancestry": {
-      "focused_branch_base": "3d9facdac71a60120441e0b13c242850d70c408f",
-      "focused_branch_unique_commits_over_main": 3
+      "focused_branch_base": "9ff74d9fb7ec0868a9095b09bf1f6244309f5f26",
+      "focused_branch_unique_commits_over_main": 0
     },
     "pull_requests": [
       {
@@ -572,6 +572,13 @@
         "number": 80,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/80"
+      },
+      {
+        "base": "main",
+        "head": "rules/generic-trigger-foundation",
+        "number": 81,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/81"
       }
     ],
     "tags": [
@@ -586,9 +593,9 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "3362d0765d7b1d1bf57abd3c038b9c7e1b85a390",
-    "certified_head_sha": "3362d0765d7b1d1bf57abd3c038b9c7e1b85a390",
-    "generation_timestamp": "2026-08-03T23:24:02Z"
+    "feature_head_sha": "9ff74d9fb7ec0868a9095b09bf1f6244309f5f26",
+    "certified_head_sha": "9ff74d9fb7ec0868a9095b09bf1f6244309f5f26",
+    "generation_timestamp": "2026-08-04T00:30:59Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -691,8 +698,14 @@
     {
       "id": "generic_trigger_foundation",
       "name": "Unified ordinary trigger occurrence and placement foundation",
+      "status": "integrated_on_certified_main",
+      "evidence": "Certified main through PR 81 replaces separate semantic and delayed executors with one immutable, versioned ordinary-trigger occurrence, APNAP batch, controller-order placement, and stack sink. Static-source semantic, delayed, and already-typed dynamic prevention triggers converge before batching; a started batch is sealed and later occurrences form a new batch. Strict construction, checkpoint loading, continuation validation, rollback, inactive-controller handling, four-player APNAP placement, same-controller ordering, save/load, and explicit historical Game Record v3 semantic and delayed continuation compatibility are covered. Exact-head public CI and merge commit 9ff74d9 passed, including post-merge main smoke. Complete CR 603 grammar, intervening-if, state triggers, reflexive triggers, and all special placement rules remain unclaimed."
+    },
+    {
+      "id": "canonical_life_and_simple_zone_triggers",
+      "name": "Canonical fixed life and normalized zone triggers",
       "status": "implemented_in_active_source_tree_pending_certification",
-      "evidence": "The active source tree replaces separate semantic and delayed executors with one immutable, versioned ordinary-trigger occurrence, APNAP batch, controller-order placement, and stack sink. Static-source semantic, delayed, and already-typed dynamic prevention triggers converge before batching; a started batch is sealed and later occurrences form a new batch. Strict construction, checkpoint loading, continuation validation, rollback, inactive-controller handling, four-player APNAP placement, same-controller ordering, save/load, and explicit historical Game Record v3 semantic and delayed continuation compatibility are covered. The engine imports a narrow trigger-processing facade and sheds the duplicate delayed-only executor. The 3,901-test quick gate had no behavioral failure; its four generated/index freshness failures were reconciled without rerunning the complete local suite. Complete CR 603 grammar, intervening-if, state triggers, reflexive triggers, and all special placement rules remain unclaimed."
+      "evidence": "The active source tree captures immutable version-1 zone-change occurrences with old/new logical identity, controller, characteristics, attachments, and canonical fingerprints; derives represented enter, leave, dies, discard, and graveyard facts without mutable state access; and routes semantic discovery through the unified ordinary trigger batch. Oracle IR v22 separately declares normalized event, APNAP placement, and effect-result capabilities. Fixed self enter/dies life triggers use the canonical replacement-capable life transaction and can be promoted only when exact and capability-closed; draw triggers remain provisional on the blocked draw capability. Simultaneous source departure, LKI controller, malformed input, rollback, replay, compiler closure, and killed implementation mutants are covered. The August 2 Commander census improves exact and trusted CardPrograms from 419 to 458 and material residuals from 60,742 to 60,587 without a printed-name runtime branch."
     },
     {
       "id": "rules_snapshot",
@@ -719,7 +732,7 @@
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
     "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_ten_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_and_player_counter_mutation_ports",
-    "capability_evidence": "implemented_registry_v17_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status",
+    "capability_evidence": "implemented_registry_v18_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status_plus_bounded_fixed_life_and_normalized_zone_trigger_capabilities",
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "hidden_information": "implemented_projected_protocol",
@@ -729,14 +742,14 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30859494835,
+      "run_id": 30862860578,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30859494835"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30862860578"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr80_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; active_source_3901_test_quick_gate_behavior_pass_with_generated_index_drift_reconciled_and_focused_trigger_architecture_capability_status_checks",
-      "focused_rules_tests": "pass_unified_ordinary_trigger_occurrence_immutable_versioned_batch_apnap_controller_order_semantic_delayed_dynamic_convergence_strict_checkpoint_continuation_rollback_multiplayer_save_load_historical_v3_compatibility_and_implementation_mutations",
+      "deterministic_tests": "certified_main_through_pr81_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; active_source_focused_normalized_zone_trigger_life_compiler_replay_mutation_and_architecture_checks_pass",
+      "focused_rules_tests": "pass_immutable_normalized_zone_occurrence_enter_leave_dies_lki_simultaneous_source_departure_fixed_life_trigger_exact_promotion_draw_fail_closed_apnap_replay_rollback_and_implementation_mutations",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
@@ -752,7 +765,7 @@
     "replay": "pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner",
     "privacy": "pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner",
       "semantic_preflight": "reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory",
-      "card_program_census": "oracle_ir_v21_full_38485_trusted_819_capability_closed_817_residual_35417_failed_2249_material_residual_69353; commander_legal_31623_trusted_419_capability_closed_417_residual_31203_failed_1_material_residual_60739; full_oracle_exact_3059_partial_16115_unresolved_19311_material_residual_69365; commander_oracle_exact_419_partial_14694_unresolved_16510_material_residual_60742; immediate_exact_promotions_indestructible_aura_and_shielded_passage; new_way_forward_and_selfless_squire_remain_partial_on_draw_and_flash_dependency_closure"
+    "card_program_census": "oracle_ir_v22_full_38485_trusted_859_capability_closed_857_residual_35377_failed_2249_material_residual_69196; full_oracle_exact_3099_partial_16075_unresolved_19311_material_residual_69208; commander_legal_31623_trusted_458_capability_closed_456_residual_31164_failed_1_material_residual_60584; commander_oracle_exact_458_partial_14655_unresolved_16510_material_residual_60587; delta_from_pr81_full_exact_trusted_and_capability_closed_plus_40_material_residual_minus_157_and_commander_exact_trusted_and_capability_closed_plus_39_material_residual_minus_155; representative_new_exact_cards_lone_missionary_cathedral_sanctifier_centaur_healer_highland_game_peace_strider_bulwark_giant_healer_of_the_glade_and_honey_mammoth; exact_etb_draw_remains_partial_on_zone_draw_library_to_hand"
   },
   "blockers": [
     "damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter/source-controller-damage aftermath, immediate independent life siblings, resumable mana-payment choices, static full-recipient redirection, and closed CR 615.13 triggered draw/damage/counter results on the ordinary stack; explicit-target or mixed immediate aftermath, arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented",
@@ -767,5 +780,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "After certifying the active unified trigger foundation, implement the corpus-ranked canonical-life-and-simple-zone-triggers batch: normalized enter/death occurrences, generic fixed life results, and closed targetless life/draw trigger lowering through the typed APNAP stack boundary."
+  "next_task": "After certifying canonical fixed life and normalized zone triggers, implement the dependency-ready continuous-effect-duration-and-source-applicability batch for CR 611.2-611.3: immutable locked sets and durations for resolution-created effects, live source-zone applicability for static effects, canonical characteristic queries, generic compiler lowering, replay, and multiplayer closure."
 }

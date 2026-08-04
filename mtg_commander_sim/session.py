@@ -119,6 +119,7 @@ class CommanderSession:
             capability_registry=capability_registry,
             capability_profile=game_config.review_profile,
             promote_exact_runtime_handlers=True,
+            promote_exact_trigger_programs=True,
         )
         engine = CommanderEngine.create(
             card_db,

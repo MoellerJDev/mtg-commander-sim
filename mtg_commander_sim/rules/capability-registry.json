@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 17,
+  "registry_version": 18,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -79,6 +79,33 @@
     }
   ],
   "capabilities": [
+    {
+      "id": "life.change.effect",
+      "version": 1,
+      "official_rules": ["119.1", "119.2", "119.3", "119.4", "119.9"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals.",
+        "inputs": ["resolved active player", "fixed integral life delta", "source/controller facts", "ordered replacement selections"],
+        "outputs": ["validated life-state plan", "replacement journal", "canonical resolved gain or loss", "authoritative life mutation"],
+        "exclusions": ["paying life costs", "setting or exchanging life totals", "dynamic life amounts", "life-gain prevention not represented by a trusted component"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.effect_runtime.life_effects._commit", "mtg_commander_sim.life_change.prepare_life_change_batch", "mtg_commander_sim.life_change.commit_life_change_batch", "mtg_commander_sim.life_state.plan_life_changes", "mtg_commander_sim.life_state.apply_life_changes"],
+      "positive_tests": ["test_life_and_loss_commit_through_the_typed_batch_owner", "test_fixed_life_self_enter_trigger_replays_exactly"],
+      "negative_tests": ["test_invalid_batch_member_rolls_back_every_life_change"],
+      "interaction_tests": ["test_drain_log_reports_final_replacement_adjusted_values"],
+      "multiplayer_tests": ["test_table_wide_loss_and_drain_are_simultaneous_typed_batches"],
+      "privacy_tests": [],
+      "replay_tests": ["test_fixed_life_self_enter_trigger_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This bounded life-effect producer delegates to the shared replacement substrate and has no capability dependency.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_life_effect_commit_mutant_is_killed removes the typed life commit and the resolved-life assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
     {
       "id": "zone.draw.library_to_hand",
       "version": 1,
@@ -348,6 +375,33 @@
       "implementation_mutation_rationale": "The focused semantic tap-state mutation test kills an aggregate sink that omits eligible creatures or bypasses individual untap behavior.",
       "blockers": ["Complete effective-characteristic dependencies and untap replacement ordering are not yet represented in ambient match closure."],
       "status": "tested"
+    },
+    {
+      "id": "trigger.event.normalized_zone_change",
+      "version": 1,
+      "official_rules": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection.",
+        "inputs": ["committed zone transition", "previous and current logical identities", "previous and current characteristics", "pre-event source-zone snapshot"],
+        "outputs": ["immutable normalized event context", "one detection attempt per matching occurrence", "last-known controller and characteristics", "ordinary trigger batch input"],
+        "exclusions": ["intervening-if and reflexive grammar", "state triggers", "delayed trigger creation", "visibility-dependent hidden-zone triggers", "enters-as and enters-with replacement effects"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.zone_trigger_events.ZoneChangeOccurrence", "mtg_commander_sim.zone_trigger_events.normalized_zone_trigger_events", "mtg_commander_sim.zone_trigger_processing.dispatch_zone_change_occurrence", "mtg_commander_sim.trigger_discovery.dispatch_semantic_event"],
+      "positive_tests": ["test_derives_exact_enter_and_death_events", "test_self_dies_trigger_uses_last_known_battlefield_zone"],
+      "negative_tests": ["test_occurrence_rejects_malformed_and_non_event_moves_are_empty"],
+      "interaction_tests": ["test_self_dies_trigger_uses_last_known_controller", "test_source_that_leaves_still_observes_simultaneous_death"],
+      "multiplayer_tests": ["test_simultaneous_semantic_triggers_use_apnap_and_owner_order"],
+      "privacy_tests": ["test_private_library_to_hand_move_produces_no_public_trigger_event"],
+      "replay_tests": ["test_fixed_life_self_enter_trigger_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This event detector produces immutable occurrence facts; stack placement and effect results are declared separately by each CardProgram.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_zone_trigger_detection_mutant_is_killed suppresses normalized event derivation and the trigger-occurrence assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
     },
     {
       "id": "trigger.placement.apnap",

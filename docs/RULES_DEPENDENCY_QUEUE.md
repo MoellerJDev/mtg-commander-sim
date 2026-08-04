@@ -19,24 +19,24 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 - Behavioral classification/review required: 2,699
 - Passing behavioral rules: 138
 - Subsystems: 21
-- Queue fingerprint: `ddbf09750036e2df499d652f2f7c72c93488d035e76bd9cc9f93749a44eb4a59`
+- Queue fingerprint: `64137107a52f6e4e84d4ad243c79c693ae4bd37be6ee24c14f10be24ff76934b`
 
 ## Selected next batch
 
-- Batch: `canonical-life-and-simple-zone-triggers`
-- Subsystem: `triggered-static-linked`
-- Rules: `603.2`
-- Target capabilities: `trigger.event.normalized_zone_change`, `life.change.effect`, `zone.draw.library_to_hand`
-- Rationale: The pinned Commander-legal residual census makes trigger wording the largest high-frequency executable family: simple enters-the-battlefield life-gain and draw triggers alone account for 180 repeated normalized instructions. The existing stack-placement/APNAP boundary is trusted, while normalized event production, generic life-change ownership, and draw dependency closure still prevent broad CardProgram promotion. This batch therefore joins one reusable zone-change trigger detector to canonical result transactions before expanding into target, modal, reflexive, or state-trigger grammar.
+- Batch: `continuous-effect-duration-and-source-applicability`
+- Subsystem: `continuous-effects`
+- Rules: `611.2`, `611.3`
+- Target capabilities: `continuous.power_toughness.fixed_anthem`, `continuous.basic_land_type.add_all_lands`
+- Rationale: The generic trigger foundation and normalized fixed-life zone-trigger slice are now represented, while effective-characteristic queries still depend on a partial continuous-effect owner. The next dependency-ready universal boundary is the CR 611 distinction between resolution-created locked sets and duration and static-ability live applicability. Closing it enables layer/static compiler expansion without adding card-shaped runtime branches.
 
 Exit criteria:
 
-- Produce typed normalized battlefield-enter and battlefield-leave/death occurrences from the canonical zone-change commit, including simultaneous objects and last-known source facts.
-- Detect one represented trigger occurrence per matching event and place it through the existing ordinary APNAP/controller-order stack boundary.
-- Route fixed life gain and loss through one replacement-capable life-change capability, and either certify or explicitly retain the draw capability blocker.
-- Lower closed targetless self-enter and self-dies fixed life/draw wording without printed-name or Oracle-ID dispatch.
-- Cover source departure, control change, multiplayer simultaneous entry/death, rollback, projection privacy, save/load, and exact replay.
-- Measure Commander-legal exact and capability-closed gains; keep targeted, modal, intervening-if, reflexive, state, and visibility-dependent trigger families residual.
+- Represent resolution-created continuous effects with a strict duration and an immutable affected-object set when CR 611.2c locks that set.
+- Represent static-ability continuous effects with live source-zone applicability and dynamic object membership under CR 611.3a-b.
+- Route current fixed anthem and basic-land-type producers through the same effective-characteristic query without printed-name or Oracle-ID dispatch.
+- Prove source departure, control change, new-object entry, characteristic changes, expiration, simultaneous objects, replay, rollback, and multiplayer behavior.
+- Extract the corresponding applicability and duration responsibility from CommanderEngine and ratchet direct characteristic reads.
+- Add generic CardProgram/compiler lowering for the closed static and until-end-of-turn wording families, then measure the Commander-legal census.
 
 ## Dependency schedule
 

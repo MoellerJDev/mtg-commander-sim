@@ -31,7 +31,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v21"
+ORACLE_COMPILER_VERSION = "oracle-ir-v22"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 
 _NUMBER_WORDS = {
@@ -1032,7 +1032,15 @@ def _trigger_node(
             "leaves the battlefield": "permanent.leave.self",
         }[trigger.group("event").casefold()]
         recognized = True
-    dependencies = ("cr-603-handling-triggered-abilities", *mechanics)
+    dependencies = (
+        "cr-603-handling-triggered-abilities",
+        *(
+            ("trigger-event-normalized-zone-change",)
+            if trigger is not None
+            else ()
+        ),
+        *mechanics,
+    )
     gate = _dependency_gate(
         mechanics=dependencies,
         effects=effects,
@@ -1748,6 +1756,7 @@ def register_generated_programs(
     capability_registry: CapabilityRegistry | None = None,
     capability_profile: str = "traditional",
     promote_exact_runtime_handlers: bool = False,
+    promote_exact_trigger_programs: bool = False,
 ) -> dict[str, Any]:
     """Compatibility API for extracted generated-program registration."""
 
@@ -1762,4 +1771,5 @@ def register_generated_programs(
         capability_registry=capability_registry,
         capability_profile=capability_profile,
         promote_exact_runtime_handlers=promote_exact_runtime_handlers,
+        promote_exact_trigger_programs=promote_exact_trigger_programs,
     )

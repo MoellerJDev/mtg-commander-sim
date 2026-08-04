@@ -2,7 +2,7 @@
 title: "MTG Commander Sim"
 status: "current"
 authoritative_source: "implemented package, server/browser runtime, and generated status reports"
-verified: "2026-08-02"
+verified: "2026-08-03"
 audience: "users and contributors"
 maintenance: "hand-maintained"
 ---
@@ -378,7 +378,7 @@ generated documentation fixtures with bearer capabilities redacted. See
   fail-closed material residuals
 - automatic deck-time generic compilation into provisional, arbiter-gated
   semantic programs
-- Oracle IR v21 simple self-trigger, unconditional-entry, counter, pump, basic
+- Oracle IR v22 simple self-trigger, unconditional-entry, counter, pump, basic
   creature-token, fixed-mana combat-declaration cost, and exact combat-
   declaration restriction/evasion/battlefield-condition/composition and
   source-controller target-scope templates with reviewed-handler precedence,
@@ -409,6 +409,10 @@ generated documentation fixtures with bearer capabilities redacted. See
   batches, one ordinary occurrence/ordering/placement path for represented
   static-source, delayed, and typed dynamic triggers, controller-at-trigger-
   time, intervening-condition, and delayed-object-incarnation invariants;
+  committed zone moves now emit immutable normalized enter/leave/dies facts
+  with old/new identity, controller, characteristics, and attachment snapshots,
+  and exact fixed-life self triggers compose that detector with the canonical
+  life transaction while draw-result triggers remain fail-closed;
   complete trigger grammar, the special second CR 603.3b part, state/reflexive
   triggers, and the look-back exception matrix remain blocked
 - source-reviewed CR 601 casting with immutable revision-pinned proposals,
@@ -1229,6 +1233,10 @@ container isolation when filesystem-level isolation must also be proven.
 - `mtg_commander_sim/trigger_batches.py` — immutable versioned CR 603.3
   occurrence groups, APNAP batching, order validation, and Game Record v3
   compatibility
+- `mtg_commander_sim/zone_trigger_events.py` — immutable normalized enter,
+  leave, dies, discard, and graveyard occurrence facts with LKI fingerprints
+- `mtg_commander_sim/trigger_discovery.py` — read-only generic event matching,
+  trigger-controller selection, and ordinary stack-occurrence construction
 - `mtg_commander_sim/life_change.py` — immutable replacement-capable life-event
   preparation, replay validation, and canonical life-state commit
 - `mtg_commander_sim/life_state.py` — stale-state validation and mutation-only

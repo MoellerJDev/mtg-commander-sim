@@ -50,10 +50,15 @@ MINIMUM_TRUSTED_REGISTRY_EVIDENCE = frozenset(
 _LIFELINK_MECHANIC = "li" + "felink"
 _TOXIC_MECHANIC = "tox" + "ic"
 MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
+    "cr-119-life": ("life.change.effect",),
+    "cr-121-drawing-a-card": ("zone.draw.library_to_hand",),
     "infect": ("damage.result.infect",),
     _LIFELINK_MECHANIC: ("damage.result.lifelink",),
     _TOXIC_MECHANIC: ("damage.result.toxic",),
     "wither": ("damage.result.wither",),
+    "trigger-event-normalized-zone-change": (
+        "trigger.event.normalized_zone_change",
+    ),
 }
 _CAPABILITY_ID = re.compile(r"^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$")
 _EFFECTIVE_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -671,11 +676,10 @@ def capability_dependencies_for_node(
             return any(contains_key(child, key) for child in value)
         return False
     dependencies: set[str] = set()
-    if not effects and target_schema is None:
-        for mechanic in mechanics:
-            dependencies.update(
-                MECHANIC_CAPABILITY_DEPENDENCIES.get(mechanic, ())
-            )
+    for mechanic in mechanics:
+        dependencies.update(
+            MECHANIC_CAPABILITY_DEPENDENCIES.get(mechanic, ())
+        )
     if (
         "cr-603-handling-triggered-abilities" in mechanics
         and bool(effects)

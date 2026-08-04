@@ -81,7 +81,8 @@
       "test_turn_history_rules",
       "test_turn_structure_rules",
       "test_untap_step_rules",
-      "test_upkeep_step_rules"
+      "test_upkeep_step_rules",
+      "test_zone_trigger_events"
     ],
     "state-actions-damage": [
       "test_combat_damage_rules",

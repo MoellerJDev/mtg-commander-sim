@@ -225,12 +225,14 @@ def register_generated_programs(
     capability_registry: CapabilityRegistry | None = None,
     capability_profile: str = "traditional",
     promote_exact_runtime_handlers: bool = False,
+    promote_exact_trigger_programs: bool = False,
 ) -> dict[str, Any]:
     from ..oracle_ir import ORACLE_COMPILER_VERSION
 
     generated = 0
     skipped_existing = 0
     promoted_runtime_handlers = 0
+    promoted_exact_programs = 0
     cards_seen: set[str] = set()
     for record in records:
         if record.oracle_id in cards_seen:
@@ -244,15 +246,25 @@ def register_generated_programs(
             capability_registry=capability_registry,
             capability_profile=capability_profile,
         )
-        trusted_handlers: dict[str, SemanticProgram] = {}
+        trusted_programs: dict[str, SemanticProgram] = {}
         if (
-            promote_exact_runtime_handlers
+            (
+                promote_exact_runtime_handlers
+                or promote_exact_trigger_programs
+            )
             and trust_level == "provisional"
             and capability_registry is not None
-            and any(program.handlers for program in provisional_programs)
+            and (
+                promote_exact_trigger_programs
+                and any(
+                    program.ability_id.startswith("trigger:")
+                    for program in provisional_programs
+                )
+                or any(program.handlers for program in provisional_programs)
+            )
         ):
             try:
-                trusted_handlers = {
+                trusted_programs = {
                     program.key: program
                     for program in generated_programs(
                         db,
@@ -263,12 +275,16 @@ def register_generated_programs(
                         capability_profile=capability_profile,
                     )
                     if program.handlers
+                    or (
+                        promote_exact_trigger_programs
+                        and program.ability_id.startswith("trigger:")
+                    )
                 }
             except ValueError as exc:
                 if "cannot be promoted to trusted generated semantics" not in str(exc):
                     raise
         for provisional in provisional_programs:
-            program = trusted_handlers.get(provisional.key, provisional)
+            program = trusted_programs.get(provisional.key, provisional)
             if registry.get(program.key) is not None:
                 skipped_existing += 1
                 continue
@@ -297,7 +313,9 @@ def register_generated_programs(
                 skipped_existing += 1
                 continue
             if program is not provisional:
-                promoted_runtime_handlers += 1
+                promoted_exact_programs += 1
+                if program.handlers:
+                    promoted_runtime_handlers += 1
             registry.put(program)
             generated += 1
     return {
@@ -305,6 +323,7 @@ def register_generated_programs(
         "programs_generated": generated,
         "programs_skipped_existing": skipped_existing,
         "runtime_handlers_promoted": promoted_runtime_handlers,
+        "exact_programs_promoted": promoted_exact_programs,
         "trust_level": trust_level,
         "compiler_version": ORACLE_COMPILER_VERSION,
         "capability_registry_fingerprint": (

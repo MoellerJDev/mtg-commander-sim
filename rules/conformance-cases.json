@@ -36798,28 +36798,34 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "authoritative normalized events and compiled trigger programs cover only selected event and wording families",
-        "uncompiled material trigger text fails to arbitration rather than triggering generically"
+        "authoritative normalized events and compiled trigger programs still cover selected event and wording families rather than the universal trigger grammar",
+        "targeted, modal, intervening-if, reflexive, state, and visibility-dependent trigger families remain residual"
       ],
       "case_id": "cr-603.2",
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
-        "positive"
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
       ],
       "dependency_rule_ids": [
         "603"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_trigger_waits_for_stabilization_then_becomes_top_stack_object"
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_trigger_waits_for_stabilization_then_becomes_top_stack_object",
+        "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_derives_exact_enter_and_death_events",
+        "tests.test_oracle_ir.OracleIRTests.test_fixed_life_self_enter_trigger_replays_exactly"
       ],
       "implementation_components": [
-        "CommanderEngine._dispatch_semantic_event",
+        "mtg_commander_sim.zone_trigger_events.normalized_zone_trigger_events",
+        "mtg_commander_sim.trigger_discovery.dispatch_semantic_event",
         "oracle_ir.OracleIRCompiler"
       ],
       "notes": [
-        "A represented event automatically creates a pending trigger without executing its effect, but universal event matching is incomplete."
+        "Represented immutable zone occurrences now create exactly one pending trigger per matching event without executing its effect, and fixed targetless life triggers replay without arbitration; universal event matching remains incomplete."
       ],
       "required_scenarios": [
         "positive",
@@ -38202,14 +38208,15 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "look-back scanning is not generic for sacrifices, cards leaving graveyards, and visible objects entering hands or libraries",
-        "simultaneous source departure plus multiple matching objects lacks a complete pre-event effective snapshot"
+        "look-back scanning is not generic for every sacrifice, card-leaves-graveyard, and visible-object-to-hand-or-library wording family",
+        "the complete continuous-effect and LKI exception matrix remains incomplete"
       ],
       "case_id": "cr-603.10a",
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
-        "positive"
+        "positive",
+        "interaction"
       ],
       "dependency_rule_ids": [
         "603.10"
@@ -38217,14 +38224,16 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [
         "tests.test_preflight_v080.NormalizedZoneEventTests.test_self_dies_trigger_uses_last_known_battlefield_zone",
-        "tests.test_oracle_ir.OracleIRTests.test_self_dies_trigger_uses_last_known_controller"
+        "tests.test_oracle_ir.OracleIRTests.test_self_dies_trigger_uses_last_known_controller",
+        "tests.test_zone_trigger_events.ZoneTriggerIntegrationTests.test_source_that_leaves_still_observes_simultaneous_death"
       ],
       "implementation_components": [
         "CommanderEngine._move_cards_simultaneously",
-        "CommanderEngine._dispatch_semantic_event"
+        "mtg_commander_sim.zone_trigger_events.ZoneChangeOccurrence",
+        "mtg_commander_sim.zone_trigger_processing.dispatch_zone_change_occurrence"
       ],
       "notes": [
-        "Self-dies triggers use pre-move zone and controller, providing one narrow look-back witness."
+        "Self-departure and simultaneous creature-death triggers use one pre-event source and effective-characteristic snapshot, including the source leaving in the same event."
       ],
       "required_scenarios": [
         "positive",

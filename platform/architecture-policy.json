@@ -47,7 +47,10 @@
     "mtg_commander_sim/targets.py",
     "mtg_commander_sim/token_creation.py",
     "mtg_commander_sim/trigger_batches.py",
+    "mtg_commander_sim/trigger_discovery.py",
     "mtg_commander_sim/trigger_processing.py",
+    "mtg_commander_sim/zone_trigger_events.py",
+    "mtg_commander_sim/zone_trigger_processing.py",
     "mtg_commander_sim/object_query.py"
   ],
   "protected_future_prefixes": [
@@ -134,7 +137,8 @@
       "mtg_commander_sim/life_state.py": "canonical typed life-total mutation owner behind represented rules transactions",
       "mtg_commander_sim/tap_state.py": "typed tap-state effect mutation owner behind the semantic intent executor",
       "mtg_commander_sim/token_creation.py": "typed token-creation and replacement mutation owner behind CommanderEngine",
-      "mtg_commander_sim/trigger_processing.py": "typed CR 603.3 occurrence batching, APNAP placement, stack commit, and historical continuation owner behind CommanderEngine"
+      "mtg_commander_sim/trigger_processing.py": "typed CR 603.3 occurrence batching, APNAP placement, stack commit, and historical continuation owner behind CommanderEngine",
+      "mtg_commander_sim/trigger_discovery.py": "normalized semantic trigger detection and immutable ordinary occurrence construction behind CommanderEngine"
       ,"mtg_commander_sim/mana_activation.py": "activated mana ability and reversible activation transaction owner"
       ,"mtg_commander_sim/semantic_choices/intent_host.py": "typed semantic-choice intent application behind the immutable choice registry"
       ,"mtg_commander_sim/effect_runtime/state_and_permissions.py": "registry-owned state and permission effect family"
@@ -155,6 +159,8 @@
       ,"mtg_commander_sim/semantic_choices/engine_coordination.py": "actor-scoped immutable choice fact materialization and routing"
       ,"mtg_commander_sim/mana_undo.py": "read-only reversible mana-window validation with commits delegated to canonical owners"
       ,"mtg_commander_sim/object_query.py": "typed read-only object selection predicates"
+      ,"mtg_commander_sim/zone_trigger_events.py": "immutable normalized CR 603.6 zone-change occurrence and event derivation"
+      ,"mtg_commander_sim/zone_trigger_processing.py": "read-only zone-trigger detection coordinator delegating placement and mutation to canonical owners"
       ,"mtg_commander_sim/damage_prevention_aftermath.py": "typed prevention-aftermath planner delegating mutation to canonical life and counter owners"
       ,"mtg_commander_sim/mana_mode_effects.py": "typed mana-mode side-effect coordinator delegating to canonical damage, life, and zone owners"
       ,"mtg_commander_sim/mana_payment_continuations.py": "atomic mana-payment suspension coordinator"

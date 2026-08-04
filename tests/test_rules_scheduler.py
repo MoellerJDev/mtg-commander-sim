@@ -122,24 +122,25 @@ class RulesSchedulerTests(unittest.TestCase):
                 self.assertNotIn("text", rule)
                 self.assertNotIn("short_summary", rule)
 
-    def test_selected_batch_is_reviewed_blocked_and_cli_next_uses_it(self):
+    def test_selected_batch_is_dependency_ready_and_cli_next_uses_it(self):
         selected = self.queue["selected_batch"]
         self.assertEqual(
-            "canonical-life-and-simple-zone-triggers",
+            "continuous-effect-duration-and-source-applicability",
             selected["batch_id"],
         )
         self.assertEqual(
-            "triggered-static-linked", selected["subsystem_id"]
+            "continuous-effects", selected["subsystem_id"]
         )
         self.assertEqual(
-            {"603.2"},
+            {"611.2", "611.3"},
             set(selected["rule_ids"]),
         )
         self.assertTrue(
             all(
-                rule["reviewed"]
-                and rule["classification"] == "behavioral"
-                and rule["conformance_status"] == "blocked"
+                not rule["reviewed"]
+                and rule["classification"] == "unclassified"
+                and rule["conformance_status"] == "unreviewed"
+                and rule["work_state"] == "behavioral_review_required"
                 for rule in selected["rules"]
             )
         )
