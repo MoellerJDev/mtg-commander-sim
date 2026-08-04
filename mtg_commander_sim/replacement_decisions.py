@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 from typing import Any, Mapping, Protocol, Sequence
 
+from .aura import AuraEntryChoiceRequired, issue_aura_entry_choice
 from .replacement_effects import (
     ReplacementChoiceRequired,
     ReplacementContinuation,
@@ -208,6 +209,18 @@ def apply_effect_with_replacement_choice(
             execute_intent_plan(host, plan)
     except ReplacementChoiceRequired as required:
         issue_replacement_order_choice(
+            host,
+            item=item,
+            effect=effect,
+            remaining=remaining,
+            destination=destination,
+            note=note,
+            instruction_pointer=instruction_pointer,
+            required=required,
+        )
+        return False
+    except AuraEntryChoiceRequired as required:
+        issue_aura_entry_choice(
             host,
             item=item,
             effect=effect,

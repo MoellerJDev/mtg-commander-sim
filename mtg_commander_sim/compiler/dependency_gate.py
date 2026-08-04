@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import re
 from typing import Any, Iterable, Mapping, Sequence
 
+from ..aura import parse_simple_enchant_line
 from ..rules.capabilities import (
     CapabilityClosure,
     CapabilityRegistry,
@@ -97,6 +98,14 @@ def keyword_dependency_gate(
     ):
         return explicit_capability_gate(
             "attachment.equip.fixed_mana",
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+        )
+    if mechanics == ("enchant",) and parse_simple_enchant_line(
+        material_line
+    ) is not None:
+        return explicit_capability_gate(
+            "attachment.aura.simple_object",
             capability_registry=capability_registry,
             capability_profile=capability_profile,
         )

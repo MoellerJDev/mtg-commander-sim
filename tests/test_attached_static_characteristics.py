@@ -559,7 +559,12 @@ class AttachedStaticEngineTests(unittest.TestCase):
         aura = self.find(engine, "B", "Animate Dead")
         nantuko = self.find(engine, "B", "Springheart Nantuko")
         target = self.find(engine, "B", "Birds of Paradise")
-        self.put_on_battlefield(engine, aura, nantuko, target)
+        self.put_on_battlefield(engine, nantuko, target)
+        # Animate Dead's graveyard-card restriction is intentionally outside
+        # the bounded simple-object Aura grammar.  Preserve this legacy
+        # semantic-component fixture by supplying its already-selected target.
+        aura.annotations["pending_aura_target"] = target.ref
+        self.put_on_battlefield(engine, aura)
         nantuko.annotations["bestowed"] = True
 
         attach_objects(

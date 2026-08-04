@@ -87,6 +87,11 @@ def _apply_bounce_or_destroy_or_discard_or_exile_or_move_or_sacrifice(
         replacement_selections=tuple(
             effect.get("_replacement_selections") or ()
         ),
+        aura_target_ref=(
+            str(effect["_aura_target_ref"])
+            if effect.get("_aura_target_ref") is not None
+            else None
+        ),
     )
 
 
@@ -171,6 +176,11 @@ def _apply_move_if_in_zone(
         semantic_events=True,
         replacement_selections=tuple(
             effect.get("_replacement_selections") or ()
+        ),
+        aura_target_ref=(
+            str(effect["_aura_target_ref"])
+            if effect.get("_aura_target_ref") is not None
+            else None
         ),
     )
 

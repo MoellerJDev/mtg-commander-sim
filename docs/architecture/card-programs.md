@@ -69,6 +69,10 @@ fail closed.
   continuous capability actually required; syntactic matches remain partial
   when targets, combat qualifications, stateful quantities, or other mechanic
   dependencies are not trusted.
+- Oracle IR v25 makes a closed simple-object Enchant keyword declare
+  `attachment.aura.simple_object`. Trust therefore requires the same targeting,
+  entry, live-legality, replay, and mutation evidence used by the runtime;
+  merely recognizing `Enchant` never makes a complex Aura exact.
 
 ## Execution ownership
 

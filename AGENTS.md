@@ -96,12 +96,17 @@ rewrite.
   transaction through a narrow typed port. Keep explicit-target or mixed
   immediate aftermath, broader conditional trigger results, and unsupported
   recursive loops fail-closed.
-- The active trigger-foundation branch replaces the delayed-only and
-  semantic-only CR 603.3 ordering executors with one immutable versioned
-  occurrence/APNAP/placement owner. Preserve explicit historical Game Record
-  v3 batch and continuation compatibility, and do not broaden this into a claim
-  of complete trigger event grammar, state/reflexive triggers, or delayed
-  creation provenance.
+- Certified main through PR 84 includes one immutable versioned ordinary
+  occurrence/APNAP/placement owner plus normalized enter/leave/dies event
+  binding, canonical fixed life results, fixed-query and locked-set continuous
+  effects, and fixed ordinary-mana Equip. Preserve explicit historical Game
+  Record v3 batch and continuation compatibility; this is not complete trigger
+  event grammar, state/reflexive trigger, or delayed-creation coverage.
+- The active Aura branch introduces a focused immutable CR 303 boundary for
+  the closed simple battlefield-object Enchant grammar. Keep mandatory cast
+  targets, nonspell entry choices, token preflight, resolution attachment, and
+  live CR 704 legality on that shared predicate. Do not broaden its trust to
+  qualities, players, other zones, multiple restrictions, or Aura creatures.
 - Keep complete CR 609.7a source categories, permanent-spell continuity,
   broader source-property predicates, general replacement-capable life gain,
   life-gain prevention, remaining prevention-aftermath wording,
@@ -112,10 +117,9 @@ rewrite.
 - The merged infrastructure phase establishes a two-slot development pipeline,
   deterministic change-impact quick gates, balanced PR shards, a stable
   certification context, compact `main` smoke, and deep nightly assurance.
-  After the generic trigger placement foundation certifies, the corpus-ranked
-  next family is canonical fixed life results plus simple targetless
-  enter/death trigger event binding and lowering. Do not resume numerical rule
-  traversal or open a status-only follow-up.
+  After the Aura batch certifies, the scheduler-selected next family is the
+  canonical draw transaction plus draw replacement/trigger closure. Do not
+  resume numerical rule traversal or open a status-only follow-up.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic

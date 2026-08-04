@@ -104,6 +104,7 @@ def _apply_create_token(
         copy_of=copy_source,
         characteristics=dict(effect.get("characteristics") or {}),
         temporary_keywords=list(effect.get("temporary_keywords") or []),
+        aura_target_ref=effect.get("aura_target_ref"),
         reason=reason,
         replacement_selections=tuple(
             effect.get("_replacement_selections") or ()

@@ -4,7 +4,7 @@
     "typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, universal replacement participation beyond represented stun and runtime-component events, and complete effective-characteristic closure",
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
-    "represented continuous effects distinguish locked resolution-created sets, live source-bound static membership, and exact relation-bound attached fixed characteristics, but Aura casting and entry, complete Enchant quality grammar, exotic Equip costs, dynamic attached values, player/rules/control-changing effects, broader durations, full dependencies/CDAs, and wider action/combat/copy invalidation remain incomplete; the structural benchmark still records latency observationally",
+    "represented continuous effects distinguish locked resolution-created sets, live source-bound static membership, and exact relation-bound attached fixed characteristics; simple battlefield-object Auras now cast, revalidate, enter, attach, and fail closed generically, but player/graveyard/quality/subtype/compound/multiple Enchant grammar, Aura creatures, complete phasing, exotic Equip costs, dynamic attached values, player/rules/control-changing effects, broader durations, full dependencies/CDAs, and wider action/combat/copy invalidation remain incomplete; the structural benchmark still records latency observationally",
     "a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence",
     "saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit",
     "the authoritative engine remains a measured oversized legacy module; casting and activation now use dedicated proposal and commit owners, while turn, effect, choice, and variant responsibilities still require incremental extraction",
@@ -16,7 +16,7 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "377c49a71a326259be1a7f5b3e685b121f8486242bcc678dab713c8c707bdebc",
+    "evaluated_source_tree_hash": "dccf3c50c538f5757b1099b97185a2a8a8bf800d268b4739899365782fc6fa93",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -133,9 +133,15 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "The active source tree introduces one reciprocal timestamped attachment owner and exact physical/logical relation-bound continuous effects in layers 4, 6, and 7c. Oracle IR v24 generically lowers closed fixed characteristics granted to enchanted, equipped, or fortified objects, and printed fixed ordinary-mana Equip becomes a payable controller-scoped creature activation at sorcery speed through the ordinary stack. Detach, reattach, phasing, source or target departure, leave-and-return, control changes, four-player independent sources, malformed state, rollback, save/load, privacy, replay, and killed implementation mutants have focused coverage. The Commander census improves exact and trusted programs from 528 to 590, capability-closed programs from 526 to 587, and material Oracle residuals from 60,307 to 59,076. Aura casting and entry, complete Enchant quality grammar, exotic Equip costs, dynamic attached values, and full CR 613 dependencies remain fail-closed.",
+      "evidence": "Certified main through PR 84 introduces one reciprocal timestamped attachment owner and exact physical/logical relation-bound continuous effects in layers 4, 6, and 7c. Oracle IR v24 generically lowers closed fixed characteristics granted to enchanted, equipped, or fortified objects, and printed fixed ordinary-mana Equip becomes a payable controller-scoped creature activation at sorcery speed through the ordinary stack. Detach, reattach, phasing, source or target departure, leave-and-return, control changes, four-player independent sources, malformed state, rollback, save/load, privacy, replay, and killed implementation mutants passed exact-head run 30882797307; merge commit f2c67f1 and main-smoke run 30883120301 are green. The Commander census improved exact and trusted programs from 528 to 590, capability-closed programs from 526 to 587, and material Oracle residuals from 60,307 to 59,076. Complete Enchant quality grammar, exotic Equip costs, dynamic attached values, and full CR 613 dependencies remain fail-closed.",
       "id": "attached_static_characteristics_and_fixed_equip",
       "name": "Attached fixed characteristics and fixed ordinary-mana Equip",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "The active source tree adds immutable closed Enchant grammar for ordinary battlefield object types and you-control or opponent-controls relations; mandatory cast targets; resolution revalidation; reciprocal attachment on spell and nonspell entry; seat-scoped immutable entry continuations; live controller/protection legality; state-based graveyard movement; and CR 303.4g Aura-token preflight before authoritative identity allocation. Complex reviewed Auras retain source-pinned target contracts without card identity in the universal casting path. Oracle IR v25 declares attachment.aura.simple_object and promotes only cards whose other nodes are capability-closed. Focused positive, negative, rollback, multiplayer, privacy, exact replay, state-based-action, legacy Animate Dead compatibility, token-replacement, and killed-mutation tests pass. The Commander census improves exact and trusted CardPrograms from 590 to 661, capability-closed from 587 to 658, and material Oracle residuals from 59,076 to 57,982; representative newly exact cards include Sensory Deprivation, Unholy Strength, Holy Strength, Flight, and Weakness. Player, graveyard-card, compound, quality, subtype, Aura-creature, and complete phasing grammar remain fail-closed.",
+      "id": "simple_object_aura_targeting_and_entry",
+      "name": "Simple-object Aura targeting, entry, and legality",
       "status": "implemented_in_active_source_tree_pending_certification"
     },
     {
@@ -151,7 +157,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "After certifying attached fixed characteristics and fixed ordinary-mana Equip, implement the selected Aura targeting, casting, entry, legality, and state-based-action family for the closed Enchant object grammar, with a typed attachment boundary and measurable generic CardProgram closure.",
+  "next_task": "Certify the simple-object Aura family, then implement the selected canonical draw transaction, replacement, and trigger closure batch for CR 121.1-121.3, extracting draw ownership from CommanderEngine and promoting fixed draw CardPrograms only after replacement, privacy, replay, multiplayer, and killed-mutation evidence pass.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.12,<3.13",
@@ -162,7 +168,7 @@
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions",
     "authoritative_kernel": "implemented_partial",
     "browser_client": "implemented_card_inspector_public_zone_browser_resilient_card_scoped_click_drag_saved_manual_auto_mana_saved_auto_pass_full_control_tapped_orientation_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause",
-    "capability_evidence": "implemented_registry_v21_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status_plus_bounded_fixed_life_normalized_zone_trigger_continuous_effect_attached_characteristic_and_fixed_equip_capabilities",
+    "capability_evidence": "implemented_registry_v22_with_42_records_31_trusted_and_315_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "durable_database": "implemented_sqlite_control_plane_plus_game_record_v3",
@@ -172,7 +178,7 @@
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "security": "guest_hash_csrf_origin_capability_and_projection_baseline",
-    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_twelve_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_player_counter_continuous_effect_and_attachment_owners",
+    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_twelve_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_player_counter_continuous_effect_attachment_and_aura_entry_owners",
     "single_writer_game_actor": "implemented_single_process",
     "transport_neutral_service": "implemented_strict_protocol_3"
   },
@@ -188,10 +194,10 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 59076,
+      "material_residuals": 57982,
       "status_counts": {
-        "exact": 590,
-        "partial": 14769,
+        "exact": 661,
+        "partial": 14698,
         "unresolved": 16264
       },
       "total": 31623
@@ -209,20 +215,20 @@
       "trusted": 0
     },
     "oracle": {
-      "material_residuals": 67559,
+      "material_residuals": 66413,
       "status_counts": {
-        "exact": 3247,
-        "partial": 16204,
+        "exact": 3320,
+        "partial": 16131,
         "unresolved": 19034
       },
       "total": 38485
     },
     "rules": {
-      "blocked": 363,
+      "blocked": 367,
       "definition_only": 93,
       "passing": 162,
       "total": 3300,
-      "unreviewed": 2682
+      "unreviewed": 2678
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -247,19 +253,19 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4632,
+    "deterministic_cases_discovered": 4646,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
     "web_files": 28
   },
   "validation": {
-    "card_program_census": "oracle_ir_v24_full_38485_trusted_1007_capability_closed_1004_mixed_1_residual_35229_failed_2249_material_residual_67547; full_oracle_exact_3247_partial_16204_unresolved_19034_material_residual_67559; commander_legal_31623_trusted_590_capability_closed_587_mixed_1_residual_31032_failed_1_material_residual_59073; commander_oracle_exact_590_partial_14769_unresolved_16264_material_residual_59076; delta_from_pr83_full_exact_and_trusted_plus_71_capability_closed_plus_70_material_oracle_residual_minus_1333_and_commander_exact_and_trusted_plus_62_capability_closed_plus_61_material_oracle_residual_minus_1231; representative_new_exact_cards_include_closed_fixed_characteristics_granted_by_auras_equipment_and_fortifications_plus_fixed_ordinary_mana_equip; aura_enchant_casting_entry_exotic_equip_costs_dynamic_conditional_attached_values_and_full_layer_dependencies_remain_residual",
+    "card_program_census": "oracle_ir_v25_full_38485_trusted_1080_capability_closed_1077_mixed_1_residual_35156_failed_2249_material_residual_66401; full_oracle_exact_3320_partial_16131_unresolved_19034_material_residual_66413; commander_legal_31623_trusted_661_capability_closed_658_mixed_1_residual_30961_failed_1_material_residual_57979; commander_oracle_exact_661_partial_14698_unresolved_16264_material_residual_57982; delta_from_pr84_full_exact_trusted_and_capability_closed_plus_73_material_oracle_residual_minus_1146_and_commander_exact_trusted_and_capability_closed_plus_71_material_oracle_residual_minus_1094; representative_new_exact_cards_include_sensory_deprivation_unholy_strength_holy_strength_flight_and_weakness; player_graveyard_quality_subtype_compound_multiple_enchant_aura_creature_and_complete_phasing_grammar_remain_residual",
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30876521847,
+      "run_id": 30882797307,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30876521847"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30882797307"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -267,8 +273,8 @@
       "browser_typecheck_and_production_build": "pass_typecheck_and_focused_headless_journey",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "certified_main_through_pr83_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; active_source_focused_attached_relation_characteristics_fixed_equip_compiler_replay_privacy_mutation_state_based_action_and_architecture_checks_pass",
-      "focused_rules_tests": "pass_immutable_continuous_effect_model_locked_resolution_sets_live_static_membership_exact_attached_relation_source_departure_control_change_entry_reentry_detach_reattach_phasing_cleanup_expiration_fixed_equip_multiplayer_save_load_replay_privacy_rollback_and_implementation_mutations",
+      "deterministic_tests": "certified_main_through_pr84_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; active_source_focused_aura_cast_entry_token_state_action_compiler_replay_privacy_mutation_and_legacy_compatibility_checks_pass",
+      "focused_rules_tests": "pass_simple_aura_closed_grammar_mandatory_cast_target_resolution_revalidation_nonspell_entry_choice_no_legal_object_aura_token_preflight_live_control_protection_state_action_multiplayer_replay_privacy_rollback_and_implementation_mutation",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",

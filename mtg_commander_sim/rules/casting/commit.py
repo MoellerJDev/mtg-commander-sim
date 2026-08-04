@@ -316,6 +316,7 @@ def _create_spell_item(
             "target_snapshots": thaw_json(proposal.target_snapshots),
             "targets_revalidated": False,
             "targets_chosen_at_creation": True,
+            "aura_spell": bool(details.get("aura_spell", False)),
             "cant_be_countered": used_uncounterable,
             "granted_improvise": used_improvise,
             "cost_option": proposal.cost_option_id,

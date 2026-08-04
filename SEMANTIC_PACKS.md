@@ -136,9 +136,15 @@ stale modifier. Oracle IR v24 lowers closed fixed enchanted/equipped/fortified
 type, supported keyword, separately reviewed rules-text, and power/toughness
 wording without card-name dispatch. Printed fixed ordinary-mana Equip is a
 separate trusted capability that targets a creature its controller controls and
-resolves through the ordinary stack. Aura casting/entry, general Enchant
-quality grammar, exotic Equip costs, dynamic or conditional attached values,
-and full CR 613 dependencies remain residual and fail closed.
+resolves through the ordinary stack. Oracle IR v25 lowers a closed
+battlefield-object Enchant grammar to the trusted
+`attachment.aura.simple_object` capability. The Aura runtime requires a legal
+cast target, revalidates it on resolution, handles nonspell entry through a
+seat-scoped replayable choice, and applies token-entry preflight without
+creating an unattached illegal token. General Enchant qualities, players,
+nonbattlefield objects, Aura creatures, exotic Equip costs, dynamic or
+conditional attached values, and full CR 613 dependencies remain residual and
+fail closed.
 
 ## Typed tap-state execution
 
