@@ -776,6 +776,21 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/compiler/unlock_frontier.py",
+      "layer": "semantics",
+      "owning_subsystem": "oracle_compiler",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/continuous_effect_model.py",
       "layer": "domain",
       "owning_subsystem": "legacy_domain",
@@ -3125,5 +3140,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "a00a7fc28a7160c6c7bf7d5e76f6052d83126c7c8faa04f6c4285ac7f5de06c9"
+  "fingerprint": "79974176efc88a9fe157b8119dcc2bae3fa4a43204fb0027d596075f0fe23255"
 }

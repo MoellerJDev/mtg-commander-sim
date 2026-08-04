@@ -61,8 +61,10 @@ def _program_face_id(program: SemanticProgram) -> str:
     if explicit:
         return explicit
     parts = program.ability_id.split(":")
-    if len(parts) > 1 and parts[1] in {"front", "back"}:
-        return parts[1]
+    if len(parts) > 1:
+        positional = parts[1].split("-", 1)[0]
+        if positional in {"front", "back"}:
+            return positional
     return "front"
 
 
@@ -70,13 +72,30 @@ def _bind_program_faces(
     programs: Iterable[SemanticProgram],
     faces: Iterable[CardProgramFace],
 ) -> tuple[SemanticProgram, ...]:
-    face_ids = {face.face_id for face in faces}
+    face_values = tuple(faces)
+    face_ids = {face.face_id for face in face_values}
     only_face = next(iter(face_ids)) if len(face_ids) == 1 else None
+    positional_aliases = (
+        {
+            "front": face_values[0].face_id,
+            "back": face_values[1].face_id,
+        }
+        if len(face_values) == 2
+        else {}
+    )
     result = []
     for program in programs:
         face_id = _program_face_id(program)
         if face_id in face_ids:
             result.append(program)
+            continue
+        if face_id in positional_aliases:
+            provenance = dict(program.provenance)
+            provenance["face_id"] = positional_aliases[face_id]
+            provenance["face_identity_adapter"] = (
+                "two_face_positional_alias"
+            )
+            result.append(replace(program, provenance=provenance))
             continue
         if only_face is None:
             raise CardProgramError(
