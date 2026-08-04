@@ -9263,7 +9263,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "7ed6b1df11c7a09c3065236869806f7a753d887544943eeb5a587f22a962b9bb"
+          "verified": "87003dbeec824de5b6cf1d5f390f1c92964a50a915432e066a0fa92bb80391b4"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9670,7 +9670,7 @@
   "tests": {
     "browser": {
       "node_unit_cases": 22,
-      "playwright_e2e_journeys": 7
+      "playwright_e2e_journeys": 8
     },
     "mutation_testing": {
       "capability_mutation_declarations": 39,
@@ -9701,8 +9701,8 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1449,
-      "discovered_total": 4749,
+      "conventional_ast_cases": 1448,
+      "discovered_total": 4748,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 38,

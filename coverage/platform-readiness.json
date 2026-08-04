@@ -17,7 +17,7 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "7ed6b1df11c7a09c3065236869806f7a753d887544943eeb5a587f22a962b9bb",
+    "evaluated_source_tree_hash": "87003dbeec824de5b6cf1d5f390f1c92964a50a915432e066a0fa92bb80391b4",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -210,7 +210,7 @@
   "provenance": {
     "certified_head_sha": "58f13457a2e4ade605f0ab788116fe62e9150d47",
     "feature_head_sha": "58f13457a2e4ade605f0ab788116fe62e9150d47",
-    "generation_timestamp": "2026-08-04T18:15:00Z"
+    "generation_timestamp": "2026-08-04T18:34:45Z"
   },
   "repository": {
     "default_branch": "main",
@@ -278,7 +278,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4749,
+    "deterministic_cases_discovered": 4748,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
