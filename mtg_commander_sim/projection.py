@@ -69,10 +69,14 @@ class StateProjector:
         characteristic_resolver: (
             Callable[[CardInstance], Mapping[str, Any]] | None
         ) = None,
+        action_explanation_resolver: (
+            Callable[[str], Mapping[str, Mapping[str, Any]]] | None
+        ) = None,
     ):
         self.card_db = card_db
         self.state = state
         self.characteristic_resolver = characteristic_resolver
+        self.action_explanation_resolver = action_explanation_resolver
 
     @staticmethod
     def seat_for(principal: str) -> str | None:
@@ -527,7 +531,7 @@ class StateProjector:
                 1 if self.state.combat.first_strike_step else 0
             ),
         }
-        return {
+        snapshot = {
             "rev": self.state.revision,
             "event": self.state.event_sequence,
             "game": {
@@ -541,6 +545,17 @@ class StateProjector:
             "stack": stack,
             "combat": combat,
         }
+        own_seat = self.seat_for(principal)
+        if (
+            own_seat in view_seats
+            and self.action_explanation_resolver is not None
+        ):
+            explanations = self.action_explanation_resolver(own_seat)
+            if explanations:
+                snapshot["action_explanations"] = copy.deepcopy(
+                    dict(explanations)
+                )
+        return snapshot
 
     def _visible_oracles(self, snapshot: Mapping[str, Any]) -> set[str]:
         found: set[str] = set()

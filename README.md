@@ -30,8 +30,9 @@ rulings exports every 24 hours, and serves an on-demand local card-image cache.
 The browser renders the engine's current generic choice vocabulary, locally
   cached card art, a persistent hover/focus card viewer, browsable public zones,
   card-specific play/cast/activate controls, resilient drag-to-play interaction,
-  saved Auto-mana/Manual mana and Auto-pass/Full control preferences, visible
-  tapped-card rotation and labels for every seat, a bottom-anchored resizable
+  saved Auto-mana/Manual mana and Auto-pass/Hold every priority preferences,
+  an exact turn rail that separates the active player from the priority holder,
+  visible tapped-card rotation and labels for every seat, a bottom-anchored resizable
   hand dock, reconnect and exact-command retry states,
   explicit active-player main-phase advancement, attack/block interaction,
   public commander-damage tracking, confirmed concession, and terminal
@@ -186,9 +187,25 @@ response window with no meaningful nonmana action. It never skips a playable
 land, cast, target, combat declaration, or other player choice, and it never
 advances the active player's empty-stack precombat or postcombat main phase.
 Those two turn boundaries always require **Continue to combat** or **End turn**,
-preventing two Auto-pass clients from silently cycling whole turns. Turn on
-**Full control** at any time to hold every otherwise pass-only priority window;
-the preference is saved in this browser.
+preventing two Auto-pass clients from silently cycling whole turns. Select
+**Hold every priority** at any time to stop Auto-pass and require an explicit
+pass at every otherwise pass-only priority window; the preference is saved in
+this browser. The turn banner names the active seat, the distinct priority
+holder, and the exact step. Its Untap-to-End rail is informational and cannot
+advance the game.
+
+In a two-player Commander duel, only the starting player skips the draw action
+on that player's first turn. The second player draws normally on turn two, and
+the starting player draws normally on turn three. In Commander games with
+three or more players, the starting player and every later player draw on their
+first turns.
+
+The default right rail keeps the stack above recent activity and the card
+viewer. **Table settings** can resize and reorder that rail, resize the anchored
+hand, change card scale and board density, collapse the viewer, or compact the
+phase rail. These bounded preferences persist only in this browser. Selecting
+an unavailable card shows a seat-scoped server explanation; the client does
+not recreate land timing or other legality rules.
 
 Commander combat damage is always displayed separately by source commander on
 every public player board, including an explicit zero before any is dealt.
@@ -500,10 +517,11 @@ generated documentation fixtures with bearer capabilities redacted. See
   turn mutation, while generic duration expiry, simultaneous extra turns,
   additional phases or steps, and skip replacement ordering remain blocked
 - source-reviewed CR 501 beginning-phase structure: the ordinary turn table
-  contains untap, upkeep, then draw; a turn-one draw skip suppresses only the
-  draw action rather than the draw step, and the phase transition exact-
-  replays into precombat main; added or skipped phases and steps remain CR 500
-  dependencies
+  contains untap, upkeep, then draw; the two-player starting-player turn-one
+  draw skip suppresses only the draw action rather than the draw step, while a
+  three-or-more-player Commander game draws normally from its first turn, and
+  the phase transition exact-replays into precombat main; added or skipped
+  phases and steps remain CR 500 dependencies
 - source-reviewed CR 502 untap boundary: ordinary untaps, stun replacement,
   represented one-shot prohibitions, stackless trigger holding, and exact
   replay are characterized; unsupported phasing and global maximum-untap

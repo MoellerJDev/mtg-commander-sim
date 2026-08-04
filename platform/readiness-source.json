@@ -6,11 +6,11 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "typed_aura_protection_and_granted_abilities",
-    "branch": "rules/typed-aura-descriptors-and-protection",
+    "active_phase": "duel_turn_state_and_table_clarity",
+    "branch": "fix/duel-turn-state-and-table-clarity",
     "branch_ancestry": {
-      "focused_branch_base": "736bfdafab934526e151b69806b92b5fff5cdea8",
-      "focused_branch_unique_commits_over_main": 1
+      "focused_branch_base": "561dc6462f99f81e3413145f8d8755e338ae54ec",
+      "focused_branch_unique_commits_over_main": 13
     },
     "pull_requests": [
       {
@@ -628,6 +628,13 @@
         "number": 88,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/88"
+      },
+      {
+        "base": "main",
+        "head": "rules/typed-aura-descriptors-and-protection",
+        "number": 89,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/89"
       }
     ],
     "tags": [
@@ -642,9 +649,9 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "ad90746049669cc6943b83bbf4a2fc4e4ad0e0f1",
-    "certified_head_sha": "ad90746049669cc6943b83bbf4a2fc4e4ad0e0f1",
-    "generation_timestamp": "2026-08-04T16:38:46Z"
+    "feature_head_sha": "58f13457a2e4ade605f0ab788116fe62e9150d47",
+    "certified_head_sha": "58f13457a2e4ade605f0ab788116fe62e9150d47",
+    "generation_timestamp": "2026-08-04T18:34:45Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -795,8 +802,8 @@
     {
       "id": "typed_aura_protection_and_granted_abilities",
       "name": "Pinned Aura descriptors, typed protection, and executable granted abilities",
-      "status": "implemented_at_feature_head",
-      "evidence": "Feature head ad907460 compiles closed Enchant and DEBT protection grammar once into face-pinned typed runtime fragments; all Aura cast, validation, resolution, nonspell entry, token entry, and state-based legality paths consume the same descriptor and no live Oracle compiler call remains. Animate Dead uses a linked physical-object Enchant fragment, while executable granted activation and trigger fragments participate in layer 6, activation and trigger discovery, source identity, capability closure, and replay fingerprints without using add_rules_text as execution. Protection targeting, blocking, attachment, and damage checks fail closed for unsupported qualities. Thornbite Staff's grant is typed, observes source/controller LKI, and pins the granted permanent's logical incarnation. Oracle IR v29 and capability registry v26 add three runtime component families and the trusted protection.typed.debt capability. The Commander census moves exact/trusted programs from 722 to 747 and capability-closed from 719 to 744; explicit unsupported protection grammar raises material residuals honestly to 57,570. CommanderEngine falls from 13,308 to 13,213 logical lines, printed-name literals fall from 693 to 658, Oracle-ID literals fall from 6 to 5, and direct writes remain 135. Eighty-eight post-extraction focused tests plus the broader affected shard, replay, privacy, rollback, mutation, compiler, capability, and architecture checks pass. Complete protection qualities, player and nonbattlefield Enchant restrictions, Aura creatures, dynamic granted abilities, ability-copy interactions, and full layer dependencies remain fail-closed."
+      "status": "integrated_on_certified_main",
+      "evidence": "Certified main through PR 89 compiles closed Enchant and DEBT protection grammar once into face-pinned typed runtime fragments; all Aura cast, validation, resolution, nonspell entry, token entry, and state-based legality paths consume the same descriptor and no live Oracle compiler call remains. Animate Dead uses a linked physical-object Enchant fragment, while executable granted activation and trigger fragments participate in layer 6, activation and trigger discovery, source identity, capability closure, and replay fingerprints without using add_rules_text as execution. Protection targeting, blocking, attachment, and damage checks fail closed for unsupported qualities. Thornbite Staff's grant is typed, observes source/controller LKI, and pins the granted permanent's logical incarnation. Oracle IR v30 and capability registry v26 add three runtime component families and the trusted protection.typed.debt capability. The Commander census moves exact/trusted programs from 722 to 747 and capability-closed from 719 to 744; explicit unsupported protection grammar raises material residuals honestly to 57,570. CommanderEngine falls from 13,308 to 13,213 logical lines, printed-name literals fall from 693 to 658, Oracle-ID literals fall from 6 to 5, and direct writes remain 135. Exact-head run 30935545835 passed every Python, generated, package, Windows, headless-browser, certification, and metrics job; merge commit 561dc646 is on main. Complete protection qualities, player and nonbattlefield Enchant restrictions, Aura creatures, dynamic granted abilities, ability-copy interactions, and full layer dependencies remain fail-closed."
     },
     {
       "id": "rules_snapshot",
@@ -872,5 +879,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Certify and merge the typed Aura, protection, and granted-ability boundary, then refresh the dependency scheduler and continue the next universal rules-system slice."
+  "next_task": "Complete and certify the separate duel turn-state and browser-table clarity branch, then continue the next dependency-ready universal rules-system slice."
 }

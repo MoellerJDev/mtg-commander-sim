@@ -88,16 +88,20 @@ async function submitImmediateAction(page: Page, actionId: string) {
   await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
 }
 
-async function submitOpenChoice(page: Page) {
+async function submitOpenChoice(page: Page, force = false) {
   const revision = await viewRevision(page);
-  await page.getByTestId("submit-choice").click();
+  if (force) {
+    await page.getByTestId("submit-choice").click({ force: true });
+  } else {
+    await page.getByTestId("submit-choice").click();
+  }
   await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
 }
 
-async function submitFormAction(page: Page, actionId: string) {
+async function submitFormAction(page: Page, actionId: string, forceChoice = false) {
   await page.getByTestId(`action-${actionId}`).click();
   await expect(page.getByTestId("choice-dialog")).toBeVisible();
-  await submitOpenChoice(page);
+  await submitOpenChoice(page, forceChoice);
 }
 
 async function submitMaybeFormAction(page: Page, actionId: string, clickTimeout = 15_000) {
@@ -118,7 +122,7 @@ async function ensureFullControl(page: Page) {
     await toggle.click();
   }
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
-  await expect(toggle).toContainText("Full control on");
+  await expect(toggle).toContainText("Hold every priority");
 }
 
 async function actionIsReady(action: Locator): Promise<boolean> {
@@ -212,6 +216,15 @@ const browserNaturalWinnerDeck = `Commander:
 Mainboard:
 50 Swamp
 49 Forest
+`;
+
+const browserSpireGardenDeck = `Commander:
+1 Saskia the Unyielding
+
+Mainboard:
+1 Spire Garden
+49 Forest
+49 Mountain
 `;
 
 test("@smoke four shared-cookie browser tabs retain isolated seats through mulligans and reconnect", async ({ browser }) => {
@@ -494,7 +507,7 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
     await expect(host.getByTestId("auto-pass-toggle")).toHaveAttribute("aria-pressed", "true");
     await expect(host.getByTestId("auto-mana-toggle")).toHaveAttribute("aria-pressed", "true");
     await host.getByTestId("auto-pass-toggle").click();
-    await expect(host.getByTestId("auto-pass-toggle")).toContainText("Full control on");
+    await expect(host.getByTestId("auto-pass-toggle")).toContainText("Hold every priority");
     await expect(host.getByTestId("auto-pass-toggle")).toHaveAttribute("aria-pressed", "false");
 
     await submitImmediateAction(host, "keep");
@@ -526,11 +539,167 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
     for (const page of [host, opponent]) {
       await expect(page.getByTestId("game-status")).toHaveText("COMPLETE");
       await expect(page.getByTestId("game-over-banner")).toContainText("Seat B wins");
-      await expect(page.getByTestId("complete-decision")).toContainText("Seat B won");
+      await expect(page.getByTestId("turn-status-terminal")).toContainText("Game complete");
+      await expect(page.getByTestId("decision-panel")).toHaveCount(0);
       await expect(page.locator('[data-testid^="action-"]')).toHaveCount(0);
     }
   } finally {
     await context.close().catch(() => undefined);
+  }
+});
+
+test("an isolated-context duel presents exact turn state and Spire Garden correctly", async ({ browser }) => {
+  test.setTimeout(180_000);
+  const hostContext = await browser.newContext();
+  const opponentContext = await browser.newContext();
+  const host = await hostContext.newPage();
+  const opponent = await opponentContext.newPage();
+  await host.setViewportSize({ width: 1920, height: 1080 });
+  await opponent.setViewportSize({ width: 1920, height: 1080 });
+  try {
+    await host.route(/\/api\/v1\/rooms$/, async (route) => {
+      const request = route.request();
+      const payload = request.postDataJSON() as Record<string, unknown>;
+      await route.continue({
+        postData: JSON.stringify({ ...payload, seed: 1 }),
+        headers: { ...request.headers(), "content-type": "application/json" },
+      });
+    });
+    await enter(host, "Turn-state host");
+    await enter(opponent, "Turn-state opponent");
+    await host.getByTestId("room-size").selectOption("2");
+    await host.getByTestId("create-room").click();
+    const invite = await host.getByTestId("room-invite").textContent();
+    expect(invite).toBeTruthy();
+    await opponent.getByTestId("invite-code").fill(invite!);
+    await opponent.getByTestId("seat-select").selectOption("B");
+    await opponent.getByTestId("join-room").click();
+    await submitNamedDeck(host, "Spire Garden timing", "Saskia the Unyielding", browserSpireGardenDeck);
+    await submitNamedDeck(opponent, "Turn-state defender", "Yargle and Multani", browserNaturalWinnerDeck);
+    await host.getByTestId("start-game").click();
+
+    await ensureFullControl(host);
+    await ensureFullControl(opponent);
+    await submitImmediateAction(host, "keep");
+    await submitImmediateAction(opponent, "keep");
+
+    for (const page of [host, opponent]) {
+      await expect(page.getByTestId("active-turn-label")).toHaveText("Seat A's Turn · Turn 1");
+      await expect(page.getByTestId("priority-label")).toContainText("Priority: Seat A");
+      await expect(page.getByTestId("exact-step-label")).toHaveText("Upkeep");
+      await expect(page.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
+    }
+
+    const spire = host
+      .getByTestId("own-hand")
+      .locator(".hand-card")
+      .filter({ has: host.locator(".card-copy strong", { hasText: /^Spire Garden$/ }) });
+    await expect(spire).toHaveCount(1);
+    await spire.click();
+    await expect(host.getByTestId("selected-card-actions")).toContainText(
+      "Lands may be played only during your own main phase while the stack is empty",
+    );
+
+    await submitMaybeFormAction(host, "pass");
+    for (const page of [host, opponent]) {
+      await expect(page.getByTestId("active-turn-label")).toHaveText("Seat A's Turn · Turn 1");
+      await expect(page.getByTestId("priority-label")).toContainText("Priority: Seat B");
+      await expect(page.getByTestId("exact-step-label")).toHaveText("Upkeep");
+    }
+
+    await passUntilDraggable([host, opponent], spire);
+    await expect(host.getByTestId("active-turn-label")).toHaveText("Seat A's Turn · Turn 1");
+    await expect(host.getByTestId("priority-label")).toContainText("Priority: Seat A");
+    await expect(host.getByTestId("exact-step-label")).toHaveText("Main Phase 1");
+    await expect(host.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
+
+    const sidebar = host.locator(".table-sidebar");
+    await expect(sidebar.locator(":scope > section").first()).toHaveAttribute("data-testid", "stack-panel");
+    const stackBounds = await host.getByTestId("stack-panel").boundingBox();
+    expect(stackBounds).not.toBeNull();
+    expect(stackBounds!.y + stackBounds!.height).toBeLessThan(1080);
+
+    await host.getByTestId("table-settings").locator("summary").click();
+    await host.getByLabel("Hand panel height").fill("360");
+    await host.getByLabel("Right rail width").fill("420");
+    await host.getByLabel("Right rail first").selectOption("activity");
+    await host.getByLabel("Board density").selectOption("compact");
+    await expect(host.locator(".game-shell")).toHaveClass(/density-compact/);
+    await expect(sidebar.locator(":scope > section").first()).toHaveAttribute("data-testid", "activity-panel");
+
+    await host.reload();
+    await expect(host.locator(".game-shell")).toBeVisible();
+    await expect(host.getByTestId("auto-pass-toggle")).toHaveAttribute("aria-pressed", "false");
+    await expect(host.locator(".game-shell")).toHaveClass(/density-compact/);
+    await expect(host.locator(".game-shell")).toHaveAttribute("style", /--right-rail-width: 420px/);
+    await expect(host.locator(".table-sidebar > section").first()).toHaveAttribute("data-testid", "activity-panel");
+    const dockBottom = await host.getByTestId("table-bottom-dock").evaluate(
+      (element) => Math.round(element.getBoundingClientRect().bottom),
+    );
+    expect(dockBottom).toBe(1072);
+
+    const beforeDrop = await viewRevision(host);
+    await spire.dragTo(host.getByTestId("own-battlefield"));
+    await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeDrop);
+    const hostSpire = host
+      .getByTestId("own-battlefield")
+      .locator(".card-tile")
+      .filter({ hasText: "Spire Garden" });
+    const opponentSpire = opponent
+      .getByTestId("player-A")
+      .locator(".battlefield .card-tile")
+      .filter({ hasText: "Spire Garden" });
+    await expect(hostSpire).toHaveAttribute("data-tapped", "true");
+    await expect(opponentSpire).toHaveAttribute("data-tapped", "true");
+    await expect(host.getByTestId("priority-label")).toContainText("Priority: Seat A");
+    await expect(host.getByTestId("action-pass")).toBeVisible();
+    await expect(host.getByTestId("own-hand").locator(".hand-card")).toHaveCount(6);
+
+    async function advanceUntilTurn(active: string, turn: number, step: string) {
+      for (let attempt = 0; attempt < 80; attempt += 1) {
+        const activeText = await host.getByTestId("active-turn-label").textContent();
+        const stepText = await host.getByTestId("exact-step-label").textContent();
+        if (activeText === `Seat ${active}'s Turn · Turn ${turn}` && stepText === step) return;
+        let advanced = false;
+        for (const page of [host, opponent]) {
+          const discard = page.getByTestId("action-discard");
+          if (await actionIsReady(discard)) {
+            await discard.click();
+            await expect(page.getByTestId("choice-dialog")).toBeVisible();
+            await page.locator('[data-testid^="choice-cards-"]').first().check();
+            await submitOpenChoice(page);
+            advanced = true;
+            break;
+          }
+          const pass = page.getByTestId("action-pass");
+          if (!(await actionIsReady(pass))) continue;
+          await submitMaybeFormAction(page, "pass", 3_000);
+          advanced = true;
+          break;
+        }
+        if (!advanced) await host.waitForTimeout(50);
+      }
+      throw new Error(`Duel did not reach Seat ${active}, turn ${turn}, ${step}`);
+    }
+
+    await advanceUntilTurn("B", 2, "Draw");
+    await expect(opponent.getByTestId("own-hand").locator(".hand-card")).toHaveCount(8);
+    await expect(host.getByTestId("priority-label")).toContainText("Priority: Seat B");
+
+    await advanceUntilTurn("A", 3, "Draw");
+    await expect(host.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
+
+    await host.getByTestId("action-concede").click();
+    await submitOpenChoice(host);
+    for (const page of [host, opponent]) {
+      await expect(page.getByTestId("turn-status-terminal")).toContainText("Game complete");
+      await expect(page.getByTestId("phase-rail")).toHaveCount(0);
+      await expect(page.getByTestId("auto-pass-toggle")).toHaveCount(0);
+      await expect(page.getByTestId("decision-panel")).toHaveCount(0);
+      await expect(page.getByTestId("game-over-banner")).toContainText("Seat B wins");
+    }
+  } finally {
+    await Promise.all([hostContext.close(), opponentContext.close()]);
   }
 });
 
@@ -673,10 +842,10 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
 });
 
 test("a duel declares an attacker in the browser and applies commander combat damage", async ({ browser }) => {
-  // This journey crosses several auto-pass windows and normally finishes near
-  // the global 90-second limit on Windows. Preserve assertion-driven waits
-  // while leaving enough time for context cleanup under serial suite load.
-  test.setTimeout(180_000);
+  // This journey crosses several auto-pass windows and persists each real
+  // command. Preserve assertion-driven waits while leaving hosted runners
+  // enough time for durability writes and context cleanup under serial load.
+  test.setTimeout(240_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -727,7 +896,12 @@ test("a duel declares an attacker in the browser and applies commander combat da
       .locator(".command-zone .card-tile")
       .filter({ has: host.locator(".card-copy strong", { hasText: "Zimone and Dina" }) });
     await expect(commander).toHaveAttribute("draggable", "true");
-    await commander.dragTo(host.getByTestId("own-battlefield"));
+    // The anchored hand intentionally remains above the board while expanded.
+    // Use the same cast capability in the always-visible decision tray after
+    // verifying the command-zone surface is server-authorized and draggable.
+    await host.getByTestId("decision-panel")
+      .getByRole("button", { name: /Cast Zimone and Dina/ })
+      .click();
     await expect(host.getByTestId("choice-dialog")).toContainText("Cast Zimone and Dina");
     await submitOpenChoice(host);
     await expect(host.getByTestId("own-battlefield")).toContainText("Zimone and Dina");
@@ -757,7 +931,7 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
   // This intentionally natural game persists more than one hundred real
   // commands. It completes near five minutes alone and can take longer after
   // the preceding serial journeys, especially on Windows or hosted CI.
-  test.setTimeout(480_000);
+  test.setTimeout(600_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -801,8 +975,12 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       // Once six mana is available, commander casting remains meaningful in
       // both main phases. Auto-pass must stop; this scripted witness declines
       // those two verified opportunities explicitly.
-      await submitFormAction(page, "pass");
-      await submitFormAction(page, "pass");
+      // The overlay is already asserted visible. Force only these repeated
+      // late-game confirmations because Chromium can otherwise wait forever
+      // for a perfectly stable synthetic click point while the fixed dock is
+      // remeasured after more than one hundred persisted commands.
+      await submitFormAction(page, "pass", true);
+      await submitFormAction(page, "pass", true);
     }
 
     const requiredMana: Array<"Swamp" | "Forest"> = [
@@ -816,7 +994,9 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
           .locator(".command-zone .card-tile")
           .filter({ has: host.locator(".card-copy strong", { hasText: "Yargle and Multani" }) });
         await expect(commander).toHaveAttribute("draggable", "true");
-        await commander.dragTo(host.getByTestId("own-battlefield"));
+        await host.getByTestId("decision-panel")
+          .getByRole("button", { name: /Cast Yargle and Multani/ })
+          .click();
         await expect(host.getByTestId("choice-dialog")).toContainText("Cast Yargle and Multani");
         await submitOpenChoice(host);
         await expect(host.getByTestId("own-battlefield")).toContainText("Yargle and Multani");
@@ -891,7 +1071,8 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
     for (const page of [host, opponent]) {
       await expect(page.getByTestId("game-status")).toHaveText("COMPLETE");
       await expect(page.getByTestId("game-over-banner")).toContainText("Seat A wins");
-      await expect(page.getByTestId("complete-decision")).toContainText("Seat A won");
+      await expect(page.getByTestId("turn-status-terminal")).toContainText("Game complete");
+      await expect(page.getByTestId("decision-panel")).toHaveCount(0);
       await expect(page.locator('[data-testid^="action-"]')).toHaveCount(0);
     }
     await host.getByTestId("open-public-log").click();

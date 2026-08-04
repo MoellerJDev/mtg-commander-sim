@@ -12,12 +12,35 @@ test("table preferences default to automatic mana and automatic empty passes", (
 });
 
 test("table preferences preserve valid toggles and repair invalid fields", () => {
-  assert.deepEqual(
-    parseTablePreferences('{"autoMana":false,"autoPass":false}'),
-    { autoMana: false, autoPass: false },
-  );
-  assert.deepEqual(
-    parseTablePreferences('{"autoMana":"yes","autoPass":false}'),
-    { autoMana: true, autoPass: false },
-  );
+  const migrated = parseTablePreferences('{"autoMana":false,"autoPass":false}');
+  assert.equal(migrated.autoMana, false);
+  assert.equal(migrated.autoPass, false);
+  assert.equal(migrated.handPanelHeight, DEFAULT_TABLE_PREFERENCES.handPanelHeight);
+  const repaired = parseTablePreferences('{"autoMana":"yes","autoPass":false,"handPanelHeight":5000,"rightRailOrder":["card","card"]}');
+  assert.equal(repaired.autoMana, true);
+  assert.equal(repaired.autoPass, false);
+  assert.equal(repaired.handPanelHeight, 650);
+  assert.deepEqual(repaired.rightRailOrder, DEFAULT_TABLE_PREFERENCES.rightRailOrder);
+});
+
+test("bounded version-two layout preferences survive parsing", () => {
+  const value = parseTablePreferences(JSON.stringify({
+    handPanelHeight: 420,
+    handAutoCollapse: false,
+    cardScale: 1.2,
+    rightRailWidth: 410,
+    rightRailOrder: ["activity", "stack", "card"],
+    inspectorCollapsed: true,
+    boardDensity: "compact",
+    compactPhaseRail: true,
+    activityVisible: false,
+  }));
+  assert.equal(value.handPanelHeight, 420);
+  assert.equal(value.cardScale, 1.2);
+  assert.equal(value.rightRailWidth, 410);
+  assert.deepEqual(value.rightRailOrder, ["activity", "stack", "card"]);
+  assert.equal(value.inspectorCollapsed, true);
+  assert.equal(value.boardDensity, "compact");
+  assert.equal(value.compactPhaseRail, true);
+  assert.equal(value.activityVisible, false);
 });

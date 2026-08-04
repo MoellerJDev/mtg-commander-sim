@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "4f48d04905672a1d00fd5fde713388cfce22eabe8bec8df039d58399e2746a5e"
+verified: "fba694b03acae08233b353840f43ba07185fe10dd141cc75110136b0be1ef2ac"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,13 +15,13 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `4f48d04905672a1d00fd5fde713388cfce22eabe8bec8df039d58399e2746a5e` (`tracked-git-clean-blobs-sha256-v3`)
-- Feature head: `ad90746049669cc6943b83bbf4a2fc4e4ad0e0f1`
-- Certified exact head: `ad90746049669cc6943b83bbf4a2fc4e4ad0e0f1`
-- Generation timestamp: `2026-08-04T16:38:46Z`
+- Evaluated source tree: `fba694b03acae08233b353840f43ba07185fe10dd141cc75110136b0be1ef2ac` (`tracked-git-clean-blobs-sha256-v3`)
+- Feature head: `58f13457a2e4ade605f0ab788116fe62e9150d47`
+- Certified exact head: `58f13457a2e4ade605f0ab788116fe62e9150d47`
+- Generation timestamp: `2026-08-04T18:34:45Z`
 - Runtime Git SHA: resolved dynamically and intentionally not persisted in this tracked report
 - Current merged main: resolved dynamically and intentionally not persisted in this tracked report
-- Active future phase: `typed_aura_protection_and_granted_abilities`
+- Active future phase: `duel_turn_state_and_table_clarity`
 - Package version: `0.8.0`
 
 Historical integration chronology belongs in `CHANGELOG.md`; this current report intentionally does not reproduce a pull-request ledger.
@@ -65,7 +65,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 | Canonical draw transaction, replacement, and fixed-program closure | `integrated_on_certified_main` | Certified main through PR 86 adds immutable draw instruction, event, result, continuation, and APNAP batch values; one narrow draw coordinator and mutation owner; strict typed prevention and Dredge replacement operations; private affected-player choices; empty-library result handling; and exact resumption of later draws or spell effects. Represented turn, resolving-effect, conditional, optional-follow-up, and table-wide producers use the same path, while ordinary intent execution fails closed on an unrouted draw. Oracle IR v26 lowers closed controller, target-player, target-opponent, each-player, and Dredge templates. Exact-head run 30901390381, merge commit b5e5caa, and main-smoke run 30902723662 are green. The Commander census improved exact/trusted CardPrograms from 661 to 722, capability-closed from 658 to 719, partial from 14,698 to 14,644, unresolved from 16,264 to 16,257, and material Oracle residuals from 57,982 to 57,497. CommanderEngine fell from 13,525 to 13,308 logical lines and the printed-name heuristic from 678 to 660. |
 | Draw limits, optional-choice legality, and instruction replacement | `integrated_on_certified_main` | Certified main through PR 87 adds immutable live draw permissions, generic no-draw and maximum-one-per-turn runtime restrictions, canonical prohibited draw results, fixed instruction-count doubling, and a seat-scoped optional-draw handler that distinguishes chooser from prospective drawer. Permission is recomputed before every individual event, so mandatory multi-draws occur partially while optional draws and draw costs require their complete count to be legal; Dredge does not consume a draw allowance, and an empty library is not treated as a prohibition. Per-card events and queued instructions run through an iterative trampoline; replacement-free and prevented counts of 2,000, midpoint suspension with 1,500 draws remaining, over-library attempts, private resume, and exact replay have focused evidence. Oracle IR v27 generically lowers fixed prohibitions, unconditional controller doubling, and fixed optional draws. Exact-head run 30913382652, merge commit a5609bc, and main-smoke run 30915475098 are green. The Commander census improved exact/trusted programs from 722 to 725, capability-closed programs from 719 to 722, and material Oracle residuals from 57,497 to 57,488; Spirit of the Labyrinth, Thought Reflection, and Oculus are newly exact. Shared-team turns, conditional or dynamic limits, complete draw-as-cost producers, CR 121.6c/121.7 result actions and nested ordering, casting-process face-down draws, reveal-as-drawn choices, and broader replacement grammar remain fail-closed. |
 | Continuous-handler identity and closed grammar | `integrated_on_certified_main` | Certified main through PR 88 makes runtime-handler equivalence consume the complete normalized ObjectQuerySpec and full modifier descriptor, adds any-of card types with exact historical schema-v1 Game Record v3 round-trip compatibility, and validates controlled-creature subtype candidates against the pinned CR 205.3m registry. Time Lord remains one creature subtype. Oracle IR v28 keeps explicit color, legendary, artifact, and valid creature-type predicates while unsupported token, nontoken, snow, commander, combat-state, negative, and compound qualities remain source-spanned material residuals. The honest Commander census demotes exact/trusted and capability-closed CardPrograms from 725/722 to 722/719 and raises material residuals from 57,488 to 57,497; Battle Frenzy, Broodwarden, and Glass of the Guildpact were false exact promotions. Exact-head run 30920252836 passed and merge commit 736bfdaf is on main. Main-smoke run 30921788037 failed only because this milestone still carried its feature-head label; the present substantive branch corrects that generated-status drift. |
-| Pinned Aura descriptors, typed protection, and executable granted abilities | `implemented_at_feature_head` | Feature head ad907460 compiles closed Enchant and DEBT protection grammar once into face-pinned typed runtime fragments; all Aura cast, validation, resolution, nonspell entry, token entry, and state-based legality paths consume the same descriptor and no live Oracle compiler call remains. Animate Dead uses a linked physical-object Enchant fragment, while executable granted activation and trigger fragments participate in layer 6, activation and trigger discovery, source identity, capability closure, and replay fingerprints without using add_rules_text as execution. Protection targeting, blocking, attachment, and damage checks fail closed for unsupported qualities. Thornbite Staff's grant is typed, observes source/controller LKI, and pins the granted permanent's logical incarnation. Oracle IR v29 and capability registry v26 add three runtime component families and the trusted protection.typed.debt capability. The Commander census moves exact/trusted programs from 722 to 747 and capability-closed from 719 to 744; explicit unsupported protection grammar raises material residuals honestly to 57,570. CommanderEngine falls from 13,308 to 13,213 logical lines, printed-name literals fall from 693 to 658, Oracle-ID literals fall from 6 to 5, and direct writes remain 135. Eighty-eight post-extraction focused tests plus the broader affected shard, replay, privacy, rollback, mutation, compiler, capability, and architecture checks pass. Complete protection qualities, player and nonbattlefield Enchant restrictions, Aura creatures, dynamic granted abilities, ability-copy interactions, and full layer dependencies remain fail-closed. |
+| Pinned Aura descriptors, typed protection, and executable granted abilities | `integrated_on_certified_main` | Certified main through PR 89 compiles closed Enchant and DEBT protection grammar once into face-pinned typed runtime fragments; all Aura cast, validation, resolution, nonspell entry, token entry, and state-based legality paths consume the same descriptor and no live Oracle compiler call remains. Animate Dead uses a linked physical-object Enchant fragment, while executable granted activation and trigger fragments participate in layer 6, activation and trigger discovery, source identity, capability closure, and replay fingerprints without using add_rules_text as execution. Protection targeting, blocking, attachment, and damage checks fail closed for unsupported qualities. Thornbite Staff's grant is typed, observes source/controller LKI, and pins the granted permanent's logical incarnation. Oracle IR v30 and capability registry v26 add three runtime component families and the trusted protection.typed.debt capability. The Commander census moves exact/trusted programs from 722 to 747 and capability-closed from 719 to 744; explicit unsupported protection grammar raises material residuals honestly to 57,570. CommanderEngine falls from 13,308 to 13,213 logical lines, printed-name literals fall from 693 to 658, Oracle-ID literals fall from 6 to 5, and direct writes remain 135. Exact-head run 30935545835 passed every Python, generated, package, Windows, headless-browser, certification, and metrics job; merge commit 561dc646 is on main. Complete protection qualities, player and nonbattlefield Enchant restrictions, Aura creatures, dynamic granted abilities, ability-copy interactions, and full layer dependencies remain fail-closed. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, and the reviewed partial CR 121 draw contract are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -91,7 +91,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4739
+- Tests discovered: 4748
 - Python matrix: Python 3.12 on Ubuntu and Windows
 - Baseline CI: [30920252836](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30920252836) — `pass`
 - Compile: `pass`
@@ -123,7 +123,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Certify and merge the typed Aura, protection, and granted-ability boundary, then refresh the dependency scheduler and continue the next universal rules-system slice.
+Complete and certify the separate duel turn-state and browser-table clarity branch, then continue the next dependency-ready universal rules-system slice.
 
 ## Regeneration
 
