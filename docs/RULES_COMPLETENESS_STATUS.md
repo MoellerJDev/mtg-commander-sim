@@ -126,10 +126,10 @@ fixed life results, the shared CR 611 applicability/duration boundary, and the
 bounded CR 303 Aura family now compose through typed replayable owners. The
 generated compiler report records the resulting exact-card and residual deltas.
 The canonical draw transaction, Dredge replacement, APNAP batches, private
-continuations, and fixed draw compiler path are now represented. The next
-selected dependency-ready batch closes per-turn draw-limit prohibitions and
-optional-draw legality for CR 121.2a-b and 121.3-121.3a rather than returning
-to a low-yield attachment micro-family.
+continuations, fixed limits, instruction doubling, prospective-drawer optional
+legality, and Oracle IR v27 compiler path are now represented. The next selected
+dependency-ready batch closes the CR 121.6c/121.7 draw-result action and nested-
+ordering boundary rather than returning to numerical traversal.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,

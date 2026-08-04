@@ -2,7 +2,7 @@
 title: "Architecture debt status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "4bec8eb29722a813d377d232b42c36e37640ed37"
+verified: "b5e5caa77f0420759e4aad2088c14fe73e7bb1f9"
 audience: "maintainers and rules contributors"
 maintenance: "generated"
 ---
@@ -13,10 +13,10 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 
 ## Baseline coordinates
 
-- Main commit: `4bec8eb29722a813d377d232b42c36e37640ed37`
+- Main commit: `b5e5caa77f0420759e4aad2088c14fe73e7bb1f9`
 - Package: `0.8.0`
 - CI run: [30892105590](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590) — `pass`
-- Production scope: 217 files, 97,441 physical lines, 89,542 logical lines
+- Production scope: 217 files, 97,446 physical lines, 89,547 logical lines
 
 ## Central engine debt
 
@@ -24,7 +24,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Methods: 28 public, 284 private, 1 dunder
 - Cross-subsystem responsibility groups: 7
 - Direct GameState-write heuristic: 135 locations
-- Semantic-operation branches: 153
+- Semantic-operation branches: 154
 - Registered typed semantic handlers: 84 across 84 operations
 - Registered typed runtime components: 15
 - Remaining legacy `apply_effect` branches: 0
@@ -38,7 +38,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 
 ## Enforced debt trend
 
-Baseline: `fd2832d4f08bf90101b48471c218541b5abc6a5f`. Guard: `python scripts/validate_architecture.py --check`.
+Baseline: `5029c62c98bdad72549625af9a7c3dde5e333ef9`. Guard: `python scripts/validate_architecture.py --check`.
 
 | Dimension | Baseline | Current | Delta |
 |---|---:|---:|---:|

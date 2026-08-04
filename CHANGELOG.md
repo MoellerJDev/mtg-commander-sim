@@ -23,9 +23,16 @@ maintenance: "hand-maintained"
   multiple-draw sequence or later spell instruction resumes.
 - Oracle IR v26 promotes closed fixed draw programs only through capability
   closure. The Commander census moves exact/trusted programs from 661 to 722
-  and reduces material Oracle residuals from 57,982 to 57,497; draw limits,
-  draw-as-cost, shared-team ordering, reveal-as-drawn, and broader replacement
-  grammar remain explicit blockers.
+  and reduces material Oracle residuals from 57,982 to 57,497.
+- Added live fixed no-draw and maximum-one-per-turn restrictions, canonical
+  prohibited results, partial mandatory multi-draw execution, fixed instruction
+  doubling, and seat-scoped optional choices that validate the prospective
+  drawer. Oracle IR v27 makes Spirit of the Labyrinth, Thought Reflection, and
+  Oculus newly exact in Commander; exact/trusted programs rise 722 to 725 and
+  capability-closed programs rise 719 to 722.
+- Conditional/dynamic limits, complete draw-as-cost producers, shared-team
+  ordering, CR 121.6c/121.7 result actions, reveal-as-drawn, and broader
+  replacement grammar remain explicit blockers.
 
 ### Combat rules family
 

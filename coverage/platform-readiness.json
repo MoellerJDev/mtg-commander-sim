@@ -17,7 +17,7 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "ddcef4abbc7680b841ae18283f4153d5e2e3ce7eb27a817e4257553a89fa10a4",
+    "evaluated_source_tree_hash": "5e1ba8eb150eef7aa07adca79bf5a890947ea6f76b30dc468a094bc8f74e50af",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -146,9 +146,15 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "The active source tree adds immutable draw instruction, event, result, continuation, and APNAP batch values; one narrow draw coordinator and mutation owner; strict typed prevention and Dredge replacement operations; private affected-player choices; empty-library result handling; and exact resumption of later draws or spell effects. Represented turn, resolving-effect, conditional, optional-follow-up, and table-wide producers use the same path, while ordinary intent execution fails closed on an unrouted draw. Oracle IR v26 lowers closed controller, target-player, target-opponent, each-player, and Dredge templates. Focused positive, negative, malformed-input, rollback, multiplayer, privacy, replay, historical-v3, and killed-mutation tests pass. The Commander census improves exact/trusted CardPrograms from 661 to 722, capability-closed from 658 to 719, partial from 14,698 to 14,644, unresolved from 16,264 to 16,257, and material Oracle residuals from 57,982 to 57,497. CommanderEngine falls from 13,525 to 13,308 logical lines and the printed-name heuristic from 678 to 661. Per-turn draw limits, optional-draw and draw-as-cost legality, shared-team turns, draw-result ordering, face-down casting-process draws, reveal-as-drawn choices, and broader replacement grammar remain fail-closed.",
+      "evidence": "Certified main through PR 86 adds immutable draw instruction, event, result, continuation, and APNAP batch values; one narrow draw coordinator and mutation owner; strict typed prevention and Dredge replacement operations; private affected-player choices; empty-library result handling; and exact resumption of later draws or spell effects. Represented turn, resolving-effect, conditional, optional-follow-up, and table-wide producers use the same path, while ordinary intent execution fails closed on an unrouted draw. Oracle IR v26 lowers closed controller, target-player, target-opponent, each-player, and Dredge templates. Exact-head run 30901390381, merge commit b5e5caa, and main-smoke run 30902723662 are green. The Commander census improved exact/trusted CardPrograms from 661 to 722, capability-closed from 658 to 719, partial from 14,698 to 14,644, unresolved from 16,264 to 16,257, and material Oracle residuals from 57,982 to 57,497. CommanderEngine fell from 13,525 to 13,308 logical lines and the printed-name heuristic from 678 to 660.",
       "id": "canonical_draw_transaction_replacement_and_trigger_closure",
       "name": "Canonical draw transaction, replacement, and fixed-program closure",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "The active source tree adds immutable live draw permissions, generic no-draw and maximum-one-per-turn runtime restrictions, canonical prohibited draw results, fixed instruction-count doubling, and a seat-scoped optional-draw handler that distinguishes chooser from prospective drawer. Permission is recomputed before every individual event, so mandatory multi-draws occur partially while optional draws and draw costs require their complete count to be legal; Dredge does not consume a draw allowance, and an empty library is not treated as a prohibition. Oracle IR v27 generically lowers fixed prohibitions, unconditional controller doubling, and fixed optional draws. The full census improves exact Oracle programs from 3,381 to 3,385, trusted CardPrograms from 1,141 to 1,145, and material Oracle residuals from 65,909 to 65,898. The Commander census improves exact/trusted programs from 722 to 725, capability-closed programs from 719 to 722, and material Oracle residuals from 57,497 to 57,488; Spirit of the Labyrinth, Thought Reflection, and Oculus are newly exact. The rebased quick gate passes 4,139 deterministic tests plus architecture, evidence, documentation, repository, rules, scheduler, and shard checks. Shared-team turns, conditional or dynamic limits, complete draw-as-cost producers, CR 121.6c/121.7 result actions and nested ordering, casting-process face-down draws, reveal-as-drawn choices, and broader replacement grammar remain fail-closed.",
+      "id": "draw_limits_optional_choice_and_instruction_replacement",
+      "name": "Draw limits, optional-choice legality, and instruction replacement",
       "status": "implemented_in_active_source_tree_pending_certification"
     },
     {
@@ -164,7 +170,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Certify the canonical draw transaction and fixed draw/Dredge compiler family, then implement the selected per-turn draw-limit prohibition and optional-draw legality boundary for CR 121.2a-121.3a, including partial mandatory multi-draw execution, choices made by another player, cost legality, replay, and generic fixed wording.",
+  "next_task": "Certify the draw-limit, optional-choice, and instruction-replacement family, then implement the selected CR 121.6c/121.7 draw-result action and nested-ordering boundary without broadening unsupported replacement grammar.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.12,<3.13",
@@ -185,7 +191,7 @@
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "security": "guest_hash_csrf_origin_capability_and_projection_baseline",
-    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_thirteen_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_player_counter_continuous_effect_attachment_aura_entry_and_draw_owners",
+    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_fifteen_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_player_counter_continuous_effect_attachment_aura_entry_and_draw_owners",
     "single_writer_game_actor": "implemented_single_process",
     "transport_neutral_service": "implemented_strict_protocol_3"
   },
@@ -201,11 +207,11 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 57497,
+      "material_residuals": 57488,
       "status_counts": {
-        "exact": 722,
-        "partial": 14644,
-        "unresolved": 16257
+        "exact": 725,
+        "partial": 14648,
+        "unresolved": 16250
       },
       "total": 31623
     },
@@ -222,11 +228,11 @@
       "trusted": 0
     },
     "oracle": {
-      "material_residuals": 65909,
+      "material_residuals": 65898,
       "status_counts": {
-        "exact": 3381,
-        "partial": 16077,
-        "unresolved": 19027
+        "exact": 3385,
+        "partial": 16082,
+        "unresolved": 19018
       },
       "total": 38485
     },

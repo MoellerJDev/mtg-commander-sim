@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "fd2832d4f08bf90101b48471c218541b5abc6a5f",
+  "baseline_commit": "5029c62c98bdad72549625af9a7c3dde5e333ef9",
   "card_named_helpers": [
     {
       "file": "mtg_commander_sim/engine.py",

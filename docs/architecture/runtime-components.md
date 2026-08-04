@@ -95,9 +95,11 @@ current library threshold, emits one immutable optional `DredgeDraw`, and pins
 the source incarnation through any private affected-player choice. The
 `drawing` package applies it before ordinary empty-library handling and
 completes its mill-and-return result before later draws or later resolution
-instructions resume. The component has no mutable-state access and does not
-imply per-turn draw limits, draw-as-cost legality, shared-team ordering,
-reveal-as-drawn, or the complete draw replacement corpus.
+instructions resume. The companion draw registries lower unconditional fixed
+instruction doubling and live fixed no-draw/maximum-one battlefield
+restrictions. These components have no mutable-state access and do not imply
+conditional/dynamic limits, complete draw-as-cost production, shared-team
+ordering, reveal-as-drawn, or the complete replacement corpus.
 
 `continuous.anthem.power_toughness.v1` supports a fixed same-controller subtype
 anthem in layer 7c. The source must be represented, on the battlefield, and not
@@ -158,7 +160,9 @@ runtime families now include `damage-modifiers.v1` for shield/redirection
 creation and `life-effects.v2` for replacement-capable typed effect life
 changes. `drawing/model.py`, `drawing/continuation.py`,
 `drawing/coordinator.py`, and `drawing/transaction.py` own the draw boundary;
-`semantic_runtime/draw_replacements.py` owns Dredge discovery and lowering.
+`semantic_runtime/draw_replacements.py` owns Dredge and fixed instruction-
+quantity lowering, while `semantic_runtime/draw_restrictions.py` owns live
+permission restrictions.
 Runtime components remain pure participants.
 
 Primary tests are `test_replacement_event_tree.py`,

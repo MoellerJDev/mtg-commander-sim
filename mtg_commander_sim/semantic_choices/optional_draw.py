@@ -80,6 +80,11 @@ class OptionalDrawHandler:
         actor: str,
         active_seats: tuple[str, ...],
     ) -> tuple[str, str, int, bool]:
+        allowed = {"op", "player", "drawer", "count", "private"}
+        if set(effect) - allowed:
+            raise SemanticChoiceError("Optional draw fields are invalid")
+        if effect.get("op") != self.operation:
+            raise SemanticChoiceError("Optional draw operation is invalid")
         chooser = _player(
             effect.get("player", actor),
             field="Optional-draw chooser",

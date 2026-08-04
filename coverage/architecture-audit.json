@@ -8,7 +8,7 @@
       }
     ],
     "debt_trend": {
-      "baseline_commit": "fd2832d4f08bf90101b48471c218541b5abc6a5f",
+      "baseline_commit": "5029c62c98bdad72549625af9a7c3dde5e333ef9",
       "dimensions": {
         "card_named_helpers": {
           "baseline": 1,
@@ -3235,7 +3235,7 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 89542,
+      "logical_lines": 89547,
       "methods": {
         "dunder": 196,
         "private": 621,
@@ -4157,8 +4157,8 @@
           "file": "mtg_commander_sim/semantic_choices/optional_draw.py",
           "functions_and_methods": 6,
           "language": "python",
-          "logical_lines": 179,
-          "physical_lines": 197
+          "logical_lines": 184,
+          "physical_lines": 202
         },
         {
           "file": "mtg_commander_sim/permissions.py",
@@ -5218,7 +5218,7 @@
           "physical_lines": 1589
         }
       ],
-      "physical_lines": 97441,
+      "physical_lines": 97446,
       "python_file_count": 204,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -6577,7 +6577,7 @@
       "card_specific_operation_branch_occurrences": {
         "remora_tax": 1
       },
-      "count": 153,
+      "count": 154,
       "limitations": "AST heuristic covers if/match conditions whose source names op or operation.",
       "locations": [
         {
@@ -7771,6 +7771,15 @@
           "symbol": "_complete_semantic_choice"
         },
         {
+          "condition": "effect.get(\"op\") != self.operation",
+          "file": "mtg_commander_sim/semantic_choices/optional_draw.py",
+          "line": 86,
+          "string_literals": [
+            "op"
+          ],
+          "symbol": "_resolved"
+        },
+        {
           "condition": "_OPERATION.fullmatch(operation) is None",
           "file": "mtg_commander_sim/semantic_choices/registry.py",
           "line": 63,
@@ -7994,7 +8003,7 @@
         "nested_event": 1,
         "next": 1,
         "not_in": 1,
-        "op": 12,
+        "op": 13,
         "operation": 4,
         "overrides": 1,
         "parse": 1,
@@ -8236,10 +8245,10 @@
     ]
   },
   "audit": {
-    "baseline_main_commit": "4bec8eb29722a813d377d232b42c36e37640ed37",
+    "baseline_main_commit": "b5e5caa77f0420759e4aad2088c14fe73e7bb1f9",
     "baseline_worktree_clean": true,
-    "phase": "canonical_draw_transaction_replacement_and_trigger_closure",
-    "scope_note": "Certified main through PR 85 includes the continuous-effect, attachment, fixed Equip, and simple-object Aura families. The current focused branch adds immutable CR 121 draw instructions, individual events, results, private continuations, and APNAP batches; a narrow draw coordinator and commit owner; strict prevention and Dredge replacement operations; generic fixed draw and Dredge compilation; and measurable corpus gains while reducing CommanderEngine and the over-inclusive printed-name heuristic.",
+    "phase": "draw_limits_optional_choice_and_instruction_replacement",
+    "scope_note": "Certified main through PR 86 includes the canonical CR 121 draw transaction, replacement-aware individual events, private continuations, APNAP batches, and fixed draw/Dredge compilation. The current focused branch adds immutable live draw permissions, generic no-draw and maximum-one restrictions, canonical prohibited results, fixed instruction doubling, prospective-drawer optional-choice legality, Oracle IR v27 templates, and measurable corpus gains while extracting fixed-count parsing from the oversized Oracle coordinator.",
     "verified_at": "2026-08-04"
   },
   "compiler": {
@@ -8260,18 +8269,18 @@
     "card_program_v2_present": true,
     "commander_legal_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.022831,
-      "material_residuals": 57497,
+      "exact_fraction": 0.022926,
+      "material_residuals": 57488,
       "residual_kinds": {
         "cost": 1779,
         "declaration_cost": 10,
         "declaration_restriction": 153,
         "dependency_contract": 15643,
         "effect": 6529,
-        "replacement_effect": 1524,
+        "replacement_effect": 1523,
         "spell_effect": 9164,
-        "static_ability": 9682,
-        "trigger": 13013
+        "static_ability": 9678,
+        "trigger": 13009
       },
       "snapshot": {
         "card_count": "38485",
@@ -8283,33 +8292,33 @@
         "scryfall_rulings_updated_at": "2026-08-02T09:00:36.367+00:00"
       },
       "status_counts": {
-        "exact": 722,
-        "partial": 14644,
-        "unresolved": 16257
+        "exact": 725,
+        "partial": 14648,
+        "unresolved": 16250
       },
-      "template_count": 163,
+      "template_count": 168,
       "total_faces": 32431,
       "total_oracle_ids": 31623
     },
     "compiler_module": "mtg_commander_sim/oracle_ir.py",
     "compiler_module_logical_lines": 1541,
     "compiler_module_physical_lines": 1589,
-    "compiler_version": "oracle-ir-v26",
+    "compiler_version": "oracle-ir-v27",
     "current_ir": "OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index",
     "full_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.087852,
-      "material_residuals": 65909,
+      "exact_fraction": 0.087956,
+      "material_residuals": 65898,
       "residual_kinds": {
         "cost": 2009,
         "declaration_cost": 11,
         "declaration_restriction": 170,
         "dependency_contract": 17088,
         "effect": 7211,
-        "replacement_effect": 1758,
+        "replacement_effect": 1757,
         "spell_effect": 11318,
-        "static_ability": 11109,
-        "trigger": 15235
+        "static_ability": 11104,
+        "trigger": 15230
       },
       "snapshot": {
         "card_count": "38485",
@@ -8321,11 +8330,11 @@
         "scryfall_rulings_updated_at": "2026-08-02T09:00:36.367+00:00"
       },
       "status_counts": {
-        "exact": 3381,
-        "partial": 16077,
-        "unresolved": 19027
+        "exact": 3385,
+        "partial": 16082,
+        "unresolved": 19018
       },
-      "template_count": 163,
+      "template_count": 168,
       "total_faces": 41702,
       "total_oracle_ids": 38485
     },
@@ -8650,7 +8659,7 @@
     ]
   },
   "coordinates": {
-    "baseline_main_commit": "4bec8eb29722a813d377d232b42c36e37640ed37",
+    "baseline_main_commit": "b5e5caa77f0420759e4aad2088c14fe73e7bb1f9",
     "baseline_worktree_clean": true,
     "ci": {
       "local_observed": {
@@ -9060,7 +9069,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "ddcef4abbc7680b841ae18283f4153d5e2e3ce7eb27a817e4257553a89fa10a4"
+          "verified": "5e1ba8eb150eef7aa07adca79bf5a890947ea6f76b30dc468a094bc8f74e50af"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9088,7 +9097,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Compiler coverage status",
-          "verified": "4bec8eb29722a813d377d232b42c36e37640ed37"
+          "verified": "b5e5caa77f0420759e4aad2088c14fe73e7bb1f9"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9102,7 +9111,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Architecture debt status",
-          "verified": "4bec8eb29722a813d377d232b42c36e37640ed37"
+          "verified": "b5e5caa77f0420759e4aad2088c14fe73e7bb1f9"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9141,7 +9150,7 @@
   "generated": {
     "card_specificity_source": "platform/card-specificity-baseline.json",
     "generator": "scripts/update_architecture_audit.py",
-    "scope_note": "Certified main through PR 85 includes the continuous-effect, attachment, fixed Equip, and simple-object Aura families. The current focused branch adds immutable CR 121 draw instructions, individual events, results, private continuations, and APNAP batches; a narrow draw coordinator and commit owner; strict prevention and Dredge replacement operations; generic fixed draw and Dredge compilation; and measurable corpus gains while reducing CommanderEngine and the over-inclusive printed-name heuristic.",
+    "scope_note": "Certified main through PR 86 includes the canonical CR 121 draw transaction, replacement-aware individual events, private continuations, APNAP batches, and fixed draw/Dredge compilation. The current focused branch adds immutable live draw permissions, generic no-draw and maximum-one restrictions, canonical prohibited results, fixed instruction doubling, prospective-drawer optional-choice legality, Oracle IR v27 templates, and measurable corpus gains while extracting fixed-count parsing from the oversized Oracle coordinator.",
     "source": "platform/architecture-audit-source.json",
     "stale_check": "python scripts/update_architecture_audit.py --check"
   },

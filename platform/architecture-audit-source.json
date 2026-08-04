@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "4bec8eb29722a813d377d232b42c36e37640ed37",
+    "baseline_main_commit": "b5e5caa77f0420759e4aad2088c14fe73e7bb1f9",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-04",
-    "phase": "canonical_draw_transaction_replacement_and_trigger_closure",
-    "scope_note": "Certified main through PR 85 includes the continuous-effect, attachment, fixed Equip, and simple-object Aura families. The current focused branch adds immutable CR 121 draw instructions, individual events, results, private continuations, and APNAP batches; a narrow draw coordinator and commit owner; strict prevention and Dredge replacement operations; generic fixed draw and Dredge compilation; and measurable corpus gains while reducing CommanderEngine and the over-inclusive printed-name heuristic."
+    "phase": "draw_limits_optional_choice_and_instruction_replacement",
+    "scope_note": "Certified main through PR 86 includes the canonical CR 121 draw transaction, replacement-aware individual events, private continuations, APNAP batches, and fixed draw/Dredge compilation. The current focused branch adds immutable live draw permissions, generic no-draw and maximum-one restrictions, canonical prohibited results, fixed instruction doubling, prospective-drawer optional-choice legality, Oracle IR v27 templates, and measurable corpus gains while extracting fixed-count parsing from the oversized Oracle coordinator."
   },
   "ci": {
     "workflow": "CI",

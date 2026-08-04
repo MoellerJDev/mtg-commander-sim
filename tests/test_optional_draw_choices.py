@@ -173,6 +173,20 @@ class OptionalDrawChoiceTests(unittest.TestCase):
                     )
                 ),
             )
+        with self.assertRaisesRegex(SemanticChoiceError, "fields are invalid"):
+            self.handler.prepare(
+                {
+                    "op": "offer_draw",
+                    "player": "A",
+                    "unexpected": True,
+                },
+                context(
+                    query(
+                        permission_a=self.unlimited_a,
+                        permission_b=self.unlimited_b,
+                    )
+                ),
+            )
 
 
 class OptionalDrawChoiceIntegrationTests(unittest.TestCase):

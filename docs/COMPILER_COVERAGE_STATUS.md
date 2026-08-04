@@ -2,7 +2,7 @@
 title: "Compiler coverage status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "4bec8eb29722a813d377d232b42c36e37640ed37"
+verified: "b5e5caa77f0420759e4aad2088c14fe73e7bb1f9"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -13,7 +13,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Current representation
 
-- Compiler: `oracle-ir-v26`
+- Compiler: `oracle-ir-v27`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
 - Compiler module: 1,589 physical / 1,541 logical lines
@@ -74,20 +74,20 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,485 | 3,381 | 16,077 | 19,027 | 65,909 | false |
-| Commander legal | 31,623 | 722 | 14,644 | 16,257 | 57,497 | false |
+| Full Oracle | 38,485 | 3,385 | 16,082 | 19,018 | 65,898 | false |
+| Commander legal | 31,623 | 725 | 14,648 | 16,250 | 57,488 | false |
 
 ## Full-corpus residual kinds
 
 | Kind | Count |
 |---|---:|
 | `dependency_contract` | 17,088 |
-| `trigger` | 15,235 |
+| `trigger` | 15,230 |
 | `spell_effect` | 11,318 |
-| `static_ability` | 11,109 |
+| `static_ability` | 11,104 |
 | `effect` | 7,211 |
 | `cost` | 2,009 |
-| `replacement_effect` | 1,758 |
+| `replacement_effect` | 1,757 |
 | `declaration_restriction` | 170 |
 | `declaration_cost` | 11 |
 

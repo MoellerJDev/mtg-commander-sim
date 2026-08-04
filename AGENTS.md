@@ -117,8 +117,10 @@ rewrite.
 - The merged infrastructure phase establishes a two-slot development pipeline,
   deterministic change-impact quick gates, balanced PR shards, a stable
   certification context, compact `main` smoke, and deep nightly assurance.
-  After the Aura batch certifies, the scheduler-selected next family is the
-  canonical draw transaction plus draw replacement/trigger closure. Do not
+  Certified main through PR 86 includes the canonical draw transaction and
+  fixed draw/Dredge closure. The active family adds fixed draw limits,
+  instruction doubling, and prospective-drawer optional legality; the selected
+  successor is CR 121.6c/121.7 draw-result actions and nested ordering. Do not
   resume numerical rule traversal or open a status-only follow-up.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
