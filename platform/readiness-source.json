@@ -6,11 +6,11 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "duel_turn_state_and_table_clarity",
-    "branch": "fix/duel-turn-state-and-table-clarity",
+    "active_phase": "card_unlock_frontier_and_first_harvest",
+    "branch": "infra/precise-ci-impact-and-escape-accounting",
     "branch_ancestry": {
-      "focused_branch_base": "561dc6462f99f81e3413145f8d8755e338ae54ec",
-      "focused_branch_unique_commits_over_main": 13
+      "focused_branch_base": "9f378ff9a9b07ce60d6e6cfeb30685df3c850bda",
+      "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
       {
@@ -635,6 +635,20 @@
         "number": 89,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/89"
+      },
+      {
+        "base": "main",
+        "head": "fix/duel-turn-state-and-table-clarity",
+        "number": 90,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/90"
+      },
+      {
+        "base": "main",
+        "head": "fix/turn-one-draw-player-count",
+        "number": 91,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/91"
       }
     ],
     "tags": [
@@ -649,9 +663,9 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "58f13457a2e4ade605f0ab788116fe62e9150d47",
-    "certified_head_sha": "58f13457a2e4ade605f0ab788116fe62e9150d47",
-    "generation_timestamp": "2026-08-04T18:34:45Z"
+    "feature_head_sha": "833c0f6a07eab03707a210784ca6d9d58ce1c59d",
+    "certified_head_sha": "833c0f6a07eab03707a210784ca6d9d58ce1c59d",
+    "generation_timestamp": "2026-08-04T21:11:30Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -662,14 +676,14 @@
     "oracle": {
       "scope": "full_and_commander_legal_oracle_snapshots_plus_exact_list_fixture",
       "status": "pinned_partial_corpus_coverage",
-      "updated_at": "2026-08-02T09:02:31.886+00:00",
-      "sha256": "47be914ae0e54bbf63b285c065b4eb823a5f42927dcff6a404c0023ca870fba0"
+      "updated_at": "2026-08-04T09:02:45.219+00:00",
+      "sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3"
     },
     "rulings": {
       "scope": "full_rulings_snapshot_plus_exact_list_fixture",
       "status": "pinned_partial_corpus_coverage",
-      "updated_at": "2026-08-02T09:00:36.367+00:00",
-      "sha256": "6e0f7b8e73981df2da7d91329c1904e68a33c0269ec655d29484379beb3b725e"
+      "updated_at": "2026-08-04T09:00:38.847+00:00",
+      "sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098"
     }
   },
   "milestones": [
@@ -806,6 +820,24 @@
       "evidence": "Certified main through PR 89 compiles closed Enchant and DEBT protection grammar once into face-pinned typed runtime fragments; all Aura cast, validation, resolution, nonspell entry, token entry, and state-based legality paths consume the same descriptor and no live Oracle compiler call remains. Animate Dead uses a linked physical-object Enchant fragment, while executable granted activation and trigger fragments participate in layer 6, activation and trigger discovery, source identity, capability closure, and replay fingerprints without using add_rules_text as execution. Protection targeting, blocking, attachment, and damage checks fail closed for unsupported qualities. Thornbite Staff's grant is typed, observes source/controller LKI, and pins the granted permanent's logical incarnation. Oracle IR v30 and capability registry v26 add three runtime component families and the trusted protection.typed.debt capability. The Commander census moves exact/trusted programs from 722 to 747 and capability-closed from 719 to 744; explicit unsupported protection grammar raises material residuals honestly to 57,570. CommanderEngine falls from 13,308 to 13,213 logical lines, printed-name literals fall from 693 to 658, Oracle-ID literals fall from 6 to 5, and direct writes remain 135. Exact-head run 30935545835 passed every Python, generated, package, Windows, headless-browser, certification, and metrics job; merge commit 561dc646 is on main. Complete protection qualities, player and nonbattlefield Enchant restrictions, Aura creatures, dynamic granted abilities, ability-copy interactions, and full layer dependencies remain fail-closed."
     },
     {
+      "id": "duel_turn_state_and_table_clarity",
+      "name": "Duel turn-state correctness and browser table clarity",
+      "status": "integrated_on_certified_main",
+      "evidence": "PR 90 separates active seat, priority holder, exact step, and a read-only phase rail; preserves explicit Full Control and terminal-state behavior; projects seat-safe unavailable land explanations; and adds bounded saved table preferences without duplicating rules in React. Deterministic coverage proves that only the starting player in a two-player game skips the opening draw action, the second player draws, and multiplayer starting players draw. Exact-head run 30945744299, merge commit e3899a0, and main-smoke run 30946667928 are green."
+    },
+    {
+      "id": "multiplayer_turn_one_draw_count_hardening",
+      "name": "Player-count-authoritative turn-one draws",
+      "status": "integrated_on_certified_main",
+      "evidence": "PR 91 makes player count authoritative so stale duel metadata or an explicit false override cannot suppress the starting player's draw in a three- or four-player game. The ordinary two-player starting-player skip remains, and the second player always draws. Twenty-nine focused tests and 145 change-selected tests passed locally; exact-head public run 30950855428 passed every required shard, package, Windows, generated, browser, and certification job before merge commit 9f378ff, and main-smoke run 30951218714 is green."
+    },
+    {
+      "id": "precise_ci_impact_and_escape_accounting",
+      "name": "Explicit CI impact policy and escape accounting",
+      "status": "implemented_at_feature_head",
+      "evidence": "Feature head 833c0f6 replaces broad action/choice substring routing with a versioned, fingerprinted many-to-many path policy consumed by CI planning and the local quick gate. Browser-facing paths remain explicit; internal rules action and choice modules no longer force full browser journeys; full Playwright work is split across two isolated shards; and protection/attachment sources select compiler, replacement, targeting, and state-action owners. A strict generated escape ledger records five observed deterministic failures plus honestly unavailable push and Slot B measurements. Focused policy, generator, workflow, documentation, and merge-gate tests pass. Public exact-head certification remains required."
+    },
+    {
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main",
@@ -831,7 +863,7 @@
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
     "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_eighteen_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_player_counter_continuous_effect_attachment_aura_entry_draw_and_typed_ability_fragment_owners",
     "capability_evidence": "implemented_registry_v26_with_43_records_33_trusted_and_336_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
-    "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions",
+    "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "hidden_information": "implemented_projected_protocol",
     "security": "guest_hash_csrf_origin_capability_and_projection_baseline",
@@ -840,14 +872,14 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30920252836,
+      "run_id": 30950855428,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30920252836"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30950855428"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr88_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass; pr88_post_merge_main_smoke_detected_only_stale_generated_feature_status_now_corrected; active_source_broad_affected_and_post_extraction_88_test_aura_protection_granted_ability_lki_replay_privacy_mutation_compiler_and_architecture_checks_pass",
-      "focused_rules_tests": "pass_typed_enchant_and_protection_fragments_aura_cast_entry_resolution_and_sba_linked_physical_object_granted_activation_and_trigger_lki_incarnation_protection_debt_fail_closed_replay_rollback_privacy_mutation_and_oracle_ir_v29",
+      "deterministic_tests": "certified_main_through_pr91_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; active_ci_impact_source_policy_generator_workflow_documentation_and_merge_gate_tests_pass",
+      "focused_rules_tests": "pass_two_player_starting_player_skip_second_player_draw_and_three_or_more_player_first_turn_draw_regressions_plus_typed_aura_protection_and_granted_ability_foundation",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
@@ -863,7 +895,7 @@
     "replay": "pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner",
     "privacy": "pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner",
       "semantic_preflight": "reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory",
-    "card_program_census": "oracle_ir_v29_full_38485_trusted_1169_capability_closed_1166_legacy_reviewed_2_mixed_1_residual_35067_failed_2249_material_residual_65981; full_oracle_exact_3409_partial_16050_unresolved_19026_material_residual_65993; commander_legal_31623_trusted_747_capability_closed_744_legacy_reviewed_2_mixed_1_residual_30875_failed_1_material_residual_57567; commander_oracle_exact_747_partial_14620_unresolved_16256_material_residual_57570; delta_from_certified_pr88_commander_exact_trusted_and_capability_closed_plus_25_and_full_plus_28; representative_new_exact_cards_include_beloved_chaplain_ihsans_shade_valeron_outlander_yavimaya_barbarian_tel_jilad_chosen_shivan_zombie_and_unquestioned_authority; unsupported_protection_qualities_and_nonclosed_enchant_restrictions_are_now_explicit_material_residuals"
+    "card_program_census": "oracle_ir_v30_full_38542_trusted_1169_capability_closed_1166_legacy_reviewed_2_mixed_1_residual_35124_failed_2249_material_residual_66148; full_oracle_exact_3409_partial_16069_unresolved_19064_material_residual_66160; commander_legal_31623_trusted_747_capability_closed_744_legacy_reviewed_2_mixed_1_residual_30875_failed_1_material_residual_57589; commander_oracle_exact_747_partial_14620_unresolved_16256_material_residual_57592; Tithing_Blade_Consuming_Sepulcher_is_the_one_commander_legal_construction_failure; unsupported_protection_qualities_nonclosed_enchant_restrictions_and_broader_oracle_grammar_remain_explicit_material_residuals"
   },
   "blockers": [
     "damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter/source-controller-damage aftermath, immediate independent life siblings, resumable mana-payment choices, static full-recipient redirection, and closed CR 615.13 triggered draw/damage/counter results on the ordinary stack; explicit-target or mixed immediate aftermath, arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented",
@@ -879,5 +911,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Complete and certify the separate duel turn-state and browser-table clarity branch, then continue the next dependency-ready universal rules-system slice."
+  "next_task": "Generate the card-unlock frontier, eliminate the dependency-relevant Commander-legal CardProgram construction failure, and complete the highest-scoring dependency-ready capability harvest with measured exact-card gain."
 }

@@ -17,14 +17,14 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "868175287690fd09565fbcd5d3eced07a88bf890b5d38f76ecce54427134d943",
+    "evaluated_source_tree_hash": "ee57dd9eae6ff20bf4b4446b49ed3324fea3c4c8937482816abe958aded5870e",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "duel_turn_state_and_table_clarity",
+    "active_phase": "card_unlock_frontier_and_first_harvest",
     "tags": [
       {
         "commit": "4dc3feb625f824b9062e162808fd74b07e97c404",
@@ -170,6 +170,24 @@
       "status": "integrated_on_certified_main"
     },
     {
+      "evidence": "PR 90 separates active seat, priority holder, exact step, and a read-only phase rail; preserves explicit Full Control and terminal-state behavior; projects seat-safe unavailable land explanations; and adds bounded saved table preferences without duplicating rules in React. Deterministic coverage proves that only the starting player in a two-player game skips the opening draw action, the second player draws, and multiplayer starting players draw. Exact-head run 30945744299, merge commit e3899a0, and main-smoke run 30946667928 are green.",
+      "id": "duel_turn_state_and_table_clarity",
+      "name": "Duel turn-state correctness and browser table clarity",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "PR 91 makes player count authoritative so stale duel metadata or an explicit false override cannot suppress the starting player's draw in a three- or four-player game. The ordinary two-player starting-player skip remains, and the second player always draws. Twenty-nine focused tests and 145 change-selected tests passed locally; exact-head public run 30950855428 passed every required shard, package, Windows, generated, browser, and certification job before merge commit 9f378ff, and main-smoke run 30951218714 is green.",
+      "id": "multiplayer_turn_one_draw_count_hardening",
+      "name": "Player-count-authoritative turn-one draws",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "Feature head 833c0f6 replaces broad action/choice substring routing with a versioned, fingerprinted many-to-many path policy consumed by CI planning and the local quick gate. Browser-facing paths remain explicit; internal rules action and choice modules no longer force full browser journeys; full Playwright work is split across two isolated shards; and protection/attachment sources select compiler, replacement, targeting, and state-action owners. A strict generated escape ledger records five observed deterministic failures plus honestly unavailable push and Slot B measurements. Focused policy, generator, workflow, documentation, and merge-gate tests pass. Public exact-head certification remains required.",
+      "id": "precise_ci_impact_and_escape_accounting",
+      "name": "Explicit CI impact policy and escape accounting",
+      "status": "implemented_at_feature_head"
+    },
+    {
       "evidence": "The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, and the reviewed partial CR 121 draw contract are represented. Broader rules and Oracle completeness remain explicitly unclaimed.",
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
@@ -182,7 +200,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Complete and certify the separate duel turn-state and browser-table clarity branch, then continue the next dependency-ready universal rules-system slice.",
+  "next_task": "Generate the card-unlock frontier, eliminate the dependency-relevant Commander-legal CardProgram construction failure, and complete the highest-scoring dependency-ready capability harvest with measured exact-card gain.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.12,<3.13",
@@ -190,7 +208,7 @@
   },
   "platform": {
     "ai_dependency": "none_for_core_tests_or_runtime",
-    "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions",
+    "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting",
     "authoritative_kernel": "implemented_partial",
     "browser_client": "implemented_card_inspector_public_zone_browser_resilient_card_scoped_click_drag_saved_manual_auto_mana_saved_auto_pass_full_control_tapped_orientation_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause",
     "capability_evidence": "implemented_registry_v26_with_43_records_33_trusted_and_336_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
@@ -208,9 +226,9 @@
     "transport_neutral_service": "implemented_strict_protocol_3"
   },
   "provenance": {
-    "certified_head_sha": "58f13457a2e4ade605f0ab788116fe62e9150d47",
-    "feature_head_sha": "58f13457a2e4ade605f0ab788116fe62e9150d47",
-    "generation_timestamp": "2026-08-04T18:34:45Z"
+    "certified_head_sha": "833c0f6a07eab03707a210784ca6d9d58ce1c59d",
+    "feature_head_sha": "833c0f6a07eab03707a210784ca6d9d58ce1c59d",
+    "generation_timestamp": "2026-08-04T21:11:30Z"
   },
   "repository": {
     "default_branch": "main",
@@ -266,31 +284,31 @@
     },
     "oracle": {
       "scope": "full_and_commander_legal_oracle_snapshots_plus_exact_list_fixture",
-      "sha256": "47be914ae0e54bbf63b285c065b4eb823a5f42927dcff6a404c0023ca870fba0",
+      "sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
       "status": "pinned_partial_corpus_coverage",
-      "updated_at": "2026-08-02T09:02:31.886+00:00"
+      "updated_at": "2026-08-04T09:02:45.219+00:00"
     },
     "rulings": {
       "scope": "full_rulings_snapshot_plus_exact_list_fixture",
-      "sha256": "6e0f7b8e73981df2da7d91329c1904e68a33c0269ec655d29484379beb3b725e",
+      "sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098",
       "status": "pinned_partial_corpus_coverage",
-      "updated_at": "2026-08-02T09:00:36.367+00:00"
+      "updated_at": "2026-08-04T09:00:38.847+00:00"
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4749,
+    "deterministic_cases_discovered": 4757,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
     "web_files": 31
   },
   "validation": {
-    "card_program_census": "oracle_ir_v29_full_38485_trusted_1169_capability_closed_1166_legacy_reviewed_2_mixed_1_residual_35067_failed_2249_material_residual_65981; full_oracle_exact_3409_partial_16050_unresolved_19026_material_residual_65993; commander_legal_31623_trusted_747_capability_closed_744_legacy_reviewed_2_mixed_1_residual_30875_failed_1_material_residual_57567; commander_oracle_exact_747_partial_14620_unresolved_16256_material_residual_57570; delta_from_certified_pr88_commander_exact_trusted_and_capability_closed_plus_25_and_full_plus_28; representative_new_exact_cards_include_beloved_chaplain_ihsans_shade_valeron_outlander_yavimaya_barbarian_tel_jilad_chosen_shivan_zombie_and_unquestioned_authority; unsupported_protection_qualities_and_nonclosed_enchant_restrictions_are_now_explicit_material_residuals",
+    "card_program_census": "oracle_ir_v30_full_38542_trusted_1169_capability_closed_1166_legacy_reviewed_2_mixed_1_residual_35124_failed_2249_material_residual_66148; full_oracle_exact_3409_partial_16069_unresolved_19064_material_residual_66160; commander_legal_31623_trusted_747_capability_closed_744_legacy_reviewed_2_mixed_1_residual_30875_failed_1_material_residual_57589; commander_oracle_exact_747_partial_14620_unresolved_16256_material_residual_57592; Tithing_Blade_Consuming_Sepulcher_is_the_one_commander_legal_construction_failure; unsupported_protection_qualities_nonclosed_enchant_restrictions_and_broader_oracle_grammar_remain_explicit_material_residuals",
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30920252836,
+      "run_id": 30950855428,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30920252836"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30950855428"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -298,8 +316,8 @@
       "browser_typecheck_and_production_build": "pass_typecheck_and_focused_headless_journey",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "certified_main_through_pr88_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass; pr88_post_merge_main_smoke_detected_only_stale_generated_feature_status_now_corrected; active_source_broad_affected_and_post_extraction_88_test_aura_protection_granted_ability_lki_replay_privacy_mutation_compiler_and_architecture_checks_pass",
-      "focused_rules_tests": "pass_typed_enchant_and_protection_fragments_aura_cast_entry_resolution_and_sba_linked_physical_object_granted_activation_and_trigger_lki_incarnation_protection_debt_fail_closed_replay_rollback_privacy_mutation_and_oracle_ir_v29",
+      "deterministic_tests": "certified_main_through_pr91_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; active_ci_impact_source_policy_generator_workflow_documentation_and_merge_gate_tests_pass",
+      "focused_rules_tests": "pass_two_player_starting_player_skip_second_player_draw_and_three_or_more_player_first_turn_draw_regressions_plus_typed_aura_protection_and_granted_ability_foundation",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",
