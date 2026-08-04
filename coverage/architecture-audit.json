@@ -3275,7 +3275,7 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 91719,
+      "logical_lines": 91723,
       "methods": {
         "dunder": 200,
         "private": 626,
@@ -3301,8 +3301,8 @@
           "file": "web/src/App.tsx",
           "functions_and_methods": null,
           "language": "web",
-          "logical_lines": 1701,
-          "physical_lines": 1757
+          "logical_lines": 1705,
+          "physical_lines": 1761
         },
         {
           "file": "mtg_commander_sim/declaration_restrictions.py",
@@ -5313,8 +5313,8 @@
           "file": "web/src/App.tsx",
           "functions_and_methods": null,
           "language": "web",
-          "logical_lines": 1701,
-          "physical_lines": 1757
+          "logical_lines": 1705,
+          "physical_lines": 1761
         },
         {
           "file": "mtg_commander_sim/declaration_restrictions.py",
@@ -5338,7 +5338,7 @@
           "physical_lines": 1577
         }
       ],
-      "physical_lines": 99953,
+      "physical_lines": 99957,
       "python_file_count": 214,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -9270,7 +9270,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "6316c8ac4436a09ffc1dd43b120512d305269508edb0269d58993f8f87715ee0"
+          "verified": "fba694b03acae08233b353840f43ba07185fe10dd141cc75110136b0be1ef2ac"
         },
         "metadata_complete": true,
         "missing_metadata": [],
