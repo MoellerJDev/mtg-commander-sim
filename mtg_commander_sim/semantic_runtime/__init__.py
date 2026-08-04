@@ -27,6 +27,11 @@ from .continuous_components import (
     FixedQueryPowerToughnessAnthemNode,
     default_continuous_effect_component_registry,
 )
+from .attached_continuous import (
+    ATTACHED_FIXED_CHARACTERISTICS_HANDLER_ID,
+    AttachedFixedCharacteristicsHandler,
+    AttachedFixedCharacteristicsNode,
+)
 from .counter_replacements import (
     collect_counter_placement_replacement_effects,
     CounterPlacementEventSpec,
@@ -178,6 +183,9 @@ def default_semantic_interpreter() -> SemanticInterpreter:
 
 
 __all__ = [
+    "ATTACHED_FIXED_CHARACTERISTICS_HANDLER_ID",
+    "AttachedFixedCharacteristicsHandler",
+    "AttachedFixedCharacteristicsNode",
     "AddBasicLandTypeHandler",
     "AddBasicLandTypeNode",
     "AddManaIntent",

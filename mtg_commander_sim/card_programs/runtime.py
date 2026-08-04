@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, TYPE_CHECKING, Callable, Mapping, Protocol, Sequence
 
+from ..attachments import attached_object_identity
 from ..continuous_effects import ContinuousEffect
 from ..semantic_runtime import (
     ContinuousEffectSourceContext,
@@ -81,6 +82,11 @@ def collect_card_program_continuous_effects(
                         ),
                         component_id=(
                             f"{program.key}:{descriptor_index}"
+                        ),
+                        attached_object=(
+                            attached_object_identity(state.cards, source)
+                            if getattr(source, "attached_to", None)
+                            else None
                         ),
                     )
                     lowered = registry.lower(descriptor, context)

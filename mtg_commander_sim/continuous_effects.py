@@ -8,6 +8,7 @@ from .continuous_effect_model import (
     ContinuousEffectDuration,
     ContinuousEffectError,
     ContinuousEffectOrigin,
+    ContinuousEffectRelation,
     ContinuousObjectIdentity,
     ContinuousOperation,
     Layer,
@@ -284,6 +285,16 @@ def _apply_operation(
             if ability.casefold() != str(value).casefold()
         ]
         return
+    if op == "add_rules_text":
+        line = str(value).strip()
+        existing = [
+            value.strip() for value in state.text.splitlines()
+        ]
+        if line not in existing:
+            state.text = "\n".join(
+                value for value in (state.text.strip(), line) if value
+            )
+        return
     if op == "remove_all_abilities":
         state.abilities = []
         return
@@ -334,6 +345,22 @@ def evaluate_continuous_effects(
     ordered, cycles = order_continuous_effects(present)
     applied: list[str] = []
     for effect in ordered:
+        if (
+            effect.relation
+            is ContinuousEffectRelation.SOURCE_ATTACHED_TO_OBJECT
+        ):
+            object_id = str(context.get("object_id") or "")
+            logical_object_id = str(
+                context.get("logical_object_id") or ""
+            )
+            if (
+                effect.related_object is None
+                or object_id != effect.related_object.object_id
+                or logical_object_id
+                != effect.related_object.logical_object_id
+            ):
+                inapplicable.append(effect.effect_id)
+                continue
         if effect.locked_objects:
             object_id = str(context.get("object_id") or "")
             logical_object_id = str(

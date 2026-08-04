@@ -38,6 +38,16 @@ LEGACY_EVIDENCE_FIELDS = {
     "replay": "replay_tests",
 }
 MUTATION_TESTS = {
+    "attachment.equip.fixed_mana": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_generic_equip_resolution_mutant_is_killed"
+    ),
+    "continuous.attached.fixed_characteristics": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_attached_characteristic_relation_mutant_is_killed"
+    ),
     "life.change.effect": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

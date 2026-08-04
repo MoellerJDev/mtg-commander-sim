@@ -7,6 +7,7 @@ from typing import Any, Mapping, Protocol
 from ..continuous_effects import (
     ContinuousEffect,
     ContinuousEffectOrigin,
+    ContinuousObjectIdentity,
     ContinuousOperation,
     Layer,
 )
@@ -59,6 +60,7 @@ class ContinuousEffectSourceContext:
     source_controller: str
     source_timestamp: int
     component_id: str
+    attached_object: ContinuousObjectIdentity | None = None
 
     def __post_init__(self) -> None:
         if not self.source_object_id or not self.source_ref:
@@ -76,6 +78,12 @@ class ContinuousEffectSourceContext:
         if self.source_timestamp < 0:
             raise SemanticNodeError(
                 "A continuous component source timestamp cannot be negative"
+            )
+        if self.attached_object is not None and not isinstance(
+            self.attached_object, ContinuousObjectIdentity
+        ):
+            raise SemanticNodeError(
+                "An attached continuous component requires typed object identity"
             )
 
 
@@ -485,11 +493,14 @@ class ContinuousEffectComponentRegistry(
 @lru_cache(maxsize=1)
 def default_continuous_effect_component_registry(
 ) -> ContinuousEffectComponentRegistry:
+    from .attached_continuous import AttachedFixedCharacteristicsHandler
+
     registry = ContinuousEffectComponentRegistry(
         (
             FixedPowerToughnessAnthemHandler(),
             FixedQueryPowerToughnessAnthemHandler(),
             AddBasicLandTypeHandler(),
+            AttachedFixedCharacteristicsHandler(),
         )
     )
     registry.require_registered_capabilities(

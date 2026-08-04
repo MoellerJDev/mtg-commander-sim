@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 from typing import Any, Iterable, Mapping, Sequence
 
 from ..rules.capabilities import (
@@ -79,4 +80,39 @@ def explicit_capability_gate(
     )
 
 
-__all__ = ["DependencyGate", "dependency_gate", "explicit_capability_gate"]
+def keyword_dependency_gate(
+    *,
+    material_line: str,
+    mechanics: tuple[str, ...],
+    trusted_mechanics: frozenset[str],
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+) -> DependencyGate:
+    """Select a reviewed keyword capability before generic mechanic gating."""
+
+    if mechanics == ("equip",) and re.fullmatch(
+        r"Equip\s+(?:\{(?:\d+|[WUBRGC])\})+\.?",
+        material_line,
+        re.IGNORECASE,
+    ):
+        return explicit_capability_gate(
+            "attachment.equip.fixed_mana",
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+        )
+    return dependency_gate(
+        mechanics=mechanics,
+        effects=(),
+        target_schema=None,
+        trusted_mechanics=trusted_mechanics,
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
+    )
+
+
+__all__ = [
+    "DependencyGate",
+    "dependency_gate",
+    "explicit_capability_gate",
+    "keyword_dependency_gate",
+]

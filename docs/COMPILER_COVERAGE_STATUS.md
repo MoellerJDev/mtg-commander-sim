@@ -13,10 +13,10 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Current representation
 
-- Compiler: `oracle-ir-v23`
+- Compiler: `oracle-ir-v24`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
-- Compiler module: 1,767 physical / 1,704 logical lines
+- Compiler module: 1,771 physical / 1,708 logical lines
 
 ## Canonical CardProgram
 
@@ -48,16 +48,16 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/19`
+- Registry schema/version: `1/21`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `bf5a6b16c6196a62145d752e90b5dba88db0b4bdfe3d2ccf0e45941fe933b6a0`
-- Evidence fingerprint: `6927067773d2e6123feb385d22a92727706b8cf1ea486391b855047518999e77`
-- Explicit evidence declarations: 280
-- Capability records: 39
-- Trusted records: 28
+- Registry fingerprint: `416feae727b5366a139cd5d82e009b593ce2ff0b918ecb743d9b267337b8cda0`
+- Evidence fingerprint: `3f8ea695be5eae344a6bdaa0276f5ed5f35361f06fad275e553a519a0af52d6b`
+- Explicit evidence declarations: 304
+- Capability records: 41
+- Trusted records: 30
 - Blocked records: 4
-- Dependency fail-closed statuses: `{"not_applicable": 16, "not_run": 3, "passed": 20}`
-- Implementation mutation statuses: `{"killed": 31, "not_run": 8}`
+- Dependency fail-closed statuses: `{"not_applicable": 18, "not_run": 3, "passed": 20}`
+- Implementation mutation statuses: `{"killed": 33, "not_run": 8}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
@@ -67,24 +67,24 @@ This generated report describes only the pinned Oracle corpus and current compil
 | `cr-903-commander` | 1 | true | none |
 | `cr-111-tokens` | 1 | false | `token.creation.additional_replacement` |
 | `cr-614-replacement-effects` | 1 | false | `zone.change.destination_replacement` |
-| `cr-613-continuous-effects` | 2 | true | none |
+| `cr-613-continuous-effects` | 3 | true | none |
 | `tap-and-untap` | 3 | false | `permanent.tap.effect`, `permanent.untap.all_creatures`, `permanent.untap.effect` |
 
 ## Pinned corpus accounting
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,485 | 3,176 | 16,255 | 19,054 | 68,892 | false |
-| Commander legal | 31,623 | 528 | 14,815 | 16,280 | 60,307 | false |
+| Full Oracle | 38,485 | 3,247 | 16,204 | 19,034 | 67,559 | false |
+| Commander legal | 31,623 | 590 | 14,769 | 16,264 | 59,076 | false |
 
 ## Full-corpus residual kinds
 
 | Kind | Count |
 |---|---:|
-| `dependency_contract` | 19,333 |
+| `dependency_contract` | 18,724 |
 | `trigger` | 15,235 |
-| `static_ability` | 11,832 |
-| `spell_effect` | 11,319 |
+| `spell_effect` | 11,318 |
+| `static_ability` | 11,109 |
 | `effect` | 7,211 |
 | `cost` | 2,009 |
 | `replacement_effect` | 1,772 |
@@ -94,8 +94,8 @@ This generated report describes only the pinned Oracle corpus and current compil
 ## Semantic packs and implicit overrides
 
 - Pack files: 15
-- Program entries: 264
-- Unique program keys: 252
+- Program entries: 265
+- Unique program keys: 253
 - Duplicate keys resolved by pack order: 12
 - Unique Oracle IDs represented: 142
 - Card-specific operation names: 6

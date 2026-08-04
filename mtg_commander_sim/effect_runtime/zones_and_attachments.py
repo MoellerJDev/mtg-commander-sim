@@ -3,6 +3,7 @@ from __future__ import annotations
 import random
 from typing import Any, Mapping, Sequence
 
+from ..attachments import attach_objects
 from ..continuous_effects import ContinuousOperation, Layer
 from ..continuous_effect_state import (
     ContinuousEffectStateError,
@@ -287,9 +288,12 @@ def _apply_reanimate_attached_creature_aura(
         reason=reason,
         semantic_events=True,
     )
-    aura.attached_to = creature.object_id
-    if aura.object_id not in creature.attachments:
-        creature.attachments.append(aura.object_id)
+    attach_objects(
+        host.state.cards,
+        aura,
+        creature,
+        source_timestamp=host._next_zone_timestamp(),
+    )
     aura.annotations["enchant_target_schema"] = {
         "zones": ["battlefield"],
         "categories": ["permanent"],
@@ -404,13 +408,16 @@ def _apply_attach(
         raise GameRuleError(
             "Attach requires an Equipment and a creature"
         )
-    if equipment.attached_to in host.state.cards:
-        previous = host.state.cards[equipment.attached_to]
-        if equipment.object_id in previous.attachments:
-            previous.attachments.remove(equipment.object_id)
-    equipment.attached_to = creature.object_id
-    if equipment.object_id not in creature.attachments:
-        creature.attachments.append(equipment.object_id)
+    attach_objects(
+        host.state.cards,
+        equipment,
+        creature,
+        source_timestamp=(
+            equipment.zone_timestamp
+            if equipment.attached_to == creature.object_id
+            else host._next_zone_timestamp()
+        ),
+    )
     host._log(
         actor,
         "attachment.attach",

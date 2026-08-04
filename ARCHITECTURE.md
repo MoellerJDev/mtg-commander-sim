@@ -159,12 +159,16 @@ Versioned CardProgram runtime component descriptors represent static
 participation in later events without printed-name or Oracle-ID dispatch in the
 engine. Registered families contribute reviewed fixed additional-token,
 zone-destination, counter-quantity, damage-quantity, and damage-prevention
-effects to immutable event trees, while a fixed subtype anthem contributes
-layer-7c continuous effects. Focused token-creation, counter-placement, and
-damage owners commit final results, and replacement choices suspend as
-seat-scoped replayable continuations. Their scope remains deliberately narrower
-than universal CR 614/615/616 participation or complete CR 613 dependency
-evaluation.
+effects to immutable event trees. Continuous components contribute fixed-query
+anthems and exact-relation attached type, ability, rules-text, and power/
+toughness operations in layers 4, 6, and 7c. `attachments.py` exclusively owns
+reciprocal timestamped attach, reattach, detach, and zone-reset transitions;
+fixed ordinary-mana Equip resolves into that owner through the normal stack.
+Focused token-creation, counter-placement, and damage owners commit final
+results, and replacement choices suspend as seat-scoped replayable
+continuations. Their scope remains deliberately narrower than universal CR
+614/615/616 participation, Aura casting and entry, or complete CR 613
+dependency evaluation.
 
 CardProgram trust is now separated into `capability_closed`,
 `legacy_reviewed`, `mixed`, `provisional`, `unresolved`, and
@@ -344,8 +348,10 @@ anything. `state_based_actions.py` classifies non-destruction graveyard moves,
 destruction, unattachment, opposing-counter removal, and token cessation; the
 engine applies the batch and rechecks before granting priority. Aura legality
 reuses the declarative target domain without applying targeting-only shroud or
-hexproof, while protection remains an attachment restriction. Unsupported
-enchant quality grammar stays unresolved. The contract is partial until every
+hexproof, while protection remains an attachment restriction. Existing Aura
+state-based actions use the shared reciprocal attachment model, but generic
+Aura casting and entry remain unresolved with unsupported Enchant quality
+grammar. The contract is partial until every
 CR 704.5/704.6 variant and simultaneous loss/replacement interaction is
 covered.
 

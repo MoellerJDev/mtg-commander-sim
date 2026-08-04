@@ -311,6 +311,7 @@ def register_generated_programs(
     capability_profile: str = "traditional",
     promote_exact_runtime_handlers: bool = False,
     promote_exact_trigger_programs: bool = False,
+    promote_exact_capability_declarations: bool = False,
 ) -> dict[str, Any]:
     from ..oracle_ir import ORACLE_COMPILER_VERSION
 
@@ -336,6 +337,7 @@ def register_generated_programs(
             (
                 promote_exact_runtime_handlers
                 or promote_exact_trigger_programs
+                or promote_exact_capability_declarations
             )
             and trust_level == "provisional"
             and capability_registry is not None
@@ -346,6 +348,14 @@ def register_generated_programs(
                     for program in provisional_programs
                 )
                 or any(program.handlers for program in provisional_programs)
+                or (
+                    promote_exact_capability_declarations
+                    and any(
+                        program.ability_id.startswith("static:")
+                        and program.capability_dependencies
+                        for program in provisional_programs
+                    )
+                )
             )
         ):
             try:
@@ -363,6 +373,11 @@ def register_generated_programs(
                     or (
                         promote_exact_trigger_programs
                         and program.ability_id.startswith("trigger:")
+                    )
+                    or (
+                        promote_exact_capability_declarations
+                        and program.ability_id.startswith("static:")
+                        and program.capability_dependencies
                     )
                 }
             except ValueError as exc:

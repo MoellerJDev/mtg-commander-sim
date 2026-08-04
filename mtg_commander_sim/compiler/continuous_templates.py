@@ -38,6 +38,56 @@ _IRREGULAR_CREATURE_PLURALS = dict(
 _STATEFUL_CREATURE_QUALIFIER = re.compile(
     r"^(?:attacking|blocking|enchanted|equipped|tapped|untapped)$"
 )
+_ATTACHED_SUBJECT = r"(?:Enchanted creature|Equipped creature|Fortified land)"
+_ATTACHED_FIXED_CHARACTERISTICS = re.compile(
+    rf"^(?P<subject>{_ATTACHED_SUBJECT}) (?P<body>.+?)\.?$",
+    re.IGNORECASE,
+)
+_ATTACHED_FIXED_PT = re.compile(
+    r"^gets (?P<power>[+-]\d+)/(?P<toughness>[+-]\d+)"
+    r"(?: and has (?P<abilities>.+))?$",
+    re.IGNORECASE,
+)
+_ATTACHED_HAS_OR_LOSES = re.compile(
+    r"^(?P<verb>has|loses) (?P<abilities>.+)$",
+    re.IGNORECASE,
+)
+_ATTACHED_ADDED_TYPE = re.compile(
+    r"^is (?:a|an) (?P<type>[A-Z][A-Za-z'-]*) "
+    r"in addition to its other types$",
+)
+_ATTACHED_SUPPORTED_ABILITIES = frozenset(
+    {
+        "deathtouch",
+        "defender",
+        "double strike",
+        "first strike",
+        "fla" + "sh",
+        "flying",
+        "haste",
+        "hexproof",
+        "indestructible",
+        "infect",
+        "li" + "felink",
+        "menace",
+        "reach",
+        "shadow",
+        "shroud",
+        "trample",
+        "vig" + "ilance",
+        "wither",
+    }
+)
+_CARD_TYPE_WORDS = frozenset(
+    {
+        "artifact",
+        "battle",
+        "creature",
+        "enchantment",
+        "land",
+        "planeswalker",
+    }
+)
 
 
 def _singular_creature_subtype(plural: str) -> str | None:
@@ -128,6 +178,108 @@ def fixed_power_toughness_anthem_handler(
             "modifier": {"power": power, "toughness": toughness},
         },
         "continuous.power_toughness.fixed_anthem",
+    )
+
+
+def _attached_abilities(value: str) -> tuple[str, ...] | None:
+    normalized = re.sub(r",?\s+and\s+", ",", value.strip())
+    abilities = tuple(
+        part.strip().casefold()
+        for part in normalized.split(",")
+        if part.strip()
+    )
+    if (
+        not abilities
+        or len(set(abilities)) != len(abilities)
+        or any(
+            ability not in _ATTACHED_SUPPORTED_ABILITIES
+            and re.fullmatch(r"toxic [1-9]\d*", ability) is None
+            for ability in abilities
+        )
+    ):
+        return None
+    return tuple(ability.title() for ability in abilities)
+
+
+def attached_fixed_characteristics_handler(
+    oracle_line: str,
+) -> tuple[str, Mapping[str, Any], str] | None:
+    """Lower one closed attached-object fixed-characteristic sentence.
+
+    Dynamic values, conditions, combat restrictions, quoted rules text, and
+    mechanics outside the reviewed keyword vocabulary remain residual.
+    """
+
+    match = _ATTACHED_FIXED_CHARACTERISTICS.fullmatch(oracle_line.strip())
+    if match is None:
+        return None
+    body = match.group("body")
+    type_operations: list[dict[str, Any]] = []
+    add_abilities: tuple[str, ...] = ()
+    remove_abilities: tuple[str, ...] = ()
+    power = 0
+    toughness = 0
+
+    pt_match = _ATTACHED_FIXED_PT.fullmatch(body)
+    ability_match = _ATTACHED_HAS_OR_LOSES.fullmatch(body)
+    type_match = _ATTACHED_ADDED_TYPE.fullmatch(body)
+    if pt_match is not None:
+        power = int(pt_match.group("power"))
+        toughness = int(pt_match.group("toughness"))
+        if pt_match.group("abilities"):
+            parsed = _attached_abilities(pt_match.group("abilities"))
+            if parsed is None:
+                return None
+            add_abilities = parsed
+    elif ability_match is not None:
+        parsed = _attached_abilities(ability_match.group("abilities"))
+        if parsed is None:
+            return None
+        if ability_match.group("verb").casefold() == "has":
+            add_abilities = parsed
+        else:
+            remove_abilities = parsed
+    elif type_match is not None:
+        type_word = type_match.group("type")
+        type_operations.append(
+            {
+                "op": "add_types",
+                "field": (
+                    "card_types"
+                    if type_word.casefold() in _CARD_TYPE_WORDS
+                    else "subtypes"
+                ),
+                "values": [type_word],
+            }
+        )
+    else:
+        return None
+
+    if not (
+        type_operations
+        or add_abilities
+        or remove_abilities
+        or power
+        or toughness
+    ):
+        return None
+    return (
+        "continuous-attached-fixed-characteristics-v1",
+        {
+            "handler_id": "continuous.attached.fixed-characteristics.v1",
+            "schema_version": 1,
+            "event": "characteristics.evaluate",
+            "condition": {"relation": "source_attached_object"},
+            "modifier": {
+                "type_operations": type_operations,
+                "add_abilities": list(add_abilities),
+                "remove_abilities": list(remove_abilities),
+                "add_rules_text": [],
+                "power": power,
+                "toughness": toughness,
+            },
+        },
+        "continuous.attached.fixed_characteristics",
     )
 
 

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 19,
+  "registry_version": 21,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -65,6 +65,7 @@
     {
       "mechanic_id": "cr-613-continuous-effects",
       "capabilities": [
+        "continuous.attached.fixed_characteristics",
         "continuous.basic_land_type.add_all_lands",
         "continuous.power_toughness.fixed_anthem"
       ]
@@ -79,6 +80,33 @@
     }
   ],
   "capabilities": [
+    {
+      "id": "attachment.equip.fixed_mana",
+      "version": 1,
+      "official_rules": ["301.5", "602.1", "602.2", "608.2b", "608.2h", "701.3", "702.6a", "702.6b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Activate an Equipment's printed Equip ability with a fixed ordinary mana cost at sorcery speed, target a creature its controller controls, and attach the live Equipment on resolution.",
+        "inputs": ["phased-in battlefield Equipment", "fixed numeric and colored mana cost", "active-player sorcery timing", "one target creature controlled by the activator"],
+        "outputs": ["payable activated-ability offer", "public target contract", "stack object", "live reciprocal attachment relation", "new attachment timestamp when the relation changes"],
+        "exclusions": ["Equip costs containing X, hybrid, Phyrexian, snow, or nonmana costs", "Equip variants with different target restrictions", "instant-speed Equip permissions", "Equipment controlled by another player", "attachment legality beyond creature control and represented protection", "static characteristics granted by the Equipment"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.abilities.parse_activated_abilities", "mtg_commander_sim.rules.activation.resolution.builtin_activation_resolution", "mtg_commander_sim.effect_runtime.zones_and_attachments._apply_attach", "mtg_commander_sim.attachments.attach_objects"],
+      "positive_tests": ["test_fixed_equip_parser_exposes_only_executable_target_contract", "test_generic_fixed_equip_activation_attaches_and_applies_characteristics"],
+      "negative_tests": ["test_fixed_equip_keyword_has_exact_bounded_capability", "test_equip_resolves_without_effect_after_equipment_leaves"],
+      "interaction_tests": ["test_live_generic_equipment_effect_moves_detaches_and_tracks_control", "test_generic_fixed_equip_activation_attaches_and_applies_characteristics"],
+      "multiplayer_tests": ["test_multiple_sources_apply_independently_in_four_player_game"],
+      "privacy_tests": ["test_projection_hides_relation_identity_and_replay_is_exact"],
+      "replay_tests": ["test_projection_hides_relation_identity_and_replay_is_exact"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This bounded intrinsic keyword ability owns its cost, timing, target, stack, and attachment commit without another optional capability.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_generic_equip_resolution_mutant_is_killed removes recognition of the typed built-in Equip resolution and the exact attach operation assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
     {
       "id": "life.change.effect",
       "version": 1,
@@ -238,6 +266,33 @@
       "dependency_fail_closed_rationale": "This bounded counter producer has no capability dependencies beyond the shared replacement event substrate.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_counter_quantity_replacement_mutant_is_killed replaces the quantity transform with an identity operation and the behavioral assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "continuous.attached.fixed_characteristics",
+      "version": 1,
+      "official_rules": ["301.5", "303.4", "604.1", "611.3a", "611.3b", "613.1d", "613.1f", "613.1g", "613.6", "701.3c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Apply fixed type, subtype, keyword, rules-text ability, and power/toughness characteristics to the exact logical object currently attached to a phased-in battlefield source.",
+        "inputs": ["active attached source object", "reciprocal physical attachment relation", "target logical object identity", "source timestamp", "fixed typed characteristic operations"],
+        "outputs": ["live source-bound layer 4, 6, and 7c effects", "fixed separately trusted granted rules text", "reattachment timestamp ordering", "immediate detach and source-departure expiration"],
+        "exclusions": ["dynamic or conditional quantities", "rules-text grants without separately trusted semantic behavior", "state-derived modifiers", "attachment legality and attach costs", "characteristic-defining abilities", "unimplemented granted keyword rules"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.attached_continuous.AttachedFixedCharacteristicsHandler", "mtg_commander_sim.attachments.attach_objects", "mtg_commander_sim.attachments.attached_object_identity", "mtg_commander_sim.card_programs.runtime.collect_card_program_continuous_effects", "mtg_commander_sim.continuous_effects.evaluate_continuous_effects"],
+      "positive_tests": ["test_fixed_modifier_and_keyword_apply_only_to_exact_logical_object", "test_animate_dead_and_bestow_modifiers_use_generic_attached_handler", "test_thornbite_staff_grants_damage_death_untap_and_shaman_attach"],
+      "negative_tests": ["test_relation_model_and_descriptor_fail_closed", "test_compiler_rejects_dynamic_conditional_and_unrepresented_text", "test_malformed_relation_fails_before_mutation"],
+      "interaction_tests": ["test_live_generic_equipment_effect_moves_detaches_and_tracks_control", "test_target_departure_and_source_departure_end_effect_without_stale_identity", "test_type_and_ability_removal_use_their_canonical_layers"],
+      "multiplayer_tests": ["test_multiple_sources_apply_independently_in_four_player_game"],
+      "privacy_tests": ["test_projection_hides_relation_identity_and_replay_is_exact"],
+      "replay_tests": ["test_projection_hides_relation_identity_and_replay_is_exact", "test_relation_round_trip_is_canonical_and_legacy_shape_stays_stable"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "The bounded relation and characteristic application use the shared continuous-effect substrate directly.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_attached_characteristic_relation_mutant_is_killed removes the typed lowering and the exact relation-bound characteristic assertions reject the survivor.",
       "blockers": [],
       "status": "trusted"
     },
