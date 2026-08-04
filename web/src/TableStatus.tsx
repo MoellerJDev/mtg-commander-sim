@@ -60,9 +60,9 @@ export function AutomationControls({
         className={`table-control-toggle${autoPass ? " active" : " full-control"}`}
         aria-pressed={autoPass}
         data-testid="auto-pass-toggle"
-        title="Automatically submit pass-only priority capabilities. Turn this off to hold every priority stop."
+        title="Automatically submit pass-only priority capabilities. Turn this off to hold every priority stop, including stops during another player's turn."
         onClick={onAutoPass}
-      >{autoPass ? "Auto-pass on" : "Full control on"}</button>
+      >{autoPass ? "Auto-pass enabled" : "Hold every priority"}</button>
       <button
         type="button"
         className={`table-control-toggle${autoMana ? " active" : " manual-control"}`}

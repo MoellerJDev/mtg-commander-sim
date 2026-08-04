@@ -1,4 +1,4 @@
-import { DragEvent, FormEvent, KeyboardEvent as ReactKeyboardEvent, useEffect, useRef, useState } from "react";
+import { type CSSProperties, DragEvent, FormEvent, KeyboardEvent as ReactKeyboardEvent, useEffect, useRef, useState } from "react";
 import {
   api,
   ApiError,
@@ -24,9 +24,13 @@ import { ingestPacket, type ProjectedView } from "./protocol";
 import { findSafeAutoPass } from "./tableAutomation";
 import { visibleActionLabel } from "./tablePresentation";
 import { AutomationControls, CommanderDamage, ManaHelp } from "./TableStatus";
+import { TableSettings } from "./TableSettings";
+import { TurnStatus } from "./TurnStatus";
 import {
+  DEFAULT_TABLE_PREFERENCES,
   loadTablePreferences,
   saveTablePreferences,
+  type RightRailPanel,
   type TablePreferences,
 } from "./tablePreferences";
 import { useTableDockClearance } from "./useTableDockClearance";
@@ -74,6 +78,7 @@ function CardTile({
   onDropCard,
   manualMana = false,
   selected = false,
+  explainUnavailable = false,
 }: {
   value: JsonValue;
   view: ProjectedView;
@@ -86,12 +91,13 @@ function CardTile({
   onDropCard?: (cardRef: string) => void;
   manualMana?: boolean;
   selected?: boolean;
+  explainUnavailable?: boolean;
 }) {
   const card = asRecord(value);
   const cid = typeof card.cid === "string" ? card.cid : "";
   const definition = cid ? view.definitions[cid] : undefined;
   const [showImage, setShowImage] = useState(Boolean(cid));
-  const interactive = actions.length > 0 && Boolean(onIntent);
+  const interactive = Boolean(onIntent) && (actions.length > 0 || explainUnavailable);
   const inspectable = Boolean(onInspect);
   const ref = String(card.id ?? "");
   const face = Number(card.face ?? 0);
@@ -99,7 +105,9 @@ function CardTile({
   const actionKinds = new Set(actions.map((action) => action.action));
   const actionHint = manualMana
     ? actionKinds.has("undo_mana") ? "UNTAP" : "TAP"
-    : actionKinds.size > 1
+    : actionKinds.size === 0
+      ? "INFO"
+      : actionKinds.size > 1
       ? "CHOOSE"
       : actionKinds.has("cast")
         ? "CAST"
@@ -844,7 +852,7 @@ function PlayerBoard({
         </div>
         <div className="life" aria-label={`${String(player.life ?? 0)} life`}><span>{String(player.life ?? 0)}</span><small>LIFE</small></div>
       </header>
-      {(active || priority) && <div className="turn-flags">{active && <span>Active player</span>}{priority && <span>Priority</span>}</div>}
+      {(active || priority) && <div className="turn-flags" aria-label={`Seat ${seat} turn status`}>{active && <span className="active-flag"><span aria-hidden="true">▶</span> Active turn</span>}{priority && <span className="priority-flag"><span aria-hidden="true">◎</span> Priority</span>}</div>}
       <CommanderDamage seat={seat} value={player.cmd_dmg ?? []} />
       <div className="zone-label">COMMAND</div>
       <div className="card-strip command-zone">{command.length ? command.map((card, index) => {
@@ -852,7 +860,7 @@ function PlayerBoard({
         const actions = mine
           ? cardActions.filter((action) => String(action.card ?? action.source ?? "") === ref)
           : [];
-        return <CardTile key={ref || index} value={card} view={view} compact actions={actions} onIntent={onCardIntent} onInspect={onInspectCard} onDragCard={onCardDrag} onDropCard={onCardDrop} selected={selectedCardRef === ref} />;
+        return <CardTile key={ref || index} value={card} view={view} compact actions={actions} onIntent={onCardIntent} onInspect={onInspectCard} onDragCard={onCardDrag} onDropCard={onCardDrop} selected={selectedCardRef === ref} explainUnavailable={mine} />;
       }) : <em>Empty</em>}</div>
       <div className="zone-label">BATTLEFIELD</div>
       <div
@@ -989,6 +997,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   const [selectedAction, setSelectedAction] = useState<LegalAction | null>(null);
   const [actionChoices, setActionChoices] = useState<LegalAction[]>([]);
   const [tablePreferences, setTablePreferences] = useState<TablePreferences>(loadTablePreferences);
+  const [handManuallyCollapsed, setHandManuallyCollapsed] = useState(false);
   const [inspectedCard, setInspectedCard] = useState<JsonValue | null>(null);
   const [cardContext, setCardContext] = useState<JsonValue | null>(null);
   const [zoneBrowser, setZoneBrowser] = useState<{ seat: string; zone: "gy" | "ex" } | null>(null);
@@ -1011,6 +1020,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   const zoneDialogRef = useRef<HTMLElement | null>(null);
   const previewDialogRef = useRef<HTMLElement | null>(null);
   const publicLogDialogRef = useRef<HTMLElement | null>(null);
+  const handPanelRef = useRef<HTMLElement | null>(null);
   const publicEventCursor = useRef(0);
   const publicLogChain = useRef(Promise.resolve());
   const draggedCardRef = useRef("");
@@ -1270,7 +1280,11 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
       setPendingRetry(null);
       setNotice(result.receipt.summary);
       if (!result.receipt.ok) {
-        setNotice(`${result.receipt.code}: ${result.receipt.summary}`);
+        setNotice(
+          ["stale_decision", "stale_view", "stale_action"].includes(result.receipt.code)
+            ? "That action expired because the authoritative decision window changed. Review the refreshed legal actions and try again."
+            : `${result.receipt.code}: ${result.receipt.summary}`,
+        );
       } else {
         setSelectedAction(null);
         setChoiceValues({});
@@ -1354,6 +1368,15 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
     setActionChoices([]);
   }
 
+  function projectedUnavailableMessage(ref: string): string {
+    const projectedState = asRecord(viewRef.current?.state);
+    const explanations = asRecord(projectedState.action_explanations);
+    const explanation = asRecord(explanations[ref]);
+    return typeof explanation.message === "string"
+      ? explanation.message
+      : "No server-authorized action is available for this card in the current decision window.";
+  }
+
   function handleCardDrop(ref: string) {
     if (lastDroppedCardRef.current === ref) return;
     lastDroppedCardRef.current = ref;
@@ -1365,18 +1388,27 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
       ["play_land", "cast"].includes(action.action),
     );
     if (!actions.length) {
-      setNotice("That card is no longer playable in the current decision window.");
+      setNotice(projectedUnavailableMessage(ref));
       return;
     }
     chooseCardAction(actions);
   }
   cardDropHandlerRef.current = handleCardDrop;
-  function setTablePreference(
-    key: keyof TablePreferences,
-    value: boolean,
+  function setTablePreference<K extends keyof TablePreferences>(
+    key: K,
+    value: TablePreferences[K],
   ) {
     if (key === "autoPass" && value) autoPassDecisionRef.current = "";
     setTablePreferences((current) => ({ ...current, [key]: value }));
+  }
+
+  function resetTablePreferences() {
+    autoPassDecisionRef.current = "";
+    setHandManuallyCollapsed(false);
+    setTablePreferences({
+      ...DEFAULT_TABLE_PREFERENCES,
+      rightRailOrder: [...DEFAULT_TABLE_PREFERENCES.rightRailOrder],
+    });
   }
 
   function submitChoice(event: FormEvent) {
@@ -1396,9 +1428,11 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   }
 
   if (!view) return <main className="loading-screen"><div className="spinner" /><p>Opening your projected table…</p>{notice && <div className="error-banner">{notice}</div>}</main>;
+  const currentView = view;
   const state = view.state;
   const game = asRecord(state.game);
   const turn = asRecord(state.turn);
+  const combat = asRecord(state.combat);
   const players = asRecord(state.players);
   const isSpectator = view.principal === "spectator" || lifecycle?.spectator === true;
   const ownSeat = isSpectator ? "" : view.principal.split(":").at(-1) ?? "?";
@@ -1434,11 +1468,66 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   const actionWindow = { activeSeat, ownSeat, phase: String(turn.phase ?? ""), stackDepth: stack.length };
   const selectedCardRef = String(asRecord(cardContext ?? undefined).id ?? "");
   const contextualActions = selectedCardRef ? actionsForCard(selectedCardRef) : [];
+  const actionExplanations = asRecord(state.action_explanations);
+  const selectedExplanation = asRecord(actionExplanations[selectedCardRef]);
   const zonePlayer = zoneBrowser ? asRecord(players[zoneBrowser.seat]) : {};
   const zoneCards = zoneBrowser ? asList(zonePlayer[zoneBrowser.zone]) : [];
   const zoneName = zoneBrowser?.zone === "gy" ? "Graveyard" : "Exile";
+  const handCollapsed = handManuallyCollapsed || (
+    tablePreferences.handAutoCollapse && hand.length === 0
+  );
+  const tableStyle = {
+    ...(shellStyle ?? {}),
+    "--hand-panel-height": `${tablePreferences.handPanelHeight}px`,
+    "--card-scale": String(tablePreferences.cardScale),
+    "--right-rail-width": `${tablePreferences.rightRailWidth}px`,
+  } as CSSProperties;
+  const turnPresentation = {
+    turnSequence: Number(turn.seq ?? 0),
+    activeSeat,
+    prioritySeat,
+    phase: String(turn.phase ?? ""),
+    step: String(turn.step ?? ""),
+    combatDamageStep: Number(combat.damage_step ?? 0),
+    firstStrikeStep: Boolean(combat.first_strike_step),
+    lifecycleStatus: lifecycle?.status ?? "loading",
+  };
+
+  function railPanel(panel: RightRailPanel) {
+    if (panel === "stack") {
+      return (
+        <section className="stack-panel" key={panel} data-testid="stack-panel">
+          <header><div className="zone-label">STACK</div><strong>{stack.length}</strong></header>
+          <div className="stack-items">
+            {stack.length ? stack.map((item, index) => <CardTile key={String(asRecord(item).id ?? index)} value={item} view={currentView} compact onInspect={setInspectedCard} />) : <em>The stack is empty</em>}
+          </div>
+        </section>
+      );
+    }
+    if (panel === "activity") {
+      if (!tablePreferences.activityVisible) return null;
+      return (
+        <section className="activity-panel" key={panel} data-testid="activity-panel">
+          <header><div className="zone-label">RECENT ACTIVITY</div><button type="button" className="link-button" onClick={() => setShowPublicLog(true)}>Full log</button></header>
+          <ol>
+            {publicEvents.slice(-5).reverse().map((event) => <li key={event.id}><span>{event.actor ? `Seat ${event.actor}` : "Game"}</span>{event.summary || readable(event.code)}</li>)}
+            {!publicEvents.length && <li className="empty-activity">Game events will appear here.</li>}
+          </ol>
+        </section>
+      );
+    }
+    if (tablePreferences.inspectorCollapsed) {
+      return (
+        <section className="inspector-collapsed" key={panel} data-testid="card-inspector-collapsed">
+          <span>Card viewer collapsed</span>
+          <button type="button" className="link-button" onClick={() => setTablePreference("inspectorCollapsed", false)}>Open</button>
+        </section>
+      );
+    }
+    return <CardInspector key={panel} value={inspectionTarget} view={currentView} onExpand={() => setExpandedInspector(true)} />;
+  }
   return (
-    <main className={`game-shell${isSpectator ? " spectator-table" : ""}`} data-view-revision={view.viewRevision} style={shellStyle}>
+    <main className={`game-shell${isSpectator ? " spectator-table" : ""} density-${tablePreferences.boardDensity}`} data-view-revision={view.viewRevision} style={tableStyle}>
       {isSpectator && <div className="watch-mode-banner" data-testid="watch-mode"><strong>WATCH MODE</strong><span>Public table and game log · no player controls</span></div>}
       <a className="skip-link" href="#decision-tray">Skip to current actions</a>
       <header className="game-topbar">
@@ -1453,9 +1542,9 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
           <span data-testid="game-status" className={`game-status ${lifecycle?.status ?? "loading"}`}>
             {(lifecycle?.status ?? "loading").toUpperCase()}
           </span>
-          <span>Turn {String(turn.seq ?? 0)} · {readable(turn.phase, "Setup")} {readable(turn.step, "")}</span>
         </div>
       </header>
+      <TurnStatus value={turnPresentation} compact={tablePreferences.compactPhaseRail} />
       {connection !== "LIVE" && (
         <div className="connection-banner" role="status">
           <div><strong>{connection === "STOPPED" ? "This game tab is stale" : "Restoring your seat projection"}</strong><span>{connection === "STOPPED" ? "Return to the lobby instead of repeatedly reconnecting to an inaccessible game." : "No actions are sent while the live table connection is unavailable."}</span></div>
@@ -1480,6 +1569,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
           onClick={() => setShowInspection((value) => !value)}
         >Inspect match</button>
         <button type="button" className="secondary-button" data-testid="open-public-log" onClick={() => setShowPublicLog(true)}>Public log</button>
+        <TableSettings value={tablePreferences} onChange={setTablePreference} onReset={resetTablePreferences} />
         {lifecycle?.owner && lifecycle.can_stop && (
           <label className="stop-control">
             Stop reason
@@ -1568,31 +1658,27 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
           ))}
         </section>
         <aside className="table-sidebar" aria-label="Stack and recent game activity">
-          <CardInspector value={inspectionTarget} view={view} onExpand={() => setExpandedInspector(true)} />
-          <section className="stack-panel">
-            <header><div className="zone-label">STACK</div><strong>{stack.length}</strong></header>
-            <div className="stack-items">
-              {stack.length ? stack.map((item, index) => <CardTile key={String(asRecord(item).id ?? index)} value={item} view={view} compact onInspect={setInspectedCard} />) : <em>The stack is empty</em>}
-            </div>
-          </section>
-          <section className="activity-panel">
-            <header><div className="zone-label">RECENT ACTIVITY</div><button type="button" className="link-button" onClick={() => setShowPublicLog(true)}>Full log</button></header>
-            <ol>
-              {publicEvents.slice(-5).reverse().map((event) => <li key={event.id}><span>{event.actor ? `Seat ${event.actor}` : "Game"}</span>{event.summary || readable(event.code)}</li>)}
-              {!publicEvents.length && <li className="empty-activity">Game events will appear here.</li>}
-            </ol>
-          </section>
+          {tablePreferences.rightRailOrder.map(railPanel)}
         </aside>
       </div>
       <div ref={bottomDockRef} className={`table-bottom-dock${isSpectator ? " spectator" : ""}`} data-testid="table-bottom-dock">
-      {!isSpectator && <section className="hand-panel" data-testid="hand-panel" data-resizable="true">
-        <header><div><span className="eyebrow">YOUR PRIVATE ZONE · SEAT {ownSeat}</span><h2>Your hand</h2></div><span className="zone-count">{hand.length} cards</span></header>
+      {!isSpectator && handCollapsed && (
+        <section className="hand-panel-collapsed" data-testid="hand-panel-collapsed">
+          <span>Your hand · {hand.length} cards</span>
+          <button type="button" className="link-button" onClick={() => setHandManuallyCollapsed(false)}>Show hand</button>
+        </section>
+      )}
+      {!isSpectator && !handCollapsed && <section ref={handPanelRef} className="hand-panel" data-testid="hand-panel" data-resizable="true" onPointerUp={() => {
+        const height = handPanelRef.current?.getBoundingClientRect().height;
+        if (height) setTablePreference("handPanelHeight", Math.round(height));
+      }}>
+        <header><div><span className="eyebrow">YOUR PRIVATE ZONE · SEAT {ownSeat}</span><h2>Your hand</h2></div><div className="hand-panel-controls"><span className="zone-count">{hand.length} cards</span><button type="button" className="link-button" onClick={() => setHandManuallyCollapsed(true)}>Collapse</button></div></header>
         {cardContext && (
           <div className="selected-card-actions" data-testid="selected-card-actions">
             <div>
               <span className="eyebrow">SELECTED CARD</span>
               <strong>{cardName(cardContext)}</strong>
-              <small>Choose a legal action, or drag the card to your battlefield for the fast path.</small>
+              <small>{contextualActions.length ? "Choose a legal action, or drag the card to your battlefield for the fast path." : typeof selectedExplanation.message === "string" ? selectedExplanation.message : "No server-authorized action is available for this card in the current decision window."}</small>
             </div>
             <div className="selected-card-action-buttons">
               {contextualActions.map((action) => (
@@ -1607,7 +1693,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
         <div className="hand-cards" data-testid="own-hand">
           {hand.map((card, index) => {
             const ref = String(asRecord(card).id ?? "");
-            return <CardTile key={ref || index} value={card} view={view} actions={actionsForCard(ref)} onIntent={selectCardActions} onInspect={setInspectedCard} onDragCard={(nextRef) => { draggedCardRef.current = nextRef ?? ""; }} onDropCard={handleCardDrop} selected={selectedCardRef === ref} />;
+            return <CardTile key={ref || index} value={card} view={view} actions={actionsForCard(ref)} onIntent={selectCardActions} onInspect={setInspectedCard} onDragCard={(nextRef) => { draggedCardRef.current = nextRef ?? ""; }} onDropCard={handleCardDrop} selected={selectedCardRef === ref} explainUnavailable />;
           })}
         </div>
       </section>}
@@ -1624,10 +1710,8 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
           onSelect={chooseAction}
         />
       )}
-      <section id="decision-tray" className="decision-panel" data-testid="decision-panel" aria-live="polite">
-        {lifecycle?.status === "complete" ? (
-          <div className="waiting-decision" data-testid="complete-decision"><span className="status-dot muted" /><div><strong>Game complete</strong><p>{lifecycle.draw ? "The game ended in a draw." : lifecycle.winner ? `Seat ${lifecycle.winner} won the game.` : "No further actions are available."}</p></div></div>
-        ) : lifecycle?.status === "paused" ? (
+      {lifecycle?.status !== "complete" && <section id="decision-tray" className="decision-panel" data-testid="decision-panel" aria-live="polite">
+        {lifecycle?.status === "paused" ? (
           <div className="waiting-decision" data-testid="paused-decision"><span className="status-dot muted" /><div><strong>Match paused</strong><p>No player action or priority pass is pending while this boundary is reviewed.</p></div></div>
         ) : isSpectator ? (
           <div className="waiting-decision"><span className="status-dot muted" /><div><strong>Watching the table</strong><p>Player decisions and private information remain seat-scoped.</p></div></div>
@@ -1654,7 +1738,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
             </div>
           </>
         ) : <div className="waiting-decision"><span className="status-dot muted" /><div><strong>Waiting for the table</strong><p>Waiting for another player’s decision.</p></div></div>}
-      </section>
+      </section>}
       </div>
       {inspectionTarget && (
         <button type="button" className="mobile-inspector-trigger" onClick={() => setExpandedInspector(true)}>

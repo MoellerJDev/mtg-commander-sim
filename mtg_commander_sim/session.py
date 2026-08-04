@@ -17,6 +17,7 @@ from .profiles import (
     deck_list_fingerprint,
     deck_source_fingerprint,
 )
+from .rules.action_explanations import projected_action_explanations
 from .rules.capabilities import load_default_capability_registry
 from .record import (
     authoritative_state_hash,
@@ -165,6 +166,9 @@ class CommanderSession:
                 card_db,
                 engine.state,
                 characteristic_resolver=engine._effective_card_data,
+                action_explanation_resolver=lambda seat: (
+                    projected_action_explanations(engine, seat)
+                ),
             ),
             initial_checkpoint=checkpoint_envelope(engine.state),
             pilot_profiles=pilot_profiles,
@@ -1147,6 +1151,9 @@ class CommanderSession:
                 card_db,
                 engine.state,
                 characteristic_resolver=engine._effective_card_data,
+                action_explanation_resolver=lambda seat: (
+                    projected_action_explanations(engine, seat)
+                ),
             ),
             cursors=cursors,
             initial_checkpoint=initial_checkpoint,

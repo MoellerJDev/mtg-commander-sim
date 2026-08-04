@@ -48,6 +48,55 @@
       "released_at": "2023-04-21",
       "toughness": "6",
       "type_line": "Legendary Creature — Frog Spirit Elemental"
+    },
+    {
+      "cmc": 0.0,
+      "color_identity": [
+        "G",
+        "R"
+      ],
+      "colors": [],
+      "defense": null,
+      "keywords": [],
+      "layout": "normal",
+      "legalities": {
+        "alchemy": "not_legal",
+        "brawl": "not_legal",
+        "commander": "legal",
+        "competitivebrawl": "not_legal",
+        "duel": "legal",
+        "future": "not_legal",
+        "gladiator": "legal",
+        "historic": "not_legal",
+        "legacy": "legal",
+        "modern": "not_legal",
+        "oathbreaker": "legal",
+        "oldschool": "not_legal",
+        "pauper": "not_legal",
+        "paupercommander": "not_legal",
+        "penny": "not_legal",
+        "pioneer": "not_legal",
+        "predh": "not_legal",
+        "premodern": "not_legal",
+        "standard": "not_legal",
+        "standardbrawl": "not_legal",
+        "timeless": "not_legal",
+        "tlr": "legal",
+        "vintage": "legal"
+      },
+      "loyalty": null,
+      "mana_cost": "",
+      "name": "Spire Garden",
+      "oracle_id": "45fe016e-1a09-410c-bbe3-4663ba06c5b7",
+      "oracle_text": "This land enters tapped unless you have two or more opponents.\n{T}: Add {R} or {G}.",
+      "power": null,
+      "produced_mana": [
+        "G",
+        "R"
+      ],
+      "released_at": "2026-03-06",
+      "toughness": null,
+      "type_line": "Land"
     }
   ],
   "fixture_kind": "public_browser_lifecycle_card_data",

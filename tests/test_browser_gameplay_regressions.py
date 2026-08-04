@@ -4,7 +4,311 @@ import unittest
 import uuid
 
 from common import keep_all, load_assets, make_session, set_fixture_turn
+from mtg_commander_sim import CommanderSession, GameConfig
+from mtg_commander_sim.deck import DeckDefinition, DeckEntry
 from mtg_commander_sim.model import CardInstance, StackItem
+
+
+class CommanderDuelTurnStateTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.db, cls.mishra, cls.zimone = load_assets()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.db.close()
+
+    def make_duel(self) -> CommanderSession:
+        spire = DeckDefinition(
+            name="Spire Garden turn-state fixture",
+            commanders=["Zimone and Dina"],
+            entries=[
+                DeckEntry("Zimone and Dina", 1, "commander"),
+                DeckEntry("Spire Garden"),
+                DeckEntry("Forest", 98),
+            ],
+        )
+        islands = DeckDefinition(
+            name="Island turn-state fixture",
+            commanders=["Mishra, Eminent One"],
+            entries=[
+                DeckEntry("Mishra, Eminent One", 1, "commander"),
+                DeckEntry("Island", 99),
+            ],
+        )
+        session = CommanderSession.create(
+            self.db,
+            {"A": spire, "B": islands},
+            first_player="A",
+            seed=1,
+            config=GameConfig(
+                seed=1,
+                profile="commander_duel",
+                auto_pass_empty_priority=False,
+            ),
+        )
+        keep_all(session)
+        return session
+
+    @staticmethod
+    def hand_count(session: CommanderSession, seat: str) -> int:
+        return sum(
+            card.owner == seat and card.zone == "hand"
+            for card in session.state.cards.values()
+        )
+
+    @staticmethod
+    def legal_actions(session: CommanderSession, seat: str) -> list[dict]:
+        decision = session.state.pending_decision
+        if decision is None:
+            return []
+        return list(
+            (decision.payload_by_actor.get(seat, {}).get("legal") or {}).get(
+                "actions", []
+            )
+        )
+
+    def advance_until(self, session: CommanderSession, predicate) -> None:
+        for _ in range(80):
+            if predicate(session.state):
+                return
+            principals = session.pending_principals()
+            if not principals:
+                session.engine.pump()
+                continue
+            result = session.act(principals[0], {"a": "pass"})
+            self.assertTrue(result.ok, result.summary)
+        self.fail("Turn-state fixture did not reach the requested boundary")
+
+    def play_first_land(self, session: CommanderSession, seat: str) -> None:
+        action = next(
+            action
+            for action in self.legal_actions(session, seat)
+            if str(action["id"]).startswith("play-land:")
+        )
+        result = session.act(f"pilot:{seat}", {"action_id": action["id"]})
+        self.assertTrue(result.ok, result.summary)
+
+    def test_full_control_exposes_upkeep_priority_without_advancing_turn(self):
+        session = self.make_duel()
+
+        self.assertEqual(1, session.state.turn_sequence)
+        self.assertEqual("A", session.state.active_player)
+        self.assertEqual("A", session.state.priority_player)
+        self.assertEqual("beginning", session.state.phase)
+        self.assertEqual("upkeep", session.state.step)
+        self.assertEqual(["pilot:A"], session.pending_principals())
+
+    def test_spire_garden_is_offered_in_own_duel_main_phase(self):
+        session = self.make_duel()
+        self.advance_until(
+            session,
+            lambda state: state.turn_sequence == 1
+            and state.phase == "precombat_main"
+            and state.priority_player == "A",
+        )
+
+        spire = next(
+            card
+            for card in session.state.cards.values()
+            if card.printed_name == "Spire Garden"
+        )
+        self.assertIn(
+            f"play-land:{spire.ref}",
+            {action["id"] for action in self.legal_actions(session, "A")},
+        )
+
+    def test_spire_garden_enters_tapped_with_one_opponent(self):
+        session = self.make_duel()
+        self.advance_until(
+            session,
+            lambda state: state.phase == "precombat_main"
+            and state.priority_player == "A",
+        )
+        spire = next(
+            card
+            for card in session.state.cards.values()
+            if card.printed_name == "Spire Garden"
+        )
+
+        result = session.act(
+            "pilot:A", {"action_id": f"play-land:{spire.ref}"}
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("battlefield", spire.zone)
+        self.assertTrue(spire.tapped)
+
+    def test_nonactive_player_cannot_play_land_while_holding_priority(self):
+        session = self.make_duel()
+        self.advance_until(
+            session,
+            lambda state: state.phase == "precombat_main"
+            and state.priority_player == "B",
+        )
+
+        self.assertEqual("A", session.state.active_player)
+        self.assertEqual("B", session.state.priority_player)
+        self.assertFalse(
+            any(
+                str(action["id"]).startswith("play-land:")
+                for action in self.legal_actions(session, "B")
+            )
+        )
+
+    def test_projection_explains_own_land_without_exposing_it_publicly(self):
+        session = self.make_duel()
+        engine = session.engine
+        spire = next(
+            card
+            for card in session.state.cards.values()
+            if card.printed_name == "Spire Garden"
+        )
+        engine.state.active_player = "B"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine.state.priority_player = "A"
+
+        projected = session.projector._snapshot("pilot:A")
+        explanation = projected["action_explanations"][spire.ref]
+
+        self.assertEqual("not_active_player", explanation["reason"])
+        self.assertIn("Seat B is the active player", explanation["message"])
+        self.assertNotIn(
+            "action_explanations",
+            session.projector._snapshot("spectator"),
+        )
+
+    def test_land_explanation_codes_cover_safe_unavailable_boundaries(self):
+        session = self.make_duel()
+        engine = session.engine
+        spire = next(
+            card
+            for card in session.state.cards.values()
+            if card.printed_name == "Spire Garden"
+        )
+
+        def reason() -> str:
+            return session.projector._snapshot("pilot:A")[
+                "action_explanations"
+            ][spire.ref]["reason"]
+
+        engine.state.active_player = "A"
+        engine.state.priority_player = "A"
+        engine.state.phase = "beginning"
+        engine.state.step = "upkeep"
+        self.assertEqual("not_main_phase", reason())
+
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine.state.stack.append(
+            StackItem(
+                stack_id=uuid.uuid4().hex,
+                ref="S-safe-explanation",
+                kind="spell",
+                controller="B",
+                label="Public stack object",
+            )
+        )
+        self.assertEqual("stack_not_empty", reason())
+        engine.state.stack.clear()
+
+        engine.state.players["A"].land_plays_remaining = 0
+        self.assertEqual("no_land_play_remaining", reason())
+        engine.state.players["A"].land_plays_remaining = 1
+        engine.state.priority_player = "B"
+        self.assertEqual("not_priority_player", reason())
+
+        engine.move_card(spire.object_id, "graveyard", log=False)
+        self.assertEqual("unsupported_face_or_zone_permission", reason())
+
+    def test_duel_first_player_skips_only_turn_one_draw(self):
+        session = self.make_duel()
+        self.advance_until(
+            session,
+            lambda state: state.turn_sequence == 1
+            and state.step == "draw"
+            and state.priority_player == "A",
+        )
+        self.assertEqual(7, self.hand_count(session, "A"))
+
+        self.advance_until(
+            session,
+            lambda state: state.turn_sequence == 1
+            and state.phase == "precombat_main"
+            and state.priority_player == "A",
+        )
+        self.play_first_land(session, "A")
+        self.advance_until(
+            session,
+            lambda state: state.turn_sequence == 2
+            and state.phase == "precombat_main"
+            and state.priority_player == "B",
+        )
+        self.play_first_land(session, "B")
+        self.advance_until(
+            session,
+            lambda state: state.turn_sequence == 3
+            and state.step == "draw"
+            and state.priority_player == "A",
+        )
+        self.assertEqual(7, self.hand_count(session, "A"))
+
+    def test_duel_second_player_draws_on_turn_two(self):
+        session = self.make_duel()
+        self.advance_until(
+            session,
+            lambda state: state.turn_sequence == 2
+            and state.step == "draw"
+            and state.priority_player == "B",
+        )
+
+        self.assertEqual(8, self.hand_count(session, "B"))
+
+    def test_three_player_commander_starting_player_draws_on_turn_one(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=3,
+            seed=9107,
+            auto_pass_empty=False,
+        )
+        keep_all(session)
+        self.assertTrue(
+            session.state.config.effective_first_player_draws(3)
+        )
+        self.advance_until(
+            session,
+            lambda state: state.turn_sequence == 1
+            and state.step == "draw"
+            and state.priority_player == "A",
+        )
+        self.assertEqual(8, self.hand_count(session, "A"))
+
+    def test_duel_first_player_draws_on_turn_three(self):
+        session = self.make_duel()
+        self.advance_until(
+            session,
+            lambda state: state.phase == "precombat_main"
+            and state.priority_player == "A",
+        )
+        self.play_first_land(session, "A")
+        self.advance_until(
+            session,
+            lambda state: state.turn_sequence == 2
+            and state.phase == "precombat_main"
+            and state.priority_player == "B",
+        )
+        self.play_first_land(session, "B")
+        self.advance_until(
+            session,
+            lambda state: state.turn_sequence == 3
+            and state.step == "draw"
+            and state.priority_player == "A",
+        )
+
+        self.assertEqual(7, self.hand_count(session, "A"))
 
 
 class BrowserGameplayRegressionTests(unittest.TestCase):
