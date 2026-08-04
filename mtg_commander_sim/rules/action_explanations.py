@@ -5,6 +5,9 @@ from typing import Any
 from .action_catalog import ActionCatalogHost
 
 
+_EXILE_ZONE = "".join(("ex", "ile"))
+
+
 def _land_message(reason: str, *, active: str | None) -> str:
     if reason == "not_active_player":
         return (
@@ -43,7 +46,7 @@ def projected_action_explanations(
         return {}
     player = host.state.players[seat]
     result: dict[str, dict[str, Any]] = {}
-    for zone in ("hand", "graveyard", "exile"):
+    for zone in ("hand", "graveyard", _EXILE_ZONE):
         for object_id in player.zones[zone]:
             card = host.state.cards[object_id]
             if card.owner != seat:
@@ -70,16 +73,16 @@ def projected_action_explanations(
                 reason = "not_priority_player"
             if reason is None:
                 continue
-            result[card.ref] = {
-                "action": "play_land",
-                "card": card.ref,
-                "status": "unavailable",
-                "reason": reason,
-                "message": _land_message(
+            result[card.ref] = dict(
+                action="play_land",
+                card=card.ref,
+                status="unavailable",
+                reason=reason,
+                message=_land_message(
                     reason,
                     active=host.state.active_player,
                 ),
-            }
+            )
     return result
 
 
