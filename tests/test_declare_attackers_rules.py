@@ -8,6 +8,7 @@ from pathlib import Path
 from common import keep_all, load_assets, make_session, pass_current
 from mtg_commander_sim.engine import TURN_STEPS
 from mtg_commander_sim.model import CombatState
+from mtg_commander_sim.tap_state import TapStateError, tap_declared_attackers
 from mtg_commander_sim.record import (
     authoritative_state_hash,
     checkpoint_envelope,
@@ -220,6 +221,83 @@ class DeclareAttackersRuleTests(unittest.TestCase):
             replay = replay_record(record_dir, self.db, verify=True)
             self.assertTrue(replay["ok"], replay)
             self.assertEqual(1, replay["commands"])
+
+    def test_vigilance_tap_owner_uses_current_effective_keywords(self):
+        session = self.make_session(50821)
+        engine = session.engine
+        ordinary = self.token(engine, "Ordinary Tap Witness")
+        vigilant = self.token(
+            engine,
+            "Vigilance Tap Witness",
+            keywords=("Haste", "Vigilance", "Vigilance"),
+        )
+
+        tapped = tap_declared_attackers(engine, (ordinary, vigilant))
+
+        self.assertEqual([ordinary.ref], tapped)
+        self.assertTrue(ordinary.tapped)
+        self.assertFalse(vigilant.tapped)
+
+    def test_vigilance_tap_owner_fails_closed_before_batch_mutation(self):
+        session = self.make_session(50822)
+        engine = session.engine
+        ordinary = self.token(engine, "Rollback Tap Witness")
+        malformed = self.token(engine, "Malformed Tap Witness")
+        malformed.zone = "graveyard"
+
+        with self.assertRaisesRegex(TapStateError, "battlefield"):
+            tap_declared_attackers(engine, (ordinary, malformed))
+
+        self.assertFalse(ordinary.tapped)
+
+    def test_vigilance_is_defender_independent_in_four_player_combat(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=4,
+            seed=50823,
+            auto_pass_empty=False,
+        )
+        keep_all(session)
+        engine = session.engine
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.priority_player = None
+        engine.state.priority_passes = []
+        engine.state.phase_index = 5
+        engine.state.phase = "combat"
+        engine.state.step = "declare_attackers"
+        engine.state.combat = CombatState()
+        attackers = [
+            self.token(
+                engine,
+                f"Vigilance Attacker {defender}",
+                keywords=("Haste", "Vigilance"),
+            )
+            for defender in ("B", "C", "D")
+        ]
+        engine._issue_attackers()
+
+        result = session.act(
+            "pilot:A",
+            {
+                "a": "attack",
+                "atk": {
+                    card.ref: defender
+                    for card, defender in zip(
+                        attackers, ("B", "C", "D"), strict=True
+                    )
+                },
+            },
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertTrue(all(not card.tapped for card in attackers))
+        self.assertEqual(
+            ["B", "C", "D"],
+            engine.state.combat.defending_players,
+        )
 
     def test_attack_requirement_is_projected_maximized_and_replayed(self):
         session = self.make_session(50809)

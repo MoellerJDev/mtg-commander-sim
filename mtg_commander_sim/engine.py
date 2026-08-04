@@ -155,6 +155,7 @@ from .mana_undo import (
     priority_actions_with_mana_undo,
     undo_mana_activation,
 )
+from .tap_state import tap_declared_attackers
 from .mana_payment_continuations import (
     execute_mana_choice_capable_priority_action,
 )
@@ -11830,10 +11831,7 @@ class CommanderEngine(
                 "The attack declaration has unresolved restriction or cost semantics"
             )
         self._validate_declaration_requirements(problem, canonical)
-        for card, _target_details in chosen:
-            data = self._effective_card_data(card)
-            if "Vigilance" not in data.get("keywords", []):
-                card.tapped = True
+        tap_declared_attackers(self, (card for card, _details in chosen))
         requirements, selected_costs = self._selected_declaration_mana(
             locked_costs,
             canonical,

@@ -170,6 +170,62 @@
       "applicability_note": "Replay the attachment command and verify the exact relation result."
     },
     {
+      "capability_id": "combat.attack.vigilance",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_vigilance_tap_owner_uses_current_effective_keywords",
+      "official_rule_ids": ["508.1f", "702.20", "702.20a", "702.20b", "702.20c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Consume current represented effective keywords and treat multiple vigilance instances as redundant."
+    },
+    {
+      "capability_id": "combat.attack.vigilance",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_vigilance_is_defender_independent_in_four_player_combat",
+      "official_rule_ids": ["508.1f", "702.20", "702.20a", "702.20b", "702.20c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Leave vigilant attackers untapped independently across three defending-player declarations."
+    },
+    {
+      "capability_id": "combat.attack.vigilance",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_combat_vigilance_mutant_is_killed",
+      "official_rule_ids": ["508.1f", "702.20", "702.20a", "702.20b", "702.20c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill a mutation that ignores the current vigilance keyword during declaration tapping."
+    },
+    {
+      "capability_id": "combat.attack.vigilance",
+      "evidence_class": "negative",
+      "test_id": "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_vigilance_tap_owner_fails_closed_before_batch_mutation",
+      "official_rule_ids": ["508.1f", "702.20", "702.20a", "702.20b", "702.20c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject a malformed attacker set before an earlier ordinary attacker is tapped."
+    },
+    {
+      "capability_id": "combat.attack.vigilance",
+      "evidence_class": "positive",
+      "test_id": "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_attackers_tap_except_vigilance_then_active_player_gets_priority",
+      "official_rule_ids": ["508.1f", "702.20", "702.20a", "702.20b", "702.20c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Tap an ordinary attacker and leave a vigilant attacker untapped in the normal declaration transaction."
+    },
+    {
+      "capability_id": "combat.attack.vigilance",
+      "evidence_class": "positive",
+      "test_id": "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_vigilance_tap_owner_uses_current_effective_keywords",
+      "official_rule_ids": ["508.1f", "702.20", "702.20a", "702.20b", "702.20c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Apply the complete tap set atomically using current represented effective keyword state."
+    },
+    {
+      "capability_id": "combat.attack.vigilance",
+      "evidence_class": "replay",
+      "test_id": "tests.test_declare_attackers_rules.DeclareAttackersRuleTests.test_attackers_tap_except_vigilance_then_active_player_gets_priority",
+      "official_rule_ids": ["508.1f", "702.20", "702.20a", "702.20b", "702.20c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the attack declaration and verify both tap outcomes exactly."
+    },
+    {
       "capability_id": "continuous.attached.fixed_characteristics",
       "evidence_class": "interaction",
       "test_id": "tests.test_attached_static_characteristics.AttachedContinuousModelTests.test_type_and_ability_removal_use_their_canonical_layers",

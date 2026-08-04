@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 26,
+  "registry_version": 27,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -428,6 +428,33 @@
       "dependency_fail_closed_rationale": "This bounded resolution-created characteristic effect has no capability dependencies beyond the shared typed continuous-effect evaluator.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_resolution_continuous_effect_commit_mutant_is_killed removes the canonical journal commit and the characteristic result assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "combat.attack.vigilance",
+      "version": 1,
+      "official_rules": ["508.1f", "702.20", "702.20a", "702.20b", "702.20c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Apply the declare-attackers tap result to a fully validated attacker set using each object's current represented effective keyword state, leaving attackers with one or more vigilance instances untapped.",
+        "inputs": ["complete validated declared-attacker set", "stable battlefield object identity", "current represented effective keywords"],
+        "outputs": ["ordinary attackers tapped", "vigilance attackers unchanged", "atomic preflight before tap mutation"],
+        "exclusions": ["attack declaration eligibility, restrictions, requirements, and costs", "unrepresented continuous-effect or copy semantics", "effects that put creatures onto the battlefield attacking", "replacement effects that modify tapping"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.tap_state.tap_declared_attackers"],
+      "positive_tests": ["test_attackers_tap_except_vigilance_then_active_player_gets_priority", "test_vigilance_tap_owner_uses_current_effective_keywords"],
+      "negative_tests": ["test_vigilance_tap_owner_fails_closed_before_batch_mutation"],
+      "interaction_tests": ["test_vigilance_tap_owner_uses_current_effective_keywords"],
+      "multiplayer_tests": ["test_vigilance_is_defender_independent_in_four_player_combat"],
+      "privacy_tests": [],
+      "replay_tests": ["test_attackers_tap_except_vigilance_then_active_player_gets_priority"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "The bounded result consumes the authoritative effective-keyword snapshot after declaration legality and has no optional capability dependency.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_combat_vigilance_mutant_is_killed changes the recognized effective keyword and the unchanged-tap assertion rejects the survivor.",
       "blockers": [],
       "status": "trusted"
     },

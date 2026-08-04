@@ -1107,6 +1107,42 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 assert_aggregate_untap()
 
+    def test_combat_vigilance_mutant_is_killed(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=2,
+            seed=7022020,
+        )
+        keep_all(session)
+        engine = session.engine
+        ref = engine.create_token(
+            "A",
+            name="Vigilance Mutation Witness",
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "power": "1",
+                "toughness": "1",
+            },
+            temporary_keywords=("Haste", "Vigilance"),
+        )[0]
+        card = engine._resolve_object("A", ref, zones={"battlefield"})
+
+        def assert_vigilance_prevents_declaration_tap() -> None:
+            card.tapped = False
+            tap_state.tap_declared_attackers(engine, (card,))
+            self.assertFalse(card.tapped)
+
+        assert_vigilance_prevents_declaration_tap()
+        with patch.object(
+            tap_state,
+            "VIGILANCE_KEYWORD",
+            "mutated-vigilance",
+        ):
+            with self.assertRaises(AssertionError):
+                assert_vigilance_prevents_declaration_tap()
+
     def test_replacement_nested_order_mutant_is_killed(self):
         child = replacement_effects.ReplaceableEvent(
             event_id="counter:child",
