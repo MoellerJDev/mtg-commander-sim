@@ -849,7 +849,7 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
         }
         try {
           await submitMaybeFormAction(host, "pass", 2_000);
-        } catch (error) {
+        } catch {
           // A projection or the safe auto-pass effect may consume the enabled
           // pass between the poll and click. Wait for that in-flight command
           // to reveal either the attackers window or the next manual pass.
@@ -864,7 +864,10 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
           if ((await panel.textContent())?.includes("Combat.Attackers")) {
             break;
           }
-          if (!(await pass.isEnabled())) throw error;
+          // If another pass is now ready, the next bounded iteration owns it.
+          // If the capability was consumed, the next iteration waits for the
+          // resulting projection. The final attackers assertion still fails
+          // closed if neither transition occurs.
         }
       }
       await expect(host.getByTestId("decision-panel")).toContainText("Combat.Attackers");

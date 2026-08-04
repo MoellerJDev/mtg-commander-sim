@@ -32,7 +32,7 @@ server, provider, and pilot success never promote rules fidelity by themselves.
 
 - A pinned Comprehensive Rules corpus, Oracle snapshot, and rulings snapshot
   support deterministic inventories and reproducible source references.
-- Oracle IR v23 provides source-spanned partial compilation and material
+- Oracle IR v25 provides source-spanned partial compilation and material
   residuals. Generated and reviewed abilities aggregate into deterministic
   CardProgram V2 artifacts with source, capability, trust, and replay
   fingerprints. Compilation remains partial and interleaved.
@@ -59,6 +59,9 @@ server, provider, and pilot success never promote rules fidelity by themselves.
   duration journal and locked physical/logical object sets; fixed-query static
   power/toughness effects use live source and membership applicability through
   the same evaluator consumed by seat projection.
+  Bounded simple-object Auras use one immutable target grammar from compiler
+  through casting, resolution, nonspell entry, token preflight, and CR 704
+  legality; unsupported Enchant forms fail before mutation.
   Most other orchestration and mutation remains centralized in
   `CommanderEngine`.
 - Reviewed semantic packs close selected card and interaction slices through
@@ -77,7 +80,8 @@ The principal architectural and behavioral gaps include:
 - full alternate/additional costs, restricted mana, and cost-modification
   ordering;
 - broad zone-casting permissions, special actions, face-down objects, linked
-  abilities, copy effects, and merged permanents;
+  abilities, copy effects, merged permanents, and complete Aura/Enchant
+  quality and nonbattlefield attachment grammar;
 - complete target, search, trigger-order, loop, shortcut, multiplayer, and
   combat edge cases;
 - broad fine-grained capability closure and migration of the remaining central
@@ -118,13 +122,12 @@ expansion resumes.
 
 The scheduler conservatively queues every reviewed blocked behavioral rule and
 every unclassified nonpassing rule. Normalized zone-change triggers, canonical
-fixed life results, and the shared CR 611 applicability/duration boundary now
-compose through typed replayable owners. The current compiler recognizes 226
-Commander-legal fixed-query anthem objects and 97 controlled-creature
-until-end-of-turn modifier objects, producing 70 new exact Commander-legal
-programs without a printed-name branch. The next batch must be reranked from
-high-frequency static, trigger, ordinary spell-effect, and dependency residuals
-rather than selected merely because it is adjacent to CR 611.
+fixed life results, the shared CR 611 applicability/duration boundary, and the
+bounded CR 303 Aura family now compose through typed replayable owners. The
+generated compiler report records the resulting exact-card and residual deltas.
+The next selected dependency-ready batch is the canonical draw transaction and
+draw replacement/trigger boundary rather than another low-yield attachment
+micro-family.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,

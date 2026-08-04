@@ -335,25 +335,28 @@
     }
   ],
   "selected_batch": {
-    "batch_id": "aura-targeting-entry-and-legality",
-    "subsystem_id": "card-types",
+    "batch_id": "draw-transaction-replacement-and-trigger-closure",
+    "subsystem_id": "resources",
     "rule_ids": [
-      "303.4a",
-      "303.4c",
-      "303.4f",
-      "303.4g"
+      "121.1",
+      "121.2",
+      "121.2a",
+      "121.2b",
+      "121.2c",
+      "121.2d",
+      "121.3"
     ],
     "target_capability_ids": [
-      "attachment.aura.simple_object"
+      "zone.draw.library_to_hand"
     ],
-    "rationale": "The attached-characteristic batch now provides an exact reciprocal object relation and live layer evaluation, but simple Aura cards remain residual because Enchant has no generic spell-target and entry contract. Closing ordinary object-target Auras next reuses that relation, unlocks the enchanted-creature compiler family, and removes the remaining Aura target-schema responsibility from CommanderEngine without claiming player Auras or arbitrary quality grammar.",
+    "rationale": "The simple-object Aura family is now generically executable and raises Commander exact and capability-closed CardPrograms by 71. The most frequent immediately dependency-ready blocker is the already-typed but still-tested draw capability: fixed draw templates are recognized broadly, yet trust remains blocked on replacement integration, mutation evidence, and mutation ownership in CommanderEngine.draw.",
     "exit_criteria": [
-      "Parse a closed Enchant grammar for ordinary battlefield object types and controller relations without accepting player, graveyard, quality, or compound restrictions.",
-      "Require the Aura spell target during casting, revalidate it on resolution, and enter attached through the canonical reciprocal relation and timestamp owner.",
-      "Handle illegal or departed targets, nonspell Aura entry choices, no-legal-object behavior, state-based detachment, control changes, phasing, protection, replay, privacy, rollback, and multiplayer targeting.",
-      "Move Aura target-schema and entry ownership out of CommanderEngine behind typed casting, entry, and state-based-action boundaries.",
-      "Generically close simple Aura CardPrograms only when both Enchant and every attached static line are capability-closed; leave other Aura grammar residual.",
-      "Run the full Oracle and Commander censuses and require a measurable exact and capability-closed Aura card cluster."
+      "Introduce one immutable, replacement-capable draw transaction and result vocabulary that distinguishes a draw from a non-draw hand move and records empty-library attempts.",
+      "Execute represented multiple-card draws one card at a time, preserving draw-replacement choice, dredge, prevention, APNAP, private information, rollback, and exact replay semantics.",
+      "Route draw-step, fixed controller, target-player, opponent, each-player, and represented trigger producers through the canonical transaction without direct hand or library mutation.",
+      "Extract draw transaction ownership and replacement continuation handling from CommanderEngine behind a narrow typed facade with focused independent tests and killed implementation mutation evidence.",
+      "Promote zone.draw.library_to_hand only after positive, negative, interaction, multiplayer, privacy, replay, dependency fail-closed, and mutation evidence all pass.",
+      "Regenerate the full Oracle and Commander censuses and report the exact, capability-closed, partial, unresolved, and material-residual deltas without treating unrelated trigger blockers as draw support."
     ]
   }
 }

@@ -13,10 +13,10 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Current representation
 
-- Compiler: `oracle-ir-v24`
+- Compiler: `oracle-ir-v25`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
-- Compiler module: 1,771 physical / 1,708 logical lines
+- Compiler module: 1,774 physical / 1,711 logical lines
 
 ## Canonical CardProgram
 
@@ -48,16 +48,16 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/21`
+- Registry schema/version: `1/22`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `416feae727b5366a139cd5d82e009b593ce2ff0b918ecb743d9b267337b8cda0`
-- Evidence fingerprint: `3f8ea695be5eae344a6bdaa0276f5ed5f35361f06fad275e553a519a0af52d6b`
-- Explicit evidence declarations: 304
-- Capability records: 41
-- Trusted records: 30
+- Registry fingerprint: `8ccb5cffcdcbe85d7c14b582349f954f55dcdbc1a2162db8f46059d093b3786e`
+- Evidence fingerprint: `8376f148940c9b7cef9e87e90d2d7990be630e019c75c0703a47b197c02d97cc`
+- Explicit evidence declarations: 315
+- Capability records: 42
+- Trusted records: 31
 - Blocked records: 4
-- Dependency fail-closed statuses: `{"not_applicable": 18, "not_run": 3, "passed": 20}`
-- Implementation mutation statuses: `{"killed": 33, "not_run": 8}`
+- Dependency fail-closed statuses: `{"not_applicable": 18, "not_run": 3, "passed": 21}`
+- Implementation mutation statuses: `{"killed": 34, "not_run": 8}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
@@ -74,14 +74,14 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,485 | 3,247 | 16,204 | 19,034 | 67,559 | false |
-| Commander legal | 31,623 | 590 | 14,769 | 16,264 | 59,076 | false |
+| Full Oracle | 38,485 | 3,320 | 16,131 | 19,034 | 66,413 | false |
+| Commander legal | 31,623 | 661 | 14,698 | 16,264 | 57,982 | false |
 
 ## Full-corpus residual kinds
 
 | Kind | Count |
 |---|---:|
-| `dependency_contract` | 18,724 |
+| `dependency_contract` | 17,578 |
 | `trigger` | 15,235 |
 | `spell_effect` | 11,318 |
 | `static_ability` | 11,109 |

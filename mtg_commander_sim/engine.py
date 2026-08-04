@@ -12,6 +12,13 @@ from typing import Any, Iterable, Iterator, Mapping, Sequence
 from .abilities import (
     ActivatedAbility,
 )
+from .aura import (
+    aura_resolution_move_kwargs,
+    commit_aura_zone_move,
+    complete_aura_entry_choice,
+    preflight_aura_zone_move,
+    simple_aura_attachment_is_legal,
+)
 from .attachments import (
     attach_objects,
     clear_object_attachment_relations,
@@ -1531,6 +1538,7 @@ class CommanderEngine(
         tapped: bool | None = None,
         enter_face: str | None = None,
         battle_protector: str | None = None,
+        aura_target_ref: str | None = None, resolving_as_aura_spell: bool = False,
         zone_timestamp: int | None = None,
         position: str | int = "top",
         reveal_to: Iterable[str] | None = None,
@@ -1666,6 +1674,10 @@ class CommanderEngine(
             error_type=GameRuleError,
         )
         destination = prepared_replacement.destination
+        if (aura_move := preflight_aura_zone_move(
+            self, card, destination=destination, requested_destination=requested_destination, destination_type_line=destination_type_line, enter_face=enter_face, controller=controller, target_ref=aura_target_ref, resolving_as_spell=resolving_as_aura_spell, origin=origin, log=log, error_type=GameRuleError,
+        )).remain_in_origin: return card
+        destination, aura_entry_plan = aura_move.destination, aura_move.entry_plan
         origin_controller = card.controller
         origin_logical_object_id = card.logical_object_id
         origin_attachments = [
@@ -1734,6 +1746,7 @@ class CommanderEngine(
                 object_id
             )
             self._initialize_intrinsic_entry_counters(card)
+            commit_aura_zone_move(self, card, aura_entry_plan, error_type=GameRuleError)
             pending_attachment = take_pending_attachment(card)
             if pending_attachment is not None:
                 try:
@@ -2783,6 +2796,12 @@ class CommanderEngine(
             self._complete_apnap_choice(decision)
         elif kind == "replacement.order":
             complete_replacement_order_choice(
+                self,
+                decision,
+                error_type=GameRuleError,
+            )
+        elif kind == "aura.entry":
+            complete_aura_entry_choice(
                 self,
                 decision,
                 error_type=GameRuleError,
@@ -9414,7 +9433,7 @@ class CommanderEngine(
             return True
         program = self.semantics.get(item.semantic_key)
         target_schema = self._stack_target_schema(item, program)
-        if not program or target_schema is None:
+        if target_schema is None:
             item.context["targets_revalidated"] = True
             return True
         try:
@@ -9774,7 +9793,7 @@ class CommanderEngine(
             entered = self.move_card(
                 card.object_id,
                 "battlefield",
-                controller=item.controller,
+                controller=item.controller, **aura_resolution_move_kwargs(item),
                 reason="permanent spell copy resolved",
                 log=False,
                 semantic_events=True,
@@ -9787,7 +9806,7 @@ class CommanderEngine(
                 entered = self.move_card(
                     card.object_id,
                     destination or item.default_destination or "graveyard",
-                    controller=item.controller,
+                    controller=item.controller, **aura_resolution_move_kwargs(item),
                     reason="spell resolved",
                     log=False,
                     semantic_events=True,
@@ -13297,114 +13316,6 @@ class CommanderEngine(
         )
         return base
 
-    def _enchant_target_schema(
-        self,
-        aura: CardInstance,
-    ) -> dict[str, Any] | None:
-        override = aura.annotations.get("enchant_target_schema")
-        if isinstance(override, Mapping):
-            return copy.deepcopy(dict(override))
-
-        oracle = str(
-            self._effective_card_data(aura).get("oracle_text") or ""
-        )
-        match = next(
-            (
-                re.fullmatch(
-                    r"enchant (?P<restriction>.+?)\.?",
-                    line.strip(),
-                    re.IGNORECASE,
-                )
-                for line in oracle.splitlines()
-                if line.strip().casefold().startswith("enchant ")
-            ),
-            None,
-        )
-        if match is None:
-            return None
-        restriction = match.group("restriction").strip().casefold()
-        controller_relation = "any"
-        for suffix, relation in (
-            (" an opponent controls", "opponent"),
-            (" opponent controls", "opponent"),
-            (" you control", "you"),
-        ):
-            if restriction.endswith(suffix):
-                restriction = restriction[: -len(suffix)].strip()
-                controller_relation = relation
-                break
-
-        schema: dict[str, Any] = {
-            "zones": ["battlefield"],
-            "categories": ["permanent"],
-            "controller": controller_relation,
-            "count": 1,
-        }
-        if restriction in {
-            "creature card in a graveyard",
-            "creature card in your graveyard",
-        }:
-            schema.update(
-                {
-                    "zones": ["graveyard"],
-                    "categories": ["card"],
-                    "creature": True,
-                    "owner": (
-                        "you"
-                        if restriction.endswith("your graveyard")
-                        else "any"
-                    ),
-                }
-            )
-            return schema
-        if restriction == "card in a graveyard":
-            schema.update(
-                {
-                    "zones": ["graveyard"],
-                    "categories": ["card"],
-                }
-            )
-            return schema
-        if restriction == "nonland permanent":
-            schema.update({"permanent": True, "land": False})
-            return schema
-
-        type_words = {
-            "artifact",
-            "battle",
-            "creature",
-            "enchantment",
-            "land",
-            "planeswalker",
-        }
-        alternatives = [
-            value.strip()
-            for value in re.split(r"\s+or\s+", restriction)
-        ]
-        if alternatives and all(
-            value in type_words for value in alternatives
-        ):
-            schema["types_any"] = alternatives
-            return schema
-        all_types = restriction.split()
-        if all_types and all(value in type_words for value in all_types):
-            schema["types_all"] = all_types
-            return schema
-        if restriction == "permanent":
-            schema["permanent"] = True
-            return schema
-        if restriction in {"player", "opponent"}:
-            # Player attachment needs a non-card attachment identity and is
-            # intentionally outside the currently reviewed subset.
-            return None
-        # A single subtype restriction (for example, "Shrine") can use the
-        # same declarative target query.  More elaborate quality grammar stays
-        # unresolved rather than being guessed.
-        if re.fullmatch(r"[a-z][a-z'-]*", restriction):
-            schema["subtypes_any"] = [restriction]
-            return schema
-        return None
-
     def _attachment_is_legal(
         self,
         attachment: CardInstance,
@@ -13418,8 +13329,15 @@ class CommanderEngine(
             return False
 
         schema: dict[str, Any] | None
+        if "aura" in subtypes and not isinstance(
+            attachment.annotations.get("enchant_target_schema"),
+            Mapping,
+        ):
+            return simple_aura_attachment_is_legal(self, attachment)
         if "aura" in subtypes:
-            schema = self._enchant_target_schema(attachment)
+            schema = copy.deepcopy(
+                dict(attachment.annotations["enchant_target_schema"])
+            )
         elif "equipment" in subtypes:
             schema = {
                 "zones": ["battlefield"],
@@ -14419,6 +14337,7 @@ class CommanderEngine(
         copy_of: str | None = None,
         characteristics: Mapping[str, Any] | None = None,
         temporary_keywords: Sequence[str] = (),
+        aura_target_ref: str | None = None,
         reason: str = "token effect",
         replacement_selections: Sequence[str | None] = (),
     ) -> list[str]:
@@ -14434,6 +14353,7 @@ class CommanderEngine(
                 copy_of=copy_of,
                 characteristics=characteristics,
                 temporary_keywords=temporary_keywords,
+                aura_target_ref=aura_target_ref,
                 reason=reason,
                 replacement_selections=replacement_selections,
             )

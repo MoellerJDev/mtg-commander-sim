@@ -3,6 +3,14 @@ from __future__ import annotations
 import copy
 from typing import Any, Iterable, Mapping, Protocol, Sequence
 
+from .aura import (
+    AuraEntryChoiceRequired,
+    AuraEntryOutcome,
+    AuraRuleError,
+    commit_aura_entry_attachment,
+    is_aura_type_line,
+    prepare_aura_entry,
+)
 from .model import CardInstance
 from .replacement_effects import ReplacementChoiceRequired
 from .semantic_runtime import (
@@ -260,6 +268,118 @@ def _new_token_identity(
     return ref, oracle_id, printed_name, annotations
 
 
+def _preview_token_object(
+    host: TokenCreationHost,
+    controller: str,
+    token_spec: Mapping[str, Any],
+) -> CardInstance:
+    """Build a nonauthoritative token object for entry preflight.
+
+    No runtime IDs or refs are allocated here.  In particular, an Aura token
+    prohibited by CR 303.4g must not consume object identity before the engine
+    knows whether it can legally enter attached.
+    """
+
+    spec = dict(token_spec)
+    characteristics = dict(spec.get("characteristics") or {})
+    copy_of = spec.get("copy_of")
+    raw_name = spec.get("name")
+    name = str(raw_name) if raw_name is not None else ""
+    if copy_of:
+        original = host._resolve_object(
+            controller,
+            str(copy_of),
+            zones={"battlefield"},
+        )
+        oracle_id = original.oracle_id
+        printed_name = name or host.display_name(original.object_id)
+        annotations = copy.deepcopy(original.annotations)
+        overrides = dict(annotations.get("copy_overrides") or {})
+        if name:
+            overrides["name"] = name
+        overrides.update(characteristics)
+        annotations["copy_overrides"] = overrides
+    else:
+        if not name:
+            name = "Token"
+        try:
+            record = host.card_db.lookup(name)
+            oracle_id = record.oracle_id
+            printed_name = record.name
+        except KeyError:
+            oracle_id = "custom-token:aura-entry-preview"
+            printed_name = name
+        annotations = {
+            "token_characteristics": copy.deepcopy(characteristics),
+        }
+        if characteristics:
+            annotations["copy_overrides"] = copy.deepcopy(
+                characteristics
+            )
+    return CardInstance(
+        object_id="aura-entry-preview",
+        ref="aura-entry-preview",
+        oracle_id=oracle_id,
+        printed_name=printed_name,
+        owner=controller,
+        controller=controller,
+        zone="outside",
+        is_token=True,
+        annotations=annotations,
+        known_to=list(host.seats),
+        revealed_to=list(host.seats),
+    )
+
+
+def _preflight_aura_token_specs(
+    host: TokenCreationHost,
+    controller: str,
+    token_specs: Sequence[Mapping[str, Any]],
+) -> tuple[Mapping[str, Any], ...]:
+    prepared: list[Mapping[str, Any]] = []
+    for raw_spec in token_specs:
+        spec = dict(raw_spec)
+        if int(spec.get("quantity", 1)) <= 0:
+            prepared.append(spec)
+            continue
+        preview = _preview_token_object(host, controller, spec)
+        data = host._effective_card_data(preview)
+        if not is_aura_type_line(str(data.get("type_line") or "")):
+            prepared.append(spec)
+            continue
+        try:
+            plan = prepare_aura_entry(
+                host,
+                preview,
+                oracle_text=str(data.get("oracle_text") or ""),
+                controller=controller,
+                target_ref=(
+                    str(spec["aura_target_ref"])
+                    if spec.get("aura_target_ref") is not None
+                    else None
+                ),
+                resolving_as_spell=False,
+            )
+        except AuraEntryChoiceRequired as exc:
+            raise TokenCreationError(
+                "Aura token creation requires a legal attachment choice "
+                "before any token is committed"
+            ) from exc
+        except AuraRuleError as exc:
+            raise TokenCreationError(str(exc)) from exc
+        if plan.outcome is AuraEntryOutcome.REMAIN_IN_ZONE:
+            # Tokens are created directly on the battlefield.  If the Aura
+            # cannot enter attached, CR 303.4g says it is not created.
+            continue
+        if plan.outcome is not AuraEntryOutcome.ENTER_ATTACHED:
+            raise TokenCreationError(
+                "Aura token entry produced an invalid preflight outcome"
+            )
+        spec["aura_target_ref"] = plan.target_ref
+        prepared.append(spec)
+    return tuple(prepared)
+
+
 def _commit_token_object(
     host: TokenCreationHost,
     controller: str,
@@ -356,21 +476,36 @@ def _commit_token_specs(
                     name=name,
                     characteristics=characteristics,
                 )
-            created.append(
-                _commit_token_object(
-                    host,
-                    controller,
-                    ref=identity[0],
-                    oracle_id=identity[1],
-                    printed_name=identity[2],
-                    annotations=identity[3],
-                    zone_timestamp=creation_timestamp,
-                    tapped=tapped,
-                    attacking=attacking,
-                    battle_protector=battle_protector,
-                    temporary_keywords=keywords,
-                )
+            object_id = _commit_token_object(
+                host,
+                controller,
+                ref=identity[0],
+                oracle_id=identity[1],
+                printed_name=identity[2],
+                annotations=identity[3],
+                zone_timestamp=creation_timestamp,
+                tapped=tapped,
+                attacking=attacking,
+                battle_protector=battle_protector,
+                temporary_keywords=keywords,
             )
+            created.append(object_id)
+            aura_target_ref = spec.get("aura_target_ref")
+            if aura_target_ref is not None:
+                token = host.state.cards[object_id]
+                data = host._effective_card_data(token)
+                try:
+                    plan = prepare_aura_entry(
+                        host,
+                        token,
+                        oracle_text=str(data.get("oracle_text") or ""),
+                        controller=controller,
+                        target_ref=str(aura_target_ref),
+                        resolving_as_spell=False,
+                    )
+                    commit_aura_entry_attachment(host, token, plan)
+                except AuraRuleError as exc:
+                    raise TokenCreationError(str(exc)) from exc
     return created, applied_components
 
 
@@ -458,6 +593,7 @@ def create_tokens(
     copy_of: str | None = None,
     characteristics: Mapping[str, Any] | None = None,
     temporary_keywords: Sequence[str] = (),
+    aura_target_ref: str | None = None,
     reason: str = "token effect",
     replacement_selections: Sequence[str | None] = (),
 ) -> list[str]:
@@ -496,14 +632,20 @@ def create_tokens(
                     dict(characteristics or {})
                 ),
                 "temporary_keywords": list(temporary_keywords),
+                "aura_target_ref": aura_target_ref,
             },
         ),
         created_types=created_types,
         replacement_effects=replacement_effects,
         replacement_selections=replacement_selections,
     )
+    token_specs = _preflight_aura_token_specs(
+        host,
+        controller,
+        token_specs,
+    )
     creation_timestamp = (
-        host._next_zone_timestamp() if quantity > 0 else 0
+        host._next_zone_timestamp() if token_specs else 0
     )
     created, applied_components = _commit_token_specs(
         host,

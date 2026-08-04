@@ -7,6 +7,7 @@ import re
 from typing import Any, Iterable, Mapping, Sequence
 
 from .abilities import parse_activated_abilities
+from .aura import keyword_target_schema
 from .carddb import CardDatabase, CardRecord
 from .compiler.corpus_reporting import (
     execute_oracle_operation,
@@ -36,7 +37,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v25"
+ORACLE_COMPILER_VERSION = "oracle-ir-v26"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 
 _NUMBER_WORDS = {
@@ -868,6 +869,7 @@ def _keyword_node(
         capability_registry=capability_registry,
         capability_profile=capability_profile,
     )
+    enchant_target_schema = keyword_target_schema(material_line, mechanics)
     residual_ids = (
         (
             _residual(
@@ -931,6 +933,7 @@ def _keyword_node(
         lowerable=True,
         exact=not gate.blockers,
         template_id="printed-keyword-list-v1",
+        target_schema=enchant_target_schema,
         mechanics=mechanics,
         residual_ids=residual_ids,
         capability_dependencies=gate.capabilities,

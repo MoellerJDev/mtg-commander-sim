@@ -92,6 +92,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         return "rules"
     if relative.startswith(
         (
+            "mtg_commander_sim/aura/",
             "mtg_commander_sim/replacement/",
             "mtg_commander_sim/rules/",
         )
@@ -160,6 +161,8 @@ def _owner(relative: str, layer: str) -> str:
         return "oracle_compiler"
     if relative.startswith("mtg_commander_sim/rules/"):
         return "rules_capabilities"
+    if relative.startswith("mtg_commander_sim/aura/"):
+        return "aura_rules"
     if relative.startswith("mtg_commander_sim/replacement/"):
         return "replacement_effects"
     if relative == "mtg_commander_sim/commander.py":
@@ -291,6 +294,7 @@ def build_classifications() -> dict[str, Any]:
                         marker in relative
                         for marker in (
                             "attachments.py",
+                            "aura/",
                             "engine.py",
                             "session.py",
                             "semantics.py",

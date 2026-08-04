@@ -61,6 +61,7 @@
       "test_static_abilities"
     ],
     "targets-choices-continuations": [
+      "test_aura_targeting_entry",
       "test_choice_forms",
       "test_decision_opportunities",
       "test_interactions_v070",

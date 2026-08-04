@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 22,
+  "registry_version": 23,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -80,6 +80,33 @@
     }
   ],
   "capabilities": [
+    {
+      "id": "attachment.aura.simple_object",
+      "version": 1,
+      "official_rules": ["303.4", "303.4a", "303.4c", "303.4f", "303.4g", "608.2b", "701.3", "702.5a", "704.5m"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Cast, resolve, enter, and continuously validate an Aura with exactly one closed battlefield-object Enchant restriction and an optional you-control or opponent-controls relation.",
+        "inputs": ["Aura card with one simple Enchant keyword line", "one public battlefield object target", "exact physical and logical source identity", "optional controller relation", "nonspell Aura entry choice"],
+        "outputs": ["mandatory cast target", "resolution-time target revalidation", "reciprocal live attachment", "seat-scoped nonspell entry choice", "no-target remain-or-graveyard result", "Aura-token preflight and no-creation result", "state-based illegal-Aura result"],
+        "exclusions": ["Auras enchanting players", "Auras enchanting cards outside the battlefield", "multiple Enchant abilities", "quality, color, subtype, state, and compound Enchant restrictions", "bestow, reconfigure, and face-up attachment", "protection qualities beyond represented everything, Aura, enchantment, and color protection"]
+      },
+      "dependencies": ["target.revalidate_resolution"],
+      "implementation_components": ["mtg_commander_sim.aura.grammar.parse_simple_enchant_line", "mtg_commander_sim.aura.runtime.prepare_aura_entry", "mtg_commander_sim.aura.runtime.simple_aura_attachment_is_legal", "mtg_commander_sim.rules.casting.proposal._aura_spell_target_schema", "mtg_commander_sim.token_creation._preflight_aura_token_specs", "mtg_commander_sim.attachments.attach_objects"],
+      "positive_tests": ["test_aura_offer_requires_and_projects_one_legal_spell_target", "test_spell_resolution_attaches_and_illegal_target_counters_by_rule", "test_aura_tokens_preflight_attachment_and_no_legal_object_is_not_created"],
+      "negative_tests": ["test_unsupported_enchant_grammar_fails_before_mutation", "test_nonspell_entry_with_no_legal_object_stays_in_origin_zone"],
+      "interaction_tests": ["test_nonspell_entry_pauses_for_choice_and_resumes_exact_effect", "test_control_relation_and_protection_are_live_attachment_legality"],
+      "multiplayer_tests": ["test_four_player_aura_targets_and_relations_are_seat_correct"],
+      "privacy_tests": ["test_aura_entry_choice_projection_and_replay_are_exact"],
+      "replay_tests": ["test_aura_entry_choice_projection_and_replay_are_exact"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The bounded Aura path is unavailable if public target validation or resolution revalidation is not trusted, and unsupported Enchant grammar fails before mutation.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_aura_cast_targeting_mutant_is_killed removes the Aura target-schema lowering and mandatory-target assertions reject the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
     {
       "id": "attachment.equip.fixed_mana",
       "version": 1,

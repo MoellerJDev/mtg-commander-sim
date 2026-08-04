@@ -11,6 +11,7 @@ from mtg_commander_sim import tap_state
 from mtg_commander_sim import trigger_batches as trigger_batches_module
 from mtg_commander_sim import zone_trigger_events as zone_trigger_events_module
 from mtg_commander_sim.rules.activation import resolution as activation_resolution
+from mtg_commander_sim.rules.casting import proposal as casting_proposal
 from mtg_commander_sim.effect_runtime import life_effects
 from mtg_commander_sim.effect_runtime import objects_stack_and_tokens
 from mtg_commander_sim.continuous_effects import (
@@ -138,6 +139,24 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_hidden_target_rejected()
+
+    def test_aura_cast_targeting_mutant_is_killed(self):
+        def assert_mandatory_aura_target() -> None:
+            schema = casting_proposal._aura_spell_target_schema(
+                type_line="Enchantment — Aura",
+                oracle_text="Enchant creature",
+            )
+            self.assertIsNotNone(schema)
+            self.assertEqual(["creature"], schema["types_all"])
+
+        assert_mandatory_aura_target()
+        with patch.object(
+            casting_proposal,
+            "_aura_spell_target_schema",
+            return_value=None,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_mandatory_aura_target()
 
     def test_object_query_string_coercion_mutant_is_killed(self):
         def assert_malformed_term_rejected() -> None:

@@ -79,6 +79,90 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/aura/__init__.py",
+      "layer": "rules",
+      "owning_subsystem": "aura_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/aura/compiler.py",
+      "layer": "rules",
+      "owning_subsystem": "aura_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/aura/decisions.py",
+      "layer": "rules",
+      "owning_subsystem": "aura_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "read_only",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/aura/grammar.py",
+      "layer": "rules",
+      "owning_subsystem": "aura_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/aura/model.py",
+      "layer": "rules",
+      "owning_subsystem": "aura_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/aura/runtime.py",
+      "layer": "rules",
+      "owning_subsystem": "aura_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "read_only",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/bulk.py",
       "layer": "application",
       "owning_subsystem": "legacy_application",
@@ -2710,5 +2794,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "7d6872bd11adc09996f82437059bd05d38a1fa51cebb02f1a5cb44dde9ceea82"
+  "fingerprint": "20f70626783523012d8a4f18d9a076ff7705dfa65eb6f29daf9ba5e0d0b69c80"
 }

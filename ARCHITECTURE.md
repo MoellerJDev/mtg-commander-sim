@@ -164,10 +164,15 @@ anthems and exact-relation attached type, ability, rules-text, and power/
 toughness operations in layers 4, 6, and 7c. `attachments.py` exclusively owns
 reciprocal timestamped attach, reattach, detach, and zone-reset transitions;
 fixed ordinary-mana Equip resolves into that owner through the normal stack.
+The focused `aura/` subsystem owns immutable simple Enchant predicates,
+mandatory cast targets, resolution and nonspell entry planning, seat-scoped
+entry continuations, and live attachment legality. Zone and token producers
+complete that preflight before authoritative mutation and delegate the actual
+reciprocal relation to `attachments.py`.
 Focused token-creation, counter-placement, and damage owners commit final
 results, and replacement choices suspend as seat-scoped replayable
 continuations. Their scope remains deliberately narrower than universal CR
-614/615/616 participation, Aura casting and entry, or complete CR 613
+614/615/616 participation, complete Enchant grammar, or complete CR 613
 dependency evaluation.
 
 CardProgram trust is now separated into `capability_closed`,
@@ -349,9 +354,11 @@ destruction, unattachment, opposing-counter removal, and token cessation; the
 engine applies the batch and rechecks before granting priority. Aura legality
 reuses the declarative target domain without applying targeting-only shroud or
 hexproof, while protection remains an attachment restriction. Existing Aura
-state-based actions use the shared reciprocal attachment model, but generic
-Aura casting and entry remain unresolved with unsupported Enchant quality
-grammar. The contract is partial until every
+state-based actions, bounded simple-object casting and resolution, nonspell
+entry choice, and Aura-token preflight use the shared predicate and reciprocal
+attachment model. Enchant qualities, players, nonbattlefield objects, Aura
+creatures, multiple restrictions, and other attachment families remain
+fail-closed. The contract is partial until every
 CR 704.5/704.6 variant and simultaneous loss/replacement interaction is
 covered.
 

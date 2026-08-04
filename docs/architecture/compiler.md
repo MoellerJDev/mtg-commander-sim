@@ -70,6 +70,13 @@ flowchart LR
   controlled-creature until-end-of-turn modifiers. Its templates are anchored
   to complete represented text and reject stateful, combat-only, conditional,
   or unresolved-target lookalikes.
+- Oracle IR v24 adds exact-relation attached fixed-characteristic components
+  and fixed ordinary-mana Equip lowering through the reciprocal attachment
+  owner.
+- Oracle IR v25 lowers only the closed simple battlefield-object Enchant
+  keyword grammar to a mandatory target schema and the trusted Aura capability.
+  Qualities, subtypes, players, cards in other zones, multiple restrictions,
+  and Aura creatures remain material residuals.
 
 ## Extension points
 

@@ -313,6 +313,9 @@ generated documentation fixtures with bearer capabilities redacted. See
   until every target group and current cost is satisfiable
 - target validation on submission and resolution, including partial target
   survival and rules-countering when every selected target becomes illegal
+- generic simple-object Aura casting with mandatory target advertisement,
+  resolution attachment, nonspell entry choice, token-entry preflight, and
+  state-based attachment legality through one reciprocal attachment owner
 - server-issued alternate/additional cost choices for the reviewed pitch,
   kicker, overload, commander-dependent, and life-X interactions
 - top-of-library knowledge and reordering
@@ -378,7 +381,7 @@ generated documentation fixtures with bearer capabilities redacted. See
   fail-closed material residuals
 - automatic deck-time generic compilation into provisional, arbiter-gated
   semantic programs
-- Oracle IR v22 simple self-trigger, unconditional-entry, counter, pump, basic
+- Oracle IR v25 simple self-trigger, unconditional-entry, counter, pump, basic
   creature-token, fixed-mana combat-declaration cost, and exact combat-
   declaration restriction/evasion/battlefield-condition/composition and
   source-controller target-scope templates with reviewed-handler precedence,
@@ -391,8 +394,9 @@ generated documentation fixtures with bearer capabilities redacted. See
   predicates and explicit blockers for universal zone scope, impossible
   instructions, `as though`, tie handling, and damage-source derivation
 - source-reviewed CR 608 resolution ordering with executable top-of-stack,
-  untargeted permanent, and permanent-spell-copy behavior, while incomplete
-  choice, LKI, Aura, mutate, and resolution-trigger families stay blocked
+  untargeted permanent, permanent-spell-copy, and bounded simple-object Aura
+  behavior, while incomplete choice, LKI, complex Aura, mutate, and
+  resolution-trigger families stay blocked
 - source-reviewed CR 607 linked-ability taxonomy with exact-incarnation and
   undefined-choice witnesses; generic pair IDs, linked sets/facts, and
   copied, granted, cross-face, and cross-object links remain blocked
@@ -716,10 +720,16 @@ to the exact physical and logical relation, so detaching, phasing, departure,
 or leave-and-return ends the old effect without a printed-name branch. Fixed
 ordinary-mana Equip abilities are payable controller-scoped creature
 activations at sorcery speed and resolve through the ordinary stack and one
-reciprocal attachment owner. Aura casting/entry and complete Enchant quality
-grammar, exotic Equip costs, dynamic attached values, complete duration
-grammar, control-changing and player/rules-modifying effects, all layer
-dependencies, and arbitrary static text remain blocked.
+reciprocal attachment owner. Oracle IR v25 adds the closed `Enchant artifact`,
+`battle`, `creature`, `enchantment`, `land`, `planeswalker`, `permanent`, and
+`nonland permanent` keyword family, including `you control` and `an opponent
+controls`. Those Auras require a legal cast target, attach during resolution,
+pause for a seat-scoped choice when entering by another represented effect,
+and use the same live legality query for CR 704. Unsupported Enchant qualities,
+players and nonbattlefield objects, Aura creatures, exotic Equip costs,
+dynamic attached values, complete duration grammar, control-changing and
+player/rules-modifying effects, all layer dependencies, and arbitrary static
+text remain blocked.
 
 The generic zone kernel now distinguishes a stable physical card identifier
 from its logical incarnation. Every ordinary zone change, including a draw or

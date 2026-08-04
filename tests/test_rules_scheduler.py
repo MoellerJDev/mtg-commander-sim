@@ -66,11 +66,11 @@ class RulesSchedulerTests(unittest.TestCase):
         self.assertEqual(len(queued), len(set(queued)))
         self.assertEqual(expected, set(queued))
         self.assertEqual(
-            363,
+            367,
             self.queue["summary"]["reviewed_behavioral_blocked"],
         )
         self.assertEqual(
-            2682,
+            2678,
             self.queue["summary"]["behavioral_review_required"],
         )
 
@@ -125,14 +125,22 @@ class RulesSchedulerTests(unittest.TestCase):
     def test_selected_batch_is_dependency_ready_and_cli_next_uses_it(self):
         selected = self.queue["selected_batch"]
         self.assertEqual(
-            "aura-targeting-entry-and-legality",
+            "draw-transaction-replacement-and-trigger-closure",
             selected["batch_id"],
         )
         self.assertEqual(
-            "card-types", selected["subsystem_id"]
+            "resources", selected["subsystem_id"]
         )
         self.assertEqual(
-            {"303.4a", "303.4c", "303.4f", "303.4g"},
+            {
+                "121.1",
+                "121.2",
+                "121.2a",
+                "121.2b",
+                "121.2c",
+                "121.2d",
+                "121.3",
+            },
             set(selected["rule_ids"]),
         )
         self.assertTrue(

@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 303.4a, 303.4c, 303.4f, and 303.4g — Simple battlefield-object Auras",
+  "cases": [
+    {
+      "rule_id": "303.4a",
+      "rule_text_sha256": "45285e11930d401ecd91b216aa882aa0dbab98afeacce352f07a91653c1043ab",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "aura.grammar.parse_simple_enchant_line",
+        "aura.model.SimpleEnchantSpec",
+        "rules.casting.proposal._aura_spell_target_schema"
+      ],
+      "executable_test_ids": [
+        "tests.test_aura_targeting_entry.SimpleEnchantModelTests.test_closed_grammar_accepts_only_reviewed_object_and_relation_shapes",
+        "tests.test_aura_targeting_entry.SimpleEnchantModelTests.test_compiler_lowers_only_closed_enchant_grammar_to_trusted_capability",
+        "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_aura_offer_requires_and_projects_one_legal_spell_target",
+        "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_unsupported_enchant_grammar_fails_before_mutation"
+      ],
+      "required_scenarios": ["positive", "negative", "interaction"],
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": [
+        "player, graveyard-card, quality, subtype, state, and compound Enchant restrictions remain outside the generic grammar",
+        "Aura creatures and multiple Enchant abilities require separate rule-family closure"
+      ],
+      "notes": [
+        "A supported Aura spell is never advertised without exactly one currently legal public object target.",
+        "Complex reviewed Auras may retain an exact source-pinned target schema without adding card identity to the universal casting path."
+      ]
+    },
+    {
+      "rule_id": "303.4c",
+      "rule_text_sha256": "1444dba69bfdf580fe65dfa01ee3a717bf1f07dc52631c6313c816f683055b97",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "aura.runtime.prepare_aura_entry",
+        "aura.runtime.commit_aura_entry_attachment",
+        "attachments.attach_objects",
+        "CommanderEngine._revalidate_resolution_targets"
+      ],
+      "executable_test_ids": [
+        "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_spell_resolution_attaches_and_illegal_target_counters_by_rule",
+        "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_aura_entry_choice_projection_and_replay_are_exact",
+        "tests.test_targeting_v070.ExactTargetingTests.test_all_targets_illegal_counters_by_rules",
+        "tests.test_attached_static_characteristics.AttachmentRelationTests.test_attach_reattach_and_detach_own_reciprocal_timestamped_relation"
+      ],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": ["positive", "negative", "interaction", "replay"],
+      "blockers": [
+        "resolution and attachment for Enchant grammar outside the reviewed simple-object family remain source-pinned or fail closed",
+        "complete copy, Aura-creature, phasing, and unusual-zone attachment interactions are not claimed"
+      ],
+      "notes": [
+        "The target is revalidated against its exact incarnation before the Aura moves, and an Aura spell whose only target is illegal is countered by the rules.",
+        "A successful move commits one reciprocal attachment with a deterministic attachment timestamp before enter events are dispatched."
+      ]
+    },
+    {
+      "rule_id": "303.4f",
+      "rule_text_sha256": "45afe95876c5bec5cc2a6caf779d876de73ff4c1994f0b520b9936a24a9159d3",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "aura.runtime.prepare_aura_entry",
+        "aura.decisions.AuraEntryContinuation",
+        "aura.decisions.issue_aura_entry_choice",
+        "aura.decisions.complete_aura_entry_choice"
+      ],
+      "executable_test_ids": [
+        "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_nonspell_entry_pauses_for_choice_and_resumes_exact_effect",
+        "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_nonspell_entry_with_no_legal_object_stays_in_origin_zone",
+        "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_four_player_aura_targets_and_relations_are_seat_correct",
+        "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_aura_entry_choice_projection_and_replay_are_exact"
+      ],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "blockers": [
+        "the generic choice continuation is implemented for represented zone-move effects, not every future battlefield-entry producer",
+        "Aura-token creation with legal objects currently requires its typed producer to supply the selected legal object before commit"
+      ],
+      "notes": [
+        "A represented nonspell entry pauses before mutation and exposes only legal public object refs to the entering Aura's controller.",
+        "The immutable continuation pins source incarnation, controller, semantic frame, instruction pointer, and advertised choices for exact replay."
+      ]
+    },
+    {
+      "rule_id": "303.4g",
+      "rule_text_sha256": "824256f5735c1b7955e17f12e0e50933497fe63cf9ccac18ce9e0f17c2cefaf5",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "aura.runtime.prepare_aura_entry",
+        "token_creation._preflight_aura_token_specs",
+        "token_creation._commit_token_specs"
+      ],
+      "executable_test_ids": [
+        "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_nonspell_entry_with_no_legal_object_stays_in_origin_zone",
+        "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_aura_tokens_preflight_attachment_and_no_legal_object_is_not_created",
+        "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_unsupported_enchant_grammar_fails_before_mutation"
+      ],
+      "required_scenarios": ["positive", "negative", "interaction"],
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": [
+        "the no-entry and no-token result is certified only for the closed simple battlefield-object Enchant grammar",
+        "simultaneous and replacement-produced Aura token specifications outside the current typed token vocabulary require additional producer coverage"
+      ],
+      "notes": [
+        "A nonspell Aura remains in its origin zone if no legal object can be chosen.",
+        "An Aura token is preflighted without allocating authoritative identity and is not created when it cannot enter attached."
+      ]
+    }
+  ]
+}
