@@ -16,7 +16,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `b5e5caa77f0420759e4aad2088c14fe73e7bb1f9`
 - Package: `0.8.0`
 - CI run: [30892105590](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590) — `pass`
-- Production scope: 226 files, 99,470 physical lines, 91,272 logical lines
+- Production scope: 229 files, 99,943 physical lines, 91,711 logical lines
 
 ## Central engine debt
 
@@ -56,7 +56,7 @@ Baseline: `5029c62c98bdad72549625af9a7c3dde5e333ef9`. Guard: `python scripts/val
 | File | Language | Physical | Logical |
 |---|---:|---:|---:|
 | `mtg_commander_sim/engine.py` | python | 13,982 | 13,213 |
-| `web/src/App.tsx` | web | 1,886 | 1,825 |
+| `web/src/App.tsx` | web | 1,970 | 1,906 |
 | `mtg_commander_sim/report.py` | python | 1,853 | 1,813 |
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
 | `mtg_commander_sim/record.py` | python | 1,706 | 1,605 |
@@ -68,7 +68,7 @@ Baseline: `5029c62c98bdad72549625af9a7c3dde5e333ef9`. Guard: `python scripts/val
 | `server/app.py` | python | 1,305 | 1,171 |
 | `mtg_commander_sim/damage_modifier_state.py` | python | 1,241 | 1,160 |
 | `mtg_commander_sim/codex_cli.py` | python | 1,214 | 1,154 |
-| `mtg_commander_sim/session.py` | python | 1,164 | 1,121 |
+| `mtg_commander_sim/session.py` | python | 1,171 | 1,128 |
 | `mtg_commander_sim/effect_runtime/zones_and_attachments.py` | python | 1,117 | 1,054 |
 
 ## Largest functions and methods
@@ -82,7 +82,7 @@ Baseline: `5029c62c98bdad72549625af9a7c3dde5e333ef9`. Guard: `python scripts/val
 | `_compile_face` | `mtg_commander_sim/oracle_ir.py:914` | 523 | 532 |
 | `_effect_template` | `mtg_commander_sim/oracle_ir.py:123` | 459 | 460 |
 | `build_parser` | `mtg_commander_sim/cli.py:406` | 369 | 393 |
-| `CommanderSession.act` | `mtg_commander_sim/session.py:543` | 362 | 366 |
+| `CommanderSession.act` | `mtg_commander_sim/session.py:547` | 362 | 366 |
 | `CommanderEngine._stabilize` | `mtg_commander_sim/engine.py:13224` | 342 | 354 |
 | `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1545` | 341 | 347 |
 | `card_semantic_status` | `mtg_commander_sim/preflight.py:426` | 304 | 304 |
@@ -114,11 +114,11 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,739
-- Conventional Python cases: 1,439
+- Python discovered: 4,749
+- Conventional Python cases: 1,449
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 7
-- Browser unit cases: 18
+- Browser unit cases: 22
 - Dedicated property suite: false
 - Mutation score: None
 - Focused executable mutation suite: true

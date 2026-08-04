@@ -1756,14 +1756,14 @@
           "module": "mtg_commander_sim.semantic_choices.defaults"
         },
         {
+          "fan_in": 8,
+          "fan_out": 13,
+          "module": "mtg_commander_sim.session"
+        },
+        {
           "fan_in": 1,
           "fan_out": 12,
           "module": "mtg_commander_sim.semantic_runtime.components"
-        },
-        {
-          "fan_in": 8,
-          "fan_out": 12,
-          "module": "mtg_commander_sim.session"
         },
         {
           "fan_in": 4,
@@ -1796,7 +1796,7 @@
           "module": "mtg_commander_sim.damage_prevention_aftermath"
         }
       ],
-      "internal_edges": 786,
+      "internal_edges": 788,
       "modules": [
         {
           "fan_in": 2,
@@ -2434,9 +2434,14 @@
           "module": "mtg_commander_sim.rules"
         },
         {
-          "fan_in": 1,
+          "fan_in": 2,
           "fan_out": 5,
           "module": "mtg_commander_sim.rules.action_catalog"
+        },
+        {
+          "fan_in": 1,
+          "fan_out": 1,
+          "module": "mtg_commander_sim.rules.action_explanations"
         },
         {
           "fan_in": 8,
@@ -2760,7 +2765,7 @@
         },
         {
           "fan_in": 8,
-          "fan_out": 12,
+          "fan_out": 13,
           "module": "mtg_commander_sim.session"
         },
         {
@@ -2937,7 +2942,7 @@
       "structural_identity": "file, nearest symbol, literal value, conditional use"
     },
     "production": {
-      "file_count": 226,
+      "file_count": 229,
       "largest_functions_and_methods": [
         {
           "end_line": 1653,
@@ -3017,10 +3022,10 @@
           "visibility": "public"
         },
         {
-          "end_line": 908,
+          "end_line": 912,
           "file": "mtg_commander_sim/session.py",
           "kind": "method",
-          "line": 543,
+          "line": 547,
           "logical_lines": 362,
           "name": "act",
           "physical_lines": 366,
@@ -3270,7 +3275,7 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 91272,
+      "logical_lines": 91711,
       "methods": {
         "dunder": 200,
         "private": 626,
@@ -3289,8 +3294,8 @@
           "file": "web/src/App.tsx",
           "functions_and_methods": null,
           "language": "web",
-          "logical_lines": 1825,
-          "physical_lines": 1886
+          "logical_lines": 1906,
+          "physical_lines": 1970
         },
         {
           "file": "mtg_commander_sim/report.py",
@@ -3373,8 +3378,8 @@
           "file": "mtg_commander_sim/session.py",
           "functions_and_methods": 21,
           "language": "python",
-          "logical_lines": 1121,
-          "physical_lines": 1164
+          "logical_lines": 1128,
+          "physical_lines": 1171
         },
         {
           "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
@@ -3471,8 +3476,8 @@
           "file": "mtg_commander_sim/projection.py",
           "functions_and_methods": 18,
           "language": "python",
-          "logical_lines": 662,
-          "physical_lines": 717
+          "logical_lines": 677,
+          "physical_lines": 732
         },
         {
           "file": "mtg_commander_sim/semantic_choices/engine_coordination.py",
@@ -3608,6 +3613,13 @@
           "physical_lines": 576
         },
         {
+          "file": "web/src/styles.css",
+          "functions_and_methods": null,
+          "language": "web",
+          "logical_lines": 532,
+          "physical_lines": 545
+        },
+        {
           "file": "mtg_commander_sim/rules/casting/costs.py",
           "functions_and_methods": 28,
           "language": "python",
@@ -3676,13 +3688,6 @@
           "language": "python",
           "logical_lines": 494,
           "physical_lines": 551
-        },
-        {
-          "file": "web/src/styles.css",
-          "functions_and_methods": null,
-          "language": "web",
-          "logical_lines": 488,
-          "physical_lines": 501
         },
         {
           "file": "mtg_commander_sim/semantic_choices/public_selection.py",
@@ -4434,6 +4439,13 @@
           "physical_lines": 126
         },
         {
+          "file": "web/src/tablePresentation.ts",
+          "functions_and_methods": null,
+          "language": "web",
+          "logical_lines": 111,
+          "physical_lines": 121
+        },
+        {
           "file": "mtg_commander_sim/semantic_runtime/registry.py",
           "functions_and_methods": 7,
           "language": "python",
@@ -4532,6 +4544,20 @@
           "physical_lines": 94
         },
         {
+          "file": "web/src/tablePreferences.ts",
+          "functions_and_methods": null,
+          "language": "web",
+          "logical_lines": 75,
+          "physical_lines": 83
+        },
+        {
+          "file": "mtg_commander_sim/rules/action_explanations.py",
+          "functions_and_methods": 2,
+          "language": "python",
+          "logical_lines": 74,
+          "physical_lines": 89
+        },
+        {
           "file": "mtg_commander_sim/drawing/__init__.py",
           "functions_and_methods": 1,
           "language": "python",
@@ -4616,6 +4642,13 @@
           "physical_lines": 62
         },
         {
+          "file": "web/src/TurnStatus.tsx",
+          "functions_and_methods": null,
+          "language": "web",
+          "logical_lines": 51,
+          "physical_lines": 54
+        },
+        {
           "file": "mtg_commander_sim/replacement_effects.py",
           "functions_and_methods": 0,
           "language": "python",
@@ -4665,18 +4698,18 @@
           "physical_lines": 44
         },
         {
+          "file": "web/src/TableSettings.tsx",
+          "functions_and_methods": null,
+          "language": "web",
+          "logical_lines": 35,
+          "physical_lines": 37
+        },
+        {
           "file": "mtg_commander_sim/semantic_choices/defaults.py",
           "functions_and_methods": 1,
           "language": "python",
           "logical_lines": 33,
           "physical_lines": 37
-        },
-        {
-          "file": "web/src/tablePreferences.ts",
-          "functions_and_methods": null,
-          "language": "web",
-          "logical_lines": 33,
-          "physical_lines": 38
         },
         {
           "file": "mtg_commander_sim/delayed_triggers.py",
@@ -4754,13 +4787,6 @@
           "language": "python",
           "logical_lines": 21,
           "physical_lines": 66
-        },
-        {
-          "file": "web/src/tablePresentation.ts",
-          "functions_and_methods": null,
-          "language": "web",
-          "logical_lines": 21,
-          "physical_lines": 23
         },
         {
           "file": "mtg_commander_sim/rules/__init__.py",
@@ -4941,10 +4967,10 @@
           "visibility": "public"
         },
         {
-          "end_line": 908,
+          "end_line": 912,
           "file": "mtg_commander_sim/session.py",
           "kind": "method",
-          "line": 543,
+          "line": 547,
           "logical_lines": 362,
           "name": "act",
           "physical_lines": 366,
@@ -5273,8 +5299,8 @@
           "file": "web/src/App.tsx",
           "functions_and_methods": null,
           "language": "web",
-          "logical_lines": 1825,
-          "physical_lines": 1886
+          "logical_lines": 1906,
+          "physical_lines": 1970
         },
         {
           "file": "mtg_commander_sim/report.py",
@@ -5305,8 +5331,8 @@
           "physical_lines": 1577
         }
       ],
-      "physical_lines": 99470,
-      "python_file_count": 213,
+      "physical_lines": 99943,
+      "python_file_count": 214,
       "review_thresholds": {
         "function_logical_lines_review": 150,
         "module_logical_lines_review": 1500
@@ -5323,8 +5349,8 @@
           "web/src"
         ]
       },
-      "top_level_functions": 1121,
-      "web_file_count": 13
+      "top_level_functions": 1123,
+      "web_file_count": 15
     },
     "semantic_handlers": {
       "engine_string_dispatch_branch_count": 3,
@@ -9237,7 +9263,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "4f48d04905672a1d00fd5fde713388cfce22eabe8bec8df039d58399e2746a5e"
+          "verified": "7ed6b1df11c7a09c3065236869806f7a753d887544943eeb5a587f22a962b9bb"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9643,7 +9669,7 @@
   },
   "tests": {
     "browser": {
-      "node_unit_cases": 18,
+      "node_unit_cases": 22,
       "playwright_e2e_journeys": 7
     },
     "mutation_testing": {
@@ -9675,13 +9701,13 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1439,
-      "discovered_total": 4739,
+      "conventional_ast_cases": 1449,
+      "discovered_total": 4749,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 38,
         "fuzz_named": 1,
-        "privacy_or_projection_named": 17,
+        "privacy_or_projection_named": 18,
         "replay_named": 85,
         "server_named": 18
       },
