@@ -211,7 +211,10 @@ class ContinuousHandlerIdentityTests(unittest.TestCase):
     def test_reviewed_unqualified_anthem_does_not_hide_color_qualified_program(self):
         db, _, _ = load_assets()
         try:
-            base = db.lookup("Lightning Bolt")
+            # Abrade is part of the repository's compact exact-list fixture.
+            # Do not make compiler unit tests depend on a developer's full
+            # local Scryfall database.
+            base = db.lookup("Abrade")
             record = replace(
                 base,
                 oracle_id="fixture-distinct-reviewed-anthem",
@@ -290,7 +293,7 @@ class ClosedContinuousGrammarTests(unittest.TestCase):
     def test_unsupported_qualities_preserve_the_exact_oracle_residual(self):
         db, _, _ = load_assets()
         try:
-            base = db.lookup("Lightning Bolt")
+            base = db.lookup("Abrade")
             capabilities = load_default_capability_registry()
             for index, text in enumerate(
                 (
@@ -329,6 +332,7 @@ class ClosedContinuousGrammarTests(unittest.TestCase):
     def test_previously_false_anthem_promotions_are_demoted(self):
         db, _, _ = load_assets()
         try:
+            base = db.lookup("Abrade")
             capabilities = load_default_capability_registry()
             cases = {
                 "Battle Frenzy": (
@@ -356,10 +360,17 @@ class ClosedContinuousGrammarTests(unittest.TestCase):
                     "Commander creatures you control get +2/+2."
                 ),
             }
-            for name, unsupported_line in cases.items():
+            for index, (name, unsupported_line) in enumerate(cases.items()):
                 with self.subTest(name=name):
+                    record = replace(
+                        base,
+                        oracle_id=f"fixture-false-anthem-{index}",
+                        name=name,
+                        type_line="Enchantment",
+                        oracle_text=unsupported_line,
+                    )
                     ir = compile_oracle_card(
-                        db.lookup(name),
+                        record,
                         capability_registry=capabilities,
                         capability_profile="commander_review",
                     )

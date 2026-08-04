@@ -132,6 +132,9 @@ class PlatformStatusTests(unittest.TestCase):
             )
         )
         source["integration"]["active_phase"] = "next_rules_family"
+        for milestone in source["milestones"]:
+            if milestone["id"] == "continuous_handler_identity_and_closed_grammar":
+                milestone["status"] = "integrated_on_certified_main"
         with mock.patch(
             "scripts.update_platform_status._git_is_ancestor",
             return_value=True,
