@@ -100,6 +100,15 @@ class CardUnlockFrontierTests(unittest.TestCase):
             report["base_residual_families"],
         )
         self.assertFalse(report["complete_snapshot_claimed"])
+        self.assertEqual(
+            {
+                "blockers": {},
+                "lowerable": False,
+                "residuals": [],
+                "template_id": None,
+            },
+            report["ability_field_defaults"],
+        )
         for card in report["cards"]:
             self.assertEqual(
                 sorted(card["minimum_known_blocker_set"]),
@@ -110,8 +119,16 @@ class CardUnlockFrontierTests(unittest.TestCase):
                     ability["status"],
                     {"exact", "lowerable_untrusted", "unresolved"},
                 )
-                self.assertIn("canonical_family_ids", ability["blockers"])
-                self.assertIn("runtime_component_ids", ability["blockers"])
+                blockers = ability.get("blockers", {})
+                self.assertEqual(
+                    blockers.get("canonical_family_ids", []),
+                    sorted(blockers.get("canonical_family_ids", [])),
+                )
+                self.assertNotIn("exact", ability)
+                self.assertNotIn("source_text_sha256", ability)
+                self.assertNotEqual(False, ability.get("lowerable"))
+                if "template_id" in ability:
+                    self.assertIsNotNone(ability["template_id"])
 
     def test_frontier_fingerprint_and_markdown_fail_closed(self):
         markdown = render_card_unlock_frontier_markdown(self.report)
@@ -122,6 +139,18 @@ class CardUnlockFrontierTests(unittest.TestCase):
         tampered["cards"][0]["card_name"] = "Tampered"
         with self.assertRaisesRegex(ValueError, "fingerprint"):
             validate_card_unlock_frontier(tampered)
+
+        malformed = deepcopy(self.report)
+        malformed["cards"][0]["abilities"][0]["unexpected"] = True
+        with self.assertRaisesRegex(ValueError, "ability fields"):
+            validate_card_unlock_frontier(malformed)
+
+        malformed = deepcopy(self.report)
+        malformed["cards"][0]["minimum_known_blocker_set"] = [
+            "effect_clause:not-a-real-observed-blocker"
+        ]
+        with self.assertRaisesRegex(ValueError, "minimum blocker"):
+            validate_card_unlock_frontier(malformed)
 
     def test_bundle_evaluation_is_bounded_and_optimizes_full_cards(self):
         evaluation = self.report["bundle_evaluation"]

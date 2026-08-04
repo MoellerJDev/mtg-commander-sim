@@ -776,7 +776,7 @@ class CardProgramV2Tests(unittest.TestCase):
 
     def test_cli_does_not_downgrade_unexpected_compiler_errors(self):
         with patch(
-            "mtg_commander_sim.card_programs.commands.compile_card_program",
+            "mtg_commander_sim.card_programs.adapters.compile_card_program",
             side_effect=ValueError("broken CardProgram structure"),
         ) as compile_program:
             with self.assertRaisesRegex(ValueError, "broken CardProgram"):

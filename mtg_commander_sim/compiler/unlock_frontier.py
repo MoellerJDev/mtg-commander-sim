@@ -7,7 +7,7 @@ from itertools import combinations
 import re
 from typing import Any, Iterable, Mapping, Sequence
 
-from ..card_programs.commands import _compile_best_available
+from ..card_programs.adapters import compile_best_available_card_program
 from ..carddb import CardDatabase
 from ..oracle_ir import compile_oracle_card
 from ..rules.capabilities import CapabilityRegistry
@@ -315,18 +315,9 @@ def _ability_row(
             )
         }
     )
-    return {
-        "ability_id": node.node_id,
-        "kind": node.kind,
-        "source_line": node.span.line,
-        "source_text_sha256": hashlib.sha256(
-            node.text.encode("utf-8")
-        ).hexdigest(),
-        _STATUS_FIELD: ability_status,
-        "exact": node.exact and not family_ids,
-        "lowerable": node.lowerable,
-        "template_id": node.template_id,
-        "blockers": {
+    blockers = {
+        key: value
+        for key, value in {
             "canonical_family_ids": sorted(family_ids),
             "capability_ids": capability_ids,
             "mechanic_ids": mechanic_ids,
@@ -342,15 +333,31 @@ def _ability_row(
                     if not value.startswith(("mechanic:", "capability:"))
                 }
             ),
-        },
-        "residuals": [
-            {
-                "residual_id": residual.residual_id,
-                "family_ids": list(canonical_residual_families(residual)),
-            }
-            for residual in attached
-        ],
+        }.items()
+        if value
     }
+    row: dict[str, Any] = {
+        "ability_id": node.node_id,
+        "kind": node.kind,
+        "source_line": node.span.line,
+        _STATUS_FIELD: ability_status,
+    }
+    if node.lowerable:
+        row["lowerable"] = True
+    if node.template_id is not None:
+        row["template_id"] = node.template_id
+    if blockers:
+        row["blockers"] = blockers
+    attached_rows = [
+        {
+            "residual_id": residual.residual_id,
+            "family_ids": list(canonical_residual_families(residual)),
+        }
+        for residual in attached
+    ]
+    if attached_rows:
+        row["residuals"] = attached_rows
+    return row
 
 
 def _orphan_ability_row(
@@ -359,27 +366,20 @@ def _orphan_ability_row(
     index: int,
 ) -> dict[str, Any]:
     families = canonical_residual_families(residual)
+    blockers = {
+        "canonical_family_ids": list(families),
+        "compiler_stage_ids": sorted(
+            {value.split(":", 1)[0] for value in families}
+        ),
+    }
+    if residual.blockers:
+        blockers["interaction_ids"] = sorted(residual.blockers)
     return {
         "ability_id": f"orphan-residual:{index}:{residual.residual_id}",
         "kind": residual.kind,
         "source_line": residual.span.line,
-        "source_text_sha256": hashlib.sha256(
-            residual.text.encode("utf-8")
-        ).hexdigest(),
         _STATUS_FIELD: "unresolved",
-        "exact": False,
-        "lowerable": False,
-        "template_id": None,
-        "blockers": {
-            "canonical_family_ids": list(families),
-            "capability_ids": [],
-            "mechanic_ids": [],
-            "compiler_stage_ids": sorted(
-                {value.split(":", 1)[0] for value in families}
-            ),
-            "runtime_component_ids": [],
-            "interaction_ids": sorted(residual.blockers),
-        },
+        "blockers": blockers,
         "residuals": [
             {
                 "residual_id": residual.residual_id,
@@ -408,7 +408,8 @@ def analyze_card_unlocks(
                 profile=profile,
             )
             attached_ids.update(
-                residual["residual_id"] for residual in row["residuals"]
+                residual["residual_id"]
+                for residual in row.get("residuals", ())
             )
             row["face_id"] = face.face_id
             abilities.append(row)
@@ -421,10 +422,14 @@ def analyze_card_unlocks(
         {
             family_id
             for ability in abilities
-            for family_id in ability["blockers"]["canonical_family_ids"]
+            for family_id in ability.get("blockers", {}).get(
+                "canonical_family_ids", ()
+            )
         }
     )
-    exact_abilities = sum(ability["exact"] for ability in abilities)
+    exact_abilities = sum(
+        ability[_STATUS_FIELD] == "exact" for ability in abilities
+    )
     lowerable_untrusted = sum(
         ability[_STATUS_FIELD] == "lowerable_untrusted"
         for ability in abilities
@@ -514,14 +519,16 @@ def _aggregate_candidates(
             affected_cards[family_id].add(str(card["oracle_id"]))
             additional[family_id][min(len(card_blockers) - 1, 3)] += 1
         for ability in card["abilities"]:
-            blockers = tuple(ability["blockers"]["canonical_family_ids"])
+            blockers = tuple(
+                ability.get("blockers", {}).get("canonical_family_ids", ())
+            )
             if blockers:
                 ability_sets[blockers] += 1
             for family_id in blockers:
                 occurrences[family_id] += 1
-                if ability["lowerable"]:
+                if ability.get("lowerable", False):
                     lowerable_occurrences[family_id] += 1
-            for residual in ability["residuals"]:
+            for residual in ability.get("residuals", ()):
                 residual_blockers = tuple(residual["family_ids"])
                 if residual_blockers:
                     residual_sets[residual_blockers] += 1
@@ -627,12 +634,12 @@ def build_card_unlock_frontier(
         program = None
         program_error = None
         try:
-            program = _compile_best_available(
+            program = compile_best_available_card_program(
                 db,
                 record,
-                registry=registry,
-                profile=profile,
-                capabilities=capabilities,
+                semantic_registry=registry,
+                capability_profile=profile,
+                capability_registry=capabilities,
             )
         except (KeyError, ValueError) as exc:
             program_error = str(exc)
@@ -677,6 +684,12 @@ def build_card_unlock_frontier(
             }
         ),
         "base_residual_families": sorted(BASE_RESIDUAL_FAMILIES),
+        "ability_field_defaults": {
+            "blockers": {},
+            "lowerable": False,
+            "residuals": [],
+            "template_id": None,
+        },
         "cards_considered": len(cards),
         "oracle_status_counts": dict(sorted(oracle_statuses.items())),
         "card_program_status_counts": dict(sorted(program_statuses.items())),
@@ -711,10 +724,125 @@ def validate_card_unlock_frontier(value: Mapping[str, Any]) -> None:
     families = value.get("base_residual_families")
     if families != sorted(BASE_RESIDUAL_FAMILIES):
         raise ValueError("Card-unlock frontier base family registry is stale")
+    if value.get("ability_field_defaults") != {
+        "blockers": {},
+        "lowerable": False,
+        "residuals": [],
+        "template_id": None,
+    }:
+        raise ValueError("Card-unlock frontier ability defaults are invalid")
     cards = value.get("cards")
     if not isinstance(cards, list) or len(cards) != value.get("cards_considered"):
         raise ValueError("Card-unlock frontier card accounting is invalid")
-    oracle_ids = [card.get("oracle_id") for card in cards if isinstance(card, Mapping)]
+    oracle_ids: list[Any] = []
+    ability_required = {
+        "ability_id",
+        "face_id",
+        "kind",
+        "source_line",
+        _STATUS_FIELD,
+    }
+    ability_allowed = ability_required | {
+        "blockers",
+        "lowerable",
+        "residuals",
+        "template_id",
+    }
+    blocker_allowed = {
+        "canonical_family_ids",
+        "capability_ids",
+        "mechanic_ids",
+        "compiler_stage_ids",
+        "runtime_component_ids",
+        "interaction_ids",
+    }
+    valid_ability_statuses = {"exact", "lowerable_untrusted", "unresolved"}
+    for card in cards:
+        if not isinstance(card, Mapping):
+            raise ValueError("Card-unlock frontier card rows must be mappings")
+        oracle_ids.append(card.get("oracle_id"))
+        abilities = card.get("abilities")
+        if not isinstance(abilities, list):
+            raise ValueError("Card-unlock frontier abilities must be a list")
+        observed_families: set[str] = set()
+        observed_exact = 0
+        observed_lowerable = 0
+        ability_ids: set[str] = set()
+        for ability in abilities:
+            if not isinstance(ability, Mapping):
+                raise ValueError("Card-unlock frontier ability rows must be mappings")
+            fields = set(ability)
+            if not ability_required <= fields or not fields <= ability_allowed:
+                raise ValueError("Card-unlock frontier ability fields are invalid")
+            ability_id = ability.get("ability_id")
+            if not isinstance(ability_id, str) or not ability_id:
+                raise ValueError("Card-unlock frontier ability_id is invalid")
+            if ability_id in ability_ids:
+                raise ValueError("Card-unlock frontier contains duplicate ability IDs")
+            ability_ids.add(ability_id)
+            status = ability.get(_STATUS_FIELD)
+            if status not in valid_ability_statuses:
+                raise ValueError("Card-unlock frontier ability status is invalid")
+            observed_exact += status == "exact"
+            observed_lowerable += status == "lowerable_untrusted"
+            if "lowerable" in ability and ability.get("lowerable") is not True:
+                raise ValueError("Card-unlock frontier lowerable override is invalid")
+            if "template_id" in ability and ability.get("template_id") is None:
+                raise ValueError("Card-unlock frontier template override is invalid")
+            blockers = ability.get("blockers", {})
+            if not isinstance(blockers, Mapping) or not blockers:
+                if blockers != {}:
+                    raise ValueError("Card-unlock frontier blockers are invalid")
+            else:
+                if not set(blockers) <= blocker_allowed:
+                    raise ValueError("Card-unlock frontier blocker fields are invalid")
+                for key, entries in blockers.items():
+                    if (
+                        not isinstance(entries, list)
+                        or not entries
+                        or not all(isinstance(entry, str) and entry for entry in entries)
+                        or entries != sorted(set(entries))
+                    ):
+                        raise ValueError(
+                            f"Card-unlock frontier blocker list {key} is invalid"
+                        )
+                canonical = blockers.get("canonical_family_ids", [])
+                for family_id in canonical:
+                    if ":" not in family_id:
+                        raise ValueError("Card-unlock frontier family ID is invalid")
+                    base, detail = family_id.split(":", 1)
+                    if base not in BASE_RESIDUAL_FAMILIES or not detail:
+                        raise ValueError("Card-unlock frontier family ID is invalid")
+                observed_families.update(canonical)
+            residuals = ability.get("residuals", [])
+            if not isinstance(residuals, list):
+                raise ValueError("Card-unlock frontier residuals are invalid")
+            for residual in residuals:
+                if not isinstance(residual, Mapping) or set(residual) != {
+                    "family_ids",
+                    "residual_id",
+                }:
+                    raise ValueError("Card-unlock frontier residual row is invalid")
+                residual_families = residual.get("family_ids")
+                if (
+                    not isinstance(residual_families, list)
+                    or not residual_families
+                    or not all(
+                        isinstance(entry, str) and entry
+                        for entry in residual_families
+                    )
+                    or residual_families != sorted(set(residual_families))
+                ):
+                    raise ValueError("Card-unlock frontier residual families are invalid")
+        minimum = card.get("minimum_known_blocker_set")
+        if minimum != sorted(observed_families):
+            raise ValueError("Card-unlock frontier minimum blocker set is invalid")
+        if card.get("material_ability_count") != len(abilities):
+            raise ValueError("Card-unlock frontier ability accounting is invalid")
+        if card.get("exact_ability_count") != observed_exact:
+            raise ValueError("Card-unlock frontier exact ability accounting is invalid")
+        if card.get("lowerable_untrusted_ability_count") != observed_lowerable:
+            raise ValueError("Card-unlock frontier lowerable accounting is invalid")
     if len(oracle_ids) != len(set(oracle_ids)):
         raise ValueError("Card-unlock frontier contains duplicate Oracle IDs")
     supplied = value.get("fingerprint")

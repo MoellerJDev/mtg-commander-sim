@@ -13,6 +13,7 @@ from ..compiler.program_generation import (
 )
 from ..oracle_ir import ORACLE_COMPILER_VERSION, compile_oracle_card
 from ..rules.capabilities import CapabilityRegistry
+from ..rules.capabilities import load_default_capability_registry
 from ..semantics import SemanticProgram, SemanticRegistry
 from .model import CardProgram, CardProgramError, CardProgramFace
 
@@ -181,6 +182,39 @@ def compile_card_program(
             ),
         },
     )
+
+
+def compile_best_available_card_program(
+    db: CardDatabase,
+    record: CardRecord,
+    *,
+    semantic_registry: SemanticRegistry,
+    capability_profile: str,
+    capability_registry: CapabilityRegistry | None = None,
+) -> CardProgram:
+    """Compile trusted output when possible and preserve provisional IR otherwise."""
+
+    capabilities = capability_registry or load_default_capability_registry()
+    try:
+        return compile_card_program(
+            db,
+            record,
+            semantic_registry=semantic_registry,
+            capability_registry=capabilities,
+            capability_profile=capability_profile,
+            trust_level="trusted",
+        )
+    except ValueError as exc:
+        if "cannot be promoted to trusted generated semantics" not in str(exc):
+            raise
+        return compile_card_program(
+            db,
+            record,
+            semantic_registry=semantic_registry,
+            capability_registry=capabilities,
+            capability_profile=capability_profile,
+            trust_level="provisional",
+        )
 
 
 def card_program_from_semantic_programs(
