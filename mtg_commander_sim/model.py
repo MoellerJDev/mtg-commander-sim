@@ -544,9 +544,15 @@ class GameConfig:
         return 0 if self.effective_profile(player_count) == "commander_duel" else 1
 
     def effective_first_player_draws(self, player_count: int) -> bool:
+        # CR 103.8 applies the starting-player draw exception only to a
+        # two-player game.  Player count is authoritative here: a stale or
+        # deliberately mismatched profile must never suppress the starting
+        # player's draw in a multiplayer game.
+        if player_count >= 3:
+            return True
         if self.first_player_draws_on_turn_one is not None:
             return self.first_player_draws_on_turn_one
-        return self.effective_profile(player_count) == "commander_multiplayer"
+        return False
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
