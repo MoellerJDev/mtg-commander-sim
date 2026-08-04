@@ -16,7 +16,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `4bec8eb29722a813d377d232b42c36e37640ed37`
 - Package: `0.8.0`
 - CI run: [30892105590](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590) — `pass`
-- Production scope: 211 files, 96,087 physical lines, 88,355 logical lines
+- Production scope: 212 files, 96,128 physical lines, 88,383 logical lines
 
 ## Central engine debt
 
@@ -29,7 +29,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Registered typed runtime components: 13
 - Remaining legacy `apply_effect` branches: 0
 - Registered operations still intercepted by engine string dispatch: 0
-- Exact printed-name literals in configured core files: 661 (97 conditional)
+- Exact printed-name literals in configured core files: 660 (97 conditional)
 - Oracle-ID literals in Python production code: 6
 - Card-named helpers: 1
 - Modules above the 1,500-logical-line review threshold: 6
@@ -38,18 +38,18 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 
 ## Enforced debt trend
 
-Baseline: `cda213c987cb8c5aef94af74bc74146f29bba0fb`. Guard: `python scripts/validate_architecture.py --check`.
+Baseline: `e537d250850544003cbac2c3a00b9d8802de7d85`. Guard: `python scripts/validate_architecture.py --check`.
 
 | Dimension | Baseline | Current | Delta |
 |---|---:|---:|---:|
-| `engine_logical_lines` | 14,761 | 13,308 | -1,453 |
-| `direct_game_state_writes` | 143 | 135 | -8 |
-| `printed_name_literals` | 693 | 661 | -32 |
+| `engine_logical_lines` | 13,308 | 13,308 | +0 |
+| `direct_game_state_writes` | 135 | 135 | +0 |
+| `printed_name_literals` | 693 | 660 | -33 |
 | `oracle_id_literals` | 6 | 6 | +0 |
-| `legacy_card_specific_operations` | 6 | 6 | +0 |
+| `legacy_card_specific_operations` | 5 | 5 | +0 |
 | `card_named_helpers` | 1 | 1 | +0 |
 | `oversized_modules` | 6 | 6 | +0 |
-| `oversized_functions_and_methods` | 40 | 37 | -3 |
+| `oversized_functions_and_methods` | 37 | 37 | +0 |
 
 ## Largest production modules
 
@@ -58,8 +58,8 @@ Baseline: `cda213c987cb8c5aef94af74bc74146f29bba0fb`. Guard: `python scripts/val
 | `mtg_commander_sim/engine.py` | python | 14,078 | 13,308 |
 | `web/src/App.tsx` | web | 1,886 | 1,825 |
 | `mtg_commander_sim/report.py` | python | 1,853 | 1,813 |
-| `mtg_commander_sim/oracle_ir.py` | python | 1,814 | 1,751 |
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
+| `mtg_commander_sim/oracle_ir.py` | python | 1,666 | 1,618 |
 | `mtg_commander_sim/record.py` | python | 1,706 | 1,605 |
 | `mtg_commander_sim/rules_corpus.py` | python | 1,561 | 1,464 |
 | `mtg_commander_sim/damage.py` | python | 1,573 | 1,442 |
@@ -79,8 +79,8 @@ Baseline: `cda213c987cb8c5aef94af74bc74146f29bba0fb`. Guard: `python scripts/val
 | `parse_declaration_restriction_line` | `mtg_commander_sim/declaration_restrictions.py:892` | 881 | 942 |
 | `create_app` | `server/app.py:537` | 724 | 769 |
 | `main` | `mtg_commander_sim/cli.py:801` | 594 | 604 |
-| `_compile_face` | `mtg_commander_sim/oracle_ir.py:1147` | 527 | 536 |
-| `_effect_template` | `mtg_commander_sim/oracle_ir.py:275` | 526 | 527 |
+| `_compile_face` | `mtg_commander_sim/oracle_ir.py:999` | 527 | 536 |
+| `_effect_template` | `mtg_commander_sim/oracle_ir.py:127` | 526 | 527 |
 | `build_parser` | `mtg_commander_sim/cli.py:406` | 369 | 393 |
 | `CommanderSession.act` | `mtg_commander_sim/session.py:543` | 362 | 366 |
 | `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1530` | 343 | 349 |
@@ -127,10 +127,10 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Documentation drift
 
-- Required: 31
-- Present after generated Phase 0 outputs: 31
+- Required: 32
+- Present after generated Phase 0 outputs: 32
 - Missing: 0
-- Metadata complete: 31
+- Metadata complete: 32
 
 The authoritative index, metadata, internal-link, stale-claim, and ADR policies are enforced by `scripts/validate_documentation.py`. Detailed document records remain in `coverage/architecture-audit.json`.
 
